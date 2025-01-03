@@ -1,0 +1,81 @@
+syntax = "proto3"; //指定proto版本
+package chat_rpc;
+
+option go_package = "./chat_rpc";
+
+
+// 定义TextMsg消息
+message TextMsg {
+  string content = 1; // 文本消息内容
+}
+
+// 定义FileMsg消息
+message FileMsg {
+  string title = 1;
+  string src = 2;
+  int32 size = 3; // 文件大小 单位字节
+  string type = 4; // 文件类型
+}
+
+// 定义VoiceMsg消息
+message VoiceMsg {
+  string src = 1;
+  int32 time = 2; // 语音时长 单位秒
+}
+
+// 定义VideoMsg消息
+message VideoMsg {
+  string title = 1;
+  string src = 2;
+  int32 time = 3; // 视频时长 单位秒
+}
+
+// 定义ImageMsg消息
+message ImageMsg {
+  string title = 1;
+  string src = 2;
+}
+
+// 定义Msg消息
+message Msg {
+  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+  TextMsg textMsg = 2; // 文本消息
+  ImageMsg imageMsg = 3; // 图片
+  VideoMsg videoMsg = 4; // 视频
+  FileMsg fileMsg = 5; // 文件
+  VoiceMsg voiceMsg = 6; // 语音
+}
+
+// 定义SendMsgReq消息
+message SendMsgReq {
+  string user_id = 1; // 用户ID
+  string conversation_id = 2; // 会话ID
+  Msg msg = 3; // 消息内容
+}
+
+// 定义Sender消息
+message Sender {
+  string user_id = 1;
+  string avatar = 2;
+  string nickname = 3;
+}
+
+// 定义SendMsgRes消息
+message SendMsgRes {
+  uint32 message_id = 1; // 消息ID
+  string conversation_id = 2; // 会话ID
+  Msg msg = 3; // 消息内容
+  Sender sender = 4; // 发送者
+  string create_at = 5; // 消息时间
+  string msg_preview = 6; // 消息预览
+}
+
+// 定义chat_rpc服务
+service Chat {
+    rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
+}
+
+
+
+
+//goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -1,0 +1,46 @@
+syntax = "v1"
+
+type LoginReq {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+}
+
+type LoginRes {
+	Token  string `json:"token"`
+	UserId string `json:"userId"`
+}
+
+type AuthenticationReq {
+	Token string `header:"Token,optional"`
+	/**
+* @description: 验证路径
+*/
+	ValidPath string `header:"ValidPath,optional"`
+}
+
+type AuthenticationRes {
+	UserId uint `json:"userId"`
+}
+
+type RegisterReq {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+}
+
+type RegisterRes {}
+
+service auth {
+	// 用户登录
+	@handler login
+	post /api/auth/login (LoginReq) returns (LoginRes)
+
+	// 用户认证
+	@handler authentication
+	get /api/auth/authentication (AuthenticationReq) returns (AuthenticationRes)
+
+	// 用户注册
+	@handler register
+	post /api/auth/register (RegisterReq) returns (RegisterRes)
+}
+
+// goctl api go -api auth_api.api -dir . --home ../../../template

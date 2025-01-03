@@ -1,0 +1,20 @@
+syntax = "proto3"; //指定proto版本
+package friend_rpc;
+
+option go_package = "./friend_rpc";
+
+
+message GetFriendIdsRequest {
+  string user_id = 1;
+}
+
+message GetFriendIdsResponse {
+  repeated string friend_ids = 1;
+}
+
+
+service Friend {
+  rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
+}
+
+//goctl rpc protoc friend_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
