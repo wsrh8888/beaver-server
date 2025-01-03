@@ -1,0 +1,25 @@
+syntax = "v1"
+
+type FileReq {
+	UserId string `header:"Beaver-User-Id"`
+}
+
+type FileRes {
+	FileId string `json:"fileId"`
+}
+
+type PreviewReq {
+	fileId string `path:"fileId"`
+}
+
+type PreviewRes {}
+
+service file {
+	@handler Preview
+	get /api/file/preview/:fileId (PreviewReq) returns (PreviewRes) //文件预览
+
+	@handler FileUploadQiniu
+	post /api/file/uploadQiniu (FileReq) returns (FileRes) //文件上传七牛云
+}
+
+// goctl api go -api file_api.api -dir . --home ../../../template

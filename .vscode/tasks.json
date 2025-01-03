@@ -1,0 +1,119 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "user_rpc",
+      "type": "shell",
+      "command": "cd app/user/user_rpc;  go run userrpc.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "friend_rpc",
+      "type": "shell",
+      "command": "cd app/friend/friend_rpc;  go run friendrpc.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "chat_rpc",
+      "type": "shell",
+      "command": "cd app/chat/chat_rpc;  go run chatrpc.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "file_rpc",
+      "type": "shell",
+      "command": "cd app/file/file_rpc;  go run filerpc.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "auth_api",
+      "type": "shell",
+      "command": "cd app/auth/auth_api;  go run auth.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "file_api",
+      "type": "shell",
+      "command": "cd app/file/file_api;  go run file.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "ws_api",
+      "type": "shell",
+      "command": "cd app/ws/ws_api;  go run ws.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "chat_api",
+      "type": "shell",
+      "command": "cd app/chat/chat_api;  go run chat.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    
+    {
+      "label": "user_api",
+      "type": "shell",
+      "command": "cd app/user/user_api;  go run user.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    
+    {
+      "label": "file_api",
+      "type": "shell",
+      "command": "cd app/file/file_api;  go run file.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "gateway_api",
+      "type": "shell",
+      "command": "cd app/gateway/gateway_api;  go run gateway.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "friend_api",
+      "type": "shell",
+      "command": "cd app/friend/friend_api;  go run friend.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "启动RPC服务",
+      "type": "shell",
+      "command": "echo Running all services",
+      "dependsOn": ["user_rpc", "group_rpc", "friend_rpc", "chat_rpc"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "启动Api全部任务",
+      "type": "shell",
+      "command": "echo Running all services",
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}

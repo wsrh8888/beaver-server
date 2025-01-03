@@ -1,0 +1,132 @@
+syntax = "v1"
+
+type TextMsg {
+	Content string `json:"content"` //文本消息内容
+}
+
+type Msg {
+	Type     uint32    `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+	TextMsg  *TextMsg  `json:"textMsg,optional"` //文本消息
+	ImageMsg *ImageMsg `json:"imageMsg,optional"` //图片
+	VideoMsg *VideoMsg `json:"videoMsg,optional"` //视频
+	FileMsg  *FileMsg  `json:"fileMsg,optional"` //文件
+	VoiceMsg *VoiceMsg `json:"voiceMsg,optional"` //语音
+}
+
+type FileMsg {
+	Title string `json:"title"`
+	Src   string `json:"src"`
+	Size  int32  `json:"size"` //文件大小 单位字节
+	Type  string `json:"type"` //文件类型
+}
+
+type VoiceMsg {
+	Src  string `json:"src"`
+	Time int32  `json:"time"` //语音时长 单位秒
+}
+
+type VideoMsg {
+	Title string `json:"title"`
+	Src   string `json:"src"`
+	Time  int32  `json:"time"` //视频时长 单位秒
+}
+
+type SendMsgReq {
+	UserId         string `header:"Beaver-User-Id"`
+	ConversationId string `json:"conversationId"` //会话id
+	Msg            Msg    `json:"msg"`
+}
+
+type ImageMsg {
+	Title string `json:"title"`
+	Src   string `json:"src"`
+}
+
+type RecentChatListReq {
+	UserId string `header:"Beaver-User-Id"`
+	Page   int    `form:"page,optional"`
+	Limit  int    `form:"limit,optional"`
+}
+
+type RecentChat {
+	Avatar         string `json:"avatar"`
+	Nickname       string `json:"nickname"`
+	MsgPreview     string `json:"msg_preview"` //消息预览
+	CreateAt       string `json:"create_at"` //消息时间
+	IsTop          bool   `json:"is_top"` //是否置顶
+	ConversationId string `json:"conversationId"` //会话id
+}
+
+type RecentChatListRes {
+	Count int64        `json:"count"`
+	List  []RecentChat `json:"list"`
+}
+
+type SendMsgRes {
+	MessageId      uint32 `json:"messageId"` //消息id
+	ConversationId string `json:"conversationId"` //会话id
+	Msg            Msg    `json:"msg"`
+	Sender         Sender `json:"sender"` //发送者
+	CreateAt       string `json:"create_at"` //消息时间
+	MsgPreview     string `json:"msgPreview"` //消息预览
+}
+
+type ChatHistoryReq {
+	UserId         string `header:"Beaver-User-Id"`
+	ConversationId string `json:"conversationId"` // 会话Id
+	Page           int    `json:"page,optional"`
+	Limit          int    `json:"limit,optional"`
+}
+
+type Sender {
+	UserId   string `json:"userId"`
+	Avatar   string `json:"avatar"`
+	Nickname string `json:"nickname"`
+}
+
+type Message {
+	MessageId      uint   `json:"messageId"` //消息id
+	ConversationId string `json:"conversationId"` //会话id
+	Msg            Msg    `json:"msg"`
+	Sender         Sender `json:"sender"` //发送者
+	CreateAt       string `json:"create_at"` //消息时间
+}
+
+type ChatHistoryRes {
+	Count int64     `json:"count"`
+	List  []Message `json:"list"`
+}
+
+type DeleteRecentReq {
+	UserId         string `header:"Beaver-User-Id"`
+	ConversationId string `json:"conversationId"` //会话id
+}
+
+type DeleteRecentRes {}
+
+type PinnedChatReq {
+	UserId         string `header:"Beaver-User-Id"`
+	ConversationId string `json:"conversationId"` //会话id
+	IsPinned       bool   `json:"isPinned"` // true表示置顶 false表示不置顶
+}
+
+type PinnedChatRes {}
+
+service chat {
+	@handler sendMsg
+	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes) //发送消息
+
+	@handler recentChatList
+	get /api/chat/getRecentChatList (RecentChatListReq) returns (RecentChatListRes) //获取最近会话列表
+
+	@handler chatHistory
+	post /api/chat/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes) //获取聊天记录
+
+	@handler deleteRecent
+	post /api/chat/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes) //删除某个最近会话
+
+	@handler pinnedChat
+	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes) //置顶某个会话
+}
+
+// goctl api go -api chat_api.api -dir . --home ../../../template

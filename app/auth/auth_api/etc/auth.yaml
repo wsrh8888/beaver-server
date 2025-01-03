@@ -1,0 +1,25 @@
+Name: auth
+Host: 0.0.0.0
+Port: 21100
+Etcd: 127.0.0.1:2379
+Auth:
+  AccessSecret: robert
+  AccessExpire: 3600
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:1800)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+Redis:
+  Addr: 127.0.0.1:18991
+  Password: '123456'
+  DB: 0
+WhiteList:
+  - /api/auth/register
+  - /api/auth/login
+  - /api/auth/open_login
+  - /api/auth/authentication
+  - /api/settings/open_login_info
+  - /api/file/preview
+UserRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: userrpc.rpc

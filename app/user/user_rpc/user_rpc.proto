@@ -1,0 +1,57 @@
+syntax = "proto3"; //指定proto版本
+package user_rpc;
+
+option go_package = "./user_rpc";
+
+
+message UserCreateReq {
+  string phone = 1;
+  string password = 2;
+  int32 source = 3;
+}
+
+message UserCreateRes {
+  string user_id = 1;
+}
+
+message UserInfoReq {
+  string user_id = 1;
+}
+
+message UserInfoRes {
+  bytes data = 1;  //用户配置的json
+ }
+ 
+
+ message IsFriendReq {
+  string user1 = 1;
+  string user2 = 2;
+}
+
+message IsFriendRes {
+  bool is_friend = 1;
+}
+
+message UserInfo {
+  string nick_name = 1;
+  string avatar = 2;
+
+}
+
+message UserListInfoReq {
+  repeated string user_id_list = 1;
+}
+
+message UserListInfoRes {
+  map<string, UserInfo> user_info = 1; //用户配置的json
+}
+
+service User {
+  rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
+  rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
+  rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友
+  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息
+
+}
+
+//goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

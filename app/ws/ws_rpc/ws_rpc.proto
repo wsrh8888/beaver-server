@@ -1,0 +1,33 @@
+syntax = "proto3"; //指定proto版本
+package ws_rpc;
+
+option go_package = "./ws_rpc";
+
+
+message HandleWebSocketRequest {
+  string user_id = 1;
+  string source = 2;
+}
+
+message HandleWebSocketResponse {
+  string status = 1;
+}
+
+message SendProxyMessageRequest {
+  string user_id = 1;
+  string command = 2;
+  string target_id = 3;
+  string message_type = 4;
+  map<string, string> body = 5;
+}
+
+message SendProxyMessageResponse {
+  string status = 1;
+}
+
+service Ws {
+  rpc HandleWebSocket(HandleWebSocketRequest) returns (HandleWebSocketResponse);
+  rpc SendProxyMessage(SendProxyMessageRequest) returns (SendProxyMessageResponse);
+}
+
+//goctl rpc protoc ws_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

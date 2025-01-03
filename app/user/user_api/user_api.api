@@ -1,0 +1,42 @@
+syntax = "v1"
+
+type UserInfoReq {
+	UserId string `header:"Beaver-User-Id"`
+}
+
+type UserInfoRes {
+	UserId   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Avatar   string `json:"avatar"`
+	Abstract string `json:"abstract"`
+	Phone    string `json:"phone"`
+}
+
+type UpdateInfoReq {
+	UserId   string  `header:"Beaver-User-Id"`
+	Nickname *string `json:"nick_name,optional" user:"nickname"`
+	Avatar   *string `json:"avatar,optional" user:"avatar"`
+}
+
+type UpdateInfoRes {}
+
+type UpdatePasswordReq {
+	UserId      string `header:"Beaver-User-Id"`
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type UpdatePasswordRes {}
+
+service user {
+	@handler userInfo
+	get /api/user/user_info (UserInfoReq) returns (UserInfoRes) //用户信息接口
+
+	@handler updateInfo
+	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes) //修改用户基础信息
+
+	@handler updatePassword
+	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes) //修改密码
+}
+
+// goctl api go -api user_api.api -dir . --home ../../../template
