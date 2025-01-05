@@ -4,7 +4,7 @@ Port: 21200
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
-  Addr: 127.0.0.1:6379
+  Addr: 127.0.0.1:8379
   Password: '123456'
   DB: 0
 Log:
