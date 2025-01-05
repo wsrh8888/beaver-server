@@ -2,18 +2,18 @@ version: '3.9'
 services:
     redis:
       image: redis:4
-      container_name: redis
+      container_name: redis1
       command: redis-server --appendonly yes --requirepass "123456"
       ports:
-        - "18991:6379"
+        - "6379:6379"
       volumes:
-        - /c/Users/hao/Desktop/docker/redis:/data
+        - ./docker/redis:/data
     mysql:
         image: mysql:5.7.31
-        container_name: mysql
+        container_name: mysql1
         restart: always
         ports:
-            - '1800:3306'
+            - '3306:3306'
         privileged: true
         environment:
               MYSQL_ROOT_PASSWORD: "123456"
@@ -23,16 +23,16 @@ services:
             '--max_connections=3000',
         ]
         volumes:
-             - /c/Users/hao/Desktop/docker/mysql/data:/var/lib/mysql
-             - /c/Users/hao/Desktop/docker/mysql/my.cnf:/etc/mysql/my.cnf
-             - /c/Users/hao/Desktop/docker/mysql/log:/var/log/mysql
+             - ./docker/mysql/data:/var/lib/mysql
+             - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+             - ./docker/mysql/log:/var/log/mysql
     etcd:
         image: bitnami/etcd:3.5.12
-        container_name: etcd
+        container_name: etcd1
         ports:
             - "2379:2379"
             - "2380:2380"
         environment:
             - ALLOW_NONE_AUTHENTICATION=yes                  
         volumes:
-            - /c/Users/hao/Desktop/docker/etcd:/etcd-data
+            - ./docker/etcd:/etcd-data
