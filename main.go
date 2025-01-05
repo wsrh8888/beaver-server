@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	if opt.DB {
-		db := core.InitGorm("root:123456@tcp(127.0.0.1:1800)/beaver?charset=utf8mb4&parseTime=True&loc=Local")
+		db := core.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local")
 		err := db.AutoMigrate(
 			&user_models.UserModel{},
 			&friend_models.FriendModel{},
