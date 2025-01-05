@@ -5,7 +5,7 @@ services:
       container_name: redis1
       command: redis-server --appendonly yes --requirepass "123456"
       ports:
-        - "6379:6379"
+        - "8379:6379"
       volumes:
         - ./docker/redis:/data
     mysql:
