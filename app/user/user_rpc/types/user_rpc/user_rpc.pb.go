@@ -88,7 +88,7 @@ type UserCreateRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserID string `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`
 }
 
 func (x *UserCreateRes) Reset() {
@@ -125,7 +125,7 @@ func (*UserCreateRes) Descriptor() ([]byte, []int) {
 
 func (x *UserCreateRes) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }
@@ -135,7 +135,7 @@ type UserInfoReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserID string `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`
 }
 
 func (x *UserInfoReq) Reset() {
@@ -172,7 +172,7 @@ func (*UserInfoReq) Descriptor() ([]byte, []int) {
 
 func (x *UserInfoReq) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }

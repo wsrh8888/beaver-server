@@ -7,7 +7,7 @@ type AuthenticationReq struct {
 }
 
 type AuthenticationRes struct {
-	UserId string `json:"userId"`
+	UserID string `json:"userId"`
 }
 
 type LoginReq struct {
@@ -17,7 +17,7 @@ type LoginReq struct {
 
 type LoginRes struct {
 	Token  string `json:"token"`
-	UserId string `json:"userId"`
+	UserID string `json:"userId"`
 }
 
 type RegisterReq struct {

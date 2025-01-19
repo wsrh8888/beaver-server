@@ -40,22 +40,22 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 
 	// 获取好友关系
 	var friend friend_models.FriendModel
-	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserId, user.UserId)
+	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserID, user.UUID)
 
 	// 生成会话Id
-	conversationId, err := conversation.GenerateConversation([]string{req.UserId, user.UserId})
+	conversationID, err := conversation.GenerateConversation([]string{req.UserID, user.UUID})
 	if err != nil {
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
 	// 构造返回值
 	resp = &types.SearchRes{
-		UserId:         user.UserId,
+		UserID:         user.UUID,
 		Nickname:       user.NickName,
 		Avatar:         user.Avatar,
 		Abstract:       user.Abstract,
 		IsFriend:       isFriend,
-		ConversationId: conversationId,
+		ConversationID: conversationID,
 	}
 
 	return resp, nil

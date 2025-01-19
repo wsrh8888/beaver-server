@@ -26,7 +26,7 @@ func NewGetFriendIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetF
 
 func (l *GetFriendIdsLogic) GetFriendIds(in *friend_rpc.GetFriendIdsRequest) (*friend_rpc.GetFriendIdsResponse, error) {
 	var friends []friend_models.FriendModel
-	err := l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = false", in.UserId, in.UserId).Find(&friends).Error
+	err := l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = false", in.UserID, in.UserID).Find(&friends).Error
 	if err != nil {
 		logx.Errorf("failed to query friends: %v", err)
 		return nil, err
@@ -34,10 +34,10 @@ func (l *GetFriendIdsLogic) GetFriendIds(in *friend_rpc.GetFriendIdsRequest) (*f
 
 	var friendIds []string
 	for _, friend := range friends {
-		if friend.SendUserId == in.UserId {
-			friendIds = append(friendIds, friend.RevUserId)
+		if friend.SendUserID == in.UserID {
+			friendIds = append(friendIds, friend.RevUserID)
 		} else {
-			friendIds = append(friendIds, friend.SendUserId)
+			friendIds = append(friendIds, friend.SendUserID)
 		}
 	}
 

@@ -1,0 +1,16 @@
+Name: grouprpc.rpc
+ListenOn: 0.0.0.0:22500
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: grouprpc.rpc
+Mysql:
+  DataSource: root:15383645663.r@tcp(127.0.0.1:1800)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false
+RedisConf:
+  Addr: 127.0.0.1:18991
+  Password: '123456'
+  DB: 0

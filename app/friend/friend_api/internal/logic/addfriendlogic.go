@@ -28,21 +28,21 @@ func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFrie
 }
 
 func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFriendRes, err error) {
-	if req.UserId == req.FriendId {
+	if req.UserID == req.FriendID {
 		return nil, errors.New("不能添加自己为好友")
 	}
 	var friend friend_models.FriendModel
-	if friend.IsFriend(l.svcCtx.DB, req.UserId, req.FriendId) {
+	if friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
 		return nil, errors.New("已经是好友了")
 	}
 	var userInfo user_models.UserModel
 
-	err = l.svcCtx.DB.Take(&userInfo, "user_id = ?", req.FriendId).Error
+	err = l.svcCtx.DB.Take(&userInfo, "uuid = ?", req.FriendID).Error
 	if err != nil {
 		return nil, errors.New("用户不存在")
 	}
 
-	err = l.svcCtx.DB.Take(&friend_models.FriendVerifyModel{}, "(send_user_id = ? AND rev_user_id = ? AND rev_status = 0) OR (send_user_id = ? AND rev_user_id = ? AND rev_status = 0)", req.UserId, req.FriendId, req.FriendId, req.UserId).Error
+	err = l.svcCtx.DB.Take(&friend_models.FriendVerifyModel{}, "(send_user_id = ? AND rev_user_id = ? AND rev_status = 0) OR (send_user_id = ? AND rev_user_id = ? AND rev_status = 0)", req.UserID, req.FriendID, req.FriendID, req.UserID).Error
 	if err == nil {
 		fmt.Println("当前已经有好友请求")
 		return nil, nil
@@ -50,8 +50,8 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 
 	resp = new(types.AddFriendRes)
 	var verifyModel = friend_models.FriendVerifyModel{
-		SendUserId: req.UserId,
-		RevUserId:  req.FriendId,
+		SendUserID: req.UserID,
+		RevUserID:  req.FriendID,
 		Message:    req.Verify,
 	}
 

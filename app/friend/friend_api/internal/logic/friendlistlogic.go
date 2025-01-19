@@ -34,7 +34,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 			Page:  req.Page,
 			Limit: req.Limit,
 		},
-		Where:   l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?", req.UserId, req.UserId, false),
+		Where:   l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?", req.UserID, req.UserID, false),
 		Preload: []string{"SendUserModel", "RevUserModel"},
 	})
 
@@ -42,35 +42,35 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 	for _, friendUser := range friends {
 		info := types.FriendInfoRes{}
 
-		if friendUser.SendUserId == req.UserId {
-			conversationId, err := conversation.GenerateConversation([]string{req.UserId, friendUser.RevUserModel.UserId})
+		if friendUser.SendUserID == req.UserID {
+			conversationID, err := conversation.GenerateConversation([]string{req.UserID, friendUser.RevUserModel.UUID})
 			if err != nil {
 				return nil, fmt.Errorf("生成会话Id失败: %v", err)
 			}
 			// 我是发起方
 			info = types.FriendInfoRes{
-				UserId:         friendUser.RevUserModel.UserId,
+				UserID:         friendUser.RevUserModel.UUID,
 				Nickname:       friendUser.RevUserModel.NickName,
 				Avatar:         friendUser.RevUserModel.Avatar,
 				Abstract:       friendUser.RevUserModel.Abstract,
 				Notice:         friendUser.SendUserNotice,
-				ConversationId: conversationId,
+				ConversationID: conversationID,
 				Phone:          friendUser.RevUserModel.Phone,
 			}
 		}
-		if friendUser.RevUserId == req.UserId {
-			conversationId, err := conversation.GenerateConversation([]string{req.UserId, friendUser.SendUserModel.UserId})
+		if friendUser.RevUserID == req.UserID {
+			conversationID, err := conversation.GenerateConversation([]string{req.UserID, friendUser.SendUserModel.UUID})
 			if err != nil {
 				return nil, fmt.Errorf("生成会话Id失败: %v", err)
 			}
 			// 我是接收方
 			info = types.FriendInfoRes{
-				UserId:         friendUser.SendUserModel.UserId,
+				UserID:         friendUser.SendUserModel.UUID,
 				Nickname:       friendUser.SendUserModel.NickName,
 				Avatar:         friendUser.SendUserModel.Avatar,
 				Abstract:       friendUser.SendUserModel.Abstract,
 				Notice:         friendUser.RevUserNotice,
-				ConversationId: conversationId,
+				ConversationID: conversationID,
 				Phone:          friendUser.SendUserModel.Phone,
 			}
 		}

@@ -27,7 +27,7 @@ func NewDeleteRecentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 func (l *DeleteRecentLogic) DeleteRecent(req *types.DeleteRecentReq) (resp *types.DeleteRecentRes, err error) {
 	// 假删除操作
 	err = l.svcCtx.DB.Model(&chat_models.ChatUserConversationModel{}).
-		Where("user_id = ? AND conversation_id = ?", req.UserId, req.ConversationId).
+		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 		Updates(map[string]interface{}{"is_delete": true, "is_pinned": false}).Error
 
 	return nil, err

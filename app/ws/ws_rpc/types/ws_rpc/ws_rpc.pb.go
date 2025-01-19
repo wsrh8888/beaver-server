@@ -25,7 +25,7 @@ type HandleWebSocketRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserID string `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`
 	Source string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
 }
 
@@ -63,7 +63,7 @@ func (*HandleWebSocketRequest) Descriptor() ([]byte, []int) {
 
 func (x *HandleWebSocketRequest) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }
@@ -127,9 +127,9 @@ type SendProxyMessageRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId      string            `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserID      string            `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`
 	Command     string            `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
-	TargetId    string            `protobuf:"bytes,3,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	TargetID    string            `protobuf:"bytes,3,opt,name=target_id,json=targetID,proto3" json:"target_id,omitempty"`
 	MessageType string            `protobuf:"bytes,4,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`
 	Body        map[string]string `protobuf:"bytes,5,rep,name=body,proto3" json:"body,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
@@ -168,7 +168,7 @@ func (*SendProxyMessageRequest) Descriptor() ([]byte, []int) {
 
 func (x *SendProxyMessageRequest) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }
@@ -182,7 +182,7 @@ func (x *SendProxyMessageRequest) GetCommand() string {
 
 func (x *SendProxyMessageRequest) GetTargetId() string {
 	if x != nil {
-		return x.TargetId
+		return x.TargetID
 	}
 	return ""
 }

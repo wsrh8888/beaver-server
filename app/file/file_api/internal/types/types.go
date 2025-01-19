@@ -2,15 +2,15 @@
 package types
 
 type FileReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 }
 
 type FileRes struct {
-	FileId string `json:"fileId"`
+	FileID string `json:"fileId"`
 }
 
 type PreviewReq struct {
-	FileId string `path:"fileId"`
+	FileID string `path:"fileId"`
 }
 
 type PreviewRes struct {

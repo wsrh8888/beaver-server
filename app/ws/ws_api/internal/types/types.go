@@ -2,7 +2,7 @@
 package types
 
 type IBodySendMsg struct {
-	ConversationId string `json:"conversationId"`
+	ConversationID string `json:"conversationId"`
 	Msg            string `json:"msg"`
 }
 
@@ -13,9 +13,9 @@ type Msg struct {
 }
 
 type ProxySendMsgReq struct {
-	UserId   string                 `header:"Beaver-User-Id"`
+	UserID   string                 `header:"Beaver-User-Id"`
 	Command  string                 `json:"command"`
-	TargetId string                 `json:"targetId"`
+	TargetID string                 `json:"targetId"`
 	Type     string                 `json:"type"`
 	Body     map[string]interface{} `json:"body"`
 }
@@ -24,13 +24,13 @@ type ProxySendMsgRes struct {
 }
 
 type SendMsgReq struct {
-	UserId         string `header:"Beaver-User-Id"`
-	ConversationId string `json:"conversationId"`
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"`
 	Msg            string `json:"msg"`
 }
 
 type WsReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 	Token  string `header:"token"`
 }
 

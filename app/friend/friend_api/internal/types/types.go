@@ -2,43 +2,43 @@
 package types
 
 type FriendDeleteReq struct {
-	UserId   string `header:"Beaver-User-Id"`
-	FriendId string `json:"friendId"`
+	UserID   string `header:"Beaver-User-Id"`
+	FriendID string `json:"friendId"`
 }
 
 type FriendDeleteRes struct {
 }
 
 type FriendInfoReq struct {
-	UserId   string `header:"Beaver-User-Id"`
-	FriendId string `form:"friendId"`
+	UserID   string `header:"Beaver-User-Id"`
+	FriendID string `form:"friendId"`
 }
 
 type FriendInfoRes struct {
-	UserId         string `json:"userId"`
+	UserID         string `json:"userId"`
 	Nickname       string `json:"nickname"`
 	Avatar         string `json:"avatar"`
 	Abstract       string `json:"abstract`
 	Notice         string `json:"notice"`
 	IsFriend       bool   `json:"isFriend"`
-	ConversationId string `json:"conversationId"`
+	ConversationID string `json:"conversationId"`
 	Phone          string `json:"phone"`
 }
 
 type FriendValidInfo struct {
-	UserId   string `json:"userId"`   //用户Id
+	UserID   string `json:"userId"`   //用户Id
 	Nickname string `json:"nickname"` //昵称
 	Avatar   string `json:"avatar"`   //头像
 	Message  string `json:"message"`  //附加消息
 	Source   string `json:"source"`   //来源
-	Id       uint   `json:"id"`       //验证记录Id
+	ID       uint   `json:"id"`       //验证记录Id
 	Flag     string `json:"flag"`     //send 发送者  receive 接收者
 	Status   int8   `json:"status"`   //状态 0 未处理 1 同意 2 拒绝
 }
 
 type FriendValidStatusReq struct {
-	UserId   string `header:"Beaver-User-Id"`
-	VerifyId uint   `json:"verifyId"`
+	UserID   string `header:"Beaver-User-Id"`
+	VerifyID uint   `json:"verifyId"`
 	Status   int8   `json:"status"`
 }
 
@@ -47,40 +47,40 @@ type FriendValidStatusRes struct {
 
 type NoticeUpdateReq struct {
 	Notice   string `json:"notice"` //备注
-	UserId   string `header:"Beaver-User-Id"`
-	FriendId string `json:"friendId"` //好友Id
+	UserID   string `header:"Beaver-User-Id"`
+	FriendID string `json:"friendId"` //好友Id
 }
 
 type NoticeUpdateRes struct {
 }
 
 type SearchReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 	Phone  string `form:"phone"` //用户id或昵称
 }
 
 type SearchRes struct {
-	UserId         string `json:"userId"`
+	UserID         string `json:"userId"`
 	Nickname       string `json:"nickname"`
 	Avatar         string `json:"avatar"`
 	Abstract       string `json:"abstract`
 	Notice         string `json:"notice"`
 	IsFriend       bool   `json:"isFriend"`
-	ConversationId string `json:"conversationId"`
+	ConversationID string `json:"conversationId"`
 }
 
 type SearchValidInfoReq struct {
-	UserId   string `header:"Beaver-User-Id"`
-	FriendId string `json:"friendId"` //好友Id
+	UserID   string `header:"Beaver-User-Id"`
+	FriendID string `json:"friendId"` //好友Id
 }
 
 type SearchValidInfoRes struct {
-	ValidId uint `json:"validId"`
+	ValidID uint `json:"validId"`
 }
 
 type AddFriendReq struct {
-	UserId   string `header:"Beaver-User-Id"`
-	FriendId string `json:"friendId"`
+	UserID   string `header:"Beaver-User-Id"`
+	FriendID string `json:"friendId"`
 	Verify   string `json:"verify,optional"`
 }
 
@@ -88,7 +88,7 @@ type AddFriendRes struct {
 }
 
 type FriendListReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 	Page   int    `form:"page,optional"`
 	Limit  int    `form:"limit,optional"`
 }
@@ -98,9 +98,9 @@ type FriendListRes struct {
 }
 
 type UserValidReq struct {
-	UserId   string `header:"Beaver-User-Id"`
+	UserID   string `header:"Beaver-User-Id"`
 	Role     int8   `header:"Role"`
-	FriendId uint   `json:"friendId"`
+	FriendID uint   `json:"friendId"`
 }
 
 type UserValidRes struct {
@@ -108,7 +108,7 @@ type UserValidRes struct {
 }
 
 type ValidListReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 	Page   int    `json:"page,optional"`
 	Limit  int    `json:"limit,optional"`
 }

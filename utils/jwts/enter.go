@@ -9,7 +9,7 @@ import (
 type JwtPayLoad struct {
 	Phone    string `json:"phone"`
 	Nickname string `json:"nickname"`
-	UserId   string `json:"userId"`
+	UserID   string `json:"userId"`
 }
 
 type CustomClaims struct {

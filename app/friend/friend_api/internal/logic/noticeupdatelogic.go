@@ -27,17 +27,17 @@ func NewNoticeUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Noti
 
 func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *types.NoticeUpdateRes, err error) {
 	var friend friend_models.FriendModel
-	if !friend.IsFriend(l.svcCtx.DB, req.UserId, req.FriendId) {
+	if !friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
 		return nil, errors.New("不是好友关系")
 	}
-	if friend.SendUserId == req.UserId {
+	if friend.SendUserID == req.UserID {
 		if friend.SendUserNotice == req.Notice {
 			return
 		}
 		// 我是发起方
 		err = l.svcCtx.DB.Model(&friend).Update("send_user_notice", req.Notice).Error
 	}
-	if friend.RevUserId == req.UserId {
+	if friend.RevUserID == req.UserID {
 		if friend.RevUserNotice == req.Notice {
 			return
 		}

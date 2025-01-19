@@ -31,7 +31,7 @@ func NewChatHistoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatH
 
 func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.ChatHistoryRes, err error) {
 
-	fmt.Println("当前的会话Id是:", req.ConversationId)
+	fmt.Println("当前的会话Id是:", req.ConversationID)
 
 	chatMessages, count, err := list_query.ListQuery(l.svcCtx.DB, chat_models.ChatModel{}, list_query.Option{
 		PageInfo: models.PageInfo{
@@ -39,7 +39,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 			Limit: req.Limit,
 			Sort:  "created_at desc",
 		},
-		Where:   l.svcCtx.DB.Where("conversation_id = ?", req.ConversationId),
+		Where:   l.svcCtx.DB.Where("conversation_id = ?", req.ConversationID),
 		Preload: []string{"SendUserModel"},
 	})
 
@@ -58,10 +58,10 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		}
 
 		message := types.Message{
-			MessageId:      chat.Id,
-			ConversationId: chat.ConversationId,
+			MessageID:      chat.ID,
+			ConversationID: chat.ConversationID,
 			Sender: types.Sender{
-				UserId:   chat.SendUserModel.UserId,
+				UserID:   chat.SendUserModel.UUID,
 				Nickname: chat.SendUserModel.NickName,
 				Avatar:   chat.SendUserModel.Avatar,
 			},

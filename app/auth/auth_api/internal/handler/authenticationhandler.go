@@ -19,9 +19,6 @@ func authenticationHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, err)
 			return
 		}
-		fmt.Println("111111111111111111111111111")
-		fmt.Println(r)
-		fmt.Println(w)
 
 		l := logic.NewAuthenticationLogic(r.Context(), svcCtx)
 		resp, err := l.Authentication(&req)

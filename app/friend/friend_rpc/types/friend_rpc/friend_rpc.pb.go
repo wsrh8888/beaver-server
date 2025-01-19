@@ -25,7 +25,7 @@ type GetFriendIdsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserID string `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`
 }
 
 func (x *GetFriendIdsRequest) Reset() {
@@ -62,7 +62,7 @@ func (*GetFriendIdsRequest) Descriptor() ([]byte, []int) {
 
 func (x *GetFriendIdsRequest) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }

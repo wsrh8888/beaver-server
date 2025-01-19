@@ -123,7 +123,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		err = svcCtx.DB.Take(&fileModel, "hash = ?", fileMd5).Error
 
 		if err == nil {
-			resp.FileId = fileModel.FileId
+			resp.FileID = fileModel.FileID
 			response.Response(r, w, resp, nil)
 			return
 		}
@@ -141,11 +141,10 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 创建新的文件记录
 		newFileModel := &file_models.FileModel{
 			FileName: fileName,
-			UserId:   req.UserId, // 这里需要根据实际情况设置用户Id
 			Size:     fileHead.Size,
 			Path:     qiniuURL,
 			Hash:     fileMd5,
-			FileId:   uuid.New().String(),
+			FileID:   uuid.New().String(),
 			Type:     fileType,
 		}
 		err = svcCtx.DB.Create(newFileModel).Error
@@ -154,7 +153,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		resp.FileId = newFileModel.FileId
+		resp.FileID = newFileModel.FileID
 		response.Response(r, w, resp, nil)
 	}
 }

@@ -12,17 +12,17 @@ import (
  */
 type FriendModel struct {
 	models.Model
-	RevUserModel   user_models.UserModel `gorm:"foreignkey:RevUserId;references:UserId" json:"-"`
-	SendUserModel  user_models.UserModel `gorm:"foreignkey:SendUserId;references:UserId" json:"-"`
-	SendUserId     string                `gorm:"size:64;index" json:"sendUserId"`         // 发起验证方的 UserId
-	RevUserId      string                `gorm:"size:64;index" json:"revUserId"`          // 接收验证方的 UserId
+	RevUserModel   user_models.UserModel `gorm:"foreignkey:RevUserID;references:UUID" json:"-"`
+	SendUserModel  user_models.UserModel `gorm:"foreignkey:SendUserID;references:UUID" json:"-"`
+	SendUserID     string                `gorm:"size:64;index" json:"sendUserId"`         // 发起验证方的 UserID
+	RevUserID      string                `gorm:"size:64;index" json:"revUserId"`          // 接收验证方的 UserID
 	SendUserNotice string                `gorm:"size: 128" json:"sendUserNotice"`         //发起验证方备注
 	RevUserNotice  string                `gorm:"size: 128" json:"revUserNotice"`          //接收验证方备注
 	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
 }
 
 /**
- * @description: A -> B SendUserId(A的Id) RevUserId(B的Id) SendUserNotice(A对B的备注） RevUserNotice(B对A的备注)
+ * @description: A -> B SendUserID(A的ID) RevUserID(B的ID) SendUserNotice(A对B的备注） RevUserNotice(B对A的备注)
  * @description: B -> A
  */
 
@@ -38,13 +38,13 @@ func (f *FriendModel) IsFriend(db *gorm.DB, A, B string) bool {
  * @description: 获取用户的备注
  * @param {uint} userId
  */
-func (f *FriendModel) GetUserNotice(userId string) string {
+func (f *FriendModel) GetUserNotice(userID string) string {
 
-	if userId == f.SendUserId {
+	if userID == f.SendUserID {
 		// 如果我是发起方
 		return f.SendUserNotice
 	}
-	if userId == f.RevUserId {
+	if userID == f.RevUserID {
 		// 如果我是接收方
 		return f.RevUserNotice
 	}
