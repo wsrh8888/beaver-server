@@ -36,11 +36,11 @@ go run main.go  -db
 
 
 ### 项目列表
-| [GitHub仓库]    |  说明                                                                                      
-| ------------------------------------------------------------ | --------------------------------------------------------------------------
-| [beaver-server](https://github.com/wsrh8888/beaver-server)               | 后端服务  |
-| [beaver-mobile](https://github.com/wsrh8888/beaver-mobile)        | 手机端 |
-| [beaver-desktop](https://github.com/wsrh8888/beaver-desktop)        | 桌面端 |
+| [GitHub仓库]    |   [Gitee仓库]    |说明                                                                                      
+| ------------------------------------------------------------ | --------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| [beaver-server](https://github.com/wsrh8888/beaver-server)               |[beaver-server](https://gitee.com/dawwdadfrf/beaver-server)               | 后端服务  |
+| [beaver-mobile](https://github.com/wsrh8888/beaver-mobile)        | [beaver-mobile](https://gitee.com/dawwdadfrf/beaver-mobile)               |手机端 |
+| [beaver-desktop](https://github.com/wsrh8888/beaver-desktop)        | [beaver-desktop](https://gitee.com/dawwdadfrf/beaver-desktop)               |桌面端 |
 
 
 ### 更新记录
