@@ -41,7 +41,7 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 
 	user = user_models.UserModel{
-		UserId:   strings.Replace(uuid.New().String(), "-", "", -1),
+		UUID:     strings.Replace(uuid.New().String(), "-", "", -1),
 		Password: in.Password,
 		Phone:    in.Phone,
 		Source:   in.Source,
@@ -57,6 +57,6 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 
 	return &user_rpc.UserCreateRes{
-		UserId: user.UserId,
+		UserID: user.UUID,
 	}, nil
 }

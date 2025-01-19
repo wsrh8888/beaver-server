@@ -1,0 +1,47 @@
+syntax = "v1"
+
+type AddEmojiReq {
+	UserID    string `header:"Beaver-User-Id"`
+	FileUrl   string `json:"fileUrl"`
+	Title     string `json:"title"`
+	PackageID uint   `json:"packageId,optional"`
+}
+
+type AddEmojiRes {}
+
+type UpdateFavoriteEmojiReq {
+	UserID  string `header:"Beaver-User-Id"`
+	EmojiID uint   `json:"emojiId"`
+	Type    string `json:"type"` // "favorite" or "unfavorite"
+}
+
+type UpdateFavoriteEmojiRes {}
+
+type GetEmojisListReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type EmojiItem {
+	EmojiID   uint   `json:"emojiId"`
+	FileUrl   string `json:"fileUrl"`
+	Title     string `json:"title"`
+	PackageID *uint  `json:"packageId"`
+}
+
+type GetEmojisListRes {
+	Count int64       `json:"count"`
+	List  []EmojiItem `json:"list"`
+}
+
+service emoji {
+	@handler AddEmoji
+	post /api/emoji/add (AddEmojiReq) returns (AddEmojiRes) // 添加表情包，并且自动收藏
+
+	@handler UpdateFavoriteEmoji
+	post /api/emoji/updateFavoriteEmoji (UpdateFavoriteEmojiReq) returns (UpdateFavoriteEmojiRes) // 收藏或者取消收藏表情
+
+	@handler GetEmojisList
+	post /api/emoji/getEmojisList (GetEmojisListReq) returns (GetEmojisListRes) // 获取用户收藏的表情列表
+}
+
+// goctl api go -api emoji_api.api -dir . --home ../../../template

@@ -33,7 +33,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	// todo: add your logic here and delete this line
 	var friendVerify friend_models.FriendVerifyModel
 	// 我要操作状态，我自己是接受方
-	err = l.svcCtx.DB.Take(&friendVerify, "id = ? and rev_user_id = ?", req.VerifyId, req.UserId).Error
+	err = l.svcCtx.DB.Take(&friendVerify, "id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
 	if err != nil {
 		return nil, errors.New("好友验证不存在")
 	}
@@ -45,16 +45,16 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		friendVerify.RevStatus = 1
 		// 往好友表里插入
 		l.svcCtx.DB.Create(&friend_models.FriendModel{
-			SendUserId: friendVerify.SendUserId,
-			RevUserId:  friendVerify.RevUserId,
+			SendUserID: friendVerify.SendUserID,
+			RevUserID:  friendVerify.RevUserID,
 		})
 
 		fmt.Println("发送消息")
-		conversationId, _ := conversation.GenerateConversation([]string{friendVerify.SendUserId, friendVerify.RevUserId})
+		conversationID, _ := conversation.GenerateConversation([]string{friendVerify.SendUserID, friendVerify.RevUserID})
 		// 默认发送一条消息
 		l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-			UserId:         friendVerify.RevUserId,
-			ConversationId: conversationId,
+			UserID:         friendVerify.RevUserID,
+			ConversationID: conversationID,
 			Msg: &chat_rpc.Msg{
 				Type: 1,
 				TextMsg: &chat_rpc.TextMsg{
@@ -75,12 +75,12 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	}
 	err = l.svcCtx.DB.Save(&friendVerify).Error
 
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_valid_type_update", friendVerify.SendUserId, friendVerify.RevUserId, map[string]interface{}{
-		"userId": friendVerify.SendUserId,
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_valid_type_update", friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
+		"userId": friendVerify.SendUserID,
 		"status": friendVerify.RevStatus,
 	})
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_valid_type_update", friendVerify.RevUserId, friendVerify.SendUserId, map[string]interface{}{
-		"userId": friendVerify.RevUserId,
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_valid_type_update", friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
+		"userId": friendVerify.RevUserID,
 		"status": friendVerify.RevStatus,
 	})
 	return

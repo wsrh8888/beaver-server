@@ -32,31 +32,31 @@ func NewFriendDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Frie
 func (l *FriendDeleteLogic) FriendDelete(req *types.FriendDeleteReq) (resp *types.FriendDeleteRes, err error) {
 	// 确认好友关系
 	var friend friend_models.FriendModel
-	if !friend.IsFriend(l.svcCtx.DB, req.UserId, req.FriendId) {
+	if !friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
 		return nil, errors.New("不是好友关系")
 	}
 
 	// 标记好友关系为已删除
-	err = l.svcCtx.DB.Model(&friend).Where("((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0", req.UserId, req.FriendId, req.FriendId, req.UserId).Update("is_deleted", 1).Error
+	err = l.svcCtx.DB.Model(&friend).Where("((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0", req.UserID, req.FriendID, req.FriendID, req.UserID).Update("is_deleted", 1).Error
 	if err != nil {
 		return nil, err
 	}
 
 	// 获取会话Id
-	conversationId, err := conversation.GenerateConversation([]string{req.UserId, req.FriendId})
+	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
 	if err != nil {
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
 	// 异步标记会话和聊天记录为已删除
 	go func() {
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "friend_delete", req.UserId, req.FriendId, map[string]interface{}{
-			"userId": req.FriendId,
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "friend_delete", req.UserID, req.FriendID, map[string]interface{}{
+			"userId": req.FriendID,
 		})
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "friend_delete", req.FriendId, req.UserId, map[string]interface{}{
-			"userId": req.FriendId,
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "friend_delete", req.FriendID, req.UserID, map[string]interface{}{
+			"userId": req.FriendID,
 		})
-		if err := l.markConversationAndChatsAsDeleted(req.UserId, conversationId); err != nil {
+		if err := l.markConversationAndChatsAsDeleted(req.UserID, conversationID); err != nil {
 			l.Logger.Error(fmt.Sprintf("删除会话和聊天记录失败: %v", err))
 		}
 	}()
@@ -64,18 +64,18 @@ func (l *FriendDeleteLogic) FriendDelete(req *types.FriendDeleteReq) (resp *type
 	return &types.FriendDeleteRes{}, nil
 }
 
-func (l *FriendDeleteLogic) markConversationAndChatsAsDeleted(userId, conversationId string) error {
+func (l *FriendDeleteLogic) markConversationAndChatsAsDeleted(userID, conversationID string) error {
 
 	db := l.svcCtx.DB
 
 	// 批量标记会话记录为已删除
-	err := db.Model(&chat_models.ChatUserConversationModel{}).Where("user_id = ? AND conversation_id = ?", userId, conversationId).Update("is_deleted", true).Error
+	err := db.Model(&chat_models.ChatUserConversationModel{}).Where("user_id = ? AND conversation_id = ?", userID, conversationID).Update("is_deleted", true).Error
 	if err != nil {
 		return err
 	}
 
 	// 批量标记聊天记录为已删除
-	err = db.Model(&chat_models.ChatModel{}).Where("conversation_id = ?", conversationId).Update("is_deleted", true).Error
+	err = db.Model(&chat_models.ChatModel{}).Where("conversation_id = ?", conversationID).Update("is_deleted", true).Error
 	if err != nil {
 		return err
 	}

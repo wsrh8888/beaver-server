@@ -1,0 +1,71 @@
+syntax = "v1"
+
+type groupCreateReq {
+	UserID     string   `header:"Beaver-User-Id"`
+	Name       string   `json:"name,optional"`
+	UserIdList []string `json:"userIdList,optional"`
+}
+
+type groupCreateRes {
+	GroupID string `json:"groupId"` // 群组ID
+}
+
+type groupDeleteReq {
+	UserID  string `header:"Beaver-User-Id"`
+	GroupID string `path:"groupId"`
+}
+
+type groupDeleteRes {}
+
+type groupMemberRemoveReq {
+	UserID   string `header:"Beaver-User-Id"`
+	GroupID  string `path:"groupId"`
+	MemberID string `form:"memberId"`
+}
+
+type groupMemberRemoveRes {}
+
+type groupMemberAddReq {
+	UserID       string   `header:"Beaver-User-Id"`
+	GroupID      string   `json:"groupId"`
+	MemberIdList []string `json:"memberIdList"`
+}
+
+type groupMemberAddRes {}
+
+type GroupMineReq {
+	UserID string `header:"Beaver-User-Id"`
+	Page   int    `json:"page,optional"`
+	Limit  int    `json:"limit,optional"`
+}
+
+type GroupInfo {
+	Title          string `json:"title"`
+	Avatar         string `json:"avatar"`
+	MemberCount    int    `json:"memberCount"`
+	ConversationID string `json:"conversationId"`
+}
+
+type GroupMineRes {
+	List  []GroupInfo `json:"list"`
+	Count int         `json:"count"`
+}
+
+service group {
+	@handler groupCreate
+	post /api/group/create (groupCreateReq) returns (groupCreateRes) // 创建群组
+
+	@handler groupDelete
+	delete /api/group/delete/:id (groupDeleteReq) returns (groupDeleteRes) //删除群
+
+	@handler groupMemberRemove
+	get /api/group/memberRemove (groupMemberRemoveReq) returns (groupMemberRemoveRes) //删除群成员
+
+	@handler groupMemberAdd
+	post /api/group/memberAdd (groupMemberAddReq) returns (groupMemberAddRes) //添加群成员
+
+	@handler group_mine
+	post /api/group/group_mine (GroupMineReq) returns (GroupMineRes) //加入的群
+}
+
+// goctl api go -api group_api.api -dir . --home ../../../template

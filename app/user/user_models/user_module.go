@@ -4,7 +4,7 @@ import "beaver/common/models"
 
 type UserModel struct {
 	models.Model
-	UserId   string `gorm:"size:64;unique" json:"userId"` // 唯一字段，但不是主键
+	UUID     string `gorm:"size:64;unique" json:"uuid"` // 设置主键 UserID
 	NickName string `json:"nickName"`
 	Password string `json:"password"`
 	Avatar   string `gorm:"default:'https://js.ibaotu.com/images/avatar/%E5%A4%B4%E5%83%8F-17.png'" json:"avatar"`

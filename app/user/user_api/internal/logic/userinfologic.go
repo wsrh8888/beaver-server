@@ -28,7 +28,7 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 
 func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRes, err error) {
 	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
-		UserId: req.UserId})
+		UserID: req.UserID})
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		return nil, err
 	}
 	resp = &types.UserInfoRes{
-		UserId:   user.UserId,
+		UserID:   user.UUID,
 		NickName: user.NickName,
 		Avatar:   user.Avatar,
 		Abstract: user.Abstract,

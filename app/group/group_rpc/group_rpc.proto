@@ -1,0 +1,24 @@
+syntax = "proto3"; //指定proto版本
+package group_rpc;
+
+option go_package = "./group_rpc";
+
+message GetGroupMembersReq {
+  string group_id = 1; // 群组Id
+}
+
+message GroupMemberInfo {
+  string user_id = 1;  // 用户Id
+  string username = 2; // 用户名
+  string avatar = 3;   // 用户头像
+}
+
+message GetGroupMembersRes {
+  repeated GroupMemberInfo members = 1; // 成员信息列表
+}
+
+service Group {
+  rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
+}
+
+//goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

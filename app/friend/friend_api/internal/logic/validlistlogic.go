@@ -34,7 +34,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			Limit: req.Limit,
 			Sort:  "created_at desc",
 		},
-		Where:   l.svcCtx.DB.Where("send_user_id = ? or rev_user_id = ?", req.UserId, req.UserId),
+		Where:   l.svcCtx.DB.Where("send_user_id = ? or rev_user_id = ?", req.UserID, req.UserID),
 		Preload: []string{"RevUserModel", "SendUserModel"},
 	})
 
@@ -43,19 +43,19 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 	for _, fv := range fvs {
 		info := types.FriendValidInfo{
 			Message: fv.Message,
-			Id:      fv.Id,
+			ID:      fv.ID,
 		}
-		if fv.SendUserId == req.UserId {
+		if fv.SendUserID == req.UserID {
 			// 我是发起方
-			info.UserId = fv.RevUserId
+			info.UserID = fv.RevUserID
 			info.Nickname = fv.RevUserModel.NickName
 			info.Avatar = fv.RevUserModel.Avatar
 			info.Flag = "send"
 			info.Status = fv.RevStatus
 		}
-		if fv.RevUserId == req.UserId {
+		if fv.RevUserID == req.UserID {
 			// 我是接受方
-			info.UserId = fv.SendUserId
+			info.UserID = fv.SendUserID
 			info.Nickname = fv.SendUserModel.NickName
 			info.Avatar = fv.SendUserModel.Avatar
 			info.Flag = "rev"

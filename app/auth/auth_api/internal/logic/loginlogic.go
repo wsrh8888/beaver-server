@@ -42,13 +42,13 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
 		Phone:    user.Phone,
 		Nickname: user.NickName,
-		UserId:   user.UserId,
+		UserID:   user.UUID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
 		logx.Errorf("生成token失败: %v", err)
 		return nil, errors.New("服务内部异常")
 	}
-	key := fmt.Sprintf("login_%s", user.UserId)
+	key := fmt.Sprintf("login_%s", user.UUID)
 	err = l.svcCtx.Redis.Set(key, token, time.Hour*48).Err()
 	if err != nil {
 		logx.Errorf("存储token失败: %v", err)
@@ -56,6 +56,6 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 	}
 	return &types.LoginRes{
 		Token:  token,
-		UserId: user.UserId,
+		UserID: user.UUID,
 	}, nil
 }

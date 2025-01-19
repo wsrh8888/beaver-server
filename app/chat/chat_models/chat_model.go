@@ -9,12 +9,12 @@ import (
 
 type ChatModel struct {
 	models.Model
-	ConversationId string                `json:"conversationId"`                   // 会话id（单聊为用户id，群聊为群id）
-	SendUserId     string                `gorm:"size:64;index"  json:"sendUserId"` // 发送者用户id
+	ConversationID string                `json:"conversationId"`                   // 会话id（单聊为用户id，群聊为群id）
+	SendUserID     string                `gorm:"size:64;index"  json:"sendUserId"` // 发送者用户id
 	MsgType        ctype.MsgType         `json:"msgType"`                          // 消息类型
 	MsgPreview     string                `gorm:"size:64" json:"msgPreview"`        // 消息预览
 	Msg            *ctype.Msg            `json:"msg"`                              // 消息内容
-	SendUserModel  user_models.UserModel `gorm:"foreignKey:SendUserId;references:UserId" json:"-"`
+	SendUserModel  user_models.UserModel `gorm:"foreignKey:SendUserID;references:UUID" json:"-"`
 	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
 }
 

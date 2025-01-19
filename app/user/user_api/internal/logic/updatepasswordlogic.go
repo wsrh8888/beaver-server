@@ -31,7 +31,7 @@ func NewUpdatePasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Up
 func (l *UpdatePasswordLogic) UpdatePassword(req *types.UpdatePasswordReq) (resp *types.UpdatePasswordRes, err error) {
 	// 查询用户信息
 	var user user_models.UserModel
-	if err := l.svcCtx.DB.Where("user_id = ?", req.UserId).First(&user).Error; err != nil {
+	if err := l.svcCtx.DB.Where("uuid = ?", req.UserID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}

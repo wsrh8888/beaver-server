@@ -41,7 +41,7 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 		err = errors.New("认证失败")
 		return
 	}
-	key := fmt.Sprintf("login_%s", claims.UserId)
+	key := fmt.Sprintf("login_%s", claims.UserID)
 	token, _ := l.svcCtx.Redis.Get(key).Result()
 	if token != req.Token {
 		fmt.Println("token不一致", token, req.Token)
@@ -49,7 +49,7 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 		return
 	}
 	resp = &types.AuthenticationRes{
-		UserId: claims.UserId,
+		UserID: claims.UserID,
 	}
 	fmt.Println(resp, "数据")
 	return resp, nil

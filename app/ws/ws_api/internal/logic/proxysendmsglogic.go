@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	websocket_utils "beaver/app/ws/ws_api/internal/logic/websocket/utils"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
@@ -40,6 +41,6 @@ func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *type
 		},
 	}
 	// todo: add your logic here and delete this line
-	SendMsgByUser(req.TargetId, req.UserId, req.Command, content)
+	websocket_utils.SendMsgByUser(req.TargetID, req.UserID, req.Command, content)
 	return
 }

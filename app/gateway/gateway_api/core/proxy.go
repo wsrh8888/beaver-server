@@ -37,12 +37,10 @@ type Proxy struct {
 }
 
 func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
-	uuid := getUuid(req)
 
 	// 执行鉴权接口
 	authAddr := etcd.GetServiceAddr(p.Config.Etcd, "auth_api")
 	if authAddr == "" {
-		writeErrorResponse(res, "认证服务错误", http.StatusInternalServerError, uuid)
 		return false
 	}
 
@@ -60,7 +58,6 @@ func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	authRes, err := authClient.Do(authReq)
 	if err != nil {
 		logx.Errorf("认证服务错误: %s", err)
-		writeErrorResponse(res, "认证服务错误", http.StatusInternalServerError, uuid)
 		return false
 	}
 	defer authRes.Body.Close()
@@ -70,14 +67,13 @@ func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 		Code   int    `json:"code"`
 		Msg    string `json:"msg"`
 		Result *struct {
-			UserId string `json:"userId"`
+			UserID string `json:"userId"`
 		} `json:"result"`
 	}
 
 	byteData, err := io.ReadAll(authRes.Body)
 	if err != nil {
 		logx.Errorf("读取认证服务响应错误: %s", err)
-		writeErrorResponse(res, "认证服务错误", http.StatusInternalServerError, uuid)
 		return false
 	}
 
@@ -85,18 +81,16 @@ func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	authErr := json.Unmarshal(byteData, &authResponse)
 	if authErr != nil {
 		logx.Errorf("解析认证服务响应错误: %s", authErr)
-		writeErrorResponse(res, "认证服务错误", http.StatusInternalServerError, uuid)
 		return false
 	}
 	// 检查响应代码
 	if authResponse.Code != 0 {
 		logx.Errorf("认证服务返回异常: %v", authResponse)
-		writeErrorResponse(res, "认证服务异常", http.StatusForbidden, uuid)
 		return false
 	}
 
 	if authResponse.Result != nil {
-		req.Header.Set("Beaver-User-Id", authResponse.Result.UserId)
+		req.Header.Set("Beaver-User-Id", authResponse.Result.UserID)
 	}
 	logx.Infof("认证成功: %v", authResponse)
 	return true

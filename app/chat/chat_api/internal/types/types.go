@@ -2,8 +2,8 @@
 package types
 
 type ChatHistoryReq struct {
-	UserId         string `header:"Beaver-User-Id"`
-	ConversationId string `json:"conversationId"` // 会话Id
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` // 会话Id
 	Page           int    `json:"page,optional"`
 	Limit          int    `json:"limit,optional"`
 }
@@ -14,8 +14,8 @@ type ChatHistoryRes struct {
 }
 
 type DeleteRecentReq struct {
-	UserId         string `header:"Beaver-User-Id"`
-	ConversationId string `json:"conversationId"` //会话id
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
 }
 
 type DeleteRecentRes struct {
@@ -34,8 +34,8 @@ type ImageMsg struct {
 }
 
 type Message struct {
-	MessageId      uint   `json:"messageId"`      //消息id
-	ConversationId string `json:"conversationId"` //会话id
+	MessageID      uint   `json:"messageId"`      //消息id
+	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"`    //发送者
 	CreateAt       string `json:"create_at"` //消息时间
@@ -51,8 +51,8 @@ type Msg struct {
 }
 
 type PinnedChatReq struct {
-	UserId         string `header:"Beaver-User-Id"`
-	ConversationId string `json:"conversationId"` //会话id
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
 	IsPinned       bool   `json:"isPinned"`       // true表示置顶 false表示不置顶
 }
 
@@ -65,11 +65,11 @@ type RecentChat struct {
 	MsgPreview     string `json:"msg_preview"`    //消息预览
 	CreateAt       string `json:"create_at"`      //消息时间
 	IsTop          bool   `json:"is_top"`         //是否置顶
-	ConversationId string `json:"conversationId"` //会话id
+	ConversationID string `json:"conversationId"` //会话id
 }
 
 type RecentChatListReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 	Page   int    `form:"page,optional"`
 	Limit  int    `form:"limit,optional"`
 }
@@ -80,14 +80,14 @@ type RecentChatListRes struct {
 }
 
 type SendMsgReq struct {
-	UserId         string `header:"Beaver-User-Id"`
-	ConversationId string `json:"conversationId"` //会话id
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 }
 
 type SendMsgRes struct {
-	MessageId      uint32 `json:"messageId"`      //消息id
-	ConversationId string `json:"conversationId"` //会话id
+	MessageID      uint32 `json:"messageId"`      //消息id
+	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"`     //发送者
 	CreateAt       string `json:"create_at"`  //消息时间
@@ -95,7 +95,7 @@ type SendMsgRes struct {
 }
 
 type Sender struct {
-	UserId   string `json:"userId"`
+	UserID   string `json:"userId"`
 	Avatar   string `json:"avatar"`
 	Nickname string `json:"nickname"`
 }

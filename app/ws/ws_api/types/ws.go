@@ -8,8 +8,9 @@ type WsContent struct {
 }
 
 type WsData struct {
-	Type string          `json:"type"` // 消息类型
-	Body json.RawMessage `json:"body"` // 消息内容
+	Type           string          `json:"type"`           // 消息类型
+	ConversationID string          `json:"conversationId"` // 会话ID
+	Body           json.RawMessage `json:"body"`           // 消息内容
 }
 
 type WsMessage struct {

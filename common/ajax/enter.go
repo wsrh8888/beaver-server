@@ -15,7 +15,7 @@ type ForwardRequest struct {
 	ApiEndpoint string
 	Method      string
 	Token       string
-	UserId      string
+	UserID      string
 	Body        *bytes.Buffer
 }
 
@@ -26,14 +26,14 @@ type Response struct {
 }
 
 type WsProxyReq struct {
-	UserId   string                 `header:"Beaver-User-Id"`
+	UserID   string                 `header:"Beaver-User-Id"`
 	Command  string                 `json:"command"`
-	TargetId string                 `json:"targetId"`
+	TargetID string                 `json:"targetId"`
 	Type     string                 `json:"type"`
 	Body     map[string]interface{} `json:"body"`
 }
 
-func SendMessageToWs(etcdUrl string, types string, senderId string, targetId string, requestBody map[string]interface{}) {
+func SendMessageToWs(etcdUrl string, types string, senderID string, targetID string, requestBody map[string]interface{}) {
 	addr := etcd.GetServiceAddr(etcdUrl, "ws_api")
 	if addr == "" {
 		logx.Error("未匹配到服务")
@@ -42,9 +42,9 @@ func SendMessageToWs(etcdUrl string, types string, senderId string, targetId str
 	apiEndpoint := fmt.Sprintf("http://%s/api/ws/proxySendMsg", addr)
 
 	wsProxyReq := WsProxyReq{
-		UserId:   senderId,
+		UserID:   senderID,
 		Command:  "COMMON_UPDATE_MESSAGE",
-		TargetId: targetId,
+		TargetID: targetID,
 		Type:     types,
 		Body:     requestBody,
 	}
@@ -54,7 +54,7 @@ func SendMessageToWs(etcdUrl string, types string, senderId string, targetId str
 		ApiEndpoint: apiEndpoint,
 		Method:      "POST",
 		Token:       "",
-		UserId:      senderId,
+		UserID:      senderID,
 		Body:        bytes.NewBuffer(body),
 	})
 }
@@ -81,7 +81,7 @@ func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Token", forwardReq.Token)           // 使用Token进行鉴权
-	req.Header.Set("Beaver-User-Id", forwardReq.UserId) // 使用Token进行鉴权
+	req.Header.Set("Beaver-User-Id", forwardReq.UserID) // 使用Token进行鉴权
 
 	resp, err := client.Do(req)
 	if err != nil {

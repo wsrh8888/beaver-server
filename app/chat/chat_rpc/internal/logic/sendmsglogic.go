@@ -32,13 +32,13 @@ func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLo
 }
 
 func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, error) {
-	if conversation.GetConversationType(in.ConversationId) == 1 {
-		if !strings.Contains(in.ConversationId, in.UserId) {
-			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserId, in.ConversationId)
+	if conversation.GetConversationType(in.ConversationID) == 1 {
+		if !strings.Contains(in.ConversationID, in.UserID) {
+			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserID, in.ConversationID)
 			return nil, errors.New("异常操作")
 		}
 		var friend friend_models.FriendModel
-		userIds := conversation.ParseConversation(in.ConversationId)
+		userIds := conversation.ParseConversation(in.ConversationID)
 		if !friend.IsFriend(l.svcCtx.DB, userIds[0], userIds[1]) {
 			return nil, errors.New("不是好友关系")
 		}
@@ -94,8 +94,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	chatModel := chat_models.ChatModel{
-		SendUserId:     in.UserId,
-		ConversationId: in.ConversationId,
+		SendUserID:     in.UserID,
+		ConversationID: in.ConversationID,
 		MsgType:        msgType,
 		Msg:            &msg,
 	}
@@ -106,7 +106,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, err
 	}
 
-	err = l.updateUserConversations(in.ConversationId, in.UserId, chatModel.MsgPreview)
+	err = l.updateUserConversations(in.ConversationID, in.UserID, chatModel.MsgPreview)
 	if err != nil {
 		return nil, err
 	}
@@ -116,19 +116,19 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		fmt.Println("Error converting msg:", err)
 		return nil, err
 	}
-	err = l.svcCtx.DB.Preload("SendUserModel").First(&chatModel, chatModel.Id).Error
+	err = l.svcCtx.DB.Preload("SendUserModel").First(&chatModel, chatModel.ID).Error
 	if err != nil {
 		fmt.Println("preload异常", err.Error())
 		return nil, err
 	}
 
 	return &chat_rpc.SendMsgRes{
-		MessageId:      uint32(chatModel.Id), // 支持 uint32 类型
-		ConversationId: chatModel.ConversationId,
+		MessageID:      uint32(chatModel.ID), // 支持 uint32 类型
+		ConversationID: chatModel.ConversationID,
 		Msg:            convertedMsg,
 		MsgPreview:     chatModel.MsgPreview,
 		Sender: &chat_rpc.Sender{
-			UserId:   chatModel.SendUserModel.UserId,
+			UserID:   chatModel.SendUserModel.UUID,
 			Avatar:   chatModel.SendUserModel.Avatar,
 			Nickname: chatModel.SendUserModel.NickName,
 		},
@@ -136,13 +136,13 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}, nil
 }
 
-func (l *SendMsgLogic) updateUserConversations(conversationId, userId, lastMessage string) error {
+func (l *SendMsgLogic) updateUserConversations(conversationID, userID, lastMessage string) error {
 	var userConvo chat_models.ChatUserConversationModel
-	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", conversationId, userId).First(&userConvo).Error
+	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", conversationID, userID).First(&userConvo).Error
 	if err != nil {
 		if err := l.svcCtx.DB.Create(&chat_models.ChatUserConversationModel{
-			UserId:         userId,
-			ConversationId: conversationId,
+			UserID:         userID,
+			ConversationID: conversationID,
 			LastMessage:    lastMessage,
 			IsDeleted:      false,
 		}).Error; err != nil {

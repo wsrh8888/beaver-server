@@ -7,7 +7,7 @@ type LoginReq {
 
 type LoginRes {
 	Token  string `json:"token"`
-	UserId string `json:"userId"`
+	UserID string `json:"userId"`
 }
 
 type AuthenticationReq {
@@ -19,7 +19,7 @@ type AuthenticationReq {
 }
 
 type AuthenticationRes {
-	UserId uint `json:"userId"`
+	UserID uint `json:"userId"`
 }
 
 type RegisterReq {

@@ -10,6 +10,15 @@
       ]
     },
     {
+      "label": "group_rpc",
+      "type": "shell",
+      "command": "cd app/group/group_rpc;  go run grouprpc.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    
+    {
       "label": "friend_rpc",
       "type": "shell",
       "command": "cd app/friend/friend_rpc;  go run friendrpc.go",
@@ -29,6 +38,15 @@
       "label": "file_rpc",
       "type": "shell",
       "command": "cd app/file/file_rpc;  go run filerpc.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+
+      "label": "emoji_api",
+      "type": "shell",
+      "command": "cd app/emoji/emoji_api;  go run emoji.go",
       "problemMatcher": [
         "$go"
       ]
@@ -74,6 +92,14 @@
         "$go"
       ]
     },
+    {
+      "label": "moment_api",
+      "type": "shell",
+      "command": "cd app/moment/moment_api;  go run moment.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
     
     {
       "label": "file_api",
@@ -100,6 +126,14 @@
       ]
     },
     {
+      "label": "group_api",
+      "type": "shell",
+      "command": "cd app/group/group_api;  go run group.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
       "label": "启动RPC服务",
       "type": "shell",
       "command": "echo Running all services",
@@ -111,7 +145,7 @@
       "label": "启动Api全部任务",
       "type": "shell",
       "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api"],
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api"],
       "dependsOrder": "parallel",
       "problemMatcher": []
     }

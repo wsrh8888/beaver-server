@@ -1,11 +1,11 @@
 syntax = "v1"
 
 type UserInfoReq {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 }
 
 type UserInfoRes {
-	UserId   string `json:"userId"`
+	UserID   string `json:"userId"`
 	NickName string `json:"nickName"`
 	Avatar   string `json:"avatar"`
 	Abstract string `json:"abstract"`
@@ -13,7 +13,7 @@ type UserInfoRes {
 }
 
 type UpdateInfoReq {
-	UserId   string  `header:"Beaver-User-Id"`
+	UserID   string  `header:"Beaver-User-Id"`
 	Nickname *string `json:"nick_name,optional" user:"nickname"`
 	Avatar   *string `json:"avatar,optional" user:"avatar"`
 }
@@ -21,7 +21,7 @@ type UpdateInfoReq {
 type UpdateInfoRes {}
 
 type UpdatePasswordReq {
-	UserId      string `header:"Beaver-User-Id"`
+	UserID      string `header:"Beaver-User-Id"`
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
 }

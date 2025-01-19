@@ -13,7 +13,7 @@ type Response struct {
 	Code       int                   `json:"code"`
 	Command    string                `json:"command"`
 	Content    type_struct.WsContent `json:"content"`
-	MessageId  string                `json:"messageId"`
+	MessageID  string                `json:"messageId"`
 	ServerTime int64                 `json:"serverTime"`
 }
 
@@ -24,7 +24,7 @@ func WsResponse(conn *websocket.Conn, command string, content type_struct.WsCont
 		Command:    command,
 		Code:       code,
 		Content:    content,
-		MessageId:  utils.GenerateRandomString(8),
+		MessageID:  utils.GenerateRandomString(8),
 		ServerTime: time.Now().Unix(),
 	}
 	responseJSON, _ := json.Marshal(response)

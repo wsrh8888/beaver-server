@@ -2,7 +2,7 @@
 package types
 
 type UpdateInfoReq struct {
-	UserId   string  `header:"Beaver-User-Id"`
+	UserID   string  `header:"Beaver-User-Id"`
 	Nickname *string `json:"nick_name,optional" user:"nickname"`
 	Avatar   *string `json:"avatar,optional" user:"avatar"`
 }
@@ -11,7 +11,7 @@ type UpdateInfoRes struct {
 }
 
 type UpdatePasswordReq struct {
-	UserId      string `header:"Beaver-User-Id"`
+	UserID      string `header:"Beaver-User-Id"`
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
 }
@@ -20,11 +20,11 @@ type UpdatePasswordRes struct {
 }
 
 type UserInfoReq struct {
-	UserId string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"`
 }
 
 type UserInfoRes struct {
-	UserId   string `json:"userId"`
+	UserID   string `json:"userId"`
 	NickName string `json:"nickName"`
 	Avatar   string `json:"avatar"`
 	Abstract string `json:"abstract"`

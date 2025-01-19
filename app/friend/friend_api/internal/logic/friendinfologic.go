@@ -35,7 +35,7 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 	var friend friend_models.FriendModel
 
 	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
-		UserId: req.FriendId,
+		UserID: req.FriendID,
 	})
 	if err != nil {
 		return nil, errors.New(err.Error())
@@ -45,18 +45,18 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 
 	var friendUser user_models.UserModel
 	json.Unmarshal(res.Data, &friendUser)
-	conversationId, err := conversation.GenerateConversation([]string{req.UserId, req.FriendId})
+	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
 	if err != nil {
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 	response := &types.FriendInfoRes{
-		ConversationId: conversationId,
-		UserId:         friendUser.UserId,
+		ConversationID: conversationID,
+		UserID:         friendUser.UUID,
 		Nickname:       friendUser.NickName,
 		Avatar:         friendUser.Avatar,
 		Abstract:       friendUser.Abstract,
-		Notice:         friend.GetUserNotice(req.UserId),
-		IsFriend:       friend.IsFriend(l.svcCtx.DB, req.UserId, req.FriendId),
+		Notice:         friend.GetUserNotice(req.UserID),
+		IsFriend:       friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID),
 		Phone:          friendUser.Phone,
 	}
 

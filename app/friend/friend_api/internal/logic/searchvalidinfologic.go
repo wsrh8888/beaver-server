@@ -31,7 +31,7 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 	// 操作状态，当前用户为接受方
 	err = l.svcCtx.DB.Where(
 		"(rev_user_id = ? and send_user_id = ?) or (rev_user_id = ? and send_user_id = ?)",
-		req.UserId, req.FriendId, req.FriendId, req.UserId,
+		req.UserID, req.FriendID, req.FriendID, req.UserID,
 	).First(&friendVerify).Error
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 
 	// 填充返回结果
 	resp = &types.SearchValidInfoRes{
-		ValidId: friendVerify.Id,
+		ValidID: friendVerify.ID,
 	}
 
 	return resp, nil

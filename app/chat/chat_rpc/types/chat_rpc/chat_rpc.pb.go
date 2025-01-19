@@ -410,8 +410,8 @@ type SendMsgReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId         string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                         // 用户ID
-	ConversationId string `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"` // 会话ID
+	UserID         string `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`                         // 用户ID
+	ConversationID string `protobuf:"bytes,2,opt,name=conversation_id,json=conversationID,proto3" json:"conversation_id,omitempty"` // 会话ID
 	Msg            *Msg   `protobuf:"bytes,3,opt,name=msg,proto3" json:"msg,omitempty"`                                             // 消息内容
 }
 
@@ -449,14 +449,14 @@ func (*SendMsgReq) Descriptor() ([]byte, []int) {
 
 func (x *SendMsgReq) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }
 
-func (x *SendMsgReq) GetConversationId() string {
+func (x *SendMsgReq) GetConversationID() string {
 	if x != nil {
-		return x.ConversationId
+		return x.ConversationID
 	}
 	return ""
 }
@@ -474,7 +474,7 @@ type Sender struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId   string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserID   string `protobuf:"bytes,1,opt,name=user_id,json=userID,proto3" json:"user_id,omitempty"`
 	Avatar   string `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	Nickname string `protobuf:"bytes,3,opt,name=nickname,proto3" json:"nickname,omitempty"`
 }
@@ -513,7 +513,7 @@ func (*Sender) Descriptor() ([]byte, []int) {
 
 func (x *Sender) GetUserId() string {
 	if x != nil {
-		return x.UserId
+		return x.UserID
 	}
 	return ""
 }
@@ -538,8 +538,8 @@ type SendMsgRes struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MessageId      uint32  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`               // 消息ID
-	ConversationId string  `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"` // 会话ID
+	MessageID      uint32  `protobuf:"varint,1,opt,name=message_id,json=messageID,proto3" json:"message_id,omitempty"`               // 消息ID
+	ConversationID string  `protobuf:"bytes,2,opt,name=conversation_id,json=conversationID,proto3" json:"conversation_id,omitempty"` // 会话ID
 	Msg            *Msg    `protobuf:"bytes,3,opt,name=msg,proto3" json:"msg,omitempty"`                                             // 消息内容
 	Sender         *Sender `protobuf:"bytes,4,opt,name=sender,proto3" json:"sender,omitempty"`                                       // 发送者
 	CreateAt       string  `protobuf:"bytes,5,opt,name=create_at,json=createAt,proto3" json:"create_at,omitempty"`                   // 消息时间
@@ -580,14 +580,14 @@ func (*SendMsgRes) Descriptor() ([]byte, []int) {
 
 func (x *SendMsgRes) GetMessageId() uint32 {
 	if x != nil {
-		return x.MessageId
+		return x.MessageID
 	}
 	return 0
 }
 
-func (x *SendMsgRes) GetConversationId() string {
+func (x *SendMsgRes) GetConversationID() string {
 	if x != nil {
-		return x.ConversationId
+		return x.ConversationID
 	}
 	return ""
 }
