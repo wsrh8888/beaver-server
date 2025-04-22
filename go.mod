@@ -1,6 +1,6 @@
 module beaver
 
-go 1.20
+go 1.23.8
 
 require (
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/qiniu/go-sdk/v7 v7.25.1
+	golang.org/x/time v0.8.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.35.2
 	gorm.io/driver/mysql v1.5.7
@@ -28,6 +29,7 @@ require (
 	github.com/elastic/go-windows v1.0.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
+	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gammazero/toposort v0.1.1 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -84,7 +86,6 @@ require (
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/term v0.26.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
-	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240711142825-46eb208f015d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

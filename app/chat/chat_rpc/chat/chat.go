@@ -13,18 +13,24 @@ import (
 )
 
 type (
-	FileMsg    = chat_rpc.FileMsg
-	ImageMsg   = chat_rpc.ImageMsg
-	Msg        = chat_rpc.Msg
-	SendMsgReq = chat_rpc.SendMsgReq
-	SendMsgRes = chat_rpc.SendMsgRes
-	Sender     = chat_rpc.Sender
-	TextMsg    = chat_rpc.TextMsg
-	VideoMsg   = chat_rpc.VideoMsg
-	VoiceMsg   = chat_rpc.VoiceMsg
+	BatchUpdateConversationReq = chat_rpc.BatchUpdateConversationReq
+	BatchUpdateConversationRes = chat_rpc.BatchUpdateConversationRes
+	FileMsg                    = chat_rpc.FileMsg
+	ImageMsg                   = chat_rpc.ImageMsg
+	Msg                        = chat_rpc.Msg
+	SendMsgReq                 = chat_rpc.SendMsgReq
+	SendMsgRes                 = chat_rpc.SendMsgRes
+	Sender                     = chat_rpc.Sender
+	TextMsg                    = chat_rpc.TextMsg
+	UpdateConversationReq      = chat_rpc.UpdateConversationReq
+	UpdateConversationRes      = chat_rpc.UpdateConversationRes
+	VideoMsg                   = chat_rpc.VideoMsg
+	VoiceMsg                   = chat_rpc.VoiceMsg
 
 	Chat interface {
 		SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)
+		UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error)
+		BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error)
 	}
 
 	defaultChat struct {
@@ -41,4 +47,14 @@ func NewChat(cli zrpc.Client) Chat {
 func (m *defaultChat) SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
 	return client.SendMsg(ctx, in, opts...)
+}
+
+func (m *defaultChat) UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.UpdateConversation(ctx, in, opts...)
+}
+
+func (m *defaultChat) BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.BatchUpdateConversation(ctx, in, opts...)
 }

@@ -15,6 +15,8 @@ import (
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/ajax"
 	"beaver/common/etcd"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -67,23 +69,27 @@ func HandleChatMessageSend(ctx context.Context, svcCtx *svc.ServiceContext, req 
 	}
 	// 判断是否为群聊，通过 "_" 判断
 	if websocket_utils.IsGroupChat(body.ConversationID) {
-
+		println("当前会话是群聊")
 		res, _ := svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
 			GroupID: body.ConversationID,
 		})
-
+		fmt.Println("群聊成员列表", res.Members)
 		for _, memberInfo := range res.Members {
-			websocket_utils.SendMsgByUser(memberInfo.UserID, req.UserID, "COMMON_CHAT_MESSAGE", type_struct.WsContent{
-				Timestamp: 0,
-				Data: type_struct.WsData{
-					Type: "group_message_send",
-					Body: json.RawMessage(sendAjaxJSON),
-				},
-			})
+			if memberInfo.UserID != req.UserID {
+				websocket_utils.SendMsgByUser(memberInfo.UserID, req.UserID, wsCommandConst.CHAT_MESSAGE, type_struct.WsContent{
+					Timestamp: 0,
+					Data: type_struct.WsData{
+						Type: wsTypeConst.GroupMessageSend,
+						Body: json.RawMessage(sendAjaxJSON),
+					},
+				})
+			}
 		}
 	} else {
+		println("当前会话是私聊")
+
 		recipientID := websocket_utils.GetRecipientIdFromConversationID(body.ConversationID, req.UserID)
-		websocket_utils.SendMsgByUser(recipientID, req.UserID, "COMMON_CHAT_MESSAGE", type_struct.WsContent{
+		websocket_utils.SendMsgByUser(recipientID, req.UserID, wsCommandConst.CHAT_MESSAGE, type_struct.WsContent{
 			Timestamp: 0,
 			Data: type_struct.WsData{
 				Type: "private_message_send",

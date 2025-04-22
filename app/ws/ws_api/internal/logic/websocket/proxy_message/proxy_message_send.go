@@ -9,6 +9,7 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/common/wsEnum/wsCommandConst"
 
 	"github.com/gorilla/websocket"
 )
@@ -18,7 +19,7 @@ func HandleProxyMessageSend(ctx context.Context, svcCtx *svc.ServiceContext, req
 
 	} else {
 		recipientID := websocket_utils.GetRecipientIdFromConversationID(ConversationID, req.UserID)
-		websocket_utils.SendMsgByUser(recipientID, req.UserID, "COMMON_PROXY_MESSAGE", type_struct.WsContent{
+		websocket_utils.SendMsgByUser(recipientID, req.UserID, wsCommandConst.FRIEND_OPERATION, type_struct.WsContent{
 			Timestamp: 0,
 			Data: type_struct.WsData{
 				Type:           "transform_websocket_message",

@@ -13,6 +13,41 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodGet,
+				Path:    "/api/user/blacklist",
+				Handler: getBlacklistHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/user/blacklist/add",
+				Handler: addBlacklistHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/user/blacklist/remove",
+				Handler: removeBlacklistHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/user/privacy",
+				Handler: getPrivacySettingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/user/privacy",
+				Handler: updatePrivacySettingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/user/settings",
+				Handler: getUserSettingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/user/settings",
+				Handler: updateUserSettingsHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/api/user/update_info",
 				Handler: updateInfoHandler(serverCtx),

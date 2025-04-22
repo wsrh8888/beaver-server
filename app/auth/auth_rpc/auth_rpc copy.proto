@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package auth;
+option go_package="./auth";
+
+// 认证服务
+service Auth {
+    // 扫码登录相关 - 公共能力
+    rpc GenerateQRCode(GenerateQRCodeReq) returns (GenerateQRCodeRes);
+    rpc GetQRCodeStatus(GetQRCodeStatusReq) returns (GetQRCodeStatusRes);
+    rpc ConfirmQRCodeLogin(ConfirmQRCodeLoginReq) returns (ConfirmQRCodeLoginRes);
+    rpc CancelQRCodeLogin(CancelQRCodeLoginReq) returns (CancelQRCodeLoginRes);
+    
+    // 普通登录相关 - 内部接口
+    rpc Login(LoginReq) returns (LoginRes);
+    rpc Logout(LogoutReq) returns (LogoutRes);
+    rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenRes);
+    rpc ValidateToken(ValidateTokenReq) returns (ValidateTokenRes);
+
+    // 应用管理相关 - 公共能力
+    rpc CreateApp(CreateAppReq) returns (CreateAppRes);
+    rpc GetAppInfo(GetAppInfoReq) returns (GetAppInfoRes);
+    rpc UpdateApp(UpdateAppReq) returns (UpdateAppRes);
+    rpc DeleteApp(DeleteAppReq) returns (DeleteAppRes);
+    rpc GetAppList(GetAppListReq) returns (GetAppListRes);
+    rpc ResetAppSecret(ResetAppSecretReq) returns (ResetAppSecretRes);
+// 二维码状态
+enum QRCodeStatus {
+    UNKNOWN = 0;
+    PENDING = 1;    // 待扫码
+    SCANNED = 2;    // 已扫码
+    CONFIRMED = 3;  // 已确认
+    EXPIRED = 4;    // 已过期
+    CANCELED = 5;   // 已取消
+}
+
+// 二维码信息
+message QRCodeInfo {
+    string qr_code_id = 1;      // 二维码ID
+    string qr_code_url = 2;     // 二维码图片URL
+    QRCodeStatus status = 3;    // 状态
+    string create_time = 4;     // 创建时间
+    string expire_time = 5;     // 过期时间
+    string scan_time = 6;       // 扫码时间
+    string confirm_time = 7;    // 确认时间
+    string device_info = 8;     // 扫码设备信息
+    string app_id = 9;          // 应用ID
+    string app_name = 10;       // 应用名称
+    string app_icon = 11;       // 应用图标
+}
+
+// 生成二维码请求
+message GenerateQRCodeReq {
+    string app_id = 1;          // 应用ID
+    string device_id = 2;       // 设备ID
+    string device_type = 3;     // 设备类型
+    string device_name = 4;     // 设备名称
+    string device_model = 5;    // 设备型号
+    string os_version = 6;      // 操作系统版本
+    string app_version = 7;     // 应用版本
+}
+
+// 生成二维码响应
+message GenerateQRCodeRes {
+    QRCodeInfo qr_code = 1;
+}
+
+// 获取二维码状态请求
+message GetQRCodeStatusReq {
+    string qr_code_id = 1;
+}
+
+// 获取二维码状态响应
+message GetQRCodeStatusRes {
+    QRCodeInfo qr_code = 1;
+}
+
+// 确认二维码登录请求
+message ConfirmQRCodeLoginReq {
+    string qr_code_id = 1;
+    string user_id = 2;
+    string device_id = 3;
+    string device_type = 4;
+    string device_name = 5;
+    string device_model = 6;
+    string os_version = 7;
+    string app_version = 8;
+}
+
+// 确认二维码登录响应
+message ConfirmQRCodeLoginRes {
+    string token = 1;           // 登录token
+    string refresh_token = 2;   // 刷新token
+    int64 expire_time = 3;      // token过期时间
+    UserInfo user_info = 4;     // 用户信息
+}
+
+// 取消二维码登录请求
+message CancelQRCodeLoginReq {
+    string qr_code_id = 1;
+    string reason = 2;          // 取消原因
+}
+
+// 取消二维码登录响应
+message CancelQRCodeLoginRes {}
+
+// 用户信息
+message UserInfo {
+    string user_id = 1;
+    string username = 2;
+    string nickname = 3;
+    string avatar = 4;
+    string phone = 5;
+    string email = 6;
+    int32 status = 7;           // 用户状态
+    string last_login_time = 8; // 最后登录时间
+    string create_time = 9;     // 创建时间
+}
+
+// 普通登录请求
+message LoginReq {
+    string username = 1;
+    string password = 2;
+    string device_id = 3;
+    string device_type = 4;
+    string device_name = 5;
+    string device_model = 6;
+    string os_version = 7;
+    string app_version = 8;
+}
+
+// 普通登录响应
+message LoginRes {
+    string token = 1;           // 登录token
+    string refresh_token = 2;   // 刷新token
+    int64 expire_time = 3;      // token过期时间
+    UserInfo user_info = 4;     // 用户信息
+}
+
+// 登出请求
+message LogoutReq {
+    string user_id = 1;
+    string token = 2;
+}
+
+// 登出响应
+message LogoutRes {}
+
+// 刷新token请求
+message RefreshTokenReq {
+    string refresh_token = 1;
+}
+
+// 刷新token响应
+message RefreshTokenRes {
+    string token = 1;           // 新的登录token
+    string refresh_token = 2;   // 新的刷新token
+    int64 expire_time = 3;      // token过期时间
+}
+
+// 验证token请求
+message ValidateTokenReq {
+    string token = 1;
+}
+
+// 验证token响应
+message ValidateTokenRes {
+    bool valid = 1;             // token是否有效
+    UserInfo user_info = 2;     // 用户信息
+    int64 expire_time = 3;      // token过期时间
+} 

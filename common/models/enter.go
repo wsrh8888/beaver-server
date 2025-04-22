@@ -1,17 +1,64 @@
 package models
 
-import "time"
+import (
+	"database/sql/driver"
+	"fmt"
+	"strings"
+	"time"
+)
 
 type Model struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"` // 自增主键
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        uint       `gorm:"primaryKey;autoIncrement" json:"id"` // 自增主键
+	CreatedAt CustomTime `json:"createdAt"`
+	UpdatedAt CustomTime `json:"updatedAt"`
 }
 
-type ModelAuth struct {
-	ID        uint      `gorm:"autoIncrement" json:"id"` // 保留自增 ID，去掉 primaryKey 标签
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+type CustomTime time.Time
+
+const layout = "2006-01-02 15:04:05"
+
+func (ct *CustomTime) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), `"`)
+
+	// 先尝试RFC3339格式（兼容带T和时区的数据）
+	t, err := time.Parse(time.RFC3339Nano, s)
+	if err == nil {
+		*ct = CustomTime(t)
+		return nil
+	}
+
+	// 可选：保留对旧格式的兼容
+	t, err = time.Parse("2006-01-02 15:04:05", s)
+	if err == nil {
+		*ct = CustomTime(t)
+		return nil
+	}
+
+	return fmt.Errorf("invalid time format: %s", s)
+}
+
+func (ct CustomTime) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + time.Time(ct).Format(layout) + `"`), nil
+}
+
+func (ct CustomTime) String() string {
+	return time.Time(ct).Format(layout)
+}
+
+// 添加这两个方法到 CustomTime 类型
+func (ct CustomTime) Value() (driver.Value, error) {
+	return time.Time(ct), nil
+}
+
+func (ct *CustomTime) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	if v, ok := value.(time.Time); ok {
+		*ct = CustomTime(v)
+		return nil
+	}
+	return fmt.Errorf("无法扫描 %T 到 CustomTime", value)
 }
 
 type PageInfo struct {

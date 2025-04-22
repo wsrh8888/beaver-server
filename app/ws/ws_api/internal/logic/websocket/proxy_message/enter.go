@@ -17,6 +17,6 @@ func HandleProxyMessageTypes(ctx context.Context, svcCtx *svc.ServiceContext, re
 	case "transform_websocket_message":
 		HandleProxyMessageSend(ctx, svcCtx, req, r, conn, content.Data.Body, content.Data.ConversationID)
 	default:
-		fmt.Println("未支持的消息类型", content.Data.Type)
+		fmt.Println("未支持的消息类型3", content.Data.Type)
 	}
 }

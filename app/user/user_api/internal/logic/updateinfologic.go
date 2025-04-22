@@ -9,6 +9,8 @@ import (
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
 	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -67,7 +69,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		fmt.Println("转发给好友的列表", response.FriendIds)
 		// 通过ws推送给自己的好友
 		for _, friendID := range response.FriendIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_update_info", req.UserID, friendID, map[string]interface{}{
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, friendID, map[string]interface{}{
 				"userId": req.UserID,
 			})
 		}

@@ -1,6 +1,10 @@
 package type_struct
 
-import "encoding/json"
+import (
+	"beaver/common/wsEnum/wsTypeConst"
+
+	"encoding/json"
+)
 
 type WsContent struct {
 	Timestamp int64  `json:"timestamp"` //消息发送时间
@@ -8,9 +12,9 @@ type WsContent struct {
 }
 
 type WsData struct {
-	Type           string          `json:"type"`           // 消息类型
-	ConversationID string          `json:"conversationId"` // 会话ID
-	Body           json.RawMessage `json:"body"`           // 消息内容
+	Type           wsTypeConst.Type `json:"type"`           // 消息类型
+	ConversationID string           `json:"conversationId"` // 会话ID
+	Body           json.RawMessage  `json:"body"`           // 消息内容
 }
 
 type WsMessage struct {

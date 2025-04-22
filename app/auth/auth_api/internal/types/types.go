@@ -10,6 +10,14 @@ type AuthenticationRes struct {
 	UserID string `json:"userId"`
 }
 
+type GetUserSessionsReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type GetUserSessionsRes struct {
+	Sessions []SessionInfo `json:"sessions"`
+}
+
 type LoginReq struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
@@ -20,10 +28,40 @@ type LoginRes struct {
 	UserID string `json:"userId"`
 }
 
+type LogoutReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type LogoutRes struct {
+}
+
+type RefreshTokenReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type RefreshTokenRes struct {
+	Token string `json:"token"`
+}
+
 type RegisterReq struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
 
 type RegisterRes struct {
+}
+
+type SessionInfo struct {
+	DeviceID   string `json:"deviceId"`
+	DeviceName string `json:"deviceName"`
+	LastActive string `json:"lastActive"`
+	IP         string `json:"ip"`
+}
+
+type TerminateSessionReq struct {
+	UserID   string `header:"Beaver-User-Id"`
+	DeviceID string `json:"deviceId"`
+}
+
+type TerminateSessionRes struct {
 }

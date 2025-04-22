@@ -38,7 +38,7 @@ func (l *Group_mineLogic) Group_mine(req *types.GroupMineReq) (resp *types.Group
 			Limit: req.Limit,
 		},
 		Preload: []string{"MemberList"},
-		Where:   l.svcCtx.DB.Where("group_id in ?", groupIdList),
+		Where:   l.svcCtx.DB.Where("uuid in ?", groupIdList),
 	})
 	fmt.Println(groupIdList)
 	resp = &types.GroupMineRes{}

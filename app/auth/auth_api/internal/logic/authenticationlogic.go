@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
@@ -33,20 +34,32 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 		return
 	}
 	if req.Token == "" {
-		err = errors.New("token不能为空")
-		return
+		return nil, errors.New("token不能为空")
 	}
 	claims, err := jwts.ParseToken(req.Token, l.svcCtx.Config.Auth.AccessSecret)
 	if err != nil {
-		err = errors.New("认证失败")
-		return
+		logx.Errorf("解析token失败: %v", err)
+		return nil, errors.New("认证失败")
 	}
 	key := fmt.Sprintf("login_%s", claims.UserID)
-	token, _ := l.svcCtx.Redis.Get(key).Result()
+	token, err := l.svcCtx.Redis.Get(key).Result()
+	if err != nil {
+		logx.Errorf("获取Redis token失败: %v", err)
+		return nil, errors.New("token已失效")
+	}
 	if token != req.Token {
-		fmt.Println("token不一致", token, req.Token)
-		err = errors.New("token已失效")
-		return
+		logx.Errorf("token不一致: Redis=%s, Request=%s", token, req.Token)
+		return nil, errors.New("token已失效")
+	}
+	if err := l.svcCtx.Redis.Expire(key, time.Duration(l.svcCtx.Config.Auth.AccessExpire)*time.Second).Err(); err != nil {
+		logx.Errorf("更新token过期时间失败: %v", err)
+	}
+	deviceKey := fmt.Sprintf("device_%s", claims.UserID)
+	deviceInfo := map[string]interface{}{
+		"last_active": time.Now().Format("2006-01-02 15:04:05"),
+	}
+	if err := l.svcCtx.Redis.HMSet(deviceKey, deviceInfo).Err(); err != nil {
+		logx.Errorf("更新设备信息失败: %v", err)
 	}
 	resp = &types.AuthenticationRes{
 		UserID: claims.UserID,

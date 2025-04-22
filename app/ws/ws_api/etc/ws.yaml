@@ -1,10 +1,10 @@
 Name: ws
 Host: 0.0.0.0
-Port: 21400
+Port: 21040
 Mysql:
-  DataSource: root:15383645663.r@tcp(127.0.0.1:1800)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
-  Addr: 127.0.0.1:18991
+  Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
 Log:
@@ -17,3 +17,10 @@ GroupRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
+# WebSocket配置
+WebSocket:
+  # 心跳配置(单位:秒)
+  PongWait: 60      # 读取超时时间
+  WriteWait: 10     # 写入超时时间
+  PingPeriod: 54    # 心跳发送间隔(应小于PongWait)
+  MaxMessageSize: 1048576  # 最大消息大小(字节), 1MB

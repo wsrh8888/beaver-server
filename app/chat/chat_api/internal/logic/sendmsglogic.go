@@ -33,7 +33,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	// 构建RPC请求
 	rpcReq := &chat_rpc.SendMsgReq{
 		UserID:         req.UserID,
-		ConversationID: req.ConversationID,
+		ConversationId: req.ConversationID,
 		Msg: &chat_rpc.Msg{
 			Type: req.Msg.Type,
 		},
@@ -44,7 +44,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	case ctype.TextMsgType:
 		rpcReq.Msg.TextMsg = &chat_rpc.TextMsg{Content: req.Msg.TextMsg.Content}
 	case ctype.ImageMsgType:
-		rpcReq.Msg.ImageMsg = &chat_rpc.ImageMsg{Title: req.Msg.ImageMsg.Title, Src: req.Msg.ImageMsg.Src}
+		rpcReq.Msg.ImageMsg = &chat_rpc.ImageMsg{Name: req.Msg.ImageMsg.Name, FileId: req.Msg.ImageMsg.FileId}
 	case ctype.VideoMsgType:
 		rpcReq.Msg.VideoMsg = &chat_rpc.VideoMsg{Title: req.Msg.VideoMsg.Title, Src: req.Msg.VideoMsg.Src, Time: req.Msg.VideoMsg.Time}
 	case ctype.FileMsgType:
@@ -65,8 +65,8 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 
 	// 构建API响应
 	resp := &types.SendMsgRes{
-		MessageID:      rpcResp.MessageID,
-		ConversationID: rpcResp.ConversationID,
+		MessageID:      rpcResp.MessageId,
+		ConversationID: rpcResp.ConversationId,
 		Msg:            req.Msg,
 		Sender: types.Sender{
 			UserID:   rpcResp.Sender.UserID,

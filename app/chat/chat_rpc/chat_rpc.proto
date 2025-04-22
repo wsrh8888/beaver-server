@@ -32,8 +32,8 @@ message VideoMsg {
 
 // 定义ImageMsg消息
 message ImageMsg {
-  string title = 1;
-  string src = 2;
+  string name = 1;
+  string fileId = 2;
 }
 
 // 定义Msg消息
@@ -48,14 +48,14 @@ message Msg {
 
 // 定义SendMsgReq消息
 message SendMsgReq {
-  string user_id = 1; // 用户ID
+  string userID = 1; // 用户ID
   string conversation_id = 2; // 会话ID
   Msg msg = 3; // 消息内容
 }
 
 // 定义Sender消息
 message Sender {
-  string user_id = 1;
+  string userID = 1;
   string avatar = 2;
   string nickname = 3;
 }
@@ -70,12 +70,37 @@ message SendMsgRes {
   string msg_preview = 6; // 消息预览
 }
 
+// 定义UpdateConversationReq消息
+message UpdateConversationReq {
+  string conversation_id = 1; // 会话ID
+  string user_id = 2; // 用户ID
+  string last_message = 3; // 最后一条消息
+  bool is_pinned = 4; // 是否置顶
+  bool is_deleted = 5; // 是否已删除
+}
+
+// 定义UpdateConversationRes消息
+message UpdateConversationRes {
+  bool success = 1; // 是否成功
+}
+
+// 定义BatchUpdateConversationReq消息
+message BatchUpdateConversationReq {
+  string conversation_id = 1; // 会话ID
+  repeated string user_ids = 2; // 用户ID列表
+  string last_message = 3; // 最后一条消息
+}
+
+// 定义BatchUpdateConversationRes消息
+message BatchUpdateConversationRes {
+  bool success = 1; // 是否成功
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
+    rpc UpdateConversation(UpdateConversationReq) returns (UpdateConversationRes); //更新单个用户的会话记录
+    rpc BatchUpdateConversation(BatchUpdateConversationReq) returns (BatchUpdateConversationRes); //批量更新会话记录
 }
-
-
-
 
 //goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -10,6 +10,8 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -50,10 +52,10 @@ func (l *FriendDeleteLogic) FriendDelete(req *types.FriendDeleteReq) (resp *type
 
 	// 异步标记会话和聊天记录为已删除
 	go func() {
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "friend_delete", req.UserID, req.FriendID, map[string]interface{}{
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendDelete, req.UserID, req.FriendID, map[string]interface{}{
 			"userId": req.FriendID,
 		})
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "friend_delete", req.FriendID, req.UserID, map[string]interface{}{
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendDelete, req.FriendID, req.UserID, map[string]interface{}{
 			"userId": req.FriendID,
 		})
 		if err := l.markConversationAndChatsAsDeleted(req.UserID, conversationID); err != nil {

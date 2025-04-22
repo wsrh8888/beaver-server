@@ -2,6 +2,7 @@ package ws_response
 
 import (
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/common/wsEnum/wsCommandConst"
 	utils "beaver/utils/rand"
 	"encoding/json"
 	"time"
@@ -10,14 +11,14 @@ import (
 )
 
 type Response struct {
-	Code       int                   `json:"code"`
-	Command    string                `json:"command"`
-	Content    type_struct.WsContent `json:"content"`
-	MessageID  string                `json:"messageId"`
-	ServerTime int64                 `json:"serverTime"`
+	Code       int                    `json:"code"`
+	Command    wsCommandConst.Command `json:"command"`
+	Content    type_struct.WsContent  `json:"content"`
+	MessageID  string                 `json:"messageId"`
+	ServerTime int64                  `json:"serverTime"`
 }
 
-func WsResponse(conn *websocket.Conn, command string, content type_struct.WsContent) {
+func WsResponse(conn *websocket.Conn, command wsCommandConst.Command, content type_struct.WsContent) {
 	code := 0
 
 	response := Response{

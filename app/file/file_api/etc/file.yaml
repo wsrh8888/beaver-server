@@ -1,8 +1,8 @@
 Name: file
 Host: 0.0.0.0
-Port: 21600
+Port: 21060
 Mysql:
-  DataSource: root:15383645663.r@tcp(127.0.0.1:1800)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
   Addr: 82.157.156.201:18991
   Password: '123456'
@@ -14,7 +14,7 @@ Log:
   Stat: false
 Timeout: 60000
 FileMaxSize:
-  image: 1    
+  image: 2    
   video: 10   
   audio: 2    
   archive: 2  
@@ -27,7 +27,7 @@ Qiniu:
   AK: 380CCZeJZztGl2g3mX-OhufNPkkYaE-HqL2ybfvc
   SK: CSaNAQG2hiDUHSpQNJWJmktCA9mj9M2_0qYkRqLr
   Bucket: beaver-im
-  Domain: 'http://so2euhgky.hb-bkt.clouddn.com'
+  Domain: 'http://static.wsrh8888.com'
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
 WhiteList:
   - png

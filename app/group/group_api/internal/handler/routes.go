@@ -14,6 +14,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
+				Path:    "/api/group/announcement",
+				Handler: updateAnnouncementHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/api/group/create",
 				Handler: groupCreateHandler(serverCtx),
 			},
@@ -24,8 +29,33 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/api/group/groupInfo",
+				Handler: groupInfoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/api/group/group_mine",
 				Handler: group_mineHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/invite",
+				Handler: inviteMembersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/join",
+				Handler: joinGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/member/displayName",
+				Handler: updateDisplayNameHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/member/role",
+				Handler: updateMemberRoleHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
@@ -33,9 +63,44 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: groupMemberAddHandler(serverCtx),
 			},
 			{
-				Method:  http.MethodGet,
+				Method:  http.MethodPost,
 				Path:    "/api/group/memberRemove",
 				Handler: groupMemberRemoveHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/members",
+				Handler: getGroupMembersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/mute",
+				Handler: groupMuteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/group/mute/list",
+				Handler: getMuteListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/quit",
+				Handler: quitGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/settings",
+				Handler: updateSettingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/transfer",
+				Handler: transferOwnerHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/group/update",
+				Handler: updateGroupInfoHandler(serverCtx),
 			},
 		},
 	)

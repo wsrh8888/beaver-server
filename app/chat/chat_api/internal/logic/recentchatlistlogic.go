@@ -36,11 +36,15 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	SELECT c.*
 	FROM chat_user_conversation_models c
 	INNER JOIN (
-					SELECT conversation_id, MAX(updated_at) AS max_updated_at
-					FROM chat_user_conversation_models
-					WHERE is_deleted = false 
-						AND (conversation_id LIKE ? OR conversation_id LIKE ?)
-					GROUP BY conversation_id
+		SELECT conversation_id, MAX(updated_at) AS max_updated_at
+		FROM chat_user_conversation_models
+		WHERE is_deleted = false AND (
+			-- 匹配私聊：用户ID在前或在后
+			(conversation_id LIKE ? OR conversation_id LIKE ?)
+			-- 匹配群聊：直接匹配用户ID
+			OR user_id = ?
+		)
+		GROUP BY conversation_id
 	) AS latest
 	ON c.conversation_id = latest.conversation_id AND c.updated_at = latest.max_updated_at
 	ORDER BY latest.max_updated_at DESC`
@@ -48,7 +52,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	pattern := "%" + req.UserID + "_%"  // userId_ 在前
 	pattern2 := "%_" + req.UserID + "%" // userId_ 在后
 	fmt.Println(req.UserID, "sssssssssssssss")
-	err = l.svcCtx.DB.Raw(sql, pattern, pattern2).Scan(&userConversations).Error
+	err = l.svcCtx.DB.Raw(sql, pattern, pattern2, req.UserID).Scan(&userConversations).Error
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +122,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		chatInfo.MsgPreview = convo.LastMessage
 		chatInfo.IsTop = convo.IsPinned
 		chatInfo.ConversationID = convo.ConversationID
-		chatInfo.CreateAt = convo.CreatedAt.String()
+		chatInfo.UpdateAt = convo.UpdatedAt.String()
 		if strings.Contains(convo.ConversationID, "_") { // 私聊
 			ids := strings.Split(convo.ConversationID, "_")
 			opponentID := ids[0]
@@ -128,9 +132,12 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			user := userMap[opponentID]
 			chatInfo.Nickname = user.NickName
 			chatInfo.Avatar = user.Avatar
+			chatInfo.ChatType = 1
 		} else { // 群聊
 			group := groupMap[convo.ConversationID]
 			chatInfo.Nickname = group.Title
+			chatInfo.Avatar = group.Avatar
+			chatInfo.ChatType = 2
 		}
 
 		respList = append(respList, chatInfo)

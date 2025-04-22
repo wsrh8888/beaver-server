@@ -1,8 +1,8 @@
 syntax = "v1"
 
 type wsReq {
-	UserID string `header:"Beaver-User-Id"`
-	Token  string `header:"token"`
+	UserID string `header:"Beaver-User-Id"` // 用户ID，用于身份识别
+	Token  string `header:"token"` // 用户token，用于验证
 }
 
 type IBodySendMsg {
@@ -10,10 +10,11 @@ type IBodySendMsg {
 	Msg            string `json:"msg"`
 }
 
+// WebSocket 消息发送请求
 type SendMsgReq {
-	UserID         string `header:"Beaver-User-Id"`
-	ConversationID string `json:"conversationId"`
-	Msg            string `json:"msg"`
+	UserID         string `header:"Beaver-User-Id"` // 发送者ID
+	ConversationID string `json:"conversationId"` // 会话ID
+	Msg            string `json:"msg"` // 消息内容
 }
 
 type Msg {
@@ -24,22 +25,39 @@ type Msg {
 
 type wsRes {}
 
+// 代理发送消息请求（用于HTTP API发送消息）
 type ProxySendMsgReq {
-	UserID   string                 `header:"Beaver-User-Id"`
-	Command  string                 `json:"command"`
-	TargetID string                 `json:"targetId"`
-	Type     string                 `json:"type"`
-	Body     map[string]interface{} `json:"body"`
+	UserID   string                 `header:"Beaver-User-Id"` // 发送者ID
+	Command  string                 `json:"command"` // 命令类型：send（发送）、recall（撤回）
+	TargetID string                 `json:"targetId"` // 目标ID（用户ID或群ID）
+	Type     string                 `json:"type"` // 消息类型
+	Body     map[string]interface{} `json:"body"` // 消息内容
 }
 
 type ProxySendMsgRes {}
 
+// 朋友圈通知消息体
+type MomentNotification {
+	Type      uint   `json:"type"` // 通知类型：1点赞 2评论
+	MomentID  uint   `json:"momentId"` // 朋友圈ID
+	UserID    string `json:"userId"` // 触发者ID
+	Content   string `json:"content"` // 通知内容
+	Timestamp int64  `json:"timestamp"` // 通知时间
+}
+
+// 系统通知消息体
+type SystemNotification {
+	Type      uint   `json:"type"` // 通知类型：1好友请求 2系统通知
+	Content   string `json:"content"` // 通知内容
+	Timestamp int64  `json:"timestamp"` // 通知时间
+}
+
 service ws {
 	@handler chatWebsocket
-	get /api/ws/ws (wsReq) returns (wsRes) //websocket
+	get /api/ws/ws (wsReq) returns (wsRes) // WebSocket连接入口
 
 	@handler proxySendMsgHandler
-	post /api/ws/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes)
+	post /api/ws/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes) // HTTP API发送消息
 }
 
 // goctl api go -api ws_api.api -dir . --home ../../template

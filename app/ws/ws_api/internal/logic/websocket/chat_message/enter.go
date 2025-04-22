@@ -17,6 +17,6 @@ func HandleChatMessageTypes(ctx context.Context, svcCtx *svc.ServiceContext, req
 	case "chat_message_send":
 		HandleChatMessageSend(ctx, svcCtx, req, r, conn, content.Data.Body)
 	default:
-		fmt.Println("未支持的消息类型", content.Data.Type)
+		fmt.Println("未支持的消息类型2", content.Data.Type)
 	}
 }

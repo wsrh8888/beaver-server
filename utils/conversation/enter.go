@@ -23,19 +23,19 @@ func GenerateConversation(userIds []string) (string, error) {
 /**
  * @description: 解析会话Id
  */
-func ParseConversation(conversationId string) []string {
-	if strings.Contains(conversationId, "_") {
-		return strings.Split(conversationId, "_")
+func ParseConversation(conversationID string) []string {
+	if strings.Contains(conversationID, "_") {
+		return strings.Split(conversationID, "_")
 	}
-	return []string{conversationId}
+	return []string{conversationID}
 }
 
 /**
  * @description: 获取会话类型
  * @return: 1: 私聊 2: 群聊
  */
-func GetConversationType(conversationId string) int {
-	if strings.Contains(conversationId, "_") {
+func GetConversationType(conversationID string) int {
+	if strings.Contains(conversationID, "_") {
 		return 1
 	}
 	return 2

@@ -10,6 +10,8 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -54,7 +56,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		// 默认发送一条消息
 		l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
 			UserID:         friendVerify.RevUserID,
-			ConversationID: conversationID,
+			ConversationId: conversationID,
 			Msg: &chat_rpc.Msg{
 				Type: 1,
 				TextMsg: &chat_rpc.TextMsg{
@@ -75,11 +77,11 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	}
 	err = l.svcCtx.DB.Save(&friendVerify).Error
 
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_valid_type_update", friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
 		"userId": friendVerify.SendUserID,
 		"status": friendVerify.RevStatus,
 	})
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, "user_valid_type_update", friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
 		"userId": friendVerify.RevUserID,
 		"status": friendVerify.RevStatus,
 	})
