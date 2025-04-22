@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
@@ -32,13 +33,13 @@ func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLo
 }
 
 func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, error) {
-	if conversation.GetConversationType(in.ConversationID) == 1 {
-		if !strings.Contains(in.ConversationID, in.UserID) {
-			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserID, in.ConversationID)
+	if conversation.GetConversationType(in.ConversationId) == 1 {
+		if !strings.Contains(in.ConversationId, in.UserID) {
+			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserID, in.ConversationId)
 			return nil, errors.New("异常操作")
 		}
 		var friend friend_models.FriendModel
-		userIds := conversation.ParseConversation(in.ConversationID)
+		userIds := conversation.ParseConversation(in.ConversationId)
 		if !friend.IsFriend(l.svcCtx.DB, userIds[0], userIds[1]) {
 			return nil, errors.New("不是好友关系")
 		}
@@ -58,8 +59,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		msg = ctype.Msg{
 			Type: ctype.ImageMsgType,
 			ImageMsg: &ctype.ImageMsg{
-				Src:   in.Msg.ImageMsg.Src,
-				Title: in.Msg.ImageMsg.Title,
+				FileId: in.Msg.ImageMsg.FileId,
+				Name:   in.Msg.ImageMsg.Name,
 			},
 		}
 	case ctype.VideoMsgType:
@@ -95,7 +96,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 
 	chatModel := chat_models.ChatModel{
 		SendUserID:     in.UserID,
-		ConversationID: in.ConversationID,
+		ConversationID: in.ConversationId,
 		MsgType:        msgType,
 		Msg:            &msg,
 	}
@@ -106,7 +107,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, err
 	}
 
-	err = l.updateUserConversations(in.ConversationID, in.UserID, chatModel.MsgPreview)
+	err = l.updateUserConversations(in.ConversationId, in.UserID, chatModel.MsgPreview)
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +124,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	return &chat_rpc.SendMsgRes{
-		MessageID:      uint32(chatModel.ID), // 支持 uint32 类型
-		ConversationID: chatModel.ConversationID,
+		MessageId:      uint32(chatModel.ID), // 支持 uint32 类型
+		ConversationId: chatModel.ConversationID,
 		Msg:            convertedMsg,
 		MsgPreview:     chatModel.MsgPreview,
 		Sender: &chat_rpc.Sender{
@@ -153,6 +154,7 @@ func (l *SendMsgLogic) updateUserConversations(conversationID, userID, lastMessa
 			Updates(map[string]interface{}{
 				"last_message": lastMessage,
 				"is_deleted":   false,
+				"updated_at":   time.Now(), // 添加这一行
 			}).Error; err != nil {
 			return err
 		}

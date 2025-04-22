@@ -70,8 +70,8 @@ type TextMsg struct {
 }
 
 type ImageMsg struct {
-	Title string `json:"title"`
-	Src   string `json:"src"`
+	Name   string `json:"name"`
+	FileId string `json:"fileId"`
 }
 
 type VideoMsg struct {
@@ -108,24 +108,24 @@ type VideoCallMsg struct {
 // 撤回消息
 type WithdrawMsg struct {
 	Content   string `json:"content"`             //撤回提示词
-	MsgId     uint   `json:"msgId"`               //撤回的消息Id
+	MsgID     uint   `json:"msgId"`               //撤回的消息Id
 	OriginMsg *Msg   `json:"originMsg,omitempty"` //原消息
 }
 
 type ReplyMsg struct {
-	MsgId         uint      `json:"msgId"`         //回复的消息Id
+	MsgID         uint      `json:"msgId"`         //回复的消息Id
 	Content       string    `json:"content"`       //回复的文本消息
 	Msg           *Msg      `json:"msg,omitempty"` //回复的消息
-	UserId        uint      `json:"userId"`        //被回复的用户Id
+	UserID        uint      `json:"userId"`        //被回复的用户Id
 	UserNickName  string    `json:"userNickName"`  //被回复的用户昵称
 	OriginMsgDate time.Time `json:"originMsgDate"` //原消息时间
 }
 
 type QuoteMsg struct {
-	MsgId         uint      `json:"msgId"`         //回复的消息Id
+	MsgID         uint      `json:"msgId"`         //回复的消息Id
 	Content       string    `json:"content"`       //回复的文本消息
 	Msg           *Msg      `json:"msg,omitempty"` //回复的消息
-	UserId        uint      `json:"userId"`        //被回复的用户Id
+	UserID        uint      `json:"userId"`        //被回复的用户Id
 	UserNickName  string    `json:"userNickName"`  //被回复的用户昵称
 	OriginMsgDate time.Time `json:"originMsgDate"` //原消息时间
 }
@@ -134,7 +134,7 @@ type QuoteMsg struct {
  * @description: @消息
  */
 type AtMsg struct {
-	UserId  uint   `json:"userId"`        //被@的用户Id
+	UserID  uint   `json:"userId"`        //被@的用户Id
 	Content string `json:"content"`       //回复的文本消息
 	Msg     *Msg   `json:"msg,omitempty"` //回复的消息
 }

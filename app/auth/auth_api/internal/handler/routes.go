@@ -24,8 +24,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/api/auth/logout",
+				Handler: logoutHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/refresh_token",
+				Handler: refreshTokenHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/api/auth/register",
 				Handler: registerHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/auth/sessions",
+				Handler: getUserSessionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/terminate_session",
+				Handler: terminateSessionHandler(serverCtx),
 			},
 		},
 	)

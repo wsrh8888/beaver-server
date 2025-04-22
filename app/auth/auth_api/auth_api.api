@@ -19,7 +19,7 @@ type AuthenticationReq {
 }
 
 type AuthenticationRes {
-	UserID uint `json:"userId"`
+	UserID string `json:"userId"`
 }
 
 type RegisterReq {
@@ -28,6 +28,51 @@ type RegisterReq {
 }
 
 type RegisterRes {}
+
+// 用户登出请求
+type LogoutReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+// 用户登出响应
+type LogoutRes {}
+
+// 刷新Token请求
+type RefreshTokenReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+// 刷新Token响应
+type RefreshTokenRes {
+	Token string `json:"token"`
+}
+
+// 获取用户会话列表请求
+type GetUserSessionsReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+// 会话信息
+type SessionInfo {
+	DeviceID   string `json:"deviceId"`
+	DeviceName string `json:"deviceName"`
+	LastActive string `json:"lastActive"`
+	IP         string `json:"ip"`
+}
+
+// 获取用户会话列表响应
+type GetUserSessionsRes {
+	Sessions []SessionInfo `json:"sessions"`
+}
+
+// 终止会话请求
+type TerminateSessionReq {
+	UserID   string `header:"Beaver-User-Id"`
+	DeviceID string `json:"deviceId"`
+}
+
+// 终止会话响应
+type TerminateSessionRes {}
 
 service auth {
 	// 用户登录
@@ -41,6 +86,22 @@ service auth {
 	// 用户注册
 	@handler register
 	post /api/auth/register (RegisterReq) returns (RegisterRes)
+
+	// 用户登出
+	@handler logout
+	post /api/auth/logout (LogoutReq) returns (LogoutRes)
+
+	// 刷新Token
+	@handler refreshToken
+	post /api/auth/refresh_token (RefreshTokenReq) returns (RefreshTokenRes)
+
+	// 获取用户会话列表用户想查看自己当前在哪些设备上登录
+	@handler getUserSessions
+	get /api/auth/sessions (GetUserSessionsReq) returns (GetUserSessionsRes)
+
+	// 终止会话 用户发现某个设备不是自己登录的,需要强制下线
+	@handler terminateSession
+	post /api/auth/terminate_session (TerminateSessionReq) returns (TerminateSessionRes)
 }
 
 // goctl api go -api auth_api.api -dir . --home ../../../template

@@ -12,6 +12,7 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/common/wsEnum/wsCommandConst"
 
 	"github.com/gorilla/websocket"
 )
@@ -36,15 +37,15 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 			continue
 		}
 
-		switch wsMessage.Command {
-		case "COMMON_CHAT_MESSAGE":
+		switch wsCommandConst.Command(wsMessage.Command) {
+		case wsCommandConst.CHAT_MESSAGE:
 			chat_message.HandleChatMessageTypes(ctx, svcCtx, req, r, conn, wsMessage.Content)
-		case "COMMON_PROXY_MESSAGE":
+		case wsCommandConst.FRIEND_OPERATION:
 			proxy_message.HandleProxyMessageTypes(ctx, svcCtx, req, r, conn, wsMessage.Content)
-		case "COMMON_WEBRTC_MESSAGE":
+		case wsCommandConst.GROUP_OPERATION:
 			webrtc_message.HandleWebRTCAnswer(ctx, svcCtx, req, r, conn, wsMessage.Content)
 		default:
-			fmt.Println("未支持的消息类型", wsMessage.Command)
+			fmt.Println("未支持的消息类型1", wsMessage.Command)
 		}
 	}
 }

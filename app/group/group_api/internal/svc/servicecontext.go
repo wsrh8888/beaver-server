@@ -1,7 +1,11 @@
 package svc
 
 import (
+	"beaver/app/chat/chat_rpc/chat"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/config"
+	"beaver/app/group/group_rpc/group"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -13,10 +17,12 @@ import (
 )
 
 type ServiceContext struct {
-	Config  config.Config
-	Redis   *redis.Client
-	UserRpc user_rpc.UserClient
-	DB      *gorm.DB
+	Config   config.Config
+	Redis    *redis.Client
+	UserRpc  user_rpc.UserClient
+	GroupRpc group_rpc.GroupClient
+	ChatRpc  chat_rpc.ChatClient
+	DB       *gorm.DB
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -24,9 +30,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 
 	return &ServiceContext{
-		DB:      mysqlDb,
-		Redis:   client,
-		Config:  c,
-		UserRpc: user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		DB:       mysqlDb,
+		Redis:    client,
+		Config:   c,
+		UserRpc:  user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		GroupRpc: group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		ChatRpc:  chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 	}
 }

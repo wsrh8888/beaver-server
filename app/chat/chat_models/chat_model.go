@@ -25,7 +25,7 @@ func (chat ChatModel) MsgPreviewMethod() string {
 	case 1:
 		return chat.Msg.TextMsg.Content
 	case 2:
-		return "[图片消息] - " + chat.Msg.ImageMsg.Title
+		return "[图片消息] - " + chat.Msg.ImageMsg.Name
 	case 3:
 		return "[视频消息] - " + chat.Msg.VideoMsg.Title
 	case 4:

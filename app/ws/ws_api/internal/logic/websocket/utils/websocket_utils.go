@@ -7,6 +7,7 @@ import (
 
 	ws_response "beaver/app/ws/ws_api/response"
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/common/wsEnum/wsCommandConst"
 
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -19,11 +20,13 @@ type UserWsInfo struct {
 }
 
 // SendMsgByUser 发消息  给指定的用户， 谁发的
-func SendMsgByUser(revUserID string, sendUserID string, command string, content type_struct.WsContent) {
+func SendMsgByUser(revUserID string, sendUserID string, command wsCommandConst.Command, content type_struct.WsContent) {
 	revUser, ok1 := UserOnlineWsMap[revUserID]
 	_, ok2 := UserOnlineWsMap[sendUserID]
 
-	if revUserID != sendUserID && ok1 && ok2 {
+	fmt.Println("revUserID:", revUserID, "sendUserID:", sendUserID, "ok1:", ok1, "ok2:", ok2)
+
+	if ok1 && ok2 {
 		jsonContent, _ := json.Marshal(content)
 		logx.Info("发送消息给用户数：", len(revUser.WsClientMap), "发送者：", sendUserID, "接收者：", revUserID, "消息内容：", string(jsonContent))
 		sendWsMapMsg(revUser.WsClientMap, command, content)
@@ -32,7 +35,7 @@ func SendMsgByUser(revUserID string, sendUserID string, command string, content 
 }
 
 // sendWsMapMsg 给一组的 WebSocket 通道发送消息
-func sendWsMapMsg(wsMap map[string]*websocket.Conn, command string, content type_struct.WsContent) {
+func sendWsMapMsg(wsMap map[string]*websocket.Conn, command wsCommandConst.Command, content type_struct.WsContent) {
 	for _, conn := range wsMap {
 		ws_response.WsResponse(conn, command, content)
 	}

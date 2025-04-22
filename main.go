@@ -2,11 +2,10 @@ package main
 
 import (
 	"beaver/app/chat/chat_models"
-	"beaver/app/emoji/emoji_models"
+	"beaver/app/feedback/feedback_models"
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
-	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_models"
 	"beaver/core"
 	"flag"
@@ -34,13 +33,7 @@ func main() {
 			&group_models.GroupModel{},
 			&group_models.GroupMemberModel{},
 			&file_models.FileModel{},
-			&moment_models.MomentModel{},
-			&moment_models.MomentLikeModel{},
-			&moment_models.MomentCommentModel{},
-			&emoji_models.EmojiPackage{},
-			&emoji_models.Emoji{},
-			&emoji_models.EmojiPackageCollect{},
-			&emoji_models.EmojiCollectEmoji{},
+			&feedback_models.FeedbackModel{},
 		)
 		if err != nil {
 			fmt.Println("表结构生成失败")

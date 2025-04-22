@@ -28,24 +28,23 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRes, err error) {
-	// todo: add your logic here and delete this line
-
+	// 检查用户是否已存在
 	var user user_models.UserModel
 	err = l.svcCtx.DB.Take(&user, "phone = ?", req.Phone).Error
-	if err != nil {
-		// 注册逻辑
-		_, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
-			Phone:    req.Phone,
-			Password: pwd.HahPwd(req.Password),
-			Source:   1,
-		})
-		if err != nil {
-			logx.Error(err)
-			return nil, errors.New("注册失败")
-		}
-	} else {
+	if err == nil {
 		return nil, errors.New("用户已存在")
 	}
 
-	return nil, nil
+	// 创建用户
+	_, err = l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
+		Phone:    req.Phone,
+		Password: pwd.HahPwd(req.Password),
+		Source:   1, // 1: 手机号注册
+	})
+	if err != nil {
+		logx.Errorf("创建用户失败: %v", err)
+		return nil, errors.New("注册失败")
+	}
+
+	return &types.RegisterRes{}, nil
 }

@@ -6,7 +6,8 @@ type FileReq struct {
 }
 
 type FileRes struct {
-	FileID string `json:"fileId"`
+	FileID   string `json:"fileId"`
+	FileName string `json:"name"`
 }
 
 type PreviewReq struct {

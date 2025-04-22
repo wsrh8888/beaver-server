@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"fmt"
 
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
@@ -26,20 +25,33 @@ func NewUserListInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 }
 
 func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rpc.UserListInfoRes, error) {
+	// 对空数组进行处理
+	if len(in.UserIdList) == 0 {
+		return &user_rpc.UserListInfoRes{
+			UserInfo: make(map[string]*user_rpc.UserInfo),
+		}, nil
+	}
+
+	// 正确使用IN查询
 	var userList []user_models.UserModel
+	err := l.svcCtx.DB.Where("uuid IN ?", in.UserIdList).Find(&userList).Error
 
-	l.svcCtx.DB.Find(&userList, "uuid = ?", in.UserIdList)
+	if err != nil {
+		l.Logger.Errorf("查询用户列表失败: %v", err)
+		return nil, err
+	}
 
-	resp := new(user_rpc.UserListInfoRes)
-	resp.UserInfo = make(map[string]*user_rpc.UserInfo, 0)
+	resp := &user_rpc.UserListInfoRes{
+		UserInfo: make(map[string]*user_rpc.UserInfo, len(userList)),
+	}
 
-	for _, i2 := range userList {
-		resp.UserInfo[i2.UUID] = &user_rpc.UserInfo{
-			NickName: i2.NickName,
-			Avatar:   i2.Avatar,
+	for _, user := range userList {
+		resp.UserInfo[user.UUID] = &user_rpc.UserInfo{
+			NickName: user.NickName,
+			Avatar:   user.Avatar,
 		}
 	}
-	fmt.Println(userList, in.UserIdList)
 
+	l.Logger.Infof("查询到 %d 个用户信息，请求ID数量: %d", len(userList), len(in.UserIdList))
 	return resp, nil
 }

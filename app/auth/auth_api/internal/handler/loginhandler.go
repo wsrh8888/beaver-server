@@ -5,10 +5,35 @@ import (
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/common/response"
+	"beaver/common/validator"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
+
+// 获取登录失败次数
+func getLoginFailCount(svcCtx *svc.ServiceContext, phone string) (int, error) {
+	key := fmt.Sprintf("login_fail_%s", phone)
+	count, err := svcCtx.Redis.Get(key).Int()
+	if err != nil {
+		return 0, nil
+	}
+	return count, nil
+}
+
+// 增加登录失败次数
+func incLoginFailCount(svcCtx *svc.ServiceContext, phone string) error {
+	key := fmt.Sprintf("login_fail_%s", phone)
+	return svcCtx.Redis.Incr(key).Err()
+}
+
+// 重置登录失败次数
+func resetLoginFailCount(svcCtx *svc.ServiceContext, phone string) error {
+	key := fmt.Sprintf("login_fail_%s", phone)
+	return svcCtx.Redis.Del(key).Err()
+}
 
 func loginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -18,8 +43,33 @@ func loginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		// 验证登录参数
+		if err := validator.ValidateLoginParams(req.Phone, req.Password); err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
+
+		// 检查登录失败次数
+		failCount, err := getLoginFailCount(svcCtx, req.Phone)
+		if err != nil {
+			response.Response(r, w, nil, errors.New("服务内部异常"))
+			return
+		}
+		if failCount >= 5 {
+			response.Response(r, w, nil, errors.New("登录失败次数过多,请稍后再试"))
+			return
+		}
+
 		l := logic.NewLoginLogic(r.Context(), svcCtx)
 		resp, err := l.Login(&req)
-		response.Response(r, w, resp, err)
+		if err != nil {
+			// 增加登录失败次数
+			if err := incLoginFailCount(svcCtx, req.Phone); err != nil {
+			}
+			response.Response(r, w, nil, err)
+			return
+		}
+
+		response.Response(r, w, resp, nil)
 	}
 }

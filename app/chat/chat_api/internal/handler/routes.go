@@ -19,6 +19,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/api/chat/edit",
+				Handler: editMessageHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/chat/forward",
+				Handler: forwardMessageHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/api/chat/getChatHistory",
 				Handler: chatHistoryHandler(serverCtx),
 			},
@@ -31,6 +41,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/chat/pinnedChat",
 				Handler: pinnedChatHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/chat/recall",
+				Handler: recallMessageHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,

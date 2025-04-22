@@ -38,8 +38,8 @@ type SendMsgReq {
 }
 
 type ImageMsg {
-	Title string `json:"title"`
-	Src   string `json:"src"`
+	FileId string `json:"fileId"`
+	Name   string `json:"name"`
 }
 
 type RecentChatListReq {
@@ -52,9 +52,10 @@ type RecentChat {
 	Avatar         string `json:"avatar"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"` //消息预览
-	CreateAt       string `json:"create_at"` //消息时间
+	UpdateAt       string `json:"update_at"` //消息时间
 	IsTop          bool   `json:"is_top"` //是否置顶
 	ConversationID string `json:"conversationId"` //会话id
+	ChatType       int    `json:"chatType"` //会话类型 1:好友 2:群聊 3:AI机器人
 }
 
 type RecentChatListRes {
@@ -112,6 +113,46 @@ type PinnedChatReq {
 
 type PinnedChatRes {}
 
+// 消息编辑请求
+type EditMessageReq {
+	UserID    string `header:"Beaver-User-Id"`
+	MessageID uint32 `json:"messageId"`
+	Content   string `json:"content"`
+}
+
+// 消息编辑响应
+type EditMessageRes {
+	MessageID uint32 `json:"messageId"`
+	Content   string `json:"content"`
+	EditTime  string `json:"editTime"`
+}
+
+// 消息撤回请求
+type RecallMessageReq {
+	UserID    string `header:"Beaver-User-Id"`
+	MessageID uint32 `json:"messageId"`
+}
+
+// 消息撤回响应
+type RecallMessageRes {
+	MessageID  uint32 `json:"messageId"`
+	RecallTime string `json:"recallTime"`
+}
+
+// 消息转发请求
+type ForwardMessageReq {
+	UserID      string `header:"Beaver-User-Id"`
+	MessageID   uint32 `json:"messageId"`
+	TargetID    string `json:"targetId"` // 目标会话ID
+	ForwardType int    `json:"forwardType"` // 1: 单聊 2: 群聊
+}
+
+// 消息转发响应
+type ForwardMessageRes {
+	MessageID   uint32 `json:"messageId"`
+	ForwardTime string `json:"forwardTime"`
+}
+
 service chat {
 	@handler sendMsg
 	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes) //发送消息
@@ -127,6 +168,15 @@ service chat {
 
 	@handler pinnedChat
 	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes) //置顶某个会话
+
+	@handler editMessage
+	post /api/chat/edit (EditMessageReq) returns (EditMessageRes) // 编辑消息
+
+	@handler recallMessage
+	post /api/chat/recall (RecallMessageReq) returns (RecallMessageRes) // 撤回消息
+
+	@handler forwardMessage
+	post /api/chat/forward (ForwardMessageReq) returns (ForwardMessageRes) // 转发消息
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template

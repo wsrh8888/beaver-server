@@ -5,18 +5,19 @@ type FileReq {
 }
 
 type FileRes {
-	FileID string `json:"fileId"`
+	FileID   string `json:"fileId"`
+	FileName string `json:"name"`
 }
 
 type PreviewReq {
-	fileID string `path:"fileId"`
+	FileID string `path:"fileId"`
 }
 
 type PreviewRes {}
 
 service file {
 	@handler Preview
-	get /api/file/preview/:fileID (PreviewReq) returns (PreviewRes) //文件预览
+	get /api/file/preview/:fileId (PreviewReq) returns (PreviewRes) //文件预览
 
 	@handler FileUploadQiniu
 	post /api/file/uploadQiniu (FileReq) returns (FileRes) //文件上传七牛云

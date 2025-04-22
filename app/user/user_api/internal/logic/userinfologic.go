@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
@@ -27,15 +28,20 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 }
 
 func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRes, err error) {
+	fmt.Println("获取用户的基础信息, UserID: %v,\n", req.UserID)
 	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
 		UserID: req.UserID})
 	if err != nil {
+		fmt.Printf("[ERROR] RPC call failed, UserID: %v, error: %v\n", req.UserID, err)
+
 		return nil, err
 	}
 	var user user_models.UserModel
 
 	err = json.Unmarshal(res.Data, &user)
 	if err != nil {
+		fmt.Printf("[ERROR] JSON unmarshal failed, data: %s, error: %v\n", string(res.Data), err)
+
 		return nil, err
 	}
 	resp = &types.UserInfoRes{

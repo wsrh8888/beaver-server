@@ -42,15 +42,7 @@
         "$go"
       ]
     },
-    {
 
-      "label": "emoji_api",
-      "type": "shell",
-      "command": "cd app/emoji/emoji_api;  go run emoji.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
     {
       "label": "auth_api",
       "type": "shell",
@@ -92,15 +84,6 @@
         "$go"
       ]
     },
-    {
-      "label": "moment_api",
-      "type": "shell",
-      "command": "cd app/moment/moment_api;  go run moment.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    
     {
       "label": "file_api",
       "type": "shell",
@@ -145,7 +128,7 @@
       "label": "启动Api全部任务",
       "type": "shell",
       "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api"],
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api"],
       "dependsOrder": "parallel",
       "problemMatcher": []
     }

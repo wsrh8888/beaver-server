@@ -26,3 +26,13 @@ func (s *ChatServer) SendMsg(ctx context.Context, in *chat_rpc.SendMsgReq) (*cha
 	l := logic.NewSendMsgLogic(ctx, s.svcCtx)
 	return l.SendMsg(in)
 }
+
+func (s *ChatServer) UpdateConversation(ctx context.Context, in *chat_rpc.UpdateConversationReq) (*chat_rpc.UpdateConversationRes, error) {
+	l := logic.NewUpdateConversationLogic(ctx, s.svcCtx)
+	return l.UpdateConversation(in)
+}
+
+func (s *ChatServer) BatchUpdateConversation(ctx context.Context, in *chat_rpc.BatchUpdateConversationReq) (*chat_rpc.BatchUpdateConversationRes, error) {
+	l := logic.NewBatchUpdateConversationLogic(ctx, s.svcCtx)
+	return l.BatchUpdateConversation(in)
+}

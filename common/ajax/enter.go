@@ -2,11 +2,15 @@ package ajax
 
 import (
 	"beaver/common/etcd"
+
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+
+	"beaver/common/wsEnum/wsCommandConst" // Import the wsCommandConst package
+	"beaver/common/wsEnum/wsTypeConst"    // Import the wsCommandConst package
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,43 +28,41 @@ type Response struct {
 	Msg    string          `json:"msg"`
 	Result json.RawMessage `json:"result"`
 }
-
 type WsProxyReq struct {
 	UserID   string                 `header:"Beaver-User-Id"`
-	Command  string                 `json:"command"`
+	Command  wsCommandConst.Command `json:"command"`
 	TargetID string                 `json:"targetId"`
-	Type     string                 `json:"type"`
+	Type     wsTypeConst.Type       `json:"type"`
 	Body     map[string]interface{} `json:"body"`
 }
 
-func SendMessageToWs(etcdUrl string, types string, senderID string, targetID string, requestBody map[string]interface{}) {
+func SendMessageToWs(etcdUrl string, command wsCommandConst.Command, types wsTypeConst.Type, senderID string, targetID string, requestBody map[string]interface{}) error {
 	addr := etcd.GetServiceAddr(etcdUrl, "ws_api")
 	if addr == "" {
-		logx.Error("未匹配到服务")
-		return
+		return fmt.Errorf("未匹配到服务")
 	}
 	apiEndpoint := fmt.Sprintf("http://%s/api/ws/proxySendMsg", addr)
 
 	wsProxyReq := WsProxyReq{
 		UserID:   senderID,
-		Command:  "COMMON_UPDATE_MESSAGE",
+		Command:  command,
 		TargetID: targetID,
 		Type:     types,
 		Body:     requestBody,
 	}
 	body, _ := json.Marshal(wsProxyReq)
 
-	ForwardMessage(ForwardRequest{
+	_, err := ForwardMessage(ForwardRequest{
 		ApiEndpoint: apiEndpoint,
 		Method:      "POST",
 		Token:       "",
 		UserID:      senderID,
 		Body:        bytes.NewBuffer(body),
 	})
+	return err
 }
 
 func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {
-
 	client := &http.Client{}
 
 	var req *http.Request
@@ -112,6 +114,6 @@ func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {
 	}
 	sendAjaxJSON, _ := json.Marshal(authResponse.Result)
 
-	fmt.Println("消息转发成功", string(sendAjaxJSON))
+	logx.Infof("消息转发成功: %s", string(sendAjaxJSON))
 	return authResponse.Result, nil
 }

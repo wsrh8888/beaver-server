@@ -21,6 +21,18 @@ type DeleteRecentReq struct {
 type DeleteRecentRes struct {
 }
 
+type EditMessageReq struct {
+	UserID    string `header:"Beaver-User-Id"`
+	MessageID uint32 `json:"messageId"`
+	Content   string `json:"content"`
+}
+
+type EditMessageRes struct {
+	MessageID uint32 `json:"messageId"`
+	Content   string `json:"content"`
+	EditTime  string `json:"editTime"`
+}
+
 type FileMsg struct {
 	Title string `json:"title"`
 	Src   string `json:"src"`
@@ -28,9 +40,21 @@ type FileMsg struct {
 	Type  string `json:"type"` //文件类型
 }
 
+type ForwardMessageReq struct {
+	UserID      string `header:"Beaver-User-Id"`
+	MessageID   uint32 `json:"messageId"`
+	TargetID    string `json:"targetId"`    // 目标会话ID
+	ForwardType int    `json:"forwardType"` // 1: 单聊 2: 群聊
+}
+
+type ForwardMessageRes struct {
+	MessageID   uint32 `json:"messageId"`
+	ForwardTime string `json:"forwardTime"`
+}
+
 type ImageMsg struct {
-	Title string `json:"title"`
-	Src   string `json:"src"`
+	FileId string `json:"fileId"`
+	Name   string `json:"name"`
 }
 
 type Message struct {
@@ -59,13 +83,24 @@ type PinnedChatReq struct {
 type PinnedChatRes struct {
 }
 
+type RecallMessageReq struct {
+	UserID    string `header:"Beaver-User-Id"`
+	MessageID uint32 `json:"messageId"`
+}
+
+type RecallMessageRes struct {
+	MessageID  uint32 `json:"messageId"`
+	RecallTime string `json:"recallTime"`
+}
+
 type RecentChat struct {
 	Avatar         string `json:"avatar"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"`    //消息预览
-	CreateAt       string `json:"create_at"`      //消息时间
+	UpdateAt       string `json:"update_at"`      //消息时间
 	IsTop          bool   `json:"is_top"`         //是否置顶
 	ConversationID string `json:"conversationId"` //会话id
+	ChatType       int    `json:"chatType"`       //会话类型 1:好友 2:群聊 3:AI机器人
 }
 
 type RecentChatListReq struct {

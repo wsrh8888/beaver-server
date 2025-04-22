@@ -28,6 +28,105 @@ type UpdatePasswordReq {
 
 type UpdatePasswordRes {}
 
+// 用户隐私设置
+type PrivacySettings {
+	ShowOnlineStatus bool `json:"showOnlineStatus"` // 是否显示在线状态
+	ShowLastSeen     bool `json:"showLastSeen"` // 是否显示最后在线时间
+	AllowAddFriend   bool `json:"allowAddFriend"` // 是否允许被添加好友
+	AllowGroupInvite bool `json:"allowGroupInvite"` // 是否允许被邀请入群
+	ShowProfile      bool `json:"showProfile"` // 是否显示个人资料
+	ShowMoment       bool `json:"showMoment"` // 是否显示动态
+}
+
+// 获取隐私设置请求
+type GetPrivacySettingsReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+// 获取隐私设置响应
+type GetPrivacySettingsRes {
+	Settings PrivacySettings `json:"settings"`
+}
+
+// 更新隐私设置请求
+type UpdatePrivacySettingsReq {
+	UserID   string          `header:"Beaver-User-Id"`
+	Settings PrivacySettings `json:"settings"`
+}
+
+// 更新隐私设置响应
+type UpdatePrivacySettingsRes {}
+
+// 黑名单用户信息
+type BlacklistUser {
+	UserID   string `json:"userId"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar"`
+	AddTime  string `json:"addTime"`
+}
+
+// 获取黑名单列表请求
+type GetBlacklistReq {
+	UserID string `header:"Beaver-User-Id"`
+	Page   int    `json:"page,optional"`
+	Limit  int    `json:"limit,optional"`
+}
+
+// 获取黑名单列表响应
+type GetBlacklistRes {
+	List  []BlacklistUser `json:"list"`
+	Count int64           `json:"count"`
+}
+
+// 添加黑名单请求
+type AddBlacklistReq {
+	UserID   string `header:"Beaver-User-Id"`
+	TargetID string `json:"targetId"`
+}
+
+// 添加黑名单响应
+type AddBlacklistRes {}
+
+// 移除黑名单请求
+type RemoveBlacklistReq {
+	UserID   string `header:"Beaver-User-Id"`
+	TargetID string `json:"targetId"`
+}
+
+// 移除黑名单响应
+type RemoveBlacklistRes {}
+
+// 用户基础设置
+type UserSettings {
+	MessageNotify    bool   `json:"messageNotify"` // 消息通知
+	ShowOnlineStatus bool   `json:"showOnlineStatus"` // 显示在线状态
+	AllowAddFriend   bool   `json:"allowAddFriend"` // 允许添加好友
+	AllowMoment      bool   `json:"allowMoment"` // 允许查看朋友圈
+	SoundEnabled     bool   `json:"soundEnabled"` // 声音开关
+	VibrateEnabled   bool   `json:"vibrateEnabled"` // 震动开关
+	Language         string `json:"language"` // 语言设置
+	Theme            string `json:"theme"` // 主题设置
+}
+
+// 获取用户设置请求
+type GetUserSettingsReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+// 获取用户设置响应
+type GetUserSettingsRes {
+	Settings UserSettings `json:"settings"`
+}
+
+// 更新用户设置请求
+type UpdateUserSettingsReq {
+	UserID   string       `header:"Beaver-User-Id"`
+	Settings UserSettings `json:"settings"`
+}
+
+// 更新用户设置响应
+type UpdateUserSettingsRes {}
+
 service user {
 	@handler userInfo
 	get /api/user/user_info (UserInfoReq) returns (UserInfoRes) //用户信息接口
@@ -37,6 +136,27 @@ service user {
 
 	@handler updatePassword
 	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes) //修改密码
+
+	@handler getUserSettings
+	get /api/user/settings (GetUserSettingsReq) returns (GetUserSettingsRes) // 获取用户设置
+
+	@handler updateUserSettings
+	post /api/user/settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes) // 更新用户设置
+
+	@handler getPrivacySettings
+	get /api/user/privacy (GetPrivacySettingsReq) returns (GetPrivacySettingsRes) // 获取隐私设置
+
+	@handler updatePrivacySettings
+	post /api/user/privacy (UpdatePrivacySettingsReq) returns (UpdatePrivacySettingsRes) // 更新隐私设置
+
+	@handler getBlacklist
+	get /api/user/blacklist (GetBlacklistReq) returns (GetBlacklistRes) // 获取黑名单列表
+
+	@handler addBlacklist
+	post /api/user/blacklist/add (AddBlacklistReq) returns (AddBlacklistRes) // 添加黑名单
+
+	@handler removeBlacklist
+	post /api/user/blacklist/remove (RemoveBlacklistReq) returns (RemoveBlacklistRes) // 移除黑名单
 }
 
 // goctl api go -api user_api.api -dir . --home ../../../template

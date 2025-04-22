@@ -124,6 +124,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		if err == nil {
 			resp.FileID = fileModel.FileID
+			resp.FileName = fileModel.FileName
 			response.Response(r, w, resp, nil)
 			return
 		}
@@ -140,7 +141,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 创建新的文件记录
 		newFileModel := &file_models.FileModel{
-			FileName: fileName,
+			FileName: strings.TrimSuffix(fileName, "."+suffix),
 			Size:     fileHead.Size,
 			Path:     qiniuURL,
 			Hash:     fileMd5,
@@ -154,6 +155,8 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		resp.FileID = newFileModel.FileID
+		resp.FileName = newFileModel.FileName
+
 		response.Response(r, w, resp, nil)
 	}
 }

@@ -1,10 +1,10 @@
 Name: chat
 Host: 0.0.0.0
-Port: 21300
+Port: 21030
 Mysql:
-  DataSource: root:15383645663.r@tcp(127.0.0.1:1800)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
-  Addr: 127.0.0.1:18991
+  Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
 Log:
