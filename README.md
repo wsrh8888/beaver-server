@@ -5,6 +5,9 @@
 +  前端使用uniapp， 后端使用go-zero， 桌面端使用electron
 + 如果喜欢可以点一个star
 + 加入QQ群：[![加入QQ群](https://img.shields.io/badge/加入QQ群-1013328597-blue.svg)](https://qm.qq.com/q/82rbf7QBzO)（1013328597）
++ 加入微信群：
++ <img src="./static/wxQcode.JPG" width="200" height="200" alt="微信群二维码"/>
+
 
 ### 版权申明
 禁止任何形式商用，只限于个人学习
