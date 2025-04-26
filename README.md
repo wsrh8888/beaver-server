@@ -105,20 +105,29 @@ go run main.go  -db
 <img src="./static/friend.png"/>
 
 消息页面
-<img src="./static/message.png"/>
+<img src="./static/home.png"/>
 
 聊天页面
 <img src="./static/chat.png"/>
 
-聊天页面
-<img src="./static/chat1.png"/>
+群聊页面
+<img src="./static/groupChat.png"/>
+
+群聊详情
+<img src="./static/groupConfig.png"/>
+
+群聊移除界面
+<img src="./static/removeMember.png"/>
 
 详情页面
 <img src="./static/info.png"/>
 
+设置页面
+<img src="./static/setting.png"/>
 
 
+关于页面
+<img src="./static/about.png"/>
 
-
-
-
+问题反馈
+<img src="./static/feedback.png"/>
