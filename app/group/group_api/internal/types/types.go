@@ -24,6 +24,7 @@ type GroupInfoReq struct {
 type GroupInfoRes struct {
 	Title          string `json:"title"`          // 群组名称
 	Avatar         string `json:"avatar"`         // 群组头像URL
+	MemberCount    int    `json:"memberCount"`    // 成员数量
 	ConversationID string `json:"conversationId"` // 会话ID
 }
 
@@ -73,8 +74,8 @@ type GroupMineReq struct {
 }
 
 type GroupMineRes struct {
-	List  []GroupInfo `json:"list"`  // 群组列表
-	Count int         `json:"count"` // 总数
+	List  []GroupInfoRes `json:"list"`  // 群组列表
+	Count int            `json:"count"` // 总数
 }
 
 type GroupMuteListReq struct {

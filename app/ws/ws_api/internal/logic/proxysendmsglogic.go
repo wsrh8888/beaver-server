@@ -40,8 +40,9 @@ func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *type
 	content := type_struct.WsContent{
 		Timestamp: 0,
 		Data: type_struct.WsData{
-			Type: wsTypeConst.Type(req.Type),
-			Body: bodyBytes,
+			Type:           wsTypeConst.Type(req.Type),
+			Body:           bodyBytes,
+			ConversationID: req.ConversationId,
 		},
 	}
 	// todo: add your logic here and delete this line

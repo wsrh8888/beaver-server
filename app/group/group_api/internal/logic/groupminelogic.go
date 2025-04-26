@@ -44,7 +44,7 @@ func (l *Group_mineLogic) Group_mine(req *types.GroupMineReq) (resp *types.Group
 	resp = &types.GroupMineRes{}
 	for _, model := range groups {
 
-		resp.List = append(resp.List, types.GroupInfo{
+		resp.List = append(resp.List, types.GroupInfoRes{
 			Title:          model.Title,
 			Avatar:         model.Avatar,
 			MemberCount:    len(model.MemberList),

@@ -33,6 +33,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: chatHistoryHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/api/chat/getConversationInfo",
+				Handler: ConversationInfoHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/api/chat/getRecentChatList",
 				Handler: recentChatListHandler(serverCtx),

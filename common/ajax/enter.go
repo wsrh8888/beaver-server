@@ -29,14 +29,15 @@ type Response struct {
 	Result json.RawMessage `json:"result"`
 }
 type WsProxyReq struct {
-	UserID   string                 `header:"Beaver-User-Id"`
-	Command  wsCommandConst.Command `json:"command"`
-	TargetID string                 `json:"targetId"`
-	Type     wsTypeConst.Type       `json:"type"`
-	Body     map[string]interface{} `json:"body"`
+	UserID         string                 `header:"Beaver-User-Id"`
+	Command        wsCommandConst.Command `json:"command"`
+	TargetID       string                 `json:"targetId"`
+	Type           wsTypeConst.Type       `json:"type"`
+	Body           map[string]interface{} `json:"body"`
+	ConversationId string                 `json:"conversationId"`
 }
 
-func SendMessageToWs(etcdUrl string, command wsCommandConst.Command, types wsTypeConst.Type, senderID string, targetID string, requestBody map[string]interface{}) error {
+func SendMessageToWs(etcdUrl string, command wsCommandConst.Command, types wsTypeConst.Type, senderID string, targetID string, requestBody map[string]interface{}, conversationId string) error {
 	addr := etcd.GetServiceAddr(etcdUrl, "ws_api")
 	if addr == "" {
 		return fmt.Errorf("未匹配到服务")
@@ -44,12 +45,14 @@ func SendMessageToWs(etcdUrl string, command wsCommandConst.Command, types wsTyp
 	apiEndpoint := fmt.Sprintf("http://%s/api/ws/proxySendMsg", addr)
 
 	wsProxyReq := WsProxyReq{
-		UserID:   senderID,
-		Command:  command,
-		TargetID: targetID,
-		Type:     types,
-		Body:     requestBody,
+		UserID:         senderID,
+		Command:        command,
+		TargetID:       targetID,
+		Type:           types,
+		Body:           requestBody,
+		ConversationId: conversationId,
 	}
+	fmt.Println("会话id是:", conversationId)
 	body, _ := json.Marshal(wsProxyReq)
 
 	_, err := ForwardMessage(ForwardRequest{

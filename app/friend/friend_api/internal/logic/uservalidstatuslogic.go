@@ -34,6 +34,7 @@ func NewUserValidStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) (resp *types.FriendValidStatusRes, err error) {
 	// todo: add your logic here and delete this line
 	var friendVerify friend_models.FriendVerifyModel
+	var conversationID string
 	// 我要操作状态，我自己是接受方
 	err = l.svcCtx.DB.Take(&friendVerify, "id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
 	if err != nil {
@@ -52,7 +53,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		})
 
 		fmt.Println("发送消息")
-		conversationID, _ := conversation.GenerateConversation([]string{friendVerify.SendUserID, friendVerify.RevUserID})
+		conversationID, _ = conversation.GenerateConversation([]string{friendVerify.SendUserID, friendVerify.RevUserID})
 		// 默认发送一条消息
 		l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
 			UserID:         friendVerify.RevUserID,
@@ -76,14 +77,14 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		return nil, nil
 	}
 	err = l.svcCtx.DB.Save(&friendVerify).Error
-
+	
 	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
 		"userId": friendVerify.SendUserID,
 		"status": friendVerify.RevStatus,
-	})
+	}, conversationID)
 	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
 		"userId": friendVerify.RevUserID,
 		"status": friendVerify.RevStatus,
-	})
+	}, conversationID)
 	return
 }

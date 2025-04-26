@@ -70,7 +70,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 					"type":     "leave",
 					"userId":   req.UserID,
 					"username": member.Username,
-				})
+				}, "")
 			}
 		}
 	}()

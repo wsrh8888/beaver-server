@@ -98,7 +98,7 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 				"type":       "owner_transfer",
 				"oldOwnerId": req.UserID,
 				"newOwnerId": req.NewOwnerID,
-			})
+			}, "")
 		}
 	}()
 

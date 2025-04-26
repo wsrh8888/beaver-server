@@ -54,10 +54,10 @@ func (l *FriendDeleteLogic) FriendDelete(req *types.FriendDeleteReq) (resp *type
 	go func() {
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendDelete, req.UserID, req.FriendID, map[string]interface{}{
 			"userId": req.FriendID,
-		})
+		}, "")
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendDelete, req.FriendID, req.UserID, map[string]interface{}{
 			"userId": req.FriendID,
-		})
+		}, "")
 		if err := l.markConversationAndChatsAsDeleted(req.UserID, conversationID); err != nil {
 			l.Logger.Error(fmt.Sprintf("删除会话和聊天记录失败: %v", err))
 		}

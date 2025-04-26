@@ -83,7 +83,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 					"avatar":   req.Avatar,
 					"notice":   req.Notice,
 					"joinType": req.JoinType,
-				})
+				}, "")
 			}
 		}
 	}()

@@ -42,13 +42,18 @@ type ImageMsg {
 	Name   string `json:"name"`
 }
 
+type ConversationInfoReq {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+}
+
 type RecentChatListReq {
 	UserID string `header:"Beaver-User-Id"`
 	Page   int    `form:"page,optional"`
 	Limit  int    `form:"limit,optional"`
 }
 
-type RecentChat {
+type ConversationInfoRes {
 	Avatar         string `json:"avatar"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"` //消息预览
@@ -59,8 +64,8 @@ type RecentChat {
 }
 
 type RecentChatListRes {
-	Count int64        `json:"count"`
-	List  []RecentChat `json:"list"`
+	Count int64                 `json:"count"`
+	List  []ConversationInfoRes `json:"list"`
 }
 
 type SendMsgRes {
@@ -156,6 +161,10 @@ type ForwardMessageRes {
 service chat {
 	@handler sendMsg
 	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes) //发送消息
+
+	// 通过会话id获取会话信息
+	@handler ConversationInfo
+	post /api/chat/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes) //获取会话id
 
 	@handler recentChatList
 	get /api/chat/getRecentChatList (RecentChatListReq) returns (RecentChatListRes) //获取最近会话列表

@@ -115,9 +115,9 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		groupMap[group.UUID] = group
 	}
 
-	var respList []types.RecentChat
+	var respList []types.ConversationInfoRes
 	for _, convo := range userConversations {
-		var chatInfo types.RecentChat
+		var chatInfo types.ConversationInfoRes
 
 		chatInfo.MsgPreview = convo.LastMessage
 		chatInfo.IsTop = convo.IsPinned

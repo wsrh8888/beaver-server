@@ -87,7 +87,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 					"groupId":   req.GroupID,
 					"memberIds": req.MemberIDs,
 					"operator":  req.UserID,
-				})
+				}, "")
 			}
 		}
 
@@ -97,7 +97,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 				"groupId":  req.GroupID,
 				"operator": req.UserID,
 				"memberId": memberID,
-			})
+			}, "")
 		}
 	}()
 
