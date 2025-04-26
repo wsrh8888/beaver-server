@@ -71,7 +71,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		for _, friendID := range response.FriendIds {
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, friendID, map[string]interface{}{
 				"userId": req.UserID,
-			})
+			}, "")
 		}
 	}()
 

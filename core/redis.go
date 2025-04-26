@@ -11,8 +11,8 @@ import (
 
 func InitRedis(addr string, password string, db int) (client *redis.Client) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
+		Addr: addr,
+		// Password: password, // no password set
 		DB:       db,
 		PoolSize: 100,
 	})

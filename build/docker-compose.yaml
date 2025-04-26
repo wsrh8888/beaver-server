@@ -5,12 +5,12 @@ services:
       container_name: redis1
       command: redis-server --appendonly yes --requirepass "123456"
       ports:
-        - "8379:6379"
+        - "6379:6379"
       volumes:
         - ./docker/redis:/data
     mysql:
         image: mysql:5.7.31
-        container_name: mysql1
+        container_name: mysql
         restart: always
         ports:
             - '3306:3306'
@@ -28,7 +28,7 @@ services:
              - ./docker/mysql/log:/var/log/mysql
     etcd:
         image: bitnami/etcd:3.5.12
-        container_name: etcd1
+        container_name: etcd
         ports:
             - "2379:2379"
             - "2380:2380"
@@ -36,3 +36,6 @@ services:
             - ALLOW_NONE_AUTHENTICATION=yes                  
         volumes:
             - ./docker/etcd:/etcd-data
+networks:
+  default:
+    driver: bridge

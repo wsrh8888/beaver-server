@@ -13,6 +13,21 @@ type ChatHistoryRes struct {
 	List  []Message `json:"list"`
 }
 
+type ConversationInfoReq struct {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+}
+
+type ConversationInfoRes struct {
+	Avatar         string `json:"avatar"`
+	Nickname       string `json:"nickname"`
+	MsgPreview     string `json:"msg_preview"`    //消息预览
+	UpdateAt       string `json:"update_at"`      //消息时间
+	IsTop          bool   `json:"is_top"`         //是否置顶
+	ConversationID string `json:"conversationId"` //会话id
+	ChatType       int    `json:"chatType"`       //会话类型 1:好友 2:群聊 3:AI机器人
+}
+
 type DeleteRecentReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
@@ -93,16 +108,6 @@ type RecallMessageRes struct {
 	RecallTime string `json:"recallTime"`
 }
 
-type RecentChat struct {
-	Avatar         string `json:"avatar"`
-	Nickname       string `json:"nickname"`
-	MsgPreview     string `json:"msg_preview"`    //消息预览
-	UpdateAt       string `json:"update_at"`      //消息时间
-	IsTop          bool   `json:"is_top"`         //是否置顶
-	ConversationID string `json:"conversationId"` //会话id
-	ChatType       int    `json:"chatType"`       //会话类型 1:好友 2:群聊 3:AI机器人
-}
-
 type RecentChatListReq struct {
 	UserID string `header:"Beaver-User-Id"`
 	Page   int    `form:"page,optional"`
@@ -110,8 +115,8 @@ type RecentChatListReq struct {
 }
 
 type RecentChatListRes struct {
-	Count int64        `json:"count"`
-	List  []RecentChat `json:"list"`
+	Count int64                 `json:"count"`
+	List  []ConversationInfoRes `json:"list"`
 }
 
 type SendMsgReq struct {

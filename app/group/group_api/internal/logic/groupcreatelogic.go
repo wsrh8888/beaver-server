@@ -108,7 +108,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 				"is_top":         false,
 				"msg_preview":    "",
 				"nickname":       groupModel.Title,
-			})
+			}, groupModel.UUID)
 		}
 	}()
 
