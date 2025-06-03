@@ -43,7 +43,7 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFun
 	// 设置CORS头
 	w.Header().Set("Access-Control-Allow-Origin", "*") // 设置允许的源域名
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Token, Uuid")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Token, Uuid, Deviceid")
 
 	// 如果是预检请求，直接返回
 	if r.Method == http.MethodOptions {

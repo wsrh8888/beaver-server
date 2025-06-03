@@ -1,0 +1,198 @@
+syntax = "v1"
+
+// 添加表情
+type AddEmojiReq {
+	UserID    string `header:"Beaver-User-Id"`
+	FileId    string `json:"fileId"`
+	Title     string `json:"title"`
+	PackageID uint   `json:"packageId,optional"`
+}
+
+type AddEmojiRes {}
+
+// 更新表情收藏状态
+type UpdateFavoriteEmojiReq {
+	UserID  string `header:"Beaver-User-Id"`
+	EmojiID uint   `json:"emojiId"`
+	Type    string `json:"type"` // "favorite" or "unfavorite"
+}
+
+type UpdateFavoriteEmojiRes {}
+
+// 获取用户收藏的表情列表
+type GetEmojisListReq {
+	UserID string `header:"Beaver-User-Id"`
+	Page   int    `json:"page"`
+	Size   int    `json:"size"`
+}
+
+type EmojiItem {
+	EmojiID   uint   `json:"emojiId"`
+	FileId    string `json:"fileId"`
+	Title     string `json:"title"`
+	PackageID *uint  `json:"packageId"`
+}
+
+type GetEmojisListRes {
+	Count int64       `json:"count"`
+	List  []EmojiItem `json:"list"`
+}
+
+type EmojiCategoryItem {
+	CategoryID   uint   `json:"categoryId"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	PackageCount int    `json:"packageCount"`
+}
+
+// 获取表情包列表
+type GetEmojiPackagesReq {
+	UserID     string `header:"Beaver-User-Id"`
+	CategoryID uint   `json:"categoryId,optional"` // 可选，按分类筛选
+	Type       string `json:"type,optional"` // 可选，按类型筛选：official-官方，user-用户自定义
+	Page       int    `json:"page"`
+	Size       int    `json:"size"`
+}
+
+type EmojiPackageItem {
+	PackageID    uint   `json:"packageId"`
+	Title        string `json:"title"`
+	CoverFile    string `json:"coverFile"`
+	Description  string `json:"description"`
+	Type         string `json:"type"` // 类型：official-官方，user-用户自定义
+	CollectCount int    `json:"collectCount"`
+	EmojiCount   int    `json:"emojiCount"`
+	IsCollected  bool   `json:"isCollected"` // 当前用户是否已收藏
+	IsAuthor     bool   `json:"isAuthor"` // 当前用户是否是作者
+}
+
+type GetEmojiPackagesRes {
+	Count int64              `json:"count"`
+	List  []EmojiPackageItem `json:"list"`
+}
+
+// 获取表情包详情
+type GetEmojiPackageDetailReq {
+	UserID    string `header:"Beaver-User-Id"`
+	PackageID uint   `json:"packageId"`
+}
+
+type GetEmojiPackageDetailRes {
+	PackageID    uint        `json:"packageId"`
+	Title        string      `json:"title"`
+	CoverFile    string      `json:"coverFile"`
+	Description  string      `json:"description"`
+	Type         string      `json:"type"` // 类型：official-官方，user-用户自定义
+	CollectCount int         `json:"collectCount"`
+	EmojiCount   int         `json:"emojiCount"`
+	IsCollected  bool        `json:"isCollected"`
+	IsAuthor     bool        `json:"isAuthor"` // 当前用户是否是作者
+	Emojis       []EmojiItem `json:"emojis"`
+}
+
+// 更新表情包收藏状态
+type UpdateFavoriteEmojiPackageReq {
+	UserID    string `header:"Beaver-User-Id"`
+	PackageID uint   `json:"packageId"`
+	Type      string `json:"type"` // "favorite" or "unfavorite"
+}
+
+type UpdateFavoriteEmojiPackageRes {}
+
+// 创建表情包集合
+type CreateEmojiPackageReq {
+	UserID      string `header:"Beaver-User-Id"`
+	Title       string `json:"title"`
+	CoverFile   string `json:"coverFile"`
+	Description string `json:"description"`
+}
+
+type CreateEmojiPackageRes {
+	PackageID uint `json:"packageId"`
+}
+
+// 添加表情到表情包
+type AddEmojiToPackageReq {
+	UserID    string `header:"Beaver-User-Id"`
+	PackageID uint   `json:"packageId"`
+	FileId    string `json:"fileId"`
+	Title     string `json:"title"`
+}
+
+type AddEmojiToPackageRes {
+	EmojiID uint `json:"emojiId"`
+}
+
+// 从表情包中删除表情
+type DeleteEmojiFromPackageReq {
+	UserID    string `header:"Beaver-User-Id"`
+	PackageID uint   `json:"packageId"`
+	EmojiID   uint   `json:"emojiId"`
+}
+
+type DeleteEmojiFromPackageRes {}
+
+// 批量添加表情到表情包
+type BatchAddEmojiToPackageReq {
+	UserID    string  `header:"Beaver-User-Id"`
+	PackageID uint    `json:"packageId"`
+	Emojis    []Emoji `json:"emojis"`
+}
+
+type Emoji {
+	FileId string `json:"fileId"`
+	Title  string `json:"title"`
+}
+
+type BatchAddEmojiToPackageRes {
+	EmojiIDs []uint `json:"emojiIds"`
+}
+
+// 获取用户收藏的表情包列表
+type GetUserFavoritePackagesReq {
+	UserID string `header:"Beaver-User-Id"`
+	Page   int    `json:"page"`
+	Size   int    `json:"size"`
+}
+
+type GetUserFavoritePackagesRes {
+	Count int64              `json:"count"`
+	List  []EmojiPackageItem `json:"list"`
+}
+
+service emoji {
+	@handler CreateEmojiPackage
+	post /api/emoji/packageCreate (CreateEmojiPackageReq) returns (CreateEmojiPackageRes) // 创建表情包集合
+
+	@handler AddEmojiToPackage
+	post /api/emoji/packageAddEmoji (AddEmojiToPackageReq) returns (AddEmojiToPackageRes) // 添加表情到表情包
+
+	@handler DeleteEmojiFromPackage
+	post /api/emoji/packageDeleteEmoji (DeleteEmojiFromPackageReq) returns (DeleteEmojiFromPackageRes) // 从表情包中删除表情
+
+	@handler BatchAddEmojiToPackage
+	post /api/emoji/packageBatchAdd (BatchAddEmojiToPackageReq) returns (BatchAddEmojiToPackageRes) // 批量添加表情到表情包
+
+	@handler AddEmoji
+	post /api/emoji/add (AddEmojiReq) returns (AddEmojiRes) // 添加表情，并且自动收藏
+
+	@handler UpdateFavoriteEmoji
+	post /api/emoji/favoriteEmoji (UpdateFavoriteEmojiReq) returns (UpdateFavoriteEmojiRes) // 收藏或者取消收藏表情
+
+	@handler GetEmojisList
+	post /api/emoji/favoriteList (GetEmojisListReq) returns (GetEmojisListRes) // 获取用户收藏的表情列表
+
+	@handler GetEmojiPackages
+	post /api/emoji/packageList (GetEmojiPackagesReq) returns (GetEmojiPackagesRes) // 获取表情包列表
+
+	@handler GetEmojiPackageDetail
+	post /api/emoji/packageInfo (GetEmojiPackageDetailReq) returns (GetEmojiPackageDetailRes) // 获取表情包详情
+
+	@handler UpdateFavoriteEmojiPackage
+	post /api/emoji/packageFavorite (UpdateFavoriteEmojiPackageReq) returns (UpdateFavoriteEmojiPackageRes) // 收藏或取消收藏表情包
+
+	@handler GetUserFavoritePackages
+	post /api/emoji/favoritePackageList (GetUserFavoritePackagesReq) returns (GetUserFavoritePackagesRes) // 获取用户收藏的表情包列表
+}
+
+// goctl api go -api emoji_api.api -dir . --home ../../../template

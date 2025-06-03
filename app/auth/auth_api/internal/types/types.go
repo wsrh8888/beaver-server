@@ -21,6 +21,7 @@ type GetUserSessionsRes struct {
 type LoginReq struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
+	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
 }
 
 type LoginRes struct {

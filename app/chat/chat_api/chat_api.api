@@ -34,6 +34,7 @@ type VideoMsg {
 type SendMsgReq {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
+	MessageID      string `json:"messageId"` //客户端消息ID
 	Msg            Msg    `json:"msg"`
 }
 
@@ -69,7 +70,8 @@ type RecentChatListRes {
 }
 
 type SendMsgRes {
-	MessageID      uint32 `json:"messageId"` //消息id
+	ID             uint   `json:"id"` //数据库自增ID
+	MessageID      string `json:"messageId"` //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"` //发送者
@@ -91,7 +93,8 @@ type Sender {
 }
 
 type Message {
-	MessageID      uint   `json:"messageId"` //消息id
+	ID             uint   `json:"id"` //数据库自增ID
+	MessageID      string `json:"messageId"` //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"` //发送者
@@ -121,13 +124,14 @@ type PinnedChatRes {}
 // 消息编辑请求
 type EditMessageReq {
 	UserID    string `header:"Beaver-User-Id"`
-	MessageID uint32 `json:"messageId"`
+	MessageID string `json:"messageId"` //客户端消息ID
 	Content   string `json:"content"`
 }
 
 // 消息编辑响应
 type EditMessageRes {
-	MessageID uint32 `json:"messageId"`
+	ID        uint   `json:"id"` //数据库自增ID
+	MessageID string `json:"messageId"` //客户端消息ID
 	Content   string `json:"content"`
 	EditTime  string `json:"editTime"`
 }
@@ -135,31 +139,33 @@ type EditMessageRes {
 // 消息撤回请求
 type RecallMessageReq {
 	UserID    string `header:"Beaver-User-Id"`
-	MessageID uint32 `json:"messageId"`
+	MessageID string `json:"messageId"` //客户端消息ID
 }
 
 // 消息撤回响应
 type RecallMessageRes {
-	MessageID  uint32 `json:"messageId"`
+	ID         uint   `json:"id"` //数据库自增ID
+	MessageID  string `json:"messageId"` //客户端消息ID
 	RecallTime string `json:"recallTime"`
 }
 
 // 消息转发请求
 type ForwardMessageReq {
 	UserID      string `header:"Beaver-User-Id"`
-	MessageID   uint32 `json:"messageId"`
+	MessageID   string `json:"messageId"` //客户端消息ID
 	TargetID    string `json:"targetId"` // 目标会话ID
 	ForwardType int    `json:"forwardType"` // 1: 单聊 2: 群聊
 }
 
 // 消息转发响应
 type ForwardMessageRes {
-	MessageID   uint32 `json:"messageId"`
+	ID          uint   `json:"id"` //数据库自增ID
+	MessageID   string `json:"messageId"` //客户端消息ID
 	ForwardTime string `json:"forwardTime"`
 }
 
 service chat {
-	@handler sendMsg
+	@handler SendMsg
 	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes) //发送消息
 
 	// 通过会话id获取会话信息

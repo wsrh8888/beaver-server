@@ -67,27 +67,27 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		msg = ctype.Msg{
 			Type: ctype.VideoMsgType,
 			VideoMsg: &ctype.VideoMsg{
-				Src:   in.Msg.VideoMsg.Src,
-				Title: in.Msg.VideoMsg.Title,
-				Time:  in.Msg.VideoMsg.Time,
+				FileId: in.Msg.VideoMsg.Src,
+				Title:  in.Msg.VideoMsg.Title,
+				Time:   in.Msg.VideoMsg.Time,
 			},
 		}
 	case ctype.FileMsgType:
 		msg = ctype.Msg{
 			Type: ctype.FileMsgType,
 			FileMsg: &ctype.FileMsg{
-				Src:   in.Msg.FileMsg.Src,
-				Title: in.Msg.FileMsg.Title,
-				Size:  in.Msg.FileMsg.Size,
-				Type:  in.Msg.FileMsg.Type,
+				FileId: in.Msg.FileMsg.Src,
+				Title:  in.Msg.FileMsg.Title,
+				Size:   in.Msg.FileMsg.Size,
+				Type:   in.Msg.FileMsg.Type,
 			},
 		}
 	case ctype.VoiceMsgType:
 		msg = ctype.Msg{
 			Type: ctype.VoiceMsgType,
 			VoiceMsg: &ctype.VoiceMsg{
-				Src:  in.Msg.VoiceMsg.Src,
-				Time: in.Msg.VoiceMsg.Time,
+				FileId: in.Msg.VoiceMsg.Src,
+				Time:   in.Msg.VoiceMsg.Time,
 			},
 		}
 	default:
@@ -96,6 +96,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 
 	chatModel := chat_models.ChatModel{
 		SendUserID:     in.UserID,
+		MessageID:      in.MessageId,
 		ConversationID: in.ConversationId,
 		MsgType:        msgType,
 		Msg:            &msg,
@@ -124,7 +125,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	return &chat_rpc.SendMsgRes{
-		MessageId:      uint32(chatModel.ID), // 支持 uint32 类型
+		Id:             uint32(chatModel.ID),
+		MessageId:      chatModel.MessageID, // 支持 uint32 类型
 		ConversationId: chatModel.ConversationID,
 		Msg:            convertedMsg,
 		MsgPreview:     chatModel.MsgPreview,

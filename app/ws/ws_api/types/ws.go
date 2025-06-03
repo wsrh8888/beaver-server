@@ -8,6 +8,7 @@ import (
 
 type WsContent struct {
 	Timestamp int64  `json:"timestamp"` //消息发送时间
+	MessageID string `json:"messageId"` //客户端消息ID
 	Data      WsData `json:"data"`      //消息内容
 }
 

@@ -33,6 +33,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	// 构建RPC请求
 	rpcReq := &chat_rpc.SendMsgReq{
 		UserID:         req.UserID,
+		MessageId:      req.MessageID,
 		ConversationId: req.ConversationID,
 		Msg: &chat_rpc.Msg{
 			Type: req.Msg.Type,
@@ -65,7 +66,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 
 	// 构建API响应
 	resp := &types.SendMsgRes{
-		MessageID:      rpcResp.MessageId,
+		ID:             uint(rpcResp.Id),
 		ConversationID: rpcResp.ConversationId,
 		Msg:            req.Msg,
 		Sender: types.Sender{

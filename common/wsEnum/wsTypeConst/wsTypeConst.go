@@ -7,6 +7,8 @@ const (
 	GroupMessageSend      Type = "group_message_send"      // 客户端->服务端 群聊消息发送
 	PrivateMessageReceive Type = "private_message_receive" //  服务端->客户端 私聊消息接收
 	GroupMessageReceive   Type = "group_message_receive"   //  服务端->客户端 群聊消息接收
+	PrivateMessageSync    Type = "private_message_sync"    //  服务端->客户端 私聊消息同步（发送者的其他设备）
+	GroupMessageSync      Type = "group_message_sync"      //  服务端->客户端 群聊消息同步（发送者的其他设备）
 	MessageReadReceipt    Type = "message_read_receipt"    //  服务端->客户端 已读回执
 	MessageRecall         Type = "message_recall"          //  服务端->客户端 消息撤回
 )

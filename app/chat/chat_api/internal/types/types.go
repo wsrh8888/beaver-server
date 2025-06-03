@@ -38,12 +38,13 @@ type DeleteRecentRes struct {
 
 type EditMessageReq struct {
 	UserID    string `header:"Beaver-User-Id"`
-	MessageID uint32 `json:"messageId"`
+	MessageID string `json:"messageId"` //客户端消息ID
 	Content   string `json:"content"`
 }
 
 type EditMessageRes struct {
-	MessageID uint32 `json:"messageId"`
+	ID        uint   `json:"id"`        //数据库自增ID
+	MessageID string `json:"messageId"` //客户端消息ID
 	Content   string `json:"content"`
 	EditTime  string `json:"editTime"`
 }
@@ -57,13 +58,14 @@ type FileMsg struct {
 
 type ForwardMessageReq struct {
 	UserID      string `header:"Beaver-User-Id"`
-	MessageID   uint32 `json:"messageId"`
+	MessageID   string `json:"messageId"`   //客户端消息ID
 	TargetID    string `json:"targetId"`    // 目标会话ID
 	ForwardType int    `json:"forwardType"` // 1: 单聊 2: 群聊
 }
 
 type ForwardMessageRes struct {
-	MessageID   uint32 `json:"messageId"`
+	ID          uint   `json:"id"`        //数据库自增ID
+	MessageID   string `json:"messageId"` //客户端消息ID
 	ForwardTime string `json:"forwardTime"`
 }
 
@@ -73,7 +75,8 @@ type ImageMsg struct {
 }
 
 type Message struct {
-	MessageID      uint   `json:"messageId"`      //消息id
+	ID             uint   `json:"id"`             //数据库自增ID
+	MessageID      string `json:"messageId"`      //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"`    //发送者
@@ -100,11 +103,12 @@ type PinnedChatRes struct {
 
 type RecallMessageReq struct {
 	UserID    string `header:"Beaver-User-Id"`
-	MessageID uint32 `json:"messageId"`
+	MessageID string `json:"messageId"` //客户端消息ID
 }
 
 type RecallMessageRes struct {
-	MessageID  uint32 `json:"messageId"`
+	ID         uint   `json:"id"`        //数据库自增ID
+	MessageID  string `json:"messageId"` //客户端消息ID
 	RecallTime string `json:"recallTime"`
 }
 
@@ -122,11 +126,13 @@ type RecentChatListRes struct {
 type SendMsgReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
+	MessageID      string `json:"messageId"`      //客户端消息ID
 	Msg            Msg    `json:"msg"`
 }
 
 type SendMsgRes struct {
-	MessageID      uint32 `json:"messageId"`      //消息id
+	ID             uint   `json:"id"`             //数据库自增ID
+	MessageID      string `json:"messageId"`      //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"`     //发送者

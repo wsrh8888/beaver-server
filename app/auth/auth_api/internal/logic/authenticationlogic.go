@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -41,29 +42,42 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 		logx.Errorf("解析token失败: %v", err)
 		return nil, errors.New("认证失败")
 	}
-	key := fmt.Sprintf("login_%s", claims.UserID)
-	token, err := l.svcCtx.Redis.Get(key).Result()
+
+	// 从context获取User-Agent
+	userAgent := l.ctx.Value("user-agent")
+	var deviceType string
+	if userAgent == nil {
+		deviceType = "unknown"
+	} else {
+		deviceType = getDeviceType(userAgent.(string))
+	}
+
+	// 直接构建特定设备类型的key
+	key := fmt.Sprintf("login_%s_%s", claims.UserID, deviceType)
+	loginInfoStr, err := l.svcCtx.Redis.Get(key).Result()
 	if err != nil {
-		logx.Errorf("获取Redis token失败: %v", err)
+		logx.Errorf("获取登录信息失败: %v", err)
 		return nil, errors.New("token已失效")
 	}
-	if token != req.Token {
-		logx.Errorf("token不一致: Redis=%s, Request=%s", token, req.Token)
-		return nil, errors.New("token已失效")
+
+	// 解析登录信息并验证token
+	var loginInfo map[string]interface{}
+	if err := json.Unmarshal([]byte(loginInfoStr), &loginInfo); err != nil {
+		return nil, errors.New("登录信息格式错误")
 	}
-	if err := l.svcCtx.Redis.Expire(key, time.Duration(l.svcCtx.Config.Auth.AccessExpire)*time.Second).Err(); err != nil {
-		logx.Errorf("更新token过期时间失败: %v", err)
+
+	storedToken, ok := loginInfo["token"].(string)
+	if !ok || storedToken != req.Token {
+		return nil, errors.New("token已失效或不匹配")
 	}
-	deviceKey := fmt.Sprintf("device_%s", claims.UserID)
-	deviceInfo := map[string]interface{}{
-		"last_active": time.Now().Format("2006-01-02 15:04:05"),
-	}
-	if err := l.svcCtx.Redis.HMSet(deviceKey, deviceInfo).Err(); err != nil {
-		logx.Errorf("更新设备信息失败: %v", err)
-	}
+
+	// 更新最后活跃时间
+	loginInfo["last_active"] = time.Now().Format("2006-01-02 15:04:05")
+	updatedInfo, _ := json.Marshal(loginInfo)
+	l.svcCtx.Redis.Set(key, string(updatedInfo), time.Hour*48)
+
 	resp = &types.AuthenticationRes{
 		UserID: claims.UserID,
 	}
-	fmt.Println(resp, "数据")
 	return resp, nil
 }
