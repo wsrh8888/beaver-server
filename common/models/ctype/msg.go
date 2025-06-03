@@ -75,21 +75,21 @@ type ImageMsg struct {
 }
 
 type VideoMsg struct {
-	Title string `json:"title"`
-	Src   string `json:"src"`
-	Time  int32  `json:"time"` //视频时长 单位秒
+	Title  string `json:"title"`
+	FileId string `json:"fileId"`
+	Time   int32  `json:"time"` //视频时长 单位秒
 }
 
 type FileMsg struct {
-	Title string `json:"title"`
-	Src   string `json:"src"`
-	Size  int32  `json:"size"` //文件大小 单位字节
-	Type  string `json:"type"` //文件类型
+	Title  string `json:"title"`
+	FileId string `json:"fileId"`
+	Size   int32  `json:"size"` //文件大小 单位字节
+	Type   string `json:"type"` //文件类型
 }
 
 type VoiceMsg struct {
-	Src  string `json:"src"`
-	Time int32  `json:"time"` //语音时长 单位秒
+	FileId string `json:"fileId"`
+	Time   int32  `json:"time"` //语音时长 单位秒
 }
 
 type VoiceCallMsg struct {

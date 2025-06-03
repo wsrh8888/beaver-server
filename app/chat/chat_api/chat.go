@@ -5,6 +5,7 @@ import (
 	"beaver/app/chat/chat_api/internal/handler"
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/common/etcd"
+	middleware "beaver/common/middle"
 	"flag"
 	"fmt"
 
@@ -26,6 +27,8 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
+	// 添加请求日志中间件
+	server.Use(middleware.RequestLogMiddleware)
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

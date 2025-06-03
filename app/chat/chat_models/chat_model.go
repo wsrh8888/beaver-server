@@ -9,6 +9,7 @@ import (
 
 type ChatModel struct {
 	models.Model
+	MessageID      string                `json:"messageId"`                        // 客户端消息ID
 	ConversationID string                `json:"conversationId"`                   // 会话id（单聊为用户id，群聊为群id）
 	SendUserID     string                `gorm:"size:64;index"  json:"sendUserId"` // 发送者用户id
 	MsgType        ctype.MsgType         `json:"msgType"`                          // 消息类型

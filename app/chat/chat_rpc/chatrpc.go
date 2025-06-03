@@ -8,11 +8,13 @@ import (
 	"beaver/app/chat/chat_rpc/internal/server"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	grpcMiddleware "beaver/common/middle/grpc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
+
 	"google.golang.org/grpc/reflection"
 )
 
@@ -33,6 +35,9 @@ func main() {
 		}
 	})
 	defer s.Stop()
+
+	// 添加拦截器
+	s.AddUnaryInterceptors(grpcMiddleware.RequestLogInterceptor)
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

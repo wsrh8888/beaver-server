@@ -18,9 +18,10 @@ type Config struct {
 	Etcd      string
 	GroupRpc  zrpc.RpcClientConf
 	WebSocket struct {
-		PongWait       int
-		WriteWait      int
-		PingPeriod     int
-		MaxMessageSize int
+		PongWait             int
+		WriteWait            int
+		PingPeriod           int
+		MaxMessageSize       int
+		AppHeartbeatInterval int
 	}
 }

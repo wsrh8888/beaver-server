@@ -58,7 +58,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		}
 
 		message := types.Message{
-			MessageID:      chat.ID,
+			ID:             chat.ID,
 			ConversationID: chat.ConversationID,
 			Sender: types.Sender{
 				UserID:   chat.SendUserModel.UUID,

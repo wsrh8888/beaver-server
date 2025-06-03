@@ -55,7 +55,7 @@ func loginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, errors.New("服务内部异常"))
 			return
 		}
-		if failCount >= 5 {
+		if failCount >= 10 {
 			response.Response(r, w, nil, errors.New("登录失败次数过多,请稍后再试"))
 			return
 		}

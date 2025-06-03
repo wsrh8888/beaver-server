@@ -42,7 +42,15 @@
         "$go"
       ]
     },
+    {
 
+      "label": "emoji_api",
+      "type": "shell",
+      "command": "cd app/emoji/emoji_api;  go run emoji.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
     {
       "label": "auth_api",
       "type": "shell",
@@ -85,6 +93,15 @@
       ]
     },
     {
+      "label": "moment_api",
+      "type": "shell",
+      "command": "cd app/moment/moment_api;  go run moment.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    
+    {
       "label": "file_api",
       "type": "shell",
       "command": "cd app/file/file_api;  go run file.go",
@@ -117,6 +134,30 @@
       ]
     },
     {
+      "label": "auth_admin",
+      "type": "shell",
+      "command": "cd app/auth/auth_admin;  go run auth.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "gateway_admin",
+      "type": "shell",
+      "command": "cd app/gateway/gateway_admin;  go run gateway.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "system_admin",
+      "type": "shell",
+      "command": "cd app/system/system_admin;  go run system.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
       "label": "启动RPC服务",
       "type": "shell",
       "command": "echo Running all services",
@@ -128,9 +169,17 @@
       "label": "启动Api全部任务",
       "type": "shell",
       "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api"],
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api"],
       "dependsOrder": "parallel",
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "启动Admin全部任务",
+      "type": "shell",
+      "command": "echo Running all services",
+      "dependsOn": ["auth_admin", "gateway_admin", "system_admin"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
   ]
 }

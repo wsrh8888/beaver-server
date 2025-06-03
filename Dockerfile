@@ -52,6 +52,8 @@ RUN go build -o ws_api/ws app/ws/ws_api/ws.go
 # file_api
 RUN go build -o file_api/file app/file/file_api/file.go
 
+# emoji_api
+RUN go build -o emoji_api/emoji app/emoji/emoji_api/emoji.go
 
 # feedback_api
 RUN go build -o feedback_api/feedback app/feedback/feedback_api/feedback.go

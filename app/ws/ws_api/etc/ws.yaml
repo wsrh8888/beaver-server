@@ -20,7 +20,10 @@ GroupRpc:
 # WebSocket配置
 WebSocket:
   # 心跳配置(单位:秒)
-  PongWait: 60      # 读取超时时间
-  WriteWait: 10     # 写入超时时间
-  PingPeriod: 54    # 心跳发送间隔(应小于PongWait)
+  PongWait: 300      # 读取超时时间，增加到5分钟
+  WriteWait: 10      # 写入超时时间
+  PingPeriod: 240    # 心跳发送间隔(应小于PongWait)，设置为4分钟
   MaxMessageSize: 1048576  # 最大消息大小(字节), 1MB
+  
+  # 应用级心跳配置
+  AppHeartbeatInterval: 480  # 应用级心跳间隔(秒)，设置为8分钟

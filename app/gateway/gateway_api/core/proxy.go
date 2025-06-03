@@ -48,6 +48,9 @@ func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	authReq, _ := http.NewRequest("GET", authUrl, nil)
 	authReq.Header.Set("ValidPath", req.URL.Path)
 
+	// 添加 User-Agent 头信息
+	authReq.Header.Set("User-Agent", req.Header.Get("User-Agent"))
+
 	token := getToken(req)
 	if token != "" {
 		authReq.Header.Set("Token", token)
@@ -124,6 +127,17 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 	remote, _ := url.Parse(fmt.Sprintf("http://%s", addr))
 	reverseProxy := httputil.NewSingleHostReverseProxy(remote)
+
+	// 修改默认的 Director 函数以保留 User-Agent
+	originalDirector := reverseProxy.Director
+	reverseProxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		// 确保 User-Agent 被保留
+		if userAgent := req.Header.Get("User-Agent"); userAgent != "" {
+			req.Header.Set("User-Agent", userAgent)
+		}
+	}
+
 	reverseProxy.ServeHTTP(res, req)
 }
 

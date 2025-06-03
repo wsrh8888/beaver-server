@@ -50,7 +50,8 @@ message Msg {
 message SendMsgReq {
   string userID = 1; // 用户ID
   string conversation_id = 2; // 会话ID
-  Msg msg = 3; // 消息内容
+  string message_id = 3; // 客户端消息ID
+  Msg msg = 4; // 消息内容
 }
 
 // 定义Sender消息
@@ -62,12 +63,13 @@ message Sender {
 
 // 定义SendMsgRes消息
 message SendMsgRes {
-  uint32 message_id = 1; // 消息ID
-  string conversation_id = 2; // 会话ID
-  Msg msg = 3; // 消息内容
-  Sender sender = 4; // 发送者
-  string create_at = 5; // 消息时间
-  string msg_preview = 6; // 消息预览
+  uint32 id = 1; // 数据库自增ID
+  string message_id = 2; // 客户端消息ID
+  string conversation_id = 3; // 会话ID
+  Msg msg = 4; // 消息内容
+  Sender sender = 5; // 发送者
+  string create_at = 6; // 消息时间
+  string msg_preview = 7; // 消息预览
 }
 
 // 定义UpdateConversationReq消息

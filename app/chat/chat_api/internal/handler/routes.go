@@ -55,7 +55,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/api/chat/sendMsg",
-				Handler: sendMsgHandler(serverCtx),
+				Handler: SendMsgHandler(serverCtx),
 			},
 		},
 	)

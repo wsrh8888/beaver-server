@@ -19,13 +19,18 @@ func HandleProxyMessageSend(ctx context.Context, svcCtx *svc.ServiceContext, req
 
 	} else {
 		recipientID := websocket_utils.GetRecipientIdFromConversationID(ConversationID, req.UserID)
-		websocket_utils.SendMsgByUser(recipientID, req.UserID, wsCommandConst.FRIEND_OPERATION, type_struct.WsContent{
+
+		content := type_struct.WsContent{
 			Timestamp: 0,
 			Data: type_struct.WsData{
 				Type:           "transform_websocket_message",
 				ConversationID: ConversationID,
 				Body:           bodyRaw,
 			},
-		})
+		}
+
+		// 分别给接收者和发送者发送消息
+		websocket_utils.SendMsgToUser(recipientID, wsCommandConst.FRIEND_OPERATION, content)
+		websocket_utils.SendMsgToUser(req.UserID, wsCommandConst.FRIEND_OPERATION, content)
 	}
 }

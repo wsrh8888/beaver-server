@@ -112,5 +112,5 @@ require (
 	github.com/zeromicro/go-zero v1.7.4
 	go.etcd.io/etcd/client/v3 v3.5.17
 	golang.org/x/crypto v0.29.0
-	gorm.io/gorm v1.25.7
+	gorm.io/gorm v1.25.11
 )
