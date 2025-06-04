@@ -4,6 +4,9 @@
 ### 更新日期
 2025-06-03
 
+### 文档地址
+https://wsrh8888.github.io/beaver-docs/
+
 ### 项目介绍
 + 本项目是利用工作之余做的一个聊天IM。
 +  前端使用uniapp， 后端使用go-zero， 桌面端使用electron
