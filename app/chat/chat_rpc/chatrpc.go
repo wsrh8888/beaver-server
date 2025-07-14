@@ -8,7 +8,7 @@ import (
 	"beaver/app/chat/chat_rpc/internal/server"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	grpcMiddleware "beaver/common/middle/grpc"
+	grpcMiddleware "beaver/common/middleware/grpc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

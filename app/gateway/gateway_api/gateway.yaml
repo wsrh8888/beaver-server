@@ -1,5 +1,5 @@
 Name: gateway
-Addr: 0.0.0.0:9999
+Addr: 0.0.0.0:20800
 etcd: 127.0.0.1:2379
 Log:
   Encoding: plain

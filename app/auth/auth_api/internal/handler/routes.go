@@ -19,8 +19,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/api/auth/login",
-				Handler: loginHandler(serverCtx),
+				Path:    "/api/auth/email_login",
+				Handler: emailLoginHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/email_password_login",
+				Handler: emailPasswordLoginHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/email_register",
+				Handler: emailRegisterHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/emailcode",
+				Handler: getEmailCodeHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
@@ -29,13 +44,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/api/auth/refresh_token",
-				Handler: refreshTokenHandler(serverCtx),
+				Path:    "/api/auth/phone_login",
+				Handler: phoneLoginHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/api/auth/register",
-				Handler: registerHandler(serverCtx),
+				Path:    "/api/auth/phone_register",
+				Handler: phoneRegisterHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/phonecode",
+				Handler: getPhoneCodeHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/refresh_token",
+				Handler: refreshTokenHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,

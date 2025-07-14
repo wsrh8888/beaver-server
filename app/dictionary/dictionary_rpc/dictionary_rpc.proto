@@ -1,0 +1,67 @@
+
+
+syntax = "proto3"; //指定proto版本
+package dictionary_rpc;
+
+option go_package = "./dictionary_rpc";
+
+// 城市信息
+message CityInfo {
+  string cityId = 1;     // 城市代码
+  string cityName = 2;     // 城市名称
+}
+
+// 获取城市列表请求
+message GetCitiesReq {}
+
+// 获取城市列表响应
+message GetCitiesRes {
+  repeated CityInfo cities = 1; // 城市列表
+}
+
+// 平台信息
+message PlatformInfo {
+  uint32 platformId = 1;    // 平台ID
+  string platformName = 2;   // 平台名称
+  string description = 3;    // 平台描述
+}
+
+// 架构信息
+message ArchitectureInfo {
+  uint32 archId = 1;        // 架构ID
+  string archName = 2;      // 架构名称
+  string description = 3;   // 架构描述
+  uint32 platformId = 4;    // 所属平台ID
+}
+
+// 获取平台列表请求
+message GetPlatformsReq {}
+
+// 获取平台列表响应
+message GetPlatformsRes {
+  repeated PlatformInfo platforms = 1; // 平台列表
+}
+
+// 获取架构列表请求
+message GetArchitecturesReq {
+  uint32 platformId = 1; // 平台ID，可选，不传则返回所有架构
+}
+
+// 获取架构列表响应
+message GetArchitecturesRes {
+  repeated ArchitectureInfo architectures = 1; // 架构列表
+}
+
+// 配置服务
+service dictionary {
+  // 获取城市列表
+  rpc GetCities(GetCitiesReq) returns (GetCitiesRes);
+  
+  // 获取平台列表
+  rpc GetPlatforms(GetPlatformsReq) returns (GetPlatformsRes);
+  
+  // 获取架构列表
+  rpc GetArchitectures(GetArchitecturesReq) returns (GetArchitecturesRes);
+} 
+
+// goctl rpc protoc dictionary_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

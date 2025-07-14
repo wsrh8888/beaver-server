@@ -4,11 +4,11 @@ package group_rpc;
 option go_package = "./group_rpc";
 
 message GetGroupMembersReq {
-  string group_id = 1; // 群组Id
+  string groupID = 1; // 群组Id
 }
 
 message GroupMemberInfo {
-  string user_id = 1;  // 用户Id
+  string userID = 1;  // 用户Id
   string username = 2; // 用户名
   string avatar = 3;   // 用户头像
 }
@@ -17,7 +17,7 @@ message GetGroupMembersRes {
   repeated GroupMemberInfo members = 1; // 成员信息列表
 }
 
-service Group {
+service group {
   rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
 }
 

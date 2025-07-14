@@ -8,7 +8,7 @@ import (
 	"beaver/app/auth/auth_api/internal/handler"
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/common/etcd"
-	middleware "beaver/common/middle"
+	"beaver/common/middleware"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"

@@ -26,7 +26,8 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				fmt.Printf("WebSocket连接异常关闭, 用户: %s, 错误: %v\n", req.UserID, err)
 			} else {
-				fmt.Printf("WebSocket连接正常关闭, 用户: %s\n", req.UserID)
+				// 正常关闭包括 CloseNormalClosure (1000)
+				fmt.Printf("WebSocket连接正常关闭, 用户: %s, 错误: %v\n", req.UserID, err)
 			}
 			break
 		}

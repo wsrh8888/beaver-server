@@ -34,8 +34,6 @@ func main() {
 	})
 	defer s.Stop()
 
-	fmt.Println("rpc config: ", c.RpcServerConf.Etcd)
-
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

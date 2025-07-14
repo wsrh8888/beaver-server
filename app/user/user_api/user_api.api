@@ -1,162 +1,80 @@
 syntax = "v1"
 
+// 用户信息请求
 type UserInfoReq {
-	UserID string `header:"Beaver-User-Id"`
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 }
 
+// 用户信息响应
 type UserInfoRes {
-	UserID   string `json:"userId"`
-	NickName string `json:"nickName"`
-	Avatar   string `json:"avatar"`
-	Abstract string `json:"abstract"`
-	Phone    string `json:"phone"`
+	UserID   string `json:"userId"` // 用户唯一标识
+	NickName string `json:"nickName"` // 用户昵称
+	Avatar   string `json:"avatar"` // 用户头像URL
+	Abstract string `json:"abstract"` // 用户个性签名
+	Phone    string `json:"phone,optional"` // 用户手机号
+	Email    string `json:"email,optional"` // 用户邮箱（可选）
+	Gender   int8   `json:"gender"` // 用户性别：1-男 2-女 0-未知
 }
 
+// 更新用户信息请求
 type UpdateInfoReq {
-	UserID   string  `header:"Beaver-User-Id"`
-	Nickname *string `json:"nick_name,optional" user:"nickname"`
-	Avatar   *string `json:"avatar,optional" user:"avatar"`
+	UserID   string  `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Nickname *string `json:"nickName,optional"` // 新昵称（可选）
+	Avatar   *string `json:"avatar,optional"` // 新头像URL（可选）
+	Abstract *string `json:"abstract,optional"` // 新个性签名（可选）
+	Gender   *int8   `json:"gender,optional"` // 性别：1-男 2-女 0-未知（可选）
 }
 
+// 更新用户信息响应
 type UpdateInfoRes {}
 
+// 修改密码请求
 type UpdatePasswordReq {
-	UserID      string `header:"Beaver-User-Id"`
-	OldPassword string `json:"oldPassword"`
-	NewPassword string `json:"newPassword"`
+	UserID      string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	OldPassword string `json:"oldPassword"` // 旧密码
+	NewPassword string `json:"newPassword"` // 新密码
 }
 
+// 修改密码响应
 type UpdatePasswordRes {}
 
-// 用户隐私设置
-type PrivacySettings {
-	ShowOnlineStatus bool `json:"showOnlineStatus"` // 是否显示在线状态
-	ShowLastSeen     bool `json:"showLastSeen"` // 是否显示最后在线时间
-	AllowAddFriend   bool `json:"allowAddFriend"` // 是否允许被添加好友
-	AllowGroupInvite bool `json:"allowGroupInvite"` // 是否允许被邀请入群
-	ShowProfile      bool `json:"showProfile"` // 是否显示个人资料
-	ShowMoment       bool `json:"showMoment"` // 是否显示动态
+// 修改邮箱请求
+type UpdateEmailReq {
+	UserID     string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	NewEmail   string `json:"newEmail"` // 新邮箱地址
+	VerifyCode string `json:"verifyCode"` // 验证码
 }
 
-// 获取隐私设置请求
-type GetPrivacySettingsReq {
-	UserID string `header:"Beaver-User-Id"`
+// 修改邮箱响应
+type UpdateEmailRes {}
+
+// 找回密码请求
+type ResetPasswordReq {
+	Email      string `json:"email"` // 用户邮箱地址
+	VerifyCode string `json:"verifyCode"` // 邮箱验证码
+	Password   string `json:"password"` // 新密码
 }
 
-// 获取隐私设置响应
-type GetPrivacySettingsRes {
-	Settings PrivacySettings `json:"settings"`
-}
+// 找回密码响应
+type ResetPasswordRes {}
 
-// 更新隐私设置请求
-type UpdatePrivacySettingsReq {
-	UserID   string          `header:"Beaver-User-Id"`
-	Settings PrivacySettings `json:"settings"`
-}
-
-// 更新隐私设置响应
-type UpdatePrivacySettingsRes {}
-
-// 黑名单用户信息
-type BlacklistUser {
-	UserID   string `json:"userId"`
-	Nickname string `json:"nickname"`
-	Avatar   string `json:"avatar"`
-	AddTime  string `json:"addTime"`
-}
-
-// 获取黑名单列表请求
-type GetBlacklistReq {
-	UserID string `header:"Beaver-User-Id"`
-	Page   int    `json:"page,optional"`
-	Limit  int    `json:"limit,optional"`
-}
-
-// 获取黑名单列表响应
-type GetBlacklistRes {
-	List  []BlacklistUser `json:"list"`
-	Count int64           `json:"count"`
-}
-
-// 添加黑名单请求
-type AddBlacklistReq {
-	UserID   string `header:"Beaver-User-Id"`
-	TargetID string `json:"targetId"`
-}
-
-// 添加黑名单响应
-type AddBlacklistRes {}
-
-// 移除黑名单请求
-type RemoveBlacklistReq {
-	UserID   string `header:"Beaver-User-Id"`
-	TargetID string `json:"targetId"`
-}
-
-// 移除黑名单响应
-type RemoveBlacklistRes {}
-
-// 用户基础设置
-type UserSettings {
-	MessageNotify    bool   `json:"messageNotify"` // 消息通知
-	ShowOnlineStatus bool   `json:"showOnlineStatus"` // 显示在线状态
-	AllowAddFriend   bool   `json:"allowAddFriend"` // 允许添加好友
-	AllowMoment      bool   `json:"allowMoment"` // 允许查看朋友圈
-	SoundEnabled     bool   `json:"soundEnabled"` // 声音开关
-	VibrateEnabled   bool   `json:"vibrateEnabled"` // 震动开关
-	Language         string `json:"language"` // 语言设置
-	Theme            string `json:"theme"` // 主题设置
-}
-
-// 获取用户设置请求
-type GetUserSettingsReq {
-	UserID string `header:"Beaver-User-Id"`
-}
-
-// 获取用户设置响应
-type GetUserSettingsRes {
-	Settings UserSettings `json:"settings"`
-}
-
-// 更新用户设置请求
-type UpdateUserSettingsReq {
-	UserID   string       `header:"Beaver-User-Id"`
-	Settings UserSettings `json:"settings"`
-}
-
-// 更新用户设置响应
-type UpdateUserSettingsRes {}
-
+// 用户服务
 service user {
 	@handler userInfo
-	get /api/user/user_info (UserInfoReq) returns (UserInfoRes) //用户信息接口
+	get /api/user/user_info (UserInfoReq) returns (UserInfoRes) // 获取用户基础信息
 
 	@handler updateInfo
-	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes) //修改用户基础信息
+	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes) // 更新用户基础信息（昵称、头像、个性签名、性别）
 
 	@handler updatePassword
-	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes) //修改密码
+	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes) // 修改用户密码
 
-	@handler getUserSettings
-	get /api/user/settings (GetUserSettingsReq) returns (GetUserSettingsRes) // 获取用户设置
+	@handler updateEmail
+	post /api/user/update_email (UpdateEmailReq) returns (UpdateEmailRes) // 修改用户邮箱（需要验证码）
 
-	@handler updateUserSettings
-	post /api/user/settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes) // 更新用户设置
-
-	@handler getPrivacySettings
-	get /api/user/privacy (GetPrivacySettingsReq) returns (GetPrivacySettingsRes) // 获取隐私设置
-
-	@handler updatePrivacySettings
-	post /api/user/privacy (UpdatePrivacySettingsReq) returns (UpdatePrivacySettingsRes) // 更新隐私设置
-
-	@handler getBlacklist
-	get /api/user/blacklist (GetBlacklistReq) returns (GetBlacklistRes) // 获取黑名单列表
-
-	@handler addBlacklist
-	post /api/user/blacklist/add (AddBlacklistReq) returns (AddBlacklistRes) // 添加黑名单
-
-	@handler removeBlacklist
-	post /api/user/blacklist/remove (RemoveBlacklistReq) returns (RemoveBlacklistRes) // 移除黑名单
+	@handler resetPassword
+	post /api/user/reset_password (ResetPasswordReq) returns (ResetPasswordRes) // 找回密码（通过邮箱验证码重置密码）
 }
 
+// 生成代码命令
 // goctl api go -api user_api.api -dir . --home ../../../template

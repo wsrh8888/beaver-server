@@ -50,6 +50,8 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		Avatar:   user.Avatar,
 		Abstract: user.Abstract,
 		Phone:    user.Phone,
+		Email:    user.Email,
+		Gender:   user.Gender,
 	}
 
 	return

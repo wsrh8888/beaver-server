@@ -43,7 +43,6 @@ func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (*types.Ref
 
 	// 生成新token
 	newToken, err := jwts.GenToken(jwts.JwtPayLoad{
-		Phone:    claims.Phone,
 		Nickname: claims.Nickname,
 		UserID:   claims.UserID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)

@@ -23,3 +23,13 @@ func GenerateRandomString(length int) string {
 	}
 	return sb.String()
 }
+
+// 生成指定长度的数字验证码
+func GenerateNumericCode(length int) string {
+	digits := "0123456789"
+	sb := strings.Builder{}
+	for i := 0; i < length; i++ {
+		sb.WriteByte(digits[rand.Intn(len(digits))])
+	}
+	return sb.String()
+}

@@ -5,7 +5,7 @@ import (
 	"beaver/app/file/file_api/internal/handler"
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/common/etcd"
-	middleware "beaver/common/middle"
+	"beaver/common/middleware"
 	"flag"
 	"fmt"
 

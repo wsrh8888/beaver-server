@@ -10,23 +10,62 @@ type AuthenticationRes struct {
 	UserID string `json:"userId"`
 }
 
+type EmailLoginReq struct {
+	Email    string `json:"email"`
+	Code     string `json:"code"`       // 验证码
+	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+}
+
+type EmailLoginRes struct {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
+type EmailPasswordLoginReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+}
+
+type EmailPasswordLoginRes struct {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
+type EmailRegisterReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Code     string `json:"code"` // 邮箱验证码
+}
+
+type EmailRegisterRes struct {
+	Message string `json:"message"`
+}
+
+type GetEmailCodeReq struct {
+	Email string `json:"email"`
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+}
+
+type GetEmailCodeRes struct {
+	Message string `json:"message"`
+}
+
+type GetPhoneCodeReq struct {
+	Phone string `json:"phone"`
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+}
+
+type GetPhoneCodeRes struct {
+	Message string `json:"message"`
+}
+
 type GetUserSessionsReq struct {
 	UserID string `header:"Beaver-User-Id"`
 }
 
 type GetUserSessionsRes struct {
 	Sessions []SessionInfo `json:"sessions"`
-}
-
-type LoginReq struct {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
-}
-
-type LoginRes struct {
-	Token  string `json:"token"`
-	UserID string `json:"userId"`
 }
 
 type LogoutReq struct {
@@ -36,20 +75,33 @@ type LogoutReq struct {
 type LogoutRes struct {
 }
 
+type PhoneLoginReq struct {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+}
+
+type PhoneLoginRes struct {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
+type PhoneRegisterReq struct {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	Code     string `json:"code"` // 手机验证码
+}
+
+type PhoneRegisterRes struct {
+	Message string `json:"message"`
+}
+
 type RefreshTokenReq struct {
 	UserID string `header:"Beaver-User-Id"`
 }
 
 type RefreshTokenRes struct {
 	Token string `json:"token"`
-}
-
-type RegisterReq struct {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-}
-
-type RegisterRes struct {
 }
 
 type SessionInfo struct {

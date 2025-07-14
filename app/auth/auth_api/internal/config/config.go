@@ -22,4 +22,12 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int
 	}
+	Email struct {
+		QQ struct {
+			Host     string
+			Port     int
+			Username string
+			Password string
+		}
+	}
 }

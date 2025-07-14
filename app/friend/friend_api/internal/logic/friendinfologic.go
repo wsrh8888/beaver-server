@@ -31,34 +31,57 @@ func NewFriendInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Friend
 }
 
 func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.FriendInfoRes, err error) {
+	// 参数验证
+	if req.FriendID == "" {
+		return nil, errors.New("好友ID不能为空")
+	}
+
+	// 不能查询自己的信息
+	if req.UserID == req.FriendID {
+		return nil, errors.New("不能查询自己的信息")
+	}
 
 	var friend friend_models.FriendModel
 
+	// 通过RPC获取用户信息
 	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
 		UserID: req.FriendID,
 	})
 	if err != nil {
-		return nil, errors.New(err.Error())
+		l.Logger.Errorf("获取用户信息失败: friendID=%s, error=%v", req.FriendID, err)
+		return nil, errors.New("用户不存在")
 	}
-	var user user_models.UserModel
-	json.Unmarshal([]byte(res.Data), &user)
 
 	var friendUser user_models.UserModel
-	json.Unmarshal(res.Data, &friendUser)
+	if err := json.Unmarshal(res.Data, &friendUser); err != nil {
+		l.Logger.Errorf("解析用户数据失败: %v", err)
+		return nil, errors.New("解析用户数据失败")
+	}
+
+	// 生成会话Id
 	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
 	if err != nil {
+		l.Logger.Errorf("生成会话Id失败: %v", err)
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
+
+	// 获取好友备注
+	notice := friend.GetUserNotice(req.UserID)
+
+	// 检查是否为好友
+	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID)
+
 	response := &types.FriendInfoRes{
 		ConversationID: conversationID,
 		UserID:         friendUser.UUID,
 		Nickname:       friendUser.NickName,
 		Avatar:         friendUser.Avatar,
 		Abstract:       friendUser.Abstract,
-		Notice:         friend.GetUserNotice(req.UserID),
-		IsFriend:       friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID),
-		Phone:          friendUser.Phone,
+		Notice:         notice,
+		IsFriend:       isFriend,
+		Email:          friendUser.Email,
 	}
 
+	l.Logger.Infof("获取好友信息成功: userID=%s, friendID=%s, isFriend=%v", req.UserID, req.FriendID, isFriend)
 	return response, nil
 }

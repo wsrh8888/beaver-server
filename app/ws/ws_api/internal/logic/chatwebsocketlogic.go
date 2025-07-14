@@ -64,6 +64,7 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 
 	// 从User-Agent获取设备类型
 	userAgent := r.Header.Get("User-Agent")
+	logx.Infof("User-Agent: %s", userAgent)
 	deviceType := getDeviceType(userAgent)
 	userKey := websocket_utils.GetUserKey(req.UserID, deviceType)
 
@@ -186,14 +187,32 @@ func cleanupConnection(userID string, conn *websocket.Conn) {
 // getDeviceType 根据User-Agent识别设备类型
 func getDeviceType(userAgent string) string {
 	userAgent = strings.ToLower(userAgent)
-	if strings.Contains(userAgent, "android") || strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "ipad") {
+
+	// 移动设备识别
+	if strings.Contains(userAgent, "android") {
 		return "mobile"
-	} else if strings.Contains(userAgent, "windows") {
+	} else if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "ipad") {
+		return "mobile"
+	} else if strings.Contains(userAgent, "mobile") {
+		return "mobile"
+	} else if strings.Contains(userAgent, "uniapp") {
+		return "mobile"
+	} else if strings.Contains(userAgent, "uni-app") {
+		return "mobile"
+	} else if strings.Contains(userAgent, "uni") {
+		return "mobile"
+	} else if strings.Contains(userAgent, "app") && (strings.Contains(userAgent, "android") || strings.Contains(userAgent, "ios")) {
+		return "mobile"
+	}
+
+	// 桌面设备识别
+	if strings.Contains(userAgent, "windows") {
 		return "windows"
 	} else if strings.Contains(userAgent, "macintosh") || strings.Contains(userAgent, "mac os") {
 		return "mac"
 	} else if strings.Contains(userAgent, "linux") {
 		return "linux"
+	} else {
+		return "web"
 	}
-	return "web"
 }

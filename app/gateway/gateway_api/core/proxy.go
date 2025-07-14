@@ -101,7 +101,7 @@ func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 
 func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	uuid := getUuid(req)
-	logx.Info("requst: ", "唯一标识: ", uuid, req.URL.Path)
+	logx.Info("request: ", "唯一标识: ", uuid, req.URL.Path)
 
 	// 匹配路由
 	regex, _ := regexp.Compile(`/api/(.*?)/`)
@@ -113,18 +113,33 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	service := addrList[1]
-	addr := etcd.GetServiceAddr(p.Config.Etcd, service+"_api")
+
+	// 增加重试机制
+	var addr string
+	for i := 0; i < 3; i++ {
+		addr = etcd.GetServiceAddr(p.Config.Etcd, service+"_api")
+		if addr != "" {
+			break
+		}
+		logx.Errorf("第%d次获取服务地址失败: %s_api", i+1, service)
+		time.Sleep(100 * time.Millisecond)
+	}
+
 	if addr == "" {
-		logx.Error("未匹配到服务")
-		writeErrorResponse(res, "未匹配到服务", http.StatusServiceUnavailable, uuid)
+		logx.Errorf("未匹配到服务: %s_api", service)
+		writeErrorResponse(res, "服务暂时不可用", http.StatusServiceUnavailable, uuid)
 		return
 	}
+
+	logx.Infof("路由到服务: %s -> %s", service, addr)
+
 	token := getToken(req)
 	req.Header.Set("Token", token)
 	if !p.auth(res, req) {
 		writeErrorResponse(res, "鉴权失败", http.StatusServiceUnavailable, uuid)
 		return
 	}
+
 	remote, _ := url.Parse(fmt.Sprintf("http://%s", addr))
 	reverseProxy := httputil.NewSingleHostReverseProxy(remote)
 

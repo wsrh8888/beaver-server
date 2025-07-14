@@ -120,7 +120,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 检查文件是否已经存在于数据库中
 		var fileModel file_models.FileModel
-		err = svcCtx.DB.Take(&fileModel, "hash = ?", fileMd5).Error
+		err = svcCtx.DB.Take(&fileModel, "md5 = ?", fileMd5).Error
 
 		if err == nil {
 			resp.FileID = fileModel.FileID
@@ -144,7 +144,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			FileName: strings.TrimSuffix(fileName, "."+suffix),
 			Size:     fileHead.Size,
 			Path:     qiniuURL,
-			Hash:     fileMd5,
+			Md5:      fileMd5,
 			FileID:   uuid.New().String(),
 			Type:     fileType,
 		}

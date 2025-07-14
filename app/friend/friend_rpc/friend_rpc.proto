@@ -5,7 +5,7 @@ option go_package = "./friend_rpc";
 
 
 message GetFriendIdsRequest {
-  string user_id = 1;
+  string UserID = 1;
 }
 
 message GetFriendIdsResponse {
@@ -13,7 +13,7 @@ message GetFriendIdsResponse {
 }
 
 
-service Friend {
+service friend {
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
 }
 

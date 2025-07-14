@@ -26,11 +26,9 @@ func NewIsFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsFriend
 
 func (l *IsFriendLogic) IsFriend(in *user_rpc.IsFriendReq) (*user_rpc.IsFriendRes, error) {
 	var friend friend_models.FriendModel
-	if !friend.IsFriend(l.svcCtx.DB, in.User1, in.User2) {
-		return nil, nil
-	}
+	isFriend := friend.IsFriend(l.svcCtx.DB, in.User1, in.User2)
 
 	return &user_rpc.IsFriendRes{
-		IsFriend: true,
+		IsFriend: isFriend,
 	}, nil
 }

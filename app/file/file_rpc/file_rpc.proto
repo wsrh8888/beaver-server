@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package file_rpc;
+
+option go_package = "./file_rpc";
+
+// 文件详情请求
+message GetFileDetailReq {
+  string fileId = 1; // 文件ID
+}
+
+// 文件详情响应
+message GetFileDetailRes {
+  string fileId = 1;     // 文件唯一ID
+  string fileName = 2;   // 文件名
+  int64 size = 3;        // 文件大小
+  string path = 4;       // 文件实际存储路径
+  string md5 = 5;        // 文件MD5
+  string type = 6;       // 文件类型
+  string createdAt = 7;  // 创建时间
+  string updatedAt = 8;  // 更新时间
+}
+
+// 获取七牛云上传token请求
+message GetQiniuUploadTokenReq {
+  // 空请求，不需要任何参数
+}
+
+// 获取七牛云上传token响应
+message GetQiniuUploadTokenRes {
+  string uploadToken = 1;    // 上传token
+  int64 expiresIn = 2;       // token过期时间 (秒)
+}
+
+// 文件服务
+service file {
+  // 通过fileId查询文件详情
+  rpc GetFileDetail(GetFileDetailReq) returns (GetFileDetailRes);
+  
+  // 获取七牛云上传token
+  rpc GetQiniuUploadToken(GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes);
+} 
+
+// goctl rpc protoc file_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -118,8 +118,13 @@ func SendMsgToReceiverAndSyncToSender(
 
 // sendWsMapMsg 给一组的 WebSocket 通道发送消息
 func sendWsMapMsg(wsMap map[string]*websocket.Conn, command wsCommandConst.Command, content type_struct.WsContent) {
-	for _, conn := range wsMap {
-		ws_response.WsResponse(conn, command, content)
+	for addr, conn := range wsMap {
+		if err := ws_response.WsResponse(conn, command, content); err != nil {
+			logx.Errorf("发送WebSocket消息失败, 地址: %s, 错误: %v", addr, err)
+			// 如果发送失败，关闭连接并从map中移除
+			conn.Close()
+			delete(wsMap, addr)
+		}
 	}
 }
 

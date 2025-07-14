@@ -10,6 +10,7 @@ import (
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/utils"
+	"beaver/utils/device"
 	"beaver/utils/jwts"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -45,19 +46,22 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 
 	// 从context获取User-Agent
 	userAgent := l.ctx.Value("user-agent")
+	logx.Infof("User-Agent: %s", userAgent)
 	var deviceType string
 	if userAgent == nil {
 		deviceType = "unknown"
+		logx.Errorf("User-Agent为空，用户: %s", claims.UserID)
 	} else {
-		deviceType = getDeviceType(userAgent.(string))
+		deviceType = device.GetDeviceType(userAgent.(string))
+		logx.Infof("认证设备类型识别 - 用户: %s, User-Agent: %s, 识别结果: %s", claims.UserID, userAgent.(string), deviceType)
 	}
 
 	// 直接构建特定设备类型的key
 	key := fmt.Sprintf("login_%s_%s", claims.UserID, deviceType)
 	loginInfoStr, err := l.svcCtx.Redis.Get(key).Result()
 	if err != nil {
-		logx.Errorf("获取登录信息失败: %v", err)
-		return nil, errors.New("token已失效")
+		logx.Errorf("获取登录信息失败: %v, Key: %s", err, key)
+		return nil, errors.New("token已失效 " + key + " " + err.Error())
 	}
 
 	// 解析登录信息并验证token

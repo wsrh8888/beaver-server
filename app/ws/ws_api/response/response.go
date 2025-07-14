@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type Response struct {
@@ -18,7 +19,7 @@ type Response struct {
 	ServerTime int64                  `json:"serverTime"`
 }
 
-func WsResponse(conn *websocket.Conn, command wsCommandConst.Command, content type_struct.WsContent) {
+func WsResponse(conn *websocket.Conn, command wsCommandConst.Command, content type_struct.WsContent) error {
 	code := 0
 
 	response := Response{
@@ -28,6 +29,23 @@ func WsResponse(conn *websocket.Conn, command wsCommandConst.Command, content ty
 		MessageID:  utils.GenerateRandomString(8),
 		ServerTime: time.Now().Unix(),
 	}
-	responseJSON, _ := json.Marshal(response)
-	conn.WriteMessage(websocket.TextMessage, responseJSON)
+
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		logx.Errorf("序列化WebSocket响应失败: %v", err)
+		return err
+	}
+
+	// 设置写入超时
+	if err := conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
+		logx.Errorf("设置WebSocket写入超时失败: %v", err)
+		return err
+	}
+
+	if err := conn.WriteMessage(websocket.TextMessage, responseJSON); err != nil {
+		logx.Errorf("发送WebSocket消息失败: %v", err)
+		return err
+	}
+
+	return nil
 }

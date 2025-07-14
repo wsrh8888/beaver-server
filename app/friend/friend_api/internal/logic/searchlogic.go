@@ -29,13 +29,23 @@ func NewSearchLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchLogi
 }
 
 func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err error) {
-	// todo: add your logic here and delete this line
+	// 参数验证
+	if req.Email == "" {
+		return nil, errors.New("邮箱不能为空")
+	}
+
 	var user user_models.UserModel
 
-	// 根据手机号查询用户信息
-	err = l.svcCtx.DB.Take(&user, "phone = ?", req.Phone).Error
+	// 根据邮箱查询用户信息
+	err = l.svcCtx.DB.Take(&user, "email = ?", req.Email).Error
 	if err != nil {
+		l.Logger.Errorf("查询用户失败: email=%s, error=%v", req.Email, err)
 		return nil, errors.New("用户不存在")
+	}
+
+	// 不能搜索自己
+	if req.UserID == user.UUID {
+		return nil, errors.New("不能搜索自己")
 	}
 
 	// 获取好友关系
@@ -45,6 +55,7 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 	// 生成会话Id
 	conversationID, err := conversation.GenerateConversation([]string{req.UserID, user.UUID})
 	if err != nil {
+		l.Logger.Errorf("生成会话Id失败: %v", err)
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
@@ -56,8 +67,9 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 		Abstract:       user.Abstract,
 		IsFriend:       isFriend,
 		ConversationID: conversationID,
+		Email:          user.Email,
 	}
 
+	l.Logger.Infof("搜索用户成功: userID=%s, targetEmail=%s, isFriend=%v", req.UserID, req.Email, isFriend)
 	return resp, nil
-
 }
