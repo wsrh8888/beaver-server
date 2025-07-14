@@ -36,7 +36,22 @@ func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRe
 		return nil, errors.New("用户不存在")
 	}
 
-	byteData, _ := json.Marshal(user)
+	// 创建安全的用户信息结构，不包含敏感信息
+	safeUserInfo := map[string]interface{}{
+		"uuid":      user.UUID,
+		"nickName":  user.NickName,
+		"email":     user.Email,
+		"phone":     user.Phone,
+		"avatar":    user.Avatar,
+		"abstract":  user.Abstract,
+		"status":    user.Status,
+		"source":    user.Source,
+		"createdAt": user.CreatedAt,
+		"updatedAt": user.UpdatedAt,
+		"gender":    user.Gender,
+	}
+
+	byteData, _ := json.Marshal(safeUserInfo)
 
 	return &user_rpc.UserInfoRes{
 		Data: byteData,

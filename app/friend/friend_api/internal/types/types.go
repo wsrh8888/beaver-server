@@ -22,7 +22,7 @@ type FriendInfoRes struct {
 	Notice         string `json:"notice"`
 	IsFriend       bool   `json:"isFriend"`
 	ConversationID string `json:"conversationId"`
-	Phone          string `json:"phone"`
+	Email          string `json:"email"`
 }
 
 type FriendValidInfo struct {
@@ -56,7 +56,7 @@ type NoticeUpdateRes struct {
 
 type SearchReq struct {
 	UserID string `header:"Beaver-User-Id"`
-	Phone  string `form:"phone"` //用户id或昵称
+	Email  string `form:"email"` //用户邮箱
 }
 
 type SearchRes struct {
@@ -67,6 +67,7 @@ type SearchRes struct {
 	Notice         string `json:"notice"`
 	IsFriend       bool   `json:"isFriend"`
 	ConversationID string `json:"conversationId"`
+	Email          string `json:"email"`
 }
 
 type SearchValidInfoReq struct {

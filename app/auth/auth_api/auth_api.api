@@ -1,12 +1,25 @@
 syntax = "v1"
 
-type LoginReq {
+type PhoneLoginReq {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
 }
 
-type LoginRes {
+type PhoneLoginRes {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
+// 邮箱密码登录请求
+type EmailPasswordLoginReq {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+}
+
+// 邮箱密码登录响应
+type EmailPasswordLoginRes {
 	Token  string `json:"token"`
 	UserID string `json:"userId"`
 }
@@ -23,12 +36,29 @@ type AuthenticationRes {
 	UserID string `json:"userId"`
 }
 
-type RegisterReq {
+// 手机号注册请求
+type PhoneRegisterReq {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
+	Code     string `json:"code"` // 手机验证码
 }
 
-type RegisterRes {}
+// 手机号注册响应
+type PhoneRegisterRes {
+	Message string `json:"message"`
+}
+
+// 邮箱注册请求
+type EmailRegisterReq {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Code     string `json:"code"` // 邮箱验证码
+}
+
+// 邮箱注册响应
+type EmailRegisterRes {
+	Message string `json:"message"`
+}
 
 // 用户登出请求
 type LogoutReq {
@@ -75,18 +105,61 @@ type TerminateSessionReq {
 // 终止会话响应
 type TerminateSessionRes {}
 
+// 获取手机验证码请求
+type GetPhoneCodeReq {
+	Phone string `json:"phone"`
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+}
+
+// 获取手机验证码响应
+type GetPhoneCodeRes {
+	Message string `json:"message"`
+}
+
+// 获取邮箱验证码请求
+type GetEmailCodeReq {
+	Email string `json:"email"`
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+}
+
+// 获取邮箱验证码响应
+type GetEmailCodeRes {
+	Message string `json:"message"`
+}
+
+// 邮箱登录请求
+type EmailLoginReq {
+	Email    string `json:"email"`
+	Code     string `json:"code"` // 验证码
+	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+}
+
+// 邮箱登录响应
+type EmailLoginRes {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
 service auth {
-	// 用户登录
-	@handler login
-	post /api/auth/login (LoginReq) returns (LoginRes)
+	// 手机号登录
+	@handler phoneLogin
+	post /api/auth/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
+
+	// 邮箱密码登录
+	@handler emailPasswordLogin
+	post /api/auth/email_password_login (EmailPasswordLoginReq) returns (EmailPasswordLoginRes)
 
 	// 用户认证
 	@handler authentication
 	get /api/auth/authentication (AuthenticationReq) returns (AuthenticationRes)
 
-	// 用户注册
-	@handler register
-	post /api/auth/register (RegisterReq) returns (RegisterRes)
+	// 手机号注册
+	@handler phoneRegister
+	post /api/auth/phone_register (PhoneRegisterReq) returns (PhoneRegisterRes)
+
+	// 邮箱注册
+	@handler emailRegister
+	post /api/auth/email_register (EmailRegisterReq) returns (EmailRegisterRes)
 
 	// 用户登出
 	@handler logout
@@ -103,6 +176,18 @@ service auth {
 	// 终止会话 用户发现某个设备不是自己登录的,需要强制下线
 	@handler terminateSession
 	post /api/auth/terminate_session (TerminateSessionReq) returns (TerminateSessionRes)
+
+	// 获取手机验证码
+	@handler getPhoneCode
+	post /api/auth/phonecode (GetPhoneCodeReq) returns (GetPhoneCodeRes)
+
+	// 获取邮箱验证码
+	@handler getEmailCode
+	post /api/auth/emailcode (GetEmailCodeReq) returns (GetEmailCodeRes)
+
+	// 邮箱登录
+	@handler emailLogin
+	post /api/auth/email_login (EmailLoginReq) returns (EmailLoginRes)
 }
 
 // goctl api go -api auth_api.api -dir . --home ../../../template

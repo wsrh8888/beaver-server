@@ -1,0 +1,21 @@
+Name: filerpc.rpc
+ListenOn: 0.0.0.0:30600
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false
+RedisConf:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  DB: 0
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: filerpc.rpc
+Qiniu: 
+  AK: 380CCZeJZztGl2g3mX-OhufNPkkYaE-HqL2ybfvc
+  SK: CSaNAQG2hiDUHSpQNJWJmktCA9mj9M2_0qYkRqLr
+  Bucket: beaver-im
+  ExpireTime: 3600 # 签名URL有效期, 单位：秒

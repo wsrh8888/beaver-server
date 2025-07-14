@@ -7,7 +7,6 @@ import (
 )
 
 type JwtPayLoad struct {
-	Phone    string `json:"phone"`
 	Nickname string `json:"nickname"`
 	UserID   string `json:"userId"`
 }

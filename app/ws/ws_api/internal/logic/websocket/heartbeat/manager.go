@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"beaver/app/ws/ws_api/internal/svc"
@@ -22,6 +23,7 @@ type Manager struct {
 	svcCtx *svc.ServiceContext
 	ctx    context.Context
 	cancel context.CancelFunc
+	mu     sync.Mutex // 添加互斥锁保护并发写入
 }
 
 // NewManager 创建心跳管理器
@@ -60,7 +62,7 @@ func (m *Manager) HandleClientHeartbeat(content type_struct.WsContent) {
 		},
 	}
 
-	ws_response.WsResponse(m.conn, wsCommandConst.HEARTBEAT, responseContent)
+	m.sendMessage(wsCommandConst.HEARTBEAT, responseContent)
 	logx.Infof("💗 心跳响应发送成功, 用户: %s", m.userID)
 }
 
@@ -105,6 +107,9 @@ func (m *Manager) startApplicationHeartbeat() {
 
 // sendProtocolPing 发送协议级ping
 func (m *Manager) sendProtocolPing() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	writeWait := time.Duration(m.svcCtx.Config.WebSocket.WriteWait) * time.Second
 	if err := m.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
 		return err
@@ -129,8 +134,26 @@ func (m *Manager) sendApplicationHeartbeat() {
 		},
 	}
 
-	ws_response.WsResponse(m.conn, wsCommandConst.HEARTBEAT, content)
+	m.sendMessage(wsCommandConst.HEARTBEAT, content)
 	logx.Infof("💓 应用级心跳成功, 用户: %s", m.userID)
+}
+
+// sendMessage 安全发送消息（带锁保护）
+func (m *Manager) sendMessage(command wsCommandConst.Command, content type_struct.WsContent) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// 检查连接是否已关闭
+	if m.conn == nil {
+		logx.Errorf("WebSocket连接已关闭, 用户: %s", m.userID)
+		return
+	}
+
+	if err := ws_response.WsResponse(m.conn, command, content); err != nil {
+		logx.Errorf("发送WebSocket消息失败, 用户: %s, 错误: %v", m.userID, err)
+		// 如果发送失败，可能需要关闭连接
+		m.conn.Close()
+	}
 }
 
 // getAppHeartbeatInterval 获取应用级心跳间隔

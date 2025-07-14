@@ -1,6 +1,6 @@
 Name: file
 Host: 0.0.0.0
-Port: 21060
+Port: 20600
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
@@ -8,11 +8,7 @@ Redis:
   Password: '123456'
   DB: 0
 Etcd: 127.0.0.1:2379
-Log:
-  Encoding: plain
-  TimeFormat: 2006-01-02T15:04:05
-  Stat: false
-Timeout: 60000
+
 FileMaxSize:
   image: 2    
   video: 10   
@@ -20,14 +16,13 @@ FileMaxSize:
   archive: 2  
   document: 2 
   unknown: 10
-FileSize: 5 # MB
-MaxBytes: 5368709120 # 5GB
+MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 UploadDir: uploads
 Qiniu: 
-  AK: 
-  SK: 
-  Bucket: 
-  Domain: 
+  AK: 123-OhufNPkkYaE-HqL2ybfvc
+  SK: 12
+  Bucket: beaver-im
+  Domain: 'http://123.123.com'
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
 WhiteList:
   - png

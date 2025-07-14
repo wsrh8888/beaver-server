@@ -3,13 +3,12 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
-	"time"
 
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/pwd"
 	utils "beaver/utils/rand"
 
 	"github.com/google/uuid"
@@ -31,30 +30,59 @@ func NewUserCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserCr
 }
 
 func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.UserCreateRes, error) {
-	// todo: add your logic here and delete this line
-	var user user_models.UserModel
+	// 验证必填字段
+	if in.Password == "" {
+		return nil, errors.New("密码不能为空")
+	}
+	if in.Phone == "" && in.Email == "" {
+		return nil, errors.New("手机号或邮箱至少需要提供一个")
+	}
 
-	err := l.svcCtx.DB.Take(&user, "phone = ?", in.Phone).Error
+	// 检查用户是否已存在
+	var user user_models.UserModel
+	var err error
+
+	if in.Phone != "" && in.Email != "" {
+		// 手机号和邮箱都提供，检查是否已存在
+		err = l.svcCtx.DB.Take(&user, "phone = ? OR email = ?", in.Phone, in.Email).Error
+	} else if in.Phone != "" {
+		// 只提供手机号
+		err = l.svcCtx.DB.Take(&user, "phone = ?", in.Phone).Error
+	} else {
+		// 只提供邮箱
+		err = l.svcCtx.DB.Take(&user, "email = ?", in.Email).Error
+	}
 
 	if err == nil {
 		return nil, errors.New("用户已存在")
 	}
 
+	// 加密密码
+	hashedPassword := pwd.HahPwd(in.Password)
+
+	// 生成随机昵称
+	nickname := utils.GenerateRandomString(8)
+	if in.NickName != "" {
+		nickname = in.NickName
+	}
+
 	user = user_models.UserModel{
 		UUID:     strings.Replace(uuid.New().String(), "-", "", -1),
-		Password: in.Password,
+		Password: hashedPassword,
+		Email:    in.Email,
 		Phone:    in.Phone,
 		Source:   in.Source,
-		NickName: utils.GenerateRandomString(8),
+		NickName: nickname,
 		Abstract: "",
 	}
-	// 打印当前时间
-	fmt.Println("Current time:", time.Now())
+
 	err = l.svcCtx.DB.Create(&user).Error
 	if err != nil {
-		logx.Error(err)
+		logx.Errorf("创建用户失败: %v", err)
 		return nil, errors.New("创建用户失败")
 	}
+
+	logx.Infof("用户创建成功: %s", user.UUID)
 
 	return &user_rpc.UserCreateRes{
 		UserID: user.UUID,

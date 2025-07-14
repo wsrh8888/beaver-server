@@ -1,5 +1,5 @@
 Name: chatrpc.rpc
-ListenOn: 0.0.0.0:22030
+ListenOn: 0.0.0.0:30300
 Etcd:
   Hosts:
   - 127.0.0.1:2379

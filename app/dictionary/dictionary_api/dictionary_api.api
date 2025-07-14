@@ -1,0 +1,20 @@
+syntax = "v1"
+
+type (
+	// 城市信息
+	CityInfo {
+		Code string `json:"code"` // 城市代码
+		Name string `json:"name"` // 城市名称
+	}
+	// 获取城市列表响应
+	GetCitiesRes {
+		Cities []CityInfo `json:"cities"` // 城市列表
+	}
+)
+
+service dictionary {
+	@handler GetCities
+	get /api/dictionary/cities returns (GetCitiesRes) // 获取城市列表
+}
+
+// goctl api go -api dictionary_api.api -dir . --home ../../../template 

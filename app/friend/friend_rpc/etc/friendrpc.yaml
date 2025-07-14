@@ -1,5 +1,5 @@
 Name: friendrpc.rpc
-ListenOn: 0.0.0.0:22020
+ListenOn: 0.0.0.0:30200
 Etcd:
   Hosts:
   - 127.0.0.1:2379

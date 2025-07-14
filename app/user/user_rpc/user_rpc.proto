@@ -5,9 +5,11 @@ option go_package = "./user_rpc";
 
 
 message UserCreateReq {
-  string phone = 1;
-  string password = 2;
-  int32 source = 3;
+  string phone = 1;    // 手机号（与email二选一）
+  string password = 2; // 密码
+  int32 source = 3;    // 注册来源：1-手机号注册，2-邮箱注册
+  string email = 4;    // 邮箱（与phone二选一）
+  string nick_name = 5; // 昵称（可选）
 }
 
 message UserCreateRes {
@@ -46,7 +48,7 @@ message UserListInfoRes {
   map<string, UserInfo> user_info = 1; //用户配置的json
 }
 
-service User {
+service user {
   rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
   rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
   rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友

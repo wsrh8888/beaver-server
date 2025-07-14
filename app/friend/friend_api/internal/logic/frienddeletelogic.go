@@ -32,37 +32,56 @@ func NewFriendDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Frie
 }
 
 func (l *FriendDeleteLogic) FriendDelete(req *types.FriendDeleteReq) (resp *types.FriendDeleteRes, err error) {
+	// 参数验证
+	if req.UserID == "" || req.FriendID == "" {
+		return nil, errors.New("用户ID和好友ID不能为空")
+	}
+
+	// 不能删除自己
+	if req.UserID == req.FriendID {
+		return nil, errors.New("不能删除自己")
+	}
+
 	// 确认好友关系
 	var friend friend_models.FriendModel
 	if !friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
+		l.Logger.Errorf("尝试删除非好友关系: userID=%s, friendID=%s", req.UserID, req.FriendID)
 		return nil, errors.New("不是好友关系")
 	}
 
 	// 标记好友关系为已删除
-	err = l.svcCtx.DB.Model(&friend).Where("((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0", req.UserID, req.FriendID, req.FriendID, req.UserID).Update("is_deleted", 1).Error
+	err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where(
+		"((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0",
+		req.UserID, req.FriendID, req.FriendID, req.UserID).Update("is_deleted", 1).Error
 	if err != nil {
-		return nil, err
+		l.Logger.Errorf("标记好友关系删除失败: %v", err)
+		return nil, errors.New("删除好友失败")
 	}
 
 	// 获取会话Id
 	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
 	if err != nil {
+		l.Logger.Errorf("生成会话Id失败: %v", err)
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
-	// 异步标记会话和聊天记录为已删除
+	// 异步处理相关数据清理
 	go func() {
+		// 发送WebSocket通知
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendDelete, req.UserID, req.FriendID, map[string]interface{}{
 			"userId": req.FriendID,
 		}, "")
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendDelete, req.FriendID, req.UserID, map[string]interface{}{
-			"userId": req.FriendID,
+			"userId": req.UserID,
 		}, "")
+
+		// 标记会话和聊天记录为已删除
 		if err := l.markConversationAndChatsAsDeleted(req.UserID, conversationID); err != nil {
-			l.Logger.Error(fmt.Sprintf("删除会话和聊天记录失败: %v", err))
+			l.Logger.Errorf("删除会话和聊天记录失败: userID=%s, conversationID=%s, error=%v", req.UserID, conversationID, err)
 		}
 	}()
 
+	l.Logger.Infof("好友删除成功: userID=%s, friendID=%s", req.UserID, req.FriendID)
 	return &types.FriendDeleteRes{}, nil
 }
 

@@ -48,6 +48,12 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	if req.Avatar != nil {
 		updateFields["avatar"] = *req.Avatar
 	}
+	if req.Abstract != nil {
+		updateFields["abstract"] = *req.Abstract
+	}
+	if req.Gender != nil {
+		updateFields["gender"] = *req.Gender
+	}
 
 	// 执行更新操作
 	if len(updateFields) > 0 {
@@ -56,8 +62,9 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 			return nil, err
 		}
 	}
-	// 异步更新缓存
-	defer func() {
+
+	// 异步更新缓存和通知好友
+	go func() {
 		// 拿到自己的好友列表
 		response, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, &friend_rpc.GetFriendIdsRequest{
 			UserID: req.UserID,
@@ -75,5 +82,5 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		}
 	}()
 
-	return nil, nil
+	return &types.UpdateInfoRes{}, nil
 }

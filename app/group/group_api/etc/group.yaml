@@ -1,6 +1,6 @@
 Name: group
 Host: 0.0.0.0
-Port: 21050
+Port: 20500
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:

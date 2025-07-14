@@ -1,6 +1,6 @@
 Name: auth
 Host: 0.0.0.0
-Port: 21010
+Port: 20100
 Etcd: 127.0.0.1:2379
 Auth:
   AccessSecret: robert
@@ -12,12 +12,33 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /api/auth/register
-  - /api/auth/login
+  - /api/auth/phone_register
+  - /api/auth/email_register
+  - /api/auth/phonecode
+  - /api/auth/emailcode
+  - /api/auth/phone_login
+  - /api/auth/email_login
   - /api/auth/open_login
   - /api/auth/authentication
   - /api/settings/open_login_info
   - /api/file/preview
+  - /api/dictionary/cities
+  - /api/auth/email_password_login
+  - /api/track/events
+  - /api/track/logs
+  - /api/update/report
+Email:
+  QQ:
+    Host: smtp.qq.com
+    Port: 111
+    Username: 123123@qq.com
+    Password: 123123123123
+  # 未来可以添加其他邮箱服务商
+  # Gmail:
+  #   Host: smtp.gmail.com
+  #   Port: 587
+  #   Username: your_gmail@gmail.com
+  #   Password: your_gmail_app_password
 UserRpc:
   Etcd:
     Hosts:
