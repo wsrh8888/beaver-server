@@ -1,41 +1,38 @@
 version: '3.9'
+name: beaver 
 services:
-    redis:
+  redis:
       image: redis:4
-      container_name: redis1
+      container_name: redis
       command: redis-server --appendonly yes --requirepass "123456"
       ports:
         - "6379:6379"
       volumes:
-        - ./docker/redis:/data
-    mysql:
-        image: mysql:5.7.31
-        container_name: mysql
-        restart: always
-        ports:
-            - '3306:3306'
-        privileged: true
-        environment:
-              MYSQL_ROOT_PASSWORD: "123456"
-        command: [
-            '--character-set-server=utf8mb4',
-            '--collation-server=utf8mb4_general_ci',
-            '--max_connections=3000',
-        ]
-        volumes:
-             - ./docker/mysql/data:/var/lib/mysql
-             - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
-             - ./docker/mysql/log:/var/log/mysql
-    etcd:
-        image: bitnami/etcd:3.5.12
-        container_name: etcd
-        ports:
-            - "2379:2379"
-            - "2380:2380"
-        environment:
-            - ALLOW_NONE_AUTHENTICATION=yes                  
-        volumes:
-            - ./docker/etcd:/etcd-data
+        - ./redis:/data
+  mysq:
+    image: mysql:5.7.31
+    container_name: mysql
+    restart: always
+    ports:
+      - '3306:3306'
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+    command: [ '--character-set-server=utf8mb4', '--collation-server=utf8mb4_general_ci', '--max_connections=3000' ]
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/log:/var/log/mysql
+  etcd:
+    image: bitnami/etcd:3.5.12
+    container_name: etcd
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    volumes:
+      - ./etcd:/etcd-data  
 networks:
   default:
     driver: bridge
