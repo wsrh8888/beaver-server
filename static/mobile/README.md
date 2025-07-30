@@ -4,34 +4,46 @@
 
 ## 现有截图文件
 
-### 通用/声明
-1. `about.jpg` - 关于页面
-2. `feedback.jpg` - 意见反馈
-3. `statement.jpg` - 项目声明
-
-### 登录注册
-4. `login.jpg` - 登录界面
-5. `find-password.jpg` - 找回密码
-6. `register.jpg` - 创建账号
+### 用户认证
+1. `login.jpg` - 登录界面
+2. `register.jpg` - 创建账号
+3. `find-password.jpg` - 找回密码
 
 ### 聊天功能
-7. `message.jpg` - 消息主界面
-8. `group-chat.jpg` - 群聊聊天内容
-9. `private-chat.jpg` - 私聊聊天内容
+4. `message.jpg` - 消息主界面
+5. `private-chat.jpg` - 私聊聊天内容
+6. `group-chat.jpg` - 群聊聊天内容
+7. `send-text.jpg` - 发送文字
+8. `send-emoji.jpg` - 发送表情
+9. `chat-details.jpg` - 聊天详情
 
-### 社交功能
-10. `new-friends.jpg` - 新的朋友列表
-11. `friend.jpg` - 好友列表
-12. `friend-info.jpg` - 好友资料
+### 群聊管理
+10. `group-list.jpg` - 群聊列表
+11. `create-group.jpg` - 创建群聊
+12. `group-details.jpg` - 群聊详情
+13. `add-members.jpg` - 添加群成员
+
+### 好友管理
+14. `new-friends.jpg` - 新的朋友列表
+15. `friend.jpg` - 好友列表
+16. `friend-info.jpg` - 好友资料
+17. `edit-remark.jpg` - 编辑好友备注
+
+### 朋友圈
+18. `moments.jpg` - 朋友圈页面
+19. `send-moments.jpg` - 发布朋友圈页面
 
 ### 个人中心
-13. `profile-edit.jpg` - 编辑个人资料
-14. `mine.jpg` - 我的主界面
+20. `profile-edit.jpg` - 编辑个人资料
+21. `mine.jpg` - 我的主界面
 
-### 其他功能
-15. `qcode.jpg` - 二维码功能
-16. `update.jpg` - 更新页面
-17. `start-group.jpg` - 发起群聊
+### 系统功能
+22. `settings.jpg` - 通用设置
+23. `qcode.jpg` - 二维码功能
+24. `update.jpg` - 更新页面
+25. `about.jpg` - 关于页面
+26. `feedback.jpg` - 意见反馈
+27. `statement.jpg` - 项目声明
 
 ## 截图要求
 
