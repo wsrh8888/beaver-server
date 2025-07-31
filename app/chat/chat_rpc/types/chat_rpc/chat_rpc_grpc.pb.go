@@ -22,6 +22,8 @@ const (
 	Chat_SendMsg_FullMethodName                 = "/chat_rpc.Chat/SendMsg"
 	Chat_UpdateConversation_FullMethodName      = "/chat_rpc.Chat/UpdateConversation"
 	Chat_BatchUpdateConversation_FullMethodName = "/chat_rpc.Chat/BatchUpdateConversation"
+	Chat_EditMessage_FullMethodName             = "/chat_rpc.Chat/EditMessage"
+	Chat_RecallMessage_FullMethodName           = "/chat_rpc.Chat/RecallMessage"
 )
 
 // ChatClient is the client API for Chat service.
@@ -31,6 +33,8 @@ type ChatClient interface {
 	SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)
 	UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error)
 	BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error)
+	EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error)
+	RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error)
 }
 
 type chatClient struct {
@@ -68,6 +72,24 @@ func (c *chatClient) BatchUpdateConversation(ctx context.Context, in *BatchUpdat
 	return out, nil
 }
 
+func (c *chatClient) EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error) {
+	out := new(EditMessageRes)
+	err := c.cc.Invoke(ctx, Chat_EditMessage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error) {
+	out := new(RecallMessageRes)
+	err := c.cc.Invoke(ctx, Chat_RecallMessage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility
@@ -75,6 +97,8 @@ type ChatServer interface {
 	SendMsg(context.Context, *SendMsgReq) (*SendMsgRes, error)
 	UpdateConversation(context.Context, *UpdateConversationReq) (*UpdateConversationRes, error)
 	BatchUpdateConversation(context.Context, *BatchUpdateConversationReq) (*BatchUpdateConversationRes, error)
+	EditMessage(context.Context, *EditMessageReq) (*EditMessageRes, error)
+	RecallMessage(context.Context, *RecallMessageReq) (*RecallMessageRes, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -90,6 +114,12 @@ func (UnimplementedChatServer) UpdateConversation(context.Context, *UpdateConver
 }
 func (UnimplementedChatServer) BatchUpdateConversation(context.Context, *BatchUpdateConversationReq) (*BatchUpdateConversationRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BatchUpdateConversation not implemented")
+}
+func (UnimplementedChatServer) EditMessage(context.Context, *EditMessageReq) (*EditMessageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditMessage not implemented")
+}
+func (UnimplementedChatServer) RecallMessage(context.Context, *RecallMessageReq) (*RecallMessageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecallMessage not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
@@ -158,6 +188,42 @@ func _Chat_BatchUpdateConversation_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chat_EditMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditMessageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).EditMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_EditMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).EditMessage(ctx, req.(*EditMessageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_RecallMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecallMessageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).RecallMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_RecallMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).RecallMessage(ctx, req.(*RecallMessageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -176,6 +242,14 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BatchUpdateConversation",
 			Handler:    _Chat_BatchUpdateConversation_Handler,
+		},
+		{
+			MethodName: "EditMessage",
+			Handler:    _Chat_EditMessage_Handler,
+		},
+		{
+			MethodName: "RecallMessage",
+			Handler:    _Chat_RecallMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

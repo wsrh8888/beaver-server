@@ -29,7 +29,7 @@ const (
 //
 // 文件服务
 type FileClient interface {
-	// 通过fileId查询文件详情
+	// 通过fileName查询文件详情
 	GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRes, error)
 	// 获取七牛云上传token
 	GetQiniuUploadToken(ctx context.Context, in *GetQiniuUploadTokenReq, opts ...grpc.CallOption) (*GetQiniuUploadTokenRes, error)
@@ -69,7 +69,7 @@ func (c *fileClient) GetQiniuUploadToken(ctx context.Context, in *GetQiniuUpload
 //
 // 文件服务
 type FileServer interface {
-	// 通过fileId查询文件详情
+	// 通过fileName查询文件详情
 	GetFileDetail(context.Context, *GetFileDetailReq) (*GetFileDetailRes, error)
 	// 获取七牛云上传token
 	GetQiniuUploadToken(context.Context, *GetQiniuUploadTokenReq) (*GetQiniuUploadTokenRes, error)

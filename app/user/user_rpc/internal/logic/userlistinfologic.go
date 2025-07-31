@@ -48,7 +48,7 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 	for _, user := range userList {
 		resp.UserInfo[user.UUID] = &user_rpc.UserInfo{
 			NickName: user.NickName,
-			Avatar:   user.Avatar,
+			FileName: user.FileName,
 		}
 	}
 

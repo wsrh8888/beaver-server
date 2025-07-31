@@ -24,7 +24,7 @@ const (
 // 文件详情请求
 type GetFileDetailReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileId        string                 `protobuf:"bytes,1,opt,name=fileId,proto3" json:"fileId,omitempty"` // 文件ID
+	FileName      string                 `protobuf:"bytes,1,opt,name=fileName,proto3" json:"fileName,omitempty"` // 文件ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -59,9 +59,9 @@ func (*GetFileDetailReq) Descriptor() ([]byte, []int) {
 	return file_file_rpc_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *GetFileDetailReq) GetFileId() string {
+func (x *GetFileDetailReq) GetFileName() string {
 	if x != nil {
-		return x.FileId
+		return x.FileName
 	}
 	return ""
 }
@@ -69,14 +69,14 @@ func (x *GetFileDetailReq) GetFileId() string {
 // 文件详情响应
 type GetFileDetailRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileId        string                 `protobuf:"bytes,1,opt,name=fileId,proto3" json:"fileId,omitempty"`       // 文件唯一ID
-	FileName      string                 `protobuf:"bytes,2,opt,name=fileName,proto3" json:"fileName,omitempty"`   // 文件名
-	Size          int64                  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`          // 文件大小
-	Path          string                 `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`           // 文件实际存储路径
-	Md5           string                 `protobuf:"bytes,5,opt,name=md5,proto3" json:"md5,omitempty"`             // 文件MD5
-	Type          string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`           // 文件类型
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=createdAt,proto3" json:"createdAt,omitempty"` // 创建时间
-	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"` // 更新时间
+	FileName      string                 `protobuf:"bytes,1,opt,name=fileName,proto3" json:"fileName,omitempty"`         // 文件唯一ID
+	OriginalName  string                 `protobuf:"bytes,2,opt,name=originalName,proto3" json:"originalName,omitempty"` // 文件名
+	Size          int64                  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`                // 文件大小
+	Path          string                 `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`                 // 文件实际存储路径
+	Md5           string                 `protobuf:"bytes,5,opt,name=md5,proto3" json:"md5,omitempty"`                   // 文件MD5
+	Type          string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`                 // 文件类型
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=createdAt,proto3" json:"createdAt,omitempty"`       // 创建时间
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`       // 更新时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -111,16 +111,16 @@ func (*GetFileDetailRes) Descriptor() ([]byte, []int) {
 	return file_file_rpc_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetFileDetailRes) GetFileId() string {
+func (x *GetFileDetailRes) GetFileName() string {
 	if x != nil {
-		return x.FileId
+		return x.FileName
 	}
 	return ""
 }
 
-func (x *GetFileDetailRes) GetFileName() string {
+func (x *GetFileDetailRes) GetOriginalName() string {
 	if x != nil {
-		return x.FileName
+		return x.OriginalName
 	}
 	return ""
 }
@@ -261,12 +261,12 @@ var File_file_rpc_proto protoreflect.FileDescriptor
 
 const file_file_rpc_proto_rawDesc = "" +
 	"\n" +
-	"\x0efile_rpc.proto\x12\bfile_rpc\"*\n" +
-	"\x10GetFileDetailReq\x12\x16\n" +
-	"\x06fileId\x18\x01 \x01(\tR\x06fileId\"\xd0\x01\n" +
-	"\x10GetFileDetailRes\x12\x16\n" +
-	"\x06fileId\x18\x01 \x01(\tR\x06fileId\x12\x1a\n" +
-	"\bfileName\x18\x02 \x01(\tR\bfileName\x12\x12\n" +
+	"\x0efile_rpc.proto\x12\bfile_rpc\".\n" +
+	"\x10GetFileDetailReq\x12\x1a\n" +
+	"\bfileName\x18\x01 \x01(\tR\bfileName\"\xdc\x01\n" +
+	"\x10GetFileDetailRes\x12\x1a\n" +
+	"\bfileName\x18\x01 \x01(\tR\bfileName\x12\"\n" +
+	"\foriginalName\x18\x02 \x01(\tR\foriginalName\x12\x12\n" +
 	"\x04size\x18\x03 \x01(\x03R\x04size\x12\x12\n" +
 	"\x04path\x18\x04 \x01(\tR\x04path\x12\x10\n" +
 	"\x03md5\x18\x05 \x01(\tR\x03md5\x12\x12\n" +

@@ -4,13 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-	"beaver/common/ajax"
-	"beaver/common/wsEnum/wsCommandConst"
-	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -39,45 +35,32 @@ func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.U
 		}
 		return nil, err
 	}
+	fmt.Println("当前邮箱:", user.Email)
+	fmt.Println("修改的邮箱", req.Email)
+	// 检查新邮箱是否与当前邮箱相同
+	if user.Email == req.Email {
+		return nil, fmt.Errorf("新邮箱不能与当前邮箱相同")
+	}
 
 	// 验证邮箱验证码
-	err = l.verifyEmailCode(req.NewEmail, req.VerifyCode, "update_email")
+	err = l.verifyEmailCode(req.Email, req.Code, "update_email")
 	if err != nil {
 		return nil, err
 	}
 
 	// 检查新邮箱是否已被其他用户使用
 	var existingUser user_models.UserModel
-	if err := l.svcCtx.DB.Where("email = ? AND uuid != ?", req.NewEmail, req.UserID).First(&existingUser).Error; err == nil {
+	if err := l.svcCtx.DB.Where("email = ? AND uuid != ?", req.Email, req.UserID).First(&existingUser).Error; err == nil {
 		return nil, fmt.Errorf("email already exists")
 	} else if err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 
 	// 更新用户邮箱
-	err = l.svcCtx.DB.Model(&user).Update("email", req.NewEmail).Error
+	err = l.svcCtx.DB.Model(&user).Update("email", req.Email).Error
 	if err != nil {
 		return nil, err
 	}
-
-	// 异步更新缓存和通知好友
-	defer func() {
-		// 拿到自己的好友列表
-		response, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, &friend_rpc.GetFriendIdsRequest{
-			UserID: req.UserID,
-		})
-		if err != nil {
-			logx.Errorf("failed to get friend ids: %v", err)
-			return
-		}
-		fmt.Println("转发给好友的列表", response.FriendIds)
-		// 通过ws推送给自己的好友
-		for _, friendID := range response.FriendIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, friendID, map[string]interface{}{
-				"userId": req.UserID,
-			}, "")
-		}
-	}()
 
 	return &types.UpdateEmailRes{}, nil
 }

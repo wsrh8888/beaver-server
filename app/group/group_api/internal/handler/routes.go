@@ -13,91 +13,109 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 更新群公告
 				Method:  http.MethodPost,
 				Path:    "/api/group/announcement",
 				Handler: updateAnnouncementHandler(serverCtx),
 			},
 			{
+				// 创建群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/create",
 				Handler: groupCreateHandler(serverCtx),
 			},
 			{
+				// 删除群组
 				Method:  http.MethodDelete,
 				Path:    "/api/group/delete/:id",
 				Handler: groupDeleteHandler(serverCtx),
 			},
 			{
+				// 更新群组信息
 				Method:  http.MethodPost,
 				Path:    "/api/group/groupInfo",
 				Handler: groupInfoHandler(serverCtx),
 			},
 			{
+				// 获取我加入的群组列表
 				Method:  http.MethodPost,
 				Path:    "/api/group/group_mine",
 				Handler: group_mineHandler(serverCtx),
 			},
 			{
+				// 邀请新成员
 				Method:  http.MethodPost,
 				Path:    "/api/group/invite",
 				Handler: inviteMembersHandler(serverCtx),
 			},
 			{
+				// 申请加入群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/join",
 				Handler: joinGroupHandler(serverCtx),
 			},
 			{
+				// 更新群内显示名称
 				Method:  http.MethodPost,
 				Path:    "/api/group/member/displayName",
 				Handler: updateDisplayNameHandler(serverCtx),
 			},
 			{
+				// 更新群成员角色
 				Method:  http.MethodPost,
 				Path:    "/api/group/member/role",
 				Handler: updateMemberRoleHandler(serverCtx),
 			},
 			{
+				// 添加群成员
 				Method:  http.MethodPost,
 				Path:    "/api/group/memberAdd",
 				Handler: groupMemberAddHandler(serverCtx),
 			},
 			{
+				// 移除群成员
 				Method:  http.MethodPost,
 				Path:    "/api/group/memberRemove",
 				Handler: groupMemberRemoveHandler(serverCtx),
 			},
 			{
+				// 获取群成员列表
 				Method:  http.MethodPost,
 				Path:    "/api/group/members",
 				Handler: getGroupMembersHandler(serverCtx),
 			},
 			{
+				// 群成员禁言管理
 				Method:  http.MethodPost,
 				Path:    "/api/group/mute",
 				Handler: groupMuteHandler(serverCtx),
 			},
 			{
+				// 获取禁言成员列表
 				Method:  http.MethodGet,
 				Path:    "/api/group/mute/list",
 				Handler: getMuteListHandler(serverCtx),
 			},
 			{
+				// 退出群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/quit",
 				Handler: quitGroupHandler(serverCtx),
 			},
 			{
+				// 更新群组设置
 				Method:  http.MethodPost,
 				Path:    "/api/group/settings",
 				Handler: updateSettingsHandler(serverCtx),
 			},
 			{
+				// 转让群主
 				Method:  http.MethodPost,
 				Path:    "/api/group/transfer",
 				Handler: transferOwnerHandler(serverCtx),
 			},
 			{
+				// 更新群组信息
 				Method:  http.MethodPost,
 				Path:    "/api/group/update",
 				Handler: updateGroupInfoHandler(serverCtx),

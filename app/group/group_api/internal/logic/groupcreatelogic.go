@@ -40,7 +40,6 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		UUID:       utils.GenerateUUId(),
 		Abstract:   "本群创建于" + time.Now().Format("2006-01-02") + "，欢迎大家加入",
 		MaxMembers: 50,
-		Avatar:     "cba984dd-bbe7-4ab4-80d7-b25654066f8d",
 	}
 	var groupUserList = []string{string(req.UserID)}
 	if len(req.UserIdList) == 0 {
@@ -79,10 +78,12 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		return nil, errors.New("创建群成员失败")
 	}
 
-	// 异步通知群成员
-	defer func() {
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
 		// 获取群成员列表
-		response, err := l.svcCtx.GroupRpc.GetGroupMembers(l.ctx, &group_rpc.GetGroupMembersReq{
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
 			GroupID: groupModel.UUID,
 		})
 		if err != nil {
@@ -93,16 +94,17 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		// 更新所有成员的会话记录
 		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
 		fmt.Println("更新所有会话列表信息")
-		_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
+		_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(ctx, &chat_rpc.BatchUpdateConversationReq{
 			UserIds:        allUserIDs,
 			ConversationId: groupModel.UUID,
 			LastMessage:    "",
 		})
+
 		// 通过ws推送给群成员
 		for _, member := range response.Members {
 			fmt.Println("推送给群成员")
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.MessageGroupCreate, req.UserID, member.UserID, map[string]interface{}{
-				"avatar":         groupModel.Avatar,
+				"file_name":      groupModel.FileName,
 				"conversationId": groupModel.UUID,
 				"update_at":      groupModel.CreatedAt.String(),
 				"is_top":         false,

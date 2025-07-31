@@ -1,0 +1,13 @@
+
+services:
+  ws_api:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/ws_api:1.0.2
+    container_name: ws_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./ws.yaml:/etc/ws.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

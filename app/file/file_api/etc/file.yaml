@@ -19,10 +19,10 @@ FileMaxSize:
 MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 UploadDir: uploads
 Qiniu: 
-  AK: 123-OhufNPkkYaE-HqL2ybfvc
-  SK: beaver
-  Bucket: beaver-im
-  Domain: 'http://123.123.com'
+  AK: your_qiniu_access_key
+  SK: your_qiniu_secret_key
+  Bucket: your_qiniu_bucket_name
+  Domain: 'your_qiniu_domain'
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
 WhiteList:
   - png

@@ -9,7 +9,7 @@ type UserInfoReq {
 type UserInfoRes {
 	UserID   string `json:"userId"` // 用户唯一标识
 	NickName string `json:"nickName"` // 用户昵称
-	Avatar   string `json:"avatar"` // 用户头像URL
+	FileName string `json:"fileName"` // 用户头像URL
 	Abstract string `json:"abstract"` // 用户个性签名
 	Phone    string `json:"phone,optional"` // 用户手机号
 	Email    string `json:"email,optional"` // 用户邮箱（可选）
@@ -20,7 +20,7 @@ type UserInfoRes {
 type UpdateInfoReq {
 	UserID   string  `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 	Nickname *string `json:"nickName,optional"` // 新昵称（可选）
-	Avatar   *string `json:"avatar,optional"` // 新头像URL（可选）
+	FileName *string `json:"fileName,optional"` // 新头像URL（可选）
 	Abstract *string `json:"abstract,optional"` // 新个性签名（可选）
 	Gender   *int8   `json:"gender,optional"` // 性别：1-男 2-女 0-未知（可选）
 }
@@ -40,9 +40,9 @@ type UpdatePasswordRes {}
 
 // 修改邮箱请求
 type UpdateEmailReq {
-	UserID     string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	NewEmail   string `json:"newEmail"` // 新邮箱地址
-	VerifyCode string `json:"verifyCode"` // 验证码
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Email  string `json:"email"` // 新邮箱地址
+	Code   string `json:"code"` // 验证码
 }
 
 // 修改邮箱响应
@@ -50,9 +50,9 @@ type UpdateEmailRes {}
 
 // 找回密码请求
 type ResetPasswordReq {
-	Email      string `json:"email"` // 用户邮箱地址
-	VerifyCode string `json:"verifyCode"` // 邮箱验证码
-	Password   string `json:"password"` // 新密码
+	Email    string `json:"email"` // 用户邮箱地址
+	Code     string `json:"code"` // 邮箱验证码
+	Password string `json:"password"` // 新密码
 }
 
 // 找回密码响应
@@ -60,20 +60,25 @@ type ResetPasswordRes {}
 
 // 用户服务
 service user {
+	@doc "获取用户基础信息"
 	@handler userInfo
-	get /api/user/user_info (UserInfoReq) returns (UserInfoRes) // 获取用户基础信息
+	get /api/user/user_info (UserInfoReq) returns (UserInfoRes)
 
+	@doc "更新用户基础信息（昵称、头像、个性签名、性别）"
 	@handler updateInfo
-	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes) // 更新用户基础信息（昵称、头像、个性签名、性别）
+	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes)
 
+	@doc "修改用户密码"
 	@handler updatePassword
-	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes) // 修改用户密码
+	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
 
+	@doc "修改用户邮箱（需要验证码）"
 	@handler updateEmail
-	post /api/user/update_email (UpdateEmailReq) returns (UpdateEmailRes) // 修改用户邮箱（需要验证码）
+	post /api/user/update_email (UpdateEmailReq) returns (UpdateEmailRes)
 
+	@doc "找回密码（通过邮箱验证码重置密码）"
 	@handler resetPassword
-	post /api/user/reset_password (ResetPasswordReq) returns (ResetPasswordRes) // 找回密码（通过邮箱验证码重置密码）
+	post /api/user/reset_password (ResetPasswordReq) returns (ResetPasswordRes)
 }
 
 // 生成代码命令

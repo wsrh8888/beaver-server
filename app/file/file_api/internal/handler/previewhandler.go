@@ -29,7 +29,7 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// response.Response(r, w, resp, err)
 
 		var fileModel file_models.FileModel
-		err := svcCtx.DB.Take(&fileModel, "file_id = ?", req.FileID).Error
+		err := svcCtx.DB.Take(&fileModel, "file_name = ?", req.FileName).Error
 		if err != nil {
 			response.Response(r, w, nil, errors.New("图片不存在"))
 			return

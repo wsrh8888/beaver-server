@@ -5,22 +5,47 @@ type FileReq {
 }
 
 type FileRes {
-	FileID   string `json:"fileId"`
-	FileName string `json:"name"`
+	FileName     string    `json:"fileName"`
+	OriginalName string    `json:"originalName"`
+	FileInfo     *FileInfo `json:"fileInfo,optional"`
+}
+
+type FileInfo {
+	Type      string     `json:"type"`
+	ImageFile *ImageFile `json:"imageFile,optional"`
+	VideoFile *VideoFile `json:"videoFile,optional"`
+	AudioFile *AudioFile `json:"audioFile,optional"`
+}
+
+type ImageFile {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type VideoFile {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+type AudioFile {
+	Duration int `json:"duration"`
 }
 
 type PreviewReq {
-	FileID string `path:"fileId"`
+	FileName string `path:"fileName"`
 }
 
 type PreviewRes {}
 
 service file {
+	@doc "文件预览"
 	@handler Preview
-	get /api/file/preview/:fileId (PreviewReq) returns (PreviewRes) //文件预览
+	get /api/file/preview/:fileName (PreviewReq) returns (PreviewRes)
 
+	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
-	post /api/file/uploadQiniu (FileReq) returns (FileRes) //文件上传七牛云
+	post /api/file/uploadQiniu (FileReq) returns (FileRes)
 }
 
 // goctl api go -api file_api.api -dir . --home ../../../template

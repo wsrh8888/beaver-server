@@ -63,7 +63,7 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 	resp = &types.SearchRes{
 		UserID:         user.UUID,
 		Nickname:       user.NickName,
-		Avatar:         user.Avatar,
+		FileName:       user.FileName,
 		Abstract:       user.Abstract,
 		IsFriend:       isFriend,
 		ConversationID: conversationID,

@@ -13,46 +13,55 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 发送好友验证请求
 				Method:  http.MethodPost,
 				Path:    "/api/friend/add_friend",
 				Handler: addFriendHandler(serverCtx),
 			},
 			{
+				// 删除好友关系
 				Method:  http.MethodDelete,
 				Path:    "/api/friend/delete",
 				Handler: friendDeleteHandler(serverCtx),
 			},
 			{
+				// 获取好友详细信息
 				Method:  http.MethodGet,
 				Path:    "/api/friend/friend_info",
 				Handler: friendInfoHandler(serverCtx),
 			},
 			{
+				// 获取好友列表
 				Method:  http.MethodGet,
 				Path:    "/api/friend/friend_list",
 				Handler: friendListHandler(serverCtx),
 			},
 			{
+				// 通过邮箱搜索用户
 				Method:  http.MethodGet,
 				Path:    "/api/friend/search",
 				Handler: searchHandler(serverCtx),
 			},
 			{
+				// 查询好友验证记录
 				Method:  http.MethodPost,
 				Path:    "/api/friend/searchValidInfo",
 				Handler: searchValidInfoHandler(serverCtx),
 			},
 			{
-				Method:  http.MethodGet,
+				// 修改好友备注
+				Method:  http.MethodPost,
 				Path:    "/api/friend/update_notice",
 				Handler: noticeUpdateHandler(serverCtx),
 			},
 			{
+				// 处理好友验证请求(同意/拒绝)
 				Method:  http.MethodPost,
 				Path:    "/api/friend/valid",
 				Handler: userValidStatusHandler(serverCtx),
 			},
 			{
+				// 获取好友验证请求列表
 				Method:  http.MethodPost,
 				Path:    "/api/friend/valid_list",
 				Handler: validListHandler(serverCtx),

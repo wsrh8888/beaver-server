@@ -3,6 +3,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -186,8 +187,9 @@ func cleanupConnection(userID string, conn *websocket.Conn) {
 
 // getDeviceType 根据User-Agent识别设备类型
 func getDeviceType(userAgent string) string {
+	fmt.Println("userAgent", userAgent)
 	userAgent = strings.ToLower(userAgent)
-
+	return "mobile"
 	// 移动设备识别
 	if strings.Contains(userAgent, "android") {
 		return "mobile"

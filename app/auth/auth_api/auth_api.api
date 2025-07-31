@@ -141,51 +141,51 @@ type EmailLoginRes {
 }
 
 service auth {
-	// 手机号登录
+	@doc "手机号登录"
 	@handler phoneLogin
 	post /api/auth/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
 
-	// 邮箱密码登录
+	@doc "邮箱密码登录"
 	@handler emailPasswordLogin
 	post /api/auth/email_password_login (EmailPasswordLoginReq) returns (EmailPasswordLoginRes)
 
-	// 用户认证
+	@doc "用户认证"
 	@handler authentication
 	get /api/auth/authentication (AuthenticationReq) returns (AuthenticationRes)
 
-	// 手机号注册
+	@doc "手机号注册"
 	@handler phoneRegister
 	post /api/auth/phone_register (PhoneRegisterReq) returns (PhoneRegisterRes)
 
-	// 邮箱注册
+	@doc "邮箱注册"
 	@handler emailRegister
 	post /api/auth/email_register (EmailRegisterReq) returns (EmailRegisterRes)
 
-	// 用户登出
+	@doc "用户登出"
 	@handler logout
 	post /api/auth/logout (LogoutReq) returns (LogoutRes)
 
-	// 刷新Token
+	@doc "刷新Token"
 	@handler refreshToken
 	post /api/auth/refresh_token (RefreshTokenReq) returns (RefreshTokenRes)
 
-	// 获取用户会话列表用户想查看自己当前在哪些设备上登录
+	@doc "获取用户会话列表用户想查看自己当前在哪些设备上登录"
 	@handler getUserSessions
 	get /api/auth/sessions (GetUserSessionsReq) returns (GetUserSessionsRes)
 
-	// 终止会话 用户发现某个设备不是自己登录的,需要强制下线
+	@doc "终止会话 用户发现某个设备不是自己登录的,需要强制下线"
 	@handler terminateSession
 	post /api/auth/terminate_session (TerminateSessionReq) returns (TerminateSessionRes)
 
-	// 获取手机验证码
+	@doc "获取手机验证码"
 	@handler getPhoneCode
 	post /api/auth/phonecode (GetPhoneCodeReq) returns (GetPhoneCodeRes)
 
-	// 获取邮箱验证码
+	@doc "获取邮箱验证码"
 	@handler getEmailCode
 	post /api/auth/emailcode (GetEmailCodeReq) returns (GetEmailCodeRes)
 
-	// 邮箱登录
+	@doc "邮箱登录"
 	@handler emailLogin
 	post /api/auth/email_login (EmailLoginReq) returns (EmailLoginRes)
 }

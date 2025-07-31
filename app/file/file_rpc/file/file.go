@@ -20,7 +20,7 @@ type (
 	GetQiniuUploadTokenRes = file_rpc.GetQiniuUploadTokenRes
 
 	File interface {
-		// 通过fileId查询文件详情
+		// 通过fileName查询文件详情
 		GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRes, error)
 		// 获取七牛云上传token
 		GetQiniuUploadToken(ctx context.Context, in *GetQiniuUploadTokenReq, opts ...grpc.CallOption) (*GetQiniuUploadTokenRes, error)
@@ -37,7 +37,7 @@ func NewFile(cli zrpc.Client) File {
 	}
 }
 
-// 通过fileId查询文件详情
+// 通过fileName查询文件详情
 func (m *defaultFile) GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRes, error) {
 	client := file_rpc.NewFileClient(m.cli.Conn())
 	return client.GetFileDetail(ctx, in, opts...)

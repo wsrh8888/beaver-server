@@ -33,14 +33,8 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 	// 生成6位数字验证码
 	code := email.GenerateCode()
 
-	// 根据邮箱域名选择邮箱服务商
-	emailProvider := email.GetEmailProvider(req.Email)
-	if emailProvider == "" {
-		return nil, errors.New("暂不支持该邮箱服务商")
-	}
-
 	// 发送验证码邮件
-	err = l.sendEmail(req.Email, code, req.Type, emailProvider)
+	err = l.sendEmail(req.Email, code, req.Type)
 	if err != nil {
 		logx.Errorf("发送邮件失败: %v", err)
 		return nil, errors.New("发送验证码失败，请稍后重试")
@@ -67,21 +61,16 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 }
 
 // 发送邮件
-func (l *GetEmailCodeLogic) sendEmail(to, code, codeType, provider string) error {
+func (l *GetEmailCodeLogic) sendEmail(to, code, codeType string) error {
 	var host, username, password string
 	var port int
 
-	// 根据服务商获取配置
-	switch provider {
-	case "QQ":
-		host = l.svcCtx.Config.Email.QQ.Host
-		port = l.svcCtx.Config.Email.QQ.Port
-		username = l.svcCtx.Config.Email.QQ.Username
-		password = l.svcCtx.Config.Email.QQ.Password
-		logx.Infof("QQ邮箱配置: Host=%s, Port=%d, Username=%s", host, port, username)
-	default:
-		return errors.New("不支持的邮箱服务商")
-	}
+	// 直接使用系统配置的邮箱服务商
+	host = l.svcCtx.Config.Email.QQ.Host
+	port = l.svcCtx.Config.Email.QQ.Port
+	username = l.svcCtx.Config.Email.QQ.Username
+	password = l.svcCtx.Config.Email.QQ.Password
+	logx.Infof("QQ邮箱配置: Host=%s, Port=%d, Username=%s", host, port, username)
 
 	// 构建邮件内容
 	subject := email.GetEmailSubject(codeType)

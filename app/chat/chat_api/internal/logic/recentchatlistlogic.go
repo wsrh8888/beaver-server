@@ -131,12 +131,12 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			}
 			user := userMap[opponentID]
 			chatInfo.Nickname = user.NickName
-			chatInfo.Avatar = user.Avatar
+			chatInfo.FileName = user.FileName
 			chatInfo.ChatType = 1
 		} else { // 群聊
 			group := groupMap[convo.ConversationID]
 			chatInfo.Nickname = group.Title
-			chatInfo.Avatar = group.Avatar
+			chatInfo.FileName = group.FileName
 			chatInfo.ChatType = 2
 		}
 

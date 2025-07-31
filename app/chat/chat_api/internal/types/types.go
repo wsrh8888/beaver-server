@@ -19,13 +19,14 @@ type ConversationInfoReq struct {
 }
 
 type ConversationInfoRes struct {
-	Avatar         string `json:"avatar"`
+	FileName       string `json:"fileName"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"`    //消息预览
 	UpdateAt       string `json:"update_at"`      //消息时间
 	IsTop          bool   `json:"is_top"`         //是否置顶
 	ConversationID string `json:"conversationId"` //会话id
 	ChatType       int    `json:"chatType"`       //会话类型 1:好友 2:群聊 3:AI机器人
+	Notice         string `json:"notice"`         //备注
 }
 
 type DeleteRecentReq struct {
@@ -39,21 +40,26 @@ type DeleteRecentRes struct {
 type EditMessageReq struct {
 	UserID    string `header:"Beaver-User-Id"`
 	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`
+	Content   string `json:"content"`   //新的消息内容
 }
 
 type EditMessageRes struct {
-	ID        uint   `json:"id"`        //数据库自增ID
+	Id        uint   `json:"id"`        //数据库自增ID
 	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`
-	EditTime  string `json:"editTime"`
+	Content   string `json:"content"`   //编辑后的内容
+	EditTime  string `json:"editTime"`  //编辑时间
+}
+
+type EmojiMsg struct {
+	FileName  string `json:"fileName"`  // 表情图片文件ID（Emoji.FileName）
+	EmojiID   uint32 `json:"emojiId"`   // 表情ID（Emoji.Id，单个表情时使用）
+	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
+	Width     int    `json:"width"`     //图片宽度
+	Height    int    `json:"height"`    //图片高度
 }
 
 type FileMsg struct {
-	Title string `json:"title"`
-	Src   string `json:"src"`
-	Size  int32  `json:"size"` //文件大小 单位字节
-	Type  string `json:"type"` //文件类型
+	FileName string `json:"fileName"` //文件ID，通过fileName可以从文件模块获取完整信息
 }
 
 type ForwardMessageReq struct {
@@ -64,32 +70,36 @@ type ForwardMessageReq struct {
 }
 
 type ForwardMessageRes struct {
-	ID          uint   `json:"id"`        //数据库自增ID
+	Id          uint   `json:"id"`        //数据库自增ID
 	MessageID   string `json:"messageId"` //客户端消息ID
 	ForwardTime string `json:"forwardTime"`
 }
 
 type ImageMsg struct {
-	FileId string `json:"fileId"`
-	Name   string `json:"name"`
+	FileName string `json:"fileName"` //图片文件ID
+	Width    int    `json:"width"`    //图片宽度
+	Height   int    `json:"height"`   //图片高度
 }
 
 type Message struct {
-	ID             uint   `json:"id"`             //数据库自增ID
+	Id             uint   `json:"id"`             //数据库自增ID
 	MessageID      string `json:"messageId"`      //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"`    //发送者
 	CreateAt       string `json:"create_at"` //消息时间
+	Status         uint32 `json:"status"`    //消息状态 1:正常 2:已撤回 3:已编辑
 }
 
 type Msg struct {
-	Type     uint32    `json:"type"`              //消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+	Type     uint32    `json:"type"`              //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
 	TextMsg  *TextMsg  `json:"textMsg,optional"`  //文本消息
 	ImageMsg *ImageMsg `json:"imageMsg,optional"` //图片
 	VideoMsg *VideoMsg `json:"videoMsg,optional"` //视频
 	FileMsg  *FileMsg  `json:"fileMsg,optional"`  //文件
 	VoiceMsg *VoiceMsg `json:"voiceMsg,optional"` //语音
+	EmojiMsg *EmojiMsg `json:"emojiMsg,optional"` //表情
+	ReplyMsg *ReplyMsg `json:"replyMsg,optional"` //回复消息
 }
 
 type PinnedChatReq struct {
@@ -107,9 +117,9 @@ type RecallMessageReq struct {
 }
 
 type RecallMessageRes struct {
-	ID         uint   `json:"id"`        //数据库自增ID
-	MessageID  string `json:"messageId"` //客户端消息ID
-	RecallTime string `json:"recallTime"`
+	Id         uint   `json:"id"`         //数据库自增ID
+	MessageID  string `json:"messageId"`  //客户端消息ID
+	RecallTime string `json:"recallTime"` //撤回时间
 }
 
 type RecentChatListReq struct {
@@ -123,6 +133,12 @@ type RecentChatListRes struct {
 	List  []ConversationInfoRes `json:"list"`
 }
 
+type ReplyMsg struct {
+	ReplyToMessageID string `json:"replyToMessageId"` // 被回复的消息ID
+	ReplyToContent   string `json:"replyToContent"`   // 被回复的消息内容预览
+	ReplyToSender    string `json:"replyToSender"`    // 被回复消息的发送者昵称
+}
+
 type SendMsgReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
@@ -131,18 +147,19 @@ type SendMsgReq struct {
 }
 
 type SendMsgRes struct {
-	ID             uint   `json:"id"`             //数据库自增ID
+	Id             uint   `json:"id"`             //数据库自增ID
 	MessageID      string `json:"messageId"`      //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"`     //发送者
 	CreateAt       string `json:"create_at"`  //消息时间
 	MsgPreview     string `json:"msgPreview"` //消息预览
+	Status         uint32 `json:"status"`     //消息状态 1:正常 2:已撤回 3:已编辑
 }
 
 type Sender struct {
 	UserID   string `json:"userId"`
-	Avatar   string `json:"avatar"`
+	FileName string `json:"fileName"`
 	Nickname string `json:"nickname"`
 }
 
@@ -151,12 +168,13 @@ type TextMsg struct {
 }
 
 type VideoMsg struct {
-	Title string `json:"title"`
-	Src   string `json:"src"`
-	Time  int32  `json:"time"` //视频时长 单位秒
+	FileName string `json:"fileName"` //视频文件ID
+	Width    int    `json:"width"`    //视频宽度
+	Height   int    `json:"height"`   //视频高度
+	Duration int    `json:"duration"` //视频时长
 }
 
 type VoiceMsg struct {
-	Src  string `json:"src"`
-	Time int32  `json:"time"` //语音时长 单位秒
+	FileName string `json:"fileName"` //语音文件ID
+	Duration int    `json:"duration"` //语音时长
 }

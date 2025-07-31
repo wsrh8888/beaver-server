@@ -34,8 +34,8 @@ func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLo
 
 func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, error) {
 	if conversation.GetConversationType(in.ConversationId) == 1 {
-		if !strings.Contains(in.ConversationId, in.UserID) {
-			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserID, in.ConversationId)
+		if !strings.Contains(in.ConversationId, in.UserId) {
+			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserId, in.ConversationId)
 			return nil, errors.New("异常操作")
 		}
 		var friend friend_models.FriendModel
@@ -59,35 +59,43 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		msg = ctype.Msg{
 			Type: ctype.ImageMsgType,
 			ImageMsg: &ctype.ImageMsg{
-				FileId: in.Msg.ImageMsg.FileId,
-				Name:   in.Msg.ImageMsg.Name,
+				FileName: in.Msg.ImageMsg.FileName,
+				Width:    int(in.Msg.ImageMsg.Width),
+				Height:   int(in.Msg.ImageMsg.Height),
 			},
 		}
 	case ctype.VideoMsgType:
 		msg = ctype.Msg{
 			Type: ctype.VideoMsgType,
 			VideoMsg: &ctype.VideoMsg{
-				FileId: in.Msg.VideoMsg.Src,
-				Title:  in.Msg.VideoMsg.Title,
-				Time:   in.Msg.VideoMsg.Time,
+				FileName: in.Msg.VideoMsg.FileName,
+				Width:    int(in.Msg.VideoMsg.Width),
+				Height:   int(in.Msg.VideoMsg.Height),
+				Duration: int(in.Msg.VideoMsg.Duration),
 			},
 		}
 	case ctype.FileMsgType:
 		msg = ctype.Msg{
 			Type: ctype.FileMsgType,
 			FileMsg: &ctype.FileMsg{
-				FileId: in.Msg.FileMsg.Src,
-				Title:  in.Msg.FileMsg.Title,
-				Size:   in.Msg.FileMsg.Size,
-				Type:   in.Msg.FileMsg.Type,
+				FileName: in.Msg.FileMsg.FileName,
 			},
 		}
 	case ctype.VoiceMsgType:
 		msg = ctype.Msg{
 			Type: ctype.VoiceMsgType,
 			VoiceMsg: &ctype.VoiceMsg{
-				FileId: in.Msg.VoiceMsg.Src,
-				Time:   in.Msg.VoiceMsg.Time,
+				FileName: in.Msg.VoiceMsg.FileName,
+				Duration: int(in.Msg.VoiceMsg.Duration),
+			},
+		}
+	case ctype.EmojiMsgType:
+		msg = ctype.Msg{
+			Type: ctype.EmojiMsgType,
+			EmojiMsg: &ctype.EmojiMsg{
+				FileName:  in.Msg.EmojiMsg.FileName,
+				EmojiID:   in.Msg.EmojiMsg.EmojiId,
+				PackageID: in.Msg.EmojiMsg.PackageId,
 			},
 		}
 	default:
@@ -95,7 +103,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	chatModel := chat_models.ChatModel{
-		SendUserID:     in.UserID,
+		SendUserID:     in.UserId,
 		MessageID:      in.MessageId,
 		ConversationID: in.ConversationId,
 		MsgType:        msgType,
@@ -108,7 +116,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, err
 	}
 
-	err = l.updateUserConversations(in.ConversationId, in.UserID, chatModel.MsgPreview)
+	err = l.updateUserConversations(in.ConversationId, in.UserId, chatModel.MsgPreview)
 	if err != nil {
 		return nil, err
 	}
@@ -118,24 +126,25 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		fmt.Println("Error converting msg:", err)
 		return nil, err
 	}
-	err = l.svcCtx.DB.Preload("SendUserModel").First(&chatModel, chatModel.ID).Error
+	err = l.svcCtx.DB.Preload("SendUserModel").First(&chatModel, chatModel.Id).Error
 	if err != nil {
 		fmt.Println("preload异常", err.Error())
 		return nil, err
 	}
 
 	return &chat_rpc.SendMsgRes{
-		Id:             uint32(chatModel.ID),
+		Id:             uint32(chatModel.Id),
 		MessageId:      chatModel.MessageID, // 支持 uint32 类型
 		ConversationId: chatModel.ConversationID,
 		Msg:            convertedMsg,
 		MsgPreview:     chatModel.MsgPreview,
 		Sender: &chat_rpc.Sender{
-			UserID:   chatModel.SendUserModel.UUID,
-			Avatar:   chatModel.SendUserModel.Avatar,
+			UserId:   chatModel.SendUserModel.UUID,
+			FileName: chatModel.SendUserModel.FileName,
 			Nickname: chatModel.SendUserModel.NickName,
 		},
 		CreateAt: chatModel.CreatedAt.String(),
+		Status:   1, // 1:正常状态
 	}, nil
 }
 

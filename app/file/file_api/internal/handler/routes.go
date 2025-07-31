@@ -13,11 +13,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 文件预览
 				Method:  http.MethodGet,
-				Path:    "/api/file/preview/:fileId",
+				Path:    "/api/file/preview/:fileName",
 				Handler: PreviewHandler(serverCtx),
 			},
 			{
+				// 文件上传七牛云
 				Method:  http.MethodPost,
 				Path:    "/api/file/uploadQiniu",
 				Handler: FileUploadQiniuHandler(serverCtx),

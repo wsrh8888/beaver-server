@@ -13,61 +13,73 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 用户认证
 				Method:  http.MethodGet,
 				Path:    "/api/auth/authentication",
 				Handler: authenticationHandler(serverCtx),
 			},
 			{
+				// 邮箱登录
 				Method:  http.MethodPost,
 				Path:    "/api/auth/email_login",
 				Handler: emailLoginHandler(serverCtx),
 			},
 			{
+				// 邮箱密码登录
 				Method:  http.MethodPost,
 				Path:    "/api/auth/email_password_login",
 				Handler: emailPasswordLoginHandler(serverCtx),
 			},
 			{
+				// 邮箱注册
 				Method:  http.MethodPost,
 				Path:    "/api/auth/email_register",
 				Handler: emailRegisterHandler(serverCtx),
 			},
 			{
+				// 获取邮箱验证码
 				Method:  http.MethodPost,
 				Path:    "/api/auth/emailcode",
 				Handler: getEmailCodeHandler(serverCtx),
 			},
 			{
+				// 用户登出
 				Method:  http.MethodPost,
 				Path:    "/api/auth/logout",
 				Handler: logoutHandler(serverCtx),
 			},
 			{
+				// 手机号登录
 				Method:  http.MethodPost,
 				Path:    "/api/auth/phone_login",
 				Handler: phoneLoginHandler(serverCtx),
 			},
 			{
+				// 手机号注册
 				Method:  http.MethodPost,
 				Path:    "/api/auth/phone_register",
 				Handler: phoneRegisterHandler(serverCtx),
 			},
 			{
+				// 获取手机验证码
 				Method:  http.MethodPost,
 				Path:    "/api/auth/phonecode",
 				Handler: getPhoneCodeHandler(serverCtx),
 			},
 			{
+				// 刷新Token
 				Method:  http.MethodPost,
 				Path:    "/api/auth/refresh_token",
 				Handler: refreshTokenHandler(serverCtx),
 			},
 			{
+				// 获取用户会话列表用户想查看自己当前在哪些设备上登录
 				Method:  http.MethodGet,
 				Path:    "/api/auth/sessions",
 				Handler: getUserSessionsHandler(serverCtx),
 			},
 			{
+				// 终止会话 用户发现某个设备不是自己登录的,需要强制下线
 				Method:  http.MethodPost,
 				Path:    "/api/auth/terminate_session",
 				Handler: terminateSessionHandler(serverCtx),

@@ -8,6 +8,7 @@ import (
 	"beaver/app/user/user_api/internal/handler"
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/common/etcd"
+	"beaver/common/middleware"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -27,6 +28,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
+	server.Use(middleware.RequestLogMiddleware)
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

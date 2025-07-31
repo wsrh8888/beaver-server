@@ -1,0 +1,116 @@
+syntax = "v1"
+
+// 创建动态的请求消息
+type CreateMomentReq {
+	UserID  string     `header:"Beaver-User-Id"` // 用户ID
+	Content string     `json:"content"` // 动态内容
+	Files   []FileInfo `json:"files"` // 文件信息列表
+}
+
+// 创建动态的响应消息
+type CreateMomentRes {}
+
+// 获取动态列表的请求消息
+type GetMomentsReq {
+	UserID string `header:"Beaver-User-Id"` // 用户ID
+	Page   int    `json:"page"` // 页码
+	Limit  int    `json:"limit"` // 每页数量
+}
+
+// 获取动态列表的响应消息
+type GetMomentsRes {
+	Count int64         `json:"count"` // 总数
+	List  []MomentModel `json:"list"` // 动态列表
+}
+
+// 点赞动态的请求消息
+type LikeMomentReq {
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	MomentID uint   `json:"momentId"` // 动态ID
+	Status   bool   `json:"status"` // 点赞状态 true: 点赞 false: 取消点赞
+}
+
+// 点赞动态的响应消息
+type LikeMomentRes {}
+
+// 获取单个动态详情的请求消息
+type GetMomentInfoReq {
+	MomentID string `form:"momendId"` // 动态ID
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+}
+
+// 获取单个动态详情的响应消息
+type GetMomentInfoRes {
+	Moment MomentModel `json:"moment"` // 动态信息
+}
+
+// 文件信息结构体定义
+type FileInfo {
+	FileName string `json:"fileName"` // 文件名
+}
+
+// 动态模型定义
+type MomentModel {
+	Id        uint                 `json:"id"` // 动态ID
+	UserID    string               `json:"userId"` // 用户ID
+	UserName  string               `json:"userName"` // 用户名
+	FileName  string               `json:"fileName"` // 用户头像
+	Content   string               `json:"content"` // 动态内容
+	Files     []FileInfo           `json:"files"` // 文件信息列表
+	Comments  []MomentCommentModel `json:"comments"` // 评论列表
+	Likes     []MomentLikeModel    `json:"likes"` // 点赞列表
+	CreatedAt string               `json:"createdAt"` // 动态创建时间
+}
+
+// 点赞模型定义
+type MomentLikeModel {
+	Id        uint   `json:"id"` // 点赞ID
+	MomentId  uint   `json:"momentId"` // 动态ID
+	UserID    string `json:"userId"` // 用户ID
+	CreatedAt string `json:"createdAt"` // 点赞时间
+	UserName  string `json:"userName"` // 用户名
+	FileName  string `json:"fileName"` // 用户头像
+}
+
+// 评论模型定义
+type MomentCommentModel {
+	Id        uint   `json:"id"` // 评论ID
+	MomentId  uint   `json:"momentId"` // 动态ID
+	UserID    string `json:"userId"` // 用户ID
+	Content   string `json:"content"` // 评论内容
+	CreatedAt string `json:"createdAt"` // 评论时间
+}
+
+// 删除动态的请求消息
+type DeleteMomentReq {
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	MomentID uint   `form:"momentId"` // 动态ID
+}
+
+// 删除动态的响应消息
+type DeleteMomentRes {}
+
+// 定义朋友圈服务
+service moment {
+	@doc "创建动态的接口"
+	@handler CreateMoment
+	post /api/moment/create (CreateMomentReq) returns (CreateMomentRes)
+
+	@doc "获取自己和好友的动态列表的接口"
+	@handler GetMomentsList
+	post /api/moment/list (GetMomentsReq) returns (GetMomentsRes)
+
+	@doc "点赞/取消点赞的接口"
+	@handler LikeMoment
+	post /api/moment/like (LikeMomentReq) returns (LikeMomentRes)
+
+	@doc "获取单个动态详情的接口"
+	@handler GetMomentInfo
+	get /api/moment/info (GetMomentInfoReq) returns (GetMomentInfoRes)
+
+	@doc "删除动态的接口"
+	@handler DeleteMoment
+	get /api/moment/delete (DeleteMomentReq) returns (DeleteMomentRes)
+}
+
+// goctl api go -api moment_api.api -dir . --home ../../../template

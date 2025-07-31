@@ -1,0 +1,15 @@
+
+
+services:
+  gateway_api:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/gateway_api:1.0.2
+    container_name: gateway_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # 挂载外部配置文件
+      - ./gateway.yaml:/etc/gateway.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

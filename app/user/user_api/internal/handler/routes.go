@@ -13,26 +13,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 找回密码（通过邮箱验证码重置密码）
 				Method:  http.MethodPost,
 				Path:    "/api/user/reset_password",
 				Handler: resetPasswordHandler(serverCtx),
 			},
 			{
+				// 修改用户邮箱（需要验证码）
 				Method:  http.MethodPost,
 				Path:    "/api/user/update_email",
 				Handler: updateEmailHandler(serverCtx),
 			},
 			{
+				// 更新用户基础信息（昵称、头像、个性签名、性别）
 				Method:  http.MethodPost,
 				Path:    "/api/user/update_info",
 				Handler: updateInfoHandler(serverCtx),
 			},
 			{
+				// 修改用户密码
 				Method:  http.MethodPost,
 				Path:    "/api/user/update_password",
 				Handler: updatePasswordHandler(serverCtx),
 			},
 			{
+				// 获取用户基础信息
 				Method:  http.MethodGet,
 				Path:    "/api/user/user_info",
 				Handler: userInfoHandler(serverCtx),

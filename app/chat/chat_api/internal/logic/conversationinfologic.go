@@ -67,7 +67,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			return nil, err
 		}
 
-		resp.Avatar = user.Avatar
+		resp.FileName = user.FileName
 		resp.Nickname = user.NickName
 		resp.ChatType = 1 // 私聊类型
 	} else {
@@ -78,7 +78,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			return nil, err
 		}
 
-		resp.Avatar = group.Avatar
+		resp.FileName = group.FileName
 		resp.Nickname = group.Title
 		resp.ChatType = 2 // 群聊类型
 	}

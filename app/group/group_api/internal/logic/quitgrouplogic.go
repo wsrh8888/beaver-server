@@ -52,9 +52,12 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 	}
 
 	// 异步通知群成员
-	defer func() {
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
 		// 获取群成员列表
-		response, err := l.svcCtx.GroupRpc.GetGroupMembers(l.ctx, &group_rpc.GetGroupMembersReq{
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
 			GroupID: req.GroupID,
 		})
 		if err != nil {

@@ -56,11 +56,13 @@ type SystemNotification {
 }
 
 service ws {
+	@doc "WebSocket连接入口"
 	@handler chatWebsocket
-	get /api/ws/ws (wsReq) returns (wsRes) // WebSocket连接入口
+	get /api/ws/ws (wsReq) returns (wsRes)
 
+	@doc "HTTP API发送消息"
 	@handler proxySendMsgHandler
-	post /api/ws/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes) // HTTP API发送消息
+	post /api/ws/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes)
 }
 
 // goctl api go -api ws_api.api -dir . --home ../../template

@@ -27,11 +27,11 @@ const (
 	FeedbackStatusRejected   FeedbackStatus = 4 // 已拒绝
 )
 
-// FileIDs 文件ID数组类型
-type FileIDs []string
+// FileNames 文件ID数组类型
+type FileNames []string
 
 // Value 实现 driver.Valuer 接口，用于写入数据库
-func (f FileIDs) Value() (driver.Value, error) {
+func (f FileNames) Value() (driver.Value, error) {
 	if f == nil {
 		return "[]", nil
 	}
@@ -39,9 +39,9 @@ func (f FileIDs) Value() (driver.Value, error) {
 }
 
 // Scan 实现 sql.Scanner 接口，用于从数据库读取数据
-func (f *FileIDs) Scan(value interface{}) error {
+func (f *FileNames) Scan(value interface{}) error {
 	if value == nil {
-		*f = FileIDs{}
+		*f = FileNames{}
 		return nil
 	}
 	bytes, ok := value.([]byte)
@@ -58,7 +58,7 @@ type FeedbackModel struct {
 	Content      string         `gorm:"type:text;not null" json:"content"`             // 反馈内容
 	Type         FeedbackType   `gorm:"type:tinyint;not null" json:"type"`             // 反馈类型
 	Status       FeedbackStatus `gorm:"type:tinyint;not null;default:1" json:"status"` // 反馈状态
-	FileIDs      FileIDs        `gorm:"type:json" json:"fileIds"`                      // 反馈图片URL数组
+	FileNames    FileNames      `gorm:"type:json" json:"fileNames"`                    // 反馈图片URL数组
 	HandlerID    int64          `gorm:"index" json:"handlerId"`                        // 处理人ID
 	HandleTime   *time.Time     `json:"handle_time"`                                   // 处理时间
 	HandleResult string         `gorm:"type:text" json:"handleResult"`                 // 处理结果

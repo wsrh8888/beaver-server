@@ -42,7 +42,7 @@ func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRe
 		"nickName":  user.NickName,
 		"email":     user.Email,
 		"phone":     user.Phone,
-		"avatar":    user.Avatar,
+		"fileName":  user.FileName,
 		"abstract":  user.Abstract,
 		"status":    user.Status,
 		"source":    user.Source,

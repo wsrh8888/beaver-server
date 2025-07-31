@@ -122,10 +122,10 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 
 		if exists {
 			groupMember.Nickname = user.NickName
-			groupMember.Avatar = user.Avatar
+			groupMember.FileName = user.FileName
 		} else {
 			groupMember.Nickname = "未知用户"
-			groupMember.Avatar = ""
+			groupMember.FileName = ""
 		}
 
 		resp.List = append(resp.List, groupMember)

@@ -65,23 +65,42 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
-	// 获取好友备注
-	notice := friend.GetUserNotice(req.UserID)
-
 	// 检查是否为好友
 	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID)
+
+	// 获取好友备注和来源
+	var notice string
+	var source string
+	if isFriend {
+		var friendModel friend_models.FriendModel
+		err = l.svcCtx.DB.Take(&friendModel,
+			"(send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)",
+			req.UserID, req.FriendID, req.FriendID, req.UserID).Error
+		if err == nil {
+			// 根据好友关系的方向确定备注
+			if friendModel.SendUserID == req.UserID {
+				// 当前用户是发送方，使用发送方的备注
+				notice = friendModel.SendUserNotice
+			} else {
+				// 当前用户是接收方，使用接收方的备注
+				notice = friendModel.RevUserNotice
+			}
+			source = friendModel.Source
+		}
+	}
 
 	response := &types.FriendInfoRes{
 		ConversationID: conversationID,
 		UserID:         friendUser.UUID,
 		Nickname:       friendUser.NickName,
-		Avatar:         friendUser.Avatar,
+		FileName:       friendUser.FileName,
 		Abstract:       friendUser.Abstract,
 		Notice:         notice,
 		IsFriend:       isFriend,
 		Email:          friendUser.Email,
+		Source:         source,
 	}
 
-	l.Logger.Infof("获取好友信息成功: userID=%s, friendID=%s, isFriend=%v", req.UserID, req.FriendID, isFriend)
+	l.Logger.Infof("获取好友信息成功: userID=%s, friendID=%s, isFriend=%v, source=%s", req.UserID, req.FriendID, isFriend, source)
 	return response, nil
 }

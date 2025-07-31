@@ -25,12 +25,12 @@ func NewGetFileDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 	}
 }
 
-// 通过fileId查询文件详情
+// 通过fileName查询文件详情
 func (l *GetFileDetailLogic) GetFileDetail(in *file_rpc.GetFileDetailReq) (*file_rpc.GetFileDetailRes, error) {
 	var file file_models.FileModel
 
-	// 通过fileId查询文件信息
-	err := l.svcCtx.DB.Take(&file, "file_id = ?", in.FileId).Error
+	// 通过fileName查询文件信息
+	err := l.svcCtx.DB.Take(&file, "file_name = ?", in.FileName).Error
 	if err != nil {
 		logx.Errorf("查询文件失败: %s", err.Error())
 		return nil, errors.New("文件不存在")
@@ -38,13 +38,13 @@ func (l *GetFileDetailLogic) GetFileDetail(in *file_rpc.GetFileDetailReq) (*file
 
 	// 返回文件详情
 	return &file_rpc.GetFileDetailRes{
-		FileId:    file.FileID,
-		FileName:  file.FileName,
-		Size:      file.Size,
-		Path:      file.Path,
-		Md5:       file.Md5,
-		Type:      file.Type,
-		CreatedAt: file.CreatedAt.String(),
-		UpdatedAt: file.UpdatedAt.String(),
+		FileName:     file.FileName,
+		OriginalName: file.OriginalName,
+		Size:         file.Size,
+		Path:         file.Path,
+		Md5:          file.Md5,
+		Type:         file.Type,
+		CreatedAt:    file.CreatedAt.String(),
+		UpdatedAt:    file.UpdatedAt.String(),
 	}, nil
 }

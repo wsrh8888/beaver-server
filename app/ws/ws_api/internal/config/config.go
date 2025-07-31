@@ -17,6 +17,7 @@ type Config struct {
 	}
 	Etcd      string
 	GroupRpc  zrpc.RpcClientConf
+	ChatRpc   zrpc.RpcClientConf
 	WebSocket struct {
 		PongWait             int
 		WriteWait            int

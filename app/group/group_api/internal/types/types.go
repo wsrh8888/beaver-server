@@ -12,7 +12,7 @@ type GroupAnnouncementRes struct {
 
 type GroupInfo struct {
 	Title          string `json:"title"`          // 群组名称
-	Avatar         string `json:"avatar"`         // 群组头像URL
+	FileName         string `json:"fileName"`         // 群组头像URL
 	MemberCount    int    `json:"memberCount"`    // 成员数量
 	ConversationID string `json:"conversationId"` // 会话ID
 }
@@ -23,7 +23,7 @@ type GroupInfoReq struct {
 
 type GroupInfoRes struct {
 	Title          string `json:"title"`          // 群组名称
-	Avatar         string `json:"avatar"`         // 群组头像URL
+	FileName         string `json:"fileName"`         // 群组头像URL
 	MemberCount    int    `json:"memberCount"`    // 成员数量
 	ConversationID string `json:"conversationId"` // 会话ID
 }
@@ -50,7 +50,7 @@ type GroupJoinRes struct {
 type GroupMember struct {
 	UserID   string `json:"userId"`   // 成员用户ID
 	Nickname string `json:"nickname"` // 成员昵称
-	Avatar   string `json:"avatar"`   // 成员头像URL
+	FileName   string `json:"fileName"`   // 成员头像URL
 	Role     int8   `json:"role"`     // 成员角色：0普通成员 1管理员 2群主
 	JoinTime string `json:"joinTime"` // 加入时间
 }
@@ -142,7 +142,7 @@ type UpdateGroupInfoReq struct {
 	UserID   string `header:"Beaver-User-Id"`  // 操作者用户ID（群主或管理员）
 	GroupID  string `json:"groupId"`           // 群组ID
 	Name     string `json:"name,optional"`     // 新群名称，可选
-	Avatar   string `json:"avatar,optional"`   // 新群头像URL，可选
+	FileName   string `json:"fileName,optional"`   // 新群头像URL，可选
 	Notice   string `json:"notice,optional"`   // 新群公告，可选
 	JoinType int    `json:"joinType,optional"` // 加入方式：0自由加入 1需要验证 2不允许加入
 }

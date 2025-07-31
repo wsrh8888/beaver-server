@@ -4,7 +4,7 @@ type SubmitFeedbackReq {
 	UserID  string   `header:"Beaver-User-Id"` // 反馈人ID
 	Content string   `json:"content"` // 反馈内容
 	Type    int      `json:"type"` // 反馈类型：1-功能异常 2-功能建议 3-使用体验 4-其他问题
-	FileIds []string `json:"fileIds,optional"` // 反馈图片，JSON格式存储URL数组，可选
+	FileNames []string `json:"fileNames,optional"` // 反馈图片，JSON格式存储URL数组，可选
 }
 
 // 获取反馈列表响应

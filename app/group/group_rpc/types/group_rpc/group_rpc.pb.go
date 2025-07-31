@@ -74,7 +74,7 @@ type GroupMemberInfo struct {
 
 	UserID   string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`     // 用户Id
 	Username string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"` // 用户名
-	Avatar   string `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`     // 用户头像
+	FileName   string `protobuf:"bytes,3,opt,name=fileName,proto3" json:"fileName,omitempty"`     // 用户头像
 }
 
 func (x *GroupMemberInfo) Reset() {
@@ -123,9 +123,9 @@ func (x *GroupMemberInfo) GetUsername() string {
 	return ""
 }
 
-func (x *GroupMemberInfo) GetAvatar() string {
+func (x *GroupMemberInfo) GetFileName() string {
 	if x != nil {
-		return x.Avatar
+		return x.FileName
 	}
 	return ""
 }

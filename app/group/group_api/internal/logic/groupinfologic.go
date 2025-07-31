@@ -37,7 +37,7 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 
 	return &types.GroupInfoRes{
 		Title:          group.Title,
-		Avatar:         group.Avatar,
+		FileName:       group.FileName,
 		ConversationID: group.UUID,
 		MemberCount:    len(group.MemberList), // 添加成员数量
 	}, nil

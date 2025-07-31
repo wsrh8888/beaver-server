@@ -2,18 +2,18 @@
 package types
 
 type ResetPasswordReq struct {
-	Email      string `json:"email"`      // 用户邮箱地址
-	VerifyCode string `json:"verifyCode"` // 邮箱验证码
-	Password   string `json:"password"`   // 新密码
+	Email    string `json:"email"`    // 用户邮箱地址
+	Code     string `json:"code"`     // 邮箱验证码
+	Password string `json:"password"` // 新密码
 }
 
 type ResetPasswordRes struct {
 }
 
 type UpdateEmailReq struct {
-	UserID     string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	NewEmail   string `json:"newEmail"`         // 新邮箱地址
-	VerifyCode string `json:"verifyCode"`       // 验证码
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Email  string `json:"email"`            // 新邮箱地址
+	Code   string `json:"code"`             // 验证码
 }
 
 type UpdateEmailRes struct {
@@ -22,7 +22,7 @@ type UpdateEmailRes struct {
 type UpdateInfoReq struct {
 	UserID   string  `header:"Beaver-User-Id"`  // 用户ID，从请求头获取
 	Nickname *string `json:"nickName,optional"` // 新昵称（可选）
-	Avatar   *string `json:"avatar,optional"`   // 新头像URL（可选）
+	FileName *string `json:"fileName,optional"` // 新头像URL（可选）
 	Abstract *string `json:"abstract,optional"` // 新个性签名（可选）
 	Gender   *int8   `json:"gender,optional"`   // 性别：1-男 2-女 0-未知（可选）
 }
@@ -46,7 +46,7 @@ type UserInfoReq struct {
 type UserInfoRes struct {
 	UserID   string `json:"userId"`         // 用户唯一标识
 	NickName string `json:"nickName"`       // 用户昵称
-	Avatar   string `json:"avatar"`         // 用户头像URL
+	FileName string `json:"fileName"`       // 用户头像URL
 	Abstract string `json:"abstract"`       // 用户个性签名
 	Phone    string `json:"phone,optional"` // 用户手机号
 	Email    string `json:"email,optional"` // 用户邮箱（可选）
