@@ -1,0 +1,13 @@
+
+services:
+  moment_api:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/moment_api:1.0.2
+    container_name: moment_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./moment.yaml:/etc/moment.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 
