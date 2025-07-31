@@ -17,7 +17,6 @@
         "$go"
       ]
     },
-    
     {
       "label": "friend_rpc",
       "type": "shell",
@@ -59,7 +58,6 @@
       ]
     },
     {
-
       "label": "emoji_api",
       "type": "shell",
       "command": "cd app/emoji/emoji_api;  go run emoji.go",
@@ -99,28 +97,10 @@
         "$go"
       ]
     },
-    
     {
       "label": "user_api",
       "type": "shell",
       "command": "cd app/user/user_api;  go run user.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "moment_api",
-      "type": "shell",
-      "command": "cd app/moment/moment_api;  go run moment.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    
-    {
-      "label": "file_api",
-      "type": "shell",
-      "command": "cd app/file/file_api;  go run file.go",
       "problemMatcher": [
         "$go"
       ]
@@ -158,130 +138,9 @@
       ]
     },
     {
-      "label": "auth_admin",
-      "type": "shell",
-      "command": "cd app/auth/auth_admin;  go run auth.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "gateway_admin",
-      "type": "shell",
-      "command": "cd app/gateway/gateway_admin;  go run gateway.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "system_admin",
-      "type": "shell",
-      "command": "cd app/system/system_admin;  go run system.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "user_admin",
-      "type": "shell",
-      "command": "cd app/user/user_admin;  go run user.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "group_admin",
-      "type": "shell",
-      "command": "cd app/group/group_admin;  go run group.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "chat_admin",
-      "type": "shell",
-      "command": "cd app/chat/chat_admin;  go run chat.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "file_admin",
-      "type": "shell",
-      "command": "cd app/file/file_admin;  go run file.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "friend_admin",
-      "type": "shell",
-      "command": "cd app/friend/friend_admin;  go run friend.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "moment_admin",
-      "type": "shell",
-      "command": "cd app/moment/moment_admin;  go run moment.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "feedback_admin",
-      "type": "shell",
-      "command": "cd app/feedback/feedback_admin;  go run feedback.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "emoji_admin",
-      "type": "shell",
-      "command": "cd app/emoji/emoji_admin;  go run emoji.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-
-    {
-      "label": "update_admin",
-      "type": "shell",
-      "command": "cd app/update/update_admin;  go run update.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "update_api",
-      "type": "shell",
-      "command": "cd app/update/update_api;  go run update.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "track_admin",
-      "type": "shell",
-      "command": "cd app/track/track_admin;  go run track.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "track_api",
-      "type": "shell",
-      "command": "cd app/track/track_api;  go run track.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
       "label": "启动RPC服务",
       "type": "shell",
-      "command": "echo Running all services",
+      "command": "echo Running all RPC services",
       "dependsOn": ["user_rpc", "group_rpc", "friend_rpc", "chat_rpc", "dictionary_rpc", "file_rpc"],
       "dependsOrder": "parallel",
       "problemMatcher": []
@@ -289,18 +148,10 @@
     {
       "label": "启动Api全部任务",
       "type": "shell",
-      "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "dictionary_api","track_api","update_api"],
+      "command": "echo Running all API services",
+      "dependsOn": ["auth_api", "user_api", "file_api", "friend_api", "chat_api", "ws_api", "group_api", "gateway_api", "emoji_api", "dictionary_api", "feedback_api"],
       "dependsOrder": "parallel",
       "problemMatcher": []
-    },
-    {
-      "label": "启动Admin全部任务",
-      "type": "shell",
-      "command": "echo Running all services",
-      "dependsOn": ["auth_admin", "gateway_admin", "system_admin", "user_admin", "group_admin", "chat_admin", "file_admin", "friend_admin", "moment_admin", "feedback_admin", "emoji_admin", "update_admin", "track_admin"],
-      "dependsOrder": "parallel",
-      "problemMatcher": []
-    },
+    }
   ]
 }

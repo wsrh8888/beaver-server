@@ -32,7 +32,7 @@ Email:
     Host: smtp.qq.com
     Port: 111
     Username: 123123@qq.com
-    Password: 123123123123
+    Password: beaver
   # 未来可以添加其他邮箱服务商
   # Gmail:
   #   Host: smtp.gmail.com
