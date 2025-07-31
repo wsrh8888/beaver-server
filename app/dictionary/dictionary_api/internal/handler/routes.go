@@ -13,6 +13,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 获取城市列表
 				Method:  http.MethodGet,
 				Path:    "/api/dictionary/cities",
 				Handler: GetCitiesHandler(serverCtx),

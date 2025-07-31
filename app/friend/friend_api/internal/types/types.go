@@ -2,119 +2,122 @@
 package types
 
 type FriendDeleteReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	FriendID string `json:"friendId"`
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	FriendID string `json:"friendId"`         // 要删除的好友用户ID
 }
 
 type FriendDeleteRes struct {
 }
 
 type FriendInfoReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	FriendID string `form:"friendId"`
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	FriendID string `form:"friendId"`         // 好友用户ID
 }
 
 type FriendInfoRes struct {
-	UserID         string `json:"userId"`
-	Nickname       string `json:"nickname"`
-	Avatar         string `json:"avatar"`
-	Abstract       string `json:"abstract`
-	Notice         string `json:"notice"`
-	IsFriend       bool   `json:"isFriend"`
-	ConversationID string `json:"conversationId"`
-	Email          string `json:"email"`
+	UserID         string `json:"userId"`         // 用户ID
+	Nickname       string `json:"nickname"`       // 用户昵称
+	FileName       string `json:"fileName"`       // 用户头像文件名
+	Abstract       string `json:"abstract"`       // 用户签名
+	Notice         string `json:"notice"`         // 好友备注
+	IsFriend       bool   `json:"isFriend"`       // 是否为好友关系
+	ConversationID string `json:"conversationId"` // 会话ID
+	Email          string `json:"email"`          // 用户邮箱
+	Source         string `json:"source"`         // 好友关系来源：email/qrcode
 }
 
 type FriendValidInfo struct {
-	UserID   string `json:"userId"`   //用户Id
-	Nickname string `json:"nickname"` //昵称
-	Avatar   string `json:"avatar"`   //头像
-	Message  string `json:"message"`  //附加消息
-	Source   string `json:"source"`   //来源
-	ID       uint   `json:"id"`       //验证记录Id
-	Flag     string `json:"flag"`     //send 发送者  receive 接收者
-	Status   int8   `json:"status"`   //状态 0 未处理 1 同意 2 拒绝
+	UserID    string `json:"userId"`    // 用户ID
+	Nickname  string `json:"nickname"`  // 用户昵称
+	FileName  string `json:"fileName"`  // 用户头像文件名
+	Message   string `json:"message"`   // 验证消息
+	Source    string `json:"source"`    // 添加好友来源：email/qrcode
+	Id        uint   `json:"id"`        // 验证记录ID
+	Flag      string `json:"flag"`      // 用户角色：send(发送者)/receive(接收者)
+	Status    int8   `json:"status"`    // 验证状态：0(未处理)/1(已通过)/2(已拒绝)
+	CreatedAt string `json:"createdAt"` // 验证时间
 }
 
 type FriendValidStatusReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	VerifyID uint   `json:"verifyId"`
-	Status   int8   `json:"status"`
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	VerifyID uint   `json:"verifyId"`         // 验证记录ID
+	Status   int8   `json:"status"`           // 处理状态：1(同意)/2(拒绝)
 }
 
 type FriendValidStatusRes struct {
 }
 
 type NoticeUpdateReq struct {
-	Notice   string `json:"notice"` //备注
-	UserID   string `header:"Beaver-User-Id"`
-	FriendID string `json:"friendId"` //好友Id
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	FriendID string `json:"friendId"`         // 好友用户ID
+	Notice   string `json:"notice"`           // 新的备注内容
 }
 
 type NoticeUpdateRes struct {
 }
 
 type SearchReq struct {
-	UserID string `header:"Beaver-User-Id"`
-	Email  string `form:"email"` //用户邮箱
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID
+	Email  string `form:"email"`            // 搜索的邮箱地址
 }
 
 type SearchRes struct {
-	UserID         string `json:"userId"`
-	Nickname       string `json:"nickname"`
-	Avatar         string `json:"avatar"`
-	Abstract       string `json:"abstract`
-	Notice         string `json:"notice"`
-	IsFriend       bool   `json:"isFriend"`
-	ConversationID string `json:"conversationId"`
-	Email          string `json:"email"`
+	UserID         string `json:"userId"`         // 用户ID
+	Nickname       string `json:"nickname"`       // 用户昵称
+	FileName       string `json:"fileName"`       // 用户头像文件名
+	Abstract       string `json:"abstract"`       // 用户签名
+	Notice         string `json:"notice"`         // 好友备注
+	IsFriend       bool   `json:"isFriend"`       // 是否为好友关系
+	ConversationID string `json:"conversationId"` // 会话ID
+	Email          string `json:"email"`          // 用户邮箱
 }
 
 type SearchValidInfoReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	FriendID string `json:"friendId"` //好友Id
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	FriendID string `json:"friendId"`         // 好友用户ID
 }
 
 type SearchValidInfoRes struct {
-	ValidID uint `json:"validId"`
+	ValidID uint `json:"validId"` // 验证记录ID
 }
 
 type AddFriendReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	FriendID string `json:"friendId"`
-	Verify   string `json:"verify,optional"`
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	FriendID string `json:"friendId"`         // 要添加的好友用户ID
+	Verify   string `json:"verify,optional"`  // 验证消息，可选
+	Source   string `json:"source"`           // 添加好友来源：email(邮箱搜索)/qrcode(扫码)
 }
 
 type AddFriendRes struct {
 }
 
 type FriendListReq struct {
-	UserID string `header:"Beaver-User-Id"`
-	Page   int    `form:"page,optional"`
-	Limit  int    `form:"limit,optional"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID
+	Page   int    `form:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `form:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type FriendListRes struct {
-	List []FriendInfoRes `json:"list"`
+	List []FriendInfoRes `json:"list"` // 好友列表
 }
 
 type UserValidReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	Role     int8   `header:"Role"`
-	FriendID uint   `json:"friendId"`
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	Role     int8   `header:"Role"`           // 用户角色
+	FriendID uint   `json:"friendId"`         // 好友用户ID
 }
 
 type UserValidRes struct {
-	Verification int8 `json:"verification"` //好友验证
+	Verification int8 `json:"verification"` // 好友验证状态：0(未处理)/1(已通过)/2(已拒绝)
 }
 
 type ValidListReq struct {
-	UserID string `header:"Beaver-User-Id"`
-	Page   int    `json:"page,optional"`
-	Limit  int    `json:"limit,optional"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID
+	Page   int    `json:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `json:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type ValidListRes struct {
-	List  []FriendValidInfo `json:"list"`
-	Count int64             `json:"count"`
+	List  []FriendValidInfo `json:"list"`  // 验证记录列表
+	Count int64             `json:"count"` // 总记录数
 }

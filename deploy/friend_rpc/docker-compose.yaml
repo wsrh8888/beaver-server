@@ -1,0 +1,14 @@
+
+services:
+  friend_rpc:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/friend_rpc:1.0.2
+    container_name: friend_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # 挂载外部配置文件
+      - ./friendrpc.yaml:/etc/friendrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

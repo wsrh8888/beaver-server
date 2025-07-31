@@ -45,13 +45,6 @@ func getEmailCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// 根据邮箱域名选择邮箱服务商
-		emailProvider := email.GetEmailProvider(req.Email)
-		if emailProvider == "" {
-			response.Response(r, w, nil, errors.New("暂不支持该邮箱服务商"))
-			return
-		}
-
 		l := logic.NewGetEmailCodeLogic(r.Context(), svcCtx)
 		resp, err := l.GetEmailCode(&req)
 		response.Response(r, w, resp, err)

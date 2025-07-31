@@ -25,10 +25,13 @@ func NewPinnedChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pinned
 }
 
 func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.PinnedChatRes, err error) {
-
+	resp = &types.PinnedChatRes{}
 	err = l.svcCtx.DB.Model(&chat_models.ChatUserConversationModel{}).
-		Where("user_id = ? AND conversation_id = ?", req, req.ConversationID).
-		Updates(map[string]interface{}{"is_delete": false, "is_pinned": req.IsPinned}).Error
-
-	return
+		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
+		Updates(map[string]interface{}{"is_deleted": false, "is_pinned": req.IsPinned}).Error
+	if err != nil {
+		l.Logger.Errorf("pinned chat update failed: %v", err)
+		return nil, err
+	}
+	return resp, nil
 }

@@ -15,9 +15,14 @@ import (
 type (
 	BatchUpdateConversationReq = chat_rpc.BatchUpdateConversationReq
 	BatchUpdateConversationRes = chat_rpc.BatchUpdateConversationRes
+	EditMessageReq             = chat_rpc.EditMessageReq
+	EditMessageRes             = chat_rpc.EditMessageRes
+	EmojiMsg                   = chat_rpc.EmojiMsg
 	FileMsg                    = chat_rpc.FileMsg
 	ImageMsg                   = chat_rpc.ImageMsg
 	Msg                        = chat_rpc.Msg
+	RecallMessageReq           = chat_rpc.RecallMessageReq
+	RecallMessageRes           = chat_rpc.RecallMessageRes
 	SendMsgReq                 = chat_rpc.SendMsgReq
 	SendMsgRes                 = chat_rpc.SendMsgRes
 	Sender                     = chat_rpc.Sender
@@ -31,6 +36,8 @@ type (
 		SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)
 		UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error)
 		BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error)
+		EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error)
+		RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error)
 	}
 
 	defaultChat struct {
@@ -57,4 +64,14 @@ func (m *defaultChat) UpdateConversation(ctx context.Context, in *UpdateConversa
 func (m *defaultChat) BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
 	return client.BatchUpdateConversation(ctx, in, opts...)
+}
+
+func (m *defaultChat) EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.EditMessage(ctx, in, opts...)
+}
+
+func (m *defaultChat) RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.RecallMessage(ctx, in, opts...)
 }

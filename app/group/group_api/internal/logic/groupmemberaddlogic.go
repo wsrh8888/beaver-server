@@ -8,6 +8,10 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -71,6 +75,49 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	if err != nil {
 		logx.Errorf("Failed to update conversation: %v", err)
 	}
+
+	// 异步通知群成员
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
+		// 获取群成员列表
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+			GroupID: req.GroupID,
+		})
+		if err != nil {
+			l.Logger.Errorf("获取群成员列表失败: %v", err)
+			return
+		}
+
+		// 构建新加入成员的ID集合
+		newMemberIds := make(map[string]bool)
+		for _, newMemberID := range req.UserIds {
+			newMemberIds[newMemberID] = true
+		}
+
+		// 通过ws推送给已存在的群成员（不通知操作者自己和新加入的成员）
+		for _, member := range response.Members {
+			if member.UserID != req.UserID && !newMemberIds[member.UserID] { // 不通知操作者自己和新加入的成员
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, member.UserID, map[string]interface{}{
+					"groupId":  req.GroupID,
+					"type":     "add",
+					"userIds":  req.UserIds,
+					"operator": req.UserID,
+				}, "")
+			}
+		}
+
+		// 通知新加入的成员（需要获取完整的群组信息）
+		for _, newMemberID := range req.UserIds {
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, newMemberID, map[string]interface{}{
+				"groupId":      req.GroupID,
+				"type":         "joined",
+				"operator":     req.UserID,
+				"needFullInfo": true, // 标记需要获取完整信息
+			}, "")
+		}
+	}()
 
 	// 创建并返回响应
 	resp = &types.GroupMemberAddRes{}

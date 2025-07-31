@@ -5,30 +5,44 @@ type TextMsg {
 }
 
 type Msg {
-	Type     uint32    `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+	Type     uint32    `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
 	TextMsg  *TextMsg  `json:"textMsg,optional"` //文本消息
 	ImageMsg *ImageMsg `json:"imageMsg,optional"` //图片
 	VideoMsg *VideoMsg `json:"videoMsg,optional"` //视频
 	FileMsg  *FileMsg  `json:"fileMsg,optional"` //文件
 	VoiceMsg *VoiceMsg `json:"voiceMsg,optional"` //语音
+	EmojiMsg *EmojiMsg `json:"emojiMsg,optional"` //表情
+	ReplyMsg *ReplyMsg `json:"replyMsg,optional"` //回复消息
 }
 
 type FileMsg {
-	Title string `json:"title"`
-	Src   string `json:"src"`
-	Size  int32  `json:"size"` //文件大小 单位字节
-	Type  string `json:"type"` //文件类型
+	FileName string `json:"fileName"` //文件ID，通过fileName可以从文件模块获取完整信息
 }
 
 type VoiceMsg {
-	Src  string `json:"src"`
-	Time int32  `json:"time"` //语音时长 单位秒
+	FileName string `json:"fileName"` //语音文件ID
 }
 
 type VideoMsg {
-	Title string `json:"title"`
-	Src   string `json:"src"`
-	Time  int32  `json:"time"` //视频时长 单位秒
+	FileName string `json:"fileName"` //视频文件ID
+}
+
+type ImageMsg {
+	FileName string `json:"fileName"` //图片文件ID
+}
+
+// 表情消息结构
+type EmojiMsg {
+	FileName  string `json:"fileName"` // 表情图片文件ID（Emoji.FileName）
+	EmojiID   uint32 `json:"emojiId"` // 表情ID（Emoji.Id，单个表情时使用）
+	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
+}
+
+// 回复消息结构
+type ReplyMsg {
+	ReplyToMessageID string `json:"replyToMessageId"` // 被回复的消息ID
+	ReplyToContent   string `json:"replyToContent"` // 被回复的消息内容预览
+	ReplyToSender    string `json:"replyToSender"` // 被回复消息的发送者昵称
 }
 
 type SendMsgReq {
@@ -36,11 +50,6 @@ type SendMsgReq {
 	ConversationID string `json:"conversationId"` //会话id
 	MessageID      string `json:"messageId"` //客户端消息ID
 	Msg            Msg    `json:"msg"`
-}
-
-type ImageMsg {
-	FileId string `json:"fileId"`
-	Name   string `json:"name"`
 }
 
 type ConversationInfoReq {
@@ -55,13 +64,14 @@ type RecentChatListReq {
 }
 
 type ConversationInfoRes {
-	Avatar         string `json:"avatar"`
+	FileName       string `json:"fileName"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"` //消息预览
 	UpdateAt       string `json:"update_at"` //消息时间
 	IsTop          bool   `json:"is_top"` //是否置顶
 	ConversationID string `json:"conversationId"` //会话id
 	ChatType       int    `json:"chatType"` //会话类型 1:好友 2:群聊 3:AI机器人
+	Notice         string `json:"notice"` //备注
 }
 
 type RecentChatListRes {
@@ -70,13 +80,14 @@ type RecentChatListRes {
 }
 
 type SendMsgRes {
-	ID             uint   `json:"id"` //数据库自增ID
+	Id             uint   `json:"id"` //数据库自增ID
 	MessageID      string `json:"messageId"` //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"` //发送者
 	CreateAt       string `json:"create_at"` //消息时间
 	MsgPreview     string `json:"msgPreview"` //消息预览
+	Status         uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
 }
 
 type ChatHistoryReq {
@@ -88,17 +99,18 @@ type ChatHistoryReq {
 
 type Sender {
 	UserID   string `json:"userId"`
-	Avatar   string `json:"avatar"`
+	FileName string `json:"fileName"`
 	Nickname string `json:"nickname"`
 }
 
 type Message {
-	ID             uint   `json:"id"` //数据库自增ID
+	Id             uint   `json:"id"` //数据库自增ID
 	MessageID      string `json:"messageId"` //客户端消息ID
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"` //发送者
 	CreateAt       string `json:"create_at"` //消息时间
+	Status         uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
 }
 
 type ChatHistoryRes {
@@ -125,15 +137,15 @@ type PinnedChatRes {}
 type EditMessageReq {
 	UserID    string `header:"Beaver-User-Id"`
 	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`
+	Content   string `json:"content"` //新的消息内容
 }
 
 // 消息编辑响应
 type EditMessageRes {
-	ID        uint   `json:"id"` //数据库自增ID
+	Id        uint   `json:"id"` //数据库自增ID
 	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`
-	EditTime  string `json:"editTime"`
+	Content   string `json:"content"` //编辑后的内容
+	EditTime  string `json:"editTime"` //编辑时间
 }
 
 // 消息撤回请求
@@ -144,9 +156,9 @@ type RecallMessageReq {
 
 // 消息撤回响应
 type RecallMessageRes {
-	ID         uint   `json:"id"` //数据库自增ID
+	Id         uint   `json:"id"` //数据库自增ID
 	MessageID  string `json:"messageId"` //客户端消息ID
-	RecallTime string `json:"recallTime"`
+	RecallTime string `json:"recallTime"` //撤回时间
 }
 
 // 消息转发请求
@@ -159,39 +171,47 @@ type ForwardMessageReq {
 
 // 消息转发响应
 type ForwardMessageRes {
-	ID          uint   `json:"id"` //数据库自增ID
+	Id          uint   `json:"id"` //数据库自增ID
 	MessageID   string `json:"messageId"` //客户端消息ID
 	ForwardTime string `json:"forwardTime"`
 }
 
 service chat {
+	@doc "发送消息"
 	@handler SendMsg
-	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes) //发送消息
+	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes)
 
-	// 通过会话id获取会话信息
+	@doc "获取会话id"
 	@handler ConversationInfo
-	post /api/chat/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes) //获取会话id
+	post /api/chat/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes)
 
+	@doc "获取最近会话列表"
 	@handler recentChatList
-	get /api/chat/getRecentChatList (RecentChatListReq) returns (RecentChatListRes) //获取最近会话列表
+	get /api/chat/getRecentChatList (RecentChatListReq) returns (RecentChatListRes)
 
+	@doc "获取聊天记录"
 	@handler chatHistory
-	post /api/chat/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes) //获取聊天记录
+	post /api/chat/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes)
 
+	@doc "删除某个最近会话"
 	@handler deleteRecent
-	post /api/chat/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes) //删除某个最近会话
+	post /api/chat/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes)
 
+	@doc "置顶某个会话"
 	@handler pinnedChat
-	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes) //置顶某个会话
+	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
 
+	@doc "编辑消息"
 	@handler editMessage
-	post /api/chat/edit (EditMessageReq) returns (EditMessageRes) // 编辑消息
+	post /api/chat/edit (EditMessageReq) returns (EditMessageRes)
 
+	@doc "撤回消息"
 	@handler recallMessage
-	post /api/chat/recall (RecallMessageReq) returns (RecallMessageRes) // 撤回消息
+	post /api/chat/recall (RecallMessageReq) returns (RecallMessageRes)
 
+	@doc "转发消息"
 	@handler forwardMessage
-	post /api/chat/forward (ForwardMessageReq) returns (ForwardMessageRes) // 转发消息
+	post /api/chat/forward (ForwardMessageReq) returns (ForwardMessageRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template

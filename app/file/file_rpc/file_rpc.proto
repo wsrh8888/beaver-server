@@ -6,13 +6,13 @@ option go_package = "./file_rpc";
 
 // 文件详情请求
 message GetFileDetailReq {
-  string fileId = 1; // 文件ID
+  string fileName = 1; // 文件ID
 }
 
 // 文件详情响应
 message GetFileDetailRes {
-  string fileId = 1;     // 文件唯一ID
-  string fileName = 2;   // 文件名
+  string fileName = 1;     // 文件唯一ID
+  string originalName = 2;   // 文件名
   int64 size = 3;        // 文件大小
   string path = 4;       // 文件实际存储路径
   string md5 = 5;        // 文件MD5
@@ -34,7 +34,7 @@ message GetQiniuUploadTokenRes {
 
 // 文件服务
 service file {
-  // 通过fileId查询文件详情
+  // 通过fileName查询文件详情
   rpc GetFileDetail(GetFileDetailReq) returns (GetFileDetailRes);
   
   // 获取七牛云上传token

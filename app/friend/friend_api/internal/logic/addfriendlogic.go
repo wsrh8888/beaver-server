@@ -27,16 +27,6 @@ func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFrie
 }
 
 func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFriendRes, err error) {
-	// 参数验证
-	if req.UserID == "" || req.FriendID == "" {
-		return nil, errors.New("用户ID和好友ID不能为空")
-	}
-
-	// 不能添加自己为好友
-	if req.UserID == req.FriendID {
-		return nil, errors.New("不能添加自己为好友")
-	}
-
 	var friend friend_models.FriendModel
 
 	// 检查是否已经是好友
@@ -68,6 +58,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		SendUserID: req.UserID,
 		RevUserID:  req.FriendID,
 		Message:    req.Verify,
+		Source:     req.Source, // 添加来源字段
 	}
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error
@@ -76,6 +67,6 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errors.New("添加好友请求失败")
 	}
 
-	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s", req.UserID, req.FriendID)
+	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
 	return &types.AddFriendRes{}, nil
 }

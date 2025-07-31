@@ -13,8 +13,9 @@ type (
 )
 
 service dictionary {
+	@doc "获取城市列表"
 	@handler GetCities
-	get /api/dictionary/cities returns (GetCitiesRes) // 获取城市列表
+	get /api/dictionary/cities returns (GetCitiesRes)
 }
 
 // goctl api go -api dictionary_api.api -dir . --home ../../../template 

@@ -60,14 +60,14 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.ID).Update("send_user_notice", req.Notice).Error
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.Id).Update("send_user_notice", req.Notice).Error
 	} else if friend.RevUserID == req.UserID {
 		// 我是接收方，更新接收方备注
 		if friend.RevUserNotice == req.Notice {
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.ID).Update("rev_user_notice", req.Notice).Error
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.Id).Update("rev_user_notice", req.Notice).Error
 	} else {
 		// 这种情况理论上不应该发生
 		l.Logger.Errorf("用户角色异常: userID=%s, friendID=%s", req.UserID, req.FriendID)

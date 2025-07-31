@@ -1,0 +1,13 @@
+
+services:
+  dictionary_rpc:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/dictionary_rpc:1.0.2
+    container_name: dictionary_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./dictionaryrpc.yaml:/etc/dictionaryrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

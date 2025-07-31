@@ -7,6 +7,7 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
+	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_models"
 	"beaver/core"
 	"flag"
@@ -47,6 +48,12 @@ func main() {
 			&emoji_models.EmojiPackageCollect{},
 			&emoji_models.EmojiCollectEmoji{},
 			&feedback_models.FeedbackModel{},
+			// Moment相关表
+			&moment_models.MomentModel{},
+			&moment_models.MomentLikeModel{},
+			&moment_models.MomentCommentModel{},
+			&moment_models.MomentFavoriteModel{},
+			&moment_models.MomentReportModel{},
 		)
 
 		if err != nil {

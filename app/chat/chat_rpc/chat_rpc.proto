@@ -11,44 +11,51 @@ message TextMsg {
 
 // 定义FileMsg消息
 message FileMsg {
-  string title = 1;
-  string src = 2;
-  int32 size = 3; // 文件大小 单位字节
-  string type = 4; // 文件类型
+  string fileName = 1; // 文件ID，通过fileName可以从文件模块获取完整信息
 }
 
 // 定义VoiceMsg消息
 message VoiceMsg {
-  string src = 1;
-  int32 time = 2; // 语音时长 单位秒
+  string fileName = 1; // 语音文件ID
+  int32 duration = 2;  // 语音时长（秒）
 }
 
 // 定义VideoMsg消息
 message VideoMsg {
-  string title = 1;
-  string src = 2;
-  int32 time = 3; // 视频时长 单位秒
+  string fileName = 1; // 视频文件ID
+  int32 width = 2;     // 视频宽度
+  int32 height = 3;    // 视频高度
+  int32 duration = 4;  // 视频时长（秒）
 }
 
 // 定义ImageMsg消息
 message ImageMsg {
-  string name = 1;
-  string fileId = 2;
+  string fileName = 1; // 图片文件ID
+  int32 width = 2;     // 图片宽度
+  int32 height = 3;    // 图片高度
+}
+
+// 定义EmojiMsg消息 - 表情相关消息
+message EmojiMsg {
+  string fileName = 1; // 表情图片文件ID（Emoji.FileName）
+  uint32 emojiId = 2; // 表情ID（Emoji.ID，单个表情时使用）
+  uint32 packageId = 3; // 表情包ID（EmojiPackage.ID，表情包分享时使用）
 }
 
 // 定义Msg消息
 message Msg {
-  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
   TextMsg textMsg = 2; // 文本消息
   ImageMsg imageMsg = 3; // 图片
   VideoMsg videoMsg = 4; // 视频
   FileMsg fileMsg = 5; // 文件
   VoiceMsg voiceMsg = 6; // 语音
+  EmojiMsg emojiMsg = 7; // 表情（单个表情或表情包）
 }
 
 // 定义SendMsgReq消息
 message SendMsgReq {
-  string userID = 1; // 用户ID
+  string userId = 1; // 用户ID
   string conversation_id = 2; // 会话ID
   string message_id = 3; // 客户端消息ID
   Msg msg = 4; // 消息内容
@@ -56,8 +63,8 @@ message SendMsgReq {
 
 // 定义Sender消息
 message Sender {
-  string userID = 1;
-  string avatar = 2;
+  string userId = 1;
+  string fileName = 2;
   string nickname = 3;
 }
 
@@ -70,6 +77,7 @@ message SendMsgRes {
   Sender sender = 5; // 发送者
   string create_at = 6; // 消息时间
   string msg_preview = 7; // 消息预览
+  uint32 status = 8; // 消息状态 1:正常 2:已撤回 3:已编辑
 }
 
 // 定义UpdateConversationReq消息
@@ -98,11 +106,41 @@ message BatchUpdateConversationRes {
   bool success = 1; // 是否成功
 }
 
+// 定义EditMessageReq消息
+message EditMessageReq {
+  string userID = 1; // 用户ID
+  string messageId = 2; // 客户端消息ID
+  string content = 3; // 新的消息内容
+}
+
+// 定义EditMessageRes消息
+message EditMessageRes {
+  uint32 id = 1; // 数据库自增ID
+  string messageId = 2; // 客户端消息ID
+  string content = 3; // 编辑后的内容
+  string editTime = 4; // 编辑时间
+}
+
+// 定义RecallMessageReq消息
+message RecallMessageReq {
+  string userID = 1; // 用户ID
+  string messageId = 2; // 客户端消息ID
+}
+
+// 定义RecallMessageRes消息
+message RecallMessageRes {
+  uint32 id = 1; // 数据库自增ID
+  string messageId = 2; // 客户端消息ID
+  string recallTime = 3; // 撤回时间
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
     rpc UpdateConversation(UpdateConversationReq) returns (UpdateConversationRes); //更新单个用户的会话记录
     rpc BatchUpdateConversation(BatchUpdateConversationReq) returns (BatchUpdateConversationRes); //批量更新会话记录
+    rpc EditMessage(EditMessageReq) returns (EditMessageRes); //编辑消息
+    rpc RecallMessage(RecallMessageReq) returns (RecallMessageRes); //撤回消息
 }
 
 //goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

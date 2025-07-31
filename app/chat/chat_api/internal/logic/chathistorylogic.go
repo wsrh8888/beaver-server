@@ -58,12 +58,12 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		}
 
 		message := types.Message{
-			ID:             chat.ID,
+			Id:             chat.Id,
 			ConversationID: chat.ConversationID,
 			Sender: types.Sender{
 				UserID:   chat.SendUserModel.UUID,
 				Nickname: chat.SendUserModel.NickName,
-				Avatar:   chat.SendUserModel.Avatar,
+				FileName: chat.SendUserModel.FileName,
 			},
 			CreateAt: chat.CreatedAt.String(),
 			Msg:      msg,

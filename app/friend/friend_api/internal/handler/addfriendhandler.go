@@ -5,6 +5,7 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/common/response"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -18,6 +19,35 @@ func addFriendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, err)
 			return
 		}
+
+		// 参数验证
+		if req.UserID == "" || req.FriendID == "" {
+			response.Response(r, w, nil, errors.New("用户ID和好友ID不能为空"))
+			return
+		}
+
+		// 验证来源字段
+		if req.Source == "" {
+			response.Response(r, w, nil, errors.New("来源字段不能为空"))
+			return
+		}
+
+		// 验证来源值是否合法
+		validSources := map[string]bool{
+			"email":  true,
+			"qrcode": true,
+		}
+		if !validSources[req.Source] {
+			response.Response(r, w, nil, errors.New("无效的来源值，只支持email和qrcode"))
+			return
+		}
+
+		// 不能添加自己为好友
+		if req.UserID == req.FriendID {
+			response.Response(r, w, nil, errors.New("不能添加自己为好友"))
+			return
+		}
+
 		fmt.Println("2222222222222222222")
 		fmt.Println(r)
 

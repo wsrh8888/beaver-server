@@ -15,7 +15,7 @@ Etcd:
   - 127.0.0.1:2379
   Key: filerpc.rpc
 Qiniu: 
-  AK: 380CCZeJZztGl2g3mX-OhufNPkkYaE-HqL2ybfvc
-  SK: CSaNAQG2hiDUHSpQNJWJmktCA9mj9M2_0qYkRqLr
-  Bucket: beaver-im
+  AK: your_qiniu_access_key
+  SK: your_qiniu_secret_key
+  Bucket: your_qiniu_bucket_name
   ExpireTime: 3600 # 签名URL有效期, 单位：秒

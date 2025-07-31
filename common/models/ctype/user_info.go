@@ -2,6 +2,6 @@ package ctype
 
 type UserInfo struct {
 	ID       uint   `json:"id"`
-	Avatar   string `json:"avatar"`
+	FileName string `json:"fileName"`
 	Nickname string `json:"nickname"`
 }

@@ -18,6 +18,7 @@ type FriendModel struct {
 	RevUserID      string                `gorm:"size:64;index" json:"revUserId"`          // 接收验证方的 UserID
 	SendUserNotice string                `gorm:"size: 128" json:"sendUserNotice"`         //发起验证方备注
 	RevUserNotice  string                `gorm:"size: 128" json:"revUserNotice"`          //接收验证方备注
+	Source         string                `gorm:"size: 32" json:"source"`                  // 好友关系来源：qrcode/search/group/recommend
 	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
 }
 

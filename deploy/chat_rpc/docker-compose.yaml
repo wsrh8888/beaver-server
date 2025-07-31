@@ -1,0 +1,13 @@
+
+services:
+  chat_rpc:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/chat_rpc:1.0.2
+    container_name: chat_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./chatrpc.yaml:/etc/chatrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

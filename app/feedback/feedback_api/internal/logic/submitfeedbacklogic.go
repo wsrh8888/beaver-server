@@ -29,11 +29,11 @@ func NewSubmitFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Su
 func (l *SubmitFeedbackLogic) SubmitFeedback(req *types.SubmitFeedbackReq) (resp *types.SubmitFeedbackRes, err error) {
 	// 创建反馈记录
 	feedback := &feedback_models.FeedbackModel{
-		UserID:  req.UserID,
-		Content: req.Content,
-		Type:    feedback_models.FeedbackType(req.Type),
-		Status:  feedback_models.FeedbackStatusPending,
-		FileIDs: feedback_models.FileIDs(req.FileIds),
+		UserID:    req.UserID,
+		Content:   req.Content,
+		Type:      feedback_models.FeedbackType(req.Type),
+		Status:    feedback_models.FeedbackStatusPending,
+		FileNames: feedback_models.FileNames(req.FileNames),
 	}
 
 	// 保存到数据库

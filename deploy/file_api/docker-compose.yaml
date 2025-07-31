@@ -1,0 +1,13 @@
+
+services:
+  file_api:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/file_api:1.0.2
+    container_name: file_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./file.yaml:/etc/file.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

@@ -45,8 +45,8 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 	if req.Name != "" {
 		updateFields["title"] = req.Name
 	}
-	if req.Avatar != "" {
-		updateFields["avatar"] = req.Avatar
+	if req.FileName != "" {
+		updateFields["file_name"] = req.FileName
 	}
 	if req.Notice != "" {
 		updateFields["notice"] = req.Notice
@@ -64,9 +64,12 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 	}
 
 	// 异步通知群成员
-	defer func() {
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
 		// 获取群成员列表
-		response, err := l.svcCtx.GroupRpc.GetGroupMembers(l.ctx, &group_rpc.GetGroupMembersReq{
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
 			GroupID: req.GroupID,
 		})
 		if err != nil {
@@ -80,7 +83,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupUpdate, req.UserID, member.UserID, map[string]interface{}{
 					"groupId":  req.GroupID,
 					"name":     req.Name,
-					"avatar":   req.Avatar,
+					"fileName": req.FileName,
 					"notice":   req.Notice,
 					"joinType": req.JoinType,
 				}, "")

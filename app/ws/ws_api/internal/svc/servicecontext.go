@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"beaver/app/chat/chat_rpc/chat"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_rpc/group"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/ws/ws_api/internal/config"
@@ -17,6 +19,7 @@ type ServiceContext struct {
 	Redis    *redis.Client
 	DB       *gorm.DB
 	GroupRpc group_rpc.GroupClient
+	ChatRpc  chat_rpc.ChatClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -27,5 +30,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:    client,
 		Config:   c,
 		GroupRpc: group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		ChatRpc:  chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 	}
 }

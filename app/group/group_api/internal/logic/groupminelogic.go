@@ -46,7 +46,7 @@ func (l *Group_mineLogic) Group_mine(req *types.GroupMineReq) (resp *types.Group
 
 		resp.List = append(resp.List, types.GroupInfoRes{
 			Title:          model.Title,
-			Avatar:         model.Avatar,
+			FileName:       model.FileName,
 			MemberCount:    len(model.MemberList),
 			ConversationID: model.UUID,
 		})

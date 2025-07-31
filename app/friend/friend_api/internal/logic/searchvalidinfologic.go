@@ -56,15 +56,15 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 
 	// 检查验证状态
 	if friendVerify.RevStatus != 0 {
-		l.Logger.Errorf("好友验证已处理: verifyID=%d, status=%d", friendVerify.ID, friendVerify.RevStatus)
+		l.Logger.Errorf("好友验证已处理: verifyID=%d, status=%d", friendVerify.Id, friendVerify.RevStatus)
 		return nil, errors.New("该验证已处理，无法重复操作")
 	}
 
 	// 填充返回结果
 	resp = &types.SearchValidInfoRes{
-		ValidID: friendVerify.ID,
+		ValidID: friendVerify.Id,
 	}
 
-	l.Logger.Infof("查询好友验证信息成功: userID=%s, friendID=%s, validID=%d", req.UserID, req.FriendID, friendVerify.ID)
+	l.Logger.Infof("查询好友验证信息成功: userID=%s, friendID=%s, validID=%d", req.UserID, req.FriendID, friendVerify.Id)
 	return resp, nil
 }

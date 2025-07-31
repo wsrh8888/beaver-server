@@ -23,7 +23,7 @@ func NewFileServer(svcCtx *svc.ServiceContext) *FileServer {
 	}
 }
 
-// 通过fileId查询文件详情
+// 通过fileName查询文件详情
 func (s *FileServer) GetFileDetail(ctx context.Context, in *file_rpc.GetFileDetailReq) (*file_rpc.GetFileDetailRes, error) {
 	l := logic.NewGetFileDetailLogic(ctx, s.svcCtx)
 	return l.GetFileDetail(in)

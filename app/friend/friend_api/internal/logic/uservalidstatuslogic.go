@@ -63,10 +63,11 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	case 1: // 同意
 		friendVerify.RevStatus = 1
 
-		// 创建好友关系
+		// 创建好友关系，同步来源信息
 		err = l.svcCtx.DB.Create(&friend_models.FriendModel{
 			SendUserID: friendVerify.SendUserID,
 			RevUserID:  friendVerify.RevUserID,
+			Source:     friendVerify.Source, // 同步来源字段
 		}).Error
 		if err != nil {
 			l.Logger.Errorf("创建好友关系失败: %v", err)
@@ -80,21 +81,30 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			return nil, fmt.Errorf("生成会话ID失败: %v", err)
 		}
 
-		// 发送默认欢迎消息
-		_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-			UserID:         friendVerify.RevUserID,
-			ConversationId: conversationID,
-			Msg: &chat_rpc.Msg{
-				Type: 1,
-				TextMsg: &chat_rpc.TextMsg{
-					Content: "我们已经是好友了，开始聊天吧",
+		// 异步发送默认欢迎消息
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					l.Logger.Errorf("异步发送欢迎消息时发生panic: %v", r)
+				}
+			}()
+
+			_, err := l.svcCtx.ChatRpc.SendMsg(context.Background(), &chat_rpc.SendMsgReq{
+				UserId:         friendVerify.RevUserID,
+				ConversationId: conversationID,
+				Msg: &chat_rpc.Msg{
+					Type: 1,
+					TextMsg: &chat_rpc.TextMsg{
+						Content: "我们已经是好友了，开始聊天吧",
+					},
 				},
-			},
-		})
-		if err != nil {
-			l.Logger.Errorf("发送欢迎消息失败: %v", err)
-			// 不返回错误，因为好友关系已经创建成功
-		}
+			})
+			if err != nil {
+				l.Logger.Errorf("异步发送欢迎消息失败: %v", err)
+			} else {
+				l.Logger.Infof("异步发送欢迎消息成功: conversationID=%s", conversationID)
+			}
+		}()
 
 	case 2: // 拒绝
 		friendVerify.RevStatus = 2
@@ -121,16 +131,26 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		return nil, errors.New("保存验证状态失败")
 	}
 
-	// 发送WebSocket通知
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
-		"userId": friendVerify.SendUserID,
-		"status": friendVerify.RevStatus,
-	}, conversationID)
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
-		"userId": friendVerify.RevUserID,
-		"status": friendVerify.RevStatus,
-	}, conversationID)
+	// 异步发送WebSocket通知
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+			}
+		}()
 
-	l.Logger.Infof("处理好友验证成功: verifyID=%d, userID=%s, status=%d", req.VerifyID, req.UserID, req.Status)
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
+			"userId": friendVerify.SendUserID,
+			"status": friendVerify.RevStatus,
+		}, conversationID)
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
+			"userId": friendVerify.RevUserID,
+			"status": friendVerify.RevStatus,
+		}, conversationID)
+
+		l.Logger.Infof("异步发送WebSocket通知完成: verifyID=%d, status=%d", req.VerifyID, friendVerify.RevStatus)
+	}()
+
+	l.Logger.Infof("处理好友验证成功: verifyID=%d, userID=%s, status=%d, source=%s", req.VerifyID, req.UserID, req.Status, friendVerify.Source)
 	return &types.FriendValidStatusRes{}, nil
 }

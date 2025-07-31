@@ -45,8 +45,8 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	if req.Nickname != nil {
 		updateFields["nick_name"] = *req.Nickname
 	}
-	if req.Avatar != nil {
-		updateFields["avatar"] = *req.Avatar
+	if req.FileName != nil {
+		updateFields["file_name"] = *req.FileName
 	}
 	if req.Abstract != nil {
 		updateFields["abstract"] = *req.Abstract
@@ -65,8 +65,10 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 
 	// 异步更新缓存和通知好友
 	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
 		// 拿到自己的好友列表
-		response, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, &friend_rpc.GetFriendIdsRequest{
+		response, err := l.svcCtx.FriendRpc.GetFriendIds(ctx, &friend_rpc.GetFriendIdsRequest{
 			UserID: req.UserID,
 		})
 		if err != nil {

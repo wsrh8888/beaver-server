@@ -38,7 +38,7 @@ func (l *ResetPasswordLogic) ResetPassword(req *types.ResetPasswordReq) (resp *t
 	}
 
 	// 验证邮箱验证码
-	err = l.verifyEmailCode(req.Email, req.VerifyCode, "reset_password")
+	err = l.verifyEmailCode(req.Email, req.Code, "reset_password")
 	if err != nil {
 		return nil, err
 	}

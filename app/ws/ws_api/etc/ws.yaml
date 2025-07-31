@@ -17,6 +17,11 @@ GroupRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
+ChatRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: chatrpc.rpc
 # WebSocket配置
 WebSocket:
   # 心跳配置(单位:秒)

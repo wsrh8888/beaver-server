@@ -26,25 +26,16 @@ func (chat ChatModel) MsgPreviewMethod() string {
 	case 1:
 		return chat.Msg.TextMsg.Content
 	case 2:
-		return "[图片消息] - " + chat.Msg.ImageMsg.Name
+		return "[图片消息]"
 	case 3:
-		return "[视频消息] - " + chat.Msg.VideoMsg.Title
+		return "[视频消息]"
 	case 4:
-		return "[文件消息] - " + chat.Msg.FileMsg.Title
+		return "[文件消息]"
 	case 5:
 		return "[语音消息]"
 	case 6:
-		return "[语音通话消息]"
-	case 7:
-		return "[视频通话消息]"
-	case 8:
-		return "[撤回消息] - " + chat.Msg.WithdrawMsg.Content
-	case 9:
-		return "[回复消息] - " + chat.Msg.ReplyMsg.Content
-	case 10:
-		return "[引用消息] - " + chat.Msg.QuoteMsg.Content
-	case 11:
-		return "[@消息] - " + chat.Msg.TextMsg.Content
+		return "[表情消息]"
+	default:
+		return "[未知消息]"
 	}
-	return "[未知消息]"
 }

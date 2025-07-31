@@ -41,7 +41,7 @@ type GroupMineReq {
 
 type GroupInfo {
 	Title          string `json:"title"` // 群组名称
-	Avatar         string `json:"avatar"` // 群组头像URL
+	FileName         string `json:"fileName"` // 群组头像URL
 	MemberCount    int    `json:"memberCount"` // 成员数量
 	ConversationID string `json:"conversationId"` // 会话ID
 }
@@ -55,7 +55,7 @@ type UpdateGroupInfoReq {
 	UserID   string `header:"Beaver-User-Id"` // 操作者用户ID（群主或管理员）
 	GroupID  string `json:"groupId"` // 群组ID
 	Name     string `json:"name,optional"` // 新群名称，可选
-	Avatar   string `json:"avatar,optional"` // 新群头像URL，可选
+	FileName   string `json:"fileName,optional"` // 新群头像URL，可选
 	Notice   string `json:"notice,optional"` // 新群公告，可选
 	JoinType int    `json:"joinType,optional"` // 加入方式：0自由加入 1需要验证 2不允许加入
 }
@@ -72,7 +72,7 @@ type GroupMemberListReq {
 type GroupMember {
 	UserID   string `json:"userId"` // 成员用户ID
 	Nickname string `json:"nickname"` // 成员昵称
-	Avatar   string `json:"avatar"` // 成员头像URL
+	FileName   string `json:"fileName"` // 成员头像URL
 	Role     int8   `json:"role"` // 成员角色：0普通成员 1管理员 2群主
 	JoinTime string `json:"joinTime"` // 加入时间
 }
@@ -184,7 +184,7 @@ type (
 	}
 	GroupInfoRes {
 		Title          string `json:"title"` // 群组名称
-		Avatar         string `json:"avatar"` // 群组头像URL
+		FileName         string `json:"fileName"` // 群组头像URL
 		MemberCount    int    `json:"memberCount"` // 成员数量
 		ConversationID string `json:"conversationId"` // 会话ID
 	}
@@ -194,59 +194,77 @@ type (
 type UpdateDisplayNameRes {}
 
 service group {
+	@doc "创建群组"
 	@handler groupCreate
-	post /api/group/create (groupCreateReq) returns (groupCreateRes) // 创建群组
+	post /api/group/create (groupCreateReq) returns (groupCreateRes)
 
+	@doc "删除群组"
 	@handler groupDelete
-	delete /api/group/delete/:id (groupDeleteReq) returns (groupDeleteRes) // 删除群组
+	delete /api/group/delete/:id (groupDeleteReq) returns (groupDeleteRes)
 
+	@doc "移除群成员"
 	@handler groupMemberRemove
-	post /api/group/memberRemove (groupMemberRemoveReq) returns (groupMemberRemoveRes) // 移除群成员
+	post /api/group/memberRemove (groupMemberRemoveReq) returns (groupMemberRemoveRes)
 
+	@doc "添加群成员"
 	@handler groupMemberAdd
-	post /api/group/memberAdd (groupMemberAddReq) returns (groupMemberAddRes) // 添加群成员
+	post /api/group/memberAdd (groupMemberAddReq) returns (groupMemberAddRes)
 
+	@doc "退出群组"
 	@handler quitGroup
-	post /api/group/quit (GroupQuitReq) returns (GroupQuitRes) // 退出群组
+	post /api/group/quit (GroupQuitReq) returns (GroupQuitRes)
 
+	@doc "更新群组信息"
 	@handler updateGroupInfo
-	post /api/group/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes) // 更新群组信息
+	post /api/group/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
 
+	@doc "更新群组信息"
 	@handler groupInfo
-	post /api/group/groupInfo (GroupInfoReq) returns (GroupInfoRes) // 更新群组信息
+	post /api/group/groupInfo (GroupInfoReq) returns (GroupInfoRes)
 
+	@doc "获取我加入的群组列表"
 	@handler group_mine
-	post /api/group/group_mine (GroupMineReq) returns (GroupMineRes) // 获取我加入的群组列表
+	post /api/group/group_mine (GroupMineReq) returns (GroupMineRes)
 
+	@doc "获取群成员列表"
 	@handler getGroupMembers
-	post /api/group/members (GroupMemberListReq) returns (GroupMemberListRes) // 获取群成员列表
+	post /api/group/members (GroupMemberListReq) returns (GroupMemberListRes)
 
+	@doc "更新群成员角色"
 	@handler updateMemberRole
-	post /api/group/member/role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes) // 更新群成员角色
+	post /api/group/member/role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
 
+	@doc "更新群公告"
 	@handler updateAnnouncement
-	post /api/group/announcement (GroupAnnouncementReq) returns (GroupAnnouncementRes) // 更新群公告
+	post /api/group/announcement (GroupAnnouncementReq) returns (GroupAnnouncementRes)
 
+	@doc "邀请新成员"
 	@handler inviteMembers
-	post /api/group/invite (GroupInviteReq) returns (GroupInviteRes) // 邀请新成员
+	post /api/group/invite (GroupInviteReq) returns (GroupInviteRes)
 
+	@doc "申请加入群组"
 	@handler joinGroup
-	post /api/group/join (GroupJoinReq) returns (GroupJoinRes) // 申请加入群组
+	post /api/group/join (GroupJoinReq) returns (GroupJoinRes)
 
+	@doc "更新群组设置"
 	@handler updateSettings
-	post /api/group/settings (GroupSettingsReq) returns (GroupSettingsRes) // 更新群组设置
+	post /api/group/settings (GroupSettingsReq) returns (GroupSettingsRes)
 
+	@doc "群成员禁言管理"
 	@handler groupMute
-	post /api/group/mute (GroupMuteReq) returns (GroupMuteRes) // 群成员禁言管理
+	post /api/group/mute (GroupMuteReq) returns (GroupMuteRes)
 
+	@doc "转让群主"
 	@handler transferOwner
-	post /api/group/transfer (TransferOwnerReq) returns (TransferOwnerRes) // 转让群主
+	post /api/group/transfer (TransferOwnerReq) returns (TransferOwnerRes)
 
+	@doc "获取禁言成员列表"
 	@handler getMuteList
-	get /api/group/mute/list (GroupMuteListReq) returns (GroupMuteListRes) // 获取禁言成员列表
+	get /api/group/mute/list (GroupMuteListReq) returns (GroupMuteListRes)
 
+	@doc "更新群内显示名称"
 	@handler updateDisplayName
-	post /api/group/member/displayName (UpdateDisplayNameReq) returns (UpdateDisplayNameRes) // 更新群内显示名称
+	post /api/group/member/displayName (UpdateDisplayNameReq) returns (UpdateDisplayNameRes)
 }
 
 // goctl api go -api group_api.api -dir . --home ../../../template

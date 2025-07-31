@@ -36,7 +36,7 @@ message IsFriendRes {
 
 message UserInfo {
   string nick_name = 1;
-  string avatar = 2;
+  string fileName = 2;
 
 }
 

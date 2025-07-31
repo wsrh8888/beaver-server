@@ -13,46 +13,55 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 删除某个最近会话
 				Method:  http.MethodPost,
 				Path:    "/api/chat/deleteRecentChat",
 				Handler: deleteRecentHandler(serverCtx),
 			},
 			{
+				// 编辑消息
 				Method:  http.MethodPost,
 				Path:    "/api/chat/edit",
 				Handler: editMessageHandler(serverCtx),
 			},
 			{
+				// 转发消息
 				Method:  http.MethodPost,
 				Path:    "/api/chat/forward",
 				Handler: forwardMessageHandler(serverCtx),
 			},
 			{
+				// 获取聊天记录
 				Method:  http.MethodPost,
 				Path:    "/api/chat/getChatHistory",
 				Handler: chatHistoryHandler(serverCtx),
 			},
 			{
+				// 获取会话id
 				Method:  http.MethodPost,
 				Path:    "/api/chat/getConversationInfo",
 				Handler: ConversationInfoHandler(serverCtx),
 			},
 			{
+				// 获取最近会话列表
 				Method:  http.MethodGet,
 				Path:    "/api/chat/getRecentChatList",
 				Handler: recentChatListHandler(serverCtx),
 			},
 			{
+				// 置顶某个会话
 				Method:  http.MethodPost,
 				Path:    "/api/chat/pinnedChat",
 				Handler: pinnedChatHandler(serverCtx),
 			},
 			{
+				// 撤回消息
 				Method:  http.MethodPost,
 				Path:    "/api/chat/recall",
 				Handler: recallMessageHandler(serverCtx),
 			},
 			{
+				// 发送消息
 				Method:  http.MethodPost,
 				Path:    "/api/chat/sendMsg",
 				Handler: SendMsgHandler(serverCtx),

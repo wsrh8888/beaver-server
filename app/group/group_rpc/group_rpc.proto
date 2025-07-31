@@ -10,7 +10,7 @@ message GetGroupMembersReq {
 message GroupMemberInfo {
   string userID = 1;  // 用户Id
   string username = 2; // 用户名
-  string avatar = 3;   // 用户头像
+  string fileName = 3;   // 用户头像
 }
 
 message GetGroupMembersRes {
