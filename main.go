@@ -2,7 +2,6 @@ package main
 
 import (
 	"beaver/app/chat/chat_models"
-	"beaver/app/emoji/emoji_models"
 	"beaver/app/feedback/feedback_models"
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
@@ -42,11 +41,6 @@ func main() {
 			&group_models.GroupModel{},
 			&group_models.GroupMemberModel{},
 			&file_models.FileModel{},
-			&emoji_models.EmojiPackage{},
-			&emoji_models.Emoji{},
-			&emoji_models.EmojiPackageEmoji{},
-			&emoji_models.EmojiPackageCollect{},
-			&emoji_models.EmojiCollectEmoji{},
 			&feedback_models.FeedbackModel{},
 			// Moment相关表
 			&moment_models.MomentModel{},

@@ -1,3 +1,13 @@
 node_modules
 package.lock.json
 
+# 忽略admin相关目录
+app/*/admin
+app/*/*_admin
+**/admin
+**/*_admin
+
+# 忽略特定服务目录
+app/update
+app/track
+app/emoji
