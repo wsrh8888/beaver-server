@@ -20,7 +20,7 @@ MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 UploadDir: uploads
 Qiniu: 
   AK: 123-OhufNPkkYaE-HqL2ybfvc
-  SK: 12
+  SK: beaver
   Bucket: beaver-im
   Domain: 'http://123.123.com'
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
