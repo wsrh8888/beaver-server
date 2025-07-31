@@ -44,7 +44,6 @@
 ### 📱 **Cross-Platform Support**
 - **Mobile Apps** - iOS/Android via UniApp framework
 - **Desktop Apps** - Windows/macOS/Linux via Electron
-- **Web Client** - Progressive Web App (PWA)
 - **API Gateway** - RESTful APIs for third-party integration
 
 ## 🛠️ Technology Stack
@@ -65,7 +64,6 @@
 |----------|-----------|----------|
 | **Mobile** | UniApp + Vue 3 | Cross-platform mobile apps |
 | **Desktop** | Electron + Vue 3 | Native desktop experience |
-| **Web** | Vue 3 + PWA | Progressive web application |
 
 ## 📊 Performance Metrics
 
@@ -78,13 +76,13 @@
 ## 🏗️ Architecture Overview
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Mobile App    │    │  Desktop App    │    │   Web Client    │
-│   (UniApp)      │    │   (Electron)    │    │    (Vue 3)      │
-└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          └──────────────────────┼──────────────────────┘
-                                 │
+┌─────────────────┐    ┌─────────────────┐
+│   Mobile App    │    │  Desktop App    │
+│   (UniApp)      │    │   (Electron)    │
+└─────────┬───────┘    └─────────┬───────┘
+          │                      │
+          └──────────────────────┘
+                    │
                     ┌─────────────┴─────────────┐
                     │      API Gateway          │
                     │      (Port: 20800)        │
@@ -121,51 +119,7 @@
                     └───────────────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
 
-### Prerequisites
-- Go >= 1.21
-- MySQL >= 8.0
-- Redis >= 6.0
-- ETCD >= 3.5
-- Docker >= 20.0
-
-### Installation
-
-1. **Clone Repository**
-```bash
-git clone https://github.com/wsrh8888/beaver-server.git
-cd beaver-server
-```
-
-2. **Install Dependencies**
-```bash
-go mod tidy
-```
-
-3. **Start Infrastructure Services**
-```bash
-# Start MySQL, Redis, ETCD with Docker Compose
-docker-compose -f build/docker-compose.yaml up -d
-```
-
-4. **Initialize Database**
-```bash
-go run main.go -db
-```
-
-5. **Start Services**
-```bash
-# Start RPC services first
-go run app/user/user_rpc/userrpc.go -f app/user/user_rpc/etc/userrpc.yaml
-go run app/auth/auth_rpc/authrpc.go -f app/auth/auth_rpc/etc/authrpc.yaml
-# ... start other RPC services
-
-# Then start API services
-go run app/user/user_api/user.go -f app/user/user_api/etc/user.yaml
-go run app/auth/auth_api/auth.go -f app/auth/auth_api/etc/auth.yaml
-# ... start other API services
-```
 
 ## 📚 Documentation & Resources
 
@@ -183,15 +137,7 @@ go run app/auth/auth_api/auth.go -f app/auth/auth_api/etc/auth.yaml
 | **beaver-mobile** | [GitHub](https://github.com/wsrh8888/beaver-mobile) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-mobile) | Mobile applications |
 | **beaver-desktop** | [GitHub](https://github.com/wsrh8888/beaver-desktop) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-desktop) | Desktop applications |
 
-## 📈 Recent Updates
 
-### v1.0.0 (2025-07-14)
-- ✅ **Enhanced Security**: Email authentication and verification codes
-- ✅ **New Services**: Dictionary API/RPC and File RPC services
-- ✅ **User Management**: Profile editing and personal information management
-- ✅ **Middleware**: Request logging and authentication middleware
-- ✅ **Bug Fixes**: Comprehensive bug fixes and performance improvements
-- ✅ **Port Optimization**: Standardized port allocation for all services
 
 ## 📱 Feature Showcase
 
@@ -258,14 +204,34 @@ beaver-server/
 │   │   ├── chat_api/            # HTTP API layer
 │   │   ├── chat_rpc/            # gRPC service layer
 │   │   └── chat_models/         # Data models
-│   ├── friend/                   # Friend management service
-│   ├── group/                    # Group management service
-│   ├── user/                     # User management service
-│   ├── ws/                       # WebSocket service
-│   ├── file/                     # File management service
-│   ├── emoji/                    # Emoji management service
+│   ├── dictionary/               # Dictionary service
+│   │   ├── dictionary_api/      # HTTP API layer
+│   │   └── dictionary_rpc/      # gRPC service layer
 │   ├── feedback/                 # Feedback service
-│   └── gateway/                  # API gateway
+│   │   ├── feedback_api/        # HTTP API layer
+│   │   └── feedback_models/     # Data models
+│   ├── file/                     # File management service
+│   │   ├── file_api/            # HTTP API layer
+│   │   ├── file_rpc/            # gRPC service layer
+│   │   └── file_models/         # Data models
+│   ├── friend/                   # Friend management service
+│   │   ├── friend_api/          # HTTP API layer
+│   │   ├── friend_rpc/          # gRPC service layer
+│   │   └── friend_models/       # Data models
+│   ├── gateway/                  # API gateway
+│   ├── group/                    # Group management service
+│   │   ├── group_api/           # HTTP API layer
+│   │   ├── group_rpc/           # gRPC service layer
+│   │   └── group_models/        # Data models
+│   ├── moment/                   # Moments service
+│   │   ├── moment_api/          # HTTP API layer
+│   │   └── moment_models/       # Data models
+│   ├── user/                     # User management service
+│   │   ├── user_api/            # HTTP API layer
+│   │   ├── user_rpc/            # gRPC service layer
+│   │   └── user_models/         # Data models
+│   └── ws/                       # WebSocket service
+│       └── ws_api/              # HTTP API layer
 ├── common/                       # Shared components
 │   ├── middleware/              # HTTP/gRPC middleware
 │   ├── models/                  # Shared data models
