@@ -58,10 +58,6 @@ RUN go build -ldflags="-s -w" -o file_api/file app/file/file_api/file.go
 # file_rpc
 RUN go build -ldflags="-s -w" -o file_rpc/filerpc app/file/file_rpc/filerpc.go
 
-# ==================== EMOJI 相关服务 ====================
-# emoji_api
-RUN go build -ldflags="-s -w" -o emoji_api/emoji app/emoji/emoji_api/emoji.go
-
 # ==================== FEEDBACK 相关服务 ====================
 # feedback_api
 RUN go build -ldflags="-s -w" -o feedback_api/feedback app/feedback/feedback_api/feedback.go
