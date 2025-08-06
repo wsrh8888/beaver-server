@@ -124,10 +124,9 @@
 ## 📚 Documentation & Resources
 
 - 📖 **Comprehensive Documentation**: [https://wsrh8888.github.io/beaver-docs/](https://wsrh8888.github.io/beaver-docs/)
-- 🎥 **Video Tutorials**: [Bilibili Channel](https://www.bilibili.com/video/BV1HrrKYeEB4/)
-- 📱 **Demo APK**: [Download v1.0.0](https://github.com/wsrh8888/beaver-docs/releases/download/v1.0.0/1.0.0.apk)
-- 🔧 **API Reference**: [Swagger Documentation](https://wsrh8888.github.io/beaver-docs/api/)
-- 🏗️ **Architecture Guide**: [System Design](https://wsrh8888.github.io/beaver-docs/architecture/)
+- 🎥 **Video Tutorials**: [Bilibili Channel](https://space.bilibili.com/269553626/lists)
+- 📱 **Demo APK**: [Beaver IM Android Demo](https://github.com/wsrh8888/beaver-docs/releases/download/lastest/latest.apk)
+- 💬 **QQ Group**: [1013328597](https://qm.qq.com/q/82rbf7QBzO)
 
 ## 🔗 Related Projects
 
@@ -270,41 +269,55 @@ We welcome contributions from the community! Please see our [Contributing Guide]
 
 This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
 
-### ⚖️ Legal Disclaimer
+### ⚖️ Usage Guidelines
 
-**Important Notice**: This project is intended for educational and legitimate business purposes only. Users must:
+**Project Purpose**: This project is primarily designed for **technical learning and communication**, aiming to provide developers with a platform for learning and research.
 
-- ✅ **Comply with Local Laws** - Ensure usage complies with applicable laws and regulations
-- ✅ **Obtain Necessary Permissions** - Secure explicit authorization before use
-- ✅ **Assume Usage Liability** - Users are solely responsible for all legal consequences arising from software usage
-- ✅ **No Illegal Use** - Strictly prohibited for fraud, harassment, privacy violations, or other illegal activities
+**Usage Recommendations**:
+- 📚 **Learning & Communication** - Welcome for personal learning, technical research, academic exchange
+- 🤝 **Open Source Contributions** - Welcome code improvements, bug fixes, feature suggestions
+- 🔒 **Compliant Usage** - Please ensure usage complies with local laws and regulations
+- 💡 **Innovative Applications** - Encourage innovative application development based on this project
 
-**Disclaimer Terms**:
-- Project developers assume no legal responsibility for user actions
-- Developers are not liable for any damages caused by software usage
-- If illegal usage is discovered, immediately cease use and report to relevant authorities
+**Friendly Reminders**:
+- This project uses the MIT open source license, allowing you to freely use, modify, and distribute
+- We recommend reading relevant laws and regulations before use to ensure compliance
+- If you have questions or need help, feel free to reach out via QQ Group or GitHub Issues
 
-### 🛡️ Compliance Guidelines
+### 📋 Project Attribution Requirements
 
-- 📋 **Enterprise Use**: Consult legal department before implementation
-- 🔒 **Privacy Protection**: Ensure data collection and usage comply with privacy regulations
-- 📞 **Customer Support**: Provide compliant customer service and support
-- 📊 **Data Security**: Implement appropriate data security measures
+**Important**: If you develop or publish based on this project, you **must** retain the following information:
 
-> 📖 **Detailed Legal Terms**: Please refer to [LEGAL.md](LEGAL.md) for complete legal disclaimers and compliance requirements.
+#### 🖥️ **Frontend Projects (Mobile/Desktop/Web Apps)**
+- **About Page**: Must include project source attribution in "About Us", "About App", or similar pages
+- **Required Text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open source IM project"
+- **Link**: Must provide clickable link to the original project
 
-## 🆘 Support & Community
+#### 🔧 **Backend Projects (Server/API Services)**
+- **README.md**: Must include attribution in the project introduction or description
+- **Required Text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open source IM project"
+- **Link**: Must provide clickable link to the original project
 
-- 📧 **Email**: [751135385@qq.com](mailto:751135385@qq.com)
-- 💬 **QQ Group**: [1013328597](https://qm.qq.com/q/82rbf7QBzO)
-- 📖 **Documentation**: [https://wsrh8888.github.io/beaver-docs/](https://wsrh8888.github.io/beaver-docs/)
-- 🎥 **Tutorials**: [Bilibili Channel](https://www.bilibili.com/video/BV1HrrKYeEB4/)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/wsrh8888/beaver-server/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/wsrh8888/beaver-server/discussions)
+#### 📄 **General Requirements**
+- **LICENSE file**: Retain the original project MIT license information
+- **Commercial Use**: Company or enterprise-level commercial applications require explicit authorization
+
+> 💡 **Friendly Note**: This project supports both personal learning and personal commercial use. For company or enterprise-level commercial applications, **explicit authorization from us is required** before any commercial use.
+
+> 📖 **Detailed Legal Terms**: Please refer to [LEGAL.md](LEGAL.md) for complete legal disclaimers and usage requirements.
 
 ## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wsrh8888/beaver-server&type=Date)](https://star-history.com/#wsrh8888/beaver-server&Date)
+
+## ☕ Buy the Author a Coffee
+
+If this project helps you, welcome to buy the author a coffee ☕
+
+<div align="center">
+  <img src="./static/sponsor/wechat.jpg" width="200" alt="WeChat Sponsor QR Code"/>
+  <img src="./static/sponsor/zhifubao.jpg" width="200" alt="Alipay Sponsor QR Code"/>
+</div>
 
 ## ⭐ Support the Project
 
