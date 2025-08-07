@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 配置变量
+REGISTRY_URL="registry.cn-hangzhou.aliyuncs.com/beaver_im"
+VERSION="1.2.0"
+
 # 函数：获取Docker镜像的Id
 get_image_id() {
     docker images -q $1 | head -n1
@@ -38,7 +42,7 @@ if [ -z "$image_id" ];then
 fi
 
 # 打标签并推送镜像
-docker tag "$image_id" wsrh8888/"$module_name":1.0.0
+docker tag "$image_id" "$REGISTRY_URL/$module_name:$VERSION"
 if [ $? -ne 0 ]; then
     echo "Error: Failed to tag the image"
     exit 1
@@ -49,8 +53,8 @@ max_retries=3
 retry_count=0
 
 while [ $retry_count -lt $max_retries ]; do
-    echo "Pushing image to Docker Hub (attempt $((retry_count + 1))/$max_retries)..."
-    docker push wsrh8888/"$module_name":1.0.0
+    echo "Pushing image to registry (attempt $((retry_count + 1))/$max_retries)..."
+    docker push "$REGISTRY_URL/$module_name:$VERSION"
     
     if [ $? -eq 0 ]; then
         echo "Successfully pushed the image"
@@ -67,4 +71,4 @@ while [ $retry_count -lt $max_retries ]; do
     fi
 done
 
-echo "Successfully built, tagged, and pushed the image: $module_name:1.0.0"
+echo "Successfully built, tagged, and pushed the image: $module_name:$VERSION"
