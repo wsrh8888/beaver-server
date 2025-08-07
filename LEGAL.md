@@ -8,7 +8,7 @@
 
 ### 📋 重要法律声明
 
-**Beaver IM** 是一个开源的即时通讯平台，仅供学习和合法商业用途使用。
+**Beaver IM** 是一个开源的即时通讯平台，主要用于**技术学习和交流**，支持个人学习和个人商业使用。
 
 ### 🚫 禁止用途
 
@@ -35,23 +35,43 @@
    - 使用者应获得相关方的明确授权
 
 3. **合规要求**
-   - 企业用户应在使用前咨询法务部门
+   - **公司或企业级商业应用必须事先获得明确授权**
+   - 个人学习和个人商业使用无需授权
    - 必须遵守数据保护法规（如GDPR、个人信息保护法等）
    - 确保用户隐私和数据安全
 
 ### 🛡️ 合规建议
 
 #### 企业使用
-- 📋 咨询法务部门评估法律风险
+- 📋 **必须事先获得明确授权**
 - 🔒 实施数据保护措施
 - 📞 建立合规的客服体系
 - 📊 定期进行安全审计
 
 #### 个人使用
-- ✅ 仅用于合法通信
+- ✅ 个人学习和个人商业使用无需授权
 - 🔐 保护个人隐私
 - 📱 遵守平台使用条款
 - ⚠️ 发现违法行为及时举报
+
+
+
+### 📋 项目来源标注要求
+
+**重要**：如果您基于本项目进行二次开发或发布，**必须**在项目中保留以下信息：
+
+#### 🖥️ **前端项目（移动端/桌面端/Web应用）**
+- **关于页面**：必须在"关于我们"、"关于应用"或类似页面中包含项目来源标注
+- **必需文本**："基于 [Beaver IM](https://github.com/wsrh8888/beaver-server) 开源IM项目开发"
+- **链接**：必须提供可点击的原始项目链接
+
+#### 🔧 **后端项目（服务器/API服务）**
+- **README.md**：必须在项目介绍或描述中包含来源标注
+- **必需文本**："基于 [Beaver IM](https://github.com/wsrh8888/beaver-server) 开源IM项目开发"
+- **链接**：必须提供可点击的原始项目链接
+
+#### 📄 **通用要求**
+- **LICENSE 文件**：保留原项目 MIT 协议信息
 
 ### 📞 举报机制
 
@@ -67,7 +87,7 @@
 
 ### 📋 Important Legal Notice
 
-**Beaver IM** is an open-source instant messaging platform intended for educational and legitimate business purposes only.
+**Beaver IM** is an open-source instant messaging platform primarily designed for **technical learning and communication**, supporting both personal learning and personal commercial use.
 
 ### 🚫 Prohibited Uses
 
@@ -94,23 +114,41 @@ The following uses are strictly prohibited:
    - Users must obtain explicit authorization from relevant parties
 
 3. **Compliance Requirements**
-   - Enterprise users should consult legal departments before implementation
+   - **Company or enterprise-level commercial applications require explicit authorization**
+   - Personal learning and personal commercial use require no authorization
    - Must comply with data protection regulations (GDPR, CCPA, etc.)
    - Ensure user privacy and data security
 
 ### 🛡️ Compliance Recommendations
 
 #### Enterprise Use
-- 📋 Consult legal department for risk assessment
+- 📋 **Explicit authorization required**
 - 🔒 Implement data protection measures
 - 📞 Establish compliant customer service systems
 - 📊 Conduct regular security audits
 
 #### Personal Use
-- ✅ Use only for legitimate communication
+- ✅ Personal learning and personal commercial use require no authorization
 - 🔐 Protect personal privacy
 - 📱 Comply with platform terms of service
 - ⚠️ Report illegal activities promptly
+
+### 📋 Project Attribution Requirements
+
+**Important**: If you develop or publish based on this project, you **must** retain the following information:
+
+#### 🖥️ **Frontend Projects (Mobile/Desktop/Web Applications)**
+- **About page**: Must include project attribution in "About Us" or "About App" pages
+- **Required text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open-source IM project"
+- **Link**: Must provide a clickable original project link
+
+#### 🔧 **Backend Projects (Server/API Services)**
+- **README.md**: Must include attribution in project description or introduction
+- **Required text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open-source IM project"
+- **Link**: Must provide a clickable original project link
+
+#### 📄 **General Requirements**
+- **LICENSE file**: Retain the original project MIT license information
 
 ### 📞 Reporting Mechanism
 
