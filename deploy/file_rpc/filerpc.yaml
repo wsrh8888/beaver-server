@@ -14,3 +14,9 @@ RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
+Qiniu: 
+  AK: your_qiniu_access_key
+  SK: your_qiniu_secret_key
+  Bucket: your_qiniu_bucket_name
+  Domain: 'your_qiniu_domain'
+  ExpireTime: 3600 # 签名URL有效期, 单位：秒
