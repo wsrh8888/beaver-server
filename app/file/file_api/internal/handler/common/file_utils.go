@@ -288,6 +288,14 @@ func GenerateFilePath(uploadDir, fileType, fileMd5, suffix string) string {
 	return filepath.Join(uploadDir, fileType, fileMd5Name)
 }
 
+// GenerateRelativePath 生成相对路径（不包含uploadDir，用于数据库存储）
+func GenerateRelativePath(fileType, fileMd5, suffix string) string {
+	fileMd5Name := fileMd5 + "." + suffix
+	// 使用 filepath.Join 生成路径，然后转换为正斜杠格式，确保跨平台一致性
+	path := filepath.Join(fileType, fileMd5Name)
+	return filepath.ToSlash(path)
+}
+
 // ParseDuration 解析时长字符串为秒数（公共函数）
 func ParseDuration(durationStr string) int {
 	// 时长格式可能是 "123.456" 秒

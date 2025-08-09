@@ -11,3 +11,4 @@ app/*/*_admin
 app/update
 app/track
 app/emoji
+./static/image/*

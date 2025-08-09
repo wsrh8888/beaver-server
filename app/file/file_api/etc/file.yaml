@@ -20,7 +20,7 @@ MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 
 # 本地存储配置
 Local:
-  UploadDir: ../uploads # 本地文件上传目录(相对路径，相对于程序运行目录)
+  UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
 # 七牛云配置
 Qiniu: 
   AK: your_qiniu_access_key
