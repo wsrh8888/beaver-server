@@ -69,3 +69,6 @@ RUN go build -ldflags="-s -w" -o dictionary_api/dictionary app/dictionary/dictio
 RUN go build -ldflags="-s -w" -o dictionary_rpc/dictionaryrpc app/dictionary/dictionary_rpc/dictionaryrpc.go
 
 
+# ==================== MOMENT 相关服务 ====================
+# moment_api
+RUN go build -ldflags="-s -w" -o moment_api/moment app/moment/moment_api/moment.go
