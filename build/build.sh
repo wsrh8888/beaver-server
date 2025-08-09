@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 配置变量
-REGISTRY_URL="wsrh8888/beaver_im"
+REGISTRY_URL="wsrh8888"
 VERSION="1.0.0"
 
 # 函数：获取Docker镜像的Id
