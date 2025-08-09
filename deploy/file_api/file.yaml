@@ -29,6 +29,9 @@ Qiniu:
   Bucket: your_qiniu_bucket_name
   Domain: 'your_qiniu_domain'
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
+# 本地存储配置
+Local:
+  UploadDir: /mnt/static # 本地文件上传目录(相对路径，相对于程序运行目录)
 WhiteList:
   - png
   - jpg

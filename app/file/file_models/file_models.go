@@ -63,13 +63,22 @@ func (f *FileInfo) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, f)
 }
 
+// FileSource 文件来源
+type FileSource string
+
+const (
+	QiniuSource FileSource = "qiniu" // 七牛云
+	LocalSource FileSource = "local" // 本地存储
+)
+
 type FileModel struct {
 	models.Model
-	FileName     string    `json:"fileName"`                      // 文件唯一ID /api/file/{uuid}
-	OriginalName string    `json:"originalName"`                  // 原始文件名（带后缀名）
-	Size         int64     `json:"size"`                          // 文件大小
-	Path         string    `json:"path"`                          // 文件实际存储路径
-	Md5          string    `json:"md5"`                           // 文件md5
-	Type         string    `json:"type"`                          // 文件类型
-	FileInfo     *FileInfo `gorm:"type:longtext" json:"fileInfo"` // 文件详细信息（JSON格式）
+	FileName     string     `json:"fileName"`                      // 文件唯一ID /api/file/{uuid}
+	OriginalName string     `json:"originalName"`                  // 原始文件名（带后缀名）
+	Size         int64      `json:"size"`                          // 文件大小
+	Path         string     `json:"path"`                          // 文件实际存储路径
+	Md5          string     `json:"md5"`                           // 文件md5
+	Type         string     `json:"type"`                          // 文件类型
+	Source       FileSource `json:"source" default:"qiniu"`        // 文件来源：qiniu(七牛云) 或 local(本地)
+	FileInfo     *FileInfo  `gorm:"type:longtext" json:"fileInfo"` // 文件详细信息（JSON格式）
 }

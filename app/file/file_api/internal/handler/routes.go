@@ -19,6 +19,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: PreviewHandler(serverCtx),
 			},
 			{
+				// 文件上传本地
+				Method:  http.MethodPost,
+				Path:    "/api/file/uploadLocal",
+				Handler: FileUploadLocalHandler(serverCtx),
+			},
+			{
 				// 文件上传七牛云
 				Method:  http.MethodPost,
 				Path:    "/api/file/uploadQiniu",
