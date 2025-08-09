@@ -2,7 +2,7 @@
 
 services:
   auth_api:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/auth_api:1.0.2
+    image: wsrh8888/auth_api:1.0.2
     container_name: auth_api
     network_mode: "host"
     volumes:
