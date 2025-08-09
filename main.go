@@ -9,6 +9,7 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_models"
 	"beaver/core"
+	"beaver/database"
 	"flag"
 	"fmt"
 )
@@ -54,6 +55,7 @@ func main() {
 			fmt.Printf("表结构生成失败: %v\n", err)
 			return
 		}
+		database.InitAllData(db)
 
 		fmt.Println("所有表结构生成成功")
 	}
