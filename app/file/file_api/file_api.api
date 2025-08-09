@@ -46,6 +46,10 @@ service file {
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
 	post /api/file/uploadQiniu (FileReq) returns (FileRes)
+
+	@doc "文件上传本地"
+	@handler FileUploadLocal
+	post /api/file/uploadLocal (FileReq) returns (FileRes)
 }
 
 // goctl api go -api file_api.api -dir . --home ../../../template

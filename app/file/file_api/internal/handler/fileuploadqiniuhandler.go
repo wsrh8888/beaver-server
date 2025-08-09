@@ -5,14 +5,11 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
@@ -21,43 +18,13 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
+	"beaver/app/file/file_api/internal/handler/common"
 	"beaver/app/file/file_api/internal/logic"
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
 	"beaver/app/file/file_models"
 	"beaver/common/response"
-	"beaver/utils"
-	"beaver/utils/md5"
 )
-
-// FileTypeMapper maps file extensions to file types.
-var FileTypeMapper = map[string]string{
-	"jpg":  "image",
-	"jpeg": "image",
-	"png":  "image",
-	"gif":  "image",
-	"bmp":  "image",
-	"mp4":  "video",
-	"avi":  "video",
-	"mkv":  "video",
-	"mp3":  "audio",
-	"wav":  "audio",
-	"ogg":  "audio",
-	"zip":  "archive",
-	"rar":  "archive",
-	"7z":   "archive",
-	"html": "document",
-	"pdf":  "document",
-	"doc":  "document",
-	"docx": "document",
-}
-
-func getFileType(suffix string) string {
-	if fileType, ok := FileTypeMapper[suffix]; ok {
-		return fileType
-	}
-	return "unknown"
-}
 
 // getQiniuFileInfo 从七牛云获取文件信息
 func getQiniuFileInfo(fileName string, svcCtx *svc.ServiceContext) *file_models.FileInfo {
@@ -75,7 +42,7 @@ func getQiniuFileInfo(fileName string, svcCtx *svc.ServiceContext) *file_models.
 	logx.Infof("七牛云文件信息: MimeType=%s, Size=%d, Hash=%s", fileInfo.MimeType, fileInfo.Fsize, fileInfo.Hash)
 
 	// 解析文件类型
-	fileType := getFileTypeFromMimeType(fileInfo.MimeType)
+	fileType := common.GetFileTypeFromMimeType(fileInfo.MimeType)
 
 	result := &file_models.FileInfo{
 		Type: file_models.FileType(fileType),
@@ -110,20 +77,6 @@ func getQiniuFileInfo(fileName string, svcCtx *svc.ServiceContext) *file_models.
 	}
 
 	return result
-}
-
-// getFileTypeFromMimeType 从MIME类型获取文件类型
-func getFileTypeFromMimeType(mimeType string) string {
-	if strings.HasPrefix(mimeType, "image/") {
-		return "image"
-	} else if strings.HasPrefix(mimeType, "video/") {
-		return "video"
-	} else if strings.HasPrefix(mimeType, "audio/") {
-		return "audio"
-	} else if strings.HasPrefix(mimeType, "application/") {
-		return "document"
-	}
-	return "other"
 }
 
 // getImageSizeFromQiniu 从七牛云获取图片尺寸
@@ -174,7 +127,6 @@ func getImageSizeFromQiniu(fileName string, svcCtx *svc.ServiceContext) (width, 
 	logx.Infof("解析到的图片尺寸: width=%d, height=%d", result.Width, result.Height)
 	return result.Width, result.Height
 
-	return result.Width, result.Height
 }
 
 // getVideoInfoFromQiniu 从七牛云获取视频信息
@@ -228,7 +180,7 @@ func getVideoInfoFromQiniu(fileName string, svcCtx *svc.ServiceContext) (width, 
 	if len(result.Streams) > 0 {
 		stream := result.Streams[0]
 		// 解析时长字符串为秒数
-		duration := parseDuration(stream.Duration)
+		duration := common.ParseDuration(stream.Duration)
 		logx.Infof("解析到的视频信息: width=%d, height=%d, duration=%d", stream.Width, stream.Height, duration)
 		return stream.Width, stream.Height, duration
 	}
@@ -284,67 +236,13 @@ func getAudioInfoFromQiniu(fileName string, svcCtx *svc.ServiceContext) (duratio
 	}
 
 	if len(result.Streams) > 0 {
-		duration := parseDuration(result.Streams[0].Duration)
+		duration := common.ParseDuration(result.Streams[0].Duration)
 		logx.Infof("解析到的音频时长: %d秒", duration)
 		return duration
 	}
 
 	logx.Errorf("音频信息中没有找到streams数据")
 	return 0
-}
-
-// parseDuration 解析时长字符串为秒数
-func parseDuration(durationStr string) int {
-	// 七牛云返回的时长格式可能是 "123.456" 秒
-	if durationStr == "" {
-		return 0
-	}
-
-	// 简单处理，取整数部分
-	if idx := strings.Index(durationStr, "."); idx != -1 {
-		durationStr = durationStr[:idx]
-	}
-
-	var duration int
-	if _, err := fmt.Sscanf(durationStr, "%d", &duration); err == nil {
-		return duration
-	}
-
-	return 0
-}
-
-// convertFileInfoToAPI 将内部FileInfo转换为API响应格式
-func convertFileInfoToAPI(fileInfo *file_models.FileInfo) *types.FileInfo {
-	if fileInfo == nil {
-		return nil
-	}
-
-	apiFileInfo := &types.FileInfo{
-		Type: string(fileInfo.Type),
-	}
-
-	if fileInfo.ImageFile != nil {
-		apiFileInfo.ImageFile = &types.ImageFile{
-			Width:  fileInfo.ImageFile.Width,
-			Height: fileInfo.ImageFile.Height,
-		}
-	}
-
-	if fileInfo.VideoFile != nil {
-		apiFileInfo.VideoFile = &types.VideoFile{
-			Width:    fileInfo.VideoFile.Width,
-			Height:   fileInfo.VideoFile.Height,
-			Duration: fileInfo.VideoFile.Duration,
-		}
-	}
-
-	if fileInfo.AudioFile != nil {
-		apiFileInfo.AudioFile = &types.AudioFile{
-			Duration: fileInfo.AudioFile.Duration,
-		}
-	}
-
-	return apiFileInfo
 }
 
 func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -362,76 +260,35 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// 文件后缀白名单
-		originalName := fileHead.Filename
-		nameList := strings.Split(originalName, ".")
-		if len(nameList) < 2 {
-			response.Response(r, w, nil, errors.New("文件格式不正确"))
-			return
-		}
-		suffix := strings.ToLower(nameList[len(nameList)-1])
-		if !utils.InList(svcCtx.Config.WhiteList, suffix) {
-			response.Response(r, w, nil, errors.New("文件非法"))
-			return
-		}
-
-		// 确定文件类型
-		fileType := getFileType(suffix)
-		if fileType == "unknown" {
-			response.Response(r, w, nil, errors.New("未知文件类型"))
-			return
-		}
-
-		// 检查文件大小
-		maxSize, ok := svcCtx.Config.FileMaxSize[fileType]
-		if !ok {
-			response.Response(r, w, nil, errors.New("配置中未找到该文件类型的最大大小"))
-			return
-		}
-		fileSizeMB := float64(fileHead.Size) / (1024 * 1024)
-		if fileSizeMB > maxSize {
-			response.Response(r, w, nil, fmt.Errorf("文件大小超过最大限制: %.2fMB", maxSize))
-			return
-		}
-
-		// 读取文件内容
-		byteData, err := io.ReadAll(file)
+		// 使用公共工具函数验证和处理文件
+		fileReq, err := common.ValidateAndProcessFile(file, fileHead, svcCtx)
 		if err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
-		fileMd5 := md5.MD5(byteData)
-		fileMd5Name := fileMd5 + "." + suffix
 
 		l := logic.NewFileUploadQiniuLogic(r.Context(), svcCtx)
 		resp, _ := l.FileUploadQiniu(&req)
 
-		host := r.Context().Value("ClientHost")
-		scheme := r.Context().Value("Scheme")
-
-		fmt.Println("当前请求的host", host, scheme)
-
 		// 检查文件是否已经存在于数据库中
-		var fileModel file_models.FileModel
-		err = svcCtx.DB.Take(&fileModel, "md5 = ?", fileMd5).Error
-
+		existingFile, err := common.CheckFileExists(fileReq.FileMd5, svcCtx)
 		if err == nil {
-			resp.FileName = fileModel.FileName
-			resp.OriginalName = fileModel.OriginalName
+			resp.FileName = existingFile.FileName
+			resp.OriginalName = existingFile.OriginalName
 
 			// 如果文件已存在但FileInfo为空，同步从七牛云获取
-			if fileModel.FileInfo == nil {
-				fileInfo := getQiniuFileInfo(fileModel.Path, svcCtx)
+			if existingFile.FileInfo == nil {
+				fileInfo := getQiniuFileInfo(existingFile.Path, svcCtx)
 				if fileInfo != nil {
-					fileModel.FileInfo = fileInfo
-					svcCtx.DB.Save(&fileModel)
-					logx.Infof("已存在文件元数据获取成功: %s", fileModel.FileName)
+					existingFile.FileInfo = fileInfo
+					svcCtx.DB.Save(existingFile)
+					logx.Infof("已存在文件元数据获取成功: %s", existingFile.FileName)
 				}
 			}
 
 			// 转换FileInfo为API响应格式
-			if fileModel.FileInfo != nil {
-				resp.FileInfo = convertFileInfoToAPI(fileModel.FileInfo)
+			if existingFile.FileInfo != nil {
+				resp.FileInfo = common.ConvertFileInfoToAPI(existingFile.FileInfo)
 			}
 
 			response.Response(r, w, resp, nil)
@@ -439,32 +296,18 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 根据文件类型创建目录结构，并生成七牛云文件路径
-		qiniuFilePath := fmt.Sprintf("%s/%s", fileType, fileMd5Name)
+		fileMd5Name := fileReq.FileMd5 + "." + fileReq.Suffix
+		qiniuFilePath := fmt.Sprintf("%s/%s", fileReq.FileType, fileMd5Name)
 
 		// 上传文件到七牛云
-		qiniuURL, err := uploadToQiniu(qiniuFilePath, byteData, svcCtx)
+		qiniuURL, err := uploadToQiniu(qiniuFilePath, fileReq.ByteData, svcCtx)
 		if err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		// 创建新的文件记录
-		// 生成带后缀的FileName
-		fileUUID := uuid.New().String()
-		fileNameWithSuffix := fileUUID + "." + suffix
-
-		// 先创建文件记录，暂时不包含FileInfo
-		newFileModel := &file_models.FileModel{
-			OriginalName: strings.TrimSuffix(originalName, "."+suffix),
-			Size:         fileHead.Size,
-			Path:         qiniuURL,
-			Md5:          fileMd5,
-			FileName:     fileNameWithSuffix,
-			Type:         fileType,
-		}
-
-		// 保存到数据库
-		err = svcCtx.DB.Create(newFileModel).Error
+		// 创建文件记录
+		newFileModel, err := common.CreateFileRecord(fileReq, qiniuURL, file_models.QiniuSource, svcCtx)
 		if err != nil {
 			response.Response(r, w, nil, err)
 			return
@@ -484,7 +327,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 转换FileInfo为API响应格式
 		if fileInfo != nil {
-			resp.FileInfo = convertFileInfoToAPI(fileInfo)
+			resp.FileInfo = common.ConvertFileInfoToAPI(fileInfo)
 		}
 
 		response.Response(r, w, resp, nil)

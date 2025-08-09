@@ -19,9 +19,11 @@ type Config struct {
 	FileMaxSize map[string]float64
 	WhiteList   []string
 	BlackList   []string
-	UploadDir   string
 	UserRpc     zrpc.RpcClientConf
-	Qiniu       struct {
+	Local       struct {
+		UploadDir string
+	}
+	Qiniu struct {
 		AK         string
 		SK         string
 		Bucket     string
