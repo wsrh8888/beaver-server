@@ -2,7 +2,7 @@
 
 services:
   gateway_api:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/gateway_api:1.0.2
+    image: wsrh8888/gateway_api:1.0.2
     container_name: gateway_api
     network_mode: "host"
     volumes:
