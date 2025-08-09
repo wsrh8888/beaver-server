@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
@@ -53,7 +54,8 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		case file_models.LocalSource:
 			// 本地文件预览
-			localFilePath := fileModel.Path
+			// fileModel.Path 存储的是相对路径，需要拼接 UploadDir
+			localFilePath := filepath.Join(svcCtx.Config.Local.UploadDir, fileModel.Path)
 
 			// 检查文件是否存在
 			if _, err := os.Stat(localFilePath); os.IsNotExist(err) {

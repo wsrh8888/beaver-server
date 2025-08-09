@@ -57,9 +57,6 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 创建本地存储目录
 		uploadDir := svcCtx.Config.Local.UploadDir
-		if uploadDir == "" {
-			uploadDir = "./uploads" // 默认路径
-		}
 
 		// 生成本地文件路径
 		localFilePath := common.GenerateFilePath(uploadDir, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
@@ -73,8 +70,11 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 获取文件信息
 		fileInfo := common.GetLocalFileInfo(localFilePath, fileReq.FileType)
 
+		// 生成相对路径用于数据库存储（不包含uploadDir）
+		relativePath := common.GenerateRelativePath(fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
+
 		// 创建文件记录
-		newFileModel, err := common.CreateFileRecord(fileReq, localFilePath, file_models.LocalSource, svcCtx)
+		newFileModel, err := common.CreateFileRecord(fileReq, relativePath, file_models.LocalSource, svcCtx)
 		if err != nil {
 			// 如果数据库保存失败，删除已保存的文件
 			// TODO: 可以添加删除文件的公共函数
