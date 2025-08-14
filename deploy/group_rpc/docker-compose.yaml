@@ -1,7 +1,7 @@
 
 services:
   group_rpc:
-    image: wsrh8888/group_rpc:1.0.2
+    image: wsrh8888/group_rpc:1.0.0
     container_name: group_rpc
     network_mode: "host"
     volumes:
