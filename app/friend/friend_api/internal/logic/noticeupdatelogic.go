@@ -53,21 +53,34 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		return nil, errors.New("查询好友关系失败")
 	}
 
-	// 根据用户角色更新对应的备注字段
+	// 获取下一个版本号
+	nextVersion, err := l.svcCtx.VersionGen.GetNextVersion("friends")
+	if err != nil {
+		l.Logger.Errorf("获取版本号失败: %v", err)
+		return nil, errors.New("系统错误")
+	}
+
+	// 根据用户角色更新对应的备注字段和版本号
 	if friend.SendUserID == req.UserID {
 		// 我是发起方，更新发起方备注
 		if friend.SendUserNotice == req.Notice {
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.Id).Update("send_user_notice", req.Notice).Error
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("uuid = ?", friend.UUID).Updates(map[string]interface{}{
+			"send_user_notice": req.Notice,
+			"version":          nextVersion,
+		}).Error
 	} else if friend.RevUserID == req.UserID {
 		// 我是接收方，更新接收方备注
 		if friend.RevUserNotice == req.Notice {
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.Id).Update("rev_user_notice", req.Notice).Error
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("uuid = ?", friend.UUID).Updates(map[string]interface{}{
+			"rev_user_notice": req.Notice,
+			"version":         nextVersion,
+		}).Error
 	} else {
 		// 这种情况理论上不应该发生
 		l.Logger.Errorf("用户角色异常: userID=%s, friendID=%s", req.UserID, req.FriendID)

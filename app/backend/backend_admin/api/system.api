@@ -1,0 +1,102 @@
+syntax = "v1"
+
+type CreateMenuReq {
+	ParentId uint   `json:"parentId"`
+	Path     string `json:"path"`
+	Name     string `json:"name"`
+	Hidden   bool   `json:"hidden"`
+	Sort     int    `json:"sort"`
+	Title    string `json:"title"`
+	Icon     string `json:"icon"`
+	UserID   string `header:"Beaver-User-Id"`
+}
+
+type CreateMenuRes {}
+
+type UpdateMenuReq {
+	Id       uint   `json:"id"`
+	ParentId uint   `json:"parentId"`
+	Path     string `json:"path"`
+	Name     string `json:"name"`
+	Hidden   bool   `json:"hidden"`
+	Sort     int    `json:"sort"`
+	Title    string `json:"title"`
+	Icon     string `json:"icon"`
+	UserID   string `header:"Beaver-User-Id"`
+}
+
+type MenuInfo {
+	Id       uint   `json:"id"`
+	ParentId uint   `json:"parentId"`
+	Path     string `json:"path"`
+	Name     string `json:"name"`
+	Hidden   bool   `json:"hidden"`
+	Sort     int    `json:"sort"`
+	Title    string `json:"title"`
+	Icon     string `json:"icon"`
+}
+
+type DeleteMenuReq {
+	Id     uint   `json:"id"`
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type DeleteMenuRes {}
+
+type UpdateMenuRes {}
+
+type GetMenuListReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type GetMenusRes {
+	List []MenuInfo `json:"list"`
+}
+
+type CreateAuthorityReq {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type CreateAuthorityRes {}
+
+type IdReq {
+	Id uint `json:"id"`
+}
+
+type UpdateAuthorityMenuReq {
+	UserID string  `header:"Beaver-User-Id"`
+	Id     uint    `json:"id"`
+	Menus  []IdReq `json:"menus"`
+}
+
+type UpdateAuthorityMenuRes {}
+
+@server (
+	group: system
+)
+service backend {
+	@doc "创建菜单"
+	@handler createMenu
+	post /admin/system/createMenu (CreateMenuReq) returns (CreateMenuRes)
+
+	@doc "更新菜单"
+	@handler updateMenu
+	put /admin/system/updateMenu (UpdateMenuReq) returns (UpdateMenuRes)
+
+	@doc "删除菜单"
+	@handler deleteMenu
+	delete /admin/system/delete (DeleteMenuReq) returns (DeleteMenuRes)
+
+	@doc "获取菜单列表"
+	@handler getMenus
+	get /admin/system/getMenuList (GetMenuListReq) returns (GetMenusRes)
+
+	@doc "创建权限"
+	@handler createAuthority
+	post /admin/system/createAuthority (CreateAuthorityReq) returns (CreateAuthorityRes)
+
+	@doc "更新权限菜单"
+	@handler updateAuthorityMenu
+	put /admin/system/updateAuthorityMenu (UpdateAuthorityMenuReq) returns (UpdateAuthorityMenuRes)
+}

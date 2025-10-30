@@ -1,0 +1,39 @@
+syntax = "v1"
+
+// 获取同步游标
+type (
+	GetSyncCursorReq {
+		UserID   string `header:"Beaver-User-Id"`
+		DeviceID string `header:"Beaver-Device-Id"`
+		DataType string `form:"dataType"` // users/friends/groups/chat_messages/chat_datasync/chat_conversation_settings
+	}
+	GetSyncCursorRes {
+		DataType string `json:"dataType"`
+		LastSeq  int64  `json:"lastSeq"` // 最后同步的序列号（消息用）或版本号（基础数据用）
+	}
+)
+
+// 更新同步游标
+type (
+	UpdateSyncCursorReq {
+		UserID         string `header:"Beaver-User-Id"`
+		DeviceID       string `header:"Beaver-Device-Id"`
+		DataType       string `json:"dataType"`
+		LastSeq        int64  `json:"lastSeq"` // 最后同步的序列号（消息用）或版本号（基础数据用）
+		ConversationID string `json:"conversationId,optional"`
+	}
+	UpdateSyncCursorRes  {}
+)
+
+// 同步服务
+service datasync {
+	@doc "获取同步游标"
+	@handler getSyncCursor
+	get /api/datasync/cursor (GetSyncCursorReq) returns (GetSyncCursorRes)
+
+	@doc "更新同步游标"
+	@handler updateSyncCursor
+	post /api/datasync/cursor (UpdateSyncCursorReq) returns (UpdateSyncCursorRes)
+}
+
+// goctl api go -api datasync_api.api -dir . --home ../../../template

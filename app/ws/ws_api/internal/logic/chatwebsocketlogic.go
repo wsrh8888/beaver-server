@@ -5,14 +5,15 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	ws "beaver/app/ws/ws_api/internal/logic/websocket"
 	"beaver/app/ws/ws_api/internal/logic/websocket/heartbeat"
 	websocket_utils "beaver/app/ws/ws_api/internal/logic/websocket/utils"
+	"beaver/app/ws/ws_api/internal/redis_ws"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
+	"beaver/utils/device"
 
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -60,16 +61,30 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	heartbeatManager := heartbeat.NewManager(conn, req.UserID, l.svcCtx)
 	defer heartbeatManager.Stop()
 
-	// 当函数返回时关闭连接并清理资源
-	defer cleanupConnection(req.UserID, conn)
-
 	// 从User-Agent获取设备类型
 	userAgent := r.Header.Get("User-Agent")
 	logx.Infof("User-Agent: %s", userAgent)
-	deviceType := getDeviceType(userAgent)
+	deviceType := device.GetDeviceType(userAgent)
 	userKey := websocket_utils.GetUserKey(req.UserID, deviceType)
 
 	logx.Infof("用户上线: %s, 设备类型: %s, User-Agent: %s, 远程地址: %s", req.UserID, deviceType, userAgent, conn.RemoteAddr().String())
+
+	// 生成连接ID
+	connID := fmt.Sprintf("%s_%d", req.UserID, time.Now().UnixNano())
+
+	// 使用Redis管理器存储连接信息
+	wsManager := redis_ws.GetWSManager(l.svcCtx.Redis)
+	err = wsManager.AddConnection(req.UserID, deviceType, connID)
+	if err != nil {
+		logx.Errorf("Redis存储连接失败: %v", err)
+	}
+
+	// 当函数返回时关闭连接并清理资源
+	defer func() {
+		cleanupConnection(req.UserID, conn)
+		// 清理Redis中的连接信息
+		wsManager.RemoveConnection(req.UserID, deviceType, connID)
+	}()
 
 	// 管理连接映射
 	manageUserConnection(userKey, conn, req.UserID, deviceType)
@@ -79,7 +94,10 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 
 	// 处理WebSocket消息
 	ws.HandleWebSocketMessages(l.ctx, l.svcCtx, req, r, conn, heartbeatManager)
-	return &types.WsRes{}, nil
+
+	// WebSocket连接已建立，不需要返回HTTP响应
+	// 返回nil避免go-zero框架尝试写入HTTP响应头
+	return nil, nil
 }
 
 // manageUserConnection 管理用户连接
@@ -90,20 +108,33 @@ func manageUserConnection(userKey string, conn *websocket.Conn, userID, deviceTy
 	addr := conn.RemoteAddr().String()
 	userWsInfo, ok := websocket_utils.UserOnlineWsMap[userKey]
 
-	if !ok {
+	// 检查连接数量限制
+	if ok {
+		// 桌面端和移动端限制为1个连接
+		if deviceType == "desktop" || deviceType == "mobile" {
+			if len(userWsInfo.WsClientMap) >= 1 {
+				// 关闭旧连接
+				for oldAddr, oldConn := range userWsInfo.WsClientMap {
+					logx.Infof("关闭旧连接，用户: %s, 设备: %s, 地址: %s", userID, deviceType, oldAddr)
+					oldConn.Close()
+					delete(userWsInfo.WsClientMap, oldAddr)
+				}
+			}
+		}
+		// 网页端允许多个连接（多个标签页）
+		userWsInfo.WsClientMap[addr] = conn
+		logx.Infof("添加连接映射, 用户: %s, 设备: %s, userKey: %s, 连接数: %d", userID, deviceType, userKey, len(userWsInfo.WsClientMap))
+	} else {
 		userWsInfo = &websocket_utils.UserWsInfo{
 			WsClientMap: map[string]*websocket.Conn{addr: conn},
 		}
 		websocket_utils.UserOnlineWsMap[userKey] = userWsInfo
 		logx.Infof("创建用户连接映射, 用户: %s, 设备: %s, userKey: %s", userID, deviceType, userKey)
-	} else {
-		userWsInfo.WsClientMap[addr] = conn
-		logx.Infof("添加连接映射, 用户: %s, 设备: %s, userKey: %s, 连接数: %d", userID, deviceType, userKey, len(userWsInfo.WsClientMap))
 	}
 
 	// 打印当前用户的所有连接状态
 	logx.Infof("=== 用户连接状态 用户ID: %s ===", userID)
-	deviceTypes := []string{"mobile", "windows", "mac", "linux", "web"}
+	deviceTypes := []string{"desktop", "mobile", "web"}
 	for _, dt := range deviceTypes {
 		uk := websocket_utils.GetUserKey(userID, dt)
 		if info, exists := websocket_utils.UserOnlineWsMap[uk]; exists {
@@ -168,7 +199,7 @@ func cleanupConnection(userID string, conn *websocket.Conn) {
 	defer websocket_utils.WsMapMutex.Unlock()
 
 	// 遍历所有设备类型查找并清理连接
-	deviceTypes := []string{"mobile", "windows", "mac", "linux", "web"}
+	deviceTypes := []string{"desktop", "mobile", "web"}
 	for _, deviceType := range deviceTypes {
 		userKey := websocket_utils.GetUserKey(userID, deviceType)
 		userWsInfo, ok := websocket_utils.UserOnlineWsMap[userKey]
@@ -182,39 +213,5 @@ func cleanupConnection(userID string, conn *websocket.Conn) {
 				logx.Infof("保留用户连接映射, 用户: %s, 设备: %s, 剩余连接数: %d", userID, deviceType, len(userWsInfo.WsClientMap))
 			}
 		}
-	}
-}
-
-// getDeviceType 根据User-Agent识别设备类型
-func getDeviceType(userAgent string) string {
-	fmt.Println("userAgent", userAgent)
-	userAgent = strings.ToLower(userAgent)
-	return "mobile"
-	// 移动设备识别
-	if strings.Contains(userAgent, "android") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "ipad") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "mobile") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "uniapp") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "uni-app") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "uni") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "app") && (strings.Contains(userAgent, "android") || strings.Contains(userAgent, "ios")) {
-		return "mobile"
-	}
-
-	// 桌面设备识别
-	if strings.Contains(userAgent, "windows") {
-		return "windows"
-	} else if strings.Contains(userAgent, "macintosh") || strings.Contains(userAgent, "mac os") {
-		return "mac"
-	} else if strings.Contains(userAgent, "linux") {
-		return "linux"
-	} else {
-		return "web"
 	}
 }

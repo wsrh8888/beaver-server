@@ -48,7 +48,7 @@ func convertFiles(files []types.FileInfo) *moment_models.Files {
 	var result moment_models.Files
 	for _, file := range files {
 		result = append(result, moment_models.FileInfo{
-			FileName: file.FileName,
+			FileKey: file.FileKey,
 		})
 	}
 	return &result

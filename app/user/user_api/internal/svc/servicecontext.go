@@ -3,12 +3,15 @@ package svc
 import (
 	"beaver/app/friend/friend_rpc/friend"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	"beaver/app/group/group_rpc/group"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_api/internal/config"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
+	"beaver/core"
+	versionPkg "beaver/core/version"
 
 	"beaver/common/zrpc_interceptor"
-	"beaver/core"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -16,21 +19,27 @@ import (
 )
 
 type ServiceContext struct {
-	Config    config.Config
-	DB        *gorm.DB
-	Redis     *redis.Client
-	UserRpc   user_rpc.UserClient
-	FriendRpc friend_rpc.FriendClient
+	Config     config.Config
+	DB         *gorm.DB
+	Redis      *redis.Client
+	UserRpc    user_rpc.UserClient
+	FriendRpc  friend_rpc.FriendClient
+	GroupRpc   group_rpc.GroupClient
+	VersionGen *versionPkg.VersionGenerator
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := core.InitGorm(c.Mysql.DataSource)
 	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
+
 	return &ServiceContext{
-		Config:    c,
-		DB:        mysqlDb,
-		Redis:     client,
-		UserRpc:   user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		FriendRpc: friend.NewFriend(zrpc.MustNewClient(c.FriendRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		Config:     c,
+		DB:         mysqlDb,
+		Redis:      client,
+		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		FriendRpc:  friend.NewFriend(zrpc.MustNewClient(c.FriendRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		GroupRpc:   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		VersionGen: versionGen,
 	}
 }

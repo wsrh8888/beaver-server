@@ -3,7 +3,6 @@ package friend_rpc;
 
 option go_package = "./friend_rpc";
 
-
 message GetFriendIdsRequest {
   string UserID = 1;
 }
@@ -12,9 +11,30 @@ message GetFriendIdsResponse {
   repeated string friend_ids = 1;
 }
 
+// 定义GetFriendVersionReq消息
+message GetFriendVersionReq {
+  string userId = 1; // 用户ID
+}
+
+// 定义GetFriendVersionRes消息
+message GetFriendVersionRes {
+  int64 latestVersion = 1; // 最新版本号
+}
+
+// 定义GetFriendVerifyVersionReq消息
+message GetFriendVerifyVersionReq {
+  string userId = 1; // 用户ID
+}
+
+// 定义GetFriendVerifyVersionRes消息
+message GetFriendVerifyVersionRes {
+  int64 latestVersion = 1; // 最新版本号
+}
 
 service friend {
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
+  rpc GetFriendVersion(GetFriendVersionReq) returns (GetFriendVersionRes); //获取好友版本号
+  rpc GetFriendVerifyVersion(GetFriendVerifyVersionReq) returns (GetFriendVerifyVersionRes); //获取好友验证版本号
 }
 
 //goctl rpc protoc friend_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

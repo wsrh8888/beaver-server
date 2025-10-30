@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/svc"
@@ -36,12 +35,10 @@ func NewGroupCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Group
 func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.GroupCreateRes, err error) {
 
 	var groupModel = group_models.GroupModel{
-		CreatorID:  req.UserID,
-		UUID:       utils.GenerateUUId(),
-		Abstract:   "本群创建于" + time.Now().Format("2006-01-02") + "，欢迎大家加入",
-		MaxMembers: 50,
+		CreatorID: req.UserID,
+		GroupID:   utils.GenerateUUId(),
 	}
-	var groupUserList = []string{string(req.UserID)}
+	var groupUserList = []string{req.UserID}
 	if len(req.UserIdList) == 0 {
 		return nil, errors.New("请选择用户")
 	}
@@ -50,7 +47,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		groupUserList = append(groupUserList, u)
 	}
 
-	groupModel.Title = req.Name
+	groupModel.Title = req.Title
 
 	err = l.svcCtx.DB.Create(&groupModel).Error
 	if err != nil {
@@ -62,7 +59,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	for i, u := range groupUserList {
 
 		memberMode := group_models.GroupMemberModel{
-			GroupID: groupModel.UUID,
+			GroupID: groupModel.GroupID,
 			UserID:  u,
 			Role:    3,
 		}
@@ -84,7 +81,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 
 		// 获取群成员列表
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
-			GroupID: groupModel.UUID,
+			GroupID: groupModel.GroupID,
 		})
 		if err != nil {
 			l.Logger.Errorf("获取群成员列表失败: %v", err)
@@ -96,7 +93,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		fmt.Println("更新所有会话列表信息")
 		_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(ctx, &chat_rpc.BatchUpdateConversationReq{
 			UserIds:        allUserIDs,
-			ConversationId: groupModel.UUID,
+			ConversationId: groupModel.GroupID,
 			LastMessage:    "",
 		})
 
@@ -104,17 +101,17 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		for _, member := range response.Members {
 			fmt.Println("推送给群成员")
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.MessageGroupCreate, req.UserID, member.UserID, map[string]interface{}{
-				"file_name":      groupModel.FileName,
-				"conversationId": groupModel.UUID,
+				"avatar":         groupModel.Avatar,
+				"conversationId": groupModel.GroupID,
 				"update_at":      groupModel.CreatedAt.String(),
 				"is_top":         false,
 				"msg_preview":    "",
 				"nickname":       groupModel.Title,
-			}, groupModel.UUID)
+			}, groupModel.GroupID)
 		}
 	}()
 
 	return &types.GroupCreateRes{
-		GroupID: groupModel.UUID,
+		GroupID: groupModel.GroupID,
 	}, nil
 }

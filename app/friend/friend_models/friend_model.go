@@ -12,6 +12,7 @@ import (
  */
 type FriendModel struct {
 	models.Model
+	UUID           string                `gorm:"size:64;unique;index"`
 	RevUserModel   user_models.UserModel `gorm:"foreignkey:RevUserID;references:UUID" json:"-"`
 	SendUserModel  user_models.UserModel `gorm:"foreignkey:SendUserID;references:UUID" json:"-"`
 	SendUserID     string                `gorm:"size:64;index" json:"sendUserId"`         // 发起验证方的 UserID
@@ -20,12 +21,8 @@ type FriendModel struct {
 	RevUserNotice  string                `gorm:"size: 128" json:"revUserNotice"`          //接收验证方备注
 	Source         string                `gorm:"size: 32" json:"source"`                  // 好友关系来源：qrcode/search/group/recommend
 	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
+	Version        int64                 `gorm:"not null;default:0;index"`                // 版本号（用于数据同步）
 }
-
-/**
- * @description: A -> B SendUserID(A的ID) RevUserID(B的ID) SendUserNotice(A对B的备注） RevUserNotice(B对A的备注)
- * @description: B -> A
- */
 
 func (f *FriendModel) IsFriend(db *gorm.DB, A, B string) bool {
 	err := db.Take(&f, "((send_user_id = ? and rev_user_id = ?) or (send_user_id = ? and rev_user_id = ?) ) and is_deleted = ?", A, B, B, A, false).Error

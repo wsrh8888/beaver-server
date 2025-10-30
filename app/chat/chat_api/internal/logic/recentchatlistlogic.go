@@ -29,7 +29,7 @@ func NewRecentChatListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Re
 }
 
 func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp *types.RecentChatListRes, err error) {
-	var userConversations []chat_models.ChatUserConversationModel
+	var userConversations []chat_models.ChatUserConversation
 
 	// 获取该用户的所有未删除会话及其最新一条消息，并按更新时间排序
 	sql := `
@@ -112,7 +112,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 
 	groupMap := make(map[string]group_models.GroupModel)
 	for _, group := range groups {
-		groupMap[group.UUID] = group
+		groupMap[group.GroupID] = group
 	}
 
 	var respList []types.ConversationInfoRes
@@ -131,12 +131,12 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			}
 			user := userMap[opponentID]
 			chatInfo.Nickname = user.NickName
-			chatInfo.FileName = user.FileName
+			chatInfo.Avatar = user.Avatar
 			chatInfo.ChatType = 1
 		} else { // 群聊
 			group := groupMap[convo.ConversationID]
 			chatInfo.Nickname = group.Title
-			chatInfo.FileName = group.FileName
+			chatInfo.Avatar = group.Avatar
 			chatInfo.ChatType = 2
 		}
 

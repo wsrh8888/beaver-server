@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -67,8 +68,16 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// 获取文件信息
-		fileInfo := common.GetLocalFileInfo(localFilePath, fileReq.FileType)
+		// 初始化文件信息
+		var fileInfo *file_models.FileInfo
+
+		// 手动解析FormData中的fileInfo字段
+		if fileInfoStr := r.FormValue("fileInfo"); fileInfoStr != "" {
+			var apiFileInfo types.FileInfo
+			if err := json.Unmarshal([]byte(fileInfoStr), &apiFileInfo); err == nil {
+				fileInfo = common.ConvertAPIFileInfoToModel(&apiFileInfo)
+			}
+		}
 
 		// 生成相对路径用于数据库存储（不包含uploadDir）
 		relativePath := common.GenerateRelativePath(fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)

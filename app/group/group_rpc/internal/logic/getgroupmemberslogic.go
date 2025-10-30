@@ -68,7 +68,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 			memberInfo := &group_rpc.GroupMemberInfo{
 				UserID:   user.UUID,
 				Username: user.NickName,
-				FileName: user.FileName,
+				Avatar:   user.Avatar,
 			}
 			members = append(members, memberInfo)
 		}

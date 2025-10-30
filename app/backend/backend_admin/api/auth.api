@@ -1,0 +1,36 @@
+syntax = "v1"
+
+type LoginReq {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+}
+
+type LoginRes {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
+type AuthenticationReq {
+	Token string `header:"Token,optional"`
+	/**
+	* @description: 验证路径
+	*/
+	ValidPath string `header:"ValidPath,optional"`
+}
+
+type AuthenticationRes {
+	UserID string `json:"userId"`
+}
+
+@server (
+	group: auth
+)
+service backend {
+	@doc "用户登录"
+	@handler login
+	post /admin/auth/login (LoginReq) returns (LoginRes)
+
+	@doc "用户认证"
+	@handler authentication
+	get /admin/auth/authentication (AuthenticationReq) returns (AuthenticationRes)
+}

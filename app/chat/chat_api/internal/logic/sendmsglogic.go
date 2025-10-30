@@ -44,16 +44,16 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	case ctype.TextMsgType:
 		rpcReq.Msg.TextMsg = &chat_rpc.TextMsg{Content: req.Msg.TextMsg.Content}
 	case ctype.ImageMsgType:
-		rpcReq.Msg.ImageMsg = &chat_rpc.ImageMsg{FileName: req.Msg.ImageMsg.FileName}
+		rpcReq.Msg.ImageMsg = &chat_rpc.ImageMsg{FileKey: req.Msg.ImageMsg.FileKey}
 	case ctype.VideoMsgType:
-		rpcReq.Msg.VideoMsg = &chat_rpc.VideoMsg{FileName: req.Msg.VideoMsg.FileName}
+		rpcReq.Msg.VideoMsg = &chat_rpc.VideoMsg{FileKey: req.Msg.VideoMsg.FileKey}
 	case ctype.FileMsgType:
-		rpcReq.Msg.FileMsg = &chat_rpc.FileMsg{FileName: req.Msg.FileMsg.FileName}
+		rpcReq.Msg.FileMsg = &chat_rpc.FileMsg{FileKey: req.Msg.FileMsg.FileKey}
 	case ctype.VoiceMsgType:
-		rpcReq.Msg.VoiceMsg = &chat_rpc.VoiceMsg{FileName: req.Msg.VoiceMsg.FileName}
+		rpcReq.Msg.VoiceMsg = &chat_rpc.VoiceMsg{FileKey: req.Msg.VoiceMsg.FileKey}
 	case ctype.EmojiMsgType:
 		rpcReq.Msg.EmojiMsg = &chat_rpc.EmojiMsg{
-			FileName:  req.Msg.EmojiMsg.FileName,
+			FileKey:   req.Msg.EmojiMsg.FileKey,
 			EmojiId:   req.Msg.EmojiMsg.EmojiID,
 			PackageId: req.Msg.EmojiMsg.PackageID,
 		}
@@ -75,12 +75,13 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		Msg:            req.Msg,
 		Sender: types.Sender{
 			UserID:   rpcResp.Sender.UserId,
-			FileName: rpcResp.Sender.FileName,
+			Avatar:   rpcResp.Sender.Avatar,
 			Nickname: rpcResp.Sender.Nickname,
 		},
 		CreateAt:   rpcResp.CreateAt,
 		MsgPreview: rpcResp.MsgPreview,
 		Status:     uint32(rpcResp.Status),
+		Seq:        rpcResp.Seq,
 	}
 
 	return resp, nil

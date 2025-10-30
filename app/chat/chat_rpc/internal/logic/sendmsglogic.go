@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/chat/chat_utils"
 	"beaver/app/friend/friend_models"
 	"beaver/common/models/ctype"
 	"beaver/utils/conversation"
@@ -59,16 +59,16 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		msg = ctype.Msg{
 			Type: ctype.ImageMsgType,
 			ImageMsg: &ctype.ImageMsg{
-				FileName: in.Msg.ImageMsg.FileName,
-				Width:    int(in.Msg.ImageMsg.Width),
-				Height:   int(in.Msg.ImageMsg.Height),
+				FileKey: in.Msg.ImageMsg.FileKey,
+				Width:   int(in.Msg.ImageMsg.Width),
+				Height:  int(in.Msg.ImageMsg.Height),
 			},
 		}
 	case ctype.VideoMsgType:
 		msg = ctype.Msg{
 			Type: ctype.VideoMsgType,
 			VideoMsg: &ctype.VideoMsg{
-				FileName: in.Msg.VideoMsg.FileName,
+				FileKey:  in.Msg.VideoMsg.FileKey,
 				Width:    int(in.Msg.VideoMsg.Width),
 				Height:   int(in.Msg.VideoMsg.Height),
 				Duration: int(in.Msg.VideoMsg.Duration),
@@ -78,14 +78,14 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		msg = ctype.Msg{
 			Type: ctype.FileMsgType,
 			FileMsg: &ctype.FileMsg{
-				FileName: in.Msg.FileMsg.FileName,
+				FileKey: in.Msg.FileMsg.FileKey,
 			},
 		}
 	case ctype.VoiceMsgType:
 		msg = ctype.Msg{
 			Type: ctype.VoiceMsgType,
 			VoiceMsg: &ctype.VoiceMsg{
-				FileName: in.Msg.VoiceMsg.FileName,
+				FileKey:  in.Msg.VoiceMsg.FileKey,
 				Duration: int(in.Msg.VoiceMsg.Duration),
 			},
 		}
@@ -93,7 +93,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		msg = ctype.Msg{
 			Type: ctype.EmojiMsgType,
 			EmojiMsg: &ctype.EmojiMsg{
-				FileName:  in.Msg.EmojiMsg.FileName,
+				FileKey:   in.Msg.EmojiMsg.FileKey,
 				EmojiID:   in.Msg.EmojiMsg.EmojiId,
 				PackageID: in.Msg.EmojiMsg.PackageId,
 			},
@@ -102,24 +102,46 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, fmt.Errorf("未识别到该类型: %d", msgType)
 	}
 
-	chatModel := chat_models.ChatModel{
+	chatModel := chat_models.ChatMessage{
 		SendUserID:     in.UserId,
 		MessageID:      in.MessageId,
 		ConversationID: in.ConversationId,
 		MsgType:        msgType,
 		Msg:            &msg,
 	}
+
+	// 1. 创建消息记录
 	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
-
-	err := l.svcCtx.DB.Create(&chatModel).Preload("SendUserModel").Error
+	err := l.svcCtx.DB.Create(&chatModel).Error
 	if err != nil {
 		return nil, err
 	}
 
-	err = l.updateUserConversations(in.ConversationId, in.UserId, chatModel.MsgPreview)
+	// 设置序列号为数据库自增ID（全局递增）
+	chatModel.Seq = int64(chatModel.Id)
+	// 更新数据库中的seq字段
+	err = l.svcCtx.DB.Model(&chatModel).Update("seq", chatModel.Seq).Error
 	if err != nil {
 		return nil, err
 	}
+
+	// 2. 更新会话级别的信息
+	err = chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.GetConversationType(in.ConversationId), chatModel.Seq)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. 更新用户会话关系
+	err = chat_utils.UpdateUserConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.UserId, in.ConversationId, chatModel.MsgPreview, false)
+	if err != nil {
+		return nil, err
+	}
+
+	// 注意：同步游标由客户端主动更新，服务端不主动更新
+	// 客户端可以通过以下方式获取更新：
+	// 1. 定期轮询同步接口
+	// 2. 通过WebSocket推送通知
+	// 3. 客户端主动调用 UpdateSyncCursor API
 
 	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(msg)
 	if err != nil {
@@ -140,37 +162,13 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		MsgPreview:     chatModel.MsgPreview,
 		Sender: &chat_rpc.Sender{
 			UserId:   chatModel.SendUserModel.UUID,
-			FileName: chatModel.SendUserModel.FileName,
+			Avatar:   chatModel.SendUserModel.Avatar,
 			Nickname: chatModel.SendUserModel.NickName,
 		},
 		CreateAt: chatModel.CreatedAt.String(),
-		Status:   1, // 1:正常状态
+		Status:   1,             // 1:正常状态
+		Seq:      chatModel.Seq, // 消息序列号
 	}, nil
-}
-
-func (l *SendMsgLogic) updateUserConversations(conversationID, userID, lastMessage string) error {
-	var userConvo chat_models.ChatUserConversationModel
-	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", conversationID, userID).First(&userConvo).Error
-	if err != nil {
-		if err := l.svcCtx.DB.Create(&chat_models.ChatUserConversationModel{
-			UserID:         userID,
-			ConversationID: conversationID,
-			LastMessage:    lastMessage,
-			IsDeleted:      false,
-		}).Error; err != nil {
-			return err
-		}
-	} else {
-		if err := l.svcCtx.DB.Model(&userConvo).
-			Updates(map[string]interface{}{
-				"last_message": lastMessage,
-				"is_deleted":   false,
-				"updated_at":   time.Now(), // 添加这一行
-			}).Error; err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(msg ctype.Msg) (*chat_rpc.Msg, error) {

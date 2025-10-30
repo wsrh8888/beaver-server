@@ -13,13 +13,39 @@ type ChatHistoryRes struct {
 	List  []Message `json:"list"`
 }
 
+type ChatSyncMessage struct {
+	MessageID      string `json:"messageId"`      //客户端消息ID
+	ConversationID string `json:"conversationId"` //会话id
+	SendUserID     string `json:"sendUserId"`     //发送者用户ID
+	MsgType        uint32 `json:"msgType"`        //消息类型
+	MsgPreview     string `json:"msgPreview"`     //消息预览
+	Msg            string `json:"msg"`            //消息内容JSON字符串
+	IsDeleted      bool   `json:"isDeleted"`      //是否已删除
+	Seq            int64  `json:"seq"`            //序列号，用于数据同步
+	CreateAt       int64  `json:"createAt"`       //创建时间戳
+}
+
+type ChatSyncReq struct {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId,optional"` // 会话ID，可选，不传则同步所有会话
+	FromSeq        int64  `json:"fromSeq"`                 // 起始序列号
+	ToSeq          int64  `json:"toSeq"`                   // 结束序列号
+	Limit          int    `json:"limit,optional"`          // 限制数量，默认100
+}
+
+type ChatSyncRes struct {
+	Messages []ChatSyncMessage `json:"messages"` // 消息列表
+	HasMore  bool              `json:"hasMore"`  // 是否还有更多数据
+	NextSeq  int64             `json:"nextSeq"`  // 下次同步的起始序列号
+}
+
 type ConversationInfoReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
 }
 
 type ConversationInfoRes struct {
-	FileName       string `json:"fileName"`
+	Avatar         string `json:"avatar"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"`    //消息预览
 	UpdateAt       string `json:"update_at"`      //消息时间
@@ -27,6 +53,28 @@ type ConversationInfoRes struct {
 	ConversationID string `json:"conversationId"` //会话id
 	ChatType       int    `json:"chatType"`       //会话类型 1:好友 2:群聊 3:AI机器人
 	Notice         string `json:"notice"`         //备注
+}
+
+type ConversationSyncItem struct {
+	ConversationID string `json:"conversationId"` // 会话ID
+	Type           int    `json:"type"`           // 会话类型 1=私聊 2=群聊 3=系统会话
+	LastReadSeq    int64  `json:"lastReadSeq"`    // 会话消息的最大Seq
+	Version        int64  `json:"version"`        // 版本号
+	CreateAt       int64  `json:"createAt"`       // 创建时间戳
+	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
+}
+
+type ConversationSyncReq struct {
+	UserID      string `header:"Beaver-User-Id"`
+	FromVersion int64  `json:"fromVersion"`    // 起始版本号
+	ToVersion   int64  `json:"toVersion"`      // 结束版本号
+	Limit       int    `json:"limit,optional"` // 限制数量，默认100
+}
+
+type ConversationSyncRes struct {
+	Conversations []ConversationSyncItem `json:"conversations"` // 会话列表
+	HasMore       bool                   `json:"hasMore"`       // 是否还有更多数据
+	NextVersion   int64                  `json:"nextVersion"`   // 下次同步的起始版本号
 }
 
 type DeleteRecentReq struct {
@@ -51,15 +99,13 @@ type EditMessageRes struct {
 }
 
 type EmojiMsg struct {
-	FileName  string `json:"fileName"`  // 表情图片文件ID（Emoji.FileName）
+	FileKey   string `json:"FileKey"`   // 表情图片文件ID（Emoji.FileName）
 	EmojiID   uint32 `json:"emojiId"`   // 表情ID（Emoji.Id，单个表情时使用）
 	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
-	Width     int    `json:"width"`     //图片宽度
-	Height    int    `json:"height"`    //图片高度
 }
 
 type FileMsg struct {
-	FileName string `json:"fileName"` //文件ID，通过fileName可以从文件模块获取完整信息
+	FileKey string `json:"FileKey"` //文件ID，通过fileName可以从文件模块获取完整信息
 }
 
 type ForwardMessageReq struct {
@@ -76,9 +122,7 @@ type ForwardMessageRes struct {
 }
 
 type ImageMsg struct {
-	FileName string `json:"fileName"` //图片文件ID
-	Width    int    `json:"width"`    //图片宽度
-	Height   int    `json:"height"`   //图片高度
+	FileKey string `json:"FileKey"` //图片文件ID
 }
 
 type Message struct {
@@ -89,6 +133,7 @@ type Message struct {
 	Sender         Sender `json:"sender"`    //发送者
 	CreateAt       string `json:"create_at"` //消息时间
 	Status         uint32 `json:"status"`    //消息状态 1:正常 2:已撤回 3:已编辑
+	Seq            int64  `json:"seq"`       //序列号，用于数据同步
 }
 
 type Msg struct {
@@ -155,11 +200,12 @@ type SendMsgRes struct {
 	CreateAt       string `json:"create_at"`  //消息时间
 	MsgPreview     string `json:"msgPreview"` //消息预览
 	Status         uint32 `json:"status"`     //消息状态 1:正常 2:已撤回 3:已编辑
+	Seq            int64  `json:"seq"`        //消息序列号，用于数据同步
 }
 
 type Sender struct {
 	UserID   string `json:"userId"`
-	FileName string `json:"fileName"`
+	Avatar   string `json:"avatar"`
 	Nickname string `json:"nickname"`
 }
 
@@ -167,14 +213,35 @@ type TextMsg struct {
 	Content string `json:"content"` //文本消息内容
 }
 
+type UserConversationSyncItem struct {
+	UserID         string `json:"userId"`         // 用户ID
+	ConversationID string `json:"conversationId"` // 会话ID
+	LastMessage    string `json:"lastMessage"`    // 最后一条消息内容
+	IsDeleted      bool   `json:"isDeleted"`      // 是否已删除
+	IsPinned       bool   `json:"isPinned"`       // 是否置顶
+	LastReadSeq    int64  `json:"lastReadSeq"`    // 用户已读到的消息Seq
+	Version        int64  `json:"version"`        // 版本号
+	CreateAt       int64  `json:"createAt"`       // 创建时间戳
+	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
+}
+
+type UserConversationSyncReq struct {
+	UserID      string `header:"Beaver-User-Id"`
+	FromVersion int64  `json:"fromVersion"`    // 起始版本号
+	ToVersion   int64  `json:"toVersion"`      // 结束版本号
+	Limit       int    `json:"limit,optional"` // 限制数量，默认100
+}
+
+type UserConversationSyncRes struct {
+	UserConversations []UserConversationSyncItem `json:"userConversations"` // 用户会话关系列表
+	HasMore           bool                       `json:"hasMore"`           // 是否还有更多数据
+	NextVersion       int64                      `json:"nextVersion"`       // 下次同步的起始版本号
+}
+
 type VideoMsg struct {
-	FileName string `json:"fileName"` //视频文件ID
-	Width    int    `json:"width"`    //视频宽度
-	Height   int    `json:"height"`   //视频高度
-	Duration int    `json:"duration"` //视频时长
+	FileKey string `json:"FileKey"` //视频文件ID
 }
 
 type VoiceMsg struct {
-	FileName string `json:"fileName"` //语音文件ID
-	Duration int    `json:"duration"` //语音时长
+	FileKey string `json:"FileKey"` //语音文件ID
 }

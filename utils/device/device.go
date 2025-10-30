@@ -1,4 +1,4 @@
-package device
+﻿package device
 
 import (
 	"strings"
@@ -8,39 +8,30 @@ import (
 func GetDeviceType(userAgent string) string {
 	userAgent = strings.ToLower(userAgent)
 
-	return "mobile"
-	// 移动设备识别
-	if strings.Contains(userAgent, "android") {
+	// 识别桌面端
+	if strings.Contains(userAgent, "beaver_desktop_windows") {
+		return "desktop"
+	} else if strings.Contains(userAgent, "beaver_desktop_macos") {
+		return "desktop"
+	} else if strings.Contains(userAgent, "beaver_desktop_linux") {
+		return "desktop"
+	}
+
+	// 识别移动端
+	if strings.Contains(userAgent, "beaver_mobile_android") {
 		return "mobile"
-	} else if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "ipad") {
+	} else if strings.Contains(userAgent, "beaver_mobile_ios") {
 		return "mobile"
-	} else if strings.Contains(userAgent, "mobile") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "uniapp") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "uni-app") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "uni") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "app") && (strings.Contains(userAgent, "android") || strings.Contains(userAgent, "ios")) {
+	} else if strings.Contains(userAgent, "beaver_mobile_harmonyos") {
 		return "mobile"
 	}
 
-	// 桌面设备识别
-	if strings.Contains(userAgent, "windows") {
-		return "windows"
-	} else if strings.Contains(userAgent, "macintosh") || strings.Contains(userAgent, "mac os") {
-		return "mac"
-	} else if strings.Contains(userAgent, "linux") {
-		return "linux"
-	} else {
-		return "web"
-	}
+	// 不是桌面端和移动端的，剩下的都是web端
+	return "web"
 }
 
 // 验证设备ID格式
 func IsValidDeviceID(deviceID string) bool {
-	// 设备ID不能为空且长度合理
 	if deviceID == "" || len(deviceID) < 8 || len(deviceID) > 64 {
 		return false
 	}

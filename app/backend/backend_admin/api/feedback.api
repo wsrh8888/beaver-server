@@ -1,0 +1,84 @@
+syntax = "v1"
+
+// 反馈信息
+type (
+	FeedbackInfo {
+		Id           uint     `json:"id"`
+		UserId       string   `json:"userId"`
+		Content      string   `json:"content"`
+		Type         int      `json:"type"`
+		Status       int      `json:"status"`
+		FileNames    []string `json:"fileNames"`
+		HandlerId    int64    `json:"handlerId"`
+		HandleTime   string   `json:"handleTime"`
+		HandleResult string   `json:"handleResult"`
+		CreatedAt    string   `json:"createdAt"`
+		UpdatedAt    string   `json:"updatedAt"`
+	}
+)
+
+// 获取反馈列表
+type (
+	GetFeedbackListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		Status   int    `form:"status,optional"` // 反馈状态筛选
+		Type     int    `form:"type,optional"` // 反馈类型筛选
+		UserID   string `form:"userId,optional"` // 用户ID筛选
+		Keywords string `form:"keywords,optional"` // 关键词搜索
+	}
+	GetFeedbackListRes {
+		List  []FeedbackInfo `json:"list"`
+		Total int64          `json:"total"`
+	}
+)
+
+// 获取反馈详情
+type (
+	GetFeedbackDetailReq {
+		Id uint `path:"id"`
+	}
+	GetFeedbackDetailRes {
+		FeedbackInfo
+	}
+)
+
+// 处理反馈
+type (
+	HandleFeedbackReq {
+		Id           uint   `path:"id"`
+		Status       int    `json:"status"` // 处理状态
+		HandleResult string `json:"handleResult"` // 处理结果
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	HandleFeedbackRes  {}
+)
+
+// 删除反馈
+type (
+	DeleteFeedbackReq {
+		Id uint `path:"id"`
+	}
+	DeleteFeedbackRes  {}
+)
+
+@server (
+	group: feedback
+)
+service backend {
+	@doc "获取反馈列表"
+	@handler GetFeedbackList
+	get /admin/feedback/list (GetFeedbackListReq) returns (GetFeedbackListRes)
+
+	@doc "获取反馈详情"
+	@handler GetFeedbackDetail
+	get /admin/feedback/:id (GetFeedbackDetailReq) returns (GetFeedbackDetailRes)
+
+	@doc "处理反馈"
+	@handler HandleFeedback
+	put /admin/feedback/:id (HandleFeedbackReq) returns (HandleFeedbackRes)
+
+	@doc "删除反馈"
+	@handler DeleteFeedback
+	delete /admin/feedback/:id (DeleteFeedbackReq) returns (DeleteFeedbackRes)
+}

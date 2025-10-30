@@ -40,11 +40,11 @@ func (l *BatchUpdateConversationLogic) BatchUpdateConversation(in *chat_rpc.Batc
 
 	// 批量更新或创建会话记录
 	for _, userID := range in.UserIds {
-		var userConvo chat_models.ChatUserConversationModel
+		var userConvo chat_models.ChatUserConversation
 		err := tx.Where("conversation_id = ? AND user_id = ?", in.ConversationId, userID).First(&userConvo).Error
 		if err != nil {
 			// 如果记录不存在，创建新记录
-			if err := tx.Create(&chat_models.ChatUserConversationModel{
+			if err := tx.Create(&chat_models.ChatUserConversation{
 				UserID:         userID,
 				ConversationID: in.ConversationId,
 				LastMessage:    in.LastMessage,

@@ -10,15 +10,59 @@ message GetGroupMembersReq {
 message GroupMemberInfo {
   string userID = 1;  // 用户Id
   string username = 2; // 用户名
-  string fileName = 3;   // 用户头像
+  string avatar = 3;   // 用户头像
 }
 
 message GetGroupMembersRes {
   repeated GroupMemberInfo members = 1; // 成员信息列表
 }
 
-service group {
-  rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
+// 获取用户群组中的其他成员ID列表
+message GetUserGroupMembersReq {
+  string userID = 1; // 用户ID
 }
 
-//goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+message GetUserGroupMembersRes {
+  repeated string memberIDs = 1; // 群成员ID列表（去重后的所有群友）
+}
+
+
+// 定义GetGroupVersionReq消息
+message GetGroupVersionReq {
+  string userId = 1; // 用户ID
+}
+
+// 定义GetGroupVersionRes消息
+message GetGroupVersionRes {
+  int64 latestVersion = 1; // 最新版本号
+}
+
+// 定义GetGroupMemberVersionReq消息
+message GetGroupMemberVersionReq {
+  string userId = 1; // 用户ID
+}
+
+// 定义GetGroupMemberVersionRes消息
+message GetGroupMemberVersionRes {
+  int64 latestVersion = 1; // 最新版本号
+}
+
+// 定义GetGroupJoinRequestVersionReq消息
+message GetGroupJoinRequestVersionReq {
+  string userId = 1; // 用户ID
+}
+
+// 定义GetGroupJoinRequestVersionRes消息
+message GetGroupJoinRequestVersionRes {
+  int64 latestVersion = 1; // 最新版本号
+}
+
+service group {
+  rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
+  rpc GetUserGroupMembers(GetUserGroupMembersReq) returns (GetUserGroupMembersRes); // 获取用户群组中的其他成员ID列表
+  rpc GetGroupVersion(GetGroupVersionReq) returns (GetGroupVersionRes); //获取群组版本号
+  rpc GetGroupMemberVersion(GetGroupMemberVersionReq) returns (GetGroupMemberVersionRes); //获取群成员版本号
+  rpc GetGroupJoinRequestVersion(GetGroupJoinRequestVersionReq) returns (GetGroupJoinRequestVersionRes); //获取群组申请版本号
+}
+
+// goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

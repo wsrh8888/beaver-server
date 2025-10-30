@@ -85,7 +85,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		info = types.FriendInfoRes{
 			UserID:         targetUser.UUID,
 			Nickname:       targetUser.NickName,
-			FileName:       targetUser.FileName,
+			Avatar:         targetUser.Avatar,
 			Abstract:       targetUser.Abstract,
 			Notice:         notice,
 			ConversationID: conversationID,

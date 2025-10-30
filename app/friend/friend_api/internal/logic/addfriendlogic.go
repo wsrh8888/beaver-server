@@ -9,6 +9,7 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/user/user_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -53,12 +54,21 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return &types.AddFriendRes{}, nil
 	}
 
+	// 获取下一个版本号
+	nextVersion, err := l.svcCtx.VersionGen.GetNextVersion("friend_verify")
+	if err != nil {
+		l.Logger.Errorf("获取版本号失败: %v", err)
+		return nil, errors.New("系统错误")
+	}
+
 	// 创建好友验证请求
 	verifyModel := friend_models.FriendVerifyModel{
 		SendUserID: req.UserID,
 		RevUserID:  req.FriendID,
 		Message:    req.Verify,
 		Source:     req.Source, // 添加来源字段
+		Version:    nextVersion,
+		UUID:       uuid.New().String(),
 	}
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error

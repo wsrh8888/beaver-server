@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-type ChatModel struct {
+type ChatMessage struct {
 	models.Model
 	MessageID      string                `json:"messageId"`                        // 客户端消息ID
 	ConversationID string                `json:"conversationId"`                   // 会话id（单聊为用户id，群聊为群id）
@@ -17,9 +17,10 @@ type ChatModel struct {
 	Msg            *ctype.Msg            `json:"msg"`                              // 消息内容
 	SendUserModel  user_models.UserModel `gorm:"foreignKey:SendUserID;references:UUID" json:"-"`
 	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
+	Seq            int64                 `gorm:"not null;default:0;index"`                // 序列号（用于消息同步，使用数据库自增ID）
 }
 
-func (chat ChatModel) MsgPreviewMethod() string {
+func (chat ChatMessage) MsgPreviewMethod() string {
 	fmt.Println("chat.Msg.Type", chat.Msg.Type)
 
 	switch chat.Msg.Type {
@@ -35,6 +36,8 @@ func (chat ChatModel) MsgPreviewMethod() string {
 		return "[语音消息]"
 	case 6:
 		return "[表情消息]"
+	case 7:
+		return "[系统提示]"
 	default:
 		return "[未知消息]"
 	}

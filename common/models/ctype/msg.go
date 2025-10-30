@@ -51,30 +51,30 @@ type TextMsg struct {
 }
 
 type ImageMsg struct {
-	FileName string `json:"fileName"` //图片文件ID
-	Width    int    `json:"width"`    //图片宽度
-	Height   int    `json:"height"`   //图片高度
+	FileKey string `json:"fileKey"` //图片文件ID
+	Width   int    `json:"width"`   //图片宽度
+	Height  int    `json:"height"`  //图片高度
 }
 
 type VideoMsg struct {
-	FileName string `json:"fileName"` //视频文件ID
+	FileKey  string `json:"fileKey"`  //视频文件ID
 	Width    int    `json:"width"`    //视频宽度
 	Height   int    `json:"height"`   //视频高度
 	Duration int    `json:"duration"` //视频时长（秒）
 }
 
 type FileMsg struct {
-	FileName string `json:"fileName"` //文件ID，通过fileName可以从文件模块获取完整信息
+	FileKey string `json:"fileKey"` //文件ID，通过fileName可以从文件模块获取完整信息
 }
 
 type VoiceMsg struct {
-	FileName string `json:"fileName"` //语音文件ID
+	FileKey  string `json:"fileKey"`  //语音文件ID
 	Duration int    `json:"duration"` //语音时长（秒）
 }
 
 // 表情消息结构
 type EmojiMsg struct {
-	FileName  string `json:"fileName"`  // 表情图片文件ID（Emoji.FileName）
+	FileKey   string `json:"fileKey"`   // 表情图片文件ID（Emoji.FileName）
 	EmojiID   uint32 `json:"emojiId"`   // 表情ID（Emoji.ID，单个表情时使用）
 	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.ID，表情包分享时使用）
 }

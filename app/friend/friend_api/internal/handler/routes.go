@@ -19,12 +19,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: addFriendHandler(serverCtx),
 			},
 			{
-				// 删除好友关系
-				Method:  http.MethodDelete,
-				Path:    "/api/friend/delete",
-				Handler: friendDeleteHandler(serverCtx),
-			},
-			{
 				// 获取好友详细信息
 				Method:  http.MethodGet,
 				Path:    "/api/friend/friend_info",
@@ -37,7 +31,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: friendListHandler(serverCtx),
 			},
 			{
-				// 通过邮箱搜索用户
+				// 通过用户ID或邮箱搜索用户
 				Method:  http.MethodGet,
 				Path:    "/api/friend/search",
 				Handler: searchHandler(serverCtx),
@@ -47,6 +41,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/friend/searchValidInfo",
 				Handler: searchValidInfoHandler(serverCtx),
+			},
+			{
+				// 好友数据同步
+				Method:  http.MethodPost,
+				Path:    "/api/friend/sync",
+				Handler: friendSyncHandler(serverCtx),
 			},
 			{
 				// 修改好友备注
@@ -65,6 +65,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/friend/valid_list",
 				Handler: validListHandler(serverCtx),
+			},
+			{
+				// 好友验证数据同步
+				Method:  http.MethodPost,
+				Path:    "/api/friend/verifySync",
+				Handler: friendVerifySyncHandler(serverCtx),
 			},
 		},
 	)
