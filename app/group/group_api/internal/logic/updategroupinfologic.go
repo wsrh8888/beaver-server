@@ -42,11 +42,11 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 
 	// 构建更新字段
 	updateFields := make(map[string]interface{})
-	if req.Name != "" {
-		updateFields["title"] = req.Name
+	if req.Title != "" {
+		updateFields["title"] = req.Title
 	}
-	if req.FileName != "" {
-		updateFields["file_name"] = req.FileName
+	if req.Avatar != "" {
+		updateFields["avatar"] = req.Avatar
 	}
 	if req.Notice != "" {
 		updateFields["notice"] = req.Notice
@@ -82,8 +82,8 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 			if member.UserID != req.UserID { // 不通知操作者自己
 				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupUpdate, req.UserID, member.UserID, map[string]interface{}{
 					"groupId":  req.GroupID,
-					"name":     req.Name,
-					"fileName": req.FileName,
+					"title":    req.Title,
+					"avatar":   req.Avatar,
 					"notice":   req.Notice,
 					"joinType": req.JoinType,
 				}, "")

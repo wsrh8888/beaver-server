@@ -33,7 +33,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{}
 
 			if fileName, ok := imageMsg["fileName"].(string); ok {
-				rpcMsg.ImageMsg.FileName = fileName
+				rpcMsg.ImageMsg.FileKey = fileName
 			}
 			// 提取宽度和高度
 			if width, ok := imageMsg["width"].(float64); ok {
@@ -48,7 +48,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{}
 
 			if fileName, ok := videoMsg["fileName"].(string); ok {
-				rpcMsg.VideoMsg.FileName = fileName
+				rpcMsg.VideoMsg.FileKey = fileName
 			}
 
 			// 提取宽度、高度和时长
@@ -65,7 +65,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 	case 4: // 文件消息
 		if fileMsg, ok := msgData["fileMsg"].(map[string]interface{}); ok {
 			if fileName, ok := fileMsg["fileName"].(string); ok {
-				rpcMsg.FileMsg = &chat_rpc.FileMsg{FileName: fileName}
+				rpcMsg.FileMsg = &chat_rpc.FileMsg{FileKey: fileName}
 			}
 		}
 	case 5: // 语音消息
@@ -73,7 +73,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{}
 
 			if fileName, ok := voiceMsg["fileName"].(string); ok {
-				rpcMsg.VoiceMsg.FileName = fileName
+				rpcMsg.VoiceMsg.FileKey = fileName
 			}
 
 			// 提取时长
@@ -85,7 +85,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 		if emojiMsg, ok := msgData["emojiMsg"].(map[string]interface{}); ok {
 			emoji := &chat_rpc.EmojiMsg{}
 			if fileName, ok := emojiMsg["fileName"].(string); ok {
-				emoji.FileName = fileName
+				emoji.FileKey = fileName
 			}
 			if emojiId, ok := emojiMsg["emojiId"].(float64); ok {
 				emoji.EmojiId = uint32(emojiId)
@@ -109,7 +109,7 @@ func buildResponseData(rpcResp *chat_rpc.SendMsgRes, originalMsg json.RawMessage
 		"msg":            originalMsg, // 使用原始消息数据
 		"sender": map[string]interface{}{
 			"userId":   rpcResp.Sender.UserId,
-			"fileName": rpcResp.Sender.FileName,
+			"avatar":   rpcResp.Sender.Avatar,
 			"nickname": rpcResp.Sender.Nickname,
 		},
 		"createAt":   rpcResp.CreateAt,

@@ -1,0 +1,145 @@
+syntax = "v1"
+
+// 获取用户列表
+type (
+	GetUserListReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=10"`
+		Email    string `form:"email, optional"`
+		Status   int    `form:"status,optional"`
+		Source   int    `form:"source,optional"`
+	}
+	GetUserListRes {
+		List  []UserInfo `json:"list"`
+		Total int64      `json:"total"`
+	}
+	UserInfo {
+		Id          string `json:"id"`
+		Nickname    string `json:"nickname"`
+		Email       string `json:"email"`
+		Abstract    string `json:"abstract"`
+		FileName      string `json:"fileName"`
+		Status      int    `json:"status"`
+		Source      int    `json:"source"`
+		LastLoginIP string `json:"lastLoginIp"`
+		CreateTime  string `json:"createTime"`
+		UpdateTime  string `json:"updateTime"`
+	}
+)
+
+// 获取用户详情
+type (
+	GetUserDetailReq {
+		UserID string `path:"id"`
+	}
+	GetUserDetailRes {
+		Id          string `json:"id"`
+		Nickname    string `json:"nickname"`
+		FileName      string `json:"fileName"`
+		Email       string `json:"email"`
+		Abstract    string `json:"abstract"`
+		Status      int    `json:"status"`
+		Source      int    `json:"source"`
+		LastLoginIP string `json:"lastLoginIp"`
+		CreateTime  string `json:"createTime"`
+		UpdateTime  string `json:"updateTime"`
+	}
+)
+
+// 创建用户
+type (
+	CreateUserReq {
+		Nickname string `json:"nickname"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
+		Abstract string `json:"abstract,optional"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	CreateUserRes {
+		Id string `json:"id"`
+	}
+)
+
+// 更新用户
+type (
+	UpdateUserReq {
+		UserID   string  `path:"id"`
+		Nickname *string `json:"nickname,optional"`
+		Email    *string `json:"email,optional"`
+		FileName   *string `json:"fileName,optional"`
+		Abstract *string `json:"abstract,optional"`
+		Status   *int    `json:"status,optional"`
+	}
+	UpdateUserRes  {}
+)
+
+// 删除用户
+type (
+	DeleteUserReq {
+		UserID string `path:"id"`
+	}
+	DeleteUserRes  {}
+)
+
+// 批量删除用户
+type (
+	BatchDeleteUsersReq {
+		Ids []string `json:"ids"`
+	}
+	BatchDeleteUsersRes  {}
+)
+
+// 重置用户密码
+type (
+	ResetUserPasswordReq {
+		UserID      string `json:"userId"`
+		NewPassword string `json:"newPassword"`
+	}
+	ResetUserPasswordRes  {}
+)
+
+// 批量更新用户状态
+type (
+	BatchUpdateUserStatusReq {
+		Ids    []string `json:"ids"`
+		Status int      `json:"status"`
+	}
+	BatchUpdateUserStatusRes  {}
+)
+
+@server (
+	group: user
+)
+service backend {
+	@doc "获取用户列表"
+	@handler getUserList
+	get /admin/user/list (GetUserListReq) returns (GetUserListRes)
+
+	@doc "获取用户详情"
+	@handler getUserDetail
+	get /admin/user/:id (GetUserDetailReq) returns (GetUserDetailRes)
+
+	@doc "创建用户"
+	@handler createUser
+	post /admin/user/create (CreateUserReq) returns (CreateUserRes)
+
+	@doc "更新用户"
+	@handler updateUser
+	put /admin/user/:id (UpdateUserReq) returns (UpdateUserRes)
+
+	@doc "删除用户"
+	@handler deleteUser
+	delete /admin/user/:id (DeleteUserReq) returns (DeleteUserRes)
+
+	@doc "批量删除用户"
+	@handler batchDeleteUsers
+	delete /admin/user/batch (BatchDeleteUsersReq) returns (BatchDeleteUsersRes)
+
+	@doc "重置用户密码"
+	@handler resetUserPassword
+	put /admin/user/password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
+
+	@doc "批量更新用户状态"
+	@handler batchUpdateUserStatus
+	put /admin/user/status (BatchUpdateUserStatusReq) returns (BatchUpdateUserStatusRes)
+}

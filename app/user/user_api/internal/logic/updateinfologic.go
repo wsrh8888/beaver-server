@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/user/user_api/internal/svc"
@@ -45,8 +46,8 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	if req.Nickname != nil {
 		updateFields["nick_name"] = *req.Nickname
 	}
-	if req.FileName != nil {
-		updateFields["file_name"] = *req.FileName
+	if req.Avatar != nil {
+		updateFields["file_name"] = *req.Avatar
 	}
 	if req.Abstract != nil {
 		updateFields["abstract"] = *req.Abstract
@@ -57,10 +58,25 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 
 	// 执行更新操作
 	if len(updateFields) > 0 {
+		// 获取新版本号
+		version, err := l.svcCtx.VersionGen.GetNextVersion("users")
+		if err != nil {
+			l.Errorf("获取版本号失败: %v", err)
+			return nil, err
+		}
+
+		// 添加版本号到更新字段
+		updateFields["version"] = version
+
 		err = l.svcCtx.DB.Model(&user).Updates(updateFields).Error
 		if err != nil {
 			return nil, err
 		}
+
+		l.Infof("用户信息更新成功: userID=%s, version=%d", req.UserID, version)
+
+		// 记录用户变更日志
+		l.recordUserChangeLog(req.UserID, version, updateFields)
 	}
 
 	// 异步更新缓存和通知好友
@@ -75,7 +91,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 			logx.Errorf("failed to get friend ids: %v", err)
 			return
 		}
-		fmt.Println("转发给好友的列表", response.FriendIds)
+		logx.Infof("转发给好友的列表: %v", response.FriendIds)
 		// 通过ws推送给自己的好友
 		for _, friendID := range response.FriendIds {
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, friendID, map[string]interface{}{
@@ -85,4 +101,51 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	}()
 
 	return &types.UpdateInfoRes{}, nil
+}
+
+// recordUserChangeLog 记录用户变更日志
+func (l *UpdateInfoLogic) recordUserChangeLog(userID string, version int64, updateFields map[string]interface{}) {
+	var changeLogs []user_models.UserChangeLogModel
+
+	// 为每个变更的字段创建日志记录
+	for field, newValue := range updateFields {
+		if field == "version" {
+			continue // 跳过版本字段
+		}
+
+		var changeType string
+		switch field {
+		case "nick_name":
+			changeType = "nickname"
+		case "avatar":
+			changeType = "avatar"
+		case "abstract":
+			changeType = "abstract"
+		case "gender":
+			changeType = "gender"
+		case "status":
+			changeType = "status"
+		default:
+			changeType = field
+		}
+
+		changeLog := user_models.UserChangeLogModel{
+			UserID:     userID,
+			ChangeType: changeType,
+			NewValue:   fmt.Sprintf("%v", newValue),
+			ChangeTime: time.Now().Unix(),
+			Version:    version,
+		}
+
+		changeLogs = append(changeLogs, changeLog)
+	}
+
+	// 批量插入变更日志
+	if len(changeLogs) > 0 {
+		if err := l.svcCtx.DB.Create(&changeLogs).Error; err != nil {
+			l.Errorf("记录用户变更日志失败: userID=%s, error=%v", userID, err)
+		} else {
+			l.Infof("用户变更日志记录成功: userID=%s, 变更数=%d", userID, len(changeLogs))
+		}
+	}
 }

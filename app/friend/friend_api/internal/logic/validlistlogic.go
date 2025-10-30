@@ -57,7 +57,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 	for _, fv := range fvs {
 		info := types.FriendValidInfo{
 			Message:   fv.Message,
-			Id:        fv.Id,
+			Id:        fv.UUID, // 使用UUID而不是数据库ID
 			Source:    fv.Source, // 添加来源字段
 			CreatedAt: fv.CreatedAt.String(),
 		}
@@ -66,14 +66,14 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			// 我是发起方
 			info.UserID = fv.RevUserID
 			info.Nickname = fv.RevUserModel.NickName
-			info.FileName = fv.RevUserModel.FileName
+			info.Avatar = fv.RevUserModel.Avatar
 			info.Flag = "send"
 			info.Status = fv.RevStatus
 		} else if fv.RevUserID == req.UserID {
 			// 我是接收方
 			info.UserID = fv.SendUserID
 			info.Nickname = fv.SendUserModel.NickName
-			info.FileName = fv.SendUserModel.FileName
+			info.Avatar = fv.SendUserModel.Avatar
 			info.Flag = "receive"
 			info.Status = fv.RevStatus
 		} else {

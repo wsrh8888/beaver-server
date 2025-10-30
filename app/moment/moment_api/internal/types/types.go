@@ -19,7 +19,7 @@ type DeleteMomentRes struct {
 }
 
 type FileInfo struct {
-	FileName string `json:"fileName"` // 文件名
+	FileKey string `json:"fileKey"` // 文件名
 }
 
 type GetMomentInfoReq struct {
@@ -65,14 +65,14 @@ type MomentLikeModel struct {
 	UserID    string `json:"userId"`    // 用户ID
 	CreatedAt string `json:"createdAt"` // 点赞时间
 	UserName  string `json:"userName"`  // 用户名
-	FileName  string `json:"fileName"`  // 用户头像
+	Avatar    string `json:"avatar"`    // 用户头像
 }
 
 type MomentModel struct {
 	Id        uint                 `json:"id"`        // 动态ID
 	UserID    string               `json:"userId"`    // 用户ID
 	UserName  string               `json:"userName"`  // 用户名
-	FileName  string               `json:"fileName"`  // 用户头像
+	Avatar    string               `json:"avatar"`    // 用户头像
 	Content   string               `json:"content"`   // 动态内容
 	Files     []FileInfo           `json:"files"`     // 文件信息列表
 	Comments  []MomentCommentModel `json:"comments"`  // 评论列表

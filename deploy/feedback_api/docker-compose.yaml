@@ -1,7 +1,7 @@
 
 services:
   feedback_api:
-    image: wsrh8888/feedback_api:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/feedback_api:1.0.2
     container_name: feedback_api
     network_mode: "host"
     volumes:

@@ -46,7 +46,7 @@ type GetMomentInfoRes {
 
 // 文件信息结构体定义
 type FileInfo {
-	FileName string `json:"fileName"` // 文件名
+	fileKey string `json:"fileKey"` // 文件名
 }
 
 // 动态模型定义
@@ -54,7 +54,7 @@ type MomentModel {
 	Id        uint                 `json:"id"` // 动态ID
 	UserID    string               `json:"userId"` // 用户ID
 	UserName  string               `json:"userName"` // 用户名
-	FileName  string               `json:"fileName"` // 用户头像
+	Avatar   string               `json:"avatar"` // 用户头像
 	Content   string               `json:"content"` // 动态内容
 	Files     []FileInfo           `json:"files"` // 文件信息列表
 	Comments  []MomentCommentModel `json:"comments"` // 评论列表
@@ -69,7 +69,7 @@ type MomentLikeModel {
 	UserID    string `json:"userId"` // 用户ID
 	CreatedAt string `json:"createdAt"` // 点赞时间
 	UserName  string `json:"userName"` // 用户名
-	FileName  string `json:"fileName"` // 用户头像
+	Avatar   string `json:"avatar"` // 用户头像
 }
 
 // 评论模型定义

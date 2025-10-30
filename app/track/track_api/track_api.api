@@ -1,0 +1,49 @@
+syntax = "v1"
+
+// 上报统计埋点事件请求
+type (
+	ReportEventsReq {
+		UserID string      `json:"userId,optional"` // 用户ID(可选)
+		Events []EventData `json:"events,optional"` // 事件列表(可选)
+	}
+	// 事件数据
+	EventData {
+		EventName string `json:"eventName"` // 事件名称，如 EVENT_REGISTER
+		Action    string `json:"action"` // 操作类型，如 click, view
+		BucketID  string `json:"bucketId"` // Bucket Id
+		Platform  string `json:"platform,optional"` // 平台，如 ios, android, web
+		Timestamp int64  `json:"timestamp"` // 事件时间戳(毫秒)
+		DeviceID  string `json:"deviceID,optional"` // 设备ID(可选)
+		Data      string `json:"data,optional"` // 额外数据(JSON格式)
+	}
+	// 上报统计埋点事件响应
+	ReportEventsRes  {}
+)
+
+// 记录日志请求
+type (
+	LogEventsReq {
+		Logs []LogData `json:"logs"` // 日志列表
+	}
+	// 日志数据
+	LogData {
+		Level     string `json:"level"` // 日志级别：debug, info, warn, error
+		BucketID  string `json:"bucketId"` // Bucket Id
+		Data      string `json:"data"` // 日志数据(JSON格式)
+		Timestamp int64  `json:"timestamp,optional"` // 日志时间戳(毫秒)，可选
+	}
+	// 记录日志响应
+	LogEventsRes  {}
+)
+
+service track {
+	@doc "上报统计埋点事件和日志"
+	@handler reportEvents
+	post /api/track/events (ReportEventsReq) returns (ReportEventsRes)
+
+	@doc "记录日志"
+	@handler logEvents
+	post /api/track/logs (LogEventsReq) returns (LogEventsRes)
+}
+
+// goctl api go -api track_api.api -dir . --home ../../../template

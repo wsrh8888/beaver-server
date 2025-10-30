@@ -14,6 +14,7 @@ import (
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -33,7 +34,7 @@ func NewUserValidStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 
 func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) (resp *types.FriendValidStatusRes, err error) {
 	// 参数验证
-	if req.UserID == "" || req.VerifyID == 0 {
+	if req.UserID == "" || req.VerifyID == "" {
 		return nil, errors.New("用户ID和验证ID不能为空")
 	}
 
@@ -46,15 +47,15 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	var conversationID string
 
 	// 查询好友验证记录，确保当前用户是接收方
-	err = l.svcCtx.DB.Take(&friendVerify, "id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&friendVerify, "uuid = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
 	if err != nil {
-		l.Logger.Errorf("好友验证记录不存在: verifyID=%d, userID=%s, error=%v", req.VerifyID, req.UserID, err)
+		l.Logger.Errorf("好友验证记录不存在: verifyID=%s, userID=%s, error=%v", req.VerifyID, req.UserID, err)
 		return nil, errors.New("好友验证不存在")
 	}
 
 	// 检查验证状态是否已处理
 	if friendVerify.RevStatus != 0 {
-		l.Logger.Errorf("好友验证已处理: verifyID=%d, currentStatus=%d", req.VerifyID, friendVerify.RevStatus)
+		l.Logger.Errorf("好友验证已处理: verifyID=%s, currentStatus=%d", req.VerifyID, friendVerify.RevStatus)
 		return nil, errors.New("该验证已处理，无法重复操作")
 	}
 
@@ -63,11 +64,20 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	case 1: // 同意
 		friendVerify.RevStatus = 1
 
+		// 获取下一个版本号
+		friendNextVersion, err := l.svcCtx.VersionGen.GetNextVersion("friends")
+		if err != nil {
+			l.Logger.Errorf("获取好友版本号失败: %v", err)
+			return nil, errors.New("系统错误")
+		}
+
 		// 创建好友关系，同步来源信息
 		err = l.svcCtx.DB.Create(&friend_models.FriendModel{
+			UUID:       uuid.New().String(), // 生成UUID作为好友记录的唯一标识
 			SendUserID: friendVerify.SendUserID,
 			RevUserID:  friendVerify.RevUserID,
 			Source:     friendVerify.Source, // 同步来源字段
+			Version:    friendNextVersion,   // 设置初始版本号
 		}).Error
 		if err != nil {
 			l.Logger.Errorf("创建好友关系失败: %v", err)
@@ -120,9 +130,17 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			return nil, errors.New("删除验证记录失败")
 		}
 
-		l.Logger.Infof("删除好友验证记录成功: verifyID=%d, userID=%s", req.VerifyID, req.UserID)
+		l.Logger.Infof("删除好友验证记录成功: verifyID=%s, userID=%s", req.VerifyID, req.UserID)
 		return &types.FriendValidStatusRes{}, nil
 	}
+
+	// 获取下一个版本号并更新version字段
+	nextVersion, err := l.svcCtx.VersionGen.GetNextVersion("friend_verify")
+	if err != nil {
+		l.Logger.Errorf("获取版本号失败: %v", err)
+		return nil, errors.New("系统错误")
+	}
+	friendVerify.Version = nextVersion
 
 	// 保存验证状态
 	err = l.svcCtx.DB.Save(&friendVerify).Error
@@ -148,9 +166,9 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			"status": friendVerify.RevStatus,
 		}, conversationID)
 
-		l.Logger.Infof("异步发送WebSocket通知完成: verifyID=%d, status=%d", req.VerifyID, friendVerify.RevStatus)
+		l.Logger.Infof("异步发送WebSocket通知完成: verifyID=%s, status=%d", req.VerifyID, friendVerify.RevStatus)
 	}()
 
-	l.Logger.Infof("处理好友验证成功: verifyID=%d, userID=%s, status=%d, source=%s", req.VerifyID, req.UserID, req.Status, friendVerify.Source)
+	l.Logger.Infof("处理好友验证成功: verifyID=%s, userID=%s, status=%d, source=%s", req.VerifyID, req.UserID, req.Status, friendVerify.Source)
 	return &types.FriendValidStatusRes{}, nil
 }

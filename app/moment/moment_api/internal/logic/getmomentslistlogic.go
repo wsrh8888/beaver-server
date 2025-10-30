@@ -82,14 +82,14 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 				Id:       like.Id,
 				UserID:   like.UserID,
 				UserName: like.LikeUserModel.NickName,
-				FileName: like.LikeUserModel.FileName,
+				Avatar:   like.LikeUserModel.Avatar,
 			})
 		}
 
 		var files []types.FileInfo
 		for _, file := range *moment.Files {
 			files = append(files, types.FileInfo{
-				FileName: file.FileName,
+				FileKey: file.FileKey,
 			})
 		}
 
@@ -101,7 +101,7 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 			Likes:   likes,
 			// Comments: comments,
 			UserName:  moment.MomentUserModel.NickName, // 增加 UserName 字段
-			FileName:  moment.MomentUserModel.FileName, // 增加 FileName 字段
+			Avatar:    moment.MomentUserModel.Avatar,   // 增加 Avatar 字段
 			CreatedAt: moment.CreatedAt.String(),
 		})
 	}

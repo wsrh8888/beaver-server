@@ -1,0 +1,147 @@
+syntax = "v1"
+
+// 聊天消息信息
+type (
+	ChatMessageInfo {
+		Id             string `json:"id"`
+		MessageID      string `json:"messageId"`
+		ConversationID string `json:"conversationId"`
+		SendUserID     string `json:"sendUserId"`
+		SendUserName   string `json:"sendUserName"`
+		MsgType        int    `json:"msgType"`
+		MsgPreview     string `json:"msgPreview"`
+		IsDeleted      bool   `json:"isDeleted"`
+		CreateTime     string `json:"createTime"`
+		UpdateTime     string `json:"updateTime"`
+	}
+)
+
+// 获取聊天消息列表
+type (
+	GetChatMessageListReq {
+		Page           int    `form:"page,default=1"`
+		PageSize       int    `form:"pageSize,default=10"`
+		ConversationID string `form:"conversationId,optional"` // 按会话ID筛选
+		SendUserID     string `form:"sendUserId,optional"` // 按发送者ID筛选
+		MsgType        int    `form:"msgType,optional"` // 按消息类型筛选
+		IsDeleted      bool   `form:"isDeleted,optional"` // 按删除状态筛选
+		StartTime      string `form:"startTime,optional"`
+		EndTime        string `form:"endTime,optional"`
+	}
+	GetChatMessageListRes {
+		List  []ChatMessageInfo `json:"list"`
+		Total int64             `json:"total"`
+	}
+)
+
+// 获取聊天消息详情
+type (
+	GetChatMessageDetailReq {
+		MessageID string `path:"id"`
+	}
+	GetChatMessageDetailRes {
+		Id             string `json:"id"`
+		MessageID      string `json:"messageId"`
+		ConversationID string `json:"conversationId"`
+		SendUserID     string `json:"sendUserId"`
+		SendUserName   string `json:"sendUserName"`
+		SendUserFileName string `json:"sendUserFileName"`
+		MsgType        int    `json:"msgType"`
+		MsgPreview     string `json:"msgPreview"`
+		MsgContent     string `json:"msgContent"`
+		IsDeleted      bool   `json:"isDeleted"`
+		CreateTime     string `json:"createTime"`
+		UpdateTime     string `json:"updateTime"`
+	}
+)
+
+// 删除聊天消息
+type (
+	DeleteChatMessageReq {
+		MessageID string `path:"id"`
+	}
+	DeleteChatMessageRes  {}
+)
+
+// 批量删除聊天消息
+type (
+	BatchDeleteChatMessagesReq {
+		Ids []string `json:"ids"`
+	}
+	BatchDeleteChatMessagesRes  {}
+)
+
+// 恢复已删除的消息
+type (
+	RestoreChatMessageReq {
+		MessageID string `json:"messageId"`
+	}
+	RestoreChatMessageRes  {}
+)
+
+// 批量恢复消息
+type (
+	BatchRestoreChatMessagesReq {
+		Ids []string `json:"ids"`
+	}
+	BatchRestoreChatMessagesRes  {}
+)
+
+// 清空会话消息
+type (
+	ClearConversationReq {
+		ConversationID string `json:"conversationId"`
+	}
+	ClearConversationRes  {}
+)
+
+// 按消息类型删除
+type (
+	DeleteMessagesByTypeReq {
+		ConversationID string `json:"conversationId,optional"`
+		MsgType        int    `json:"msgType"`
+		StartTime      string `json:"startTime,optional"`
+		EndTime        string `json:"endTime,optional"`
+	}
+	DeleteMessagesByTypeRes {
+		DeletedCount int64 `json:"deletedCount"`
+	}
+)
+
+@server (
+	group: chat
+)
+service backend {
+	@doc "获取聊天消息列表"
+	@handler getChatMessageList
+	get /admin/chat/list (GetChatMessageListReq) returns (GetChatMessageListRes)
+
+	@doc "获取聊天消息详情"
+	@handler getChatMessageDetail
+	get /admin/chat/:id (GetChatMessageDetailReq) returns (GetChatMessageDetailRes)
+
+	@doc "删除聊天消息"
+	@handler deleteChatMessage
+	delete /admin/chat/:id (DeleteChatMessageReq) returns (DeleteChatMessageRes)
+
+	@doc "批量删除聊天消息"
+	@handler batchDeleteChatMessages
+	delete /admin/chat/batch (BatchDeleteChatMessagesReq) returns (BatchDeleteChatMessagesRes)
+
+	@doc "恢复已删除的消息"
+	@handler restoreChatMessage
+	put /admin/chat/restore (RestoreChatMessageReq) returns (RestoreChatMessageRes)
+
+	@doc "批量恢复消息"
+	@handler batchRestoreChatMessages
+	put /admin/chat/restorebatch (BatchRestoreChatMessagesReq) returns (BatchRestoreChatMessagesRes)
+
+	@doc "清空会话消息"
+	@handler clearConversation
+	delete /admin/chat/clearconv (ClearConversationReq) returns (ClearConversationRes)
+
+	@doc "按消息类型删除"
+	@handler deleteMessagesByType
+	delete /admin/chat/bytype (DeleteMessagesByTypeReq) returns (DeleteMessagesByTypeRes)
+}
+

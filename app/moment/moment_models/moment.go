@@ -10,7 +10,7 @@ import (
 
 // FileInfo 结构体，用于存储文件的信息
 type FileInfo struct {
-	FileName string `json:"fileName"` // 文件名
+	FileKey string `json:"fileKey"` // 文件名
 }
 
 type Files []FileInfo
@@ -41,4 +41,5 @@ type MomentModel struct {
 	LikesModel      []MomentLikeModel     `gorm:"foreignkey:MomentID;references:Id" json:"-"` // 点赞列表
 	MomentUserModel user_models.UserModel `gorm:"foreignKey:UserID;references:UUID" json:"-"`
 	IsDeleted       bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
+	Version         int64                 `gorm:"not null;default:0;index"`                // 版本号（用于数据同步）
 }

@@ -33,7 +33,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 
 	fmt.Println("当前的会话Id是:", req.ConversationID)
 
-	chatMessages, count, err := list_query.ListQuery(l.svcCtx.DB, chat_models.ChatModel{}, list_query.Option{
+	chatMessages, count, err := list_query.ListQuery(l.svcCtx.DB, chat_models.ChatMessage{}, list_query.Option{
 		PageInfo: models.PageInfo{
 			Page:  req.Page,
 			Limit: req.Limit,
@@ -63,7 +63,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 			Sender: types.Sender{
 				UserID:   chat.SendUserModel.UUID,
 				Nickname: chat.SendUserModel.NickName,
-				FileName: chat.SendUserModel.FileName,
+				Avatar:   chat.SendUserModel.Avatar,
 			},
 			CreateAt: chat.CreatedAt.String(),
 			Msg:      msg,

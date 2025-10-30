@@ -8,6 +8,7 @@ import (
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core"
+	versionPkg "beaver/core/version"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -15,22 +16,25 @@ import (
 )
 
 type ServiceContext struct {
-	Config  config.Config
-	Redis   *redis.Client
-	UserRpc user_rpc.UserClient
-	ChatRpc chat_rpc.ChatClient
-	DB      *gorm.DB
+	Config     config.Config
+	Redis      *redis.Client
+	UserRpc    user_rpc.UserClient
+	ChatRpc    chat_rpc.ChatClient
+	DB         *gorm.DB
+	VersionGen *versionPkg.VersionGenerator
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := core.InitGorm(c.Mysql.DataSource)
 	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
 
 	return &ServiceContext{
-		DB:      mysqlDb,
-		Redis:   client,
-		Config:  c,
-		UserRpc: user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		ChatRpc: chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		DB:         mysqlDb,
+		Redis:      client,
+		Config:     c,
+		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		ChatRpc:    chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		VersionGen: versionGen,
 	}
 }

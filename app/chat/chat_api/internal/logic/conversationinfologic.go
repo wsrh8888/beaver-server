@@ -31,7 +31,7 @@ func NewConversationInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq) (resp *types.ConversationInfoRes, err error) {
 	// 查询会话信息
-	var userConversation chat_models.ChatUserConversationModel
+	var userConversation chat_models.ChatUserConversation
 	err = l.svcCtx.DB.Where("conversation_id = ? AND is_deleted = false", req.ConversationID).First(&userConversation).Error
 
 	// 初始化响应
@@ -67,7 +67,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			return nil, err
 		}
 
-		resp.FileName = user.FileName
+		resp.Avatar = user.Avatar
 		resp.Nickname = user.NickName
 		resp.ChatType = 1 // 私聊类型
 	} else {
@@ -78,7 +78,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			return nil, err
 		}
 
-		resp.FileName = group.FileName
+		resp.Avatar = group.Avatar
 		resp.Nickname = group.Title
 		resp.ChatType = 2 // 群聊类型
 	}

@@ -11,18 +11,18 @@ message TextMsg {
 
 // 定义FileMsg消息
 message FileMsg {
-  string fileName = 1; // 文件ID，通过fileName可以从文件模块获取完整信息
+  string fileKey = 1; // 文件ID，通过fileName可以从文件模块获取完整信息
 }
 
 // 定义VoiceMsg消息
 message VoiceMsg {
-  string fileName = 1; // 语音文件ID
+  string fileKey = 1; // 语音文件ID
   int32 duration = 2;  // 语音时长（秒）
 }
 
 // 定义VideoMsg消息
 message VideoMsg {
-  string fileName = 1; // 视频文件ID
+  string fileKey = 1; // 视频文件ID
   int32 width = 2;     // 视频宽度
   int32 height = 3;    // 视频高度
   int32 duration = 4;  // 视频时长（秒）
@@ -30,14 +30,14 @@ message VideoMsg {
 
 // 定义ImageMsg消息
 message ImageMsg {
-  string fileName = 1; // 图片文件ID
+  string fileKey = 1; // 图片文件ID
   int32 width = 2;     // 图片宽度
   int32 height = 3;    // 图片高度
 }
 
 // 定义EmojiMsg消息 - 表情相关消息
 message EmojiMsg {
-  string fileName = 1; // 表情图片文件ID（Emoji.FileName）
+  string fileKey = 1; // 表情图片文件ID（Emoji.FileName）
   uint32 emojiId = 2; // 表情ID（Emoji.ID，单个表情时使用）
   uint32 packageId = 3; // 表情包ID（EmojiPackage.ID，表情包分享时使用）
 }
@@ -59,12 +59,13 @@ message SendMsgReq {
   string conversation_id = 2; // 会话ID
   string message_id = 3; // 客户端消息ID
   Msg msg = 4; // 消息内容
+  string deviceId = 5;
 }
 
 // 定义Sender消息
 message Sender {
   string userId = 1;
-  string fileName = 2;
+  string avatar = 2;
   string nickname = 3;
 }
 
@@ -78,6 +79,7 @@ message SendMsgRes {
   string create_at = 6; // 消息时间
   string msg_preview = 7; // 消息预览
   uint32 status = 8; // 消息状态 1:正常 2:已撤回 3:已编辑
+  int64 seq = 9; // 消息序列号，用于数据同步
 }
 
 // 定义UpdateConversationReq消息
@@ -134,6 +136,36 @@ message RecallMessageRes {
   string recallTime = 3; // 撤回时间
 }
 
+// 定义GetLatestSeqReq消息
+message GetLatestSeqReq {
+  string conversationId = 1; // 会话ID，为空则获取所有会话的最新序列号
+}
+
+// 定义GetLatestSeqRes消息
+message GetLatestSeqRes {
+  int64 latestSeq = 1; // 最新序列号
+}
+
+// 定义GetConversationVersionReq消息
+message GetConversationVersionReq {
+  // 数据同步表版本号是全局的，不需要用户ID参数
+}
+
+// 定义GetConversationVersionRes消息
+message GetConversationVersionRes {
+  int64 latestVersion = 1; // 数据同步表最新版本号
+}
+
+// 定义GetConversationSettingVersionReq消息
+message GetConversationSettingVersionReq {
+  string userId = 1; // 用户ID
+}
+
+// 定义GetConversationSettingVersionRes消息
+message GetConversationSettingVersionRes {
+  int64 latestVersion = 1; // 会话设置表最新版本号
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
@@ -141,6 +173,9 @@ service Chat {
     rpc BatchUpdateConversation(BatchUpdateConversationReq) returns (BatchUpdateConversationRes); //批量更新会话记录
     rpc EditMessage(EditMessageReq) returns (EditMessageRes); //编辑消息
     rpc RecallMessage(RecallMessageReq) returns (RecallMessageRes); //撤回消息
+    rpc GetMessageSeq(GetLatestSeqReq) returns (GetLatestSeqRes); //获取最新消息序列号
+    rpc GetConversationVersion(GetConversationVersionReq) returns (GetConversationVersionRes); //获取数据同步表版本号
+    rpc GetConversationSettingVersion(GetConversationSettingVersionReq) returns (GetConversationSettingVersionRes); //获取会话设置表的最新版本号
 }
 
 //goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

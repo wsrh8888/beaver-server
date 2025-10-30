@@ -25,11 +25,11 @@ func NewUpdateConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateConversationLogic) UpdateConversation(in *chat_rpc.UpdateConversationReq) (*chat_rpc.UpdateConversationRes, error) {
-	var userConvo chat_models.ChatUserConversationModel
+	var userConvo chat_models.ChatUserConversation
 	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", in.ConversationId, in.UserId).First(&userConvo).Error
 	if err != nil {
 		// 如果记录不存在，创建新记录
-		if err := l.svcCtx.DB.Create(&chat_models.ChatUserConversationModel{
+		if err := l.svcCtx.DB.Create(&chat_models.ChatUserConversation{
 			UserID:         in.UserId,
 			ConversationID: in.ConversationId,
 			LastMessage:    in.LastMessage,

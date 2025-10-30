@@ -47,7 +47,7 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 	resp = &types.UserInfoRes{
 		UserID:   user.UUID,
 		NickName: user.NickName,
-		FileName: user.FileName,
+		Avatar:   user.Avatar,
 		Abstract: user.Abstract,
 		Phone:    user.Phone,
 		Email:    user.Email,

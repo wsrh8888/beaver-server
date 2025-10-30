@@ -63,7 +63,7 @@ func convertToResponseFiles(files moment_models.Files) []types.FileInfo {
 	var result []types.FileInfo
 	for _, file := range files {
 		result = append(result, types.FileInfo{
-			FileName: file.FileName,
+			FileKey: file.FileKey,
 		})
 	}
 	return result

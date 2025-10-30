@@ -1,0 +1,137 @@
+syntax = "v1"
+
+// 获取动态列表
+type (
+	GetMomentListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		UserId   string `form:"userId,optional"` // 用户ID筛选
+		Keywords string `form:"keywords,optional"` // 内容关键词搜索
+	}
+	GetMomentListRes {
+		List  []MomentInfo `json:"list"`
+		Total int64        `json:"total"`
+	}
+	MomentInfo {
+		Id        uint       `json:"id"`
+		UserId    string     `json:"userId"`
+		Content   string     `json:"content"`
+		Files     []FileInfo `json:"files"`
+		IsDeleted bool       `json:"isDeleted"`
+		CreatedAt string     `json:"createdAt"`
+		UpdatedAt string     `json:"updatedAt"`
+	}
+)
+
+// 获取动态详情
+type (
+	GetMomentDetailReq {
+		Id uint `path:"id"`
+	}
+	GetMomentDetailRes {
+		MomentInfo
+	}
+)
+
+// 删除动态
+type (
+	DeleteMomentReq {
+		Id uint `path:"id"`
+	}
+	DeleteMomentRes  {}
+)
+
+// 获取动态评论列表
+type (
+	GetMomentCommentListReq {
+		Page     int  `form:"page,optional"`
+		Limit    int  `form:"limit,optional"`
+		MomentId uint `form:"momentId"`
+	}
+	GetMomentCommentListRes {
+		List  []MomentCommentInfo `json:"list"`
+		Total int64               `json:"total"`
+	}
+	MomentCommentInfo {
+		Id        uint   `json:"id"`
+		MomentId  uint   `json:"momentId"`
+		UserId    string `json:"userId"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
+)
+
+// 删除动态评论
+type (
+	DeleteMomentCommentReq {
+		Id uint `path:"id"`
+	}
+	DeleteMomentCommentRes  {}
+)
+
+// 获取动态举报列表
+type (
+	GetMomentReportListReq {
+		Page     int  `form:"page,optional"`
+		Limit    int  `form:"limit,optional"`
+		Status   int  `form:"status,optional"` // 处理状态筛选
+		MomentId uint `form:"momentId,optional"` // 动态ID筛选
+	}
+	GetMomentReportListRes {
+		List  []MomentReportInfo `json:"list"`
+		Total int64              `json:"total"`
+	}
+	MomentReportInfo {
+		Id        uint       `json:"id"`
+		UserId    string     `json:"userId"`
+		MomentId  uint       `json:"momentId"`
+		Reason    string     `json:"reason"`
+		Images    []FileInfo `json:"images"`
+		Status    int        `json:"status"`
+		CreatedAt string     `json:"createdAt"`
+		UpdatedAt string     `json:"updatedAt"`
+	}
+)
+
+// 处理动态举报
+type (
+	HandleMomentReportReq {
+		Id     uint `path:"id"`
+		Status int  `json:"status"` // 处理状态：1已处理 2已驳回
+	}
+	HandleMomentReportRes  {}
+)
+
+@server (
+	group: moment
+)
+service backend {
+	@doc "获取动态列表"
+	@handler GetMomentList
+	get /admin/moment/list (GetMomentListReq) returns (GetMomentListRes)
+
+	@doc "获取动态详情"
+	@handler GetMomentDetail
+	get /admin/moment/:id (GetMomentDetailReq) returns (GetMomentDetailRes)
+
+	@doc "删除动态"
+	@handler DeleteMoment
+	delete /admin/moment/:id (DeleteMomentReq) returns (DeleteMomentRes)
+
+	@doc "获取动态评论列表"
+	@handler GetMomentCommentList
+	get /admin/moment/comments (GetMomentCommentListReq) returns (GetMomentCommentListRes)
+
+	@doc "删除动态评论"
+	@handler DeleteMomentComment
+	delete /admin/moment/comment/:id (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
+
+	@doc "获取动态举报列表"
+	@handler GetMomentReportList
+	get /admin/moment/reports (GetMomentReportListReq) returns (GetMomentReportListRes)
+
+	@doc "处理动态举报"
+	@handler HandleMomentReport
+	put /admin/moment/report/:id (HandleMomentReportReq) returns (HandleMomentReportRes)
+}

@@ -1,0 +1,205 @@
+syntax = "v1"
+
+// 好友关系信息
+type (
+	FriendInfo {
+		Id             string `json:"id"`
+		SendUserId     string `json:"sendUserId"`
+		SendUserName   string `json:"sendUserName"`
+		RevUserId      string `json:"revUserId"`
+		RevUserName    string `json:"revUserName"`
+		SendUserNotice string `json:"sendUserNotice"`
+		RevUserNotice  string `json:"revUserNotice"`
+		IsDeleted      bool   `json:"isDeleted"`
+		CreateTime     string `json:"createTime"`
+		UpdateTime     string `json:"updateTime"`
+	}
+)
+
+// 好友关系详情信息
+type (
+	FriendDetailInfo {
+		Id             string `json:"id"`
+		SendUserId     string `json:"sendUserId"`
+		SendUserName   string `json:"sendUserName"`
+		SendUserFileName string `json:"sendUserFileName"`
+		RevUserId      string `json:"revUserId"`
+		RevUserName    string `json:"revUserName"`
+		RevUserFileName  string `json:"revUserFileName"`
+		SendUserNotice string `json:"sendUserNotice"`
+		RevUserNotice  string `json:"revUserNotice"`
+		IsDeleted      bool   `json:"isDeleted"`
+		CreateTime     string `json:"createTime"`
+		UpdateTime     string `json:"updateTime"`
+	}
+)
+
+// 好友验证信息
+type (
+	FriendVerifyInfo {
+		Id           string `json:"id"`
+		SendUserId   string `json:"sendUserId"`
+		SendUserName string `json:"sendUserName"`
+		RevUserId    string `json:"revUserId"`
+		RevUserName  string `json:"revUserName"`
+		SendStatus   int    `json:"sendStatus"`
+		RevStatus    int    `json:"revStatus"`
+		Message      string `json:"message"`
+		CreateTime   string `json:"createTime"`
+		UpdateTime   string `json:"updateTime"`
+	}
+)
+
+// 好友验证详情信息
+type (
+	FriendVerifyDetailInfo {
+		Id             string `json:"id"`
+		SendUserId     string `json:"sendUserId"`
+		SendUserName   string `json:"sendUserName"`
+		SendUserFileName string `json:"sendUserFileName"`
+		RevUserId      string `json:"revUserId"`
+		RevUserName    string `json:"revUserName"`
+		RevUserFileName  string `json:"revUserFileName"`
+		SendStatus     int    `json:"sendStatus"`
+		RevStatus      int    `json:"revStatus"`
+		Message        string `json:"message"`
+		CreateTime     string `json:"createTime"`
+		UpdateTime     string `json:"updateTime"`
+	}
+)
+
+// 获取好友关系列表
+type (
+	GetFriendListReq {
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=10"`
+		UserID    string `form:"userId,optional"` // 按用户ID筛选
+		FriendID  string `form:"friendId,optional"` // 按好友ID筛选
+		IsDeleted bool   `form:"isDeleted,optional"` // 按删除状态筛选
+		StartTime string `form:"startTime,optional"`
+		EndTime   string `form:"endTime,optional"`
+	}
+	GetFriendListRes {
+		List  []FriendInfo `json:"list"`
+		Total int64        `json:"total"`
+	}
+)
+
+// 获取好友关系详情
+type (
+	GetFriendDetailReq {
+		FriendID string `path:"id"`
+	}
+	GetFriendDetailRes {
+		FriendDetailInfo
+	}
+)
+
+// 强制删除好友关系
+type (
+	DeleteFriendReq {
+		FriendID string `path:"id"`
+	}
+	DeleteFriendRes  {}
+)
+
+// 批量删除好友关系
+type (
+	BatchDeleteFriendsReq {
+		Ids []string `json:"ids"`
+	}
+	BatchDeleteFriendsRes  {}
+)
+
+// 恢复好友关系
+type (
+	RestoreFriendReq {
+		FriendID string `json:"friendId"`
+	}
+	RestoreFriendRes  {}
+)
+
+// 获取好友验证列表
+type (
+	GetFriendVerifyListReq {
+		Page       int    `form:"page,default=1"`
+		PageSize   int    `form:"pageSize,default=10"`
+		SendUserId string `form:"sendUserId,optional"`
+		RevUserId  string `form:"revUserId,optional"`
+		SendStatus int    `form:"sendStatus,optional"` // 0:未处理 1:已通过 2:已拒绝 3:忽略 4:删除
+		RevStatus  int    `form:"revStatus,optional"`
+		StartTime  string `form:"startTime,optional"`
+		EndTime    string `form:"endTime,optional"`
+	}
+	GetFriendVerifyListRes {
+		List  []FriendVerifyInfo `json:"list"`
+		Total int64              `json:"total"`
+	}
+)
+
+// 获取好友验证详情
+type (
+	GetFriendVerifyDetailReq {
+		VerifyID string `form:"verifyId"`
+	}
+	GetFriendVerifyDetailRes {
+		FriendVerifyDetailInfo
+	}
+)
+
+// 删除好友验证记录
+type (
+	DeleteFriendVerifyReq {
+		VerifyID string `json:"verifyId"`
+	}
+	DeleteFriendVerifyRes  {}
+)
+
+// 批量删除好友验证记录
+type (
+	BatchDeleteFriendVerifyReq {
+		Ids []string `json:"ids"`
+	}
+	BatchDeleteFriendVerifyRes  {}
+)
+
+@server (
+	group: friend
+)
+service backend {
+	@doc "获取好友关系列表"
+	@handler getFriendList
+	get /admin/friend/list (GetFriendListReq) returns (GetFriendListRes)
+
+	@doc "获取好友关系详情"
+	@handler getFriendDetail
+	get /admin/friend/:id (GetFriendDetailReq) returns (GetFriendDetailRes)
+
+	@doc "强制删除好友关系"
+	@handler deleteFriend
+	delete /admin/friend/:id (DeleteFriendReq) returns (DeleteFriendRes)
+
+	@doc "批量删除好友关系"
+	@handler batchDeleteFriends
+	delete /admin/friend/batch (BatchDeleteFriendsReq) returns (BatchDeleteFriendsRes)
+
+	@doc "恢复好友关系"
+	@handler restoreFriend
+	put /admin/friend/restore (RestoreFriendReq) returns (RestoreFriendRes)
+
+	@doc "获取好友验证列表"
+	@handler getFriendVerifyList
+	get /admin/friend/verifylist (GetFriendVerifyListReq) returns (GetFriendVerifyListRes)
+
+	@doc "获取好友验证详情"
+	@handler getFriendVerifyDetail
+	get /admin/friend/verify (GetFriendVerifyDetailReq) returns (GetFriendVerifyDetailRes)
+
+	@doc "删除好友验证记录"
+	@handler deleteFriendVerify
+	delete /admin/friend/verify (DeleteFriendVerifyReq) returns (DeleteFriendVerifyRes)
+
+	@doc "批量删除好友验证记录"
+	@handler batchDeleteFriendVerify
+	delete /admin/friend/verifybatch (BatchDeleteFriendVerifyReq) returns (BatchDeleteFriendVerifyRes)
+}

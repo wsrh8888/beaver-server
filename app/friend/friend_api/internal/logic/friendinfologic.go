@@ -93,7 +93,7 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		ConversationID: conversationID,
 		UserID:         friendUser.UUID,
 		Nickname:       friendUser.NickName,
-		FileName:       friendUser.FileName,
+		Avatar:         friendUser.Avatar,
 		Abstract:       friendUser.Abstract,
 		Notice:         notice,
 		IsFriend:       isFriend,

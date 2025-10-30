@@ -30,17 +30,35 @@ func NewSearchLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchLogi
 
 func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err error) {
 	// 参数验证
-	if req.Email == "" {
-		return nil, errors.New("邮箱不能为空")
+	if req.Keyword == "" {
+		return nil, errors.New("搜索关键词不能为空")
 	}
 
 	var user user_models.UserModel
 
-	// 根据邮箱查询用户信息
-	err = l.svcCtx.DB.Take(&user, "email = ?", req.Email).Error
-	if err != nil {
-		l.Logger.Errorf("查询用户失败: email=%s, error=%v", req.Email, err)
-		return nil, errors.New("用户不存在")
+	// 根据搜索类型查询用户信息
+	switch req.Type {
+	case "email":
+		// 根据邮箱查询
+		err = l.svcCtx.DB.Take(&user, "email = ?", req.Keyword).Error
+		if err != nil {
+			l.Logger.Errorf("根据邮箱查询用户失败: email=%s, error=%v", req.Keyword, err)
+			return nil, errors.New("用户不存在")
+		}
+	case "userId":
+		// 根据用户ID查询
+		err = l.svcCtx.DB.Take(&user, "uuid = ?", req.Keyword).Error
+		if err != nil {
+			l.Logger.Errorf("根据用户ID查询用户失败: userId=%s, error=%v", req.Keyword, err)
+			return nil, errors.New("用户不存在")
+		}
+	default:
+		// 默认按邮箱搜索
+		err = l.svcCtx.DB.Take(&user, "email = ?", req.Keyword).Error
+		if err != nil {
+			l.Logger.Errorf("根据邮箱查询用户失败: email=%s, error=%v", req.Keyword, err)
+			return nil, errors.New("用户不存在")
+		}
 	}
 
 	// 不能搜索自己
@@ -63,13 +81,13 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 	resp = &types.SearchRes{
 		UserID:         user.UUID,
 		Nickname:       user.NickName,
-		FileName:       user.FileName,
+		Avatar:         user.Avatar,
 		Abstract:       user.Abstract,
 		IsFriend:       isFriend,
 		ConversationID: conversationID,
 		Email:          user.Email,
 	}
 
-	l.Logger.Infof("搜索用户成功: userID=%s, targetEmail=%s, isFriend=%v", req.UserID, req.Email, isFriend)
+	l.Logger.Infof("搜索用户成功: userID=%s, keyword=%s, type=%s, isFriend=%v", req.UserID, req.Keyword, req.Type, isFriend)
 	return resp, nil
 }
