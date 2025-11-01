@@ -11,12 +11,12 @@ import (
 
 type ChatUserConversation struct {
 	models.Model
-	UserID         string `gorm:"size:64;not;index"`   // 属于哪个用户
-	ConversationID string `json:"conversationId"`      // 会话id（单聊为用户id，群聊为群id）
-	LastMessage    string `gorm:"size:128"`            // 最后一条消息预览（UI显示用）
-	IsDeleted      bool   `gorm:"default:false"`       // 用户是否把会话从列表删除/隐藏
-	IsPinned       bool   `gorm:"default:false"`       // 用户置顶
-	IsMuted        bool   `gorm:"default:false"`       // 用户免打扰
-	LastReadSeq    int64  `gorm:"not;default:0"`       // 用户已读到的消息 Seq（用户维度的已读）
-	Version        int64  `gorm:"not;default:0;index"` // 用户个性化设置版本
+	UserID         string `gorm:"size:64;index" json:"userId"`          // 用户ID
+	ConversationID string `gorm:"size:128;index" json:"conversationId"` // 关联的会话ID
+	JoinedAt       int64  `gorm:"not;default:0" json:"joinedAt"`        // 用户加入会话的时间戳
+	IsHidden       bool   `gorm:"default:false" json:"isHidden"`        // 是否在当前用户的会话列表隐藏
+	IsPinned       bool   `gorm:"default:false" json:"isPinned"`        // 置顶
+	IsMuted        bool   `gorm:"default:false" json:"isMuted"`         // 免打扰
+	UserReadSeq    int64  `gorm:"not;default:0" json:"userReadSeq"`     // 当前用户已读游标
+	Version        int64  `gorm:"not;default:0;index" json:"version"`   // 配置版本，用于多端同步
 }

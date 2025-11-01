@@ -11,7 +11,7 @@ import (
 )
 
 // CreateOrUpdateConversation 创建或更新会话信息
-func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, conversationID string, conversationType int, lastSeq int64) error {
+func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, conversationID string, conversationType int, lastSeq int64, lastMessage string) error {
 	var convModel chat_models.ChatConversationMeta
 	err := db.Where("conversation_id = ?", conversationID).First(&convModel).Error
 
@@ -26,7 +26,8 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 			convModel = chat_models.ChatConversationMeta{
 				ConversationID: conversationID,
 				Type:           conversationType,
-				LastReadSeq:    lastSeq,
+				MaxSeq:         lastSeq,
+				LastMessage:    lastMessage,
 				Version:        version,
 			}
 			err = db.Create(&convModel).Error
@@ -48,9 +49,10 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 		}
 		err = db.Model(&convModel).
 			Updates(map[string]interface{}{
-				"last_read_seq": lastSeq,
-				"version":       version,
-				"updated_at":    time.Now(),
+				"max_seq":      lastSeq,
+				"last_message": lastMessage,
+				"version":      version,
+				"updated_at":   time.Now(),
 			}).Error
 		if err != nil {
 			logx.Errorf("更新会话信息失败: %v", err)
@@ -61,14 +63,14 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 	return nil
 }
 
-// UpdateUserConversation 更新用户会话关系
-func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, userID, conversationID, lastMessage string, isDeleted bool) error {
+// UpdateUserConversation 更新用户会话关系（不再更新LastMessage，只更新版本号）
+func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, userID, conversationID string, isDeleted bool) error {
 	var userConvo chat_models.ChatUserConversation
 	err := db.Where("conversation_id = ? AND user_id = ?", conversationID, userID).First(&userConvo).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// 如果不存在，则创建
-			version, err := versionGen.GetNextVersion("user_conversations")
+			version, err := versionGen.GetNextVersion("chat_user_conversations")
 			if err != nil {
 				logx.Errorf("获取用户会话版本号失败: %v", err)
 				return err
@@ -76,11 +78,10 @@ func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, user
 			err = db.Create(&chat_models.ChatUserConversation{
 				UserID:         userID,
 				ConversationID: conversationID,
-				LastMessage:    lastMessage,
-				IsDeleted:      isDeleted,
+				IsHidden:       isDeleted, // 兼容旧的isDeleted参数
 				IsPinned:       false,
 				IsMuted:        false,
-				LastReadSeq:    0,
+				UserReadSeq:    0,
 				Version:        version,
 			}).Error
 			if err != nil {
@@ -101,10 +102,8 @@ func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, user
 		}
 		err = db.Model(&userConvo).
 			Updates(map[string]interface{}{
-				"last_message": lastMessage,
-				"is_deleted":   isDeleted,
-				"updated_at":   time.Now(),
-				"version":      version,
+				"updated_at": time.Now(),
+				"version":    version,
 			}).Error
 		if err != nil {
 			logx.Errorf("更新用户会话关系失败: %v", err)

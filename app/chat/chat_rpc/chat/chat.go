@@ -27,11 +27,15 @@ type (
 	GetLatestSeqReq                  = chat_rpc.GetLatestSeqReq
 	GetLatestSeqRes                  = chat_rpc.GetLatestSeqRes
 	ImageMsg                         = chat_rpc.ImageMsg
+	InitializeConversationReq        = chat_rpc.InitializeConversationReq
+	InitializeConversationRes        = chat_rpc.InitializeConversationRes
 	Msg                              = chat_rpc.Msg
 	RecallMessageReq                 = chat_rpc.RecallMessageReq
 	RecallMessageRes                 = chat_rpc.RecallMessageRes
 	SendMsgReq                       = chat_rpc.SendMsgReq
 	SendMsgRes                       = chat_rpc.SendMsgRes
+	SendSystemMessageReq             = chat_rpc.SendSystemMessageReq
+	SendSystemMessageRes             = chat_rpc.SendSystemMessageRes
 	Sender                           = chat_rpc.Sender
 	TextMsg                          = chat_rpc.TextMsg
 	UpdateConversationReq            = chat_rpc.UpdateConversationReq
@@ -48,6 +52,8 @@ type (
 		GetMessageSeq(ctx context.Context, in *GetLatestSeqReq, opts ...grpc.CallOption) (*GetLatestSeqRes, error)
 		GetConversationVersion(ctx context.Context, in *GetConversationVersionReq, opts ...grpc.CallOption) (*GetConversationVersionRes, error)
 		GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error)
+		InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error)
+		SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
 	}
 
 	defaultChat struct {
@@ -99,4 +105,14 @@ func (m *defaultChat) GetConversationVersion(ctx context.Context, in *GetConvers
 func (m *defaultChat) GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
 	return client.GetConversationSettingVersion(ctx, in, opts...)
+}
+
+func (m *defaultChat) InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.InitializeConversation(ctx, in, opts...)
+}
+
+func (m *defaultChat) SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.SendSystemMessage(ctx, in, opts...)
 }

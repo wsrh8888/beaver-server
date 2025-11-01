@@ -13,4 +13,5 @@ type Config struct {
 		Db       int
 	}
 	DatasyncRpc zrpc.RpcClientConf
+	UserRpc     zrpc.RpcClientConf
 }
