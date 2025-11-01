@@ -1,7 +1,6 @@
 package friend_models
 
 import (
-	"beaver/app/user/user_models"
 	"beaver/common/models"
 
 	"gorm.io/gorm"
@@ -12,16 +11,14 @@ import (
  */
 type FriendModel struct {
 	models.Model
-	UUID           string                `gorm:"size:64;unique;index"`
-	RevUserModel   user_models.UserModel `gorm:"foreignkey:RevUserID;references:UUID" json:"-"`
-	SendUserModel  user_models.UserModel `gorm:"foreignkey:SendUserID;references:UUID" json:"-"`
-	SendUserID     string                `gorm:"size:64;index" json:"sendUserId"`         // 发起验证方的 UserID
-	RevUserID      string                `gorm:"size:64;index" json:"revUserId"`          // 接收验证方的 UserID
-	SendUserNotice string                `gorm:"size: 128" json:"sendUserNotice"`         //发起验证方备注
-	RevUserNotice  string                `gorm:"size: 128" json:"revUserNotice"`          //接收验证方备注
-	Source         string                `gorm:"size: 32" json:"source"`                  // 好友关系来源：qrcode/search/group/recommend
-	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
-	Version        int64                 `gorm:"not null;default:0;index"`                // 版本号（用于数据同步）
+	UUID           string `gorm:"size:64;unique;index"`
+	SendUserID     string `gorm:"size:64;index" json:"sendUserId"`         // 发起验证方的 UserID
+	RevUserID      string `gorm:"size:64;index" json:"revUserId"`          // 接收验证方的 UserID
+	SendUserNotice string `gorm:"size: 128" json:"sendUserNotice"`         //发起验证方备注
+	RevUserNotice  string `gorm:"size: 128" json:"revUserNotice"`          //接收验证方备注
+	Source         string `gorm:"size: 32" json:"source"`                  // 好友关系来源：qrcode/search/group/recommend
+	IsDeleted      bool   `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
+	Version        int64  `gorm:"not null;default:0;index"`                // 版本号（用于数据同步）
 }
 
 func (f *FriendModel) IsFriend(db *gorm.DB, A, B string) bool {

@@ -27,6 +27,8 @@ const (
 	Chat_GetMessageSeq_FullMethodName                 = "/chat_rpc.Chat/GetMessageSeq"
 	Chat_GetConversationVersion_FullMethodName        = "/chat_rpc.Chat/GetConversationVersion"
 	Chat_GetConversationSettingVersion_FullMethodName = "/chat_rpc.Chat/GetConversationSettingVersion"
+	Chat_InitializeConversation_FullMethodName        = "/chat_rpc.Chat/InitializeConversation"
+	Chat_SendSystemMessage_FullMethodName             = "/chat_rpc.Chat/SendSystemMessage"
 )
 
 // ChatClient is the client API for Chat service.
@@ -43,6 +45,8 @@ type ChatClient interface {
 	GetMessageSeq(ctx context.Context, in *GetLatestSeqReq, opts ...grpc.CallOption) (*GetLatestSeqRes, error)
 	GetConversationVersion(ctx context.Context, in *GetConversationVersionReq, opts ...grpc.CallOption) (*GetConversationVersionRes, error)
 	GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error)
+	InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error)
+	SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
 }
 
 type chatClient struct {
@@ -133,6 +137,26 @@ func (c *chatClient) GetConversationSettingVersion(ctx context.Context, in *GetC
 	return out, nil
 }
 
+func (c *chatClient) InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InitializeConversationRes)
+	err := c.cc.Invoke(ctx, Chat_InitializeConversation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendSystemMessageRes)
+	err := c.cc.Invoke(ctx, Chat_SendSystemMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility.
@@ -147,6 +171,8 @@ type ChatServer interface {
 	GetMessageSeq(context.Context, *GetLatestSeqReq) (*GetLatestSeqRes, error)
 	GetConversationVersion(context.Context, *GetConversationVersionReq) (*GetConversationVersionRes, error)
 	GetConversationSettingVersion(context.Context, *GetConversationSettingVersionReq) (*GetConversationSettingVersionRes, error)
+	InitializeConversation(context.Context, *InitializeConversationReq) (*InitializeConversationRes, error)
+	SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -180,6 +206,12 @@ func (UnimplementedChatServer) GetConversationVersion(context.Context, *GetConve
 }
 func (UnimplementedChatServer) GetConversationSettingVersion(context.Context, *GetConversationSettingVersionReq) (*GetConversationSettingVersionRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConversationSettingVersion not implemented")
+}
+func (UnimplementedChatServer) InitializeConversation(context.Context, *InitializeConversationReq) (*InitializeConversationRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitializeConversation not implemented")
+}
+func (UnimplementedChatServer) SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendSystemMessage not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 func (UnimplementedChatServer) testEmbeddedByValue()              {}
@@ -346,6 +378,42 @@ func _Chat_GetConversationSettingVersion_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chat_InitializeConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitializeConversationReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).InitializeConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_InitializeConversation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).InitializeConversation(ctx, req.(*InitializeConversationReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_SendSystemMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendSystemMessageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).SendSystemMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_SendSystemMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).SendSystemMessage(ctx, req.(*SendSystemMessageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -384,6 +452,14 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConversationSettingVersion",
 			Handler:    _Chat_GetConversationSettingVersion_Handler,
+		},
+		{
+			MethodName: "InitializeConversation",
+			Handler:    _Chat_InitializeConversation_Handler,
+		},
+		{
+			MethodName: "SendSystemMessage",
+			Handler:    _Chat_SendSystemMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

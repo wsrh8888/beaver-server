@@ -60,9 +60,11 @@ func (l *UserConversationSyncLogic) UserConversationSync(req *types.UserConversa
 		userConversationItems = append(userConversationItems, types.UserConversationSyncItem{
 			UserID:         uc.UserID,
 			ConversationID: uc.ConversationID,
-			LastMessage:    uc.LastMessage,
-			IsDeleted:      uc.IsDeleted,
+			JoinedAt:       uc.JoinedAt,
+			IsHidden:       uc.IsHidden,
 			IsPinned:       uc.IsPinned,
+			IsMuted:        uc.IsMuted,
+			UserReadSeq:    uc.UserReadSeq,
 			Version:        uc.Version,
 			CreateAt:       time.Time(uc.CreatedAt).Unix(),
 			UpdateAt:       time.Time(uc.UpdatedAt).Unix(),

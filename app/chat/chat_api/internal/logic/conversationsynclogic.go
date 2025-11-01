@@ -35,14 +35,20 @@ func (l *ConversationSyncLogic) ConversationSync(req *types.ConversationSyncReq)
 		limit = 100
 	}
 
-	// 查询数据 - 修复查询条件，ChatConversationMeta没有user_id字段
-	err = l.svcCtx.DB.Where("version > ? AND version <= ?",
-		req.FromVersion, req.ToVersion).
+	// 查询该用户参与的会话的元数据
+	// 通过关联用户会话设置表来过滤只返回用户参与的会话
+	subQuery := l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
+		Select("conversation_id").
+		Where("user_id = ?", req.UserID)
+
+	err = l.svcCtx.DB.Model(&chat_models.ChatConversationMeta{}).
+		Where("conversation_id IN (?) AND version > ? AND version <= ?",
+			subQuery, req.FromVersion, req.ToVersion).
 		Order("version ASC").
 		Limit(limit + 1).
 		Find(&conversations).Error
 	if err != nil {
-		l.Errorf("查询会话数据失败: %v", err)
+		l.Errorf("查询用户会话数据失败: %v", err)
 		return nil, err
 	}
 
@@ -60,7 +66,8 @@ func (l *ConversationSyncLogic) ConversationSync(req *types.ConversationSyncReq)
 		conversationItems = append(conversationItems, types.ConversationSyncItem{
 			ConversationID: conv.ConversationID,
 			Type:           conv.Type,
-			LastReadSeq:    conv.LastReadSeq,
+			MaxSeq:         conv.MaxSeq,
+			LastMessage:    conv.LastMessage,
 			Version:        conv.Version,
 			CreateAt:       time.Time(conv.CreatedAt).Unix(),
 			UpdateAt:       time.Time(conv.UpdatedAt).Unix(),

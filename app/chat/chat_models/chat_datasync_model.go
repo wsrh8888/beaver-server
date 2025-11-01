@@ -12,8 +12,9 @@ import (
 // ChatConversationMeta 数据同步模型
 type ChatConversationMeta struct {
 	models.Model
-	ConversationID string `json:"conversationId"`      // 会话id（单聊为用户id，群聊为群id）
-	Type           int    `gorm:"not"`                 // 1=私聊 2=群聊 3=系统会话/客服
-	LastReadSeq    int64  `gorm:"not;default:0"`       // 会话消息的最大 Seq（用于消息定位）
-	Version        int64  `gorm:"not;default:0;index"` // 会话元信息版本（类型、参与人等有变时+1）
+	ConversationID string `gorm:"size:128;uniqueIndex" json:"conversationId"` // 唯一会话ID（私聊/群聊/系统）
+	Type           int    `gorm:"not" json:"type"`                            // 1=私聊 2=群聊 3=系统会话
+	MaxSeq         int64  `gorm:"not;default:0" json:"maxSeq"`                // 会话全局最新消息序号
+	LastMessage    string `gorm:"size:256" json:"lastMessage"`                // 会话最后一条消息预览（全局唯一）
+	Version        int64  `gorm:"not;default:0;index" json:"version"`         // 公共元信息版本，用于同步（群名、成员等变化+1）
 }

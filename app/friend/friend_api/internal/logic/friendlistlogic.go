@@ -8,7 +8,7 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/list_query"
 	"beaver/common/models"
 	"beaver/utils/conversation"
@@ -50,46 +50,88 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 			Page:  req.Page,
 			Limit: req.Limit,
 		},
-		Where:   l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?", req.UserID, req.UserID, false),
-		Preload: []string{"SendUserModel", "RevUserModel"},
+		Where: l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?", req.UserID, req.UserID, false),
+		// 移除Preload，微服务架构中通过RPC获取用户信息
 	})
+
+	// 收集需要获取用户信息的UserID列表
+	var userIds []string
+	userIdSet := make(map[string]bool)
+	for _, friendUser := range friends {
+		if friendUser.SendUserID != "" && !userIdSet[friendUser.SendUserID] {
+			userIds = append(userIds, friendUser.SendUserID)
+			userIdSet[friendUser.SendUserID] = true
+		}
+		if friendUser.RevUserID != "" && !userIdSet[friendUser.RevUserID] {
+			userIds = append(userIds, friendUser.RevUserID)
+			userIdSet[friendUser.RevUserID] = true
+		}
+	}
+
+	// 批量获取用户信息
+	userInfoMap := make(map[string]*user_rpc.UserInfo)
+	if len(userIds) > 0 {
+		userListResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+			UserIdList: userIds,
+		})
+		if err != nil {
+			l.Logger.Errorf("批量获取用户信息失败: %v", err)
+			// 不返回错误，继续处理，为没有用户信息的设置默认值
+		} else {
+			userInfoMap = userListResp.UserInfo
+		}
+	}
 
 	var list []types.FriendInfoRes
 	for _, friendUser := range friends {
-		var info types.FriendInfoRes
-		var targetUser user_models.UserModel
+		var targetUserID string
 		var notice string
 
-		// 确定目标用户和备注信息
+		// 确定目标用户ID和备注信息
 		if friendUser.SendUserID == req.UserID {
 			// 我是发起方，目标用户是接收方
-			targetUser = friendUser.RevUserModel
+			targetUserID = friendUser.RevUserID
 			notice = friendUser.SendUserNotice
 		} else if friendUser.RevUserID == req.UserID {
 			// 我是接收方，目标用户是发起方
-			targetUser = friendUser.SendUserModel
+			targetUserID = friendUser.SendUserID
 			notice = friendUser.RevUserNotice
 		} else {
 			// 这种情况理论上不应该发生，跳过
 			continue
 		}
 
+		// 获取用户信息
+		var nickname, avatar, abstract, email string
+		if userInfo, exists := userInfoMap[targetUserID]; exists && userInfo != nil {
+			nickname = userInfo.NickName
+			avatar = userInfo.Avatar
+			// 注意：UserInfo中可能没有Abstract和Email字段，这里暂时设置为空
+			abstract = ""
+			email = ""
+		} else {
+			nickname = "未知用户"
+			avatar = ""
+			abstract = ""
+			email = ""
+		}
+
 		// 生成会话Id
-		conversationID, err := conversation.GenerateConversation([]string{req.UserID, targetUser.UUID})
+		conversationID, err := conversation.GenerateConversation([]string{req.UserID, targetUserID})
 		if err != nil {
-			l.Logger.Errorf("生成会话Id失败: userID=%s, targetID=%s, error=%v", req.UserID, targetUser.UUID, err)
+			l.Logger.Errorf("生成会话Id失败: userID=%s, targetID=%s, error=%v", req.UserID, targetUserID, err)
 			return nil, fmt.Errorf("生成会话Id失败: %v", err)
 		}
 
 		// 构造好友信息
-		info = types.FriendInfoRes{
-			UserID:         targetUser.UUID,
-			Nickname:       targetUser.NickName,
-			Avatar:         targetUser.Avatar,
-			Abstract:       targetUser.Abstract,
+		info := types.FriendInfoRes{
+			UserID:         targetUserID,
+			Nickname:       nickname,
+			Avatar:         avatar,
+			Abstract:       abstract,
 			Notice:         notice,
 			ConversationID: conversationID,
-			Email:          targetUser.Email,
+			Email:          email,
 		}
 
 		list = append(list, info)

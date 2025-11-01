@@ -138,7 +138,8 @@ message RecallMessageRes {
 
 // 定义GetLatestSeqReq消息
 message GetLatestSeqReq {
-  string conversationId = 1; // 会话ID，为空则获取所有会话的最新序列号
+  string userId = 1; // 用户ID，获取该用户参与的所有会话中的最新消息序列号
+  string conversationId = 2; // 会话ID，可选，用于指定特定会话
 }
 
 // 定义GetLatestSeqRes消息
@@ -148,7 +149,7 @@ message GetLatestSeqRes {
 
 // 定义GetConversationVersionReq消息
 message GetConversationVersionReq {
-  // 数据同步表版本号是全局的，不需要用户ID参数
+  string userId = 1; // 用户ID，用于获取该用户相关的会话版本号
 }
 
 // 定义GetConversationVersionRes消息
@@ -166,6 +167,31 @@ message GetConversationSettingVersionRes {
   int64 latestVersion = 1; // 会话设置表最新版本号
 }
 
+// 定义InitializeConversationReq消息 - 通用会话初始化
+message InitializeConversationReq {
+  string conversationId = 1;    // 会话ID（调用方生成）
+  int32 type = 2;               // 会话类型: 1=私聊 2=群聊 3=AI会话 4=客服会话
+  repeated string userIds = 3;  // 参与用户ID列表
+}
+
+// 定义InitializeConversationRes消息
+message InitializeConversationRes {
+  string conversationId = 1; // 创建的会话ID
+}
+
+// 定义SendSystemMessageReq消息 - 发送系统消息
+message SendSystemMessageReq {
+  string conversationId = 1;    // 会话ID
+  int32 messageType = 2;        // 系统消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
+  string content = 3;           // 消息内容
+  string relatedUserId = 4;     // 相关用户ID（如新加好友的ID）
+}
+
+// 定义SendSystemMessageRes消息
+message SendSystemMessageRes {
+  string messageId = 1; // 生成的消息ID
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
@@ -176,6 +202,8 @@ service Chat {
     rpc GetMessageSeq(GetLatestSeqReq) returns (GetLatestSeqRes); //获取最新消息序列号
     rpc GetConversationVersion(GetConversationVersionReq) returns (GetConversationVersionRes); //获取数据同步表版本号
     rpc GetConversationSettingVersion(GetConversationSettingVersionReq) returns (GetConversationSettingVersionRes); //获取会话设置表的最新版本号
+    rpc InitializeConversation(InitializeConversationReq) returns (InitializeConversationRes); //初始化会话
+    rpc SendSystemMessage(SendSystemMessageReq) returns (SendSystemMessageRes); //发送系统消息
 }
 
-//goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+// goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

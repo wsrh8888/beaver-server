@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"beaver/app/chat/chat_api/internal/svc"
@@ -72,19 +73,35 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 		// 序列化消息内容
 		msgJson := ""
 		if chat.Msg != nil {
-			// 这里需要将Msg结构体序列化为JSON字符串
-			// 由于Msg是*ctype.Msg类型，需要根据实际类型进行序列化
-			msgJson = chat.MsgPreview // 暂时使用预览作为消息内容
+			// 将Msg结构体序列化为JSON字符串
+			msgBytes, err := json.Marshal(chat.Msg)
+			if err != nil {
+				l.Errorf("序列化消息内容失败: %v", err)
+				msgJson = chat.MsgPreview // 出错时使用预览
+			} else {
+				msgJson = string(msgBytes)
+			}
 		}
+
+		// 根据消息类型判断是否已删除（撤回或删除类型）
+		isDeleted := chat.MsgType == 7 || chat.MsgType == 8 // 假设7=REVOKE, 8=DELETE
+
+		// 处理发送者ID
+		sendUserID := ""
+		if chat.SendUserID != nil {
+			sendUserID = *chat.SendUserID
+		}
+
+		// 对于系统消息，前端可以根据SendUserID是否为空来判断
 
 		messages = append(messages, types.ChatSyncMessage{
 			MessageID:      chat.MessageID,
 			ConversationID: chat.ConversationID,
-			SendUserID:     chat.SendUserID,
+			SendUserID:     sendUserID,
 			MsgType:        uint32(chat.MsgType),
 			MsgPreview:     chat.MsgPreview,
 			Msg:            msgJson,
-			IsDeleted:      chat.IsDeleted,
+			IsDeleted:      isDeleted,
 			Seq:            chat.Seq,
 			CreateAt:       time.Time(chat.CreatedAt).Unix(),
 		})

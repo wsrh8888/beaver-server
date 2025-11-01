@@ -28,7 +28,14 @@ func (l *GetMessageSeqLogic) GetMessageSeq(in *chat_rpc.GetLatestSeqReq) (*chat_
 	var maxSeq int64
 	query := l.svcCtx.DB.Model(&chat_models.ChatMessage{}).Select("COALESCE(MAX(seq), 0)")
 
-	if in.ConversationId != "" {
+	// 如果提供了用户ID，则查询该用户参与的所有会话中的最大消息序列号
+	if in.UserId != "" {
+		subQuery := l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
+			Select("conversation_id").
+			Where("user_id = ?", in.UserId)
+		query = query.Where("conversation_id IN (?)", subQuery)
+	} else if in.ConversationId != "" {
+		// 如果提供了会话ID，则查询特定会话的最大消息序列号
 		query = query.Where("conversation_id = ?", in.ConversationId)
 	}
 

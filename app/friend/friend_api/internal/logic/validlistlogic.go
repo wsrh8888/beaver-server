@@ -7,6 +7,7 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/list_query"
 	"beaver/common/models"
 
@@ -48,32 +49,69 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			Limit: req.Limit,
 			Sort:  "created_at desc",
 		},
-		Where:   l.svcCtx.DB.Where("send_user_id = ? or rev_user_id = ?", req.UserID, req.UserID),
-		Preload: []string{"RevUserModel", "SendUserModel"},
+		Where: l.svcCtx.DB.Where("send_user_id = ? or rev_user_id = ?", req.UserID, req.UserID),
+		// 移除Preload，微服务架构中通过RPC获取用户信息
 	})
 
-	var list []types.FriendValidInfo
+	// 收集需要获取用户信息的UserID列表
+	var userIds []string
+	userIdSet := make(map[string]bool)
+	for _, fv := range fvs {
+		if fv.SendUserID != "" && !userIdSet[fv.SendUserID] {
+			userIds = append(userIds, fv.SendUserID)
+			userIdSet[fv.SendUserID] = true
+		}
+		if fv.RevUserID != "" && !userIdSet[fv.RevUserID] {
+			userIds = append(userIds, fv.RevUserID)
+			userIdSet[fv.RevUserID] = true
+		}
+	}
 
+	// 批量获取用户信息
+	userInfoMap := make(map[string]*user_rpc.UserInfo)
+	if len(userIds) > 0 {
+		userListResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+			UserIdList: userIds,
+		})
+		if err != nil {
+			l.Logger.Errorf("批量获取用户信息失败: %v", err)
+			// 不返回错误，继续处理，为没有用户信息的设置默认值
+		} else {
+			userInfoMap = userListResp.UserInfo
+		}
+	}
+
+	var list []types.FriendValidInfo
 	for _, fv := range fvs {
 		info := types.FriendValidInfo{
 			Message:   fv.Message,
-			Id:        fv.UUID, // 使用UUID而不是数据库ID
-			Source:    fv.Source, // 添加来源字段
+			Id:        fv.UUID,
+			Source:    fv.Source,
 			CreatedAt: fv.CreatedAt.String(),
 		}
 
 		if fv.SendUserID == req.UserID {
 			// 我是发起方
 			info.UserID = fv.RevUserID
-			info.Nickname = fv.RevUserModel.NickName
-			info.Avatar = fv.RevUserModel.Avatar
+			if userInfo, exists := userInfoMap[fv.RevUserID]; exists && userInfo != nil {
+				info.Nickname = userInfo.NickName
+				info.Avatar = userInfo.Avatar
+			} else {
+				info.Nickname = "未知用户"
+				info.Avatar = ""
+			}
 			info.Flag = "send"
 			info.Status = fv.RevStatus
 		} else if fv.RevUserID == req.UserID {
 			// 我是接收方
 			info.UserID = fv.SendUserID
-			info.Nickname = fv.SendUserModel.NickName
-			info.Avatar = fv.SendUserModel.Avatar
+			if userInfo, exists := userInfoMap[fv.SendUserID]; exists && userInfo != nil {
+				info.Nickname = userInfo.NickName
+				info.Avatar = userInfo.Avatar
+			} else {
+				info.Nickname = "未知用户"
+				info.Avatar = ""
+			}
 			info.Flag = "receive"
 			info.Status = fv.RevStatus
 		} else {

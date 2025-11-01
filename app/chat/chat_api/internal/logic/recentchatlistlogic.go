@@ -2,14 +2,13 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
+	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_models"
-	"beaver/app/user/user_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,29 +29,29 @@ func NewRecentChatListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Re
 
 func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp *types.RecentChatListRes, err error) {
 	var userConversations []chat_models.ChatUserConversation
+	var conversationMetas []chat_models.ChatConversationMeta
 
-	// 获取该用户的所有未删除会话及其最新一条消息，并按更新时间排序
-	sql := `
-	SELECT c.*
-	FROM chat_user_conversation_models c
-	INNER JOIN (
-		SELECT conversation_id, MAX(updated_at) AS max_updated_at
-		FROM chat_user_conversation_models
-		WHERE is_deleted = false AND (
-			-- 匹配私聊：用户ID在前或在后
-			(conversation_id LIKE ? OR conversation_id LIKE ?)
-			-- 匹配群聊：直接匹配用户ID
-			OR user_id = ?
-		)
-		GROUP BY conversation_id
-	) AS latest
-	ON c.conversation_id = latest.conversation_id AND c.updated_at = latest.max_updated_at
-	ORDER BY latest.max_updated_at DESC`
+	// 获取该用户的所有未隐藏会话
+	err = l.svcCtx.DB.Where("user_id = ? AND is_hidden = ?", req.UserID, false).
+		Order("is_pinned DESC, updated_at DESC").
+		Find(&userConversations).Error
+	if err != nil {
+		return nil, err
+	}
 
-	pattern := "%" + req.UserID + "_%"  // userId_ 在前
-	pattern2 := "%_" + req.UserID + "%" // userId_ 在后
-	fmt.Println(req.UserID, "sssssssssssssss")
-	err = l.svcCtx.DB.Raw(sql, pattern, pattern2, req.UserID).Scan(&userConversations).Error
+	// 获取对应的会话元数据（包含LastMessage）
+	conversationIds := make([]string, len(userConversations))
+	for i, conv := range userConversations {
+		conversationIds[i] = conv.ConversationID
+	}
+
+	if len(conversationIds) > 0 {
+		err = l.svcCtx.DB.Where("conversation_id IN (?)", conversationIds).
+			Find(&conversationMetas).Error
+		if err != nil {
+			return nil, err
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -70,12 +69,17 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	}
 
 	// 从私聊Id中提取用户Id进行去重
+	// 会话ID格式: private_A_B
 	userIdMap := make(map[string]struct{})
 	for _, chatID := range privateChatIds {
 		ids := strings.Split(chatID, "_")
-		for _, id := range ids {
-			if id != req.UserID {
-				userIdMap[id] = struct{}{}
+		// 跳过第一个元素 "private"，取后面两个用户ID
+		if len(ids) >= 3 {
+			for i := 1; i < len(ids); i++ {
+				id := ids[i]
+				if id != req.UserID && id != "private" {
+					userIdMap[id] = struct{}{}
+				}
 			}
 		}
 	}
@@ -86,58 +90,87 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		userIds = append(userIds, id)
 	}
 
-	// 批量查询用户信息
-	var users []user_models.UserModel
+	// 通过FriendRpc获取好友详细信息（包含用户基础信息和备注）
+	var friendDetails []*friend_rpc.FriendDetailItem
 	if len(userIds) > 0 {
-		err = l.svcCtx.DB.Where("uuid IN (?)", userIds).Find(&users).Error
+		friendDetailRes, err := l.svcCtx.FriendRpc.GetFriendDetail(l.ctx, &friend_rpc.GetFriendDetailReq{
+			UserId:    req.UserID,
+			FriendIds: userIds,
+		})
 		if err != nil {
+			logx.Errorf("获取好友详情失败: %v", err)
 			return nil, err
 		}
+		friendDetails = friendDetailRes.Friends
 	}
 
 	// 批量查询群组信息
 	var groups []group_models.GroupModel
 	if len(groupChatIds) > 0 {
-		err = l.svcCtx.DB.Where("uuid IN (?)", groupChatIds).Find(&groups).Error
+		err = l.svcCtx.DB.Where("group_id IN (?)", groupChatIds).Find(&groups).Error
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// 构建最近会话列表数据
-	userMap := make(map[string]user_models.UserModel)
-	for _, user := range users {
-		userMap[user.UUID] = user
-	}
-
+	// 构建数据映射
 	groupMap := make(map[string]group_models.GroupModel)
 	for _, group := range groups {
 		groupMap[group.GroupID] = group
+	}
+
+	// 构建好友详细信息映射
+	friendDetailMap := make(map[string]*friend_rpc.FriendDetailItem)
+	for _, friendDetail := range friendDetails {
+		friendDetailMap[friendDetail.UserId] = friendDetail
+	}
+
+	conversationMetaMap := make(map[string]chat_models.ChatConversationMeta)
+	for _, meta := range conversationMetas {
+		conversationMetaMap[meta.ConversationID] = meta
 	}
 
 	var respList []types.ConversationInfoRes
 	for _, convo := range userConversations {
 		var chatInfo types.ConversationInfoRes
 
-		chatInfo.MsgPreview = convo.LastMessage
+		// 从会话元数据中获取最后消息
+		if meta, exists := conversationMetaMap[convo.ConversationID]; exists {
+			chatInfo.MsgPreview = meta.LastMessage
+		} else {
+			chatInfo.MsgPreview = ""
+		}
+
 		chatInfo.IsTop = convo.IsPinned
 		chatInfo.ConversationID = convo.ConversationID
 		chatInfo.UpdateAt = convo.UpdatedAt.String()
-		if strings.Contains(convo.ConversationID, "_") { // 私聊
+		if strings.HasPrefix(convo.ConversationID, "private_") { // 私聊
 			ids := strings.Split(convo.ConversationID, "_")
-			opponentID := ids[0]
-			if ids[0] == req.UserID {
+			// ids格式: ["private", "A", "B"]
+			var opponentID string
+			if ids[1] == req.UserID {
+				opponentID = ids[2]
+			} else {
 				opponentID = ids[1]
 			}
-			user := userMap[opponentID]
-			chatInfo.Nickname = user.NickName
-			chatInfo.Avatar = user.Avatar
+
+			// 从好友详细信息中获取用户信息和备注
+			if friendDetail, exists := friendDetailMap[opponentID]; exists {
+				chatInfo.Nickname = friendDetail.Nickname
+				chatInfo.Avatar = friendDetail.Avatar
+				chatInfo.Notice = friendDetail.Notice
+			} else {
+				chatInfo.Nickname = "未知用户"
+				chatInfo.Avatar = ""
+				chatInfo.Notice = ""
+			}
 			chatInfo.ChatType = 1
 		} else { // 群聊
 			group := groupMap[convo.ConversationID]
 			chatInfo.Nickname = group.Title
 			chatInfo.Avatar = group.Avatar
 			chatInfo.ChatType = 2
+			chatInfo.Notice = "" // 群聊暂时没有备注功能
 		}
 
 		respList = append(respList, chatInfo)

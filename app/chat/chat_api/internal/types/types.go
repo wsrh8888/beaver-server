@@ -58,7 +58,8 @@ type ConversationInfoRes struct {
 type ConversationSyncItem struct {
 	ConversationID string `json:"conversationId"` // 会话ID
 	Type           int    `json:"type"`           // 会话类型 1=私聊 2=群聊 3=系统会话
-	LastReadSeq    int64  `json:"lastReadSeq"`    // 会话消息的最大Seq
+	MaxSeq         int64  `json:"maxSeq"`         // 会话消息的最大Seq
+	LastMessage    string `json:"lastMessage"`    // 会话最后一条消息预览
 	Version        int64  `json:"version"`        // 版本号
 	CreateAt       int64  `json:"createAt"`       // 创建时间戳
 	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
@@ -216,10 +217,11 @@ type TextMsg struct {
 type UserConversationSyncItem struct {
 	UserID         string `json:"userId"`         // 用户ID
 	ConversationID string `json:"conversationId"` // 会话ID
-	LastMessage    string `json:"lastMessage"`    // 最后一条消息内容
-	IsDeleted      bool   `json:"isDeleted"`      // 是否已删除
+	JoinedAt       int64  `json:"joinedAt"`       // 用户加入会话的时间戳
+	IsHidden       bool   `json:"isHidden"`       // 是否在会话列表隐藏
 	IsPinned       bool   `json:"isPinned"`       // 是否置顶
-	LastReadSeq    int64  `json:"lastReadSeq"`    // 用户已读到的消息Seq
+	IsMuted        bool   `json:"isMuted"`        // 是否免打扰
+	UserReadSeq    int64  `json:"userReadSeq"`    // 用户已读到的消息Seq
 	Version        int64  `json:"version"`        // 版本号
 	CreateAt       int64  `json:"createAt"`       // 创建时间戳
 	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳

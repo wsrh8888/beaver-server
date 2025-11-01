@@ -31,10 +31,29 @@ message GetFriendVerifyVersionRes {
   int64 latestVersion = 1; // 最新版本号
 }
 
+// 获取好友详细信息（包含用户基础信息和好友关系信息）
+message GetFriendDetailReq {
+  string userId = 1; // 当前用户ID
+  repeated string friendIds = 2; // 好友ID列表
+}
+
+message FriendDetailItem {
+  string userId = 1; // 用户ID
+  string nickname = 2; // 用户昵称
+  string avatar = 3; // 用户头像
+  string notice = 4; // 好友备注
+  int64 friendAt = 5; // 成为好友的时间
+}
+
+message GetFriendDetailRes {
+  repeated FriendDetailItem friends = 1; // 好友详细信息列表
+}
+
 service friend {
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
   rpc GetFriendVersion(GetFriendVersionReq) returns (GetFriendVersionRes); //获取好友版本号
   rpc GetFriendVerifyVersion(GetFriendVerifyVersionReq) returns (GetFriendVerifyVersionRes); //获取好友验证版本号
+  rpc GetFriendDetail(GetFriendDetailReq) returns (GetFriendDetailRes); //获取好友详细信息
 }
 
-//goctl rpc protoc friend_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+// goctl rpc protoc friend_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

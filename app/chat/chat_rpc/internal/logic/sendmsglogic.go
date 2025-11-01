@@ -12,6 +12,7 @@ import (
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/chat/chat_utils"
 	"beaver/app/friend/friend_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/models/ctype"
 	"beaver/utils/conversation"
 
@@ -102,37 +103,43 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, fmt.Errorf("未识别到该类型: %d", msgType)
 	}
 
+	// 获取下一个序列号
+	var maxSeq int64
+	err := l.svcCtx.DB.Model(&chat_models.ChatMessage{}).
+		Where("conversation_id = ?", in.ConversationId).
+		Select("COALESCE(MAX(seq), 0)").
+		Scan(&maxSeq).Error
+	if err != nil {
+		l.Logger.Errorf("获取序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
+		return nil, err
+	}
+
+	nextSeq := maxSeq + 1
+
 	chatModel := chat_models.ChatMessage{
-		SendUserID:     in.UserId,
+		SendUserID:     &in.UserId,
 		MessageID:      in.MessageId,
 		ConversationID: in.ConversationId,
+		Seq:            nextSeq, // 设置正确的序列号
 		MsgType:        msgType,
 		Msg:            &msg,
 	}
 
 	// 1. 创建消息记录
 	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
-	err := l.svcCtx.DB.Create(&chatModel).Error
-	if err != nil {
-		return nil, err
-	}
-
-	// 设置序列号为数据库自增ID（全局递增）
-	chatModel.Seq = int64(chatModel.Id)
-	// 更新数据库中的seq字段
-	err = l.svcCtx.DB.Model(&chatModel).Update("seq", chatModel.Seq).Error
+	err = l.svcCtx.DB.Create(&chatModel).Error
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. 更新会话级别的信息
-	err = chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.GetConversationType(in.ConversationId), chatModel.Seq)
+	err = chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.GetConversationType(in.ConversationId), chatModel.Seq, chatModel.MsgPreview)
 	if err != nil {
 		return nil, err
 	}
 
 	// 3. 更新用户会话关系
-	err = chat_utils.UpdateUserConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.UserId, in.ConversationId, chatModel.MsgPreview, false)
+	err = chat_utils.UpdateUserConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.UserId, in.ConversationId, false)
 	if err != nil {
 		return nil, err
 	}
@@ -148,26 +155,72 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		fmt.Println("Error converting msg:", err)
 		return nil, err
 	}
-	err = l.svcCtx.DB.Preload("SendUserModel").First(&chatModel, chatModel.Id).Error
+
+	// 重新查询消息（不使用Preload）
+	err = l.svcCtx.DB.First(&chatModel, chatModel.Id).Error
 	if err != nil {
-		fmt.Println("preload异常", err.Error())
+		fmt.Println("查询消息异常", err.Error())
 		return nil, err
+	}
+
+	// 获取发送者信息
+	var sender *chat_rpc.Sender
+	sendUserID := ""
+	if chatModel.SendUserID != nil {
+		sendUserID = *chatModel.SendUserID
+	}
+
+	if sendUserID != "" {
+		// 调用UserRpc获取用户信息
+		userInfoResp, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+			UserID: sendUserID,
+		})
+		if err != nil {
+			l.Logger.Errorf("获取用户信息失败: %v", err)
+			// 设置默认发送者信息
+			sender = &chat_rpc.Sender{
+				UserId:   sendUserID,
+				Nickname: "未知用户",
+				Avatar:   "",
+			}
+		} else {
+			// 解析用户信息（假设UserInfo是JSON格式）
+			var userInfo user_rpc.UserInfo
+			err = json.Unmarshal(userInfoResp.Data, &userInfo)
+			if err != nil {
+				l.Logger.Errorf("解析用户信息失败: %v", err)
+				sender = &chat_rpc.Sender{
+					UserId:   sendUserID,
+					Nickname: "未知用户",
+					Avatar:   "",
+				}
+			} else {
+				sender = &chat_rpc.Sender{
+					UserId:   sendUserID,
+					Nickname: userInfo.NickName,
+					Avatar:   userInfo.Avatar,
+				}
+			}
+		}
+	} else {
+		// 系统消息：SendUserID为空
+		sender = &chat_rpc.Sender{
+			UserId:   "",
+			Nickname: "系统消息",
+			Avatar:   "",
+		}
 	}
 
 	return &chat_rpc.SendMsgRes{
 		Id:             uint32(chatModel.Id),
-		MessageId:      chatModel.MessageID, // 支持 uint32 类型
+		MessageId:      chatModel.MessageID,
 		ConversationId: chatModel.ConversationID,
 		Msg:            convertedMsg,
 		MsgPreview:     chatModel.MsgPreview,
-		Sender: &chat_rpc.Sender{
-			UserId:   chatModel.SendUserModel.UUID,
-			Avatar:   chatModel.SendUserModel.Avatar,
-			Nickname: chatModel.SendUserModel.NickName,
-		},
-		CreateAt: chatModel.CreatedAt.String(),
-		Status:   1,             // 1:正常状态
-		Seq:      chatModel.Seq, // 消息序列号
+		Sender:         sender,
+		CreateAt:       chatModel.CreatedAt.String(),
+		Status:         1,
+		Seq:            chatModel.Seq,
 	}, nil
 }
 

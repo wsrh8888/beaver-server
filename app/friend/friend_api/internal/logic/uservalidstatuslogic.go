@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/friend/friend_api/internal/svc"
@@ -12,7 +13,6 @@ import (
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/conversation"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -84,14 +84,24 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			return nil, errors.New("创建好友关系失败")
 		}
 
-		// 生成会话ID
-		conversationID, err = conversation.GenerateConversation([]string{friendVerify.SendUserID, friendVerify.RevUserID})
-		if err != nil {
-			l.Logger.Errorf("生成会话ID失败: %v", err)
-			return nil, fmt.Errorf("生成会话ID失败: %v", err)
-		}
+		// 生成私聊会话ID（微信风格：排序后拼接）
+		userIds := []string{friendVerify.SendUserID, friendVerify.RevUserID}
+		sort.Strings(userIds) // 确保ID顺序一致
+		conversationId := fmt.Sprintf("private_%s_%s", userIds[0], userIds[1])
 
-		// 异步发送默认欢迎消息
+		// 调用Chat服务初始化私聊会话
+		initResp, err := l.svcCtx.ChatRpc.InitializeConversation(context.Background(), &chat_rpc.InitializeConversationReq{
+			ConversationId: conversationId,
+			Type:           1, // 私聊
+			UserIds:        []string{friendVerify.SendUserID, friendVerify.RevUserID},
+		})
+		if err != nil {
+			l.Logger.Errorf("初始化私聊会话失败: %v", err)
+			return nil, fmt.Errorf("初始化私聊会话失败: %v", err)
+		}
+		conversationID = initResp.ConversationId
+
+		// 异步发送系统欢迎消息（通过专门的系统消息服务）
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
@@ -99,15 +109,12 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				}
 			}()
 
-			_, err := l.svcCtx.ChatRpc.SendMsg(context.Background(), &chat_rpc.SendMsgReq{
-				UserId:         friendVerify.RevUserID,
+			// 调用Chat服务的系统消息发送接口
+			_, err := l.svcCtx.ChatRpc.SendSystemMessage(context.Background(), &chat_rpc.SendSystemMessageReq{
 				ConversationId: conversationID,
-				Msg: &chat_rpc.Msg{
-					Type: 1,
-					TextMsg: &chat_rpc.TextMsg{
-						Content: "我们已经是好友了，开始聊天吧",
-					},
-				},
+				MessageType:    1, // 好友添加成功欢迎消息
+				Content:        "我们已经是好友了，开始聊天吧",
+				RelatedUserId:  friendVerify.SendUserID, // 相关好友ID
 			})
 			if err != nil {
 				l.Logger.Errorf("异步发送欢迎消息失败: %v", err)

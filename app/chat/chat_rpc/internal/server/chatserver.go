@@ -62,3 +62,13 @@ func (s *ChatServer) GetConversationSettingVersion(ctx context.Context, in *chat
 	l := logic.NewGetConversationSettingVersionLogic(ctx, s.svcCtx)
 	return l.GetConversationSettingVersion(in)
 }
+
+func (s *ChatServer) InitializeConversation(ctx context.Context, in *chat_rpc.InitializeConversationReq) (*chat_rpc.InitializeConversationRes, error) {
+	l := logic.NewInitializeConversationLogic(ctx, s.svcCtx)
+	return l.InitializeConversation(in)
+}
+
+func (s *ChatServer) SendSystemMessage(ctx context.Context, in *chat_rpc.SendSystemMessageReq) (*chat_rpc.SendSystemMessageRes, error) {
+	l := logic.NewSendSystemMessageLogic(ctx, s.svcCtx)
+	return l.SendSystemMessage(in)
+}
