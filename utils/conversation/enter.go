@@ -40,3 +40,19 @@ func GetConversationType(conversationID string) int {
 	}
 	return 2
 }
+
+/**
+ * @description: 解析会话ID并返回类型和用户IDs
+ * @return: conversationType (1:私聊 2:群聊), userIds ([]string)
+ */
+func ParseConversationWithType(conversationID string) (int, []string) {
+	conversationType := GetConversationType(conversationID)
+	userIds := ParseConversation(conversationID)
+
+	// 对于私聊，如果是带前缀的格式 (private_userId1_userId2)，移除前缀
+	if conversationType == 1 && len(userIds) >= 3 && userIds[0] == "private" {
+		userIds = userIds[1:]
+	}
+
+	return conversationType, userIds
+}
