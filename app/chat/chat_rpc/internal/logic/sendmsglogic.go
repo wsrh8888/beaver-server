@@ -34,14 +34,23 @@ func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLo
 }
 
 func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, error) {
-	if conversation.GetConversationType(in.ConversationId) == 1 {
+	conversationType, userIds := conversation.ParseConversationWithType(in.ConversationId)
+
+	if conversationType == 1 {
+		// 私聊需要验证好友关系
 		if !strings.Contains(in.ConversationId, in.UserId) {
 			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserId, in.ConversationId)
 			return nil, errors.New("异常操作")
 		}
+
+		if len(userIds) != 2 {
+			logx.Errorf("私聊会话ID解析失败，期望2个用户ID，实际: %v", userIds)
+			return nil, errors.New("无效的私聊会话ID")
+		}
+
 		var friend friend_models.FriendModel
-		userIds := conversation.ParseConversation(in.ConversationId)
 		if !friend.IsFriend(l.svcCtx.DB, userIds[0], userIds[1]) {
+			logx.Errorf("不是好友关系，用户IDs: %v", userIds)
 			return nil, errors.New("不是好友关系")
 		}
 	}
@@ -133,7 +142,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	// 2. 更新会话级别的信息
-	err = chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.GetConversationType(in.ConversationId), chatModel.Seq, chatModel.MsgPreview)
+	err = chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
 	if err != nil {
 		return nil, err
 	}
