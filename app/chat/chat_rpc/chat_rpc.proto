@@ -136,16 +136,6 @@ message RecallMessageRes {
   string recallTime = 3; // 撤回时间
 }
 
-// 定义GetLatestSeqReq消息
-message GetLatestSeqReq {
-  string userId = 1; // 用户ID，获取该用户参与的所有会话中的最新消息序列号
-  string conversationId = 2; // 会话ID，可选，用于指定特定会话
-}
-
-// 定义GetLatestSeqRes消息
-message GetLatestSeqRes {
-  int64 latestSeq = 1; // 最新序列号
-}
 
 // 定义GetConversationVersionReq消息
 message GetConversationVersionReq {
@@ -199,7 +189,6 @@ service Chat {
     rpc BatchUpdateConversation(BatchUpdateConversationReq) returns (BatchUpdateConversationRes); //批量更新会话记录
     rpc EditMessage(EditMessageReq) returns (EditMessageRes); //编辑消息
     rpc RecallMessage(RecallMessageReq) returns (RecallMessageRes); //撤回消息
-    rpc GetMessageSeq(GetLatestSeqReq) returns (GetLatestSeqRes); //获取最新消息序列号
     rpc GetConversationVersion(GetConversationVersionReq) returns (GetConversationVersionRes); //获取数据同步表版本号
     rpc GetConversationSettingVersion(GetConversationSettingVersionReq) returns (GetConversationSettingVersionRes); //获取会话设置表的最新版本号
     rpc InitializeConversation(InitializeConversationReq) returns (InitializeConversationRes); //初始化会话

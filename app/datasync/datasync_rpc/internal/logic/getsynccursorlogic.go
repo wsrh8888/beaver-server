@@ -33,9 +33,6 @@ func (l *GetSyncCursorLogic) GetSyncCursor(in *datasync_rpc.GetSyncCursorReq) (*
 
 	// 根据数据类型获取服务端的最新游标/版本（来自各业务RPC）
 	switch in.DataType {
-	case "chat_messages":
-		// 当前实现采用全局拉取，不按会话维度；固定查询全局最新 seq
-		serverLast = l.getLatestChatSeq(in.UserId)
 	case "chat_datasync":
 		serverLast = l.getLatestDatasyncVersion(in.UserId)
 	case "chat_conversation_settings":
@@ -59,19 +56,6 @@ func (l *GetSyncCursorLogic) GetSyncCursor(in *datasync_rpc.GetSyncCursorReq) (*
 	return &datasync_rpc.GetSyncCursorRes{
 		ServerLatest: serverLast,
 	}, nil
-}
-
-// getLatestChatSeq 获取最新聊天消息序列号
-func (l *GetSyncCursorLogic) getLatestChatSeq(userID string) int64 {
-	// 调用chat RPC服务获取用户相关的最新消息序列号
-	resp, err := l.svcCtx.ChatRpc.GetMessageSeq(l.ctx, &chat_rpc.GetLatestSeqReq{
-		UserId: userID, // 传递用户ID，让chat服务查询该用户参与的会话中的最大消息序列号
-	})
-	if err != nil {
-		l.Errorf("调用chat_rpc获取用户最新消息序列号失败: %v", err)
-		return 0
-	}
-	return resp.LatestSeq
 }
 
 // getLatestDatasyncVersion 获取最新数据同步表版本号

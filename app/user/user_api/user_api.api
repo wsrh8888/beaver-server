@@ -67,7 +67,7 @@ type (
 	}
 )
 
-// 用户数据同步
+// 用户数据同步（传统版本号方式）
 type (
 	UserSyncReq {
 		UserID      string `header:"Beaver-User-Id"`
@@ -95,6 +95,17 @@ type (
 	}
 )
 
+// 用户数据同步（通过用户ID列表，大厂方式）
+type (
+	UserSyncByIdsReq {
+		UserIDs []string `json:"userIds"` // 要同步的用户ID列表
+		Limit   int      `json:"limit,optional"` // 限制数量，默认100
+	}
+	UserSyncByIdsRes {
+		Users []UserSyncItem `json:"users"` // 用户列表
+	}
+)
+
 // 用户服务
 service user {
 	@doc "获取用户基础信息"
@@ -117,9 +128,13 @@ service user {
 	@handler getDevices
 	get /api/user/devices (GetDevicesReq) returns (GetDevicesRes)
 
-	@doc "用户数据同步"
+	@doc "用户数据同步（传统版本号方式）"
 	@handler userSync
 	post /api/user/sync (UserSyncReq) returns (UserSyncRes)
+
+	@doc "用户数据同步（通过用户ID列表，大厂方式）"
+	@handler userSyncByIds
+	post /api/user/sync-by-ids (UserSyncByIdsReq) returns (UserSyncByIdsRes)
 }
 
 // 生成代码命令

@@ -62,6 +62,15 @@ type UserInfoRes struct {
 	Gender   int8   `json:"gender"`         // 用户性别：1-男 2-女 0-未知
 }
 
+type UserSyncByIdsReq struct {
+	UserIDs []string `json:"userIds"`        // 要同步的用户ID列表
+	Limit   int      `json:"limit,optional"` // 限制数量，默认100
+}
+
+type UserSyncByIdsRes struct {
+	Users []UserSyncItem `json:"users"` // 用户列表
+}
+
 type UserSyncItem struct {
 	UserID   string `json:"userId"`   // 用户ID
 	Nickname string `json:"nickname"` // 用户昵称
