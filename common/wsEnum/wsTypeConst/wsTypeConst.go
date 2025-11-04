@@ -2,13 +2,17 @@ package wsTypeConst
 
 type Type string
 
+// send（发起消息给服务端）
+// receive（发给对方设备）
+// sync（发给自己其他设备进行记录同步）
+
 const (
 	PrivateMessageSend    Type = "private_message_send"    // 客户端->服务端 私聊消息发送
 	GroupMessageSend      Type = "group_message_send"      // 客户端->服务端 群聊消息发送
 	PrivateMessageReceive Type = "private_message_receive" //  服务端->客户端 私聊消息接收
 	GroupMessageReceive   Type = "group_message_receive"   //  服务端->客户端 群聊消息接收
-	PrivateMessageSync    Type = "private_message_sync"    //  服务端->客户端 私聊消息同步（发送者的其他设备）
-	GroupMessageSync      Type = "group_message_sync"      //  服务端->客户端 群聊消息同步（发送者的其他设备）
+	PrivateMessageSync    Type = "private_message_sync"    //  服务端->客户端 自己其他设备同步消息
+	GroupMessageSync      Type = "group_message_sync"      //  服务端->客户端 自己其他设备同步消息
 	MessageReadReceipt    Type = "message_read_receipt"    //  服务端->客户端 已读回执
 	MessageRecall         Type = "message_recall"          //  服务端->客户端 消息撤回
 )
