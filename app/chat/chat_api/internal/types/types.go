@@ -14,15 +14,16 @@ type ChatHistoryRes struct {
 }
 
 type ChatSyncMessage struct {
-	MessageID      string `json:"messageId"`      //客户端消息ID
-	ConversationID string `json:"conversationId"` //会话id
-	SendUserID     string `json:"sendUserId"`     //发送者用户ID
-	MsgType        uint32 `json:"msgType"`        //消息类型
-	MsgPreview     string `json:"msgPreview"`     //消息预览
-	Msg            string `json:"msg"`            //消息内容JSON字符串
-	IsDeleted      bool   `json:"isDeleted"`      //是否已删除
-	Seq            int64  `json:"seq"`            //序列号，用于数据同步
-	CreateAt       int64  `json:"createAt"`       //创建时间戳
+	MessageID        string `json:"messageId"`        //客户端消息ID
+	ConversationID   string `json:"conversationId"`   //会话id
+	ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
+	SendUserID       string `json:"sendUserId"`       //发送者用户ID
+	MsgType          uint32 `json:"msgType"`          //消息类型
+	MsgPreview       string `json:"msgPreview"`       //消息预览
+	Msg              string `json:"msg"`              //消息内容JSON字符串
+	IsDeleted        bool   `json:"isDeleted"`        //是否已删除
+	Seq              int64  `json:"seq"`              //序列号，用于数据同步
+	CreateAt         int64  `json:"createAt"`         //创建时间戳
 }
 
 type ChatSyncReq struct {
@@ -127,14 +128,15 @@ type ImageMsg struct {
 }
 
 type Message struct {
-	Id             uint   `json:"id"`             //数据库自增ID
-	MessageID      string `json:"messageId"`      //客户端消息ID
-	ConversationID string `json:"conversationId"` //会话id
-	Msg            Msg    `json:"msg"`
-	Sender         Sender `json:"sender"`    //发送者
-	CreateAt       string `json:"create_at"` //消息时间
-	Status         uint32 `json:"status"`    //消息状态 1:正常 2:已撤回 3:已编辑
-	Seq            int64  `json:"seq"`       //序列号，用于数据同步
+	Id               uint   `json:"id"`               //数据库自增ID
+	MessageID        string `json:"messageId"`        //客户端消息ID
+	ConversationID   string `json:"conversationId"`   //会话id
+	ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
+	Msg              Msg    `json:"msg"`
+	Sender           Sender `json:"sender"`    //发送者
+	CreateAt         string `json:"create_at"` //消息时间
+	Status           uint32 `json:"status"`    //消息状态 1:正常 2:已撤回 3:已编辑
+	Seq              int64  `json:"seq"`       //序列号，用于数据同步
 }
 
 type Msg struct {

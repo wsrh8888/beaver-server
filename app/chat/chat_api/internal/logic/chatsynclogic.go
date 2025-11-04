@@ -95,15 +95,16 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 		// 对于系统消息，前端可以根据SendUserID是否为空来判断
 
 		messages = append(messages, types.ChatSyncMessage{
-			MessageID:      chat.MessageID,
-			ConversationID: chat.ConversationID,
-			SendUserID:     sendUserID,
-			MsgType:        uint32(chat.MsgType),
-			MsgPreview:     chat.MsgPreview,
-			Msg:            msgJson,
-			IsDeleted:      isDeleted,
-			Seq:            chat.Seq,
-			CreateAt:       time.Time(chat.CreatedAt).Unix(),
+			MessageID:        chat.MessageID,
+			ConversationID:   chat.ConversationID,
+			ConversationType: chat.ConversationType,
+			SendUserID:       sendUserID,
+			MsgType:          uint32(chat.MsgType),
+			MsgPreview:       chat.MsgPreview,
+			Msg:              msgJson,
+			IsDeleted:        isDeleted,
+			Seq:              chat.Seq,
+			CreateAt:         time.Time(chat.CreatedAt).Unix(),
 		})
 
 		nextSeq = chat.Seq

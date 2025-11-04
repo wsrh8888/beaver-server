@@ -71,13 +71,14 @@ func (l *SendSystemMessageLogic) SendSystemMessage(in *chat_rpc.SendSystemMessag
 	}
 
 	systemMessage := chat_models.ChatMessage{
-		MessageID:      messageId,
-		ConversationID: in.ConversationId,
-		Seq:            nextSeq,
-		SendUserID:     nil, // 系统消息SendUserID为null
-		MsgType:        7,   // 系统消息类型
-		MsgPreview:     in.Content,
-		Msg:            systemMsg, // 系统消息的结构化内容
+		MessageID:        messageId,
+		ConversationID:   in.ConversationId,
+		ConversationType: conversation.Type,
+		Seq:              nextSeq,
+		SendUserID:       nil, // 系统消息SendUserID为null
+		MsgType:          7,   // 系统消息类型
+		MsgPreview:       in.Content,
+		Msg:              systemMsg, // 系统消息的结构化内容
 	}
 
 	if err := l.svcCtx.DB.Create(&systemMessage).Error; err != nil {

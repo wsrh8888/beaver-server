@@ -45,8 +45,7 @@ func main() {
 			&chat_models.ChatMessage{},
 			&chat_models.ChatConversationMeta{},
 			&chat_models.ChatUserConversation{},
-			&group_models.GroupModel{},
-			&group_models.GroupMemberModel{},
+
 			&file_models.FileModel{},
 			&moment_models.MomentModel{},
 			&moment_models.MomentLikeModel{},
@@ -70,6 +69,11 @@ func main() {
 			&update_models.UpdateReport{},
 
 			&datasync_models.DatasyncModel{},
+
+			&group_models.GroupModel{},
+			&group_models.GroupMemberModel{},
+			&group_models.GroupJoinRequestModel{},
+			&group_models.GroupMemberChangeLogModel{},
 		)
 
 		if err != nil {

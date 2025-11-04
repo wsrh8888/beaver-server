@@ -112,9 +112,11 @@ func buildResponseData(rpcResp *chat_rpc.SendMsgRes, originalMsg json.RawMessage
 			"avatar":   rpcResp.Sender.Avatar,
 			"nickname": rpcResp.Sender.Nickname,
 		},
-		"createAt":   rpcResp.CreateAt,
-		"msgPreview": rpcResp.MsgPreview,
-		"status":     rpcResp.Status,
+		"conversationType": rpcResp.ConversationType,
+		"createAt":         rpcResp.CreateAt,
+		"msgPreview":       rpcResp.MsgPreview,
+		"status":           rpcResp.Status,
+		"seq":              rpcResp.Seq,
 	}
 
 	// 将响应数据转换为 JSON 格式
