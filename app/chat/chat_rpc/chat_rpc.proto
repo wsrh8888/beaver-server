@@ -80,6 +80,7 @@ message SendMsgRes {
   string msg_preview = 7; // 消息预览
   uint32 status = 8; // 消息状态 1:正常 2:已撤回 3:已编辑
   int64 seq = 9; // 消息序列号，用于数据同步
+  uint32 conversation_type = 10; // 会话类型 1:私聊 2:群聊
 }
 
 // 定义UpdateConversationReq消息

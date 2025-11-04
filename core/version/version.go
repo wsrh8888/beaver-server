@@ -98,6 +98,10 @@ func (vg *VersionGenerator) getTableName(dataType string) string {
 		return "friend_models"
 	case "groups":
 		return "group_models"
+	case "group_members":
+		return "group_member_models"
+	case "group_member_logs":
+		return "group_member_change_log_models"
 	case "chats":
 		return "chat_models"
 	default:

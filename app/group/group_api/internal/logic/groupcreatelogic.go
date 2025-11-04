@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/svc"
@@ -37,6 +38,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	var groupModel = group_models.GroupModel{
 		CreatorID: req.UserID,
 		GroupID:   utils.GenerateUUId(),
+		Version:   1, // 新创建的群组版本从1开始
 	}
 	var groupUserList = []string{req.UserID}
 	if len(req.UserIdList) == 0 {
@@ -59,9 +61,11 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	for i, u := range groupUserList {
 
 		memberMode := group_models.GroupMemberModel{
-			GroupID: groupModel.GroupID,
-			UserID:  u,
-			Role:    3,
+			GroupID:  groupModel.GroupID,
+			UserID:   u,
+			Role:     3,
+			JoinTime: time.Now(),
+			Version:  1, // 新加入成员的版本从1开始
 		}
 		if i == 0 {
 			memberMode.Role = 1
@@ -73,6 +77,33 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	if err != nil {
 		logx.Errorf("创建群成员失败: %v", err)
 		return nil, errors.New("创建群成员失败")
+	}
+
+	// 创建成员变更日志
+	var changeLogs []group_models.GroupMemberChangeLogModel
+	for _, member := range members {
+		// 获取全局递增的变更日志版本号
+		logVersion, err := l.svcCtx.VersionGen.GetNextVersion("group_member_logs")
+		if err != nil {
+			logx.Errorf("获取变更日志版本号失败，用户ID: %s, 错误: %v", member.UserID, err)
+			return nil, errors.New("获取版本号失败")
+		}
+
+		changeLog := group_models.GroupMemberChangeLogModel{
+			GroupID:    member.GroupID,
+			UserID:     member.UserID,
+			ChangeType: "join",
+			OperatedBy: req.UserID, // 创建者操作
+			ChangeTime: member.JoinTime,
+			Version:    logVersion,
+		}
+		changeLogs = append(changeLogs, changeLog)
+	}
+
+	err = l.svcCtx.DB.Create(&changeLogs).Error
+	if err != nil {
+		logx.Errorf("创建群成员变更日志失败: %v", err)
+		// 这里不返回错误，因为主要功能已经完成，只是日志记录失败
 	}
 
 	go func() {

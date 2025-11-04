@@ -126,12 +126,13 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	nextSeq := maxSeq + 1
 
 	chatModel := chat_models.ChatMessage{
-		SendUserID:     &in.UserId,
-		MessageID:      in.MessageId,
-		ConversationID: in.ConversationId,
-		Seq:            nextSeq, // 设置正确的序列号
-		MsgType:        msgType,
-		Msg:            &msg,
+		SendUserID:       &in.UserId,
+		MessageID:        in.MessageId,
+		ConversationID:   in.ConversationId,
+		ConversationType: conversationType,
+		Seq:              nextSeq, // 设置正确的序列号
+		MsgType:          msgType,
+		Msg:              &msg,
 	}
 
 	// 1. 创建消息记录
@@ -221,15 +222,16 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	return &chat_rpc.SendMsgRes{
-		Id:             uint32(chatModel.Id),
-		MessageId:      chatModel.MessageID,
-		ConversationId: chatModel.ConversationID,
-		Msg:            convertedMsg,
-		MsgPreview:     chatModel.MsgPreview,
-		Sender:         sender,
-		CreateAt:       chatModel.CreatedAt.String(),
-		Status:         1,
-		Seq:            chatModel.Seq,
+		Id:               uint32(chatModel.Id),
+		MessageId:        chatModel.MessageID,
+		ConversationId:   chatModel.ConversationID,
+		Msg:              convertedMsg,
+		MsgPreview:       chatModel.MsgPreview,
+		Sender:           sender,
+		CreateAt:         chatModel.CreatedAt.String(),
+		Status:           1,
+		ConversationType: uint32(chatModel.ConversationType),
+		Seq:              chatModel.Seq,
 	}, nil
 }
 
