@@ -52,10 +52,18 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	memberList = []group_models.GroupMemberModel{}
 
 	for _, memberID := range req.UserIds {
+		// 获取该群成员的版本号（按群独立递增）
+		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID, nil)
+		if memberVersion == -1 {
+			l.Logger.Errorf("获取群成员版本号失败")
+			return nil, errors.New("获取版本号失败")
+		}
+
 		memberList = append(memberList, group_models.GroupMemberModel{
 			GroupID: req.GroupID,
 			UserID:  memberID,
 			Role:    3,
+			Version: memberVersion,
 		})
 	}
 
@@ -64,6 +72,15 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	if err != nil {
 		l.Logger.Errorf("添加群成员失败: %v", err)
 		return nil, errors.New("添加失败")
+	}
+
+	// 更新群组的成员版本号
+	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+		Where("group_id = ?", req.GroupID).
+		Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
+	if err != nil {
+		l.Logger.Errorf("更新群组成员版本失败: %v", err)
+		// 这里不返回错误，因为主要功能已经完成
 	}
 
 	// 更新新成员的会话记录

@@ -69,6 +69,15 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		return nil, errors.New("移除成员失败")
 	}
 
+	// 更新群组的成员版本号
+	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+		Where("group_id = ?", req.GroupID).
+		Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
+	if err != nil {
+		l.Logger.Errorf("更新群组成员版本失败: %v", err)
+		// 这里不返回错误，因为主要功能已经完成
+	}
+
 	// 异步通知群成员
 	go func() {
 		// 创建新的context，避免使用请求的context

@@ -17,7 +17,7 @@ type GroupMemberSyncLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 群成员数据同步
+// 群成员同步
 func NewGroupMemberSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupMemberSyncLogic {
 	return &GroupMemberSyncLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,61 +27,39 @@ func NewGroupMemberSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 }
 
 func (l *GroupMemberSyncLogic) GroupMemberSync(req *types.GroupMemberSyncReq) (resp *types.GroupMemberSyncRes, err error) {
-	var groupMembers []group_models.GroupMemberModel
-
-	// 设置默认限制
-	limit := req.Limit
-	if limit <= 0 {
-		limit = 100
-	}
-
-	// 查询用户作为成员的所有群成员记录
-	err = l.svcCtx.DB.Where("user_id = ? AND version > ? AND version <= ?",
-		req.UserID, req.FromVersion, req.ToVersion).
-		Order("version ASC").
-		Limit(limit + 1).
-		Find(&groupMembers).Error
-	if err != nil {
-		l.Errorf("查询群成员数据失败: %v", err)
-		return nil, err
-	}
-
-	// 判断是否还有更多数据
-	hasMore := len(groupMembers) > limit
-	if hasMore {
-		groupMembers = groupMembers[:limit]
-	}
-
-	// 转换为响应格式
-	var groupMemberItems []types.GroupMemberSyncItem
-	var nextVersion int64 = req.FromVersion
-
-	for _, member := range groupMembers {
-		groupMemberItems = append(groupMemberItems, types.GroupMemberSyncItem{
-			GroupID:  member.GroupID,
-			UserID:   member.UserID,
-			Role:     member.Role,
-			Status:   member.Status,
-			JoinTime: time.Time(member.JoinTime).Unix(),
-			Version:  member.Version,
-			CreateAt: time.Time(member.CreatedAt).Unix(),
-			UpdateAt: time.Time(member.UpdatedAt).Unix(),
-		})
-
-		nextVersion = member.Version
-	}
-
-	// 如果没有更多数据，nextVersion应该是toVersion+1
-	if !hasMore {
-		nextVersion = req.ToVersion + 1
-	}
-
 	resp = &types.GroupMemberSyncRes{
-		GroupMembers: groupMemberItems,
-		HasMore:      hasMore,
-		NextVersion:  nextVersion,
+		GroupMembers: []types.GroupMemberSyncItem{},
 	}
 
-	l.Infof("群成员数据同步完成，用户ID: %s, 返回群成员记录数: %d, 还有更多: %v", req.UserID, len(groupMemberItems), hasMore)
+	if len(req.Groups) == 0 {
+		l.Infof("群成员同步完成，用户ID: %s, 无需同步的群组", req.UserID)
+		return resp, nil
+	}
+
+	// 为每个群组查询所有当前成员（状态正常）
+	for _, groupReq := range req.Groups {
+		var members []group_models.GroupMemberModel
+		err = l.svcCtx.DB.Where("group_id = ? AND status = 1", groupReq.GroupID).
+			Find(&members).Error
+		if err != nil {
+			l.Errorf("查询群成员数据失败，群组ID: %s, 错误: %v", groupReq.GroupID, err)
+			continue
+		}
+
+		for _, member := range members {
+			resp.GroupMembers = append(resp.GroupMembers, types.GroupMemberSyncItem{
+				GroupID:  member.GroupID,
+				UserID:   member.UserID,
+				Role:     member.Role,
+				Status:   member.Status,
+				JoinTime: time.Time(member.JoinTime).Unix(),
+				Version:  member.Version,
+				CreateAt: time.Time(member.CreatedAt).Unix(),
+				UpdateAt: time.Time(member.UpdatedAt).Unix(),
+			})
+		}
+	}
+
+	l.Infof("群成员同步完成，用户ID: %s, 返回成员变化数: %d", req.UserID, len(resp.GroupMembers))
 	return resp, nil
 }

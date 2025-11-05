@@ -49,7 +49,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: joinGroupHandler(serverCtx),
 			},
 			{
-				// 群组申请数据同步
+				// 入群申请同步
 				Method:  http.MethodPost,
 				Path:    "/api/group/join-request-sync",
 				Handler: groupJoinRequestSyncHandler(serverCtx),
@@ -67,7 +67,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: groupJoinRequestListHandler(serverCtx),
 			},
 			{
-				// 群成员数据同步
+				// 群成员同步
 				Method:  http.MethodPost,
 				Path:    "/api/group/member-sync",
 				Handler: groupMemberSyncHandler(serverCtx),
@@ -103,7 +103,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: quitGroupHandler(serverCtx),
 			},
 			{
-				// 群组数据同步
+				// 群资料同步
 				Method:  http.MethodPost,
 				Path:    "/api/group/sync",
 				Handler: groupSyncHandler(serverCtx),
@@ -119,6 +119,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/group/update",
 				Handler: updateGroupInfoHandler(serverCtx),
+			},
+			{
+				// 获取用户群组版本信息
+				Method:  http.MethodGet,
+				Path:    "/api/group/versions",
+				Handler: getUserGroupVersionsHandler(serverCtx),
 			},
 		},
 	)

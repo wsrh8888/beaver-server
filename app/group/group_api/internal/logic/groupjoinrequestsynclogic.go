@@ -17,7 +17,7 @@ type GroupJoinRequestSyncLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 群组申请数据同步
+// 入群申请同步
 func NewGroupJoinRequestSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupJoinRequestSyncLogic {
 	return &GroupJoinRequestSyncLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,67 +27,45 @@ func NewGroupJoinRequestSyncLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinRequestSyncReq) (resp *types.GroupJoinRequestSyncRes, err error) {
-	var groupJoinRequests []group_models.GroupJoinRequestModel
-
-	// 设置默认限制
-	limit := req.Limit
-	if limit <= 0 {
-		limit = 100
+	resp = &types.GroupJoinRequestSyncRes{
+		GroupJoinRequests: []types.GroupJoinRequestSyncItem{},
 	}
 
-	// 查询用户发起的所有群组申请记录
-	err = l.svcCtx.DB.Where("applicant_user_id = ? AND version > ? AND version <= ?",
-		req.UserID, req.FromVersion, req.ToVersion).
-		Order("version ASC").
-		Limit(limit + 1).
-		Find(&groupJoinRequests).Error
-	if err != nil {
-		l.Errorf("查询群组申请数据失败: %v", err)
-		return nil, err
+	if len(req.Groups) == 0 {
+		l.Infof("入群申请同步完成，用户ID: %s, 无需同步的群组", req.UserID)
+		return resp, nil
 	}
 
-	// 判断是否还有更多数据
-	hasMore := len(groupJoinRequests) > limit
-	if hasMore {
-		groupJoinRequests = groupJoinRequests[:limit]
-	}
-
-	// 转换为响应格式
-	var groupJoinRequestItems []types.GroupJoinRequestSyncItem
-	var nextVersion int64 = req.FromVersion
-
-	for _, request := range groupJoinRequests {
-		handledAt := int64(0)
-		if request.HandledAt != nil {
-			handledAt = request.HandledAt.Unix()
+	// 为每个群组查询版本变化的数据
+	for _, groupReq := range req.Groups {
+		var requests []group_models.GroupJoinRequestModel
+		err = l.svcCtx.DB.Where("group_id = ? AND version > ?", groupReq.GroupID, groupReq.Version).
+			Find(&requests).Error
+		if err != nil {
+			l.Errorf("查询入群申请数据失败，群组ID: %s, 错误: %v", groupReq.GroupID, err)
+			continue
 		}
 
-		groupJoinRequestItems = append(groupJoinRequestItems, types.GroupJoinRequestSyncItem{
-			GroupID:         request.GroupID,
-			ApplicantUserID: request.ApplicantUserID,
-			Message:         request.Message,
-			Status:          request.Status,
-			HandledBy:       request.HandledBy,
-			HandledAt:       handledAt,
-			Version:         request.Version,
-			CreateAt:        time.Time(request.CreatedAt).Unix(),
-			UpdateAt:        time.Time(request.UpdatedAt).Unix(),
-		})
-
-		nextVersion = request.Version
+		for _, request := range requests {
+			resp.GroupJoinRequests = append(resp.GroupJoinRequests, types.GroupJoinRequestSyncItem{
+				GroupID:         request.GroupID,
+				ApplicantUserID: request.ApplicantUserID,
+				Message:         request.Message,
+				Status:          request.Status,
+				HandledBy:       request.HandledBy,
+				HandledAt: func() int64 {
+					if request.HandledAt != nil {
+						return request.HandledAt.Unix()
+					}
+					return 0
+				}(),
+				Version:  request.Version,
+				CreateAt: time.Time(request.CreatedAt).Unix(),
+				UpdateAt: time.Time(request.UpdatedAt).Unix(),
+			})
+		}
 	}
 
-	// 如果没有更多数据，nextVersion应该是toVersion+1
-	if !hasMore {
-		nextVersion = req.ToVersion + 1
-	}
-
-	resp = &types.GroupJoinRequestSyncRes{
-		GroupJoinRequests: groupJoinRequestItems,
-		HasMore:           hasMore,
-		NextVersion:       nextVersion,
-	}
-
-	l.Infof("群组申请数据同步完成，用户ID: %s, 返回群组申请记录数: %d, 还有更多: %v", req.UserID, len(groupJoinRequestItems), hasMore)
+	l.Infof("入群申请同步完成，用户ID: %s, 返回申请变化数: %d", req.UserID, len(resp.GroupJoinRequests))
 	return resp, nil
 }

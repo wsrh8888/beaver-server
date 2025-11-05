@@ -7,12 +7,11 @@
 package user_rpc
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -371,7 +370,7 @@ func (x *UserInfo) GetNickName() string {
 	return ""
 }
 
-func (x *UserInfo) GetAvatart() string {
+func (x *UserInfo) GetAvatar() string {
 	if x != nil {
 		return x.Avatar
 	}
@@ -466,95 +465,6 @@ func (x *UserListInfoRes) GetUserInfo() map[string]*UserInfo {
 	return nil
 }
 
-// 获取用户版本号
-type GetUserVersionReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"` // 用户ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserVersionReq) Reset() {
-	*x = GetUserVersionReq{}
-	mi := &file_user_rpc_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserVersionReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserVersionReq) ProtoMessage() {}
-
-func (x *GetUserVersionReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserVersionReq.ProtoReflect.Descriptor instead.
-func (*GetUserVersionReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *GetUserVersionReq) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-type GetUserVersionRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	LatestVersion int64                  `protobuf:"varint,1,opt,name=latestVersion,proto3" json:"latestVersion,omitempty"` // 最新版本号
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserVersionRes) Reset() {
-	*x = GetUserVersionRes{}
-	mi := &file_user_rpc_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserVersionRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserVersionRes) ProtoMessage() {}
-
-func (x *GetUserVersionRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserVersionRes.ProtoReflect.Descriptor instead.
-func (*GetUserVersionRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *GetUserVersionRes) GetLatestVersion() int64 {
-	if x != nil {
-		return x.LatestVersion
-	}
-	return 0
-}
-
 var File_user_rpc_proto protoreflect.FileDescriptor
 
 const file_user_rpc_proto_rawDesc = "" +
@@ -576,10 +486,10 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\x05user1\x18\x01 \x01(\tR\x05user1\x12\x14\n" +
 	"\x05user2\x18\x02 \x01(\tR\x05user2\"*\n" +
 	"\vIsFriendRes\x12\x1b\n" +
-	"\tis_friend\x18\x01 \x01(\bR\bisFriend\"A\n" +
+	"\tis_friend\x18\x01 \x01(\bR\bisFriend\"?\n" +
 	"\bUserInfo\x12\x1b\n" +
-	"\tnick_name\x18\x01 \x01(\tR\bnickName\x12\x18\n" +
-	"\aavatart\x18\x02 \x01(\tR\aavatart\"3\n" +
+	"\tnick_name\x18\x01 \x01(\tR\bnickName\x12\x16\n" +
+	"\x06avatar\x18\x02 \x01(\tR\x06avatar\"3\n" +
 	"\x0fUserListInfoReq\x12 \n" +
 	"\fuser_id_list\x18\x01 \x03(\tR\n" +
 	"userIdList\"\xa8\x01\n" +
@@ -587,18 +497,13 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\tuser_info\x18\x01 \x03(\v2'.user_rpc.UserListInfoRes.UserInfoEntryR\buserInfo\x1aO\n" +
 	"\rUserInfoEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12(\n" +
-	"\x05value\x18\x02 \x01(\v2\x12.user_rpc.UserInfoR\x05value:\x028\x01\"+\n" +
-	"\x11GetUserVersionReq\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\"9\n" +
-	"\x11GetUserVersionRes\x12$\n" +
-	"\rlatestVersion\x18\x01 \x01(\x03R\rlatestVersion2\xcc\x02\n" +
+	"\x05value\x18\x02 \x01(\v2\x12.user_rpc.UserInfoR\x05value:\x028\x012\x80\x02\n" +
 	"\x04user\x12>\n" +
 	"\n" +
 	"UserCreate\x12\x17.user_rpc.UserCreateReq\x1a\x17.user_rpc.UserCreateRes\x128\n" +
 	"\bUserInfo\x12\x15.user_rpc.UserInfoReq\x1a\x15.user_rpc.UserInfoRes\x128\n" +
 	"\bIsFriend\x12\x15.user_rpc.IsFriendReq\x1a\x15.user_rpc.IsFriendRes\x12D\n" +
-	"\fUserListInfo\x12\x19.user_rpc.UserListInfoReq\x1a\x19.user_rpc.UserListInfoRes\x12J\n" +
-	"\x0eGetUserVersion\x12\x1b.user_rpc.GetUserVersionReq\x1a\x1b.user_rpc.GetUserVersionResB\fZ\n" +
+	"\fUserListInfo\x12\x19.user_rpc.UserListInfoReq\x1a\x19.user_rpc.UserListInfoResB\fZ\n" +
 	"./user_rpcb\x06proto3"
 
 var (
@@ -613,39 +518,35 @@ func file_user_rpc_proto_rawDescGZIP() []byte {
 	return file_user_rpc_proto_rawDescData
 }
 
-var file_user_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_user_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_user_rpc_proto_goTypes = []any{
-	(*UserCreateReq)(nil),     // 0: user_rpc.UserCreateReq
-	(*UserCreateRes)(nil),     // 1: user_rpc.UserCreateRes
-	(*UserInfoReq)(nil),       // 2: user_rpc.UserInfoReq
-	(*UserInfoRes)(nil),       // 3: user_rpc.UserInfoRes
-	(*IsFriendReq)(nil),       // 4: user_rpc.IsFriendReq
-	(*IsFriendRes)(nil),       // 5: user_rpc.IsFriendRes
-	(*UserInfo)(nil),          // 6: user_rpc.UserInfo
-	(*UserListInfoReq)(nil),   // 7: user_rpc.UserListInfoReq
-	(*UserListInfoRes)(nil),   // 8: user_rpc.UserListInfoRes
-	(*GetUserVersionReq)(nil), // 9: user_rpc.GetUserVersionReq
-	(*GetUserVersionRes)(nil), // 10: user_rpc.GetUserVersionRes
-	nil,                       // 11: user_rpc.UserListInfoRes.UserInfoEntry
+	(*UserCreateReq)(nil),   // 0: user_rpc.UserCreateReq
+	(*UserCreateRes)(nil),   // 1: user_rpc.UserCreateRes
+	(*UserInfoReq)(nil),     // 2: user_rpc.UserInfoReq
+	(*UserInfoRes)(nil),     // 3: user_rpc.UserInfoRes
+	(*IsFriendReq)(nil),     // 4: user_rpc.IsFriendReq
+	(*IsFriendRes)(nil),     // 5: user_rpc.IsFriendRes
+	(*UserInfo)(nil),        // 6: user_rpc.UserInfo
+	(*UserListInfoReq)(nil), // 7: user_rpc.UserListInfoReq
+	(*UserListInfoRes)(nil), // 8: user_rpc.UserListInfoRes
+	nil,                     // 9: user_rpc.UserListInfoRes.UserInfoEntry
 }
 var file_user_rpc_proto_depIdxs = []int32{
-	11, // 0: user_rpc.UserListInfoRes.user_info:type_name -> user_rpc.UserListInfoRes.UserInfoEntry
-	6,  // 1: user_rpc.UserListInfoRes.UserInfoEntry.value:type_name -> user_rpc.UserInfo
-	0,  // 2: user_rpc.user.UserCreate:input_type -> user_rpc.UserCreateReq
-	2,  // 3: user_rpc.user.UserInfo:input_type -> user_rpc.UserInfoReq
-	4,  // 4: user_rpc.user.IsFriend:input_type -> user_rpc.IsFriendReq
-	7,  // 5: user_rpc.user.UserListInfo:input_type -> user_rpc.UserListInfoReq
-	9,  // 6: user_rpc.user.GetUserVersion:input_type -> user_rpc.GetUserVersionReq
-	1,  // 7: user_rpc.user.UserCreate:output_type -> user_rpc.UserCreateRes
-	3,  // 8: user_rpc.user.UserInfo:output_type -> user_rpc.UserInfoRes
-	5,  // 9: user_rpc.user.IsFriend:output_type -> user_rpc.IsFriendRes
-	8,  // 10: user_rpc.user.UserListInfo:output_type -> user_rpc.UserListInfoRes
-	10, // 11: user_rpc.user.GetUserVersion:output_type -> user_rpc.GetUserVersionRes
-	7,  // [7:12] is the sub-list for method output_type
-	2,  // [2:7] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	9, // 0: user_rpc.UserListInfoRes.user_info:type_name -> user_rpc.UserListInfoRes.UserInfoEntry
+	6, // 1: user_rpc.UserListInfoRes.UserInfoEntry.value:type_name -> user_rpc.UserInfo
+	0, // 2: user_rpc.user.UserCreate:input_type -> user_rpc.UserCreateReq
+	2, // 3: user_rpc.user.UserInfo:input_type -> user_rpc.UserInfoReq
+	4, // 4: user_rpc.user.IsFriend:input_type -> user_rpc.IsFriendReq
+	7, // 5: user_rpc.user.UserListInfo:input_type -> user_rpc.UserListInfoReq
+	1, // 6: user_rpc.user.UserCreate:output_type -> user_rpc.UserCreateRes
+	3, // 7: user_rpc.user.UserInfo:output_type -> user_rpc.UserInfoRes
+	5, // 8: user_rpc.user.IsFriend:output_type -> user_rpc.IsFriendRes
+	8, // 9: user_rpc.user.UserListInfo:output_type -> user_rpc.UserListInfoRes
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_rpc_proto_init() }
@@ -659,7 +560,7 @@ func file_user_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_rpc_proto_rawDesc), len(file_user_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

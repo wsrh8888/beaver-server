@@ -48,21 +48,11 @@ message UserListInfoRes {
   map<string, UserInfo> user_info = 1; //用户配置的json
 }
 
-// 获取用户版本号
-message GetUserVersionReq {
-  string userId = 1; // 用户ID
-}
-
-message GetUserVersionRes {
-  int64 latestVersion = 1; // 最新版本号
-}
-
 service user {
   rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
   rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
   rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友
   rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息
-  rpc GetUserVersion(GetUserVersionReq) returns(GetUserVersionRes); //获取用户版本号
 
 }
 

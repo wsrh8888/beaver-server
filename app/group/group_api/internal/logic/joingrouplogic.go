@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
@@ -47,11 +48,18 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			err = l.svcCtx.DB.Model(&existingMember).Updates(map[string]interface{}{
 				"status":    1,
 				"join_time": time.Now(),
-				"version":   time.Now().Unix(),
 			}).Error
 			if err != nil {
 				l.Errorf("更新群成员状态失败: %v", err)
 				return nil, err
+			}
+
+			// 更新群组的成员版本号
+			err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+				Where("group_id = ?", req.GroupID).
+				Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
+			if err != nil {
+				l.Errorf("更新群组成员版本失败: %v", err)
 			}
 		}
 	} else {
@@ -74,6 +82,13 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			l.Infof("用户申请加入群组，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 			return resp, nil
 		} else {
+			// 获取该群成员的版本号（按群独立递增）
+			memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID, nil)
+			if memberVersion == -1 {
+				l.Errorf("获取群成员版本号失败")
+				return nil, errors.New("获取版本号失败")
+			}
+
 			// 直接加入
 			member := group_models.GroupMemberModel{
 				GroupID:  req.GroupID,
@@ -81,12 +96,20 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				Role:     3, // 普通成员
 				Status:   1, // 正常状态
 				JoinTime: time.Now(),
-				Version:  time.Now().Unix(),
+				Version:  memberVersion,
 			}
 			err = l.svcCtx.DB.Create(&member).Error
 			if err != nil {
 				l.Errorf("添加群成员失败: %v", err)
 				return nil, err
+			}
+
+			// 更新群组的成员版本号
+			err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+				Where("group_id = ?", req.GroupID).
+				Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
+			if err != nil {
+				l.Errorf("更新群组成员版本失败: %v", err)
 			}
 
 			// 记录群成员变更日志
@@ -96,7 +119,6 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				ChangeType: "join",
 				OperatedBy: req.UserID,
 				ChangeTime: time.Now(),
-				Version:    time.Now().Unix(),
 			}
 			err = l.svcCtx.DB.Create(&changeLog).Error
 			if err != nil {

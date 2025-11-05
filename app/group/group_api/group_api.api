@@ -159,18 +159,34 @@ type (
 	}
 )
 
-// 群组数据同步
+// 获取用户群组版本信息
+type (
+	GetUserGroupVersionsReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	GetUserGroupVersionsRes {
+		Groups []GroupVersionItem `json:"groups"` // 用户加入的所有群组版本信息
+	}
+	GroupVersionItem {
+		GroupID        string `json:"groupId"` // 群组ID
+		GroupVersion   int64  `json:"groupVersion"` // 群资料版本
+		MemberVersion  int64  `json:"memberVersion"` // 群成员版本
+		RequestVersion int64  `json:"requestVersion"` // 入群申请版本
+	}
+)
+
+// 群资料同步（基于群组版本对象）
 type (
 	GroupSyncReq {
-		UserID      string `header:"Beaver-User-Id"`
-		FromVersion int64  `json:"fromVersion"` // 起始版本号
-		ToVersion   int64  `json:"toVersion"` // 结束版本号
-		Limit       int    `json:"limit,optional"` // 限制数量，默认100
+		UserID string                 `header:"Beaver-User-Id"`
+		Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
+	}
+	GroupVersionSyncItem {
+		GroupID string `json:"groupId"` // 群组ID
+		Version int64  `json:"version"` // 本地版本号
 	}
 	GroupSyncRes {
-		Groups      []GroupSyncItem `json:"groups"` // 群组列表
-		HasMore     bool            `json:"hasMore"` // 是否还有更多数据
-		NextVersion int64           `json:"nextVersion"` // 下次同步的起始版本号
+		Groups []GroupSyncItem `json:"groups"` // 群组资料变化
 	}
 	GroupSyncItem {
 		GroupID   string `json:"groupId"` // 群组ID
@@ -185,18 +201,14 @@ type (
 	}
 )
 
-// 群成员数据同步
+// 群成员同步（基于群组版本对象）
 type (
 	GroupMemberSyncReq {
-		UserID      string `header:"Beaver-User-Id"`
-		FromVersion int64  `json:"fromVersion"` // 起始版本号
-		ToVersion   int64  `json:"toVersion"` // 结束版本号
-		Limit       int    `json:"limit,optional"` // 限制数量，默认100
+		UserID string                 `header:"Beaver-User-Id"`
+		Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
 	}
 	GroupMemberSyncRes {
-		GroupMembers []GroupMemberSyncItem `json:"groupMembers"` // 群成员列表
-		HasMore      bool                  `json:"hasMore"` // 是否还有更多数据
-		NextVersion  int64                 `json:"nextVersion"` // 下次同步的起始版本号
+		GroupMembers []GroupMemberSyncItem `json:"groupMembers"` // 群成员变化
 	}
 	GroupMemberSyncItem {
 		GroupID  string `json:"groupId"` // 群组ID
@@ -210,18 +222,14 @@ type (
 	}
 )
 
-// 群组申请数据同步
+// 入群申请同步（基于群组版本对象）
 type (
 	GroupJoinRequestSyncReq {
-		UserID      string `header:"Beaver-User-Id"`
-		FromVersion int64  `json:"fromVersion"` // 起始版本号
-		ToVersion   int64  `json:"toVersion"` // 结束版本号
-		Limit       int    `json:"limit,optional"` // 限制数量，默认100
+		UserID string                 `header:"Beaver-User-Id"`
+		Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
 	}
 	GroupJoinRequestSyncRes {
-		GroupJoinRequests []GroupJoinRequestSyncItem `json:"groupJoinRequests"` // 群组申请列表
-		HasMore           bool                       `json:"hasMore"` // 是否还有更多数据
-		NextVersion       int64                      `json:"nextVersion"` // 下次同步的起始版本号
+		GroupJoinRequests []GroupJoinRequestSyncItem `json:"groupJoinRequests"` // 入群申请变化
 	}
 	GroupJoinRequestSyncItem {
 		GroupID         string `json:"groupId"` // 群组ID
@@ -330,18 +338,6 @@ service group {
 	@handler transferOwner
 	post /api/group/transfer (TransferOwnerReq) returns (TransferOwnerRes)
 
-	@doc "群组数据同步"
-	@handler groupSync
-	post /api/group/sync (GroupSyncReq) returns (GroupSyncRes)
-
-	@doc "群成员数据同步"
-	@handler groupMemberSync
-	post /api/group/member-sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
-
-	@doc "群组申请数据同步"
-	@handler groupJoinRequestSync
-	post /api/group/join-request-sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
-
 	@doc "获取用户管理的群组申请列表"
 	@handler groupJoinRequestList
 	post /api/group/joinRequest-list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
@@ -353,6 +349,22 @@ service group {
 	@doc "邀请用户加入群组"
 	@handler groupInvite
 	post /api/group/invite (GroupInviteReq) returns (GroupInviteRes)
+
+	@doc "获取用户群组版本信息"
+	@handler getUserGroupVersions
+	get /api/group/versions (GetUserGroupVersionsReq) returns (GetUserGroupVersionsRes)
+
+	@doc "群资料同步"
+	@handler groupSync
+	post /api/group/sync (GroupSyncReq) returns (GroupSyncRes)
+
+	@doc "群成员同步"
+	@handler groupMemberSync
+	post /api/group/member-sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
+
+	@doc "入群申请同步"
+	@handler groupJoinRequestSync
+	post /api/group/join-request-sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
 }
 
 // goctl api go -api group_api.api -dir . --home ../../../template

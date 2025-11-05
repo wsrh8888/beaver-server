@@ -76,6 +76,14 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 				return nil, err
 			}
 		} else {
+			// 获取群组当前最大版本号并递增
+			var maxVersion int64
+			tx.Model(&group_models.GroupMemberModel{}).
+				Where("group_id = ?", request.GroupID).
+				Select("COALESCE(MAX(version), 0)").
+				Scan(&maxVersion)
+			maxVersion++ // 递增版本号
+
 			// 添加新群成员
 			member := group_models.GroupMemberModel{
 				GroupID:  request.GroupID,
@@ -83,7 +91,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 				Role:     3, // 普通成员
 				Status:   1, // 正常状态
 				JoinTime: now,
-				Version:  time.Now().Unix(),
+				Version:  maxVersion,
 			}
 			err = tx.Create(&member).Error
 			if err != nil {
@@ -100,7 +108,6 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 			ChangeType: "join",
 			OperatedBy: req.UserID,
 			ChangeTime: now,
-			Version:    time.Now().Unix(),
 		}
 		err = tx.Create(&changeLog).Error
 		if err != nil {

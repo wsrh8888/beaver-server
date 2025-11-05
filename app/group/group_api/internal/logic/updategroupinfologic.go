@@ -54,6 +54,16 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 
 	// 执行更新
 	if len(updateFields) > 0 {
+		// 获取该群的新版本号（独立递增）
+		newVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID, nil)
+		if newVersion == -1 {
+			l.Logger.Errorf("获取群组版本号失败")
+			return nil, errors.New("获取版本号失败")
+		}
+
+		// 添加版本号到更新字段
+		updateFields["version"] = newVersion
+
 		err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
 			Where("uuid = ?", req.GroupID).
 			Updates(updateFields).Error

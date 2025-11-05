@@ -35,10 +35,20 @@ func NewGroupCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Group
 
 func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.GroupCreateRes, err error) {
 
+	//先生成群组ID
+	groupID := utils.GenerateUUId()
+
+	// 获取该群组的版本号（每个群独立递增）
+	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", groupID, nil)
+	if groupVersion == -1 {
+		logx.Errorf("获取群组版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	var groupModel = group_models.GroupModel{
 		CreatorID: req.UserID,
-		GroupID:   utils.GenerateUUId(),
-		Version:   1, // 新创建的群组版本从1开始
+		GroupID:   groupID,
+		Version:   groupVersion, // 该群的独立版本
 	}
 	var groupUserList = []string{req.UserID}
 	if len(req.UserIdList) == 0 {
@@ -59,13 +69,19 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 
 	var members []group_models.GroupMemberModel
 	for i, u := range groupUserList {
+		// 获取该群成员的版本号（按群独立递增）
+		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", groupID, nil)
+		if memberVersion == -1 {
+			logx.Errorf("获取群成员版本号失败")
+			return nil, errors.New("获取版本号失败")
+		}
 
 		memberMode := group_models.GroupMemberModel{
-			GroupID:  groupModel.GroupID,
+			GroupID:  groupID,
 			UserID:   u,
 			Role:     3,
 			JoinTime: time.Now(),
-			Version:  1, // 新加入成员的版本从1开始
+			Version:  memberVersion, // 该群成员的独立版本
 		}
 		if i == 0 {
 			memberMode.Role = 1
@@ -83,9 +99,9 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	var changeLogs []group_models.GroupMemberChangeLogModel
 	for _, member := range members {
 		// 获取全局递增的变更日志版本号
-		logVersion, err := l.svcCtx.VersionGen.GetNextVersion("group_member_logs")
-		if err != nil {
-			logx.Errorf("获取变更日志版本号失败，用户ID: %s, 错误: %v", member.UserID, err)
+		logVersion := l.svcCtx.VersionGen.GetNextVersion("group_member_logs", "", "", nil)
+		if logVersion == -1 {
+			logx.Errorf("获取变更日志版本号失败，用户ID: %s", member.UserID)
 			return nil, errors.New("获取版本号失败")
 		}
 

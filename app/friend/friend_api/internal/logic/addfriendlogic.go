@@ -55,9 +55,9 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	}
 
 	// 获取下一个版本号
-	nextVersion, err := l.svcCtx.VersionGen.GetNextVersion("friend_verify")
-	if err != nil {
-		l.Logger.Errorf("获取版本号失败: %v", err)
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "", nil)
+	if nextVersion == -1 {
+		l.Logger.Errorf("获取版本号失败")
 		return nil, errors.New("系统错误")
 	}
 
