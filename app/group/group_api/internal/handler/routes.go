@@ -103,6 +103,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: quitGroupHandler(serverCtx),
 			},
 			{
+				// 搜索群组
+				Method:  http.MethodGet,
+				Path:    "/api/group/search",
+				Handler: searchGroupsHandler(serverCtx),
+			},
+			{
 				// 群资料同步
 				Method:  http.MethodPost,
 				Path:    "/api/group/sync",
