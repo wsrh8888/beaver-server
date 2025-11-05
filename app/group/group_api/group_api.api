@@ -51,9 +51,10 @@ type (
 	GroupMineItem {
 		GroupID        string `json:"groupId"` // 群组ID
 		Title          string `json:"title"` // 群组名称
-		Avatar        string `json:"avatar"` // 群组头像URL
+		Avatar         string `json:"avatar"` // 群组头像URL
 		MemberCount    int    `json:"memberCount"` // 成员数量
 		ConversationID string `json:"conversationId"` // 会话ID
+		Version        int64  `json:"version"` // 数据版本号
 	}
 	GroupMineRes {
 		List  []GroupMineItem `json:"list"` // 群组列表
@@ -67,7 +68,7 @@ type (
 		UserID   string `header:"Beaver-User-Id"` // 操作者用户ID（群主或管理员）
 		GroupID  string `json:"groupId"` // 群组ID
 		Title    string `json:"title,optional"` // 新群名称，可选
-		Avatar  string `json:"avatar,optional"` // 新群头像URL，可选
+		Avatar   string `json:"avatar,optional"` // 新群头像URL，可选
 		Notice   string `json:"notice,optional"` // 新群公告，可选
 		JoinType int8   `json:"joinType,optional"` // 加入方式：0自由加入 1需审批 2不允许加入
 	}
@@ -85,10 +86,11 @@ type (
 	GroupMemberListItem {
 		UserID   string `json:"userId"` // 成员用户ID
 		Nickname string `json:"nickname"` // 成员昵称
-		Avatar  string `json:"avatar"` // 成员头像URL
+		Avatar   string `json:"avatar"` // 成员头像URL
 		Role     int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
 		Status   int8   `json:"status"` // 成员状态：1正常 2退出 3被踢
 		JoinTime string `json:"joinTime"` // 加入时间戳
+		Version  int64  `json:"version"` // 数据版本号
 	}
 	GroupMemberListRes {
 		List  []GroupMemberListItem `json:"list"` // 成员列表
@@ -144,7 +146,7 @@ type (
 	GroupInfoRes {
 		GroupID        string `json:"groupId"` // 群组ID
 		Title          string `json:"title"` // 群组名称
-		Avatar        string `json:"avatar"` // 群组头像URL
+		Avatar         string `json:"avatar"` // 群组头像URL
 		MemberCount    int    `json:"memberCount"` // 成员数量
 		CreatorID      string `json:"creatorId"` // 创建者ID
 		Notice         string `json:"notice"` // 群公告
@@ -153,6 +155,7 @@ type (
 		ConversationID string `json:"conversationId"` // 会话ID
 		CreateAt       int64  `json:"createAt"` // 创建时间戳
 		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+		Version        int64  `json:"version"` // 数据版本号
 	}
 )
 
@@ -172,7 +175,7 @@ type (
 	GroupSyncItem {
 		GroupID   string `json:"groupId"` // 群组ID
 		Title     string `json:"title"` // 群组名称
-		Avatar   string `json:"avatar"` // 群组头像
+		Avatar    string `json:"avatar"` // 群组头像
 		CreatorID string `json:"creatorId"` // 创建者ID
 		JoinType  int8   `json:"joinType"` // 加入方式
 		IsDeleted bool   `json:"isDeleted"` // 是否已删除
@@ -236,10 +239,9 @@ type (
 // 群组申请管理
 type (
 	GroupJoinRequestListReq {
-		UserID  string `header:"Beaver-User-Id"` // 查询者用户ID（群主或管理员）
-		GroupID string `json:"groupId"` // 群组ID
-		Page    int    `json:"page,optional"` // 页码，可选，默认1
-		Limit   int    `json:"limit,optional"` // 每页数量，可选，默认20
+		UserID string `header:"Beaver-User-Id"` // 查询者用户ID（群主或管理员）
+		Page   int    `json:"page,optional"` // 页码，可选，默认1
+		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
 	}
 	GroupJoinRequestItem {
 		RequestID       uint   `json:"requestId"` // 申请ID
@@ -250,6 +252,7 @@ type (
 		Message         string `json:"message"` // 申请消息
 		Status          int8   `json:"status"` // 状态：0待审 1同意 2拒绝
 		CreateAt        int64  `json:"createAt"` // 申请时间戳
+		Version         int64  `json:"version"` // 数据版本号
 	}
 	GroupJoinRequestListRes {
 		List  []GroupJoinRequestItem `json:"list"` // 申请列表
@@ -265,28 +268,6 @@ type (
 		Status    int8   `json:"status"` // 处理状态：1同意 2拒绝
 	}
 	GroupJoinRequestHandleRes  {}
-)
-
-// 群成员变更日志
-type (
-	GroupMemberChangeLogReq {
-		UserID  string `header:"Beaver-User-Id"` // 查询者用户ID
-		GroupID string `json:"groupId"` // 群组ID
-		Page    int    `json:"page,optional"` // 页码，可选，默认1
-		Limit   int    `json:"limit,optional"` // 每页数量，可选，默认20
-	}
-	GroupMemberChangeLogItem {
-		UserID       string `json:"userId"` // 变更用户ID
-		UserName     string `json:"userName"` // 变更用户昵称
-		ChangeType   string `json:"changeType"` // 变更类型：join/leave/kick/promote/demote
-		OperatedBy   string `json:"operatedBy"` // 操作者ID
-		OperatorName string `json:"operatorName"` // 操作者昵称
-		ChangeTime   int64  `json:"changeTime"` // 变更时间戳
-	}
-	GroupMemberChangeLogRes {
-		List  []GroupMemberChangeLogItem `json:"list"` // 变更日志列表
-		Count int64                      `json:"count"` // 总数
-	}
 )
 
 // 邀请用户加入群组
@@ -361,17 +342,13 @@ service group {
 	@handler groupJoinRequestSync
 	post /api/group/join-request-sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
 
-	@doc "获取群组申请列表"
+	@doc "获取用户管理的群组申请列表"
 	@handler groupJoinRequestList
-	post /api/group/joinRequest/list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
+	post /api/group/joinRequest-list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
 
 	@doc "处理群组申请"
 	@handler groupJoinRequestHandle
-	post /api/group/joinRequest/handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
-
-	@doc "获取群成员变更日志"
-	@handler groupMemberChangeLog
-	post /api/group/memberChangeLog (GroupMemberChangeLogReq) returns (GroupMemberChangeLogRes)
+	post /api/group/joinRequest-handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
 
 	@doc "邀请用户加入群组"
 	@handler groupInvite
