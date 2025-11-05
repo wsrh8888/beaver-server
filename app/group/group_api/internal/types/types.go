@@ -206,6 +206,26 @@ type GroupQuitReq struct {
 type GroupQuitRes struct {
 }
 
+type GroupSearchItem struct {
+	GroupID     string `json:"groupId"`     // 群组ID
+	Title       string `json:"title"`       // 群组名称
+	Avatar      string `json:"avatar"`      // 群组头像URL
+	MemberCount int    `json:"memberCount"` // 成员数量
+	JoinType    int8   `json:"joinType"`    // 加入方式：0自由加入 1需审批 2不允许加入
+	CreatorID   string `json:"creatorId"`   // 创建者ID
+}
+
+type GroupSearchReq struct {
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+	Keyword string `form:"keyword"`          // 搜索关键词（用户ID或邮箱）
+	Type    string `form:"type,optional"`    // 搜索类型：userId(用户ID)/email(邮箱)，默认email
+}
+
+type GroupSearchRes struct {
+	List  []GroupSearchItem `json:"list"`  // 群组列表
+	Count int64             `json:"count"` // 总数
+}
+
 type GroupSyncItem struct {
 	GroupID   string `json:"groupId"`   // 群组ID
 	Title     string `json:"title"`     // 群组名称
