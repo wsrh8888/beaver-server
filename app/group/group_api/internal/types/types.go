@@ -35,6 +35,7 @@ type GroupInfoRes struct {
 	ConversationID string `json:"conversationId"` // 会话ID
 	CreateAt       int64  `json:"createAt"`       // 创建时间戳
 	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
+	Version        int64  `json:"version"`        // 数据版本号
 }
 
 type GroupInviteReq struct {
@@ -71,13 +72,13 @@ type GroupJoinRequestItem struct {
 	Message         string `json:"message"`         // 申请消息
 	Status          int8   `json:"status"`          // 状态：0待审 1同意 2拒绝
 	CreateAt        int64  `json:"createAt"`        // 申请时间戳
+	Version         int64  `json:"version"`         // 数据版本号
 }
 
 type GroupJoinRequestListReq struct {
-	UserID  string `header:"Beaver-User-Id"` // 查询者用户ID（群主或管理员）
-	GroupID string `json:"groupId"`          // 群组ID
-	Page    int    `json:"page,optional"`    // 页码，可选，默认1
-	Limit   int    `json:"limit,optional"`   // 每页数量，可选，默认20
+	UserID string `header:"Beaver-User-Id"` // 查询者用户ID（群主或管理员）
+	Page   int    `json:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `json:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type GroupJoinRequestListRes struct {
@@ -122,27 +123,6 @@ type GroupMemberAddReq struct {
 type GroupMemberAddRes struct {
 }
 
-type GroupMemberChangeLogItem struct {
-	UserID       string `json:"userId"`       // 变更用户ID
-	UserName     string `json:"userName"`     // 变更用户昵称
-	ChangeType   string `json:"changeType"`   // 变更类型：join/leave/kick/promote/demote
-	OperatedBy   string `json:"operatedBy"`   // 操作者ID
-	OperatorName string `json:"operatorName"` // 操作者昵称
-	ChangeTime   int64  `json:"changeTime"`   // 变更时间戳
-}
-
-type GroupMemberChangeLogReq struct {
-	UserID  string `header:"Beaver-User-Id"` // 查询者用户ID
-	GroupID string `json:"groupId"`          // 群组ID
-	Page    int    `json:"page,optional"`    // 页码，可选，默认1
-	Limit   int    `json:"limit,optional"`   // 每页数量，可选，默认20
-}
-
-type GroupMemberChangeLogRes struct {
-	List  []GroupMemberChangeLogItem `json:"list"`  // 变更日志列表
-	Count int64                      `json:"count"` // 总数
-}
-
 type GroupMemberListItem struct {
 	UserID   string `json:"userId"`   // 成员用户ID
 	Nickname string `json:"nickname"` // 成员昵称
@@ -150,6 +130,7 @@ type GroupMemberListItem struct {
 	Role     int8   `json:"role"`     // 成员角色：1群主 2管理员 3普通成员
 	Status   int8   `json:"status"`   // 成员状态：1正常 2退出 3被踢
 	JoinTime string `json:"joinTime"` // 加入时间戳
+	Version  int64  `json:"version"`  // 数据版本号
 }
 
 type GroupMemberListReq struct {
@@ -203,6 +184,7 @@ type GroupMineItem struct {
 	Avatar         string `json:"avatar"`         // 群组头像URL
 	MemberCount    int    `json:"memberCount"`    // 成员数量
 	ConversationID string `json:"conversationId"` // 会话ID
+	Version        int64  `json:"version"`        // 数据版本号
 }
 
 type GroupMineReq struct {

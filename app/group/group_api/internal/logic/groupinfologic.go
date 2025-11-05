@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
@@ -41,9 +42,17 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 		Where("group_id = ?", req.GroupID).Count(&memberCount).Error
 
 	return &types.GroupInfoRes{
+		GroupID:        group.GroupID,
 		Title:          group.Title,
 		Avatar:         group.Avatar,
 		ConversationID: group.GroupID,
 		MemberCount:    int(memberCount),
+		CreatorID:      group.CreatorID,
+		Notice:         group.Notice,
+		JoinType:       group.JoinType,
+		Status:         group.Status,
+		CreateAt:       time.Time(group.CreatedAt).Unix(),
+		UpdateAt:       time.Time(group.UpdatedAt).Unix(),
+		Version:        group.Version,
 	}, nil
 }

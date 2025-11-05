@@ -219,7 +219,6 @@ type TextMsg struct {
 type UserConversationSyncItem struct {
 	UserID         string `json:"userId"`         // 用户ID
 	ConversationID string `json:"conversationId"` // 会话ID
-	JoinedAt       int64  `json:"joinedAt"`       // 用户加入会话的时间戳
 	IsHidden       bool   `json:"isHidden"`       // 是否在会话列表隐藏
 	IsPinned       bool   `json:"isPinned"`       // 是否置顶
 	IsMuted        bool   `json:"isMuted"`        // 是否免打扰

@@ -115,7 +115,9 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 		groupMember := types.GroupMemberListItem{
 			UserID:   member.UserID,
 			Role:     member.Role,
-			JoinTime: member.CreatedAt.String(),
+			Status:   member.Status,
+			JoinTime: member.JoinTime.String(),
+			Version:  member.Version,
 		}
 
 		if exists {

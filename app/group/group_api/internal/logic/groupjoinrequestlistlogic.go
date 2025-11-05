@@ -17,7 +17,7 @@ type GroupJoinRequestListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取群组申请列表
+// 获取用户管理的群组申请列表
 func NewGroupJoinRequestListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupJoinRequestListLogic {
 	return &GroupJoinRequestListLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,8 +27,6 @@ func NewGroupJoinRequestListLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinRequestListReq) (resp *types.GroupJoinRequestListRes, err error) {
-	var requests []group_models.GroupJoinRequestModel
-
 	// 设置默认分页参数
 	page := req.Page
 	if page <= 0 {
@@ -40,8 +38,28 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 	}
 	offset := (page - 1) * limit
 
-	// 查询群组申请列表
-	err = l.svcCtx.DB.Where("group_id = ?", req.GroupID).
+	// 先获取用户管理的群组ID列表（作为群主或管理员）
+	var managedGroupIDs []string
+	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("user_id = ? AND role IN (1, 2)", req.UserID).
+		Pluck("group_id", &managedGroupIDs).Error
+	if err != nil {
+		l.Errorf("获取用户管理的群组失败: %v", err)
+		return nil, err
+	}
+
+	// 如果用户没有管理的群组，直接返回空结果
+	if len(managedGroupIDs) == 0 {
+		return &types.GroupJoinRequestListRes{
+			List:  []types.GroupJoinRequestItem{},
+			Count: 0,
+		}, nil
+	}
+
+	var requests []group_models.GroupJoinRequestModel
+
+	// 查询用户管理的所有群组的申请列表
+	err = l.svcCtx.DB.Where("group_id IN (?)", managedGroupIDs).
 		Order("created_at DESC").
 		Offset(offset).
 		Limit(limit).
@@ -54,7 +72,7 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 	// 获取总数
 	var total int64
 	err = l.svcCtx.DB.Model(&group_models.GroupJoinRequestModel{}).
-		Where("group_id = ?", req.GroupID).
+		Where("group_id IN (?)", managedGroupIDs).
 		Count(&total).Error
 	if err != nil {
 		l.Errorf("获取群组申请总数失败: %v", err)
@@ -76,6 +94,7 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 			Message:         request.Message,
 			Status:          request.Status,
 			CreateAt:        time.Time(request.CreatedAt).Unix(),
+			Version:         request.Version,
 		})
 	}
 
@@ -84,6 +103,6 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 		Count: total,
 	}
 
-	l.Infof("获取群组申请列表完成，群组ID: %s, 用户ID: %s, 返回申请数: %d", req.GroupID, req.UserID, len(requestItems))
+	l.Infof("获取群组申请列表完成，用户ID: %s, 返回申请数: %d", req.UserID, len(requestItems))
 	return resp, nil
 }

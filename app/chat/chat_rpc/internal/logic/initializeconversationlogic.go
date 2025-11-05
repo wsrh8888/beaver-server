@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"time"
 
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
@@ -51,8 +50,6 @@ func (l *InitializeConversationLogic) InitializeConversation(in *chat_rpc.Initia
 		}, nil
 	}
 
-	currentTime := time.Now()
-
 	// 创建会话元数据
 	conversationMeta := chat_models.ChatConversationMeta{
 		ConversationID: in.ConversationId,
@@ -72,7 +69,6 @@ func (l *InitializeConversationLogic) InitializeConversation(in *chat_rpc.Initia
 		userConversation := chat_models.ChatUserConversation{
 			UserID:         userId,
 			ConversationID: in.ConversationId,
-			JoinedAt:       currentTime.Unix(),
 			IsPinned:       false,
 			IsMuted:        false,
 			UserReadSeq:    0,

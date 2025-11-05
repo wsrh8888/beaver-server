@@ -88,6 +88,7 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 			Avatar:         group.Avatar,
 			MemberCount:    int(memberCount),
 			ConversationID: group.GroupID, // 群组ID作为会话ID
+			Version:        group.Version,
 		})
 	}
 

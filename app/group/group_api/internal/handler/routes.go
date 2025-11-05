@@ -57,13 +57,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 处理群组申请
 				Method:  http.MethodPost,
-				Path:    "/api/group/joinRequest/handle",
+				Path:    "/api/group/joinRequest-handle",
 				Handler: groupJoinRequestHandleHandler(serverCtx),
 			},
 			{
-				// 获取群组申请列表
+				// 获取用户管理的群组申请列表
 				Method:  http.MethodPost,
-				Path:    "/api/group/joinRequest/list",
+				Path:    "/api/group/joinRequest-list",
 				Handler: groupJoinRequestListHandler(serverCtx),
 			},
 			{
@@ -83,12 +83,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/group/memberAdd",
 				Handler: groupMemberAddHandler(serverCtx),
-			},
-			{
-				// 获取群成员变更日志
-				Method:  http.MethodPost,
-				Path:    "/api/group/memberChangeLog",
-				Handler: groupMemberChangeLogHandler(serverCtx),
 			},
 			{
 				// 移除群成员

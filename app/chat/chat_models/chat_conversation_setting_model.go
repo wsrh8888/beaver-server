@@ -13,7 +13,6 @@ type ChatUserConversation struct {
 	models.Model
 	UserID         string `gorm:"size:64;index" json:"userId"`          // 用户ID
 	ConversationID string `gorm:"size:128;index" json:"conversationId"` // 关联的会话ID
-	JoinedAt       int64  `gorm:"not;default:0" json:"joinedAt"`        // 用户加入会话的时间戳
 	IsHidden       bool   `gorm:"default:false" json:"isHidden"`        // 是否在当前用户的会话列表隐藏
 	IsPinned       bool   `gorm:"default:false" json:"isPinned"`        // 置顶
 	IsMuted        bool   `gorm:"default:false" json:"isMuted"`         // 免打扰
