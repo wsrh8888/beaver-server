@@ -99,9 +99,9 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 
 	// 获取新版本号
-	version, err := l.svcCtx.VersionGen.GetNextVersion("users")
-	if err != nil {
-		logx.Errorf("获取版本号失败: %v", err)
+	version := l.svcCtx.VersionGen.GetNextVersion("users", "", "", nil)
+	if version == -1 {
+		logx.Errorf("获取版本号失败")
 		return nil, errors.New("获取版本号失败")
 	}
 	logx.Infof("获取新版本号: %d", version)

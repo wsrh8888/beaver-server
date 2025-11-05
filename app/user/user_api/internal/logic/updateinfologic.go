@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -59,10 +60,10 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	// 执行更新操作
 	if len(updateFields) > 0 {
 		// 获取新版本号
-		version, err := l.svcCtx.VersionGen.GetNextVersion("users")
-		if err != nil {
-			l.Errorf("获取版本号失败: %v", err)
-			return nil, err
+		version := l.svcCtx.VersionGen.GetNextVersion("users", "", "", nil)
+		if version == -1 {
+			l.Errorf("获取版本号失败")
+			return nil, errors.New("获取版本号失败")
 		}
 
 		// 添加版本号到更新字段

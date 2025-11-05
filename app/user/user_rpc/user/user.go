@@ -14,24 +14,21 @@ import (
 )
 
 type (
-	GetUserVersionReq = user_rpc.GetUserVersionReq
-	GetUserVersionRes = user_rpc.GetUserVersionRes
-	IsFriendReq       = user_rpc.IsFriendReq
-	IsFriendRes       = user_rpc.IsFriendRes
-	UserCreateReq     = user_rpc.UserCreateReq
-	UserCreateRes     = user_rpc.UserCreateRes
-	UserInfo          = user_rpc.UserInfo
-	UserInfoReq       = user_rpc.UserInfoReq
-	UserInfoRes       = user_rpc.UserInfoRes
-	UserListInfoReq   = user_rpc.UserListInfoReq
-	UserListInfoRes   = user_rpc.UserListInfoRes
+	IsFriendReq     = user_rpc.IsFriendReq
+	IsFriendRes     = user_rpc.IsFriendRes
+	UserCreateReq   = user_rpc.UserCreateReq
+	UserCreateRes   = user_rpc.UserCreateRes
+	UserInfo        = user_rpc.UserInfo
+	UserInfoReq     = user_rpc.UserInfoReq
+	UserInfoRes     = user_rpc.UserInfoRes
+	UserListInfoReq = user_rpc.UserListInfoReq
+	UserListInfoRes = user_rpc.UserListInfoRes
 
 	User interface {
 		UserCreate(ctx context.Context, in *UserCreateReq, opts ...grpc.CallOption) (*UserCreateRes, error)
 		UserInfo(ctx context.Context, in *UserInfoReq, opts ...grpc.CallOption) (*UserInfoRes, error)
 		IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendRes, error)
 		UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
-		GetUserVersion(ctx context.Context, in *GetUserVersionReq, opts ...grpc.CallOption) (*GetUserVersionRes, error)
 	}
 
 	defaultUser struct {
@@ -63,9 +60,4 @@ func (m *defaultUser) IsFriend(ctx context.Context, in *IsFriendReq, opts ...grp
 func (m *defaultUser) UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error) {
 	client := user_rpc.NewUserClient(m.cli.Conn())
 	return client.UserListInfo(ctx, in, opts...)
-}
-
-func (m *defaultUser) GetUserVersion(ctx context.Context, in *GetUserVersionReq, opts ...grpc.CallOption) (*GetUserVersionRes, error) {
-	client := user_rpc.NewUserClient(m.cli.Conn())
-	return client.GetUserVersion(ctx, in, opts...)
 }

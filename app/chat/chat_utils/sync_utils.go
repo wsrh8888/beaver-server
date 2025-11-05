@@ -18,7 +18,7 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// 如果不存在，则创建
-			version, err := versionGen.GetNextVersion("conversations")
+			version, err := versionGen.GetNextVersion("conversations", "", "")
 			if err != nil {
 				logx.Errorf("获取会话版本号失败: %v", err)
 				return err
@@ -42,7 +42,7 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 		}
 	} else {
 		// 如果存在，则更新
-		version, err := versionGen.GetNextVersion("conversations")
+		version, err := versionGen.GetNextVersion("conversations", "", "")
 		if err != nil {
 			logx.Errorf("获取会话版本号失败: %v", err)
 			return err
@@ -70,7 +70,7 @@ func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, user
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// 如果不存在，则创建
-			version, err := versionGen.GetNextVersion("chat_user_conversations")
+			version, err := versionGen.GetNextVersion("chat_user_conversations", "", "")
 			if err != nil {
 				logx.Errorf("获取用户会话版本号失败: %v", err)
 				return err
@@ -95,7 +95,7 @@ func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, user
 		}
 	} else {
 		// 如果存在，则更新
-		version, err := versionGen.GetNextVersion("user_conversations")
+		version, err := versionGen.GetNextVersion("user_conversations", "", "")
 		if err != nil {
 			logx.Errorf("获取用户会话版本号失败: %v", err)
 			return err

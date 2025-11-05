@@ -19,11 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_UserCreate_FullMethodName     = "/user_rpc.user/UserCreate"
-	User_UserInfo_FullMethodName       = "/user_rpc.user/UserInfo"
-	User_IsFriend_FullMethodName       = "/user_rpc.user/IsFriend"
-	User_UserListInfo_FullMethodName   = "/user_rpc.user/UserListInfo"
-	User_GetUserVersion_FullMethodName = "/user_rpc.user/GetUserVersion"
+	User_UserCreate_FullMethodName   = "/user_rpc.user/UserCreate"
+	User_UserInfo_FullMethodName     = "/user_rpc.user/UserInfo"
+	User_IsFriend_FullMethodName     = "/user_rpc.user/IsFriend"
+	User_UserListInfo_FullMethodName = "/user_rpc.user/UserListInfo"
 )
 
 // UserClient is the client API for User service.
@@ -34,7 +33,6 @@ type UserClient interface {
 	UserInfo(ctx context.Context, in *UserInfoReq, opts ...grpc.CallOption) (*UserInfoRes, error)
 	IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendRes, error)
 	UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
-	GetUserVersion(ctx context.Context, in *GetUserVersionReq, opts ...grpc.CallOption) (*GetUserVersionRes, error)
 }
 
 type userClient struct {
@@ -85,16 +83,6 @@ func (c *userClient) UserListInfo(ctx context.Context, in *UserListInfoReq, opts
 	return out, nil
 }
 
-func (c *userClient) GetUserVersion(ctx context.Context, in *GetUserVersionReq, opts ...grpc.CallOption) (*GetUserVersionRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserVersionRes)
-	err := c.cc.Invoke(ctx, User_GetUserVersion_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility.
@@ -103,7 +91,6 @@ type UserServer interface {
 	UserInfo(context.Context, *UserInfoReq) (*UserInfoRes, error)
 	IsFriend(context.Context, *IsFriendReq) (*IsFriendRes, error)
 	UserListInfo(context.Context, *UserListInfoReq) (*UserListInfoRes, error)
-	GetUserVersion(context.Context, *GetUserVersionReq) (*GetUserVersionRes, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -125,9 +112,6 @@ func (UnimplementedUserServer) IsFriend(context.Context, *IsFriendReq) (*IsFrien
 }
 func (UnimplementedUserServer) UserListInfo(context.Context, *UserListInfoReq) (*UserListInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserListInfo not implemented")
-}
-func (UnimplementedUserServer) GetUserVersion(context.Context, *GetUserVersionReq) (*GetUserVersionRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserVersion not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 func (UnimplementedUserServer) testEmbeddedByValue()              {}
@@ -222,24 +206,6 @@ func _User_UserListInfo_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_GetUserVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserVersionReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).GetUserVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: User_GetUserVersion_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).GetUserVersion(ctx, req.(*GetUserVersionReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -262,10 +228,6 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserListInfo",
 			Handler:    _User_UserListInfo_Handler,
-		},
-		{
-			MethodName: "GetUserVersion",
-			Handler:    _User_GetUserVersion_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
