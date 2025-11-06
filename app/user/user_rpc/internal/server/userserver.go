@@ -42,3 +42,8 @@ func (s *UserServer) UserListInfo(ctx context.Context, in *user_rpc.UserListInfo
 	l := logic.NewUserListInfoLogic(ctx, s.svcCtx)
 	return l.UserListInfo(in)
 }
+
+func (s *UserServer) UserVersions(ctx context.Context, in *user_rpc.UserVersionsReq) (*user_rpc.UserVersionsRes, error) {
+	l := logic.NewUserVersionsLogic(ctx, s.svcCtx)
+	return l.UserVersions(in)
+}

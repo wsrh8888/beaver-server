@@ -23,12 +23,16 @@ type (
 	UserInfoRes     = user_rpc.UserInfoRes
 	UserListInfoReq = user_rpc.UserListInfoReq
 	UserListInfoRes = user_rpc.UserListInfoRes
+	UserVersionInfo = user_rpc.UserVersionInfo
+	UserVersionsReq = user_rpc.UserVersionsReq
+	UserVersionsRes = user_rpc.UserVersionsRes
 
 	User interface {
 		UserCreate(ctx context.Context, in *UserCreateReq, opts ...grpc.CallOption) (*UserCreateRes, error)
 		UserInfo(ctx context.Context, in *UserInfoReq, opts ...grpc.CallOption) (*UserInfoRes, error)
 		IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendRes, error)
 		UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
+		UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error)
 	}
 
 	defaultUser struct {
@@ -60,4 +64,9 @@ func (m *defaultUser) IsFriend(ctx context.Context, in *IsFriendReq, opts ...grp
 func (m *defaultUser) UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error) {
 	client := user_rpc.NewUserClient(m.cli.Conn())
 	return client.UserListInfo(ctx, in, opts...)
+}
+
+func (m *defaultUser) UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error) {
+	client := user_rpc.NewUserClient(m.cli.Conn())
+	return client.UserVersions(ctx, in, opts...)
 }
