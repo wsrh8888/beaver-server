@@ -19,6 +19,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: addFriendHandler(serverCtx),
 			},
 			{
+				// 获取好友用户版本信息（用于数据同步）
+				Method:  http.MethodPost,
+				Path:    "/api/friend/friend-user-versions",
+				Handler: friendUserVersionsHandler(serverCtx),
+			},
+			{
 				// 获取好友详细信息
 				Method:  http.MethodGet,
 				Path:    "/api/friend/friend_info",
