@@ -9,6 +9,7 @@ type (
 	}
 	GroupCreateRes {
 		GroupID string `json:"groupId"` // 创建的群组ID
+		Version int64  `json:"version"` // 群组初始版本号
 	}
 )
 
@@ -18,7 +19,9 @@ type (
 		UserID  string `header:"Beaver-User-Id"` // 操作者用户ID
 		GroupID string `path:"groupId"` // 要删除的群组ID
 	}
-	GroupDeleteRes  {}
+	GroupDeleteRes {
+		Version int64 `json:"version"` // 群组新版本号
+	}
 )
 
 // 移除群成员
@@ -28,7 +31,9 @@ type (
 		GroupID   string   `json:"groupId"` // 群组ID
 		MemberIDs []string `json:"memberIds"` // 要移除的成员ID
 	}
-	GroupMemberRemoveRes  {}
+	GroupMemberRemoveRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
 )
 
 // 添加群成员
@@ -38,7 +43,9 @@ type (
 		GroupID string   `json:"groupId"` // 群组ID
 		UserIds []string `json:"userIds"` // 要添加的成员ID列表
 	}
-	GroupMemberAddRes  {}
+	GroupMemberAddRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
 )
 
 // 我加入的群组
@@ -72,7 +79,9 @@ type (
 		Notice   string `json:"notice,optional"` // 新群公告，可选
 		JoinType int8   `json:"joinType,optional"` // 加入方式：0自由加入 1需审批 2不允许加入
 	}
-	UpdateGroupInfoRes  {}
+	UpdateGroupInfoRes {
+		Version int64 `json:"version"` // 群资料新版本号
+	}
 )
 
 // 获取群成员列表
@@ -106,7 +115,9 @@ type (
 		MemberID string `json:"memberId"` // 目标成员ID
 		Role     int8   `json:"role"` // 新角色：2管理员 3普通成员
 	}
-	UpdateMemberRoleRes  {}
+	UpdateMemberRoleRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
 )
 
 // 申请加入群组
@@ -116,7 +127,9 @@ type (
 		GroupID string `json:"groupId"` // 目标群组ID
 		Message string `json:"message,optional"` // 申请消息，可选
 	}
-	GroupJoinRes  {}
+	GroupJoinRes {
+		Version int64 `json:"version"` // 入群申请版本号
+	}
 )
 
 // 退出群组
@@ -125,7 +138,9 @@ type (
 		UserID  string `header:"Beaver-User-Id"` // 退出者用户ID
 		GroupID string `json:"groupId"` // 群组ID
 	}
-	GroupQuitRes  {}
+	GroupQuitRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
 )
 
 // 转让群主
@@ -135,7 +150,9 @@ type (
 		GroupID    string `json:"groupId"` // 群组ID
 		NewOwnerID string `json:"newOwnerId"` // 新群主ID
 	}
-	TransferOwnerRes  {}
+	TransferOwnerRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
 )
 
 // 群信息
@@ -250,6 +267,8 @@ type (
 		UserID  string `header:"Beaver-User-Id"` // 当前用户ID
 		Keyword string `form:"keyword"` // 搜索关键词（用户ID或邮箱）
 		Type    string `form:"type,optional"` // 搜索类型：userId(用户ID)/email(邮箱)，默认email
+		Page    int    `form:"page,optional"` // 页码，可选，默认1
+		Limit   int    `form:"limit,optional"` // 每页数量，可选，默认20
 	}
 	GroupSearchItem {
 		GroupID     string `json:"groupId"` // 群组ID
@@ -296,7 +315,9 @@ type (
 		RequestID uint   `json:"requestId"` // 申请ID
 		Status    int8   `json:"status"` // 处理状态：1同意 2拒绝
 	}
-	GroupJoinRequestHandleRes  {}
+	GroupJoinRequestHandleRes {
+		Version int64 `json:"version"` // 入群申请新版本号
+	}
 )
 
 // 邀请用户加入群组
@@ -307,7 +328,9 @@ type (
 		UserIds []string `json:"userIds"` // 被邀请的用户ID列表
 		Message string   `json:"message,optional"` // 邀请消息，可选
 	}
-	GroupInviteRes  {}
+	GroupInviteRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
 )
 
 service group {

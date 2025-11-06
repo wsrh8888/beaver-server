@@ -65,7 +65,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		friendVerify.RevStatus = 1
 
 		// 获取下一个版本号
-		friendNextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "", nil)
+		friendNextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
 		if friendNextVersion == -1 {
 			l.Logger.Errorf("获取好友版本号失败")
 			return nil, errors.New("系统错误")
@@ -142,7 +142,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	}
 
 	// 获取下一个版本号并更新version字段
-	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "", nil)
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "")
 	if nextVersion == -1 {
 		l.Logger.Errorf("获取版本号失败")
 		return nil, errors.New("系统错误")
@@ -177,5 +177,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	}()
 
 	l.Logger.Infof("处理好友验证成功: verifyID=%s, userID=%s, status=%d, source=%s", req.VerifyID, req.UserID, req.Status, friendVerify.Source)
-	return &types.FriendValidStatusRes{}, nil
+	return &types.FriendValidStatusRes{
+		Version: nextVersion,
+	}, nil
 }

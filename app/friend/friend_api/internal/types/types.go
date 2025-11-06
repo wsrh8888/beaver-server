@@ -63,6 +63,7 @@ type FriendValidStatusReq struct {
 }
 
 type FriendValidStatusRes struct {
+	Version int64 `json:"version"` // 处理后的好友版本号
 }
 
 type FriendVerifySyncItem struct {
@@ -98,6 +99,7 @@ type NoticeUpdateReq struct {
 }
 
 type NoticeUpdateRes struct {
+	Version int64 `json:"version"` // 更新后的好友版本号
 }
 
 type SearchReq struct {
@@ -134,6 +136,7 @@ type AddFriendReq struct {
 }
 
 type AddFriendRes struct {
+	Version int64 `json:"version"` // 好友验证版本号
 }
 
 type FriendListReq struct {

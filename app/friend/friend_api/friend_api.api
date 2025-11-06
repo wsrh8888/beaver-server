@@ -7,7 +7,9 @@ type addFriendReq {
 	Source   string `json:"source"` // 添加好友来源：email(邮箱搜索)/qrcode(扫码)/userId(用户ID搜索)
 }
 
-type addFriendRes {}
+type addFriendRes {
+	Version int64 `json:"version"` // 好友验证版本号
+}
 
 type friendListReq {
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID
@@ -35,7 +37,9 @@ type FriendValidStatusReq {
 	Status   int8   `json:"status"` // 处理状态：1(同意)/2(拒绝)
 }
 
-type FriendValidStatusRes {}
+type FriendValidStatusRes {
+	Version int64 `json:"version"` // 处理后的好友版本号
+}
 
 type validListReq {
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID
@@ -83,7 +87,9 @@ type NoticeUpdateReq {
 	Notice   string `json:"notice"` // 新的备注内容
 }
 
-type NoticeUpdateRes {}
+type NoticeUpdateRes {
+	Version int64 `json:"version"` // 更新后的好友版本号
+}
 
 type SearchReq {
 	UserID  string `header:"Beaver-User-Id"` // 当前用户ID

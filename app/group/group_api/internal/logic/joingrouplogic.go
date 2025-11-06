@@ -27,6 +27,8 @@ func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGro
 }
 
 func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJoinRes, err error) {
+	var memberVersion int64 = 0
+
 	// 检查群组是否存在
 	var group group_models.GroupModel
 	err = l.svcCtx.DB.Where("group_id = ? AND status = ?", req.GroupID, 1).First(&group).Error
@@ -66,11 +68,19 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		// 检查群组加入方式
 		if group.JoinType == 1 {
 			// 需要申请，创建申请记录
+			// 获取该群入群申请的版本号（按群独立递增）
+			requestVersion := l.svcCtx.VersionGen.GetNextVersion("group_join_requests", "group_id", req.GroupID)
+			if requestVersion == -1 {
+				l.Errorf("获取入群申请版本号失败")
+				return nil, errors.New("获取版本号失败")
+			}
+
 			joinRequest := group_models.GroupJoinRequestModel{
 				GroupID:         req.GroupID,
 				ApplicantUserID: req.UserID,
 				Message:         req.Message,
 				Status:          0, // 待审核
+				Version:         requestVersion,
 			}
 			err = l.svcCtx.DB.Create(&joinRequest).Error
 			if err != nil {
@@ -78,12 +88,14 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				return nil, err
 			}
 
-			resp = &types.GroupJoinRes{}
+			resp = &types.GroupJoinRes{
+				Version: requestVersion,
+			}
 			l.Infof("用户申请加入群组，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 			return resp, nil
 		} else {
 			// 获取该群成员的版本号（按群独立递增）
-			memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID, nil)
+			memberVersion = l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 			if memberVersion == -1 {
 				l.Errorf("获取群成员版本号失败")
 				return nil, errors.New("获取版本号失败")
@@ -128,7 +140,18 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		}
 	}
 
-	resp = &types.GroupJoinRes{}
+	// 确保memberVersion有值（在直接加入的情况下）
+	if memberVersion == 0 {
+		memberVersion = l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+		if memberVersion == -1 {
+			l.Errorf("获取群成员版本号失败")
+			return nil, errors.New("获取版本号失败")
+		}
+	}
+
+	resp = &types.GroupJoinRes{
+		Version: memberVersion,
+	}
 
 	l.Infof("用户加入群组成功，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 	return resp, nil

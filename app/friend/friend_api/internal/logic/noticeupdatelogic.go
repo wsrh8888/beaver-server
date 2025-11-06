@@ -54,7 +54,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 	}
 
 	// 获取下一个版本号
-	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "", nil)
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
 	if nextVersion == -1 {
 		l.Logger.Errorf("获取版本号失败")
 		return nil, errors.New("系统错误")
@@ -93,5 +93,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 	}
 
 	l.Logger.Infof("更新好友备注成功: userID=%s, friendID=%s, notice=%s", req.UserID, req.FriendID, req.Notice)
-	return &types.NoticeUpdateRes{}, nil
+	return &types.NoticeUpdateRes{
+		Version: nextVersion,
+	}, nil
 }

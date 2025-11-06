@@ -8,7 +8,6 @@ import (
 	"beaver/app/datasync/datasync_rpc/types/types/datasync_rpc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -47,8 +46,6 @@ func (l *GetSyncCursorLogic) GetSyncCursor(in *datasync_rpc.GetSyncCursorReq) (*
 		serverLast = l.getLatestGroupMemberVersion(in.UserId)
 	case "group_join_requests":
 		serverLast = l.getLatestGroupJoinRequestVersion(in.UserId)
-	case "users":
-		serverLast = l.getLatestUserVersion(in.UserId)
 	default:
 		serverLast = 0
 	}
@@ -137,18 +134,6 @@ func (l *GetSyncCursorLogic) getLatestGroupJoinRequestVersion(userID string) int
 	})
 	if err != nil {
 		l.Errorf("调用group_rpc获取最新群组申请版本号失败: %v", err)
-		return 0
-	}
-	return resp.LatestVersion
-}
-
-// getLatestUserVersion 获取最新用户版本号
-func (l *GetSyncCursorLogic) getLatestUserVersion(userID string) int64 {
-	resp, err := l.svcCtx.UserRpc.GetUserVersion(l.ctx, &user_rpc.GetUserVersionReq{
-		UserId: userID,
-	})
-	if err != nil {
-		l.Errorf("调用user_rpc获取最新用户版本号失败: %v", err)
 		return 0
 	}
 	return resp.LatestVersion

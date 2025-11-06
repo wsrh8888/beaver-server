@@ -62,6 +62,13 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		}
 	}
 
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Logger.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	// 执行移除操作
 	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.MemberIDs).Delete(&group_models.GroupMemberModel{}).Error
 	if err != nil {
@@ -113,5 +120,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		}
 	}()
 
-	return &types.GroupMemberRemoveRes{}, nil
+	return &types.GroupMemberRemoveRes{
+		Version: memberVersion,
+	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_models"
+	"beaver/app/user/user_models"
 	"beaver/common/list_query"
 	"beaver/common/models"
 
@@ -47,8 +48,11 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 		whereClause = whereClause.Where("msg_type = ?", req.MsgType)
 	}
 
-	// 删除状态筛选
-	whereClause = whereClause.Where("is_deleted = ?", req.IsDeleted)
+	// 状态筛选 - 0表示全部状态，否则按指定状态筛选
+	if req.Status != 0 {
+		whereClause = whereClause.Where("status = ?", req.Status)
+	}
+	// Status=0时不添加状态筛选条件，查询所有状态的消息
 
 	// 时间范围筛选
 	if req.StartTime != "" {
@@ -70,8 +74,7 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 			Limit: req.PageSize,
 			Sort:  "created_at desc",
 		},
-		Where:   whereClause,
-		Preload: []string{"SendUserModel"},
+		Where: whereClause,
 	})
 
 	if err != nil {
@@ -83,19 +86,26 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 	var list []types.ChatMessageInfo
 	for _, message := range messages {
 		sendUserName := ""
-		if message.SendUserModel.NickName != "" {
-			sendUserName = message.SendUserModel.NickName
+		sendUserFileName := ""
+		sendUserID := ""
+		if message.SendUserID != nil && *message.SendUserID != "" {
+			sendUserID = *message.SendUserID
+			var user user_models.UserModel
+			if err := l.svcCtx.DB.Where("uuid = ?", *message.SendUserID).First(&user).Error; err == nil {
+				sendUserName = user.NickName
+				sendUserFileName = user.Avatar
+			}
 		}
 
 		list = append(list, types.ChatMessageInfo{
 			Id:             message.MessageID,
 			MessageID:      message.MessageID,
 			ConversationID: message.ConversationID,
-			SendUserID:     message.SendUserID,
+			SendUserID:     sendUserID,
 			SendUserName:   sendUserName,
 			MsgType:        int(message.MsgType),
 			MsgPreview:     message.MsgPreview,
-			IsDeleted:      message.IsDeleted,
+			Status:         message.Status,
 			CreateTime:     message.CreatedAt.String(),
 			UpdateTime:     message.UpdatedAt.String(),
 		})

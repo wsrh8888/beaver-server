@@ -8,6 +8,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_models"
+	"beaver/app/user/user_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -31,7 +32,7 @@ func NewGetChatMessageDetailLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func (l *GetChatMessageDetailLogic) GetChatMessageDetail(req *types.GetChatMessageDetailReq) (resp *types.GetChatMessageDetailRes, err error) {
 	var message chat_models.ChatMessage
 
-	err = l.svcCtx.DB.Preload("SendUserModel").Where("message_id = ?", req.MessageID).First(&message).Error
+	err = l.svcCtx.DB.Where("message_id = ?", req.MessageID).First(&message).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			logx.Errorf("聊天消息不存在: %s", req.MessageID)
@@ -43,11 +44,12 @@ func (l *GetChatMessageDetailLogic) GetChatMessageDetail(req *types.GetChatMessa
 
 	sendUserName := ""
 	sendUserFileName := ""
-	if message.SendUserModel.NickName != "" {
-		sendUserName = message.SendUserModel.NickName
-	}
-	if message.SendUserModel.FileName != "" {
-		sendUserFileName = message.SendUserModel.FileName
+	if message.SendUserID != nil && *message.SendUserID != "" {
+		var user user_models.UserModel
+		if err := l.svcCtx.DB.Where("uuid = ?", *message.SendUserID).First(&user).Error; err == nil {
+			sendUserName = user.NickName
+			sendUserFileName = user.Avatar
+		}
 	}
 
 	msgContent := ""
@@ -57,17 +59,22 @@ func (l *GetChatMessageDetailLogic) GetChatMessageDetail(req *types.GetChatMessa
 		}
 	}
 
+	sendUserID := ""
+	if message.SendUserID != nil {
+		sendUserID = *message.SendUserID
+	}
+
 	return &types.GetChatMessageDetailRes{
 		Id:               message.MessageID,
 		MessageID:        message.MessageID,
 		ConversationID:   message.ConversationID,
-		SendUserID:       message.SendUserID,
+		SendUserID:       sendUserID,
 		SendUserName:     sendUserName,
 		SendUserFileName: sendUserFileName,
 		MsgType:          int(message.MsgType),
 		MsgPreview:       message.MsgPreview,
 		MsgContent:       msgContent,
-		IsDeleted:        message.IsDeleted,
+		Status:           message.Status,
 		CreateTime:       message.CreatedAt.String(),
 		UpdateTime:       message.UpdatedAt.String(),
 	}, nil

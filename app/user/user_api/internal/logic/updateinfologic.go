@@ -60,7 +60,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	// 执行更新操作
 	if len(updateFields) > 0 {
 		// 获取新版本号
-		version := l.svcCtx.VersionGen.GetNextVersion("users", "", "", nil)
+		version := l.svcCtx.VersionGen.GetNextVersion("users", "", "")
 		if version == -1 {
 			l.Errorf("获取版本号失败")
 			return nil, errors.New("获取版本号失败")
