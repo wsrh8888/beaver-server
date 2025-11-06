@@ -43,6 +43,13 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		return nil, errors.New("群主不能直接退出，请先转让群主权限")
 	}
 
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Logger.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	// 执行退出操作
 	err = l.svcCtx.DB.Where("group_id = ? and user_id = ?", req.GroupID, req.UserID).
 		Delete(&group_models.GroupMemberModel{}).Error
@@ -78,5 +85,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		}
 	}()
 
-	return &types.GroupQuitRes{}, nil
+	return &types.GroupQuitRes{
+		Version: memberVersion,
+	}, nil
 }

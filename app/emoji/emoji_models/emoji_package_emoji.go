@@ -6,9 +6,8 @@ import "beaver/common/models"
 // 一个表情可以属于多个表情包，一个表情包可以包含多个表情
 type EmojiPackageEmoji struct {
 	models.Model
-	PackageID  uint         `json:"packageId"` // 表情包ID
-	EmojiID    uint         `json:"emojiId"`   // 表情ID
-	SortOrder  int          `json:"sortOrder"` // 在表情包中的排序
-	Package    EmojiPackage `gorm:"foreignkey:PackageID;references:Id" json:"-"`
-	EmojiModel Emoji        `gorm:"foreignkey:EmojiID;references:Id" json:"-"`
+	PackageID uint `json:"packageId"`                  // 表情包ID
+	EmojiID   uint `json:"emojiId"`                    // 表情ID
+	SortOrder int  `gorm:"default:0" json:"sortOrder"` // 在表情包中的排序
+	// 注意：移除外键关联，改用关联查询
 }

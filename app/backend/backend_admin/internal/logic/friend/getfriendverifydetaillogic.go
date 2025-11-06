@@ -10,6 +10,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/user/user_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -40,8 +41,6 @@ func (l *GetFriendVerifyDetailLogic) GetFriendVerifyDetail(req *types.GetFriendV
 
 	var verify friend_models.FriendVerifyModel
 	err = l.svcCtx.DB.Where("id = ?", uint(verifyID)).
-		Preload("SendUserModel").
-		Preload("RevUserModel").
 		First(&verify).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -53,13 +52,21 @@ func (l *GetFriendVerifyDetailLogic) GetFriendVerifyDetail(req *types.GetFriendV
 	}
 
 	var sendUserName, sendUserFileName, revUserName, revUserFileName string
-	if verify.SendUserModel.UserID != "" {
-		sendUserName = verify.SendUserModel.NickName
-		sendUserFileName = verify.SendUserModel.FileName
+	// 查询发送者信息
+	if verify.SendUserID != "" {
+		var sendUser user_models.UserModel
+		if err := l.svcCtx.DB.Where("uuid = ?", verify.SendUserID).First(&sendUser).Error; err == nil {
+			sendUserName = sendUser.NickName
+			sendUserFileName = sendUser.Avatar
+		}
 	}
-	if verify.RevUserModel.UserID != "" {
-		revUserName = verify.RevUserModel.NickName
-		revUserFileName = verify.RevUserModel.FileName
+	// 查询接收者信息
+	if verify.RevUserID != "" {
+		var revUser user_models.UserModel
+		if err := l.svcCtx.DB.Where("uuid = ?", verify.RevUserID).First(&revUser).Error; err == nil {
+			revUserName = revUser.NickName
+			revUserFileName = revUser.Avatar
+		}
 	}
 
 	return &types.GetFriendVerifyDetailRes{

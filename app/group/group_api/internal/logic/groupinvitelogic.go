@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
@@ -117,7 +118,16 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 		return nil, err
 	}
 
-	resp = &types.GroupInviteRes{}
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
+	resp = &types.GroupInviteRes{
+		Version: memberVersion,
+	}
 
 	l.Infof("群组邀请完成，群组ID: %s, 邀请者: %s, 被邀请用户数: %d", req.GroupID, req.UserID, len(req.UserIds))
 	return resp, nil

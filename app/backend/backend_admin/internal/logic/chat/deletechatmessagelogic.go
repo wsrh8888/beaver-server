@@ -40,8 +40,8 @@ func (l *DeleteChatMessageLogic) DeleteChatMessage(req *types.DeleteChatMessageR
 		return nil, errors.New("查询聊天消息失败")
 	}
 
-	// 逻辑删除，设置is_deleted为true
-	err = l.svcCtx.DB.Model(&message).Update("is_deleted", true).Error
+	// 逻辑删除，设置status为4（已删除）
+	err = l.svcCtx.DB.Model(&message).Update("status", 4).Error
 	if err != nil {
 		logx.Errorf("删除聊天消息失败: %v", err)
 		return nil, errors.New("删除聊天消息失败")

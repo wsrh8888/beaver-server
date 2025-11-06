@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
@@ -72,6 +73,14 @@ func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq)
 		}
 	}()
 
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		tx.Rollback()
+		l.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	// 更新成员角色
 	err = tx.Model(&targetMember).Update("role", req.Role).Error
 	if err != nil {
@@ -112,7 +121,9 @@ func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq)
 		return nil, err
 	}
 
-	resp = &types.UpdateMemberRoleRes{}
+	resp = &types.UpdateMemberRoleRes{
+		Version: memberVersion,
+	}
 
 	l.Infof("更新群成员角色完成，群组ID: %s, 目标用户: %s, 新角色: %d, 操作者: %s", req.GroupID, req.MemberID, req.Role, req.UserID)
 	return resp, nil

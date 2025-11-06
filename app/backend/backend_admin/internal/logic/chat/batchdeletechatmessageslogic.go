@@ -30,7 +30,7 @@ func (l *BatchDeleteChatMessagesLogic) BatchDeleteChatMessages(req *types.BatchD
 	// 批量逻辑删除
 	err = l.svcCtx.DB.Model(&chat_models.ChatMessage{}).
 		Where("message_id IN ?", req.Ids).
-		Update("is_deleted", true).Error
+		Update("status", 4).Error
 	if err != nil {
 		logx.Errorf("批量删除聊天消息失败: %v", err)
 		return nil, errors.New("批量删除聊天消息失败")

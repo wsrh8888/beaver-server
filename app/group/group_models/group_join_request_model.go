@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// 全局递增版本
+// 按照群组独立递增版本
 // GroupJoinRequestModel 入群申请表
 type GroupJoinRequestModel struct {
 	models.Model

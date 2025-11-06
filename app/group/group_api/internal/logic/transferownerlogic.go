@@ -74,6 +74,13 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 		return nil, errors.New("转让群组失败")
 	}
 
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Logger.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	// 提交事务
 	if err = tx.Commit().Error; err != nil {
 		l.Logger.Errorf("提交事务失败: %v", err)
@@ -105,5 +112,7 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 		}
 	}()
 
-	return &types.TransferOwnerRes{}, nil
+	return &types.TransferOwnerRes{
+		Version: memberVersion,
+	}, nil
 }

@@ -8,6 +8,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/user/user_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -42,9 +43,7 @@ func (l *GetFriendVerifyListLogic) GetFriendVerifyList(req *types.GetFriendVerif
 	}
 
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&friend_models.FriendVerifyModel{}).
-		Preload("SendUserModel").
-		Preload("RevUserModel")
+	query := l.svcCtx.DB.Model(&friend_models.FriendVerifyModel{})
 
 	// 按发送用户ID筛选
 	if req.SendUserId != "" {
@@ -97,11 +96,19 @@ func (l *GetFriendVerifyListLogic) GetFriendVerifyList(req *types.GetFriendVerif
 	list := make([]types.FriendVerifyInfo, len(verifies))
 	for i, verify := range verifies {
 		var sendUserName, revUserName string
-		if verify.SendUserModel.UserID != "" {
-			sendUserName = verify.SendUserModel.NickName
+		// 查询发送者信息
+		if verify.SendUserID != "" {
+			var sendUser user_models.UserModel
+			if err := l.svcCtx.DB.Where("uuid = ?", verify.SendUserID).First(&sendUser).Error; err == nil {
+				sendUserName = sendUser.NickName
+			}
 		}
-		if verify.RevUserModel.UserID != "" {
-			revUserName = verify.RevUserModel.NickName
+		// 查询接收者信息
+		if verify.RevUserID != "" {
+			var revUser user_models.UserModel
+			if err := l.svcCtx.DB.Where("uuid = ?", verify.RevUserID).First(&revUser).Error; err == nil {
+				revUserName = revUser.NickName
+			}
 		}
 
 		list[i] = types.FriendVerifyInfo{

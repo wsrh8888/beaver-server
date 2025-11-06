@@ -17,6 +17,7 @@ type GroupCreateReq struct {
 
 type GroupCreateRes struct {
 	GroupID string `json:"groupId"` // 创建的群组ID
+	Version int64  `json:"version"` // 群组初始版本号
 }
 
 type GroupDeleteReq struct {
@@ -25,6 +26,7 @@ type GroupDeleteReq struct {
 }
 
 type GroupDeleteRes struct {
+	Version int64 `json:"version"` // 群组新版本号
 }
 
 type GroupInfoReq struct {
@@ -54,6 +56,7 @@ type GroupInviteReq struct {
 }
 
 type GroupInviteRes struct {
+	Version int64 `json:"version"` // 群成员新版本号
 }
 
 type GroupJoinReq struct {
@@ -69,6 +72,7 @@ type GroupJoinRequestHandleReq struct {
 }
 
 type GroupJoinRequestHandleRes struct {
+	Version int64 `json:"version"` // 入群申请新版本号
 }
 
 type GroupJoinRequestItem struct {
@@ -116,6 +120,7 @@ type GroupJoinRequestSyncRes struct {
 }
 
 type GroupJoinRes struct {
+	Version int64 `json:"version"` // 入群申请版本号
 }
 
 type GroupMemberAddReq struct {
@@ -125,6 +130,7 @@ type GroupMemberAddReq struct {
 }
 
 type GroupMemberAddRes struct {
+	Version int64 `json:"version"` // 群成员新版本号
 }
 
 type GroupMemberListItem struct {
@@ -156,6 +162,7 @@ type GroupMemberRemoveReq struct {
 }
 
 type GroupMemberRemoveRes struct {
+	Version int64 `json:"version"` // 群成员新版本号
 }
 
 type GroupMemberSyncItem struct {
@@ -204,6 +211,7 @@ type GroupQuitReq struct {
 }
 
 type GroupQuitRes struct {
+	Version int64 `json:"version"` // 群成员新版本号
 }
 
 type GroupSearchItem struct {
@@ -219,6 +227,8 @@ type GroupSearchReq struct {
 	UserID  string `header:"Beaver-User-Id"` // 当前用户ID
 	Keyword string `form:"keyword"`          // 搜索关键词（用户ID或邮箱）
 	Type    string `form:"type,optional"`    // 搜索类型：userId(用户ID)/email(邮箱)，默认email
+	Page    int    `form:"page,optional"`    // 页码，可选，默认1
+	Limit   int    `form:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type GroupSearchRes struct {
@@ -266,6 +276,7 @@ type TransferOwnerReq struct {
 }
 
 type TransferOwnerRes struct {
+	Version int64 `json:"version"` // 群成员新版本号
 }
 
 type UpdateGroupInfoReq struct {
@@ -278,6 +289,7 @@ type UpdateGroupInfoReq struct {
 }
 
 type UpdateGroupInfoRes struct {
+	Version int64 `json:"version"` // 群资料新版本号
 }
 
 type UpdateMemberRoleReq struct {
@@ -288,4 +300,5 @@ type UpdateMemberRoleReq struct {
 }
 
 type UpdateMemberRoleRes struct {
+	Version int64 `json:"version"` // 群成员新版本号
 }

@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
@@ -124,7 +125,16 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 		return nil, err
 	}
 
-	resp = &types.GroupJoinRequestHandleRes{}
+	// 获取该群入群申请的版本号（按群独立递增）
+	requestVersion := l.svcCtx.VersionGen.GetNextVersion("group_join_requests", "group_id", request.GroupID)
+	if requestVersion == -1 {
+		l.Errorf("获取入群申请版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
+	resp = &types.GroupJoinRequestHandleRes{
+		Version: requestVersion,
+	}
 
 	statusText := "拒绝"
 	if req.Status == 1 {

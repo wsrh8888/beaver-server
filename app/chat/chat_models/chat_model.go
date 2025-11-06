@@ -3,7 +3,6 @@ package chat_models
 import (
 	"beaver/common/models"
 	"beaver/common/models/ctype"
-	"fmt"
 )
 
 type ChatMessage struct {
@@ -17,11 +16,12 @@ type ChatMessage struct {
 	TargetMessageID  string        `gorm:"size:64;index" json:"targetMessageId,omitempty"` // 针对的原消息ID（撤回/删除/编辑事件）
 	MsgPreview       string        `gorm:"size:256" json:"msgPreview"`                     // 消息预览文本
 	Msg              *ctype.Msg    `gorm:"type:json" json:"msg"`                           // 消息内容（JSON）
+
+	// 数据状态管理 - 处理违规内容等情况
+	Status int8 `gorm:"not null;default:1;index" json:"status"` // 消息状态：1=正常 2=违规待审核 3=违规已屏蔽 4=已删除
 }
 
 func (chat ChatMessage) MsgPreviewMethod() string {
-	fmt.Println("chat.Msg.Type", chat.Msg.Type)
-
 	switch chat.Msg.Type {
 	case 1:
 		return chat.Msg.TextMsg.Content

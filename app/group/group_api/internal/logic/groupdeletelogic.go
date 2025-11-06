@@ -36,6 +36,13 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		return nil, errors.New("只有群主才可以删除群组")
 	}
 
+	// 获取该群的版本号（独立递增）
+	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+	if groupVersion == -1 {
+		l.Logger.Errorf("获取群组版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	//  群成员要删掉
 	var memberList []group_models.GroupMemberModel
 	err = l.svcCtx.DB.Find(&memberList, "group_id = ?", req.GroupID).Delete(&memberList).Error
@@ -50,5 +57,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		return nil, errors.New("删除群组失败")
 	}
 
-	return
+	return &types.GroupDeleteRes{
+		Version: groupVersion,
+	}, nil
 }

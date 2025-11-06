@@ -31,6 +31,8 @@ func NewGroupMemberAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gr
 }
 
 func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp *types.GroupMemberAddRes, err error) {
+	var memberVersion int64
+
 	// 群成员邀请好友，isInvite 为true
 	var member group_models.GroupMemberModel
 	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
@@ -53,7 +55,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 	for _, memberID := range req.UserIds {
 		// 获取该群成员的版本号（按群独立递增）
-		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID, nil)
+		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 		if memberVersion == -1 {
 			l.Logger.Errorf("获取群成员版本号失败")
 			return nil, errors.New("获取版本号失败")
@@ -137,7 +139,9 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	}()
 
 	// 创建并返回响应
-	resp = &types.GroupMemberAddRes{}
+	resp = &types.GroupMemberAddRes{
+		Version: memberVersion,
+	}
 
 	l.Logger.Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)
 	return resp, nil

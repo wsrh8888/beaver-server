@@ -30,6 +30,8 @@ func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 }
 
 func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoRes, err error) {
+	var newVersion int64
+
 	// 检查操作者权限
 	var member group_models.GroupMemberModel
 	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
@@ -55,7 +57,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 	// 执行更新
 	if len(updateFields) > 0 {
 		// 获取该群的新版本号（独立递增）
-		newVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID, nil)
+		newVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 		if newVersion == -1 {
 			l.Logger.Errorf("获取群组版本号失败")
 			return nil, errors.New("获取版本号失败")
@@ -101,5 +103,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		}
 	}()
 
-	return &types.UpdateGroupInfoRes{}, nil
+	return &types.UpdateGroupInfoRes{
+		Version: newVersion,
+	}, nil
 }

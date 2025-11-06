@@ -54,7 +54,7 @@ type GetChatMessageDetailRes struct {
 	MsgType          int    `json:"msgType"`
 	MsgPreview       string `json:"msgPreview"`
 	MsgContent       string `json:"msgContent"`
-	IsDeleted        bool   `json:"isDeleted"`
+	Status           int8   `json:"status"`     // 消息状态：1=正常 2=违规待审核 3=违规已屏蔽 4=已删除
 	CreateTime       string `json:"createTime"`
 	UpdateTime       string `json:"updateTime"`
 }
@@ -65,7 +65,7 @@ type GetChatMessageListReq struct {
 	ConversationID string `form:"conversationId,optional"` // 按会话ID筛选
 	SendUserID     string `form:"sendUserId,optional"`     // 按发送者ID筛选
 	MsgType        int    `form:"msgType,optional"`        // 按消息类型筛选
-	IsDeleted      bool   `form:"isDeleted,optional"`      // 按删除状态筛选
+	Status         int    `form:"status,optional"`         // 按消息状态筛选：0=全部 1=正常 2=违规待审核 3=违规已屏蔽 4=已删除
 	StartTime      string `form:"startTime,optional"`
 	EndTime        string `form:"endTime,optional"`
 }
