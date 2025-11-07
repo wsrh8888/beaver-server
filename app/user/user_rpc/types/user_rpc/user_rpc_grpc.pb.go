@@ -22,8 +22,9 @@ const (
 	User_UserCreate_FullMethodName   = "/user_rpc.user/UserCreate"
 	User_UserInfo_FullMethodName     = "/user_rpc.user/UserInfo"
 	User_IsFriend_FullMethodName     = "/user_rpc.user/IsFriend"
-	User_UserListInfo_FullMethodName = "/user_rpc.user/UserListInfo"
 	User_SearchUser_FullMethodName   = "/user_rpc.user/SearchUser"
+	User_UserListInfo_FullMethodName = "/user_rpc.user/UserListInfo"
+	User_UserVersions_FullMethodName = "/user_rpc.user/UserVersions"
 )
 
 // UserClient is the client API for User service.
@@ -33,8 +34,9 @@ type UserClient interface {
 	UserCreate(ctx context.Context, in *UserCreateReq, opts ...grpc.CallOption) (*UserCreateRes, error)
 	UserInfo(ctx context.Context, in *UserInfoReq, opts ...grpc.CallOption) (*UserInfoRes, error)
 	IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendRes, error)
-	UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
 	SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserRes, error)
+	UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
+	UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error)
 }
 
 type userClient struct {
@@ -75,6 +77,16 @@ func (c *userClient) IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc
 	return out, nil
 }
 
+func (c *userClient) SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchUserRes)
+	err := c.cc.Invoke(ctx, User_SearchUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userClient) UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UserListInfoRes)
@@ -85,10 +97,10 @@ func (c *userClient) UserListInfo(ctx context.Context, in *UserListInfoReq, opts
 	return out, nil
 }
 
-func (c *userClient) SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserRes, error) {
+func (c *userClient) UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SearchUserRes)
-	err := c.cc.Invoke(ctx, User_SearchUser_FullMethodName, in, out, cOpts...)
+	out := new(UserVersionsRes)
+	err := c.cc.Invoke(ctx, User_UserVersions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +114,9 @@ type UserServer interface {
 	UserCreate(context.Context, *UserCreateReq) (*UserCreateRes, error)
 	UserInfo(context.Context, *UserInfoReq) (*UserInfoRes, error)
 	IsFriend(context.Context, *IsFriendReq) (*IsFriendRes, error)
-	UserListInfo(context.Context, *UserListInfoReq) (*UserListInfoRes, error)
 	SearchUser(context.Context, *SearchUserReq) (*SearchUserRes, error)
+	UserListInfo(context.Context, *UserListInfoReq) (*UserListInfoRes, error)
+	UserVersions(context.Context, *UserVersionsReq) (*UserVersionsRes, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -123,11 +136,14 @@ func (UnimplementedUserServer) UserInfo(context.Context, *UserInfoReq) (*UserInf
 func (UnimplementedUserServer) IsFriend(context.Context, *IsFriendReq) (*IsFriendRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsFriend not implemented")
 }
+func (UnimplementedUserServer) SearchUser(context.Context, *SearchUserReq) (*SearchUserRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
+}
 func (UnimplementedUserServer) UserListInfo(context.Context, *UserListInfoReq) (*UserListInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserListInfo not implemented")
 }
-func (UnimplementedUserServer) SearchUser(context.Context, *SearchUserReq) (*SearchUserRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
+func (UnimplementedUserServer) UserVersions(context.Context, *UserVersionsReq) (*UserVersionsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserVersions not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 func (UnimplementedUserServer) testEmbeddedByValue()              {}
@@ -204,6 +220,24 @@ func _User_IsFriend_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_SearchUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchUserReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).SearchUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_SearchUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).SearchUser(ctx, req.(*SearchUserReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _User_UserListInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserListInfoReq)
 	if err := dec(in); err != nil {
@@ -222,20 +256,20 @@ func _User_UserListInfo_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_SearchUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchUserReq)
+func _User_UserVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserVersionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).SearchUser(ctx, in)
+		return srv.(UserServer).UserVersions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: User_SearchUser_FullMethodName,
+		FullMethod: User_UserVersions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).SearchUser(ctx, req.(*SearchUserReq))
+		return srv.(UserServer).UserVersions(ctx, req.(*UserVersionsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -260,12 +294,16 @@ var User_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _User_IsFriend_Handler,
 		},
 		{
+			MethodName: "SearchUser",
+			Handler:    _User_SearchUser_Handler,
+		},
+		{
 			MethodName: "UserListInfo",
 			Handler:    _User_UserListInfo_Handler,
 		},
 		{
-			MethodName: "SearchUser",
-			Handler:    _User_SearchUser_Handler,
+			MethodName: "UserVersions",
+			Handler:    _User_UserVersions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

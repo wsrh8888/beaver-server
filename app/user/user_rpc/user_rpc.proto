@@ -41,7 +41,19 @@ message UserInfo {
   int64 version = 4;    // 用户版本号，用于同步
   string email = 5;
   string abstract = 6;
+}
 
+message UserVersionInfo {
+  string user_id = 1;
+  int64 version = 2;
+}
+
+message UserVersionsReq {
+  repeated string user_ids = 1;
+}
+
+message UserVersionsRes {
+  map<string, int64> user_versions = 1; // user_id -> version
 }
 
 message UserListInfoReq {
@@ -66,8 +78,10 @@ service user {
   rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
   rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
   rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友
-  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息，支持增量同步
   rpc SearchUser(SearchUserReq) returns(SearchUserRes); // 根据邮箱或用户ID搜索用户
+  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息
+  rpc UserVersions(UserVersionsReq) returns(UserVersionsRes); // 批量获取用户版本信息
+
 }
 
 // goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

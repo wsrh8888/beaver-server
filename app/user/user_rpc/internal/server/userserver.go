@@ -38,12 +38,17 @@ func (s *UserServer) IsFriend(ctx context.Context, in *user_rpc.IsFriendReq) (*u
 	return l.IsFriend(in)
 }
 
+func (s *UserServer) SearchUser(ctx context.Context, in *user_rpc.SearchUserReq) (*user_rpc.SearchUserRes, error) {
+	l := logic.NewSearchUserLogic(ctx, s.svcCtx)
+	return l.SearchUser(in)
+}
+
 func (s *UserServer) UserListInfo(ctx context.Context, in *user_rpc.UserListInfoReq) (*user_rpc.UserListInfoRes, error) {
 	l := logic.NewUserListInfoLogic(ctx, s.svcCtx)
 	return l.UserListInfo(in)
 }
 
-func (s *UserServer) SearchUser(ctx context.Context, in *user_rpc.SearchUserReq) (*user_rpc.SearchUserRes, error) {
-	l := logic.NewSearchUserLogic(ctx, s.svcCtx)
-	return l.SearchUser(in)
+func (s *UserServer) UserVersions(ctx context.Context, in *user_rpc.UserVersionsReq) (*user_rpc.UserVersionsRes, error) {
+	l := logic.NewUserVersionsLogic(ctx, s.svcCtx)
+	return l.UserVersions(in)
 }
