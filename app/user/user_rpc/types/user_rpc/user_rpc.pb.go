@@ -409,6 +409,146 @@ func (x *UserInfo) GetAbstract() string {
 	return ""
 }
 
+type UserVersionInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserVersionInfo) Reset() {
+	*x = UserVersionInfo{}
+	mi := &file_user_rpc_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserVersionInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserVersionInfo) ProtoMessage() {}
+
+func (x *UserVersionInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserVersionInfo.ProtoReflect.Descriptor instead.
+func (*UserVersionInfo) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *UserVersionInfo) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserVersionInfo) GetVersion() int64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+type UserVersionsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserIds       []string               `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserVersionsReq) Reset() {
+	*x = UserVersionsReq{}
+	mi := &file_user_rpc_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserVersionsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserVersionsReq) ProtoMessage() {}
+
+func (x *UserVersionsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserVersionsReq.ProtoReflect.Descriptor instead.
+func (*UserVersionsReq) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UserVersionsReq) GetUserIds() []string {
+	if x != nil {
+		return x.UserIds
+	}
+	return nil
+}
+
+type UserVersionsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserVersions  map[string]int64       `protobuf:"bytes,1,rep,name=user_versions,json=userVersions,proto3" json:"user_versions,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // user_id -> version
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserVersionsRes) Reset() {
+	*x = UserVersionsRes{}
+	mi := &file_user_rpc_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserVersionsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserVersionsRes) ProtoMessage() {}
+
+func (x *UserVersionsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserVersionsRes.ProtoReflect.Descriptor instead.
+func (*UserVersionsRes) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UserVersionsRes) GetUserVersions() map[string]int64 {
+	if x != nil {
+		return x.UserVersions
+	}
+	return nil
+}
+
 type UserListInfoReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	UserIdList     []string               `protobuf:"bytes,1,rep,name=user_id_list,json=userIdList,proto3" json:"user_id_list,omitempty"`
@@ -419,7 +559,7 @@ type UserListInfoReq struct {
 
 func (x *UserListInfoReq) Reset() {
 	*x = UserListInfoReq{}
-	mi := &file_user_rpc_proto_msgTypes[7]
+	mi := &file_user_rpc_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -431,7 +571,7 @@ func (x *UserListInfoReq) String() string {
 func (*UserListInfoReq) ProtoMessage() {}
 
 func (x *UserListInfoReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[7]
+	mi := &file_user_rpc_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -444,7 +584,7 @@ func (x *UserListInfoReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserListInfoReq.ProtoReflect.Descriptor instead.
 func (*UserListInfoReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{7}
+	return file_user_rpc_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UserListInfoReq) GetUserIdList() []string {
@@ -470,7 +610,7 @@ type UserListInfoRes struct {
 
 func (x *UserListInfoRes) Reset() {
 	*x = UserListInfoRes{}
-	mi := &file_user_rpc_proto_msgTypes[8]
+	mi := &file_user_rpc_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -482,7 +622,7 @@ func (x *UserListInfoRes) String() string {
 func (*UserListInfoRes) ProtoMessage() {}
 
 func (x *UserListInfoRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[8]
+	mi := &file_user_rpc_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -495,7 +635,7 @@ func (x *UserListInfoRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserListInfoRes.ProtoReflect.Descriptor instead.
 func (*UserListInfoRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{8}
+	return file_user_rpc_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UserListInfoRes) GetUserInfo() map[string]*UserInfo {
@@ -515,7 +655,7 @@ type SearchUserReq struct {
 
 func (x *SearchUserReq) Reset() {
 	*x = SearchUserReq{}
-	mi := &file_user_rpc_proto_msgTypes[9]
+	mi := &file_user_rpc_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -527,7 +667,7 @@ func (x *SearchUserReq) String() string {
 func (*SearchUserReq) ProtoMessage() {}
 
 func (x *SearchUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[9]
+	mi := &file_user_rpc_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -540,7 +680,7 @@ func (x *SearchUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchUserReq.ProtoReflect.Descriptor instead.
 func (*SearchUserReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{9}
+	return file_user_rpc_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SearchUserReq) GetKeyword() string {
@@ -566,7 +706,7 @@ type SearchUserRes struct {
 
 func (x *SearchUserRes) Reset() {
 	*x = SearchUserRes{}
-	mi := &file_user_rpc_proto_msgTypes[10]
+	mi := &file_user_rpc_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -578,7 +718,7 @@ func (x *SearchUserRes) String() string {
 func (*SearchUserRes) ProtoMessage() {}
 
 func (x *SearchUserRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[10]
+	mi := &file_user_rpc_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -591,7 +731,7 @@ func (x *SearchUserRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchUserRes.ProtoReflect.Descriptor instead.
 func (*SearchUserRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{10}
+	return file_user_rpc_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SearchUserRes) GetUserInfo() *UserInfo {
@@ -629,7 +769,17 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\x03R\aversion\x12\x14\n" +
 	"\x05email\x18\x05 \x01(\tR\x05email\x12\x1a\n" +
-	"\babstract\x18\x06 \x01(\tR\babstract\"\\\n" +
+	"\babstract\x18\x06 \x01(\tR\babstract\"D\n" +
+	"\x0fUserVersionInfo\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\",\n" +
+	"\x0fUserVersionsReq\x12\x19\n" +
+	"\buser_ids\x18\x01 \x03(\tR\auserIds\"\xa4\x01\n" +
+	"\x0fUserVersionsRes\x12P\n" +
+	"\ruser_versions\x18\x01 \x03(\v2+.user_rpc.UserVersionsRes.UserVersionsEntryR\fuserVersions\x1a?\n" +
+	"\x11UserVersionsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\\\n" +
 	"\x0fUserListInfoReq\x12 \n" +
 	"\fuser_id_list\x18\x01 \x03(\tR\n" +
 	"userIdList\x12'\n" +
@@ -643,15 +793,16 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\akeyword\x18\x01 \x01(\tR\akeyword\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\"@\n" +
 	"\rSearchUserRes\x12/\n" +
-	"\tuser_info\x18\x01 \x01(\v2\x12.user_rpc.UserInfoR\buserInfo2\xc0\x02\n" +
+	"\tuser_info\x18\x01 \x01(\v2\x12.user_rpc.UserInfoR\buserInfo2\x86\x03\n" +
 	"\x04user\x12>\n" +
 	"\n" +
 	"UserCreate\x12\x17.user_rpc.UserCreateReq\x1a\x17.user_rpc.UserCreateRes\x128\n" +
 	"\bUserInfo\x12\x15.user_rpc.UserInfoReq\x1a\x15.user_rpc.UserInfoRes\x128\n" +
-	"\bIsFriend\x12\x15.user_rpc.IsFriendReq\x1a\x15.user_rpc.IsFriendRes\x12D\n" +
-	"\fUserListInfo\x12\x19.user_rpc.UserListInfoReq\x1a\x19.user_rpc.UserListInfoRes\x12>\n" +
+	"\bIsFriend\x12\x15.user_rpc.IsFriendReq\x1a\x15.user_rpc.IsFriendRes\x12>\n" +
 	"\n" +
-	"SearchUser\x12\x17.user_rpc.SearchUserReq\x1a\x17.user_rpc.SearchUserResB\fZ\n" +
+	"SearchUser\x12\x17.user_rpc.SearchUserReq\x1a\x17.user_rpc.SearchUserRes\x12D\n" +
+	"\fUserListInfo\x12\x19.user_rpc.UserListInfoReq\x1a\x19.user_rpc.UserListInfoRes\x12D\n" +
+	"\fUserVersions\x12\x19.user_rpc.UserVersionsReq\x1a\x19.user_rpc.UserVersionsResB\fZ\n" +
 	"./user_rpcb\x06proto3"
 
 var (
@@ -666,7 +817,7 @@ func file_user_rpc_proto_rawDescGZIP() []byte {
 	return file_user_rpc_proto_rawDescData
 }
 
-var file_user_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_user_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_user_rpc_proto_goTypes = []any{
 	(*UserCreateReq)(nil),   // 0: user_rpc.UserCreateReq
 	(*UserCreateRes)(nil),   // 1: user_rpc.UserCreateRes
@@ -675,32 +826,39 @@ var file_user_rpc_proto_goTypes = []any{
 	(*IsFriendReq)(nil),     // 4: user_rpc.IsFriendReq
 	(*IsFriendRes)(nil),     // 5: user_rpc.IsFriendRes
 	(*UserInfo)(nil),        // 6: user_rpc.UserInfo
-	(*UserListInfoReq)(nil), // 7: user_rpc.UserListInfoReq
-	(*UserListInfoRes)(nil), // 8: user_rpc.UserListInfoRes
-	(*SearchUserReq)(nil),   // 9: user_rpc.SearchUserReq
-	(*SearchUserRes)(nil),   // 10: user_rpc.SearchUserRes
-	nil,                     // 11: user_rpc.UserListInfoRes.UserInfoEntry
+	(*UserVersionInfo)(nil), // 7: user_rpc.UserVersionInfo
+	(*UserVersionsReq)(nil), // 8: user_rpc.UserVersionsReq
+	(*UserVersionsRes)(nil), // 9: user_rpc.UserVersionsRes
+	(*UserListInfoReq)(nil), // 10: user_rpc.UserListInfoReq
+	(*UserListInfoRes)(nil), // 11: user_rpc.UserListInfoRes
+	(*SearchUserReq)(nil),   // 12: user_rpc.SearchUserReq
+	(*SearchUserRes)(nil),   // 13: user_rpc.SearchUserRes
+	nil,                     // 14: user_rpc.UserVersionsRes.UserVersionsEntry
+	nil,                     // 15: user_rpc.UserListInfoRes.UserInfoEntry
 }
 var file_user_rpc_proto_depIdxs = []int32{
 	6,  // 0: user_rpc.UserInfoRes.user_info:type_name -> user_rpc.UserInfo
-	11, // 1: user_rpc.UserListInfoRes.user_info:type_name -> user_rpc.UserListInfoRes.UserInfoEntry
-	6,  // 2: user_rpc.SearchUserRes.user_info:type_name -> user_rpc.UserInfo
-	6,  // 3: user_rpc.UserListInfoRes.UserInfoEntry.value:type_name -> user_rpc.UserInfo
-	0,  // 4: user_rpc.user.UserCreate:input_type -> user_rpc.UserCreateReq
-	2,  // 5: user_rpc.user.UserInfo:input_type -> user_rpc.UserInfoReq
-	4,  // 6: user_rpc.user.IsFriend:input_type -> user_rpc.IsFriendReq
-	7,  // 7: user_rpc.user.UserListInfo:input_type -> user_rpc.UserListInfoReq
-	9,  // 8: user_rpc.user.SearchUser:input_type -> user_rpc.SearchUserReq
-	1,  // 9: user_rpc.user.UserCreate:output_type -> user_rpc.UserCreateRes
-	3,  // 10: user_rpc.user.UserInfo:output_type -> user_rpc.UserInfoRes
-	5,  // 11: user_rpc.user.IsFriend:output_type -> user_rpc.IsFriendRes
-	8,  // 12: user_rpc.user.UserListInfo:output_type -> user_rpc.UserListInfoRes
-	10, // 13: user_rpc.user.SearchUser:output_type -> user_rpc.SearchUserRes
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	14, // 1: user_rpc.UserVersionsRes.user_versions:type_name -> user_rpc.UserVersionsRes.UserVersionsEntry
+	15, // 2: user_rpc.UserListInfoRes.user_info:type_name -> user_rpc.UserListInfoRes.UserInfoEntry
+	6,  // 3: user_rpc.SearchUserRes.user_info:type_name -> user_rpc.UserInfo
+	6,  // 4: user_rpc.UserListInfoRes.UserInfoEntry.value:type_name -> user_rpc.UserInfo
+	0,  // 5: user_rpc.user.UserCreate:input_type -> user_rpc.UserCreateReq
+	2,  // 6: user_rpc.user.UserInfo:input_type -> user_rpc.UserInfoReq
+	4,  // 7: user_rpc.user.IsFriend:input_type -> user_rpc.IsFriendReq
+	12, // 8: user_rpc.user.SearchUser:input_type -> user_rpc.SearchUserReq
+	10, // 9: user_rpc.user.UserListInfo:input_type -> user_rpc.UserListInfoReq
+	8,  // 10: user_rpc.user.UserVersions:input_type -> user_rpc.UserVersionsReq
+	1,  // 11: user_rpc.user.UserCreate:output_type -> user_rpc.UserCreateRes
+	3,  // 12: user_rpc.user.UserInfo:output_type -> user_rpc.UserInfoRes
+	5,  // 13: user_rpc.user.IsFriend:output_type -> user_rpc.IsFriendRes
+	13, // 14: user_rpc.user.SearchUser:output_type -> user_rpc.SearchUserRes
+	11, // 15: user_rpc.user.UserListInfo:output_type -> user_rpc.UserListInfoRes
+	9,  // 16: user_rpc.user.UserVersions:output_type -> user_rpc.UserVersionsRes
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_user_rpc_proto_init() }
@@ -714,7 +872,7 @@ func file_user_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_rpc_proto_rawDesc), len(file_user_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

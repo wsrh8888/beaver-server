@@ -44,6 +44,22 @@ type FriendSyncRes struct {
 	NextVersion int64            `json:"nextVersion"` // 下次同步的起始版本号
 }
 
+type FriendUserVersionItem struct {
+	UserID  string `json:"userId"`  // 好友用户ID
+	Version int64  `json:"version"` // 好友用户资料版本号
+}
+
+type FriendUserVersionsReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID
+	Offset int    `json:"offset,optional"`  // 分页偏移量，默认0
+	Limit  int    `json:"limit,optional"`   // 分页大小，默认100
+}
+
+type FriendUserVersionsRes struct {
+	UserVersions []FriendUserVersionItem `json:"userVersions"` // 好友用户版本信息列表
+	Total        int                     `json:"total"`        // 总好友数
+}
+
 type FriendValidInfo struct {
 	UserID    string `json:"userId"`    // 用户ID
 	Nickname  string `json:"nickname"`  // 用户昵称
