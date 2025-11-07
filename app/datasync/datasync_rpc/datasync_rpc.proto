@@ -17,26 +17,12 @@ message GetSyncCursorRes {
   int64 serverLatest = 1;  // 服务器当前该数据类型的最新 seq/version（来自各业务RPC，如 chat_rpc）
 }
 
-// 更新同步游标请求
-message UpdateSyncCursorReq {
-  string userId = 1;         // 用户ID
-  string deviceId = 2;      // 设备ID
-  string dataType = 3;       // 数据类型
-  int64 lastSeq = 4;         // 最后同步的序列号（消息用）或版本号（基础数据用）
-  string conversationId = 5; // 会话ID（仅聊天消息使用）
-}
-
-// 更新同步游标响应
-message UpdateSyncCursorRes {
-}
 
 
 // 数据同步服务
 service Datasync {
   // 获取同步游标
   rpc GetSyncCursor(GetSyncCursorReq) returns(GetSyncCursorRes);
-  // 更新同步游标
-  rpc UpdateSyncCursor(UpdateSyncCursorReq) returns(UpdateSyncCursorRes);
 }
 
 

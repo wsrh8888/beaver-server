@@ -21,8 +21,8 @@ message UserInfoReq {
 }
 
 message UserInfoRes {
-  bytes data = 1;  //用户配置的json
- }
+  UserInfo user_info = 1;  // 用户信息
+}
  
 
  message IsFriendReq {
@@ -35,25 +35,39 @@ message IsFriendRes {
 }
 
 message UserInfo {
-  string nick_name = 1;
-  string avatar = 2;
+  string user_id = 1;   // 用户ID
+  string nick_name = 2;
+  string avatar = 3;
+  int64 version = 4;    // 用户版本号，用于同步
+  string email = 5;
+  string abstract = 6;
 
 }
 
 message UserListInfoReq {
   repeated string user_id_list = 1;
+  int64 since_timestamp = 2; // 可选：从这个时间戳之后查询更新的用户，不传则返回所有
 }
 
 message UserListInfoRes {
   map<string, UserInfo> user_info = 1; //用户配置的json
 }
 
+message SearchUserReq {
+  string keyword = 1; // 搜索关键词（邮箱或用户ID）
+  string type = 2;    // 搜索类型：email 或 userId
+}
+
+message SearchUserRes {
+  UserInfo user_info = 1; // 用户信息
+}
+
 service user {
   rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
   rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
   rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友
-  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息
-
+  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息，支持增量同步
+  rpc SearchUser(SearchUserReq) returns(SearchUserRes); // 根据邮箱或用户ID搜索用户
 }
 
 // goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

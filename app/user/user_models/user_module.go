@@ -16,5 +16,5 @@ type UserModel struct {
 	Status   int8   `gorm:"default:1"`                                             // 1:正常 2:禁用 3:删除
 	Gender   int8   `gorm:"default:3"`                                             // 1:男 2:女 3:未知
 	Source   int32  // 注册来源
-	Version  int64  `gorm:"not null;default:0;index"` // 版本号（user表全局递增）
+	Version  int64  `gorm:"not null;default:0;index"` // 版本号（用户独立递增）
 }

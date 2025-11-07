@@ -62,15 +62,6 @@ type UserInfoRes struct {
 	Gender   int8   `json:"gender"`         // 用户性别：1-男 2-女 0-未知
 }
 
-type UserSyncByIdsReq struct {
-	UserIDs []string `json:"userIds"`        // 要同步的用户ID列表
-	Limit   int      `json:"limit,optional"` // 限制数量，默认100
-}
-
-type UserSyncByIdsRes struct {
-	Users []UserSyncItem `json:"users"` // 用户列表
-}
-
 type UserSyncItem struct {
 	UserID   string `json:"userId"`   // 用户ID
 	Nickname string `json:"nickname"` // 用户昵称
@@ -86,14 +77,15 @@ type UserSyncItem struct {
 }
 
 type UserSyncReq struct {
-	UserID      string `header:"Beaver-User-Id"`
-	FromVersion int64  `json:"fromVersion"`    // 起始版本号
-	ToVersion   int64  `json:"toVersion"`      // 结束版本号
-	Limit       int    `json:"limit,optional"` // 限制数量，默认100
+	UserID       string        `header:"Beaver-User-Id"`
+	UserVersions []UserVersion `json:"userVersions"` // 用户版本号数组
 }
 
 type UserSyncRes struct {
-	Users       []UserSyncItem `json:"users"`       // 用户列表
-	HasMore     bool           `json:"hasMore"`     // 是否还有更多数据
-	NextVersion int64          `json:"nextVersion"` // 下次同步的起始版本号
+	Users []UserSyncItem `json:"users"` // 用户列表
+}
+
+type UserVersion struct {
+	UserID  string `json:"userId"`  // 用户ID
+	Version int64  `json:"version"` // 该用户的最后同步版本号
 }

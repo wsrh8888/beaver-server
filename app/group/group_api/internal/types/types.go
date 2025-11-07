@@ -6,7 +6,8 @@ type GetUserGroupVersionsReq struct {
 }
 
 type GetUserGroupVersionsRes struct {
-	Groups []GroupVersionItem `json:"groups"` // 用户加入的所有群组版本信息
+	Groups          []GroupVersionItem `json:"groups"`          // 用户加入的所有群组版本信息
+	ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
 type GroupCreateReq struct {

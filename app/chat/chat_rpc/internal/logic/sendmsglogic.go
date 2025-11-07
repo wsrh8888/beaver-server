@@ -194,22 +194,12 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 				Avatar:   "",
 			}
 		} else {
-			// 解析用户信息（假设UserInfo是JSON格式）
-			var userInfo user_rpc.UserInfo
-			err = json.Unmarshal(userInfoResp.Data, &userInfo)
-			if err != nil {
-				l.Logger.Errorf("解析用户信息失败: %v", err)
-				sender = &chat_rpc.Sender{
-					UserId:   sendUserID,
-					Nickname: "未知用户",
-					Avatar:   "",
-				}
-			} else {
-				sender = &chat_rpc.Sender{
-					UserId:   sendUserID,
-					Nickname: userInfo.NickName,
-					Avatar:   userInfo.Avatar,
-				}
+			// 直接使用结构化用户信息
+			userInfo := userInfoResp.UserInfo
+			sender = &chat_rpc.Sender{
+				UserId:   sendUserID,
+				Nickname: userInfo.NickName,
+				Avatar:   userInfo.Avatar,
 			}
 		}
 	} else {

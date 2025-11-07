@@ -2,13 +2,11 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,21 +27,15 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 
 func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRes, err error) {
 	fmt.Println("获取用户的基础信息, UserID: %v,\n", req.UserID)
-	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
-		UserID: req.UserID})
-	if err != nil {
-		fmt.Printf("[ERROR] RPC call failed, UserID: %v, error: %v\n", req.UserID, err)
 
-		return nil, err
-	}
+	// 直接从数据库查询，避免RPC调用自身服务
 	var user user_models.UserModel
-
-	err = json.Unmarshal(res.Data, &user)
+	err = l.svcCtx.DB.Take(&user, "uuid = ?", req.UserID).Error
 	if err != nil {
-		fmt.Printf("[ERROR] JSON unmarshal failed, data: %s, error: %v\n", string(res.Data), err)
-
+		fmt.Printf("[ERROR] 查询用户失败, UserID: %v, error: %v\n", req.UserID, err)
 		return nil, err
 	}
+
 	resp = &types.UserInfoRes{
 		UserID:   user.UUID,
 		NickName: user.NickName,
@@ -54,5 +46,5 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		Gender:   user.Gender,
 	}
 
-	return
+	return resp, nil
 }

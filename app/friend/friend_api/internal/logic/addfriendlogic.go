@@ -7,7 +7,7 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -35,9 +35,10 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errors.New("已经是好友了")
 	}
 
-	// 检查目标用户是否存在
-	var userInfo user_models.UserModel
-	err = l.svcCtx.DB.Take(&userInfo, "uuid = ?", req.FriendID).Error
+	// 检查目标用户是否存在（通过RPC）
+	_, err = l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		UserID: req.FriendID,
+	})
 	if err != nil {
 		l.Logger.Errorf("目标用户不存在: friendID=%s, error=%v", req.FriendID, err)
 		return nil, errors.New("用户不存在")

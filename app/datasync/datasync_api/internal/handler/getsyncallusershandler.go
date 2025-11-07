@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func updateSyncCursorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func getSyncAllUsersHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateSyncCursorReq
+		var req types.GetSyncAllUsersReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewUpdateSyncCursorLogic(r.Context(), svcCtx)
-		resp, err := l.UpdateSyncCursor(&req)
+		l := logic.NewGetSyncAllUsersLogic(r.Context(), svcCtx)
+		resp, err := l.GetSyncAllUsers(&req)
 		response.Response(r, w, resp, err)
 	}
 }

@@ -19,8 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Datasync_GetSyncCursor_FullMethodName    = "/datasync_rpc.Datasync/GetSyncCursor"
-	Datasync_UpdateSyncCursor_FullMethodName = "/datasync_rpc.Datasync/UpdateSyncCursor"
+	Datasync_GetSyncCursor_FullMethodName = "/datasync_rpc.Datasync/GetSyncCursor"
 )
 
 // DatasyncClient is the client API for Datasync service.
@@ -31,8 +30,6 @@ const (
 type DatasyncClient interface {
 	// 获取同步游标
 	GetSyncCursor(ctx context.Context, in *GetSyncCursorReq, opts ...grpc.CallOption) (*GetSyncCursorRes, error)
-	// 更新同步游标
-	UpdateSyncCursor(ctx context.Context, in *UpdateSyncCursorReq, opts ...grpc.CallOption) (*UpdateSyncCursorRes, error)
 }
 
 type datasyncClient struct {
@@ -53,16 +50,6 @@ func (c *datasyncClient) GetSyncCursor(ctx context.Context, in *GetSyncCursorReq
 	return out, nil
 }
 
-func (c *datasyncClient) UpdateSyncCursor(ctx context.Context, in *UpdateSyncCursorReq, opts ...grpc.CallOption) (*UpdateSyncCursorRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateSyncCursorRes)
-	err := c.cc.Invoke(ctx, Datasync_UpdateSyncCursor_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // DatasyncServer is the server API for Datasync service.
 // All implementations must embed UnimplementedDatasyncServer
 // for forward compatibility.
@@ -71,8 +58,6 @@ func (c *datasyncClient) UpdateSyncCursor(ctx context.Context, in *UpdateSyncCur
 type DatasyncServer interface {
 	// 获取同步游标
 	GetSyncCursor(context.Context, *GetSyncCursorReq) (*GetSyncCursorRes, error)
-	// 更新同步游标
-	UpdateSyncCursor(context.Context, *UpdateSyncCursorReq) (*UpdateSyncCursorRes, error)
 	mustEmbedUnimplementedDatasyncServer()
 }
 
@@ -85,9 +70,6 @@ type UnimplementedDatasyncServer struct{}
 
 func (UnimplementedDatasyncServer) GetSyncCursor(context.Context, *GetSyncCursorReq) (*GetSyncCursorRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSyncCursor not implemented")
-}
-func (UnimplementedDatasyncServer) UpdateSyncCursor(context.Context, *UpdateSyncCursorReq) (*UpdateSyncCursorRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateSyncCursor not implemented")
 }
 func (UnimplementedDatasyncServer) mustEmbedUnimplementedDatasyncServer() {}
 func (UnimplementedDatasyncServer) testEmbeddedByValue()                  {}
@@ -128,24 +110,6 @@ func _Datasync_GetSyncCursor_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Datasync_UpdateSyncCursor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateSyncCursorReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DatasyncServer).UpdateSyncCursor(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Datasync_UpdateSyncCursor_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DatasyncServer).UpdateSyncCursor(ctx, req.(*UpdateSyncCursorReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Datasync_ServiceDesc is the grpc.ServiceDesc for Datasync service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,10 +120,6 @@ var Datasync_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSyncCursor",
 			Handler:    _Datasync_GetSyncCursor_Handler,
-		},
-		{
-			MethodName: "UpdateSyncCursor",
-			Handler:    _Datasync_UpdateSyncCursor_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

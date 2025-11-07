@@ -28,9 +28,3 @@ func (s *DatasyncServer) GetSyncCursor(ctx context.Context, in *datasync_rpc.Get
 	l := logic.NewGetSyncCursorLogic(ctx, s.svcCtx)
 	return l.GetSyncCursor(in)
 }
-
-// 更新同步游标
-func (s *DatasyncServer) UpdateSyncCursor(ctx context.Context, in *datasync_rpc.UpdateSyncCursorReq) (*datasync_rpc.UpdateSyncCursorRes, error) {
-	l := logic.NewUpdateSyncCursorLogic(ctx, s.svcCtx)
-	return l.UpdateSyncCursor(in)
-}

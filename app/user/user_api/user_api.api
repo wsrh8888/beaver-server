@@ -67,18 +67,18 @@ type (
 	}
 )
 
-// 用户数据同步（传统版本号方式）
+// 用户数据同步（大厂用户独立版本号方式）
 type (
+	UserVersion {
+		UserID  string `json:"userId"` // 用户ID
+		Version int64  `json:"version"` // 该用户的最后同步版本号
+	}
 	UserSyncReq {
-		UserID      string `header:"Beaver-User-Id"`
-		FromVersion int64  `json:"fromVersion"` // 起始版本号
-		ToVersion   int64  `json:"toVersion"` // 结束版本号
-		Limit       int    `json:"limit,optional"` // 限制数量，默认100
+		UserID       string        `header:"Beaver-User-Id"`
+		UserVersions []UserVersion `json:"userVersions"` // 用户版本号数组
 	}
 	UserSyncRes {
-		Users       []UserSyncItem `json:"users"` // 用户列表
-		HasMore     bool           `json:"hasMore"` // 是否还有更多数据
-		NextVersion int64          `json:"nextVersion"` // 下次同步的起始版本号
+		Users []UserSyncItem `json:"users"` // 用户列表
 	}
 	UserSyncItem {
 		UserID   string `json:"userId"` // 用户ID
@@ -92,17 +92,6 @@ type (
 		Version  int64  `json:"version"` // 版本号
 		CreateAt int64  `json:"createAt"` // 创建时间戳
 		UpdateAt int64  `json:"updateAt"` // 更新时间戳
-	}
-)
-
-// 用户数据同步（通过用户ID列表，大厂方式）
-type (
-	UserSyncByIdsReq {
-		UserIDs []string `json:"userIds"` // 要同步的用户ID列表
-		Limit   int      `json:"limit,optional"` // 限制数量，默认100
-	}
-	UserSyncByIdsRes {
-		Users []UserSyncItem `json:"users"` // 用户列表
 	}
 )
 
@@ -128,13 +117,9 @@ service user {
 	@handler getDevices
 	get /api/user/devices (GetDevicesReq) returns (GetDevicesRes)
 
-	@doc "用户数据同步（传统版本号方式）"
+	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
 	post /api/user/sync (UserSyncReq) returns (UserSyncRes)
-
-	@doc "用户数据同步（通过用户ID列表，大厂方式）"
-	@handler userSyncByIds
-	post /api/user/sync-by-ids (UserSyncByIdsReq) returns (UserSyncByIdsRes)
 }
 
 // 生成代码命令
