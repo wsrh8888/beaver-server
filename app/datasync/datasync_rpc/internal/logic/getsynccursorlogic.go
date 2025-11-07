@@ -7,7 +7,6 @@ import (
 	"beaver/app/datasync/datasync_rpc/internal/svc"
 	"beaver/app/datasync/datasync_rpc/types/types/datasync_rpc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-	"beaver/app/group/group_rpc/types/group_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -40,12 +39,6 @@ func (l *GetSyncCursorLogic) GetSyncCursor(in *datasync_rpc.GetSyncCursorReq) (*
 		serverLast = l.getLatestFriendVersion(in.UserId)
 	case "friend_verify":
 		serverLast = l.getLatestFriendVerifyVersion(in.UserId)
-	case "groups":
-		serverLast = l.getLatestGroupVersion(in.UserId)
-	case "group_members":
-		serverLast = l.getLatestGroupMemberVersion(in.UserId)
-	case "group_join_requests":
-		serverLast = l.getLatestGroupJoinRequestVersion(in.UserId)
 	default:
 		serverLast = 0
 	}
@@ -98,42 +91,6 @@ func (l *GetSyncCursorLogic) getLatestFriendVerifyVersion(userID string) int64 {
 	})
 	if err != nil {
 		l.Errorf("调用friend_rpc获取最新好友验证版本号失败: %v", err)
-		return 0
-	}
-	return resp.LatestVersion
-}
-
-// getLatestGroupVersion 获取最新群组版本号
-func (l *GetSyncCursorLogic) getLatestGroupVersion(userID string) int64 {
-	resp, err := l.svcCtx.GroupRpc.GetGroupVersion(l.ctx, &group_rpc.GetGroupVersionReq{
-		UserId: userID,
-	})
-	if err != nil {
-		l.Errorf("调用group_rpc获取最新群组版本号失败: %v", err)
-		return 0
-	}
-	return resp.LatestVersion
-}
-
-// getLatestGroupMemberVersion 获取最新群成员版本号
-func (l *GetSyncCursorLogic) getLatestGroupMemberVersion(userID string) int64 {
-	resp, err := l.svcCtx.GroupRpc.GetGroupMemberVersion(l.ctx, &group_rpc.GetGroupMemberVersionReq{
-		UserId: userID,
-	})
-	if err != nil {
-		l.Errorf("调用group_rpc获取最新群成员版本号失败: %v", err)
-		return 0
-	}
-	return resp.LatestVersion
-}
-
-// getLatestGroupJoinRequestVersion 获取最新群组申请版本号
-func (l *GetSyncCursorLogic) getLatestGroupJoinRequestVersion(userID string) int64 {
-	resp, err := l.svcCtx.GroupRpc.GetGroupJoinRequestVersion(l.ctx, &group_rpc.GetGroupJoinRequestVersionReq{
-		UserId: userID,
-	})
-	if err != nil {
-		l.Errorf("调用group_rpc获取最新群组申请版本号失败: %v", err)
 		return 0
 	}
 	return resp.LatestVersion

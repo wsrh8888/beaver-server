@@ -106,9 +106,17 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		if userInfo, exists := userInfoMap[targetUserID]; exists && userInfo != nil {
 			nickname = userInfo.NickName
 			avatar = userInfo.Avatar
-			// 注意：UserInfo中可能没有Abstract和Email字段，这里暂时设置为空
-			abstract = ""
-			email = ""
+			email = userInfo.Email
+
+			// 获取完整的用户信息（包括Abstract字段）
+			userDetailResp, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+				UserID: targetUserID,
+			})
+			if err == nil {
+				abstract = userDetailResp.UserInfo.Abstract
+			} else {
+				abstract = ""
+			}
 		} else {
 			nickname = "未知用户"
 			avatar = ""

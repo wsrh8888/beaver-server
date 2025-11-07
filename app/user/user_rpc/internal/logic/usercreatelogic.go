@@ -98,13 +98,13 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		return nil, errors.New("生成用户ID失败")
 	}
 
-	// 获取新版本号
-	version := l.svcCtx.VersionGen.GetNextVersion("users", "", "")
+	// 获取新版本号（用户独立递增，从1开始）
+	version := l.svcCtx.VersionGen.GetNextVersion("users", "uuid", userID)
 	if version == -1 {
 		logx.Errorf("获取版本号失败")
 		return nil, errors.New("获取版本号失败")
 	}
-	logx.Infof("获取新版本号: %d", version)
+	logx.Infof("获取用户版本号: userID=%s, version=%d", userID, version)
 
 	user = user_models.UserModel{
 		UUID:     userID,

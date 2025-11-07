@@ -5,6 +5,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"context"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -36,7 +37,8 @@ func (l *GetUserGroupVersionsLogic) GetUserGroupVersions(req *types.GetUserGroup
 
 	if len(userGroupMembers) == 0 {
 		return &types.GetUserGroupVersionsRes{
-			Groups: []types.GroupVersionItem{},
+			Groups:          []types.GroupVersionItem{},
+			ServerTimestamp: time.Now().UnixMilli(),
 		}, nil
 	}
 
@@ -94,7 +96,8 @@ func (l *GetUserGroupVersionsLogic) GetUserGroupVersions(req *types.GetUserGroup
 	}
 
 	resp = &types.GetUserGroupVersionsRes{
-		Groups: result,
+		Groups:          result,
+		ServerTimestamp: time.Now().UnixMilli(),
 	}
 
 	l.Infof("获取用户群组版本信息完成，用户ID: %s, 返回群组数: %d", req.UserID, len(result))

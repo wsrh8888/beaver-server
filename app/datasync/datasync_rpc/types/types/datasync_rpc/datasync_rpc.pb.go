@@ -26,8 +26,8 @@ type GetSyncCursorReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	UserId         string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`                 // 用户ID
 	DeviceId       string                 `protobuf:"bytes,2,opt,name=deviceId,proto3" json:"deviceId,omitempty"`             // 设备ID（多端支持）
-	DataType       string                 `protobuf:"bytes,3,opt,name=dataType,proto3" json:"dataType,omitempty"`             // 数据类型：users/friends/groups/chats/conversations
-	ConversationId string                 `protobuf:"bytes,4,opt,name=conversationId,proto3" json:"conversationId,omitempty"` // 会话ID：当 dataType == "chats" 且按会话拉取时可填；全局拉取可留空
+	DataType       string                 `protobuf:"bytes,3,opt,name=dataType,proto3" json:"dataType,omitempty"`             // 数据类型：users/friends/friend_verify/groups/group_members/group_join_requests/chat_messages/chat_datasync/chat_conversation_settings
+	ConversationId string                 `protobuf:"bytes,4,opt,name=conversationId,proto3" json:"conversationId,omitempty"` // 会话ID：当 dataType == "chat_messages" 且按会话拉取时可填；全局拉取可留空
 	ClientLast     int64                  `protobuf:"varint,5,opt,name=clientLast,proto3" json:"clientLast,omitempty"`        // 客户端最后的游标/版本（消息为 seq，其它为 version）。客户端带上，服务端聚合各业务的最新值
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -143,120 +143,6 @@ func (x *GetSyncCursorRes) GetServerLatest() int64 {
 	return 0
 }
 
-// 更新同步游标请求
-type UpdateSyncCursorReq struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	UserId         string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`                 // 用户ID
-	DeviceId       string                 `protobuf:"bytes,2,opt,name=deviceId,proto3" json:"deviceId,omitempty"`             // 设备ID
-	DataType       string                 `protobuf:"bytes,3,opt,name=dataType,proto3" json:"dataType,omitempty"`             // 数据类型
-	LastSeq        int64                  `protobuf:"varint,4,opt,name=lastSeq,proto3" json:"lastSeq,omitempty"`              // 最后同步的序列号（消息用）或版本号（基础数据用）
-	ConversationId string                 `protobuf:"bytes,5,opt,name=conversationId,proto3" json:"conversationId,omitempty"` // 会话ID（仅聊天消息使用）
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *UpdateSyncCursorReq) Reset() {
-	*x = UpdateSyncCursorReq{}
-	mi := &file_datasync_rpc_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateSyncCursorReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateSyncCursorReq) ProtoMessage() {}
-
-func (x *UpdateSyncCursorReq) ProtoReflect() protoreflect.Message {
-	mi := &file_datasync_rpc_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateSyncCursorReq.ProtoReflect.Descriptor instead.
-func (*UpdateSyncCursorReq) Descriptor() ([]byte, []int) {
-	return file_datasync_rpc_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *UpdateSyncCursorReq) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *UpdateSyncCursorReq) GetDeviceId() string {
-	if x != nil {
-		return x.DeviceId
-	}
-	return ""
-}
-
-func (x *UpdateSyncCursorReq) GetDataType() string {
-	if x != nil {
-		return x.DataType
-	}
-	return ""
-}
-
-func (x *UpdateSyncCursorReq) GetLastSeq() int64 {
-	if x != nil {
-		return x.LastSeq
-	}
-	return 0
-}
-
-func (x *UpdateSyncCursorReq) GetConversationId() string {
-	if x != nil {
-		return x.ConversationId
-	}
-	return ""
-}
-
-// 更新同步游标响应
-type UpdateSyncCursorRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateSyncCursorRes) Reset() {
-	*x = UpdateSyncCursorRes{}
-	mi := &file_datasync_rpc_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateSyncCursorRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateSyncCursorRes) ProtoMessage() {}
-
-func (x *UpdateSyncCursorRes) ProtoReflect() protoreflect.Message {
-	mi := &file_datasync_rpc_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateSyncCursorRes.ProtoReflect.Descriptor instead.
-func (*UpdateSyncCursorRes) Descriptor() ([]byte, []int) {
-	return file_datasync_rpc_proto_rawDescGZIP(), []int{3}
-}
-
 var File_datasync_rpc_proto protoreflect.FileDescriptor
 
 const file_datasync_rpc_proto_rawDesc = "" +
@@ -271,17 +157,9 @@ const file_datasync_rpc_proto_rawDesc = "" +
 	"clientLast\x18\x05 \x01(\x03R\n" +
 	"clientLast\"6\n" +
 	"\x10GetSyncCursorRes\x12\"\n" +
-	"\fserverLatest\x18\x01 \x01(\x03R\fserverLatest\"\xa7\x01\n" +
-	"\x13UpdateSyncCursorReq\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
-	"\bdeviceId\x18\x02 \x01(\tR\bdeviceId\x12\x1a\n" +
-	"\bdataType\x18\x03 \x01(\tR\bdataType\x12\x18\n" +
-	"\alastSeq\x18\x04 \x01(\x03R\alastSeq\x12&\n" +
-	"\x0econversationId\x18\x05 \x01(\tR\x0econversationId\"\x15\n" +
-	"\x13UpdateSyncCursorRes2\xb5\x01\n" +
+	"\fserverLatest\x18\x01 \x01(\x03R\fserverLatest2[\n" +
 	"\bDatasync\x12O\n" +
-	"\rGetSyncCursor\x12\x1e.datasync_rpc.GetSyncCursorReq\x1a\x1e.datasync_rpc.GetSyncCursorRes\x12X\n" +
-	"\x10UpdateSyncCursor\x12!.datasync_rpc.UpdateSyncCursorReq\x1a!.datasync_rpc.UpdateSyncCursorResB\x16Z\x14./types/datasync_rpcb\x06proto3"
+	"\rGetSyncCursor\x12\x1e.datasync_rpc.GetSyncCursorReq\x1a\x1e.datasync_rpc.GetSyncCursorResB\x16Z\x14./types/datasync_rpcb\x06proto3"
 
 var (
 	file_datasync_rpc_proto_rawDescOnce sync.Once
@@ -295,20 +173,16 @@ func file_datasync_rpc_proto_rawDescGZIP() []byte {
 	return file_datasync_rpc_proto_rawDescData
 }
 
-var file_datasync_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_datasync_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_datasync_rpc_proto_goTypes = []any{
-	(*GetSyncCursorReq)(nil),    // 0: datasync_rpc.GetSyncCursorReq
-	(*GetSyncCursorRes)(nil),    // 1: datasync_rpc.GetSyncCursorRes
-	(*UpdateSyncCursorReq)(nil), // 2: datasync_rpc.UpdateSyncCursorReq
-	(*UpdateSyncCursorRes)(nil), // 3: datasync_rpc.UpdateSyncCursorRes
+	(*GetSyncCursorReq)(nil), // 0: datasync_rpc.GetSyncCursorReq
+	(*GetSyncCursorRes)(nil), // 1: datasync_rpc.GetSyncCursorRes
 }
 var file_datasync_rpc_proto_depIdxs = []int32{
 	0, // 0: datasync_rpc.Datasync.GetSyncCursor:input_type -> datasync_rpc.GetSyncCursorReq
-	2, // 1: datasync_rpc.Datasync.UpdateSyncCursor:input_type -> datasync_rpc.UpdateSyncCursorReq
-	1, // 2: datasync_rpc.Datasync.GetSyncCursor:output_type -> datasync_rpc.GetSyncCursorRes
-	3, // 3: datasync_rpc.Datasync.UpdateSyncCursor:output_type -> datasync_rpc.UpdateSyncCursorRes
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	1, // 1: datasync_rpc.Datasync.GetSyncCursor:output_type -> datasync_rpc.GetSyncCursorRes
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -325,7 +199,7 @@ func file_datasync_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_datasync_rpc_proto_rawDesc), len(file_datasync_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

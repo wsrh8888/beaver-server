@@ -14,16 +14,12 @@ import (
 )
 
 type (
-	GetSyncCursorReq    = datasync_rpc.GetSyncCursorReq
-	GetSyncCursorRes    = datasync_rpc.GetSyncCursorRes
-	UpdateSyncCursorReq = datasync_rpc.UpdateSyncCursorReq
-	UpdateSyncCursorRes = datasync_rpc.UpdateSyncCursorRes
+	GetSyncCursorReq = datasync_rpc.GetSyncCursorReq
+	GetSyncCursorRes = datasync_rpc.GetSyncCursorRes
 
 	Datasync interface {
 		// 获取同步游标
 		GetSyncCursor(ctx context.Context, in *GetSyncCursorReq, opts ...grpc.CallOption) (*GetSyncCursorRes, error)
-		// 更新同步游标
-		UpdateSyncCursor(ctx context.Context, in *UpdateSyncCursorReq, opts ...grpc.CallOption) (*UpdateSyncCursorRes, error)
 	}
 
 	defaultDatasync struct {
@@ -41,10 +37,4 @@ func NewDatasync(cli zrpc.Client) Datasync {
 func (m *defaultDatasync) GetSyncCursor(ctx context.Context, in *GetSyncCursorReq, opts ...grpc.CallOption) (*GetSyncCursorRes, error) {
 	client := datasync_rpc.NewDatasyncClient(m.cli.Conn())
 	return client.GetSyncCursor(ctx, in, opts...)
-}
-
-// 更新同步游标
-func (m *defaultDatasync) UpdateSyncCursor(ctx context.Context, in *UpdateSyncCursorReq, opts ...grpc.CallOption) (*UpdateSyncCursorRes, error) {
-	client := datasync_rpc.NewDatasyncClient(m.cli.Conn())
-	return client.UpdateSyncCursor(ctx, in, opts...)
 }

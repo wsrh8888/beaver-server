@@ -3,8 +3,8 @@ syntax = "v1"
 // 获取同步游标
 type (
 	GetSyncCursorReq {
-		UserID   string `header:"Beaver-User-Id"`
-		DeviceID string `header:"Beaver-Device-Id"`
+		UserID   string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		DeviceID string `header:"Beaver-Device-Id"` // 设备ID，从请求头获取
 		DataType string `form:"dataType"` // users/friends/groups/chat_messages/chat_datasync/chat_conversation_settings
 	}
 	GetSyncCursorRes {
@@ -13,16 +13,40 @@ type (
 	}
 )
 
-// 更新同步游标
+// 同步用户数据（两阶段同步）
 type (
-	UpdateSyncCursorReq {
-		UserID         string `header:"Beaver-User-Id"`
-		DeviceID       string `header:"Beaver-Device-Id"`
-		DataType       string `json:"dataType"`
-		LastSeq        int64  `json:"lastSeq"` // 最后同步的序列号（消息用）或版本号（基础数据用）
-		ConversationID string `json:"conversationId,optional"`
+	// 第一阶段：获取变更摘要
+	GetSyncAllUsersReq {
+		Type   string `json:"type,optional"` // 类型：friends/group/all，不传或为空则同步所有相关用户
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 	}
-	UpdateSyncCursorRes  {}
+	GetSyncAllUsersRes {
+		UserVersions    []UserVersionItem `json:"userVersions"` // 变更的用户版本摘要
+		ServerTimestamp int64             `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	UserVersionItem {
+		UserID  string `json:"userId"` // 用户ID
+		Version int64  `json:"version"` // 最新版本号
+	}
+)
+
+// 同步群组数据
+type (
+	GetSyncAllGroupsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
+	}
+	GetSyncAllGroupsRes {
+		GroupVersions   []GroupVersionItem `json:"groupVersions"` // 变更的群组版本摘要
+		ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	GroupVersionItem {
+		GroupID        string `json:"groupId"` // 群组ID
+		GroupVersion   int64  `json:"groupVersion"` // 群资料版本
+		MemberVersion  int64  `json:"memberVersion"` // 群成员版本
+		RequestVersion int64  `json:"requestVersion"` // 入群申请版本
+	}
 )
 
 // 同步服务
@@ -31,9 +55,13 @@ service datasync {
 	@handler getSyncCursor
 	get /api/datasync/cursor (GetSyncCursorReq) returns (GetSyncCursorRes)
 
-	@doc "更新同步游标"
-	@handler updateSyncCursor
-	post /api/datasync/cursor (UpdateSyncCursorReq) returns (UpdateSyncCursorRes)
+	@doc "获取所有需要更新的用户版本信息"
+	@handler getSyncAllUsers
+	post /api/datasync/getSyncAllUsers (GetSyncAllUsersReq) returns (GetSyncAllUsersRes)
+
+	@doc "获取所有需要更新的群组版本信息"
+	@handler getSyncAllGroups
+	post /api/datasync/getSyncAllGroups (GetSyncAllGroupsReq) returns (GetSyncAllGroupsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

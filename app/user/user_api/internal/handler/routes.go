@@ -19,16 +19,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getDevicesHandler(serverCtx),
 			},
 			{
-				// 用户数据同步（传统版本号方式）
+				// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
 				Method:  http.MethodPost,
 				Path:    "/api/user/sync",
 				Handler: userSyncHandler(serverCtx),
-			},
-			{
-				// 用户数据同步（通过用户ID列表，大厂方式）
-				Method:  http.MethodPost,
-				Path:    "/api/user/sync-by-ids",
-				Handler: userSyncByIdsHandler(serverCtx),
 			},
 			{
 				// 修改用户邮箱（需要验证码）

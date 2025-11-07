@@ -19,10 +19,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncCursorHandler(serverCtx),
 			},
 			{
-				// 更新同步游标
+				// 获取所有需要更新的群组版本信息
 				Method:  http.MethodPost,
-				Path:    "/api/datasync/cursor",
-				Handler: updateSyncCursorHandler(serverCtx),
+				Path:    "/api/datasync/getSyncAllGroups",
+				Handler: getSyncAllGroupsHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的用户版本信息
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncAllUsers",
+				Handler: getSyncAllUsersHandler(serverCtx),
 			},
 		},
 	)

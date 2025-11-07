@@ -17,3 +17,18 @@ DatasyncRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: datasyncrpc.rpc
+FriendRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: friendrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: grouprpc.rpc
+UserRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: userrpc.rpc
