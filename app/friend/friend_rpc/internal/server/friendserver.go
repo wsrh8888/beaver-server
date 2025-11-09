@@ -28,14 +28,24 @@ func (s *FriendServer) GetFriendIds(ctx context.Context, in *friend_rpc.GetFrien
 	return l.GetFriendIds(in)
 }
 
-func (s *FriendServer) GetFriendVersion(ctx context.Context, in *friend_rpc.GetFriendVersionReq) (*friend_rpc.GetFriendVersionRes, error) {
-	l := logic.NewGetFriendVersionLogic(ctx, s.svcCtx)
-	return l.GetFriendVersion(in)
+func (s *FriendServer) GetFriendVersions(ctx context.Context, in *friend_rpc.GetFriendVersionsReq) (*friend_rpc.GetFriendVersionsRes, error) {
+	l := logic.NewGetFriendVersionsLogic(ctx, s.svcCtx)
+	return l.GetFriendVersions(in)
 }
 
-func (s *FriendServer) GetFriendVerifyVersion(ctx context.Context, in *friend_rpc.GetFriendVerifyVersionReq) (*friend_rpc.GetFriendVerifyVersionRes, error) {
-	l := logic.NewGetFriendVerifyVersionLogic(ctx, s.svcCtx)
-	return l.GetFriendVerifyVersion(in)
+func (s *FriendServer) GetFriendVerifyVersions(ctx context.Context, in *friend_rpc.GetFriendVerifyVersionsReq) (*friend_rpc.GetFriendVerifyVersionsRes, error) {
+	l := logic.NewGetFriendVerifyVersionsLogic(ctx, s.svcCtx)
+	return l.GetFriendVerifyVersions(in)
+}
+
+func (s *FriendServer) GetFriendsListByIds(ctx context.Context, in *friend_rpc.GetFriendsListByIdsReq) (*friend_rpc.GetFriendsListByIdsRes, error) {
+	l := logic.NewGetFriendsListByIdsLogic(ctx, s.svcCtx)
+	return l.GetFriendsListByIds(in)
+}
+
+func (s *FriendServer) GetFriendVerifiesListByIds(ctx context.Context, in *friend_rpc.GetFriendVerifiesListByIdsReq) (*friend_rpc.GetFriendVerifiesListByIdsRes, error) {
+	l := logic.NewGetFriendVerifiesListByIdsLogic(ctx, s.svcCtx)
+	return l.GetFriendVerifiesListByIds(in)
 }
 
 func (s *FriendServer) GetFriendDetail(ctx context.Context, in *friend_rpc.GetFriendDetailReq) (*friend_rpc.GetFriendDetailRes, error) {

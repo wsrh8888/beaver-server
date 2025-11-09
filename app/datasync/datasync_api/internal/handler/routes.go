@@ -37,6 +37,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncChatUserConversationsHandler(serverCtx),
 			},
 			{
+				// 获取所有需要更新的好友验证版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncFriendVerifies",
+				Handler: getSyncFriendVerifiesHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的好友版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncFriends",
+				Handler: getSyncFriendsHandler(serverCtx),
+			},
+			{
 				// 获取所有需要更新的群组信息版本
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/getSyncGroupInfo",

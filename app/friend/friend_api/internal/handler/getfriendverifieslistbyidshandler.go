@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func getFriendsListByIdsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func getFriendVerifiesListByIdsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetFriendsListByIdsReq
+		var req types.GetFriendVerifiesListByIdsReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGetFriendsListByIdsLogic(r.Context(), svcCtx)
-		resp, err := l.GetFriendsListByIds(&req)
+		l := logic.NewGetFriendVerifiesListByIdsLogic(r.Context(), svcCtx)
+		resp, err := l.GetFriendVerifiesListByIds(&req)
 		response.Response(r, w, resp, err)
 	}
 }

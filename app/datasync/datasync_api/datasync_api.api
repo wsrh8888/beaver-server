@@ -114,6 +114,38 @@ type (
 	}
 )
 
+// 同步好友信息
+type (
+	GetSyncFriendsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncFriendsRes {
+		FriendVersions  []FriendVersionItem `json:"friendVersions"` // 变更的好友版本摘要
+		ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	FriendVersionItem {
+		Id      string `json:"id"` // 好友关系唯一ID
+		Version int64  `json:"version"` // 好友关系版本号
+	}
+)
+
+// 同步好友验证信息
+type (
+	GetSyncFriendVerifiesReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncFriendVerifiesRes {
+		FriendVerifyVersions []FriendVerifyVersionItem `json:"friendVerifyVersions"` // 变更的好友验证版本摘要
+		ServerTimestamp      int64                     `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	FriendVerifyVersionItem {
+		UUID    string `json:"uuid"` // 验证记录UUID
+		Version int64  `json:"version"` // 验证记录版本号
+	}
+)
+
 // 同步服务
 service datasync {
 	@doc "获取所有需要更新的用户版本信息"
@@ -143,6 +175,14 @@ service datasync {
 	@doc "获取所有需要更新的用户会话设置版本"
 	@handler getSyncChatUserConversations
 	post /api/datasync/getSyncChatUserConversations (GetSyncChatUserConversationsReq) returns (GetSyncChatUserConversationsRes)
+
+	@doc "获取所有需要更新的好友版本"
+	@handler getSyncFriends
+	post /api/datasync/getSyncFriends (GetSyncFriendsReq) returns (GetSyncFriendsRes)
+
+	@doc "获取所有需要更新的好友验证版本"
+	@handler getSyncFriendVerifies
+	post /api/datasync/getSyncFriendVerifies (GetSyncFriendVerifiesReq) returns (GetSyncFriendVerifiesRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

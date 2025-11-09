@@ -26,25 +26,30 @@ func NewGetGroupMembersListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 
 func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *group_rpc.GetGroupMembersListByIdsReq) (*group_rpc.GetGroupMembersListByIdsRes, error) {
 	if len(in.GroupIDs) == 0 {
+		l.Errorf("群组ID列表为空")
 		return &group_rpc.GetGroupMembersListByIdsRes{Members: []*group_rpc.GroupMemberListById{}}, nil
 	}
 
-	// 查询指定群组ID列表中，自指定时间戳以来变更的群成员
-	var changedMembers []group_models.GroupMemberModel
+	// 查询指定群组ID列表中的群成员
+	var membersData []group_models.GroupMemberModel
 	query := l.svcCtx.DB.Where("group_id IN (?)", in.GroupIDs)
+
+	// 注意：Since在这里表示客户端已知的最新版本号，用于增量同步
 	if in.Since > 0 {
-		query = query.Where("updated_at > ?", in.Since)
+		query = query.Where("version > ?", in.Since)
 	}
 
-	err := query.Find(&changedMembers).Error
+	err := query.Find(&membersData).Error
 	if err != nil {
-		l.Errorf("查询变更的群成员失败: %v", err)
+		l.Errorf("查询群成员失败: groupIDs=%v, since=%d, error=%v", in.GroupIDs, in.Since, err)
 		return nil, err
 	}
 
+	l.Infof("查询到 %d 个群成员", len(membersData))
+
 	// 转换为响应格式
 	var members []*group_rpc.GroupMemberListById
-	for _, member := range changedMembers {
+	for _, member := range membersData {
 		members = append(members, &group_rpc.GroupMemberListById{
 			GroupID:  member.GroupID,
 			UserID:   member.UserID,
