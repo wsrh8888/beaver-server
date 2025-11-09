@@ -109,53 +109,60 @@ message BatchUpdateConversationRes {
   bool success = 1; // 是否成功
 }
 
-// 定义EditMessageReq消息
-message EditMessageReq {
-  string userID = 1; // 用户ID
-  string messageId = 2; // 客户端消息ID
-  string content = 3; // 新的消息内容
-}
-
-// 定义EditMessageRes消息
-message EditMessageRes {
-  uint32 id = 1; // 数据库自增ID
-  string messageId = 2; // 客户端消息ID
-  string content = 3; // 编辑后的内容
-  string editTime = 4; // 编辑时间
-}
-
-// 定义RecallMessageReq消息
-message RecallMessageReq {
-  string userID = 1; // 用户ID
-  string messageId = 2; // 客户端消息ID
-}
-
-// 定义RecallMessageRes消息
-message RecallMessageRes {
-  uint32 id = 1; // 数据库自增ID
-  string messageId = 2; // 客户端消息ID
-  string recallTime = 3; // 撤回时间
-}
 
 
-// 定义GetConversationVersionReq消息
-message GetConversationVersionReq {
-  string userId = 1; // 用户ID，用于获取该用户相关的会话版本号
-}
 
-// 定义GetConversationVersionRes消息
-message GetConversationVersionRes {
-  int64 latestVersion = 1; // 数据同步表最新版本号
-}
-
-// 定义GetConversationSettingVersionReq消息
-message GetConversationSettingVersionReq {
+// 定义GetUserConversationsReq消息 - 获取用户参与的会话列表
+message GetUserConversationsReq {
   string userId = 1; // 用户ID
 }
 
-// 定义GetConversationSettingVersionRes消息
-message GetConversationSettingVersionRes {
-  int64 latestVersion = 1; // 会话设置表最新版本号
+// 定义ConversationItem消息 - 会话信息
+message ConversationItem {
+  string conversationId = 1; // 会话ID
+  int32 type = 2; // 会话类型 1=私聊 2=群聊
+}
+
+// 定义GetUserConversationsRes消息
+message GetUserConversationsRes {
+  repeated ConversationItem conversations = 1; // 用户参与的会话列表
+}
+
+// 定义GetConversationsListByIdsReq消息 - 批量获取会话版本信息（类似group的GetGroupsListByIds）
+message GetConversationsListByIdsReq {
+  repeated string conversationIds = 1; // 会话ID列表
+  int64 since = 2; // 从这个版本号之后获取变更的记录
+}
+
+// 定义ConversationListById消息 - 会话版本信息
+message ConversationListById {
+  string conversationId = 1; // 会话ID
+  int32 type = 2; // 会话类型 1=私聊 2=群聊
+  int64 seq = 3; // 最新消息序列号
+  int64 version = 4; // 会话元信息版本号
+}
+
+// 定义GetConversationsListByIdsRes消息
+message GetConversationsListByIdsRes {
+  repeated ConversationListById conversations = 1; // 会话版本信息列表
+}
+
+// 定义GetUserConversationSettingsListByIdsReq消息 - 批量获取用户会话设置版本信息
+message GetUserConversationSettingsListByIdsReq {
+  string userId = 1; // 用户ID
+  repeated string conversationIds = 2; // 会话ID列表
+  int64 since = 3; // 从这个版本号之后获取变更的记录
+}
+
+// 定义UserConversationSettingListById消息 - 用户会话设置版本信息
+message UserConversationSettingListById {
+  string conversationId = 1; // 会话ID
+  int64 version = 2; // 用户会话设置版本号
+}
+
+// 定义GetUserConversationSettingsListByIdsRes消息
+message GetUserConversationSettingsListByIdsRes {
+  repeated UserConversationSettingListById userConversationSettings = 1; // 用户会话设置版本信息列表
 }
 
 // 定义InitializeConversationReq消息 - 通用会话初始化
@@ -188,10 +195,9 @@ service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
     rpc UpdateConversation(UpdateConversationReq) returns (UpdateConversationRes); //更新单个用户的会话记录
     rpc BatchUpdateConversation(BatchUpdateConversationReq) returns (BatchUpdateConversationRes); //批量更新会话记录
-    rpc EditMessage(EditMessageReq) returns (EditMessageRes); //编辑消息
-    rpc RecallMessage(RecallMessageReq) returns (RecallMessageRes); //撤回消息
-    rpc GetConversationVersion(GetConversationVersionReq) returns (GetConversationVersionRes); //获取数据同步表版本号
-    rpc GetConversationSettingVersion(GetConversationSettingVersionReq) returns (GetConversationSettingVersionRes); //获取会话设置表的最新版本号
+    rpc GetUserConversations(GetUserConversationsReq) returns (GetUserConversationsRes); //获取用户参与的会话列表
+    rpc GetConversationsListByIds(GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes); //批量获取会话版本信息
+    rpc GetUserConversationSettingsListByIds(GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes); //批量获取用户会话设置版本信息
     rpc InitializeConversation(InitializeConversationReq) returns (InitializeConversationRes); //初始化会话
     rpc SendSystemMessage(SendSystemMessageReq) returns (SendSystemMessageRes); //发送系统消息
 }

@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 
@@ -25,15 +26,11 @@ func NewGetUserGroupIDsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *group_rpc.GetUserGroupIDsReq) (*group_rpc.GetUserGroupIDsRes, error) {
 	// 获取用户加入的所有群组ID
-	var groups []struct {
-		GroupID string `gorm:"column:group_id"`
-	}
+	var members []group_models.GroupMemberModel
 
-	err := l.svcCtx.DB.Raw(`
-		SELECT group_id
-		FROM group_members
-		WHERE user_id = ? AND status = 1
-	`, in.UserID).Scan(&groups).Error
+	err := l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("user_id = ? AND status = ?", in.UserID, 1).
+		Find(&members).Error
 
 	if err != nil {
 		l.Errorf("查询用户群组ID失败: %v", err)
@@ -41,9 +38,9 @@ func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *group_rpc.GetUserGroupIDsReq)
 	}
 
 	// 提取群组ID列表
-	var groupIDs []string
-	for _, group := range groups {
-		groupIDs = append(groupIDs, group.GroupID)
+	groupIDs := make([]string, 0, len(members))
+	for _, member := range members {
+		groupIDs = append(groupIDs, member.GroupID)
 	}
 
 	l.Infof("获取用户群组ID成功，用户ID: %s, 群组数: %d", in.UserID, len(groupIDs))

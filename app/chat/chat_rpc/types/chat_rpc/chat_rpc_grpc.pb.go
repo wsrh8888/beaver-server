@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v4.25.3
-// source: chat_rpc.proto
+// source: app/chat/chat_rpc/chat_rpc.proto
 
 package chat_rpc
 
@@ -19,15 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Chat_SendMsg_FullMethodName                       = "/chat_rpc.Chat/SendMsg"
-	Chat_UpdateConversation_FullMethodName            = "/chat_rpc.Chat/UpdateConversation"
-	Chat_BatchUpdateConversation_FullMethodName       = "/chat_rpc.Chat/BatchUpdateConversation"
-	Chat_EditMessage_FullMethodName                   = "/chat_rpc.Chat/EditMessage"
-	Chat_RecallMessage_FullMethodName                 = "/chat_rpc.Chat/RecallMessage"
-	Chat_GetConversationVersion_FullMethodName        = "/chat_rpc.Chat/GetConversationVersion"
-	Chat_GetConversationSettingVersion_FullMethodName = "/chat_rpc.Chat/GetConversationSettingVersion"
-	Chat_InitializeConversation_FullMethodName        = "/chat_rpc.Chat/InitializeConversation"
-	Chat_SendSystemMessage_FullMethodName             = "/chat_rpc.Chat/SendSystemMessage"
+	Chat_SendMsg_FullMethodName                              = "/chat_rpc.Chat/SendMsg"
+	Chat_UpdateConversation_FullMethodName                   = "/chat_rpc.Chat/UpdateConversation"
+	Chat_BatchUpdateConversation_FullMethodName              = "/chat_rpc.Chat/BatchUpdateConversation"
+	Chat_GetUserConversations_FullMethodName                 = "/chat_rpc.Chat/GetUserConversations"
+	Chat_GetConversationsListByIds_FullMethodName            = "/chat_rpc.Chat/GetConversationsListByIds"
+	Chat_GetUserConversationSettingsListByIds_FullMethodName = "/chat_rpc.Chat/GetUserConversationSettingsListByIds"
+	Chat_InitializeConversation_FullMethodName               = "/chat_rpc.Chat/InitializeConversation"
+	Chat_SendSystemMessage_FullMethodName                    = "/chat_rpc.Chat/SendSystemMessage"
 )
 
 // ChatClient is the client API for Chat service.
@@ -39,10 +38,9 @@ type ChatClient interface {
 	SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)
 	UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error)
 	BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error)
-	EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error)
-	RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error)
-	GetConversationVersion(ctx context.Context, in *GetConversationVersionReq, opts ...grpc.CallOption) (*GetConversationVersionRes, error)
-	GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error)
+	GetUserConversations(ctx context.Context, in *GetUserConversationsReq, opts ...grpc.CallOption) (*GetUserConversationsRes, error)
+	GetConversationsListByIds(ctx context.Context, in *GetConversationsListByIdsReq, opts ...grpc.CallOption) (*GetConversationsListByIdsRes, error)
+	GetUserConversationSettingsListByIds(ctx context.Context, in *GetUserConversationSettingsListByIdsReq, opts ...grpc.CallOption) (*GetUserConversationSettingsListByIdsRes, error)
 	InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error)
 	SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
 }
@@ -85,40 +83,30 @@ func (c *chatClient) BatchUpdateConversation(ctx context.Context, in *BatchUpdat
 	return out, nil
 }
 
-func (c *chatClient) EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error) {
+func (c *chatClient) GetUserConversations(ctx context.Context, in *GetUserConversationsReq, opts ...grpc.CallOption) (*GetUserConversationsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(EditMessageRes)
-	err := c.cc.Invoke(ctx, Chat_EditMessage_FullMethodName, in, out, cOpts...)
+	out := new(GetUserConversationsRes)
+	err := c.cc.Invoke(ctx, Chat_GetUserConversations_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *chatClient) RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error) {
+func (c *chatClient) GetConversationsListByIds(ctx context.Context, in *GetConversationsListByIdsReq, opts ...grpc.CallOption) (*GetConversationsListByIdsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecallMessageRes)
-	err := c.cc.Invoke(ctx, Chat_RecallMessage_FullMethodName, in, out, cOpts...)
+	out := new(GetConversationsListByIdsRes)
+	err := c.cc.Invoke(ctx, Chat_GetConversationsListByIds_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *chatClient) GetConversationVersion(ctx context.Context, in *GetConversationVersionReq, opts ...grpc.CallOption) (*GetConversationVersionRes, error) {
+func (c *chatClient) GetUserConversationSettingsListByIds(ctx context.Context, in *GetUserConversationSettingsListByIdsReq, opts ...grpc.CallOption) (*GetUserConversationSettingsListByIdsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetConversationVersionRes)
-	err := c.cc.Invoke(ctx, Chat_GetConversationVersion_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *chatClient) GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetConversationSettingVersionRes)
-	err := c.cc.Invoke(ctx, Chat_GetConversationSettingVersion_FullMethodName, in, out, cOpts...)
+	out := new(GetUserConversationSettingsListByIdsRes)
+	err := c.cc.Invoke(ctx, Chat_GetUserConversationSettingsListByIds_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,10 +142,9 @@ type ChatServer interface {
 	SendMsg(context.Context, *SendMsgReq) (*SendMsgRes, error)
 	UpdateConversation(context.Context, *UpdateConversationReq) (*UpdateConversationRes, error)
 	BatchUpdateConversation(context.Context, *BatchUpdateConversationReq) (*BatchUpdateConversationRes, error)
-	EditMessage(context.Context, *EditMessageReq) (*EditMessageRes, error)
-	RecallMessage(context.Context, *RecallMessageReq) (*RecallMessageRes, error)
-	GetConversationVersion(context.Context, *GetConversationVersionReq) (*GetConversationVersionRes, error)
-	GetConversationSettingVersion(context.Context, *GetConversationSettingVersionReq) (*GetConversationSettingVersionRes, error)
+	GetUserConversations(context.Context, *GetUserConversationsReq) (*GetUserConversationsRes, error)
+	GetConversationsListByIds(context.Context, *GetConversationsListByIdsReq) (*GetConversationsListByIdsRes, error)
+	GetUserConversationSettingsListByIds(context.Context, *GetUserConversationSettingsListByIdsReq) (*GetUserConversationSettingsListByIdsRes, error)
 	InitializeConversation(context.Context, *InitializeConversationReq) (*InitializeConversationRes, error)
 	SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error)
 	mustEmbedUnimplementedChatServer()
@@ -179,17 +166,14 @@ func (UnimplementedChatServer) UpdateConversation(context.Context, *UpdateConver
 func (UnimplementedChatServer) BatchUpdateConversation(context.Context, *BatchUpdateConversationReq) (*BatchUpdateConversationRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BatchUpdateConversation not implemented")
 }
-func (UnimplementedChatServer) EditMessage(context.Context, *EditMessageReq) (*EditMessageRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EditMessage not implemented")
+func (UnimplementedChatServer) GetUserConversations(context.Context, *GetUserConversationsReq) (*GetUserConversationsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserConversations not implemented")
 }
-func (UnimplementedChatServer) RecallMessage(context.Context, *RecallMessageReq) (*RecallMessageRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RecallMessage not implemented")
+func (UnimplementedChatServer) GetConversationsListByIds(context.Context, *GetConversationsListByIdsReq) (*GetConversationsListByIdsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConversationsListByIds not implemented")
 }
-func (UnimplementedChatServer) GetConversationVersion(context.Context, *GetConversationVersionReq) (*GetConversationVersionRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConversationVersion not implemented")
-}
-func (UnimplementedChatServer) GetConversationSettingVersion(context.Context, *GetConversationSettingVersionReq) (*GetConversationSettingVersionRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConversationSettingVersion not implemented")
+func (UnimplementedChatServer) GetUserConversationSettingsListByIds(context.Context, *GetUserConversationSettingsListByIdsReq) (*GetUserConversationSettingsListByIdsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserConversationSettingsListByIds not implemented")
 }
 func (UnimplementedChatServer) InitializeConversation(context.Context, *InitializeConversationReq) (*InitializeConversationRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitializeConversation not implemented")
@@ -272,74 +256,56 @@ func _Chat_BatchUpdateConversation_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_EditMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EditMessageReq)
+func _Chat_GetUserConversations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserConversationsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).EditMessage(ctx, in)
+		return srv.(ChatServer).GetUserConversations(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_EditMessage_FullMethodName,
+		FullMethod: Chat_GetUserConversations_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).EditMessage(ctx, req.(*EditMessageReq))
+		return srv.(ChatServer).GetUserConversations(ctx, req.(*GetUserConversationsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_RecallMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RecallMessageReq)
+func _Chat_GetConversationsListByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConversationsListByIdsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).RecallMessage(ctx, in)
+		return srv.(ChatServer).GetConversationsListByIds(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_RecallMessage_FullMethodName,
+		FullMethod: Chat_GetConversationsListByIds_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).RecallMessage(ctx, req.(*RecallMessageReq))
+		return srv.(ChatServer).GetConversationsListByIds(ctx, req.(*GetConversationsListByIdsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_GetConversationVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConversationVersionReq)
+func _Chat_GetUserConversationSettingsListByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserConversationSettingsListByIdsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).GetConversationVersion(ctx, in)
+		return srv.(ChatServer).GetUserConversationSettingsListByIds(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_GetConversationVersion_FullMethodName,
+		FullMethod: Chat_GetUserConversationSettingsListByIds_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetConversationVersion(ctx, req.(*GetConversationVersionReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Chat_GetConversationSettingVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConversationSettingVersionReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).GetConversationSettingVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Chat_GetConversationSettingVersion_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetConversationSettingVersion(ctx, req.(*GetConversationSettingVersionReq))
+		return srv.(ChatServer).GetUserConversationSettingsListByIds(ctx, req.(*GetUserConversationSettingsListByIdsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -400,20 +366,16 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_BatchUpdateConversation_Handler,
 		},
 		{
-			MethodName: "EditMessage",
-			Handler:    _Chat_EditMessage_Handler,
+			MethodName: "GetUserConversations",
+			Handler:    _Chat_GetUserConversations_Handler,
 		},
 		{
-			MethodName: "RecallMessage",
-			Handler:    _Chat_RecallMessage_Handler,
+			MethodName: "GetConversationsListByIds",
+			Handler:    _Chat_GetConversationsListByIds_Handler,
 		},
 		{
-			MethodName: "GetConversationVersion",
-			Handler:    _Chat_GetConversationVersion_Handler,
-		},
-		{
-			MethodName: "GetConversationSettingVersion",
-			Handler:    _Chat_GetConversationSettingVersion_Handler,
+			MethodName: "GetUserConversationSettingsListByIds",
+			Handler:    _Chat_GetUserConversationSettingsListByIds_Handler,
 		},
 		{
 			MethodName: "InitializeConversation",
@@ -425,5 +387,5 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "chat_rpc.proto",
+	Metadata: "app/chat/chat_rpc/chat_rpc.proto",
 }

@@ -20,7 +20,7 @@ type GetSyncAllUsersLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取需要同步的用户列表（第一阶段：获取变更摘要）
+// 获取需要同步的用户列表
 func NewGetSyncAllUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncAllUsersLogic {
 	return &GetSyncAllUsersLogic{
 		Logger: logx.WithContext(ctx),
@@ -45,6 +45,9 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 	// 使用map进行去重
 	userMap := make(map[string]bool)
+
+	// 始终包含自己的ID
+	userMap[userId] = true
 
 	// 获取好友列表
 	if needFriends {

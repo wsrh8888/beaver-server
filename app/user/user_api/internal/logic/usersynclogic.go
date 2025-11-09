@@ -38,7 +38,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	var args []interface{}
 
 	for _, uv := range req.UserVersions {
-		conditions = append(conditions, "(uuid = ? AND version > ?)")
+		conditions = append(conditions, "(uuid = ? AND version >= ?)")
 		args = append(args, uv.UserID, uv.Version)
 	}
 

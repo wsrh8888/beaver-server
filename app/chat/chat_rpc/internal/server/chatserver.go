@@ -38,24 +38,19 @@ func (s *ChatServer) BatchUpdateConversation(ctx context.Context, in *chat_rpc.B
 	return l.BatchUpdateConversation(in)
 }
 
-func (s *ChatServer) EditMessage(ctx context.Context, in *chat_rpc.EditMessageReq) (*chat_rpc.EditMessageRes, error) {
-	l := logic.NewEditMessageLogic(ctx, s.svcCtx)
-	return l.EditMessage(in)
+func (s *ChatServer) GetUserConversations(ctx context.Context, in *chat_rpc.GetUserConversationsReq) (*chat_rpc.GetUserConversationsRes, error) {
+	l := logic.NewGetUserConversationsLogic(ctx, s.svcCtx)
+	return l.GetUserConversations(in)
 }
 
-func (s *ChatServer) RecallMessage(ctx context.Context, in *chat_rpc.RecallMessageReq) (*chat_rpc.RecallMessageRes, error) {
-	l := logic.NewRecallMessageLogic(ctx, s.svcCtx)
-	return l.RecallMessage(in)
+func (s *ChatServer) GetConversationsListByIds(ctx context.Context, in *chat_rpc.GetConversationsListByIdsReq) (*chat_rpc.GetConversationsListByIdsRes, error) {
+	l := logic.NewGetConversationsListByIdsLogic(ctx, s.svcCtx)
+	return l.GetConversationsListByIds(in)
 }
 
-func (s *ChatServer) GetConversationVersion(ctx context.Context, in *chat_rpc.GetConversationVersionReq) (*chat_rpc.GetConversationVersionRes, error) {
-	l := logic.NewGetConversationVersionLogic(ctx, s.svcCtx)
-	return l.GetConversationVersion(in)
-}
-
-func (s *ChatServer) GetConversationSettingVersion(ctx context.Context, in *chat_rpc.GetConversationSettingVersionReq) (*chat_rpc.GetConversationSettingVersionRes, error) {
-	l := logic.NewGetConversationSettingVersionLogic(ctx, s.svcCtx)
-	return l.GetConversationSettingVersion(in)
+func (s *ChatServer) GetUserConversationSettingsListByIds(ctx context.Context, in *chat_rpc.GetUserConversationSettingsListByIdsReq) (*chat_rpc.GetUserConversationSettingsListByIdsRes, error) {
+	l := logic.NewGetUserConversationSettingsListByIdsLogic(ctx, s.svcCtx)
+	return l.GetUserConversationSettingsListByIds(in)
 }
 
 func (s *ChatServer) InitializeConversation(ctx context.Context, in *chat_rpc.InitializeConversationReq) (*chat_rpc.InitializeConversationRes, error) {

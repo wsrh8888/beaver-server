@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 
@@ -25,48 +26,49 @@ func NewGetUserGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *group_rpc.GetUserGroupMembersReq) (*group_rpc.GetUserGroupMembersRes, error) {
 	// 获取用户加入的所有群组
-	var groups []struct {
-		GroupID string `gorm:"column:group_id"`
-	}
+	var userMembers []group_models.GroupMemberModel
 
-	err := l.svcCtx.DB.Raw(`
-		SELECT group_id
-		FROM group_members
-		WHERE user_id = ? AND status = 1
-	`, in.UserID).Scan(&groups).Error
+	err := l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("user_id = ? AND status = ?", in.UserID, 1).
+		Find(&userMembers).Error
 
 	if err != nil {
 		l.Errorf("查询用户群组失败: %v", err)
 		return nil, err
 	}
 
-	var allMemberIDs []string
+	// 提取用户加入的群组ID
+	groupIDs := make([]string, 0, len(userMembers))
+	for _, member := range userMembers {
+		groupIDs = append(groupIDs, member.GroupID)
+	}
+
+	if len(groupIDs) == 0 {
+		l.Infof("用户未加入任何群组，用户ID: %s", in.UserID)
+		return &group_rpc.GetUserGroupMembersRes{
+			MemberIDs: []string{},
+		}, nil
+	}
+
+	// 获取所有群组的成员列表
+	var allMembers []group_models.GroupMemberModel
+	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("group_id IN ? AND status = ?", groupIDs, 1).
+		Find(&allMembers).Error
+
+	if err != nil {
+		l.Errorf("查询群组成员失败: %v", err)
+		return nil, err
+	}
+
+	// 去重并排除自己
 	seen := make(map[string]bool)
+	var allMemberIDs []string
 
-	// 遍历每个群组，获取成员列表
-	for _, group := range groups {
-		// 获取群成员列表
-		var members []struct {
-			UserID string `gorm:"column:user_id"`
-		}
-
-		err := l.svcCtx.DB.Raw(`
-			SELECT user_id
-			FROM group_members
-			WHERE group_id = ? AND status = 1
-		`, group.GroupID).Scan(&members).Error
-
-		if err != nil {
-			l.Errorf("查询群组成员失败，群组ID: %s, 错误: %v", group.GroupID, err)
-			continue
-		}
-
-		// 添加群成员ID（排除自己，并且去重）
-		for _, member := range members {
-			if member.UserID != in.UserID && !seen[member.UserID] {
-				seen[member.UserID] = true
-				allMemberIDs = append(allMemberIDs, member.UserID)
-			}
+	for _, member := range allMembers {
+		if member.UserID != in.UserID && !seen[member.UserID] {
+			seen[member.UserID] = true
+			allMemberIDs = append(allMemberIDs, member.UserID)
 		}
 	}
 

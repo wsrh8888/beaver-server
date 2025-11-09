@@ -48,7 +48,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		updateFields["nick_name"] = *req.Nickname
 	}
 	if req.Avatar != nil {
-		updateFields["file_name"] = *req.Avatar
+		updateFields["avatar"] = *req.Avatar
 	}
 	if req.Abstract != nil {
 		updateFields["abstract"] = *req.Abstract

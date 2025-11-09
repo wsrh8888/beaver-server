@@ -10,7 +10,7 @@ type ChatMessage struct {
 	MessageID        string        `gorm:"size:64;uniqueIndex" json:"messageId"`           // 唯一消息ID（客户端生成+服务端确认）
 	ConversationID   string        `gorm:"size:128;index" json:"conversationId"`           // 所属会话ID
 	ConversationType int           `gorm:"not" json:"conversationType"`                    // 会话类型（1=私聊 2=群聊）
-	Seq              int64         `gorm:"not;default:0;index" json:"seq"`                 // 消息在会话内的序列号（单调递增）
+	Seq              int64         `gorm:"not;default:0;index" json:"seq"`                 // 消息在会话内的序列号（基于ConversationID递增，从1开始）
 	SendUserID       *string       `gorm:"size:64;index" json:"sendUserId,omitempty"`      // 发送者用户ID（系统消息可为null）
 	MsgType          ctype.MsgType `gorm:"not" json:"msgType"`                             // 消息类型（TEXT/IMAGE/VIDEO/REVOKE/DELETE/EDIT等）
 	TargetMessageID  string        `gorm:"size:64;index" json:"targetMessageId,omitempty"` // 针对的原消息ID（撤回/删除/编辑事件）

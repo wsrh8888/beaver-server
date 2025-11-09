@@ -1,18 +1,5 @@
 syntax = "v1"
 
-// 获取同步游标
-type (
-	GetSyncCursorReq {
-		UserID   string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		DeviceID string `header:"Beaver-Device-Id"` // 设备ID，从请求头获取
-		DataType string `form:"dataType"` // users/friends/groups/chat_messages/chat_datasync/chat_conversation_settings
-	}
-	GetSyncCursorRes {
-		DataType string `json:"dataType"`
-		LastSeq  int64  `json:"lastSeq"` // 最后同步的序列号（消息用）或版本号（基础数据用）
-	}
-)
-
 // 同步用户数据（两阶段同步）
 type (
 	// 第一阶段：获取变更摘要
@@ -31,37 +18,131 @@ type (
 	}
 )
 
-// 同步群组数据
+// 同步群组信息
 type (
-	GetSyncAllGroupsReq {
+	GetSyncGroupInfoReq {
 		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
-	GetSyncAllGroupsRes {
-		GroupVersions   []GroupVersionItem `json:"groupVersions"` // 变更的群组版本摘要
-		ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
+	GetSyncGroupInfoRes {
+		GroupVersions   []GroupInfoVersionItem `json:"groupVersions"` // 变更的群组信息版本摘要
+		ServerTimestamp int64                  `json:"serverTimestamp"` // 服务端处理时间戳
 	}
-	GroupVersionItem {
-		GroupID        string `json:"groupId"` // 群组ID
-		GroupVersion   int64  `json:"groupVersion"` // 群资料版本
-		MemberVersion  int64  `json:"memberVersion"` // 群成员版本
-		RequestVersion int64  `json:"requestVersion"` // 入群申请版本
+	GroupInfoVersionItem {
+		GroupID string `json:"groupId"` // 群组ID
+		Version int64  `json:"version"` // 群资料版本
+	}
+)
+
+// 同步群成员信息
+type (
+	GetSyncGroupMembersReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncGroupMembersRes {
+		GroupVersions   []GroupMembersVersionItem `json:"groupVersions"` // 变更的群成员版本摘要
+		ServerTimestamp int64                     `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	GroupMembersVersionItem {
+		GroupID string `json:"groupId"` // 群组ID
+		Version int64  `json:"version"` // 群成员版本
+	}
+)
+
+// 同步入群申请信息
+type (
+	GetSyncGroupRequestsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncGroupRequestsRes {
+		GroupVersions   []GroupRequestsVersionItem `json:"groupVersions"` // 变更的入群申请版本摘要
+		ServerTimestamp int64                      `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	GroupRequestsVersionItem {
+		GroupID string `json:"groupId"` // 群组ID
+		Version int64  `json:"version"` // 入群申请版本
+	}
+)
+
+// 同步聊天消息
+type (
+	GetSyncChatMessagesReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个序列号之后开始同步，不传则同步所有
+	}
+	GetSyncChatMessagesRes {
+		MessageVersions []ChatMessageVersionItem `json:"messageVersions"` // 变更的消息版本摘要
+		ServerTimestamp int64                    `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	ChatMessageVersionItem {
+		ConversationID string `json:"conversationId"` // 会话ID
+		Seq            int64  `json:"seq"` // 会话最新消息序列号
+	}
+)
+
+// 同步会话元信息
+type (
+	GetSyncChatConversationsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncChatConversationsRes {
+		ConversationVersions []ChatConversationVersionItem `json:"conversationVersions"` // 变更的会话版本摘要
+		ServerTimestamp      int64                         `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	ChatConversationVersionItem {
+		ConversationID string `json:"conversationId"` // 会话ID
+		Version        int64  `json:"version"` // 会话版本号
+	}
+)
+
+// 同步用户会话设置
+type (
+	GetSyncChatUserConversationsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncChatUserConversationsRes {
+		UserConversationVersions []ChatUserConversationVersionItem `json:"userConversationVersions"` // 变更的用户会话设置版本摘要
+		ServerTimestamp          int64                             `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	ChatUserConversationVersionItem {
+		ConversationID string `json:"conversationId"` // 会话ID
+		Version        int64  `json:"version"` // 用户会话设置版本号
 	}
 )
 
 // 同步服务
 service datasync {
-	@doc "获取同步游标"
-	@handler getSyncCursor
-	get /api/datasync/cursor (GetSyncCursorReq) returns (GetSyncCursorRes)
-
 	@doc "获取所有需要更新的用户版本信息"
 	@handler getSyncAllUsers
 	post /api/datasync/getSyncAllUsers (GetSyncAllUsersReq) returns (GetSyncAllUsersRes)
 
-	@doc "获取所有需要更新的群组版本信息"
-	@handler getSyncAllGroups
-	post /api/datasync/getSyncAllGroups (GetSyncAllGroupsReq) returns (GetSyncAllGroupsRes)
+	@doc "获取所有需要更新的群组信息版本"
+	@handler getSyncGroupInfo
+	post /api/datasync/getSyncGroupInfo (GetSyncGroupInfoReq) returns (GetSyncGroupInfoRes)
+
+	@doc "获取所有需要更新的群成员版本"
+	@handler getSyncGroupMembers
+	post /api/datasync/getSyncGroupMembers (GetSyncGroupMembersReq) returns (GetSyncGroupMembersRes)
+
+	@doc "获取所有需要更新的入群申请版本"
+	@handler getSyncGroupRequests
+	post /api/datasync/getSyncGroupRequests (GetSyncGroupRequestsReq) returns (GetSyncGroupRequestsRes)
+
+	@doc "获取所有需要更新的聊天消息版本"
+	@handler getSyncChatMessages
+	post /api/datasync/getSyncChatMessages (GetSyncChatMessagesReq) returns (GetSyncChatMessagesRes)
+
+	@doc "获取所有需要更新的会话元信息版本"
+	@handler getSyncChatConversations
+	post /api/datasync/getSyncChatConversations (GetSyncChatConversationsReq) returns (GetSyncChatConversationsRes)
+
+	@doc "获取所有需要更新的用户会话设置版本"
+	@handler getSyncChatUserConversations
+	post /api/datasync/getSyncChatUserConversations (GetSyncChatUserConversationsReq) returns (GetSyncChatUserConversationsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

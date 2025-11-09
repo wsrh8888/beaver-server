@@ -13,22 +13,46 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取同步游标
-				Method:  http.MethodGet,
-				Path:    "/api/datasync/cursor",
-				Handler: getSyncCursorHandler(serverCtx),
-			},
-			{
-				// 获取所有需要更新的群组版本信息
-				Method:  http.MethodPost,
-				Path:    "/api/datasync/getSyncAllGroups",
-				Handler: getSyncAllGroupsHandler(serverCtx),
-			},
-			{
 				// 获取所有需要更新的用户版本信息
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/getSyncAllUsers",
 				Handler: getSyncAllUsersHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的会话元信息版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncChatConversations",
+				Handler: getSyncChatConversationsHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的聊天消息版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncChatMessages",
+				Handler: getSyncChatMessagesHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的用户会话设置版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncChatUserConversations",
+				Handler: getSyncChatUserConversationsHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的群组信息版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncGroupInfo",
+				Handler: getSyncGroupInfoHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的群成员版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncGroupMembers",
+				Handler: getSyncGroupMembersHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的入群申请版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncGroupRequests",
+				Handler: getSyncGroupRequestsHandler(serverCtx),
 			},
 		},
 	)
