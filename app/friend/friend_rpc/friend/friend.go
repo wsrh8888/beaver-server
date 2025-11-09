@@ -14,20 +14,30 @@ import (
 )
 
 type (
-	FriendDetailItem          = friend_rpc.FriendDetailItem
-	GetFriendDetailReq        = friend_rpc.GetFriendDetailReq
-	GetFriendDetailRes        = friend_rpc.GetFriendDetailRes
-	GetFriendIdsRequest       = friend_rpc.GetFriendIdsRequest
-	GetFriendIdsResponse      = friend_rpc.GetFriendIdsResponse
-	GetFriendVerifyVersionReq = friend_rpc.GetFriendVerifyVersionReq
-	GetFriendVerifyVersionRes = friend_rpc.GetFriendVerifyVersionRes
-	GetFriendVersionReq       = friend_rpc.GetFriendVersionReq
-	GetFriendVersionRes       = friend_rpc.GetFriendVersionRes
+	FriendDetailItem                               = friend_rpc.FriendDetailItem
+	FriendListById                                 = friend_rpc.FriendListById
+	FriendVerifyListById                           = friend_rpc.FriendVerifyListById
+	GetFriendDetailReq                             = friend_rpc.GetFriendDetailReq
+	GetFriendDetailRes                             = friend_rpc.GetFriendDetailRes
+	GetFriendIdsRequest                            = friend_rpc.GetFriendIdsRequest
+	GetFriendIdsResponse                           = friend_rpc.GetFriendIdsResponse
+	GetFriendVerifiesListByIdsReq                  = friend_rpc.GetFriendVerifiesListByIdsReq
+	GetFriendVerifiesListByIdsRes                  = friend_rpc.GetFriendVerifiesListByIdsRes
+	GetFriendVerifyVersionsReq                     = friend_rpc.GetFriendVerifyVersionsReq
+	GetFriendVerifyVersionsRes                     = friend_rpc.GetFriendVerifyVersionsRes
+	GetFriendVerifyVersionsRes_FriendVerifyVersion = friend_rpc.GetFriendVerifyVersionsRes_FriendVerifyVersion
+	GetFriendVersionsReq                           = friend_rpc.GetFriendVersionsReq
+	GetFriendVersionsRes                           = friend_rpc.GetFriendVersionsRes
+	GetFriendVersionsRes_FriendVersion             = friend_rpc.GetFriendVersionsRes_FriendVersion
+	GetFriendsListByIdsReq                         = friend_rpc.GetFriendsListByIdsReq
+	GetFriendsListByIdsRes                         = friend_rpc.GetFriendsListByIdsRes
 
 	Friend interface {
 		GetFriendIds(ctx context.Context, in *GetFriendIdsRequest, opts ...grpc.CallOption) (*GetFriendIdsResponse, error)
-		GetFriendVersion(ctx context.Context, in *GetFriendVersionReq, opts ...grpc.CallOption) (*GetFriendVersionRes, error)
-		GetFriendVerifyVersion(ctx context.Context, in *GetFriendVerifyVersionReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionRes, error)
+		GetFriendVersions(ctx context.Context, in *GetFriendVersionsReq, opts ...grpc.CallOption) (*GetFriendVersionsRes, error)
+		GetFriendVerifyVersions(ctx context.Context, in *GetFriendVerifyVersionsReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionsRes, error)
+		GetFriendsListByIds(ctx context.Context, in *GetFriendsListByIdsReq, opts ...grpc.CallOption) (*GetFriendsListByIdsRes, error)
+		GetFriendVerifiesListByIds(ctx context.Context, in *GetFriendVerifiesListByIdsReq, opts ...grpc.CallOption) (*GetFriendVerifiesListByIdsRes, error)
 		GetFriendDetail(ctx context.Context, in *GetFriendDetailReq, opts ...grpc.CallOption) (*GetFriendDetailRes, error)
 	}
 
@@ -47,14 +57,24 @@ func (m *defaultFriend) GetFriendIds(ctx context.Context, in *GetFriendIdsReques
 	return client.GetFriendIds(ctx, in, opts...)
 }
 
-func (m *defaultFriend) GetFriendVersion(ctx context.Context, in *GetFriendVersionReq, opts ...grpc.CallOption) (*GetFriendVersionRes, error) {
+func (m *defaultFriend) GetFriendVersions(ctx context.Context, in *GetFriendVersionsReq, opts ...grpc.CallOption) (*GetFriendVersionsRes, error) {
 	client := friend_rpc.NewFriendClient(m.cli.Conn())
-	return client.GetFriendVersion(ctx, in, opts...)
+	return client.GetFriendVersions(ctx, in, opts...)
 }
 
-func (m *defaultFriend) GetFriendVerifyVersion(ctx context.Context, in *GetFriendVerifyVersionReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionRes, error) {
+func (m *defaultFriend) GetFriendVerifyVersions(ctx context.Context, in *GetFriendVerifyVersionsReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionsRes, error) {
 	client := friend_rpc.NewFriendClient(m.cli.Conn())
-	return client.GetFriendVerifyVersion(ctx, in, opts...)
+	return client.GetFriendVerifyVersions(ctx, in, opts...)
+}
+
+func (m *defaultFriend) GetFriendsListByIds(ctx context.Context, in *GetFriendsListByIdsReq, opts ...grpc.CallOption) (*GetFriendsListByIdsRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.GetFriendsListByIds(ctx, in, opts...)
+}
+
+func (m *defaultFriend) GetFriendVerifiesListByIds(ctx context.Context, in *GetFriendVerifiesListByIdsReq, opts ...grpc.CallOption) (*GetFriendVerifiesListByIdsRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.GetFriendVerifiesListByIds(ctx, in, opts...)
 }
 
 func (m *defaultFriend) GetFriendDetail(ctx context.Context, in *GetFriendDetailReq, opts ...grpc.CallOption) (*GetFriendDetailRes, error) {

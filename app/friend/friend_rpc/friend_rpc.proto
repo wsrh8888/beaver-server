@@ -11,24 +11,78 @@ message GetFriendIdsResponse {
   repeated string friend_ids = 1;
 }
 
-// 定义GetFriendVersionReq消息
-message GetFriendVersionReq {
+// 通过ID获取好友列表
+message GetFriendsListByIdsReq {
+  repeated string ids = 1; // 唯一ID列表
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message FriendListById {
+  string id = 1; // 唯一ID
+  string sendUserId = 2; // 发送者用户ID
+  string revUserId = 3; // 接收者用户ID
+  string sendUserNotice = 4; // 发送者备注
+  string revUserNotice = 5; // 接收者备注
+  string source = 6; // 添加好友来源
+  bool isDeleted = 7; // 是否已删除
+  int64 version = 8; // 版本号
+  int64 createAt = 9; // 创建时间
+  int64 updateAt = 10; // 更新时间
+}
+
+message GetFriendsListByIdsRes {
+  repeated FriendListById friends = 1; // 好友列表
+}
+
+// 获取用户好友版本信息
+message GetFriendVersionsReq {
   string userId = 1; // 用户ID
+  int64 since = 2; // 从这个版本号之后开始同步
 }
 
-// 定义GetFriendVersionRes消息
-message GetFriendVersionRes {
-  int64 latestVersion = 1; // 最新版本号
+message GetFriendVersionsRes {
+  message FriendVersion {
+    string id = 1; // 唯一ID
+    int64 version = 2; // 版本号
+  }
+  repeated FriendVersion friendVersions = 1; // 好友版本列表
 }
 
-// 定义GetFriendVerifyVersionReq消息
-message GetFriendVerifyVersionReq {
+// 获取用户好友验证版本信息
+message GetFriendVerifyVersionsReq {
   string userId = 1; // 用户ID
+  int64 since = 2; // 从这个版本号之后开始同步
 }
 
-// 定义GetFriendVerifyVersionRes消息
-message GetFriendVerifyVersionRes {
-  int64 latestVersion = 1; // 最新版本号
+message GetFriendVerifyVersionsRes {
+  message FriendVerifyVersion {
+    string uuid = 1; // 验证记录UUID
+    int64 version = 2; // 版本号
+  }
+  repeated FriendVerifyVersion friendVerifyVersions = 1; // 好友验证版本列表
+}
+
+// 通过ID获取好友验证列表
+message GetFriendVerifiesListByIdsReq {
+  repeated string uuids = 1; // 验证记录UUID列表
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message FriendVerifyListById {
+  string uuid = 1; // 验证记录UUID
+  string sendUserId = 2; // 发送者用户ID
+  string revUserId = 3; // 接收者用户ID
+  int32 sendStatus = 4; // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+  int32 revStatus = 5; // 接收方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+  string message = 6; // 附加消息
+  string source = 7; // 添加好友来源
+  int64 version = 8; // 版本号
+  int64 createAt = 9; // 创建时间
+  int64 updateAt = 10; // 更新时间
+}
+
+message GetFriendVerifiesListByIdsRes {
+  repeated FriendVerifyListById friendVerifies = 1; // 好友验证列表
 }
 
 // 获取好友详细信息（包含用户基础信息和好友关系信息）
@@ -51,8 +105,10 @@ message GetFriendDetailRes {
 
 service friend {
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
-  rpc GetFriendVersion(GetFriendVersionReq) returns (GetFriendVersionRes); //获取好友版本号
-  rpc GetFriendVerifyVersion(GetFriendVerifyVersionReq) returns (GetFriendVerifyVersionRes); //获取好友验证版本号
+  rpc GetFriendVersions(GetFriendVersionsReq) returns (GetFriendVersionsRes); //获取用户好友版本信息
+  rpc GetFriendVerifyVersions(GetFriendVerifyVersionsReq) returns (GetFriendVerifyVersionsRes); //获取用户好友验证版本信息
+  rpc GetFriendsListByIds(GetFriendsListByIdsReq) returns (GetFriendsListByIdsRes); //通过ID获取好友列表
+  rpc GetFriendVerifiesListByIds(GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes); //通过ID获取好友验证列表
   rpc GetFriendDetail(GetFriendDetailReq) returns (GetFriendDetailRes); //获取好友详细信息
 }
 

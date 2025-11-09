@@ -16,6 +16,16 @@ type ChatUserConversationVersionItem struct {
 	Version        int64  `json:"version"`        // 用户会话设置版本号
 }
 
+type FriendVerifyVersionItem struct {
+	UUID    string `json:"uuid"`    // 验证记录UUID
+	Version int64  `json:"version"` // 验证记录版本号
+}
+
+type FriendVersionItem struct {
+	Id      string `json:"id"`      // 好友关系唯一ID
+	Version int64  `json:"version"` // 好友关系版本号
+}
+
 type GetSyncAllUsersReq struct {
 	Type   string `json:"type,optional"`    // 类型：friends/group/all，不传或为空则同步所有相关用户
 	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
@@ -55,6 +65,26 @@ type GetSyncChatUserConversationsReq struct {
 type GetSyncChatUserConversationsRes struct {
 	UserConversationVersions []ChatUserConversationVersionItem `json:"userConversationVersions"` // 变更的用户会话设置版本摘要
 	ServerTimestamp          int64                             `json:"serverTimestamp"`          // 服务端处理时间戳
+}
+
+type GetSyncFriendVerifiesReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+}
+
+type GetSyncFriendVerifiesRes struct {
+	FriendVerifyVersions []FriendVerifyVersionItem `json:"friendVerifyVersions"` // 变更的好友验证版本摘要
+	ServerTimestamp      int64                     `json:"serverTimestamp"`      // 服务端处理时间戳
+}
+
+type GetSyncFriendsReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+}
+
+type GetSyncFriendsRes struct {
+	FriendVersions  []FriendVersionItem `json:"friendVersions"`  // 变更的好友版本摘要
+	ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
 type GetSyncGroupInfoReq struct {

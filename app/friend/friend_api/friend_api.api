@@ -188,7 +188,7 @@ type (
 	}
 )
 
-// 批量获取好友数据
+// 批量获取好友数据（通过用户ID）
 type (
 	GetFriendsListByIdsReq {
 		UserID    string   `header:"Beaver-User-Id"` // 用户ID
@@ -196,6 +196,50 @@ type (
 	}
 	GetFriendsListByIdsRes {
 		Friends []FriendSyncItem `json:"friends"` // 好友列表
+	}
+)
+
+// 批量获取好友数据（通过好友关系ID）
+type (
+	GetFriendsListByFriendshipIdsReq {
+		FriendshipIds []string `json:"friendshipIds"` // 好友关系ID列表
+	}
+	GetFriendsListByFriendshipIdsRes {
+		Friends []FriendByFriendshipId `json:"friends"` // 好友列表
+	}
+	FriendByFriendshipId {
+		Id             string `json:"id"` // 唯一ID
+		SendUserID     string `json:"sendUserId"` // 发送者用户ID
+		RevUserID      string `json:"revUserId"` // 接收者用户ID
+		SendUserNotice string `json:"sendUserNotice"` // 发送者备注
+		RevUserNotice  string `json:"revUserNotice"` // 接收者备注
+		Source         string `json:"source"` // 添加好友来源
+		IsDeleted      bool   `json:"isDeleted"` // 是否已删除
+		Version        int64  `json:"version"` // 版本号
+		CreateAt       int64  `json:"createAt"` // 创建时间戳
+		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+	}
+)
+
+// 批量获取好友验证数据（通过UUID）
+type (
+	GetFriendVerifiesListByIdsReq {
+		Uuids []string `json:"uuids"` // 验证记录UUID列表
+	}
+	GetFriendVerifiesListByIdsRes {
+		FriendVerifies []FriendVerifyById `json:"friendVerifies"` // 好友验证列表
+	}
+	FriendVerifyById {
+		UUID       string `json:"uuid"` // 验证记录UUID
+		SendUserID string `json:"sendUserId"` // 发送者用户ID
+		RevUserID  string `json:"revUserId"` // 接收者用户ID
+		SendStatus int32  `json:"sendStatus"` // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+		RevStatus  int32  `json:"revStatus"` // 接收方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+		Message    string `json:"message"` // 附加消息
+		Source     string `json:"source"` // 添加好友来源
+		Version    int64  `json:"version"` // 版本号
+		CreateAt   int64  `json:"createAt"` // 创建时间戳
+		UpdateAt   int64  `json:"updateAt"` // 更新时间戳
 	}
 )
 
@@ -244,9 +288,17 @@ service friend {
 	@handler friendVerifySync
 	post /api/friend/verifySync (FriendVerifySyncReq) returns (FriendVerifySyncRes)
 
-	@doc "批量获取好友数据"
+	@doc "批量获取好友数据（通过用户ID）"
 	@handler getFriendsListByIds
 	post /api/friend/getFriendsListByIds (GetFriendsListByIdsReq) returns (GetFriendsListByIdsRes)
+
+	@doc "批量获取好友数据（通过好友关系ID）"
+	@handler getFriendsListByFriendshipIds
+	post /api/friend/getFriendsListByFriendshipIds (GetFriendsListByFriendshipIdsReq) returns (GetFriendsListByFriendshipIdsRes)
+
+	@doc "批量获取好友验证数据（通过UUID）"
+	@handler getFriendVerifiesListByIds
+	post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
 }
 
 // goctl api go -api friend_api.api -dir . --home ../../../template

@@ -19,10 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Friend_GetFriendIds_FullMethodName           = "/friend_rpc.friend/GetFriendIds"
-	Friend_GetFriendVersion_FullMethodName       = "/friend_rpc.friend/GetFriendVersion"
-	Friend_GetFriendVerifyVersion_FullMethodName = "/friend_rpc.friend/GetFriendVerifyVersion"
-	Friend_GetFriendDetail_FullMethodName        = "/friend_rpc.friend/GetFriendDetail"
+	Friend_GetFriendIds_FullMethodName               = "/friend_rpc.friend/GetFriendIds"
+	Friend_GetFriendVersions_FullMethodName          = "/friend_rpc.friend/GetFriendVersions"
+	Friend_GetFriendVerifyVersions_FullMethodName    = "/friend_rpc.friend/GetFriendVerifyVersions"
+	Friend_GetFriendsListByIds_FullMethodName        = "/friend_rpc.friend/GetFriendsListByIds"
+	Friend_GetFriendVerifiesListByIds_FullMethodName = "/friend_rpc.friend/GetFriendVerifiesListByIds"
+	Friend_GetFriendDetail_FullMethodName            = "/friend_rpc.friend/GetFriendDetail"
 )
 
 // FriendClient is the client API for Friend service.
@@ -30,8 +32,10 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FriendClient interface {
 	GetFriendIds(ctx context.Context, in *GetFriendIdsRequest, opts ...grpc.CallOption) (*GetFriendIdsResponse, error)
-	GetFriendVersion(ctx context.Context, in *GetFriendVersionReq, opts ...grpc.CallOption) (*GetFriendVersionRes, error)
-	GetFriendVerifyVersion(ctx context.Context, in *GetFriendVerifyVersionReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionRes, error)
+	GetFriendVersions(ctx context.Context, in *GetFriendVersionsReq, opts ...grpc.CallOption) (*GetFriendVersionsRes, error)
+	GetFriendVerifyVersions(ctx context.Context, in *GetFriendVerifyVersionsReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionsRes, error)
+	GetFriendsListByIds(ctx context.Context, in *GetFriendsListByIdsReq, opts ...grpc.CallOption) (*GetFriendsListByIdsRes, error)
+	GetFriendVerifiesListByIds(ctx context.Context, in *GetFriendVerifiesListByIdsReq, opts ...grpc.CallOption) (*GetFriendVerifiesListByIdsRes, error)
 	GetFriendDetail(ctx context.Context, in *GetFriendDetailReq, opts ...grpc.CallOption) (*GetFriendDetailRes, error)
 }
 
@@ -53,20 +57,40 @@ func (c *friendClient) GetFriendIds(ctx context.Context, in *GetFriendIdsRequest
 	return out, nil
 }
 
-func (c *friendClient) GetFriendVersion(ctx context.Context, in *GetFriendVersionReq, opts ...grpc.CallOption) (*GetFriendVersionRes, error) {
+func (c *friendClient) GetFriendVersions(ctx context.Context, in *GetFriendVersionsReq, opts ...grpc.CallOption) (*GetFriendVersionsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetFriendVersionRes)
-	err := c.cc.Invoke(ctx, Friend_GetFriendVersion_FullMethodName, in, out, cOpts...)
+	out := new(GetFriendVersionsRes)
+	err := c.cc.Invoke(ctx, Friend_GetFriendVersions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *friendClient) GetFriendVerifyVersion(ctx context.Context, in *GetFriendVerifyVersionReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionRes, error) {
+func (c *friendClient) GetFriendVerifyVersions(ctx context.Context, in *GetFriendVerifyVersionsReq, opts ...grpc.CallOption) (*GetFriendVerifyVersionsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetFriendVerifyVersionRes)
-	err := c.cc.Invoke(ctx, Friend_GetFriendVerifyVersion_FullMethodName, in, out, cOpts...)
+	out := new(GetFriendVerifyVersionsRes)
+	err := c.cc.Invoke(ctx, Friend_GetFriendVerifyVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendClient) GetFriendsListByIds(ctx context.Context, in *GetFriendsListByIdsReq, opts ...grpc.CallOption) (*GetFriendsListByIdsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFriendsListByIdsRes)
+	err := c.cc.Invoke(ctx, Friend_GetFriendsListByIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendClient) GetFriendVerifiesListByIds(ctx context.Context, in *GetFriendVerifiesListByIdsReq, opts ...grpc.CallOption) (*GetFriendVerifiesListByIdsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFriendVerifiesListByIdsRes)
+	err := c.cc.Invoke(ctx, Friend_GetFriendVerifiesListByIds_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +112,10 @@ func (c *friendClient) GetFriendDetail(ctx context.Context, in *GetFriendDetailR
 // for forward compatibility.
 type FriendServer interface {
 	GetFriendIds(context.Context, *GetFriendIdsRequest) (*GetFriendIdsResponse, error)
-	GetFriendVersion(context.Context, *GetFriendVersionReq) (*GetFriendVersionRes, error)
-	GetFriendVerifyVersion(context.Context, *GetFriendVerifyVersionReq) (*GetFriendVerifyVersionRes, error)
+	GetFriendVersions(context.Context, *GetFriendVersionsReq) (*GetFriendVersionsRes, error)
+	GetFriendVerifyVersions(context.Context, *GetFriendVerifyVersionsReq) (*GetFriendVerifyVersionsRes, error)
+	GetFriendsListByIds(context.Context, *GetFriendsListByIdsReq) (*GetFriendsListByIdsRes, error)
+	GetFriendVerifiesListByIds(context.Context, *GetFriendVerifiesListByIdsReq) (*GetFriendVerifiesListByIdsRes, error)
 	GetFriendDetail(context.Context, *GetFriendDetailReq) (*GetFriendDetailRes, error)
 	mustEmbedUnimplementedFriendServer()
 }
@@ -104,11 +130,17 @@ type UnimplementedFriendServer struct{}
 func (UnimplementedFriendServer) GetFriendIds(context.Context, *GetFriendIdsRequest) (*GetFriendIdsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendIds not implemented")
 }
-func (UnimplementedFriendServer) GetFriendVersion(context.Context, *GetFriendVersionReq) (*GetFriendVersionRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFriendVersion not implemented")
+func (UnimplementedFriendServer) GetFriendVersions(context.Context, *GetFriendVersionsReq) (*GetFriendVersionsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendVersions not implemented")
 }
-func (UnimplementedFriendServer) GetFriendVerifyVersion(context.Context, *GetFriendVerifyVersionReq) (*GetFriendVerifyVersionRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFriendVerifyVersion not implemented")
+func (UnimplementedFriendServer) GetFriendVerifyVersions(context.Context, *GetFriendVerifyVersionsReq) (*GetFriendVerifyVersionsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendVerifyVersions not implemented")
+}
+func (UnimplementedFriendServer) GetFriendsListByIds(context.Context, *GetFriendsListByIdsReq) (*GetFriendsListByIdsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendsListByIds not implemented")
+}
+func (UnimplementedFriendServer) GetFriendVerifiesListByIds(context.Context, *GetFriendVerifiesListByIdsReq) (*GetFriendVerifiesListByIdsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendVerifiesListByIds not implemented")
 }
 func (UnimplementedFriendServer) GetFriendDetail(context.Context, *GetFriendDetailReq) (*GetFriendDetailRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendDetail not implemented")
@@ -152,38 +184,74 @@ func _Friend_GetFriendIds_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_GetFriendVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFriendVersionReq)
+func _Friend_GetFriendVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendVersionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).GetFriendVersion(ctx, in)
+		return srv.(FriendServer).GetFriendVersions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Friend_GetFriendVersion_FullMethodName,
+		FullMethod: Friend_GetFriendVersions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).GetFriendVersion(ctx, req.(*GetFriendVersionReq))
+		return srv.(FriendServer).GetFriendVersions(ctx, req.(*GetFriendVersionsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_GetFriendVerifyVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFriendVerifyVersionReq)
+func _Friend_GetFriendVerifyVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendVerifyVersionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).GetFriendVerifyVersion(ctx, in)
+		return srv.(FriendServer).GetFriendVerifyVersions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Friend_GetFriendVerifyVersion_FullMethodName,
+		FullMethod: Friend_GetFriendVerifyVersions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).GetFriendVerifyVersion(ctx, req.(*GetFriendVerifyVersionReq))
+		return srv.(FriendServer).GetFriendVerifyVersions(ctx, req.(*GetFriendVerifyVersionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Friend_GetFriendsListByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendsListByIdsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).GetFriendsListByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Friend_GetFriendsListByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).GetFriendsListByIds(ctx, req.(*GetFriendsListByIdsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Friend_GetFriendVerifiesListByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendVerifiesListByIdsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).GetFriendVerifiesListByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Friend_GetFriendVerifiesListByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).GetFriendVerifiesListByIds(ctx, req.(*GetFriendVerifiesListByIdsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -218,12 +286,20 @@ var Friend_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Friend_GetFriendIds_Handler,
 		},
 		{
-			MethodName: "GetFriendVersion",
-			Handler:    _Friend_GetFriendVersion_Handler,
+			MethodName: "GetFriendVersions",
+			Handler:    _Friend_GetFriendVersions_Handler,
 		},
 		{
-			MethodName: "GetFriendVerifyVersion",
-			Handler:    _Friend_GetFriendVerifyVersion_Handler,
+			MethodName: "GetFriendVerifyVersions",
+			Handler:    _Friend_GetFriendVerifyVersions_Handler,
+		},
+		{
+			MethodName: "GetFriendsListByIds",
+			Handler:    _Friend_GetFriendsListByIds_Handler,
+		},
+		{
+			MethodName: "GetFriendVerifiesListByIds",
+			Handler:    _Friend_GetFriendVerifiesListByIds_Handler,
 		},
 		{
 			MethodName: "GetFriendDetail",

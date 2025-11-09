@@ -109,28 +109,29 @@ func (x *GetFriendIdsResponse) GetFriendIds() []string {
 	return nil
 }
 
-// 定义GetFriendVersionReq消息
-type GetFriendVersionReq struct {
+// 通过ID获取好友列表
+type GetFriendsListByIdsReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"` // 用户ID
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`      // 唯一ID列表
+	Since         int64                  `protobuf:"varint,2,opt,name=since,proto3" json:"since,omitempty"` // 时间戳，从此时间戳之后获取变更的记录
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetFriendVersionReq) Reset() {
-	*x = GetFriendVersionReq{}
+func (x *GetFriendsListByIdsReq) Reset() {
+	*x = GetFriendsListByIdsReq{}
 	mi := &file_friend_rpc_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetFriendVersionReq) String() string {
+func (x *GetFriendsListByIdsReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetFriendVersionReq) ProtoMessage() {}
+func (*GetFriendsListByIdsReq) ProtoMessage() {}
 
-func (x *GetFriendVersionReq) ProtoReflect() protoreflect.Message {
+func (x *GetFriendsListByIdsReq) ProtoReflect() protoreflect.Message {
 	mi := &file_friend_rpc_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -142,40 +143,55 @@ func (x *GetFriendVersionReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetFriendVersionReq.ProtoReflect.Descriptor instead.
-func (*GetFriendVersionReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetFriendsListByIdsReq.ProtoReflect.Descriptor instead.
+func (*GetFriendsListByIdsReq) Descriptor() ([]byte, []int) {
 	return file_friend_rpc_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetFriendVersionReq) GetUserId() string {
+func (x *GetFriendsListByIdsReq) GetIds() []string {
 	if x != nil {
-		return x.UserId
+		return x.Ids
 	}
-	return ""
+	return nil
 }
 
-// 定义GetFriendVersionRes消息
-type GetFriendVersionRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	LatestVersion int64                  `protobuf:"varint,1,opt,name=latestVersion,proto3" json:"latestVersion,omitempty"` // 最新版本号
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+func (x *GetFriendsListByIdsReq) GetSince() int64 {
+	if x != nil {
+		return x.Since
+	}
+	return 0
 }
 
-func (x *GetFriendVersionRes) Reset() {
-	*x = GetFriendVersionRes{}
+type FriendListById struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`                         // 唯一ID
+	SendUserId     string                 `protobuf:"bytes,2,opt,name=sendUserId,proto3" json:"sendUserId,omitempty"`         // 发送者用户ID
+	RevUserId      string                 `protobuf:"bytes,3,opt,name=revUserId,proto3" json:"revUserId,omitempty"`           // 接收者用户ID
+	SendUserNotice string                 `protobuf:"bytes,4,opt,name=sendUserNotice,proto3" json:"sendUserNotice,omitempty"` // 发送者备注
+	RevUserNotice  string                 `protobuf:"bytes,5,opt,name=revUserNotice,proto3" json:"revUserNotice,omitempty"`   // 接收者备注
+	Source         string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`                 // 添加好友来源
+	IsDeleted      bool                   `protobuf:"varint,7,opt,name=isDeleted,proto3" json:"isDeleted,omitempty"`          // 是否已删除
+	Version        int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`              // 版本号
+	CreateAt       int64                  `protobuf:"varint,9,opt,name=createAt,proto3" json:"createAt,omitempty"`            // 创建时间
+	UpdateAt       int64                  `protobuf:"varint,10,opt,name=updateAt,proto3" json:"updateAt,omitempty"`           // 更新时间
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *FriendListById) Reset() {
+	*x = FriendListById{}
 	mi := &file_friend_rpc_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetFriendVersionRes) String() string {
+func (x *FriendListById) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetFriendVersionRes) ProtoMessage() {}
+func (*FriendListById) ProtoMessage() {}
 
-func (x *GetFriendVersionRes) ProtoReflect() protoreflect.Message {
+func (x *FriendListById) ProtoReflect() protoreflect.Message {
 	mi := &file_friend_rpc_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -187,40 +203,102 @@ func (x *GetFriendVersionRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetFriendVersionRes.ProtoReflect.Descriptor instead.
-func (*GetFriendVersionRes) Descriptor() ([]byte, []int) {
+// Deprecated: Use FriendListById.ProtoReflect.Descriptor instead.
+func (*FriendListById) Descriptor() ([]byte, []int) {
 	return file_friend_rpc_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetFriendVersionRes) GetLatestVersion() int64 {
+func (x *FriendListById) GetId() string {
 	if x != nil {
-		return x.LatestVersion
+		return x.Id
+	}
+	return ""
+}
+
+func (x *FriendListById) GetSendUserId() string {
+	if x != nil {
+		return x.SendUserId
+	}
+	return ""
+}
+
+func (x *FriendListById) GetRevUserId() string {
+	if x != nil {
+		return x.RevUserId
+	}
+	return ""
+}
+
+func (x *FriendListById) GetSendUserNotice() string {
+	if x != nil {
+		return x.SendUserNotice
+	}
+	return ""
+}
+
+func (x *FriendListById) GetRevUserNotice() string {
+	if x != nil {
+		return x.RevUserNotice
+	}
+	return ""
+}
+
+func (x *FriendListById) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *FriendListById) GetIsDeleted() bool {
+	if x != nil {
+		return x.IsDeleted
+	}
+	return false
+}
+
+func (x *FriendListById) GetVersion() int64 {
+	if x != nil {
+		return x.Version
 	}
 	return 0
 }
 
-// 定义GetFriendVerifyVersionReq消息
-type GetFriendVerifyVersionReq struct {
+func (x *FriendListById) GetCreateAt() int64 {
+	if x != nil {
+		return x.CreateAt
+	}
+	return 0
+}
+
+func (x *FriendListById) GetUpdateAt() int64 {
+	if x != nil {
+		return x.UpdateAt
+	}
+	return 0
+}
+
+type GetFriendsListByIdsRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"` // 用户ID
+	Friends       []*FriendListById      `protobuf:"bytes,1,rep,name=friends,proto3" json:"friends,omitempty"` // 好友列表
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetFriendVerifyVersionReq) Reset() {
-	*x = GetFriendVerifyVersionReq{}
+func (x *GetFriendsListByIdsRes) Reset() {
+	*x = GetFriendsListByIdsRes{}
 	mi := &file_friend_rpc_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetFriendVerifyVersionReq) String() string {
+func (x *GetFriendsListByIdsRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetFriendVerifyVersionReq) ProtoMessage() {}
+func (*GetFriendsListByIdsRes) ProtoMessage() {}
 
-func (x *GetFriendVerifyVersionReq) ProtoReflect() protoreflect.Message {
+func (x *GetFriendsListByIdsRes) ProtoReflect() protoreflect.Message {
 	mi := &file_friend_rpc_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -232,41 +310,93 @@ func (x *GetFriendVerifyVersionReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetFriendVerifyVersionReq.ProtoReflect.Descriptor instead.
-func (*GetFriendVerifyVersionReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetFriendsListByIdsRes.ProtoReflect.Descriptor instead.
+func (*GetFriendsListByIdsRes) Descriptor() ([]byte, []int) {
 	return file_friend_rpc_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetFriendVerifyVersionReq) GetUserId() string {
+func (x *GetFriendsListByIdsRes) GetFriends() []*FriendListById {
+	if x != nil {
+		return x.Friends
+	}
+	return nil
+}
+
+// 获取用户好友版本信息
+type GetFriendVersionsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"` // 用户ID
+	Since         int64                  `protobuf:"varint,2,opt,name=since,proto3" json:"since,omitempty"`  // 从这个版本号之后开始同步
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFriendVersionsReq) Reset() {
+	*x = GetFriendVersionsReq{}
+	mi := &file_friend_rpc_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVersionsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVersionsReq) ProtoMessage() {}
+
+func (x *GetFriendVersionsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVersionsReq.ProtoReflect.Descriptor instead.
+func (*GetFriendVersionsReq) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetFriendVersionsReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-// 定义GetFriendVerifyVersionRes消息
-type GetFriendVerifyVersionRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	LatestVersion int64                  `protobuf:"varint,1,opt,name=latestVersion,proto3" json:"latestVersion,omitempty"` // 最新版本号
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+func (x *GetFriendVersionsReq) GetSince() int64 {
+	if x != nil {
+		return x.Since
+	}
+	return 0
 }
 
-func (x *GetFriendVerifyVersionRes) Reset() {
-	*x = GetFriendVerifyVersionRes{}
-	mi := &file_friend_rpc_proto_msgTypes[5]
+type GetFriendVersionsRes struct {
+	state          protoimpl.MessageState                `protogen:"open.v1"`
+	FriendVersions []*GetFriendVersionsRes_FriendVersion `protobuf:"bytes,1,rep,name=friendVersions,proto3" json:"friendVersions,omitempty"` // 好友版本列表
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetFriendVersionsRes) Reset() {
+	*x = GetFriendVersionsRes{}
+	mi := &file_friend_rpc_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetFriendVerifyVersionRes) String() string {
+func (x *GetFriendVersionsRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetFriendVerifyVersionRes) ProtoMessage() {}
+func (*GetFriendVersionsRes) ProtoMessage() {}
 
-func (x *GetFriendVerifyVersionRes) ProtoReflect() protoreflect.Message {
-	mi := &file_friend_rpc_proto_msgTypes[5]
+func (x *GetFriendVersionsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -277,16 +407,326 @@ func (x *GetFriendVerifyVersionRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetFriendVerifyVersionRes.ProtoReflect.Descriptor instead.
-func (*GetFriendVerifyVersionRes) Descriptor() ([]byte, []int) {
-	return file_friend_rpc_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use GetFriendVersionsRes.ProtoReflect.Descriptor instead.
+func (*GetFriendVersionsRes) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetFriendVerifyVersionRes) GetLatestVersion() int64 {
+func (x *GetFriendVersionsRes) GetFriendVersions() []*GetFriendVersionsRes_FriendVersion {
 	if x != nil {
-		return x.LatestVersion
+		return x.FriendVersions
+	}
+	return nil
+}
+
+// 获取用户好友验证版本信息
+type GetFriendVerifyVersionsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"` // 用户ID
+	Since         int64                  `protobuf:"varint,2,opt,name=since,proto3" json:"since,omitempty"`  // 从这个版本号之后开始同步
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFriendVerifyVersionsReq) Reset() {
+	*x = GetFriendVerifyVersionsReq{}
+	mi := &file_friend_rpc_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVerifyVersionsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVerifyVersionsReq) ProtoMessage() {}
+
+func (x *GetFriendVerifyVersionsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVerifyVersionsReq.ProtoReflect.Descriptor instead.
+func (*GetFriendVerifyVersionsReq) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetFriendVerifyVersionsReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetFriendVerifyVersionsReq) GetSince() int64 {
+	if x != nil {
+		return x.Since
 	}
 	return 0
+}
+
+type GetFriendVerifyVersionsRes struct {
+	state                protoimpl.MessageState                            `protogen:"open.v1"`
+	FriendVerifyVersions []*GetFriendVerifyVersionsRes_FriendVerifyVersion `protobuf:"bytes,1,rep,name=friendVerifyVersions,proto3" json:"friendVerifyVersions,omitempty"` // 好友验证版本列表
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetFriendVerifyVersionsRes) Reset() {
+	*x = GetFriendVerifyVersionsRes{}
+	mi := &file_friend_rpc_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVerifyVersionsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVerifyVersionsRes) ProtoMessage() {}
+
+func (x *GetFriendVerifyVersionsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVerifyVersionsRes.ProtoReflect.Descriptor instead.
+func (*GetFriendVerifyVersionsRes) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetFriendVerifyVersionsRes) GetFriendVerifyVersions() []*GetFriendVerifyVersionsRes_FriendVerifyVersion {
+	if x != nil {
+		return x.FriendVerifyVersions
+	}
+	return nil
+}
+
+// 通过ID获取好友验证列表
+type GetFriendVerifiesListByIdsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uuids         []string               `protobuf:"bytes,1,rep,name=uuids,proto3" json:"uuids,omitempty"`  // 验证记录UUID列表
+	Since         int64                  `protobuf:"varint,2,opt,name=since,proto3" json:"since,omitempty"` // 时间戳，从此时间戳之后获取变更的记录
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFriendVerifiesListByIdsReq) Reset() {
+	*x = GetFriendVerifiesListByIdsReq{}
+	mi := &file_friend_rpc_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVerifiesListByIdsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVerifiesListByIdsReq) ProtoMessage() {}
+
+func (x *GetFriendVerifiesListByIdsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVerifiesListByIdsReq.ProtoReflect.Descriptor instead.
+func (*GetFriendVerifiesListByIdsReq) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetFriendVerifiesListByIdsReq) GetUuids() []string {
+	if x != nil {
+		return x.Uuids
+	}
+	return nil
+}
+
+func (x *GetFriendVerifiesListByIdsReq) GetSince() int64 {
+	if x != nil {
+		return x.Since
+	}
+	return 0
+}
+
+type FriendVerifyListById struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`              // 验证记录UUID
+	SendUserId    string                 `protobuf:"bytes,2,opt,name=sendUserId,proto3" json:"sendUserId,omitempty"`  // 发送者用户ID
+	RevUserId     string                 `protobuf:"bytes,3,opt,name=revUserId,proto3" json:"revUserId,omitempty"`    // 接收者用户ID
+	SendStatus    int32                  `protobuf:"varint,4,opt,name=sendStatus,proto3" json:"sendStatus,omitempty"` // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+	RevStatus     int32                  `protobuf:"varint,5,opt,name=revStatus,proto3" json:"revStatus,omitempty"`   // 接收方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+	Message       string                 `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty"`        // 附加消息
+	Source        string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`          // 添加好友来源
+	Version       int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`       // 版本号
+	CreateAt      int64                  `protobuf:"varint,9,opt,name=createAt,proto3" json:"createAt,omitempty"`     // 创建时间
+	UpdateAt      int64                  `protobuf:"varint,10,opt,name=updateAt,proto3" json:"updateAt,omitempty"`    // 更新时间
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FriendVerifyListById) Reset() {
+	*x = FriendVerifyListById{}
+	mi := &file_friend_rpc_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FriendVerifyListById) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FriendVerifyListById) ProtoMessage() {}
+
+func (x *FriendVerifyListById) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FriendVerifyListById.ProtoReflect.Descriptor instead.
+func (*FriendVerifyListById) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *FriendVerifyListById) GetUuid() string {
+	if x != nil {
+		return x.Uuid
+	}
+	return ""
+}
+
+func (x *FriendVerifyListById) GetSendUserId() string {
+	if x != nil {
+		return x.SendUserId
+	}
+	return ""
+}
+
+func (x *FriendVerifyListById) GetRevUserId() string {
+	if x != nil {
+		return x.RevUserId
+	}
+	return ""
+}
+
+func (x *FriendVerifyListById) GetSendStatus() int32 {
+	if x != nil {
+		return x.SendStatus
+	}
+	return 0
+}
+
+func (x *FriendVerifyListById) GetRevStatus() int32 {
+	if x != nil {
+		return x.RevStatus
+	}
+	return 0
+}
+
+func (x *FriendVerifyListById) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *FriendVerifyListById) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *FriendVerifyListById) GetVersion() int64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *FriendVerifyListById) GetCreateAt() int64 {
+	if x != nil {
+		return x.CreateAt
+	}
+	return 0
+}
+
+func (x *FriendVerifyListById) GetUpdateAt() int64 {
+	if x != nil {
+		return x.UpdateAt
+	}
+	return 0
+}
+
+type GetFriendVerifiesListByIdsRes struct {
+	state          protoimpl.MessageState  `protogen:"open.v1"`
+	FriendVerifies []*FriendVerifyListById `protobuf:"bytes,1,rep,name=friendVerifies,proto3" json:"friendVerifies,omitempty"` // 好友验证列表
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetFriendVerifiesListByIdsRes) Reset() {
+	*x = GetFriendVerifiesListByIdsRes{}
+	mi := &file_friend_rpc_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVerifiesListByIdsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVerifiesListByIdsRes) ProtoMessage() {}
+
+func (x *GetFriendVerifiesListByIdsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVerifiesListByIdsRes.ProtoReflect.Descriptor instead.
+func (*GetFriendVerifiesListByIdsRes) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetFriendVerifiesListByIdsRes) GetFriendVerifies() []*FriendVerifyListById {
+	if x != nil {
+		return x.FriendVerifies
+	}
+	return nil
 }
 
 // 获取好友详细信息（包含用户基础信息和好友关系信息）
@@ -300,7 +740,7 @@ type GetFriendDetailReq struct {
 
 func (x *GetFriendDetailReq) Reset() {
 	*x = GetFriendDetailReq{}
-	mi := &file_friend_rpc_proto_msgTypes[6]
+	mi := &file_friend_rpc_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -312,7 +752,7 @@ func (x *GetFriendDetailReq) String() string {
 func (*GetFriendDetailReq) ProtoMessage() {}
 
 func (x *GetFriendDetailReq) ProtoReflect() protoreflect.Message {
-	mi := &file_friend_rpc_proto_msgTypes[6]
+	mi := &file_friend_rpc_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -325,7 +765,7 @@ func (x *GetFriendDetailReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFriendDetailReq.ProtoReflect.Descriptor instead.
 func (*GetFriendDetailReq) Descriptor() ([]byte, []int) {
-	return file_friend_rpc_proto_rawDescGZIP(), []int{6}
+	return file_friend_rpc_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetFriendDetailReq) GetUserId() string {
@@ -355,7 +795,7 @@ type FriendDetailItem struct {
 
 func (x *FriendDetailItem) Reset() {
 	*x = FriendDetailItem{}
-	mi := &file_friend_rpc_proto_msgTypes[7]
+	mi := &file_friend_rpc_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -367,7 +807,7 @@ func (x *FriendDetailItem) String() string {
 func (*FriendDetailItem) ProtoMessage() {}
 
 func (x *FriendDetailItem) ProtoReflect() protoreflect.Message {
-	mi := &file_friend_rpc_proto_msgTypes[7]
+	mi := &file_friend_rpc_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -380,7 +820,7 @@ func (x *FriendDetailItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendDetailItem.ProtoReflect.Descriptor instead.
 func (*FriendDetailItem) Descriptor() ([]byte, []int) {
-	return file_friend_rpc_proto_rawDescGZIP(), []int{7}
+	return file_friend_rpc_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *FriendDetailItem) GetUserId() string {
@@ -427,7 +867,7 @@ type GetFriendDetailRes struct {
 
 func (x *GetFriendDetailRes) Reset() {
 	*x = GetFriendDetailRes{}
-	mi := &file_friend_rpc_proto_msgTypes[8]
+	mi := &file_friend_rpc_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -439,7 +879,7 @@ func (x *GetFriendDetailRes) String() string {
 func (*GetFriendDetailRes) ProtoMessage() {}
 
 func (x *GetFriendDetailRes) ProtoReflect() protoreflect.Message {
-	mi := &file_friend_rpc_proto_msgTypes[8]
+	mi := &file_friend_rpc_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -452,7 +892,7 @@ func (x *GetFriendDetailRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFriendDetailRes.ProtoReflect.Descriptor instead.
 func (*GetFriendDetailRes) Descriptor() ([]byte, []int) {
-	return file_friend_rpc_proto_rawDescGZIP(), []int{8}
+	return file_friend_rpc_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetFriendDetailRes) GetFriends() []*FriendDetailItem {
@@ -460,6 +900,110 @@ func (x *GetFriendDetailRes) GetFriends() []*FriendDetailItem {
 		return x.Friends
 	}
 	return nil
+}
+
+type GetFriendVersionsRes_FriendVersion struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`            // 唯一ID
+	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFriendVersionsRes_FriendVersion) Reset() {
+	*x = GetFriendVersionsRes_FriendVersion{}
+	mi := &file_friend_rpc_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVersionsRes_FriendVersion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVersionsRes_FriendVersion) ProtoMessage() {}
+
+func (x *GetFriendVersionsRes_FriendVersion) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVersionsRes_FriendVersion.ProtoReflect.Descriptor instead.
+func (*GetFriendVersionsRes_FriendVersion) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{6, 0}
+}
+
+func (x *GetFriendVersionsRes_FriendVersion) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *GetFriendVersionsRes_FriendVersion) GetVersion() int64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+type GetFriendVerifyVersionsRes_FriendVerifyVersion struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 验证记录UUID
+	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) Reset() {
+	*x = GetFriendVerifyVersionsRes_FriendVerifyVersion{}
+	mi := &file_friend_rpc_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFriendVerifyVersionsRes_FriendVerifyVersion) ProtoMessage() {}
+
+func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) ProtoReflect() protoreflect.Message {
+	mi := &file_friend_rpc_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFriendVerifyVersionsRes_FriendVerifyVersion.ProtoReflect.Descriptor instead.
+func (*GetFriendVerifyVersionsRes_FriendVerifyVersion) Descriptor() ([]byte, []int) {
+	return file_friend_rpc_proto_rawDescGZIP(), []int{8, 0}
+}
+
+func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) GetUuid() string {
+	if x != nil {
+		return x.Uuid
+	}
+	return ""
+}
+
+func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) GetVersion() int64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
 }
 
 var File_friend_rpc_proto protoreflect.FileDescriptor
@@ -472,15 +1016,63 @@ const file_friend_rpc_proto_rawDesc = "" +
 	"\x06UserID\x18\x01 \x01(\tR\x06UserID\"5\n" +
 	"\x14GetFriendIdsResponse\x12\x1d\n" +
 	"\n" +
-	"friend_ids\x18\x01 \x03(\tR\tfriendIds\"-\n" +
-	"\x13GetFriendVersionReq\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\";\n" +
-	"\x13GetFriendVersionRes\x12$\n" +
-	"\rlatestVersion\x18\x01 \x01(\x03R\rlatestVersion\"3\n" +
-	"\x19GetFriendVerifyVersionReq\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\"A\n" +
-	"\x19GetFriendVerifyVersionRes\x12$\n" +
-	"\rlatestVersion\x18\x01 \x01(\x03R\rlatestVersion\"J\n" +
+	"friend_ids\x18\x01 \x03(\tR\tfriendIds\"@\n" +
+	"\x16GetFriendsListByIdsReq\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\x12\x14\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xb4\x02\n" +
+	"\x0eFriendListById\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
+	"\n" +
+	"sendUserId\x18\x02 \x01(\tR\n" +
+	"sendUserId\x12\x1c\n" +
+	"\trevUserId\x18\x03 \x01(\tR\trevUserId\x12&\n" +
+	"\x0esendUserNotice\x18\x04 \x01(\tR\x0esendUserNotice\x12$\n" +
+	"\rrevUserNotice\x18\x05 \x01(\tR\rrevUserNotice\x12\x16\n" +
+	"\x06source\x18\x06 \x01(\tR\x06source\x12\x1c\n" +
+	"\tisDeleted\x18\a \x01(\bR\tisDeleted\x12\x18\n" +
+	"\aversion\x18\b \x01(\x03R\aversion\x12\x1a\n" +
+	"\bcreateAt\x18\t \x01(\x03R\bcreateAt\x12\x1a\n" +
+	"\bupdateAt\x18\n" +
+	" \x01(\x03R\bupdateAt\"N\n" +
+	"\x16GetFriendsListByIdsRes\x124\n" +
+	"\afriends\x18\x01 \x03(\v2\x1a.friend_rpc.FriendListByIdR\afriends\"D\n" +
+	"\x14GetFriendVersionsReq\x12\x16\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xa9\x01\n" +
+	"\x14GetFriendVersionsRes\x12V\n" +
+	"\x0efriendVersions\x18\x01 \x03(\v2..friend_rpc.GetFriendVersionsRes.FriendVersionR\x0efriendVersions\x1a9\n" +
+	"\rFriendVersion\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"J\n" +
+	"\x1aGetFriendVerifyVersionsReq\x12\x16\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xd1\x01\n" +
+	"\x1aGetFriendVerifyVersionsRes\x12n\n" +
+	"\x14friendVerifyVersions\x18\x01 \x03(\v2:.friend_rpc.GetFriendVerifyVersionsRes.FriendVerifyVersionR\x14friendVerifyVersions\x1aC\n" +
+	"\x13FriendVerifyVersion\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"K\n" +
+	"\x1dGetFriendVerifiesListByIdsReq\x12\x14\n" +
+	"\x05uuids\x18\x01 \x03(\tR\x05uuids\x12\x14\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xaa\x02\n" +
+	"\x14FriendVerifyListById\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x1e\n" +
+	"\n" +
+	"sendUserId\x18\x02 \x01(\tR\n" +
+	"sendUserId\x12\x1c\n" +
+	"\trevUserId\x18\x03 \x01(\tR\trevUserId\x12\x1e\n" +
+	"\n" +
+	"sendStatus\x18\x04 \x01(\x05R\n" +
+	"sendStatus\x12\x1c\n" +
+	"\trevStatus\x18\x05 \x01(\x05R\trevStatus\x12\x18\n" +
+	"\amessage\x18\x06 \x01(\tR\amessage\x12\x16\n" +
+	"\x06source\x18\a \x01(\tR\x06source\x12\x18\n" +
+	"\aversion\x18\b \x01(\x03R\aversion\x12\x1a\n" +
+	"\bcreateAt\x18\t \x01(\x03R\bcreateAt\x12\x1a\n" +
+	"\bupdateAt\x18\n" +
+	" \x01(\x03R\bupdateAt\"i\n" +
+	"\x1dGetFriendVerifiesListByIdsRes\x12H\n" +
+	"\x0efriendVerifies\x18\x01 \x03(\v2 .friend_rpc.FriendVerifyListByIdR\x0efriendVerifies\"J\n" +
 	"\x12GetFriendDetailReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1c\n" +
 	"\tfriendIds\x18\x02 \x03(\tR\tfriendIds\"\x92\x01\n" +
@@ -491,11 +1083,13 @@ const file_friend_rpc_proto_rawDesc = "" +
 	"\x06notice\x18\x04 \x01(\tR\x06notice\x12\x1a\n" +
 	"\bfriendAt\x18\x05 \x01(\x03R\bfriendAt\"L\n" +
 	"\x12GetFriendDetailRes\x126\n" +
-	"\afriends\x18\x01 \x03(\v2\x1c.friend_rpc.FriendDetailItemR\afriends2\xec\x02\n" +
+	"\afriends\x18\x01 \x03(\v2\x1c.friend_rpc.FriendDetailItemR\afriends2\xc5\x04\n" +
 	"\x06friend\x12Q\n" +
-	"\fGetFriendIds\x12\x1f.friend_rpc.GetFriendIdsRequest\x1a .friend_rpc.GetFriendIdsResponse\x12T\n" +
-	"\x10GetFriendVersion\x12\x1f.friend_rpc.GetFriendVersionReq\x1a\x1f.friend_rpc.GetFriendVersionRes\x12f\n" +
-	"\x16GetFriendVerifyVersion\x12%.friend_rpc.GetFriendVerifyVersionReq\x1a%.friend_rpc.GetFriendVerifyVersionRes\x12Q\n" +
+	"\fGetFriendIds\x12\x1f.friend_rpc.GetFriendIdsRequest\x1a .friend_rpc.GetFriendIdsResponse\x12W\n" +
+	"\x11GetFriendVersions\x12 .friend_rpc.GetFriendVersionsReq\x1a .friend_rpc.GetFriendVersionsRes\x12i\n" +
+	"\x17GetFriendVerifyVersions\x12&.friend_rpc.GetFriendVerifyVersionsReq\x1a&.friend_rpc.GetFriendVerifyVersionsRes\x12]\n" +
+	"\x13GetFriendsListByIds\x12\".friend_rpc.GetFriendsListByIdsReq\x1a\".friend_rpc.GetFriendsListByIdsRes\x12r\n" +
+	"\x1aGetFriendVerifiesListByIds\x12).friend_rpc.GetFriendVerifiesListByIdsReq\x1a).friend_rpc.GetFriendVerifiesListByIdsRes\x12Q\n" +
 	"\x0fGetFriendDetail\x12\x1e.friend_rpc.GetFriendDetailReq\x1a\x1e.friend_rpc.GetFriendDetailResB\x0eZ\f./friend_rpcb\x06proto3"
 
 var (
@@ -510,33 +1104,49 @@ func file_friend_rpc_proto_rawDescGZIP() []byte {
 	return file_friend_rpc_proto_rawDescData
 }
 
-var file_friend_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_friend_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_friend_rpc_proto_goTypes = []any{
-	(*GetFriendIdsRequest)(nil),       // 0: friend_rpc.GetFriendIdsRequest
-	(*GetFriendIdsResponse)(nil),      // 1: friend_rpc.GetFriendIdsResponse
-	(*GetFriendVersionReq)(nil),       // 2: friend_rpc.GetFriendVersionReq
-	(*GetFriendVersionRes)(nil),       // 3: friend_rpc.GetFriendVersionRes
-	(*GetFriendVerifyVersionReq)(nil), // 4: friend_rpc.GetFriendVerifyVersionReq
-	(*GetFriendVerifyVersionRes)(nil), // 5: friend_rpc.GetFriendVerifyVersionRes
-	(*GetFriendDetailReq)(nil),        // 6: friend_rpc.GetFriendDetailReq
-	(*FriendDetailItem)(nil),          // 7: friend_rpc.FriendDetailItem
-	(*GetFriendDetailRes)(nil),        // 8: friend_rpc.GetFriendDetailRes
+	(*GetFriendIdsRequest)(nil),                            // 0: friend_rpc.GetFriendIdsRequest
+	(*GetFriendIdsResponse)(nil),                           // 1: friend_rpc.GetFriendIdsResponse
+	(*GetFriendsListByIdsReq)(nil),                         // 2: friend_rpc.GetFriendsListByIdsReq
+	(*FriendListById)(nil),                                 // 3: friend_rpc.FriendListById
+	(*GetFriendsListByIdsRes)(nil),                         // 4: friend_rpc.GetFriendsListByIdsRes
+	(*GetFriendVersionsReq)(nil),                           // 5: friend_rpc.GetFriendVersionsReq
+	(*GetFriendVersionsRes)(nil),                           // 6: friend_rpc.GetFriendVersionsRes
+	(*GetFriendVerifyVersionsReq)(nil),                     // 7: friend_rpc.GetFriendVerifyVersionsReq
+	(*GetFriendVerifyVersionsRes)(nil),                     // 8: friend_rpc.GetFriendVerifyVersionsRes
+	(*GetFriendVerifiesListByIdsReq)(nil),                  // 9: friend_rpc.GetFriendVerifiesListByIdsReq
+	(*FriendVerifyListById)(nil),                           // 10: friend_rpc.FriendVerifyListById
+	(*GetFriendVerifiesListByIdsRes)(nil),                  // 11: friend_rpc.GetFriendVerifiesListByIdsRes
+	(*GetFriendDetailReq)(nil),                             // 12: friend_rpc.GetFriendDetailReq
+	(*FriendDetailItem)(nil),                               // 13: friend_rpc.FriendDetailItem
+	(*GetFriendDetailRes)(nil),                             // 14: friend_rpc.GetFriendDetailRes
+	(*GetFriendVersionsRes_FriendVersion)(nil),             // 15: friend_rpc.GetFriendVersionsRes.FriendVersion
+	(*GetFriendVerifyVersionsRes_FriendVerifyVersion)(nil), // 16: friend_rpc.GetFriendVerifyVersionsRes.FriendVerifyVersion
 }
 var file_friend_rpc_proto_depIdxs = []int32{
-	7, // 0: friend_rpc.GetFriendDetailRes.friends:type_name -> friend_rpc.FriendDetailItem
-	0, // 1: friend_rpc.friend.GetFriendIds:input_type -> friend_rpc.GetFriendIdsRequest
-	2, // 2: friend_rpc.friend.GetFriendVersion:input_type -> friend_rpc.GetFriendVersionReq
-	4, // 3: friend_rpc.friend.GetFriendVerifyVersion:input_type -> friend_rpc.GetFriendVerifyVersionReq
-	6, // 4: friend_rpc.friend.GetFriendDetail:input_type -> friend_rpc.GetFriendDetailReq
-	1, // 5: friend_rpc.friend.GetFriendIds:output_type -> friend_rpc.GetFriendIdsResponse
-	3, // 6: friend_rpc.friend.GetFriendVersion:output_type -> friend_rpc.GetFriendVersionRes
-	5, // 7: friend_rpc.friend.GetFriendVerifyVersion:output_type -> friend_rpc.GetFriendVerifyVersionRes
-	8, // 8: friend_rpc.friend.GetFriendDetail:output_type -> friend_rpc.GetFriendDetailRes
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3,  // 0: friend_rpc.GetFriendsListByIdsRes.friends:type_name -> friend_rpc.FriendListById
+	15, // 1: friend_rpc.GetFriendVersionsRes.friendVersions:type_name -> friend_rpc.GetFriendVersionsRes.FriendVersion
+	16, // 2: friend_rpc.GetFriendVerifyVersionsRes.friendVerifyVersions:type_name -> friend_rpc.GetFriendVerifyVersionsRes.FriendVerifyVersion
+	10, // 3: friend_rpc.GetFriendVerifiesListByIdsRes.friendVerifies:type_name -> friend_rpc.FriendVerifyListById
+	13, // 4: friend_rpc.GetFriendDetailRes.friends:type_name -> friend_rpc.FriendDetailItem
+	0,  // 5: friend_rpc.friend.GetFriendIds:input_type -> friend_rpc.GetFriendIdsRequest
+	5,  // 6: friend_rpc.friend.GetFriendVersions:input_type -> friend_rpc.GetFriendVersionsReq
+	7,  // 7: friend_rpc.friend.GetFriendVerifyVersions:input_type -> friend_rpc.GetFriendVerifyVersionsReq
+	2,  // 8: friend_rpc.friend.GetFriendsListByIds:input_type -> friend_rpc.GetFriendsListByIdsReq
+	9,  // 9: friend_rpc.friend.GetFriendVerifiesListByIds:input_type -> friend_rpc.GetFriendVerifiesListByIdsReq
+	12, // 10: friend_rpc.friend.GetFriendDetail:input_type -> friend_rpc.GetFriendDetailReq
+	1,  // 11: friend_rpc.friend.GetFriendIds:output_type -> friend_rpc.GetFriendIdsResponse
+	6,  // 12: friend_rpc.friend.GetFriendVersions:output_type -> friend_rpc.GetFriendVersionsRes
+	8,  // 13: friend_rpc.friend.GetFriendVerifyVersions:output_type -> friend_rpc.GetFriendVerifyVersionsRes
+	4,  // 14: friend_rpc.friend.GetFriendsListByIds:output_type -> friend_rpc.GetFriendsListByIdsRes
+	11, // 15: friend_rpc.friend.GetFriendVerifiesListByIds:output_type -> friend_rpc.GetFriendVerifiesListByIdsRes
+	14, // 16: friend_rpc.friend.GetFriendDetail:output_type -> friend_rpc.GetFriendDetailRes
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_friend_rpc_proto_init() }
@@ -550,7 +1160,7 @@ func file_friend_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_friend_rpc_proto_rawDesc), len(file_friend_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -17,5 +17,5 @@ type ChatUserConversation struct {
 	IsPinned       bool   `gorm:"default:false" json:"isPinned"`        // 置顶
 	IsMuted        bool   `gorm:"default:false" json:"isMuted"`         // 免打扰
 	UserReadSeq    int64  `gorm:"not;default:0" json:"userReadSeq"`     // 当前用户已读游标
-	Version        int64  `gorm:"not;default:0;index" json:"version"`   // 配置版本，用于多端同步（基于ConversationID递增，从0开始）
+	Version        int64  `gorm:"not;default:0;index" json:"version"`   // 用户会话设置版本，用于多端同步（基于UserID递增，所有会话设置共享版本号，从1开始）
 }
