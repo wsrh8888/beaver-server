@@ -188,6 +188,17 @@ type (
 	}
 )
 
+// 批量获取好友数据
+type (
+	GetFriendsListByIdsReq {
+		UserID    string   `header:"Beaver-User-Id"` // 用户ID
+		FriendIds []string `json:"friendIds"` // 好友ID列表
+	}
+	GetFriendsListByIdsRes {
+		Friends []FriendSyncItem `json:"friends"` // 好友列表
+	}
+)
+
 service friend {
 	@doc "发送好友验证请求"
 	@handler addFriend
@@ -232,6 +243,10 @@ service friend {
 	@doc "好友验证数据同步"
 	@handler friendVerifySync
 	post /api/friend/verifySync (FriendVerifySyncReq) returns (FriendVerifySyncRes)
+
+	@doc "批量获取好友数据"
+	@handler getFriendsListByIds
+	post /api/friend/getFriendsListByIds (GetFriendsListByIdsReq) returns (GetFriendsListByIdsRes)
 }
 
 // goctl api go -api friend_api.api -dir . --home ../../../template

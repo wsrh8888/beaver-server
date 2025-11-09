@@ -60,6 +60,7 @@ type UserInfoRes struct {
 	Phone    string `json:"phone,optional"` // 用户手机号
 	Email    string `json:"email,optional"` // 用户邮箱（可选）
 	Gender   int8   `json:"gender"`         // 用户性别：1-男 2-女 0-未知
+	Version  int64  `json:"version"`        // 用户数据版本号
 }
 
 type UserSyncItem struct {

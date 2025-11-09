@@ -14,41 +14,41 @@ import (
 )
 
 type (
-	BatchUpdateConversationReq       = chat_rpc.BatchUpdateConversationReq
-	BatchUpdateConversationRes       = chat_rpc.BatchUpdateConversationRes
-	EditMessageReq                   = chat_rpc.EditMessageReq
-	EditMessageRes                   = chat_rpc.EditMessageRes
-	EmojiMsg                         = chat_rpc.EmojiMsg
-	FileMsg                          = chat_rpc.FileMsg
-	GetConversationSettingVersionReq = chat_rpc.GetConversationSettingVersionReq
-	GetConversationSettingVersionRes = chat_rpc.GetConversationSettingVersionRes
-	GetConversationVersionReq        = chat_rpc.GetConversationVersionReq
-	GetConversationVersionRes        = chat_rpc.GetConversationVersionRes
-	ImageMsg                         = chat_rpc.ImageMsg
-	InitializeConversationReq        = chat_rpc.InitializeConversationReq
-	InitializeConversationRes        = chat_rpc.InitializeConversationRes
-	Msg                              = chat_rpc.Msg
-	RecallMessageReq                 = chat_rpc.RecallMessageReq
-	RecallMessageRes                 = chat_rpc.RecallMessageRes
-	SendMsgReq                       = chat_rpc.SendMsgReq
-	SendMsgRes                       = chat_rpc.SendMsgRes
-	SendSystemMessageReq             = chat_rpc.SendSystemMessageReq
-	SendSystemMessageRes             = chat_rpc.SendSystemMessageRes
-	Sender                           = chat_rpc.Sender
-	TextMsg                          = chat_rpc.TextMsg
-	UpdateConversationReq            = chat_rpc.UpdateConversationReq
-	UpdateConversationRes            = chat_rpc.UpdateConversationRes
-	VideoMsg                         = chat_rpc.VideoMsg
-	VoiceMsg                         = chat_rpc.VoiceMsg
+	BatchUpdateConversationReq              = chat_rpc.BatchUpdateConversationReq
+	BatchUpdateConversationRes              = chat_rpc.BatchUpdateConversationRes
+	ConversationItem                        = chat_rpc.ConversationItem
+	ConversationListById                    = chat_rpc.ConversationListById
+	EmojiMsg                                = chat_rpc.EmojiMsg
+	FileMsg                                 = chat_rpc.FileMsg
+	GetConversationsListByIdsReq            = chat_rpc.GetConversationsListByIdsReq
+	GetConversationsListByIdsRes            = chat_rpc.GetConversationsListByIdsRes
+	GetUserConversationSettingsListByIdsReq = chat_rpc.GetUserConversationSettingsListByIdsReq
+	GetUserConversationSettingsListByIdsRes = chat_rpc.GetUserConversationSettingsListByIdsRes
+	GetUserConversationsReq                 = chat_rpc.GetUserConversationsReq
+	GetUserConversationsRes                 = chat_rpc.GetUserConversationsRes
+	ImageMsg                                = chat_rpc.ImageMsg
+	InitializeConversationReq               = chat_rpc.InitializeConversationReq
+	InitializeConversationRes               = chat_rpc.InitializeConversationRes
+	Msg                                     = chat_rpc.Msg
+	SendMsgReq                              = chat_rpc.SendMsgReq
+	SendMsgRes                              = chat_rpc.SendMsgRes
+	SendSystemMessageReq                    = chat_rpc.SendSystemMessageReq
+	SendSystemMessageRes                    = chat_rpc.SendSystemMessageRes
+	Sender                                  = chat_rpc.Sender
+	TextMsg                                 = chat_rpc.TextMsg
+	UpdateConversationReq                   = chat_rpc.UpdateConversationReq
+	UpdateConversationRes                   = chat_rpc.UpdateConversationRes
+	UserConversationSettingListById         = chat_rpc.UserConversationSettingListById
+	VideoMsg                                = chat_rpc.VideoMsg
+	VoiceMsg                                = chat_rpc.VoiceMsg
 
 	Chat interface {
 		SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)
 		UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error)
 		BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error)
-		EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error)
-		RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error)
-		GetConversationVersion(ctx context.Context, in *GetConversationVersionReq, opts ...grpc.CallOption) (*GetConversationVersionRes, error)
-		GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error)
+		GetUserConversations(ctx context.Context, in *GetUserConversationsReq, opts ...grpc.CallOption) (*GetUserConversationsRes, error)
+		GetConversationsListByIds(ctx context.Context, in *GetConversationsListByIdsReq, opts ...grpc.CallOption) (*GetConversationsListByIdsRes, error)
+		GetUserConversationSettingsListByIds(ctx context.Context, in *GetUserConversationSettingsListByIdsReq, opts ...grpc.CallOption) (*GetUserConversationSettingsListByIdsRes, error)
 		InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error)
 		SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
 	}
@@ -79,24 +79,19 @@ func (m *defaultChat) BatchUpdateConversation(ctx context.Context, in *BatchUpda
 	return client.BatchUpdateConversation(ctx, in, opts...)
 }
 
-func (m *defaultChat) EditMessage(ctx context.Context, in *EditMessageReq, opts ...grpc.CallOption) (*EditMessageRes, error) {
+func (m *defaultChat) GetUserConversations(ctx context.Context, in *GetUserConversationsReq, opts ...grpc.CallOption) (*GetUserConversationsRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
-	return client.EditMessage(ctx, in, opts...)
+	return client.GetUserConversations(ctx, in, opts...)
 }
 
-func (m *defaultChat) RecallMessage(ctx context.Context, in *RecallMessageReq, opts ...grpc.CallOption) (*RecallMessageRes, error) {
+func (m *defaultChat) GetConversationsListByIds(ctx context.Context, in *GetConversationsListByIdsReq, opts ...grpc.CallOption) (*GetConversationsListByIdsRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
-	return client.RecallMessage(ctx, in, opts...)
+	return client.GetConversationsListByIds(ctx, in, opts...)
 }
 
-func (m *defaultChat) GetConversationVersion(ctx context.Context, in *GetConversationVersionReq, opts ...grpc.CallOption) (*GetConversationVersionRes, error) {
+func (m *defaultChat) GetUserConversationSettingsListByIds(ctx context.Context, in *GetUserConversationSettingsListByIdsReq, opts ...grpc.CallOption) (*GetUserConversationSettingsListByIdsRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
-	return client.GetConversationVersion(ctx, in, opts...)
-}
-
-func (m *defaultChat) GetConversationSettingVersion(ctx context.Context, in *GetConversationSettingVersionReq, opts ...grpc.CallOption) (*GetConversationSettingVersionRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
-	return client.GetConversationSettingVersion(ctx, in, opts...)
+	return client.GetUserConversationSettingsListByIds(ctx, in, opts...)
 }
 
 func (m *defaultChat) InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error) {

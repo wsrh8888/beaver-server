@@ -26,7 +26,7 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 }
 
 func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRes, err error) {
-	fmt.Println("获取用户的基础信息, UserID: %v,\n", req.UserID)
+	fmt.Printf("获取用户的基础信息, UserID: %v\n", req.UserID)
 
 	// 直接从数据库查询，避免RPC调用自身服务
 	var user user_models.UserModel
@@ -44,6 +44,7 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		Phone:    user.Phone,
 		Email:    user.Email,
 		Gender:   user.Gender,
+		Version:  user.Version,
 	}
 
 	return resp, nil

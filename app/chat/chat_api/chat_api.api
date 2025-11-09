@@ -257,6 +257,28 @@ type (
 	}
 )
 
+// 批量获取会话数据
+type (
+	GetConversationsListByIdsReq {
+		UserID          string   `header:"Beaver-User-Id"` // 用户ID
+		ConversationIds []string `json:"conversationIds"` // 会话ID列表
+	}
+	GetConversationsListByIdsRes {
+		Conversations []ConversationSyncItem `json:"conversations"` // 会话列表
+	}
+)
+
+// 批量获取用户会话设置数据
+type (
+	GetUserConversationSettingsListByIdsReq {
+		UserID          string   `header:"Beaver-User-Id"` // 用户ID
+		ConversationIds []string `json:"conversationIds"` // 会话ID列表
+	}
+	GetUserConversationSettingsListByIdsRes {
+		UserConversationSettings []UserConversationSyncItem `json:"userConversationSettings"` // 用户会话设置列表
+	}
+)
+
 service chat {
 	@doc "发送消息"
 	@handler SendMsg
@@ -305,6 +327,14 @@ service chat {
 	@doc "用户会话关系数据同步"
 	@handler userConversationSync
 	post /api/chat/userConversationSync (UserConversationSyncReq) returns (UserConversationSyncRes)
+
+	@doc "批量获取会话数据"
+	@handler getConversationsListByIds
+	post /api/chat/getConversationsListByIds (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
+
+	@doc "批量获取用户会话设置数据"
+	@handler getUserConversationSettingsListByIds
+	post /api/chat/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template

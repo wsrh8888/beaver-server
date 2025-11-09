@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func getSyncCursorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func getSyncChatMessagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetSyncCursorReq
+		var req types.GetSyncChatMessagesReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGetSyncCursorLogic(r.Context(), svcCtx)
-		resp, err := l.GetSyncCursor(&req)
+		l := logic.NewGetSyncChatMessagesLogic(r.Context(), svcCtx)
+		resp, err := l.GetSyncChatMessages(&req)
 		response.Response(r, w, resp, err)
 	}
 }
