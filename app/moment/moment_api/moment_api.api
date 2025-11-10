@@ -1,94 +1,163 @@
 syntax = "v1"
 
-// 创建动态的请求消息
-type CreateMomentReq {
-	UserID  string     `header:"Beaver-User-Id"` // 用户ID
-	Content string     `json:"content"` // 动态内容
-	Files   []FileInfo `json:"files"` // 文件信息列表
-}
+// 基础类型定义
+type (
+	// 创建动态的请求消息
+	CreateMomentReq {
+		UserID  string     `header:"Beaver-User-Id"` // 用户ID
+		Content string     `json:"content"` // 动态内容
+		Files   []FileInfo `json:"files"` // 文件信息列表
+	}
+	// 创建动态的响应消息
+	CreateMomentRes  {}
+	// 获取动态列表的请求消息
+	GetMomentsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID
+		Page   int    `json:"page"` // 页码
+		Limit  int    `json:"limit"` // 每页数量
+	}
+	// 获取动态列表的响应消息
+	GetMomentsRes {
+		Count int64         `json:"count"` // 总数
+		List  []MomentModel `json:"list"` // 动态列表
+	}
+	// 点赞动态的请求消息
+	LikeMomentReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		MomentID uint   `json:"momentId"` // 动态ID
+		Status   bool   `json:"status"` // 点赞状态 true: 点赞 false: 取消点赞
+	}
+	// 点赞动态的响应消息
+	LikeMomentRes  {}
+	// 获取单个动态详情的请求消息
+	GetMomentInfoReq {
+		MomentID string `form:"momendId"` // 动态ID
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+	}
+	// 获取单个动态详情的响应消息
+	GetMomentInfoRes {
+		Moment MomentModel `json:"moment"` // 动态信息
+	}
+	// 文件信息结构体定义
+	FileInfo {
+		fileKey string `json:"fileKey"` // 文件名
+	}
+	// 动态模型定义
+	MomentModel {
+		Id        uint                 `json:"id"` // 动态ID
+		UserID    string               `json:"userId"` // 用户ID
+		UserName  string               `json:"userName"` // 用户名
+		Avatar    string               `json:"avatar"` // 用户头像
+		Content   string               `json:"content"` // 动态内容
+		Files     []FileInfo           `json:"files"` // 文件信息列表
+		Comments  []MomentCommentModel `json:"comments"` // 评论列表
+		Likes     []MomentLikeModel    `json:"likes"` // 点赞列表
+		CreatedAt string               `json:"createdAt"` // 动态创建时间
+	}
+	// 点赞模型定义
+	MomentLikeModel {
+		Id        uint   `json:"id"` // 点赞ID
+		MomentId  uint   `json:"momentId"` // 动态ID
+		UserID    string `json:"userId"` // 用户ID
+		CreatedAt string `json:"createdAt"` // 点赞时间
+		UserName  string `json:"userName"` // 用户名
+		Avatar    string `json:"avatar"` // 用户头像
+	}
+	// 评论模型定义
+	MomentCommentModel {
+		Id        uint   `json:"id"` // 评论ID
+		MomentId  uint   `json:"momentId"` // 动态ID
+		UserID    string `json:"userId"` // 用户ID
+		Content   string `json:"content"` // 评论内容
+		CreatedAt string `json:"createdAt"` // 评论时间
+	}
+	// 删除动态的请求消息
+	DeleteMomentReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		MomentID uint   `form:"momentId"` // 动态ID
+	}
+	// 删除动态的响应消息
+	DeleteMomentRes  {}
+)
 
-// 创建动态的响应消息
-type CreateMomentRes {}
+// 批量获取动态数据（用于数据同步）
+type (
+	GetMomentsBatchReq {
+		UserID       string   `header:"Beaver-User-Id"` // 用户ID
+		UserIds      []string `json:"userIds"` // 要查询的用户ID列表
+		StartVersion int64    `json:"startVersion"` // 起始版本号
+		EndVersion   int64    `json:"endVersion"` // 结束版本号
+		Limit        int      `json:"limit,optional"` // 限制数量，默认100
+	}
+	GetMomentsBatchRes {
+		Moments     []MomentBatchItem `json:"moments"` // 动态数据列表
+		HasMore     bool              `json:"hasMore"` // 是否还有更多数据
+		NextVersion int64             `json:"nextVersion"` // 下次同步的起始版本号
+	}
+	MomentBatchItem {
+		UUID      string `json:"uuid"` // 动态UUID
+		UserID    string `json:"userId"` // 发布者ID
+		Content   string `json:"content"` // 动态内容
+		Files     string `json:"files"` // 文件信息JSON
+		Version   int64  `json:"version"` // 版本号
+		CreateAt  int64  `json:"createAt"` // 创建时间戳
+		UpdateAt  int64  `json:"updateAt"` // 更新时间戳
+		IsDeleted bool   `json:"isDeleted"` // 是否删除
+	}
+)
 
-// 获取动态列表的请求消息
-type GetMomentsReq {
-	UserID string `header:"Beaver-User-Id"` // 用户ID
-	Page   int    `json:"page"` // 页码
-	Limit  int    `json:"limit"` // 每页数量
-}
+// 批量获取评论数据（用于数据同步）
+type (
+	GetCommentsBatchReq {
+		UserID       string   `header:"Beaver-User-Id"` // 用户ID
+		UserIds      []string `json:"userIds"` // 要查询的用户ID列表（动态发布者）
+		StartVersion int64    `json:"startVersion"` // 起始版本号
+		EndVersion   int64    `json:"endVersion"` // 结束版本号
+		Limit        int      `json:"limit,optional"` // 限制数量，默认100
+	}
+	GetCommentsBatchRes {
+		Comments    []CommentBatchItem `json:"comments"` // 评论数据列表
+		HasMore     bool               `json:"hasMore"` // 是否还有更多数据
+		NextVersion int64              `json:"nextVersion"` // 下次同步的起始版本号
+	}
+	CommentBatchItem {
+		UUID         string `json:"uuid"` // 评论UUID
+		MomentID     uint   `json:"momentId"` // 动态ID
+		UserID       string `json:"userId"` // 评论者ID
+		MomentUserID string `json:"momentUserId"` // 动态发布者ID
+		Content      string `json:"content"` // 评论内容
+		Version      int64  `json:"version"` // 版本号
+		CreateAt     int64  `json:"createAt"` // 创建时间戳
+		UpdateAt     int64  `json:"updateAt"` // 更新时间戳
+		IsDeleted    bool   `json:"isDeleted"` // 是否删除
+	}
+)
 
-// 获取动态列表的响应消息
-type GetMomentsRes {
-	Count int64         `json:"count"` // 总数
-	List  []MomentModel `json:"list"` // 动态列表
-}
-
-// 点赞动态的请求消息
-type LikeMomentReq {
-	UserID   string `header:"Beaver-User-Id"` // 用户ID
-	MomentID uint   `json:"momentId"` // 动态ID
-	Status   bool   `json:"status"` // 点赞状态 true: 点赞 false: 取消点赞
-}
-
-// 点赞动态的响应消息
-type LikeMomentRes {}
-
-// 获取单个动态详情的请求消息
-type GetMomentInfoReq {
-	MomentID string `form:"momendId"` // 动态ID
-	UserID   string `header:"Beaver-User-Id"` // 用户ID
-}
-
-// 获取单个动态详情的响应消息
-type GetMomentInfoRes {
-	Moment MomentModel `json:"moment"` // 动态信息
-}
-
-// 文件信息结构体定义
-type FileInfo {
-	fileKey string `json:"fileKey"` // 文件名
-}
-
-// 动态模型定义
-type MomentModel {
-	Id        uint                 `json:"id"` // 动态ID
-	UserID    string               `json:"userId"` // 用户ID
-	UserName  string               `json:"userName"` // 用户名
-	Avatar   string               `json:"avatar"` // 用户头像
-	Content   string               `json:"content"` // 动态内容
-	Files     []FileInfo           `json:"files"` // 文件信息列表
-	Comments  []MomentCommentModel `json:"comments"` // 评论列表
-	Likes     []MomentLikeModel    `json:"likes"` // 点赞列表
-	CreatedAt string               `json:"createdAt"` // 动态创建时间
-}
-
-// 点赞模型定义
-type MomentLikeModel {
-	Id        uint   `json:"id"` // 点赞ID
-	MomentId  uint   `json:"momentId"` // 动态ID
-	UserID    string `json:"userId"` // 用户ID
-	CreatedAt string `json:"createdAt"` // 点赞时间
-	UserName  string `json:"userName"` // 用户名
-	Avatar   string `json:"avatar"` // 用户头像
-}
-
-// 评论模型定义
-type MomentCommentModel {
-	Id        uint   `json:"id"` // 评论ID
-	MomentId  uint   `json:"momentId"` // 动态ID
-	UserID    string `json:"userId"` // 用户ID
-	Content   string `json:"content"` // 评论内容
-	CreatedAt string `json:"createdAt"` // 评论时间
-}
-
-// 删除动态的请求消息
-type DeleteMomentReq {
-	UserID   string `header:"Beaver-User-Id"` // 用户ID
-	MomentID uint   `form:"momentId"` // 动态ID
-}
-
-// 删除动态的响应消息
-type DeleteMomentRes {}
+// 批量获取点赞数据（用于数据同步）
+type (
+	GetLikesBatchReq {
+		UserID       string   `header:"Beaver-User-Id"` // 用户ID
+		UserIds      []string `json:"userIds"` // 要查询的用户ID列表（动态发布者）
+		StartVersion int64    `json:"startVersion"` // 起始版本号
+		EndVersion   int64    `json:"endVersion"` // 结束版本号
+		Limit        int      `json:"limit,optional"` // 限制数量，默认100
+	}
+	GetLikesBatchRes {
+		Likes       []LikeBatchItem `json:"likes"` // 点赞数据列表
+		HasMore     bool            `json:"hasMore"` // 是否还有更多数据
+		NextVersion int64           `json:"nextVersion"` // 下次同步的起始版本号
+	}
+	LikeBatchItem {
+		UUID         string `json:"uuid"` // 点赞UUID
+		MomentID     uint   `json:"momentId"` // 动态ID
+		UserID       string `json:"userId"` // 点赞者ID
+		MomentUserID string `json:"momentUserId"` // 动态发布者ID
+		Version      int64  `json:"version"` // 版本号
+		CreateAt     int64  `json:"createAt"` // 创建时间戳
+		UpdateAt     int64  `json:"updateAt"` // 更新时间戳
+		IsDeleted    bool   `json:"isDeleted"` // 是否删除
+	}
+)
 
 // 定义朋友圈服务
 service moment {
@@ -111,6 +180,18 @@ service moment {
 	@doc "删除动态的接口"
 	@handler DeleteMoment
 	get /api/moment/delete (DeleteMomentReq) returns (DeleteMomentRes)
+
+	@doc "批量获取动态数据（用于数据同步）"
+	@handler GetMomentsBatch
+	post /api/moment/batch (GetMomentsBatchReq) returns (GetMomentsBatchRes)
+
+	@doc "批量获取评论数据（用于数据同步）"
+	@handler GetCommentsBatch
+	post /api/moment/comments-batch (GetCommentsBatchReq) returns (GetCommentsBatchRes)
+
+	@doc "批量获取点赞数据（用于数据同步）"
+	@handler GetLikesBatch
+	post /api/moment/likes-batch (GetLikesBatchReq) returns (GetLikesBatchRes)
 }
 
 // goctl api go -api moment_api.api -dir . --home ../../../template

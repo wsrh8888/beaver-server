@@ -40,6 +40,16 @@ type ChatSyncRes struct {
 	NextSeq  int64             `json:"nextSeq"`  // 下次同步的起始序列号
 }
 
+type ConversationById struct {
+	ConversationID string `json:"conversationId"` // 会话ID
+	Type           int    `json:"type"`           // 会话类型 1=私聊 2=群聊 3=系统会话
+	MaxSeq         int64  `json:"maxSeq"`         // 会话消息的最大Seq
+	LastMessage    string `json:"lastMessage"`    // 会话最后一条消息预览
+	Version        int64  `json:"version"`        // 版本号
+	CreateAt       int64  `json:"createAt"`       // 创建时间戳
+	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
+}
+
 type ConversationInfoReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
@@ -54,29 +64,6 @@ type ConversationInfoRes struct {
 	ConversationID string `json:"conversationId"` //会话id
 	ChatType       int    `json:"chatType"`       //会话类型 1:好友 2:群聊 3:AI机器人
 	Notice         string `json:"notice"`         //备注
-}
-
-type ConversationSyncItem struct {
-	ConversationID string `json:"conversationId"` // 会话ID
-	Type           int    `json:"type"`           // 会话类型 1=私聊 2=群聊 3=系统会话
-	MaxSeq         int64  `json:"maxSeq"`         // 会话消息的最大Seq
-	LastMessage    string `json:"lastMessage"`    // 会话最后一条消息预览
-	Version        int64  `json:"version"`        // 版本号
-	CreateAt       int64  `json:"createAt"`       // 创建时间戳
-	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
-}
-
-type ConversationSyncReq struct {
-	UserID      string `header:"Beaver-User-Id"`
-	FromVersion int64  `json:"fromVersion"`    // 起始版本号
-	ToVersion   int64  `json:"toVersion"`      // 结束版本号
-	Limit       int    `json:"limit,optional"` // 限制数量，默认100
-}
-
-type ConversationSyncRes struct {
-	Conversations []ConversationSyncItem `json:"conversations"` // 会话列表
-	HasMore       bool                   `json:"hasMore"`       // 是否还有更多数据
-	NextVersion   int64                  `json:"nextVersion"`   // 下次同步的起始版本号
 }
 
 type DeleteRecentReq struct {
@@ -129,7 +116,7 @@ type GetConversationsListByIdsReq struct {
 }
 
 type GetConversationsListByIdsRes struct {
-	Conversations []ConversationSyncItem `json:"conversations"` // 会话列表
+	Conversations []ConversationById `json:"conversations"` // 会话列表
 }
 
 type GetUserConversationSettingsListByIdsReq struct {
@@ -138,7 +125,7 @@ type GetUserConversationSettingsListByIdsReq struct {
 }
 
 type GetUserConversationSettingsListByIdsRes struct {
-	UserConversationSettings []UserConversationSyncItem `json:"userConversationSettings"` // 用户会话设置列表
+	UserConversationSettings []UserConversationSettingById `json:"userConversationSettings"` // 用户会话设置列表
 }
 
 type ImageMsg struct {
@@ -234,29 +221,17 @@ type TextMsg struct {
 	Content string `json:"content"` //文本消息内容
 }
 
-type UserConversationSyncItem struct {
+type UserConversationSettingById struct {
 	UserID         string `json:"userId"`         // 用户ID
 	ConversationID string `json:"conversationId"` // 会话ID
-	IsHidden       bool   `json:"isHidden"`       // 是否在会话列表隐藏
+	LastMessage    string `json:"lastMessage"`    // 最后一条消息预览
+	IsHidden       bool   `json:"isHidden"`       // 是否隐藏
 	IsPinned       bool   `json:"isPinned"`       // 是否置顶
 	IsMuted        bool   `json:"isMuted"`        // 是否免打扰
-	UserReadSeq    int64  `json:"userReadSeq"`    // 用户已读到的消息Seq
+	UserReadSeq    int64  `json:"userReadSeq"`    // 用户已读序列号
 	Version        int64  `json:"version"`        // 版本号
 	CreateAt       int64  `json:"createAt"`       // 创建时间戳
 	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
-}
-
-type UserConversationSyncReq struct {
-	UserID      string `header:"Beaver-User-Id"`
-	FromVersion int64  `json:"fromVersion"`    // 起始版本号
-	ToVersion   int64  `json:"toVersion"`      // 结束版本号
-	Limit       int    `json:"limit,optional"` // 限制数量，默认100
-}
-
-type UserConversationSyncRes struct {
-	UserConversations []UserConversationSyncItem `json:"userConversations"` // 用户会话关系列表
-	HasMore           bool                       `json:"hasMore"`           // 是否还有更多数据
-	NextVersion       int64                      `json:"nextVersion"`       // 下次同步的起始版本号
 }
 
 type VideoMsg struct {

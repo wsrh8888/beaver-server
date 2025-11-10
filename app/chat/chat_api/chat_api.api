@@ -207,20 +207,16 @@ type (
 	}
 )
 
-// 会话数据同步
+// 批量获取会话数据
 type (
-	ConversationSyncReq {
-		UserID      string `header:"Beaver-User-Id"`
-		FromVersion int64  `json:"fromVersion"` // 起始版本号
-		ToVersion   int64  `json:"toVersion"` // 结束版本号
-		Limit       int    `json:"limit,optional"` // 限制数量，默认100
+	GetConversationsListByIdsReq {
+		UserID          string   `header:"Beaver-User-Id"` // 用户ID
+		ConversationIds []string `json:"conversationIds"` // 会话ID列表
 	}
-	ConversationSyncRes {
-		Conversations []ConversationSyncItem `json:"conversations"` // 会话列表
-		HasMore       bool                   `json:"hasMore"` // 是否还有更多数据
-		NextVersion   int64                  `json:"nextVersion"` // 下次同步的起始版本号
+	GetConversationsListByIdsRes {
+		Conversations []ConversationById `json:"conversations"` // 会话列表
 	}
-	ConversationSyncItem {
+	ConversationById {
 		ConversationID string `json:"conversationId"` // 会话ID
 		Type           int    `json:"type"` // 会话类型 1=私聊 2=群聊 3=系统会话
 		MaxSeq         int64  `json:"maxSeq"` // 会话消息的最大Seq
@@ -231,43 +227,6 @@ type (
 	}
 )
 
-// 用户会话关系数据同步
-type (
-	UserConversationSyncReq {
-		UserID      string `header:"Beaver-User-Id"`
-		FromVersion int64  `json:"fromVersion"` // 起始版本号
-		ToVersion   int64  `json:"toVersion"` // 结束版本号
-		Limit       int    `json:"limit,optional"` // 限制数量，默认100
-	}
-	UserConversationSyncRes {
-		UserConversations []UserConversationSyncItem `json:"userConversations"` // 用户会话关系列表
-		HasMore           bool                       `json:"hasMore"` // 是否还有更多数据
-		NextVersion       int64                      `json:"nextVersion"` // 下次同步的起始版本号
-	}
-	UserConversationSyncItem {
-		UserID         string `json:"userId"` // 用户ID
-		ConversationID string `json:"conversationId"` // 会话ID
-		IsHidden       bool   `json:"isHidden"` // 是否在会话列表隐藏
-		IsPinned       bool   `json:"isPinned"` // 是否置顶
-		IsMuted        bool   `json:"isMuted"` // 是否免打扰
-		UserReadSeq    int64  `json:"userReadSeq"` // 用户已读到的消息Seq
-		Version        int64  `json:"version"` // 版本号
-		CreateAt       int64  `json:"createAt"` // 创建时间戳
-		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
-	}
-)
-
-// 批量获取会话数据
-type (
-	GetConversationsListByIdsReq {
-		UserID          string   `header:"Beaver-User-Id"` // 用户ID
-		ConversationIds []string `json:"conversationIds"` // 会话ID列表
-	}
-	GetConversationsListByIdsRes {
-		Conversations []ConversationSyncItem `json:"conversations"` // 会话列表
-	}
-)
-
 // 批量获取用户会话设置数据
 type (
 	GetUserConversationSettingsListByIdsReq {
@@ -275,7 +234,19 @@ type (
 		ConversationIds []string `json:"conversationIds"` // 会话ID列表
 	}
 	GetUserConversationSettingsListByIdsRes {
-		UserConversationSettings []UserConversationSyncItem `json:"userConversationSettings"` // 用户会话设置列表
+		UserConversationSettings []UserConversationSettingById `json:"userConversationSettings"` // 用户会话设置列表
+	}
+	UserConversationSettingById {
+		UserID         string `json:"userId"` // 用户ID
+		ConversationID string `json:"conversationId"` // 会话ID
+		LastMessage    string `json:"lastMessage"` // 最后一条消息预览
+		IsHidden       bool   `json:"isHidden"` // 是否隐藏
+		IsPinned       bool   `json:"isPinned"` // 是否置顶
+		IsMuted        bool   `json:"isMuted"` // 是否免打扰
+		UserReadSeq    int64  `json:"userReadSeq"` // 用户已读序列号
+		Version        int64  `json:"version"` // 版本号
+		CreateAt       int64  `json:"createAt"` // 创建时间戳
+		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
 	}
 )
 
@@ -319,14 +290,6 @@ service chat {
 	@doc "聊天数据同步"
 	@handler chatSync
 	post /api/chat/sync (ChatSyncReq) returns (ChatSyncRes)
-
-	@doc "会话数据同步"
-	@handler conversationSync
-	post /api/chat/conversationSync (ConversationSyncReq) returns (ConversationSyncRes)
-
-	@doc "用户会话关系数据同步"
-	@handler userConversationSync
-	post /api/chat/userConversationSync (UserConversationSyncReq) returns (UserConversationSyncRes)
 
 	@doc "批量获取会话数据"
 	@handler getConversationsListByIds

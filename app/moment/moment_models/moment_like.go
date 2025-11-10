@@ -1,7 +1,6 @@
 package moment_models
 
 import (
-	"beaver/app/user/user_models"
 	"beaver/common/models"
 )
 
@@ -10,7 +9,10 @@ import (
  */
 type MomentLikeModel struct {
 	models.Model
-	MomentID      uint                  `gorm:"size:64;index;not null" json:"momentId"` // 动态Id
-	UserID        string                `gorm:"size:64;index" json:"userId"`            // 接收验证方的 UserID
-	LikeUserModel user_models.UserModel `gorm:"foreignKey:UserID;references:UUID" json:"-"`
+	UUID         string `gorm:"size:64;uniqueIndex;not null" json:"uuid"`      // 全局唯一ID (UUID，跨库同步用)
+	MomentID     uint   `gorm:"not null;index" json:"momentId"`                // 动态Id (索引)
+	UserID       string `gorm:"size:64;not null;index" json:"userId"`          // 点赞用户Id (索引)
+	MomentUserID string `gorm:"size:64;not null;index" json:"momentUserId"`    // 动态发布者Id (索引，用于版本号递增)
+	IsDeleted    bool   `gorm:"not null;default:false;index" json:"isDeleted"` // 软删除标记 (索引)
+	Version      int64  `gorm:"not null;default:0;index" json:"version"`       // 动态发布者级版本号（基于MomentUserID递增，每次数据变更都递增）
 }

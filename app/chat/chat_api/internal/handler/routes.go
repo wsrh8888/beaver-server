@@ -13,12 +13,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 会话数据同步
-				Method:  http.MethodPost,
-				Path:    "/api/chat/conversationSync",
-				Handler: conversationSyncHandler(serverCtx),
-			},
-			{
 				// 删除某个最近会话
 				Method:  http.MethodPost,
 				Path:    "/api/chat/deleteRecentChat",
@@ -89,12 +83,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/chat/sync",
 				Handler: chatSyncHandler(serverCtx),
-			},
-			{
-				// 用户会话关系数据同步
-				Method:  http.MethodPost,
-				Path:    "/api/chat/userConversationSync",
-				Handler: userConversationSyncHandler(serverCtx),
 			},
 		},
 	)
