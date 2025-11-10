@@ -239,7 +239,6 @@ type (
 	UserConversationSettingById {
 		UserID         string `json:"userId"` // 用户ID
 		ConversationID string `json:"conversationId"` // 会话ID
-		LastMessage    string `json:"lastMessage"` // 最后一条消息预览
 		IsHidden       bool   `json:"isHidden"` // 是否隐藏
 		IsPinned       bool   `json:"isPinned"` // 是否置顶
 		IsMuted        bool   `json:"isMuted"` // 是否免打扰
