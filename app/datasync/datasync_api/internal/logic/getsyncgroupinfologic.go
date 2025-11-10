@@ -6,6 +6,7 @@ import (
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -50,6 +51,8 @@ func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq)
 		}, nil
 	}
 
+	fmt.Println("111111111111111111")
+	fmt.Println(groupIDs)
 	// 2. 获取变更的群组资料
 	serverTimestamp := time.Now().UnixMilli()
 

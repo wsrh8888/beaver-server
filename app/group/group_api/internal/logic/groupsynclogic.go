@@ -39,7 +39,7 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 	// 为每个群组查询版本变化的数据
 	for _, groupReq := range req.Groups {
 		var groups []group_models.GroupModel
-		err = l.svcCtx.DB.Where("group_id = ? AND version > ?", groupReq.GroupID, groupReq.Version).
+		err = l.svcCtx.DB.Where("group_id = ? AND version >= ?", groupReq.GroupID, groupReq.Version).
 			Find(&groups).Error
 		if err != nil {
 			l.Errorf("查询群组数据失败，群组ID: %s, 错误: %v", groupReq.GroupID, err)

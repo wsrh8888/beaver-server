@@ -30,8 +30,8 @@ func NewChatSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatSync
 func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRes, err error) {
 	var chats []chat_models.ChatMessage
 
-	// 构建基础查询条件
-	var query = l.svcCtx.DB.Where("seq > ? AND seq <= ?", req.FromSeq, req.ToSeq)
+	// 构建基础查询条件 - 查询指定seq范围的消息（包含起始seq）
+	var query = l.svcCtx.DB.Where("seq >= ? AND seq <= ?", req.FromSeq, req.ToSeq)
 
 	// 如果指定了会话ID，则只同步该会话的消息
 	if req.ConversationID != "" {

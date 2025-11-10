@@ -2,9 +2,11 @@ package logic
 
 import (
 	"context"
+	"time"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
+	"beaver/app/chat/chat_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +27,31 @@ func NewGetUserConversationSettingsListByIdsLogic(ctx context.Context, svcCtx *s
 }
 
 func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsListByIds(req *types.GetUserConversationSettingsListByIdsReq) (resp *types.GetUserConversationSettingsListByIdsRes, err error) {
-	// todo: add your logic here and delete this line
+	// 只查询用户会话设置表的数据
+	var userConversations []chat_models.ChatUserConversation
+	err = l.svcCtx.DB.Where("user_id = ? AND conversation_id IN (?)", req.UserID, req.ConversationIds).Find(&userConversations).Error
+	if err != nil {
+		l.Errorf("查询用户会话设置失败: %v", err)
+		return nil, err
+	}
 
-	return
+	// 转换数据库模型为API响应
+	conversationSettings := make([]types.UserConversationSettingById, 0, len(userConversations))
+	for _, uc := range userConversations {
+		conversationSettings = append(conversationSettings, types.UserConversationSettingById{
+			UserID:         uc.UserID,
+			ConversationID: uc.ConversationID,
+			IsHidden:       uc.IsHidden,
+			IsPinned:       uc.IsPinned,
+			IsMuted:        uc.IsMuted,
+			UserReadSeq:    uc.UserReadSeq,
+			Version:        uc.Version,
+			CreateAt:       time.Time(uc.CreatedAt).Unix(),
+			UpdateAt:       time.Time(uc.UpdatedAt).Unix(),
+		})
+	}
+
+	return &types.GetUserConversationSettingsListByIdsRes{
+		UserConversationSettings: conversationSettings,
+	}, nil
 }

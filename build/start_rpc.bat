@@ -11,3 +11,4 @@ wt new-tab --title "User RPC" cmd /k "cd /d !ROOT_DIR!\app\user\user_rpc && go r
   ; new-tab --title "Chat RPC" cmd /k "cd /d !ROOT_DIR!\app\chat\chat_rpc && go run chatrpc.go" ^
   ; new-tab --title "File RPC" cmd /k "cd /d !ROOT_DIR!\app\file\file_rpc && go run filerpc.go" ^
   ; new-tab --title "Dictionary RPC" cmd /k "cd /d !ROOT_DIR!\app\dictionary\dictionary_rpc && go run dictionaryrpc.go" ^
+  ; new-tab --title "Moment RPC" cmd /k "cd /d !ROOT_DIR!\app\moment\moment_rpc && go run momentrpc.go" ^
