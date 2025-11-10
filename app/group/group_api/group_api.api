@@ -176,22 +176,6 @@ type (
 	}
 )
 
-// 获取用户群组版本信息
-type (
-	GetUserGroupVersionsReq {
-		UserID string `header:"Beaver-User-Id"`
-	}
-	GetUserGroupVersionsRes {
-		Groups          []GroupVersionItem `json:"groups"` // 用户加入的所有群组版本信息
-		ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
-	}
-	GroupVersionItem {
-		GroupID        string `json:"groupId"` // 群组ID
-		GroupVersion   int64  `json:"groupVersion"` // 群资料版本
-		MemberVersion  int64  `json:"memberVersion"` // 群成员版本
-		RequestVersion int64  `json:"requestVersion"` // 入群申请版本
-	}
-)
 
 // 群资料同步（基于群组版本对象）
 type (
@@ -394,10 +378,6 @@ service group {
 	@doc "邀请用户加入群组"
 	@handler groupInvite
 	post /api/group/invite (GroupInviteReq) returns (GroupInviteRes)
-
-	@doc "获取用户群组版本信息"
-	@handler getUserGroupVersions
-	get /api/group/versions (GetUserGroupVersionsReq) returns (GetUserGroupVersionsRes)
 
 	@doc "群资料同步"
 	@handler groupSync

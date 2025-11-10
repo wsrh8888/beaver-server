@@ -1,7 +1,6 @@
 package moment_models
 
 import (
-	"beaver/app/user/user_models"
 	"beaver/common/models"
 	"database/sql/driver"
 	"encoding/json"
@@ -34,12 +33,10 @@ func (f *Files) Scan(value interface{}) error {
  */
 type MomentModel struct {
 	models.Model
-	UserID          string                `gorm:"size:64;not null" json:"userId"`             // 用户Id
-	Content         string                `json:"content"`                                    // 动态内容
-	Files           *Files                `gorm:"type:longtext" json:"files" `                // 文件信息（JSON数组），包括文件URL和类型
-	CommentsModel   []MomentCommentModel  `gorm:"foreignkey:MomentID;references:Id" json:"-"` // 评论列表
-	LikesModel      []MomentLikeModel     `gorm:"foreignkey:MomentID;references:Id" json:"-"` // 点赞列表
-	MomentUserModel user_models.UserModel `gorm:"foreignKey:UserID;references:UUID" json:"-"`
-	IsDeleted       bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
-	Version         int64                 `gorm:"not null;default:0;index"`                // 版本号（用于数据同步）
+	UUID      string `gorm:"size:64;uniqueIndex;not null" json:"uuid"`      // 全局唯一ID (UUID，跨库同步用)
+	UserID    string `gorm:"size:64;not null;index" json:"userId"`          // 用户Id (索引，提升查询性能)
+	Content   string `gorm:"type:text;not null" json:"content"`             // 动态内容
+	Files     *Files `gorm:"type:longtext" json:"files"`                    // 文件信息（JSON数组）
+	IsDeleted bool   `gorm:"not null;default:false;index" json:"isDeleted"` // 软删除标记 (索引)
+	Version   int64  `gorm:"not null;default:0;index" json:"version"`       // 用户级版本号（基于UserID递增，每次数据变更都递增）
 }

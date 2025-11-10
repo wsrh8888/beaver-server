@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package moment_rpc;
+
+option go_package = "./moment_rpc";
+
+// 获取动态版本摘要请求
+message GetMomentVersionsReq {
+  string userId = 1; // 用户ID
+  int64 since = 2;   // 从这个时间戳之后开始同步
+}
+
+// 动态版本项
+message MomentVersionItem {
+  string userId = 1; // 动态发布者ID
+  int64 version = 2; // 版本号
+}
+
+// 获取动态版本摘要响应
+message GetMomentVersionsRes {
+  repeated MomentVersionItem momentVersions = 1; // 动态版本摘要
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+// 获取动态评论版本摘要请求
+message GetMomentCommentVersionsReq {
+  string userId = 1; // 用户ID
+  int64 since = 2;   // 从这个时间戳之后开始同步
+}
+
+// 动态评论版本项
+message MomentCommentVersionItem {
+  string userId = 1; // ⭐ 动态发布者ID（按发布者分组）
+  int64 version = 2; // 版本号
+}
+
+// 获取动态评论版本摘要响应
+message GetMomentCommentVersionsRes {
+  repeated MomentCommentVersionItem momentCommentVersions = 1; // 动态评论版本摘要
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+// 获取动态点赞版本摘要请求
+message GetMomentLikeVersionsReq {
+  string userId = 1; // 用户ID
+  int64 since = 2;   // 从这个时间戳之后开始同步
+}
+
+// 动态点赞版本项
+message MomentLikeVersionItem {
+  string userId = 1; // ⭐ 动态发布者ID（按发布者分组）
+  int64 version = 2; // 版本号
+}
+
+// 获取动态点赞版本摘要响应
+message GetMomentLikeVersionsRes {
+  repeated MomentLikeVersionItem momentLikeVersions = 1; // 动态点赞版本摘要
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+service Moment {
+  // 获取动态版本摘要
+  rpc GetMomentVersions (GetMomentVersionsReq) returns (GetMomentVersionsRes);
+  // 获取动态评论版本摘要
+  rpc GetMomentCommentVersions (GetMomentCommentVersionsReq) returns (GetMomentCommentVersionsRes);
+  // 获取动态点赞版本摘要
+  rpc GetMomentLikeVersions (GetMomentLikeVersionsReq) returns (GetMomentLikeVersionsRes);
+}
+
+// goctl rpc protoc moment_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

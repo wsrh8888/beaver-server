@@ -66,6 +66,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/datasync/getSyncGroupRequests",
 				Handler: getSyncGroupRequestsHandler(serverCtx),
 			},
+			{
+				// 获取所有需要更新的动态评论版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncMomentComments",
+				Handler: getSyncMomentCommentsHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的动态点赞版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncMomentLikes",
+				Handler: getSyncMomentLikesHandler(serverCtx),
+			},
+			{
+				// 获取所有需要更新的动态版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncMoments",
+				Handler: getSyncMomentsHandler(serverCtx),
+			},
 		},
 	)
 }

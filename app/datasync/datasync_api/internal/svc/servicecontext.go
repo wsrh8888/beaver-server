@@ -5,6 +5,7 @@ import (
 	"beaver/app/datasync/datasync_api/internal/config"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/moment/moment_rpc/types/moment_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/core"
 
@@ -21,6 +22,7 @@ type ServiceContext struct {
 	GroupRpc  group_rpc.GroupClient
 	UserRpc   user_rpc.UserClient
 	ChatRpc   chat_rpc.ChatClient
+	MomentRpc moment_rpc.MomentClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -34,5 +36,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		GroupRpc:  group_rpc.NewGroupClient(zrpc.MustNewClient(c.GroupRpc).Conn()),
 		UserRpc:   user_rpc.NewUserClient(zrpc.MustNewClient(c.UserRpc).Conn()),
 		ChatRpc:   chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc).Conn()),
+		MomentRpc: moment_rpc.NewMomentClient(zrpc.MustNewClient(c.MomentRpc).Conn()),
 	}
 }

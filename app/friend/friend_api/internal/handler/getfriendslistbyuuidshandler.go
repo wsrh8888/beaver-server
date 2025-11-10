@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func friendSyncHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func getFriendsListByUuidsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.FriendSyncReq
+		var req types.GetFriendsListByUuidsReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewFriendSyncLogic(r.Context(), svcCtx)
-		resp, err := l.FriendSync(&req)
+		l := logic.NewGetFriendsListByUuidsLogic(r.Context(), svcCtx)
+		resp, err := l.GetFriendsListByUuids(&req)
 		response.Response(r, w, resp, err)
 	}
 }
