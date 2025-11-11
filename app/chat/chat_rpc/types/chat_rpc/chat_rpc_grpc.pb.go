@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v4.25.3
-// source: app/chat/chat_rpc/chat_rpc.proto
+// source: chat_rpc.proto
 
 package chat_rpc
 
@@ -25,7 +25,11 @@ const (
 	Chat_GetUserConversations_FullMethodName                 = "/chat_rpc.Chat/GetUserConversations"
 	Chat_GetConversationsListByIds_FullMethodName            = "/chat_rpc.Chat/GetConversationsListByIds"
 	Chat_GetUserConversationSettingsListByIds_FullMethodName = "/chat_rpc.Chat/GetUserConversationSettingsListByIds"
+	Chat_GetUserConversationVersions_FullMethodName          = "/chat_rpc.Chat/GetUserConversationVersions"
 	Chat_InitializeConversation_FullMethodName               = "/chat_rpc.Chat/InitializeConversation"
+	Chat_AddConversationMembers_FullMethodName               = "/chat_rpc.Chat/AddConversationMembers"
+	Chat_RemoveConversationMembers_FullMethodName            = "/chat_rpc.Chat/RemoveConversationMembers"
+	Chat_DissolveConversation_FullMethodName                 = "/chat_rpc.Chat/DissolveConversation"
 	Chat_SendSystemMessage_FullMethodName                    = "/chat_rpc.Chat/SendSystemMessage"
 )
 
@@ -41,7 +45,11 @@ type ChatClient interface {
 	GetUserConversations(ctx context.Context, in *GetUserConversationsReq, opts ...grpc.CallOption) (*GetUserConversationsRes, error)
 	GetConversationsListByIds(ctx context.Context, in *GetConversationsListByIdsReq, opts ...grpc.CallOption) (*GetConversationsListByIdsRes, error)
 	GetUserConversationSettingsListByIds(ctx context.Context, in *GetUserConversationSettingsListByIdsReq, opts ...grpc.CallOption) (*GetUserConversationSettingsListByIdsRes, error)
+	GetUserConversationVersions(ctx context.Context, in *GetUserConversationVersionsReq, opts ...grpc.CallOption) (*GetUserConversationVersionsRes, error)
 	InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error)
+	AddConversationMembers(ctx context.Context, in *AddConversationMembersReq, opts ...grpc.CallOption) (*AddConversationMembersRes, error)
+	RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error)
+	DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
 	SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
 }
 
@@ -113,10 +121,50 @@ func (c *chatClient) GetUserConversationSettingsListByIds(ctx context.Context, i
 	return out, nil
 }
 
+func (c *chatClient) GetUserConversationVersions(ctx context.Context, in *GetUserConversationVersionsReq, opts ...grpc.CallOption) (*GetUserConversationVersionsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserConversationVersionsRes)
+	err := c.cc.Invoke(ctx, Chat_GetUserConversationVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *chatClient) InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(InitializeConversationRes)
 	err := c.cc.Invoke(ctx, Chat_InitializeConversation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) AddConversationMembers(ctx context.Context, in *AddConversationMembersReq, opts ...grpc.CallOption) (*AddConversationMembersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddConversationMembersRes)
+	err := c.cc.Invoke(ctx, Chat_AddConversationMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveConversationMembersRes)
+	err := c.cc.Invoke(ctx, Chat_RemoveConversationMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DissolveConversationRes)
+	err := c.cc.Invoke(ctx, Chat_DissolveConversation_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +193,11 @@ type ChatServer interface {
 	GetUserConversations(context.Context, *GetUserConversationsReq) (*GetUserConversationsRes, error)
 	GetConversationsListByIds(context.Context, *GetConversationsListByIdsReq) (*GetConversationsListByIdsRes, error)
 	GetUserConversationSettingsListByIds(context.Context, *GetUserConversationSettingsListByIdsReq) (*GetUserConversationSettingsListByIdsRes, error)
+	GetUserConversationVersions(context.Context, *GetUserConversationVersionsReq) (*GetUserConversationVersionsRes, error)
 	InitializeConversation(context.Context, *InitializeConversationReq) (*InitializeConversationRes, error)
+	AddConversationMembers(context.Context, *AddConversationMembersReq) (*AddConversationMembersRes, error)
+	RemoveConversationMembers(context.Context, *RemoveConversationMembersReq) (*RemoveConversationMembersRes, error)
+	DissolveConversation(context.Context, *DissolveConversationReq) (*DissolveConversationRes, error)
 	SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error)
 	mustEmbedUnimplementedChatServer()
 }
@@ -175,8 +227,20 @@ func (UnimplementedChatServer) GetConversationsListByIds(context.Context, *GetCo
 func (UnimplementedChatServer) GetUserConversationSettingsListByIds(context.Context, *GetUserConversationSettingsListByIdsReq) (*GetUserConversationSettingsListByIdsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserConversationSettingsListByIds not implemented")
 }
+func (UnimplementedChatServer) GetUserConversationVersions(context.Context, *GetUserConversationVersionsReq) (*GetUserConversationVersionsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserConversationVersions not implemented")
+}
 func (UnimplementedChatServer) InitializeConversation(context.Context, *InitializeConversationReq) (*InitializeConversationRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitializeConversation not implemented")
+}
+func (UnimplementedChatServer) AddConversationMembers(context.Context, *AddConversationMembersReq) (*AddConversationMembersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddConversationMembers not implemented")
+}
+func (UnimplementedChatServer) RemoveConversationMembers(context.Context, *RemoveConversationMembersReq) (*RemoveConversationMembersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveConversationMembers not implemented")
+}
+func (UnimplementedChatServer) DissolveConversation(context.Context, *DissolveConversationReq) (*DissolveConversationRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DissolveConversation not implemented")
 }
 func (UnimplementedChatServer) SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendSystemMessage not implemented")
@@ -310,6 +374,24 @@ func _Chat_GetUserConversationSettingsListByIds_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chat_GetUserConversationVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserConversationVersionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetUserConversationVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_GetUserConversationVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetUserConversationVersions(ctx, req.(*GetUserConversationVersionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Chat_InitializeConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InitializeConversationReq)
 	if err := dec(in); err != nil {
@@ -324,6 +406,60 @@ func _Chat_InitializeConversation_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChatServer).InitializeConversation(ctx, req.(*InitializeConversationReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_AddConversationMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddConversationMembersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).AddConversationMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_AddConversationMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).AddConversationMembers(ctx, req.(*AddConversationMembersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_RemoveConversationMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveConversationMembersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).RemoveConversationMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_RemoveConversationMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).RemoveConversationMembers(ctx, req.(*RemoveConversationMembersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_DissolveConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DissolveConversationReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).DissolveConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_DissolveConversation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).DissolveConversation(ctx, req.(*DissolveConversationReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -378,8 +514,24 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_GetUserConversationSettingsListByIds_Handler,
 		},
 		{
+			MethodName: "GetUserConversationVersions",
+			Handler:    _Chat_GetUserConversationVersions_Handler,
+		},
+		{
 			MethodName: "InitializeConversation",
 			Handler:    _Chat_InitializeConversation_Handler,
+		},
+		{
+			MethodName: "AddConversationMembers",
+			Handler:    _Chat_AddConversationMembers_Handler,
+		},
+		{
+			MethodName: "RemoveConversationMembers",
+			Handler:    _Chat_RemoveConversationMembers_Handler,
+		},
+		{
+			MethodName: "DissolveConversation",
+			Handler:    _Chat_DissolveConversation_Handler,
 		},
 		{
 			MethodName: "SendSystemMessage",
@@ -387,5 +539,5 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "app/chat/chat_rpc/chat_rpc.proto",
+	Metadata: "chat_rpc.proto",
 }

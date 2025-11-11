@@ -33,43 +33,21 @@ func (l *GetSyncChatUserConversationsLogic) GetSyncChatUserConversations(req *ty
 		return nil, errors.New("用户ID不能为空")
 	}
 
-	// 获取用户参与的会话列表
-	conversationsResp, err := l.svcCtx.ChatRpc.GetUserConversations(l.ctx, &chat_rpc.GetUserConversationsReq{
-		UserId: userId,
-	})
-	if err != nil {
-		l.Errorf("获取用户会话列表失败: %v", err)
-		return nil, err
-	}
-
-	conversationIDs := make([]string, 0, len(conversationsResp.Conversations))
-	for _, conv := range conversationsResp.Conversations {
-		conversationIDs = append(conversationIDs, conv.ConversationId)
-	}
-
-	if len(conversationIDs) == 0 {
-		return &types.GetSyncChatUserConversationsRes{
-			UserConversationVersions: []types.ChatUserConversationVersionItem{},
-			ServerTimestamp:          time.Now().UnixMilli(),
-		}, nil
-	}
-
-	// 获取变更的用户会话设置版本
+	// 直接获取用户的所有会话设置版本（一个RPC调用搞定）
 	serverTimestamp := time.Now().UnixMilli()
 
-	userConvResp, err := l.svcCtx.ChatRpc.GetUserConversationSettingsListByIds(l.ctx, &chat_rpc.GetUserConversationSettingsListByIdsReq{
-		UserId:          userId,
-		ConversationIds: conversationIDs,
-		Since:           req.Since,
+	userConvResp, err := l.svcCtx.ChatRpc.GetUserConversationVersions(l.ctx, &chat_rpc.GetUserConversationVersionsReq{
+		UserId: userId,
+		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取变更的用户会话设置版本失败: %v", err)
+		l.Errorf("获取用户会话设置版本失败: %v", err)
 		return nil, err
 	}
 
 	// 转换为响应格式
 	var userConversationVersions []types.ChatUserConversationVersionItem
-	for _, userConv := range userConvResp.UserConversationSettings {
+	for _, userConv := range userConvResp.UserConversationVersions {
 		userConversationVersions = append(userConversationVersions, types.ChatUserConversationVersionItem{
 			ConversationID: userConv.ConversationId,
 			Version:        userConv.Version,

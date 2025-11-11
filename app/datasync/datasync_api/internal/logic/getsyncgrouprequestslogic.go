@@ -33,54 +33,27 @@ func (l *GetSyncGroupRequestsLogic) GetSyncGroupRequests(req *types.GetSyncGroup
 		return nil, errors.New("用户ID不能为空")
 	}
 
-	// 1. 获取用户加入的群组ID列表
-	groupIDsResp, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &group_rpc.GetUserGroupIDsReq{
+	// 获取用户群组申请版本信息
+	versionResp, err := l.svcCtx.GroupRpc.GetUserGroupRequestVersions(l.ctx, &group_rpc.GetUserGroupRequestVersionsReq{
 		UserID: userId,
+		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取用户群组ID列表失败: %v", err)
+		l.Errorf("获取用户群组申请版本失败: %v", err)
 		return nil, err
 	}
 
-	groupIDs := groupIDsResp.GroupIDs
-	if len(groupIDs) == 0 {
-		return &types.GetSyncGroupRequestsRes{
-			GroupVersions:   []types.GroupRequestsVersionItem{},
-			ServerTimestamp: time.Now().UnixMilli(),
-		}, nil
-	}
-
-	// 2. 获取变更的入群申请
-	serverTimestamp := time.Now().UnixMilli()
-
-	requestResp, err := l.svcCtx.GroupRpc.GetGroupJoinRequestsListByIds(l.ctx, &group_rpc.GetGroupJoinRequestsListByIdsReq{
-		GroupIDs: groupIDs,
-		Since:    req.Since,
-	})
-	if err != nil {
-		l.Errorf("获取变更的入群申请失败: %v", err)
-		return nil, err
-	}
-
-	// 3. 合并版本信息，按群组聚合最新版本
-	groupVersionsMap := make(map[string]int64)
-	for _, request := range requestResp.Requests {
-		if currentVersion, exists := groupVersionsMap[request.GroupID]; !exists || request.Version > currentVersion {
-			groupVersionsMap[request.GroupID] = request.Version
-		}
-	}
-
-	// 4. 转换为响应格式
+	// 转换为响应格式
 	var groupVersions []types.GroupRequestsVersionItem
-	for groupID, version := range groupVersionsMap {
+	for _, version := range versionResp.Versions {
 		groupVersions = append(groupVersions, types.GroupRequestsVersionItem{
-			GroupID: groupID,
-			Version: version,
+			GroupID: version.GroupID,
+			Version: version.Version,
 		})
 	}
 
 	return &types.GetSyncGroupRequestsRes{
 		GroupVersions:   groupVersions,
-		ServerTimestamp: serverTimestamp,
+		ServerTimestamp: time.Now().UnixMilli(),
 	}, nil
 }

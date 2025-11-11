@@ -190,6 +190,55 @@ message SendSystemMessageRes {
   string messageId = 1; // 生成的消息ID
 }
 
+// 定义AddConversationMembersReq消息 - 添加会话成员
+message AddConversationMembersReq {
+  string conversationId = 1; // 会话ID
+  repeated string userIds = 2; // 要添加的用户ID列表
+}
+
+// 定义AddConversationMembersRes消息
+message AddConversationMembersRes {
+  bool success = 1; // 是否成功
+}
+
+// 定义RemoveConversationMembersReq消息 - 移除会话成员
+message RemoveConversationMembersReq {
+  string conversationId = 1; // 会话ID
+  repeated string userIds = 2; // 要移除的用户ID列表
+}
+
+// 定义RemoveConversationMembersRes消息
+message RemoveConversationMembersRes {
+  bool success = 1; // 是否成功
+}
+
+// 定义DissolveConversationReq消息 - 解散会话
+message DissolveConversationReq {
+  string conversationId = 1; // 会话ID
+}
+
+// 定义DissolveConversationRes消息
+message DissolveConversationRes {
+  bool success = 1; // 是否成功
+}
+
+// 定义GetUserConversationVersionsReq消息 - 获取用户会话设置版本信息
+message GetUserConversationVersionsReq {
+  string userId = 1; // 用户ID
+  int64 since = 2;   // 从这个版本号之后开始同步
+}
+
+// 定义UserConversationVersion消息
+message UserConversationVersion {
+  string conversationId = 1; // 会话ID
+  int64 version = 2;         // 用户会话设置版本号
+}
+
+// 定义GetUserConversationVersionsRes消息
+message GetUserConversationVersionsRes {
+  repeated UserConversationVersion userConversationVersions = 1; // 用户会话设置版本列表
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
@@ -198,7 +247,11 @@ service Chat {
     rpc GetUserConversations(GetUserConversationsReq) returns (GetUserConversationsRes); //获取用户参与的会话列表
     rpc GetConversationsListByIds(GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes); //批量获取会话版本信息
     rpc GetUserConversationSettingsListByIds(GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes); //批量获取用户会话设置版本信息
+    rpc GetUserConversationVersions(GetUserConversationVersionsReq) returns (GetUserConversationVersionsRes); //获取用户会话设置版本信息
     rpc InitializeConversation(InitializeConversationReq) returns (InitializeConversationRes); //初始化会话
+    rpc AddConversationMembers(AddConversationMembersReq) returns (AddConversationMembersRes); //添加会话成员
+    rpc RemoveConversationMembers(RemoveConversationMembersReq) returns (RemoveConversationMembersRes); //移除会话成员
+    rpc DissolveConversation(DissolveConversationReq) returns (DissolveConversationRes); //解散会话
     rpc SendSystemMessage(SendSystemMessageReq) returns (SendSystemMessageRes); //发送系统消息
 }
 

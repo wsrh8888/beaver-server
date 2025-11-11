@@ -93,6 +93,20 @@ message GetGroupJoinRequestsListByIdsRes {
   repeated GroupJoinRequestListById requests = 1; // 入群申请列表
 }
 
+// 获取用户的群组申请（包括发出的申请和管理的申请）
+message GetUserGroupRequestVersionsReq {
+  string userID = 1; // 用户ID
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message GetUserGroupRequestVersionsRes {
+  repeated GroupRequestVersionItem versions = 1; // 版本列表
+}
+
+message GroupRequestVersionItem {
+  string groupID = 1; // 群组ID
+  int64 version = 2; // 最新版本号
+}
 
 
 service group {
@@ -102,6 +116,7 @@ service group {
   rpc GetGroupsListByIds(GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes); // 通过ID获取群组列表
   rpc GetGroupMembersListByIds(GetGroupMembersListByIdsReq) returns (GetGroupMembersListByIdsRes); // 通过ID获取群成员列表
   rpc GetGroupJoinRequestsListByIds(GetGroupJoinRequestsListByIdsReq) returns (GetGroupJoinRequestsListByIdsRes); // 通过ID获取入群申请列表
+  rpc GetUserGroupRequestVersions(GetUserGroupRequestVersionsReq) returns (GetUserGroupRequestVersionsRes); // 获取用户群组申请版本信息
 }
 
 // goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -23,9 +23,9 @@ func InitFileData(db *gorm.DB) error {
 			OriginalName: "defaultGroupFileName",
 			Size:         90310,
 			Path:         "image/group.png",
-			Md5:          "83f8cc2c12a508444281b3181c62608f",
+			Md5:          "a8ba5d19ea54a91aec17dec0ad5000e6.png",
 			Type:         "image",
-			FileName:     "83f8cc2c12a508444281b3181c62608f.png",
+			FileName:     "a8ba5d19ea54a91aec17dec0ad5000e6.png",
 			Source:       file_models.LocalSource,
 		},
 	}

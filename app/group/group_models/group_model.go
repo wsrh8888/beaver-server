@@ -10,7 +10,7 @@ type GroupModel struct {
 	GroupID   string `gorm:"size:64;unique;index" json:"groupId"`
 	Type      int8   `gorm:"default:1" json:"type"`                                               // 群类型：1正常群 2讨论组 ...
 	Title     string `gorm:"size:32;index" json:"title"`                                          // 群名
-	Avatar    string `gorm:"size:256;default:a9de5548bef8c10b92428fff61275c72.png" json:"avatar"` // 群头像文件名
+	Avatar    string `gorm:"size:256;default:a8ba5d19ea54a91aec17dec0ad5000e6.png" json:"avatar"` // 群头像文件名
 	CreatorID string `gorm:"size:64;index" json:"creatorId"`                                      // 创建者ID
 	Notice    string `gorm:"type:text" json:"notice"`                                             // 当前公告内容
 	JoinType  int8   `gorm:"not null;default:0" json:"joinType"`                                  // 0自由加入 1需审批 2不可加入
