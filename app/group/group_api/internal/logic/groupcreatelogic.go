@@ -131,14 +131,40 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			return
 		}
 
-		// 更新所有成员的会话记录
+		// 初始化群聊会话（创建chat_conversation_meta和chat_user_conversations）
 		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
-		fmt.Println("更新所有会话列表信息")
-		_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(ctx, &chat_rpc.BatchUpdateConversationReq{
-			UserIds:        allUserIDs,
+		fmt.Println("初始化群聊会话")
+		_, err = l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
 			ConversationId: groupModel.GroupID,
-			LastMessage:    "",
+			Type:           2, // 群聊类型
+			UserIds:        allUserIDs,
 		})
+		if err != nil {
+			l.Logger.Errorf("初始化群聊会话失败: %v", err)
+			return
+		}
+
+		// 异步发送群创建成功的系统消息
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					l.Logger.Errorf("异步发送群创建消息时发生panic: %v", r)
+				}
+			}()
+
+			// 调用Chat服务的系统消息发送接口，发送群创建通知
+			_, err := l.svcCtx.ChatRpc.SendSystemMessage(context.Background(), &chat_rpc.SendSystemMessageReq{
+				ConversationId: groupModel.GroupID,
+				MessageType:    2,                                   // 群创建成功消息
+				Content:        fmt.Sprintf("%s 创建了群聊", req.UserID), // 这里应该用实际的用户名，但简化处理
+				RelatedUserId:  req.UserID,                          // 创建者ID
+			})
+			if err != nil {
+				l.Logger.Errorf("异步发送群创建消息失败: %v", err)
+			} else {
+				l.Logger.Infof("异步发送群创建消息成功: groupID=%s", groupModel.GroupID)
+			}
+		}()
 
 		// 通过ws推送给群成员
 		for _, member := range response.Members {

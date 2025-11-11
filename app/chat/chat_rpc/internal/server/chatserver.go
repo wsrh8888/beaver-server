@@ -53,9 +53,29 @@ func (s *ChatServer) GetUserConversationSettingsListByIds(ctx context.Context, i
 	return l.GetUserConversationSettingsListByIds(in)
 }
 
+func (s *ChatServer) GetUserConversationVersions(ctx context.Context, in *chat_rpc.GetUserConversationVersionsReq) (*chat_rpc.GetUserConversationVersionsRes, error) {
+	l := logic.NewGetUserConversationVersionsLogic(ctx, s.svcCtx)
+	return l.GetUserConversationVersions(in)
+}
+
 func (s *ChatServer) InitializeConversation(ctx context.Context, in *chat_rpc.InitializeConversationReq) (*chat_rpc.InitializeConversationRes, error) {
 	l := logic.NewInitializeConversationLogic(ctx, s.svcCtx)
 	return l.InitializeConversation(in)
+}
+
+func (s *ChatServer) AddConversationMembers(ctx context.Context, in *chat_rpc.AddConversationMembersReq) (*chat_rpc.AddConversationMembersRes, error) {
+	l := logic.NewAddConversationMembersLogic(ctx, s.svcCtx)
+	return l.AddConversationMembers(in)
+}
+
+func (s *ChatServer) RemoveConversationMembers(ctx context.Context, in *chat_rpc.RemoveConversationMembersReq) (*chat_rpc.RemoveConversationMembersRes, error) {
+	l := logic.NewRemoveConversationMembersLogic(ctx, s.svcCtx)
+	return l.RemoveConversationMembers(in)
+}
+
+func (s *ChatServer) DissolveConversation(ctx context.Context, in *chat_rpc.DissolveConversationReq) (*chat_rpc.DissolveConversationRes, error) {
+	l := logic.NewDissolveConversationLogic(ctx, s.svcCtx)
+	return l.DissolveConversation(in)
 }
 
 func (s *ChatServer) SendSystemMessage(ctx context.Context, in *chat_rpc.SendSystemMessageReq) (*chat_rpc.SendSystemMessageRes, error) {

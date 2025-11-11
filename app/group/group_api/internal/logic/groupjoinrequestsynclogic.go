@@ -39,7 +39,7 @@ func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinReq
 	// 为每个群组查询版本变化的数据
 	for _, groupReq := range req.Groups {
 		var requests []group_models.GroupJoinRequestModel
-		err = l.svcCtx.DB.Where("group_id = ? AND version > ?", groupReq.GroupID, groupReq.Version).
+		err = l.svcCtx.DB.Where("group_id = ? AND version >= ?", groupReq.GroupID, groupReq.Version).
 			Find(&requests).Error
 		if err != nil {
 			l.Errorf("查询入群申请数据失败，群组ID: %s, 错误: %v", groupReq.GroupID, err)
