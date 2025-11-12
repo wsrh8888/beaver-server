@@ -30,7 +30,7 @@ func (l *GetFileDetailLogic) GetFileDetail(in *file_rpc.GetFileDetailReq) (*file
 	var file file_models.FileModel
 
 	// 通过fileName查询文件信息
-	err := l.svcCtx.DB.Take(&file, "file_name = ?", in.FileName).Error
+	err := l.svcCtx.DB.Take(&file, "file_key = ?", in.FileKey).Error
 	if err != nil {
 		logx.Errorf("查询文件失败: %s", err.Error())
 		return nil, errors.New("文件不存在")
@@ -38,7 +38,7 @@ func (l *GetFileDetailLogic) GetFileDetail(in *file_rpc.GetFileDetailReq) (*file
 
 	// 返回文件详情
 	return &file_rpc.GetFileDetailRes{
-		FileName:     file.FileName,
+		FileKey:      file.FileKey,
 		OriginalName: file.OriginalName,
 		Size:         file.Size,
 		Path:         file.Path,

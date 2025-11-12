@@ -60,7 +60,7 @@ type FileUploadRequest struct {
 // ValidateAndProcessFile 验证并处理文件上传
 func ValidateAndProcessFile(file multipart.File, fileHeader *multipart.FileHeader, svcCtx *svc.ServiceContext) (*FileUploadRequest, error) {
 	// 文件后缀白名单验证
-	originalName := fileHeader.Filename
+	originalName := fileHeader.FileKey
 	nameList := strings.Split(originalName, ".")
 	if len(nameList) < 2 {
 		return nil, errors.New("文件格式不正确")
@@ -118,15 +118,15 @@ func CheckFileExists(fileMd5 string, svcCtx *svc.ServiceContext) (*file_models.F
 
 // CreateFileRecord 创建文件记录
 func CreateFileRecord(req *FileUploadRequest, filePath string, source file_models.FileSource, svcCtx *svc.ServiceContext) (*file_models.FileModel, error) {
-	fileNameWithSuffix := req.FileMd5 + "." + req.Suffix
+	FileKeyWithSuffix := req.FileMd5 + "." + req.Suffix
 
 	// 创建文件记录
 	newFileModel := &file_models.FileModel{
-		OriginalName: strings.TrimSuffix(req.FileHeader.Filename, "."+req.Suffix),
+		OriginalName: strings.TrimSuffix(req.FileHeader.FileKey, "."+req.Suffix),
 		Size:         req.Size,
 		Path:         filePath,
 		Md5:          req.FileMd5,
-		FileName:     fileNameWithSuffix,
+		FileKey:      FileKeyWithSuffix,
 		Type:         req.FileType,
 		Source:       source,
 	}
@@ -137,7 +137,7 @@ func CreateFileRecord(req *FileUploadRequest, filePath string, source file_model
 		return nil, fmt.Errorf("保存文件记录失败: %v", err)
 	}
 
-	logx.Infof("文件记录创建成功: %s, 来源: %s", newFileModel.FileName, source)
+	logx.Infof("文件记录创建成功: %s, 来源: %s", newFileModel.FileKey, source)
 	return newFileModel, nil
 }
 

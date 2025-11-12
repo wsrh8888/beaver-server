@@ -9,6 +9,18 @@ message TextMsg {
   string content = 1; // 文本消息内容
 }
 
+// 定义VideoStyle消息 - 视频样式信息
+message VideoStyle {
+  int32 width = 1;     // 视频宽度
+  int32 height = 2;    // 视频高度
+  int32 duration = 3;    // 视频时长（秒）
+}
+
+// 定义VoiceStyle消息 - 语音样式信息
+message VoiceStyle {
+  int32 duration = 1;    // 语音时长（秒）
+}
+
 // 定义FileMsg消息
 message FileMsg {
   string fileKey = 1; // 文件ID，通过fileName可以从文件模块获取完整信息
@@ -17,22 +29,25 @@ message FileMsg {
 // 定义VoiceMsg消息
 message VoiceMsg {
   string fileKey = 1; // 语音文件ID
-  int32 duration = 2;  // 语音时长（秒）
+  VoiceStyle style = 2; // 语音样式（可选）
 }
 
 // 定义VideoMsg消息
 message VideoMsg {
   string fileKey = 1; // 视频文件ID
-  int32 width = 2;     // 视频宽度
-  int32 height = 3;    // 视频高度
-  int32 duration = 4;  // 视频时长（秒）
+  VideoStyle style = 2; // 视频样式（可选）
+}
+
+// 定义ImageStyle消息 - 图片样式信息
+message ImageStyle {
+  int32 width = 1;     // 图片宽度
+  int32 height = 2;    // 图片高度
 }
 
 // 定义ImageMsg消息
 message ImageMsg {
   string fileKey = 1; // 图片文件ID
-  int32 width = 2;     // 图片宽度
-  int32 height = 3;    // 图片高度
+  ImageStyle style = 2; // 图片样式（可选）
 }
 
 // 定义EmojiMsg消息 - 表情相关消息
