@@ -33,6 +33,7 @@ type (
 	GetUserConversationsReq                 = chat_rpc.GetUserConversationsReq
 	GetUserConversationsRes                 = chat_rpc.GetUserConversationsRes
 	ImageMsg                                = chat_rpc.ImageMsg
+	ImageStyle                              = chat_rpc.ImageStyle
 	InitializeConversationReq               = chat_rpc.InitializeConversationReq
 	InitializeConversationRes               = chat_rpc.InitializeConversationRes
 	Msg                                     = chat_rpc.Msg
@@ -49,7 +50,9 @@ type (
 	UserConversationSettingListById         = chat_rpc.UserConversationSettingListById
 	UserConversationVersion                 = chat_rpc.UserConversationVersion
 	VideoMsg                                = chat_rpc.VideoMsg
+	VideoStyle                              = chat_rpc.VideoStyle
 	VoiceMsg                                = chat_rpc.VoiceMsg
+	VoiceStyle                              = chat_rpc.VoiceStyle
 
 	Chat interface {
 		SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)

@@ -44,13 +44,37 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	case ctype.TextMsgType:
 		rpcReq.Msg.TextMsg = &chat_rpc.TextMsg{Content: req.Msg.TextMsg.Content}
 	case ctype.ImageMsgType:
-		rpcReq.Msg.ImageMsg = &chat_rpc.ImageMsg{FileKey: req.Msg.ImageMsg.FileKey}
+		imageMsg := &chat_rpc.ImageMsg{FileKey: req.Msg.ImageMsg.FileKey}
+		// 如果存在 style，则设置 style
+		if req.Msg.ImageMsg.Style != nil {
+			imageMsg.Style = &chat_rpc.ImageStyle{
+				Width:  int32(req.Msg.ImageMsg.Style.Width),
+				Height: int32(req.Msg.ImageMsg.Style.Height),
+			}
+		}
+		rpcReq.Msg.ImageMsg = imageMsg
 	case ctype.VideoMsgType:
-		rpcReq.Msg.VideoMsg = &chat_rpc.VideoMsg{FileKey: req.Msg.VideoMsg.FileKey}
+		videoMsg := &chat_rpc.VideoMsg{FileKey: req.Msg.VideoMsg.FileKey}
+		// 如果存在 style，则设置 style
+		if req.Msg.VideoMsg.Style != nil {
+			videoMsg.Style = &chat_rpc.VideoStyle{
+				Width:    int32(req.Msg.VideoMsg.Style.Width),
+				Height:   int32(req.Msg.VideoMsg.Style.Height),
+				Duration: int32(req.Msg.VideoMsg.Style.Duration),
+			}
+		}
+		rpcReq.Msg.VideoMsg = videoMsg
 	case ctype.FileMsgType:
 		rpcReq.Msg.FileMsg = &chat_rpc.FileMsg{FileKey: req.Msg.FileMsg.FileKey}
 	case ctype.VoiceMsgType:
-		rpcReq.Msg.VoiceMsg = &chat_rpc.VoiceMsg{FileKey: req.Msg.VoiceMsg.FileKey}
+		voiceMsg := &chat_rpc.VoiceMsg{FileKey: req.Msg.VoiceMsg.FileKey}
+		// 如果存在 style，则设置 style
+		if req.Msg.VoiceMsg.Style != nil {
+			voiceMsg.Style = &chat_rpc.VoiceStyle{
+				Duration: int32(req.Msg.VoiceMsg.Style.Duration),
+			}
+		}
+		rpcReq.Msg.VoiceMsg = voiceMsg
 	case ctype.EmojiMsgType:
 		rpcReq.Msg.EmojiMsg = &chat_rpc.EmojiMsg{
 			FileKey:   req.Msg.EmojiMsg.FileKey,

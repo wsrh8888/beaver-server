@@ -5,7 +5,7 @@ type FileReq {
 }
 
 type FileRes {
-	FileName     string    `json:"fileName"`
+	FileKey      string    `json:"fileKey"`
 	OriginalName string    `json:"originalName"`
 	FileInfo     *FileInfo `json:"fileInfo,optional"`
 }
@@ -33,7 +33,7 @@ type AudioFile {
 }
 
 type PreviewReq {
-	FileName string `path:"fileName"`
+	FileKey string `path:"fileKey"`
 }
 
 type PreviewRes {}
@@ -41,7 +41,7 @@ type PreviewRes {}
 service file {
 	@doc "文件预览"
 	@handler Preview
-	get /api/file/preview/:fileName (PreviewReq) returns (PreviewRes)
+	get /api/file/preview/:fileKey (PreviewReq) returns (PreviewRes)
 
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu

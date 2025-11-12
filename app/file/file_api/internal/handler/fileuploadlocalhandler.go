@@ -44,7 +44,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 检查文件是否已经存在于数据库中
 		existingFile, err := common.CheckFileExists(fileReq.FileMd5, svcCtx)
 		if err == nil {
-			resp.FileName = existingFile.FileName
+			resp.FileKey = existingFile.FileKey
 			resp.OriginalName = existingFile.OriginalName
 
 			// 转换FileInfo为API响应格式
@@ -97,7 +97,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			svcCtx.DB.Save(newFileModel)
 		}
 
-		resp.FileName = newFileModel.FileName
+		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
 
 		// 转换FileInfo为API响应格式
@@ -105,7 +105,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			resp.FileInfo = common.ConvertFileInfoToAPI(fileInfo)
 		}
 
-		logx.Infof("本地文件上传成功: %s", newFileModel.FileName)
+		logx.Infof("本地文件上传成功: %s", newFileModel.FileKey)
 		response.Response(r, w, resp, nil)
 	}
 }

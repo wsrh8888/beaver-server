@@ -128,8 +128,24 @@ type GetUserConversationSettingsListByIdsRes struct {
 	UserConversationSettings []UserConversationSettingById `json:"userConversationSettings"` // 用户会话设置列表
 }
 
+type ImageStyle struct {
+	Width  int `json:"width"`  //图片宽度
+	Height int `json:"height"` //图片高度
+}
+
+type VideoStyle struct {
+	Width    int `json:"width"`    //视频宽度
+	Height   int `json:"height"`   //视频高度
+	Duration int `json:"duration"` //视频时长（秒）
+}
+
+type VoiceStyle struct {
+	Duration int `json:"duration"` //语音时长（秒）
+}
+
 type ImageMsg struct {
-	FileKey string `json:"FileKey"` //图片文件ID
+	FileKey string      `json:"fileKey"`        //图片文件ID
+	Style   *ImageStyle `json:"style,omitempty"` //图片样式（可选）
 }
 
 type Message struct {
@@ -234,9 +250,11 @@ type UserConversationSettingById struct {
 }
 
 type VideoMsg struct {
-	FileKey string `json:"FileKey"` //视频文件ID
+	FileKey string       `json:"fileKey"`        //视频文件ID
+	Style   *VideoStyle  `json:"style,omitempty"` //视频样式（可选）
 }
 
 type VoiceMsg struct {
-	FileKey string `json:"FileKey"` //语音文件ID
+	FileKey string       `json:"fileKey"`        //语音文件ID
+	Style   *VoiceStyle  `json:"style,omitempty"` //语音样式（可选）
 }

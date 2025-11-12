@@ -49,7 +49,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 检查文件是否已经存在于数据库中
 		existingFile, err := common.CheckFileExists(fileReq.FileMd5, svcCtx)
 		if err == nil {
-			resp.FileName = existingFile.FileName
+			resp.FileKey = existingFile.FileKey
 			resp.OriginalName = existingFile.OriginalName
 
 			// 如果文件已存在但FileInfo为空，可以设置默认值
@@ -58,7 +58,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					Type: file_models.FileType(existingFile.Type),
 				}
 				svcCtx.DB.Save(existingFile)
-				logx.Infof("已存在文件元数据设置默认值: %s", existingFile.FileName)
+				logx.Infof("已存在文件元数据设置默认值: %s", existingFile.FileKey)
 			}
 
 			// 转换FileInfo为API响应格式
@@ -103,10 +103,10 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			// 更新数据库中的FileInfo
 			newFileModel.FileInfo = fileInfo
 			svcCtx.DB.Save(newFileModel)
-			logx.Infof("文件元数据获取成功: %s", newFileModel.FileName)
+			logx.Infof("文件元数据获取成功: %s", newFileModel.FileKey)
 		}
 
-		resp.FileName = newFileModel.FileName
+		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
 
 		// 转换FileInfo为API响应格式

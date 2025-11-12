@@ -66,23 +66,35 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			},
 		}
 	case ctype.ImageMsgType:
+		imageMsg := &ctype.ImageMsg{
+			FileKey: in.Msg.ImageMsg.FileKey,
+		}
+		// 如果存在 style，则设置 style
+		if in.Msg.ImageMsg.Style != nil {
+			imageMsg.Style = &ctype.ImageStyle{
+				Width:  int(in.Msg.ImageMsg.Style.Width),
+				Height: int(in.Msg.ImageMsg.Style.Height),
+			}
+		}
 		msg = ctype.Msg{
-			Type: ctype.ImageMsgType,
-			ImageMsg: &ctype.ImageMsg{
-				FileKey: in.Msg.ImageMsg.FileKey,
-				Width:   int(in.Msg.ImageMsg.Width),
-				Height:  int(in.Msg.ImageMsg.Height),
-			},
+			Type:     ctype.ImageMsgType,
+			ImageMsg: imageMsg,
 		}
 	case ctype.VideoMsgType:
+		videoMsg := &ctype.VideoMsg{
+			FileKey: in.Msg.VideoMsg.FileKey,
+		}
+		// 如果存在 style，则设置 style
+		if in.Msg.VideoMsg.Style != nil {
+			videoMsg.Style = &ctype.VideoStyle{
+				Width:    int(in.Msg.VideoMsg.Style.Width),
+				Height:   int(in.Msg.VideoMsg.Style.Height),
+				Duration: int(in.Msg.VideoMsg.Style.Duration),
+			}
+		}
 		msg = ctype.Msg{
-			Type: ctype.VideoMsgType,
-			VideoMsg: &ctype.VideoMsg{
-				FileKey:  in.Msg.VideoMsg.FileKey,
-				Width:    int(in.Msg.VideoMsg.Width),
-				Height:   int(in.Msg.VideoMsg.Height),
-				Duration: int(in.Msg.VideoMsg.Duration),
-			},
+			Type:     ctype.VideoMsgType,
+			VideoMsg: videoMsg,
 		}
 	case ctype.FileMsgType:
 		msg = ctype.Msg{
@@ -92,12 +104,18 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			},
 		}
 	case ctype.VoiceMsgType:
+		voiceMsg := &ctype.VoiceMsg{
+			FileKey: in.Msg.VoiceMsg.FileKey,
+		}
+		// 如果存在 style，则设置 style
+		if in.Msg.VoiceMsg.Style != nil {
+			voiceMsg.Style = &ctype.VoiceStyle{
+				Duration: int(in.Msg.VoiceMsg.Style.Duration),
+			}
+		}
 		msg = ctype.Msg{
-			Type: ctype.VoiceMsgType,
-			VoiceMsg: &ctype.VoiceMsg{
-				FileKey:  in.Msg.VoiceMsg.FileKey,
-				Duration: int(in.Msg.VoiceMsg.Duration),
-			},
+			Type:     ctype.VoiceMsgType,
+			VoiceMsg: voiceMsg,
 		}
 	case ctype.EmojiMsgType:
 		msg = ctype.Msg{
