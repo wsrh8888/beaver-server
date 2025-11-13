@@ -29,7 +29,7 @@ type GetLatestVersionRes {
 	HasUpdate      bool   `json:"hasUpdate"` // 是否有更新
 	ArchitectureID uint   `json:"architectureId,omitempty"` // 架构ID（内部使用）
 	Version        string `json:"version,omitempty"` // 最新版本号
-	FileName       string `json:"fileName"` // 文件ID
+	FileKey        string `json:"fileKey"` // 文件Key
 	Size           int64  `json:"size"` // 安装包大小
 	MD5            string `json:"md5"` // MD5校验
 	Description    string `json:"description,omitempty"` // 版本描述

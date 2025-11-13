@@ -83,7 +83,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 
 	// 5. 通过file_rpc获取文件详情
 	fileDetail, err := l.svcCtx.FileRpc.GetFileDetail(l.ctx, &file_rpc.GetFileDetailReq{
-		FileName: latestVersion.FileName,
+		FileKey: latestVersion.FileKey,
 	})
 	if err != nil {
 		logx.Errorf("获取文件详情失败: %v", err)
@@ -92,7 +92,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 			HasUpdate:      true,
 			ArchitectureID: uint(architecture.Id),
 			Version:        latestVersion.Version,
-			FileName:       latestVersion.FileName,
+			FileKey:        latestVersion.FileKey,
 			Size:           fileDetail.Size,
 			MD5:            fileDetail.Md5,
 			Description:    latestVersion.Description,
@@ -104,7 +104,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 			HasUpdate:      true,
 			ArchitectureID: uint(architecture.Id),
 			Version:        latestVersion.Version,
-			FileName:       latestVersion.FileName,
+			FileKey:        latestVersion.FileKey,
 			Size:           fileDetail.Size,
 			MD5:            fileDetail.Md5,
 			Description:    latestVersion.Description,

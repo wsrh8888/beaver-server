@@ -8,7 +8,7 @@ type UpdateVersion struct {
 	models.Model
 	ArchitectureID uint   `json:"architectureId" gorm:"index"` // 架构id (统一小写d)
 	Version        string `json:"version"`                     // 版本号
-	FileName       string `json:"fileName"`                    // 文件ID
+	FileKey        string `json:"fileKey"`                     // 文件Key
 	Description    string `json:"description"`                 // 版本描述
 	ReleaseNotes   string `json:"releaseNotes"`                // 更新日志
 
