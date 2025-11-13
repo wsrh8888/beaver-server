@@ -66,30 +66,31 @@ func (x *TextMsg) GetContent() string {
 	return ""
 }
 
-// 定义VideoStyle消息 - 视频样式信息
-type VideoStyle struct {
+// 定义ImageMsg消息
+type ImageMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Width         int32                  `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`       // 视频宽度
-	Height        int32                  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`     // 视频高度
-	Duration      int32                  `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"` // 视频时长（秒）
+	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"` // 图片文件ID
+	Width         int32                  `protobuf:"varint,2,opt,name=width,proto3" json:"width,omitempty"`    // 图片宽度（可选）
+	Height        int32                  `protobuf:"varint,3,opt,name=height,proto3" json:"height,omitempty"`  // 图片高度（可选）
+	Size          int64                  `protobuf:"varint,4,opt,name=size,proto3" json:"size,omitempty"`      // 文件大小（字节，可选）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VideoStyle) Reset() {
-	*x = VideoStyle{}
+func (x *ImageMsg) Reset() {
+	*x = ImageMsg{}
 	mi := &file_chat_rpc_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VideoStyle) String() string {
+func (x *ImageMsg) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VideoStyle) ProtoMessage() {}
+func (*ImageMsg) ProtoMessage() {}
 
-func (x *VideoStyle) ProtoReflect() protoreflect.Message {
+func (x *ImageMsg) ProtoReflect() protoreflect.Message {
 	mi := &file_chat_rpc_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -101,54 +102,66 @@ func (x *VideoStyle) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VideoStyle.ProtoReflect.Descriptor instead.
-func (*VideoStyle) Descriptor() ([]byte, []int) {
+// Deprecated: Use ImageMsg.ProtoReflect.Descriptor instead.
+func (*ImageMsg) Descriptor() ([]byte, []int) {
 	return file_chat_rpc_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *VideoStyle) GetWidth() int32 {
+func (x *ImageMsg) GetFileKey() string {
+	if x != nil {
+		return x.FileKey
+	}
+	return ""
+}
+
+func (x *ImageMsg) GetWidth() int32 {
 	if x != nil {
 		return x.Width
 	}
 	return 0
 }
 
-func (x *VideoStyle) GetHeight() int32 {
+func (x *ImageMsg) GetHeight() int32 {
 	if x != nil {
 		return x.Height
 	}
 	return 0
 }
 
-func (x *VideoStyle) GetDuration() int32 {
+func (x *ImageMsg) GetSize() int64 {
 	if x != nil {
-		return x.Duration
+		return x.Size
 	}
 	return 0
 }
 
-// 定义VoiceStyle消息 - 语音样式信息
-type VoiceStyle struct {
+// 定义VideoMsg消息
+type VideoMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Duration      int32                  `protobuf:"varint,1,opt,name=duration,proto3" json:"duration,omitempty"` // 语音时长（秒）
+	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"`           // 视频文件ID
+	Width         int32                  `protobuf:"varint,2,opt,name=width,proto3" json:"width,omitempty"`              // 视频宽度（可选）
+	Height        int32                  `protobuf:"varint,3,opt,name=height,proto3" json:"height,omitempty"`            // 视频高度（可选）
+	Duration      int32                  `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty"`        // 视频时长（秒，可选）
+	ThumbnailKey  string                 `protobuf:"bytes,5,opt,name=thumbnailKey,proto3" json:"thumbnailKey,omitempty"` // 视频封面图文件ID（可选）
+	Size          int64                  `protobuf:"varint,6,opt,name=size,proto3" json:"size,omitempty"`                // 文件大小（字节，可选）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VoiceStyle) Reset() {
-	*x = VoiceStyle{}
+func (x *VideoMsg) Reset() {
+	*x = VideoMsg{}
 	mi := &file_chat_rpc_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VoiceStyle) String() string {
+func (x *VideoMsg) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VoiceStyle) ProtoMessage() {}
+func (*VideoMsg) ProtoMessage() {}
 
-func (x *VoiceStyle) ProtoReflect() protoreflect.Message {
+func (x *VideoMsg) ProtoReflect() protoreflect.Message {
 	mi := &file_chat_rpc_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -160,14 +173,49 @@ func (x *VoiceStyle) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VoiceStyle.ProtoReflect.Descriptor instead.
-func (*VoiceStyle) Descriptor() ([]byte, []int) {
+// Deprecated: Use VideoMsg.ProtoReflect.Descriptor instead.
+func (*VideoMsg) Descriptor() ([]byte, []int) {
 	return file_chat_rpc_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *VoiceStyle) GetDuration() int32 {
+func (x *VideoMsg) GetFileKey() string {
+	if x != nil {
+		return x.FileKey
+	}
+	return ""
+}
+
+func (x *VideoMsg) GetWidth() int32 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *VideoMsg) GetHeight() int32 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *VideoMsg) GetDuration() int32 {
 	if x != nil {
 		return x.Duration
+	}
+	return 0
+}
+
+func (x *VideoMsg) GetThumbnailKey() string {
+	if x != nil {
+		return x.ThumbnailKey
+	}
+	return ""
+}
+
+func (x *VideoMsg) GetSize() int64 {
+	if x != nil {
+		return x.Size
 	}
 	return 0
 }
@@ -175,7 +223,10 @@ func (x *VoiceStyle) GetDuration() int32 {
 // 定义FileMsg消息
 type FileMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"` // 文件ID，通过fileName可以从文件模块获取完整信息
+	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"`   // 文件ID
+	FileName      string                 `protobuf:"bytes,2,opt,name=fileName,proto3" json:"fileName,omitempty"` // 原始文件名（可选，用于显示）
+	Size          int64                  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`        // 文件大小（字节，可选）
+	MimeType      string                 `protobuf:"bytes,4,opt,name=mimeType,proto3" json:"mimeType,omitempty"` // MIME类型（可选，如 application/pdf）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -217,11 +268,33 @@ func (x *FileMsg) GetFileKey() string {
 	return ""
 }
 
+func (x *FileMsg) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
+func (x *FileMsg) GetSize() int64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
+func (x *FileMsg) GetMimeType() string {
+	if x != nil {
+		return x.MimeType
+	}
+	return ""
+}
+
 // 定义VoiceMsg消息
 type VoiceMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"` // 语音文件ID
-	Style         *VoiceStyle            `protobuf:"bytes,2,opt,name=style,proto3" json:"style,omitempty"`     // 语音样式（可选）
+	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"`    // 语音文件ID
+	Duration      int32                  `protobuf:"varint,2,opt,name=duration,proto3" json:"duration,omitempty"` // 语音时长（秒，可选）
+	Size          int64                  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`         // 文件大小（字节，可选）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -263,36 +336,45 @@ func (x *VoiceMsg) GetFileKey() string {
 	return ""
 }
 
-func (x *VoiceMsg) GetStyle() *VoiceStyle {
+func (x *VoiceMsg) GetDuration() int32 {
 	if x != nil {
-		return x.Style
+		return x.Duration
 	}
-	return nil
+	return 0
 }
 
-// 定义VideoMsg消息
-type VideoMsg struct {
+func (x *VoiceMsg) GetSize() int64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
+// 定义AudioFileMsg消息 - 音频文件消息
+type AudioFileMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"` // 视频文件ID
-	Style         *VideoStyle            `protobuf:"bytes,2,opt,name=style,proto3" json:"style,omitempty"`     // 视频样式（可选）
+	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"`    // 音频文件ID
+	FileName      string                 `protobuf:"bytes,2,opt,name=fileName,proto3" json:"fileName,omitempty"`  // 原始文件名（可选，用于显示）
+	Duration      int32                  `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"` // 音频时长（秒，可选）
+	Size          int64                  `protobuf:"varint,4,opt,name=size,proto3" json:"size,omitempty"`         // 文件大小（字节，可选）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VideoMsg) Reset() {
-	*x = VideoMsg{}
+func (x *AudioFileMsg) Reset() {
+	*x = AudioFileMsg{}
 	mi := &file_chat_rpc_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VideoMsg) String() string {
+func (x *AudioFileMsg) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VideoMsg) ProtoMessage() {}
+func (*AudioFileMsg) ProtoMessage() {}
 
-func (x *VideoMsg) ProtoReflect() protoreflect.Message {
+func (x *AudioFileMsg) ProtoReflect() protoreflect.Message {
 	mi := &file_chat_rpc_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -304,129 +386,37 @@ func (x *VideoMsg) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VideoMsg.ProtoReflect.Descriptor instead.
-func (*VideoMsg) Descriptor() ([]byte, []int) {
+// Deprecated: Use AudioFileMsg.ProtoReflect.Descriptor instead.
+func (*AudioFileMsg) Descriptor() ([]byte, []int) {
 	return file_chat_rpc_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *VideoMsg) GetFileKey() string {
+func (x *AudioFileMsg) GetFileKey() string {
 	if x != nil {
 		return x.FileKey
 	}
 	return ""
 }
 
-func (x *VideoMsg) GetStyle() *VideoStyle {
+func (x *AudioFileMsg) GetFileName() string {
 	if x != nil {
-		return x.Style
-	}
-	return nil
-}
-
-// 定义ImageStyle消息 - 图片样式信息
-type ImageStyle struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Width         int32                  `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`   // 图片宽度
-	Height        int32                  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"` // 图片高度
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ImageStyle) Reset() {
-	*x = ImageStyle{}
-	mi := &file_chat_rpc_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ImageStyle) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ImageStyle) ProtoMessage() {}
-
-func (x *ImageStyle) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ImageStyle.ProtoReflect.Descriptor instead.
-func (*ImageStyle) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *ImageStyle) GetWidth() int32 {
-	if x != nil {
-		return x.Width
-	}
-	return 0
-}
-
-func (x *ImageStyle) GetHeight() int32 {
-	if x != nil {
-		return x.Height
-	}
-	return 0
-}
-
-// 定义ImageMsg消息
-type ImageMsg struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"` // 图片文件ID
-	Style         *ImageStyle            `protobuf:"bytes,2,opt,name=style,proto3" json:"style,omitempty"`     // 图片样式（可选）
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ImageMsg) Reset() {
-	*x = ImageMsg{}
-	mi := &file_chat_rpc_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ImageMsg) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ImageMsg) ProtoMessage() {}
-
-func (x *ImageMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ImageMsg.ProtoReflect.Descriptor instead.
-func (*ImageMsg) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *ImageMsg) GetFileKey() string {
-	if x != nil {
-		return x.FileKey
+		return x.FileName
 	}
 	return ""
 }
 
-func (x *ImageMsg) GetStyle() *ImageStyle {
+func (x *AudioFileMsg) GetDuration() int32 {
 	if x != nil {
-		return x.Style
+		return x.Duration
 	}
-	return nil
+	return 0
+}
+
+func (x *AudioFileMsg) GetSize() int64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
 }
 
 // 定义EmojiMsg消息 - 表情相关消息
@@ -441,7 +431,7 @@ type EmojiMsg struct {
 
 func (x *EmojiMsg) Reset() {
 	*x = EmojiMsg{}
-	mi := &file_chat_rpc_proto_msgTypes[8]
+	mi := &file_chat_rpc_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -453,7 +443,7 @@ func (x *EmojiMsg) String() string {
 func (*EmojiMsg) ProtoMessage() {}
 
 func (x *EmojiMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[8]
+	mi := &file_chat_rpc_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -466,7 +456,7 @@ func (x *EmojiMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmojiMsg.ProtoReflect.Descriptor instead.
 func (*EmojiMsg) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{8}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *EmojiMsg) GetFileKey() string {
@@ -490,23 +480,78 @@ func (x *EmojiMsg) GetPackageId() uint32 {
 	return 0
 }
 
-// 定义Msg消息
-type Msg struct {
+// 定义NotificationMsg消息 - 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
+type NotificationMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          uint32                 `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`        // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
-	TextMsg       *TextMsg               `protobuf:"bytes,2,opt,name=textMsg,proto3" json:"textMsg,omitempty"`   // 文本消息
-	ImageMsg      *ImageMsg              `protobuf:"bytes,3,opt,name=imageMsg,proto3" json:"imageMsg,omitempty"` // 图片
-	VideoMsg      *VideoMsg              `protobuf:"bytes,4,opt,name=videoMsg,proto3" json:"videoMsg,omitempty"` // 视频
-	FileMsg       *FileMsg               `protobuf:"bytes,5,opt,name=fileMsg,proto3" json:"fileMsg,omitempty"`   // 文件
-	VoiceMsg      *VoiceMsg              `protobuf:"bytes,6,opt,name=voiceMsg,proto3" json:"voiceMsg,omitempty"` // 语音
-	EmojiMsg      *EmojiMsg              `protobuf:"bytes,7,opt,name=emojiMsg,proto3" json:"emojiMsg,omitempty"` // 表情（单个表情或表情包）
+	Type          int32                  `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`    // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+	Actors        []string               `protobuf:"bytes,2,rep,name=actors,proto3" json:"actors,omitempty"` // 相关用户ID列表
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *NotificationMsg) Reset() {
+	*x = NotificationMsg{}
+	mi := &file_chat_rpc_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationMsg) ProtoMessage() {}
+
+func (x *NotificationMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_rpc_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationMsg.ProtoReflect.Descriptor instead.
+func (*NotificationMsg) Descriptor() ([]byte, []int) {
+	return file_chat_rpc_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *NotificationMsg) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *NotificationMsg) GetActors() []string {
+	if x != nil {
+		return x.Actors
+	}
+	return nil
+}
+
+// 定义Msg消息
+type Msg struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Type            uint32                 `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
+	TextMsg         *TextMsg               `protobuf:"bytes,2,opt,name=textMsg,proto3" json:"textMsg,omitempty"`                 // 文本消息
+	ImageMsg        *ImageMsg              `protobuf:"bytes,3,opt,name=imageMsg,proto3" json:"imageMsg,omitempty"`               // 图片
+	VideoMsg        *VideoMsg              `protobuf:"bytes,4,opt,name=videoMsg,proto3" json:"videoMsg,omitempty"`               // 视频
+	FileMsg         *FileMsg               `protobuf:"bytes,5,opt,name=fileMsg,proto3" json:"fileMsg,omitempty"`                 // 文件
+	VoiceMsg        *VoiceMsg              `protobuf:"bytes,6,opt,name=voiceMsg,proto3" json:"voiceMsg,omitempty"`               // 语音（移动端录制的短语音）
+	EmojiMsg        *EmojiMsg              `protobuf:"bytes,7,opt,name=emojiMsg,proto3" json:"emojiMsg,omitempty"`               // 表情（单个表情或表情包）
+	NotificationMsg *NotificationMsg       `protobuf:"bytes,8,opt,name=notificationMsg,proto3" json:"notificationMsg,omitempty"` // 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+	AudioFileMsg    *AudioFileMsg          `protobuf:"bytes,9,opt,name=audioFileMsg,proto3" json:"audioFileMsg,omitempty"`       // 音频文件（用户上传的音频文件）
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
 func (x *Msg) Reset() {
 	*x = Msg{}
-	mi := &file_chat_rpc_proto_msgTypes[9]
+	mi := &file_chat_rpc_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +563,7 @@ func (x *Msg) String() string {
 func (*Msg) ProtoMessage() {}
 
 func (x *Msg) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[9]
+	mi := &file_chat_rpc_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +576,7 @@ func (x *Msg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Msg.ProtoReflect.Descriptor instead.
 func (*Msg) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{9}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Msg) GetType() uint32 {
@@ -583,6 +628,20 @@ func (x *Msg) GetEmojiMsg() *EmojiMsg {
 	return nil
 }
 
+func (x *Msg) GetNotificationMsg() *NotificationMsg {
+	if x != nil {
+		return x.NotificationMsg
+	}
+	return nil
+}
+
+func (x *Msg) GetAudioFileMsg() *AudioFileMsg {
+	if x != nil {
+		return x.AudioFileMsg
+	}
+	return nil
+}
+
 // 定义SendMsgReq消息
 type SendMsgReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
@@ -597,7 +656,7 @@ type SendMsgReq struct {
 
 func (x *SendMsgReq) Reset() {
 	*x = SendMsgReq{}
-	mi := &file_chat_rpc_proto_msgTypes[10]
+	mi := &file_chat_rpc_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -609,7 +668,7 @@ func (x *SendMsgReq) String() string {
 func (*SendMsgReq) ProtoMessage() {}
 
 func (x *SendMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[10]
+	mi := &file_chat_rpc_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -622,7 +681,7 @@ func (x *SendMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendMsgReq.ProtoReflect.Descriptor instead.
 func (*SendMsgReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{10}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SendMsgReq) GetUserId() string {
@@ -672,7 +731,7 @@ type Sender struct {
 
 func (x *Sender) Reset() {
 	*x = Sender{}
-	mi := &file_chat_rpc_proto_msgTypes[11]
+	mi := &file_chat_rpc_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -684,7 +743,7 @@ func (x *Sender) String() string {
 func (*Sender) ProtoMessage() {}
 
 func (x *Sender) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[11]
+	mi := &file_chat_rpc_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -697,7 +756,7 @@ func (x *Sender) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Sender.ProtoReflect.Descriptor instead.
 func (*Sender) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{11}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Sender) GetUserId() string {
@@ -740,7 +799,7 @@ type SendMsgRes struct {
 
 func (x *SendMsgRes) Reset() {
 	*x = SendMsgRes{}
-	mi := &file_chat_rpc_proto_msgTypes[12]
+	mi := &file_chat_rpc_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -752,7 +811,7 @@ func (x *SendMsgRes) String() string {
 func (*SendMsgRes) ProtoMessage() {}
 
 func (x *SendMsgRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[12]
+	mi := &file_chat_rpc_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -765,7 +824,7 @@ func (x *SendMsgRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendMsgRes.ProtoReflect.Descriptor instead.
 func (*SendMsgRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{12}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SendMsgRes) GetId() uint32 {
@@ -852,7 +911,7 @@ type UpdateConversationReq struct {
 
 func (x *UpdateConversationReq) Reset() {
 	*x = UpdateConversationReq{}
-	mi := &file_chat_rpc_proto_msgTypes[13]
+	mi := &file_chat_rpc_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -864,7 +923,7 @@ func (x *UpdateConversationReq) String() string {
 func (*UpdateConversationReq) ProtoMessage() {}
 
 func (x *UpdateConversationReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[13]
+	mi := &file_chat_rpc_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -877,7 +936,7 @@ func (x *UpdateConversationReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateConversationReq.ProtoReflect.Descriptor instead.
 func (*UpdateConversationReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{13}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateConversationReq) GetConversationId() string {
@@ -925,7 +984,7 @@ type UpdateConversationRes struct {
 
 func (x *UpdateConversationRes) Reset() {
 	*x = UpdateConversationRes{}
-	mi := &file_chat_rpc_proto_msgTypes[14]
+	mi := &file_chat_rpc_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -937,7 +996,7 @@ func (x *UpdateConversationRes) String() string {
 func (*UpdateConversationRes) ProtoMessage() {}
 
 func (x *UpdateConversationRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[14]
+	mi := &file_chat_rpc_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -950,7 +1009,7 @@ func (x *UpdateConversationRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateConversationRes.ProtoReflect.Descriptor instead.
 func (*UpdateConversationRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{14}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UpdateConversationRes) GetSuccess() bool {
@@ -972,7 +1031,7 @@ type BatchUpdateConversationReq struct {
 
 func (x *BatchUpdateConversationReq) Reset() {
 	*x = BatchUpdateConversationReq{}
-	mi := &file_chat_rpc_proto_msgTypes[15]
+	mi := &file_chat_rpc_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -984,7 +1043,7 @@ func (x *BatchUpdateConversationReq) String() string {
 func (*BatchUpdateConversationReq) ProtoMessage() {}
 
 func (x *BatchUpdateConversationReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[15]
+	mi := &file_chat_rpc_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -997,7 +1056,7 @@ func (x *BatchUpdateConversationReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchUpdateConversationReq.ProtoReflect.Descriptor instead.
 func (*BatchUpdateConversationReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{15}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *BatchUpdateConversationReq) GetConversationId() string {
@@ -1031,7 +1090,7 @@ type BatchUpdateConversationRes struct {
 
 func (x *BatchUpdateConversationRes) Reset() {
 	*x = BatchUpdateConversationRes{}
-	mi := &file_chat_rpc_proto_msgTypes[16]
+	mi := &file_chat_rpc_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1043,7 +1102,7 @@ func (x *BatchUpdateConversationRes) String() string {
 func (*BatchUpdateConversationRes) ProtoMessage() {}
 
 func (x *BatchUpdateConversationRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[16]
+	mi := &file_chat_rpc_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1056,7 +1115,7 @@ func (x *BatchUpdateConversationRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchUpdateConversationRes.ProtoReflect.Descriptor instead.
 func (*BatchUpdateConversationRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{16}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *BatchUpdateConversationRes) GetSuccess() bool {
@@ -1076,7 +1135,7 @@ type GetUserConversationsReq struct {
 
 func (x *GetUserConversationsReq) Reset() {
 	*x = GetUserConversationsReq{}
-	mi := &file_chat_rpc_proto_msgTypes[17]
+	mi := &file_chat_rpc_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1088,7 +1147,7 @@ func (x *GetUserConversationsReq) String() string {
 func (*GetUserConversationsReq) ProtoMessage() {}
 
 func (x *GetUserConversationsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[17]
+	mi := &file_chat_rpc_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1101,7 +1160,7 @@ func (x *GetUserConversationsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserConversationsReq.ProtoReflect.Descriptor instead.
 func (*GetUserConversationsReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{17}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetUserConversationsReq) GetUserId() string {
@@ -1122,7 +1181,7 @@ type ConversationItem struct {
 
 func (x *ConversationItem) Reset() {
 	*x = ConversationItem{}
-	mi := &file_chat_rpc_proto_msgTypes[18]
+	mi := &file_chat_rpc_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1134,7 +1193,7 @@ func (x *ConversationItem) String() string {
 func (*ConversationItem) ProtoMessage() {}
 
 func (x *ConversationItem) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[18]
+	mi := &file_chat_rpc_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1147,7 +1206,7 @@ func (x *ConversationItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConversationItem.ProtoReflect.Descriptor instead.
 func (*ConversationItem) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{18}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ConversationItem) GetConversationId() string {
@@ -1174,7 +1233,7 @@ type GetUserConversationsRes struct {
 
 func (x *GetUserConversationsRes) Reset() {
 	*x = GetUserConversationsRes{}
-	mi := &file_chat_rpc_proto_msgTypes[19]
+	mi := &file_chat_rpc_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1186,7 +1245,7 @@ func (x *GetUserConversationsRes) String() string {
 func (*GetUserConversationsRes) ProtoMessage() {}
 
 func (x *GetUserConversationsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[19]
+	mi := &file_chat_rpc_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1199,7 +1258,7 @@ func (x *GetUserConversationsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserConversationsRes.ProtoReflect.Descriptor instead.
 func (*GetUserConversationsRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{19}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetUserConversationsRes) GetConversations() []*ConversationItem {
@@ -1220,7 +1279,7 @@ type GetConversationsListByIdsReq struct {
 
 func (x *GetConversationsListByIdsReq) Reset() {
 	*x = GetConversationsListByIdsReq{}
-	mi := &file_chat_rpc_proto_msgTypes[20]
+	mi := &file_chat_rpc_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1232,7 +1291,7 @@ func (x *GetConversationsListByIdsReq) String() string {
 func (*GetConversationsListByIdsReq) ProtoMessage() {}
 
 func (x *GetConversationsListByIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[20]
+	mi := &file_chat_rpc_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1245,7 +1304,7 @@ func (x *GetConversationsListByIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConversationsListByIdsReq.ProtoReflect.Descriptor instead.
 func (*GetConversationsListByIdsReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{20}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GetConversationsListByIdsReq) GetConversationIds() []string {
@@ -1275,7 +1334,7 @@ type ConversationListById struct {
 
 func (x *ConversationListById) Reset() {
 	*x = ConversationListById{}
-	mi := &file_chat_rpc_proto_msgTypes[21]
+	mi := &file_chat_rpc_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1287,7 +1346,7 @@ func (x *ConversationListById) String() string {
 func (*ConversationListById) ProtoMessage() {}
 
 func (x *ConversationListById) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[21]
+	mi := &file_chat_rpc_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1300,7 +1359,7 @@ func (x *ConversationListById) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConversationListById.ProtoReflect.Descriptor instead.
 func (*ConversationListById) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{21}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ConversationListById) GetConversationId() string {
@@ -1341,7 +1400,7 @@ type GetConversationsListByIdsRes struct {
 
 func (x *GetConversationsListByIdsRes) Reset() {
 	*x = GetConversationsListByIdsRes{}
-	mi := &file_chat_rpc_proto_msgTypes[22]
+	mi := &file_chat_rpc_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1353,7 +1412,7 @@ func (x *GetConversationsListByIdsRes) String() string {
 func (*GetConversationsListByIdsRes) ProtoMessage() {}
 
 func (x *GetConversationsListByIdsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[22]
+	mi := &file_chat_rpc_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1366,7 +1425,7 @@ func (x *GetConversationsListByIdsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConversationsListByIdsRes.ProtoReflect.Descriptor instead.
 func (*GetConversationsListByIdsRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{22}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetConversationsListByIdsRes) GetConversations() []*ConversationListById {
@@ -1388,7 +1447,7 @@ type GetUserConversationSettingsListByIdsReq struct {
 
 func (x *GetUserConversationSettingsListByIdsReq) Reset() {
 	*x = GetUserConversationSettingsListByIdsReq{}
-	mi := &file_chat_rpc_proto_msgTypes[23]
+	mi := &file_chat_rpc_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1400,7 +1459,7 @@ func (x *GetUserConversationSettingsListByIdsReq) String() string {
 func (*GetUserConversationSettingsListByIdsReq) ProtoMessage() {}
 
 func (x *GetUserConversationSettingsListByIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[23]
+	mi := &file_chat_rpc_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1413,7 +1472,7 @@ func (x *GetUserConversationSettingsListByIdsReq) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use GetUserConversationSettingsListByIdsReq.ProtoReflect.Descriptor instead.
 func (*GetUserConversationSettingsListByIdsReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{23}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetUserConversationSettingsListByIdsReq) GetUserId() string {
@@ -1448,7 +1507,7 @@ type UserConversationSettingListById struct {
 
 func (x *UserConversationSettingListById) Reset() {
 	*x = UserConversationSettingListById{}
-	mi := &file_chat_rpc_proto_msgTypes[24]
+	mi := &file_chat_rpc_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1460,7 +1519,7 @@ func (x *UserConversationSettingListById) String() string {
 func (*UserConversationSettingListById) ProtoMessage() {}
 
 func (x *UserConversationSettingListById) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[24]
+	mi := &file_chat_rpc_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1473,7 +1532,7 @@ func (x *UserConversationSettingListById) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserConversationSettingListById.ProtoReflect.Descriptor instead.
 func (*UserConversationSettingListById) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{24}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *UserConversationSettingListById) GetConversationId() string {
@@ -1500,7 +1559,7 @@ type GetUserConversationSettingsListByIdsRes struct {
 
 func (x *GetUserConversationSettingsListByIdsRes) Reset() {
 	*x = GetUserConversationSettingsListByIdsRes{}
-	mi := &file_chat_rpc_proto_msgTypes[25]
+	mi := &file_chat_rpc_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1512,7 +1571,7 @@ func (x *GetUserConversationSettingsListByIdsRes) String() string {
 func (*GetUserConversationSettingsListByIdsRes) ProtoMessage() {}
 
 func (x *GetUserConversationSettingsListByIdsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[25]
+	mi := &file_chat_rpc_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1525,7 +1584,7 @@ func (x *GetUserConversationSettingsListByIdsRes) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use GetUserConversationSettingsListByIdsRes.ProtoReflect.Descriptor instead.
 func (*GetUserConversationSettingsListByIdsRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{25}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetUserConversationSettingsListByIdsRes) GetUserConversationSettings() []*UserConversationSettingListById {
@@ -1547,7 +1606,7 @@ type InitializeConversationReq struct {
 
 func (x *InitializeConversationReq) Reset() {
 	*x = InitializeConversationReq{}
-	mi := &file_chat_rpc_proto_msgTypes[26]
+	mi := &file_chat_rpc_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1559,7 +1618,7 @@ func (x *InitializeConversationReq) String() string {
 func (*InitializeConversationReq) ProtoMessage() {}
 
 func (x *InitializeConversationReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[26]
+	mi := &file_chat_rpc_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1572,7 +1631,7 @@ func (x *InitializeConversationReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeConversationReq.ProtoReflect.Descriptor instead.
 func (*InitializeConversationReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{26}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *InitializeConversationReq) GetConversationId() string {
@@ -1606,7 +1665,7 @@ type InitializeConversationRes struct {
 
 func (x *InitializeConversationRes) Reset() {
 	*x = InitializeConversationRes{}
-	mi := &file_chat_rpc_proto_msgTypes[27]
+	mi := &file_chat_rpc_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1618,7 +1677,7 @@ func (x *InitializeConversationRes) String() string {
 func (*InitializeConversationRes) ProtoMessage() {}
 
 func (x *InitializeConversationRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[27]
+	mi := &file_chat_rpc_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1631,7 +1690,7 @@ func (x *InitializeConversationRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeConversationRes.ProtoReflect.Descriptor instead.
 func (*InitializeConversationRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{27}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *InitializeConversationRes) GetConversationId() string {
@@ -1641,32 +1700,32 @@ func (x *InitializeConversationRes) GetConversationId() string {
 	return ""
 }
 
-// 定义SendSystemMessageReq消息 - 发送系统消息
-type SendSystemMessageReq struct {
+// 定义SendNotificationMessageReq消息 - 发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+type SendNotificationMessageReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ConversationId string                 `protobuf:"bytes,1,opt,name=conversationId,proto3" json:"conversationId,omitempty"` // 会话ID
-	MessageType    int32                  `protobuf:"varint,2,opt,name=messageType,proto3" json:"messageType,omitempty"`      // 系统消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
+	MessageType    int32                  `protobuf:"varint,2,opt,name=messageType,proto3" json:"messageType,omitempty"`      // 通知消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
 	Content        string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`               // 消息内容
 	RelatedUserId  string                 `protobuf:"bytes,4,opt,name=relatedUserId,proto3" json:"relatedUserId,omitempty"`   // 相关用户ID（如新加好友的ID）
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *SendSystemMessageReq) Reset() {
-	*x = SendSystemMessageReq{}
-	mi := &file_chat_rpc_proto_msgTypes[28]
+func (x *SendNotificationMessageReq) Reset() {
+	*x = SendNotificationMessageReq{}
+	mi := &file_chat_rpc_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SendSystemMessageReq) String() string {
+func (x *SendNotificationMessageReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SendSystemMessageReq) ProtoMessage() {}
+func (*SendNotificationMessageReq) ProtoMessage() {}
 
-func (x *SendSystemMessageReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[28]
+func (x *SendNotificationMessageReq) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_rpc_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1677,62 +1736,62 @@ func (x *SendSystemMessageReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SendSystemMessageReq.ProtoReflect.Descriptor instead.
-func (*SendSystemMessageReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{28}
+// Deprecated: Use SendNotificationMessageReq.ProtoReflect.Descriptor instead.
+func (*SendNotificationMessageReq) Descriptor() ([]byte, []int) {
+	return file_chat_rpc_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *SendSystemMessageReq) GetConversationId() string {
+func (x *SendNotificationMessageReq) GetConversationId() string {
 	if x != nil {
 		return x.ConversationId
 	}
 	return ""
 }
 
-func (x *SendSystemMessageReq) GetMessageType() int32 {
+func (x *SendNotificationMessageReq) GetMessageType() int32 {
 	if x != nil {
 		return x.MessageType
 	}
 	return 0
 }
 
-func (x *SendSystemMessageReq) GetContent() string {
+func (x *SendNotificationMessageReq) GetContent() string {
 	if x != nil {
 		return x.Content
 	}
 	return ""
 }
 
-func (x *SendSystemMessageReq) GetRelatedUserId() string {
+func (x *SendNotificationMessageReq) GetRelatedUserId() string {
 	if x != nil {
 		return x.RelatedUserId
 	}
 	return ""
 }
 
-// 定义SendSystemMessageRes消息
-type SendSystemMessageRes struct {
+// 定义SendNotificationMessageRes消息
+type SendNotificationMessageRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MessageId     string                 `protobuf:"bytes,1,opt,name=messageId,proto3" json:"messageId,omitempty"` // 生成的消息ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SendSystemMessageRes) Reset() {
-	*x = SendSystemMessageRes{}
-	mi := &file_chat_rpc_proto_msgTypes[29]
+func (x *SendNotificationMessageRes) Reset() {
+	*x = SendNotificationMessageRes{}
+	mi := &file_chat_rpc_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SendSystemMessageRes) String() string {
+func (x *SendNotificationMessageRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SendSystemMessageRes) ProtoMessage() {}
+func (*SendNotificationMessageRes) ProtoMessage() {}
 
-func (x *SendSystemMessageRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[29]
+func (x *SendNotificationMessageRes) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_rpc_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1743,12 +1802,12 @@ func (x *SendSystemMessageRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SendSystemMessageRes.ProtoReflect.Descriptor instead.
-func (*SendSystemMessageRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{29}
+// Deprecated: Use SendNotificationMessageRes.ProtoReflect.Descriptor instead.
+func (*SendNotificationMessageRes) Descriptor() ([]byte, []int) {
+	return file_chat_rpc_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *SendSystemMessageRes) GetMessageId() string {
+func (x *SendNotificationMessageRes) GetMessageId() string {
 	if x != nil {
 		return x.MessageId
 	}
@@ -1766,7 +1825,7 @@ type AddConversationMembersReq struct {
 
 func (x *AddConversationMembersReq) Reset() {
 	*x = AddConversationMembersReq{}
-	mi := &file_chat_rpc_proto_msgTypes[30]
+	mi := &file_chat_rpc_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1778,7 +1837,7 @@ func (x *AddConversationMembersReq) String() string {
 func (*AddConversationMembersReq) ProtoMessage() {}
 
 func (x *AddConversationMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[30]
+	mi := &file_chat_rpc_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1791,7 +1850,7 @@ func (x *AddConversationMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddConversationMembersReq.ProtoReflect.Descriptor instead.
 func (*AddConversationMembersReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{30}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *AddConversationMembersReq) GetConversationId() string {
@@ -1818,7 +1877,7 @@ type AddConversationMembersRes struct {
 
 func (x *AddConversationMembersRes) Reset() {
 	*x = AddConversationMembersRes{}
-	mi := &file_chat_rpc_proto_msgTypes[31]
+	mi := &file_chat_rpc_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1830,7 +1889,7 @@ func (x *AddConversationMembersRes) String() string {
 func (*AddConversationMembersRes) ProtoMessage() {}
 
 func (x *AddConversationMembersRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[31]
+	mi := &file_chat_rpc_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1843,7 +1902,7 @@ func (x *AddConversationMembersRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddConversationMembersRes.ProtoReflect.Descriptor instead.
 func (*AddConversationMembersRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{31}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *AddConversationMembersRes) GetSuccess() bool {
@@ -1864,7 +1923,7 @@ type RemoveConversationMembersReq struct {
 
 func (x *RemoveConversationMembersReq) Reset() {
 	*x = RemoveConversationMembersReq{}
-	mi := &file_chat_rpc_proto_msgTypes[32]
+	mi := &file_chat_rpc_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1876,7 +1935,7 @@ func (x *RemoveConversationMembersReq) String() string {
 func (*RemoveConversationMembersReq) ProtoMessage() {}
 
 func (x *RemoveConversationMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[32]
+	mi := &file_chat_rpc_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1889,7 +1948,7 @@ func (x *RemoveConversationMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveConversationMembersReq.ProtoReflect.Descriptor instead.
 func (*RemoveConversationMembersReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{32}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *RemoveConversationMembersReq) GetConversationId() string {
@@ -1916,7 +1975,7 @@ type RemoveConversationMembersRes struct {
 
 func (x *RemoveConversationMembersRes) Reset() {
 	*x = RemoveConversationMembersRes{}
-	mi := &file_chat_rpc_proto_msgTypes[33]
+	mi := &file_chat_rpc_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1928,7 +1987,7 @@ func (x *RemoveConversationMembersRes) String() string {
 func (*RemoveConversationMembersRes) ProtoMessage() {}
 
 func (x *RemoveConversationMembersRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[33]
+	mi := &file_chat_rpc_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1941,7 +2000,7 @@ func (x *RemoveConversationMembersRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveConversationMembersRes.ProtoReflect.Descriptor instead.
 func (*RemoveConversationMembersRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{33}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *RemoveConversationMembersRes) GetSuccess() bool {
@@ -1961,7 +2020,7 @@ type DissolveConversationReq struct {
 
 func (x *DissolveConversationReq) Reset() {
 	*x = DissolveConversationReq{}
-	mi := &file_chat_rpc_proto_msgTypes[34]
+	mi := &file_chat_rpc_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1973,7 +2032,7 @@ func (x *DissolveConversationReq) String() string {
 func (*DissolveConversationReq) ProtoMessage() {}
 
 func (x *DissolveConversationReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[34]
+	mi := &file_chat_rpc_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1986,7 +2045,7 @@ func (x *DissolveConversationReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DissolveConversationReq.ProtoReflect.Descriptor instead.
 func (*DissolveConversationReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{34}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *DissolveConversationReq) GetConversationId() string {
@@ -2006,7 +2065,7 @@ type DissolveConversationRes struct {
 
 func (x *DissolveConversationRes) Reset() {
 	*x = DissolveConversationRes{}
-	mi := &file_chat_rpc_proto_msgTypes[35]
+	mi := &file_chat_rpc_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2018,7 +2077,7 @@ func (x *DissolveConversationRes) String() string {
 func (*DissolveConversationRes) ProtoMessage() {}
 
 func (x *DissolveConversationRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[35]
+	mi := &file_chat_rpc_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2031,7 +2090,7 @@ func (x *DissolveConversationRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DissolveConversationRes.ProtoReflect.Descriptor instead.
 func (*DissolveConversationRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{35}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *DissolveConversationRes) GetSuccess() bool {
@@ -2052,7 +2111,7 @@ type GetUserConversationVersionsReq struct {
 
 func (x *GetUserConversationVersionsReq) Reset() {
 	*x = GetUserConversationVersionsReq{}
-	mi := &file_chat_rpc_proto_msgTypes[36]
+	mi := &file_chat_rpc_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2064,7 +2123,7 @@ func (x *GetUserConversationVersionsReq) String() string {
 func (*GetUserConversationVersionsReq) ProtoMessage() {}
 
 func (x *GetUserConversationVersionsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[36]
+	mi := &file_chat_rpc_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2077,7 +2136,7 @@ func (x *GetUserConversationVersionsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserConversationVersionsReq.ProtoReflect.Descriptor instead.
 func (*GetUserConversationVersionsReq) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{36}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetUserConversationVersionsReq) GetUserId() string {
@@ -2105,7 +2164,7 @@ type UserConversationVersion struct {
 
 func (x *UserConversationVersion) Reset() {
 	*x = UserConversationVersion{}
-	mi := &file_chat_rpc_proto_msgTypes[37]
+	mi := &file_chat_rpc_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2117,7 +2176,7 @@ func (x *UserConversationVersion) String() string {
 func (*UserConversationVersion) ProtoMessage() {}
 
 func (x *UserConversationVersion) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[37]
+	mi := &file_chat_rpc_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2130,7 +2189,7 @@ func (x *UserConversationVersion) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserConversationVersion.ProtoReflect.Descriptor instead.
 func (*UserConversationVersion) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{37}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UserConversationVersion) GetConversationId() string {
@@ -2157,7 +2216,7 @@ type GetUserConversationVersionsRes struct {
 
 func (x *GetUserConversationVersionsRes) Reset() {
 	*x = GetUserConversationVersionsRes{}
-	mi := &file_chat_rpc_proto_msgTypes[38]
+	mi := &file_chat_rpc_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2169,7 +2228,7 @@ func (x *GetUserConversationVersionsRes) String() string {
 func (*GetUserConversationVersionsRes) ProtoMessage() {}
 
 func (x *GetUserConversationVersionsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_rpc_proto_msgTypes[38]
+	mi := &file_chat_rpc_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2182,7 +2241,7 @@ func (x *GetUserConversationVersionsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserConversationVersionsRes.ProtoReflect.Descriptor instead.
 func (*GetUserConversationVersionsRes) Descriptor() ([]byte, []int) {
-	return file_chat_rpc_proto_rawDescGZIP(), []int{38}
+	return file_chat_rpc_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetUserConversationVersionsRes) GetUserConversationVersions() []*UserConversationVersion {
@@ -2198,34 +2257,40 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\n" +
 	"\x0echat_rpc.proto\x12\bchat_rpc\"#\n" +
 	"\aTextMsg\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent\"V\n" +
-	"\n" +
-	"VideoStyle\x12\x14\n" +
-	"\x05width\x18\x01 \x01(\x05R\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\x05R\x06height\x12\x1a\n" +
-	"\bduration\x18\x03 \x01(\x05R\bduration\"(\n" +
-	"\n" +
-	"VoiceStyle\x12\x1a\n" +
-	"\bduration\x18\x01 \x01(\x05R\bduration\"#\n" +
-	"\aFileMsg\x12\x18\n" +
-	"\afileKey\x18\x01 \x01(\tR\afileKey\"P\n" +
-	"\bVoiceMsg\x12\x18\n" +
-	"\afileKey\x18\x01 \x01(\tR\afileKey\x12*\n" +
-	"\x05style\x18\x02 \x01(\v2\x14.chat_rpc.VoiceStyleR\x05style\"P\n" +
-	"\bVideoMsg\x12\x18\n" +
-	"\afileKey\x18\x01 \x01(\tR\afileKey\x12*\n" +
-	"\x05style\x18\x02 \x01(\v2\x14.chat_rpc.VideoStyleR\x05style\":\n" +
-	"\n" +
-	"ImageStyle\x12\x14\n" +
-	"\x05width\x18\x01 \x01(\x05R\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\x05R\x06height\"P\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\"f\n" +
 	"\bImageMsg\x12\x18\n" +
-	"\afileKey\x18\x01 \x01(\tR\afileKey\x12*\n" +
-	"\x05style\x18\x02 \x01(\v2\x14.chat_rpc.ImageStyleR\x05style\"\\\n" +
+	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x14\n" +
+	"\x05width\x18\x02 \x01(\x05R\x05width\x12\x16\n" +
+	"\x06height\x18\x03 \x01(\x05R\x06height\x12\x12\n" +
+	"\x04size\x18\x04 \x01(\x03R\x04size\"\xa6\x01\n" +
+	"\bVideoMsg\x12\x18\n" +
+	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x14\n" +
+	"\x05width\x18\x02 \x01(\x05R\x05width\x12\x16\n" +
+	"\x06height\x18\x03 \x01(\x05R\x06height\x12\x1a\n" +
+	"\bduration\x18\x04 \x01(\x05R\bduration\x12\"\n" +
+	"\fthumbnailKey\x18\x05 \x01(\tR\fthumbnailKey\x12\x12\n" +
+	"\x04size\x18\x06 \x01(\x03R\x04size\"o\n" +
+	"\aFileMsg\x12\x18\n" +
+	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x1a\n" +
+	"\bfileName\x18\x02 \x01(\tR\bfileName\x12\x12\n" +
+	"\x04size\x18\x03 \x01(\x03R\x04size\x12\x1a\n" +
+	"\bmimeType\x18\x04 \x01(\tR\bmimeType\"T\n" +
+	"\bVoiceMsg\x12\x18\n" +
+	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x1a\n" +
+	"\bduration\x18\x02 \x01(\x05R\bduration\x12\x12\n" +
+	"\x04size\x18\x03 \x01(\x03R\x04size\"t\n" +
+	"\fAudioFileMsg\x12\x18\n" +
+	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x1a\n" +
+	"\bfileName\x18\x02 \x01(\tR\bfileName\x12\x1a\n" +
+	"\bduration\x18\x03 \x01(\x05R\bduration\x12\x12\n" +
+	"\x04size\x18\x04 \x01(\x03R\x04size\"\\\n" +
 	"\bEmojiMsg\x12\x18\n" +
 	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x18\n" +
 	"\aemojiId\x18\x02 \x01(\rR\aemojiId\x12\x1c\n" +
-	"\tpackageId\x18\x03 \x01(\rR\tpackageId\"\xb3\x02\n" +
+	"\tpackageId\x18\x03 \x01(\rR\tpackageId\"=\n" +
+	"\x0fNotificationMsg\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\x05R\x04type\x12\x16\n" +
+	"\x06actors\x18\x02 \x03(\tR\x06actors\"\xb4\x03\n" +
 	"\x03Msg\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\rR\x04type\x12+\n" +
 	"\atextMsg\x18\x02 \x01(\v2\x11.chat_rpc.TextMsgR\atextMsg\x12.\n" +
@@ -2233,7 +2298,9 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\bvideoMsg\x18\x04 \x01(\v2\x12.chat_rpc.VideoMsgR\bvideoMsg\x12+\n" +
 	"\afileMsg\x18\x05 \x01(\v2\x11.chat_rpc.FileMsgR\afileMsg\x12.\n" +
 	"\bvoiceMsg\x18\x06 \x01(\v2\x12.chat_rpc.VoiceMsgR\bvoiceMsg\x12.\n" +
-	"\bemojiMsg\x18\a \x01(\v2\x12.chat_rpc.EmojiMsgR\bemojiMsg\"\xa9\x01\n" +
+	"\bemojiMsg\x18\a \x01(\v2\x12.chat_rpc.EmojiMsgR\bemojiMsg\x12C\n" +
+	"\x0fnotificationMsg\x18\b \x01(\v2\x19.chat_rpc.NotificationMsgR\x0fnotificationMsg\x12:\n" +
+	"\faudioFileMsg\x18\t \x01(\v2\x16.chat_rpc.AudioFileMsgR\faudioFileMsg\"\xa9\x01\n" +
 	"\n" +
 	"SendMsgReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12'\n" +
@@ -2307,13 +2374,13 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x04type\x18\x02 \x01(\x05R\x04type\x12\x18\n" +
 	"\auserIds\x18\x03 \x03(\tR\auserIds\"C\n" +
 	"\x19InitializeConversationRes\x12&\n" +
-	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\"\xa0\x01\n" +
-	"\x14SendSystemMessageReq\x12&\n" +
+	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\"\xa6\x01\n" +
+	"\x1aSendNotificationMessageReq\x12&\n" +
 	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\x12 \n" +
 	"\vmessageType\x18\x02 \x01(\x05R\vmessageType\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12$\n" +
-	"\rrelatedUserId\x18\x04 \x01(\tR\rrelatedUserId\"4\n" +
-	"\x14SendSystemMessageRes\x12\x1c\n" +
+	"\rrelatedUserId\x18\x04 \x01(\tR\rrelatedUserId\":\n" +
+	"\x1aSendNotificationMessageRes\x12\x1c\n" +
 	"\tmessageId\x18\x01 \x01(\tR\tmessageId\"]\n" +
 	"\x19AddConversationMembersReq\x12&\n" +
 	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\x12\x18\n" +
@@ -2336,7 +2403,7 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"\x7f\n" +
 	"\x1eGetUserConversationVersionsRes\x12]\n" +
-	"\x18userConversationVersions\x18\x01 \x03(\v2!.chat_rpc.UserConversationVersionR\x18userConversationVersions2\xb1\t\n" +
+	"\x18userConversationVersions\x18\x01 \x03(\v2!.chat_rpc.UserConversationVersionR\x18userConversationVersions2\xc3\t\n" +
 	"\x04Chat\x125\n" +
 	"\aSendMsg\x12\x14.chat_rpc.SendMsgReq\x1a\x14.chat_rpc.SendMsgRes\x12V\n" +
 	"\x12UpdateConversation\x12\x1f.chat_rpc.UpdateConversationReq\x1a\x1f.chat_rpc.UpdateConversationRes\x12e\n" +
@@ -2348,8 +2415,8 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x16InitializeConversation\x12#.chat_rpc.InitializeConversationReq\x1a#.chat_rpc.InitializeConversationRes\x12b\n" +
 	"\x16AddConversationMembers\x12#.chat_rpc.AddConversationMembersReq\x1a#.chat_rpc.AddConversationMembersRes\x12k\n" +
 	"\x19RemoveConversationMembers\x12&.chat_rpc.RemoveConversationMembersReq\x1a&.chat_rpc.RemoveConversationMembersRes\x12\\\n" +
-	"\x14DissolveConversation\x12!.chat_rpc.DissolveConversationReq\x1a!.chat_rpc.DissolveConversationRes\x12S\n" +
-	"\x11SendSystemMessage\x12\x1e.chat_rpc.SendSystemMessageReq\x1a\x1e.chat_rpc.SendSystemMessageResB\fZ\n" +
+	"\x14DissolveConversation\x12!.chat_rpc.DissolveConversationReq\x1a!.chat_rpc.DissolveConversationRes\x12e\n" +
+	"\x17SendNotificationMessage\x12$.chat_rpc.SendNotificationMessageReq\x1a$.chat_rpc.SendNotificationMessageResB\fZ\n" +
 	"./chat_rpcb\x06proto3"
 
 var (
@@ -2364,94 +2431,92 @@ func file_chat_rpc_proto_rawDescGZIP() []byte {
 	return file_chat_rpc_proto_rawDescData
 }
 
-var file_chat_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_chat_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_chat_rpc_proto_goTypes = []any{
 	(*TextMsg)(nil),                                 // 0: chat_rpc.TextMsg
-	(*VideoStyle)(nil),                              // 1: chat_rpc.VideoStyle
-	(*VoiceStyle)(nil),                              // 2: chat_rpc.VoiceStyle
+	(*ImageMsg)(nil),                                // 1: chat_rpc.ImageMsg
+	(*VideoMsg)(nil),                                // 2: chat_rpc.VideoMsg
 	(*FileMsg)(nil),                                 // 3: chat_rpc.FileMsg
 	(*VoiceMsg)(nil),                                // 4: chat_rpc.VoiceMsg
-	(*VideoMsg)(nil),                                // 5: chat_rpc.VideoMsg
-	(*ImageStyle)(nil),                              // 6: chat_rpc.ImageStyle
-	(*ImageMsg)(nil),                                // 7: chat_rpc.ImageMsg
-	(*EmojiMsg)(nil),                                // 8: chat_rpc.EmojiMsg
-	(*Msg)(nil),                                     // 9: chat_rpc.Msg
-	(*SendMsgReq)(nil),                              // 10: chat_rpc.SendMsgReq
-	(*Sender)(nil),                                  // 11: chat_rpc.Sender
-	(*SendMsgRes)(nil),                              // 12: chat_rpc.SendMsgRes
-	(*UpdateConversationReq)(nil),                   // 13: chat_rpc.UpdateConversationReq
-	(*UpdateConversationRes)(nil),                   // 14: chat_rpc.UpdateConversationRes
-	(*BatchUpdateConversationReq)(nil),              // 15: chat_rpc.BatchUpdateConversationReq
-	(*BatchUpdateConversationRes)(nil),              // 16: chat_rpc.BatchUpdateConversationRes
-	(*GetUserConversationsReq)(nil),                 // 17: chat_rpc.GetUserConversationsReq
-	(*ConversationItem)(nil),                        // 18: chat_rpc.ConversationItem
-	(*GetUserConversationsRes)(nil),                 // 19: chat_rpc.GetUserConversationsRes
-	(*GetConversationsListByIdsReq)(nil),            // 20: chat_rpc.GetConversationsListByIdsReq
-	(*ConversationListById)(nil),                    // 21: chat_rpc.ConversationListById
-	(*GetConversationsListByIdsRes)(nil),            // 22: chat_rpc.GetConversationsListByIdsRes
-	(*GetUserConversationSettingsListByIdsReq)(nil), // 23: chat_rpc.GetUserConversationSettingsListByIdsReq
-	(*UserConversationSettingListById)(nil),         // 24: chat_rpc.UserConversationSettingListById
-	(*GetUserConversationSettingsListByIdsRes)(nil), // 25: chat_rpc.GetUserConversationSettingsListByIdsRes
-	(*InitializeConversationReq)(nil),               // 26: chat_rpc.InitializeConversationReq
-	(*InitializeConversationRes)(nil),               // 27: chat_rpc.InitializeConversationRes
-	(*SendSystemMessageReq)(nil),                    // 28: chat_rpc.SendSystemMessageReq
-	(*SendSystemMessageRes)(nil),                    // 29: chat_rpc.SendSystemMessageRes
-	(*AddConversationMembersReq)(nil),               // 30: chat_rpc.AddConversationMembersReq
-	(*AddConversationMembersRes)(nil),               // 31: chat_rpc.AddConversationMembersRes
-	(*RemoveConversationMembersReq)(nil),            // 32: chat_rpc.RemoveConversationMembersReq
-	(*RemoveConversationMembersRes)(nil),            // 33: chat_rpc.RemoveConversationMembersRes
-	(*DissolveConversationReq)(nil),                 // 34: chat_rpc.DissolveConversationReq
-	(*DissolveConversationRes)(nil),                 // 35: chat_rpc.DissolveConversationRes
-	(*GetUserConversationVersionsReq)(nil),          // 36: chat_rpc.GetUserConversationVersionsReq
-	(*UserConversationVersion)(nil),                 // 37: chat_rpc.UserConversationVersion
-	(*GetUserConversationVersionsRes)(nil),          // 38: chat_rpc.GetUserConversationVersionsRes
+	(*AudioFileMsg)(nil),                            // 5: chat_rpc.AudioFileMsg
+	(*EmojiMsg)(nil),                                // 6: chat_rpc.EmojiMsg
+	(*NotificationMsg)(nil),                         // 7: chat_rpc.NotificationMsg
+	(*Msg)(nil),                                     // 8: chat_rpc.Msg
+	(*SendMsgReq)(nil),                              // 9: chat_rpc.SendMsgReq
+	(*Sender)(nil),                                  // 10: chat_rpc.Sender
+	(*SendMsgRes)(nil),                              // 11: chat_rpc.SendMsgRes
+	(*UpdateConversationReq)(nil),                   // 12: chat_rpc.UpdateConversationReq
+	(*UpdateConversationRes)(nil),                   // 13: chat_rpc.UpdateConversationRes
+	(*BatchUpdateConversationReq)(nil),              // 14: chat_rpc.BatchUpdateConversationReq
+	(*BatchUpdateConversationRes)(nil),              // 15: chat_rpc.BatchUpdateConversationRes
+	(*GetUserConversationsReq)(nil),                 // 16: chat_rpc.GetUserConversationsReq
+	(*ConversationItem)(nil),                        // 17: chat_rpc.ConversationItem
+	(*GetUserConversationsRes)(nil),                 // 18: chat_rpc.GetUserConversationsRes
+	(*GetConversationsListByIdsReq)(nil),            // 19: chat_rpc.GetConversationsListByIdsReq
+	(*ConversationListById)(nil),                    // 20: chat_rpc.ConversationListById
+	(*GetConversationsListByIdsRes)(nil),            // 21: chat_rpc.GetConversationsListByIdsRes
+	(*GetUserConversationSettingsListByIdsReq)(nil), // 22: chat_rpc.GetUserConversationSettingsListByIdsReq
+	(*UserConversationSettingListById)(nil),         // 23: chat_rpc.UserConversationSettingListById
+	(*GetUserConversationSettingsListByIdsRes)(nil), // 24: chat_rpc.GetUserConversationSettingsListByIdsRes
+	(*InitializeConversationReq)(nil),               // 25: chat_rpc.InitializeConversationReq
+	(*InitializeConversationRes)(nil),               // 26: chat_rpc.InitializeConversationRes
+	(*SendNotificationMessageReq)(nil),              // 27: chat_rpc.SendNotificationMessageReq
+	(*SendNotificationMessageRes)(nil),              // 28: chat_rpc.SendNotificationMessageRes
+	(*AddConversationMembersReq)(nil),               // 29: chat_rpc.AddConversationMembersReq
+	(*AddConversationMembersRes)(nil),               // 30: chat_rpc.AddConversationMembersRes
+	(*RemoveConversationMembersReq)(nil),            // 31: chat_rpc.RemoveConversationMembersReq
+	(*RemoveConversationMembersRes)(nil),            // 32: chat_rpc.RemoveConversationMembersRes
+	(*DissolveConversationReq)(nil),                 // 33: chat_rpc.DissolveConversationReq
+	(*DissolveConversationRes)(nil),                 // 34: chat_rpc.DissolveConversationRes
+	(*GetUserConversationVersionsReq)(nil),          // 35: chat_rpc.GetUserConversationVersionsReq
+	(*UserConversationVersion)(nil),                 // 36: chat_rpc.UserConversationVersion
+	(*GetUserConversationVersionsRes)(nil),          // 37: chat_rpc.GetUserConversationVersionsRes
 }
 var file_chat_rpc_proto_depIdxs = []int32{
-	2,  // 0: chat_rpc.VoiceMsg.style:type_name -> chat_rpc.VoiceStyle
-	1,  // 1: chat_rpc.VideoMsg.style:type_name -> chat_rpc.VideoStyle
-	6,  // 2: chat_rpc.ImageMsg.style:type_name -> chat_rpc.ImageStyle
-	0,  // 3: chat_rpc.Msg.textMsg:type_name -> chat_rpc.TextMsg
-	7,  // 4: chat_rpc.Msg.imageMsg:type_name -> chat_rpc.ImageMsg
-	5,  // 5: chat_rpc.Msg.videoMsg:type_name -> chat_rpc.VideoMsg
-	3,  // 6: chat_rpc.Msg.fileMsg:type_name -> chat_rpc.FileMsg
-	4,  // 7: chat_rpc.Msg.voiceMsg:type_name -> chat_rpc.VoiceMsg
-	8,  // 8: chat_rpc.Msg.emojiMsg:type_name -> chat_rpc.EmojiMsg
-	9,  // 9: chat_rpc.SendMsgReq.msg:type_name -> chat_rpc.Msg
-	9,  // 10: chat_rpc.SendMsgRes.msg:type_name -> chat_rpc.Msg
-	11, // 11: chat_rpc.SendMsgRes.sender:type_name -> chat_rpc.Sender
-	18, // 12: chat_rpc.GetUserConversationsRes.conversations:type_name -> chat_rpc.ConversationItem
-	21, // 13: chat_rpc.GetConversationsListByIdsRes.conversations:type_name -> chat_rpc.ConversationListById
-	24, // 14: chat_rpc.GetUserConversationSettingsListByIdsRes.userConversationSettings:type_name -> chat_rpc.UserConversationSettingListById
-	37, // 15: chat_rpc.GetUserConversationVersionsRes.userConversationVersions:type_name -> chat_rpc.UserConversationVersion
-	10, // 16: chat_rpc.Chat.SendMsg:input_type -> chat_rpc.SendMsgReq
-	13, // 17: chat_rpc.Chat.UpdateConversation:input_type -> chat_rpc.UpdateConversationReq
-	15, // 18: chat_rpc.Chat.BatchUpdateConversation:input_type -> chat_rpc.BatchUpdateConversationReq
-	17, // 19: chat_rpc.Chat.GetUserConversations:input_type -> chat_rpc.GetUserConversationsReq
-	20, // 20: chat_rpc.Chat.GetConversationsListByIds:input_type -> chat_rpc.GetConversationsListByIdsReq
-	23, // 21: chat_rpc.Chat.GetUserConversationSettingsListByIds:input_type -> chat_rpc.GetUserConversationSettingsListByIdsReq
-	36, // 22: chat_rpc.Chat.GetUserConversationVersions:input_type -> chat_rpc.GetUserConversationVersionsReq
-	26, // 23: chat_rpc.Chat.InitializeConversation:input_type -> chat_rpc.InitializeConversationReq
-	30, // 24: chat_rpc.Chat.AddConversationMembers:input_type -> chat_rpc.AddConversationMembersReq
-	32, // 25: chat_rpc.Chat.RemoveConversationMembers:input_type -> chat_rpc.RemoveConversationMembersReq
-	34, // 26: chat_rpc.Chat.DissolveConversation:input_type -> chat_rpc.DissolveConversationReq
-	28, // 27: chat_rpc.Chat.SendSystemMessage:input_type -> chat_rpc.SendSystemMessageReq
-	12, // 28: chat_rpc.Chat.SendMsg:output_type -> chat_rpc.SendMsgRes
-	14, // 29: chat_rpc.Chat.UpdateConversation:output_type -> chat_rpc.UpdateConversationRes
-	16, // 30: chat_rpc.Chat.BatchUpdateConversation:output_type -> chat_rpc.BatchUpdateConversationRes
-	19, // 31: chat_rpc.Chat.GetUserConversations:output_type -> chat_rpc.GetUserConversationsRes
-	22, // 32: chat_rpc.Chat.GetConversationsListByIds:output_type -> chat_rpc.GetConversationsListByIdsRes
-	25, // 33: chat_rpc.Chat.GetUserConversationSettingsListByIds:output_type -> chat_rpc.GetUserConversationSettingsListByIdsRes
-	38, // 34: chat_rpc.Chat.GetUserConversationVersions:output_type -> chat_rpc.GetUserConversationVersionsRes
-	27, // 35: chat_rpc.Chat.InitializeConversation:output_type -> chat_rpc.InitializeConversationRes
-	31, // 36: chat_rpc.Chat.AddConversationMembers:output_type -> chat_rpc.AddConversationMembersRes
-	33, // 37: chat_rpc.Chat.RemoveConversationMembers:output_type -> chat_rpc.RemoveConversationMembersRes
-	35, // 38: chat_rpc.Chat.DissolveConversation:output_type -> chat_rpc.DissolveConversationRes
-	29, // 39: chat_rpc.Chat.SendSystemMessage:output_type -> chat_rpc.SendSystemMessageRes
-	28, // [28:40] is the sub-list for method output_type
-	16, // [16:28] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	0,  // 0: chat_rpc.Msg.textMsg:type_name -> chat_rpc.TextMsg
+	1,  // 1: chat_rpc.Msg.imageMsg:type_name -> chat_rpc.ImageMsg
+	2,  // 2: chat_rpc.Msg.videoMsg:type_name -> chat_rpc.VideoMsg
+	3,  // 3: chat_rpc.Msg.fileMsg:type_name -> chat_rpc.FileMsg
+	4,  // 4: chat_rpc.Msg.voiceMsg:type_name -> chat_rpc.VoiceMsg
+	6,  // 5: chat_rpc.Msg.emojiMsg:type_name -> chat_rpc.EmojiMsg
+	7,  // 6: chat_rpc.Msg.notificationMsg:type_name -> chat_rpc.NotificationMsg
+	5,  // 7: chat_rpc.Msg.audioFileMsg:type_name -> chat_rpc.AudioFileMsg
+	8,  // 8: chat_rpc.SendMsgReq.msg:type_name -> chat_rpc.Msg
+	8,  // 9: chat_rpc.SendMsgRes.msg:type_name -> chat_rpc.Msg
+	10, // 10: chat_rpc.SendMsgRes.sender:type_name -> chat_rpc.Sender
+	17, // 11: chat_rpc.GetUserConversationsRes.conversations:type_name -> chat_rpc.ConversationItem
+	20, // 12: chat_rpc.GetConversationsListByIdsRes.conversations:type_name -> chat_rpc.ConversationListById
+	23, // 13: chat_rpc.GetUserConversationSettingsListByIdsRes.userConversationSettings:type_name -> chat_rpc.UserConversationSettingListById
+	36, // 14: chat_rpc.GetUserConversationVersionsRes.userConversationVersions:type_name -> chat_rpc.UserConversationVersion
+	9,  // 15: chat_rpc.Chat.SendMsg:input_type -> chat_rpc.SendMsgReq
+	12, // 16: chat_rpc.Chat.UpdateConversation:input_type -> chat_rpc.UpdateConversationReq
+	14, // 17: chat_rpc.Chat.BatchUpdateConversation:input_type -> chat_rpc.BatchUpdateConversationReq
+	16, // 18: chat_rpc.Chat.GetUserConversations:input_type -> chat_rpc.GetUserConversationsReq
+	19, // 19: chat_rpc.Chat.GetConversationsListByIds:input_type -> chat_rpc.GetConversationsListByIdsReq
+	22, // 20: chat_rpc.Chat.GetUserConversationSettingsListByIds:input_type -> chat_rpc.GetUserConversationSettingsListByIdsReq
+	35, // 21: chat_rpc.Chat.GetUserConversationVersions:input_type -> chat_rpc.GetUserConversationVersionsReq
+	25, // 22: chat_rpc.Chat.InitializeConversation:input_type -> chat_rpc.InitializeConversationReq
+	29, // 23: chat_rpc.Chat.AddConversationMembers:input_type -> chat_rpc.AddConversationMembersReq
+	31, // 24: chat_rpc.Chat.RemoveConversationMembers:input_type -> chat_rpc.RemoveConversationMembersReq
+	33, // 25: chat_rpc.Chat.DissolveConversation:input_type -> chat_rpc.DissolveConversationReq
+	27, // 26: chat_rpc.Chat.SendNotificationMessage:input_type -> chat_rpc.SendNotificationMessageReq
+	11, // 27: chat_rpc.Chat.SendMsg:output_type -> chat_rpc.SendMsgRes
+	13, // 28: chat_rpc.Chat.UpdateConversation:output_type -> chat_rpc.UpdateConversationRes
+	15, // 29: chat_rpc.Chat.BatchUpdateConversation:output_type -> chat_rpc.BatchUpdateConversationRes
+	18, // 30: chat_rpc.Chat.GetUserConversations:output_type -> chat_rpc.GetUserConversationsRes
+	21, // 31: chat_rpc.Chat.GetConversationsListByIds:output_type -> chat_rpc.GetConversationsListByIdsRes
+	24, // 32: chat_rpc.Chat.GetUserConversationSettingsListByIds:output_type -> chat_rpc.GetUserConversationSettingsListByIdsRes
+	37, // 33: chat_rpc.Chat.GetUserConversationVersions:output_type -> chat_rpc.GetUserConversationVersionsRes
+	26, // 34: chat_rpc.Chat.InitializeConversation:output_type -> chat_rpc.InitializeConversationRes
+	30, // 35: chat_rpc.Chat.AddConversationMembers:output_type -> chat_rpc.AddConversationMembersRes
+	32, // 36: chat_rpc.Chat.RemoveConversationMembers:output_type -> chat_rpc.RemoveConversationMembersRes
+	34, // 37: chat_rpc.Chat.DissolveConversation:output_type -> chat_rpc.DissolveConversationRes
+	28, // 38: chat_rpc.Chat.SendNotificationMessage:output_type -> chat_rpc.SendNotificationMessageRes
+	27, // [27:39] is the sub-list for method output_type
+	15, // [15:27] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_chat_rpc_proto_init() }
@@ -2465,7 +2530,7 @@ func file_chat_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_rpc_proto_rawDesc), len(file_chat_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   39,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

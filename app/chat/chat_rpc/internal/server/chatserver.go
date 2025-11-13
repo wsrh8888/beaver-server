@@ -78,7 +78,7 @@ func (s *ChatServer) DissolveConversation(ctx context.Context, in *chat_rpc.Diss
 	return l.DissolveConversation(in)
 }
 
-func (s *ChatServer) SendSystemMessage(ctx context.Context, in *chat_rpc.SendSystemMessageReq) (*chat_rpc.SendSystemMessageRes, error) {
-	l := logic.NewSendSystemMessageLogic(ctx, s.svcCtx)
-	return l.SendSystemMessage(in)
+func (s *ChatServer) SendNotificationMessage(ctx context.Context, in *chat_rpc.SendNotificationMessageReq) (*chat_rpc.SendNotificationMessageRes, error) {
+	l := logic.NewSendNotificationMessageLogic(ctx, s.svcCtx)
+	return l.SendNotificationMessage(in)
 }

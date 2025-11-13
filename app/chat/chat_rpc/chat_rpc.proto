@@ -9,45 +9,45 @@ message TextMsg {
   string content = 1; // 文本消息内容
 }
 
-// 定义VideoStyle消息 - 视频样式信息
-message VideoStyle {
-  int32 width = 1;     // 视频宽度
-  int32 height = 2;    // 视频高度
-  int32 duration = 3;    // 视频时长（秒）
-}
-
-// 定义VoiceStyle消息 - 语音样式信息
-message VoiceStyle {
-  int32 duration = 1;    // 语音时长（秒）
-}
-
-// 定义FileMsg消息
-message FileMsg {
-  string fileKey = 1; // 文件ID，通过fileName可以从文件模块获取完整信息
-}
-
-// 定义VoiceMsg消息
-message VoiceMsg {
-  string fileKey = 1; // 语音文件ID
-  VoiceStyle style = 2; // 语音样式（可选）
+// 定义ImageMsg消息
+message ImageMsg {
+  string fileKey = 1; // 图片文件ID
+  int32 width = 2;    // 图片宽度（可选）
+  int32 height = 3;   // 图片高度（可选）
+  int64 size = 4;     // 文件大小（字节，可选）
 }
 
 // 定义VideoMsg消息
 message VideoMsg {
-  string fileKey = 1; // 视频文件ID
-  VideoStyle style = 2; // 视频样式（可选）
+  string fileKey = 1;      // 视频文件ID
+  int32 width = 2;         // 视频宽度（可选）
+  int32 height = 3;        // 视频高度（可选）
+  int32 duration = 4;      // 视频时长（秒，可选）
+  string thumbnailKey = 5; // 视频封面图文件ID（可选）
+  int64 size = 6;          // 文件大小（字节，可选）
 }
 
-// 定义ImageStyle消息 - 图片样式信息
-message ImageStyle {
-  int32 width = 1;     // 图片宽度
-  int32 height = 2;    // 图片高度
+// 定义FileMsg消息
+message FileMsg {
+  string fileKey = 1;  // 文件ID
+  string fileName = 2; // 原始文件名（可选，用于显示）
+  int64 size = 3;      // 文件大小（字节，可选）
+  string mimeType = 4; // MIME类型（可选，如 application/pdf）
 }
 
-// 定义ImageMsg消息
-message ImageMsg {
-  string fileKey = 1; // 图片文件ID
-  ImageStyle style = 2; // 图片样式（可选）
+// 定义VoiceMsg消息
+message VoiceMsg {
+  string fileKey = 1;   // 语音文件ID
+  int32 duration = 2;   // 语音时长（秒，可选）
+  int64 size = 3;       // 文件大小（字节，可选）
+}
+
+// 定义AudioFileMsg消息 - 音频文件消息
+message AudioFileMsg {
+  string fileKey = 1;  // 音频文件ID
+  string fileName = 2; // 原始文件名（可选，用于显示）
+  int32 duration = 3;  // 音频时长（秒，可选）
+  int64 size = 4;      // 文件大小（字节，可选）
 }
 
 // 定义EmojiMsg消息 - 表情相关消息
@@ -57,15 +57,23 @@ message EmojiMsg {
   uint32 packageId = 3; // 表情包ID（EmojiPackage.ID，表情包分享时使用）
 }
 
+// 定义NotificationMsg消息 - 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
+message NotificationMsg {
+  int32 type = 1;         // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+  repeated string actors = 2; // 相关用户ID列表
+}
+
 // 定义Msg消息
 message Msg {
-  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
+  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
   TextMsg textMsg = 2; // 文本消息
   ImageMsg imageMsg = 3; // 图片
   VideoMsg videoMsg = 4; // 视频
   FileMsg fileMsg = 5; // 文件
-  VoiceMsg voiceMsg = 6; // 语音
+  VoiceMsg voiceMsg = 6; // 语音（移动端录制的短语音）
   EmojiMsg emojiMsg = 7; // 表情（单个表情或表情包）
+  NotificationMsg notificationMsg = 8; // 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+  AudioFileMsg audioFileMsg = 9; // 音频文件（用户上传的音频文件）
 }
 
 // 定义SendMsgReq消息
@@ -192,16 +200,16 @@ message InitializeConversationRes {
   string conversationId = 1; // 创建的会话ID
 }
 
-// 定义SendSystemMessageReq消息 - 发送系统消息
-message SendSystemMessageReq {
+// 定义SendNotificationMessageReq消息 - 发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+message SendNotificationMessageReq {
   string conversationId = 1;    // 会话ID
-  int32 messageType = 2;        // 系统消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
+  int32 messageType = 2;        // 通知消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
   string content = 3;           // 消息内容
   string relatedUserId = 4;     // 相关用户ID（如新加好友的ID）
 }
 
-// 定义SendSystemMessageRes消息
-message SendSystemMessageRes {
+// 定义SendNotificationMessageRes消息
+message SendNotificationMessageRes {
   string messageId = 1; // 生成的消息ID
 }
 
@@ -267,7 +275,7 @@ service Chat {
     rpc AddConversationMembers(AddConversationMembersReq) returns (AddConversationMembersRes); //添加会话成员
     rpc RemoveConversationMembers(RemoveConversationMembersReq) returns (RemoveConversationMembersRes); //移除会话成员
     rpc DissolveConversation(DissolveConversationReq) returns (DissolveConversationRes); //解散会话
-    rpc SendSystemMessage(SendSystemMessageReq) returns (SendSystemMessageRes); //发送系统消息
+    rpc SendNotificationMessage(SendNotificationMessageReq) returns (SendNotificationMessageRes); //发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
 }
 
 // goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -16,6 +16,7 @@ import (
 type (
 	AddConversationMembersReq               = chat_rpc.AddConversationMembersReq
 	AddConversationMembersRes               = chat_rpc.AddConversationMembersRes
+	AudioFileMsg                            = chat_rpc.AudioFileMsg
 	BatchUpdateConversationReq              = chat_rpc.BatchUpdateConversationReq
 	BatchUpdateConversationRes              = chat_rpc.BatchUpdateConversationRes
 	ConversationItem                        = chat_rpc.ConversationItem
@@ -33,16 +34,16 @@ type (
 	GetUserConversationsReq                 = chat_rpc.GetUserConversationsReq
 	GetUserConversationsRes                 = chat_rpc.GetUserConversationsRes
 	ImageMsg                                = chat_rpc.ImageMsg
-	ImageStyle                              = chat_rpc.ImageStyle
 	InitializeConversationReq               = chat_rpc.InitializeConversationReq
 	InitializeConversationRes               = chat_rpc.InitializeConversationRes
 	Msg                                     = chat_rpc.Msg
+	NotificationMsg                         = chat_rpc.NotificationMsg
 	RemoveConversationMembersReq            = chat_rpc.RemoveConversationMembersReq
 	RemoveConversationMembersRes            = chat_rpc.RemoveConversationMembersRes
 	SendMsgReq                              = chat_rpc.SendMsgReq
 	SendMsgRes                              = chat_rpc.SendMsgRes
-	SendSystemMessageReq                    = chat_rpc.SendSystemMessageReq
-	SendSystemMessageRes                    = chat_rpc.SendSystemMessageRes
+	SendNotificationMessageReq              = chat_rpc.SendNotificationMessageReq
+	SendNotificationMessageRes              = chat_rpc.SendNotificationMessageRes
 	Sender                                  = chat_rpc.Sender
 	TextMsg                                 = chat_rpc.TextMsg
 	UpdateConversationReq                   = chat_rpc.UpdateConversationReq
@@ -50,9 +51,7 @@ type (
 	UserConversationSettingListById         = chat_rpc.UserConversationSettingListById
 	UserConversationVersion                 = chat_rpc.UserConversationVersion
 	VideoMsg                                = chat_rpc.VideoMsg
-	VideoStyle                              = chat_rpc.VideoStyle
 	VoiceMsg                                = chat_rpc.VoiceMsg
-	VoiceStyle                              = chat_rpc.VoiceStyle
 
 	Chat interface {
 		SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)
@@ -66,7 +65,7 @@ type (
 		AddConversationMembers(ctx context.Context, in *AddConversationMembersReq, opts ...grpc.CallOption) (*AddConversationMembersRes, error)
 		RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error)
 		DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
-		SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
+		SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
 	}
 
 	defaultChat struct {
@@ -135,7 +134,7 @@ func (m *defaultChat) DissolveConversation(ctx context.Context, in *DissolveConv
 	return client.DissolveConversation(ctx, in, opts...)
 }
 
-func (m *defaultChat) SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error) {
+func (m *defaultChat) SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
-	return client.SendSystemMessage(ctx, in, opts...)
+	return client.SendNotificationMessage(ctx, in, opts...)
 }

@@ -48,7 +48,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		return nil, err
 	}
 
-	// 收集需要查询用户信息的UserID列表（排除系统消息）
+		// 收集需要查询用户信息的UserID列表（排除通知消息）
 	var userIds []string
 	userIdSet := make(map[string]bool)
 	for _, chat := range chatMessages {
@@ -113,10 +113,10 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 				}
 			}
 		} else {
-			// 系统消息：SendUserID为空
+			// 通知消息：SendUserID为空
 			sender = types.Sender{
 				UserID:   "",
-				Nickname: "系统消息",
+				Nickname: "通知消息",
 				Avatar:   "",
 			}
 		}

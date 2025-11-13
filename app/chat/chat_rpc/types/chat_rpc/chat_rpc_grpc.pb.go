@@ -30,7 +30,7 @@ const (
 	Chat_AddConversationMembers_FullMethodName               = "/chat_rpc.Chat/AddConversationMembers"
 	Chat_RemoveConversationMembers_FullMethodName            = "/chat_rpc.Chat/RemoveConversationMembers"
 	Chat_DissolveConversation_FullMethodName                 = "/chat_rpc.Chat/DissolveConversation"
-	Chat_SendSystemMessage_FullMethodName                    = "/chat_rpc.Chat/SendSystemMessage"
+	Chat_SendNotificationMessage_FullMethodName              = "/chat_rpc.Chat/SendNotificationMessage"
 )
 
 // ChatClient is the client API for Chat service.
@@ -50,7 +50,7 @@ type ChatClient interface {
 	AddConversationMembers(ctx context.Context, in *AddConversationMembersReq, opts ...grpc.CallOption) (*AddConversationMembersRes, error)
 	RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error)
 	DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
-	SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error)
+	SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
 }
 
 type chatClient struct {
@@ -171,10 +171,10 @@ func (c *chatClient) DissolveConversation(ctx context.Context, in *DissolveConve
 	return out, nil
 }
 
-func (c *chatClient) SendSystemMessage(ctx context.Context, in *SendSystemMessageReq, opts ...grpc.CallOption) (*SendSystemMessageRes, error) {
+func (c *chatClient) SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SendSystemMessageRes)
-	err := c.cc.Invoke(ctx, Chat_SendSystemMessage_FullMethodName, in, out, cOpts...)
+	out := new(SendNotificationMessageRes)
+	err := c.cc.Invoke(ctx, Chat_SendNotificationMessage_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ type ChatServer interface {
 	AddConversationMembers(context.Context, *AddConversationMembersReq) (*AddConversationMembersRes, error)
 	RemoveConversationMembers(context.Context, *RemoveConversationMembersReq) (*RemoveConversationMembersRes, error)
 	DissolveConversation(context.Context, *DissolveConversationReq) (*DissolveConversationRes, error)
-	SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error)
+	SendNotificationMessage(context.Context, *SendNotificationMessageReq) (*SendNotificationMessageRes, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -242,8 +242,8 @@ func (UnimplementedChatServer) RemoveConversationMembers(context.Context, *Remov
 func (UnimplementedChatServer) DissolveConversation(context.Context, *DissolveConversationReq) (*DissolveConversationRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DissolveConversation not implemented")
 }
-func (UnimplementedChatServer) SendSystemMessage(context.Context, *SendSystemMessageReq) (*SendSystemMessageRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendSystemMessage not implemented")
+func (UnimplementedChatServer) SendNotificationMessage(context.Context, *SendNotificationMessageReq) (*SendNotificationMessageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendNotificationMessage not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 func (UnimplementedChatServer) testEmbeddedByValue()              {}
@@ -464,20 +464,20 @@ func _Chat_DissolveConversation_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_SendSystemMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendSystemMessageReq)
+func _Chat_SendNotificationMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendNotificationMessageReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).SendSystemMessage(ctx, in)
+		return srv.(ChatServer).SendNotificationMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_SendSystemMessage_FullMethodName,
+		FullMethod: Chat_SendNotificationMessage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).SendSystemMessage(ctx, req.(*SendSystemMessageReq))
+		return srv.(ChatServer).SendNotificationMessage(ctx, req.(*SendNotificationMessageReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -534,8 +534,8 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_DissolveConversation_Handler,
 		},
 		{
-			MethodName: "SendSystemMessage",
-			Handler:    _Chat_SendSystemMessage_Handler,
+			MethodName: "SendNotificationMessage",
+			Handler:    _Chat_SendNotificationMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

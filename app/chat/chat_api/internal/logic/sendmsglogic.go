@@ -45,34 +45,57 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		rpcReq.Msg.TextMsg = &chat_rpc.TextMsg{Content: req.Msg.TextMsg.Content}
 	case ctype.ImageMsgType:
 		imageMsg := &chat_rpc.ImageMsg{FileKey: req.Msg.ImageMsg.FileKey}
-		// 如果存在 style，则设置 style
-		if req.Msg.ImageMsg.Style != nil {
-			imageMsg.Style = &chat_rpc.ImageStyle{
-				Width:  int32(req.Msg.ImageMsg.Style.Width),
-				Height: int32(req.Msg.ImageMsg.Style.Height),
-			}
+		// 设置可选字段（打平后的结构）
+		if req.Msg.ImageMsg.Width > 0 {
+			imageMsg.Width = int32(req.Msg.ImageMsg.Width)
+		}
+		if req.Msg.ImageMsg.Height > 0 {
+			imageMsg.Height = int32(req.Msg.ImageMsg.Height)
+		}
+		if req.Msg.ImageMsg.Size > 0 {
+			imageMsg.Size = req.Msg.ImageMsg.Size
 		}
 		rpcReq.Msg.ImageMsg = imageMsg
 	case ctype.VideoMsgType:
 		videoMsg := &chat_rpc.VideoMsg{FileKey: req.Msg.VideoMsg.FileKey}
-		// 如果存在 style，则设置 style
-		if req.Msg.VideoMsg.Style != nil {
-			videoMsg.Style = &chat_rpc.VideoStyle{
-				Width:    int32(req.Msg.VideoMsg.Style.Width),
-				Height:   int32(req.Msg.VideoMsg.Style.Height),
-				Duration: int32(req.Msg.VideoMsg.Style.Duration),
-			}
+		// 设置可选字段（打平后的结构）
+		if req.Msg.VideoMsg.Width > 0 {
+			videoMsg.Width = int32(req.Msg.VideoMsg.Width)
+		}
+		if req.Msg.VideoMsg.Height > 0 {
+			videoMsg.Height = int32(req.Msg.VideoMsg.Height)
+		}
+		if req.Msg.VideoMsg.Duration > 0 {
+			videoMsg.Duration = int32(req.Msg.VideoMsg.Duration)
+		}
+		if req.Msg.VideoMsg.ThumbnailKey != "" {
+			videoMsg.ThumbnailKey = req.Msg.VideoMsg.ThumbnailKey
+		}
+		if req.Msg.VideoMsg.Size > 0 {
+			videoMsg.Size = req.Msg.VideoMsg.Size
 		}
 		rpcReq.Msg.VideoMsg = videoMsg
 	case ctype.FileMsgType:
-		rpcReq.Msg.FileMsg = &chat_rpc.FileMsg{FileKey: req.Msg.FileMsg.FileKey}
+		fileMsg := &chat_rpc.FileMsg{FileKey: req.Msg.FileMsg.FileKey}
+		// 设置可选字段
+		if req.Msg.FileMsg.FileName != "" {
+			fileMsg.FileName = req.Msg.FileMsg.FileName
+		}
+		if req.Msg.FileMsg.Size > 0 {
+			fileMsg.Size = req.Msg.FileMsg.Size
+		}
+		if req.Msg.FileMsg.MimeType != "" {
+			fileMsg.MimeType = req.Msg.FileMsg.MimeType
+		}
+		rpcReq.Msg.FileMsg = fileMsg
 	case ctype.VoiceMsgType:
 		voiceMsg := &chat_rpc.VoiceMsg{FileKey: req.Msg.VoiceMsg.FileKey}
-		// 如果存在 style，则设置 style
-		if req.Msg.VoiceMsg.Style != nil {
-			voiceMsg.Style = &chat_rpc.VoiceStyle{
-				Duration: int32(req.Msg.VoiceMsg.Style.Duration),
-			}
+		// 设置可选字段（打平后的结构）
+		if req.Msg.VoiceMsg.Duration > 0 {
+			voiceMsg.Duration = int32(req.Msg.VoiceMsg.Duration)
+		}
+		if req.Msg.VoiceMsg.Size > 0 {
+			voiceMsg.Size = req.Msg.VoiceMsg.Size
 		}
 		rpcReq.Msg.VoiceMsg = voiceMsg
 	case ctype.EmojiMsgType:
@@ -81,6 +104,24 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 			EmojiId:   req.Msg.EmojiMsg.EmojiID,
 			PackageId: req.Msg.EmojiMsg.PackageID,
 		}
+	case ctype.NotificationMsgType:
+		rpcReq.Msg.NotificationMsg = &chat_rpc.NotificationMsg{
+			Type:   int32(req.Msg.NotificationMsg.Type),
+			Actors: req.Msg.NotificationMsg.Actors,
+		}
+	case ctype.AudioFileMsgType:
+		audioFileMsg := &chat_rpc.AudioFileMsg{FileKey: req.Msg.AudioFileMsg.FileKey}
+		// 设置可选字段（打平后的结构）
+		if req.Msg.AudioFileMsg.FileName != "" {
+			audioFileMsg.FileName = req.Msg.AudioFileMsg.FileName
+		}
+		if req.Msg.AudioFileMsg.Duration > 0 {
+			audioFileMsg.Duration = int32(req.Msg.AudioFileMsg.Duration)
+		}
+		if req.Msg.AudioFileMsg.Size > 0 {
+			audioFileMsg.Size = req.Msg.AudioFileMsg.Size
+		}
+		rpcReq.Msg.AudioFileMsg = audioFileMsg
 	default:
 		return nil, errors.New("invalid message type")
 	}

@@ -11,7 +11,7 @@ type ChatMessage struct {
 	ConversationID   string        `gorm:"size:128;index" json:"conversationId"`           // 所属会话ID
 	ConversationType int           `gorm:"not" json:"conversationType"`                    // 会话类型（1=私聊 2=群聊）
 	Seq              int64         `gorm:"not;default:0;index" json:"seq"`                 // 消息在会话内的序列号（基于ConversationID递增，从1开始）
-	SendUserID       *string       `gorm:"size:64;index" json:"sendUserId,omitempty"`      // 发送者用户ID（系统消息可为null）
+	SendUserID       *string       `gorm:"size:64;index" json:"sendUserId,omitempty"`      // 发送者用户ID（通知消息可为null）
 	MsgType          ctype.MsgType `gorm:"not" json:"msgType"`                             // 消息类型（TEXT/IMAGE/VIDEO/REVOKE/DELETE/EDIT等）
 	TargetMessageID  string        `gorm:"size:64;index" json:"targetMessageId,omitempty"` // 针对的原消息ID（撤回/删除/编辑事件）
 	MsgPreview       string        `gorm:"size:256" json:"msgPreview"`                     // 消息预览文本
@@ -36,7 +36,9 @@ func (chat ChatMessage) MsgPreviewMethod() string {
 	case 6:
 		return "[表情消息]"
 	case 7:
-		return "[系统提示]"
+		return "[通知消息]"
+	case 8:
+		return "[音频文件]"
 	default:
 		return "[未知消息]"
 	}
