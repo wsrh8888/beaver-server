@@ -101,7 +101,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		}
 		conversationID = initResp.ConversationId
 
-		// 异步发送系统欢迎消息（通过专门的系统消息服务）
+		// 异步发送通知欢迎消息（通过专门的通知消息服务）
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
@@ -109,8 +109,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				}
 			}()
 
-			// 调用Chat服务的系统消息发送接口
-			_, err := l.svcCtx.ChatRpc.SendSystemMessage(context.Background(), &chat_rpc.SendSystemMessageReq{
+			// 调用Chat服务的通知消息发送接口
+			_, err := l.svcCtx.ChatRpc.SendNotificationMessage(context.Background(), &chat_rpc.SendNotificationMessageReq{
 				ConversationId: conversationID,
 				MessageType:    1, // 好友添加成功欢迎消息
 				Content:        "我们已经是好友了，开始聊天吧",

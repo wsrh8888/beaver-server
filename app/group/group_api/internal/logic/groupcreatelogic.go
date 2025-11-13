@@ -135,7 +135,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
 		fmt.Println("初始化群聊会话")
 		_, err = l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
-			ConversationId: groupModel.GroupID,
+			ConversationId: "group_" + groupModel.GroupID,
 			Type:           2, // 群聊类型
 			UserIds:        allUserIDs,
 		})
@@ -152,9 +152,9 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 				}
 			}()
 
-			// 调用Chat服务的系统消息发送接口，发送群创建通知
-			_, err := l.svcCtx.ChatRpc.SendSystemMessage(context.Background(), &chat_rpc.SendSystemMessageReq{
-				ConversationId: groupModel.GroupID,
+			// 调用Chat服务的通知消息发送接口，发送群创建通知
+			_, err := l.svcCtx.ChatRpc.SendNotificationMessage(context.Background(), &chat_rpc.SendNotificationMessageReq{
+				ConversationId: "group_" + groupModel.GroupID,
 				MessageType:    2,                                   // 群创建成功消息
 				Content:        fmt.Sprintf("%s 创建了群聊", req.UserID), // 这里应该用实际的用户名，但简化处理
 				RelatedUserId:  req.UserID,                          // 创建者ID

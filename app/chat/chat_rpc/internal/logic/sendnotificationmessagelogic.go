@@ -14,21 +14,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type SendSystemMessageLogic struct {
+type SendNotificationMessageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewSendSystemMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendSystemMessageLogic {
-	return &SendSystemMessageLogic{
+func NewSendNotificationMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendNotificationMessageLogic {
+	return &SendNotificationMessageLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *SendSystemMessageLogic) SendSystemMessage(in *chat_rpc.SendSystemMessageReq) (*chat_rpc.SendSystemMessageRes, error) {
+func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.SendNotificationMessageReq) (*chat_rpc.SendNotificationMessageRes, error) {
 	// 参数验证
 	if in.ConversationId == "" {
 		return nil, errors.New("会话ID不能为空")
@@ -36,6 +36,12 @@ func (l *SendSystemMessageLogic) SendSystemMessage(in *chat_rpc.SendSystemMessag
 
 	if in.Content == "" {
 		return nil, errors.New("消息内容不能为空")
+	}
+
+	// 构建通知消息的结构化数据
+	actors := []string{}
+	if in.RelatedUserId != "" {
+		actors = append(actors, in.RelatedUserId)
 	}
 
 	// 检查会话是否存在
@@ -62,28 +68,29 @@ func (l *SendSystemMessageLogic) SendSystemMessage(in *chat_rpc.SendSystemMessag
 
 	nextSeq := maxSeq + 1
 
-	// 为系统消息创建Msg结构（使用TextMsg类型）
-	systemMsg := &ctype.Msg{
-		Type: ctype.TextMsgType, // 使用文本消息类型
-		TextMsg: &ctype.TextMsg{
-			Content: in.Content, // 系统消息内容
+	// 为通知消息创建Msg结构（使用NotificationMsg类型）
+	notificationMsg := &ctype.Msg{
+		Type: ctype.NotificationMsgType, // 使用通知消息类型
+		NotificationMsg: &ctype.NotificationMsg{
+			Type:   int(in.MessageType), // 通知类型
+			Actors: actors,              // 相关用户ID列表
 		},
 	}
 
-	systemMessage := chat_models.ChatMessage{
+	notificationMessage := chat_models.ChatMessage{
 		MessageID:        messageId,
 		ConversationID:   in.ConversationId,
 		ConversationType: conversation.Type,
 		Seq:              nextSeq,
-		SendUserID:       nil, // 系统消息SendUserID为null
-		MsgType:          7,   // 系统消息类型
+		SendUserID:       nil, // 通知消息SendUserID为null
+		MsgType:          7,   // 通知消息类型
 		MsgPreview:       in.Content,
-		Msg:              systemMsg, // 系统消息的结构化内容
+		Msg:              notificationMsg, // 通知消息的结构化内容
 	}
 
-	if err := l.svcCtx.DB.Create(&systemMessage).Error; err != nil {
-		l.Logger.Errorf("创建系统消息失败: conversationId=%s, error=%v", in.ConversationId, err)
-		return nil, errors.New("创建系统消息失败")
+	if err := l.svcCtx.DB.Create(&notificationMessage).Error; err != nil {
+		l.Logger.Errorf("创建通知消息失败: conversationId=%s, error=%v", in.ConversationId, err)
+		return nil, errors.New("创建通知消息失败")
 	}
 
 	// 更新会话级别的信息
@@ -110,9 +117,9 @@ func (l *SendSystemMessageLogic) SendSystemMessage(in *chat_rpc.SendSystemMessag
 		}
 	}
 
-	l.Logger.Infof("发送系统消息成功: conversationId=%s, messageId=%s, type=%d", in.ConversationId, messageId, in.MessageType)
+	l.Logger.Infof("发送通知消息成功: conversationId=%s, messageId=%s, type=%d", in.ConversationId, messageId, in.MessageType)
 
-	return &chat_rpc.SendSystemMessageRes{
+	return &chat_rpc.SendNotificationMessageRes{
 		MessageId: messageId,
 	}, nil
 }

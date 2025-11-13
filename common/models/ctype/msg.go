@@ -8,23 +8,51 @@ import (
 type MsgType uint32
 
 const (
+	/***
+	 * @description: 文本消息类型
+	 */
 	TextMsgType MsgType = iota + 1
+	/**
+	 * @description: 图片消息类型
+	 */
 	ImageMsgType
+	/**
+	 * @description: 视频消息类型
+	 */
 	VideoMsgType
+	/**
+	 * @description: 文件消息类型
+	 */
 	FileMsgType
+	/**
+	 * @description: 语音消息类型（移动端录制的短语音）
+	 */
 	VoiceMsgType
+	/**
+	 * @description: 表情消息类型
+	 */
 	EmojiMsgType
+	/**
+	 * @description: 通知消息类型（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+	 */
+	NotificationMsgType
+	/**
+	 * @description: 音频文件消息类型（用户上传的音频文件）
+	 */
+	AudioFileMsgType
 )
 
 type Msg struct {
-	Type     MsgType   `json:"type"`               //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
-	TextMsg  *TextMsg  `json:"textMsg,omitempty"`  //文本消息
-	ImageMsg *ImageMsg `json:"imageMsg,omitempty"` //图片消息
-	VideoMsg *VideoMsg `json:"videoMsg,omitempty"` //视频消息
-	FileMsg  *FileMsg  `json:"fileMsg,omitempty"`  //文件消息
-	VoiceMsg *VoiceMsg `json:"voiceMsg,omitempty"` //语音消息
-	EmojiMsg *EmojiMsg `json:"emojiMsg,omitempty"` //表情消息
-	ReplyMsg *ReplyMsg `json:"replyMsg,omitempty"` //回复消息
+	Type            MsgType          `json:"type"`                      //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
+	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         //文本消息
+	ImageMsg        *ImageMsg        `json:"imageMsg,omitempty"`        //图片消息
+	VideoMsg        *VideoMsg        `json:"videoMsg,omitempty"`        //视频消息
+	FileMsg         *FileMsg         `json:"fileMsg,omitempty"`         //文件消息
+	VoiceMsg        *VoiceMsg        `json:"voiceMsg,omitempty"`        //语音消息（移动端录制的短语音）
+	EmojiMsg        *EmojiMsg        `json:"emojiMsg,omitempty"`        //表情消息
+	NotificationMsg *NotificationMsg `json:"notificationMsg,omitempty"` //通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,omitempty"`    //音频文件消息（用户上传的音频文件）
+	ReplyMsg        *ReplyMsg        `json:"replyMsg,omitempty"`        //回复消息
 }
 
 /**
@@ -50,38 +78,47 @@ type TextMsg struct {
 	Content string `json:"content"` //文本消息内容
 }
 
-type ImageStyle struct {
-	Width  int `json:"width"`  //图片宽度
-	Height int `json:"height"` //图片高度
+// NotificationMsg 通知消息结构（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
+type NotificationMsg struct {
+	Type   int      `json:"type"`   // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+	Actors []string `json:"actors"` // 相关用户ID列表
 }
 
 type ImageMsg struct {
-	FileKey string      `json:"fileKey"` //图片文件ID
-	Style   *ImageStyle `json:"style,omitempty"` //图片样式（可选）
-}
-
-type VideoStyle struct {
-	Width    int `json:"width"`    //视频宽度
-	Height   int `json:"height"`   //视频高度
-	Duration int `json:"duration"` //视频时长（秒）
-}
-
-type VoiceStyle struct {
-	Duration int `json:"duration"` //语音时长（秒）
+	FileKey string `json:"fileKey"`          //图片文件ID
+	Width   int    `json:"width,omitempty"`  //图片宽度（可选）
+	Height  int    `json:"height,omitempty"` //图片高度（可选）
+	Size    int64  `json:"size,omitempty"`   //文件大小（字节，可选）
 }
 
 type VideoMsg struct {
-	FileKey string       `json:"fileKey"`        //视频文件ID
-	Style   *VideoStyle  `json:"style,omitempty"` //视频样式（可选）
+	FileKey      string `json:"fileKey"`                //视频文件ID
+	Width        int    `json:"width,omitempty"`        //视频宽度（可选）
+	Height       int    `json:"height,omitempty"`       //视频高度（可选）
+	Duration     int    `json:"duration,omitempty"`     //视频时长（秒，可选）
+	ThumbnailKey string `json:"thumbnailKey,omitempty"` //视频封面图文件ID（可选）
+	Size         int64  `json:"size,omitempty"`         //文件大小（字节，可选）
 }
 
 type FileMsg struct {
-	FileKey string `json:"fileKey"` //文件ID，通过fileName可以从文件模块获取完整信息
+	FileKey  string `json:"fileKey"`            //文件ID
+	FileName string `json:"fileName,omitempty"` //原始文件名（可选，用于显示）
+	Size     int64  `json:"size,omitempty"`     //文件大小（字节，可选）
+	MimeType string `json:"mimeType,omitempty"` //MIME类型（可选，如 application/pdf）
 }
 
 type VoiceMsg struct {
-	FileKey string       `json:"fileKey"`        //语音文件ID
-	Style   *VoiceStyle  `json:"style,omitempty"` //语音样式（可选）
+	FileKey  string `json:"fileKey"`            //语音文件ID
+	Duration int    `json:"duration,omitempty"` //语音时长（秒，可选）
+	Size     int64  `json:"size,omitempty"`     //文件大小（字节，可选）
+}
+
+// AudioFileMsg 音频文件消息结构
+type AudioFileMsg struct {
+	FileKey  string `json:"fileKey"`            //音频文件ID
+	FileName string `json:"fileName,omitempty"` //原始文件名（可选，用于显示）
+	Duration int    `json:"duration,omitempty"` //音频时长（秒，可选）
+	Size     int64  `json:"size,omitempty"`     //文件大小（字节，可选）
 }
 
 // 表情消息结构

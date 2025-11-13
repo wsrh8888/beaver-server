@@ -92,7 +92,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 			sendUserID = *chat.SendUserID
 		}
 
-		// 对于系统消息，前端可以根据SendUserID是否为空来判断
+		// 对于通知消息，前端可以根据SendUserID是否为空来判断
 
 		messages = append(messages, types.ChatSyncMessage{
 			MessageID:        chat.MessageID,

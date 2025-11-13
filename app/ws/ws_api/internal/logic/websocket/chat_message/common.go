@@ -39,29 +39,27 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.ImageMsg.FileKey = fileName
 			}
 
-			// 提取 style 对象（新格式）
+			// 提取打平后的字段（兼容 style 对象和直接字段两种格式）
 			if style, ok := imageMsg["style"].(map[string]interface{}); ok {
-				rpcMsg.ImageMsg.Style = &chat_rpc.ImageStyle{}
+				// 兼容旧格式：从 style 对象提取
 				if width, ok := style["width"].(float64); ok {
-					rpcMsg.ImageMsg.Style.Width = int32(width)
+					rpcMsg.ImageMsg.Width = int32(width)
 				}
 				if height, ok := style["height"].(float64); ok {
-					rpcMsg.ImageMsg.Style.Height = int32(height)
+					rpcMsg.ImageMsg.Height = int32(height)
 				}
 			} else {
-				// 兼容旧格式：直接从 imageMsg 提取 width 和 height
+				// 新格式：直接从 imageMsg 提取 width 和 height
 				if width, ok := imageMsg["width"].(float64); ok {
-					if rpcMsg.ImageMsg.Style == nil {
-						rpcMsg.ImageMsg.Style = &chat_rpc.ImageStyle{}
-					}
-					rpcMsg.ImageMsg.Style.Width = int32(width)
+					rpcMsg.ImageMsg.Width = int32(width)
 				}
 				if height, ok := imageMsg["height"].(float64); ok {
-					if rpcMsg.ImageMsg.Style == nil {
-						rpcMsg.ImageMsg.Style = &chat_rpc.ImageStyle{}
-					}
-					rpcMsg.ImageMsg.Style.Height = int32(height)
+					rpcMsg.ImageMsg.Height = int32(height)
 				}
+			}
+			// 提取 size
+			if size, ok := imageMsg["size"].(float64); ok {
+				rpcMsg.ImageMsg.Size = int64(size)
 			}
 		}
 	case 3: // 视频消息
@@ -75,45 +73,58 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.VideoMsg.FileKey = fileName
 			}
 
-			// 提取 style 对象（新格式）
+			// 提取打平后的字段（兼容 style 对象和直接字段两种格式）
 			if style, ok := videoMsg["style"].(map[string]interface{}); ok {
-				rpcMsg.VideoMsg.Style = &chat_rpc.VideoStyle{}
+				// 兼容旧格式：从 style 对象提取
 				if width, ok := style["width"].(float64); ok {
-					rpcMsg.VideoMsg.Style.Width = int32(width)
+					rpcMsg.VideoMsg.Width = int32(width)
 				}
 				if height, ok := style["height"].(float64); ok {
-					rpcMsg.VideoMsg.Style.Height = int32(height)
+					rpcMsg.VideoMsg.Height = int32(height)
 				}
 				if duration, ok := style["duration"].(float64); ok {
-					rpcMsg.VideoMsg.Style.Duration = int32(duration)
+					rpcMsg.VideoMsg.Duration = int32(duration)
 				}
 			} else {
-				// 兼容旧格式：直接从 videoMsg 提取 width、height 和 duration
+				// 新格式：直接从 videoMsg 提取 width、height 和 duration
 				if width, ok := videoMsg["width"].(float64); ok {
-					if rpcMsg.VideoMsg.Style == nil {
-						rpcMsg.VideoMsg.Style = &chat_rpc.VideoStyle{}
-					}
-					rpcMsg.VideoMsg.Style.Width = int32(width)
+					rpcMsg.VideoMsg.Width = int32(width)
 				}
 				if height, ok := videoMsg["height"].(float64); ok {
-					if rpcMsg.VideoMsg.Style == nil {
-						rpcMsg.VideoMsg.Style = &chat_rpc.VideoStyle{}
-					}
-					rpcMsg.VideoMsg.Style.Height = int32(height)
+					rpcMsg.VideoMsg.Height = int32(height)
 				}
 				if duration, ok := videoMsg["duration"].(float64); ok {
-					if rpcMsg.VideoMsg.Style == nil {
-						rpcMsg.VideoMsg.Style = &chat_rpc.VideoStyle{}
-					}
-					rpcMsg.VideoMsg.Style.Duration = int32(duration)
+					rpcMsg.VideoMsg.Duration = int32(duration)
 				}
+			}
+			// 提取 thumbnailKey 和 size
+			if thumbnailKey, ok := videoMsg["thumbnailKey"].(string); ok {
+				rpcMsg.VideoMsg.ThumbnailKey = thumbnailKey
+			}
+			if size, ok := videoMsg["size"].(float64); ok {
+				rpcMsg.VideoMsg.Size = int64(size)
 			}
 		}
 	case 4: // 文件消息
 		if fileMsg, ok := msgData["fileMsg"].(map[string]interface{}); ok {
-			if fileName, ok := fileMsg["fileName"].(string); ok {
-				rpcMsg.FileMsg = &chat_rpc.FileMsg{FileKey: fileName}
+			file := &chat_rpc.FileMsg{}
+			// 提取 fileKey（优先）或 fileName（兼容旧格式）
+			if fileKey, ok := fileMsg["fileKey"].(string); ok {
+				file.FileKey = fileKey
+			} else if fileName, ok := fileMsg["fileName"].(string); ok {
+				file.FileKey = fileName
 			}
+			// 提取可选字段
+			if fileName, ok := fileMsg["fileName"].(string); ok {
+				file.FileName = fileName
+			}
+			if size, ok := fileMsg["size"].(float64); ok {
+				file.Size = int64(size)
+			}
+			if mimeType, ok := fileMsg["mimeType"].(string); ok {
+				file.MimeType = mimeType
+			}
+			rpcMsg.FileMsg = file
 		}
 	case 5: // 语音消息
 		if voiceMsg, ok := msgData["voiceMsg"].(map[string]interface{}); ok {
@@ -129,26 +140,30 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.VoiceMsg.FileKey = src
 			}
 
-			// 提取 style 对象（新格式）
+			// 提取打平后的字段（兼容 style 对象和直接字段两种格式）
 			if style, ok := voiceMsg["style"].(map[string]interface{}); ok {
-				rpcMsg.VoiceMsg.Style = &chat_rpc.VoiceStyle{}
+				// 兼容旧格式：从 style 对象提取
 				if duration, ok := style["duration"].(float64); ok {
-					rpcMsg.VoiceMsg.Style.Duration = int32(duration)
+					rpcMsg.VoiceMsg.Duration = int32(duration)
 				}
 			} else {
-				// 兼容旧格式：直接从 voiceMsg 提取 duration
+				// 新格式：直接从 voiceMsg 提取 duration
 				if duration, ok := voiceMsg["duration"].(float64); ok {
-					if rpcMsg.VoiceMsg.Style == nil {
-						rpcMsg.VoiceMsg.Style = &chat_rpc.VoiceStyle{}
-					}
-					rpcMsg.VoiceMsg.Style.Duration = int32(duration)
+					rpcMsg.VoiceMsg.Duration = int32(duration)
 				}
+			}
+			// 提取 size
+			if size, ok := voiceMsg["size"].(float64); ok {
+				rpcMsg.VoiceMsg.Size = int64(size)
 			}
 		}
 	case 6: // 表情消息
 		if emojiMsg, ok := msgData["emojiMsg"].(map[string]interface{}); ok {
 			emoji := &chat_rpc.EmojiMsg{}
-			if fileName, ok := emojiMsg["fileName"].(string); ok {
+			// 提取 fileKey（优先）或 fileName（兼容旧格式）
+			if fileKey, ok := emojiMsg["fileKey"].(string); ok {
+				emoji.FileKey = fileKey
+			} else if fileName, ok := emojiMsg["fileName"].(string); ok {
 				emoji.FileKey = fileName
 			}
 			if emojiId, ok := emojiMsg["emojiId"].(float64); ok {
@@ -158,6 +173,42 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				emoji.PackageId = uint32(packageId)
 			}
 			rpcMsg.EmojiMsg = emoji
+		}
+	case 7: // 通知消息
+		if notificationMsg, ok := msgData["notificationMsg"].(map[string]interface{}); ok {
+			rpcMsg.NotificationMsg = &chat_rpc.NotificationMsg{}
+			if msgType, ok := notificationMsg["type"].(float64); ok {
+				rpcMsg.NotificationMsg.Type = int32(msgType)
+			}
+			if actors, ok := notificationMsg["actors"].([]interface{}); ok {
+				for _, actor := range actors {
+					if actorStr, ok := actor.(string); ok {
+						rpcMsg.NotificationMsg.Actors = append(rpcMsg.NotificationMsg.Actors, actorStr)
+					}
+				}
+			}
+		}
+	case 8: // 音频文件消息
+		if audioFileMsg, ok := msgData["audioFileMsg"].(map[string]interface{}); ok {
+			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{}
+
+			// 提取 fileKey（优先）或 fileName（兼容旧格式）
+			if fileKey, ok := audioFileMsg["fileKey"].(string); ok {
+				rpcMsg.AudioFileMsg.FileKey = fileKey
+			} else if fileName, ok := audioFileMsg["fileName"].(string); ok {
+				rpcMsg.AudioFileMsg.FileKey = fileName
+			}
+
+			// 提取可选字段
+			if fileName, ok := audioFileMsg["fileName"].(string); ok {
+				rpcMsg.AudioFileMsg.FileName = fileName
+			}
+			if duration, ok := audioFileMsg["duration"].(float64); ok {
+				rpcMsg.AudioFileMsg.Duration = int32(duration)
+			}
+			if size, ok := audioFileMsg["size"].(float64); ok {
+				rpcMsg.AudioFileMsg.Size = int64(size)
+			}
 		}
 	}
 

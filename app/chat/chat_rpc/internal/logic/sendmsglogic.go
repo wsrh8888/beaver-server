@@ -69,12 +69,16 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		imageMsg := &ctype.ImageMsg{
 			FileKey: in.Msg.ImageMsg.FileKey,
 		}
-		// 如果存在 style，则设置 style
-		if in.Msg.ImageMsg.Style != nil {
-			imageMsg.Style = &ctype.ImageStyle{
-				Width:  int(in.Msg.ImageMsg.Style.Width),
-				Height: int(in.Msg.ImageMsg.Style.Height),
-			}
+		// 设置可选字段（proto 字段名是小写开头，但 Go 生成的是大写开头）
+		// 注意：需要重新生成 proto 后，字段名会是 Width, Height, Size
+		if in.Msg.ImageMsg.Width > 0 {
+			imageMsg.Width = int(in.Msg.ImageMsg.Width)
+		}
+		if in.Msg.ImageMsg.Height > 0 {
+			imageMsg.Height = int(in.Msg.ImageMsg.Height)
+		}
+		if in.Msg.ImageMsg.Size > 0 {
+			imageMsg.Size = in.Msg.ImageMsg.Size
 		}
 		msg = ctype.Msg{
 			Type:     ctype.ImageMsgType,
@@ -84,34 +88,54 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		videoMsg := &ctype.VideoMsg{
 			FileKey: in.Msg.VideoMsg.FileKey,
 		}
-		// 如果存在 style，则设置 style
-		if in.Msg.VideoMsg.Style != nil {
-			videoMsg.Style = &ctype.VideoStyle{
-				Width:    int(in.Msg.VideoMsg.Style.Width),
-				Height:   int(in.Msg.VideoMsg.Style.Height),
-				Duration: int(in.Msg.VideoMsg.Style.Duration),
-			}
+		// 设置可选字段
+		if in.Msg.VideoMsg.Width > 0 {
+			videoMsg.Width = int(in.Msg.VideoMsg.Width)
+		}
+		if in.Msg.VideoMsg.Height > 0 {
+			videoMsg.Height = int(in.Msg.VideoMsg.Height)
+		}
+		if in.Msg.VideoMsg.Duration > 0 {
+			videoMsg.Duration = int(in.Msg.VideoMsg.Duration)
+		}
+		if in.Msg.VideoMsg.ThumbnailKey != "" {
+			videoMsg.ThumbnailKey = in.Msg.VideoMsg.ThumbnailKey
+		}
+		if in.Msg.VideoMsg.Size > 0 {
+			videoMsg.Size = in.Msg.VideoMsg.Size
 		}
 		msg = ctype.Msg{
 			Type:     ctype.VideoMsgType,
 			VideoMsg: videoMsg,
 		}
 	case ctype.FileMsgType:
+		fileMsg := &ctype.FileMsg{
+			FileKey: in.Msg.FileMsg.FileKey,
+		}
+		// 设置可选字段
+		if in.Msg.FileMsg.FileName != "" {
+			fileMsg.FileName = in.Msg.FileMsg.FileName
+		}
+		if in.Msg.FileMsg.Size > 0 {
+			fileMsg.Size = in.Msg.FileMsg.Size
+		}
+		if in.Msg.FileMsg.MimeType != "" {
+			fileMsg.MimeType = in.Msg.FileMsg.MimeType
+		}
 		msg = ctype.Msg{
-			Type: ctype.FileMsgType,
-			FileMsg: &ctype.FileMsg{
-				FileKey: in.Msg.FileMsg.FileKey,
-			},
+			Type:    ctype.FileMsgType,
+			FileMsg: fileMsg,
 		}
 	case ctype.VoiceMsgType:
 		voiceMsg := &ctype.VoiceMsg{
 			FileKey: in.Msg.VoiceMsg.FileKey,
 		}
-		// 如果存在 style，则设置 style
-		if in.Msg.VoiceMsg.Style != nil {
-			voiceMsg.Style = &ctype.VoiceStyle{
-				Duration: int(in.Msg.VoiceMsg.Style.Duration),
-			}
+		// 设置可选字段
+		if in.Msg.VoiceMsg.Duration > 0 {
+			voiceMsg.Duration = int(in.Msg.VoiceMsg.Duration)
+		}
+		if in.Msg.VoiceMsg.Size > 0 {
+			voiceMsg.Size = in.Msg.VoiceMsg.Size
 		}
 		msg = ctype.Msg{
 			Type:     ctype.VoiceMsgType,
@@ -125,6 +149,33 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 				EmojiID:   in.Msg.EmojiMsg.EmojiId,
 				PackageID: in.Msg.EmojiMsg.PackageId,
 			},
+		}
+	case ctype.NotificationMsgType:
+		notificationMsg := &ctype.NotificationMsg{
+			Type:   int(in.Msg.NotificationMsg.Type),
+			Actors: in.Msg.NotificationMsg.Actors,
+		}
+		msg = ctype.Msg{
+			Type:            ctype.NotificationMsgType,
+			NotificationMsg: notificationMsg,
+		}
+	case ctype.AudioFileMsgType:
+		audioFileMsg := &ctype.AudioFileMsg{
+			FileKey: in.Msg.AudioFileMsg.FileKey,
+		}
+		// 设置可选字段
+		if in.Msg.AudioFileMsg.FileName != "" {
+			audioFileMsg.FileName = in.Msg.AudioFileMsg.FileName
+		}
+		if in.Msg.AudioFileMsg.Duration > 0 {
+			audioFileMsg.Duration = int(in.Msg.AudioFileMsg.Duration)
+		}
+		if in.Msg.AudioFileMsg.Size > 0 {
+			audioFileMsg.Size = in.Msg.AudioFileMsg.Size
+		}
+		msg = ctype.Msg{
+			Type:         ctype.AudioFileMsgType,
+			AudioFileMsg: audioFileMsg,
 		}
 	default:
 		return nil, fmt.Errorf("未识别到该类型: %d", msgType)
@@ -221,10 +272,10 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			}
 		}
 	} else {
-		// 系统消息：SendUserID为空
+		// 通知消息：SendUserID为空
 		sender = &chat_rpc.Sender{
 			UserId:   "",
-			Nickname: "系统消息",
+			Nickname: "通知消息",
 			Avatar:   "",
 		}
 	}
