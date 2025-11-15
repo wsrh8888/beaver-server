@@ -4,7 +4,6 @@ package handler
 import (
 	"net/http"
 
-	ai "beaver/app/backend/backend_admin/internal/handler/ai"
 	auth "beaver/app/backend/backend_admin/internal/handler/auth"
 	chat "beaver/app/backend/backend_admin/internal/handler/chat"
 	emoji "beaver/app/backend/backend_admin/internal/handler/emoji"
@@ -23,35 +22,6 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 创建AI机器人
-				Method:  http.MethodPost,
-				Path:    "/admin/ai/bot/create",
-				Handler: ai.CreateAIBotHandler(serverCtx),
-			},
-			{
-				// 删除AI机器人
-				Method:  http.MethodPost,
-				Path:    "/admin/ai/bot/delete",
-				Handler: ai.DeleteAIBotHandler(serverCtx),
-			},
-			{
-				// 更新AI机器人
-				Method:  http.MethodPost,
-				Path:    "/admin/ai/bot/update",
-				Handler: ai.UpdateAIBotHandler(serverCtx),
-			},
-			{
-				// 获取AI机器人列表
-				Method:  http.MethodGet,
-				Path:    "/admin/ai/bots",
-				Handler: ai.GetAIBotsHandler(serverCtx),
-			},
-		},
-	)
-
 	server.AddRoutes(
 		[]rest.Route{
 			{
@@ -424,18 +394,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/admin/moment/list",
 				Handler: moment.GetMomentListHandler(serverCtx),
-			},
-			{
-				// 处理动态举报
-				Method:  http.MethodPut,
-				Path:    "/admin/moment/report/:id",
-				Handler: moment.HandleMomentReportHandler(serverCtx),
-			},
-			{
-				// 获取动态举报列表
-				Method:  http.MethodGet,
-				Path:    "/admin/moment/reports",
-				Handler: moment.GetMomentReportListHandler(serverCtx),
 			},
 		},
 	)

@@ -41,17 +41,15 @@ func (l *GetGroupDetailLogic) GetGroupDetail(req *types.GetGroupDetailReq) (resp
 	}
 
 	return &types.GetGroupDetailRes{
-		GroupInfo: types.GroupInfo{
-			Id:        group.Id,
-			Uuid:      group.GroupID,
-			Type:      int(group.Type),
-			Title:     group.Title,
-			FileName:  group.FileName,
-			CreatorId: group.CreatorID,
-			Notice:    group.Notice,
-			Status:    int(group.Status),
-			CreatedAt: group.CreatedAt.String(),
-			UpdatedAt: group.UpdatedAt.String(),
-		},
+		Id:        group.Id,
+		Uuid:      group.GroupID,
+		Type:      int(group.Type),
+		Title:     group.Title,
+		FileName:  group.Avatar,
+		CreatorId: group.CreatorID,
+		Notice:    group.Notice,
+		Status:    int(group.Status),
+		CreatedAt: group.CreatedAt.String(),
+		UpdatedAt: group.UpdatedAt.String(),
 	}, nil
 }

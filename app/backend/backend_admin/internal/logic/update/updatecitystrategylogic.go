@@ -52,7 +52,7 @@ func (l *UpdateCityStrategyLogic) UpdateCityStrategy(req *types.UpdateCityStrate
 }
 
 // updateSingleCityStrategy 更新单个城市的策略
-func (l *UpdateCityStrategyLogic) updateSingleCityStrategy(appID, cityID string, newStrategy []types.StrategyInfo, updateType string) error {
+func (l *UpdateCityStrategyLogic) updateSingleCityStrategy(appID, cityID string, newStrategy []types.UpdateCityStrategyItem, updateType string) error {
 	// 查找或创建城市策略记录
 	var strategy update_models.UpdateStrategy
 	err := l.svcCtx.DB.Where("app_id = ? AND city_id = ?", appID, cityID).First(&strategy).Error

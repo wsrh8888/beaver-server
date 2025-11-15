@@ -83,14 +83,14 @@ func (l *GetFeedbackListLogic) GetFeedbackList(req *types.GetFeedbackListReq) (r
 	}
 
 	// 转换为响应格式
-	list := make([]types.FeedbackInfo, len(feedbacks))
+	list := make([]types.GetFeedbackListItem, len(feedbacks))
 	for i, feedback := range feedbacks {
 		var handleTime string
 		if feedback.HandleTime != nil {
 			handleTime = feedback.HandleTime.Format(time.RFC3339)
 		}
 
-		list[i] = types.FeedbackInfo{
+		list[i] = types.GetFeedbackListItem{
 			Id:           feedback.Id,
 			UserId:       feedback.UserID,
 			Content:      feedback.Content,

@@ -10,6 +10,5 @@ import "api/track.api"
 import "api/update.api"
 import "api/user.api"
 import "api/system.api"
-import "api/ai.api"
 
 // goctl api go -api backend_admin.api -dir . --home ../../../template

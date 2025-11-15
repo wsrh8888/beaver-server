@@ -54,9 +54,9 @@ func (l *GetArchitecturesLogic) GetArchitectures(req *types.GetArchitecturesReq)
 	}
 
 	// 构建响应
-	architectureList := make([]types.ArchitectureInfo, 0, len(list))
+	architectureList := make([]types.GetArchitecturesItem, 0, len(list))
 	for _, arch := range list {
-		architectureList = append(architectureList, types.ArchitectureInfo{
+		architectureList = append(architectureList, types.GetArchitecturesItem{
 			Id:          uint(arch.Id),
 			AppID:       arch.AppID,
 			AppName:     arch.App.Name, // 添加应用名称

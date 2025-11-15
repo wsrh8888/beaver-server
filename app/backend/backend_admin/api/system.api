@@ -1,76 +1,86 @@
 syntax = "v1"
 
-type CreateMenuReq {
-	ParentId uint   `json:"parentId"`
-	Path     string `json:"path"`
-	Name     string `json:"name"`
-	Hidden   bool   `json:"hidden"`
-	Sort     int    `json:"sort"`
-	Title    string `json:"title"`
-	Icon     string `json:"icon"`
-	UserID   string `header:"Beaver-User-Id"`
-}
+// 创建菜单
+type (
+	CreateMenuReq {
+		ParentId uint   `json:"parentId"`
+		Path     string `json:"path"`
+		Name     string `json:"name"`
+		Hidden   bool   `json:"hidden"`
+		Sort     int    `json:"sort"`
+		Title    string `json:"title"`
+		Icon     string `json:"icon"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	CreateMenuRes {}
+)
 
-type CreateMenuRes {}
+// 更新菜单
+type (
+	UpdateMenuReq {
+		Id       uint   `json:"id"`
+		ParentId uint   `json:"parentId"`
+		Path     string `json:"path"`
+		Name     string `json:"name"`
+		Hidden   bool   `json:"hidden"`
+		Sort     int    `json:"sort"`
+		Title    string `json:"title"`
+		Icon     string `json:"icon"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	UpdateMenuRes {}
+)
 
-type UpdateMenuReq {
-	Id       uint   `json:"id"`
-	ParentId uint   `json:"parentId"`
-	Path     string `json:"path"`
-	Name     string `json:"name"`
-	Hidden   bool   `json:"hidden"`
-	Sort     int    `json:"sort"`
-	Title    string `json:"title"`
-	Icon     string `json:"icon"`
-	UserID   string `header:"Beaver-User-Id"`
-}
+// 删除菜单
+type (
+	DeleteMenuReq {
+		Id     uint   `json:"id"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DeleteMenuRes {}
+)
 
-type MenuInfo {
-	Id       uint   `json:"id"`
-	ParentId uint   `json:"parentId"`
-	Path     string `json:"path"`
-	Name     string `json:"name"`
-	Hidden   bool   `json:"hidden"`
-	Sort     int    `json:"sort"`
-	Title    string `json:"title"`
-	Icon     string `json:"icon"`
-}
+// 获取菜单列表
+type (
+	GetMenuListReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	GetMenuListRes {
+		List []GetMenuListItem `json:"list"`
+	}
+	GetMenuListItem {
+		Id       uint   `json:"id"`
+		ParentId uint   `json:"parentId"`
+		Path     string `json:"path"`
+		Name     string `json:"name"`
+		Hidden   bool   `json:"hidden"`
+		Sort     int    `json:"sort"`
+		Title    string `json:"title"`
+		Icon     string `json:"icon"`
+	}
+)
 
-type DeleteMenuReq {
-	Id     uint   `json:"id"`
-	UserID string `header:"Beaver-User-Id"`
-}
+// 创建权限
+type (
+	CreateAuthorityReq {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	CreateAuthorityRes {}
+)
 
-type DeleteMenuRes {}
-
-type UpdateMenuRes {}
-
-type GetMenuListReq {
-	UserID string `header:"Beaver-User-Id"`
-}
-
-type GetMenusRes {
-	List []MenuInfo `json:"list"`
-}
-
-type CreateAuthorityReq {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-type CreateAuthorityRes {}
-
-type IdReq {
-	Id uint `json:"id"`
-}
-
-type UpdateAuthorityMenuReq {
-	UserID string  `header:"Beaver-User-Id"`
-	Id     uint    `json:"id"`
-	Menus  []IdReq `json:"menus"`
-}
-
-type UpdateAuthorityMenuRes {}
+// 更新权限菜单
+type (
+	UpdateAuthorityMenuReq {
+		UserID string        `header:"Beaver-User-Id"`
+		Id     uint          `json:"id"`
+		Menus  []UpdateAuthorityMenuMenuItem `json:"menus"`
+	}
+	UpdateAuthorityMenuMenuItem {
+		Id uint `json:"id"`
+	}
+	UpdateAuthorityMenuRes {}
+)
 
 @server (
 	group: system
@@ -90,7 +100,7 @@ service backend {
 
 	@doc "获取菜单列表"
 	@handler getMenus
-	get /admin/system/getMenuList (GetMenuListReq) returns (GetMenusRes)
+	get /admin/system/getMenuList (GetMenuListReq) returns (GetMenuListRes)
 
 	@doc "创建权限"
 	@handler createAuthority

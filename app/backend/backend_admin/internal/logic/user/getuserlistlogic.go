@@ -73,14 +73,14 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 	var list []types.UserInfo
 	for _, user := range users {
 		list = append(list, types.UserInfo{
-			Id:          user.UserID,
+			Id:          user.UUID,
 			Nickname:    user.NickName,
 			Email:       user.Email,
 			Abstract:    user.Abstract,
-			FileName:    user.FileName,
+			FileName:    user.Avatar,
 			Status:      int(user.Status),
 			Source:      int(user.Source),
-			LastLoginIP: user.LastLoginIP,
+			LastLoginIP: "", // UserModel 没有 LastLoginIP 字段
 			CreateTime:  user.CreatedAt.String(),
 			UpdateTime:  user.UpdatedAt.String(),
 		})

@@ -5,32 +5,25 @@ type (
 	GetGroupListReq {
 		Page     int    `form:"page,optional"`
 		Limit    int    `form:"limit,optional"`
-		Status   int    `form:"status,optional"` // 群状态筛选
-		Type     int    `form:"type,optional"` // 群类型筛选
+		Status   int    `form:"status,optional"`   // 群状态筛选
+		Type     int    `form:"type,optional"`     // 群类型筛选
 		Keywords string `form:"keywords,optional"` // 群名关键词搜索
 	}
 	GetGroupListRes {
-		List  []GroupInfo `json:"list"`
-		Total int64       `json:"total"`
+		List  []GetGroupListItem `json:"list"`
+		Total int64              `json:"total"`
 	}
-	GroupInfo {
-		Id             uint   `json:"id"`
-		Uuid           string `json:"uuid"`
-		Type           int    `json:"type"`
-		Title          string `json:"title"`
-		Abstract       string `json:"abstract"`
-		FileName         string `json:"fileName"`
-		CreatorId      string `json:"creatorId"`
-		Notice         string `json:"notice"`
-		Tags           string `json:"tags"`
-		MaxMembers     int    `json:"maxMembers"`
-		CurrentMembers int    `json:"currentMembers"`
-		Status         int    `json:"status"`
-		MuteAll        bool   `json:"muteAll"`
-		DissolveTime   string `json:"dissolveTime"`
-		Category       string `json:"category"`
-		CreatedAt      string `json:"createdAt"`
-		UpdatedAt      string `json:"updatedAt"`
+	GetGroupListItem {
+		Id        uint   `json:"id"`
+		Uuid      string `json:"uuid"`
+		Type      int    `json:"type"`
+		Title     string `json:"title"`
+		FileName  string `json:"fileName"`
+		CreatorId string `json:"creatorId"`
+		Notice    string `json:"notice"`
+		Status    int    `json:"status"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
 	}
 )
 
@@ -40,25 +33,31 @@ type (
 		Id uint `path:"id"`
 	}
 	GetGroupDetailRes {
-		GroupInfo
+		Id        uint   `json:"id"`
+		Uuid      string `json:"uuid"`
+		Type      int    `json:"type"`
+		Title     string `json:"title"`
+		FileName  string `json:"fileName"`
+		CreatorId string `json:"creatorId"`
+		Notice    string `json:"notice"`
+		Status    int    `json:"status"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
 	}
 )
 
 // 更新群组信息
 type (
 	UpdateGroupReq {
-		Id         uint   `path:"id"`
-		Title      string `json:"title,optional"`
-		Abstract   string `json:"abstract,optional"`
-		FileName     string `json:"fileName,optional"`
-		Notice     string `json:"notice,optional"`
-		Tags       string `json:"tags,optional"`
-		MaxMembers int    `json:"maxMembers,optional"`
-		Status     int    `json:"status,optional"`
-		MuteAll    bool   `json:"muteAll,optional"`
-		Category   string `json:"category,optional"`
+		Id       uint   `path:"id"`
+		Title    string `json:"title,optional"`
+		FileName string `json:"fileName,optional"`
+		Notice   string `json:"notice,optional"`
+		Status   int    `json:"status,optional"`
+		MuteAll  bool   `json:"muteAll,optional"`
+		Category string `json:"category,optional"`
 	}
-	UpdateGroupRes  {}
+	UpdateGroupRes {}
 )
 
 // 删除群组
@@ -66,7 +65,7 @@ type (
 	DeleteGroupReq {
 		Id uint `path:"id"`
 	}
-	DeleteGroupRes  {}
+	DeleteGroupRes {}
 )
 
 // 获取群成员列表
@@ -75,14 +74,14 @@ type (
 		Page    int    `form:"page,optional"`
 		Limit   int    `form:"limit,optional"`
 		GroupId string `form:"groupId"`
-		Role    int    `form:"role,optional"` // 成员角色筛选
+		Role    int    `form:"role,optional"`   // 成员角色筛选
 		Status  int    `form:"status,optional"` // 成员状态筛选
 	}
 	GetGroupMemberListRes {
-		List  []GroupMemberInfo `json:"list"`
-		Total int64             `json:"total"`
+		List  []GetGroupMemberListItem `json:"list"`
+		Total int64                    `json:"total"`
 	}
-	GroupMemberInfo {
+	GetGroupMemberListItem {
 		Id              uint   `json:"id"`
 		GroupId         string `json:"groupId"`
 		UserId          string `json:"userId"`
@@ -104,7 +103,7 @@ type (
 		GroupId   string   `json:"groupId"`
 		MemberIds []string `json:"memberIds"`
 	}
-	RemoveGroupMemberRes  {}
+	RemoveGroupMemberRes {}
 )
 
 // 更新群成员角色
@@ -113,7 +112,7 @@ type (
 		Id   uint `path:"id"`
 		Role int  `json:"role"`
 	}
-	UpdateMemberRoleRes  {}
+	UpdateMemberRoleRes {}
 )
 
 // 禁言群成员
@@ -122,7 +121,7 @@ type (
 		Id              uint `path:"id"`
 		ProhibitionTime int  `json:"prohibitionTime"` // 禁言时长(分钟)，0表示解除禁言
 	}
-	MuteGroupMemberRes  {}
+	MuteGroupMemberRes {}
 )
 
 @server (

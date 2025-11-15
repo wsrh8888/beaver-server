@@ -70,19 +70,17 @@ func (l *GetFriendDetailLogic) GetFriendDetail(req *types.GetFriendDetailReq) (r
 	}
 
 	return &types.GetFriendDetailRes{
-		FriendDetailInfo: types.FriendDetailInfo{
-			Id:               fmt.Sprintf("%d", friend.Id),
-			SendUserId:       friend.SendUserID,
-			SendUserName:     sendUserName,
-			SendUserFileName: sendUserFileName,
-			RevUserId:        friend.RevUserID,
-			RevUserName:      revUserName,
-			RevUserFileName:  revUserFileName,
-			SendUserNotice:   friend.SendUserNotice,
-			RevUserNotice:    friend.RevUserNotice,
-			IsDeleted:        friend.IsDeleted,
-			CreateTime:       time.Time(friend.CreatedAt).Format(time.RFC3339),
-			UpdateTime:       time.Time(friend.UpdatedAt).Format(time.RFC3339),
-		},
+		Id:               fmt.Sprintf("%d", friend.Id),
+		SendUserId:       friend.SendUserID,
+		SendUserName:     sendUserName,
+		SendUserFileName: sendUserFileName,
+		RevUserId:        friend.RevUserID,
+		RevUserName:      revUserName,
+		RevUserFileName:  revUserFileName,
+		SendUserNotice:   friend.SendUserNotice,
+		RevUserNotice:    friend.RevUserNotice,
+		IsDeleted:        friend.IsDeleted,
+		CreateTime:       time.Time(friend.CreatedAt).Format(time.RFC3339),
+		UpdateTime:       time.Time(friend.UpdatedAt).Format(time.RFC3339),
 	}, nil
 }

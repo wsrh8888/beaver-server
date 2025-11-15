@@ -1,124 +1,121 @@
 syntax = "v1"
 
-// ========================= Bucket 管理接口 =========================
-// /admin/track/bucket 创建接口
+// 获取Bucket列表
+type (
+	GetBucketListReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		Page     int    `form:"page,default=1"`    // 页码
+		PageSize int    `form:"pageSize,default=10"` // 每页大小
+		Keyword  string `form:"keyword,optional"`  // 关键词搜索(名称或描述)
+		IsActive *bool  `form:"isActive,optional"` // 是否激活
+	}
+	GetBucketListRes {
+		List  []GetBucketListItem `json:"list"` // Bucket列表
+		Total int64                `json:"total"` // 总数
+	}
+	GetBucketListItem {
+		UUID        string `json:"uuid"`        // Bucket UUID
+		Name        string `json:"name"`        // Bucket名称
+		Description string `json:"description"` // Bucket描述
+		CreateUser  string `json:"createUser"`  // 创建者
+		IsActive    bool   `json:"isActive"`    // 是否激活
+		CreatedAt   string `json:"createdAt"`   // 创建时间
+		UpdatedAt   string `json:"updatedAt"`   // 更新时间
+	}
+)
+
+// 创建Bucket
 type (
 	CreateBucketReq {
 		UserID      string `header:"Beaver-User-Id"` // 用户ID
-		Name        string `json:"name"` // Bucket名称
-		Description string `json:"description"` // Bucket描述
+		Name        string `json:"name"`              // Bucket名称
+		Description string `json:"description"`      // Bucket描述
 	}
 	CreateBucketRes {
 		UUID string `json:"uuid"` // 创建的Bucket UUID
 	}
 )
 
-// /admin/track/buckets 接口
-type (
-	GetBucketListReq {
-		UserID   string `header:"Beaver-User-Id"` // 用户ID
-		Page     int    `form:"page,default=1"` // 页码
-		PageSize int    `form:"pageSize,default=10"` // 每页大小
-		Keyword  string `form:"keyword,optional"` // 关键词搜索(名称或描述)
-		IsActive *bool  `form:"isActive,optional"` // 是否激活
-	}
-	GetBucketListRes {
-		List  []GetBucketListResItem `json:"list"` // Bucket列表
-		Total int64                  `json:"total"` // 总数
-	}
-	GetBucketListResItem {
-		UUID        string `json:"uuid"` // Bucket UUID
-		Name        string `json:"name"` // Bucket名称
-		Description string `json:"description"` // Bucket描述
-		CreateUser  string `json:"createUser"` // 创建者
-		IsActive    bool   `json:"isActive"` // 是否激活
-		CreatedAt   string `json:"createdAt"` // 创建时间
-		UpdatedAt   string `json:"updatedAt"` // 更新时间
-	}
-)
-
-// /admin/track/bucket 更新接口
+// 更新Bucket
 type (
 	UpdateBucketReq {
 		UserID      string `header:"Beaver-User-Id"` // 用户ID
-		UUID        string `json:"uuid"` // Bucket UUID
-		Name        string `json:"name,optional"` // Bucket名称
+		UUID        string `json:"uuid"`              // Bucket UUID
+		Name        string `json:"name,optional"`   // Bucket名称
 		Description string `json:"description,optional"` // Bucket描述
-		IsActive    *bool  `json:"isActive,optional"` // 是否激活
+		IsActive    *bool  `json:"isActive,optional"`     // 是否激活
 	}
-	UpdateBucketRes  {}
+	UpdateBucketRes {}
 )
 
-// /admin/track/bucket 删除接口
+// 删除Bucket
 type (
 	DeleteBucketReq {
 		UserID string `header:"Beaver-User-Id"` // 用户ID
-		UUID   string `json:"uuid"` // Bucket UUID
+		UUID   string `json:"uuid"`             // Bucket UUID
 	}
-	DeleteBucketRes  {}
+	DeleteBucketRes {}
 )
 
-// ========================= 事件管理接口 =========================
-// /admin/track/events 接口
+// 获取事件列表
 type (
 	GetEventListReq {
 		UserID     string `header:"Beaver-User-Id"` // 用户ID
-		Page       int    `form:"page,default=1"` // 页码
+		Page       int    `form:"page,default=1"`   // 页码
 		PageSize   int    `form:"pageSize,default=20"` // 每页大小
-		BucketID   string `form:"bucketId,optional"` // Bucket ID筛选
-		EventName  string `form:"eventName,optional"` // 事件名称筛选
-		Action     string `form:"action,optional"` // 操作筛选
+		BucketID   string `form:"bucketId,optional"`   // Bucket ID筛选
+		EventName  string `form:"eventName,optional"`  // 事件名称筛选
+		Action     string `form:"action,optional"`     // 操作筛选
 		UserFilter string `form:"userFilter,optional"` // 用户ID筛选
 		StartTime  int64  `form:"startTime,optional"` // 开始时间戳(毫秒)
-		EndTime    int64  `form:"endTime,optional"` // 结束时间戳(毫秒)
-		Platform   string `form:"platform,optional"` // 平台筛选
+		EndTime    int64  `form:"endTime,optional"`   // 结束时间戳(毫秒)
+		Platform   string `form:"platform,optional"`   // 平台筛选
 	}
 	GetEventListRes {
-		List  []GetEventListResItem `json:"list"` // 事件列表
-		Total int64                 `json:"total"` // 总数
+		List  []GetEventListItem `json:"list"` // 事件列表
+		Total int64               `json:"total"` // 总数
 	}
-	GetEventListResItem {
-		Id         uint   `json:"id"` // 事件ID
-		EventName  string `json:"eventName"` // 事件名称
-		Action     string `json:"action"` // 操作
-		UserID     string `json:"userId"` // 用户ID
-		BucketID   string `json:"bucketId"` // Bucket Id
+	GetEventListItem {
+		Id         uint   `json:"id"`         // 事件ID
+		EventName  string `json:"eventName"`  // 事件名称
+		Action     string `json:"action"`     // 操作
+		UserID     string `json:"userId"`     // 用户ID
+		BucketID   string `json:"bucketId"`   // Bucket Id
 		BucketName string `json:"bucketName"` // Bucket名称
-		Platform   string `json:"platform"` // 平台
-		DeviceID   string `json:"deviceId"` // 设备ID
-		Data       string `json:"data"` // 事件数据(JSON格式)
-		Timestamp  int64  `json:"timestamp"` // 事件时间戳(毫秒)
-		CreatedAt  string `json:"createdAt"` // 创建时间
+		Platform   string `json:"platform"`   // 平台
+		DeviceID   string `json:"deviceId"`   // 设备ID
+		Data       string `json:"data"`       // 事件数据(JSON格式)
+		Timestamp  int64  `json:"timestamp"`  // 事件时间戳(毫秒)
+		CreatedAt  string `json:"createdAt"`  // 创建时间
 	}
 )
 
-// ========================= 日志管理接口 =========================
-// /admin/track/logs 接口
+// 查询日志
 type (
 	QueryLogsReq {
 		UserID     string `header:"Beaver-User-Id"` // 用户ID
-		BucketID   string `form:"bucketId"` // Bucket Id
-		Level      string `form:"level,optional"` // 日志级别(可选)
-		StartTime  int64  `form:"startTime"` // 开始时间戳(毫秒)
-		EndTime    int64  `form:"endTime"` // 结束时间戳(毫秒)
+		BucketID   string `form:"bucketId"`         // Bucket Id
+		Level      string `form:"level,optional"`    // 日志级别(可选)
+		StartTime  int64  `form:"startTime"`        // 开始时间戳(毫秒)
+		EndTime    int64  `form:"endTime"`          // 结束时间戳(毫秒)
 		Keyword    string `form:"keyword,optional"` // 关键词(可选)
 		UserFilter string `form:"userFilter,optional"` // 用户ID筛选(可选)
-		Page       int    `form:"page,default=1"` // 页码
+		Page       int    `form:"page,default=1"`   // 页码
 		PageSize   int    `form:"pageSize,default=20"` // 每页大小
 	}
 	QueryLogsRes {
-		Total int64              `json:"total"` // 总数
-		Logs  []QueryLogsResItem `json:"logs"` // 日志条目
+		Total int64            `json:"total"` // 总数
+		Logs  []QueryLogsItem `json:"logs"`  // 日志条目
 	}
-	QueryLogsResItem {
-		Id         uint   `json:"id"` // 日志ID
-		Level      string `json:"level"` // 日志级别
-		Data       string `json:"data"` // 日志数据
-		UserID     string `json:"userId"` // 用户ID
-		BucketID   string `json:"bucketId"` // Bucket Id
+	QueryLogsItem {
+		Id         uint   `json:"id"`         // 日志ID
+		Level      string `json:"level"`      // 日志级别
+		Data       string `json:"data"`       // 日志数据
+		UserID     string `json:"userId"`     // 用户ID
+		BucketID   string `json:"bucketId"`   // Bucket Id
 		BucketName string `json:"bucketName"` // Bucket名称
-		Timestamp  int64  `json:"timestamp"` // 时间戳(毫秒)
-		CreatedAt  string `json:"createdAt"` // 创建时间
+		Timestamp  int64  `json:"timestamp"`  // 时间戳(毫秒)
+		CreatedAt  string `json:"createdAt"`  // 创建时间
 	}
 )
 

@@ -24,7 +24,7 @@ func NewGetMenusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMenus
 	}
 }
 
-func (l *GetMenusLogic) GetMenus(req *types.GetMenuListReq) (resp *types.GetMenusRes, err error) {
+func (l *GetMenusLogic) GetMenus(req *types.GetMenuListReq) (resp *types.GetMenuListRes, err error) {
 	// todo: add your logic here and delete this line
 
 	return

@@ -60,9 +60,9 @@ func (l *GetAppsLogic) GetApps(req *types.GetAppsReq) (resp *types.GetAppsRes, e
 	}
 
 	// 构建响应
-	appList := make([]types.AppInfo, 0, len(apps))
+	appList := make([]types.GetAppsItem, 0, len(apps))
 	for _, app := range apps {
-		appList = append(appList, types.AppInfo{
+		appList = append(appList, types.GetAppsItem{
 			Id:          app.Id,
 			AppID:       app.UUID,
 			Name:        app.Name,

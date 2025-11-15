@@ -57,9 +57,9 @@ func (l *GetGroupMemberListLogic) GetGroupMemberList(req *types.GetGroupMemberLi
 	}
 
 	// 转换为响应格式（已精简模型字段，以下为兼容管理端返回结构的占位）
-	var list []types.GroupMemberInfo
+	var list []types.GetGroupMemberListItem
 	for _, member := range members {
-		list = append(list, types.GroupMemberInfo{
+		list = append(list, types.GetGroupMemberListItem{
 			Id:              member.Id,
 			GroupId:         member.GroupID,
 			UserId:          member.UserID,

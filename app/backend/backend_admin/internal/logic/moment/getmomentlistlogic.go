@@ -54,18 +54,18 @@ func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *t
 	}
 
 	// 转换为响应格式
-	var list []types.MomentInfo
+	var list []types.GetMomentListItem
 	for _, moment := range moments {
-		var files []types.FileInfo
+		var files []types.GetMomentListFileInfo
 		if moment.Files != nil {
 			for _, file := range *moment.Files {
-				files = append(files, types.FileInfo{
-					FileName: file.FileName,
+				files = append(files, types.GetMomentListFileInfo{
+					FileName: file.FileKey,
 				})
 			}
 		}
 
-		list = append(list, types.MomentInfo{
+		list = append(list, types.GetMomentListItem{
 			Id:        moment.Id,
 			UserId:    moment.UserID,
 			Content:   moment.Content,

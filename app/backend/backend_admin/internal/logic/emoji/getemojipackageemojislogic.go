@@ -61,7 +61,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	// 如果没有表情，返回空列表
 	if len(emojiPackageEmojis) == 0 {
 		return &types.GetEmojiPackageEmojisRes{
-			List:  []types.EmojiInfo{},
+			List:  []types.GetEmojiPackageEmojisItem{},
 			Total: 0,
 		}, nil
 	}
@@ -108,9 +108,9 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	pagedEmojis := orderedEmojis[start:end]
 
 	// 转换为响应格式
-	var list []types.EmojiInfo
+	var list []types.GetEmojiPackageEmojisItem
 	for _, emoji := range pagedEmojis {
-		list = append(list, types.EmojiInfo{
+		list = append(list, types.GetEmojiPackageEmojisItem{
 			Id:         strconv.Itoa(int(emoji.Id)),
 			FileName:   emoji.FileName,
 			Title:      emoji.Title,

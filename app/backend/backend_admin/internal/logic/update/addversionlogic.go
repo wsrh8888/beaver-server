@@ -46,7 +46,7 @@ func (l *AddVersionLogic) AddVersion(req *types.AddVersionReq) (resp *types.AddV
 	version := update_models.UpdateVersion{
 		ArchitectureID: req.ArchitectureID,
 		Version:        req.Version,
-		FileName:       req.FileName,
+		FileKey:        req.FileName,
 		Description:    req.Description,
 		ReleaseNotes:   req.ReleaseNotes,
 	}

@@ -24,8 +24,8 @@ func NewFileUploadQiniuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 	}
 }
 
-func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileReq) (resp *types.FileRes, err error) {
+func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileUploadQiniuReq) (resp *types.FileUploadQiniuRes, err error) {
 	// todo: add your logic here and delete this line
 
-	return &types.FileRes{}, nil
+	return &types.FileUploadQiniuRes{}, nil
 }

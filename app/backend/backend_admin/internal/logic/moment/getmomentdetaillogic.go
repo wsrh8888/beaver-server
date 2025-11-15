@@ -41,24 +41,22 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 	}
 
 	// 转换文件信息
-	var files []types.FileInfo
+	var files []types.GetMomentDetailFileInfo
 	if moment.Files != nil {
 		for _, file := range *moment.Files {
-			files = append(files, types.FileInfo{
-				FileName: file.FileName,
+			files = append(files, types.GetMomentDetailFileInfo{
+				FileName: file.FileKey,
 			})
 		}
 	}
 
 	return &types.GetMomentDetailRes{
-		MomentInfo: types.MomentInfo{
-			Id:        moment.Id,
-			UserId:    moment.UserID,
-			Content:   moment.Content,
-			Files:     files,
-			IsDeleted: moment.IsDeleted,
-			CreatedAt: moment.CreatedAt.String(),
-			UpdatedAt: moment.UpdatedAt.String(),
-		},
+		Id:        moment.Id,
+		UserId:    moment.UserID,
+		Content:   moment.Content,
+		Files:     files,
+		IsDeleted: moment.IsDeleted,
+		CreatedAt: moment.CreatedAt.String(),
+		UpdatedAt: moment.UpdatedAt.String(),
 	}, nil
 }

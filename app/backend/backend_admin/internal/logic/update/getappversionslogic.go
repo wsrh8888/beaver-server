@@ -62,7 +62,7 @@ func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp
 	}
 
 	// 转换为响应格式
-	var architectureInfos []types.ArchitectureVersionInfo
+	var architectureInfos []types.GetAppVersionsItem
 	for _, arch := range architectures {
 		// 查询该架构下的版本
 		var versions []update_models.UpdateVersion
@@ -72,15 +72,15 @@ func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp
 		}
 
 		// 转换为简化版本信息
-		var simpleVersions []types.SimpleVersionInfo
+		var simpleVersions []types.GetAppVersionsVersionItem
 		for _, version := range versions {
-			simpleVersions = append(simpleVersions, types.SimpleVersionInfo{
+			simpleVersions = append(simpleVersions, types.GetAppVersionsVersionItem{
 				VersionID: uint(version.Id),
 				Version:   version.Version,
 			})
 		}
 
-		architectureInfo := types.ArchitectureVersionInfo{
+		architectureInfo := types.GetAppVersionsItem{
 			ArchitectureID: uint(arch.Id),
 			ArchID:         arch.ArchID,
 			Description:    arch.Description,
