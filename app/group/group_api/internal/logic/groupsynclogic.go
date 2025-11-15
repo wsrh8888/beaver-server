@@ -36,7 +36,7 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 		return resp, nil
 	}
 
-	// 为每个群组查询版本变化的数据
+	// 为每个群组查询版本大于等于本地版本的群组变更
 	for _, groupReq := range req.Groups {
 		var groups []group_models.GroupModel
 		err = l.svcCtx.DB.Where("group_id = ? AND version >= ?", groupReq.GroupID, groupReq.Version).
@@ -47,16 +47,13 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 		}
 
 		for _, group := range groups {
-			// 判断群组是否被删除（通过状态字段）
-			isDeleted := group.Status != 1 // 假设状态1为正常，其他为删除
-
 			resp.Groups = append(resp.Groups, types.GroupSyncItem{
 				GroupID:   group.GroupID,
 				Title:     group.Title,
 				Avatar:    group.Avatar,
 				CreatorID: group.CreatorID,
 				JoinType:  group.JoinType,
-				IsDeleted: isDeleted,
+				Status:    group.Status,
 				Version:   group.Version,
 				CreateAt:  time.Time(group.CreatedAt).Unix(),
 				UpdateAt:  time.Time(group.UpdatedAt).Unix(),

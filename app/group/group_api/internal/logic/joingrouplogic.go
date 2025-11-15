@@ -56,13 +56,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				return nil, err
 			}
 
-			// 更新群组的成员版本号
-			err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
-				Where("group_id = ?", req.GroupID).
-				Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
-			if err != nil {
-				l.Errorf("更新群组成员版本失败: %v", err)
-			}
+			// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 		}
 	} else {
 		// 检查群组加入方式
@@ -116,13 +110,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				return nil, err
 			}
 
-			// 更新群组的成员版本号
-			err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
-				Where("group_id = ?", req.GroupID).
-				Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
-			if err != nil {
-				l.Errorf("更新群组成员版本失败: %v", err)
-			}
+			// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 
 			// 记录群成员变更日志
 			changeLog := group_models.GroupMemberChangeLogModel{

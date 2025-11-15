@@ -27,9 +27,9 @@ type (
 // 移除群成员
 type (
 	GroupMemberRemoveReq {
-		UserID    string   `header:"Beaver-User-Id"` // 操作者用户ID（群主或管理员）
-		GroupID   string   `json:"groupId"` // 群组ID
-		MemberIDs []string `json:"memberIds"` // 要移除的成员ID
+		UserID  string   `header:"Beaver-User-Id"` // 操作者用户ID（群主或管理员）
+		GroupID string   `json:"groupId"` // 群组ID
+		UserIds []string `json:"userIds"` // 要移除的成员ID列表
 	}
 	GroupMemberRemoveRes {
 		Version int64 `json:"version"` // 群成员新版本号
@@ -176,7 +176,6 @@ type (
 	}
 )
 
-
 // 群资料同步（基于群组版本对象）
 type (
 	GroupSyncReq {
@@ -196,7 +195,7 @@ type (
 		Avatar    string `json:"avatar"` // 群组头像
 		CreatorID string `json:"creatorId"` // 创建者ID
 		JoinType  int8   `json:"joinType"` // 加入方式
-		IsDeleted bool   `json:"isDeleted"` // 是否已删除
+		Status    int8   `json:"status"` // 群状态：1正常 2冻结 3解散
 		Version   int64  `json:"version"` // 版本号
 		CreateAt  int64  `json:"createAt"` // 创建时间戳
 		UpdateAt  int64  `json:"updateAt"` // 更新时间戳

@@ -50,9 +50,12 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		return nil, errors.New("获取版本号失败")
 	}
 
-	// 执行退出操作
-	err = l.svcCtx.DB.Where("group_id = ? and user_id = ?", req.GroupID, req.UserID).
-		Delete(&group_models.GroupMemberModel{}).Error
+	// 更新成员状态为退出（Status = 2）
+	err = l.svcCtx.DB.Model(&member).
+		Updates(map[string]interface{}{
+			"status":  2, // 2退出
+			"version": memberVersion,
+		}).Error
 	if err != nil {
 		l.Logger.Errorf("退出群组失败: %v", err)
 		return nil, errors.New("退出群组失败")

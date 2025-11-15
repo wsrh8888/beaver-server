@@ -84,6 +84,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/chat/sync",
 				Handler: chatSyncHandler(serverCtx),
 			},
+			{
+				// 更新会话已读序列号
+				Method:  http.MethodPost,
+				Path:    "/api/chat/updateReadSeq",
+				Handler: updateReadSeqHandler(serverCtx),
+			},
 		},
 	)
 }

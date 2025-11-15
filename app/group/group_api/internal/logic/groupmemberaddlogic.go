@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/svc"
@@ -31,8 +32,6 @@ func NewGroupMemberAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gr
 }
 
 func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp *types.GroupMemberAddRes, err error) {
-	var memberVersion int64
-
 	// 群成员邀请好友，isInvite 为true
 	var member group_models.GroupMemberModel
 	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
@@ -41,17 +40,27 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		return nil, errors.New("用户不是群组成员")
 	}
 
-	// 去查一下哪些用户已经进群了。
-	var memberList []group_models.GroupMemberModel
+	// 检查哪些用户已经进群了，并分类处理
+	var existingMembers []group_models.GroupMemberModel
+	l.svcCtx.DB.Find(&existingMembers, "group_id = ? and user_id in ?", req.GroupID, req.UserIds)
 
-	l.svcCtx.DB.Find(&memberList, "group_id = ? and user_id in ?", req.GroupID, req.UserIds)
-
-	if len(memberList) > 0 {
-		return nil, errors.New("已经有用户已经是群成员")
+	// 构建已存在成员的映射（按userID）
+	existingMemberMap := make(map[string]*group_models.GroupMemberModel)
+	for i := range existingMembers {
+		existingMemberMap[existingMembers[i].UserID] = &existingMembers[i]
 	}
 
-	// 清空memberList重新使用
-	memberList = []group_models.GroupMemberModel{}
+	// 检查是否有正常状态的成员（不允许重复添加）
+	for _, existingMember := range existingMembers {
+		if existingMember.Status == 1 {
+			return nil, errors.New("已经有用户已经是群成员")
+		}
+	}
+
+	// 分类处理：需要创建的新成员和需要更新的已存在成员
+	var newMembers []group_models.GroupMemberModel
+	var updateMembers []group_models.GroupMemberModel
+	var lastVersion int64 // 记录最后一个版本号，用于返回
 
 	for _, memberID := range req.UserIds {
 		// 获取该群成员的版本号（按群独立递增）
@@ -60,30 +69,59 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			l.Logger.Errorf("获取群成员版本号失败")
 			return nil, errors.New("获取版本号失败")
 		}
+		lastVersion = memberVersion // 记录最后一个版本号
 
-		memberList = append(memberList, group_models.GroupMemberModel{
-			GroupID: req.GroupID,
-			UserID:  memberID,
-			Role:    3,
-			Version: memberVersion,
-		})
+		existingMember, exists := existingMemberMap[memberID]
+		if exists {
+			// 成员已存在但状态不是正常（Status=2退出 或 3被踢），更新状态为正常
+			updateMembers = append(updateMembers, group_models.GroupMemberModel{
+				GroupID:  req.GroupID,
+				UserID:   memberID,
+				Role:     existingMember.Role, // 保持原有角色
+				Status:   1,                   // 更新为正常状态
+				JoinTime: time.Now(),          // 更新加入时间
+				Version:  memberVersion,       // 更新版本号
+			})
+		} else {
+			// 成员不存在，创建新记录
+			newMembers = append(newMembers, group_models.GroupMemberModel{
+				GroupID:  req.GroupID,
+				UserID:   memberID,
+				Role:     3, // 普通成员
+				Status:   1, // 正常状态
+				JoinTime: time.Now(),
+				Version:  memberVersion,
+			})
+		}
 	}
 
-	err = l.svcCtx.DB.Create(&memberList).Error
-
-	if err != nil {
-		l.Logger.Errorf("添加群成员失败: %v", err)
-		return nil, errors.New("添加失败")
+	// 创建新成员
+	if len(newMembers) > 0 {
+		err = l.svcCtx.DB.Create(&newMembers).Error
+		if err != nil {
+			l.Logger.Errorf("添加群成员失败: %v", err)
+			return nil, errors.New("添加失败")
+		}
 	}
 
-	// 更新群组的成员版本号
-	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
-		Where("group_id = ?", req.GroupID).
-		Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
-	if err != nil {
-		l.Logger.Errorf("更新群组成员版本失败: %v", err)
-		// 这里不返回错误，因为主要功能已经完成
+	// 更新已存在成员的状态
+	if len(updateMembers) > 0 {
+		for _, updateMember := range updateMembers {
+			err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+				Where("group_id = ? AND user_id = ?", updateMember.GroupID, updateMember.UserID).
+				Updates(map[string]interface{}{
+					"status":    1,                    // 更新为正常状态
+					"join_time": time.Now(),           // 更新加入时间
+					"version":   updateMember.Version, // 更新版本号
+				}).Error
+			if err != nil {
+				l.Logger.Errorf("更新群成员状态失败: %v", err)
+				return nil, errors.New("更新成员状态失败")
+			}
+		}
 	}
+
+	// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 
 	// 更新新成员的会话记录
 	_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
@@ -140,7 +178,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 	// 创建并返回响应
 	resp = &types.GroupMemberAddRes{
-		Version: memberVersion,
+		Version: lastVersion,
 	}
 
 	l.Logger.Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)

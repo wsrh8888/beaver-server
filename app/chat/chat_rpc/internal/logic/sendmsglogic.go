@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
@@ -17,6 +18,7 @@ import (
 	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 type SendMsgLogic struct {
@@ -223,11 +225,50 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, err
 	}
 
-	// 注意：同步游标由客户端主动更新，服务端不主动更新
-	// 客户端可以通过以下方式获取更新：
-	// 1. 定期轮询同步接口
-	// 2. 通过WebSocket推送通知
-	// 3. 客户端主动调用 UpdateSyncCursor API
+	// 4. 自动更新发送者的userReadSeq到最新seq（自己发送的消息应该自动标记为已读）
+	// 这是IM的标准做法：发送者已经看到了自己发送的消息，所以应该自动标记为已读
+	// 这样未读数就不会包含自己发送的消息，保持服务端和客户端数据一致
+	var userConvo chat_models.ChatUserConversation
+	err = l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", in.ConversationId, in.UserId).First(&userConvo).Error
+	if err == nil {
+		// 如果用户会话关系存在，更新userReadSeq到最新seq（只有当新的seq大于当前值时才更新）
+		if chatModel.Seq > userConvo.UserReadSeq {
+			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", in.UserId)
+			err = l.svcCtx.DB.Model(&userConvo).
+				Updates(map[string]interface{}{
+					"user_read_seq": chatModel.Seq,
+					"updated_at":    time.Now(),
+					"version":       version,
+				}).Error
+			if err != nil {
+				l.Logger.Errorf("自动更新发送者已读序列号失败: userId=%s, conversationId=%s, seq=%d, error=%v", in.UserId, in.ConversationId, chatModel.Seq, err)
+				// 这里不返回错误，因为消息已经创建成功，已读数更新失败不应该影响消息发送
+			} else {
+				l.Logger.Infof("自动更新发送者已读序列号成功: userId=%s, conversationId=%s, readSeq=%d", in.UserId, in.ConversationId, chatModel.Seq)
+			}
+		}
+	} else if err == gorm.ErrRecordNotFound {
+		// 如果记录不存在，创建新记录并设置已读序列号
+		version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", in.UserId)
+		err = l.svcCtx.DB.Create(&chat_models.ChatUserConversation{
+			UserID:         in.UserId,
+			ConversationID: in.ConversationId,
+			IsHidden:       false,
+			IsPinned:       false,
+			IsMuted:        false,
+			UserReadSeq:    chatModel.Seq,
+			Version:        version,
+		}).Error
+		if err != nil {
+			l.Logger.Errorf("创建用户会话关系并设置已读序列号失败: userId=%s, conversationId=%s, seq=%d, error=%v", in.UserId, in.ConversationId, chatModel.Seq, err)
+			// 这里不返回错误，因为消息已经创建成功
+		} else {
+			l.Logger.Infof("创建用户会话关系并设置已读序列号成功: userId=%s, conversationId=%s, readSeq=%d", in.UserId, in.ConversationId, chatModel.Seq)
+		}
+	} else {
+		l.Logger.Errorf("查询用户会话关系失败: userId=%s, conversationId=%s, error=%v", in.UserId, in.ConversationId, err)
+		// 这里不返回错误，因为消息已经创建成功
+	}
 
 	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(msg)
 	if err != nil {
