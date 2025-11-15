@@ -8,7 +8,7 @@ type GetLatestVersionReq struct {
 	AppID      string `json:"appId"`                     // 应用ID
 	PlatformID uint   `json:"platformId"`                // 平台ID：1=Windows, 2=MacOS, 3=iOS, 4=Android, 5=HarmonyOS
 	ArchID     uint   `json:"archId"`                    // 架构ID：1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=iOS, 6=Android, 7=HarmonyOS
-	Version    string `json:"version"`                   // 当前版本号
+	Version    string `header:"version"`                 // 当前版本号
 }
 
 type GetLatestVersionRes struct {
@@ -25,10 +25,10 @@ type GetLatestVersionRes struct {
 type ReportVersionReq struct {
 	UserID     string `header:"Beaver-User-Id,optional"` // 用户ID(可选)
 	DeviceID   string `header:"deviceId"`                // 客户端生成的设备唯一标识符
+	Version    string `header:"version"`                 // 版本号
 	AppID      string `json:"appId"`                     // 应用ID
 	PlatformID uint   `json:"platformId"`                // 平台ID：1=Windows, 2=MacOS, 3=iOS, 4=Android, 5=HarmonyOS
 	ArchID     uint   `json:"archId"`                    // 架构ID：0=h5, 1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=iOS, 6=Android, 7=HarmonyOS
-	Version    string `json:"version"`                   // 版本号
 }
 
 type ReportVersionRes struct {

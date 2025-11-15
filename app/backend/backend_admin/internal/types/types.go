@@ -36,7 +36,7 @@ type AddEmojiToPackageRes struct {
 type AddVersionReq struct {
 	ArchitectureID uint   `json:"architectureId"`        // 架构ID
 	Version        string `json:"version"`               // 版本号
-	FileName       string `json:"fileName"`              // 文件ID
+	FileKey        string `json:"fileKey"`               // 文件ID
 	Description    string `json:"description,optional"`  // 版本描述
 	ReleaseNotes   string `json:"releaseNotes,optional"` // 更新日志
 }
@@ -281,12 +281,21 @@ type DeleteUserReq struct {
 type DeleteUserRes struct {
 }
 
+type FileUploadLocalReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type FileUploadLocalRes struct {
+	FileKey      string `json:"fileKey"`
+	OriginalName string `json:"originalName"`
+}
+
 type FileUploadQiniuReq struct {
 	UserID string `header:"Beaver-User-Id"`
 }
 
 type FileUploadQiniuRes struct {
-	FileName     string `json:"fileName"`
+	FileKey      string `json:"fileKey"`
 	OriginalName string `json:"originalName"`
 }
 
@@ -963,7 +972,7 @@ type GetVersionListItem struct {
 	VersionID      uint   `json:"versionId"`      // 版本ID
 	ArchitectureID uint   `json:"architectureId"` // 架构ID
 	Version        string `json:"version"`        // 版本号
-	FileName       string `json:"fileName"`       // 文件ID
+	FileKey        string `json:"fileKey"`        // 文件ID
 	Description    string `json:"description"`    // 版本描述
 	ReleaseNotes   string `json:"releaseNotes"`   // 更新日志
 	ReleaseDate    string `json:"releaseDate"`    // 发布时间
@@ -1093,7 +1102,7 @@ type SaveFileReq struct {
 }
 
 type SaveFileRes struct {
-	FileName string `json:"fileName"`
+	FileKey string `json:"fileKey"`
 }
 
 type UpdateArchitectureReq struct {

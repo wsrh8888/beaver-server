@@ -57,7 +57,7 @@ func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp
 			VersionID:      uint(ver.Id),
 			ArchitectureID: ver.ArchitectureID,
 			Version:        ver.Version,
-			FileName:       ver.FileKey,
+			FileKey:        ver.FileKey,
 			Description:    ver.Description,
 			ReleaseNotes:   ver.ReleaseNotes,
 			CreatedAt:      ver.CreatedAt.String(),

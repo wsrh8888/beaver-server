@@ -36,7 +36,7 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 	if err == nil {
 		l.Logger.Infof("文件已存在，返回现有文件ID: %s", existingFile.FileKey)
 		return &types.SaveFileRes{
-			FileName: existingFile.FileKey,
+			FileKey: existingFile.FileKey,
 		}, nil
 	}
 
@@ -73,6 +73,6 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 	l.Logger.Infof("文件信息保存成功: %s", fileKey)
 
 	return &types.SaveFileRes{
-		FileName: fileKey,
+		FileKey: fileKey,
 	}, nil
 }

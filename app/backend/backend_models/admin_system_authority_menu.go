@@ -8,7 +8,6 @@ import "beaver/common/models"
  */
 type AdminSystemAuthorityMenu struct {
 	models.Model
-	AuthorityID uint            `json:"authorityId" gorm:"comment:角色ID"`
-	MenuID      uint            `json:"menuId" gorm:"comment:菜单ID"`
-	MenuModel   AdminSystemMenu `gorm:"foreignKey:MenuID;references:Id" json:"-"`
+	AuthorityID uint `json:"authorityId" gorm:"comment:角色ID;index:idx_authority_menu,unique"`
+	MenuID      uint `json:"menuId" gorm:"comment:菜单ID;index:idx_authority_menu,unique"`
 }

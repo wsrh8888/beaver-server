@@ -67,13 +67,24 @@ type (
 	PreviewRes {}
 )
 
+// 文件上传本地
+type (
+	FileUploadLocalReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	FileUploadLocalRes {
+		FileKey      string `json:"fileKey"`
+		OriginalName string `json:"originalName"`
+	}
+)
+
 // 文件上传七牛云
 type (
 	FileUploadQiniuReq {
 		UserID string `header:"Beaver-User-Id"`
 	}
 	FileUploadQiniuRes {
-		FileName     string `json:"fileName"`
+		FileKey      string `json:"fileKey"`
 		OriginalName string `json:"originalName"`
 	}
 )
@@ -97,7 +108,7 @@ type (
 		Type         string `json:"type"`         // 文件类型
 	}
 	SaveFileRes {
-		FileName string `json:"fileName"`
+		FileKey string `json:"fileKey"`
 	}
 )
 
@@ -124,6 +135,10 @@ service backend {
 	@doc "文件预览"
 	@handler Preview
 	get /admin/file/preview/:fileName (PreviewReq) returns (PreviewRes)
+
+	@doc "文件上传本地"
+	@handler FileUploadLocal
+	post /admin/file/uploadLocal (FileUploadLocalReq) returns (FileUploadLocalRes)
 
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu

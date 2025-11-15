@@ -1,14 +1,14 @@
+import "api/auth.api"
 import "api/chat.api"
 import "api/emoji.api"
 import "api/feedback.api"
-import "api/auth.api"
 import "api/file.api"
 import "api/friend.api"
 import "api/group.api"
 import "api/moment.api"
+import "api/system.api"
 import "api/track.api"
 import "api/update.api"
 import "api/user.api"
-import "api/system.api"
 
 // goctl api go -api backend_admin.api -dir . --home ../../../template

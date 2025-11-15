@@ -17,21 +17,27 @@ type Config struct {
 		Db       int
 	}
 	WhiteList []string //白名单
-	UserRpc   zrpc.RpcClientConf
-	Auth      struct {
+	BlackList []string //黑名单
+	File      struct {
+		WhiteList []string
+		BlackList []string
+		MaxSize   map[string]float64 // 文件大小限制
+	}
+	UserRpc zrpc.RpcClientConf
+	Auth    struct {
 		AccessSecret string
 		AccessExpire int
 	}
-	FileMaxSize map[string]float64
-	BlackList   []string
-	UploadDir   string
-	FileRpc     zrpc.RpcClientConf
-	Qiniu       struct {
+	Local struct {
+		UploadDir string // 本地文件上传目录
+	}
+	Qiniu struct {
 		AK         string
 		SK         string
 		Bucket     string
 		Domain     string
-		ExpireTime int64
+		ExpireTime int64 // 签名URL有效期, 单位：秒
 	}
+	FileRpc       zrpc.RpcClientConf
 	DictionaryRpc zrpc.RpcClientConf
 }

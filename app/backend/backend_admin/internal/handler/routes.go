@@ -243,6 +243,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: file.SaveFileHandler(serverCtx),
 			},
 			{
+				// 文件上传本地
+				Method:  http.MethodPost,
+				Path:    "/admin/file/uploadLocal",
+				Handler: file.FileUploadLocalHandler(serverCtx),
+			},
+			{
 				// 文件上传七牛云
 				Method:  http.MethodPost,
 				Path:    "/admin/file/uploadQiniu",

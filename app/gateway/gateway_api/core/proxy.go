@@ -65,6 +65,10 @@ func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	if deviceId != "" {
 		req.Header.Set("Beaver-Device-Id", deviceId)
 	}
+	version := req.Header.Get("version")
+	if version != "" {
+		req.Header.Set("Version", version)
+	}
 
 	logx.Infof("JWT验证成功: 用户=%s, 设备=%s", claims.UserID, deviceId)
 
