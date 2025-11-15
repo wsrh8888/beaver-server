@@ -42,7 +42,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 
 	// 检查要移除的成员
 	var members []group_models.GroupMemberModel
-	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.MemberIDs).Find(&members).Error
+	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.UserIds).Find(&members).Error
 	if err != nil {
 		return nil, errors.New("查询成员信息失败")
 	}
@@ -69,21 +69,19 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		return nil, errors.New("获取版本号失败")
 	}
 
-	// 执行移除操作
-	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.MemberIDs).Delete(&group_models.GroupMemberModel{}).Error
+	// 批量更新成员状态为被踢（Status = 3）
+	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("group_id = ? and user_id in ?", req.GroupID, req.UserIds).
+		Updates(map[string]interface{}{
+			"status":  3, // 3被踢
+			"version": memberVersion,
+		}).Error
 	if err != nil {
 		l.Logger.Errorf("移除成员失败: %v", err)
 		return nil, errors.New("移除成员失败")
 	}
 
-	// 更新群组的成员版本号
-	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
-		Where("group_id = ?", req.GroupID).
-		Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
-	if err != nil {
-		l.Logger.Errorf("更新群组成员版本失败: %v", err)
-		// 这里不返回错误，因为主要功能已经完成
-	}
+	// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 
 	// 异步通知群成员
 	go func() {
@@ -103,15 +101,15 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		for _, member := range response.Members {
 			if member.UserID != req.UserID { // 不通知操作者自己
 				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, member.UserID, map[string]interface{}{
-					"groupId":   req.GroupID,
-					"memberIds": req.MemberIDs,
-					"operator":  req.UserID,
+					"groupId":  req.GroupID,
+					"userIds":  req.UserIds,
+					"operator": req.UserID,
 				}, "")
 			}
 		}
 
 		// 通知被移除的成员
-		for _, memberID := range req.MemberIDs {
+		for _, memberID := range req.UserIds {
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, memberID, map[string]interface{}{
 				"groupId":  req.GroupID,
 				"operator": req.UserID,

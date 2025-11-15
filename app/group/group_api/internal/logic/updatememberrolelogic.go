@@ -89,15 +89,7 @@ func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq)
 		return nil, err
 	}
 
-	// 更新群组的成员版本号
-	err = tx.Model(&group_models.GroupModel{}).
-		Where("group_id = ?", req.GroupID).
-		Update("member_version", l.svcCtx.DB.Raw("member_version + 1")).Error
-	if err != nil {
-		tx.Rollback()
-		l.Errorf("更新群组成员版本失败: %v", err)
-		return nil, err
-	}
+	// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 
 	// 记录群成员变更日志
 	changeLog := group_models.GroupMemberChangeLogModel{

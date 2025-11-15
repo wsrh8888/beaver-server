@@ -126,12 +126,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/group/update",
 				Handler: updateGroupInfoHandler(serverCtx),
 			},
-			{
-				// 获取用户群组版本信息
-				Method:  http.MethodGet,
-				Path:    "/api/group/versions",
-				Handler: getUserGroupVersionsHandler(serverCtx),
-			},
 		},
 	)
 }

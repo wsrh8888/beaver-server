@@ -36,10 +36,11 @@ func (l *GroupMemberSyncLogic) GroupMemberSync(req *types.GroupMemberSyncReq) (r
 		return resp, nil
 	}
 
-	// 为每个群组查询所有当前成员（状态正常）
+	// 为每个群组查询版本大于本地版本的成员变更（包括所有状态：正常、退出、被踢）
 	for _, groupReq := range req.Groups {
 		var members []group_models.GroupMemberModel
-		err = l.svcCtx.DB.Where("group_id = ? AND status = 1", groupReq.GroupID).
+		// 查询 version > groupReq.Version 的成员，包括所有状态
+		err = l.svcCtx.DB.Where("group_id = ? AND version >= ?", groupReq.GroupID, groupReq.Version).
 			Find(&members).Error
 		if err != nil {
 			l.Errorf("查询群成员数据失败，群组ID: %s, 错误: %v", groupReq.GroupID, err)
@@ -52,7 +53,7 @@ func (l *GroupMemberSyncLogic) GroupMemberSync(req *types.GroupMemberSyncReq) (r
 				UserID:   member.UserID,
 				Role:     member.Role,
 				Status:   member.Status,
-				JoinTime: time.Time(member.JoinTime).Unix(),
+				JoinTime: member.JoinTime.Unix(),
 				Version:  member.Version,
 				CreateAt: time.Time(member.CreatedAt).Unix(),
 				UpdateAt: time.Time(member.UpdatedAt).Unix(),

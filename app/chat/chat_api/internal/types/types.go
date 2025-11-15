@@ -241,6 +241,16 @@ type TextMsg struct {
 	Content string `json:"content"` //文本消息内容
 }
 
+type UpdateReadSeqReq struct {
+	UserID         string `header:"Beaver-User-Id"` // 用户ID
+	ConversationID string `json:"conversationId"`   // 会话ID
+	ReadSeq        int64  `json:"readSeq"`          // 已读序列号（用户已读到的消息seq）
+}
+
+type UpdateReadSeqRes struct {
+	Success bool `json:"success"` // 是否成功
+}
+
 type UserConversationSettingById struct {
 	UserID         string `json:"userId"`         // 用户ID
 	ConversationID string `json:"conversationId"` // 会话ID

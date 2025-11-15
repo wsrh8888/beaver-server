@@ -276,6 +276,18 @@ type (
 	}
 )
 
+// 更新会话已读序列号
+type (
+	UpdateReadSeqReq {
+		UserID         string `header:"Beaver-User-Id"` // 用户ID
+		ConversationID string `json:"conversationId"` // 会话ID
+		ReadSeq        int64  `json:"readSeq"` // 已读序列号（用户已读到的消息seq）
+	}
+	UpdateReadSeqRes {
+		Success bool `json:"success"` // 是否成功
+	}
+)
+
 service chat {
 	@doc "发送消息"
 	@handler SendMsg
@@ -324,6 +336,10 @@ service chat {
 	@doc "批量获取用户会话设置数据"
 	@handler getUserConversationSettingsListByIds
 	post /api/chat/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
+
+	@doc "更新会话已读序列号"
+	@handler updateReadSeq
+	post /api/chat/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template
