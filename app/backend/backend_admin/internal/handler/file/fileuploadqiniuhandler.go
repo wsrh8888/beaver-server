@@ -57,7 +57,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logx.Info("开始处理文件上传请求")
 
-		var req types.FileReq
+		var req types.FileUploadQiniuReq
 		if err := httpx.Parse(r, &req); err != nil {
 			logx.Error("解析请求参数失败:", err)
 			response.Response(r, w, nil, errors.New("解析请求参数失败"))
@@ -70,10 +70,10 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, errors.New("获取上传文件失败"))
 			return
 		}
-		logx.Info("成功获取上传文件:", fileHead.Filename, "大小:", fileHead.Size)
+		logx.Info("成功获取上传文件:", fileHead.FileName, "大小:", fileHead.Size)
 
 		// 文件后缀白名单
-		originalName := fileHead.Filename
+		originalName := fileHead.FileName
 		nameList := strings.Split(originalName, ".")
 		if len(nameList) < 2 {
 			logx.Error("文件名格式不正确:", originalName)
@@ -135,8 +135,8 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		err = svcCtx.DB.Take(&fileModel, "md5 = ?", fileMd5).Error
 
 		if err == nil {
-			logx.Info("文件已存在，直接返回:", fileModel.FileName, fileModel.OriginalName)
-			resp.FileName = fileModel.FileName
+			logx.Info("文件已存在，直接返回:", fileModel.FileKey, fileModel.OriginalName)
+			resp.FileName = fileModel.FileKey
 			resp.OriginalName = fileModel.OriginalName
 			response.Response(r, w, resp, nil)
 			return
@@ -159,16 +159,16 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 创建新的文件记录
 		logx.Info("开始创建数据库记录")
-		// 生成带后缀的FileName
+		// 生成带后缀的FileKey
 		fileUUID := uuid.New().String()
-		fileNameWithSuffix := fileUUID + "." + suffix
+		fileKeyWithSuffix := fileUUID + "." + suffix
 
 		newFileModel := &file_models.FileModel{
 			OriginalName: strings.TrimSuffix(originalName, "."+suffix),
 			Size:         fileHead.Size,
 			Path:         qiniuURL,
 			Md5:          fileMd5,
-			FileName:     fileNameWithSuffix,
+			FileKey:      fileKeyWithSuffix,
 			Type:         fileType,
 		}
 		err = svcCtx.DB.Create(newFileModel).Error
@@ -177,9 +177,9 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, errors.New("保存文件信息失败"))
 			return
 		}
-		logx.Info("数据库记录创建成功:", newFileModel.FileName)
+		logx.Info("数据库记录创建成功:", newFileModel.FileKey)
 
-		resp.FileName = newFileModel.FileName
+		resp.FileName = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
 
 		logx.Info("文件上传完成:", resp.FileName)

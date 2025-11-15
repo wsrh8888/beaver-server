@@ -56,9 +56,9 @@ func (l *GetBucketListLogic) GetBucketList(req *types.GetBucketListReq) (resp *t
 	}
 
 	// 转换为响应格式
-	list := make([]types.GetBucketListResItem, 0, len(buckets))
+	list := make([]types.GetBucketListItem, 0, len(buckets))
 	for _, bucket := range buckets {
-		list = append(list, types.GetBucketListResItem{
+		list = append(list, types.GetBucketListItem{
 			UUID:        bucket.UUID,
 			Name:        bucket.Name,
 			Description: bucket.Description,

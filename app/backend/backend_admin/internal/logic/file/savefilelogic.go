@@ -34,9 +34,9 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 	var existingFile file_models.FileModel
 	err = l.svcCtx.DB.Take(&existingFile, "md5 = ?", req.Md5).Error
 	if err == nil {
-		l.Logger.Infof("文件已存在，返回现有文件ID: %s", existingFile.FileName)
+		l.Logger.Infof("文件已存在，返回现有文件ID: %s", existingFile.FileKey)
 		return &types.SaveFileRes{
-			FileName: existingFile.FileName,
+			FileName: existingFile.FileKey,
 		}, nil
 	}
 
@@ -49,13 +49,13 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 		}
 	}
 
-	// 使用MD5作为文件名，这样相同内容的文件会有相同的FileName，实现缓存复用
-	fileName := req.Md5 + "." + suffix
-	l.Logger.Infof("使用MD5生成文件ID: %s", fileName)
+	// 使用MD5作为文件名，这样相同内容的文件会有相同的FileKey，实现缓存复用
+	fileKey := req.Md5 + "." + suffix
+	l.Logger.Infof("使用MD5生成文件ID: %s", fileKey)
 
 	// 创建新的文件记录
 	newFileModel := &file_models.FileModel{
-		FileName:     fileName,
+		FileKey:      fileKey,
 		OriginalName: req.OriginalName,
 		Size:         req.Size,
 		Path:         req.Path,
@@ -70,9 +70,9 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 		return nil, errors.New("保存文件信息失败")
 	}
 
-	l.Logger.Infof("文件信息保存成功: %s", fileName)
+	l.Logger.Infof("文件信息保存成功: %s", fileKey)
 
 	return &types.SaveFileRes{
-		FileName: fileName,
+		FileName: fileKey,
 	}, nil
 }

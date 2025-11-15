@@ -47,18 +47,16 @@ func (l *GetFeedbackDetailLogic) GetFeedbackDetail(req *types.GetFeedbackDetailR
 	}
 
 	return &types.GetFeedbackDetailRes{
-		FeedbackInfo: types.FeedbackInfo{
-			Id:           feedback.Id,
-			UserId:       feedback.UserID,
-			Content:      feedback.Content,
-			Type:         int(feedback.Type),
-			Status:       int(feedback.Status),
-			FileNames:    []string(feedback.FileNames),
-			HandlerId:    feedback.HandlerID,
-			HandleTime:   handleTime,
-			HandleResult: feedback.HandleResult,
-			CreatedAt:    time.Time(feedback.CreatedAt).Format(time.RFC3339),
-			UpdatedAt:    time.Time(feedback.UpdatedAt).Format(time.RFC3339),
-		},
+		Id:           feedback.Id,
+		UserId:       feedback.UserID,
+		Content:      feedback.Content,
+		Type:         int(feedback.Type),
+		Status:       int(feedback.Status),
+		FileNames:    []string(feedback.FileNames),
+		HandlerId:    feedback.HandlerID,
+		HandleTime:   handleTime,
+		HandleResult: feedback.HandleResult,
+		CreatedAt:    time.Time(feedback.CreatedAt).Format(time.RFC3339),
+		UpdatedAt:    time.Time(feedback.UpdatedAt).Format(time.RFC3339),
 	}, nil
 }

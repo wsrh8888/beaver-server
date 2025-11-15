@@ -43,7 +43,7 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 
 	// 创建用户，设置默认值
 	user := user_models.UserModel{
-		UserID:   userUUID,
+		UUID:     userUUID,
 		NickName: req.Nickname,
 		Password: pwd.HahPwd(req.Password),
 		Email:    req.Email,
@@ -58,8 +58,8 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 		return nil, errors.New("创建用户失败")
 	}
 
-	l.Logger.Infof("创建用户成功: userID=%s, email=%s", user.UserID, req.Email)
+	l.Logger.Infof("创建用户成功: userID=%s, email=%s", user.UUID, req.Email)
 	return &types.CreateUserRes{
-		Id: user.UserID,
+		Id: user.UUID,
 	}, nil
 }

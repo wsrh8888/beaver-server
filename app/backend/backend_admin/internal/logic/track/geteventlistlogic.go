@@ -80,7 +80,7 @@ func (l *GetEventListLogic) GetEventList(req *types.GetEventListReq) (resp *type
 	}
 
 	// 转换为响应格式
-	list := make([]types.GetEventListResItem, 0, len(events))
+	list := make([]types.GetEventListItem, 0, len(events))
 	for _, event := range events {
 		bucketName := ""
 		if event.BucketModel != nil {
@@ -92,7 +92,7 @@ func (l *GetEventListLogic) GetEventList(req *types.GetEventListReq) (resp *type
 			userID = *event.UserID
 		}
 
-		list = append(list, types.GetEventListResItem{
+		list = append(list, types.GetEventListItem{
 			Id:         uint(event.Id),
 			EventName:  event.EventName,
 			Action:     event.Action,

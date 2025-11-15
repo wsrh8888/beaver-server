@@ -59,14 +59,14 @@ func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *type
 	}
 
 	// 转换为响应格式
-	var list []types.GroupInfo
+	var list []types.GetGroupListItem
 	for _, group := range groups {
-		list = append(list, types.GroupInfo{
+		list = append(list, types.GetGroupListItem{
 			Id:        group.Id,
 			Uuid:      group.GroupID,
 			Type:      int(group.Type),
 			Title:     group.Title,
-			FileName:  group.FileName,
+			FileName:  group.Avatar,
 			CreatorId: group.CreatorID,
 			Notice:    group.Notice,
 			Status:    int(group.Status),

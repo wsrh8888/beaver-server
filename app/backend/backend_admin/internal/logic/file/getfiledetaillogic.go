@@ -41,16 +41,14 @@ func (l *GetFileDetailLogic) GetFileDetail(req *types.GetFileDetailReq) (resp *t
 	}
 
 	return &types.GetFileDetailRes{
-		FileInfo: types.FileInfo{
-			Id:           file.Id,
-			FileName:     file.FileName,
-			OriginalName: file.OriginalName,
-			Size:         file.Size,
-			Path:         file.Path,
-			Md5:          file.Md5,
-			Type:         file.Type,
-			CreatedAt:    time.Time(file.CreatedAt).Format(time.RFC3339),
-			UpdatedAt:    time.Time(file.UpdatedAt).Format(time.RFC3339),
-		},
+		Id:           file.Id,
+		FileName:     file.FileKey,
+		OriginalName: file.OriginalName,
+		Size:         file.Size,
+		Path:         file.Path,
+		Md5:          file.Md5,
+		Type:         file.Type,
+		CreatedAt:    time.Time(file.CreatedAt).Format(time.RFC3339),
+		UpdatedAt:    time.Time(file.UpdatedAt).Format(time.RFC3339),
 	}, nil
 }

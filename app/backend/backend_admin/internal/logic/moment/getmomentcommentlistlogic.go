@@ -47,9 +47,9 @@ func (l *GetMomentCommentListLogic) GetMomentCommentList(req *types.GetMomentCom
 	}
 
 	// 转换为响应格式
-	var list []types.MomentCommentInfo
+	var list []types.GetMomentCommentListItem
 	for _, comment := range comments {
-		list = append(list, types.MomentCommentInfo{
+		list = append(list, types.GetMomentCommentListItem{
 			Id:        comment.Id,
 			MomentId:  comment.MomentID,
 			UserId:    comment.UserID,

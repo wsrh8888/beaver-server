@@ -45,20 +45,11 @@ func (l *UpdateGroupLogic) UpdateGroup(req *types.UpdateGroupReq) (resp *types.U
 	if req.Title != "" {
 		updateData["title"] = req.Title
 	}
-	if req.Abstract != "" {
-		updateData["abstract"] = req.Abstract
-	}
 	if req.FileName != "" {
 		updateData["file_name"] = req.FileName
 	}
 	if req.Notice != "" {
 		updateData["notice"] = req.Notice
-	}
-	if req.Tags != "" {
-		updateData["tags"] = req.Tags
-	}
-	if req.MaxMembers > 0 {
-		updateData["max_members"] = req.MaxMembers
 	}
 	if req.Status != 0 {
 		updateData["status"] = req.Status

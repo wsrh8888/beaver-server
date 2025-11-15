@@ -69,9 +69,9 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	}
 
 	// 转换为响应格式
-	var list []types.EmojiInfo
+	var list []types.GetEmojiListItem
 	for _, emoji := range emojis {
-		list = append(list, types.EmojiInfo{
+		list = append(list, types.GetEmojiListItem{
 			Id:         strconv.Itoa(int(emoji.Id)),
 			FileName:   emoji.FileName,
 			Title:      emoji.Title,

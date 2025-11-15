@@ -42,14 +42,14 @@ func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *t
 
 	l.Logger.Infof("获取用户详情成功: userID=%s", req.UserID)
 	return &types.GetUserDetailRes{
-		Id:          user.UserID,
+		Id:          user.UUID,
 		Nickname:    user.NickName,
-		FileName:    user.FileName,
+		FileName:    user.Avatar,
 		Email:       user.Email,
 		Abstract:    user.Abstract,
 		Status:      int(user.Status),
 		Source:      int(user.Source),
-		LastLoginIP: user.LastLoginIP,
+		LastLoginIP: "", // UserModel 没有 LastLoginIP 字段
 		CreateTime:  user.CreatedAt.String(),
 		UpdateTime:  user.UpdatedAt.String(),
 	}, nil

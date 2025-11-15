@@ -50,7 +50,7 @@ func (l *GetFileListLogic) GetFileList(req *types.GetFileListReq) (resp *types.G
 
 	// 文件名关键词搜索
 	if req.Keywords != "" {
-		query = query.Where("file_name LIKE ?", "%"+req.Keywords+"%")
+		query = query.Where("file_key LIKE ? OR original_name LIKE ?", "%"+req.Keywords+"%", "%"+req.Keywords+"%")
 	}
 
 	// 查询总数
@@ -73,11 +73,11 @@ func (l *GetFileListLogic) GetFileList(req *types.GetFileListReq) (resp *types.G
 	}
 
 	// 转换为响应格式
-	list := make([]types.FileInfo, len(files))
+	list := make([]types.GetFileListItem, len(files))
 	for i, file := range files {
-		list[i] = types.FileInfo{
+		list[i] = types.GetFileListItem{
 			Id:           file.Id,
-			FileName:     file.FileName,
+			FileName:     file.FileKey,
 			OriginalName: file.OriginalName,
 			Size:         file.Size,
 			Path:         file.Path,

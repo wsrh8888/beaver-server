@@ -25,7 +25,7 @@ func NewGetQiniuUploadTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
-func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(req *types.GetQiniuTokenReq) (resp *types.GetQiniuTokenRes, err error) {
+func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(req *types.GetQiniuUploadTokenReq) (resp *types.GetQiniuUploadTokenRes, err error) {
 	// 调用fileRpc服务获取七牛云上传token
 	rpcResp, err := l.svcCtx.FileRpc.GetQiniuUploadToken(l.ctx, &file_rpc.GetQiniuUploadTokenReq{})
 	if err != nil {
@@ -34,7 +34,7 @@ func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(req *types.GetQiniuTokenR
 	}
 
 	// 转换为HTTP响应格式
-	resp = &types.GetQiniuTokenRes{
+	resp = &types.GetQiniuUploadTokenRes{
 		UploadToken: rpcResp.UploadToken,
 		ExpiresIn:   rpcResp.ExpiresIn,
 	}

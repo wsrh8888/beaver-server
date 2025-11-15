@@ -73,7 +73,7 @@ func (l *QueryLogsLogic) QueryLogs(req *types.QueryLogsReq) (resp *types.QueryLo
 	}
 
 	// 转换为响应格式
-	logEntries := make([]types.QueryLogsResItem, 0, len(logs))
+	logEntries := make([]types.QueryLogsItem, 0, len(logs))
 	for _, log := range logs {
 		bucketName := ""
 		if log.BucketModel != nil {
@@ -87,7 +87,7 @@ func (l *QueryLogsLogic) QueryLogs(req *types.QueryLogsReq) (resp *types.QueryLo
 			dataStr = string(dataBytes)
 		}
 
-		logEntries = append(logEntries, types.QueryLogsResItem{
+		logEntries = append(logEntries, types.QueryLogsItem{
 			Id:         uint(log.Id),
 			Level:      log.Level,
 			Data:       dataStr,

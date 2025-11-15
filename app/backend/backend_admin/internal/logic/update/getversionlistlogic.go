@@ -51,13 +51,13 @@ func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp
 	}
 
 	// 构建响应
-	versionList := make([]types.VersionInfo, 0, len(list))
+	versionList := make([]types.GetVersionListItem, 0, len(list))
 	for _, ver := range list {
-		versionList = append(versionList, types.VersionInfo{
+		versionList = append(versionList, types.GetVersionListItem{
 			VersionID:      uint(ver.Id),
 			ArchitectureID: ver.ArchitectureID,
 			Version:        ver.Version,
-			FileName:       ver.FileName,
+			FileName:       ver.FileKey,
 			Description:    ver.Description,
 			ReleaseNotes:   ver.ReleaseNotes,
 			CreatedAt:      ver.CreatedAt.String(),

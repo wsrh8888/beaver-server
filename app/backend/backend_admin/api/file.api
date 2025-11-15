@@ -5,23 +5,23 @@ type (
 	GetFileListReq {
 		Page     int    `form:"page,optional"`
 		Limit    int    `form:"limit,optional"`
-		Type     string `form:"type,optional"` // 文件类型筛选
+		Type     string `form:"type,optional"`     // 文件类型筛选
 		Keywords string `form:"keywords,optional"` // 文件名关键词搜索
 	}
 	GetFileListRes {
-		List  []FileInfo `json:"list"`
-		Total int64      `json:"total"`
+		List  []GetFileListItem `json:"list"`
+		Total int64             `json:"total"`
 	}
-	FileInfo {
-		Id        uint   `json:"id"`
-		FileName    string `json:"fileName"`
-		OriginalName  string `json:"originalName"`
-		Size      int64  `json:"size"`
-		Path      string `json:"path"`
-		Md5       string `json:"md5"`
-		Type      string `json:"type"`
-		CreatedAt string `json:"createdAt"`
-		UpdatedAt string `json:"updatedAt"`
+	GetFileListItem {
+		Id           uint   `json:"id"`
+		FileName     string `json:"fileName"`
+		OriginalName string `json:"originalName"`
+		Size         int64  `json:"size"`
+		Path         string `json:"path"`
+		Md5          string `json:"md5"`
+		Type         string `json:"type"`
+		CreatedAt    string `json:"createdAt"`
+		UpdatedAt    string `json:"updatedAt"`
 	}
 )
 
@@ -31,7 +31,15 @@ type (
 		Id uint `path:"id"`
 	}
 	GetFileDetailRes {
-		FileInfo
+		Id           uint   `json:"id"`
+		FileName     string `json:"fileName"`
+		OriginalName string `json:"originalName"`
+		Size         int64  `json:"size"`
+		Path         string `json:"path"`
+		Md5          string `json:"md5"`
+		Type         string `json:"type"`
+		CreatedAt    string `json:"createdAt"`
+		UpdatedAt    string `json:"updatedAt"`
 	}
 )
 
@@ -40,7 +48,7 @@ type (
 	DeleteFileReq {
 		Id uint `path:"id"`
 	}
-	DeleteFileRes  {}
+	DeleteFileRes {}
 )
 
 // 批量删除文件
@@ -48,43 +56,45 @@ type (
 	BatchDeleteFileReq {
 		Ids []uint `json:"ids"`
 	}
-	BatchDeleteFileRes  {}
+	BatchDeleteFileRes {}
 )
 
-type FileReq {
-	UserID string `header:"Beaver-User-Id"`
-}
-
+// 文件预览
 type (
-	FileRes {
-		FileName   string `json:"fileName"`
-		OriginalName string `json:"originalName"`
-	}
 	PreviewReq {
 		FileName string `path:"fileName"`
 	}
+	PreviewRes {}
 )
 
+// 文件上传七牛云
 type (
-	PreviewRes  {}
-	// 获取七牛云上传token请求
-	GetQiniuTokenReq  {}
+	FileUploadQiniuReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	FileUploadQiniuRes {
+		FileName     string `json:"fileName"`
+		OriginalName string `json:"originalName"`
+	}
 )
 
-// 获取七牛云上传token响应
-type GetQiniuTokenRes {
-	UploadToken string `json:"uploadToken"` // 上传token
-	ExpiresIn   int64  `json:"expiresIn"` // token过期时间 (秒)
-}
+// 获取七牛云上传token
+type (
+	GetQiniuUploadTokenReq {}
+	GetQiniuUploadTokenRes {
+		UploadToken string `json:"uploadToken"` // 上传token
+		ExpiresIn   int64  `json:"expiresIn"`   // token过期时间 (秒)
+	}
+)
 
 // 保存文件信息到数据库
 type (
 	SaveFileReq {
 		OriginalName string `json:"originalName"` // 文件名
-		Size     int64  `json:"size"` // 文件大小
-		Path     string `json:"path"` // 文件在七牛云的路径
-		Md5      string `json:"md5"` // 文件MD5
-		Type     string `json:"type"` // 文件类型
+		Size         int64  `json:"size"`         // 文件大小
+		Path         string `json:"path"`         // 文件在七牛云的路径
+		Md5          string `json:"md5"`          // 文件MD5
+		Type         string `json:"type"`         // 文件类型
 	}
 	SaveFileRes {
 		FileName string `json:"fileName"`
@@ -117,11 +127,11 @@ service backend {
 
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
-	post /admin/file/uploadQiniu (FileReq) returns (FileRes)
+	post /admin/file/uploadQiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
 
 	@doc "获取七牛云上传token"
 	@handler GetQiniuUploadToken
-	post /admin/file/qiniuToken (GetQiniuTokenReq) returns (GetQiniuTokenRes)
+	post /admin/file/qiniuToken (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
 
 	@doc "保存文件信息到数据库"
 	@handler SaveFile

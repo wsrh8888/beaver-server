@@ -89,7 +89,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	}
 
 	// 转换为响应格式
-	list := make([]types.FriendInfo, len(friends))
+	list := make([]types.GetFriendListItem, len(friends))
 	for i, friend := range friends {
 		var sendUserName, revUserName string
 		// 查询发送者信息
@@ -107,7 +107,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 			}
 		}
 
-		list[i] = types.FriendInfo{
+		list[i] = types.GetFriendListItem{
 			Id:             friend.UUID, // 使用UUID而不是数据库ID
 			SendUserId:     friend.SendUserID,
 			SendUserName:   sendUserName,

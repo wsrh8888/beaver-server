@@ -64,10 +64,10 @@ func (l *GetCityStrategiesLogic) GetCityStrategies(req *types.GetCityStrategiesR
 	}
 
 	// 转换为响应格式
-	var strategyInfos []types.CityStrategyInfo
+	var strategyInfos []types.GetCityStrategiesItem
 	for _, strategy := range strategies {
 		// 转换策略信息
-		var strategyInfosList []types.StrategyInfoWithVersion
+		var strategyInfosList []types.GetCityStrategiesStrategyItem
 		if strategy.Strategy != nil {
 			for _, s := range *strategy.Strategy {
 				// 查询版本信息
@@ -77,7 +77,7 @@ func (l *GetCityStrategiesLogic) GetCityStrategies(req *types.GetCityStrategiesR
 					versionStr = version.Version
 				}
 
-				strategyInfosList = append(strategyInfosList, types.StrategyInfoWithVersion{
+				strategyInfosList = append(strategyInfosList, types.GetCityStrategiesStrategyItem{
 					ArchitectureID: s.ArchitectureID,
 					VersionID:      s.VersionID,
 					Version:        versionStr,
@@ -87,7 +87,7 @@ func (l *GetCityStrategiesLogic) GetCityStrategies(req *types.GetCityStrategiesR
 			}
 		}
 
-		strategyInfo := types.CityStrategyInfo{
+		strategyInfo := types.GetCityStrategiesItem{
 			Id:        uint(strategy.Id),
 			AppID:     strategy.AppID,
 			CityID:    strategy.CityID,

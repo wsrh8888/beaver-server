@@ -65,8 +65,7 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 			Limit: req.PageSize,
 			Sort:  "created_at desc",
 		},
-		Where:   whereClause,
-		Preload: []string{"EmojiModel"},
+		Where: whereClause,
 	})
 
 	if err != nil {
@@ -75,18 +74,18 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 	}
 
 	// 转换为响应格式
-	var list []types.EmojiCollectInfo
+	var list []types.GetEmojiCollectListItem
 	for _, collect := range collects {
 		emojiTitle := ""
 		emojiFileName := ""
-		if collect.EmojiModel.Title != "" {
-			emojiTitle = collect.EmojiModel.Title
-		}
-		if collect.EmojiModel.FileName != "" {
-			emojiFileName = collect.EmojiModel.FileName
+		// 通过 EmojiID 查询 Emoji 信息
+		var emoji emoji_models.Emoji
+		if err := l.svcCtx.DB.Where("id = ?", collect.EmojiID).First(&emoji).Error; err == nil {
+			emojiTitle = emoji.Title
+			emojiFileName = emoji.FileName
 		}
 
-		list = append(list, types.EmojiCollectInfo{
+		list = append(list, types.GetEmojiCollectListItem{
 			Id:            strconv.Itoa(int(collect.Id)),
 			UserID:        collect.UserID,
 			EmojiID:       strconv.Itoa(int(collect.EmojiID)),

@@ -79,16 +79,16 @@ func (l *GetEmojiPackageListLogic) GetEmojiPackageList(req *types.GetEmojiPackag
 	}
 
 	// 转换为响应格式
-	var list []types.EmojiPackageInfo
+	var list []types.GetEmojiPackageListItem
 	for _, pkg := range packages {
-		list = append(list, types.EmojiPackageInfo{
+		list = append(list, types.GetEmojiPackageListItem{
 			Id:          strconv.Itoa(int(pkg.Id)),
 			Title:       pkg.Title,
 			CoverFile:   pkg.CoverFile,
 			UserID:      pkg.UserID,
 			Description: pkg.Description,
 			Type:        pkg.Type,
-			Status:      pkg.Status,
+			Status:      int(pkg.Status),
 			CreateTime:  pkg.CreatedAt.String(),
 			UpdateTime:  pkg.UpdatedAt.String(),
 		})

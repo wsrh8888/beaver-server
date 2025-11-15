@@ -70,19 +70,17 @@ func (l *GetFriendVerifyDetailLogic) GetFriendVerifyDetail(req *types.GetFriendV
 	}
 
 	return &types.GetFriendVerifyDetailRes{
-		FriendVerifyDetailInfo: types.FriendVerifyDetailInfo{
-			Id:               fmt.Sprintf("%d", verify.Id),
-			SendUserId:       verify.SendUserID,
-			SendUserName:     sendUserName,
-			SendUserFileName: sendUserFileName,
-			RevUserId:        verify.RevUserID,
-			RevUserName:      revUserName,
-			RevUserFileName:  revUserFileName,
-			SendStatus:       int(verify.SendStatus),
-			RevStatus:        int(verify.RevStatus),
-			Message:          verify.Message,
-			CreateTime:       time.Time(verify.CreatedAt).Format(time.RFC3339),
-			UpdateTime:       time.Time(verify.UpdatedAt).Format(time.RFC3339),
-		},
+		Id:               fmt.Sprintf("%d", verify.Id),
+		SendUserId:       verify.SendUserID,
+		SendUserName:     sendUserName,
+		SendUserFileName: sendUserFileName,
+		RevUserId:        verify.RevUserID,
+		RevUserName:      revUserName,
+		RevUserFileName:  revUserFileName,
+		SendStatus:       int(verify.SendStatus),
+		RevStatus:        int(verify.RevStatus),
+		Message:          verify.Message,
+		CreateTime:       time.Time(verify.CreatedAt).Format(time.RFC3339),
+		UpdateTime:       time.Time(verify.UpdatedAt).Format(time.RFC3339),
 	}, nil
 }

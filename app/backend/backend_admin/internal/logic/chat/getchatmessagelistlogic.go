@@ -48,11 +48,10 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 		whereClause = whereClause.Where("msg_type = ?", req.MsgType)
 	}
 
-	// 状态筛选 - 0表示全部状态，否则按指定状态筛选
-	if req.Status != 0 {
-		whereClause = whereClause.Where("status = ?", req.Status)
+	// 删除状态筛选 - GetChatMessageListReq 没有 Status 字段，使用 IsDeleted
+	if req.IsDeleted {
+		whereClause = whereClause.Where("status = ?", 4) // 4=已删除
 	}
-	// Status=0时不添加状态筛选条件，查询所有状态的消息
 
 	// 时间范围筛选
 	if req.StartTime != "" {
@@ -83,21 +82,19 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 	}
 
 	// 转换为响应格式
-	var list []types.ChatMessageInfo
+	var list []types.GetChatMessageListItem
 	for _, message := range messages {
 		sendUserName := ""
-		sendUserFileName := ""
 		sendUserID := ""
 		if message.SendUserID != nil && *message.SendUserID != "" {
 			sendUserID = *message.SendUserID
 			var user user_models.UserModel
 			if err := l.svcCtx.DB.Where("uuid = ?", *message.SendUserID).First(&user).Error; err == nil {
 				sendUserName = user.NickName
-				sendUserFileName = user.Avatar
 			}
 		}
 
-		list = append(list, types.ChatMessageInfo{
+		list = append(list, types.GetChatMessageListItem{
 			Id:             message.MessageID,
 			MessageID:      message.MessageID,
 			ConversationID: message.ConversationID,
@@ -105,7 +102,7 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 			SendUserName:   sendUserName,
 			MsgType:        int(message.MsgType),
 			MsgPreview:     message.MsgPreview,
-			Status:         message.Status,
+			IsDeleted:      message.Status == 4, // 4=已删除
 			CreateTime:     message.CreatedAt.String(),
 			UpdateTime:     message.UpdatedAt.String(),
 		})

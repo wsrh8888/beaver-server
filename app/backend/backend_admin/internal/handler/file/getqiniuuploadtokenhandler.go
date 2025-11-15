@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/backend/backend_admin/internal/logic/file"
+	logic "beaver/app/backend/backend_admin/internal/logic/file"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/common/response"
@@ -12,7 +12,7 @@ import (
 
 func GetQiniuUploadTokenHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetQiniuTokenReq
+		var req types.GetQiniuUploadTokenReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return

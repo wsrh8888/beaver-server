@@ -93,7 +93,7 @@ func (l *GetFriendVerifyListLogic) GetFriendVerifyList(req *types.GetFriendVerif
 	}
 
 	// 转换为响应格式
-	list := make([]types.FriendVerifyInfo, len(verifies))
+	list := make([]types.GetFriendVerifyListItem, len(verifies))
 	for i, verify := range verifies {
 		var sendUserName, revUserName string
 		// 查询发送者信息
@@ -111,7 +111,7 @@ func (l *GetFriendVerifyListLogic) GetFriendVerifyList(req *types.GetFriendVerif
 			}
 		}
 
-		list[i] = types.FriendVerifyInfo{
+		list[i] = types.GetFriendVerifyListItem{
 			Id:           fmt.Sprintf("%d", verify.Id),
 			SendUserId:   verify.SendUserID,
 			SendUserName: sendUserName,
