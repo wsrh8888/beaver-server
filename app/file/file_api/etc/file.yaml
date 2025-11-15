@@ -37,8 +37,8 @@ WhiteList:
   - mp4
   - mp3
   - pdf
-BlackList:
   - exe
+BlackList:
   - sh
   - bat
 UserRpc:

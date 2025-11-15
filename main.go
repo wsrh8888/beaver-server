@@ -1,6 +1,7 @@
 package main
 
 import (
+	"beaver/app/backend/backend_models"
 	"beaver/app/chat/chat_models"
 	"beaver/app/datasync/datasync_models"
 	"beaver/app/emoji/emoji_models"
@@ -74,6 +75,13 @@ func main() {
 			&group_models.GroupMemberModel{},
 			&group_models.GroupJoinRequestModel{},
 			&group_models.GroupMemberChangeLogModel{},
+
+			// 后台管理相关表
+			&backend_models.AdminUser{},
+			&backend_models.AdminSystemAuthority{},
+			&backend_models.AdminSystemAuthorityMenu{},
+			&backend_models.AdminSystemAuthorityUser{},
+			&backend_models.AdminSystemMenu{},
 		)
 
 		if err != nil {

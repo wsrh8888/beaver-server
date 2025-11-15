@@ -20,7 +20,7 @@ WhiteList:
   - /api/auth/authentication
   - /api/settings/open_login_info
   - /api/auth/email_password_login
-  - /api/file/preview
+  - /api/file/preview/.*
   - /api/dictionary/cities
   - /api/track/events
   - /api/track/logs

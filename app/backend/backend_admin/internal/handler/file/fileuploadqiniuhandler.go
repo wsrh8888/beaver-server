@@ -1,6 +1,7 @@
 package handler
 
 import (
+	filecommon "beaver/app/backend/backend_admin/internal/handler/file/common"
 	logic "beaver/app/backend/backend_admin/internal/logic/file"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
@@ -23,35 +24,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
-
-var FileTypeMapper = map[string]string{
-	"jpg":  "image",
-	"jpeg": "image",
-	"png":  "image",
-	"gif":  "image",
-	"bmp":  "image",
-	"mp4":  "video",
-	"avi":  "video",
-	"mkv":  "video",
-	"mp3":  "audio",
-	"wav":  "audio",
-	"ogg":  "audio",
-	"zip":  "archive",
-	"rar":  "archive",
-	"7z":   "archive",
-	"html": "document",
-	"pdf":  "document",
-	"doc":  "document",
-	"docx": "document",
-	"apk":  "apk",
-}
-
-func getFileType(suffix string) string {
-	if fileType, ok := FileTypeMapper[suffix]; ok {
-		return fileType
-	}
-	return "unknown"
-}
 
 func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +61,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		logx.Info("文件类型检查通过:", suffix)
 
 		// 确定文件类型
-		fileType := getFileType(suffix)
+		fileType := filecommon.GetFileType(suffix)
 		if fileType == "unknown" {
 			logx.Error("未知的文件类型:", suffix)
 			response.Response(r, w, nil, errors.New("不支持的文件类型"))
@@ -98,7 +70,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		logx.Info("文件类型:", fileType)
 
 		// 检查文件大小
-		maxSize, ok := svcCtx.Config.FileMaxSize[fileType]
+		maxSize, ok := svcCtx.Config.File.MaxSize[fileType]
 		if !ok {
 			logx.Error("配置中未找到文件类型的大小限制:", fileType)
 			response.Response(r, w, nil, errors.New("系统配置错误"))
@@ -136,7 +108,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		if err == nil {
 			logx.Info("文件已存在，直接返回:", fileModel.FileKey, fileModel.OriginalName)
-			resp.FileName = fileModel.FileKey
+			resp.FileKey = fileModel.FileKey
 			resp.OriginalName = fileModel.OriginalName
 			response.Response(r, w, resp, nil)
 			return
@@ -179,10 +151,10 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		logx.Info("数据库记录创建成功:", newFileModel.FileKey)
 
-		resp.FileName = newFileModel.FileKey
+		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
 
-		logx.Info("文件上传完成:", resp.FileName)
+		logx.Info("文件上传完成:", resp.FileKey)
 		response.Response(r, w, resp, nil)
 	}
 }

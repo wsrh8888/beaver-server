@@ -1,11 +1,14 @@
 Name: backend
 Host: 0.0.0.0
-Port: 8888
+Port: 40000
+Timeout: 600000 # 10分钟超时，单位毫秒，文件上传需要更长的处理时间
 Auth:
   AccessSecret: robert
   AccessExpire: 3600
+Etcd: 127.0.0.1:2379
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+Etcd: 127.0.0.1:2379
 Redis:
   Addr: 127.0.0.1:6379
   Password: '123456'
@@ -13,6 +16,40 @@ Redis:
 WhiteList:
   - /admin/auth/login
   - /admin/auth/authentication
+BlackList: []
+File:
+  WhiteList:
+    - png
+    - jpg
+    - jpeg
+    - gif
+    - webp
+    - mp4
+    - mp3
+    - pdf
+    - exe
+  BlackList:
+    - sh
+    - bat
+  MaxSize:
+    image: 2
+    video: 10
+    audio: 2
+    archive: 2
+    document: 2
+    unknown: 10
+    exe: 1024
+MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
+# 本地存储配置
+Local:
+  UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
+# 七牛云配置
+Qiniu:
+  AK: your_qiniu_access_key
+  SK: your_qiniu_secret_key
+  Bucket: your_qiniu_bucket_name
+  Domain: 'your_qiniu_domain'
+  ExpireTime: 3600 # 签名URL有效期, 单位：秒
 UserRpc:
   Etcd:
     Hosts:
