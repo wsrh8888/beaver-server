@@ -45,7 +45,7 @@ func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.Pinn
 		return nil, err
 	}
 
-	// 发送WS通知给会话成员（除了操作者自己）
+	// 发送WS通知给自己（更新本地数据）
 	go func() {
 		l.notifyPinnedUpdate(req.ConversationID, req.UserID, version)
 	}()
@@ -61,15 +61,6 @@ func (l *PinnedChatLogic) notifyPinnedUpdate(conversationId, userId string, vers
 		}
 	}()
 
-	// 获取该会话的所有用户会话关系（除了操作者自己）
-	var allUserConversations []chat_models.ChatUserConversation
-	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id != ?", conversationId, userId).
-		Find(&allUserConversations).Error
-	if err != nil {
-		l.Logger.Errorf("获取会话用户关系失败: conversationId=%s, error=%v", conversationId, err)
-		return
-	}
-
 	// 构建用户会话表更新数据
 	userConversationsUpdate := map[string]interface{}{
 		"table":          "user_conversations",
@@ -82,17 +73,14 @@ func (l *PinnedChatLogic) notifyPinnedUpdate(conversationId, userId string, vers
 		},
 	}
 
-	// 为每个会话成员推送更新
+	// 发送给自己
 	tableUpdates := []map[string]interface{}{userConversationsUpdate}
 	messageType := wsTypeConst.ChatUserConversationReceive
 
-	for _, userConversation := range allUserConversations {
-		recipientId := userConversation.UserID
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.CHAT_MESSAGE, messageType, userId, recipientId, map[string]interface{}{
-			"tableUpdates": tableUpdates,
-		}, conversationId)
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.CHAT_MESSAGE, messageType, userId, userId, map[string]interface{}{
+		"tableUpdates": tableUpdates,
+	}, conversationId)
 
-		l.Logger.Infof("发送置顶状态更新通知: recipient=%s, conversation=%s, version=%d",
-			recipientId, conversationId, version)
-	}
+	l.Logger.Infof("发送置顶状态更新通知: user=%s, conversation=%s, version=%d",
+		userId, conversationId, version)
 }

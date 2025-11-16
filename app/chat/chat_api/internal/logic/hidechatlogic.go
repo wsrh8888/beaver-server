@@ -73,7 +73,6 @@ func (l *HideChatLogic) notifyHiddenUpdate(conversationId, userId string, versio
 			},
 		},
 	}
-
 	// 发送给自己
 	tableUpdates := []map[string]interface{}{userConversationsUpdate}
 	messageType := wsTypeConst.ChatUserConversationReceive
