@@ -57,10 +57,12 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		updateFields["gender"] = *req.Gender
 	}
 
+	var version int64 // 定义version变量在更外层作用域
+
 	// 执行更新操作
 	if len(updateFields) > 0 {
 		// 获取新版本号（用户独立递增）
-		version := l.svcCtx.VersionGen.GetNextVersion("users", "uuid", req.UserID)
+		version = l.svcCtx.VersionGen.GetNextVersion("users", "uuid", req.UserID)
 		if version == -1 {
 			l.Errorf("获取版本号失败")
 			return nil, errors.New("获取版本号失败")
@@ -80,31 +82,38 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		l.recordUserChangeLog(req.UserID, version, updateFields)
 	}
 
-	// 异步更新缓存和通知好友
-	go func() {
-		// 创建新的context，避免使用请求的context
-		ctx := context.Background()
-		// 拿到自己的好友列表
-		response, err := l.svcCtx.FriendRpc.GetFriendIds(ctx, &friend_rpc.GetFriendIdsRequest{
-			UserID: req.UserID,
-		})
-		if err != nil {
-			logx.Errorf("failed to get friend ids: %v", err)
-			return
-		}
-		logx.Infof("转发给好友的列表: %v", response.FriendIds)
-		// 通过ws推送给自己的好友
-		for _, friendID := range response.FriendIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, friendID, map[string]interface{}{
-				"userId": req.UserID,
-			}, "")
-		}
-	}()
+	// 异步更新缓存和通知好友（只有在有更新的情况下才推送）
+	if version > 0 {
+		go func() {
+			// 创建新的context，避免使用请求的context
+			ctx := context.Background()
+			// 拿到自己的好友列表
+			response, err := l.svcCtx.FriendRpc.GetFriendIds(ctx, &friend_rpc.GetFriendIdsRequest{
+				UserID: req.UserID,
+			})
+			if err != nil {
+				logx.Errorf("failed to get friend ids: %v", err)
+				return
+			}
+			logx.Infof("转发给好友的列表: %v", response.FriendIds)
+			// 通过ws推送给自己和好友
+			allRecipients := append(response.FriendIds, req.UserID) // 包含自己
+			for _, recipientID := range allRecipients {
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, recipientID, map[string]interface{}{
+					"table":    "users",        // 涉及的数据库表
+					"version":  int32(version), // 最新版本号（转换为int32类型）
+					"targetId": req.UserID,     // 变更的记录ID
+				}, "")
+			}
+		}()
+	}
 
 	return &types.UpdateInfoRes{}, nil
 }
 
-// recordUserChangeLog 记录用户变更日志
+/**
+ * 记录用户变更日志
+ */
 func (l *UpdateInfoLogic) recordUserChangeLog(userID string, version int64, updateFields map[string]interface{}) {
 	var changeLogs []user_models.UserChangeLogModel
 

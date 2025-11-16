@@ -6,6 +6,9 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -43,5 +46,44 @@ func (l *MuteChatLogic) MuteChat(req *types.MuteChatReq) (resp *types.MuteChatRe
 		return nil, err
 	}
 
+	// 发送WS通知给自己（更新本地数据）
+	go func() {
+		l.notifyMutedUpdate(req.ConversationID, req.UserID, version)
+	}()
+
 	return resp, nil
+}
+
+// 发送免打扰状态更新通知
+func (l *MuteChatLogic) notifyMutedUpdate(conversationId, userId string, version int64) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Logger.Errorf("发送免打扰通知时发生panic: %v", r)
+		}
+	}()
+
+	// 获取会话类型
+
+	// 构建用户会话表更新数据
+	userConversationsUpdate := map[string]interface{}{
+		"table":          "user_conversations",
+		"userId":         userId,
+		"conversationId": conversationId,
+		"data": []map[string]interface{}{
+			{
+				"version": int32(version),
+			},
+		},
+	}
+
+	// 发送给自己
+	tableUpdates := []map[string]interface{}{userConversationsUpdate}
+	messageType := wsTypeConst.ChatUserConversationReceive
+
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.CHAT_MESSAGE, messageType, userId, userId, map[string]interface{}{
+		"tableUpdates": tableUpdates,
+	}, conversationId)
+
+	l.Logger.Infof("发送免打扰状态更新通知: user=%s, conversation=%s, version=%d",
+		userId, conversationId, version)
 }
