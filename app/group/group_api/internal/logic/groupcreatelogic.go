@@ -166,16 +166,16 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			}
 		}()
 
-		// 通过ws推送给群成员
+		// 通过ws推送给群成员 - 群组信息同步
 		for _, member := range response.Members {
-			fmt.Println("推送给群成员")
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.MessageGroupCreate, req.UserID, member.UserID, map[string]interface{}{
-				"avatar":         groupModel.Avatar,
-				"conversationId": groupModel.GroupID,
-				"update_at":      groupModel.CreatedAt.String(),
-				"is_top":         false,
-				"msg_preview":    "",
-				"nickname":       groupModel.Title,
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
+				"table": "groups",
+				"data": []map[string]interface{}{
+					{
+						"version": groupVersion,
+						"groupId": groupModel.GroupID,
+					},
+				},
 			}, groupModel.GroupID)
 		}
 	}()

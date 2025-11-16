@@ -45,6 +45,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 
 	var friendVerify friend_models.FriendVerifyModel
 	var conversationID string
+	var friendNextVersion int64
+	var friendUUID string
 
 	// 查询好友验证记录，确保当前用户是接收方
 	err = l.svcCtx.DB.Take(&friendVerify, "uuid = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
@@ -65,15 +67,18 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		friendVerify.RevStatus = 1
 
 		// 获取下一个版本号
-		friendNextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
+		friendNextVersion = l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
 		if friendNextVersion == -1 {
 			l.Logger.Errorf("获取好友版本号失败")
 			return nil, errors.New("系统错误")
 		}
 
+		// 生成UUID
+		friendUUID = uuid.New().String()
+
 		// 创建好友关系，同步来源信息
 		err = l.svcCtx.DB.Create(&friend_models.FriendModel{
-			UUID:       uuid.New().String(), // 生成UUID作为好友记录的唯一标识
+			UUID:       friendUUID, // 使用预生成的UUID
 			SendUserID: friendVerify.SendUserID,
 			RevUserID:  friendVerify.RevUserID,
 			Source:     friendVerify.Source, // 同步来源字段
@@ -164,14 +169,44 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			}
 		}()
 
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
-			"userId": friendVerify.SendUserID,
-			"status": friendVerify.RevStatus,
-		}, conversationID)
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendRequestReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
-			"userId": friendVerify.RevUserID,
-			"status": friendVerify.RevStatus,
-		}, conversationID)
+		// 构建表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		if friendVerify.RevStatus == 1 { // 同意添加好友
+			// 通知双方好友关系已建立 - 发送friends表版本更新
+			friendUpdates := map[string]interface{}{
+				"table": "friends",
+				"data": []map[string]interface{}{
+					{
+						"version": friendNextVersion,
+						"uuid":    friendUUID, // 使用预生成的UUID
+					},
+				},
+			}
+
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
+				"tableUpdates": []map[string]interface{}{friendUpdates},
+			}, conversationID)
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
+				"tableUpdates": []map[string]interface{}{friendUpdates},
+			}, conversationID)
+		} else {
+			// 其他状态（拒绝、忽略）发送验证表版本更新
+			verifyUpdates := map[string]interface{}{
+				"table": "friend_verify",
+				"data": []map[string]interface{}{
+					{
+						"version": nextVersion,
+						"uuid":    friendVerify.UUID,
+					},
+				},
+			}
+
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
+				"tableUpdates": []map[string]interface{}{verifyUpdates},
+			}, conversationID)
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
+				"tableUpdates": []map[string]interface{}{verifyUpdates},
+			}, conversationID)
+		}
 
 		l.Logger.Infof("异步发送WebSocket通知完成: verifyID=%s, status=%d", req.VerifyID, friendVerify.RevStatus)
 	}()

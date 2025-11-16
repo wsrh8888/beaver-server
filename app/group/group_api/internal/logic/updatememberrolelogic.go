@@ -8,6 +8,10 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -112,6 +116,36 @@ func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq)
 		l.Errorf("提交事务失败: %v", err)
 		return nil, err
 	}
+
+	// 异步通知群成员角色变更
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
+		// 获取群成员列表，用于推送通知
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+			GroupID: req.GroupID,
+		})
+		if err != nil {
+			l.Errorf("获取群成员列表失败: %v", err)
+			return
+		}
+
+		// 推送给所有群成员 - 群成员变动通知
+		for _, member := range response.Members {
+			if member.UserID != req.UserID { // 不通知操作者自己
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": memberVersion,
+							"groupId": req.GroupID,
+						},
+					},
+				}, "")
+			}
+		}
+	}()
 
 	resp = &types.UpdateMemberRoleRes{
 		Version: memberVersion,

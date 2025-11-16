@@ -8,6 +8,9 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -77,6 +80,38 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		l.Logger.Errorf("创建好友验证请求失败: %v", err)
 		return nil, errors.New("添加好友请求失败")
 	}
+
+	// 异步发送WebSocket通知给发送方和接收方
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+			}
+		}()
+
+		// 构建好友验证表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		verifyUpdates := map[string]interface{}{
+			"table": "friend_verify",
+			"data": []map[string]interface{}{
+				{
+					"version": nextVersion,
+					"uuid":    verifyModel.UUID,
+				},
+			},
+		}
+
+		// 通知接收方有新的好友验证请求
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.UserID, req.FriendID, map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{verifyUpdates},
+		}, "")
+
+		// 通知发送方请求发送成功
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.FriendID, req.UserID, map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{verifyUpdates},
+		}, "")
+
+		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, uuid=%s", req.UserID, req.FriendID, nextVersion, verifyModel.UUID)
+	}()
 
 	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
 	return &types.AddFriendRes{

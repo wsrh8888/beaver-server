@@ -8,6 +8,10 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -134,6 +138,49 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 
 	resp = &types.GroupJoinRequestHandleRes{
 		Version: requestVersion,
+	}
+
+	// 如果同意申请，异步通知相关成员
+	if req.Status == 1 {
+		go func() {
+			// 创建新的context，避免使用请求的context
+			ctx := context.Background()
+
+			// 获取群成员列表，用于推送通知
+			response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+				GroupID: request.GroupID,
+			})
+			if err != nil {
+				l.Errorf("获取群成员列表失败: %v", err)
+				return
+			}
+
+			// 推送给已存在的群成员 - 群成员变动通知
+			for _, member := range response.Members {
+				if member.UserID != req.UserID { // 不通知操作者自己
+					ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+						"table": "group_members",
+						"data": []map[string]interface{}{
+							{
+								"version": requestVersion,
+								"groupId": request.GroupID,
+							},
+						},
+					}, "")
+				}
+			}
+
+			// 通知新加入的成员 - 群成员变动通知
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, request.ApplicantUserID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": requestVersion,
+						"groupId": request.GroupID,
+					},
+				},
+			}, "")
+		}()
 	}
 
 	statusText := "拒绝"
