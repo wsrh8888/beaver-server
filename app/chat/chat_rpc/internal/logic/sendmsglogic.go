@@ -6,19 +6,20 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
-	"beaver/app/chat/chat_models"
+	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/chat/chat_utils"
 	"beaver/app/friend/friend_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/common/ajax"
 	"beaver/common/models/ctype"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type SendMsgLogic struct {
@@ -183,14 +184,14 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, fmt.Errorf("未识别到该类型: %d", msgType)
 	}
 
-	// 获取下一个序列号
+	// 获取下一个消息序列号（消息表内部序列号）
 	var maxSeq int64
 	err := l.svcCtx.DB.Model(&chat_models.ChatMessage{}).
 		Where("conversation_id = ?", in.ConversationId).
 		Select("COALESCE(MAX(seq), 0)").
 		Scan(&maxSeq).Error
 	if err != nil {
-		l.Logger.Errorf("获取序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
+		l.Logger.Errorf("获取消息序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
 	}
 
@@ -206,127 +207,69 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Msg:              &msg,
 	}
 
-	// 1. 创建消息记录
+	// 1. 创建消息记录并设置预览
 	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
 	err = l.svcCtx.DB.Create(&chatModel).Error
 	if err != nil {
+		l.Logger.Errorf("创建消息记录失败: conversationId=%s, userId=%s, error=%v", in.ConversationId, in.UserId, err)
 		return nil, err
+	}
+
+	// 1.1 构建 Messages 表更新数据
+	messagesUpdate := map[string]interface{}{
+		"table":          "messages",
+		"conversationId": in.ConversationId,
+		"data": []map[string]interface{}{
+			{
+				"seq": chatModel.Seq,
+			},
+		},
 	}
 
 	// 2. 更新会话级别的信息
-	err = chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
+	conversationVersion, err := chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
 	if err != nil {
+		l.Logger.Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
 	}
 
-	// 3. 更新发送者用户会话关系
-	err = chat_utils.UpdateUserConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.UserId, in.ConversationId, false)
+	// 2.1 构建 Conversations 表更新数据
+	conversationsUpdate := map[string]interface{}{
+		"table":          "conversations",
+		"conversationId": in.ConversationId,
+		"data": []map[string]interface{}{
+			{
+				"version": int32(conversationVersion),
+			},
+		},
+	}
+
+	// 3. 批量更新该会话所有用户的会话关系（包括发送者：恢复隐藏状态，更新版本号，更新已读序列号）
+	allUserConversationUpdates, err := chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
 	if err != nil {
-		return nil, err
+		l.Logger.Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
+		// 不影响消息发送成功，只记录错误
+		allUserConversationUpdates = []chat_utils.UserConversationUpdate{}
 	}
 
-	// 4. 更新聊天中所有其他用户的会话关系（自动恢复隐藏状态）
-	err = chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId)
-	if err != nil {
-		l.Logger.Errorf("更新其他用户会话关系失败: conversationId=%s, senderId=%s, error=%v", in.ConversationId, in.UserId, err)
-		// 不返回错误，因为消息已经发送成功，会话关系更新失败不应该影响消息发送
-	}
-
-	// 5. 自动更新发送者的userReadSeq到最新seq（自己发送的消息应该自动标记为已读）
-	// 这是IM的标准做法：发送者已经看到了自己发送的消息，所以应该自动标记为已读
-	// 这样未读数就不会包含自己发送的消息，保持服务端和客户端数据一致
-	var userConvo chat_models.ChatUserConversation
-	err = l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", in.ConversationId, in.UserId).First(&userConvo).Error
-	if err == nil {
-		// 如果用户会话关系存在，更新userReadSeq到最新seq（只有当新的seq大于当前值时才更新）
-		if chatModel.Seq > userConvo.UserReadSeq {
-			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", in.UserId)
-			err = l.svcCtx.DB.Model(&userConvo).
-				Updates(map[string]interface{}{
-					"user_read_seq": chatModel.Seq,
-					"updated_at":    time.Now(),
-					"version":       version,
-				}).Error
-			if err != nil {
-				l.Logger.Errorf("自动更新发送者已读序列号失败: userId=%s, conversationId=%s, seq=%d, error=%v", in.UserId, in.ConversationId, chatModel.Seq, err)
-				// 这里不返回错误，因为消息已经创建成功，已读数更新失败不应该影响消息发送
-			} else {
-				l.Logger.Infof("自动更新发送者已读序列号成功: userId=%s, conversationId=%s, readSeq=%d", in.UserId, in.ConversationId, chatModel.Seq)
-			}
-		}
-	} else if err == gorm.ErrRecordNotFound {
-		// 如果记录不存在，创建新记录并设置已读序列号
-		version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", in.UserId)
-		err = l.svcCtx.DB.Create(&chat_models.ChatUserConversation{
-			UserID:         in.UserId,
-			ConversationID: in.ConversationId,
-			IsHidden:       false,
-			IsPinned:       false,
-			IsMuted:        false,
-			UserReadSeq:    chatModel.Seq,
-			Version:        version,
-		}).Error
-		if err != nil {
-			l.Logger.Errorf("创建用户会话关系并设置已读序列号失败: userId=%s, conversationId=%s, seq=%d, error=%v", in.UserId, in.ConversationId, chatModel.Seq, err)
-			// 这里不返回错误，因为消息已经创建成功
-		} else {
-			l.Logger.Infof("创建用户会话关系并设置已读序列号成功: userId=%s, conversationId=%s, readSeq=%d", in.UserId, in.ConversationId, chatModel.Seq)
-		}
-	} else {
-		l.Logger.Errorf("查询用户会话关系失败: userId=%s, conversationId=%s, error=%v", in.UserId, in.ConversationId, err)
-		// 这里不返回错误，因为消息已经创建成功
-	}
-
+	// 转换消息格式
 	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(msg)
 	if err != nil {
-		fmt.Println("Error converting msg:", err)
-		return nil, err
-	}
-
-	// 重新查询消息（不使用Preload）
-	err = l.svcCtx.DB.First(&chatModel, chatModel.Id).Error
-	if err != nil {
-		fmt.Println("查询消息异常", err.Error())
+		l.Logger.Errorf("转换消息格式失败: %v", err)
 		return nil, err
 	}
 
 	// 获取发送者信息
-	var sender *chat_rpc.Sender
-	sendUserID := ""
-	if chatModel.SendUserID != nil {
-		sendUserID = *chatModel.SendUserID
+	sender, err := l.getSenderInfo(chatModel)
+	if err != nil {
+		l.Logger.Errorf("获取发送者信息失败: %v", err)
+		return nil, err
 	}
 
-	if sendUserID != "" {
-		// 调用UserRpc获取用户信息
-		userInfoResp, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
-			UserID: sendUserID,
-		})
-		if err != nil {
-			l.Logger.Errorf("获取用户信息失败: %v", err)
-			// 设置默认发送者信息
-			sender = &chat_rpc.Sender{
-				UserId:   sendUserID,
-				Nickname: "未知用户",
-				Avatar:   "",
-			}
-		} else {
-			// 直接使用结构化用户信息
-			userInfo := userInfoResp.UserInfo
-			sender = &chat_rpc.Sender{
-				UserId:   sendUserID,
-				Nickname: userInfo.NickName,
-				Avatar:   userInfo.Avatar,
-			}
-		}
-	} else {
-		// 通知消息：SendUserID为空
-		sender = &chat_rpc.Sender{
-			UserId:   "",
-			Nickname: "通知消息",
-			Avatar:   "",
-		}
-	}
+	// 5. 异步推送消息更新给会话成员（按表分组，一次推送包含所有相关更新）
+	go func() {
+		l.notifyMessageUpdateGrouped(in.ConversationId, in.UserId, conversationType, messagesUpdate, conversationsUpdate, allUserConversationUpdates)
+	}()
 
 	return &chat_rpc.SendMsgRes{
 		Id:               uint32(chatModel.Id),
@@ -339,6 +282,102 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Status:           1,
 		ConversationType: uint32(chatModel.ConversationType),
 		Seq:              chatModel.Seq,
+	}, nil
+}
+
+// notifyMessageUpdateGrouped 按会话分组推送消息更新（给该会话的所有用户推送）
+func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chat_utils.UserConversationUpdate) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Logger.Errorf("推送消息更新时发生panic: %v", r)
+		}
+	}()
+
+	// 获取该会话的所有用户ID（包括发送者，给所有人推送）
+	var recipientIds []string
+	for _, update := range allUserConversationUpdates {
+		if update.ConversationID == conversationId {
+			recipientIds = append(recipientIds, update.UserID)
+		}
+	}
+
+	// 构建按表分组的更新数据结构
+	tableUpdates := []map[string]interface{}{
+		messagesUpdate,      // 已经构建好的 Messages 更新
+		conversationsUpdate, // 已经构建好的 Conversations 更新
+	}
+
+	// 3. User_conversations 表更新（直接循环 allUserConversationUpdates）
+	for _, update := range allUserConversationUpdates {
+		userConversationsUpdate := map[string]interface{}{
+			"table":          "user_conversations",
+			"userId":         update.UserID,
+			"conversationId": update.ConversationID,
+			"data": []map[string]interface{}{
+				{
+					"version": int32(update.Version),
+				},
+			},
+		}
+		tableUpdates = append(tableUpdates, userConversationsUpdate)
+	}
+
+	// 为每个接收者推送批量更新
+	messageType := wsTypeConst.ChatConversationMessageReceive
+
+	fmt.Println(("111111111111111111111"))
+	fmt.Println(("111111111111111111111"))
+	fmt.Println(("111111111111111111111"))
+	fmt.Println(("111111111111111111111"))
+	fmt.Println(("111111111111111111111"))
+	fmt.Println("推送消息更新给会话成员: ", recipientIds)
+	for _, recipientId := range recipientIds {
+		// 一次性推送所有表的更新信息
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd.Hosts[0], wsCommandConst.CHAT_MESSAGE, messageType, senderId, recipientId, map[string]interface{}{
+			"tableUpdates": tableUpdates, // 按表分组的更新数组
+		}, conversationId)
+
+		l.Logger.Infof("分组推送消息相关更新: recipient=%s, conversation=%s, tableUpdateCount=%d",
+			recipientId, conversationId, len(tableUpdates))
+	}
+}
+
+// getSenderInfo 获取发送者信息
+func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_rpc.Sender, error) {
+	sendUserID := ""
+	if chatModel.SendUserID != nil {
+		sendUserID = *chatModel.SendUserID
+	}
+
+	if sendUserID == "" {
+		// 通知消息：SendUserID为空
+		return &chat_rpc.Sender{
+			UserId:   "",
+			Nickname: "通知消息",
+			Avatar:   "",
+		}, nil
+	}
+
+	// 调用UserRpc获取用户信息
+	userInfoResp, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		UserID: sendUserID,
+	})
+	if err != nil {
+		l.Logger.Errorf("获取用户信息失败: userId=%s, error=%v", sendUserID, err)
+		// 返回默认发送者信息，不影响消息发送
+		return &chat_rpc.Sender{
+			UserId:   sendUserID,
+			Nickname: "未知用户",
+			Avatar:   "",
+		}, nil
+	}
+
+	// 使用结构化用户信息
+	userInfo := userInfoResp.UserInfo
+	return &chat_rpc.Sender{
+		UserId:   sendUserID,
+		Nickname: userInfo.NickName,
+		Avatar:   userInfo.Avatar,
 	}, nil
 }
 

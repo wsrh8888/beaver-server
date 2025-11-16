@@ -30,7 +30,7 @@ func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 }
 
 func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoRes, err error) {
-	var newVersion int64
+	var newVersion int64 // 定义newVersion变量在更外层作用域
 
 	// 检查操作者权限
 	var member group_models.GroupMemberModel
@@ -57,7 +57,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 	// 执行更新
 	if len(updateFields) > 0 {
 		// 获取该群的新版本号（独立递增）
-		newVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+		newVersion = l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 		if newVersion == -1 {
 			l.Logger.Errorf("获取群组版本号失败")
 			return nil, errors.New("获取版本号失败")
@@ -75,33 +75,32 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		}
 	}
 
-	// 异步通知群成员
-	go func() {
-		// 创建新的context，避免使用请求的context
-		ctx := context.Background()
+	// 异步通知群成员（只有在有更新的情况下才推送）
+	if newVersion > 0 {
+		go func() {
+			// 创建新的context，避免使用请求的context
+			ctx := context.Background()
 
-		// 获取群成员列表
-		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
-			GroupID: req.GroupID,
-		})
-		if err != nil {
-			l.Logger.Errorf("获取群成员列表失败: %v", err)
-			return
-		}
+			// 获取群成员列表
+			response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+				GroupID: req.GroupID,
+			})
+			if err != nil {
+				l.Logger.Errorf("获取群成员列表失败: %v", err)
+				return
+			}
 
-		// 通过ws推送给群成员
-		for _, member := range response.Members {
-			if member.UserID != req.UserID { // 不通知操作者自己
+			// 通过ws推送给自己和群成员
+			allRecipients := append(response.Members, &group_rpc.GroupMemberInfo{UserID: req.UserID}) // 包含自己
+			for _, member := range allRecipients {
 				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupUpdate, req.UserID, member.UserID, map[string]interface{}{
-					"groupId":  req.GroupID,
-					"title":    req.Title,
-					"avatar":   req.Avatar,
-					"notice":   req.Notice,
-					"joinType": req.JoinType,
+					"table":    "groups",          // 涉及的数据库表
+					"version":  int32(newVersion), // 最新版本号（转换为int32类型）
+					"targetId": req.GroupID,       // 变更的记录ID
 				}, "")
 			}
-		}
-	}()
+		}()
+	}
 
 	return &types.UpdateGroupInfoRes{
 		Version: newVersion,

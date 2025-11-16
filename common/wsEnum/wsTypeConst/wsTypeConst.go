@@ -7,16 +7,16 @@ type Type string
 // sync（发给自己其他设备进行记录同步）
 
 const (
-	PrivateMessageSend    Type = "private_message_send"    // 客户端->服务端 私聊消息发送
-	GroupMessageSend      Type = "group_message_send"      // 客户端->服务端 群聊消息发送
-	PrivateMessageReceive Type = "private_message_receive" //  服务端->客户端 私聊消息接收
-	GroupMessageReceive   Type = "group_message_receive"   //  服务端->客户端 群聊消息接收
-	PrivateMessageSync    Type = "private_message_sync"    //  服务端->客户端 自己其他设备同步消息
-	GroupMessageSync      Type = "group_message_sync"      //  服务端->客户端 自己其他设备同步消息
-	MessageReadReceipt    Type = "message_read_receipt"    //  服务端->客户端 已读回执
-	MessageRecall         Type = "message_recall"          //  服务端->客户端 消息撤回
-)
+	PrivateMessageSend Type = "private_message_send" // 客户端->服务端 私聊消息发送
+	GroupMessageSend   Type = "group_message_send"   // 客户端->服务端 群聊消息发送
+	// --------------------------------------------------------
+	// --------------------------------------------------------
 
+	// 会话信息同步
+	ChatConversationMetaReceive    Type = "chat_conversation_meta_receive"    //  服务端->客户端 会话信息同步
+	ChatUserConversationReceive    Type = "chat_user_conversation_receive"    //  服务端->客户端 用户会话信息同步
+	ChatConversationMessageReceive Type = "chat_conversation_message_receive" //  服务端->客户端 会话消息同步
+)
 const (
 	FriendAddRequest     Type = "friend_add_request"     // 客户端->服务端 添加好友请求
 	FriendAccept         Type = "friend_accept"          // 客户端->服务端 接受好友请求
