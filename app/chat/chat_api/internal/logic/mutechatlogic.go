@@ -10,35 +10,36 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type PinnedChatLogic struct {
+type MuteChatLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewPinnedChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PinnedChatLogic {
-	return &PinnedChatLogic{
+// 设置会话免打扰
+func NewMuteChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteChatLogic {
+	return &MuteChatLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.PinnedChatRes, err error) {
-	resp = &types.PinnedChatRes{}
+func (l *MuteChatLogic) MuteChat(req *types.MuteChatReq) (resp *types.MuteChatRes, err error) {
+	resp = &types.MuteChatRes{}
 
 	// 获取下一个版本号
 	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
 
-	// 更新会话置顶状态和版本号
+	// 更新会话免打扰状态和版本号
 	err = l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
 		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 		Updates(map[string]interface{}{
-			"is_pinned": req.IsPinned,
-			"version":   version,
+			"is_muted": req.IsMuted,
+			"version":  version,
 		}).Error
 	if err != nil {
-		l.Logger.Errorf("pinned chat update failed: %v", err)
+		l.Logger.Errorf("mute chat update failed: %v", err)
 		return nil, err
 	}
 

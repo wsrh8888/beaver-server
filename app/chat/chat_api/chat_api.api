@@ -163,6 +163,22 @@ type PinnedChatReq {
 
 type PinnedChatRes {}
 
+type MuteChatReq {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+	IsMuted        bool   `json:"isMuted"` // true表示免打扰 false表示取消免打扰
+}
+
+type MuteChatRes {}
+
+type HideChatReq {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+	IsHidden       bool   `json:"isHidden"` // true表示隐藏 false表示显示
+}
+
+type HideChatRes {}
+
 // 消息编辑请求
 type EditMessageReq {
 	UserID    string `header:"Beaver-User-Id"`
@@ -312,6 +328,14 @@ service chat {
 	@doc "置顶某个会话"
 	@handler pinnedChat
 	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
+
+	@doc "设置会话免打扰"
+	@handler muteChat
+	post /api/chat/muteChat (MuteChatReq) returns (MuteChatRes)
+
+	@doc "隐藏/显示会话"
+	@handler hideChat
+	post /api/chat/hideChat (HideChatReq) returns (HideChatRes)
 
 	@doc "编辑消息"
 	@handler editMessage

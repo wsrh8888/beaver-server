@@ -138,6 +138,15 @@ type GetUserConversationSettingsListByIdsRes struct {
 	UserConversationSettings []UserConversationSettingById `json:"userConversationSettings"` // 用户会话设置列表
 }
 
+type HideChatReq struct {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+	IsHidden       bool   `json:"isHidden"`       // true表示隐藏 false表示显示
+}
+
+type HideChatRes struct {
+}
+
 type ImageMsg struct {
 	FileKey string `json:"fileKey"`         //图片文件ID
 	Width   int    `json:"width,optional"`  //图片宽度（可选）
@@ -168,6 +177,15 @@ type Msg struct {
 	NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` //通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
 	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,optional"`    //音频文件
 	ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"`        //回复消息
+}
+
+type MuteChatReq struct {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+	IsMuted        bool   `json:"isMuted"`        // true表示免打扰 false表示取消免打扰
+}
+
+type MuteChatRes struct {
 }
 
 type NotificationMsg struct {
