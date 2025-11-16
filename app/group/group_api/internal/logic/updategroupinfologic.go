@@ -90,14 +90,18 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 				return
 			}
 
-			// 通过ws推送给自己和群成员
+			// 通过ws推送给自己和群成员 - 群组信息同步
 			allRecipients := append(response.Members, &group_rpc.GroupMemberInfo{UserID: req.UserID}) // 包含自己
 			for _, member := range allRecipients {
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupUpdate, req.UserID, member.UserID, map[string]interface{}{
-					"table":    "groups",          // 涉及的数据库表
-					"version":  int32(newVersion), // 最新版本号（转换为int32类型）
-					"targetId": req.GroupID,       // 变更的记录ID
-				}, "")
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
+					"table": "groups",
+					"data": []map[string]interface{}{
+						{
+							"version": newVersion,
+							"groupId": req.GroupID,
+						},
+					},
+				}, req.GroupID)
 			}
 		}()
 	}

@@ -101,13 +101,16 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 			return
 		}
 
-		// 通过ws推送给群成员
+		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupUpdate, req.GroupID, member.UserID, map[string]interface{}{
-				"groupId":    req.GroupID,
-				"type":       "owner_transfer",
-				"oldOwnerId": req.UserID,
-				"newOwnerId": req.NewOwnerID,
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.GroupID, member.UserID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": memberVersion,
+						"groupId": req.GroupID,
+					},
+				},
 			}, "")
 		}
 	}()

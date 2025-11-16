@@ -7,6 +7,9 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -91,6 +94,32 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		l.Logger.Errorf("更新好友备注失败: %v", err)
 		return nil, errors.New("更新好友备注失败")
 	}
+
+	// 异步发送WebSocket通知给自己（备注是个人设置）
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+			}
+		}()
+
+		// 构建好友表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		friendUpdates := map[string]interface{}{
+			"table": "friends",
+			"data": []map[string]interface{}{
+				{
+					"version": nextVersion,
+					"uuid":    friend.UUID,
+				},
+			},
+		}
+
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, req.UserID, req.UserID, map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{friendUpdates},
+		}, "")
+
+		l.Logger.Infof("异步发送好友备注更新通知完成: userId=%s, uuid=%s, version=%d", req.UserID, friend.UUID, nextVersion)
+	}()
 
 	l.Logger.Infof("更新好友备注成功: userID=%s, friendID=%s, notice=%s", req.UserID, req.FriendID, req.Notice)
 	return &types.NoticeUpdateRes{

@@ -97,23 +97,31 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 			return
 		}
 
-		// 通过ws推送给群成员
+		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
 			if member.UserID != req.UserID { // 不通知操作者自己
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, member.UserID, map[string]interface{}{
-					"groupId":  req.GroupID,
-					"userIds":  req.UserIds,
-					"operator": req.UserID,
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": memberVersion,
+							"groupId": req.GroupID,
+						},
+					},
 				}, "")
 			}
 		}
 
-		// 通知被移除的成员
+		// 通知被移除的成员 - 群成员变动通知
 		for _, memberID := range req.UserIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, memberID, map[string]interface{}{
-				"groupId":  req.GroupID,
-				"operator": req.UserID,
-				"memberId": memberID,
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, memberID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": memberVersion,
+						"groupId": req.GroupID,
+					},
+				},
 			}, "")
 		}
 	}()

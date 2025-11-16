@@ -153,25 +153,31 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			newMemberIds[newMemberID] = true
 		}
 
-		// 通过ws推送给已存在的群成员（不通知操作者自己和新加入的成员）
+		// 通过ws推送给已存在的群成员 - 群成员变动通知
 		for _, member := range response.Members {
 			if member.UserID != req.UserID && !newMemberIds[member.UserID] { // 不通知操作者自己和新加入的成员
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, member.UserID, map[string]interface{}{
-					"groupId":  req.GroupID,
-					"type":     "add",
-					"userIds":  req.UserIds,
-					"operator": req.UserID,
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": lastVersion,
+							"groupId": req.GroupID,
+						},
+					},
 				}, "")
 			}
 		}
 
-		// 通知新加入的成员（需要获取完整的群组信息）
+		// 通知新加入的成员 - 群成员变动通知
 		for _, newMemberID := range req.UserIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, newMemberID, map[string]interface{}{
-				"groupId":      req.GroupID,
-				"type":         "joined",
-				"operator":     req.UserID,
-				"needFullInfo": true, // 标记需要获取完整信息
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, newMemberID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": lastVersion,
+						"groupId": req.GroupID,
+					},
+				},
 			}, "")
 		}
 	}()
