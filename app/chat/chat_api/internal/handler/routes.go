@@ -61,6 +61,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getUserConversationSettingsListByIdsHandler(serverCtx),
 			},
 			{
+				// 隐藏/显示会话
+				Method:  http.MethodPost,
+				Path:    "/api/chat/hideChat",
+				Handler: hideChatHandler(serverCtx),
+			},
+			{
+				// 设置会话免打扰
+				Method:  http.MethodPost,
+				Path:    "/api/chat/muteChat",
+				Handler: muteChatHandler(serverCtx),
+			},
+			{
 				// 置顶某个会话
 				Method:  http.MethodPost,
 				Path:    "/api/chat/pinnedChat",

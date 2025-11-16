@@ -219,13 +219,20 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, err
 	}
 
-	// 3. 更新用户会话关系
+	// 3. 更新发送者用户会话关系
 	err = chat_utils.UpdateUserConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.UserId, in.ConversationId, false)
 	if err != nil {
 		return nil, err
 	}
 
-	// 4. 自动更新发送者的userReadSeq到最新seq（自己发送的消息应该自动标记为已读）
+	// 4. 更新聊天中所有其他用户的会话关系（自动恢复隐藏状态）
+	err = chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId)
+	if err != nil {
+		l.Logger.Errorf("更新其他用户会话关系失败: conversationId=%s, senderId=%s, error=%v", in.ConversationId, in.UserId, err)
+		// 不返回错误，因为消息已经发送成功，会话关系更新失败不应该影响消息发送
+	}
+
+	// 5. 自动更新发送者的userReadSeq到最新seq（自己发送的消息应该自动标记为已读）
 	// 这是IM的标准做法：发送者已经看到了自己发送的消息，所以应该自动标记为已读
 	// 这样未读数就不会包含自己发送的消息，保持服务端和客户端数据一致
 	var userConvo chat_models.ChatUserConversation

@@ -56,6 +56,7 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 }
 
 // UpdateUserConversation 更新用户会话关系（不再更新LastMessage，只更新版本号）
+// isDeleted: 是否删除会话（true=隐藏，false=正常/发送消息时恢复显示）
 func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, userID, conversationID string, isDeleted bool) error {
 	var userConvo chat_models.ChatUserConversation
 	err := db.Where("conversation_id = ? AND user_id = ?", conversationID, userID).First(&userConvo).Error
@@ -86,16 +87,64 @@ func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, user
 		// 如果存在，则更新
 		// 注意：version基于user_id递增，所有用户的会话设置共享同一个版本号（用户级同步）
 		version := versionGen.GetNextVersion("chat_user_conversations", "user_id", userID)
-		err = db.Model(&userConvo).
-			Updates(map[string]interface{}{
-				"updated_at": time.Now(),
-				"version":    version,
-			}).Error
+
+		// 如果不是删除操作（即发送消息等正常操作），自动恢复显示状态
+		updateFields := map[string]interface{}{
+			"updated_at": time.Now(),
+			"version":    version,
+		}
+
+		if !isDeleted {
+			// 发送消息时自动恢复显示（取消隐藏状态）
+			updateFields["is_hidden"] = false
+		}
+
+		err = db.Model(&userConvo).Updates(updateFields).Error
 		if err != nil {
 			logx.Errorf("更新用户会话关系失败: %v", err)
 			return err
 		}
-		logx.Infof("更新用户会话关系成功: userID=%s, conversationID=%s, version=%d", userID, conversationID, version)
+		if !isDeleted {
+			logx.Infof("更新用户会话关系成功并自动恢复显示: userID=%s, conversationID=%s, version=%d", userID, conversationID, version)
+		} else {
+			logx.Infof("更新用户会话关系成功: userID=%s, conversationID=%s, version=%d", userID, conversationID, version)
+		}
 	}
+	return nil
+}
+
+// UpdateAllUserConversationsInChat 更新聊天中所有用户的会话关系（发送消息时自动恢复隐藏状态）
+func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGenerator, conversationID string, excludeUserID string) error {
+	// 查询需要更新的记录
+	var userConversations []chat_models.ChatUserConversation
+	err := db.Where("conversation_id = ? AND user_id != ? AND is_hidden = ?",
+		conversationID, excludeUserID, true).Find(&userConversations).Error
+	if err != nil {
+		logx.Errorf("查询需要更新的用户会话失败: conversationID=%s, error=%v", conversationID, err)
+		return err
+	}
+
+	if len(userConversations) == 0 {
+		logx.Infof("没有需要恢复的隐藏会话: conversationID=%s", conversationID)
+		return nil
+	}
+
+	// 直接逐个更新每条记录（N次数据库操作）
+	for _, convo := range userConversations {
+		version := versionGen.GetNextVersion("chat_user_conversations", "user_id", convo.UserID)
+		err = db.Model(&chat_models.ChatUserConversation{}).
+			Where("conversation_id = ? AND user_id = ?", conversationID, convo.UserID).
+			Updates(map[string]interface{}{
+				"is_hidden":  false,
+				"updated_at": time.Now(),
+				"version":    version,
+			}).Error
+		if err != nil {
+			logx.Errorf("更新用户会话失败: userID=%s, conversationID=%s, error=%v", convo.UserID, conversationID, err)
+			// 继续处理其他用户，不要因为一个失败而中断整个流程
+		}
+	}
+
+	logx.Infof("恢复隐藏会话成功: conversationID=%s, 恢复用户数=%d", conversationID, len(userConversations))
 	return nil
 }
