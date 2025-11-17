@@ -60,7 +60,7 @@ type FileUploadRequest struct {
 // ValidateAndProcessFile 验证并处理文件上传
 func ValidateAndProcessFile(file multipart.File, fileHeader *multipart.FileHeader, svcCtx *svc.ServiceContext) (*FileUploadRequest, error) {
 	// 文件后缀白名单验证
-	originalName := fileHeader.FileName
+	originalName := fileHeader.Filename
 	nameList := strings.Split(originalName, ".")
 	if len(nameList) < 2 {
 		return nil, errors.New("文件格式不正确")
@@ -122,7 +122,7 @@ func CreateFileRecord(req *FileUploadRequest, filePath string, source file_model
 
 	// 创建文件记录
 	newFileModel := &file_models.FileModel{
-		OriginalName: strings.TrimSuffix(req.FileHeader.FileName, "."+req.Suffix),
+		OriginalName: strings.TrimSuffix(req.FileHeader.Filename, "."+req.Suffix),
 		Size:         req.Size,
 		Path:         filePath,
 		Md5:          req.FileMd5,

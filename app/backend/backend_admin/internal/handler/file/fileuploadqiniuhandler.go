@@ -42,10 +42,10 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, errors.New("获取上传文件失败"))
 			return
 		}
-		logx.Info("成功获取上传文件:", fileHead.FileName, "大小:", fileHead.Size)
+		logx.Info("成功获取上传文件:", fileHead.Filename, "大小:", fileHead.Size)
 
 		// 文件后缀白名单
-		originalName := fileHead.FileName
+		originalName := fileHead.Filename
 		nameList := strings.Split(originalName, ".")
 		if len(nameList) < 2 {
 			logx.Error("文件名格式不正确:", originalName)

@@ -53,7 +53,7 @@ type FileUploadRequest struct {
 // ValidateAndProcessFile 验证并处理文件上传
 func ValidateAndProcessFile(file multipart.File, fileHeader *multipart.FileHeader, svcCtx *svc.ServiceContext) (*FileUploadRequest, error) {
 	// 文件后缀白名单验证
-	originalName := fileHeader.FileName
+	originalName := fileHeader.Filename
 	nameList := strings.Split(originalName, ".")
 	if len(nameList) < 2 {
 		return nil, errors.New("文件格式不正确")
