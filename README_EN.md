@@ -191,60 +191,6 @@
   <img src="./static/mobile/statement.jpg" width="200" alt="Statement"/>
 </div>
 
-## 📁 Project Structure
-
-```
-beaver-server/
-├── app/                          # Microservices applications
-│   ├── auth/                     # Authentication service
-│   │   ├── auth_api/            # HTTP API layer
-│   │   └── auth_rpc/            # gRPC service layer
-│   ├── chat/                     # Chat service
-│   │   ├── chat_api/            # HTTP API layer
-│   │   ├── chat_rpc/            # gRPC service layer
-│   │   └── chat_models/         # Data models
-│   ├── dictionary/               # Dictionary service
-│   │   ├── dictionary_api/      # HTTP API layer
-│   │   └── dictionary_rpc/      # gRPC service layer
-│   ├── feedback/                 # Feedback service
-│   │   ├── feedback_api/        # HTTP API layer
-│   │   └── feedback_models/     # Data models
-│   ├── file/                     # File management service
-│   │   ├── file_api/            # HTTP API layer
-│   │   ├── file_rpc/            # gRPC service layer
-│   │   └── file_models/         # Data models
-│   ├── friend/                   # Friend management service
-│   │   ├── friend_api/          # HTTP API layer
-│   │   ├── friend_rpc/          # gRPC service layer
-│   │   └── friend_models/       # Data models
-│   ├── gateway/                  # API gateway
-│   ├── group/                    # Group management service
-│   │   ├── group_api/           # HTTP API layer
-│   │   ├── group_rpc/           # gRPC service layer
-│   │   └── group_models/        # Data models
-│   ├── moment/                   # Moments service
-│   │   ├── moment_api/          # HTTP API layer
-│   │   └── moment_models/       # Data models
-│   ├── user/                     # User management service
-│   │   ├── user_api/            # HTTP API layer
-│   │   ├── user_rpc/            # gRPC service layer
-│   │   └── user_models/         # Data models
-│   └── ws/                       # WebSocket service
-│       └── ws_api/              # HTTP API layer
-├── common/                       # Shared components
-│   ├── middleware/              # HTTP/gRPC middleware
-│   ├── models/                  # Shared data models
-│   ├── response/                # Response utilities
-│   └── validator/               # Request validation
-├── core/                        # Core configurations
-│   ├── etcd.go                 # ETCD client
-│   ├── gorm.go                 # Database connection
-│   └── redis.go                # Redis client
-├── static/                      # Static assets
-├── template/                    # Code generation templates
-└── utils/                       # Utility functions
-```
-
 ## 🤝 Contributing
 
 We welcome contributions from the community! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
