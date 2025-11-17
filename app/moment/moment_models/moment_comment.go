@@ -15,5 +15,5 @@ type MomentCommentModel struct {
 	MomentUserID string `gorm:"size:64;not null;index" json:"momentUserId"`    // 动态发布者Id (索引，用于版本号递增)
 	Content      string `gorm:"type:text;not null" json:"content"`             // 评论内容
 	IsDeleted    bool   `gorm:"not null;default:false;index" json:"isDeleted"` // 软删除标记 (索引)
-	Version      int64  `gorm:"not null;default:0;index" json:"version"`       // 动态发布者级版本号（基于动态发布者UserID递增，每次数据变更都递增）
+	Version      int64  `gorm:"index"`                                         // 基于MomentID递增！⭐
 }

@@ -18,21 +18,12 @@ const (
 	ChatConversationMessageReceive Type = "chat_conversation_message_receive" //  服务端->客户端 会话消息同步
 )
 const (
-	FriendAddRequest Type = "friend_add_request" // 客户端->服务端 添加好友请求
-	FriendAccept     Type = "friend_accept"      // 客户端->服务端 接受好友请求
-	FriendReject     Type = "friend_reject"      // 客户端->服务端 拒绝好友请求
-
 	// -------------------------------------------------------------------------------------
 	FriendReceive       Type = "friend_receive"        // 服务端->客户端 好友信息同步
 	FriendVerifyReceive Type = "friend_verify_receive" // 服务端->客户端 好友验证信息同步
 )
 
 const (
-	GroupCreate      Type = "group_create"       // 客户端->服务端 创建群组
-	GroupInvite      Type = "group_invite"       // 客户端->服务端 邀请入群
-	GroupJoinRequest Type = "group_join_request" // 客户端->服务端 申请入群
-	GroupQuit        Type = "group_quit"         // 客户端->服务端 退出群组
-
 	// -------------------------------------------------------------------------------------
 	GroupReceive            Type = "group_receive"              // 服务端->客户端 群组信息同步
 	GroupJoinRequestReceive Type = "group_join_request_receive" // 服务端->客户端 群成员添加请求
@@ -41,6 +32,6 @@ const (
 )
 
 const (
-	ProfileUpdate       Type = "profile_update"        // 客户端->服务端 更新个人信息
-	ProfileChangeNotify Type = "profile_change_notify" // 服务端->客户端 他人资料变更通知
+	// --------------------------------------------------------
+	UserReceive Type = "user_receive" // 服务端->客户端 用户信息同步
 )

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
@@ -82,24 +83,24 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		l.recordUserChangeLog(req.UserID, version, updateFields)
 	}
 
-	// 异步更新缓存和通知好友（只有在有更新的情况下才推送）
+	// 异步获取所有相关用户并推送通知（只有在有更新的情况下才推送）
 	if version > 0 {
 		go func() {
 			// 创建新的context，避免使用请求的context
 			ctx := context.Background()
-			// 拿到自己的好友列表
-			response, err := l.svcCtx.FriendRpc.GetFriendIds(ctx, &friend_rpc.GetFriendIdsRequest{
-				UserID: req.UserID,
-			})
+
+			// 获取所有需要推送的用户ID
+			allRecipients, err := l.getAllRelatedUserIds(ctx, req.UserID)
 			if err != nil {
-				logx.Errorf("failed to get friend ids: %v", err)
+				logx.Errorf("获取相关用户ID失败: %v", err)
 				return
 			}
-			logx.Infof("转发给好友的列表: %v", response.FriendIds)
-			// 通过ws推送给自己和好友
-			allRecipients := append(response.FriendIds, req.UserID) // 包含自己
+
+			logx.Infof("推送用户信息变更给 %d 个用户: %v", len(allRecipients), allRecipients)
+
+			// 通过ws推送给所有相关用户
 			for _, recipientID := range allRecipients {
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.ProfileChangeNotify, req.UserID, recipientID, map[string]interface{}{
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.UserReceive, req.UserID, recipientID, map[string]interface{}{
 					"table":    "users",        // 涉及的数据库表
 					"version":  int32(version), // 最新版本号（转换为int32类型）
 					"targetId": req.UserID,     // 变更的记录ID
@@ -158,4 +159,47 @@ func (l *UpdateInfoLogic) recordUserChangeLog(userID string, version int64, upda
 			l.Infof("用户变更日志记录成功: userID=%s, 变更数=%d", userID, len(changeLogs))
 		}
 	}
+}
+
+/**
+ * 获取所有需要推送的用户ID（自己 + 好友 + 群成员）
+ */
+func (l *UpdateInfoLogic) getAllRelatedUserIds(ctx context.Context, userID string) ([]string, error) {
+	// 使用map进行去重
+	userMap := make(map[string]bool)
+
+	// 始终包含自己的ID
+	userMap[userID] = true
+
+	// 1. 获取好友列表
+	friendResp, err := l.svcCtx.FriendRpc.GetFriendIds(ctx, &friend_rpc.GetFriendIdsRequest{
+		UserID: userID,
+	})
+	if err != nil {
+		l.Errorf("获取好友列表失败: %v", err)
+		return nil, err
+	}
+	for _, uid := range friendResp.FriendIds {
+		userMap[uid] = true
+	}
+
+	// 2. 获取群成员列表
+	groupResp, err := l.svcCtx.GroupRpc.GetUserGroupMembers(ctx, &group_rpc.GetUserGroupMembersReq{
+		UserID: userID,
+	})
+	if err != nil {
+		l.Errorf("获取群成员列表失败: %v", err)
+		return nil, err
+	}
+	for _, uid := range groupResp.MemberIDs {
+		userMap[uid] = true
+	}
+
+	// 转换为切片
+	var result []string
+	for uid := range userMap {
+		result = append(result, uid)
+	}
+
+	return result, nil
 }
