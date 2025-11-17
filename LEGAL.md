@@ -56,22 +56,6 @@
 
 
 
-### 📋 项目来源标注要求
-
-**重要**：如果您基于本项目进行二次开发或发布，**必须**在项目中保留以下信息：
-
-#### 🖥️ **前端项目（移动端/桌面端/Web应用）**
-- **关于页面**：必须在"关于我们"、"关于应用"或类似页面中包含项目来源标注
-- **必需文本**："基于 [Beaver IM](https://github.com/wsrh8888/beaver-server) 开源IM项目开发"
-- **链接**：必须提供可点击的原始项目链接
-
-#### 🔧 **后端项目（服务器/API服务）**
-- **README.md**：必须在项目介绍或描述中包含来源标注
-- **必需文本**："基于 [Beaver IM](https://github.com/wsrh8888/beaver-server) 开源IM项目开发"
-- **链接**：必须提供可点击的原始项目链接
-
-#### 📄 **通用要求**
-- **LICENSE 文件**：保留原项目 MIT 协议信息
 
 ### 📞 举报机制
 
@@ -133,22 +117,6 @@ The following uses are strictly prohibited:
 - 📱 Comply with platform terms of service
 - ⚠️ Report illegal activities promptly
 
-### 📋 Project Attribution Requirements
-
-**Important**: If you develop or publish based on this project, you **must** retain the following information:
-
-#### 🖥️ **Frontend Projects (Mobile/Desktop/Web Applications)**
-- **About page**: Must include project attribution in "About Us" or "About App" pages
-- **Required text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open-source IM project"
-- **Link**: Must provide a clickable original project link
-
-#### 🔧 **Backend Projects (Server/API Services)**
-- **README.md**: Must include attribution in project description or introduction
-- **Required text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open-source IM project"
-- **Link**: Must provide a clickable original project link
-
-#### 📄 **General Requirements**
-- **LICENSE file**: Retain the original project MIT license information
 
 ### 📞 Reporting Mechanism
 

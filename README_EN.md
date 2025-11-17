@@ -284,26 +284,6 @@ This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LI
 - We recommend reading relevant laws and regulations before use to ensure compliance
 - If you have questions or need help, feel free to reach out via QQ Group or GitHub Issues
 
-### 📋 Project Attribution Requirements
-
-**Important**: If you develop or publish based on this project, you **must** retain the following information:
-
-#### 🖥️ **Frontend Projects (Mobile/Desktop/Web Apps)**
-- **About Page**: Must include project source attribution in "About Us", "About App", or similar pages
-- **Required Text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open source IM project"
-- **Link**: Must provide clickable link to the original project
-
-#### 🔧 **Backend Projects (Server/API Services)**
-- **README.md**: Must include attribution in the project introduction or description
-- **Required Text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open source IM project"
-- **Link**: Must provide clickable link to the original project
-
-#### 📄 **General Requirements**
-- **LICENSE file**: Retain the original project MIT license information
-- **Commercial Use**: Company or enterprise-level commercial applications require explicit authorization
-
-> 💡 **Friendly Note**: This project supports both personal learning and personal commercial use. For company or enterprise-level commercial applications, **explicit authorization from us is required** before any commercial use.
-
 > 📖 **Detailed Legal Terms**: Please refer to [LEGAL.md](LEGAL.md) for complete legal disclaimers and usage requirements.
 
 ## ⭐ Star History
