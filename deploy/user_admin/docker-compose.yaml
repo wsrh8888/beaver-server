@@ -1,0 +1,13 @@
+
+services:
+  user_admin:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/user_admin:1.0.2
+    container_name: user_admin
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./user.yaml:/etc/user.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

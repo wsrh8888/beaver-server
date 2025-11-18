@@ -1,0 +1,108 @@
+syntax = "v1"
+
+// 获取动态列表
+type (
+	GetMomentListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		UserId   string `form:"userId,optional"` // 用户ID筛选
+		Keywords string `form:"keywords,optional"` // 内容关键词搜索
+	}
+	GetMomentListRes {
+		List  []GetMomentListItem `json:"list"`
+		Total int64               `json:"total"`
+	}
+	GetMomentListItem {
+		Id        uint                  `json:"id"`
+		UserId    string                `json:"userId"`
+		Content   string                `json:"content"`
+		Files     []GetMomentListFileInfo `json:"files"`
+		IsDeleted bool                  `json:"isDeleted"`
+		CreatedAt string                `json:"createdAt"`
+		UpdatedAt string                `json:"updatedAt"`
+	}
+	GetMomentListFileInfo {
+		FileName string `json:"fileName"`
+	}
+)
+
+// 获取动态详情
+type (
+	GetMomentDetailReq {
+		Id uint `path:"id"`
+	}
+	GetMomentDetailRes {
+		Id        uint                      `json:"id"`
+		UserId    string                   `json:"userId"`
+		Content   string                   `json:"content"`
+		Files     []GetMomentDetailFileInfo `json:"files"`
+		IsDeleted bool                     `json:"isDeleted"`
+		CreatedAt string                   `json:"createdAt"`
+		UpdatedAt string                   `json:"updatedAt"`
+	}
+	GetMomentDetailFileInfo {
+		FileName string `json:"fileName"`
+	}
+)
+
+// 删除动态
+type (
+	DeleteMomentReq {
+		Id uint `path:"id"`
+	}
+	DeleteMomentRes {}
+)
+
+// 获取动态评论列表
+type (
+	GetMomentCommentListReq {
+		Page     int  `form:"page,optional"`
+		Limit    int  `form:"limit,optional"`
+		MomentId uint `form:"momentId"`
+	}
+	GetMomentCommentListRes {
+		List  []GetMomentCommentListItem `json:"list"`
+		Total int64                      `json:"total"`
+	}
+	GetMomentCommentListItem {
+		Id        uint   `json:"id"`
+		MomentId  uint   `json:"momentId"`
+		UserId    string `json:"userId"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
+)
+
+// 删除动态评论
+type (
+	DeleteMomentCommentReq {
+		Id uint `path:"id"`
+	}
+	DeleteMomentCommentRes {}
+)
+
+@server (
+	group: moment
+)
+service backend {
+	@doc "获取动态列表"
+	@handler GetMomentList
+	get /admin/moment/list (GetMomentListReq) returns (GetMomentListRes)
+
+	@doc "获取动态详情"
+	@handler GetMomentDetail
+	get /admin/moment/:id (GetMomentDetailReq) returns (GetMomentDetailRes)
+
+	@doc "删除动态"
+	@handler DeleteMoment
+	delete /admin/moment/:id (DeleteMomentReq) returns (DeleteMomentRes)
+
+	@doc "获取动态评论列表"
+	@handler GetMomentCommentList
+	get /admin/moment/comments (GetMomentCommentListReq) returns (GetMomentCommentListRes)
+
+	@doc "删除动态评论"
+	@handler DeleteMomentComment
+	delete /admin/moment/comment/:id (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
+}

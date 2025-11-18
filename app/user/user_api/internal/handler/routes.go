@@ -13,10 +13,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 找回密码（通过邮箱验证码重置密码）
+				// 获取用户设备列表
+				Method:  http.MethodGet,
+				Path:    "/api/user/devices",
+				Handler: getDevicesHandler(serverCtx),
+			},
+			{
+				// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
 				Method:  http.MethodPost,
-				Path:    "/api/user/reset_password",
-				Handler: resetPasswordHandler(serverCtx),
+				Path:    "/api/user/sync",
+				Handler: userSyncHandler(serverCtx),
 			},
 			{
 				// 修改用户邮箱（需要验证码）

@@ -30,9 +30,9 @@ func NewConversationInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq) (resp *types.ConversationInfoRes, err error) {
-	// 查询会话信息
-	var userConversation chat_models.ChatUserConversationModel
-	err = l.svcCtx.DB.Where("conversation_id = ? AND is_deleted = false", req.ConversationID).First(&userConversation).Error
+	// 查询会话信息（这里应该是查询用户特定的会话设置）
+	var userConversation chat_models.ChatUserConversation
+	err = l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", req.ConversationID, req.UserID).First(&userConversation).Error
 
 	// 初始化响应
 	resp = &types.ConversationInfoRes{
@@ -42,9 +42,16 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		IsTop:          false,
 	}
 
+	// 查询会话元数据获取最后消息
+	var conversationMeta chat_models.ChatConversationMeta
+	metaErr := l.svcCtx.DB.Where("conversation_id = ?", req.ConversationID).First(&conversationMeta).Error
+
 	// 存在会话时填充消息预览和时间信息
 	if err == nil {
-		resp.MsgPreview = userConversation.LastMessage
+		// 从会话元数据中获取最后消息
+		if metaErr == nil {
+			resp.MsgPreview = conversationMeta.LastMessage
+		}
 		resp.UpdateAt = userConversation.UpdatedAt.String()
 		resp.IsTop = userConversation.IsPinned
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -67,7 +74,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			return nil, err
 		}
 
-		resp.FileName = user.FileName
+		resp.Avatar = user.Avatar
 		resp.Nickname = user.NickName
 		resp.ChatType = 1 // 私聊类型
 	} else {
@@ -78,7 +85,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			return nil, err
 		}
 
-		resp.FileName = group.FileName
+		resp.Avatar = group.Avatar
 		resp.Nickname = group.Title
 		resp.ChatType = 2 // 群聊类型
 	}

@@ -52,9 +52,7 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 	// 获取自己的动态和好友的动态
 	var moments []moment_models.MomentModel
 	if err := l.svcCtx.DB.Where("user_id IN (?) AND is_deleted = false", friendIds).
-		Preload("CommentsModel.CommentUserModel").
-		Preload("LikesModel.LikeUserModel").
-		Preload("MomentUserModel").
+		Order("created_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&moments).Error; err != nil {
@@ -71,37 +69,72 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 	// 准备响应数据
 	resp = &types.GetMomentsRes{
-		Count: count, // 修改为动态数目
+		Count: count,
 		List:  make([]types.MomentModel, 0, len(moments)),
 	}
 
+	// 获取所有动态ID，用于批量查询评论和点赞数量
+	momentIds := make([]uint, 0, len(moments))
 	for _, moment := range moments {
-		var likes []types.MomentLikeModel
-		for _, like := range moment.LikesModel {
-			likes = append(likes, types.MomentLikeModel{
-				Id:       like.Id,
-				UserID:   like.UserID,
-				UserName: like.LikeUserModel.NickName,
-				FileName: like.LikeUserModel.FileName,
-			})
-		}
+		momentIds = append(momentIds, moment.Id)
+	}
 
+	// 批量查询评论数量
+	commentCounts := make(map[uint]int64)
+	if len(momentIds) > 0 {
+		var commentStats []struct {
+			MomentID uint
+			Count    int64
+		}
+		l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
+			Where("moment_id IN (?) AND is_deleted = false", momentIds).
+			Select("moment_id, COUNT(*) as count").
+			Group("moment_id").
+			Scan(&commentStats)
+
+		for _, stat := range commentStats {
+			commentCounts[stat.MomentID] = stat.Count
+		}
+	}
+
+	// 批量查询点赞数量
+	likeCounts := make(map[uint]int64)
+	if len(momentIds) > 0 {
+		var likeStats []struct {
+			MomentID uint
+			Count    int64
+		}
+		l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
+			Where("moment_id IN (?) AND is_deleted = false", momentIds).
+			Select("moment_id, COUNT(*) as count").
+			Group("moment_id").
+			Scan(&likeStats)
+
+		for _, stat := range likeStats {
+			likeCounts[stat.MomentID] = stat.Count
+		}
+	}
+
+	for _, moment := range moments {
 		var files []types.FileInfo
-		for _, file := range *moment.Files {
-			files = append(files, types.FileInfo{
-				FileName: file.FileName,
-			})
+		if moment.Files != nil {
+			for _, file := range *moment.Files {
+				files = append(files, types.FileInfo{
+					FileKey: file.FileKey,
+				})
+			}
 		}
 
+		// 简化响应，只包含基本信息和统计数据
 		resp.List = append(resp.List, types.MomentModel{
-			Id:      moment.Id,
-			UserID:  moment.MomentUserModel.UUID, // 使用 MomentUserModel 的 UserID
-			Content: moment.Content,
-			Files:   files,
-			Likes:   likes,
-			// Comments: comments,
-			UserName:  moment.MomentUserModel.NickName, // 增加 UserName 字段
-			FileName:  moment.MomentUserModel.FileName, // 增加 FileName 字段
+			Id:        moment.Id,
+			UserID:    moment.UserID,
+			Content:   moment.Content,
+			Files:     files,
+			Likes:     make([]types.MomentLikeModel, 0),    // 列表页不显示具体点赞用户
+			Comments:  make([]types.MomentCommentModel, 0), // 列表页不显示具体评论
+			UserName:  "",                                  // 需要从用户服务获取
+			Avatar:    "",                                  // 需要从用户服务获取
 			CreatedAt: moment.CreatedAt.String(),
 		})
 	}

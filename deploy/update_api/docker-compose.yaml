@@ -1,0 +1,13 @@
+
+services:
+  update_api:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/update_api:1.0.2
+    container_name: update_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./update.yaml:/etc/update.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

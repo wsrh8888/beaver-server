@@ -42,7 +42,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 
 	// 检查要移除的成员
 	var members []group_models.GroupMemberModel
-	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.MemberIDs).Find(&members).Error
+	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.UserIds).Find(&members).Error
 	if err != nil {
 		return nil, errors.New("查询成员信息失败")
 	}
@@ -62,12 +62,26 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		}
 	}
 
-	// 执行移除操作
-	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.MemberIDs).Delete(&group_models.GroupMemberModel{}).Error
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Logger.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
+	// 批量更新成员状态为被踢（Status = 3）
+	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("group_id = ? and user_id in ?", req.GroupID, req.UserIds).
+		Updates(map[string]interface{}{
+			"status":  3, // 3被踢
+			"version": memberVersion,
+		}).Error
 	if err != nil {
 		l.Logger.Errorf("移除成员失败: %v", err)
 		return nil, errors.New("移除成员失败")
 	}
+
+	// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 
 	// 异步通知群成员
 	go func() {
@@ -83,26 +97,36 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 			return
 		}
 
-		// 通过ws推送给群成员
+		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
 			if member.UserID != req.UserID { // 不通知操作者自己
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, member.UserID, map[string]interface{}{
-					"groupId":   req.GroupID,
-					"memberIds": req.MemberIDs,
-					"operator":  req.UserID,
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": memberVersion,
+							"groupId": req.GroupID,
+						},
+					},
 				}, "")
 			}
 		}
 
-		// 通知被移除的成员
-		for _, memberID := range req.MemberIDs {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.UserID, memberID, map[string]interface{}{
-				"groupId":  req.GroupID,
-				"operator": req.UserID,
-				"memberId": memberID,
+		// 通知被移除的成员 - 群成员变动通知
+		for _, memberID := range req.UserIds {
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, memberID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": memberVersion,
+						"groupId": req.GroupID,
+					},
+				},
 			}, "")
 		}
 	}()
 
-	return &types.GroupMemberRemoveRes{}, nil
+	return &types.GroupMemberRemoveRes{
+		Version: memberVersion,
+	}, nil
 }

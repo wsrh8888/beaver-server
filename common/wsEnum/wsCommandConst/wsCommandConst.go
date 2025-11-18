@@ -15,8 +15,6 @@ const (
 	USER_PROFILE Command = "USER_PROFILE"
 	// 系统通知类
 	SYSTEM_NOTIFICATION Command = "SYSTEM_NOTIFICATION"
-	// 在线状态类
-	PRESENCE Command = "PRESENCE"
 	// 消息同步类
 	MESSAGE_SYNC Command = "MESSAGE_SYNC"
 	// 心跳消息类（应用级心跳）

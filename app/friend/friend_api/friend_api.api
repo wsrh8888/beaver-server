@@ -4,17 +4,12 @@ type addFriendReq {
 	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 	FriendID string `json:"friendId"` // 要添加的好友用户ID
 	Verify   string `json:"verify,optional"` // 验证消息，可选
-	Source   string `json:"source"` // 添加好友来源：email(邮箱搜索)/qrcode(扫码)
+	Source   string `json:"source"` // 添加好友来源：email(邮箱搜索)/qrcode(扫码)/userId(用户ID搜索)
 }
 
-type addFriendRes {}
-
-type FriendDeleteReq {
-	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-	FriendID string `json:"friendId"` // 要删除的好友用户ID
+type addFriendRes {
+	Version int64 `json:"version"` // 好友验证版本号
 }
-
-type FriendDeleteRes {}
 
 type friendListReq {
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID
@@ -38,11 +33,13 @@ type userValidRes {
 
 type FriendValidStatusReq {
 	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-	VerifyID uint   `json:"verifyId"` // 验证记录ID
+	VerifyID string `json:"verifyId"` // 验证记录UUID
 	Status   int8   `json:"status"` // 处理状态：1(同意)/2(拒绝)
 }
 
-type FriendValidStatusRes {}
+type FriendValidStatusRes {
+	Version int64 `json:"version"` // 处理后的好友版本号
+}
 
 type validListReq {
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID
@@ -53,10 +50,10 @@ type validListReq {
 type FriendValidInfo {
 	UserID    string `json:"userId"` // 用户ID
 	Nickname  string `json:"nickname"` // 用户昵称
-	FileName  string `json:"fileName"` // 用户头像文件名
+	Avatar    string `json:"avatar"` // 用户头像文件名
 	Message   string `json:"message"` // 验证消息
 	Source    string `json:"source"` // 添加好友来源：email/qrcode
-	Id        uint   `json:"id"` // 验证记录ID
+	Id        string `json:"id"` // 验证记录UUID（作为唯一标识）
 	Flag      string `json:"flag"` // 用户角色：send(发送者)/receive(接收者)
 	Status    int8   `json:"status"` // 验证状态：0(未处理)/1(已通过)/2(已拒绝)
 	CreatedAt string `json:"createdAt"` // 验证时间
@@ -75,7 +72,7 @@ type FriendInfoReq {
 type FriendInfoRes {
 	UserID         string `json:"userId"` // 用户ID
 	Nickname       string `json:"nickname"` // 用户昵称
-	FileName       string `json:"fileName"` // 用户头像文件名
+	Avatar         string `json:"avatar"` // 用户头像文件名
 	Abstract       string `json:"abstract"` // 用户签名
 	Notice         string `json:"notice"` // 好友备注
 	IsFriend       bool   `json:"isFriend"` // 是否为好友关系
@@ -90,17 +87,20 @@ type NoticeUpdateReq {
 	Notice   string `json:"notice"` // 新的备注内容
 }
 
-type NoticeUpdateRes {}
+type NoticeUpdateRes {
+	Version int64 `json:"version"` // 更新后的好友版本号
+}
 
 type SearchReq {
-	UserID string `header:"Beaver-User-Id"` // 当前用户ID
-	Email  string `form:"email"` // 搜索的邮箱地址
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+	Keyword string `form:"keyword"` // 搜索关键词（用户ID或邮箱）
+	Type    string `form:"type,optional"` // 搜索类型：userId(用户ID)/email(邮箱)，默认email
 }
 
 type SearchRes {
 	UserID         string `json:"userId"` // 用户ID
 	Nickname       string `json:"nickname"` // 用户昵称
-	FileName       string `json:"fileName"` // 用户头像文件名
+	Avatar         string `json:"avatar"` // 用户头像文件名
 	Abstract       string `json:"abstract"` // 用户签名
 	Notice         string `json:"notice"` // 好友备注
 	IsFriend       bool   `json:"isFriend"` // 是否为好友关系
@@ -114,8 +114,52 @@ type SearchValidInfoReq {
 }
 
 type SearchValidInfoRes {
-	ValidID uint `json:"validId"` // 验证记录ID
+	ValidID string `json:"validId"` // 验证记录UUID
 }
+
+// 批量获取好友数据（通过UUID）
+type (
+	GetFriendsListByUuidsReq {
+		Uuids []string `json:"uuids"` // 好友记录UUID列表
+	}
+	GetFriendsListByUuidsRes {
+		Friends []FriendByUuid `json:"friends"` // 好友列表
+	}
+	FriendByUuid {
+		Uuid           string `json:"uuid"` // 好友记录UUID
+		SendUserID     string `json:"sendUserId"` // 发送者用户ID
+		RevUserID      string `json:"revUserId"` // 接收者用户ID
+		SendUserNotice string `json:"sendUserNotice"` // 发送者备注
+		RevUserNotice  string `json:"revUserNotice"` // 接收者备注
+		Source         string `json:"source"` // 添加好友来源
+		IsDeleted      bool   `json:"isDeleted"` // 是否已删除
+		Version        int64  `json:"version"` // 版本号
+		CreateAt       int64  `json:"createAt"` // 创建时间戳
+		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+	}
+)
+
+// 批量获取好友验证数据（通过UUID）
+type (
+	GetFriendVerifiesListByIdsReq {
+		Uuids []string `json:"uuids"` // 验证记录UUID列表
+	}
+	GetFriendVerifiesListByIdsRes {
+		FriendVerifies []FriendVerifyById `json:"friendVerifies"` // 好友验证列表
+	}
+	FriendVerifyById {
+		UUID       string `json:"uuid"` // 验证记录UUID
+		SendUserID string `json:"sendUserId"` // 发送者用户ID
+		RevUserID  string `json:"revUserId"` // 接收者用户ID
+		SendStatus int32  `json:"sendStatus"` // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+		RevStatus  int32  `json:"revStatus"` // 接收方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+		Message    string `json:"message"` // 附加消息
+		Source     string `json:"source"` // 添加好友来源
+		Version    int64  `json:"version"` // 版本号
+		CreateAt   int64  `json:"createAt"` // 创建时间戳
+		UpdateAt   int64  `json:"updateAt"` // 更新时间戳
+	}
+)
 
 service friend {
 	@doc "发送好友验证请求"
@@ -125,10 +169,6 @@ service friend {
 	@doc "处理好友验证请求(同意/拒绝)"
 	@handler userValidStatus
 	post /api/friend/valid (FriendValidStatusReq) returns (FriendValidStatusRes)
-
-	@doc "删除好友关系"
-	@handler friendDelete
-	delete /api/friend/delete (FriendDeleteReq) returns (FriendDeleteRes)
 
 	@doc "获取好友列表"
 	@handler friendList
@@ -146,13 +186,21 @@ service friend {
 	@handler noticeUpdate
 	post /api/friend/update_notice (NoticeUpdateReq) returns (NoticeUpdateRes)
 
-	@doc "通过邮箱搜索用户"
+	@doc "通过用户ID或邮箱搜索用户"
 	@handler search
 	get /api/friend/search (SearchReq) returns (SearchRes)
 
 	@doc "查询好友验证记录"
 	@handler searchValidInfo
 	post /api/friend/searchValidInfo (SearchValidInfoReq) returns (SearchValidInfoRes)
+
+	@doc "批量获取好友数据（通过UUID）"
+	@handler getFriendsListByUuids
+	post /api/friend/getFriendsListByUuids (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
+
+	@doc "批量获取好友验证数据（通过UUID）"
+	@handler getFriendVerifiesListByIds
+	post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
 }
 
 // goctl api go -api friend_api.api -dir . --home ../../../template

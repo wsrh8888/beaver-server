@@ -1,27 +1,27 @@
 package chat_models
 
 import (
-	"beaver/app/user/user_models"
 	"beaver/common/models"
 	"beaver/common/models/ctype"
-	"fmt"
 )
 
-type ChatModel struct {
+type ChatMessage struct {
 	models.Model
-	MessageID      string                `json:"messageId"`                        // 客户端消息ID
-	ConversationID string                `json:"conversationId"`                   // 会话id（单聊为用户id，群聊为群id）
-	SendUserID     string                `gorm:"size:64;index"  json:"sendUserId"` // 发送者用户id
-	MsgType        ctype.MsgType         `json:"msgType"`                          // 消息类型
-	MsgPreview     string                `gorm:"size:64" json:"msgPreview"`        // 消息预览
-	Msg            *ctype.Msg            `json:"msg"`                              // 消息内容
-	SendUserModel  user_models.UserModel `gorm:"foreignKey:SendUserID;references:UUID" json:"-"`
-	IsDeleted      bool                  `gorm:"not null;default:false" json:"isDeleted"` // 标记用户是否删除会话
+	MessageID        string        `gorm:"size:64;uniqueIndex" json:"messageId"`           // 唯一消息ID（客户端生成+服务端确认）
+	ConversationID   string        `gorm:"size:128;index" json:"conversationId"`           // 所属会话ID
+	ConversationType int           `gorm:"not" json:"conversationType"`                    // 会话类型（1=私聊 2=群聊）
+	Seq              int64         `gorm:"not;default:0;index" json:"seq"`                 // 消息在会话内的序列号（基于ConversationID递增，从1开始）
+	SendUserID       *string       `gorm:"size:64;index" json:"sendUserId,omitempty"`      // 发送者用户ID（通知消息可为null）
+	MsgType          ctype.MsgType `gorm:"not" json:"msgType"`                             // 消息类型（TEXT/IMAGE/VIDEO/REVOKE/DELETE/EDIT等）
+	TargetMessageID  string        `gorm:"size:64;index" json:"targetMessageId,omitempty"` // 针对的原消息ID（撤回/删除/编辑事件）
+	MsgPreview       string        `gorm:"size:256" json:"msgPreview"`                     // 消息预览文本
+	Msg              *ctype.Msg    `gorm:"type:json" json:"msg"`                           // 消息内容（JSON）
+
+	// 数据状态管理 - 处理违规内容等情况
+	Status int8 `gorm:"not null;default:1;index" json:"status"` // 消息状态：1=正常 2=违规待审核 3=违规已屏蔽 4=已删除
 }
 
-func (chat ChatModel) MsgPreviewMethod() string {
-	fmt.Println("chat.Msg.Type", chat.Msg.Type)
-
+func (chat ChatMessage) MsgPreviewMethod() string {
 	switch chat.Msg.Type {
 	case 1:
 		return chat.Msg.TextMsg.Content
@@ -35,6 +35,10 @@ func (chat ChatModel) MsgPreviewMethod() string {
 		return "[语音消息]"
 	case 6:
 		return "[表情消息]"
+	case 7:
+		return "[通知消息]"
+	case 8:
+		return "[音频文件]"
 	default:
 		return "[未知消息]"
 	}

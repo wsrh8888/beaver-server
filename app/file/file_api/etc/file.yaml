@@ -35,8 +35,10 @@ WhiteList:
   - gif
   - webp
   - mp4
-BlackList:
+  - mp3
+  - pdf
   - exe
+BlackList:
   - sh
   - bat
 UserRpc:

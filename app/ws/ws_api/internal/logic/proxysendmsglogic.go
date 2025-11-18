@@ -48,7 +48,7 @@ func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *type
 
 	// 分别给接收者和发送者发送消息
 	websocket_utils.SendMsgToUser(req.TargetID, wsCommandConst.Command(req.Command), content)
-	websocket_utils.SendMsgToUser(req.UserID, wsCommandConst.Command(req.Command), content)
+	// websocket_utils.SendMsgToUser(req.UserID, wsCommandConst.Command(req.Command), content)
 
 	return
 }

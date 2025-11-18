@@ -7,8 +7,12 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -34,9 +38,10 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errors.New("已经是好友了")
 	}
 
-	// 检查目标用户是否存在
-	var userInfo user_models.UserModel
-	err = l.svcCtx.DB.Take(&userInfo, "uuid = ?", req.FriendID).Error
+	// 检查目标用户是否存在（通过RPC）
+	_, err = l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		UserID: req.FriendID,
+	})
 	if err != nil {
 		l.Logger.Errorf("目标用户不存在: friendID=%s, error=%v", req.FriendID, err)
 		return nil, errors.New("用户不存在")
@@ -53,12 +58,21 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return &types.AddFriendRes{}, nil
 	}
 
+	// 获取下一个版本号
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "")
+	if nextVersion == -1 {
+		l.Logger.Errorf("获取版本号失败")
+		return nil, errors.New("系统错误")
+	}
+
 	// 创建好友验证请求
 	verifyModel := friend_models.FriendVerifyModel{
 		SendUserID: req.UserID,
 		RevUserID:  req.FriendID,
 		Message:    req.Verify,
 		Source:     req.Source, // 添加来源字段
+		Version:    nextVersion,
+		UUID:       uuid.New().String(),
 	}
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error
@@ -67,6 +81,40 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errors.New("添加好友请求失败")
 	}
 
+	// 异步发送WebSocket通知给发送方和接收方
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+			}
+		}()
+
+		// 构建好友验证表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		verifyUpdates := map[string]interface{}{
+			"table": "friend_verify",
+			"data": []map[string]interface{}{
+				{
+					"version": nextVersion,
+					"uuid":    verifyModel.UUID,
+				},
+			},
+		}
+
+		// 通知接收方有新的好友验证请求
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.UserID, req.FriendID, map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{verifyUpdates},
+		}, "")
+
+		// 通知发送方请求发送成功
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.FriendID, req.UserID, map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{verifyUpdates},
+		}, "")
+
+		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, uuid=%s", req.UserID, req.FriendID, nextVersion, verifyModel.UUID)
+	}()
+
 	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
-	return &types.AddFriendRes{}, nil
+	return &types.AddFriendRes{
+		Version: nextVersion,
+	}, nil
 }

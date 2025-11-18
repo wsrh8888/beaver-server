@@ -28,11 +28,9 @@ func NewCreateMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *types.CreateMomentRes, err error) {
 	// 构造MomentModel实例
 	moment := moment_models.MomentModel{
-		UserID:        req.UserID,
-		Content:       req.Content,
-		Files:         convertFiles(req.Files),
-		CommentsModel: []moment_models.MomentCommentModel{}, // 初始化为空切片
-		LikesModel:    []moment_models.MomentLikeModel{},    // 初始化为空切片
+		UserID:  req.UserID,
+		Content: req.Content,
+		Files:   convertFiles(req.Files),
 	}
 
 	// 插入数据库
@@ -48,7 +46,7 @@ func convertFiles(files []types.FileInfo) *moment_models.Files {
 	var result moment_models.Files
 	for _, file := range files {
 		result = append(result, moment_models.FileInfo{
-			FileName: file.FileName,
+			FileKey: file.FileKey,
 		})
 	}
 	return &result

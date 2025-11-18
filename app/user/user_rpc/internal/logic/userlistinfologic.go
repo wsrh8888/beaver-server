@@ -32,9 +32,16 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 		}, nil
 	}
 
-	// 正确使用IN查询
+	// 构建查询条件
+	query := l.svcCtx.DB.Model(&user_models.UserModel{}).Where("uuid IN ?", in.UserIdList)
+
+	// 如果提供了时间戳，则只返回该时间之后更新的用户
+	if in.SinceTimestamp > 0 {
+		query = query.Where("updated_at > ?", in.SinceTimestamp)
+	}
+
 	var userList []user_models.UserModel
-	err := l.svcCtx.DB.Where("uuid IN ?", in.UserIdList).Find(&userList).Error
+	err := query.Find(&userList).Error
 
 	if err != nil {
 		l.Logger.Errorf("查询用户列表失败: %v", err)
@@ -47,11 +54,22 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 
 	for _, user := range userList {
 		resp.UserInfo[user.UUID] = &user_rpc.UserInfo{
+			UserId:   user.UUID, // 保持向后兼容
 			NickName: user.NickName,
-			FileName: user.FileName,
+			Avatar:   user.Avatar,
+			Version:  user.Version,
+			Email:    user.Email,
+			Abstract: user.Abstract,
 		}
 	}
 
-	l.Logger.Infof("查询到 %d 个用户信息，请求ID数量: %d", len(userList), len(in.UserIdList))
+	if in.SinceTimestamp > 0 {
+		l.Logger.Infof("增量查询用户，时间戳: %d，查询到 %d 个用户信息，请求ID数量: %d",
+			in.SinceTimestamp, len(userList), len(in.UserIdList))
+	} else {
+		l.Logger.Infof("全量查询用户，查询到 %d 个用户信息，请求ID数量: %d",
+			len(userList), len(in.UserIdList))
+	}
+
 	return resp, nil
 }

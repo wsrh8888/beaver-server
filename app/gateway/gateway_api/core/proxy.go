@@ -3,10 +3,10 @@ package core
 import (
 	"beaver/app/gateway/gateway_api/types"
 	"beaver/common/etcd"
-	"bytes"
+	"beaver/utils"
+	"beaver/utils/jwts"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -37,71 +37,54 @@ type Proxy struct {
 }
 
 func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
-
-	// 执行鉴权接口
-	authAddr := etcd.GetServiceAddr(p.Config.Etcd, "auth_api")
-	if authAddr == "" {
-		return false
+	// 1. 检查白名单
+	if utils.InListByRegex(p.Config.WhiteList, req.URL.Path) {
+		logx.Infof("白名单请求：%s", req.URL.Path)
+		return true
 	}
 
-	authUrl := fmt.Sprintf("http://%s/api/auth/authentication", authAddr)
-	authReq, _ := http.NewRequest("GET", authUrl, nil)
-	authReq.Header.Set("ValidPath", req.URL.Path)
-
-	// 添加 User-Agent 头信息
-	authReq.Header.Set("User-Agent", req.Header.Get("User-Agent"))
-
+	// 2. 获取token
 	token := getToken(req)
-	if token != "" {
-		authReq.Header.Set("Token", token)
+	if token == "" {
+		logx.Error("token为空")
+		return false
 	}
 
-	// 设置请求超时
-	authClient := &http.Client{Timeout: 10 * time.Second}
-	authRes, err := authClient.Do(authReq)
+	// 3. 直接解析JWT（避免HTTP调用）
+	claims, err := jwts.ParseToken(token, p.Config.Auth.AccessSecret)
 	if err != nil {
-		logx.Errorf("认证服务错误: %s", err)
-		return false
-	}
-	defer authRes.Body.Close()
-
-	// 解析响应
-	type Response struct {
-		Code   int    `json:"code"`
-		Msg    string `json:"msg"`
-		Result *struct {
-			UserID string `json:"userId"`
-		} `json:"result"`
-	}
-
-	byteData, err := io.ReadAll(authRes.Body)
-	if err != nil {
-		logx.Errorf("读取认证服务响应错误: %s", err)
+		logx.Errorf("JWT解析失败: %v", err)
 		return false
 	}
 
-	var authResponse Response
-	authErr := json.Unmarshal(byteData, &authResponse)
-	if authErr != nil {
-		logx.Errorf("解析认证服务响应错误: %s", authErr)
-		return false
+	// 4. 设置用户ID和设备ID到请求头
+	req.Header.Set("Beaver-User-Id", claims.UserID)
+
+	// 从请求头获取设备ID
+	deviceId := req.Header.Get("deviceId")
+	if deviceId != "" {
+		req.Header.Set("Beaver-Device-Id", deviceId)
 	}
-	// 检查响应代码
-	if authResponse.Code != 0 {
-		logx.Errorf("认证服务返回异常: %v", authResponse)
-		return false
+	version := req.Header.Get("version")
+	if version != "" {
+		req.Header.Set("Version", version)
 	}
 
-	if authResponse.Result != nil {
-		req.Header.Set("Beaver-User-Id", authResponse.Result.UserID)
-	}
-	logx.Infof("认证成功: %v", authResponse)
+	logx.Infof("JWT验证成功: 用户=%s, 设备=%s", claims.UserID, deviceId)
+
 	return true
 }
 
 func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	uuid := getUuid(req)
 	logx.Info("request: ", "唯一标识: ", uuid, req.URL.Path)
+
+	token := getToken(req)
+	req.Header.Set("Token", token)
+	if !p.auth(res, req) {
+		writeErrorResponse(res, "网关鉴权失败", http.StatusServiceUnavailable, uuid)
+		return
+	}
 
 	// 匹配路由
 	regex, _ := regexp.Compile(`/api/(.*?)/`)
@@ -133,13 +116,6 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	logx.Infof("路由到服务: %s -> %s", service, addr)
 
-	token := getToken(req)
-	req.Header.Set("Token", token)
-	if !p.auth(res, req) {
-		writeErrorResponse(res, "鉴权失败", http.StatusServiceUnavailable, uuid)
-		return
-	}
-
 	remote, _ := url.Parse(fmt.Sprintf("http://%s", addr))
 	reverseProxy := httputil.NewSingleHostReverseProxy(remote)
 
@@ -154,16 +130,6 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	reverseProxy.ServeHTTP(res, req)
-}
-
-func logResponseBody(uuid string, res *http.Response) {
-	bodyBytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		logx.Errorf("读取响应体错误: %s", err)
-		return
-	}
-	res.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // 恢复响应体
-	logx.Info("response: ", "唯一标识: ", uuid, string(bodyBytes))
 }
 
 func getToken(req *http.Request) string {

@@ -44,7 +44,7 @@ type EmailRegisterRes struct {
 
 type GetEmailCodeReq struct {
 	Email string `json:"email"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
 }
 
 type GetEmailCodeRes struct {
@@ -53,19 +53,11 @@ type GetEmailCodeRes struct {
 
 type GetPhoneCodeReq struct {
 	Phone string `json:"phone"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
 }
 
 type GetPhoneCodeRes struct {
 	Message string `json:"message"`
-}
-
-type GetUserSessionsReq struct {
-	UserID string `header:"Beaver-User-Id"`
-}
-
-type GetUserSessionsRes struct {
-	Sessions []SessionInfo `json:"sessions"`
 }
 
 type LogoutReq struct {
@@ -96,25 +88,11 @@ type PhoneRegisterRes struct {
 	Message string `json:"message"`
 }
 
-type RefreshTokenReq struct {
-	UserID string `header:"Beaver-User-Id"`
+type ResetPasswordReq struct {
+	Email    string `json:"email"`    // 用户邮箱地址
+	Code     string `json:"code"`     // 邮箱验证码
+	Password string `json:"password"` // 新密码
 }
 
-type RefreshTokenRes struct {
-	Token string `json:"token"`
-}
-
-type SessionInfo struct {
-	DeviceID   string `json:"deviceId"`
-	DeviceName string `json:"deviceName"`
-	LastActive string `json:"lastActive"`
-	IP         string `json:"ip"`
-}
-
-type TerminateSessionReq struct {
-	UserID   string `header:"Beaver-User-Id"`
-	DeviceID string `json:"deviceId"`
-}
-
-type TerminateSessionRes struct {
+type ResetPasswordRes struct {
 }

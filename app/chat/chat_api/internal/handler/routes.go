@@ -43,10 +43,34 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ConversationInfoHandler(serverCtx),
 			},
 			{
+				// 批量获取会话数据
+				Method:  http.MethodPost,
+				Path:    "/api/chat/getConversationsListByIds",
+				Handler: getConversationsListByIdsHandler(serverCtx),
+			},
+			{
 				// 获取最近会话列表
 				Method:  http.MethodGet,
 				Path:    "/api/chat/getRecentChatList",
 				Handler: recentChatListHandler(serverCtx),
+			},
+			{
+				// 批量获取用户会话设置数据
+				Method:  http.MethodPost,
+				Path:    "/api/chat/getUserConversationSettingsListByIds",
+				Handler: getUserConversationSettingsListByIdsHandler(serverCtx),
+			},
+			{
+				// 隐藏/显示会话
+				Method:  http.MethodPost,
+				Path:    "/api/chat/hideChat",
+				Handler: hideChatHandler(serverCtx),
+			},
+			{
+				// 设置会话免打扰
+				Method:  http.MethodPost,
+				Path:    "/api/chat/muteChat",
+				Handler: muteChatHandler(serverCtx),
 			},
 			{
 				// 置顶某个会话
@@ -65,6 +89,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/chat/sendMsg",
 				Handler: SendMsgHandler(serverCtx),
+			},
+			{
+				// 聊天数据同步
+				Method:  http.MethodPost,
+				Path:    "/api/chat/sync",
+				Handler: chatSyncHandler(serverCtx),
+			},
+			{
+				// 更新会话已读序列号
+				Method:  http.MethodPost,
+				Path:    "/api/chat/updateReadSeq",
+				Handler: updateReadSeqHandler(serverCtx),
 			},
 		},
 	)

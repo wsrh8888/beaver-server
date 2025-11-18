@@ -73,7 +73,7 @@ const (
 
 type FileModel struct {
 	models.Model
-	FileName     string     `json:"fileName"`                      // 文件唯一ID /api/file/{uuid}
+	FileKey      string     `json:"fileKey"`                       // 文件唯一ID /api/file/{uuid}
 	OriginalName string     `json:"originalName"`                  // 原始文件名（带后缀名）
 	Size         int64      `json:"size"`                          // 文件大小
 	Path         string     `json:"path"`                          // 文件实际存储路径

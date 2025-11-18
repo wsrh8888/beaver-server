@@ -25,27 +25,27 @@ func NewUpdateConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateConversationLogic) UpdateConversation(in *chat_rpc.UpdateConversationReq) (*chat_rpc.UpdateConversationRes, error) {
-	var userConvo chat_models.ChatUserConversationModel
+	var userConvo chat_models.ChatUserConversation
 	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", in.ConversationId, in.UserId).First(&userConvo).Error
 	if err != nil {
 		// 如果记录不存在，创建新记录
-		if err := l.svcCtx.DB.Create(&chat_models.ChatUserConversationModel{
+		if err := l.svcCtx.DB.Create(&chat_models.ChatUserConversation{
 			UserID:         in.UserId,
 			ConversationID: in.ConversationId,
-			LastMessage:    in.LastMessage,
 			IsPinned:       in.IsPinned,
-			IsDeleted:      in.IsDeleted,
+			IsHidden:       in.IsDeleted, // 兼容旧的IsDeleted参数
+			IsMuted:        false,
+			UserReadSeq:    0,
+			Version:        1, // 初始版本
 		}).Error; err != nil {
 			return nil, err
 		}
 	} else {
 		// 如果记录存在，更新记录
 		updates := map[string]interface{}{
-			"is_deleted": in.IsDeleted,
+			"is_hidden": in.IsDeleted, // 兼容旧的IsDeleted参数
 		}
-		if in.LastMessage != "" {
-			updates["last_message"] = in.LastMessage
-		}
+		// LastMessage 不再存储在用户会话表中，已移至ChatConversationMeta表
 		if in.IsPinned != userConvo.IsPinned {
 			updates["is_pinned"] = in.IsPinned
 		}

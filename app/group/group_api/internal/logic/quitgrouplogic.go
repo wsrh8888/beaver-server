@@ -43,9 +43,19 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		return nil, errors.New("群主不能直接退出，请先转让群主权限")
 	}
 
-	// 执行退出操作
-	err = l.svcCtx.DB.Where("group_id = ? and user_id = ?", req.GroupID, req.UserID).
-		Delete(&group_models.GroupMemberModel{}).Error
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Logger.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
+	// 更新成员状态为退出（Status = 2）
+	err = l.svcCtx.DB.Model(&member).
+		Updates(map[string]interface{}{
+			"status":  2, // 2退出
+			"version": memberVersion,
+		}).Error
 	if err != nil {
 		l.Logger.Errorf("退出群组失败: %v", err)
 		return nil, errors.New("退出群组失败")
@@ -65,18 +75,23 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 			return
 		}
 
-		// 通过ws推送给群成员
+		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
 			if member.UserID != req.UserID { // 不通知操作者自己
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberUpdate, req.GroupID, member.UserID, map[string]interface{}{
-					"groupId":  req.GroupID,
-					"type":     "leave",
-					"userId":   req.UserID,
-					"username": member.Username,
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.GroupID, member.UserID, map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": memberVersion,
+							"groupId": req.GroupID,
+						},
+					},
 				}, "")
 			}
 		}
 	}()
 
-	return &types.GroupQuitRes{}, nil
+	return &types.GroupQuitRes{
+		Version: memberVersion,
+	}, nil
 }

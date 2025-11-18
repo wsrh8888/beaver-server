@@ -32,7 +32,6 @@ func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 
 func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp *types.AuthenticationRes, err error) {
 	if utils.InListByRegex(l.svcCtx.Config.WhiteList, req.ValidPath) {
-		logx.Infof("白名单请求：%s, %s", req.ValidPath, req.Token)
 		return
 	}
 	if req.Token == "" {
@@ -61,7 +60,7 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 	loginInfoStr, err := l.svcCtx.Redis.Get(key).Result()
 	if err != nil {
 		logx.Errorf("获取登录信息失败: %v, Key: %s", err, key)
-		return nil, errors.New("token已失效 " + key + " " + err.Error())
+		return nil, errors.New("token已失效")
 	}
 
 	// 解析登录信息并验证token

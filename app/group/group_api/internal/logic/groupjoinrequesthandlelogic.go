@@ -1,0 +1,193 @@
+package logic
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"beaver/app/group/group_api/internal/svc"
+	"beaver/app/group/group_api/internal/types"
+	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type GroupJoinRequestHandleLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+// 处理群组申请
+func NewGroupJoinRequestHandleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupJoinRequestHandleLogic {
+	return &GroupJoinRequestHandleLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoinRequestHandleReq) (resp *types.GroupJoinRequestHandleRes, err error) {
+	// 查询申请记录
+	var request group_models.GroupJoinRequestModel
+	err = l.svcCtx.DB.Where("id = ?", req.RequestID).First(&request).Error
+	if err != nil {
+		l.Errorf("查询群组申请记录失败: %v", err)
+		return nil, err
+	}
+
+	// 检查申请状态
+	if request.Status != 0 {
+		l.Errorf("申请已被处理，申请ID: %d, 当前状态: %d", req.RequestID, request.Status)
+		return nil, err
+	}
+
+	// 开始事务
+	tx := l.svcCtx.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// 更新申请状态
+	now := time.Now()
+	err = tx.Model(&request).Updates(map[string]interface{}{
+		"status":     req.Status,
+		"handled_by": req.UserID,
+		"handled_at": &now,
+	}).Error
+	if err != nil {
+		tx.Rollback()
+		l.Errorf("更新申请状态失败: %v", err)
+		return nil, err
+	}
+
+	// 如果同意申请，添加群成员
+	if req.Status == 1 {
+		// 检查用户是否已经是群成员
+		var existingMember group_models.GroupMemberModel
+		err = tx.Where("group_id = ? AND user_id = ?", request.GroupID, request.ApplicantUserID).First(&existingMember).Error
+		if err == nil {
+			// 用户已经是群成员，更新状态为正常
+			err = tx.Model(&existingMember).Update("status", 1).Error
+			if err != nil {
+				tx.Rollback()
+				l.Errorf("更新群成员状态失败: %v", err)
+				return nil, err
+			}
+		} else {
+			// 获取群组当前最大版本号并递增
+			var maxVersion int64
+			tx.Model(&group_models.GroupMemberModel{}).
+				Where("group_id = ?", request.GroupID).
+				Select("COALESCE(MAX(version), 0)").
+				Scan(&maxVersion)
+			maxVersion++ // 递增版本号
+
+			// 添加新群成员
+			member := group_models.GroupMemberModel{
+				GroupID:  request.GroupID,
+				UserID:   request.ApplicantUserID,
+				Role:     3, // 普通成员
+				Status:   1, // 正常状态
+				JoinTime: now,
+				Version:  maxVersion,
+			}
+			err = tx.Create(&member).Error
+			if err != nil {
+				tx.Rollback()
+				l.Errorf("添加群成员失败: %v", err)
+				return nil, err
+			}
+		}
+
+		// 记录群成员变更日志
+		changeLog := group_models.GroupMemberChangeLogModel{
+			GroupID:    request.GroupID,
+			UserID:     request.ApplicantUserID,
+			ChangeType: "join",
+			OperatedBy: req.UserID,
+			ChangeTime: now,
+		}
+		err = tx.Create(&changeLog).Error
+		if err != nil {
+			tx.Rollback()
+			l.Errorf("记录群成员变更日志失败: %v", err)
+			return nil, err
+		}
+	}
+
+	// 提交事务
+	err = tx.Commit().Error
+	if err != nil {
+		l.Errorf("提交事务失败: %v", err)
+		return nil, err
+	}
+
+	// 获取该群入群申请的版本号（按群独立递增）
+	requestVersion := l.svcCtx.VersionGen.GetNextVersion("group_join_requests", "group_id", request.GroupID)
+	if requestVersion == -1 {
+		l.Errorf("获取入群申请版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
+	resp = &types.GroupJoinRequestHandleRes{
+		Version: requestVersion,
+	}
+
+	// 如果同意申请，异步通知相关成员
+	if req.Status == 1 {
+		go func() {
+			// 创建新的context，避免使用请求的context
+			ctx := context.Background()
+
+			// 获取群成员列表，用于推送通知
+			response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+				GroupID: request.GroupID,
+			})
+			if err != nil {
+				l.Errorf("获取群成员列表失败: %v", err)
+				return
+			}
+
+			// 推送给已存在的群成员 - 群成员变动通知
+			for _, member := range response.Members {
+				if member.UserID != req.UserID { // 不通知操作者自己
+					ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+						"table": "group_members",
+						"data": []map[string]interface{}{
+							{
+								"version": requestVersion,
+								"groupId": request.GroupID,
+							},
+						},
+					}, "")
+				}
+			}
+
+			// 通知新加入的成员 - 群成员变动通知
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, request.ApplicantUserID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": requestVersion,
+						"groupId": request.GroupID,
+					},
+				},
+			}, "")
+		}()
+	}
+
+	statusText := "拒绝"
+	if req.Status == 1 {
+		statusText = "同意"
+	}
+
+	l.Infof("处理群组申请完成，申请ID: %d, 处理结果: %s, 处理者: %s", req.RequestID, statusText, req.UserID)
+	return resp, nil
+}

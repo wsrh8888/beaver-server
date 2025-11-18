@@ -81,7 +81,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 
 	// 构建响应
 	resp = &types.GroupMemberListRes{
-		List:  make([]types.GroupMember, 0, len(members)),
+		List:  make([]types.GroupMemberListItem, 0, len(members)),
 		Count: count,
 	}
 
@@ -108,24 +108,24 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 
 	// 直接使用返回的用户信息映射
 	userMap := userResp.UserInfo
-	// 打印userMap的值
-	logx.Infof("userMap: %v", userIDs)
 	// 组装最终结果
 	for _, member := range members {
 		user, exists := userMap[member.UserID]
 
-		groupMember := types.GroupMember{
+		groupMember := types.GroupMemberListItem{
 			UserID:   member.UserID,
 			Role:     member.Role,
-			JoinTime: member.CreatedAt.String(),
+			Status:   member.Status,
+			JoinTime: member.JoinTime.String(),
+			Version:  member.Version,
 		}
 
 		if exists {
 			groupMember.Nickname = user.NickName
-			groupMember.FileName = user.FileName
+			groupMember.Avatar = user.Avatar
 		} else {
 			groupMember.Nickname = "未知用户"
-			groupMember.FileName = ""
+			groupMember.Avatar = ""
 		}
 
 		resp.List = append(resp.List, groupMember)

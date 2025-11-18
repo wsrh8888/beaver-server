@@ -1,7 +1,7 @@
 
 services:
   group_api:
-    image: wsrh8888/group_api:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/group_api:1.0.2
     container_name: group_api
     network_mode: "host"
     volumes:

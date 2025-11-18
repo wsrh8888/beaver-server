@@ -40,25 +40,26 @@ func (l *BatchUpdateConversationLogic) BatchUpdateConversation(in *chat_rpc.Batc
 
 	// 批量更新或创建会话记录
 	for _, userID := range in.UserIds {
-		var userConvo chat_models.ChatUserConversationModel
+		var userConvo chat_models.ChatUserConversation
 		err := tx.Where("conversation_id = ? AND user_id = ?", in.ConversationId, userID).First(&userConvo).Error
 		if err != nil {
 			// 如果记录不存在，创建新记录
-			if err := tx.Create(&chat_models.ChatUserConversationModel{
+			if err := tx.Create(&chat_models.ChatUserConversation{
 				UserID:         userID,
 				ConversationID: in.ConversationId,
-				LastMessage:    in.LastMessage,
-				IsDeleted:      false,
+				IsHidden:       false,
+				IsPinned:       false,
+				IsMuted:        false,
+				UserReadSeq:    0,
+				Version:        1, // 初始版本
 			}).Error; err != nil {
 				tx.Rollback()
 				return nil, err
 			}
 		} else {
-			// 如果记录存在，更新记录
-			if err := tx.Model(&userConvo).Updates(map[string]interface{}{
-				"last_message": in.LastMessage,
-				"is_deleted":   false,
-			}).Error; err != nil {
+			// 如果记录存在，不需要更新LastMessage（已在ChatConversationMeta中）
+			// 这里只确保会话没有被隐藏
+			if err := tx.Model(&userConvo).Update("is_hidden", false).Error; err != nil {
 				tx.Rollback()
 				return nil, err
 			}
