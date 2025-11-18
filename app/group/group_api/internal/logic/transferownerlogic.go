@@ -74,6 +74,13 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 		return nil, errors.New("转让群组失败")
 	}
 
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.Logger.Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
+	}
+
 	// 提交事务
 	if err = tx.Commit().Error; err != nil {
 		l.Logger.Errorf("提交事务失败: %v", err)
@@ -94,16 +101,21 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 			return
 		}
 
-		// 通过ws推送给群成员
+		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupUpdate, req.GroupID, member.UserID, map[string]interface{}{
-				"groupId":    req.GroupID,
-				"type":       "owner_transfer",
-				"oldOwnerId": req.UserID,
-				"newOwnerId": req.NewOwnerID,
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.GroupID, member.UserID, map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": memberVersion,
+						"groupId": req.GroupID,
+					},
+				},
 			}, "")
 		}
 	}()
 
-	return &types.TransferOwnerRes{}, nil
+	return &types.TransferOwnerRes{
+		Version: memberVersion,
+	}, nil
 }

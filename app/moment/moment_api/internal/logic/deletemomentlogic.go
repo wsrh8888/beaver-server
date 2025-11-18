@@ -28,7 +28,7 @@ func NewDeleteMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 func (l *DeleteMomentLogic) DeleteMoment(req *types.DeleteMomentReq) (resp *types.DeleteMomentRes, err error) {
 	// 检查动态是否存在以及用户是否有权限删除该动态
 	var moment moment_models.MomentModel
-	if err := l.svcCtx.DB.Where("id = ? AND moment_user_id = ?", req.MomentID, req.UserID).First(&moment).Error; err != nil {
+	if err := l.svcCtx.DB.Where("id = ? AND user_id = ?", req.MomentID, req.UserID).First(&moment).Error; err != nil {
 		return nil, fmt.Errorf("删除失败")
 	}
 

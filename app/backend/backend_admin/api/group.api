@@ -1,0 +1,162 @@
+syntax = "v1"
+
+// 获取群组列表
+type (
+	GetGroupListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		Status   int    `form:"status,optional"`   // 群状态筛选
+		Type     int    `form:"type,optional"`     // 群类型筛选
+		Keywords string `form:"keywords,optional"` // 群名关键词搜索
+	}
+	GetGroupListRes {
+		List  []GetGroupListItem `json:"list"`
+		Total int64              `json:"total"`
+	}
+	GetGroupListItem {
+		Id        uint   `json:"id"`
+		Uuid      string `json:"uuid"`
+		Type      int    `json:"type"`
+		Title     string `json:"title"`
+		FileName  string `json:"fileName"`
+		CreatorId string `json:"creatorId"`
+		Notice    string `json:"notice"`
+		Status    int    `json:"status"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
+)
+
+// 获取群组详情
+type (
+	GetGroupDetailReq {
+		Id uint `path:"id"`
+	}
+	GetGroupDetailRes {
+		Id        uint   `json:"id"`
+		Uuid      string `json:"uuid"`
+		Type      int    `json:"type"`
+		Title     string `json:"title"`
+		FileName  string `json:"fileName"`
+		CreatorId string `json:"creatorId"`
+		Notice    string `json:"notice"`
+		Status    int    `json:"status"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
+)
+
+// 更新群组信息
+type (
+	UpdateGroupReq {
+		Id       uint   `path:"id"`
+		Title    string `json:"title,optional"`
+		FileName string `json:"fileName,optional"`
+		Notice   string `json:"notice,optional"`
+		Status   int    `json:"status,optional"`
+		MuteAll  bool   `json:"muteAll,optional"`
+		Category string `json:"category,optional"`
+	}
+	UpdateGroupRes {}
+)
+
+// 删除群组
+type (
+	DeleteGroupReq {
+		Id uint `path:"id"`
+	}
+	DeleteGroupRes {}
+)
+
+// 获取群成员列表
+type (
+	GetGroupMemberListReq {
+		Page    int    `form:"page,optional"`
+		Limit   int    `form:"limit,optional"`
+		GroupId string `form:"groupId"`
+		Role    int    `form:"role,optional"`   // 成员角色筛选
+		Status  int    `form:"status,optional"` // 成员状态筛选
+	}
+	GetGroupMemberListRes {
+		List  []GetGroupMemberListItem `json:"list"`
+		Total int64                    `json:"total"`
+	}
+	GetGroupMemberListItem {
+		Id              uint   `json:"id"`
+		GroupId         string `json:"groupId"`
+		UserId          string `json:"userId"`
+		MemberNickname  string `json:"memberNickname"`
+		Role            int    `json:"role"`
+		ProhibitionTime int    `json:"prohibitionTime"`
+		InviterId       string `json:"inviterId"`
+		Status          int    `json:"status"`
+		NotifyLevel     int    `json:"notifyLevel"`
+		DisplayName     string `json:"displayName"`
+		CreatedAt       string `json:"createdAt"`
+		UpdatedAt       string `json:"updatedAt"`
+	}
+)
+
+// 移除群成员
+type (
+	RemoveGroupMemberReq {
+		GroupId   string   `json:"groupId"`
+		MemberIds []string `json:"memberIds"`
+	}
+	RemoveGroupMemberRes {}
+)
+
+// 更新群成员角色
+type (
+	UpdateMemberRoleReq {
+		Id   uint `path:"id"`
+		Role int  `json:"role"`
+	}
+	UpdateMemberRoleRes {}
+)
+
+// 禁言群成员
+type (
+	MuteGroupMemberReq {
+		Id              uint `path:"id"`
+		ProhibitionTime int  `json:"prohibitionTime"` // 禁言时长(分钟)，0表示解除禁言
+	}
+	MuteGroupMemberRes {}
+)
+
+@server (
+	group: group
+)
+service backend {
+	@doc "获取群组列表"
+	@handler GetGroupList
+	get /admin/group/list (GetGroupListReq) returns (GetGroupListRes)
+
+	@doc "获取群组详情"
+	@handler GetGroupDetail
+	get /admin/group/:id (GetGroupDetailReq) returns (GetGroupDetailRes)
+
+	@doc "更新群组信息"
+	@handler UpdateGroup
+	put /admin/group/:id (UpdateGroupReq) returns (UpdateGroupRes)
+
+	@doc "删除群组"
+	@handler DeleteGroup
+	delete /admin/group/:id (DeleteGroupReq) returns (DeleteGroupRes)
+
+	@doc "获取群成员列表"
+	@handler GetGroupMemberList
+	get /admin/group/members (GetGroupMemberListReq) returns (GetGroupMemberListRes)
+
+	@doc "移除群成员"
+	@handler RemoveGroupMember
+	post /admin/group/remove-member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
+
+	@doc "更新群成员角色"
+	@handler UpdateMemberRole
+	put /admin/group/member/:id (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
+
+	@doc "禁言群成员"
+	@handler MuteGroupMember
+	put /admin/group/mute/:id (MuteGroupMemberReq) returns (MuteGroupMemberRes)
+}

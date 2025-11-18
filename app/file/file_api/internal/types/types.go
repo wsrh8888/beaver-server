@@ -17,7 +17,7 @@ type FileReq struct {
 }
 
 type FileRes struct {
-	FileName     string    `json:"fileName"`
+	FileKey      string    `json:"fileKey"`
 	OriginalName string    `json:"originalName"`
 	FileInfo     *FileInfo `json:"fileInfo,optional"`
 }
@@ -28,7 +28,7 @@ type ImageFile struct {
 }
 
 type PreviewReq struct {
-	FileName string `path:"fileName"`
+	FileKey string `path:"fileKey"`
 }
 
 type PreviewRes struct {

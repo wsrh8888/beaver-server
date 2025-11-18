@@ -9,6 +9,13 @@ type Config struct {
 	Log        logx.LogConf
 	Prometheus PrometheusConfig
 	Limit      LimitConfig
+	Auth       AuthConfig
+	WhiteList  []string
+}
+
+type AuthConfig struct {
+	AccessSecret string
+	AccessExpire int
 }
 
 type PrometheusConfig struct {

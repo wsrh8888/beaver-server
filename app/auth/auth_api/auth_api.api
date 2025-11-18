@@ -68,47 +68,10 @@ type LogoutReq {
 // 用户登出响应
 type LogoutRes {}
 
-// 刷新Token请求
-type RefreshTokenReq {
-	UserID string `header:"Beaver-User-Id"`
-}
-
-// 刷新Token响应
-type RefreshTokenRes {
-	Token string `json:"token"`
-}
-
-// 获取用户会话列表请求
-type GetUserSessionsReq {
-	UserID string `header:"Beaver-User-Id"`
-}
-
-// 会话信息
-type SessionInfo {
-	DeviceID   string `json:"deviceId"`
-	DeviceName string `json:"deviceName"`
-	LastActive string `json:"lastActive"`
-	IP         string `json:"ip"`
-}
-
-// 获取用户会话列表响应
-type GetUserSessionsRes {
-	Sessions []SessionInfo `json:"sessions"`
-}
-
-// 终止会话请求
-type TerminateSessionReq {
-	UserID   string `header:"Beaver-User-Id"`
-	DeviceID string `json:"deviceId"`
-}
-
-// 终止会话响应
-type TerminateSessionRes {}
-
 // 获取手机验证码请求
 type GetPhoneCodeReq {
 	Phone string `json:"phone"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
 }
 
 // 获取手机验证码响应
@@ -119,7 +82,7 @@ type GetPhoneCodeRes {
 // 获取邮箱验证码请求
 type GetEmailCodeReq {
 	Email string `json:"email"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset(重置密码)、login(登录)
+	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
 }
 
 // 获取邮箱验证码响应
@@ -139,6 +102,16 @@ type EmailLoginRes {
 	Token  string `json:"token"`
 	UserID string `json:"userId"`
 }
+
+// 找回密码请求
+type ResetPasswordReq {
+	Email    string `json:"email"` // 用户邮箱地址
+	Code     string `json:"code"` // 邮箱验证码
+	Password string `json:"password"` // 新密码
+}
+
+// 找回密码响应
+type ResetPasswordRes {}
 
 service auth {
 	@doc "手机号登录"
@@ -165,18 +138,6 @@ service auth {
 	@handler logout
 	post /api/auth/logout (LogoutReq) returns (LogoutRes)
 
-	@doc "刷新Token"
-	@handler refreshToken
-	post /api/auth/refresh_token (RefreshTokenReq) returns (RefreshTokenRes)
-
-	@doc "获取用户会话列表用户想查看自己当前在哪些设备上登录"
-	@handler getUserSessions
-	get /api/auth/sessions (GetUserSessionsReq) returns (GetUserSessionsRes)
-
-	@doc "终止会话 用户发现某个设备不是自己登录的,需要强制下线"
-	@handler terminateSession
-	post /api/auth/terminate_session (TerminateSessionReq) returns (TerminateSessionRes)
-
 	@doc "获取手机验证码"
 	@handler getPhoneCode
 	post /api/auth/phonecode (GetPhoneCodeReq) returns (GetPhoneCodeRes)
@@ -188,6 +149,10 @@ service auth {
 	@doc "邮箱登录"
 	@handler emailLogin
 	post /api/auth/email_login (EmailLoginReq) returns (EmailLoginRes)
+
+	@doc "找回密码（通过邮箱验证码重置密码）"
+	@handler resetPassword
+	post /api/auth/reset_password (ResetPasswordReq) returns (ResetPasswordRes)
 }
 
 // goctl api go -api auth_api.api -dir . --home ../../../template

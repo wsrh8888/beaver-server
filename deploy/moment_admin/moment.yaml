@@ -1,0 +1,16 @@
+Name: moment
+Host: 0.0.0.0
+Port: 20901
+Etcd: 127.0.0.1:2379
+Auth:
+  AccessSecret: robert
+  AccessExpire: 3600
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  DB: 0
+WhiteList:
+  - /api/moment_admin/moments
+  - /api/moment_admin/comments 

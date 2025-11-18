@@ -17,6 +17,7 @@
         "$go"
       ]
     },
+    
     {
       "label": "friend_rpc",
       "type": "shell",
@@ -58,6 +59,15 @@
       ]
     },
     {
+
+      "label": "emoji_api",
+      "type": "shell",
+      "command": "cd app/emoji/emoji_api;  go run emoji.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
       "label": "auth_api",
       "type": "shell",
       "command": "cd app/auth/auth_api;  go run auth.go",
@@ -89,10 +99,28 @@
         "$go"
       ]
     },
+    
     {
       "label": "user_api",
       "type": "shell",
       "command": "cd app/user/user_api;  go run user.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "moment_api",
+      "type": "shell",
+      "command": "cd app/moment/moment_api;  go run moment.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    
+    {
+      "label": "file_api",
+      "type": "shell",
+      "command": "cd app/file/file_api;  go run file.go",
       "problemMatcher": [
         "$go"
       ]
@@ -130,9 +158,33 @@
       ]
     },
     {
-      "label": "moment_api",
+      "label": "datasync_api",
       "type": "shell",
-      "command": "cd app/moment/moment_api;  go run moment.go",
+      "command": "cd app/datasync/datasync_api;  go run datasync.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "track_api",
+      "type": "shell",
+      "command": "cd app/track/track_api;  go run track.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "update_api",
+      "type": "shell",
+      "command": "cd app/update/update_api;  go run update.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "backend_admin",
+      "type": "shell",
+      "command": "cd app/backend/backend_admin;  go run backend_admin.go",
       "problemMatcher": [
         "$go"
       ]
@@ -140,7 +192,7 @@
     {
       "label": "启动RPC服务",
       "type": "shell",
-      "command": "echo Running all RPC services",
+      "command": "echo Running all services",
       "dependsOn": ["user_rpc", "group_rpc", "friend_rpc", "chat_rpc", "dictionary_rpc", "file_rpc"],
       "dependsOrder": "parallel",
       "problemMatcher": []
@@ -148,9 +200,16 @@
     {
       "label": "启动Api全部任务",
       "type": "shell",
-      "command": "echo Running all API services",
-      "dependsOn": ["auth_api", "user_api", "file_api", "friend_api", "chat_api", "ws_api", "group_api", "gateway_api", "dictionary_api", "feedback_api", "moment_api"],
+      "command": "echo Running all services",
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "dictionary_api","track_api","update_api",],
       "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "启动Admin全部任务",
+      "type": "shell",
+      "command": "cd app/backend/backend_admin;  go run backend_admin.go",
+      "dependsOn": ["backend_admin", "gateway_admin"],
       "problemMatcher": []
     }
   ]

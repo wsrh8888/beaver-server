@@ -30,7 +30,7 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// response.Response(r, w, resp, err)
 
 		var fileModel file_models.FileModel
-		err := svcCtx.DB.Take(&fileModel, "file_name = ?", req.FileName).Error
+		err := svcCtx.DB.Take(&fileModel, "file_key = ?", req.FileKey).Error
 		if err != nil {
 			// 文件记录不存在，返回404
 			http.NotFound(w, r)
@@ -66,7 +66,7 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 			// 设置响应头
 			w.Header().Set("Content-Type", common.GetContentType(fileModel.Type))
-			w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", fileModel.OriginalName))
+			w.Header().Set("Content-Disposition", fmt.Sprintf("inline; FileKey=%s", fileModel.OriginalName))
 
 			// 直接返回文件内容
 			http.ServeFile(w, r, localFilePath)

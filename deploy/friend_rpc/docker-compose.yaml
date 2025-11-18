@@ -1,7 +1,7 @@
 
 services:
   friend_rpc:
-    image: wsrh8888/friend_rpc:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/friend_rpc:1.0.2
     container_name: friend_rpc
     network_mode: "host"
     volumes:

@@ -5,35 +5,62 @@ type TextMsg {
 }
 
 type Msg {
-	Type     uint32    `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情
-	TextMsg  *TextMsg  `json:"textMsg,optional"` //文本消息
-	ImageMsg *ImageMsg `json:"imageMsg,optional"` //图片
-	VideoMsg *VideoMsg `json:"videoMsg,optional"` //视频
-	FileMsg  *FileMsg  `json:"fileMsg,optional"` //文件
-	VoiceMsg *VoiceMsg `json:"voiceMsg,optional"` //语音
-	EmojiMsg *EmojiMsg `json:"emojiMsg,optional"` //表情
-	ReplyMsg *ReplyMsg `json:"replyMsg,optional"` //回复消息
+	Type            uint32           `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
+	TextMsg         *TextMsg         `json:"textMsg,optional"` //文本消息
+	ImageMsg        *ImageMsg        `json:"imageMsg,optional"` //图片
+	VideoMsg        *VideoMsg        `json:"videoMsg,optional"` //视频
+	FileMsg         *FileMsg         `json:"fileMsg,optional"` //文件
+	VoiceMsg        *VoiceMsg        `json:"voiceMsg,optional"` //语音
+	EmojiMsg        *EmojiMsg        `json:"emojiMsg,optional"` //表情
+	NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` //通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,optional"` //音频文件
+	ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"` //回复消息
 }
 
 type FileMsg {
-	FileName string `json:"fileName"` //文件ID，通过fileName可以从文件模块获取完整信息
-}
-
-type VoiceMsg {
-	FileName string `json:"fileName"` //语音文件ID
+	FileKey  string `json:"fileKey"` //文件ID
+	FileName string `json:"fileName,optional"` //原始文件名（可选，用于显示）
+	Size     int64  `json:"size,optional"` //文件大小（字节，可选）
+	MimeType string `json:"mimeType,optional"` //MIME类型（可选，如 application/pdf）
 }
 
 type VideoMsg {
-	FileName string `json:"fileName"` //视频文件ID
+	FileKey      string `json:"fileKey"` //视频文件ID
+	Width        int    `json:"width,optional"` //视频宽度（可选）
+	Height       int    `json:"height,optional"` //视频高度（可选）
+	Duration     int    `json:"duration,optional"` //视频时长（秒，可选）
+	ThumbnailKey string `json:"thumbnailKey,optional"` //视频封面图文件ID（可选）
+	Size         int64  `json:"size,optional"` //文件大小（字节，可选）
+}
+
+type VoiceMsg {
+	FileKey  string `json:"fileKey"` //语音文件ID
+	Duration int    `json:"duration,optional"` //语音时长（秒，可选）
+	Size     int64  `json:"size,optional"` //文件大小（字节，可选）
 }
 
 type ImageMsg {
-	FileName string `json:"fileName"` //图片文件ID
+	FileKey string `json:"fileKey"` //图片文件ID
+	Width   int    `json:"width,optional"` //图片宽度（可选）
+	Height  int    `json:"height,optional"` //图片高度（可选）
+	Size    int64  `json:"size,optional"` //文件大小（字节，可选）
+}
+
+type NotificationMsg {
+	Type   int      `json:"type"` // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+	Actors []string `json:"actors"` // 相关用户ID列表
+}
+
+type AudioFileMsg {
+	FileKey  string `json:"fileKey"` //音频文件ID
+	FileName string `json:"fileName,optional"` //原始文件名（可选，用于显示）
+	Duration int    `json:"duration,optional"` //音频时长（秒，可选）
+	Size     int64  `json:"size,optional"` //文件大小（字节，可选）
 }
 
 // 表情消息结构
 type EmojiMsg {
-	FileName  string `json:"fileName"` // 表情图片文件ID（Emoji.FileName）
+	FileKey   string `json:"fileKey"` // 表情图片文件ID（Emoji.FileName）
 	EmojiID   uint32 `json:"emojiId"` // 表情ID（Emoji.Id，单个表情时使用）
 	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
 }
@@ -64,7 +91,7 @@ type RecentChatListReq {
 }
 
 type ConversationInfoRes {
-	FileName       string `json:"fileName"`
+	Avatar         string `json:"avatar"`
 	Nickname       string `json:"nickname"`
 	MsgPreview     string `json:"msg_preview"` //消息预览
 	UpdateAt       string `json:"update_at"` //消息时间
@@ -88,6 +115,7 @@ type SendMsgRes {
 	CreateAt       string `json:"create_at"` //消息时间
 	MsgPreview     string `json:"msgPreview"` //消息预览
 	Status         uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
+	Seq            int64  `json:"seq"` //消息序列号，用于数据同步
 }
 
 type ChatHistoryReq {
@@ -99,18 +127,20 @@ type ChatHistoryReq {
 
 type Sender {
 	UserID   string `json:"userId"`
-	FileName string `json:"fileName"`
+	Avatar   string `json:"avatar"`
 	Nickname string `json:"nickname"`
 }
 
 type Message {
-	Id             uint   `json:"id"` //数据库自增ID
-	MessageID      string `json:"messageId"` //客户端消息ID
-	ConversationID string `json:"conversationId"` //会话id
-	Msg            Msg    `json:"msg"`
-	Sender         Sender `json:"sender"` //发送者
-	CreateAt       string `json:"create_at"` //消息时间
-	Status         uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
+	Id               uint   `json:"id"` //数据库自增ID
+	MessageID        string `json:"messageId"` //客户端消息ID
+	ConversationID   string `json:"conversationId"` //会话id
+	ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
+	Msg              Msg    `json:"msg"`
+	Sender           Sender `json:"sender"` //发送者
+	CreateAt         string `json:"create_at"` //消息时间
+	Status           uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
+	Seq              int64  `json:"seq"` //序列号，用于数据同步
 }
 
 type ChatHistoryRes {
@@ -132,6 +162,22 @@ type PinnedChatReq {
 }
 
 type PinnedChatRes {}
+
+type MuteChatReq {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+	IsMuted        bool   `json:"isMuted"` // true表示免打扰 false表示取消免打扰
+}
+
+type MuteChatRes {}
+
+type HideChatReq {
+	UserID         string `header:"Beaver-User-Id"`
+	ConversationID string `json:"conversationId"` //会话id
+	IsHidden       bool   `json:"isHidden"` // true表示隐藏 false表示显示
+}
+
+type HideChatRes {}
 
 // 消息编辑请求
 type EditMessageReq {
@@ -176,6 +222,88 @@ type ForwardMessageRes {
 	ForwardTime string `json:"forwardTime"`
 }
 
+// 聊天数据同步
+type (
+	ChatSyncReq {
+		UserID         string `header:"Beaver-User-Id"`
+		ConversationID string `json:"conversationId,optional"` // 会话ID，可选，不传则同步所有会话
+		FromSeq        int64  `json:"fromSeq"` // 起始序列号
+		ToSeq          int64  `json:"toSeq"` // 结束序列号
+		Limit          int    `json:"limit,optional"` // 限制数量，默认100
+	}
+	ChatSyncRes {
+		Messages []ChatSyncMessage `json:"messages"` // 消息列表
+		HasMore  bool              `json:"hasMore"` // 是否还有更多数据
+		NextSeq  int64             `json:"nextSeq"` // 下次同步的起始序列号
+	}
+	ChatSyncMessage {
+		MessageID        string `json:"messageId"` //客户端消息ID
+		ConversationID   string `json:"conversationId"` //会话id
+		ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
+		SendUserID       string `json:"sendUserId"` //发送者用户ID
+		MsgType          uint32 `json:"msgType"` //消息类型
+		MsgPreview       string `json:"msgPreview"` //消息预览
+		Msg              string `json:"msg"` //消息内容JSON字符串
+		IsDeleted        bool   `json:"isDeleted"` //是否已删除
+		Seq              int64  `json:"seq"` //序列号，用于数据同步
+		CreateAt         int64  `json:"createAt"` //创建时间戳
+	}
+)
+
+// 批量获取会话数据
+type (
+	GetConversationsListByIdsReq {
+		UserID          string   `header:"Beaver-User-Id"` // 用户ID
+		ConversationIds []string `json:"conversationIds"` // 会话ID列表
+	}
+	GetConversationsListByIdsRes {
+		Conversations []ConversationById `json:"conversations"` // 会话列表
+	}
+	ConversationById {
+		ConversationID string `json:"conversationId"` // 会话ID
+		Type           int    `json:"type"` // 会话类型 1=私聊 2=群聊 3=系统会话
+		MaxSeq         int64  `json:"maxSeq"` // 会话消息的最大Seq
+		LastMessage    string `json:"lastMessage"` // 会话最后一条消息预览
+		Version        int64  `json:"version"` // 版本号
+		CreateAt       int64  `json:"createAt"` // 创建时间戳
+		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+	}
+)
+
+// 批量获取用户会话设置数据
+type (
+	GetUserConversationSettingsListByIdsReq {
+		UserID          string   `header:"Beaver-User-Id"` // 用户ID
+		ConversationIds []string `json:"conversationIds"` // 会话ID列表
+	}
+	GetUserConversationSettingsListByIdsRes {
+		UserConversationSettings []UserConversationSettingById `json:"userConversationSettings"` // 用户会话设置列表
+	}
+	UserConversationSettingById {
+		UserID         string `json:"userId"` // 用户ID
+		ConversationID string `json:"conversationId"` // 会话ID
+		IsHidden       bool   `json:"isHidden"` // 是否隐藏
+		IsPinned       bool   `json:"isPinned"` // 是否置顶
+		IsMuted        bool   `json:"isMuted"` // 是否免打扰
+		UserReadSeq    int64  `json:"userReadSeq"` // 用户已读序列号
+		Version        int64  `json:"version"` // 版本号
+		CreateAt       int64  `json:"createAt"` // 创建时间戳
+		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+	}
+)
+
+// 更新会话已读序列号
+type (
+	UpdateReadSeqReq {
+		UserID         string `header:"Beaver-User-Id"` // 用户ID
+		ConversationID string `json:"conversationId"` // 会话ID
+		ReadSeq        int64  `json:"readSeq"` // 已读序列号（用户已读到的消息seq）
+	}
+	UpdateReadSeqRes {
+		Success bool `json:"success"` // 是否成功
+	}
+)
+
 service chat {
 	@doc "发送消息"
 	@handler SendMsg
@@ -201,6 +329,14 @@ service chat {
 	@handler pinnedChat
 	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
 
+	@doc "设置会话免打扰"
+	@handler muteChat
+	post /api/chat/muteChat (MuteChatReq) returns (MuteChatRes)
+
+	@doc "隐藏/显示会话"
+	@handler hideChat
+	post /api/chat/hideChat (HideChatReq) returns (HideChatRes)
+
 	@doc "编辑消息"
 	@handler editMessage
 	post /api/chat/edit (EditMessageReq) returns (EditMessageRes)
@@ -212,6 +348,22 @@ service chat {
 	@doc "转发消息"
 	@handler forwardMessage
 	post /api/chat/forward (ForwardMessageReq) returns (ForwardMessageRes)
+
+	@doc "聊天数据同步"
+	@handler chatSync
+	post /api/chat/sync (ChatSyncReq) returns (ChatSyncRes)
+
+	@doc "批量获取会话数据"
+	@handler getConversationsListByIds
+	post /api/chat/getConversationsListByIds (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
+
+	@doc "批量获取用户会话设置数据"
+	@handler getUserConversationSettingsListByIds
+	post /api/chat/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
+
+	@doc "更新会话已读序列号"
+	@handler updateReadSeq
+	post /api/chat/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template

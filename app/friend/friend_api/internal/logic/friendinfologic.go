@@ -2,14 +2,12 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/conversation"
 
@@ -52,11 +50,7 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		return nil, errors.New("用户不存在")
 	}
 
-	var friendUser user_models.UserModel
-	if err := json.Unmarshal(res.Data, &friendUser); err != nil {
-		l.Logger.Errorf("解析用户数据失败: %v", err)
-		return nil, errors.New("解析用户数据失败")
-	}
+	friendUser := res.UserInfo
 
 	// 生成会话Id
 	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
@@ -91,9 +85,9 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 
 	response := &types.FriendInfoRes{
 		ConversationID: conversationID,
-		UserID:         friendUser.UUID,
+		UserID:         friendUser.UserId,
 		Nickname:       friendUser.NickName,
-		FileName:       friendUser.FileName,
+		Avatar:         friendUser.Avatar,
 		Abstract:       friendUser.Abstract,
 		Notice:         notice,
 		IsFriend:       isFriend,

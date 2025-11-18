@@ -7,6 +7,9 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -53,21 +56,34 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		return nil, errors.New("查询好友关系失败")
 	}
 
-	// 根据用户角色更新对应的备注字段
+	// 获取下一个版本号
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
+	if nextVersion == -1 {
+		l.Logger.Errorf("获取版本号失败")
+		return nil, errors.New("系统错误")
+	}
+
+	// 根据用户角色更新对应的备注字段和版本号
 	if friend.SendUserID == req.UserID {
 		// 我是发起方，更新发起方备注
 		if friend.SendUserNotice == req.Notice {
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.Id).Update("send_user_notice", req.Notice).Error
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("uuid = ?", friend.UUID).Updates(map[string]interface{}{
+			"send_user_notice": req.Notice,
+			"version":          nextVersion,
+		}).Error
 	} else if friend.RevUserID == req.UserID {
 		// 我是接收方，更新接收方备注
 		if friend.RevUserNotice == req.Notice {
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("id = ?", friend.Id).Update("rev_user_notice", req.Notice).Error
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("uuid = ?", friend.UUID).Updates(map[string]interface{}{
+			"rev_user_notice": req.Notice,
+			"version":         nextVersion,
+		}).Error
 	} else {
 		// 这种情况理论上不应该发生
 		l.Logger.Errorf("用户角色异常: userID=%s, friendID=%s", req.UserID, req.FriendID)
@@ -79,6 +95,34 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		return nil, errors.New("更新好友备注失败")
 	}
 
+	// 异步发送WebSocket通知给自己（备注是个人设置）
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+			}
+		}()
+
+		// 构建好友表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		friendUpdates := map[string]interface{}{
+			"table": "friends",
+			"data": []map[string]interface{}{
+				{
+					"version": nextVersion,
+					"uuid":    friend.UUID,
+				},
+			},
+		}
+
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, req.UserID, req.UserID, map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{friendUpdates},
+		}, "")
+
+		l.Logger.Infof("异步发送好友备注更新通知完成: userId=%s, uuid=%s, version=%d", req.UserID, friend.UUID, nextVersion)
+	}()
+
 	l.Logger.Infof("更新好友备注成功: userID=%s, friendID=%s, notice=%s", req.UserID, req.FriendID, req.Notice)
-	return &types.NoticeUpdateRes{}, nil
+	return &types.NoticeUpdateRes{
+		Version: nextVersion,
+	}, nil
 }

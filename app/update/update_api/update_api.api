@@ -1,0 +1,50 @@
+syntax = "v1"
+
+// 上报用户版本请求
+type ReportVersionReq {
+	UserID     string `header:"Beaver-User-Id,optional"` // 用户ID(可选)
+	DeviceID   string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	Version    string `header:"version"` // 版本号
+	AppID      string `json:"appId"` // 应用ID
+	PlatformID uint   `json:"platformId"` // 平台ID：1=Windows, 2=MacOS, 3=iOS, 4=Android, 5=HarmonyOS
+	ArchID     uint   `json:"archId"` // 架构ID：0=h5, 1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=iOS, 6=Android, 7=HarmonyOS
+}
+
+// 上报用户版本响应
+type ReportVersionRes {}
+
+// 获取最新版本请求
+type GetLatestVersionReq {
+	UserID     string `header:"Beaver-User-Id,optional"` // 用户ID(可选)
+	CityName   string `header:"X-City-Name,optional"` // 城市名称(可选)
+	DeviceID   string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	AppID      string `json:"appId"` // 应用ID
+	PlatformID uint   `json:"platformId"` // 平台ID：1=Windows, 2=MacOS, 3=iOS, 4=Android, 5=HarmonyOS
+	ArchID     uint   `json:"archId"` // 架构ID：1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=iOS, 6=Android, 7=HarmonyOS
+	Version    string `header:"version"` // 当前版本号
+}
+
+// 获取最新版本响应
+type GetLatestVersionRes {
+	HasUpdate      bool   `json:"hasUpdate"` // 是否有更新
+	ArchitectureID uint   `json:"architectureId,omitempty"` // 架构ID（内部使用）
+	Version        string `json:"version,omitempty"` // 最新版本号
+	FileKey        string `json:"fileKey"` // 文件Key
+	Size           int64  `json:"size"` // 安装包大小
+	MD5            string `json:"md5"` // MD5校验
+	Description    string `json:"description,omitempty"` // 版本描述
+	ReleaseNotes   string `json:"releaseNotes,omitempty"` // 更新日志
+}
+
+// 用户相关服务接口
+service update {
+	@doc "上报版本信息"
+	@handler reportVersion
+	post /api/update/report (ReportVersionReq) returns (ReportVersionRes)
+
+	@doc "获取最新版本"
+	@handler getLatestVersion
+	post /api/update/latest (GetLatestVersionReq) returns (GetLatestVersionRes)
+}
+
+// goctl api go -api update_api.api -dir . --home ../../../template

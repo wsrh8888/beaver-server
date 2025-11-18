@@ -1,0 +1,241 @@
+syntax = "v1"
+
+// 添加应用
+type (
+	AddAppReq {
+		Name        string `json:"name"`                 // 应用名称
+		Description string `json:"description,optional"` // 应用描述
+	}
+	AddAppRes {
+		Id    uint   `json:"id"`    // 创建的应用ID
+		AppID string `json:"appId"` // 系统生成的应用唯一标识
+	}
+)
+
+// 获取应用列表
+type (
+	GetAppsReq {
+		Page     int  `form:"page,optional"`     // 页码
+		PageSize int  `form:"pageSize,optional"` // 每页数量
+		IsActive bool `form:"isActive,optional"` // 是否仅显示活跃应用
+	}
+	GetAppsRes {
+		Total int64          `json:"total"` // 总数
+		Apps  []GetAppsItem `json:"apps"`  // 应用列表
+	}
+	GetAppsItem {
+		Id          uint   `json:"id"`          // 应用ID
+		AppID       string `json:"appId"`       // 应用唯一标识
+		Name        string `json:"name"`        // 应用名称
+		Description string `json:"description"` // 应用描述
+		IsActive    bool   `json:"isActive"`   // 是否活跃
+		CreatedAt   string `json:"createdAt"`  // 创建时间
+		UpdatedAt   string `json:"updatedAt"` // 更新时间
+	}
+)
+
+// 添加架构
+type (
+	AddArchitectureReq {
+		AppID       string `json:"appId"`                // 应用ID
+		PlatformID  uint   `json:"platformId"`          // 平台ID：1=Windows, 2=MacOS, 3=Android
+		ArchID      uint   `json:"archId"`               // 架构ID：1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=Android
+		Description string `json:"description,optional"` // 描述
+	}
+	AddArchitectureRes {
+		Id uint `json:"id"` // 创建的记录ID
+	}
+)
+
+// 更新架构
+type (
+	UpdateArchitectureReq {
+		Id          uint   `json:"id"`                   // 记录ID
+		Description string `json:"description,optional"` // 描述
+		IsActive    bool   `json:"isActive,optional"`   // 是否启用
+	}
+	UpdateArchitectureRes {}
+)
+
+// 获取架构列表
+type (
+	GetArchitecturesReq {
+		AppID    string `form:"appId,optional"`   // 应用ID
+		Page     int    `form:"page,optional"`    // 页码
+		PageSize int    `form:"pageSize,optional"` // 每页数量
+		IsActive bool   `form:"isActive,optional"` // 是否仅显示活跃架构
+	}
+	GetArchitecturesRes {
+		Total         int64                    `json:"total"`         // 总数
+		Architectures []GetArchitecturesItem `json:"architectures"` // 架构列表
+	}
+	GetArchitecturesItem {
+		Id          uint   `json:"id"`          // 记录ID
+		AppID       string `json:"appId"`      // 应用ID
+		AppName     string `json:"appName"`    // 应用名称
+		PlatformID  uint   `json:"platformId"` // 平台ID：1=Windows, 2=MacOS, 3=Android
+		ArchID      uint   `json:"archId"`     // 架构ID：1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=Android
+		Description string `json:"description"` // 描述
+		IsActive    bool   `json:"isActive"`    // 是否启用
+		CreatedAt   string `json:"createdAt"`   // 创建时间
+		UpdatedAt   string `json:"updatedAt"`   // 更新时间
+	}
+)
+
+// 添加版本
+type (
+	AddVersionReq {
+		ArchitectureID uint   `json:"architectureId"`        // 架构ID
+		Version        string `json:"version"`               // 版本号
+		FileKey       string `json:"fileKey"`                // 文件ID
+		Description    string `json:"description,optional"`  // 版本描述
+		ReleaseNotes   string `json:"releaseNotes,optional"` // 更新日志
+	}
+	AddVersionRes {
+		VersionID uint `json:"versionId"` // 创建的版本ID
+	}
+)
+
+// 获取版本列表
+type (
+	GetVersionListReq {
+		ArchitectureID uint   `form:"architectureId"`    // 架构ID
+		AppID          string `form:"appId,optional"`   // 应用ID
+		Page           int    `form:"page,optional"`    // 页码
+		PageSize       int    `form:"pageSize,optional"` // 每页数量
+	}
+	GetVersionListRes {
+		Total    int64                 `json:"total"`    // 总数
+		Versions []GetVersionListItem `json:"versions"` // 版本列表
+	}
+	GetVersionListItem {
+		VersionID      uint   `json:"versionId"`      // 版本ID
+		ArchitectureID uint   `json:"architectureId"` // 架构ID
+		Version        string `json:"version"`        // 版本号
+		FileKey       string `json:"fileKey"`       // 文件ID
+		Description    string `json:"description"`     // 版本描述
+		ReleaseNotes   string `json:"releaseNotes"`    // 更新日志
+		ReleaseDate    string `json:"releaseDate"`     // 发布时间
+		CreatedAt      string `json:"createdAt"`      // 创建时间
+		UpdatedAt      string `json:"updatedAt"`       // 更新时间
+	}
+)
+
+// 获取应用下所有版本
+type (
+	GetAppVersionsReq {
+		AppID    string `form:"appId"`              // 应用ID
+		Page     int    `form:"page,optional"`      // 页码
+		PageSize int    `form:"pageSize,optional"`   // 每页数量
+	}
+	GetAppVersionsRes {
+		Total         int64                      `json:"total"`         // 总架构数
+		Architectures []GetAppVersionsItem `json:"architectures"` // 按架构分组的版本信息
+	}
+	GetAppVersionsItem {
+		ArchitectureID uint                        `json:"architectureId"` // 架构ID
+		ArchID         uint                        `json:"archId"`         // 架构类型
+		Description    string                      `json:"description"`    // 架构描述
+		Versions       []GetAppVersionsVersionItem `json:"versions"`       // 该架构下的版本列表
+	}
+	GetAppVersionsVersionItem {
+		VersionID uint   `json:"versionId"` // 版本ID
+		Version   string `json:"version"`   // 版本号
+	}
+)
+
+// 更新城市策略
+type (
+	UpdateCityStrategyReq {
+		AppID      string                      `json:"appId"`      // 应用ID
+		CityIDs    []string                    `json:"cityIds"`    // 城市ID数组
+		Strategy   []UpdateCityStrategyItem `json:"strategy"`   // 城市策略配置
+		UpdateType string                      `json:"updateType,optional"` // 更新类型：single(单个架构) | global(全局架构)
+	}
+	UpdateCityStrategyItem {
+		ArchitectureID uint `json:"architectureId"` // 架构ID
+		VersionID      uint `json:"versionId"`       // 版本ID
+		ForceUpdate    bool `json:"forceUpdate"`     // 是否强制更新
+		IsActive       bool `json:"isActive"`        // 是否启用
+	}
+	UpdateCityStrategyRes {}
+)
+
+// 获取城市策略列表
+type (
+	GetCityStrategiesReq {
+		AppID    string `form:"appId,optional"`   // 应用ID
+		IsActive bool   `form:"isActive,optional"` // 是否仅查询活跃策略
+		Page     int    `form:"page,optional"`     // 页码
+		PageSize int    `form:"pageSize,optional"` // 每页数量
+	}
+	GetCityStrategiesRes {
+		Total      int64                      `json:"total"`      // 总数
+		Strategies []GetCityStrategiesItem `json:"strategies"` // 策略列表
+	}
+	GetCityStrategiesItem {
+		Id        uint                              `json:"id"`        // 策略ID
+		AppID     string                            `json:"appId"`     // 应用ID
+		CityID    string                            `json:"cityId"`    // 城市代码
+		Strategy  []GetCityStrategiesStrategyItem `json:"strategy"`  // 城市策略配置
+		IsActive  bool                              `json:"isActive"`  // 是否启用
+		CreatedAt string                            `json:"createdAt"` // 创建时间
+		UpdatedAt string                            `json:"updatedAt"` // 更新时间
+	}
+	GetCityStrategiesStrategyItem {
+		ArchitectureID uint   `json:"architectureId"` // 架构ID
+		VersionID      uint   `json:"versionId"`       // 版本ID
+		Version        string `json:"version"`         // 版本号
+		ForceUpdate    bool   `json:"forceUpdate"`      // 是否强制更新
+		IsActive       bool   `json:"isActive"`         // 是否启用
+	}
+)
+
+@server (
+	group: update
+)
+service backend {
+	// 应用管理API
+	@doc "添加新应用"
+	@handler AddApp
+	post /admin/update/appAdd (AddAppReq) returns (AddAppRes)
+
+	@doc "获取应用列表"
+	@handler GetApps
+	get /admin/update/appsUpdate (GetAppsReq) returns (GetAppsRes)
+
+	// 架构管理API
+	@doc "添加新架构"
+	@handler AddArchitecture
+	post /admin/update/architectureAdd (AddArchitectureReq) returns (AddArchitectureRes)
+
+	@doc "更新架构信息"
+	@handler UpdateArchitecture
+	post /admin/update/architectureUpdate (UpdateArchitectureReq) returns (UpdateArchitectureRes)
+
+	@doc "获取架构列表"
+	@handler GetArchitectures
+	get /admin/update/architectures (GetArchitecturesReq) returns (GetArchitecturesRes)
+
+	// 版本管理API
+	@doc "添加新版本"
+	@handler AddVersion
+	post /admin/update/versionAdd (AddVersionReq) returns (AddVersionRes)
+
+	@doc "获取版本列表"
+	@handler GetVersionList
+	get /admin/update/versionList (GetVersionListReq) returns (GetVersionListRes)
+
+	@doc "获取应用下所有版本"
+	@handler GetAppVersions
+	get /admin/update/versions (GetAppVersionsReq) returns (GetAppVersionsRes)
+
+	// 城市策略管理API
+	@doc "更新城市策略"
+	@handler UpdateCityStrategy
+	post /admin/update/cityStrategyUpdate (UpdateCityStrategyReq) returns (UpdateCityStrategyRes)
+
+	@doc "获取城市策略列表"
+	@handler GetCityStrategies
+	get /admin/update/cityStrategies (GetCityStrategiesReq) returns (GetCityStrategiesRes)
+}

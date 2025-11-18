@@ -10,15 +10,113 @@ message GetGroupMembersReq {
 message GroupMemberInfo {
   string userID = 1;  // 用户Id
   string username = 2; // 用户名
-  string fileName = 3;   // 用户头像
+  string avatar = 3;   // 用户头像
 }
 
 message GetGroupMembersRes {
   repeated GroupMemberInfo members = 1; // 成员信息列表
 }
 
-service group {
-  rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
+// 获取用户群组中的其他成员ID列表
+message GetUserGroupMembersReq {
+  string userID = 1; // 用户ID
 }
 
-//goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+message GetUserGroupMembersRes {
+  repeated string memberIDs = 1; // 群成员ID列表（去重后的所有群友）
+}
+
+// 获取用户加入的群组ID列表
+message GetUserGroupIDsReq {
+  string userID = 1; // 用户ID
+}
+
+message GetUserGroupIDsRes {
+  repeated string groupIDs = 1; // 用户加入的群组ID列表
+}
+
+// 通过ID获取群组列表
+message GetGroupsListByIdsReq {
+  repeated string groupIDs = 1; // 群组ID列表
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message GroupListById {
+  string groupID = 1; // 群组ID
+  string name = 2; // 群组名称
+  string avatar = 3; // 群组头像
+  string description = 4; // 群组描述
+  int64 version = 5; // 版本号
+  int64 createdAt = 6; // 创建时间
+  int64 updatedAt = 7; // 更新时间
+}
+
+message GetGroupsListByIdsRes {
+  repeated GroupListById groups = 1; // 群组列表
+}
+
+// 通过ID获取群成员列表
+message GetGroupMembersListByIdsReq {
+  repeated string groupIDs = 1; // 群组ID列表
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message GroupMemberListById {
+  string groupID = 1; // 群组ID
+  string userID = 2; // 用户ID
+  int32 role = 3; // 成员角色 (1: 群主, 2: 管理员, 3: 普通成员)
+  int64 joinedAt = 4; // 加入时间
+  int64 version = 5; // 版本号
+}
+
+message GetGroupMembersListByIdsRes {
+  repeated GroupMemberListById members = 1; // 群成员列表
+}
+
+// 通过ID获取入群申请列表
+message GetGroupJoinRequestsListByIdsReq {
+  repeated string groupIDs = 1; // 群组ID列表
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message GroupJoinRequestListById {
+  string requestID = 1; // 申请ID
+  string groupID = 2; // 群组ID
+  string userID = 3; // 申请用户ID
+  string message = 4; // 申请消息
+  int32 status = 5; // 申请状态 (0: 待审核, 1: 已通过, 2: 已拒绝)
+  int64 appliedAt = 6; // 申请时间
+  int64 version = 7; // 版本号
+}
+
+message GetGroupJoinRequestsListByIdsRes {
+  repeated GroupJoinRequestListById requests = 1; // 入群申请列表
+}
+
+// 获取用户的群组申请（包括发出的申请和管理的申请）
+message GetUserGroupRequestVersionsReq {
+  string userID = 1; // 用户ID
+  int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
+}
+
+message GetUserGroupRequestVersionsRes {
+  repeated GroupRequestVersionItem versions = 1; // 版本列表
+}
+
+message GroupRequestVersionItem {
+  string groupID = 1; // 群组ID
+  int64 version = 2; // 最新版本号
+}
+
+
+service group {
+  rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
+  rpc GetUserGroupMembers(GetUserGroupMembersReq) returns (GetUserGroupMembersRes); // 获取用户群组中的其他成员ID列表
+  rpc GetUserGroupIDs(GetUserGroupIDsReq) returns (GetUserGroupIDsRes); // 获取用户加入的群组ID列表
+  rpc GetGroupsListByIds(GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes); // 通过ID获取群组列表
+  rpc GetGroupMembersListByIds(GetGroupMembersListByIdsReq) returns (GetGroupMembersListByIdsRes); // 通过ID获取群成员列表
+  rpc GetGroupJoinRequestsListByIds(GetGroupJoinRequestsListByIdsReq) returns (GetGroupJoinRequestsListByIdsRes); // 通过ID获取入群申请列表
+  rpc GetUserGroupRequestVersions(GetUserGroupRequestVersionsReq) returns (GetUserGroupRequestVersionsRes); // 获取用户群组申请版本信息
+}
+
+// goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -1,0 +1,13 @@
+
+services:
+  update_admin:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/update_admin:1.0.2
+    container_name: update_admin
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./update.yaml:/etc/update.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

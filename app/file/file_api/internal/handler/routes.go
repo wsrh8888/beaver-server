@@ -15,7 +15,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 文件预览
 				Method:  http.MethodGet,
-				Path:    "/api/file/preview/:fileName",
+				Path:    "/api/file/preview/:fileKey",
 				Handler: PreviewHandler(serverCtx),
 			},
 			{

@@ -1,0 +1,13 @@
+
+services:
+  group_admin:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/group_admin:1.0.2
+    container_name: group_admin
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./group.yaml:/etc/group.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

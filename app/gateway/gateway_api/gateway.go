@@ -42,7 +42,7 @@ func main() {
 func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// 设置CORS头
 	w.Header().Set("Access-Control-Allow-Origin", "*") // 设置允许的源域名
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	// 如果是预检请求，直接返回

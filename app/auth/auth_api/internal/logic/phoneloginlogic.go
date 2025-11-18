@@ -76,7 +76,7 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (resp *types.Phon
 			if oldDeviceID != req.DeviceID {
 				fmt.Println("不是同一设备，需要通知踢出旧设备:", oldDeviceID)
 				// 不是同一设备，需要通知踢出旧设备
-				// notifyForceOffline(user.UUID, oldDeviceID)
+				// notifyForceOffline(user.UserID, oldDeviceID)
 			}
 		}
 	}

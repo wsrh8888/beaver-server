@@ -3,7 +3,7 @@ Host: 0.0.0.0
 Port: 20100
 Etcd: 127.0.0.1:2379
 Auth:
-  AccessSecret: your_jwt_secret_here
+  AccessSecret: robert
   AccessExpire: 3600
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
@@ -31,8 +31,8 @@ Email:
   QQ:
     Host: smtp.qq.com
     Port: 465
-    Username: your_email@qq.com
-    Password: your_email_password
+    Username: 751135385@qq.com
+    Password: klokenvhymkobaif
   # 未来可以添加其他邮箱服务商
   # Gmail:
   #   Host: smtp.gmail.com

@@ -1,7 +1,7 @@
 
 services:
   dictionary_api:
-    image: wsrh8888/dictionary_api:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/dictionary_api:1.0.2
     container_name: dictionary_api
     network_mode: "host"
     volumes:

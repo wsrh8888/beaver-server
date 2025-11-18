@@ -14,3 +14,13 @@ RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
+DatasyncRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: datasyncrpc.rpc
+UserRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: userrpc.rpc

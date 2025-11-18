@@ -3,7 +3,6 @@ package common
 import (
 	"errors"
 	"fmt"
-	"image"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -19,7 +18,6 @@ import (
 	"beaver/utils"
 	"beaver/utils/md5"
 
-	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -120,9 +118,7 @@ func CheckFileExists(fileMd5 string, svcCtx *svc.ServiceContext) (*file_models.F
 
 // CreateFileRecord 创建文件记录
 func CreateFileRecord(req *FileUploadRequest, filePath string, source file_models.FileSource, svcCtx *svc.ServiceContext) (*file_models.FileModel, error) {
-	// 生成带后缀的FileName
-	fileUUID := uuid.New().String()
-	fileNameWithSuffix := fileUUID + "." + req.Suffix
+	FileKeyWithSuffix := req.FileMd5 + "." + req.Suffix
 
 	// 创建文件记录
 	newFileModel := &file_models.FileModel{
@@ -130,7 +126,7 @@ func CreateFileRecord(req *FileUploadRequest, filePath string, source file_model
 		Size:         req.Size,
 		Path:         filePath,
 		Md5:          req.FileMd5,
-		FileName:     fileNameWithSuffix,
+		FileKey:      FileKeyWithSuffix,
 		Type:         req.FileType,
 		Source:       source,
 	}
@@ -141,7 +137,7 @@ func CreateFileRecord(req *FileUploadRequest, filePath string, source file_model
 		return nil, fmt.Errorf("保存文件记录失败: %v", err)
 	}
 
-	logx.Infof("文件记录创建成功: %s, 来源: %s", newFileModel.FileName, source)
+	logx.Infof("文件记录创建成功: %s, 来源: %s", newFileModel.FileKey, source)
 	return newFileModel, nil
 }
 
@@ -219,50 +215,38 @@ func ConvertFileInfoToAPI(fileInfo *file_models.FileInfo) *types.FileInfo {
 	return result
 }
 
-// GetLocalFileInfo 获取本地文件信息（包括图片尺寸等）
-func GetLocalFileInfo(filePath string, fileType string) *file_models.FileInfo {
-	result := &file_models.FileInfo{
-		Type: file_models.FileType(fileType),
+// ConvertAPIFileInfoToModel 转换API FileInfo为数据库模型格式
+func ConvertAPIFileInfoToModel(apiFileInfo *types.FileInfo) *file_models.FileInfo {
+	if apiFileInfo == nil {
+		return nil
 	}
 
-	// 根据文件类型处理
-	switch fileType {
-	case "image":
-		// 对于图片，获取尺寸信息
-		if width, height := getImageSizeFromLocal(filePath); width > 0 && height > 0 {
-			result.ImageFile = &file_models.ImageFile{
-				Width:  width,
-				Height: height,
-			}
+	result := &file_models.FileInfo{
+		Type: file_models.FileType(apiFileInfo.Type),
+	}
+
+	if apiFileInfo.ImageFile != nil {
+		result.ImageFile = &file_models.ImageFile{
+			Width:  apiFileInfo.ImageFile.Width,
+			Height: apiFileInfo.ImageFile.Height,
 		}
-	case "video":
-		// 对于视频，可以后续添加视频信息获取逻辑
-		// 这里暂时返回基本信息
-	case "audio":
-		// 对于音频，可以后续添加音频信息获取逻辑
-		// 这里暂时返回基本信息
+	}
+
+	if apiFileInfo.VideoFile != nil {
+		result.VideoFile = &file_models.VideoFile{
+			Width:    apiFileInfo.VideoFile.Width,
+			Height:   apiFileInfo.VideoFile.Height,
+			Duration: apiFileInfo.VideoFile.Duration,
+		}
+	}
+
+	if apiFileInfo.AudioFile != nil {
+		result.AudioFile = &file_models.AudioFile{
+			Duration: apiFileInfo.AudioFile.Duration,
+		}
 	}
 
 	return result
-}
-
-// getImageSizeFromLocal 从本地文件获取图片尺寸
-func getImageSizeFromLocal(filePath string) (width, height int) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		logx.Errorf("打开图片文件失败: %v", err)
-		return 0, 0
-	}
-	defer file.Close()
-
-	img, _, err := image.DecodeConfig(file)
-	if err != nil {
-		logx.Errorf("解析图片配置失败: %v", err)
-		return 0, 0
-	}
-
-	logx.Infof("本地图片尺寸: width=%d, height=%d", img.Width, img.Height)
-	return img.Width, img.Height
 }
 
 // SaveFileToLocal 保存文件到本地（公共函数）

@@ -1,0 +1,13 @@
+
+services:
+  gateway_admin:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/gateway_admin:1.0.2
+    container_name: gateway_admin
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./gateway.yaml:/etc/gateway.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

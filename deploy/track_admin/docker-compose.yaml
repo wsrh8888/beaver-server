@@ -1,0 +1,13 @@
+
+services:
+  track_admin:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/track_admin:1.0.2
+    container_name: track_admin
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./track.yaml:/etc/track.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always 

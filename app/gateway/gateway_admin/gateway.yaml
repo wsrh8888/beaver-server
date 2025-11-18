@@ -1,0 +1,25 @@
+Name: gateway_admin
+Addr: 0.0.0.0:40800
+Etcd: 127.0.0.1:2379
+# JWT 认证配置（网关直接解析 JWT，避免调用后端认证接口，提升性能）
+Auth:
+  AccessSecret: robert  # 必须与 backend_admin 的 AccessSecret 一致
+  AccessExpire: 3600    # token 过期时间（秒），可选
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  Db: 0
+WhiteList:
+  - /admin/auth/login
+  - /admin/auth/authentication
+
+RateLimit:
+  Enabled: false  # 是否启用限流
+  QPS: 1000       # 每秒请求数限制
+
+Timeout:
+  Backend: 30 # 后端请求超时
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false

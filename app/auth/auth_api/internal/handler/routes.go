@@ -67,22 +67,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getPhoneCodeHandler(serverCtx),
 			},
 			{
-				// 刷新Token
+				// 找回密码（通过邮箱验证码重置密码）
 				Method:  http.MethodPost,
-				Path:    "/api/auth/refresh_token",
-				Handler: refreshTokenHandler(serverCtx),
-			},
-			{
-				// 获取用户会话列表用户想查看自己当前在哪些设备上登录
-				Method:  http.MethodGet,
-				Path:    "/api/auth/sessions",
-				Handler: getUserSessionsHandler(serverCtx),
-			},
-			{
-				// 终止会话 用户发现某个设备不是自己登录的,需要强制下线
-				Method:  http.MethodPost,
-				Path:    "/api/auth/terminate_session",
-				Handler: terminateSessionHandler(serverCtx),
+				Path:    "/api/auth/reset_password",
+				Handler: resetPasswordHandler(serverCtx),
 			},
 		},
 	)

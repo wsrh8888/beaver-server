@@ -6,7 +6,6 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/common/response"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -36,6 +35,7 @@ func addFriendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		validSources := map[string]bool{
 			"email":  true,
 			"qrcode": true,
+			"userId": true,
 		}
 		if !validSources[req.Source] {
 			response.Response(r, w, nil, errors.New("无效的来源值，只支持email和qrcode"))
@@ -47,9 +47,6 @@ func addFriendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, errors.New("不能添加自己为好友"))
 			return
 		}
-
-		fmt.Println("2222222222222222222")
-		fmt.Println(r)
 
 		l := logic.NewAddFriendLogic(r.Context(), svcCtx)
 		resp, err := l.AddFriend(&req)

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -43,7 +44,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 检查文件是否已经存在于数据库中
 		existingFile, err := common.CheckFileExists(fileReq.FileMd5, svcCtx)
 		if err == nil {
-			resp.FileName = existingFile.FileName
+			resp.FileKey = existingFile.FileKey
 			resp.OriginalName = existingFile.OriginalName
 
 			// 转换FileInfo为API响应格式
@@ -67,8 +68,16 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// 获取文件信息
-		fileInfo := common.GetLocalFileInfo(localFilePath, fileReq.FileType)
+		// 初始化文件信息
+		var fileInfo *file_models.FileInfo
+
+		// 手动解析FormData中的fileInfo字段
+		if fileInfoStr := r.FormValue("fileInfo"); fileInfoStr != "" {
+			var apiFileInfo types.FileInfo
+			if err := json.Unmarshal([]byte(fileInfoStr), &apiFileInfo); err == nil {
+				fileInfo = common.ConvertAPIFileInfoToModel(&apiFileInfo)
+			}
+		}
 
 		// 生成相对路径用于数据库存储（不包含uploadDir）
 		relativePath := common.GenerateRelativePath(fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
@@ -88,7 +97,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			svcCtx.DB.Save(newFileModel)
 		}
 
-		resp.FileName = newFileModel.FileName
+		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
 
 		// 转换FileInfo为API响应格式
@@ -96,7 +105,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			resp.FileInfo = common.ConvertFileInfoToAPI(fileInfo)
 		}
 
-		logx.Infof("本地文件上传成功: %s", newFileModel.FileName)
+		logx.Infof("本地文件上传成功: %s", newFileModel.FileKey)
 		response.Response(r, w, resp, nil)
 	}
 }

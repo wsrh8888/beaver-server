@@ -6,12 +6,12 @@ option go_package = "./file_rpc";
 
 // 文件详情请求
 message GetFileDetailReq {
-  string fileName = 1; // 文件ID
+  string fileKey = 1; // 文件ID
 }
 
 // 文件详情响应
 message GetFileDetailRes {
-  string fileName = 1;     // 文件唯一ID
+  string fileKey = 1;     // 文件唯一ID
   string originalName = 2;   // 文件名
   int64 size = 3;        // 文件大小
   string path = 4;       // 文件实际存储路径

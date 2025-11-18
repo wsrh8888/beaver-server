@@ -39,6 +39,9 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 		return nil, errors.New("用户不存在")
 	}
 
+	// 调试日志：检查用户数据
+	logx.Infof("登录用户信息: UserID=%s, NickName=%s, Email=%s", user.UUID, user.NickName, user.Email)
+
 	// 验证密码
 	if !pwd.CheckPad(user.Password, req.Password) {
 		return nil, errors.New("密码错误")
@@ -77,7 +80,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 			if oldDeviceID != req.DeviceID {
 				fmt.Println("不是同一设备，需要通知踢出旧设备:", oldDeviceID)
 				// 不是同一设备，需要通知踢出旧设备
-				// notifyForceOffline(user.UUID, oldDeviceID)
+				// notifyForceOffline(user.UserID, oldDeviceID)
 			}
 		}
 	}

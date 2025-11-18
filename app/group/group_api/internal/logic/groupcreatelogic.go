@@ -35,13 +35,22 @@ func NewGroupCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Group
 
 func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.GroupCreateRes, err error) {
 
-	var groupModel = group_models.GroupModel{
-		CreatorID:  req.UserID,
-		UUID:       utils.GenerateUUId(),
-		Abstract:   "本群创建于" + time.Now().Format("2006-01-02") + "，欢迎大家加入",
-		MaxMembers: 50,
+	//先生成群组ID
+	groupID := utils.GenerateUUId()
+
+	// 获取该群组的版本号（每个群独立递增）
+	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", groupID)
+	if groupVersion == -1 {
+		logx.Errorf("获取群组版本号失败")
+		return nil, errors.New("获取版本号失败")
 	}
-	var groupUserList = []string{string(req.UserID)}
+
+	var groupModel = group_models.GroupModel{
+		CreatorID: req.UserID,
+		GroupID:   groupID,
+		Version:   groupVersion, // 该群的独立版本
+	}
+	var groupUserList = []string{req.UserID}
 	if len(req.UserIdList) == 0 {
 		return nil, errors.New("请选择用户")
 	}
@@ -50,7 +59,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		groupUserList = append(groupUserList, u)
 	}
 
-	groupModel.Title = req.Name
+	groupModel.Title = req.Title
 
 	err = l.svcCtx.DB.Create(&groupModel).Error
 	if err != nil {
@@ -60,11 +69,15 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 
 	var members []group_models.GroupMemberModel
 	for i, u := range groupUserList {
+		// 获取该群成员的版本号（按群独立递增）
+		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", groupID)
 
 		memberMode := group_models.GroupMemberModel{
-			GroupID: groupModel.UUID,
-			UserID:  u,
-			Role:    3,
+			GroupID:  groupID,
+			UserID:   u,
+			Role:     3,
+			JoinTime: time.Now(),
+			Version:  memberVersion, // 该群成员的独立版本
 		}
 		if i == 0 {
 			memberMode.Role = 1
@@ -78,43 +91,97 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		return nil, errors.New("创建群成员失败")
 	}
 
+	// 创建成员变更日志
+	var changeLogs []group_models.GroupMemberChangeLogModel
+	for _, member := range members {
+		// 获取全局递增的变更日志版本号
+		logVersion := l.svcCtx.VersionGen.GetNextVersion("group_member_logs", "", "")
+		if logVersion == -1 {
+			logx.Errorf("获取变更日志版本号失败，用户ID: %s", member.UserID)
+			return nil, errors.New("获取版本号失败")
+		}
+
+		changeLog := group_models.GroupMemberChangeLogModel{
+			GroupID:    member.GroupID,
+			UserID:     member.UserID,
+			ChangeType: "join",
+			OperatedBy: req.UserID, // 创建者操作
+			ChangeTime: member.JoinTime,
+			Version:    logVersion,
+		}
+		changeLogs = append(changeLogs, changeLog)
+	}
+
+	err = l.svcCtx.DB.Create(&changeLogs).Error
+	if err != nil {
+		logx.Errorf("创建群成员变更日志失败: %v", err)
+		// 这里不返回错误，因为主要功能已经完成，只是日志记录失败
+	}
+
 	go func() {
 		// 创建新的context，避免使用请求的context
 		ctx := context.Background()
 
 		// 获取群成员列表
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
-			GroupID: groupModel.UUID,
+			GroupID: groupModel.GroupID,
 		})
 		if err != nil {
 			l.Logger.Errorf("获取群成员列表失败: %v", err)
 			return
 		}
 
-		// 更新所有成员的会话记录
+		// 初始化群聊会话（创建chat_conversation_meta和chat_user_conversations）
 		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
-		fmt.Println("更新所有会话列表信息")
-		_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(ctx, &chat_rpc.BatchUpdateConversationReq{
+		fmt.Println("初始化群聊会话")
+		_, err = l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
+			ConversationId: "group_" + groupModel.GroupID,
+			Type:           2, // 群聊类型
 			UserIds:        allUserIDs,
-			ConversationId: groupModel.UUID,
-			LastMessage:    "",
 		})
+		if err != nil {
+			l.Logger.Errorf("初始化群聊会话失败: %v", err)
+			return
+		}
 
-		// 通过ws推送给群成员
+		// 异步发送群创建成功的系统消息
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					l.Logger.Errorf("异步发送群创建消息时发生panic: %v", r)
+				}
+			}()
+
+			// 调用Chat服务的通知消息发送接口，发送群创建通知
+			_, err := l.svcCtx.ChatRpc.SendNotificationMessage(context.Background(), &chat_rpc.SendNotificationMessageReq{
+				ConversationId: "group_" + groupModel.GroupID,
+				MessageType:    2,                                   // 群创建成功消息
+				Content:        fmt.Sprintf("%s 创建了群聊", req.UserID), // 这里应该用实际的用户名，但简化处理
+				RelatedUserId:  req.UserID,                          // 创建者ID
+			})
+			if err != nil {
+				l.Logger.Errorf("异步发送群创建消息失败: %v", err)
+			} else {
+				l.Logger.Infof("异步发送群创建消息成功: groupID=%s", groupModel.GroupID)
+			}
+		}()
+
+		// 通过ws推送给群成员 - 群组信息同步
 		for _, member := range response.Members {
-			fmt.Println("推送给群成员")
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.MessageGroupCreate, req.UserID, member.UserID, map[string]interface{}{
-				"file_name":      groupModel.FileName,
-				"conversationId": groupModel.UUID,
-				"update_at":      groupModel.CreatedAt.String(),
-				"is_top":         false,
-				"msg_preview":    "",
-				"nickname":       groupModel.Title,
-			}, groupModel.UUID)
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
+				"table": "groups",
+				"data": []map[string]interface{}{
+					{
+						"version": groupVersion,
+						"groupId": groupModel.GroupID,
+					},
+				},
+			}, groupModel.GroupID)
 		}
 	}()
 
 	return &types.GroupCreateRes{
-		GroupID: groupModel.UUID,
+		GroupID: groupModel.GroupID,
+		Version: groupVersion,
 	}, nil
 }
