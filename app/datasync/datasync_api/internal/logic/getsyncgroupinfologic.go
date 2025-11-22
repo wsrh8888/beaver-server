@@ -65,13 +65,15 @@ func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq)
 		return nil, err
 	}
 
-	// 3. 转换为响应格式
-	var groupVersions []types.GroupInfoVersionItem
-	for _, group := range groupResp.Groups {
-		groupVersions = append(groupVersions, types.GroupInfoVersionItem{
-			GroupID: group.GroupID,
-			Version: group.Version,
-		})
+	// 3. 转换为响应格式，确保返回空数组而不是null
+	groupVersions := make([]types.GroupInfoVersionItem, 0)
+	if groupResp.Groups != nil {
+		for _, group := range groupResp.Groups {
+			groupVersions = append(groupVersions, types.GroupInfoVersionItem{
+				GroupID: group.GroupID,
+				Version: group.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncGroupInfoRes{

@@ -39,13 +39,15 @@ func (l *GetSyncFriendsLogic) GetSyncFriends(req *types.GetSyncFriendsReq) (resp
 
 	l.Infof("查询到 %d 个好友版本信息", len(friendResp.FriendVersions))
 
-	// 转换为响应格式
-	var friendVersions []types.FriendVersionItem
-	for _, friend := range friendResp.FriendVersions {
-		friendVersions = append(friendVersions, types.FriendVersionItem{
-			Id:      friend.Id,
-			Version: friend.Version,
-		})
+	// 转换为响应格式，确保返回空数组而不是null
+	friendVersions := make([]types.FriendVersionItem, 0)
+	if friendResp.FriendVersions != nil {
+		for _, friend := range friendResp.FriendVersions {
+			friendVersions = append(friendVersions, types.FriendVersionItem{
+				Id:      friend.Id,
+				Version: friend.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncFriendsRes{
