@@ -1,5 +1,5 @@
 @echo off
-REM 启动所有API服务
+REM 启动所有admin服务
 setlocal enabledelayedexpansion
 
 REM 获取脚本所在目录的上级目录（beaver-server根目录）

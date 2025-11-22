@@ -40,13 +40,15 @@ func (l *GetSyncMomentsLogic) GetSyncMoments(req *types.GetSyncMomentsReq) (resp
 		}, nil
 	}
 
-	// 转换响应格式
-	var versions []types.MomentVersionItem
-	for _, v := range rpcResp.MomentVersions {
-		versions = append(versions, types.MomentVersionItem{
-			UserID:  v.UserId,
-			Version: v.Version,
-		})
+	// 转换响应格式，确保返回空数组而不是null
+	versions := make([]types.MomentVersionItem, 0)
+	if rpcResp.MomentVersions != nil {
+		for _, v := range rpcResp.MomentVersions {
+			versions = append(versions, types.MomentVersionItem{
+				UserID:  v.UserId,
+				Version: v.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncMomentsRes{
