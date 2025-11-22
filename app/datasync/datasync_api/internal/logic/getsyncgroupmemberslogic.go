@@ -70,13 +70,15 @@ func (l *GetSyncGroupMembersLogic) GetSyncGroupMembers(req *types.GetSyncGroupMe
 		}
 	}
 
-	// 4. 转换为响应格式
-	var groupVersions []types.GroupMembersVersionItem
-	for groupID, version := range groupVersionsMap {
-		groupVersions = append(groupVersions, types.GroupMembersVersionItem{
-			GroupID: groupID,
-			Version: version,
-		})
+	// 4. 转换为响应格式，确保返回空数组而不是null
+	groupVersions := make([]types.GroupMembersVersionItem, 0)
+	if groupVersionsMap != nil {
+		for groupID, version := range groupVersionsMap {
+			groupVersions = append(groupVersions, types.GroupMembersVersionItem{
+				GroupID: groupID,
+				Version: version,
+			})
+		}
 	}
 
 	return &types.GetSyncGroupMembersRes{

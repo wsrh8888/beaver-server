@@ -66,13 +66,15 @@ func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetS
 		return nil, err
 	}
 
-	// 转换为响应格式，只提取会话元信息版本
-	var conversationVersions []types.ChatConversationVersionItem
-	for _, conv := range convResp.Conversations {
-		conversationVersions = append(conversationVersions, types.ChatConversationVersionItem{
-			ConversationID: conv.ConversationId,
-			Version:        conv.Version,
-		})
+	// 转换为响应格式，只提取会话元信息版本，确保返回空数组而不是null
+	conversationVersions := make([]types.ChatConversationVersionItem, 0)
+	if convResp.Conversations != nil {
+		for _, conv := range convResp.Conversations {
+			conversationVersions = append(conversationVersions, types.ChatConversationVersionItem{
+				ConversationID: conv.ConversationId,
+				Version:        conv.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncChatConversationsRes{

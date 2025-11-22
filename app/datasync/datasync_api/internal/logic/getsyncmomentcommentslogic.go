@@ -41,13 +41,15 @@ func (l *GetSyncMomentCommentsLogic) GetSyncMomentComments(req *types.GetSyncMom
 		}, nil
 	}
 
-	// 转换响应格式
-	var versions []types.MomentCommentVersionItem
-	for _, v := range rpcResp.MomentCommentVersions {
-		versions = append(versions, types.MomentCommentVersionItem{
-			UserID:  v.UserId,
-			Version: v.Version,
-		})
+	// 转换响应格式，确保返回空数组而不是null
+	versions := make([]types.MomentCommentVersionItem, 0)
+	if rpcResp.MomentCommentVersions != nil {
+		for _, v := range rpcResp.MomentCommentVersions {
+			versions = append(versions, types.MomentCommentVersionItem{
+				UserID:  v.UserId,
+				Version: v.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncMomentCommentsRes{

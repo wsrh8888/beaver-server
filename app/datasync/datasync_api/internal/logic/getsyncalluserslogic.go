@@ -169,13 +169,15 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 		return nil, err
 	}
 
-	// 转换为版本摘要
-	var userVersions []types.UserVersionItem
-	for userId, userInfo := range userResp.UserInfo {
-		userVersions = append(userVersions, types.UserVersionItem{
-			UserID:  userId,
-			Version: userInfo.Version,
-		})
+	// 转换为版本摘要，确保返回空数组而不是null
+	userVersions := make([]types.UserVersionItem, 0)
+	if userResp.UserInfo != nil {
+		for userId, userInfo := range userResp.UserInfo {
+			userVersions = append(userVersions, types.UserVersionItem{
+				UserID:  userId,
+				Version: userInfo.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncAllUsersRes{
