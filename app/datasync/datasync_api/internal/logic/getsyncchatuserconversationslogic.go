@@ -45,13 +45,15 @@ func (l *GetSyncChatUserConversationsLogic) GetSyncChatUserConversations(req *ty
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var userConversationVersions []types.ChatUserConversationVersionItem
-	for _, userConv := range userConvResp.UserConversationVersions {
-		userConversationVersions = append(userConversationVersions, types.ChatUserConversationVersionItem{
-			ConversationID: userConv.ConversationId,
-			Version:        userConv.Version,
-		})
+	// 转换为响应格式，确保返回空数组而不是null
+	userConversationVersions := make([]types.ChatUserConversationVersionItem, 0)
+	if userConvResp.UserConversationVersions != nil {
+		for _, userConv := range userConvResp.UserConversationVersions {
+			userConversationVersions = append(userConversationVersions, types.ChatUserConversationVersionItem{
+				ConversationID: userConv.ConversationId,
+				Version:        userConv.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncChatUserConversationsRes{

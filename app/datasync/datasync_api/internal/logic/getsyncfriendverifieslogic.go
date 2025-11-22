@@ -39,13 +39,15 @@ func (l *GetSyncFriendVerifiesLogic) GetSyncFriendVerifies(req *types.GetSyncFri
 
 	l.Infof("查询到 %d 个好友验证版本信息", len(verifyResp.FriendVerifyVersions))
 
-	// 转换为响应格式
-	var friendVerifyVersions []types.FriendVerifyVersionItem
-	for _, verify := range verifyResp.FriendVerifyVersions {
-		friendVerifyVersions = append(friendVerifyVersions, types.FriendVerifyVersionItem{
-			UUID:    verify.Uuid,
-			Version: verify.Version,
-		})
+	// 转换为响应格式，确保返回空数组而不是null
+	friendVerifyVersions := make([]types.FriendVerifyVersionItem, 0)
+	if verifyResp.FriendVerifyVersions != nil {
+		for _, verify := range verifyResp.FriendVerifyVersions {
+			friendVerifyVersions = append(friendVerifyVersions, types.FriendVerifyVersionItem{
+				UUID:    verify.Uuid,
+				Version: verify.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncFriendVerifiesRes{

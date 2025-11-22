@@ -40,13 +40,15 @@ func (l *GetSyncMomentLikesLogic) GetSyncMomentLikes(req *types.GetSyncMomentLik
 		}, nil
 	}
 
-	// 转换响应格式
-	var versions []types.MomentLikeVersionItem
-	for _, v := range rpcResp.MomentLikeVersions {
-		versions = append(versions, types.MomentLikeVersionItem{
-			UserID:  v.UserId,
-			Version: v.Version,
-		})
+	// 转换响应格式，确保返回空数组而不是null
+	versions := make([]types.MomentLikeVersionItem, 0)
+	if rpcResp.MomentLikeVersions != nil {
+		for _, v := range rpcResp.MomentLikeVersions {
+			versions = append(versions, types.MomentLikeVersionItem{
+				UserID:  v.UserId,
+				Version: v.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncMomentLikesRes{

@@ -43,13 +43,15 @@ func (l *GetSyncGroupRequestsLogic) GetSyncGroupRequests(req *types.GetSyncGroup
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var groupVersions []types.GroupRequestsVersionItem
-	for _, version := range versionResp.Versions {
-		groupVersions = append(groupVersions, types.GroupRequestsVersionItem{
-			GroupID: version.GroupID,
-			Version: version.Version,
-		})
+	// 转换为响应格式，确保返回空数组而不是null
+	groupVersions := make([]types.GroupRequestsVersionItem, 0)
+	if versionResp.Versions != nil {
+		for _, version := range versionResp.Versions {
+			groupVersions = append(groupVersions, types.GroupRequestsVersionItem{
+				GroupID: version.GroupID,
+				Version: version.Version,
+			})
+		}
 	}
 
 	return &types.GetSyncGroupRequestsRes{
