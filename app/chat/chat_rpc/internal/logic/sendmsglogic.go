@@ -353,7 +353,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		// 通知消息：SendUserID为空
 		return &chat_rpc.Sender{
 			UserId:   "",
-			Nickname: "通知消息",
+			NickName: "通知消息",
 			Avatar:   "",
 		}, nil
 	}
@@ -367,7 +367,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		// 返回默认发送者信息，不影响消息发送
 		return &chat_rpc.Sender{
 			UserId:   sendUserID,
-			Nickname: "未知用户",
+			NickName: "未知用户",
 			Avatar:   "",
 		}, nil
 	}
@@ -376,7 +376,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 	userInfo := userInfoResp.UserInfo
 	return &chat_rpc.Sender{
 		UserId:   sendUserID,
-		Nickname: userInfo.NickName,
+		NickName: userInfo.NickName,
 		Avatar:   userInfo.Avatar,
 	}, nil
 }

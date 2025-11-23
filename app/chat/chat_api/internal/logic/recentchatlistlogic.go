@@ -156,18 +156,18 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 
 			// 从好友详细信息中获取用户信息和备注
 			if friendDetail, exists := friendDetailMap[opponentID]; exists {
-				chatInfo.Nickname = friendDetail.Nickname
+				chatInfo.NickName = friendDetail.NickName
 				chatInfo.Avatar = friendDetail.Avatar
 				chatInfo.Notice = friendDetail.Notice
 			} else {
-				chatInfo.Nickname = "未知用户"
+				chatInfo.NickName = "未知用户"
 				chatInfo.Avatar = ""
 				chatInfo.Notice = ""
 			}
 			chatInfo.ChatType = 1
 		} else { // 群聊
 			group := groupMap[convo.ConversationID]
-			chatInfo.Nickname = group.Title
+			chatInfo.NickName = group.Title
 			chatInfo.Avatar = group.Avatar
 			chatInfo.ChatType = 2
 			chatInfo.Notice = "" // 群聊暂时没有备注功能

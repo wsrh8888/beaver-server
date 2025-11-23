@@ -21,7 +21,7 @@ type FriendInfoReq struct {
 
 type FriendInfoRes struct {
 	UserID         string `json:"userId"`         // 用户ID
-	Nickname       string `json:"nickname"`       // 用户昵称
+	NickName       string `json:"nickName"`       // 用户昵称
 	Avatar         string `json:"avatar"`         // 用户头像文件名
 	Abstract       string `json:"abstract"`       // 用户签名
 	Notice         string `json:"notice"`         // 好友备注
@@ -33,7 +33,7 @@ type FriendInfoRes struct {
 
 type FriendValidInfo struct {
 	UserID    string `json:"userId"`    // 用户ID
-	Nickname  string `json:"nickname"`  // 用户昵称
+	NickName  string `json:"nickName"`  // 用户昵称
 	Avatar    string `json:"avatar"`    // 用户头像文件名
 	Message   string `json:"message"`   // 验证消息
 	Source    string `json:"source"`    // 添加好友来源：email/qrcode
@@ -100,7 +100,7 @@ type SearchReq struct {
 
 type SearchRes struct {
 	UserID         string `json:"userId"`         // 用户ID
-	Nickname       string `json:"nickname"`       // 用户昵称
+	NickName       string `json:"nickName"`       // 用户昵称
 	Avatar         string `json:"avatar"`         // 用户头像文件名
 	Abstract       string `json:"abstract"`       // 用户签名
 	Notice         string `json:"notice"`         // 好友备注

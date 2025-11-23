@@ -20,7 +20,7 @@ func CreateUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 参数校验
-		if req.Nickname == "" || req.Password == "" || req.Email == "" {
+		if req.NickName == "" || req.Password == "" || req.Email == "" {
 			response.Response(r, w, nil, errors.New("昵称、密码和邮箱不能为空"))
 			return
 		}
