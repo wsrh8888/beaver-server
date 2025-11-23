@@ -44,7 +44,7 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 	// 创建用户，设置默认值
 	user := user_models.UserModel{
 		UUID:     userUUID,
-		NickName: req.Nickname,
+		NickName: req.NickName,
 		Password: pwd.HahPwd(req.Password),
 		Email:    req.Email,
 		Abstract: req.Abstract,

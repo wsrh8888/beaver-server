@@ -64,7 +64,7 @@ type ConversationInfoReq struct {
 
 type ConversationInfoRes struct {
 	Avatar         string `json:"avatar"`
-	Nickname       string `json:"nickname"`
+	NickName       string `json:"nickName"`
 	MsgPreview     string `json:"msg_preview"`    //消息预览
 	UpdateAt       string `json:"update_at"`      //消息时间
 	IsTop          bool   `json:"is_top"`         //是否置顶
@@ -252,7 +252,7 @@ type SendMsgRes struct {
 type Sender struct {
 	UserID   string `json:"userId"`
 	Avatar   string `json:"avatar"`
-	Nickname string `json:"nickname"`
+	NickName string `json:"nickName"`
 }
 
 type TextMsg struct {

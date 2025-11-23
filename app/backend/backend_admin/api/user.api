@@ -15,7 +15,7 @@ type (
 	}
 	UserInfo {
 		Id          string `json:"id"`
-		Nickname    string `json:"nickname"`
+		NickName    string `json:"nickName"`
 		Email       string `json:"email"`
 		Abstract    string `json:"abstract"`
 		FileName      string `json:"fileName"`
@@ -34,7 +34,7 @@ type (
 	}
 	GetUserDetailRes {
 		Id          string `json:"id"`
-		Nickname    string `json:"nickname"`
+		NickName    string `json:"nickName"`
 		FileName      string `json:"fileName"`
 		Email       string `json:"email"`
 		Abstract    string `json:"abstract"`
@@ -49,7 +49,7 @@ type (
 // 创建用户
 type (
 	CreateUserReq {
-		Nickname string `json:"nickname"`
+		NickName string `json:"nickName"`
 		Password string `json:"password"`
 		Email    string `json:"email"`
 		Abstract string `json:"abstract,optional"`
@@ -64,7 +64,7 @@ type (
 type (
 	UpdateUserReq {
 		UserID   string  `path:"id"`
-		Nickname *string `json:"nickname,optional"`
+		NickName *string `json:"nickName,optional"`
 		Email    *string `json:"email,optional"`
 		FileName   *string `json:"fileName,optional"`
 		Abstract *string `json:"abstract,optional"`

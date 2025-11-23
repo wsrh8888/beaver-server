@@ -68,7 +68,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 
 	// 生成JWT token
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
-		Nickname: adminUser.NickName,
+		NickName: adminUser.NickName,
 		UserID:   adminUser.UUID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {

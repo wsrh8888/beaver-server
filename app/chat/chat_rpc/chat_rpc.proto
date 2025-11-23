@@ -89,7 +89,7 @@ message SendMsgReq {
 message Sender {
   string userId = 1;
   string avatar = 2;
-  string nickname = 3;
+  string nickName = 3;
 }
 
 // 定义SendMsgRes消息

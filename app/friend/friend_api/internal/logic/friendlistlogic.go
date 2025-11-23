@@ -102,9 +102,9 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		}
 
 		// 获取用户信息
-		var nickname, avatar, abstract, email string
+		var nickName, avatar, abstract, email string
 		if userInfo, exists := userInfoMap[targetUserID]; exists && userInfo != nil {
-			nickname = userInfo.NickName
+			nickName = userInfo.NickName
 			avatar = userInfo.Avatar
 			email = userInfo.Email
 
@@ -118,7 +118,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 				abstract = ""
 			}
 		} else {
-			nickname = "未知用户"
+			nickName = "未知用户"
 			avatar = ""
 			abstract = ""
 			email = ""
@@ -134,7 +134,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		// 构造好友信息
 		info := types.FriendInfoRes{
 			UserID:         targetUserID,
-			Nickname:       nickname,
+			NickName:       nickName,
 			Avatar:         avatar,
 			Abstract:       abstract,
 			Notice:         notice,

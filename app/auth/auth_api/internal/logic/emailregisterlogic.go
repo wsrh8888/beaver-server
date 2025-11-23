@@ -43,12 +43,12 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (resp *t
 	}
 
 	// 生成随机昵称
-	nickname := fmt.Sprintf("用户%s", req.Email[:strings.Index(req.Email, "@")])
+	nickName := fmt.Sprintf("用户%s", req.Email[:strings.Index(req.Email, "@")])
 
 	// 创建用户
 	_, err = l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
 		Email:    req.Email,
-		NickName: nickname,
+		NickName: nickName,
 		Password: req.Password,
 		Source:   2,  // 2: 邮箱注册
 		Phone:    "", // 邮箱注册时不传手机号

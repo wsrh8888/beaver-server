@@ -53,8 +53,8 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.Upda
 	// 构建更新字段
 	updates := make(map[string]interface{})
 
-	if req.Nickname != nil {
-		updates["nick_name"] = *req.Nickname
+	if req.NickName != nil {
+		updates["nick_name"] = *req.NickName
 	}
 	if req.Email != nil {
 		updates["email"] = *req.Email
