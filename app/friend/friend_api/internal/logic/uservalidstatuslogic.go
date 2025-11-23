@@ -131,9 +131,6 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	case 2: // 拒绝
 		friendVerify.RevStatus = 2
 
-	case 3: // 忽略
-		friendVerify.RevStatus = 3
-
 	case 4: // 删除
 		// 直接删除验证记录
 		err = l.svcCtx.DB.Delete(&friendVerify).Error
@@ -170,8 +167,22 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		}()
 
 		// 构建表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
-		if friendVerify.RevStatus == 1 { // 同意添加好友
-			// 通知双方好友关系已建立 - 发送friends表版本更新
+		var tableUpdates []map[string]interface{}
+
+		// 所有处理成功的状态都发送friend_verify表的更新
+		verifyUpdates := map[string]interface{}{
+			"table": "friend_verify",
+			"data": []map[string]interface{}{
+				{
+					"version": nextVersion,
+					"uuid":    friendVerify.UUID,
+				},
+			},
+		}
+		tableUpdates = append(tableUpdates, verifyUpdates)
+
+		// 如果是同意添加好友，额外发送friends表版本更新
+		if friendVerify.RevStatus == 1 {
 			friendUpdates := map[string]interface{}{
 				"table": "friends",
 				"data": []map[string]interface{}{
@@ -181,32 +192,15 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 					},
 				},
 			}
-
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
-				"tableUpdates": []map[string]interface{}{friendUpdates},
-			}, conversationID)
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
-				"tableUpdates": []map[string]interface{}{friendUpdates},
-			}, conversationID)
-		} else {
-			// 其他状态（拒绝、忽略）发送验证表版本更新
-			verifyUpdates := map[string]interface{}{
-				"table": "friend_verify",
-				"data": []map[string]interface{}{
-					{
-						"version": nextVersion,
-						"uuid":    friendVerify.UUID,
-					},
-				},
-			}
-
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
-				"tableUpdates": []map[string]interface{}{verifyUpdates},
-			}, conversationID)
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
-				"tableUpdates": []map[string]interface{}{verifyUpdates},
-			}, conversationID)
+			tableUpdates = append(tableUpdates, friendUpdates)
 		}
+
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
+			"tableUpdates": tableUpdates,
+		}, conversationID)
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
+			"tableUpdates": tableUpdates,
+		}, conversationID)
 
 		l.Logger.Infof("异步发送WebSocket通知完成: verifyID=%s, status=%d", req.VerifyID, friendVerify.RevStatus)
 	}()

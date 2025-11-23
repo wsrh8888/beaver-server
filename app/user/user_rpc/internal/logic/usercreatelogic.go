@@ -37,6 +37,12 @@ func NewUserCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserCr
 
 // generateUserID 生成递增用户ID
 func (l *UserCreateLogic) generateUserID() (string, error) {
+	// 首先确保Redis计数器已初始化
+	err := l.initializeRedisCounter()
+	if err != nil {
+		return "", fmt.Errorf("初始化Redis计数器失败: %v", err)
+	}
+
 	// 使用Redis INCR原子性递增
 	result := l.svcCtx.Redis.Incr(userIDKey)
 	if result.Err() != nil {
@@ -44,14 +50,43 @@ func (l *UserCreateLogic) generateUserID() (string, error) {
 	}
 
 	id := result.Val()
+	return strconv.FormatInt(id, 10), nil
+}
 
-	// 如果小于最小值，设置为最小值
-	if id < minUserID {
-		l.svcCtx.Redis.Set(userIDKey, minUserID, 0)
-		id = minUserID
+// initializeRedisCounter 初始化Redis计数器，确保与数据库同步
+func (l *UserCreateLogic) initializeRedisCounter() error {
+	// 检查Redis计数器是否存在
+	exists := l.svcCtx.Redis.Exists(userIDKey)
+	if exists.Err() != nil {
+		return fmt.Errorf("检查Redis计数器失败: %v", exists.Err())
 	}
 
-	return strconv.FormatInt(id, 10), nil
+	// 如果计数器不存在，从数据库初始化
+	if exists.Val() == 0 {
+		var maxUser user_models.UserModel
+		err := l.svcCtx.DB.Select("uuid").Order("CAST(uuid AS UNSIGNED) DESC").First(&maxUser).Error
+		if err != nil && err.Error() != "record not found" {
+			return fmt.Errorf("查询数据库最大用户ID失败: %v", err)
+		}
+
+		var nextID int64 = minUserID
+		if maxUser.UUID != "" {
+			// 将字符串ID转换为数字
+			if currentMaxID, parseErr := strconv.ParseInt(maxUser.UUID, 10, 64); parseErr == nil {
+				nextID = currentMaxID + 1
+			}
+		}
+
+		// 设置Redis计数器
+		err = l.svcCtx.Redis.Set(userIDKey, nextID, 0).Err()
+		if err != nil {
+			return fmt.Errorf("设置Redis计数器失败: %v", err)
+		}
+
+		l.Logger.Infof("Redis计数器初始化完成: nextID=%d", nextID)
+	}
+
+	return nil
 }
 
 func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.UserCreateRes, error) {
