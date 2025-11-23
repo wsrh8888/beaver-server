@@ -86,9 +86,9 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	hashedPassword := pwd.HahPwd(in.Password)
 
 	// 生成随机昵称
-	nickname := utils.GenerateRandomString(8)
+	nickName := utils.GenerateRandomString(8)
 	if in.NickName != "" {
-		nickname = in.NickName
+		nickName = in.NickName
 	}
 
 	// 生成6位数字递增用户ID
@@ -112,7 +112,7 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		Email:    in.Email,
 		Phone:    in.Phone,
 		Source:   in.Source,
-		NickName: nickname,
+		NickName: nickName,
 		Abstract: "",
 		Version:  version,
 	}

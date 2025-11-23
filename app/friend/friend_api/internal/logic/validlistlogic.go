@@ -94,10 +94,10 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			// 我是发起方
 			info.UserID = fv.RevUserID
 			if userInfo, exists := userInfoMap[fv.RevUserID]; exists && userInfo != nil {
-				info.Nickname = userInfo.NickName
+				info.NickName = userInfo.NickName
 				info.Avatar = userInfo.Avatar
 			} else {
-				info.Nickname = "未知用户"
+				info.NickName = "未知用户"
 				info.Avatar = ""
 			}
 			info.Flag = "send"
@@ -106,10 +106,10 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			// 我是接收方
 			info.UserID = fv.SendUserID
 			if userInfo, exists := userInfoMap[fv.SendUserID]; exists && userInfo != nil {
-				info.Nickname = userInfo.NickName
+				info.NickName = userInfo.NickName
 				info.Avatar = userInfo.Avatar
 			} else {
-				info.Nickname = "未知用户"
+				info.NickName = "未知用户"
 				info.Avatar = ""
 			}
 			info.Flag = "receive"

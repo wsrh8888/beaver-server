@@ -166,7 +166,7 @@ type CreateMenuRes struct {
 }
 
 type CreateUserReq struct {
-	Nickname string `json:"nickname"`
+	NickName string `json:"nickName"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
 	Abstract string `json:"abstract,optional"`
@@ -944,7 +944,7 @@ type GetUserDetailReq struct {
 
 type GetUserDetailRes struct {
 	Id          string `json:"id"`
-	Nickname    string `json:"nickname"`
+	NickName    string `json:"nickName"`
 	FileName    string `json:"fileName"`
 	Email       string `json:"email"`
 	Abstract    string `json:"abstract"`
@@ -1214,7 +1214,7 @@ type UpdateMenuRes struct {
 
 type UpdateUserReq struct {
 	UserID   string  `path:"id"`
-	Nickname *string `json:"nickname,optional"`
+	NickName *string `json:"nickName,optional"`
 	Email    *string `json:"email,optional"`
 	FileName *string `json:"fileName,optional"`
 	Abstract *string `json:"abstract,optional"`
@@ -1226,7 +1226,7 @@ type UpdateUserRes struct {
 
 type UserInfo struct {
 	Id          string `json:"id"`
-	Nickname    string `json:"nickname"`
+	NickName    string `json:"nickName"`
 	Email       string `json:"email"`
 	Abstract    string `json:"abstract"`
 	FileName    string `json:"fileName"`

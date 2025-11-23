@@ -43,7 +43,7 @@ func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *t
 	l.Logger.Infof("获取用户详情成功: userID=%s", req.UserID)
 	return &types.GetUserDetailRes{
 		Id:          user.UUID,
-		Nickname:    user.NickName,
+		NickName:    user.NickName,
 		FileName:    user.Avatar,
 		Email:       user.Email,
 		Abstract:    user.Abstract,

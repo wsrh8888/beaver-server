@@ -121,10 +121,10 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 		}
 
 		if exists {
-			groupMember.Nickname = user.NickName
+			groupMember.NickName = user.NickName
 			groupMember.Avatar = user.Avatar
 		} else {
-			groupMember.Nickname = "未知用户"
+			groupMember.NickName = "未知用户"
 			groupMember.Avatar = ""
 		}
 

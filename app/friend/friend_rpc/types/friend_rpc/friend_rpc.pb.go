@@ -7,11 +7,12 @@
 package friend_rpc
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -785,7 +786,7 @@ func (x *GetFriendDetailReq) GetFriendIds() []string {
 type FriendDetailItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`      // 用户ID
-	Nickname      string                 `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`  // 用户昵称
+	NickName      string                 `protobuf:"bytes,2,opt,name=nickName,proto3" json:"nickName,omitempty"`  // 用户昵称
 	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`      // 用户头像
 	Notice        string                 `protobuf:"bytes,4,opt,name=notice,proto3" json:"notice,omitempty"`      // 好友备注
 	FriendAt      int64                  `protobuf:"varint,5,opt,name=friendAt,proto3" json:"friendAt,omitempty"` // 成为好友的时间
@@ -832,7 +833,7 @@ func (x *FriendDetailItem) GetUserId() string {
 
 func (x *FriendDetailItem) GetNickname() string {
 	if x != nil {
-		return x.Nickname
+		return x.NickName
 	}
 	return ""
 }

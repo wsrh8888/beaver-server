@@ -55,7 +55,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	for i, user := range users {
 		userItems[i] = types.UserSyncItem{
 			UserID:   user.UUID,
-			Nickname: user.NickName,
+			NickName: user.NickName,
 			Avatar:   user.Avatar,
 			Abstract: user.Abstract,
 			Phone:    user.Phone,

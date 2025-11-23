@@ -63,7 +63,7 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 
 	// 生成token，包含设备信息
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
-		Nickname: user.NickName,
+		NickName: user.NickName,
 		UserID:   user.UUID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
@@ -112,12 +112,12 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 // 通过邮箱创建新用户
 func (l *EmailLoginLogic) createUserByEmail(email string) (user_models.UserModel, error) {
 	// 生成随机昵称
-	nickname := fmt.Sprintf("用户%s", email[:strings.Index(email, "@")])
+	nickName := fmt.Sprintf("用户%s", email[:strings.Index(email, "@")])
 
 	// 创建用户
 	user := user_models.UserModel{
 		Email:    email,
-		NickName: nickname,
+		NickName: nickName,
 		UUID:     generateUUID(),
 		// 其他字段使用默认值
 	}

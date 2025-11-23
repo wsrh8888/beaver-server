@@ -96,7 +96,7 @@ func (l *GetFriendDetailLogic) GetFriendDetail(in *friend_rpc.GetFriendDetailReq
 
 		friendDetails = append(friendDetails, &friend_rpc.FriendDetailItem{
 			UserId:   friendId, // userInfoMap的key就是用户ID
-			Nickname: userInfo.NickName,
+			NickName: userInfo.NickName,
 			Avatar:   userInfo.Avatar,
 			Notice:   notice,
 			FriendAt: friendAt,

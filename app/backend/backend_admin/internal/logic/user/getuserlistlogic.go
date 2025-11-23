@@ -74,7 +74,7 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 	for _, user := range users {
 		list = append(list, types.UserInfo{
 			Id:          user.UUID,
-			Nickname:    user.NickName,
+			NickName:    user.NickName,
 			Email:       user.Email,
 			Abstract:    user.Abstract,
 			FileName:    user.Avatar,
