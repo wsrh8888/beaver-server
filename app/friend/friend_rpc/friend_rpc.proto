@@ -93,7 +93,7 @@ message GetFriendDetailReq {
 
 message FriendDetailItem {
   string userId = 1; // 用户ID
-  string nickname = 2; // 用户昵称
+  string nickName = 2; // 用户昵称
   string avatar = 3; // 用户头像
   string notice = 4; // 好友备注
   int64 friendAt = 5; // 成为好友的时间

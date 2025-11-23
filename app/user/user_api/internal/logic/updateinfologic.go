@@ -45,8 +45,8 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 
 	// 准备更新的字段
 	updateFields := make(map[string]interface{})
-	if req.Nickname != nil {
-		updateFields["nick_name"] = *req.Nickname
+	if req.NickName != nil {
+		updateFields["nick_name"] = *req.NickName
 	}
 	if req.Avatar != nil {
 		updateFields["avatar"] = *req.Avatar
@@ -127,7 +127,7 @@ func (l *UpdateInfoLogic) recordUserChangeLog(userID string, version int64, upda
 		var changeType string
 		switch field {
 		case "nick_name":
-			changeType = "nickname"
+			changeType = "nickName"
 		case "avatar":
 			changeType = "avatar"
 		case "abstract":

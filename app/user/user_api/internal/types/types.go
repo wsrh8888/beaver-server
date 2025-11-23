@@ -30,7 +30,7 @@ type UpdateEmailRes struct {
 
 type UpdateInfoReq struct {
 	UserID   string  `header:"Beaver-User-Id"`  // 用户ID，从请求头获取
-	Nickname *string `json:"nickName,optional"` // 新昵称（可选）
+	NickName *string `json:"nickName,optional"` // 新昵称（可选）
 	Avatar   *string `json:"avatar,optional"`   // 新头像URL（可选）
 	Abstract *string `json:"abstract,optional"` // 新个性签名（可选）
 	Gender   *int8   `json:"gender,optional"`   // 性别：1-男 2-女 0-未知（可选）
@@ -65,7 +65,7 @@ type UserInfoRes struct {
 
 type UserSyncItem struct {
 	UserID   string `json:"userId"`   // 用户ID
-	Nickname string `json:"nickname"` // 用户昵称
+	NickName string `json:"nickName"` // 用户昵称
 	Avatar   string `json:"avatar"`   // 用户头像
 	Abstract string `json:"abstract"` // 个性签名
 	Phone    string `json:"phone"`    // 手机号

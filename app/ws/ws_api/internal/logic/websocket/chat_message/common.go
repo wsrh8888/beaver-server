@@ -225,7 +225,7 @@ func buildResponseData(rpcResp *chat_rpc.SendMsgRes, originalMsg json.RawMessage
 		"sender": map[string]interface{}{
 			"userId":   rpcResp.Sender.UserId,
 			"avatar":   rpcResp.Sender.Avatar,
-			"nickname": rpcResp.Sender.Nickname,
+			"nickName": rpcResp.Sender.NickName,
 		},
 		"conversationType": rpcResp.ConversationType,
 		"createAt":         rpcResp.CreateAt,

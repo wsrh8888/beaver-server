@@ -59,7 +59,7 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (resp *types.Phon
 
 	// 生成token，包含设备信息
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
-		Nickname: user.NickName,
+		NickName: user.NickName,
 		UserID:   user.UUID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {

@@ -119,7 +119,7 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 	// 构造返回值
 	resp = &types.SearchRes{
 		UserID:         userInfo.UserId,
-		Nickname:       userInfo.NickName,
+		NickName:       userInfo.NickName,
 		Avatar:         userInfo.Avatar,
 		Abstract:       userDetail.Abstract,
 		IsFriend:       isFriend,

@@ -89,7 +89,22 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			}
 		}()
 
-		// 构建好友验证表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		// 获取发送者和接收者的用户信息
+		senderInfo, senderErr := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+			UserID: req.UserID,
+		})
+		if senderErr != nil {
+			l.Logger.Errorf("获取发送者用户信息失败: %v", senderErr)
+		}
+
+		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+			UserID: req.FriendID,
+		})
+		if receiverErr != nil {
+			l.Logger.Errorf("获取接收者用户信息失败: %v", receiverErr)
+		}
+
+		// 构建好友验证表更新数据
 		verifyUpdates := map[string]interface{}{
 			"table": "friend_verify",
 			"data": []map[string]interface{}{
@@ -100,14 +115,42 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			},
 		}
 
-		// 通知接收方有新的好友验证请求
+		// 构建用户表更新数据数组
+		var userUpdates []map[string]interface{}
+		if senderInfo != nil {
+			userUpdates = append(userUpdates, map[string]interface{}{
+				"table": "users",
+				"data": []map[string]interface{}{
+					{
+						"userId":  senderInfo.UserInfo.UserId,
+						"version": senderInfo.UserInfo.Version,
+					},
+				},
+			})
+		}
+		if receiverInfo != nil {
+			userUpdates = append(userUpdates, map[string]interface{}{
+				"table": "users",
+				"data": []map[string]interface{}{
+					{
+						"userId":  senderInfo.UserInfo.UserId,
+						"version": senderInfo.UserInfo.Version,
+					},
+				},
+			})
+		}
+
+		// 合并所有表更新
+		tableUpdates := append([]map[string]interface{}{verifyUpdates}, userUpdates...)
+
+		// 通知接收方
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.UserID, req.FriendID, map[string]interface{}{
-			"tableUpdates": []map[string]interface{}{verifyUpdates},
+			"tableUpdates": tableUpdates,
 		}, "")
 
-		// 通知发送方请求发送成功
+		// 通知发送方
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.FriendID, req.UserID, map[string]interface{}{
-			"tableUpdates": []map[string]interface{}{verifyUpdates},
+			"tableUpdates": tableUpdates,
 		}, "")
 
 		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, uuid=%s", req.UserID, req.FriendID, nextVersion, verifyModel.UUID)

@@ -141,7 +141,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		Sender: types.Sender{
 			UserID:   rpcResp.Sender.UserId,
 			Avatar:   rpcResp.Sender.Avatar,
-			Nickname: rpcResp.Sender.Nickname,
+			NickName: rpcResp.Sender.NickName,
 		},
 		CreateAt:   rpcResp.CreateAt,
 		MsgPreview: rpcResp.MsgPreview,
