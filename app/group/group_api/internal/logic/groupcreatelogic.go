@@ -50,14 +50,12 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		GroupID:   groupID,
 		Version:   groupVersion, // 该群的独立版本
 	}
-	var groupUserList = []string{req.UserID}
 	if len(req.UserIdList) == 0 {
 		return nil, errors.New("请选择用户")
 	}
 
-	for _, u := range req.UserIdList {
-		groupUserList = append(groupUserList, u)
-	}
+	var groupUserList = []string{req.UserID}
+	groupUserList = append(groupUserList, req.UserIdList...)
 
 	groupModel.Title = req.Title
 
@@ -166,14 +164,42 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			}
 		}()
 
-		// 通过ws推送给群成员 - 群组信息同步
+		// 通过ws推送给群成员 - 群组信息同步（推送groups和group_members两张表的更新）
+		// 构建所有群成员的数据（包含每个成员的版本号）
+		var memberData []map[string]interface{}
+		for _, rpcMember := range response.Members {
+			// 为每个成员查找其对应的版本号
+			var memberVersion int64 = 0
+			for _, createdMember := range members {
+				if createdMember.UserID == rpcMember.UserID {
+					memberVersion = createdMember.Version
+					break
+				}
+			}
+
+			memberData = append(memberData, map[string]interface{}{
+				"version": memberVersion,
+				"groupId": groupModel.GroupID,
+				"userId":  rpcMember.UserID,
+			})
+		}
+
+		// 推送给每个群成员相同的完整数据
 		for _, member := range response.Members {
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
-				"table": "groups",
-				"data": []map[string]interface{}{
+				"tables": []map[string]interface{}{
 					{
-						"version": groupVersion,
-						"groupId": groupModel.GroupID,
+						"table": "groups",
+						"data": []map[string]interface{}{
+							{
+								"version": groupVersion,
+								"groupId": groupModel.GroupID,
+							},
+						},
+					},
+					{
+						"table": "group_members",
+						"data":  memberData, // 推送所有群成员的信息
 					},
 				},
 			}, groupModel.GroupID)
