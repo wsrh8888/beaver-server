@@ -23,8 +23,9 @@ const (
 	FriendVerifyReceive Type = "friend_verify_receive" // 服务端->客户端 好友验证信息同步
 )
 
+// -------------------------------------------------------------------------------------
+
 const (
-	// -------------------------------------------------------------------------------------
 	GroupReceive            Type = "group_receive"              // 服务端->客户端 群组信息同步
 	GroupJoinRequestReceive Type = "group_join_request_receive" // 服务端->客户端 群成员添加请求
 	GroupMemberReceive      Type = "group_member_receive"       // 服务端->客户端 群成员变动（加入，离开、被踢出等）

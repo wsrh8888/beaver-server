@@ -81,6 +81,8 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		return nil, errors.New("移除成员失败")
 	}
 
+	// 注意：群成员移除时，groups 表信息没有变化，不需要更新版本号
+
 	// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
 
 	// 异步通知群成员
@@ -97,29 +99,46 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 			return
 		}
 
-		// 通过ws推送给群成员 - 群成员变动通知
+		// 构建被移除成员的数据列表
+		var removedMemberData []map[string]interface{}
+		for _, memberID := range req.UserIds {
+			removedMemberData = append(removedMemberData, map[string]interface{}{
+				"version": memberVersion,
+				"groupId": req.GroupID,
+				"userId":  memberID,
+			})
+		}
+
+		// 通知所有人（当前群成员 + 被移除的成员）：group_members变化
+		// 前端收到通知后，自己判断是否还在这群里，如果不在了就删除群信息
+
+		// 去重，避免重复通知
+		memberMap := make(map[string]bool)
+		var allMembers []string
+
+		// 添加当前群成员
 		for _, member := range response.Members {
-			if member.UserID != req.UserID { // 不通知操作者自己
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
-					"table": "group_members",
-					"data": []map[string]interface{}{
-						{
-							"version": memberVersion,
-							"groupId": req.GroupID,
-						},
-					},
-				}, "")
+			if !memberMap[member.UserID] {
+				memberMap[member.UserID] = true
+				allMembers = append(allMembers, member.UserID)
 			}
 		}
 
-		// 通知被移除的成员 - 群成员变动通知
+		// 添加被移除的成员
 		for _, memberID := range req.UserIds {
+			if !memberMap[memberID] {
+				memberMap[memberID] = true
+				allMembers = append(allMembers, memberID)
+			}
+		}
+
+		// 统一给所有人发送相同的消息
+		for _, memberID := range allMembers {
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, memberID, map[string]interface{}{
-				"table": "group_members",
-				"data": []map[string]interface{}{
+				"tables": []map[string]interface{}{
 					{
-						"version": memberVersion,
-						"groupId": req.GroupID,
+						"table": "group_members",
+						"data":  removedMemberData, // 推送所有被移除成员的信息列表
 					},
 				},
 			}, "")
