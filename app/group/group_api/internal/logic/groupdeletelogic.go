@@ -46,48 +46,41 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		return nil, errors.New("获取版本号失败")
 	}
 
-	//  群成员要删掉
-	var memberList []group_models.GroupMemberModel
-	err = l.svcCtx.DB.Find(&memberList, "group_id = ?", req.GroupID).Delete(&memberList).Error
-	if err != nil {
-		return nil, errors.New("删除群成员失败")
-	}
-
 	// 获取群成员列表，用于推送通知
-	memberList = make([]group_models.GroupMemberModel, 0)
+	var memberList []group_models.GroupMemberModel
 	err = l.svcCtx.DB.Find(&memberList, "group_id = ?", req.GroupID).Error
 	if err != nil {
 		return nil, errors.New("获取群成员失败")
 	}
 
-	// 群成员要删掉
-	err = l.svcCtx.DB.Where("group_id = ?", req.GroupID).Delete(&group_models.GroupMemberModel{}).Error
+	// 将群组状态改为解散（逻辑删除），并更新版本号
+	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+		Where("group_id = ?", req.GroupID).
+		Updates(map[string]interface{}{
+			"status":  3, // 3=解散
+			"version": groupVersion,
+		}).Error
 	if err != nil {
-		return nil, errors.New("删除群成员失败")
-	}
-
-	// 群组要删掉
-	var group group_models.GroupModel
-	err = l.svcCtx.DB.Take(&group, req.GroupID).Delete(&group).Error
-	if err != nil {
-		return nil, errors.New("删除群组失败")
+		return nil, errors.New("解散群组失败")
 	}
 
 	// 异步通知所有成员群组已被解散
 	go func() {
 		// 推送给所有成员 - 群组信息同步（标记为删除状态）
 		for _, member := range memberList {
-			if member.UserID != req.UserID { // 不通知操作者自己
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
-					"table": "groups",
-					"data": []map[string]interface{}{
-						{
-							"version": groupVersion,
-							"groupId": req.GroupID,
+			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
+				"tables": []map[string]interface{}{
+					{
+						"table": "groups",
+						"data": []map[string]interface{}{
+							{
+								"version": groupVersion,
+								"groupId": req.GroupID,
+							},
 						},
 					},
-				}, req.GroupID)
-			}
+				},
+			}, "")
 		}
 	}()
 
