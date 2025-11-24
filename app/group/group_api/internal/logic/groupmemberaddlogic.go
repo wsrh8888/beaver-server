@@ -153,29 +153,61 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			newMemberIds[newMemberID] = true
 		}
 
-		// 通过ws推送给已存在的群成员 - 群成员变动通知
+		// 获取群组版本号（用于通知群组信息变化）
+		groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+		if groupVersion == -1 {
+			l.Logger.Errorf("获取群组版本号失败")
+			// 这里不影响主要功能，只是日志记录失败
+		}
+
+		// 预构建成员版本号映射表，避免重复查找
+		memberVersionMap := make(map[string]int64)
+		for _, member := range append(newMembers, updateMembers...) {
+			memberVersionMap[member.UserID] = member.Version
+		}
+
+		// 1. 通知已在群的成员：group_members变化（成员列表增加了）
+		// 构建新加入成员的数据列表
+		var newMemberData []map[string]interface{}
+		for _, newMemberID := range req.UserIds {
+			newMemberVersion := memberVersionMap[newMemberID] // 直接从映射表获取
+
+			newMemberData = append(newMemberData, map[string]interface{}{
+				"version": newMemberVersion,
+				"groupId": req.GroupID,
+				"userId":  newMemberID,
+			})
+		}
+
 		for _, member := range response.Members {
-			if member.UserID != req.UserID && !newMemberIds[member.UserID] { // 不通知操作者自己和新加入的成员
+			if !newMemberIds[member.UserID] { // 不通知新加入的成员（已在群的所有成员都要收到通知，包括操作者自己）
 				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
-					"table": "group_members",
-					"data": []map[string]interface{}{
+					"tables": []map[string]interface{}{
 						{
-							"version": lastVersion,
-							"groupId": req.GroupID,
+							"table": "group_members",
+							"data":  newMemberData, // 推送所有新加入成员的信息列表
 						},
 					},
 				}, "")
 			}
 		}
 
-		// 通知新加入的成员 - 群成员变动通知
+		// 2. 通知新加入的成员：group_members变化（他们成为了成员）+ groups变化（群基本信息）
 		for _, newMemberID := range req.UserIds {
 			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, newMemberID, map[string]interface{}{
-				"table": "group_members",
-				"data": []map[string]interface{}{
+				"tables": []map[string]interface{}{
 					{
-						"version": lastVersion,
-						"groupId": req.GroupID,
+						"table": "groups",
+						"data": []map[string]interface{}{
+							{
+								"version": groupVersion,
+								"groupId": req.GroupID,
+							},
+						},
+					},
+					{
+						"table": "group_members",
+						"data":  newMemberData, // 推送所有新加入成员的信息列表
 					},
 				},
 			}, "")
