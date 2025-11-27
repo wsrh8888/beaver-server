@@ -22,4 +22,5 @@ type Config struct {
 	UserRpc   zrpc.RpcClientConf
 	ChatRpc   zrpc.RpcClientConf
 	MomentRpc zrpc.RpcClientConf
+	EmojiRpc  zrpc.RpcClientConf
 }

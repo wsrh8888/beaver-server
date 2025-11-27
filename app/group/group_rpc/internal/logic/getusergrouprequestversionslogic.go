@@ -83,85 +83,74 @@ func (l *GetUserGroupRequestVersionsLogic) getUserGroupRequestVersions(userID st
 	return result, nil
 }
 
-// 获取用户作为申请者发出的申请版本
+// 获取用户作为申请者发出的申请版本 - 优化查询性能
 func (l *GetUserGroupRequestVersionsLogic) getSentRequestVersions(userID string, since int64) ([]*group_rpc.GroupRequestVersionItem, error) {
-	var requests []group_models.GroupJoinRequestModel
-	query := l.svcCtx.DB.Where("applicant_user_id = ? AND status = 0", userID)
+	var results []struct {
+		GroupID string
+		Version int64
+	}
+
+	query := l.svcCtx.DB.Model(&group_models.GroupJoinRequestModel{}).
+		Select("group_id, MAX(version) as version").
+		Where("applicant_user_id = ? AND status = 0", userID)
+
 	if since > 0 {
 		sinceTime := time.UnixMilli(since)
 		query = query.Where("created_at > ?", sinceTime)
 	}
 
-	err := query.Find(&requests).Error
+	query = query.Group("group_id")
+
+	err := query.Scan(&results).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// 按群组聚合版本
-	versionMap := make(map[string]int64)
-	for _, req := range requests {
-		if currentVersion, exists := versionMap[req.GroupID]; !exists || req.Version > currentVersion {
-			versionMap[req.GroupID] = req.Version
-		}
-	}
-
-	var result []*group_rpc.GroupRequestVersionItem
-	for groupID, version := range versionMap {
-		result = append(result, &group_rpc.GroupRequestVersionItem{
-			GroupID: groupID,
-			Version: version,
+	// 转换为响应格式
+	var response []*group_rpc.GroupRequestVersionItem
+	for _, item := range results {
+		response = append(response, &group_rpc.GroupRequestVersionItem{
+			GroupID: item.GroupID,
+			Version: item.Version,
 		})
 	}
 
-	return result, nil
+	return response, nil
 }
 
-// 获取用户作为管理者收到的申请版本
+// 获取用户作为管理者收到的申请版本 - 优化查询性能
 func (l *GetUserGroupRequestVersionsLogic) getManagedRequestVersions(userID string, since int64) ([]*group_rpc.GroupRequestVersionItem, error) {
-	// 1. 获取用户管理的群组
-	var memberships []group_models.GroupMemberModel
-	err := l.svcCtx.DB.Where("user_id = ? AND role IN (1, 2)", userID).Find(&memberships).Error
-	if err != nil {
-		return nil, err
+	var results []struct {
+		GroupID string
+		Version int64
 	}
 
-	if len(memberships) == 0 {
-		return []*group_rpc.GroupRequestVersionItem{}, nil
-	}
+	// 使用JOIN查询避免IN子查询，提高性能
+	query := l.svcCtx.DB.Table("group_join_request_models gjr").
+		Select("gjr.group_id, MAX(gjr.version) as version").
+		Joins("JOIN group_member_models gm ON gjr.group_id = gm.group_id").
+		Where("gm.user_id = ? AND gm.role IN (1, 2)", userID)
 
-	var managedGroupIDs []string
-	for _, membership := range memberships {
-		managedGroupIDs = append(managedGroupIDs, membership.GroupID)
-	}
-
-	// 2. 获取这些群组的申请版本
-	var requests []group_models.GroupJoinRequestModel
-	query := l.svcCtx.DB.Where("group_id IN (?)", managedGroupIDs)
 	if since > 0 {
 		sinceTime := time.UnixMilli(since)
-		query = query.Where("created_at > ?", sinceTime)
+		query = query.Where("gjr.created_at > ?", sinceTime)
 	}
 
-	err = query.Find(&requests).Error
+	query = query.Group("gjr.group_id")
+
+	err := query.Scan(&results).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// 按群组聚合版本
-	versionMap := make(map[string]int64)
-	for _, req := range requests {
-		if currentVersion, exists := versionMap[req.GroupID]; !exists || req.Version > currentVersion {
-			versionMap[req.GroupID] = req.Version
-		}
-	}
-
-	var result []*group_rpc.GroupRequestVersionItem
-	for groupID, version := range versionMap {
-		result = append(result, &group_rpc.GroupRequestVersionItem{
-			GroupID: groupID,
-			Version: version,
+	// 转换为响应格式
+	var response []*group_rpc.GroupRequestVersionItem
+	for _, item := range results {
+		response = append(response, &group_rpc.GroupRequestVersionItem{
+			GroupID: item.GroupID,
+			Version: item.Version,
 		})
 	}
 
-	return result, nil
+	return response, nil
 }

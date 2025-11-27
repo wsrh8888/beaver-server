@@ -3,6 +3,7 @@ package svc
 import (
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/datasync/datasync_api/internal/config"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
@@ -23,6 +24,7 @@ type ServiceContext struct {
 	UserRpc   user_rpc.UserClient
 	ChatRpc   chat_rpc.ChatClient
 	MomentRpc moment_rpc.MomentClient
+	EmojiRpc  emoji_rpc.EmojiClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -37,5 +39,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:   user_rpc.NewUserClient(zrpc.MustNewClient(c.UserRpc).Conn()),
 		ChatRpc:   chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc).Conn()),
 		MomentRpc: moment_rpc.NewMomentClient(zrpc.MustNewClient(c.MomentRpc).Conn()),
+		EmojiRpc:  emoji_rpc.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc).Conn()),
 	}
 }
