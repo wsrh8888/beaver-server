@@ -5,7 +5,8 @@ import "beaver/common/models"
 // 用户收藏表情包合集
 type EmojiPackageCollect struct {
 	models.Model
-	UserID    string `json:"userId"`    // 用户ID
-	PackageID uint   `json:"packageId"` // 表情包ID
-	// 注意：移除外键关联，改用关联查询
+	UUID      string `gorm:"size:64;unique;index" json:"uuid"`        // 全局唯一标识符，用于前端同步
+	UserID    string `json:"userId"`                                  // 用户ID
+	PackageID uint   `json:"packageId"`                               // 表情包ID
+	Version   int64  `gorm:"not null;default:0;index" json:"version"` // 基于userId递增
 }

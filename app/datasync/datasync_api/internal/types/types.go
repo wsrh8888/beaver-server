@@ -16,6 +16,31 @@ type ChatUserConversationVersionItem struct {
 	Version        int64  `json:"version"`        // 用户会话设置版本号
 }
 
+type EmojiCollectVersionItem struct {
+	Id      string `json:"id"`      // 收藏记录UUID
+	Version int64  `json:"version"` // 收藏版本号
+}
+
+type EmojiPackageCollectVersionItem struct {
+	Id      string `json:"id"`      // 收藏记录UUID
+	Version int64  `json:"version"` // 收藏版本号
+}
+
+type EmojiPackageContentVersionItem struct {
+	PackageId uint32 `json:"packageId"` // 表情包ID
+	Version   int64  `json:"version"`   // 表情包内容版本号
+}
+
+type EmojiPackageVersionItem struct {
+	Id      uint32 `json:"id"`      // 表情包ID
+	Version int64  `json:"version"` // 表情包版本号
+}
+
+type EmojiVersionItem struct {
+	Id      uint32 `json:"id"`      // 表情ID
+	Version int64  `json:"version"` // 表情版本号
+}
+
 type FriendVerifyVersionItem struct {
 	UUID    string `json:"uuid"`    // 验证记录UUID
 	Version int64  `json:"version"` // 验证记录版本号
@@ -65,6 +90,20 @@ type GetSyncChatUserConversationsReq struct {
 type GetSyncChatUserConversationsRes struct {
 	UserConversationVersions []ChatUserConversationVersionItem `json:"userConversationVersions"` // 变更的用户会话设置版本摘要
 	ServerTimestamp          int64                             `json:"serverTimestamp"`          // 服务端处理时间戳
+}
+
+type GetSyncEmojiCollectsReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+}
+
+type GetSyncEmojiCollectsRes struct {
+	EmojiCollectVersions        []EmojiCollectVersionItem        `json:"emojiCollectVersions"`        // 用户收藏的表情变更摘要
+	EmojiPackageCollectVersions []EmojiPackageCollectVersionItem `json:"emojiPackageCollectVersions"` // 用户收藏的表情包变更摘要
+	EmojiVersions               []EmojiVersionItem               `json:"emojiVersions"`               // 表情数据变更摘要
+	EmojiPackageVersions        []EmojiPackageVersionItem        `json:"emojiPackageVersions"`        // 表情包数据变更摘要
+	EmojiPackageContentVersions []EmojiPackageContentVersionItem `json:"emojiPackageContentVersions"` // 表情包内容变更摘要
+	ServerTimestamp             int64                            `json:"serverTimestamp"`             // 服务端处理时间戳
 }
 
 type GetSyncFriendVerifiesReq struct {

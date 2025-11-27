@@ -17,23 +17,28 @@ FriendRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: friendrpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒
 GroupRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒
 UserRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒
 ChatRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: chatrpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒
 MomentRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: momentrpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒
