@@ -43,27 +43,26 @@ func (l *GetMomentCommentVersionsLogic) GetMomentCommentVersions(in *moment.GetM
 
 	var versions []*moment.MomentCommentVersionItem
 
-	// 查询每个用户的最新评论版本号（按动态发布者分组）
-	for _, userId := range followeeIds {
-		// 查询该用户作为动态发布者收到的评论的最大版本号
-		var maxVersion int64
-		err := l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
-			Where("moment_user_id = ? AND is_deleted = false", userId).
-			Select("COALESCE(MAX(version), 0)").
-			Scan(&maxVersion).Error
+	// 查询好友（包括自己）的动态在指定时间之后收到的评论
+	var comments []moment_models.MomentCommentModel
+	err := l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
+		Where("moment_user_id IN (?) AND is_deleted = false AND updated_at > ?", followeeIds, time.UnixMilli(in.Since)).
+		Find(&comments).Error
 
-		if err != nil {
-			l.Errorf("查询用户 %s 的评论版本号失败: %v", userId, err)
-			continue
-		}
+	if err != nil {
+		l.Errorf("查询评论版本失败: %v", err)
+		return &moment.GetMomentCommentVersionsRes{
+			MomentCommentVersions: []*moment.MomentCommentVersionItem{},
+			ServerTimestamp:       time.Now().UnixMilli(),
+		}, nil
+	}
 
-		// 如果版本号大于请求的since时间戳，则返回
-		if maxVersion > in.Since {
-			versions = append(versions, &moment.MomentCommentVersionItem{
-				UserId:  userId,
-				Version: maxVersion,
-			})
-		}
+	// 构建版本摘要
+	for _, comment := range comments {
+		versions = append(versions, &moment.MomentCommentVersionItem{
+			Uuid:    comment.UUID,
+			Version: comment.Version,
+		})
 	}
 
 	return &moment.GetMomentCommentVersionsRes{

@@ -43,27 +43,26 @@ func (l *GetMomentVersionsLogic) GetMomentVersions(in *moment.GetMomentVersionsR
 
 	var versions []*moment.MomentVersionItem
 
-	// 查询每个用户的最新版本号
-	for _, userId := range followeeIds {
-		// 查询该用户动态的最大版本号
-		var maxVersion int64
-		err := l.svcCtx.DB.Model(&moment_models.MomentModel{}).
-			Where("user_id = ? AND is_deleted = false", userId).
-			Select("COALESCE(MAX(version), 0)").
-			Scan(&maxVersion).Error
+	// 查询好友（包括自己）在指定时间之后有更新的动态
+	var moments []moment_models.MomentModel
+	err := l.svcCtx.DB.Model(&moment_models.MomentModel{}).
+		Where("user_id IN (?) AND is_deleted = false AND updated_at > ?", followeeIds, time.UnixMilli(in.Since)).
+		Find(&moments).Error
 
-		if err != nil {
-			l.Errorf("查询用户 %s 的动态版本号失败: %v", userId, err)
-			continue
-		}
+	if err != nil {
+		l.Errorf("查询动态版本失败: %v", err)
+		return &moment.GetMomentVersionsRes{
+			MomentVersions:  []*moment.MomentVersionItem{},
+			ServerTimestamp: time.Now().UnixMilli(),
+		}, nil
+	}
 
-		// 如果版本号大于请求的since时间戳，则返回
-		if maxVersion > in.Since {
-			versions = append(versions, &moment.MomentVersionItem{
-				UserId:  userId,
-				Version: maxVersion,
-			})
-		}
+	// 构建版本摘要
+	for _, moment := range moments {
+		versions = append(versions, &moment.MomentVersionItem{
+			Uuid:    moment.UUID,
+			Version: moment.Version,
+		})
 	}
 
 	return &moment.GetMomentVersionsRes{
