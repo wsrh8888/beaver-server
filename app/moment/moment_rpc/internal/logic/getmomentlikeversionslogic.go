@@ -43,27 +43,26 @@ func (l *GetMomentLikeVersionsLogic) GetMomentLikeVersions(in *moment.GetMomentL
 
 	var versions []*moment.MomentLikeVersionItem
 
-	// 查询每个用户的最新点赞版本号（按动态发布者分组）
-	for _, userId := range followeeIds {
-		// 查询该用户作为动态发布者收到的点赞的最大版本号
-		var maxVersion int64
-		err := l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
-			Where("moment_user_id = ? AND is_deleted = false", userId).
-			Select("COALESCE(MAX(version), 0)").
-			Scan(&maxVersion).Error
+	// 查询好友（包括自己）的动态在指定时间之后收到的点赞
+	var likes []moment_models.MomentLikeModel
+	err := l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
+		Where("moment_user_id IN (?) AND is_deleted = false AND updated_at > ?", followeeIds, time.UnixMilli(in.Since)).
+		Find(&likes).Error
 
-		if err != nil {
-			l.Errorf("查询用户 %s 的点赞版本号失败: %v", userId, err)
-			continue
-		}
+	if err != nil {
+		l.Errorf("查询点赞版本失败: %v", err)
+		return &moment.GetMomentLikeVersionsRes{
+			MomentLikeVersions: []*moment.MomentLikeVersionItem{},
+			ServerTimestamp:    time.Now().UnixMilli(),
+		}, nil
+	}
 
-		// 如果版本号大于请求的since时间戳，则返回
-		if maxVersion > in.Since {
-			versions = append(versions, &moment.MomentLikeVersionItem{
-				UserId:  userId,
-				Version: maxVersion,
-			})
-		}
+	// 构建版本摘要
+	for _, like := range likes {
+		versions = append(versions, &moment.MomentLikeVersionItem{
+			Uuid:    like.UUID,
+			Version: like.Version,
+		})
 	}
 
 	return &moment.GetMomentLikeVersionsRes{

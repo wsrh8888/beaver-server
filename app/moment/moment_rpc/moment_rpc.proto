@@ -12,7 +12,7 @@ message GetMomentVersionsReq {
 
 // 动态版本项
 message MomentVersionItem {
-  string userId = 1; // 动态发布者ID
+  string uuid = 1; // 动态UUID
   int64 version = 2; // 版本号
 }
 
@@ -30,7 +30,7 @@ message GetMomentCommentVersionsReq {
 
 // 动态评论版本项
 message MomentCommentVersionItem {
-  string userId = 1; // ⭐ 动态发布者ID（按发布者分组）
+  string uuid = 1; // 评论UUID
   int64 version = 2; // 版本号
 }
 
@@ -48,7 +48,7 @@ message GetMomentLikeVersionsReq {
 
 // 动态点赞版本项
 message MomentLikeVersionItem {
-  string userId = 1; // ⭐ 动态发布者ID（按发布者分组）
+  string uuid = 1; // 点赞UUID
   int64 version = 2; // 版本号
 }
 

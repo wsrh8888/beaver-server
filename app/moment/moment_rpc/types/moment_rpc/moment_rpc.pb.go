@@ -77,7 +77,7 @@ func (x *GetMomentVersionsReq) GetSince() int64 {
 // 动态版本项
 type MomentVersionItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`    // 动态发布者ID
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 动态UUID
 	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -113,9 +113,9 @@ func (*MomentVersionItem) Descriptor() ([]byte, []int) {
 	return file_moment_rpc_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MomentVersionItem) GetUserId() string {
+func (x *MomentVersionItem) GetUuid() string {
 	if x != nil {
-		return x.UserId
+		return x.Uuid
 	}
 	return ""
 }
@@ -236,7 +236,7 @@ func (x *GetMomentCommentVersionsReq) GetSince() int64 {
 // 动态评论版本项
 type MomentCommentVersionItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`    // ⭐ 动态发布者ID（按发布者分组）
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 评论UUID
 	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -272,9 +272,9 @@ func (*MomentCommentVersionItem) Descriptor() ([]byte, []int) {
 	return file_moment_rpc_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *MomentCommentVersionItem) GetUserId() string {
+func (x *MomentCommentVersionItem) GetUuid() string {
 	if x != nil {
-		return x.UserId
+		return x.Uuid
 	}
 	return ""
 }
@@ -395,7 +395,7 @@ func (x *GetMomentLikeVersionsReq) GetSince() int64 {
 // 动态点赞版本项
 type MomentLikeVersionItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`    // ⭐ 动态发布者ID（按发布者分组）
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 点赞UUID
 	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -431,9 +431,9 @@ func (*MomentLikeVersionItem) Descriptor() ([]byte, []int) {
 	return file_moment_rpc_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *MomentLikeVersionItem) GetUserId() string {
+func (x *MomentLikeVersionItem) GetUuid() string {
 	if x != nil {
-		return x.UserId
+		return x.Uuid
 	}
 	return ""
 }
@@ -506,27 +506,27 @@ const file_moment_rpc_proto_rawDesc = "" +
 	"moment_rpc\"D\n" +
 	"\x14GetMomentVersionsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"E\n" +
-	"\x11MomentVersionItem\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"A\n" +
+	"\x11MomentVersionItem\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"\x87\x01\n" +
 	"\x14GetMomentVersionsRes\x12E\n" +
 	"\x0emomentVersions\x18\x01 \x03(\v2\x1d.moment_rpc.MomentVersionItemR\x0emomentVersions\x12(\n" +
 	"\x0fserverTimestamp\x18\x02 \x01(\x03R\x0fserverTimestamp\"K\n" +
 	"\x1bGetMomentCommentVersionsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"L\n" +
-	"\x18MomentCommentVersionItem\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"H\n" +
+	"\x18MomentCommentVersionItem\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"\xa3\x01\n" +
 	"\x1bGetMomentCommentVersionsRes\x12Z\n" +
 	"\x15momentCommentVersions\x18\x01 \x03(\v2$.moment_rpc.MomentCommentVersionItemR\x15momentCommentVersions\x12(\n" +
 	"\x0fserverTimestamp\x18\x02 \x01(\x03R\x0fserverTimestamp\"H\n" +
 	"\x18GetMomentLikeVersionsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"I\n" +
-	"\x15MomentLikeVersionItem\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"E\n" +
+	"\x15MomentLikeVersionItem\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"\x97\x01\n" +
 	"\x18GetMomentLikeVersionsRes\x12Q\n" +
 	"\x12momentLikeVersions\x18\x01 \x03(\v2!.moment_rpc.MomentLikeVersionItemR\x12momentLikeVersions\x12(\n" +
