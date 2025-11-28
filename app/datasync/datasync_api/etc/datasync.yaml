@@ -42,3 +42,9 @@ MomentRpc:
     - 127.0.0.1:2379
     Key: momentrpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
+EmojiRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: emojirpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒

@@ -11,5 +11,5 @@ type EmojiPackage struct {
 	Description string `json:"description"`                             // 表情包描述
 	Type        string `json:"type"`                                    // 类型：official-官方，user-用户自定义
 	Status      int8   `gorm:"default:1" json:"status"`                 // 状态：1=正常 2=审核中 3=违规禁用
-	Version     int64  `gorm:"not null;default:0;index" json:"version"` // 表情包内容版本号（内容变化时递增）
+	Version     int64  `gorm:"not null;default:0;index" json:"version"` // 表情包UUID版本号， 每次修改内存数据时递增
 }

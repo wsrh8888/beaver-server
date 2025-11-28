@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"time"
 
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
@@ -30,9 +31,10 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *emoji_rpc.GetEmojiPackagesR
 	query := l.svcCtx.DB.Where("(type = ? OR user_id = ?) AND status = ?",
 		"official", in.UserId, 1) // 1=正常状态
 
-	// 增量同步：只返回版本号大于since的记录
+	// 增量同步：只返回更新时间大于since的记录
 	if in.Since > 0 {
-		query = query.Where("version > ?", in.Since)
+		sinceTime := time.UnixMilli(in.Since)
+		query = query.Where("updated_at > ?", sinceTime)
 	}
 
 	err := query.Find(&packages).Error
@@ -41,16 +43,19 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *emoji_rpc.GetEmojiPackagesR
 		return nil, err
 	}
 
-	l.Infof("查询到用户 %s 的 %d 个表情包版本信息", in.UserId, len(packages))
+	l.Infof("查询到 %d 个表情包版本变更", len(packages))
 
-	// 转换为响应格式
-	var packageVersions []*emoji_rpc.GetEmojiPackagesRes_EmojiPackageVersion
+	// 转换为版本摘要格式
+	var packageVersions []*emoji_rpc.EmojiPackageVersionItem
 	for _, pkg := range packages {
-		packageVersions = append(packageVersions, &emoji_rpc.GetEmojiPackagesRes_EmojiPackageVersion{
-			Id:      uint32(pkg.ID),
+		packageVersions = append(packageVersions, &emoji_rpc.EmojiPackageVersionItem{
+			Id:      pkg.UUID,
 			Version: pkg.Version,
 		})
 	}
 
-	return &emoji_rpc.GetEmojiPackagesRes{PackageVersions: packageVersions}, nil
+	return &emoji_rpc.GetEmojiPackagesRes{
+		EmojiPackageVersions: packageVersions,
+		ServerTimestamp:      time.Now().UnixMilli(),
+	}, nil
 }

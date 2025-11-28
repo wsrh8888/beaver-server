@@ -17,7 +17,7 @@ type GetSyncEmojisLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取所有需要更新的表情版本
+// 获取表情基础数据版本信息
 func NewGetSyncEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncEmojisLogic {
 	return &GetSyncEmojisLogic{
 		Logger: logx.WithContext(ctx),
@@ -44,7 +44,7 @@ func (l *GetSyncEmojisLogic) GetSyncEmojis(req *types.GetSyncEmojisReq) (resp *t
 	if emojiResp.EmojiVersions != nil {
 		for _, emoji := range emojiResp.EmojiVersions {
 			emojiVersions = append(emojiVersions, types.EmojiVersionItem{
-				Id:      emoji.Id,
+				Uuid:    emoji.Uuid,
 				Version: emoji.Version,
 			})
 		}

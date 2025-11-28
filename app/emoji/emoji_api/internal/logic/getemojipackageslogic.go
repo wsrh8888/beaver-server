@@ -55,20 +55,20 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 
 	// 6. 获取收藏状态和收藏数
-	packageIDs := make([]uint, len(packages))
+	packageUUIDs := make([]string, len(packages))
 	for i, p := range packages {
-		packageIDs[i] = p.Id
+		packageUUIDs[i] = p.UUID
 	}
 
 	// 获取收藏数
-	collectCounts := make(map[uint]int64)
+	collectCounts := make(map[string]int64)
 	var collects []struct {
-		PackageID uint
+		PackageID string
 		Count     int64
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ?", packageIDs).
+		Where("package_id IN ? AND is_deleted = ?", packageUUIDs, false).
 		Group("package_id").
 		Find(&collects).Error
 	if err != nil {
@@ -79,14 +79,14 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 
 	// 获取表情数量
-	emojiCounts := make(map[uint]int64)
+	emojiCounts := make(map[string]int64)
 	var emojiCountsData []struct {
-		PackageID uint
+		PackageID string
 		Count     int64
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageEmoji{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ?", packageIDs).
+		Where("package_id IN ?", packageUUIDs).
 		Group("package_id").
 		Find(&emojiCountsData).Error
 	if err != nil {
@@ -97,10 +97,10 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 
 	// 获取当前用户的收藏状态
-	userCollects := make(map[uint]bool)
-	if len(packageIDs) > 0 {
+	userCollects := make(map[string]bool)
+	if len(packageUUIDs) > 0 {
 		var userCollectList []emoji_models.EmojiPackageCollect
-		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageIDs).
+		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ? AND is_deleted = ?", req.UserID, packageUUIDs, false).
 			Find(&userCollectList).Error
 		if err != nil {
 			return nil, status.Error(codes.Internal, "获取收藏状态失败")
@@ -114,14 +114,14 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	list := make([]types.EmojiPackageItem, len(packages))
 	for i, p := range packages {
 		list[i] = types.EmojiPackageItem{
-			PackageID:    p.Id,
+			PackageID:    p.UUID,
 			Title:        p.Title,
 			CoverFile:    p.CoverFile,
 			Description:  p.Description,
 			Type:         p.Type,
-			CollectCount: int(collectCounts[p.Id]),
-			EmojiCount:   int(emojiCounts[p.Id]),
-			IsCollected:  userCollects[p.Id],
+			CollectCount: int(collectCounts[p.UUID]),
+			EmojiCount:   int(emojiCounts[p.UUID]),
+			IsCollected:  userCollects[p.UUID],
 			IsAuthor:     p.UserID == req.UserID,
 		}
 	}

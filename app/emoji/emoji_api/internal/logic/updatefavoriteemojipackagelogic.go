@@ -30,7 +30,7 @@ func NewUpdateFavoriteEmojiPackageLogic(ctx context.Context, svcCtx *svc.Service
 func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.UpdateFavoriteEmojiPackageReq) (*types.UpdateFavoriteEmojiPackageRes, error) {
 	// 1. 检查表情包是否存在
 	var emojiPackage emoji_models.EmojiPackage
-	err := l.svcCtx.DB.First(&emojiPackage, req.PackageID).Error
+	err := l.svcCtx.DB.Where("uuid = ?", req.PackageID).First(&emojiPackage).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, status.Error(codes.NotFound, "表情包不存在")
@@ -54,9 +54,17 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		if err == nil {
 			return nil, status.Error(codes.AlreadyExists, "已经收藏过了")
 		}
+		// 生成收藏版本号（按用户ID分区）
+		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", req.UserID)
+		if collectVersion == -1 {
+			logx.Error("生成表情包收藏版本号失败")
+			return nil, status.Error(codes.Internal, "生成版本号失败")
+		}
+
 		collectRecord = emoji_models.EmojiPackageCollect{
 			UserID:    req.UserID,
 			PackageID: req.PackageID,
+			Version:   collectVersion,
 		}
 		err = l.svcCtx.DB.Create(&collectRecord).Error
 		if err != nil {
@@ -67,9 +75,19 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		if err != nil {
 			return nil, status.Error(codes.NotFound, "未收藏过")
 		}
-		err = l.svcCtx.DB.Delete(&collectRecord).Error
+
+		// 软删除：设置IsDeleted为true并更新版本号（按用户ID分区）
+		collectRecord.IsDeleted = true
+		collectRecord.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", req.UserID)
+		if collectRecord.Version == -1 {
+			logx.Error("生成版本号失败")
+			return nil, status.Error(codes.Internal, "生成版本号失败")
+		}
+
+		err = l.svcCtx.DB.Save(&collectRecord).Error
 		if err != nil {
-			return nil, status.Error(codes.Internal, "取消收藏失败")
+			logx.Error("软删除收藏失败", err)
+			return nil, status.Error(codes.Internal, "软删除收藏失败")
 		}
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")

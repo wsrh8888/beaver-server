@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
@@ -25,11 +26,18 @@ func NewAddEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddEmoji
 }
 
 func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRes, err error) {
+	// 生成表情版本号
+	emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+	if emojiVersion == -1 {
+		logx.Error("生成表情版本号失败")
+		return nil, errors.New("生成版本号失败")
+	}
+
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		FileName: req.FileName,
-		Title:    req.Title,
-		AuthorID: req.UserID,
+		FileKey: req.FileName, // 使用FileKey字段存储文件名
+		Title:   req.Title,
+		Version: emojiVersion,
 	}
 
 	// 保存到数据库
@@ -40,12 +48,20 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	}
 
 	// 如果指定了表情包ID，则添加到表情包
-	if req.PackageID != 0 {
+	if req.PackageID != "" {
+		// 生成表情包表情关联的版本号（按表情包ID分区）
+		packageEmojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_emoji", "package_id", req.PackageID)
+		if packageEmojiVersion == -1 {
+			logx.Error("生成表情包表情关联版本号失败")
+			return nil, errors.New("生成版本号失败")
+		}
+
 		// 创建表情包与表情的关联
 		emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
 			PackageID: req.PackageID,
-			EmojiID:   emoji.Id,
+			EmojiID:   emoji.UUID,
 			SortOrder: 0, // 默认排序
+			Version:   packageEmojiVersion,
 		}
 
 		err = l.svcCtx.DB.Create(&emojiPackageEmoji).Error
@@ -55,10 +71,18 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 		}
 	}
 
+	// 生成收藏版本号（按用户ID分区）
+	collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
+	if collectVersion == -1 {
+		logx.Error("生成收藏版本号失败")
+		return nil, errors.New("生成版本号失败")
+	}
+
 	// 添加表情并收藏
 	favoriteEmoji := emoji_models.EmojiCollectEmoji{
 		UserID:  req.UserID,
-		EmojiID: emoji.Id, // 使用新增表情的ID
+		EmojiID: emoji.UUID, // 使用新增表情的UUID
+		Version: collectVersion,
 	}
 
 	err = l.svcCtx.DB.Create(&favoriteEmoji).Error

@@ -46,10 +46,18 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 			return nil, errors.New("表情已收藏")
 		}
 
+		// 生成收藏版本号（按用户ID分区）
+		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
+		if collectVersion == -1 {
+			logx.Error("生成收藏版本号失败")
+			return nil, errors.New("生成版本号失败")
+		}
+
 		// 添加收藏
 		newFavoriteEmoji := emoji_models.EmojiCollectEmoji{
 			UserID:  req.UserID,
 			EmojiID: req.EmojiID,
+			Version: collectVersion,
 		}
 		err = l.svcCtx.DB.Create(&newFavoriteEmoji).Error
 		if err != nil {
@@ -63,11 +71,18 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 			return nil, errors.New("表情未收藏")
 		}
 
-		// 取消收藏
-		err = l.svcCtx.DB.Delete(&favoriteEmoji).Error
+		// 软删除：设置IsDeleted为true并更新版本号（按用户ID分区）
+		favoriteEmoji.IsDeleted = true
+		favoriteEmoji.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
+		if favoriteEmoji.Version == -1 {
+			logx.Error("生成版本号失败")
+			return nil, errors.New("生成版本号失败")
+		}
+
+		err = l.svcCtx.DB.Save(&favoriteEmoji).Error
 		if err != nil {
-			logx.Error("取消收藏表情失败", err)
-			return nil, errors.New("取消收藏表情失败")
+			logx.Error("软删除收藏失败", err)
+			return nil, errors.New("软删除收藏失败")
 		}
 	default:
 		logx.Error("无效的操作类型")

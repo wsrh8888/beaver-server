@@ -27,17 +27,17 @@ type EmojiPackageCollectVersionItem struct {
 }
 
 type EmojiPackageContentVersionItem struct {
-	PackageId uint32 `json:"packageId"` // 表情包ID
+	PackageId string `json:"packageId"` // 表情包UUID
 	Version   int64  `json:"version"`   // 表情包内容版本号
 }
 
 type EmojiPackageVersionItem struct {
-	Id      uint32 `json:"id"`      // 表情包ID
+	Id      string `json:"id"`      // 表情包UUID
 	Version int64  `json:"version"` // 表情包版本号
 }
 
 type EmojiVersionItem struct {
-	Id      uint32 `json:"id"`      // 表情ID
+	Uuid    string `json:"uuid"`    // 表情UUID
 	Version int64  `json:"version"` // 表情版本号
 }
 
@@ -100,10 +100,19 @@ type GetSyncEmojiCollectsReq struct {
 type GetSyncEmojiCollectsRes struct {
 	EmojiCollectVersions        []EmojiCollectVersionItem        `json:"emojiCollectVersions"`        // 用户收藏的表情变更摘要
 	EmojiPackageCollectVersions []EmojiPackageCollectVersionItem `json:"emojiPackageCollectVersions"` // 用户收藏的表情包变更摘要
-	EmojiVersions               []EmojiVersionItem               `json:"emojiVersions"`               // 表情数据变更摘要
 	EmojiPackageVersions        []EmojiPackageVersionItem        `json:"emojiPackageVersions"`        // 表情包数据变更摘要
 	EmojiPackageContentVersions []EmojiPackageContentVersionItem `json:"emojiPackageContentVersions"` // 表情包内容变更摘要
 	ServerTimestamp             int64                            `json:"serverTimestamp"`             // 服务端处理时间戳
+}
+
+type GetSyncEmojisReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+}
+
+type GetSyncEmojisRes struct {
+	EmojiVersions   []EmojiVersionItem `json:"emojiVersions"`   // 表情基础数据摘要
+	ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
 type GetSyncFriendVerifiesReq struct {
