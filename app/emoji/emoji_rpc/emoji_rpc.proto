@@ -3,36 +3,74 @@ package emoji_rpc;
 
 option go_package = "./emoji_rpc";
 
-// 获取用户表情数据同步摘要（包含所有相关数据）
-message GetUserEmojiSyncReq {
+// ========== 用户收藏表情同步 ==========
+message GetUserEmojiCollectsReq {
   string userId = 1; // 用户ID
   int64 since = 2; // 从这个版本号之后获取变更
-  int32 limit = 3; // 最大返回数量限制，默认1000
 }
 
-message GetUserEmojiSyncRes {
-  repeated EmojiCollectVersionItem emojiCollectVersions = 1; // 用户收藏的表情变更
-  repeated EmojiPackageCollectVersionItem emojiPackageCollectVersions = 2; // 用户收藏的表情包变更
-  repeated EmojiVersionItem emojiVersions = 3; // 表情基础数据变更（用户相关的）
-  repeated EmojiPackageVersionItem emojiPackageVersions = 4; // 表情包基础数据变更（用户相关的）
-  repeated EmojiPackageContentVersionItem emojiPackageContentVersions = 5; // 表情包内容变更（用户相关的）
-  int64 serverTimestamp = 6; // 服务端时间戳
-  bool hasMore = 7; // 是否还有更多数据
+message GetUserEmojiCollectsRes {
+  repeated EmojiVersionItem emojiVersions = 1; // 用户收藏的表情基础数据变更
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+// ========== 用户收藏表情包同步 ==========
+message GetUserEmojiPackageCollectsReq {
+  string userId = 1; // 用户ID
+  int64 since = 2; // 从这个版本号之后获取变更
+}
+
+message GetUserEmojiPackageCollectsRes {
+  repeated EmojiPackageCollectVersionItem emojiPackageCollectVersions = 1; // 用户收藏的表情包变更
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+// ========== 表情包基础数据同步 ==========
+message GetEmojiPackagesReq {
+  string userId = 1; // 用户ID（可选，用于权限控制）
+  int64 since = 2; // 从这个版本号之后获取变更
+}
+
+message GetEmojiPackagesRes {
+  repeated EmojiPackageVersionItem emojiPackageVersions = 1; // 表情包基础数据变更
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+// ========== 表情包内容同步 ==========
+message GetEmojiPackageContentsReq {
+  string userId = 1; // 用户ID（可选，用于权限控制）
+  int64 since = 2; // 从这个版本号之后获取变更
+}
+
+message GetEmojiPackageContentsRes {
+  repeated EmojiPackageContentVersionItem emojiPackageContentVersions = 1; // 表情包内容变更
+  int64 serverTimestamp = 2; // 服务端时间戳
+}
+
+// ========== 用户相关表情基础数据同步 ==========
+message GetEmojisReq {
+  string userId = 1; // 用户ID
+  int64 since = 2; // 从这个时间戳之后获取变更
+}
+
+message GetEmojisRes {
+  repeated EmojiVersionItem emojiVersions = 1; // 用户相关的表情基础数据变更
+  int64 serverTimestamp = 2; // 服务端时间戳
 }
 
 // 版本摘要数据结构
 message EmojiVersionItem {
-  uint32 id = 1; // 表情ID
+  string uuid = 1; // 表情UUID
   int64 version = 2; // 版本号
 }
 
 message EmojiPackageVersionItem {
-  uint32 id = 1; // 表情包ID
+  string id = 1; // 表情包UUID
   int64 version = 2; // 版本号
 }
 
 message EmojiPackageContentVersionItem {
-  uint32 packageId = 1; // 表情包ID
+  string packageId = 1; // 表情包UUID
   int64 version = 2; // 内容版本号
 }
 
@@ -47,8 +85,20 @@ message EmojiPackageCollectVersionItem {
 }
 
 service emoji {
-  // 用户表情数据同步接口（为微服务架构设计）
-  rpc GetUserEmojiSync(GetUserEmojiSyncReq) returns (GetUserEmojiSyncRes);
+  // ========== 用户收藏表情同步 ==========
+  rpc GetUserEmojiCollects(GetUserEmojiCollectsReq) returns (GetUserEmojiCollectsRes);
+
+  // ========== 用户收藏表情包同步 ==========
+  rpc GetUserEmojiPackageCollects(GetUserEmojiPackageCollectsReq) returns (GetUserEmojiPackageCollectsRes);
+
+  // ========== 表情包基础数据同步 ==========
+  rpc GetEmojiPackages(GetEmojiPackagesReq) returns (GetEmojiPackagesRes);
+
+  // ========== 表情包内容同步 ==========
+  rpc GetEmojiPackageContents(GetEmojiPackageContentsReq) returns (GetEmojiPackageContentsRes);
+
+  // ========== 表情基础数据同步 ==========
+  rpc GetEmojis(GetEmojisReq) returns (GetEmojisRes);
 }
 
 // goctl rpc protoc emoji_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

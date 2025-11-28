@@ -6,6 +6,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -16,7 +17,7 @@ type GetSyncEmojiCollectsLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取所有需要更新的收藏表情版本
+// 获取用户表情收藏的版本信息
 func NewGetSyncEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncEmojiCollectsLogic {
 	return &GetSyncEmojiCollectsLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,105 +27,99 @@ func NewGetSyncEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmojiCollectsReq) (resp *types.GetSyncEmojiCollectsRes, err error) {
-	// 简化架构：datasync直接查询表情数据库，避免RPC调用
-	// 注意：这会造成服务间耦合，但对于表情这种简单模块是合理的
-
-	// 1. 获取用户收藏的表情数据（直接查询数据库）
-	var emojiCollects []map[string]interface{}
-	query := `
-		SELECT uuid, version FROM emoji_collect_emoji
-		WHERE user_id = ? AND updated_at > FROM_UNIXTIME(?)
-	`
-	err = l.svcCtx.DB.Raw(query, req.UserID, req.Since/1000).Scan(&emojiCollects).Error
-	if err != nil {
-		l.Errorf("查询用户收藏表情失败: userId=%s, error=%v", req.UserID, err)
-		return nil, err
-	}
-
-	// 2. 获取用户收藏的表情包数据
-	var emojiPackageCollects []map[string]interface{}
-	query = `
-		SELECT uuid, version FROM emoji_package_collect
-		WHERE user_id = ? AND updated_at > FROM_UNIXTIME(?)
-	`
-	err = l.svcCtx.DB.Raw(query, req.UserID, req.Since/1000).Scan(&emojiPackageCollects).Error
-	if err != nil {
-		l.Errorf("查询用户收藏表情包失败: userId=%s, error=%v", req.UserID, err)
-		return nil, err
-	}
-
-	// 检查表情包数据的版本变化（所有表情包，不仅仅是用户收藏的）
-	var emojiPackageVersions []types.EmojiPackageVersionItem
-	packageQuery := `SELECT id, version FROM emoji_package WHERE version > ?`
-	var packages []struct {
-		Id      uint32
-		Version int64
-	}
-	l.svcCtx.DB.Raw(packageQuery, req.Since).Scan(&packages)
-
-	for _, pkg := range packages {
-		emojiPackageVersions = append(emojiPackageVersions, types.EmojiPackageVersionItem{
-			Id:      pkg.Id,
-			Version: pkg.Version,
-		})
-	}
-
-	// 检查表情数据的版本变化（所有表情，不仅仅是用户收藏的）
-	var emojiVersions []types.EmojiVersionItem
-	emojiQuery := `SELECT id, version FROM emoji WHERE version > ?`
-	var emojis []struct {
-		Id      uint32
-		Version int64
-	}
-	l.svcCtx.DB.Raw(emojiQuery, req.Since).Scan(&emojis)
-
-	for _, emoji := range emojis {
-		emojiVersions = append(emojiVersions, types.EmojiVersionItem{
-			Id:      emoji.Id,
-			Version: emoji.Version,
-		})
-	}
-
-	// 检查表情包内容的版本变化（所有表情包内容）
-	var emojiPackageContentVersions []types.EmojiPackageContentVersionItem
-	contentQuery := `SELECT package_id, version FROM emoji_package_emoji WHERE version > ?`
-	var contents []struct {
-		PackageId uint32
-		Version   int64
-	}
-	l.svcCtx.DB.Raw(contentQuery, req.Since).Scan(&contents)
-
-	for _, content := range contents {
-		emojiPackageContentVersions = append(emojiPackageContentVersions, types.EmojiPackageContentVersionItem{
-			PackageId: content.PackageId,
-			Version:   content.Version,
-		})
-	}
-
-	l.Infof("用户表情同步：收藏表情=%d, 收藏表情包=%d",
-		len(emojiCollects), len(emojiPackageCollects))
-
-	// 转换为版本摘要格式
+	// 初始化结果变量
 	emojiCollectVersions := make([]types.EmojiCollectVersionItem, 0)
-	for _, item := range emojiCollects {
-		emojiCollectVersions = append(emojiCollectVersions, types.EmojiCollectVersionItem{
-			Id:      item["uuid"].(string),
-			Version: item["version"].(int64),
-		})
+	emojiPackageCollectVersions := make([]types.EmojiPackageCollectVersionItem, 0)
+	emojiPackageVersions := make([]types.EmojiPackageVersionItem, 0)
+	emojiPackageContentVersions := make([]types.EmojiPackageContentVersionItem, 0)
+
+	// 1. 获取用户收藏的表情版本信息
+	emojiCollectResp, err := l.svcCtx.EmojiRpc.GetUserEmojiCollects(l.ctx, &emoji_rpc.GetUserEmojiCollectsReq{
+		UserId: req.UserID,
+		Since:  req.Since,
+	})
+	if err != nil {
+		l.Errorf("获取用户收藏表情版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		return nil, err
 	}
 
-	emojiPackageCollectVersions := make([]types.EmojiPackageCollectVersionItem, 0)
-	for _, item := range emojiPackageCollects {
-		emojiPackageCollectVersions = append(emojiPackageCollectVersions, types.EmojiPackageCollectVersionItem{
-			Id:      item["uuid"].(string),
-			Version: item["version"].(int64),
-		})
+	// 转换用户收藏的表情数据
+	if emojiCollectResp.EmojiVersions != nil {
+		for _, item := range emojiCollectResp.EmojiVersions {
+			emojiCollectVersions = append(emojiCollectVersions, types.EmojiCollectVersionItem{
+				Id:      item.Uuid, // 注意：这里使用 Uuid 作为 Id
+				Version: item.Version,
+			})
+		}
 	}
+
+	// 2. 获取用户收藏的表情包版本信息
+	emojiPackageCollectResp, err := l.svcCtx.EmojiRpc.GetUserEmojiPackageCollects(l.ctx, &emoji_rpc.GetUserEmojiPackageCollectsReq{
+		UserId: req.UserID,
+		Since:  req.Since,
+	})
+	if err != nil {
+		l.Errorf("获取用户收藏表情包版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		return nil, err
+	}
+
+	// 转换用户收藏的表情包数据
+	if emojiPackageCollectResp.EmojiPackageCollectVersions != nil {
+		for _, item := range emojiPackageCollectResp.EmojiPackageCollectVersions {
+			emojiPackageCollectVersions = append(emojiPackageCollectVersions, types.EmojiPackageCollectVersionItem{
+				Id:      item.Uuid, // 注意：这里使用 Uuid 作为 Id
+				Version: item.Version,
+			})
+		}
+	}
+
+	// 3. 获取表情包基础数据版本信息
+	emojiPackagesResp, err := l.svcCtx.EmojiRpc.GetEmojiPackages(l.ctx, &emoji_rpc.GetEmojiPackagesReq{
+		UserId: req.UserID,
+		Since:  req.Since,
+	})
+	if err != nil {
+		l.Errorf("获取表情包基础数据版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		return nil, err
+	}
+
+	// 转换表情包数据
+	if emojiPackagesResp.EmojiPackageVersions != nil {
+		for _, item := range emojiPackagesResp.EmojiPackageVersions {
+			emojiPackageVersions = append(emojiPackageVersions, types.EmojiPackageVersionItem{
+				Id:      item.Id,
+				Version: item.Version,
+			})
+		}
+	}
+
+	// 4. 获取表情包内容版本信息
+	emojiPackageContentsResp, err := l.svcCtx.EmojiRpc.GetEmojiPackageContents(l.ctx, &emoji_rpc.GetEmojiPackageContentsReq{
+		UserId: req.UserID,
+		Since:  req.Since,
+	})
+	if err != nil {
+		l.Errorf("获取表情包内容版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		return nil, err
+	}
+
+	// 转换表情包内容数据
+	if emojiPackageContentsResp.EmojiPackageContentVersions != nil {
+		for _, item := range emojiPackageContentsResp.EmojiPackageContentVersions {
+			emojiPackageContentVersions = append(emojiPackageContentVersions, types.EmojiPackageContentVersionItem{
+				PackageId: item.PackageId,
+				Version:   item.Version,
+			})
+		}
+	}
+
+	l.Infof("用户 %s 表情收藏同步完成: 收藏表情=%d, 收藏表情包=%d, 表情包=%d, 表情包内容=%d",
+		req.UserID, len(emojiCollectVersions), len(emojiPackageCollectVersions),
+		len(emojiPackageVersions), len(emojiPackageContentVersions))
 
 	return &types.GetSyncEmojiCollectsRes{
 		EmojiCollectVersions:        emojiCollectVersions,
 		EmojiPackageCollectVersions: emojiPackageCollectVersions,
-		EmojiVersions:               emojiVersions,
 		EmojiPackageVersions:        emojiPackageVersions,
 		EmojiPackageContentVersions: emojiPackageContentVersions,
 		ServerTimestamp:             time.Now().UnixMilli(),

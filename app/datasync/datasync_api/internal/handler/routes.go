@@ -43,6 +43,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncEmojiCollectsHandler(serverCtx),
 			},
 			{
+				// 获取表情基础数据版本信息
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncEmojis",
+				Handler: getSyncEmojisHandler(serverCtx),
+			},
+			{
 				// 获取所有需要更新的好友验证版本
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/getSyncFriendVerifies",

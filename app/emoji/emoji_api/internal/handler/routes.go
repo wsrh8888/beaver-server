@@ -19,6 +19,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: AddEmojiHandler(serverCtx),
 			},
 			{
+				// 批量获取用户收藏的表情记录详情（同步用）
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/collects-by-ids",
+				Handler: GetEmojiCollectsByIdsHandler(serverCtx),
+			},
+			{
+				// 批量获取表情详情
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/emojis-by-ids",
+				Handler: GetEmojisByIdsHandler(serverCtx),
+			},
+			{
 				// 收藏或者取消收藏表情
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/favoriteEmoji",
@@ -37,28 +49,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: GetUserFavoritePackagesHandler(serverCtx),
 			},
 			{
-				// 添加表情到表情包
+				// 批量获取用户收藏的表情包记录详情（同步用）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageAddEmoji",
-				Handler: AddEmojiToPackageHandler(serverCtx),
+				Path:    "/api/emoji/package-collects-by-ids",
+				Handler: GetEmojiPackageCollectsByIdsHandler(serverCtx),
 			},
 			{
-				// 批量添加表情到表情包
+				// 批量获取表情包内容详情（同步用）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageBatchAdd",
-				Handler: BatchAddEmojiToPackageHandler(serverCtx),
-			},
-			{
-				// 创建表情包集合
-				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageCreate",
-				Handler: CreateEmojiPackageHandler(serverCtx),
-			},
-			{
-				// 从表情包中删除表情
-				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageDeleteEmoji",
-				Handler: DeleteEmojiFromPackageHandler(serverCtx),
+				Path:    "/api/emoji/package-contents-by-package-ids",
+				Handler: GetEmojiPackageContentsByPackageIdsHandler(serverCtx),
 			},
 			{
 				// 收藏或取消收藏表情包
@@ -77,6 +77,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/packageList",
 				Handler: GetEmojiPackagesHandler(serverCtx),
+			},
+			{
+				// 批量获取表情包详情
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/packages-by-ids",
+				Handler: GetEmojiPackagesByIdsHandler(serverCtx),
 			},
 		},
 	)
