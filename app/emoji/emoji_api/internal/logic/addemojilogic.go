@@ -8,6 +8,7 @@ import (
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -35,7 +36,8 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		FileKey: req.FileName, // 使用FileKey字段存储文件名
+		UUID:    uuid.New().String(),
+		FileKey: req.FileKey, // 使用FileKey字段存储文件名
 		Title:   req.Title,
 		Version: emojiVersion,
 	}
@@ -58,6 +60,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 
 		// 创建表情包与表情的关联
 		emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
+			UUID:      uuid.New().String(),
 			PackageID: req.PackageID,
 			EmojiID:   emoji.UUID,
 			SortOrder: 0, // 默认排序
@@ -80,6 +83,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 
 	// 添加表情并收藏
 	favoriteEmoji := emoji_models.EmojiCollectEmoji{
+		UUID:    uuid.New().String(),
 		UserID:  req.UserID,
 		EmojiID: emoji.UUID, // 使用新增表情的UUID
 		Version: collectVersion,

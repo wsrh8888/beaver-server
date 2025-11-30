@@ -8,6 +8,7 @@ import (
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -70,24 +71,32 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 	// 准备响应数据
 	resp = &types.GetMomentsRes{
 		Count: count,
-		List:  make([]types.MomentModel, 0, len(moments)),
+		List:  make([]types.MomentListItem, 0, len(moments)),
 	}
 
-	// 获取所有动态ID，用于批量查询评论和点赞数量
-	momentIds := make([]uint, 0, len(moments))
+	// 获取所有动态UUID，用于批量查询评论和点赞数量
+	momentUUIDs := make([]string, 0, len(moments))
+	userIds := make(map[string]bool) // 用于去重用户ID
 	for _, moment := range moments {
-		momentIds = append(momentIds, moment.Id)
+		momentUUIDs = append(momentUUIDs, moment.UUID)
+		userIds[moment.UserID] = true
+	}
+
+	// 将用户ID转换为数组
+	var userIdList []string
+	for userId := range userIds {
+		userIdList = append(userIdList, userId)
 	}
 
 	// 批量查询评论数量
-	commentCounts := make(map[uint]int64)
-	if len(momentIds) > 0 {
+	commentCounts := make(map[string]int64)
+	if len(momentUUIDs) > 0 {
 		var commentStats []struct {
-			MomentID uint
+			MomentID string
 			Count    int64
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
-			Where("moment_id IN (?) AND is_deleted = false", momentIds).
+			Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
 			Select("moment_id, COUNT(*) as count").
 			Group("moment_id").
 			Scan(&commentStats)
@@ -98,14 +107,14 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 	}
 
 	// 批量查询点赞数量
-	likeCounts := make(map[uint]int64)
-	if len(momentIds) > 0 {
+	likeCounts := make(map[string]int64)
+	if len(momentUUIDs) > 0 {
 		var likeStats []struct {
-			MomentID uint
+			MomentID string
 			Count    int64
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
-			Where("moment_id IN (?) AND is_deleted = false", momentIds).
+			Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
 			Select("moment_id, COUNT(*) as count").
 			Group("moment_id").
 			Scan(&likeStats)
@@ -115,29 +124,128 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 		}
 	}
 
+	// 批量查询具体的评论数据（限制每条动态最多返回3条评论）
+	commentMap := make(map[string][]moment_models.MomentCommentModel)
+	if len(momentUUIDs) > 0 {
+		var allComments []moment_models.MomentCommentModel
+		// 直接查询所有相关的评论，然后按动态分组
+		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
+			Order("moment_id, created_at DESC").
+			Find(&allComments)
+
+		// 按动态分组，最多保留3条最新评论
+		commentCount := make(map[string]int)
+		for _, comment := range allComments {
+			if commentCount[comment.MomentID] < 3 {
+				commentMap[comment.MomentID] = append(commentMap[comment.MomentID], comment)
+				commentCount[comment.MomentID]++
+			}
+		}
+	}
+
+	// 批量查询具体的点赞数据（限制每条动态最多返回10个点赞）
+	likeMap := make(map[string][]moment_models.MomentLikeModel)
+	if len(momentUUIDs) > 0 {
+		var allLikes []moment_models.MomentLikeModel
+		// 直接查询所有相关的点赞，然后按动态分组
+		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
+			Order("moment_id, created_at DESC").
+			Find(&allLikes)
+
+		// 按动态分组，最多保留10个最新点赞
+		likeCount := make(map[string]int)
+		for _, like := range allLikes {
+			if likeCount[like.MomentID] < 10 {
+				likeMap[like.MomentID] = append(likeMap[like.MomentID], like)
+				likeCount[like.MomentID]++
+			}
+		}
+	}
+
+	// 批量获取用户信息
+	userInfoMap := make(map[string]*user_rpc.UserInfo)
+	if len(userIdList) > 0 {
+		userResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+			UserIdList: userIdList,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user info: %v", err)
+		}
+		userInfoMap = userResp.UserInfo
+	}
+
 	for _, moment := range moments {
-		var files []types.FileInfo
+		var files []types.MomentListFileInfo
 		if moment.Files != nil {
 			for _, file := range *moment.Files {
-				files = append(files, types.FileInfo{
+				files = append(files, types.MomentListFileInfo{
 					FileKey: file.FileKey,
+					Type:    uint32(file.Type),
 				})
 			}
 		}
 
-		// 简化响应，只包含基本信息和统计数据
-		resp.List = append(resp.List, types.MomentModel{
-			Id:        moment.Id,
+		// 获取用户信息
+		userName := ""
+		avatar := ""
+		if userInfo, exists := userInfoMap[moment.UserID]; exists {
+			userName = userInfo.NickName
+			avatar = userInfo.Avatar
+		}
+
+		// 转换评论数据
+		comments := convertListComments(commentMap[moment.UUID], userInfoMap)
+
+		// 转换点赞数据
+		likes := convertListLikes(likeMap[moment.UUID], userInfoMap)
+
+		// 构建完整响应
+		resp.List = append(resp.List, types.MomentListItem{
+			Id:        moment.UUID,
 			UserID:    moment.UserID,
 			Content:   moment.Content,
 			Files:     files,
-			Likes:     make([]types.MomentLikeModel, 0),    // 列表页不显示具体点赞用户
-			Comments:  make([]types.MomentCommentModel, 0), // 列表页不显示具体评论
-			UserName:  "",                                  // 需要从用户服务获取
-			Avatar:    "",                                  // 需要从用户服务获取
+			Comments:  comments,
+			Likes:     likes,
+			UserName:  userName,
+			Avatar:    avatar,
 			CreatedAt: moment.CreatedAt.String(),
 		})
 	}
 
 	return resp, nil
+}
+
+func convertListComments(comments []moment_models.MomentCommentModel, userInfoMap map[string]*user_rpc.UserInfo) []types.MomentListCommentInfo {
+	var result []types.MomentListCommentInfo
+	for _, comment := range comments {
+		result = append(result, types.MomentListCommentInfo{
+			Id:        comment.UUID,
+			UserID:    comment.UserID,
+			Content:   comment.Content,
+			CreatedAt: comment.CreatedAt.String(),
+		})
+	}
+	return result
+}
+
+func convertListLikes(likes []moment_models.MomentLikeModel, userInfoMap map[string]*user_rpc.UserInfo) []types.MomentListLikeInfo {
+	var result []types.MomentListLikeInfo
+	for _, like := range likes {
+		userName := ""
+		avatar := ""
+		if userInfo, exists := userInfoMap[like.UserID]; exists {
+			userName = userInfo.NickName
+			avatar = userInfo.Avatar
+		}
+
+		result = append(result, types.MomentListLikeInfo{
+			Id:        like.UUID,
+			UserID:    like.UserID,
+			CreatedAt: like.CreatedAt.String(),
+			UserName:  userName,
+			Avatar:    avatar,
+		})
+	}
+	return result
 }

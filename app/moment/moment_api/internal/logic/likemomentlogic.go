@@ -8,6 +8,7 @@ import (
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
@@ -32,6 +33,7 @@ func (l *LikeMomentLogic) LikeMoment(req *types.LikeMomentReq) (resp *types.Like
 	if req.Status {
 		// 点赞操作
 		like = moment_models.MomentLikeModel{
+			UUID:     uuid.New().String(),
 			MomentID: req.MomentID,
 			UserID:   req.UserID,
 		}
@@ -46,10 +48,18 @@ func (l *LikeMomentLogic) LikeMoment(req *types.LikeMomentReq) (resp *types.Like
 		} else if result.Error != nil {
 			// 其他错误
 			return nil, result.Error
+		} else {
+			// 记录存在，如果被软删除了则恢复
+			if like.IsDeleted {
+				if err := l.svcCtx.DB.Model(&like).Update("is_deleted", false).Error; err != nil {
+					return nil, err
+				}
+			}
+			// 如果记录存在且未被删除，则无需操作
 		}
 	} else {
-		// 取消点赞操作
-		if err := l.svcCtx.DB.Where("moment_id = ? AND user_id = ?", req.MomentID, req.UserID).Delete(&moment_models.MomentLikeModel{}).Error; err != nil {
+		// 取消点赞操作（软删除）
+		if err := l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).Where("moment_id = ? AND user_id = ? AND is_deleted = false", req.MomentID, req.UserID).Update("is_deleted", true).Error; err != nil {
 			return nil, err
 		}
 	}

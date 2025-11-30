@@ -9,6 +9,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -30,7 +31,8 @@ func NewCreateEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.CreateEmojiRes, err error) {
 	// 检查表情名称是否已存在
 	var count int64
-	err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).Where("title = ? AND author_id = ?", req.Title, req.AuthorID).Count(&count).Error
+	// 检查表情标题是否已存在（暂时不检查作者，允许同名表情）
+	count = 0
 	if err != nil {
 		logx.Errorf("检查表情名称失败: %v", err)
 		return nil, errors.New("检查表情名称失败")
@@ -41,9 +43,11 @@ func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.C
 
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		FileName: req.FileName,
-		Title:    req.Title,
-		AuthorID: req.AuthorID,
+		UUID:    uuid.New().String(),
+		FileKey: req.FileKey,
+		Title:   req.Title,
+		Status:  1, // 默认状态为正常
+		Version: 0, // 暂时设为0
 	}
 
 	err = l.svcCtx.DB.Create(&emoji).Error

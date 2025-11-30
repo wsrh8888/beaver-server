@@ -63,7 +63,7 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 		if emoji, exists := emojiMap[favoriteEmoji.EmojiID]; exists {
 			emojiItems = append(emojiItems, types.EmojiItem{
 				EmojiID:   emoji.UUID,
-				FileName:  emoji.FileKey, // 使用FileKey字段
+				FileKey:   emoji.FileKey, // 使用FileKey字段
 				Title:     emoji.Title,
 				PackageID: nil, // 在收藏表情列表中不显示包ID
 			})

@@ -90,7 +90,7 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 			UserID:        collect.UserID,
 			EmojiID:       strconv.Itoa(int(collect.EmojiID)),
 			EmojiTitle:    emojiTitle,
-			EmojiFileName: emojiFileName,
+			EmojiFileKey: emojiFileName,
 			CreateTime:    collect.CreatedAt.String(),
 			UpdateTime:    collect.UpdatedAt.String(),
 		})

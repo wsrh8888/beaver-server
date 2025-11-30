@@ -8,6 +8,7 @@ import (
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -55,6 +56,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 
 		// 添加收藏
 		newFavoriteEmoji := emoji_models.EmojiCollectEmoji{
+			UUID:    uuid.New().String(),
 			UserID:  req.UserID,
 			EmojiID: req.EmojiID,
 			Version: collectVersion,

@@ -3,7 +3,7 @@ package types
 
 type AddEmojiReq struct {
 	UserID    string `header:"Beaver-User-Id"`
-	FileName  string `json:"fileName"`
+	FileKey   string `json:"fileKey"`
 	Title     string `json:"title"`
 	PackageID string `json:"packageId,optional"`
 }
@@ -35,7 +35,7 @@ type EmojiDetailItem struct {
 
 type EmojiItem struct {
 	EmojiID   string  `json:"emojiId"`
-	FileName  string  `json:"fileName"`
+	FileKey   string  `json:"fileKey"`
 	Title     string  `json:"title"`
 	PackageID *string `json:"packageId"`
 }

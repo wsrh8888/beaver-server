@@ -112,9 +112,9 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	for _, emoji := range pagedEmojis {
 		list = append(list, types.GetEmojiPackageEmojisItem{
 			Id:         strconv.Itoa(int(emoji.Id)),
-			FileName:   emoji.FileName,
+			FileKey:    emoji.FileName,
 			Title:      emoji.Title,
-			AuthorID:   emoji.AuthorID,
+			AuthorID:   "", // 暂时为空，后续可从其他途径获取
 			CreateTime: emoji.CreatedAt.String(),
 			UpdateTime: emoji.UpdatedAt.String(),
 		})

@@ -50,15 +50,15 @@ func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.U
 
 	// 构建更新数据
 	updateData := make(map[string]interface{})
-	if req.FileName != nil {
-		updateData["file_name"] = *req.FileName
+	if req.FileKey != nil {
+		updateData["file_name"] = *req.FileKey
 	}
 	if req.Title != nil {
 		// 检查同创建者下的表情名称是否重复
 		if *req.Title != emoji.Title {
 			var count int64
 			err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).
-				Where("title = ? AND author_id = ? AND id != ?", *req.Title, emoji.AuthorID, emojiID).
+				Where("title = ? AND id != ?", *req.Title, emojiID).
 				Count(&count).Error
 			if err != nil {
 				logx.Errorf("检查表情名称失败: %v", err)

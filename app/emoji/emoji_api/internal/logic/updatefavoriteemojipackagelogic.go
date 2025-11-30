@@ -7,6 +7,7 @@ import (
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -62,6 +63,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		}
 
 		collectRecord = emoji_models.EmojiPackageCollect{
+			UUID:      uuid.New().String(),
 			UserID:    req.UserID,
 			PackageID: req.PackageID,
 			Version:   collectVersion,

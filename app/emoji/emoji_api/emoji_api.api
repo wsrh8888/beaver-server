@@ -4,7 +4,7 @@ syntax = "v1"
 type (
 	AddEmojiReq {
 		UserID    string `header:"Beaver-User-Id"`
-		FileName  string `json:"fileName"`
+		FileKey   string `json:"fileKey"`
 		Title     string `json:"title"`
 		PackageID string `json:"packageId,optional"`
 	}
@@ -30,7 +30,7 @@ type (
 	}
 	EmojiItem {
 		EmojiID   string  `json:"emojiId"`
-		FileName  string  `json:"fileName"`
+		FileKey   string  `json:"fileKey"`
 		Title     string  `json:"title"`
 		PackageID *string `json:"packageId"`
 	}

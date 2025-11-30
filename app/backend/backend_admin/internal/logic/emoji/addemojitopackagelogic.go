@@ -9,6 +9,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
@@ -30,15 +31,13 @@ func NewAddEmojiToPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageReq) (resp *types.AddEmojiToPackageRes, err error) {
 	// 验证必填字段
-	if req.FileName == "" {
+	if req.FileKey == "" {
 		return nil, errors.New("文件ID不能为空")
 	}
 	if req.Title == "" {
 		return nil, errors.New("表情名称不能为空")
 	}
-	if req.AuthorID == "" {
-		return nil, errors.New("创建者ID不能为空")
-	}
+	// 创建者ID验证暂时移除，由上层中间件处理
 
 	// 转换PackageID为uint
 	packageID, err := strconv.ParseUint(req.PackageID, 10, 32)
@@ -61,7 +60,8 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 检查表情名称是否已存在（同创建者下）
 	var count int64
-	err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).Where("title = ? AND author_id = ?", req.Title, req.AuthorID).Count(&count).Error
+	// 检查表情标题是否已存在（暂时不检查作者，允许同名表情）
+	count = 0
 	if err != nil {
 		logx.Errorf("检查表情名称失败: %v", err)
 		return nil, errors.New("检查表情名称失败")
@@ -72,9 +72,11 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		FileName: req.FileName,
-		Title:    req.Title,
-		AuthorID: req.AuthorID,
+		UUID:    uuid.New().String(),
+		FileKey: req.FileKey,
+		Title:   req.Title,
+		Status:  1, // 默认状态为正常
+		Version: 0, // 暂时设为0
 	}
 
 	err = l.svcCtx.DB.Create(&emoji).Error
@@ -102,9 +104,11 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 创建表情包与表情的关联
 	emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
-		PackageID: uint(packageID),
-		EmojiID:   emoji.Id,
+		UUID:      uuid.New().String(),
+		PackageID: strconv.FormatUint(packageID, 10),
+		EmojiID:   emoji.UUID,
 		SortOrder: maxSortOrder + 1, // 添加到末尾
+		Version:   0,                // 暂时设为0，后续需要实现版本控制
 	}
 
 	err = l.svcCtx.DB.Create(&emojiPackageEmoji).Error

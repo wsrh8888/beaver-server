@@ -6,7 +6,7 @@ type (
 		Page      int    `form:"page,default=1"`
 		PageSize  int    `form:"pageSize,default=10"`
 		AuthorID  string `form:"authorId,optional"` // 按创建者ID筛选
-		Title     string `form:"title,optional"`    // 按表情图片名称搜索
+		Title     string `form:"title,optional"` // 按表情图片名称搜索
 		StartTime string `form:"startTime,optional"`
 		EndTime   string `form:"endTime,optional"`
 	}
@@ -16,7 +16,7 @@ type (
 	}
 	GetEmojiListItem {
 		Id         string `json:"id"`
-		FileName   string `json:"fileName"`
+		FileKey    string `json:"fileKey"`
 		Title      string `json:"title"`
 		AuthorID   string `json:"authorId"`
 		CreateTime string `json:"createTime"`
@@ -27,7 +27,7 @@ type (
 // 创建表情图片
 type (
 	CreateEmojiReq {
-		FileName string `json:"fileName"`
+		FileKey  string `json:"fileKey"`
 		Title    string `json:"title"`
 		AuthorID string `header:"Beaver-User-Id"`
 	}
@@ -39,11 +39,11 @@ type (
 // 更新表情图片
 type (
 	UpdateEmojiReq {
-		EmojiID  string  `path:"id"`
-		FileName *string `json:"fileName,optional"`
-		Title    *string `json:"title,optional"`
+		EmojiID string  `path:"id"`
+		FileKey *string `json:"fileKey,optional"`
+		Title   *string `json:"title,optional"`
 	}
-	UpdateEmojiRes {}
+	UpdateEmojiRes  {}
 )
 
 // 删除表情图片
@@ -51,7 +51,7 @@ type (
 	DeleteEmojiReq {
 		EmojiID string `path:"id"`
 	}
-	DeleteEmojiRes {}
+	DeleteEmojiRes  {}
 )
 
 // 获取表情包集合列表
@@ -59,10 +59,10 @@ type (
 	GetEmojiPackageListReq {
 		Page      int    `form:"page,default=1"`
 		PageSize  int    `form:"pageSize,default=10"`
-		UserID    string `form:"userId,optional"`    // 按创建者ID筛选
-		Type      string `form:"type,optional"`      // 按类型筛选
-		Status    int    `form:"status,optional"`    // 按状态筛选
-		Title     string `form:"title,optional"`     // 按表情包集合名称搜索
+		UserID    string `form:"userId,optional"` // 按创建者ID筛选
+		Type      string `form:"type,optional"` // 按类型筛选
+		Status    int    `form:"status,optional"` // 按状态筛选
+		Title     string `form:"title,optional"` // 按表情包集合名称搜索
 		StartTime string `form:"startTime,optional"`
 		EndTime   string `form:"endTime,optional"`
 	}
@@ -107,7 +107,7 @@ type (
 		Type        *string `json:"type,optional"`
 		Status      *int    `json:"status,optional"`
 	}
-	UpdateEmojiPackageRes {}
+	UpdateEmojiPackageRes  {}
 )
 
 // 删除表情包集合
@@ -115,7 +115,7 @@ type (
 	DeleteEmojiPackageReq {
 		PackageID string `json:"packageId"`
 	}
-	DeleteEmojiPackageRes {}
+	DeleteEmojiPackageRes  {}
 )
 
 // 获取表情包内的表情图片列表
@@ -131,7 +131,7 @@ type (
 	}
 	GetEmojiPackageEmojisItem {
 		Id         string `json:"id"`
-		FileName   string `json:"fileName"`
+		FileKey    string `json:"fileKey"`
 		Title      string `json:"title"`
 		AuthorID   string `json:"authorId"`
 		CreateTime string `json:"createTime"`
@@ -143,7 +143,7 @@ type (
 type (
 	AddEmojiToPackageReq {
 		PackageID string `json:"packageId"`
-		FileName  string `json:"fileName"`
+		FileKey   string `json:"fileKey"`
 		Title     string `json:"title"`
 		AuthorID  string `header:"Beaver-User-Id"`
 	}
@@ -158,7 +158,7 @@ type (
 		PackageID string `json:"packageId"`
 		EmojiID   string `json:"emojiId"`
 	}
-	RemoveEmojiFromPackageRes {}
+	RemoveEmojiFromPackageRes  {}
 )
 
 // 获取用户收藏的表情图片列表
@@ -166,23 +166,23 @@ type (
 	GetEmojiCollectListReq {
 		Page      int    `form:"page,default=1"`
 		PageSize  int    `form:"pageSize,default=10"`
-		UserID    string `form:"userId,optional"`    // 按用户ID筛选
-		EmojiID   string `form:"emojiId,optional"`   // 按表情图片ID筛选
+		UserID    string `form:"userId,optional"` // 按用户ID筛选
+		EmojiID   string `form:"emojiId,optional"` // 按表情图片ID筛选
 		StartTime string `form:"startTime,optional"`
 		EndTime   string `form:"endTime,optional"`
 	}
 	GetEmojiCollectListRes {
 		List  []GetEmojiCollectListItem `json:"list"`
-		Total int64                      `json:"total"`
+		Total int64                     `json:"total"`
 	}
 	GetEmojiCollectListItem {
-		Id            string `json:"id"`
-		UserID        string `json:"userId"`
-		EmojiID       string `json:"emojiId"`
-		EmojiTitle    string `json:"emojiTitle"`
-		EmojiFileName string `json:"emojiFileName"`
-		CreateTime    string `json:"createTime"`
-		UpdateTime    string `json:"updateTime"`
+		Id           string `json:"id"`
+		UserID       string `json:"userId"`
+		EmojiID      string `json:"emojiId"`
+		EmojiTitle   string `json:"emojiTitle"`
+		EmojiFileKey string `json:"emojiFileKey"`
+		CreateTime   string `json:"createTime"`
+		UpdateTime   string `json:"updateTime"`
 	}
 )
 
@@ -238,3 +238,4 @@ service backend {
 	@handler getEmojiCollectList
 	get /admin/emoji/collects (GetEmojiCollectListReq) returns (GetEmojiCollectListRes)
 }
+
