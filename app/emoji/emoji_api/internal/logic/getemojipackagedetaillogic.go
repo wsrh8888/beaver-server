@@ -123,7 +123,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 
 		emojiItems = append(emojiItems, types.EmojiItem{
 			EmojiID:   emoji.UUID,
-			FileName:  emoji.FileKey, // 使用FileKey字段
+			FileKey:   emoji.FileKey, // 使用FileKey字段
 			Title:     emoji.Title,
 			PackageID: &packageUUID,
 		})

@@ -7,7 +7,9 @@ import (
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
+	"beaver/common/models/ctype"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -30,6 +32,7 @@ func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *type
 	moment := moment_models.MomentModel{
 		UserID:  req.UserID,
 		Content: req.Content,
+		UUID:    uuid.New().String(),
 		Files:   convertFiles(req.Files),
 	}
 
@@ -42,11 +45,12 @@ func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *type
 }
 
 // 辅助函数：将请求中的文件信息转换为数据库模型所需的结构
-func convertFiles(files []types.FileInfo) *moment_models.Files {
+func convertFiles(files []types.CreateFileInfo) *moment_models.Files {
 	var result moment_models.Files
 	for _, file := range files {
 		result = append(result, moment_models.FileInfo{
 			FileKey: file.FileKey,
+			Type:    ctype.MsgType(file.Type),
 		})
 	}
 	return &result

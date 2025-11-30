@@ -165,36 +165,6 @@ type GetSyncGroupRequestsRes struct {
 	ServerTimestamp int64                      `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
-type GetSyncMomentCommentsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
-}
-
-type GetSyncMomentCommentsRes struct {
-	MomentCommentVersions []MomentCommentVersionItem `json:"momentCommentVersions"` // 变更的动态评论版本摘要
-	ServerTimestamp       int64                      `json:"serverTimestamp"`       // 服务端处理时间戳
-}
-
-type GetSyncMomentLikesReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
-}
-
-type GetSyncMomentLikesRes struct {
-	MomentLikeVersions []MomentLikeVersionItem `json:"momentLikeVersions"` // 变更的动态点赞版本摘要
-	ServerTimestamp    int64                   `json:"serverTimestamp"`    // 服务端处理时间戳
-}
-
-type GetSyncMomentsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
-}
-
-type GetSyncMomentsRes struct {
-	MomentVersions  []MomentVersionItem `json:"momentVersions"`  // 变更的动态版本摘要
-	ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
-}
-
 type GroupInfoVersionItem struct {
 	GroupID string `json:"groupId"` // 群组ID
 	Version int64  `json:"version"` // 群资料版本
@@ -208,21 +178,6 @@ type GroupMembersVersionItem struct {
 type GroupRequestsVersionItem struct {
 	GroupID string `json:"groupId"` // 群组ID
 	Version int64  `json:"version"` // 入群申请版本
-}
-
-type MomentCommentVersionItem struct {
-	UserID  string `json:"userId"`  // ⭐ 动态发布者ID（按发布者分组）
-	Version int64  `json:"version"` // 评论版本号
-}
-
-type MomentLikeVersionItem struct {
-	UserID  string `json:"userId"`  // ⭐ 动态发布者ID（按发布者分组）
-	Version int64  `json:"version"` // 点赞版本号
-}
-
-type MomentVersionItem struct {
-	UserID  string `json:"userId"`  // 动态发布者ID
-	Version int64  `json:"version"` // 动态版本号
 }
 
 type UserVersionItem struct {

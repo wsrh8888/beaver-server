@@ -34,9 +34,7 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	whereClause := l.svcCtx.DB.Where("1 = 1")
 
 	// 按创建者ID筛选
-	if req.AuthorID != "" {
-		whereClause = whereClause.Where("author_id = ?", req.AuthorID)
-	}
+	// 作者ID筛选暂时移除
 
 	// 时间范围筛选
 	if req.StartTime != "" {
@@ -73,9 +71,9 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	for _, emoji := range emojis {
 		list = append(list, types.GetEmojiListItem{
 			Id:         strconv.Itoa(int(emoji.Id)),
-			FileName:   emoji.FileName,
+			FileKey:    emoji.FileName,
 			Title:      emoji.Title,
-			AuthorID:   emoji.AuthorID,
+			AuthorID:   "", // 暂时为空，后续可从其他途径获取
 			CreateTime: emoji.CreatedAt.String(),
 			UpdateTime: emoji.UpdatedAt.String(),
 		})

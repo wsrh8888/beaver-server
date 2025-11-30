@@ -9,6 +9,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -41,6 +42,7 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 
 	// 创建表情包
 	pkg := emoji_models.EmojiPackage{
+		UUID:        uuid.New().String(),
 		Title:       req.Title,
 		UserID:      req.UserID,
 		Description: req.Description,
