@@ -175,10 +175,10 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 	}
 
 	for _, moment := range moments {
-		var files []types.MomentListFileInfo
+		var files []types.GetMomentsFileInfo
 		if moment.Files != nil {
 			for _, file := range *moment.Files {
-				files = append(files, types.MomentListFileInfo{
+				files = append(files, types.GetMomentsFileInfo{
 					FileKey: file.FileKey,
 					Type:    uint32(file.Type),
 				})
@@ -216,12 +216,21 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 	return resp, nil
 }
 
-func convertListComments(comments []moment_models.MomentCommentModel, userInfoMap map[string]*user_rpc.UserInfo) []types.MomentListCommentInfo {
-	var result []types.MomentListCommentInfo
+func convertListComments(comments []moment_models.MomentCommentModel, userInfoMap map[string]*user_rpc.UserInfo) []types.GetMomentsCommentInfo {
+	var result []types.GetMomentsCommentInfo
 	for _, comment := range comments {
-		result = append(result, types.MomentListCommentInfo{
+		userName := ""
+		avatar := ""
+		if userInfo, exists := userInfoMap[comment.UserID]; exists {
+			userName = userInfo.NickName
+			avatar = userInfo.Avatar
+		}
+
+		result = append(result, types.GetMomentsCommentInfo{
 			Id:        comment.UUID,
 			UserID:    comment.UserID,
+			UserName:  userName,
+			Avatar:    avatar,
 			Content:   comment.Content,
 			CreatedAt: comment.CreatedAt.String(),
 		})
@@ -229,8 +238,8 @@ func convertListComments(comments []moment_models.MomentCommentModel, userInfoMa
 	return result
 }
 
-func convertListLikes(likes []moment_models.MomentLikeModel, userInfoMap map[string]*user_rpc.UserInfo) []types.MomentListLikeInfo {
-	var result []types.MomentListLikeInfo
+func convertListLikes(likes []moment_models.MomentLikeModel, userInfoMap map[string]*user_rpc.UserInfo) []types.GetMomentsLikeInfo {
+	var result []types.GetMomentsLikeInfo
 	for _, like := range likes {
 		userName := ""
 		avatar := ""
@@ -239,7 +248,7 @@ func convertListLikes(likes []moment_models.MomentLikeModel, userInfoMap map[str
 			avatar = userInfo.Avatar
 		}
 
-		result = append(result, types.MomentListLikeInfo{
+		result = append(result, types.GetMomentsLikeInfo{
 			Id:        like.UUID,
 			UserID:    like.UserID,
 			CreatedAt: like.CreatedAt.String(),

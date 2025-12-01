@@ -28,6 +28,19 @@ func NewGetMomentListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 }
 
 func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *types.GetMomentListRes, err error) {
+	// 分页参数校验
+	page := req.Page
+	limit := req.Limit
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
 	// 构建查询条件
 	whereClause := l.svcCtx.DB.Where("1 = 1")
 
@@ -39,8 +52,8 @@ func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *t
 	// 分页查询
 	moments, count, err := list_query.ListQuery(l.svcCtx.DB, moment_models.MomentModel{}, list_query.Option{
 		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.Limit,
+			Page:  page,
+			Limit: limit,
 			Key:   req.Keywords,
 			Sort:  "created_at desc",
 		},
@@ -66,7 +79,7 @@ func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *t
 		}
 
 		list = append(list, types.GetMomentListItem{
-			Id:        moment.Id,
+			Id:        moment.UUID,
 			UserId:    moment.UserID,
 			Content:   moment.Content,
 			Files:     files,

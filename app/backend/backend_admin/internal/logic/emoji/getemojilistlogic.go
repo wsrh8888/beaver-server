@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
@@ -30,6 +29,19 @@ func NewGetEmojiListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetE
 }
 
 func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *types.GetEmojiListRes, err error) {
+	// 分页参数校验
+	page := req.Page
+	pageSize := req.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
 	// 构建查询条件
 	whereClause := l.svcCtx.DB.Where("1 = 1")
 
@@ -52,8 +64,8 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	// 分页查询
 	emojis, count, err := list_query.ListQuery(l.svcCtx.DB, emoji_models.Emoji{}, list_query.Option{
 		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
+			Page:  page,
+			Limit: pageSize,
 			Key:   req.Title,
 			Sort:  "created_at desc",
 		},
@@ -70,8 +82,8 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	var list []types.GetEmojiListItem
 	for _, emoji := range emojis {
 		list = append(list, types.GetEmojiListItem{
-			Id:         strconv.Itoa(int(emoji.Id)),
-			FileKey:    emoji.FileName,
+			UUID:       emoji.UUID,
+			FileKey:    emoji.FileKey,
 			Title:      emoji.Title,
 			AuthorID:   "", // 暂时为空，后续可从其他途径获取
 			CreateTime: emoji.CreatedAt.String(),

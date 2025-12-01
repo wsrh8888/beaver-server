@@ -25,7 +25,14 @@ func NewPreviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PreviewLo
 }
 
 func (l *PreviewLogic) Preview(req *types.PreviewReq) (resp *types.PreviewRes, err error) {
-	// todo: add your logic here and delete this line
+	// 文件预览逻辑
+	// 这里应该根据文件名查找文件并返回预览信息
+	// 暂时返回空结果，具体实现需要根据实际需求
 
-	return
+	logx.Infof("文件预览请求: %s", req.FileName)
+
+	// TODO: 实现文件查找和预览逻辑
+	// 可以返回文件URL或者直接返回文件内容
+
+	return &types.PreviewRes{}, nil
 }

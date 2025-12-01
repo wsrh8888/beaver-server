@@ -13,6 +13,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 获取动态评论列表的接口（分页）
+				Method:  http.MethodPost,
+				Path:    "/api/moment/comments",
+				Handler: GetMomentCommentsHandler(serverCtx),
+			},
+			{
 				// 创建动态的接口
 				Method:  http.MethodPost,
 				Path:    "/api/moment/create",
@@ -25,13 +31,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: DeleteMomentHandler(serverCtx),
 			},
 			{
+				// 获取动态详情的接口（包含更多评论和点赞）
+				Method:  http.MethodPost,
+				Path:    "/api/moment/detail",
+				Handler: GetMomentDetailHandler(serverCtx),
+			},
+			{
 				// 点赞/取消点赞的接口
 				Method:  http.MethodPost,
 				Path:    "/api/moment/like",
 				Handler: LikeMomentHandler(serverCtx),
 			},
 			{
-				// 获取自己和好友的动态列表的接口
+				// 获取动态点赞列表的接口（分页）
+				Method:  http.MethodPost,
+				Path:    "/api/moment/likes",
+				Handler: GetMomentLikesHandler(serverCtx),
+			},
+			{
+				// 获取自己和好友的动态列表的接口（只返回部分评论和点赞）
 				Method:  http.MethodPost,
 				Path:    "/api/moment/list",
 				Handler: GetMomentsListHandler(serverCtx),

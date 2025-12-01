@@ -29,10 +29,10 @@ type (
 // 获取动态详情
 type (
 	GetMomentDetailReq {
-		Id uint `path:"id"`
+		Id string `path:"id"`
 	}
 	GetMomentDetailRes {
-		Id        uint                      `json:"id"`
+		Id        string                    `json:"id"`
 		UserId    string                   `json:"userId"`
 		Content   string                   `json:"content"`
 		Files     []GetMomentDetailFileInfo `json:"files"`
@@ -48,7 +48,7 @@ type (
 // 删除动态
 type (
 	DeleteMomentReq {
-		Id uint `path:"id"`
+		Id string `path:"id"`
 	}
 	DeleteMomentRes {}
 )
@@ -56,17 +56,17 @@ type (
 // 获取动态评论列表
 type (
 	GetMomentCommentListReq {
-		Page     int  `form:"page,optional"`
-		Limit    int  `form:"limit,optional"`
-		MomentId uint `form:"momentId"`
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		MomentId string `form:"momentId"`
 	}
 	GetMomentCommentListRes {
 		List  []GetMomentCommentListItem `json:"list"`
 		Total int64                      `json:"total"`
 	}
 	GetMomentCommentListItem {
-		Id        uint   `json:"id"`
-		MomentId  uint   `json:"momentId"`
+		Id        string `json:"id"`
+		MomentId  string `json:"momentId"`
 		UserId    string `json:"userId"`
 		Content   string `json:"content"`
 		CreatedAt string `json:"createdAt"`
@@ -77,7 +77,7 @@ type (
 // 删除动态评论
 type (
 	DeleteMomentCommentReq {
-		Id uint `path:"id"`
+		Id string `path:"id"`
 	}
 	DeleteMomentCommentRes {}
 )

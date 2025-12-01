@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
@@ -61,11 +60,24 @@ func (l *GetEmojiPackageListLogic) GetEmojiPackageList(req *types.GetEmojiPackag
 		}
 	}
 
+	// 分页参数校验
+	page := req.Page
+	pageSize := req.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
 	// 分页查询
 	packages, count, err := list_query.ListQuery(l.svcCtx.DB, emoji_models.EmojiPackage{}, list_query.Option{
 		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
+			Page:  page,
+			Limit: pageSize,
 			Key:   req.Title,
 			Sort:  "created_at desc",
 		},
@@ -82,7 +94,7 @@ func (l *GetEmojiPackageListLogic) GetEmojiPackageList(req *types.GetEmojiPackag
 	var list []types.GetEmojiPackageListItem
 	for _, pkg := range packages {
 		list = append(list, types.GetEmojiPackageListItem{
-			Id:          strconv.Itoa(int(pkg.Id)),
+			UUID:        pkg.UUID,
 			Title:       pkg.Title,
 			CoverFile:   pkg.CoverFile,
 			UserID:      pkg.UserID,

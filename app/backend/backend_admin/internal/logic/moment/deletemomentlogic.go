@@ -30,7 +30,7 @@ func NewDeleteMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 func (l *DeleteMomentLogic) DeleteMoment(req *types.DeleteMomentReq) (resp *types.DeleteMomentRes, err error) {
 	// 检查动态是否存在
 	var moment moment_models.MomentModel
-	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&moment).Error
+	err = l.svcCtx.DB.Where("uuid = ?", req.Id).First(&moment).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			logx.Errorf("动态不存在: %d", req.Id)
