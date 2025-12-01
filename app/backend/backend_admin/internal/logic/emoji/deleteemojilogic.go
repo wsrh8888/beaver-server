@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
@@ -29,19 +28,12 @@ func NewDeleteEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 }
 
 func (l *DeleteEmojiLogic) DeleteEmoji(req *types.DeleteEmojiReq) (resp *types.DeleteEmojiRes, err error) {
-	// 转换EmojiID为uint
-	emojiID, err := strconv.ParseUint(req.EmojiID, 10, 32)
-	if err != nil {
-		logx.Errorf("表情ID格式错误: %s", req.EmojiID)
-		return nil, errors.New("表情ID格式错误")
-	}
-
 	// 检查表情是否存在
 	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("id = ?", emojiID).First(&emoji).Error
+	err = l.svcCtx.DB.Where("uuid = ?", req.UUID).First(&emoji).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.EmojiID)
+			logx.Errorf("表情不存在: %s", req.UUID)
 			return nil, errors.New("表情不存在")
 		}
 		logx.Errorf("查询表情失败: %v", err)

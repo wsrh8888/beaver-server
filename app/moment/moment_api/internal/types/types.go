@@ -23,6 +23,111 @@ type DeleteMomentReq struct {
 type DeleteMomentRes struct {
 }
 
+type GetMomentCommentsInfo struct {
+	Id        string `json:"id"`        // 评论ID
+	UserID    string `json:"userId"`    // 用户ID
+	UserName  string `json:"userName"`  // 用户名
+	Avatar    string `json:"avatar"`    // 用户头像
+	Content   string `json:"content"`   // 评论内容
+	CreatedAt string `json:"createdAt"` // 评论时间
+}
+
+type GetMomentCommentsReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	MomentID string `json:"momentId"`         // 动态ID
+	Page     int    `json:"page"`             // 页码
+	Limit    int    `json:"limit"`            // 每页数量
+}
+
+type GetMomentCommentsRes struct {
+	Count int64                   `json:"count"` // 总数
+	List  []GetMomentCommentsInfo `json:"list"`  // 评论列表
+}
+
+type GetMomentDetailCommentInfo struct {
+	Id        string `json:"id"`        // 评论ID
+	UserID    string `json:"userId"`    // 用户ID
+	UserName  string `json:"userName"`  // 用户名
+	Avatar    string `json:"avatar"`    // 用户头像
+	Content   string `json:"content"`   // 评论内容
+	CreatedAt string `json:"createdAt"` // 评论时间
+}
+
+type GetMomentDetailFileInfo struct {
+	FileKey string `json:"fileKey"` // 文件名
+	Type    uint32 `json:"type"`    // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
+}
+
+type GetMomentDetailLikeInfo struct {
+	Id        string `json:"id"`        // 点赞ID
+	UserID    string `json:"userId"`    // 用户ID
+	UserName  string `json:"userName"`  // 用户名
+	Avatar    string `json:"avatar"`    // 用户头像
+	CreatedAt string `json:"createdAt"` // 点赞时间
+}
+
+type GetMomentDetailReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	MomentID string `json:"momentId"`         // 动态ID
+}
+
+type GetMomentDetailRes struct {
+	Id           string                       `json:"id"`           // 动态ID
+	UserID       string                       `json:"userId"`       // 用户ID
+	UserName     string                       `json:"userName"`     // 用户名
+	Avatar       string                       `json:"avatar"`       // 用户头像
+	Content      string                       `json:"content"`      // 动态内容
+	Files        []GetMomentDetailFileInfo    `json:"files"`        // 文件信息列表
+	Comments     []GetMomentDetailCommentInfo `json:"comments"`     // 最新20条评论
+	Likes        []GetMomentDetailLikeInfo    `json:"likes"`        // 最新50个点赞
+	CommentCount int64                        `json:"commentCount"` // 总评论数
+	LikeCount    int64                        `json:"likeCount"`    // 总点赞数
+	IsLiked      bool                         `json:"isLiked"`      // 当前用户是否已点赞
+	CreatedAt    string                       `json:"createdAt"`    // 动态创建时间
+}
+
+type GetMomentLikesInfo struct {
+	Id        string `json:"id"`        // 点赞ID
+	UserID    string `json:"userId"`    // 用户ID
+	UserName  string `json:"userName"`  // 用户名
+	Avatar    string `json:"avatar"`    // 用户头像
+	CreatedAt string `json:"createdAt"` // 点赞时间
+}
+
+type GetMomentLikesReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	MomentID string `json:"momentId"`         // 动态ID
+	Page     int    `json:"page"`             // 页码
+	Limit    int    `json:"limit"`            // 每页数量
+}
+
+type GetMomentLikesRes struct {
+	Count int64                `json:"count"` // 总数
+	List  []GetMomentLikesInfo `json:"list"`  // 点赞列表
+}
+
+type GetMomentsCommentInfo struct {
+	Id        string `json:"id"`        // 评论ID
+	UserID    string `json:"userId"`    // 用户ID
+	UserName  string `json:"userName"`  // 用户名
+	Avatar    string `json:"avatar"`    // 用户头像
+	Content   string `json:"content"`   // 评论内容
+	CreatedAt string `json:"createdAt"` // 评论时间
+}
+
+type GetMomentsFileInfo struct {
+	FileKey string `json:"fileKey"` // 文件名
+	Type    uint32 `json:"type"`    // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
+}
+
+type GetMomentsLikeInfo struct {
+	Id        string `json:"id"`        // 点赞ID
+	UserID    string `json:"userId"`    // 用户ID
+	UserName  string `json:"userName"`  // 用户名
+	Avatar    string `json:"avatar"`    // 用户头像
+	CreatedAt string `json:"createdAt"` // 点赞时间
+}
+
 type GetMomentsReq struct {
 	UserID string `header:"Beaver-User-Id"` // 用户ID
 	Page   int    `json:"page"`             // 页码
@@ -43,34 +148,17 @@ type LikeMomentReq struct {
 type LikeMomentRes struct {
 }
 
-type MomentListCommentInfo struct {
-	Id        string `json:"id"`        // 评论ID
-	UserID    string `json:"userId"`    // 用户ID
-	Content   string `json:"content"`   // 评论内容
-	CreatedAt string `json:"createdAt"` // 评论时间
-}
-
-type MomentListFileInfo struct {
-	FileKey string `json:"fileKey"` // 文件名
-	Type    uint32 `json:"type"`    // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
-}
-
 type MomentListItem struct {
-	Id        string                  `json:"id"`        // 动态ID
-	UserID    string                  `json:"userId"`    // 用户ID
-	UserName  string                  `json:"userName"`  // 用户名
-	Avatar    string                  `json:"avatar"`    // 用户头像
-	Content   string                  `json:"content"`   // 动态内容
-	Files     []MomentListFileInfo    `json:"files"`     // 文件信息列表
-	Comments  []MomentListCommentInfo `json:"comments"`  // 评论列表
-	Likes     []MomentListLikeInfo    `json:"likes"`     // 点赞列表
-	CreatedAt string                  `json:"createdAt"` // 动态创建时间
-}
-
-type MomentListLikeInfo struct {
-	Id        string `json:"id"`        // 点赞ID
-	UserID    string `json:"userId"`    // 用户ID
-	CreatedAt string `json:"createdAt"` // 点赞时间
-	UserName  string `json:"userName"`  // 用户名
-	Avatar    string `json:"avatar"`    // 用户头像
+	Id           string                  `json:"id"`           // 动态ID
+	UserID       string                  `json:"userId"`       // 用户ID
+	UserName     string                  `json:"userName"`     // 用户名
+	Avatar       string                  `json:"avatar"`       // 用户头像
+	Content      string                  `json:"content"`      // 动态内容
+	Files        []GetMomentsFileInfo    `json:"files"`        // 文件信息列表
+	Comments     []GetMomentsCommentInfo `json:"comments"`     // 评论列表（最多3条最新评论）
+	Likes        []GetMomentsLikeInfo    `json:"likes"`        // 点赞列表（最多10个最新点赞）
+	CommentCount int64                   `json:"commentCount"` // 总评论数
+	LikeCount    int64                   `json:"likeCount"`    // 总点赞数
+	IsLiked      bool                    `json:"isLiked"`      // 当前用户是否已点赞
+	CreatedAt    string                  `json:"createdAt"`    // 动态创建时间
 }

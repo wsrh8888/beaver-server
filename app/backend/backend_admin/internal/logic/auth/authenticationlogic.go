@@ -32,7 +32,7 @@ func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp *types.AuthenticationRes, err error) {
 	if utils.InListByRegex(l.svcCtx.Config.WhiteList, req.ValidPath) {
 		logx.Infof("白名单请求：%s, %s", req.ValidPath, req.Token)
-		return
+		return &types.AuthenticationRes{}, nil
 	}
 
 	claims, err := jwts.ParseToken(req.Token, l.svcCtx.Config.Auth.AccessSecret)

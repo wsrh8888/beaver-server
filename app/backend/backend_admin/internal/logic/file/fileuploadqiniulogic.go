@@ -25,7 +25,14 @@ func NewFileUploadQiniuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 }
 
 func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileUploadQiniuReq) (resp *types.FileUploadQiniuRes, err error) {
-	// todo: add your logic here and delete this line
+	// 七牛云文件上传处理逻辑
+	// 这里应该处理七牛云上传后的回调信息
+	// 暂时返回空结果，具体实现需要根据实际需求
 
-	return &types.FileUploadQiniuRes{}, nil
+	logx.Infof("七牛云文件上传请求，用户ID: %s", req.UserID)
+
+	return &types.FileUploadQiniuRes{
+		FileKey:      "",
+		OriginalName: "",
+	}, nil
 }

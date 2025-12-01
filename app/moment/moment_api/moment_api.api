@@ -21,40 +21,126 @@ type (
 		Page   int    `json:"page"` // 页码
 		Limit  int    `json:"limit"` // 每页数量
 	}
-	// 列表页文件信息
-	MomentListFileInfo {
+	GetMomentsFileInfo {
 		FileKey string `json:"fileKey"` // 文件名
 		Type    uint32 `json:"type"` // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
 	}
-	// 列表页评论信息
-	MomentListCommentInfo {
+	GetMomentsCommentInfo {
 		Id        string `json:"id"` // 评论ID
 		UserID    string `json:"userId"` // 用户ID
+		UserName  string `json:"userName"` // 用户名
+		Avatar    string `json:"avatar"` // 用户头像
 		Content   string `json:"content"` // 评论内容
 		CreatedAt string `json:"createdAt"` // 评论时间
 	}
-	// 列表页点赞信息
-	MomentListLikeInfo {
+	GetMomentsLikeInfo {
 		Id        string `json:"id"` // 点赞ID
 		UserID    string `json:"userId"` // 用户ID
-		CreatedAt string `json:"createdAt"` // 点赞时间
 		UserName  string `json:"userName"` // 用户名
 		Avatar    string `json:"avatar"` // 用户头像
+		CreatedAt string `json:"createdAt"` // 点赞时间
 	}
 	MomentListItem {
-		Id        string                  `json:"id"` // 动态ID
-		UserID    string                  `json:"userId"` // 用户ID
-		UserName  string                  `json:"userName"` // 用户名
-		Avatar    string                  `json:"avatar"` // 用户头像
-		Content   string                  `json:"content"` // 动态内容
-		Files     []MomentListFileInfo    `json:"files"` // 文件信息列表
-		Comments  []MomentListCommentInfo `json:"comments"` // 评论列表
-		Likes     []MomentListLikeInfo    `json:"likes"` // 点赞列表
-		CreatedAt string                  `json:"createdAt"` // 动态创建时间
+		Id           string                  `json:"id"` // 动态ID
+		UserID       string                  `json:"userId"` // 用户ID
+		UserName     string                  `json:"userName"` // 用户名
+		Avatar       string                  `json:"avatar"` // 用户头像
+		Content      string                  `json:"content"` // 动态内容
+		Files        []GetMomentsFileInfo    `json:"files"` // 文件信息列表
+		Comments     []GetMomentsCommentInfo `json:"comments"` // 评论列表（最多3条最新评论）
+		Likes        []GetMomentsLikeInfo    `json:"likes"` // 点赞列表（最多10个最新点赞）
+		CommentCount int64                   `json:"commentCount"` // 总评论数
+		LikeCount    int64                   `json:"likeCount"` // 总点赞数
+		IsLiked      bool                    `json:"isLiked"` // 当前用户是否已点赞
+		CreatedAt    string                  `json:"createdAt"` // 动态创建时间
 	}
 	GetMomentsRes {
 		Count int64            `json:"count"` // 总数
 		List  []MomentListItem `json:"list"` // 动态列表
+	}
+)
+
+// 获取动态详情接口类型
+type (
+	GetMomentDetailReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		MomentID string `json:"momentId"` // 动态ID
+	}
+	GetMomentDetailFileInfo {
+		FileKey string `json:"fileKey"` // 文件名
+		Type    uint32 `json:"type"` // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
+	}
+	GetMomentDetailCommentInfo {
+		Id        string `json:"id"` // 评论ID
+		UserID    string `json:"userId"` // 用户ID
+		UserName  string `json:"userName"` // 用户名
+		Avatar    string `json:"avatar"` // 用户头像
+		Content   string `json:"content"` // 评论内容
+		CreatedAt string `json:"createdAt"` // 评论时间
+	}
+	GetMomentDetailLikeInfo {
+		Id        string `json:"id"` // 点赞ID
+		UserID    string `json:"userId"` // 用户ID
+		UserName  string `json:"userName"` // 用户名
+		Avatar    string `json:"avatar"` // 用户头像
+		CreatedAt string `json:"createdAt"` // 点赞时间
+	}
+	GetMomentDetailRes {
+		Id           string                       `json:"id"` // 动态ID
+		UserID       string                       `json:"userId"` // 用户ID
+		UserName     string                       `json:"userName"` // 用户名
+		Avatar       string                       `json:"avatar"` // 用户头像
+		Content      string                       `json:"content"` // 动态内容
+		Files        []GetMomentDetailFileInfo    `json:"files"` // 文件信息列表
+		Comments     []GetMomentDetailCommentInfo `json:"comments"` // 最新20条评论
+		Likes        []GetMomentDetailLikeInfo    `json:"likes"` // 最新50个点赞
+		CommentCount int64                        `json:"commentCount"` // 总评论数
+		LikeCount    int64                        `json:"likeCount"` // 总点赞数
+		IsLiked      bool                         `json:"isLiked"` // 当前用户是否已点赞
+		CreatedAt    string                       `json:"createdAt"` // 动态创建时间
+	}
+)
+
+// 获取动态评论列表接口类型
+type (
+	GetMomentCommentsReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		MomentID string `json:"momentId"` // 动态ID
+		Page     int    `json:"page"` // 页码
+		Limit    int    `json:"limit"` // 每页数量
+	}
+	GetMomentCommentsInfo {
+		Id        string `json:"id"` // 评论ID
+		UserID    string `json:"userId"` // 用户ID
+		UserName  string `json:"userName"` // 用户名
+		Avatar    string `json:"avatar"` // 用户头像
+		Content   string `json:"content"` // 评论内容
+		CreatedAt string `json:"createdAt"` // 评论时间
+	}
+	GetMomentCommentsRes {
+		Count int64                   `json:"count"` // 总数
+		List  []GetMomentCommentsInfo `json:"list"` // 评论列表
+	}
+)
+
+// 获取动态点赞列表接口类型
+type (
+	GetMomentLikesReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		MomentID string `json:"momentId"` // 动态ID
+		Page     int    `json:"page"` // 页码
+		Limit    int    `json:"limit"` // 每页数量
+	}
+	GetMomentLikesInfo {
+		Id        string `json:"id"` // 点赞ID
+		UserID    string `json:"userId"` // 用户ID
+		UserName  string `json:"userName"` // 用户名
+		Avatar    string `json:"avatar"` // 用户头像
+		CreatedAt string `json:"createdAt"` // 点赞时间
+	}
+	GetMomentLikesRes {
+		Count int64                `json:"count"` // 总数
+		List  []GetMomentLikesInfo `json:"list"` // 点赞列表
 	}
 )
 
@@ -83,9 +169,21 @@ service moment {
 	@handler CreateMoment
 	post /api/moment/create (CreateMomentReq) returns (CreateMomentRes)
 
-	@doc "获取自己和好友的动态列表的接口"
+	@doc "获取自己和好友的动态列表的接口（只返回部分评论和点赞）"
 	@handler GetMomentsList
 	post /api/moment/list (GetMomentsReq) returns (GetMomentsRes)
+
+	@doc "获取动态详情的接口（包含更多评论和点赞）"
+	@handler GetMomentDetail
+	post /api/moment/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
+
+	@doc "获取动态评论列表的接口（分页）"
+	@handler GetMomentComments
+	post /api/moment/comments (GetMomentCommentsReq) returns (GetMomentCommentsRes)
+
+	@doc "获取动态点赞列表的接口（分页）"
+	@handler GetMomentLikes
+	post /api/moment/likes (GetMomentLikesReq) returns (GetMomentLikesRes)
 
 	@doc "点赞/取消点赞的接口"
 	@handler LikeMoment

@@ -7,7 +7,6 @@ import (
 	"beaver/common/response"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
@@ -21,15 +20,8 @@ func DeleteEmojiHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 参数校验
-		if req.EmojiID == "" {
-			response.Response(r, w, nil, errors.New("表情ID不能为空"))
-			return
-		}
-
-		// 验证EmojiID格式
-		_, err := strconv.ParseUint(req.EmojiID, 10, 32)
-		if err != nil {
-			response.Response(r, w, nil, errors.New("表情ID格式错误"))
+		if req.UUID == "" {
+			response.Response(r, w, nil, errors.New("表情UUID不能为空"))
 			return
 		}
 

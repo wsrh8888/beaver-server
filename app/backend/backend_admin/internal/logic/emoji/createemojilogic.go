@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
@@ -57,6 +56,6 @@ func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.C
 	}
 
 	return &types.CreateEmojiRes{
-		Id: strconv.Itoa(int(emoji.Id)),
+		UUID: emoji.UUID,
 	}, nil
 }

@@ -28,6 +28,19 @@ func NewGetGroupMemberListLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *GetGroupMemberListLogic) GetGroupMemberList(req *types.GetGroupMemberListReq) (resp *types.GetGroupMemberListRes, err error) {
+	// 分页参数校验
+	page := req.Page
+	limit := req.Limit
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
 	// 构建查询条件
 	whereClause := l.svcCtx.DB.Where("group_id = ?", req.GroupId)
 
@@ -44,8 +57,8 @@ func (l *GetGroupMemberListLogic) GetGroupMemberList(req *types.GetGroupMemberLi
 	// 分页查询
 	members, count, err := list_query.ListQuery(l.svcCtx.DB, group_models.GroupMemberModel{}, list_query.Option{
 		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.Limit,
+			Page:  page,
+			Limit: limit,
 			Sort:  "created_at desc",
 		},
 		Where: whereClause,
