@@ -124,12 +124,27 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 		}
 	}
 
+	// 批量查询当前用户是否点赞
+	likedMap := make(map[string]bool)
+	if len(momentUUIDs) > 0 {
+		var liked []struct {
+			MomentID string
+		}
+		l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
+			Where("moment_id IN (?) AND user_id = ? AND is_deleted = false", momentUUIDs, req.UserID).
+			Select("moment_id").
+			Scan(&liked)
+		for _, item := range liked {
+			likedMap[item.MomentID] = true
+		}
+	}
+
 	// 批量查询具体的评论数据（限制每条动态最多返回3条评论）
 	commentMap := make(map[string][]moment_models.MomentCommentModel)
 	if len(momentUUIDs) > 0 {
 		var allComments []moment_models.MomentCommentModel
-		// 直接查询所有相关的评论，然后按动态分组
-		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
+		// 仅取顶层评论，直接查询所有相关的评论，然后按动态分组
+		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false AND parent_id = ''", momentUUIDs).
 			Order("moment_id, created_at DESC").
 			Find(&allComments)
 
@@ -201,15 +216,18 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 		// 构建完整响应
 		resp.List = append(resp.List, types.MomentListItem{
-			Id:        moment.UUID,
-			UserID:    moment.UserID,
-			Content:   moment.Content,
-			Files:     files,
-			Comments:  comments,
-			Likes:     likes,
-			UserName:  userName,
-			Avatar:    avatar,
-			CreatedAt: moment.CreatedAt.String(),
+			Id:           moment.UUID,
+			UserID:       moment.UserID,
+			Content:      moment.Content,
+			Files:        files,
+			Comments:     comments,
+			Likes:        likes,
+			UserName:     userName,
+			Avatar:       avatar,
+			CommentCount: commentCounts[moment.UUID],
+			LikeCount:    likeCounts[moment.UUID],
+			IsLiked:      likedMap[moment.UUID],
+			CreatedAt:    moment.CreatedAt.String(),
 		})
 	}
 
@@ -227,12 +245,15 @@ func convertListComments(comments []moment_models.MomentCommentModel, userInfoMa
 		}
 
 		result = append(result, types.GetMomentsCommentInfo{
-			Id:        comment.UUID,
-			UserID:    comment.UserID,
-			UserName:  userName,
-			Avatar:    avatar,
-			Content:   comment.Content,
-			CreatedAt: comment.CreatedAt.String(),
+			Id:               comment.UUID,
+			UserID:           comment.UserID,
+			UserName:         userName,
+			Avatar:           avatar,
+			Content:          comment.Content,
+			ParentId:         "", // 列表只返回顶层
+			ReplyToCommentId: "",
+			ReplyToUserName:  "",
+			CreatedAt:        comment.CreatedAt.String(),
 		})
 	}
 	return result

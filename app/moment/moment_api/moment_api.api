@@ -14,6 +14,28 @@ type (
 	CreateMomentRes  {}
 )
 
+// 创建评论接口类型
+type (
+	CreateMomentCommentReq {
+		UserID           string `header:"Beaver-User-Id"` // 用户ID
+		MomentID         string `json:"momentId"` // 动态ID
+		Content          string `json:"content"` // 评论内容
+		ParentId         string `json:"parentId,optional"` // 父评论ID，空表示对动态的一级评论
+		ReplyToCommentId string `json:"replyToCommentId"` // 被回复的评论ID（两层限制：只能回复顶级评论）
+	}
+	CreateMomentCommentRes {
+		Id               string `json:"id"` // 评论ID
+		UserID           string `json:"userId"` // 用户ID
+		UserName         string `json:"userName"` // 用户昵称
+		Avatar           string `json:"avatar"` // 用户头像
+		Content          string `json:"content"` // 评论内容
+		ParentId         string `json:"parentId"` // 父评论ID，空表示一级评论
+		ReplyToCommentId string `json:"replyToCommentId"` // 被回复的评论ID
+		ReplyToUserName  string `json:"replyToUserName"` // 被回复用户昵称
+		CreatedAt        string `json:"createdAt"` // 评论时间
+	}
+)
+
 // 获取动态列表接口类型
 type (
 	GetMomentsReq {
@@ -26,12 +48,16 @@ type (
 		Type    uint32 `json:"type"` // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
 	}
 	GetMomentsCommentInfo {
-		Id        string `json:"id"` // 评论ID
-		UserID    string `json:"userId"` // 用户ID
-		UserName  string `json:"userName"` // 用户名
-		Avatar    string `json:"avatar"` // 用户头像
-		Content   string `json:"content"` // 评论内容
-		CreatedAt string `json:"createdAt"` // 评论时间
+		Id               string                  `json:"id"` // 评论ID
+		UserID           string                  `json:"userId"` // 用户ID
+		UserName         string                  `json:"userName"` // 用户名
+		Avatar           string                  `json:"avatar"` // 用户头像
+		Content          string                  `json:"content"` // 评论内容
+		ParentId         string                  `json:"parentId,optional"` // 父评论ID，空表示一级评论
+		ReplyToCommentId string                  `json:"replyToCommentId"` // 被回复的评论ID
+		ReplyToUserName  string                  `json:"replyToUserName"` // 被回复用户昵称
+		Children         []GetMomentsCommentInfo `json:"children"` // 子评论（返回部分，前端可按需展示）
+		CreatedAt        string                  `json:"createdAt"` // 评论时间
 	}
 	GetMomentsLikeInfo {
 		Id        string `json:"id"` // 点赞ID
@@ -47,7 +73,7 @@ type (
 		Avatar       string                  `json:"avatar"` // 用户头像
 		Content      string                  `json:"content"` // 动态内容
 		Files        []GetMomentsFileInfo    `json:"files"` // 文件信息列表
-		Comments     []GetMomentsCommentInfo `json:"comments"` // 评论列表（最多3条最新评论）
+		Comments     []GetMomentsCommentInfo `json:"comments"` // 评论列表（最多3条最新评论，含子评论片段）
 		Likes        []GetMomentsLikeInfo    `json:"likes"` // 点赞列表（最多10个最新点赞）
 		CommentCount int64                   `json:"commentCount"` // 总评论数
 		LikeCount    int64                   `json:"likeCount"` // 总点赞数
@@ -71,12 +97,17 @@ type (
 		Type    uint32 `json:"type"` // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
 	}
 	GetMomentDetailCommentInfo {
-		Id        string `json:"id"` // 评论ID
-		UserID    string `json:"userId"` // 用户ID
-		UserName  string `json:"userName"` // 用户名
-		Avatar    string `json:"avatar"` // 用户头像
-		Content   string `json:"content"` // 评论内容
-		CreatedAt string `json:"createdAt"` // 评论时间
+		Id               string                       `json:"id"` // 评论ID
+		UserID           string                       `json:"userId"` // 用户ID
+		UserName         string                       `json:"userName"` // 用户名
+		Avatar           string                       `json:"avatar"` // 用户头像
+		Content          string                       `json:"content"` // 评论内容
+		ParentId         string                       `json:"parentId,optional"` // 父评论ID，空表示一级评论
+		ReplyToCommentId string                       `json:"replyToCommentId"` // 被回复的评论ID
+		ReplyToUserName  string                       `json:"replyToUserName"` // 被回复用户昵称
+		ChildCount       int64                        `json:"childCount"` // 子评论总数
+		Children         []GetMomentDetailCommentInfo `json:"children"` // 子评论（可按需返回，避免一次性拉全量）
+		CreatedAt        string                       `json:"createdAt"` // 评论时间
 	}
 	GetMomentDetailLikeInfo {
 		Id        string `json:"id"` // 点赞ID
@@ -106,16 +137,22 @@ type (
 	GetMomentCommentsReq {
 		UserID   string `header:"Beaver-User-Id"` // 用户ID
 		MomentID string `json:"momentId"` // 动态ID
+		ParentId string `json:"parentId,optional"` // 可选：顶层评论ID，查询其子回复
 		Page     int    `json:"page"` // 页码
 		Limit    int    `json:"limit"` // 每页数量
 	}
 	GetMomentCommentsInfo {
-		Id        string `json:"id"` // 评论ID
-		UserID    string `json:"userId"` // 用户ID
-		UserName  string `json:"userName"` // 用户名
-		Avatar    string `json:"avatar"` // 用户头像
-		Content   string `json:"content"` // 评论内容
-		CreatedAt string `json:"createdAt"` // 评论时间
+		Id               string                  `json:"id"` // 评论ID
+		UserID           string                  `json:"userId"` // 用户ID
+		UserName         string                  `json:"userName"` // 用户名
+		Avatar           string                  `json:"avatar"` // 用户头像
+		Content          string                  `json:"content"` // 评论内容
+		ParentId         string                  `json:"parentId"` // 父评论ID，空表示一级评论
+		ReplyToCommentId string                  `json:"replyToCommentId"` // 被回复的评论ID
+		ReplyToUserName  string                  `json:"replyToUserName"` // 被回复用户昵称
+		ChildCount       int64                   `json:"childCount"` // 子评论总数
+		Children         []GetMomentCommentsInfo `json:"children"` // 子评论
+		CreatedAt        string                  `json:"createdAt"` // 评论时间
 	}
 	GetMomentCommentsRes {
 		Count int64                   `json:"count"` // 总数
@@ -176,6 +213,10 @@ service moment {
 	@doc "获取动态详情的接口（包含更多评论和点赞）"
 	@handler GetMomentDetail
 	post /api/moment/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
+
+	@doc "发表评论的接口"
+	@handler CreateMomentComment
+	post /api/moment/comment/create (CreateMomentCommentReq) returns (CreateMomentCommentRes)
 
 	@doc "获取动态评论列表的接口（分页）"
 	@handler GetMomentComments

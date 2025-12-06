@@ -13,6 +13,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 发表评论的接口
+				Method:  http.MethodPost,
+				Path:    "/api/moment/comment/create",
+				Handler: CreateMomentCommentHandler(serverCtx),
+			},
+			{
 				// 获取动态评论列表的接口（分页）
 				Method:  http.MethodPost,
 				Path:    "/api/moment/comments",

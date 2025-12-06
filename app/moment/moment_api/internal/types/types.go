@@ -6,6 +6,26 @@ type CreateFileInfo struct {
 	Type    uint32 `json:"type"`    // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
 }
 
+type CreateMomentCommentReq struct {
+	UserID           string `header:"Beaver-User-Id"`  // 用户ID
+	MomentID         string `json:"momentId"`          // 动态ID
+	Content          string `json:"content"`           // 评论内容
+	ParentId         string `json:"parentId,optional"` // 父评论ID，空表示对动态的一级评论
+	ReplyToCommentId string `json:"replyToCommentId"`  // 被回复的评论ID（两层限制：只能回复顶级评论）
+}
+
+type CreateMomentCommentRes struct {
+	Id               string `json:"id"`               // 评论ID
+	UserID           string `json:"userId"`           // 用户ID
+	UserName         string `json:"userName"`         // 用户昵称
+	Avatar           string `json:"avatar"`           // 用户头像
+	Content          string `json:"content"`          // 评论内容
+	ParentId         string `json:"parentId"`         // 父评论ID，空表示一级评论
+	ReplyToCommentId string `json:"replyToCommentId"` // 被回复的评论ID
+	ReplyToUserName  string `json:"replyToUserName"`  // 被回复用户昵称
+	CreatedAt        string `json:"createdAt"`        // 评论时间
+}
+
 type CreateMomentReq struct {
 	UserID  string           `header:"Beaver-User-Id"` // 用户ID
 	Content string           `json:"content"`          // 动态内容
@@ -24,19 +44,25 @@ type DeleteMomentRes struct {
 }
 
 type GetMomentCommentsInfo struct {
-	Id        string `json:"id"`        // 评论ID
-	UserID    string `json:"userId"`    // 用户ID
-	UserName  string `json:"userName"`  // 用户名
-	Avatar    string `json:"avatar"`    // 用户头像
-	Content   string `json:"content"`   // 评论内容
-	CreatedAt string `json:"createdAt"` // 评论时间
+	Id               string                  `json:"id"`               // 评论ID
+	UserID           string                  `json:"userId"`           // 用户ID
+	UserName         string                  `json:"userName"`         // 用户名
+	Avatar           string                  `json:"avatar"`           // 用户头像
+	Content          string                  `json:"content"`          // 评论内容
+	ParentId         string                  `json:"parentId"`         // 父评论ID，空表示一级评论
+	ReplyToCommentId string                  `json:"replyToCommentId"` // 被回复的评论ID
+	ReplyToUserName  string                  `json:"replyToUserName"`  // 被回复用户昵称
+	ChildCount       int64                   `json:"childCount"`       // 子评论总数
+	Children         []GetMomentCommentsInfo `json:"children"`         // 子评论
+	CreatedAt        string                  `json:"createdAt"`        // 评论时间
 }
 
 type GetMomentCommentsReq struct {
-	UserID   string `header:"Beaver-User-Id"` // 用户ID
-	MomentID string `json:"momentId"`         // 动态ID
-	Page     int    `json:"page"`             // 页码
-	Limit    int    `json:"limit"`            // 每页数量
+	UserID   string `header:"Beaver-User-Id"`  // 用户ID
+	MomentID string `json:"momentId"`          // 动态ID
+	ParentId string `json:"parentId,optional"` // 可选：顶层评论ID，查询其子回复
+	Page     int    `json:"page"`              // 页码
+	Limit    int    `json:"limit"`             // 每页数量
 }
 
 type GetMomentCommentsRes struct {
@@ -45,12 +71,17 @@ type GetMomentCommentsRes struct {
 }
 
 type GetMomentDetailCommentInfo struct {
-	Id        string `json:"id"`        // 评论ID
-	UserID    string `json:"userId"`    // 用户ID
-	UserName  string `json:"userName"`  // 用户名
-	Avatar    string `json:"avatar"`    // 用户头像
-	Content   string `json:"content"`   // 评论内容
-	CreatedAt string `json:"createdAt"` // 评论时间
+	Id               string                       `json:"id"`                // 评论ID
+	UserID           string                       `json:"userId"`            // 用户ID
+	UserName         string                       `json:"userName"`          // 用户名
+	Avatar           string                       `json:"avatar"`            // 用户头像
+	Content          string                       `json:"content"`           // 评论内容
+	ParentId         string                       `json:"parentId,optional"` // 父评论ID，空表示一级评论
+	ReplyToCommentId string                       `json:"replyToCommentId"`  // 被回复的评论ID
+	ReplyToUserName  string                       `json:"replyToUserName"`   // 被回复用户昵称
+	ChildCount       int64                        `json:"childCount"`        // 子评论总数
+	Children         []GetMomentDetailCommentInfo `json:"children"`          // 子评论（可按需返回，避免一次性拉全量）
+	CreatedAt        string                       `json:"createdAt"`         // 评论时间
 }
 
 type GetMomentDetailFileInfo struct {
@@ -107,12 +138,16 @@ type GetMomentLikesRes struct {
 }
 
 type GetMomentsCommentInfo struct {
-	Id        string `json:"id"`        // 评论ID
-	UserID    string `json:"userId"`    // 用户ID
-	UserName  string `json:"userName"`  // 用户名
-	Avatar    string `json:"avatar"`    // 用户头像
-	Content   string `json:"content"`   // 评论内容
-	CreatedAt string `json:"createdAt"` // 评论时间
+	Id               string                  `json:"id"`                // 评论ID
+	UserID           string                  `json:"userId"`            // 用户ID
+	UserName         string                  `json:"userName"`          // 用户名
+	Avatar           string                  `json:"avatar"`            // 用户头像
+	Content          string                  `json:"content"`           // 评论内容
+	ParentId         string                  `json:"parentId,optional"` // 父评论ID，空表示一级评论
+	ReplyToCommentId string                  `json:"replyToCommentId"`  // 被回复的评论ID
+	ReplyToUserName  string                  `json:"replyToUserName"`   // 被回复用户昵称
+	Children         []GetMomentsCommentInfo `json:"children"`          // 子评论（返回部分，前端可按需展示）
+	CreatedAt        string                  `json:"createdAt"`         // 评论时间
 }
 
 type GetMomentsFileInfo struct {
@@ -155,7 +190,7 @@ type MomentListItem struct {
 	Avatar       string                  `json:"avatar"`       // 用户头像
 	Content      string                  `json:"content"`      // 动态内容
 	Files        []GetMomentsFileInfo    `json:"files"`        // 文件信息列表
-	Comments     []GetMomentsCommentInfo `json:"comments"`     // 评论列表（最多3条最新评论）
+	Comments     []GetMomentsCommentInfo `json:"comments"`     // 评论列表（最多3条最新评论，含子评论片段）
 	Likes        []GetMomentsLikeInfo    `json:"likes"`        // 点赞列表（最多10个最新点赞）
 	CommentCount int64                   `json:"commentCount"` // 总评论数
 	LikeCount    int64                   `json:"likeCount"`    // 总点赞数

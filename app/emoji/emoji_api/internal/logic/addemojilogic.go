@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 type AddEmojiLogic struct {
@@ -27,50 +28,61 @@ func NewAddEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddEmoji
 }
 
 func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRes, err error) {
-	// 生成表情版本号
-	emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
-	if emojiVersion == -1 {
-		logx.Error("生成表情版本号失败")
-		return nil, errors.New("生成版本号失败")
-	}
-
-	// 创建表情
-	emoji := emoji_models.Emoji{
-		UUID:    uuid.New().String(),
-		FileKey: req.FileKey, // 使用FileKey字段存储文件名
-		Title:   req.Title,
-		Version: emojiVersion,
-	}
-
-	// 保存到数据库
-	err = l.svcCtx.DB.Create(&emoji).Error
-	if err != nil {
-		logx.Error("添加表情失败", err)
+	// 先按 FileKey 查重，已有则复用，不重复落库
+	var emoji emoji_models.Emoji
+	err = l.svcCtx.DB.Where("file_key = ?", req.FileKey).First(&emoji).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
+	}
+
+	// 仅当不存在时创建新的 emoji
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+		if emojiVersion == -1 {
+			logx.Error("生成表情版本号失败")
+			return nil, errors.New("生成版本号失败")
+		}
+
+		emoji = emoji_models.Emoji{
+			UUID:    uuid.New().String(),
+			FileKey: req.FileKey,
+			Title:   req.Title,
+			Version: emojiVersion,
+		}
+
+		if err := l.svcCtx.DB.Create(&emoji).Error; err != nil {
+			logx.Error("添加表情失败", err)
+			return nil, err
+		}
 	}
 
 	// 如果指定了表情包ID，则添加到表情包
 	if req.PackageID != "" {
-		// 生成表情包表情关联的版本号（按表情包ID分区）
-		packageEmojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_emoji", "package_id", req.PackageID)
-		if packageEmojiVersion == -1 {
-			logx.Error("生成表情包表情关联版本号失败")
-			return nil, errors.New("生成版本号失败")
-		}
-
-		// 创建表情包与表情的关联
-		emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
-			UUID:      uuid.New().String(),
-			PackageID: req.PackageID,
-			EmojiID:   emoji.UUID,
-			SortOrder: 0, // 默认排序
-			Version:   packageEmojiVersion,
-		}
-
-		err = l.svcCtx.DB.Create(&emojiPackageEmoji).Error
-		if err != nil {
-			logx.Error("添加表情到表情包失败", err)
+		var existPkgEmoji emoji_models.EmojiPackageEmoji
+		err = l.svcCtx.DB.Where("package_id = ? AND emoji_id = ?", req.PackageID, emoji.UUID).First(&existPkgEmoji).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			packageEmojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_emoji", "package_id", req.PackageID)
+			if packageEmojiVersion == -1 {
+				logx.Error("生成表情包表情关联版本号失败")
+				return nil, errors.New("生成版本号失败")
+			}
+
+			emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
+				UUID:      uuid.New().String(),
+				PackageID: req.PackageID,
+				EmojiID:   emoji.UUID,
+				SortOrder: 0,
+				Version:   packageEmojiVersion,
+			}
+
+			if err := l.svcCtx.DB.Create(&emojiPackageEmoji).Error; err != nil {
+				logx.Error("添加表情到表情包失败", err)
+				return nil, err
+			}
 		}
 	}
 
@@ -85,14 +97,21 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	favoriteEmoji := emoji_models.EmojiCollectEmoji{
 		UUID:    uuid.New().String(),
 		UserID:  req.UserID,
-		EmojiID: emoji.UUID, // 使用新增表情的UUID
+		EmojiID: emoji.UUID,
 		Version: collectVersion,
 	}
 
-	err = l.svcCtx.DB.Create(&favoriteEmoji).Error
-	if err != nil {
-		logx.Error("收藏表情失败", err)
+	// 去重：同一用户对同一 emoji 已收藏则跳过创建
+	var existFavorite emoji_models.EmojiCollectEmoji
+	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", req.UserID, emoji.UUID).First(&existFavorite).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err := l.svcCtx.DB.Create(&favoriteEmoji).Error; err != nil {
+			logx.Error("收藏表情失败", err)
+			return nil, err
+		}
 	}
 
 	return &types.AddEmojiRes{}, nil
