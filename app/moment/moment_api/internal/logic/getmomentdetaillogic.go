@@ -69,22 +69,66 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 
 	// 检查当前用户是否已点赞
 	var isLiked bool
-	if err := l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
-		Where("moment_id = ? AND user_id = ? AND is_deleted = false", req.MomentID, req.UserID).
-		Select("1").
-		Limit(1).
-		Find(&[]moment_models.MomentLikeModel{}).Error; err == nil {
-		isLiked = true
+	if req.UserID != "" {
+		var likeExists int64
+		if err := l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
+			Where("moment_id = ? AND user_id = ? AND is_deleted = false", req.MomentID, req.UserID).
+			Limit(1).
+			Count(&likeExists).Error; err == nil && likeExists > 0 {
+			isLiked = true
+		}
 	}
 
-	// 获取最新的20条评论
-	var comments []moment_models.MomentCommentModel
+	// 获取最新的20条顶层评论
+	var topComments []moment_models.MomentCommentModel
 	if commentCount > 0 {
-		if err := l.svcCtx.DB.Where("moment_id = ? AND is_deleted = false", req.MomentID).
+		if err := l.svcCtx.DB.Where("moment_id = ? AND is_deleted = false AND parent_id = ''", req.MomentID).
 			Order("created_at DESC").
 			Limit(20).
-			Find(&comments).Error; err != nil {
+			Find(&topComments).Error; err != nil {
 			return nil, err
+		}
+	}
+
+	// 统计子评论数量
+	childCountMap := make(map[string]int64)
+	if len(topComments) > 0 {
+		var childStats []struct {
+			ParentID string
+			Count    int64
+		}
+		var parentIDs []string
+		for _, c := range topComments {
+			parentIDs = append(parentIDs, c.UUID)
+		}
+		l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
+			Where("parent_id IN (?) AND is_deleted = false", parentIDs).
+			Select("parent_id, COUNT(*) as count").
+			Group("parent_id").
+			Scan(&childStats)
+		for _, stat := range childStats {
+			childCountMap[stat.ParentID] = stat.Count
+		}
+	}
+
+	// 获取子评论预览（每个顶层最多20条）
+	childPreviewLimit := 20
+	childMap := make(map[string][]moment_models.MomentCommentModel)
+	if len(topComments) > 0 {
+		var parentIDs []string
+		for _, c := range topComments {
+			parentIDs = append(parentIDs, c.UUID)
+		}
+		var children []moment_models.MomentCommentModel
+		l.svcCtx.DB.Where("parent_id IN (?) AND is_deleted = false", parentIDs).
+			Order("created_at DESC").
+			Find(&children)
+		childCount := make(map[string]int)
+		for _, ch := range children {
+			if childCount[ch.ParentID] < childPreviewLimit {
+				childMap[ch.ParentID] = append(childMap[ch.ParentID], ch)
+				childCount[ch.ParentID]++
+			}
 		}
 	}
 
@@ -102,8 +146,13 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 	// 获取评论和点赞的用户信息
 	userIds := make(map[string]bool)
 	userIds[moment.UserID] = true // 动态作者
-	for _, comment := range comments {
+	for _, comment := range topComments {
 		userIds[comment.UserID] = true
+	}
+	for _, children := range childMap {
+		for _, c := range children {
+			userIds[c.UserID] = true
+		}
 	}
 	for _, like := range likes {
 		userIds[like.UserID] = true
@@ -138,7 +187,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 
 	// 转换评论信息
 	var commentInfos []types.GetMomentDetailCommentInfo
-	for _, comment := range comments {
+	for _, comment := range topComments {
 		userInfo := userInfoMap[comment.UserID]
 		userName := ""
 		avatar := ""
@@ -147,13 +196,63 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 			avatar = userInfo.Avatar
 		}
 
+		// 子评论预览
+		var childInfos []types.GetMomentDetailCommentInfo
+		for _, ch := range childMap[comment.UUID] {
+			chUser := userInfoMap[ch.UserID]
+			chName := ""
+			chAvatar := ""
+			if chUser != nil {
+				chName = chUser.NickName
+				chAvatar = chUser.Avatar
+			}
+
+			// 需要被回复的昵称
+			replyName := ""
+			if ch.ReplyToCommentID != "" {
+				// 尝试从子列表或父评论获取
+				if ch.ReplyToCommentID == comment.UUID {
+					replyName = userName
+				} else {
+					// 在当前 childMap 里查找
+					for _, other := range childMap[comment.UUID] {
+						if other.UUID == ch.ReplyToCommentID {
+							if u := userInfoMap[other.UserID]; u != nil {
+								replyName = u.NickName
+							}
+							break
+						}
+					}
+				}
+			}
+
+			childInfos = append(childInfos, types.GetMomentDetailCommentInfo{
+				Id:               ch.UUID,
+				UserID:           ch.UserID,
+				UserName:         chName,
+				Avatar:           chAvatar,
+				Content:          ch.Content,
+				ParentId:         ch.ParentID,
+				ReplyToCommentId: ch.ReplyToCommentID,
+				ReplyToUserName:  replyName,
+				ChildCount:       0, // 子评论不再嵌套
+				Children:         nil,
+				CreatedAt:        ch.CreatedAt.String(),
+			})
+		}
+
 		commentInfos = append(commentInfos, types.GetMomentDetailCommentInfo{
-			Id:        comment.UUID,
-			UserID:    comment.UserID,
-			UserName:  userName,
-			Avatar:    avatar,
-			Content:   comment.Content,
-			CreatedAt: comment.CreatedAt.String(),
+			Id:               comment.UUID,
+			UserID:           comment.UserID,
+			UserName:         userName,
+			Avatar:           avatar,
+			Content:          comment.Content,
+			ParentId:         "", // 顶层
+			ReplyToCommentId: "",
+			ReplyToUserName:  "",
+			ChildCount:       childCountMap[comment.UUID],
+			Children:         childInfos,
+			CreatedAt:        comment.CreatedAt.String(),
 		})
 	}
 
