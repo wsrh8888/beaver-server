@@ -30,10 +30,10 @@ func NewDeleteMomentCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext
 func (l *DeleteMomentCommentLogic) DeleteMomentComment(req *types.DeleteMomentCommentReq) (resp *types.DeleteMomentCommentRes, err error) {
 	// 检查评论是否存在
 	var comment moment_models.MomentCommentModel
-	err = l.svcCtx.DB.Where("uuid = ?", req.Id).First(&comment).Error
+	err = l.svcCtx.DB.Where("uuid = ?", req.Uuid).First(&comment).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("评论不存在: %d", req.Id)
+			logx.Errorf("评论不存在: %s", req.Uuid)
 			return nil, errors.New("评论不存在")
 		}
 		logx.Errorf("查询评论失败: %v", err)

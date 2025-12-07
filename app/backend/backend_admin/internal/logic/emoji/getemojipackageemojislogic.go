@@ -59,7 +59,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	}
 
 	// 获取所有表情ID
-	emojiIDs := make([]uint, len(emojiPackageEmojis))
+	emojiIDs := make([]string, len(emojiPackageEmojis))
 	for i, emojiPackageEmoji := range emojiPackageEmojis {
 		emojiIDs[i] = emojiPackageEmoji.EmojiID
 	}
@@ -72,7 +72,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 		return nil, err
 	}
 
-	// 创建表情UUID到表情的映射
+	// 创建表情ID到表情的映射
 	emojiMap := make(map[string]emoji_models.Emoji)
 	for _, emoji := range emojis {
 		emojiMap[emoji.UUID] = emoji

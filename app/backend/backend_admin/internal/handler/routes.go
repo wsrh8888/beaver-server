@@ -374,19 +374,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 获取动态详情
 				Method:  http.MethodGet,
-				Path:    "/admin/moment/:id",
+				Path:    "/admin/moment/:uuid",
 				Handler: moment.GetMomentDetailHandler(serverCtx),
 			},
 			{
 				// 删除动态
 				Method:  http.MethodDelete,
-				Path:    "/admin/moment/:id",
+				Path:    "/admin/moment/:uuid",
 				Handler: moment.DeleteMomentHandler(serverCtx),
 			},
 			{
 				// 删除动态评论
 				Method:  http.MethodDelete,
-				Path:    "/admin/moment/comment/:id",
+				Path:    "/admin/moment/comment/:uuid",
 				Handler: moment.DeleteMomentCommentHandler(serverCtx),
 			},
 			{
