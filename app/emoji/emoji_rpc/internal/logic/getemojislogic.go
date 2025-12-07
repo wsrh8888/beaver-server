@@ -32,7 +32,7 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 		UpdatedAt time.Time `gorm:"column:updated_at"`
 	}
 
-	collectQuery := l.svcCtx.DB.Table("emoji_collect_emoji").Where("user_id = ?", in.UserId)
+	collectQuery := l.svcCtx.DB.Table("emoji_collect_emojis").Where("user_id = ?", in.UserId)
 
 	// 时间戳过滤：只返回更新时间大于since的收藏记录
 	if in.Since > 0 {
@@ -65,7 +65,7 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 		Version int64  `gorm:"column:version"`
 	}
 
-	err = l.svcCtx.DB.Table("emoji").Where("uuid IN ? AND status = ?", emojiUUIDs, 1).
+	err = l.svcCtx.DB.Table("emojis").Where("uuid IN ? AND status = 1", emojiUUIDs).
 		Select("uuid, version").Find(&emojis).Error
 	if err != nil {
 		l.Errorf("查询表情基础信息失败: emojiUUIDs=%v, error=%v", emojiUUIDs, err)

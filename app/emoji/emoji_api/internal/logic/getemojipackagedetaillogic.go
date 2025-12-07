@@ -101,7 +101,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 	// 5. 检查当前用户是否已收藏
 	var isCollected bool
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
-		Where("user_id = ? AND package_id = ? AND is_deleted = ?", req.UserID, req.PackageID, false).
+		Where("user_id = ? AND package_id = ?", req.UserID, req.PackageID).
 		First(&emoji_models.EmojiPackageCollect{}).Error
 	if err == nil {
 		isCollected = true

@@ -131,6 +131,23 @@ type (
 	}
 )
 
+// 按UUID批量获取表情基础信息
+type (
+	GetEmojisByUuidsReq {
+		Uuids []string `json:"uuids"`
+	}
+	EmojiSimpleItem {
+		EmojiID string `json:"emojiId"`
+		FileKey string `json:"fileKey"`
+		Title   string `json:"title"`
+		Version int64  `json:"version"`
+		Status  int8   `json:"status"`
+	}
+	GetEmojisByUuidsRes {
+		Emojis []EmojiSimpleItem `json:"emojis"`
+	}
+)
+
 // 批量获取表情包详情
 type (
 	GetEmojiPackagesByIdsReq {
@@ -173,6 +190,16 @@ type (
 		Version   int64  `json:"version"`
 		CreateAt  int64  `json:"createAt"`
 		UpdateAt  int64  `json:"updateAt"`
+	}
+)
+
+// 按收藏UUID批量获取表情收藏记录（同步补齐）
+type (
+	GetEmojiCollectsByUuidsReq {
+		Uuids []string `json:"uuids"`
+	}
+	GetEmojiCollectsByUuidsRes {
+		Collects []EmojiCollectDetailItem `json:"collects"`
 	}
 )
 
@@ -248,6 +275,10 @@ service emoji {
 	@handler GetEmojisByIds
 	post /api/emoji/emojis-by-ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
 
+	@doc "按UUID批量查询表情基础信息（用于版本同步后补齐）"
+	@handler GetEmojisByUuids
+	post /api/emoji/getEmojisByUuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
+
 	@doc "批量获取表情包详情"
 	@handler GetEmojiPackagesByIds
 	post /api/emoji/packages-by-ids (GetEmojiPackagesByIdsReq) returns (GetEmojiPackagesByIdsRes)
@@ -255,6 +286,10 @@ service emoji {
 	@doc "批量获取用户收藏的表情记录详情（同步用）"
 	@handler GetEmojiCollectsByIds
 	post /api/emoji/collects-by-ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
+
+	@doc "按收藏UUID批量获取表情收藏记录（同步补齐）"
+	@handler GetEmojiCollectsByUuids
+	post /api/emoji/getEmojiCollectsByUuids (GetEmojiCollectsByUuidsReq) returns (GetEmojiCollectsByUuidsRes)
 
 	@doc "批量获取用户收藏的表情包记录详情（同步用）"
 	@handler GetEmojiPackageCollectsByIds

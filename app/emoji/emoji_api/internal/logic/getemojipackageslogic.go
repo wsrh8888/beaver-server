@@ -68,7 +68,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ? AND is_deleted = ?", packageUUIDs, false).
+		Where("package_id IN ?", packageUUIDs).
 		Group("package_id").
 		Find(&collects).Error
 	if err != nil {
@@ -100,7 +100,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	userCollects := make(map[string]bool)
 	if len(packageUUIDs) > 0 {
 		var userCollectList []emoji_models.EmojiPackageCollect
-		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ? AND is_deleted = ?", req.UserID, packageUUIDs, false).
+		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageUUIDs).
 			Find(&userCollectList).Error
 		if err != nil {
 			return nil, status.Error(codes.Internal, "获取收藏状态失败")

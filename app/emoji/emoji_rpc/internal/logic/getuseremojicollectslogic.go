@@ -27,7 +27,7 @@ func NewGetUserEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 // 获取用户收藏的表情版本摘要（用于datasync增量同步）
 func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *emoji_rpc.GetUserEmojiCollectsReq) (*emoji_rpc.GetUserEmojiCollectsRes, error) {
-	// 首先获取用户收藏的表情ID列表
+	// 获取用户收藏的表情记录（返回收藏记录自身的版本，而不是表情版本）
 	var collectRecords []emoji_models.EmojiCollectEmoji
 	collectQuery := l.svcCtx.DB.Where("user_id = ?", in.UserId)
 
@@ -50,33 +50,17 @@ func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *emoji_rpc.GetUserEm
 		}, nil
 	}
 
-	// 提取表情UUID列表
-	emojiUUIDs := make([]string, 0, len(collectRecords))
-	for _, record := range collectRecords {
-		emojiUUIDs = append(emojiUUIDs, record.EmojiID)
-	}
-
-	// 根据表情UUID获取表情基础信息
-	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid IN ?", emojiUUIDs).Find(&emojis).Error
-	if err != nil {
-		l.Errorf("查询表情基础信息失败: emojiUUIDs=%v, error=%v", emojiUUIDs, err)
-		return nil, err
-	}
-
-	l.Infof("查询到用户 %s 的 %d 个收藏表情的基础信息", in.UserId, len(emojis))
-
-	// 转换为版本摘要格式
-	var emojiVersions []*emoji_rpc.EmojiVersionItem
-	for _, emoji := range emojis {
-		emojiVersions = append(emojiVersions, &emoji_rpc.EmojiVersionItem{
-			Uuid:    emoji.UUID,
-			Version: emoji.Version,
+	// 转换为收藏记录的版本摘要（使用收藏记录 UUID + 版本号）
+	var emojiCollectVersions []*emoji_rpc.EmojiVersionItem
+	for _, collect := range collectRecords {
+		emojiCollectVersions = append(emojiCollectVersions, &emoji_rpc.EmojiVersionItem{
+			Uuid:    collect.UUID,
+			Version: collect.Version,
 		})
 	}
 
 	return &emoji_rpc.GetUserEmojiCollectsRes{
-		EmojiVersions:   emojiVersions,
+		EmojiVersions:   emojiCollectVersions,
 		ServerTimestamp: time.Now().UnixMilli(),
 	}, nil
 }

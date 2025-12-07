@@ -86,12 +86,28 @@ type EmojiPackageItem struct {
 	IsAuthor     bool   `json:"isAuthor"`    // 当前用户是否是作者
 }
 
+type EmojiSimpleItem struct {
+	EmojiID string `json:"emojiId"`
+	FileKey string `json:"fileKey"`
+	Title   string `json:"title"`
+	Version int64  `json:"version"`
+	Status  int8   `json:"status"`
+}
+
 type GetEmojiCollectsByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"`
 	Ids    []string `json:"ids"` // 收藏记录UUID列表
 }
 
 type GetEmojiCollectsByIdsRes struct {
+	Collects []EmojiCollectDetailItem `json:"collects"`
+}
+
+type GetEmojiCollectsByUuidsReq struct {
+	Uuids []string `json:"uuids"`
+}
+
+type GetEmojiCollectsByUuidsRes struct {
 	Collects []EmojiCollectDetailItem `json:"collects"`
 }
 
@@ -160,6 +176,14 @@ type GetEmojisByIdsReq struct {
 
 type GetEmojisByIdsRes struct {
 	Emojis []EmojiDetailItem `json:"emojis"`
+}
+
+type GetEmojisByUuidsReq struct {
+	Uuids []string `json:"uuids"`
+}
+
+type GetEmojisByUuidsRes struct {
+	Emojis []EmojiSimpleItem `json:"emojis"`
 }
 
 type GetEmojisListReq struct {
