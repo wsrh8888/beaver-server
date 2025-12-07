@@ -17,12 +17,12 @@ type ChatUserConversationVersionItem struct {
 }
 
 type EmojiCollectVersionItem struct {
-	Id      string `json:"id"`      // 收藏记录UUID
+	UUID    string `json:"uuid"`    // 收藏记录UUID
 	Version int64  `json:"version"` // 收藏版本号
 }
 
 type EmojiPackageCollectVersionItem struct {
-	Id      string `json:"id"`      // 收藏记录UUID
+	UUID    string `json:"uuid"`    // 收藏记录UUID
 	Version int64  `json:"version"` // 收藏版本号
 }
 

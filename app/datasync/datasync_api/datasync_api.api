@@ -160,11 +160,11 @@ type (
 		ServerTimestamp             int64                            `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	EmojiCollectVersionItem {
-		Id      string `json:"id"` // 收藏记录UUID
+		UUID    string `json:"uuid"` // 收藏记录UUID
 		Version int64  `json:"version"` // 收藏版本号
 	}
 	EmojiPackageCollectVersionItem {
-		Id      string `json:"id"` // 收藏记录UUID
+		UUID    string `json:"uuid"` // 收藏记录UUID
 		Version int64  `json:"version"` // 收藏版本号
 	}
 	EmojiPackageVersionItem {

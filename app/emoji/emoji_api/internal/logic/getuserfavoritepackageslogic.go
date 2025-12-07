@@ -27,9 +27,9 @@ func NewGetUserFavoritePackagesLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUserFavoritePackagesReq) (resp *types.GetUserFavoritePackagesRes, err error) {
-	// 1. 查询用户收藏的表情包ID列表（过滤掉已软删除的）
+	// 1. 查询用户收藏的表情包ID列表
 	var packageCollects []emoji_models.EmojiPackageCollect
-	err = l.svcCtx.DB.Where("user_id = ? AND is_deleted = ?", req.UserID, false).
+	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).
 		Offset((req.Page - 1) * req.Size).
 		Limit(req.Size).
 		Find(&packageCollects).Error
@@ -39,10 +39,10 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		return nil, status.Error(codes.Internal, "查询收藏的表情包失败")
 	}
 
-	// 2. 获取收藏总数（过滤掉已软删除的）
+	// 2. 获取收藏总数
 	var total int64
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
-		Where("user_id = ? AND is_deleted = ?", req.UserID, false).
+		Where("user_id = ?", req.UserID).
 		Count(&total).Error
 	if err != nil {
 		logx.Errorf("获取收藏总数失败: %v", err)
@@ -104,7 +104,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ? AND is_deleted = ?", packageUUIDs, false).
+		Where("package_id IN ?", packageUUIDs).
 		Group("package_id").
 		Find(&collectCountsData).Error
 	if err != nil {

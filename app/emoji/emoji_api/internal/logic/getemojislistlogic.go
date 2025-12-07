@@ -25,9 +25,9 @@ func NewGetEmojisListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 }
 
 func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *types.GetEmojisListRes, err error) {
-	// 获取用户收藏的表情ID列表（过滤掉已软删除的）
+	// 获取用户收藏的表情ID列表
 	var favoriteEmojis []emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("user_id = ? AND is_deleted = ?", req.UserID, false).Find(&favoriteEmojis).Error
+	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).Find(&favoriteEmojis).Error
 	if err != nil {
 		logx.Error("获取用户收藏的表情失败", err)
 		return nil, err

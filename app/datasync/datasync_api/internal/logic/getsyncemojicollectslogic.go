@@ -43,11 +43,11 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		return nil, err
 	}
 
-	// 转换用户收藏的表情数据
+	// 转换用户收藏的表情数据（使用收藏记录UUID）
 	if emojiCollectResp.EmojiVersions != nil {
 		for _, item := range emojiCollectResp.EmojiVersions {
 			emojiCollectVersions = append(emojiCollectVersions, types.EmojiCollectVersionItem{
-				Id:      item.Uuid, // 注意：这里使用 Uuid 作为 Id
+				UUID:    item.Uuid,
 				Version: item.Version,
 			})
 		}
@@ -63,11 +63,11 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		return nil, err
 	}
 
-	// 转换用户收藏的表情包数据
+	// 转换用户收藏的表情包数据（使用收藏记录UUID）
 	if emojiPackageCollectResp.EmojiPackageCollectVersions != nil {
 		for _, item := range emojiPackageCollectResp.EmojiPackageCollectVersions {
 			emojiPackageCollectVersions = append(emojiPackageCollectVersions, types.EmojiPackageCollectVersionItem{
-				Id:      item.Uuid, // 注意：这里使用 Uuid 作为 Id
+				UUID:    item.Uuid,
 				Version: item.Version,
 			})
 		}
