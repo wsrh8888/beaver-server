@@ -89,7 +89,7 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 		if message.SendUserID != nil && *message.SendUserID != "" {
 			sendUserID = *message.SendUserID
 			var user user_models.UserModel
-			if err := l.svcCtx.DB.Where("uuid = ?", *message.SendUserID).First(&user).Error; err == nil {
+			if err := l.svcCtx.DB.Where("user_id = ?", *message.SendUserID).First(&user).Error; err == nil {
 				sendUserName = user.NickName
 			}
 		}

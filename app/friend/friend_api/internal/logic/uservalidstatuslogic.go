@@ -46,10 +46,10 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	var friendVerify friend_models.FriendVerifyModel
 	var conversationID string
 	var friendNextVersion int64
-	var friendUUID string
+	var friendID string
 
 	// 查询好友验证记录，确保当前用户是接收方
-	err = l.svcCtx.DB.Take(&friendVerify, "uuid = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&friendVerify, "verify_id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
 	if err != nil {
 		l.Logger.Errorf("好友验证记录不存在: verifyID=%s, userID=%s, error=%v", req.VerifyID, req.UserID, err)
 		return nil, errors.New("好友验证不存在")
@@ -73,12 +73,12 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			return nil, errors.New("系统错误")
 		}
 
-		// 生成UUID
-		friendUUID = uuid.New().String()
+		// 生成好友记录ID
+		friendID = uuid.New().String()
 
 		// 创建好友关系，同步来源信息
 		err = l.svcCtx.DB.Create(&friend_models.FriendModel{
-			UUID:       friendUUID, // 使用预生成的UUID
+			FriendID:   friendID, // 使用预生成的ID
 			SendUserID: friendVerify.SendUserID,
 			RevUserID:  friendVerify.RevUserID,
 			Source:     friendVerify.Source, // 同步来源字段
@@ -166,7 +166,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			}
 		}()
 
-		// 构建表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		// 构建表更新数据 - 包含版本号和ID，让前端知道具体同步哪些数据
 		var tableUpdates []map[string]interface{}
 
 		// 所有处理成功的状态都发送friend_verify表的更新
@@ -174,8 +174,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			"table": "friend_verify",
 			"data": []map[string]interface{}{
 				{
-					"version": nextVersion,
-					"uuid":    friendVerify.UUID,
+					"version":  nextVersion,
+					"verifyId": friendVerify.VerifyID,
 				},
 			},
 		}
@@ -187,8 +187,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				"table": "friends",
 				"data": []map[string]interface{}{
 					{
-						"version": friendNextVersion,
-						"uuid":    friendUUID, // 使用预生成的UUID
+						"version":  friendNextVersion,
+						"friendId": friendID, // 使用预生成的ID
 					},
 				},
 			}

@@ -28,20 +28,19 @@ func NewBatchDeleteFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *BatchDeleteFriendsLogic) BatchDeleteFriends(req *types.BatchDeleteFriendsReq) (resp *types.BatchDeleteFriendsRes, err error) {
-	// 转换字符串UUID为string切片（现在使用UUID而不是数据库ID）
-	var friendUUIDs []string
-	for _, uuidStr := range req.Ids {
-		// 简单验证UUID格式（可以根据需要添加更严格的验证）
-		if len(uuidStr) == 0 {
-			logx.Errorf("无效的好友关系UUID: %s", uuidStr)
-			return nil, fmt.Errorf("无效的好友关系UUID: %s", uuidStr)
+	// 转换好友ID列表
+	friendIDs := make([]string, 0, len(req.Ids))
+	for _, id := range req.Ids {
+		if len(id) == 0 {
+			logx.Errorf("无效的好友关系ID: %s", id)
+			return nil, fmt.Errorf("无效的好友关系ID: %s", id)
 		}
-		friendUUIDs = append(friendUUIDs, uuidStr)
+		friendIDs = append(friendIDs, id)
 	}
 
 	// 先查询要删除的好友关系
 	var friends []friend_models.FriendModel
-	err = l.svcCtx.DB.Where("uuid IN ?", friendUUIDs).Find(&friends).Error
+	err = l.svcCtx.DB.Where("friend_id IN ?", friendIDs).Find(&friends).Error
 	if err != nil {
 		logx.Errorf("查询要删除的好友关系失败: %v", err)
 		return nil, err
@@ -52,7 +51,7 @@ func (l *BatchDeleteFriendsLogic) BatchDeleteFriends(req *types.BatchDeleteFrien
 	}
 
 	// 批量删除好友关系（物理删除）
-	err = l.svcCtx.DB.Unscoped().Where("uuid IN ?", friendUUIDs).Delete(&friend_models.FriendModel{}).Error
+	err = l.svcCtx.DB.Unscoped().Where("friend_id IN ?", friendIDs).Delete(&friend_models.FriendModel{}).Error
 	if err != nil {
 		logx.Errorf("批量删除好友关系失败: %v", err)
 		return nil, err
@@ -60,8 +59,8 @@ func (l *BatchDeleteFriendsLogic) BatchDeleteFriends(req *types.BatchDeleteFrien
 
 	logx.Infof("批量删除好友关系完成, 删除数量: %d", len(friends))
 	for _, friend := range friends {
-		logx.Infof("删除好友关系 - UUID: %s, SendUserID: %s, RevUserID: %s",
-			friend.UUID, friend.SendUserID, friend.RevUserID)
+		logx.Infof("删除好友关系 - friendId: %s, SendUserID: %s, RevUserID: %s",
+			friend.FriendID, friend.SendUserID, friend.RevUserID)
 	}
 
 	return &types.BatchDeleteFriendsRes{}, nil

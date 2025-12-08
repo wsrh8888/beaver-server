@@ -95,20 +95,20 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		// 查询发送者信息
 		if friend.SendUserID != "" {
 			var sendUser user_models.UserModel
-			if err := l.svcCtx.DB.Where("uuid = ?", friend.SendUserID).First(&sendUser).Error; err == nil {
+			if err := l.svcCtx.DB.Where("user_id = ?", friend.SendUserID).First(&sendUser).Error; err == nil {
 				sendUserName = sendUser.NickName
 			}
 		}
 		// 查询接收者信息
 		if friend.RevUserID != "" {
 			var revUser user_models.UserModel
-			if err := l.svcCtx.DB.Where("uuid = ?", friend.RevUserID).First(&revUser).Error; err == nil {
+			if err := l.svcCtx.DB.Where("user_id = ?", friend.RevUserID).First(&revUser).Error; err == nil {
 				revUserName = revUser.NickName
 			}
 		}
 
 		list[i] = types.GetFriendListItem{
-			Id:             friend.UUID, // 使用UUID而不是数据库ID
+			Id:             friend.FriendID, // 使用友链ID
 			SendUserId:     friend.SendUserID,
 			SendUserName:   sendUserName,
 			RevUserId:      friend.RevUserID,

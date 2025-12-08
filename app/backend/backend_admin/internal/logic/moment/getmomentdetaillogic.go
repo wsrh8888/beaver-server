@@ -30,10 +30,10 @@ func NewGetMomentDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (resp *types.GetMomentDetailRes, err error) {
 	var moment moment_models.MomentModel
 
-	err = l.svcCtx.DB.Where("uuid = ?", req.Uuid).First(&moment).Error
+	err = l.svcCtx.DB.Where("moment_id = ?", req.MomentId).First(&moment).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("动态不存在: %s", req.Uuid)
+			logx.Errorf("动态不存在: %s", req.MomentId)
 			return nil, errors.New("动态不存在")
 		}
 		logx.Errorf("查询动态详情失败: %v", err)
@@ -51,7 +51,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 	}
 
 	return &types.GetMomentDetailRes{
-		Uuid:      moment.UUID,
+		MomentId:  moment.MomentID,
 		UserId:    moment.UserID,
 		Content:   moment.Content,
 		Files:     files,

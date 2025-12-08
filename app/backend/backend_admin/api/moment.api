@@ -13,7 +13,7 @@ type (
 		Total int64               `json:"total"`
 	}
 	GetMomentListItem {
-		Uuid      string                  `json:"uuid"`
+		MomentId  string                  `json:"momentId"`
 		UserId    string                  `json:"userId"`
 		Content   string                  `json:"content"`
 		Files     []GetMomentListFileInfo `json:"files"`
@@ -29,10 +29,10 @@ type (
 // 获取动态详情
 type (
 	GetMomentDetailReq {
-		Uuid string `path:"uuid"`
+		MomentId string `path:"momentId"`
 	}
 	GetMomentDetailRes {
-		Uuid      string                     `json:"uuid"`
+		MomentId  string                     `json:"momentId"`
 		UserId    string                     `json:"userId"`
 		Content   string                     `json:"content"`
 		Files     []GetMomentDetailFileInfo  `json:"files"`
@@ -48,7 +48,7 @@ type (
 // 删除动态
 type (
 	DeleteMomentReq {
-		Uuid string `path:"uuid"`
+		MomentId string `path:"momentId"`
 	}
 	DeleteMomentRes {}
 )
@@ -58,15 +58,15 @@ type (
 	GetMomentCommentListReq {
 		Page      int    `form:"page,optional"`
 		Limit     int    `form:"limit,optional"`
-		MomentUuid string `form:"momentUuid"`
+		MomentId string `form:"momentId"`
 	}
 	GetMomentCommentListRes {
 		List  []GetMomentCommentListItem `json:"list"`
 		Total int64                      `json:"total"`
 	}
 	GetMomentCommentListItem {
-		Uuid       string `json:"uuid"`
-		MomentUuid string `json:"momentUuid"`
+		CommentId  string `json:"commentId"`
+		MomentId   string `json:"momentId"`
 		UserId     string `json:"userId"`
 		Content    string `json:"content"`
 		CreatedAt  string `json:"createdAt"`
@@ -77,7 +77,7 @@ type (
 // 删除动态评论
 type (
 	DeleteMomentCommentReq {
-		Uuid string `path:"uuid"`
+		CommentId string `path:"commentId"`
 	}
 	DeleteMomentCommentRes {}
 )
@@ -92,11 +92,11 @@ service backend {
 
 	@doc "获取动态详情"
 	@handler GetMomentDetail
-	get /admin/moment/:uuid (GetMomentDetailReq) returns (GetMomentDetailRes)
+	get /admin/moment/:momentId (GetMomentDetailReq) returns (GetMomentDetailRes)
 
 	@doc "删除动态"
 	@handler DeleteMoment
-	delete /admin/moment/:uuid (DeleteMomentReq) returns (DeleteMomentRes)
+	delete /admin/moment/:momentId (DeleteMomentReq) returns (DeleteMomentRes)
 
 	@doc "获取动态评论列表"
 	@handler GetMomentCommentList
@@ -104,5 +104,5 @@ service backend {
 
 	@doc "删除动态评论"
 	@handler DeleteMomentComment
-	delete /admin/moment/comment/:uuid (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
+	delete /admin/moment/comment/:commentId (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
 }

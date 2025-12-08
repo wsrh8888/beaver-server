@@ -42,7 +42,7 @@ func (l *GetGroupDetailLogic) GetGroupDetail(req *types.GetGroupDetailReq) (resp
 
 	return &types.GetGroupDetailRes{
 		Id:        group.Id,
-		Uuid:      group.GroupID,
+		GroupId:   group.GroupID,
 		Type:      int(group.Type),
 		Title:     group.Title,
 		FileName:  group.Avatar,

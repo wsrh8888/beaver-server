@@ -10,6 +10,7 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
 	"beaver/app/moment/moment_models"
+	"beaver/app/notification/notification_models"
 	"beaver/app/track/track_models"
 	"beaver/app/update/update_models"
 	"beaver/app/user/user_models"
@@ -75,6 +76,11 @@ func main() {
 			&group_models.GroupMemberModel{},
 			&group_models.GroupJoinRequestModel{},
 			&group_models.GroupMemberChangeLogModel{},
+
+			// 通知中心表
+			&notification_models.NotificationEvent{},
+			&notification_models.NotificationInbox{},
+			&notification_models.NotificationReadCursor{},
 
 			// 后台管理相关表
 			&backend_models.AdminUser{},

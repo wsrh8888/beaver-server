@@ -70,7 +70,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("uuid = ?", friend.UUID).Updates(map[string]interface{}{
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("friend_id = ?", friend.FriendID).Updates(map[string]interface{}{
 			"send_user_notice": req.Notice,
 			"version":          nextVersion,
 		}).Error
@@ -80,7 +80,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			// 备注没有变化，直接返回
 			return &types.NoticeUpdateRes{}, nil
 		}
-		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("uuid = ?", friend.UUID).Updates(map[string]interface{}{
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("friend_id = ?", friend.FriendID).Updates(map[string]interface{}{
 			"rev_user_notice": req.Notice,
 			"version":         nextVersion,
 		}).Error
@@ -103,13 +103,13 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			}
 		}()
 
-		// 构建好友表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		// 构建好友表更新数据 - 包含版本号和ID，让前端知道具体同步哪些数据
 		friendUpdates := map[string]interface{}{
 			"table": "friends",
 			"data": []map[string]interface{}{
 				{
-					"version": nextVersion,
-					"uuid":    friend.UUID,
+					"version":  nextVersion,
+					"friendId": friend.FriendID,
 				},
 			},
 		}
@@ -118,7 +118,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			"tableUpdates": []map[string]interface{}{friendUpdates},
 		}, "")
 
-		l.Logger.Infof("异步发送好友备注更新通知完成: userId=%s, uuid=%s, version=%d", req.UserID, friend.UUID, nextVersion)
+		l.Logger.Infof("异步发送好友备注更新通知完成: userId=%s, friendId=%s, version=%d", req.UserID, friend.FriendID, nextVersion)
 	}()
 
 	l.Logger.Infof("更新好友备注成功: userID=%s, friendID=%s, notice=%s", req.UserID, req.FriendID, req.Notice)

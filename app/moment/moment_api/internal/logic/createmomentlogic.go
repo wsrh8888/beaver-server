@@ -30,10 +30,10 @@ func NewCreateMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *types.CreateMomentRes, err error) {
 	// 构造MomentModel实例
 	moment := moment_models.MomentModel{
-		UserID:  req.UserID,
-		Content: req.Content,
-		UUID:    uuid.New().String(),
-		Files:   convertFiles(req.Files),
+		UserID:   req.UserID,
+		Content:  req.Content,
+		MomentID: uuid.New().String(),
+		Files:    convertFiles(req.Files),
 	}
 
 	// 插入数据库

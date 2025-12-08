@@ -82,7 +82,7 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	var list []types.GetEmojiListItem
 	for _, emoji := range emojis {
 		list = append(list, types.GetEmojiListItem{
-			UUID:       emoji.UUID,
+			EmojiId:    emoji.EmojiID,
 			FileKey:    emoji.FileKey,
 			Title:      emoji.Title,
 			AuthorID:   "", // 暂时为空，后续可从其他途径获取

@@ -31,7 +31,7 @@ func NewUpdateFavoriteEmojiPackageLogic(ctx context.Context, svcCtx *svc.Service
 func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.UpdateFavoriteEmojiPackageReq) (*types.UpdateFavoriteEmojiPackageRes, error) {
 	// 1. 检查表情包是否存在
 	var emojiPackage emoji_models.EmojiPackage
-	err := l.svcCtx.DB.Where("uuid = ?", req.PackageID).First(&emojiPackage).Error
+	err := l.svcCtx.DB.Where("package_id = ?", req.PackageID).First(&emojiPackage).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, status.Error(codes.NotFound, "表情包不存在")
@@ -63,10 +63,10 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		}
 
 		collectRecord = emoji_models.EmojiPackageCollect{
-			UUID:      uuid.New().String(),
-			UserID:    req.UserID,
-			PackageID: req.PackageID,
-			Version:   collectVersion,
+			PackageCollectID: uuid.New().String(),
+			UserID:           req.UserID,
+			PackageID:        req.PackageID,
+			Version:          collectVersion,
 		}
 		err = l.svcCtx.DB.Create(&collectRecord).Error
 		if err != nil {

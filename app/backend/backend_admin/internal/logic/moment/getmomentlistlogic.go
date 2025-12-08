@@ -79,7 +79,7 @@ func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *t
 		}
 
 		list = append(list, types.GetMomentListItem{
-			Uuid:      moment.UUID,
+			MomentId:  moment.MomentID,
 			UserId:    moment.UserID,
 			Content:   moment.Content,
 			Files:     files,

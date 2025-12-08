@@ -30,7 +30,7 @@ func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 func (l *DeleteUserLogic) DeleteUser(req *types.DeleteUserReq) (resp *types.DeleteUserRes, err error) {
 	// 检查用户是否存在
 	var user user_models.UserModel
-	err = l.svcCtx.DB.Where("uuid = ?", req.UserID).First(&user).Error
+	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			logx.Errorf("用户不存在: %s", req.UserID)

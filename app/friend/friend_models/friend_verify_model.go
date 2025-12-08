@@ -9,7 +9,7 @@ import (
  */
 type FriendVerifyModel struct {
 	models.Model
-	UUID       string `gorm:"size:64;unique;index"`
+	VerifyID   string `gorm:"column:verify_id;size:64;uniqueIndex" json:"verifyId"`
 	SendUserID string `gorm:"size:64;index" json:"sendUserId"` // 使用 VARCHAR(64)
 	RevUserID  string `gorm:"size:64;index" json:"revUserId"`  // 使用 VARCHAR(64)
 	SendStatus int8   `json:"sendStatus"`                      // 发起方状态 0:未处理 1:已通过 2:已拒绝 3: 忽略 4:删除

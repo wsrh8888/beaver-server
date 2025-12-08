@@ -64,15 +64,15 @@ func (l *UserCreateLogic) initializeRedisCounter() error {
 	// 如果计数器不存在，从数据库初始化
 	if exists.Val() == 0 {
 		var maxUser user_models.UserModel
-		err := l.svcCtx.DB.Select("uuid").Order("CAST(uuid AS UNSIGNED) DESC").First(&maxUser).Error
+		err := l.svcCtx.DB.Select("user_id").Order("CAST(user_id AS UNSIGNED) DESC").First(&maxUser).Error
 		if err != nil && err.Error() != "record not found" {
 			return fmt.Errorf("查询数据库最大用户ID失败: %v", err)
 		}
 
 		var nextID int64 = minUserID
-		if maxUser.UUID != "" {
+		if maxUser.UserID != "" {
 			// 将字符串ID转换为数字
-			if currentMaxID, parseErr := strconv.ParseInt(maxUser.UUID, 10, 64); parseErr == nil {
+			if currentMaxID, parseErr := strconv.ParseInt(maxUser.UserID, 10, 64); parseErr == nil {
 				nextID = currentMaxID + 1
 			}
 		}
@@ -134,7 +134,7 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 
 	// 获取新版本号（用户独立递增，从1开始）
-	version := l.svcCtx.VersionGen.GetNextVersion("users", "uuid", userID)
+	version := l.svcCtx.VersionGen.GetNextVersion("users", "user_id", userID)
 	if version == -1 {
 		logx.Errorf("获取版本号失败")
 		return nil, errors.New("获取版本号失败")
@@ -142,7 +142,7 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	logx.Infof("获取用户版本号: userID=%s, version=%d", userID, version)
 
 	user = user_models.UserModel{
-		UUID:     userID,
+		UserID:   userID,
 		Password: hashedPassword,
 		Email:    in.Email,
 		Phone:    in.Phone,
@@ -159,12 +159,12 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 
 	// 记录用户创建的变更日志
-	l.recordUserCreateLog(user.UUID, version)
+	l.recordUserCreateLog(user.UserID, version)
 
-	logx.Infof("用户创建成功: %s, version: %d", user.UUID, version)
+	logx.Infof("用户创建成功: %s, version: %d", user.UserID, version)
 
 	return &user_rpc.UserCreateRes{
-		UserID: user.UUID,
+		UserID: user.UserID,
 	}, nil
 }
 

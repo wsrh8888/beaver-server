@@ -90,13 +90,13 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 		// 获取验证详情以提取申请者ID
 		if len(verifyResp.FriendVerifyVersions) > 0 {
-			uuids := make([]string, 0, len(verifyResp.FriendVerifyVersions))
+			verifyIds := make([]string, 0, len(verifyResp.FriendVerifyVersions))
 			for _, verify := range verifyResp.FriendVerifyVersions {
-				uuids = append(uuids, verify.Uuid)
+				verifyIds = append(verifyIds, verify.VerifyId)
 			}
 
 			verifyDetailResp, err := l.svcCtx.FriendRpc.GetFriendVerifiesListByIds(l.ctx, &friend_rpc.GetFriendVerifiesListByIdsReq{
-				Uuids: uuids,
+				VerifyIds: verifyIds,
 			})
 			if err != nil {
 				l.Errorf("获取好友验证详情失败: %v", err)

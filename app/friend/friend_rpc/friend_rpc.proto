@@ -56,7 +56,7 @@ message GetFriendVerifyVersionsReq {
 
 message GetFriendVerifyVersionsRes {
   message FriendVerifyVersion {
-    string uuid = 1; // 验证记录UUID
+    string verify_id = 1; // 验证记录ID
     int64 version = 2; // 版本号
   }
   repeated FriendVerifyVersion friendVerifyVersions = 1; // 好友验证版本列表
@@ -64,12 +64,12 @@ message GetFriendVerifyVersionsRes {
 
 // 通过ID获取好友验证列表
 message GetFriendVerifiesListByIdsReq {
-  repeated string uuids = 1; // 验证记录UUID列表
+  repeated string verify_ids = 1; // 验证记录ID列表
   int64 since = 2; // 时间戳，从此时间戳之后获取变更的记录
 }
 
 message FriendVerifyListById {
-  string uuid = 1; // 验证记录UUID
+  string verify_id = 1; // 验证记录ID
   string sendUserId = 2; // 发送者用户ID
   string revUserId = 3; // 接收者用户ID
   int32 sendStatus = 4; // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)

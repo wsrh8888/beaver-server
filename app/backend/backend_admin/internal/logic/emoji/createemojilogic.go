@@ -42,7 +42,7 @@ func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.C
 
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		UUID:    uuid.New().String(),
+		EmojiID: uuid.New().String(),
 		FileKey: req.FileKey,
 		Title:   req.Title,
 		Status:  1, // 默认状态为正常
@@ -56,6 +56,6 @@ func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.C
 	}
 
 	return &types.CreateEmojiRes{
-		UUID: emoji.UUID,
+		EmojiId: emoji.EmojiID,
 	}, nil
 }

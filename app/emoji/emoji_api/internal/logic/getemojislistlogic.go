@@ -33,28 +33,28 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 		return nil, err
 	}
 
-	// 提取表情UUID列表
-	var emojiUUIDs []string
+	// 提取表情ID列表
+	var emojiIDs []string
 	for _, favorite := range favoriteEmojis {
-		emojiUUIDs = append(emojiUUIDs, favorite.EmojiID)
+		emojiIDs = append(emojiIDs, favorite.EmojiID)
 	}
 
-	if len(emojiUUIDs) == 0 {
+	if len(emojiIDs) == 0 {
 		return &types.GetEmojisListRes{List: make([]types.EmojiItem, 0)}, nil
 	}
 
 	// 批量查询表情详情
 	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid IN ? AND status = ?", emojiUUIDs, 1).Find(&emojis).Error
+	err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", emojiIDs, 1).Find(&emojis).Error
 	if err != nil {
 		logx.Error("获取表情详情失败", err)
 		return nil, err
 	}
 
-	// 构建表情UUID到表情的映射
+	// 构建表情ID到表情的映射
 	emojiMap := make(map[string]emoji_models.Emoji)
 	for _, emoji := range emojis {
-		emojiMap[emoji.UUID] = emoji
+		emojiMap[emoji.EmojiID] = emoji
 	}
 
 	// 构建响应数据
@@ -62,7 +62,7 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 	for _, favoriteEmoji := range favoriteEmojis {
 		if emoji, exists := emojiMap[favoriteEmoji.EmojiID]; exists {
 			emojiItems = append(emojiItems, types.EmojiItem{
-				EmojiID:   emoji.UUID,
+				EmojiID:   emoji.EmojiID,
 				FileKey:   emoji.FileKey, // 使用FileKey字段
 				Title:     emoji.Title,
 				PackageID: nil, // 在收藏表情列表中不显示包ID

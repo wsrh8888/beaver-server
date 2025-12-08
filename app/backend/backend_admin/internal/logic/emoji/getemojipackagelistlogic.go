@@ -94,7 +94,7 @@ func (l *GetEmojiPackageListLogic) GetEmojiPackageList(req *types.GetEmojiPackag
 	var list []types.GetEmojiPackageListItem
 	for _, pkg := range packages {
 		list = append(list, types.GetEmojiPackageListItem{
-			UUID:        pkg.UUID,
+			PackageId:   pkg.PackageID,
 			Title:       pkg.Title,
 			CoverFile:   pkg.CoverFile,
 			UserID:      pkg.UserID,

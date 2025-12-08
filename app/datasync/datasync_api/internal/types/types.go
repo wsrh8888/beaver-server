@@ -17,33 +17,33 @@ type ChatUserConversationVersionItem struct {
 }
 
 type EmojiCollectVersionItem struct {
-	UUID    string `json:"uuid"`    // 收藏记录UUID
-	Version int64  `json:"version"` // 收藏版本号
+	EmojiCollectId string `json:"emojiCollectId"` // 收藏记录ID
+	Version        int64  `json:"version"`        // 收藏版本号
 }
 
 type EmojiPackageCollectVersionItem struct {
-	UUID    string `json:"uuid"`    // 收藏记录UUID
-	Version int64  `json:"version"` // 收藏版本号
+	PackageCollectId string `json:"packageCollectId"` // 收藏记录ID
+	Version          int64  `json:"version"`          // 收藏版本号
 }
 
 type EmojiPackageContentVersionItem struct {
-	PackageId string `json:"packageId"` // 表情包UUID
+	PackageId string `json:"packageId"` // 表情包ID
 	Version   int64  `json:"version"`   // 表情包内容版本号
 }
 
 type EmojiPackageVersionItem struct {
-	Id      string `json:"id"`      // 表情包UUID
-	Version int64  `json:"version"` // 表情包版本号
+	PackageId string `json:"packageId"` // 表情包ID
+	Version   int64  `json:"version"`   // 表情包版本号
 }
 
 type EmojiVersionItem struct {
-	Uuid    string `json:"uuid"`    // 表情UUID
+	EmojiId string `json:"emojiId"` // 表情ID
 	Version int64  `json:"version"` // 表情版本号
 }
 
 type FriendVerifyVersionItem struct {
-	UUID    string `json:"uuid"`    // 验证记录UUID
-	Version int64  `json:"version"` // 验证记录版本号
+	VerifyId string `json:"verifyId"` // 验证记录ID
+	Version  int64  `json:"version"`  // 验证记录版本号
 }
 
 type FriendVersionItem struct {

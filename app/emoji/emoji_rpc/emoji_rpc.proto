@@ -10,7 +10,7 @@ message GetUserEmojiCollectsReq {
 }
 
 message GetUserEmojiCollectsRes {
-  repeated EmojiVersionItem emojiVersions = 1; // 用户收藏的表情基础数据变更
+  repeated EmojiCollectVersionItem emojiCollectVersions = 1; // 用户收藏的表情记录变更
   int64 serverTimestamp = 2; // 服务端时间戳
 }
 
@@ -60,27 +60,27 @@ message GetEmojisRes {
 
 // 版本摘要数据结构
 message EmojiVersionItem {
-  string uuid = 1; // 表情UUID
+  string emojiId = 1; // 表情ID
   int64 version = 2; // 版本号
 }
 
 message EmojiPackageVersionItem {
-  string id = 1; // 表情包UUID
+  string packageId = 1; // 表情包ID
   int64 version = 2; // 版本号
 }
 
 message EmojiPackageContentVersionItem {
-  string packageId = 1; // 表情包UUID
+  string packageId = 1; // 表情包ID
   int64 version = 2; // 内容版本号
 }
 
 message EmojiCollectVersionItem {
-  string uuid = 1; // 收藏记录UUID
+  string emojiCollectId = 1; // 表情收藏记录ID
   int64 version = 2; // 版本号
 }
 
 message EmojiPackageCollectVersionItem {
-  string uuid = 1; // 收藏记录UUID
+  string packageCollectId = 1; // 表情包收藏记录ID
   int64 version = 2; // 版本号
 }
 

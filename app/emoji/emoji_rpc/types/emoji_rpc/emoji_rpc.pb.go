@@ -75,11 +75,11 @@ func (x *GetUserEmojiCollectsReq) GetSince() int64 {
 }
 
 type GetUserEmojiCollectsRes struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	EmojiVersions   []*EmojiVersionItem    `protobuf:"bytes,1,rep,name=emojiVersions,proto3" json:"emojiVersions,omitempty"`      // 用户收藏的表情基础数据变更
-	ServerTimestamp int64                  `protobuf:"varint,2,opt,name=serverTimestamp,proto3" json:"serverTimestamp,omitempty"` // 服务端时间戳
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                protoimpl.MessageState     `protogen:"open.v1"`
+	EmojiCollectVersions []*EmojiCollectVersionItem `protobuf:"bytes,1,rep,name=emojiCollectVersions,proto3" json:"emojiCollectVersions,omitempty"` // 用户收藏的表情记录变更
+	ServerTimestamp      int64                      `protobuf:"varint,2,opt,name=serverTimestamp,proto3" json:"serverTimestamp,omitempty"`          // 服务端时间戳
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *GetUserEmojiCollectsRes) Reset() {
@@ -112,9 +112,9 @@ func (*GetUserEmojiCollectsRes) Descriptor() ([]byte, []int) {
 	return file_emoji_rpc_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetUserEmojiCollectsRes) GetEmojiVersions() []*EmojiVersionItem {
+func (x *GetUserEmojiCollectsRes) GetEmojiCollectVersions() []*EmojiCollectVersionItem {
 	if x != nil {
-		return x.EmojiVersions
+		return x.EmojiCollectVersions
 	}
 	return nil
 }
@@ -549,7 +549,7 @@ func (x *GetEmojisRes) GetServerTimestamp() int64 {
 // 版本摘要数据结构
 type EmojiVersionItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 表情UUID
+	EmojiId       string                 `protobuf:"bytes,1,opt,name=emojiId,proto3" json:"emojiId,omitempty"`  // 表情ID
 	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -585,9 +585,9 @@ func (*EmojiVersionItem) Descriptor() ([]byte, []int) {
 	return file_emoji_rpc_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *EmojiVersionItem) GetUuid() string {
+func (x *EmojiVersionItem) GetEmojiId() string {
 	if x != nil {
-		return x.Uuid
+		return x.EmojiId
 	}
 	return ""
 }
@@ -601,8 +601,8 @@ func (x *EmojiVersionItem) GetVersion() int64 {
 
 type EmojiPackageVersionItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`            // 表情包UUID
-	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
+	PackageId     string                 `protobuf:"bytes,1,opt,name=packageId,proto3" json:"packageId,omitempty"` // 表情包ID
+	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`    // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -637,9 +637,9 @@ func (*EmojiPackageVersionItem) Descriptor() ([]byte, []int) {
 	return file_emoji_rpc_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *EmojiPackageVersionItem) GetId() string {
+func (x *EmojiPackageVersionItem) GetPackageId() string {
 	if x != nil {
-		return x.Id
+		return x.PackageId
 	}
 	return ""
 }
@@ -653,7 +653,7 @@ func (x *EmojiPackageVersionItem) GetVersion() int64 {
 
 type EmojiPackageContentVersionItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PackageId     string                 `protobuf:"bytes,1,opt,name=packageId,proto3" json:"packageId,omitempty"` // 表情包UUID
+	PackageId     string                 `protobuf:"bytes,1,opt,name=packageId,proto3" json:"packageId,omitempty"` // 表情包ID
 	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`    // 内容版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -704,11 +704,11 @@ func (x *EmojiPackageContentVersionItem) GetVersion() int64 {
 }
 
 type EmojiCollectVersionItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 收藏记录UUID
-	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	EmojiCollectId string                 `protobuf:"bytes,1,opt,name=emojiCollectId,proto3" json:"emojiCollectId,omitempty"` // 表情收藏记录ID
+	Version        int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`              // 版本号
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *EmojiCollectVersionItem) Reset() {
@@ -741,9 +741,9 @@ func (*EmojiCollectVersionItem) Descriptor() ([]byte, []int) {
 	return file_emoji_rpc_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *EmojiCollectVersionItem) GetUuid() string {
+func (x *EmojiCollectVersionItem) GetEmojiCollectId() string {
 	if x != nil {
-		return x.Uuid
+		return x.EmojiCollectId
 	}
 	return ""
 }
@@ -756,11 +756,11 @@ func (x *EmojiCollectVersionItem) GetVersion() int64 {
 }
 
 type EmojiPackageCollectVersionItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 收藏记录UUID
-	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	PackageCollectId string                 `protobuf:"bytes,1,opt,name=packageCollectId,proto3" json:"packageCollectId,omitempty"` // 表情包收藏记录ID
+	Version          int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`                  // 版本号
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *EmojiPackageCollectVersionItem) Reset() {
@@ -793,9 +793,9 @@ func (*EmojiPackageCollectVersionItem) Descriptor() ([]byte, []int) {
 	return file_emoji_rpc_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *EmojiPackageCollectVersionItem) GetUuid() string {
+func (x *EmojiPackageCollectVersionItem) GetPackageCollectId() string {
 	if x != nil {
-		return x.Uuid
+		return x.PackageCollectId
 	}
 	return ""
 }
@@ -814,9 +814,9 @@ const file_emoji_rpc_proto_rawDesc = "" +
 	"\x0femoji_rpc.proto\x12\temoji_rpc\"G\n" +
 	"\x17GetUserEmojiCollectsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"\x86\x01\n" +
-	"\x17GetUserEmojiCollectsRes\x12A\n" +
-	"\remojiVersions\x18\x01 \x03(\v2\x1b.emoji_rpc.EmojiVersionItemR\remojiVersions\x12(\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\x9b\x01\n" +
+	"\x17GetUserEmojiCollectsRes\x12V\n" +
+	"\x14emojiCollectVersions\x18\x01 \x03(\v2\".emoji_rpc.EmojiCollectVersionItemR\x14emojiCollectVersions\x12(\n" +
 	"\x0fserverTimestamp\x18\x02 \x01(\x03R\x0fserverTimestamp\"N\n" +
 	"\x1eGetUserEmojiPackageCollectsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
@@ -841,21 +841,21 @@ const file_emoji_rpc_proto_rawDesc = "" +
 	"\x05since\x18\x02 \x01(\x03R\x05since\"{\n" +
 	"\fGetEmojisRes\x12A\n" +
 	"\remojiVersions\x18\x01 \x03(\v2\x1b.emoji_rpc.EmojiVersionItemR\remojiVersions\x12(\n" +
-	"\x0fserverTimestamp\x18\x02 \x01(\x03R\x0fserverTimestamp\"@\n" +
-	"\x10EmojiVersionItem\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x03R\aversion\"C\n" +
-	"\x17EmojiPackageVersionItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\x0fserverTimestamp\x18\x02 \x01(\x03R\x0fserverTimestamp\"F\n" +
+	"\x10EmojiVersionItem\x12\x18\n" +
+	"\aemojiId\x18\x01 \x01(\tR\aemojiId\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"Q\n" +
+	"\x17EmojiPackageVersionItem\x12\x1c\n" +
+	"\tpackageId\x18\x01 \x01(\tR\tpackageId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"X\n" +
 	"\x1eEmojiPackageContentVersionItem\x12\x1c\n" +
 	"\tpackageId\x18\x01 \x01(\tR\tpackageId\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x03R\aversion\"G\n" +
-	"\x17EmojiCollectVersionItem\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x03R\aversion\"N\n" +
-	"\x1eEmojiPackageCollectVersionItem\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"[\n" +
+	"\x17EmojiCollectVersionItem\x12&\n" +
+	"\x0eemojiCollectId\x18\x01 \x01(\tR\x0eemojiCollectId\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"f\n" +
+	"\x1eEmojiPackageCollectVersionItem\x12*\n" +
+	"\x10packageCollectId\x18\x01 \x01(\tR\x10packageCollectId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion2\xd8\x03\n" +
 	"\x05emoji\x12^\n" +
 	"\x14GetUserEmojiCollects\x12\".emoji_rpc.GetUserEmojiCollectsReq\x1a\".emoji_rpc.GetUserEmojiCollectsRes\x12s\n" +
@@ -895,7 +895,7 @@ var file_emoji_rpc_proto_goTypes = []any{
 	(*EmojiPackageCollectVersionItem)(nil), // 14: emoji_rpc.EmojiPackageCollectVersionItem
 }
 var file_emoji_rpc_proto_depIdxs = []int32{
-	10, // 0: emoji_rpc.GetUserEmojiCollectsRes.emojiVersions:type_name -> emoji_rpc.EmojiVersionItem
+	13, // 0: emoji_rpc.GetUserEmojiCollectsRes.emojiCollectVersions:type_name -> emoji_rpc.EmojiCollectVersionItem
 	14, // 1: emoji_rpc.GetUserEmojiPackageCollectsRes.emojiPackageCollectVersions:type_name -> emoji_rpc.EmojiPackageCollectVersionItem
 	11, // 2: emoji_rpc.GetEmojiPackagesRes.emojiPackageVersions:type_name -> emoji_rpc.EmojiPackageVersionItem
 	12, // 3: emoji_rpc.GetEmojiPackageContentsRes.emojiPackageContentVersions:type_name -> emoji_rpc.EmojiPackageContentVersionItem

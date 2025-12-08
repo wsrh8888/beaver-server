@@ -33,7 +33,7 @@ func (l *SearchUserLogic) SearchUser(in *user_rpc.SearchUserReq) (*user_rpc.Sear
 	case "email":
 		err = l.svcCtx.DB.Take(&user, "email = ?", in.Keyword).Error
 	case "userId":
-		err = l.svcCtx.DB.Take(&user, "uuid = ?", in.Keyword).Error
+		err = l.svcCtx.DB.Take(&user, "user_id = ?", in.Keyword).Error
 	default:
 		// 默认按邮箱搜索
 		err = l.svcCtx.DB.Take(&user, "email = ?", in.Keyword).Error
@@ -46,7 +46,7 @@ func (l *SearchUserLogic) SearchUser(in *user_rpc.SearchUserReq) (*user_rpc.Sear
 
 	return &user_rpc.SearchUserRes{
 		UserInfo: &user_rpc.UserInfo{
-			UserId:   user.UUID,
+			UserId:   user.UserID,
 			NickName: user.NickName,
 			Avatar:   user.Avatar,
 			Version:  user.Version,

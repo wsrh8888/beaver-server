@@ -72,7 +72,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		Message:    req.Verify,
 		Source:     req.Source, // 添加来源字段
 		Version:    nextVersion,
-		UUID:       uuid.New().String(),
+		VerifyID:   uuid.New().String(),
 	}
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error
@@ -109,8 +109,8 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			"table": "friend_verify",
 			"data": []map[string]interface{}{
 				{
-					"version": nextVersion,
-					"uuid":    verifyModel.UUID,
+					"version":  nextVersion,
+					"verifyId": verifyModel.VerifyID,
 				},
 			},
 		}
@@ -153,7 +153,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			"tableUpdates": tableUpdates,
 		}, "")
 
-		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, uuid=%s", req.UserID, req.FriendID, nextVersion, verifyModel.UUID)
+		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, verifyId=%s", req.UserID, req.FriendID, nextVersion, verifyModel.VerifyID)
 	}()
 
 	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)

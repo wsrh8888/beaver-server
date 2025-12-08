@@ -55,9 +55,9 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 
 	// 6. 获取收藏状态和收藏数
-	packageUUIDs := make([]string, len(packages))
+	packageIDs := make([]string, len(packages))
 	for i, p := range packages {
-		packageUUIDs[i] = p.UUID
+		packageIDs[i] = p.PackageID
 	}
 
 	// 获取收藏数
@@ -68,7 +68,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ?", packageUUIDs).
+		Where("package_id IN ?", packageIDs).
 		Group("package_id").
 		Find(&collects).Error
 	if err != nil {
@@ -86,7 +86,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageEmoji{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ?", packageUUIDs).
+		Where("package_id IN ?", packageIDs).
 		Group("package_id").
 		Find(&emojiCountsData).Error
 	if err != nil {
@@ -98,9 +98,9 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 
 	// 获取当前用户的收藏状态
 	userCollects := make(map[string]bool)
-	if len(packageUUIDs) > 0 {
+	if len(packageIDs) > 0 {
 		var userCollectList []emoji_models.EmojiPackageCollect
-		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageUUIDs).
+		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageIDs).
 			Find(&userCollectList).Error
 		if err != nil {
 			return nil, status.Error(codes.Internal, "获取收藏状态失败")
@@ -114,14 +114,14 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	list := make([]types.EmojiPackageItem, len(packages))
 	for i, p := range packages {
 		list[i] = types.EmojiPackageItem{
-			PackageID:    p.UUID,
+			PackageID:    p.PackageID,
 			Title:        p.Title,
 			CoverFile:    p.CoverFile,
 			Description:  p.Description,
 			Type:         p.Type,
-			CollectCount: int(collectCounts[p.UUID]),
-			EmojiCount:   int(emojiCounts[p.UUID]),
-			IsCollected:  userCollects[p.UUID],
+			CollectCount: int(collectCounts[p.PackageID]),
+			EmojiCount:   int(emojiCounts[p.PackageID]),
+			IsCollected:  userCollects[p.PackageID],
 			IsAuthor:     p.UserID == req.UserID,
 		}
 	}

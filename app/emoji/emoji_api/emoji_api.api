@@ -113,14 +113,13 @@ type (
 type (
 	GetEmojisByIdsReq {
 		UserID string   `header:"Beaver-User-Id"`
-		Ids    []string `json:"ids"` // 表情UUID列表
+		Ids    []string `json:"ids"` // 表情ID列表
 	}
 	GetEmojisByIdsRes {
 		Emojis []EmojiDetailItem `json:"emojis"`
 	}
 	EmojiDetailItem {
 		EmojiID   string  `json:"emojiId"`
-		UUID      string  `json:"uuid"`
 		FileKey   string  `json:"fileKey"`
 		Title     string  `json:"title"`
 		Status    int8    `json:"status"`
@@ -131,10 +130,10 @@ type (
 	}
 )
 
-// 按UUID批量获取表情基础信息
+// 按ID批量获取表情基础信息
 type (
 	GetEmojisByUuidsReq {
-		Uuids []string `json:"uuids"`
+		Ids []string `json:"ids"` // 表情ID列表
 	}
 	EmojiSimpleItem {
 		EmojiID string `json:"emojiId"`
@@ -152,14 +151,13 @@ type (
 type (
 	GetEmojiPackagesByIdsReq {
 		UserID string   `header:"Beaver-User-Id"`
-		Ids    []string `json:"ids"` // 表情包UUID列表
+		Ids    []string `json:"ids"` // 表情包ID列表
 	}
 	GetEmojiPackagesByIdsRes {
 		Packages []EmojiPackageDetailItem `json:"packages"`
 	}
 	EmojiPackageDetailItem {
 		PackageID    string `json:"packageId"`
-		UUID         string `json:"uuid"`
 		Title        string `json:"title"`
 		CoverFile    string `json:"coverFile"`
 		UserID       string `json:"userId"`
@@ -177,26 +175,26 @@ type (
 type (
 	GetEmojiCollectsByIdsReq {
 		UserID string   `header:"Beaver-User-Id"`
-		Ids    []string `json:"ids"` // 收藏记录UUID列表
+		Ids    []string `json:"ids"` // 收藏记录ID列表
 	}
 	GetEmojiCollectsByIdsRes {
 		Collects []EmojiCollectDetailItem `json:"collects"`
 	}
 	EmojiCollectDetailItem {
-		UUID      string `json:"uuid"`
-		UserID    string `json:"userId"`
-		EmojiID   string `json:"emojiId"`
-		IsDeleted bool   `json:"isDeleted"`
-		Version   int64  `json:"version"`
-		CreateAt  int64  `json:"createAt"`
-		UpdateAt  int64  `json:"updateAt"`
+		EmojiCollectID string `json:"emojiCollectId"`
+		UserID         string `json:"userId"`
+		EmojiID        string `json:"emojiId"`
+		IsDeleted      bool   `json:"isDeleted"`
+		Version        int64  `json:"version"`
+		CreateAt       int64  `json:"createAt"`
+		UpdateAt       int64  `json:"updateAt"`
 	}
 )
 
-// 按收藏UUID批量获取表情收藏记录（同步补齐）
+// 按收藏ID批量获取表情收藏记录（同步补齐）
 type (
 	GetEmojiCollectsByUuidsReq {
-		Uuids []string `json:"uuids"`
+		Ids []string `json:"ids"` // 收藏记录ID列表
 	}
 	GetEmojiCollectsByUuidsRes {
 		Collects []EmojiCollectDetailItem `json:"collects"`
@@ -207,19 +205,19 @@ type (
 type (
 	GetEmojiPackageCollectsByIdsReq {
 		UserID string   `header:"Beaver-User-Id"`
-		Ids    []string `json:"ids"` // 收藏记录UUID列表
+		Ids    []string `json:"ids"` // 收藏记录ID列表
 	}
 	GetEmojiPackageCollectsByIdsRes {
 		Collects []EmojiPackageCollectDetailItem `json:"collects"`
 	}
 	EmojiPackageCollectDetailItem {
-		UUID      string `json:"uuid"`
-		UserID    string `json:"userId"`
-		PackageID string `json:"packageId"`
-		IsDeleted bool   `json:"isDeleted"`
-		Version   int64  `json:"version"`
-		CreateAt  int64  `json:"createAt"`
-		UpdateAt  int64  `json:"updateAt"`
+		PackageCollectID string `json:"packageCollectId"`
+		UserID           string `json:"userId"`
+		PackageID        string `json:"packageId"`
+		IsDeleted        bool   `json:"isDeleted"`
+		Version          int64  `json:"version"`
+		CreateAt         int64  `json:"createAt"`
+		UpdateAt         int64  `json:"updateAt"`
 	}
 )
 
@@ -275,7 +273,7 @@ service emoji {
 	@handler GetEmojisByIds
 	post /api/emoji/emojis-by-ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
 
-	@doc "按UUID批量查询表情基础信息（用于版本同步后补齐）"
+	@doc "按ID批量查询表情基础信息（用于版本同步后补齐）"
 	@handler GetEmojisByUuids
 	post /api/emoji/getEmojisByUuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
 
@@ -287,7 +285,7 @@ service emoji {
 	@handler GetEmojiCollectsByIds
 	post /api/emoji/collects-by-ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
 
-	@doc "按收藏UUID批量获取表情收藏记录（同步补齐）"
+	@doc "按收藏ID批量获取表情收藏记录（同步补齐）"
 	@handler GetEmojiCollectsByUuids
 	post /api/emoji/getEmojiCollectsByUuids (GetEmojiCollectsByUuidsReq) returns (GetEmojiCollectsByUuidsRes)
 

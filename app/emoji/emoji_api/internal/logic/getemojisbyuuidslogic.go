@@ -25,19 +25,19 @@ func NewGetEmojisByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetEmojisByUuidsLogic) GetEmojisByUuids(req *types.GetEmojisByUuidsReq) (resp *types.GetEmojisByUuidsRes, err error) {
-	if len(req.Uuids) == 0 {
+	if len(req.Ids) == 0 {
 		return &types.GetEmojisByUuidsRes{Emojis: []types.EmojiSimpleItem{}}, nil
 	}
 
 	var emojis []emoji_models.Emoji
-	if err := l.svcCtx.DB.Where("uuid IN ? AND status = 1", req.Uuids).Find(&emojis).Error; err != nil {
+	if err := l.svcCtx.DB.Where("emoji_id IN ? AND status = 1", req.Ids).Find(&emojis).Error; err != nil {
 		return nil, err
 	}
 
 	items := make([]types.EmojiSimpleItem, 0, len(emojis))
 	for _, e := range emojis {
 		items = append(items, types.EmojiSimpleItem{
-			EmojiID: e.UUID,
+			EmojiID: e.EmojiID,
 			FileKey: e.FileKey,
 			Title:   e.Title,
 			Version: e.Version,

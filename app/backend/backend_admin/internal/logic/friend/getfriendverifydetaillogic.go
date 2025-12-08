@@ -55,7 +55,7 @@ func (l *GetFriendVerifyDetailLogic) GetFriendVerifyDetail(req *types.GetFriendV
 	// 查询发送者信息
 	if verify.SendUserID != "" {
 		var sendUser user_models.UserModel
-		if err := l.svcCtx.DB.Where("uuid = ?", verify.SendUserID).First(&sendUser).Error; err == nil {
+		if err := l.svcCtx.DB.Where("user_id = ?", verify.SendUserID).First(&sendUser).Error; err == nil {
 			sendUserName = sendUser.NickName
 			sendUserFileName = sendUser.Avatar
 		}
@@ -63,7 +63,7 @@ func (l *GetFriendVerifyDetailLogic) GetFriendVerifyDetail(req *types.GetFriendV
 	// 查询接收者信息
 	if verify.RevUserID != "" {
 		var revUser user_models.UserModel
-		if err := l.svcCtx.DB.Where("uuid = ?", verify.RevUserID).First(&revUser).Error; err == nil {
+		if err := l.svcCtx.DB.Where("user_id = ?", verify.RevUserID).First(&revUser).Error; err == nil {
 			revUserName = revUser.NickName
 			revUserFileName = revUser.Avatar
 		}

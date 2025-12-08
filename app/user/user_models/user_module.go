@@ -6,7 +6,7 @@ import (
 
 type UserModel struct {
 	models.Model
-	UUID     string `gorm:"size:64;unique;index"`
+	UserID   string `gorm:"size:64;uniqueIndex" json:"userId"`
 	NickName string `gorm:"size:32;index"`                                         // 昵称
 	Password string `gorm:"size:128"`                                              // 存储加密后的密码
 	Email    string `gorm:"size:128;index"`                                        // 邮箱

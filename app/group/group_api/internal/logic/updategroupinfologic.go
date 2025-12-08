@@ -67,7 +67,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		updateFields["version"] = newVersion
 
 		err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
-			Where("uuid = ?", req.GroupID).
+			Where("group_id = ?", req.GroupID).
 			Updates(updateFields).Error
 		if err != nil {
 			l.Logger.Errorf("更新群组信息失败: %v", err)

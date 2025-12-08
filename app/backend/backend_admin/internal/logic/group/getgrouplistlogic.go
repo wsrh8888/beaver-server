@@ -76,7 +76,7 @@ func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *type
 	for _, group := range groups {
 		list = append(list, types.GetGroupListItem{
 			Id:        group.Id,
-			Uuid:      group.GroupID,
+			GroupId:   group.GroupID,
 			Type:      int(group.Type),
 			Title:     group.Title,
 			FileName:  group.Avatar,

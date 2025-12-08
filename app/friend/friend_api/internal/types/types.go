@@ -2,7 +2,7 @@
 package types
 
 type FriendByUuid struct {
-	Uuid           string `json:"uuid"`           // 好友记录UUID
+	FriendID       string `json:"friendId"`       // 好友记录ID
 	SendUserID     string `json:"sendUserId"`     // 发送者用户ID
 	RevUserID      string `json:"revUserId"`      // 接收者用户ID
 	SendUserNotice string `json:"sendUserNotice"` // 发送者备注
@@ -37,7 +37,7 @@ type FriendValidInfo struct {
 	Avatar    string `json:"avatar"`    // 用户头像文件名
 	Message   string `json:"message"`   // 验证消息
 	Source    string `json:"source"`    // 添加好友来源：email/qrcode
-	Id        string `json:"id"`        // 验证记录UUID（作为唯一标识）
+	Id        string `json:"id"`        // 验证记录ID（作为唯一标识）
 	Flag      string `json:"flag"`      // 用户角色：send(发送者)/receive(接收者)
 	Status    int8   `json:"status"`    // 验证状态：0(未处理)/1(已通过)/2(已拒绝)
 	CreatedAt string `json:"createdAt"` // 验证时间
@@ -45,7 +45,7 @@ type FriendValidInfo struct {
 
 type FriendValidStatusReq struct {
 	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-	VerifyID string `json:"verifyId"`         // 验证记录UUID
+	VerifyID string `json:"verifyId"`         // 验证记录ID
 	Status   int8   `json:"status"`           // 处理状态：1(同意)/2(拒绝)
 }
 
@@ -54,7 +54,7 @@ type FriendValidStatusRes struct {
 }
 
 type FriendVerifyById struct {
-	UUID       string `json:"uuid"`       // 验证记录UUID
+	VerifyID   string `json:"verifyId"`   // 验证记录ID
 	SendUserID string `json:"sendUserId"` // 发送者用户ID
 	RevUserID  string `json:"revUserId"`  // 接收者用户ID
 	SendStatus int32  `json:"sendStatus"` // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
@@ -67,7 +67,7 @@ type FriendVerifyById struct {
 }
 
 type GetFriendVerifiesListByIdsReq struct {
-	Uuids []string `json:"uuids"` // 验证记录UUID列表
+	Ids []string `json:"ids"` // 验证记录ID列表
 }
 
 type GetFriendVerifiesListByIdsRes struct {
@@ -75,7 +75,7 @@ type GetFriendVerifiesListByIdsRes struct {
 }
 
 type GetFriendsListByUuidsReq struct {
-	Uuids []string `json:"uuids"` // 好友记录UUID列表
+	Ids []string `json:"ids"` // 好友记录ID列表
 }
 
 type GetFriendsListByUuidsRes struct {
@@ -115,7 +115,7 @@ type SearchValidInfoReq struct {
 }
 
 type SearchValidInfoRes struct {
-	ValidID string `json:"validId"` // 验证记录UUID
+	ValidID string `json:"validId"` // 验证记录ID
 }
 
 type AddFriendReq struct {

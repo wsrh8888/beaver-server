@@ -44,7 +44,7 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 	// - replyToCommentId 指向具体被回复的评论（可为顶层或子评论）
 	var targetComment moment_models.MomentCommentModel
 	if replyToCommentId != "" {
-		if err := l.svcCtx.DB.Where("uuid = ? AND is_deleted = false", replyToCommentId).
+		if err := l.svcCtx.DB.Where("comment_id = ? AND is_deleted = false", replyToCommentId).
 			First(&targetComment).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errors.New("reply comment not found")
@@ -56,13 +56,13 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 		}
 		// 顶层评论自身就是根；子评论的父就是根
 		if targetComment.ParentID == "" {
-			parentId = targetComment.UUID
+			parentId = targetComment.CommentID
 		} else {
 			parentId = targetComment.ParentID
 		}
 	} else if parentId != "" {
 		// 直接指定 parentId，要求它必须是顶层，防止出现第三层
-		if err := l.svcCtx.DB.Where("uuid = ? AND is_deleted = false", parentId).
+		if err := l.svcCtx.DB.Where("comment_id = ? AND is_deleted = false", parentId).
 			First(&targetComment).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errors.New("parent comment not found")
@@ -76,11 +76,11 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 			return nil, errors.New("only support two-level comments")
 		}
 		// replyToCommentId 为空时，视为回复顶层
-		replyToCommentId = targetComment.UUID
+		replyToCommentId = targetComment.CommentID
 	}
 
 	comment := moment_models.MomentCommentModel{
-		UUID:             uuid.New().String(),
+		CommentID:        uuid.New().String(),
 		MomentID:         req.MomentID,
 		UserID:           req.UserID,
 		Content:          content,
@@ -118,7 +118,7 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 	}
 
 	resp = &types.CreateMomentCommentRes{
-		Id:               comment.UUID,
+		Id:               comment.CommentID,
 		UserID:           comment.UserID,
 		UserName:         userName,
 		Avatar:           avatar,

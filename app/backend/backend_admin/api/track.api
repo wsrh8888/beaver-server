@@ -14,7 +14,7 @@ type (
 		Total int64                `json:"total"` // 总数
 	}
 	GetBucketListItem {
-		UUID        string `json:"uuid"`        // Bucket UUID
+		BucketId    string `json:"bucketId"`    // Bucket ID
 		Name        string `json:"name"`        // Bucket名称
 		Description string `json:"description"` // Bucket描述
 		CreateUser  string `json:"createUser"`  // 创建者
@@ -32,7 +32,7 @@ type (
 		Description string `json:"description"`      // Bucket描述
 	}
 	CreateBucketRes {
-		UUID string `json:"uuid"` // 创建的Bucket UUID
+		BucketId string `json:"bucketId"` // 创建的Bucket ID
 	}
 )
 
@@ -40,7 +40,7 @@ type (
 type (
 	UpdateBucketReq {
 		UserID      string `header:"Beaver-User-Id"` // 用户ID
-		UUID        string `json:"uuid"`              // Bucket UUID
+		BucketId    string `json:"bucketId"`          // Bucket ID
 		Name        string `json:"name,optional"`   // Bucket名称
 		Description string `json:"description,optional"` // Bucket描述
 		IsActive    *bool  `json:"isActive,optional"`     // 是否激活
@@ -52,7 +52,7 @@ type (
 type (
 	DeleteBucketReq {
 		UserID string `header:"Beaver-User-Id"` // 用户ID
-		UUID   string `json:"uuid"`             // Bucket UUID
+		BucketId   string `json:"bucketId"`     // Bucket ID
 	}
 	DeleteBucketRes {}
 )

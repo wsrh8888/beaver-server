@@ -15,7 +15,7 @@ type (
 	}
 	GetGroupListItem {
 		Id        uint   `json:"id"`
-		Uuid      string `json:"uuid"`
+		GroupId   string `json:"groupId"`
 		Type      int    `json:"type"`
 		Title     string `json:"title"`
 		FileName  string `json:"fileName"`
@@ -34,7 +34,7 @@ type (
 	}
 	GetGroupDetailRes {
 		Id        uint   `json:"id"`
-		Uuid      string `json:"uuid"`
+		GroupId   string `json:"groupId"`
 		Type      int    `json:"type"`
 		Title     string `json:"title"`
 		FileName  string `json:"fileName"`

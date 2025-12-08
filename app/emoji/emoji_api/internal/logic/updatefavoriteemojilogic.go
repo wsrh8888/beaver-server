@@ -56,10 +56,10 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 
 		// 添加收藏
 		newFavoriteEmoji := emoji_models.EmojiCollectEmoji{
-			UUID:    uuid.New().String(),
-			UserID:  req.UserID,
-			EmojiID: req.EmojiID,
-			Version: collectVersion,
+			EmojiCollectID: uuid.New().String(),
+			UserID:         req.UserID,
+			EmojiID:        req.EmojiID,
+			Version:        collectVersion,
 		}
 		err = l.svcCtx.DB.Create(&newFavoriteEmoji).Error
 		if err != nil {

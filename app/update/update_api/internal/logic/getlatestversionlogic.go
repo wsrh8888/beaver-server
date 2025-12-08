@@ -40,7 +40,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 
 	// 1. 验证应用是否存在
 	var app update_models.UpdateApp
-	if err := l.svcCtx.DB.Where("uuid = ? AND is_active = ?", req.AppID, true).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND is_active = ?", req.AppID, true).First(&app).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("应用不存在或已停用")
 		}

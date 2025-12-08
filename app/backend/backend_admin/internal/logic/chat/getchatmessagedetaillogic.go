@@ -46,7 +46,7 @@ func (l *GetChatMessageDetailLogic) GetChatMessageDetail(req *types.GetChatMessa
 	sendUserFileName := ""
 	if message.SendUserID != nil && *message.SendUserID != "" {
 		var user user_models.UserModel
-		if err := l.svcCtx.DB.Where("uuid = ?", *message.SendUserID).First(&user).Error; err == nil {
+		if err := l.svcCtx.DB.Where("user_id = ?", *message.SendUserID).First(&user).Error; err == nil {
 			sendUserName = user.NickName
 			sendUserFileName = user.Avatar
 		}

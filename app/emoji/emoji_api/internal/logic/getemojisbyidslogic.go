@@ -33,29 +33,29 @@ func (l *GetEmojisByIdsLogic) GetEmojisByIds(req *types.GetEmojisByIdsReq) (resp
 		}, nil
 	}
 
-	// 根据UUID列表查询表情详情
+	// 根据ID列表查询表情详情
 	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid IN ? AND status = ?", req.Ids, 1).Find(&emojis).Error
+	err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", req.Ids, 1).Find(&emojis).Error
 	if err != nil {
-		l.Errorf("查询表情详情失败: uuids=%v, error=%v", req.Ids, err)
+		l.Errorf("查询表情详情失败: ids=%v, error=%v", req.Ids, err)
 		return nil, err
 	}
 
 	l.Infof("批量查询表情详情: 请求%d个, 返回%d个", len(req.Ids), len(emojis))
 
-	// 获取表情UUID列表，用于查询关联的包信息
-	emojiUUIDs := make([]string, len(emojis))
+	// 获取表情ID列表，用于查询关联的包信息
+	emojiIDs := make([]string, len(emojis))
 	for i, emoji := range emojis {
-		emojiUUIDs[i] = emoji.UUID
+		emojiIDs[i] = emoji.EmojiID
 	}
 
 	// 查询表情包关联信息
 	var packageEmojis []emoji_models.EmojiPackageEmoji
-	if len(emojiUUIDs) > 0 {
-		l.svcCtx.DB.Where("emoji_id IN ?", emojiUUIDs).Find(&packageEmojis)
+	if len(emojiIDs) > 0 {
+		l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&packageEmojis)
 	}
 
-	// 建立表情UUID到包UUID的映射
+	// 建立表情ID到包ID的映射
 	emojiToPackage := make(map[string]*string)
 	for _, pe := range packageEmojis {
 		if pe.PackageID != "" {
@@ -67,13 +67,12 @@ func (l *GetEmojisByIdsLogic) GetEmojisByIds(req *types.GetEmojisByIdsReq) (resp
 	var emojiItems []types.EmojiDetailItem
 	for _, emoji := range emojis {
 		emojiItems = append(emojiItems, types.EmojiDetailItem{
-			EmojiID:   emoji.UUID,
-			UUID:      emoji.UUID,
+			EmojiID:   emoji.EmojiID,
 			FileKey:   emoji.FileKey,
 			Title:     emoji.Title,
 			Status:    emoji.Status,
 			Version:   emoji.Version,
-			PackageID: emojiToPackage[emoji.UUID],
+			PackageID: emojiToPackage[emoji.EmojiID],
 			CreateAt:  time.Time(emoji.CreatedAt).UnixMilli(),
 			UpdateAt:  time.Time(emoji.UpdatedAt).UnixMilli(),
 		})

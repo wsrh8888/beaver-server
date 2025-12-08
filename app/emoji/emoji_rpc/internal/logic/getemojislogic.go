@@ -53,22 +53,22 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 		}, nil
 	}
 
-	// 提取表情UUID列表
-	emojiUUIDs := make([]string, 0, len(collectRecords))
+	// 提取表情ID列表
+	emojiIDs := make([]string, 0, len(collectRecords))
 	for _, record := range collectRecords {
-		emojiUUIDs = append(emojiUUIDs, record.EmojiID)
+		emojiIDs = append(emojiIDs, record.EmojiID)
 	}
 
 	// 获取这些表情的基础信息
 	var emojis []struct {
-		UUID    string `gorm:"column:uuid"`
+		EmojiID string `gorm:"column:emoji_id"`
 		Version int64  `gorm:"column:version"`
 	}
 
-	err = l.svcCtx.DB.Table("emojis").Where("uuid IN ? AND status = 1", emojiUUIDs).
-		Select("uuid, version").Find(&emojis).Error
+	err = l.svcCtx.DB.Table("emojis").Where("emoji_id IN ? AND status = 1", emojiIDs).
+		Select("emoji_id, version").Find(&emojis).Error
 	if err != nil {
-		l.Errorf("查询表情基础信息失败: emojiUUIDs=%v, error=%v", emojiUUIDs, err)
+		l.Errorf("查询表情基础信息失败: emojiIds=%v, error=%v", emojiIDs, err)
 		return nil, err
 	}
 
@@ -78,7 +78,7 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 	var emojiVersions []*emoji_rpc.EmojiVersionItem
 	for _, emoji := range emojis {
 		emojiVersions = append(emojiVersions, &emoji_rpc.EmojiVersionItem{
-			Uuid:    emoji.UUID,
+			EmojiId: emoji.EmojiID,
 			Version: emoji.Version,
 		})
 	}

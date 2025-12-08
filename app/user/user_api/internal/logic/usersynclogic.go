@@ -38,7 +38,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	var args []interface{}
 
 	for _, uv := range req.UserVersions {
-		conditions = append(conditions, "(uuid = ? AND version >= ?)")
+		conditions = append(conditions, "(user_id = ? AND version >= ?)")
 		args = append(args, uv.UserID, uv.Version)
 	}
 
@@ -54,7 +54,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	userItems := make([]types.UserSyncItem, len(users))
 	for i, user := range users {
 		userItems[i] = types.UserSyncItem{
-			UserID:   user.UUID,
+			UserID:   user.UserID,
 			NickName: user.NickName,
 			Avatar:   user.Avatar,
 			Abstract: user.Abstract,

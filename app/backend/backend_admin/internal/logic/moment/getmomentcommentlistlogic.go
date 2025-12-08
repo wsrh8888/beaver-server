@@ -41,8 +41,8 @@ func (l *GetMomentCommentListLogic) GetMomentCommentList(req *types.GetMomentCom
 		limit = 100
 	}
 
-	// 构建查询条件（使用 moment uuid）
-	whereClause := l.svcCtx.DB.Where("moment_id = ?", req.MomentUuid)
+	// 构建查询条件（使用 moment id）
+	whereClause := l.svcCtx.DB.Where("moment_id = ?", req.MomentId)
 
 	// 分页查询评论
 	comments, count, err := list_query.ListQuery(l.svcCtx.DB, moment_models.MomentCommentModel{}, list_query.Option{
@@ -63,12 +63,12 @@ func (l *GetMomentCommentListLogic) GetMomentCommentList(req *types.GetMomentCom
 	var list []types.GetMomentCommentListItem
 	for _, comment := range comments {
 		list = append(list, types.GetMomentCommentListItem{
-			Uuid:       comment.UUID,
-			MomentUuid: comment.MomentID,
-			UserId:     comment.UserID,
-			Content:    comment.Content,
-			CreatedAt:  comment.CreatedAt.String(),
-			UpdatedAt:  comment.UpdatedAt.String(),
+			CommentId: comment.CommentID,
+			MomentId:  comment.MomentID,
+			UserId:    comment.UserID,
+			Content:   comment.Content,
+			CreatedAt: comment.CreatedAt.String(),
+			UpdatedAt: comment.UpdatedAt.String(),
 		})
 	}
 

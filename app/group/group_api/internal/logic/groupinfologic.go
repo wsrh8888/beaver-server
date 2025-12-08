@@ -29,7 +29,7 @@ func NewGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupIn
 func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupInfoRes, err error) {
 	// 查询群组信息
 	var group group_models.GroupModel
-	err = l.svcCtx.DB.Take(&group, "uuid = ?", req.GroupID).Error
+	err = l.svcCtx.DB.Take(&group, "group_id = ?", req.GroupID).Error
 
 	if err != nil {
 		logx.Errorf("查询群组失败: %s", err.Error())

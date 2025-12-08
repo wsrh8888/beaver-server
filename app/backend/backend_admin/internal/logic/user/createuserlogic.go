@@ -38,12 +38,12 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 		return nil, errors.New("邮箱已存在")
 	}
 
-	// 生成用户UUID
-	userUUID := strings.Replace(utils.GenerateUUId(), "-", "", -1)
+	// 生成用户ID
+	userID := strings.Replace(utils.GenerateUUId(), "-", "", -1)
 
 	// 创建用户，设置默认值
 	user := user_models.UserModel{
-		UUID:     userUUID,
+		UserID:   userID,
 		NickName: req.NickName,
 		Password: pwd.HahPwd(req.Password),
 		Email:    req.Email,
@@ -58,8 +58,8 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 		return nil, errors.New("创建用户失败")
 	}
 
-	l.Logger.Infof("创建用户成功: userID=%s, email=%s", user.UUID, req.Email)
+	l.Logger.Infof("创建用户成功: userID=%s, email=%s", user.UserID, req.Email)
 	return &types.CreateUserRes{
-		Id: user.UUID,
+		Id: user.UserID,
 	}, nil
 }

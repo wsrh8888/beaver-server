@@ -92,7 +92,7 @@ func (l *GetMomentLikesLogic) GetMomentLikes(req *types.GetMomentLikesReq) (resp
 		}
 
 		likeInfos = append(likeInfos, types.GetMomentLikesInfo{
-			Id:        like.UUID,
+			Id:        like.LikeID,
 			UserID:    like.UserID,
 			UserName:  userName,
 			Avatar:    avatar,

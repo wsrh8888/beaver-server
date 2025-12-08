@@ -49,13 +49,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: GetUserFavoritePackagesHandler(serverCtx),
 			},
 			{
-				// 按收藏UUID批量获取表情收藏记录（同步补齐）
+				// 按收藏ID批量获取表情收藏记录（同步补齐）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/getEmojiCollectsByUuids",
 				Handler: GetEmojiCollectsByUuidsHandler(serverCtx),
 			},
 			{
-				// 按UUID批量查询表情基础信息（用于版本同步后补齐）
+				// 按ID批量查询表情基础信息（用于版本同步后补齐）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/getEmojisByUuids",
 				Handler: GetEmojisByUuidsHandler(serverCtx),

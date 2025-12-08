@@ -36,7 +36,7 @@ func NewUpdateInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.UpdateInfoRes, err error) {
 	// 获取要更新的用户信息
 	var user user_models.UserModel
-	if err := l.svcCtx.DB.Where("uuid = ?", req.UserID).First(&user).Error; err != nil {
+	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
@@ -63,7 +63,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	// 执行更新操作
 	if len(updateFields) > 0 {
 		// 获取新版本号（用户独立递增）
-		version = l.svcCtx.VersionGen.GetNextVersion("users", "uuid", req.UserID)
+		version = l.svcCtx.VersionGen.GetNextVersion("users", "user_id", req.UserID)
 		if version == -1 {
 			l.Errorf("获取版本号失败")
 			return nil, errors.New("获取版本号失败")

@@ -30,7 +30,7 @@ func NewGetUserDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *types.GetUserDetailRes, err error) {
 	var user user_models.UserModel
 
-	err = l.svcCtx.DB.Where("uuid = ?", req.UserID).First(&user).Error
+	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			l.Logger.Errorf("用户不存在: %s", req.UserID)
@@ -42,7 +42,7 @@ func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *t
 
 	l.Logger.Infof("获取用户详情成功: userID=%s", req.UserID)
 	return &types.GetUserDetailRes{
-		Id:          user.UUID,
+		Id:          user.UserID,
 		NickName:    user.NickName,
 		FileName:    user.Avatar,
 		Email:       user.Email,

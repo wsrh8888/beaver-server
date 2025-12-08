@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
@@ -40,9 +39,7 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 
 	// 按表情ID筛选
 	if req.EmojiID != "" {
-		if emojiID, err := strconv.ParseUint(req.EmojiID, 10, 32); err == nil {
-			whereClause = whereClause.Where("emoji_id = ?", emojiID)
-		}
+		whereClause = whereClause.Where("emoji_id = ?", req.EmojiID)
 	}
 
 	// 时间范围筛选
@@ -93,15 +90,15 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 		emojiFileName := ""
 		// 通过 EmojiID 查询 Emoji 信息
 		var emoji emoji_models.Emoji
-		if err := l.svcCtx.DB.Where("uuid = ?", collect.EmojiID).First(&emoji).Error; err == nil {
+		if err := l.svcCtx.DB.Where("emoji_id = ?", collect.EmojiID).First(&emoji).Error; err == nil {
 			emojiTitle = emoji.Title
 			emojiFileName = emoji.FileKey
 		}
 
 		list = append(list, types.GetEmojiCollectListItem{
-			UUID:         collect.UUID,
+			CollectId:    collect.EmojiCollectID,
 			UserID:       collect.UserID,
-			EmojiUUID:    collect.EmojiID,
+			EmojiId:      collect.EmojiID,
 			EmojiTitle:   emojiTitle,
 			EmojiFileKey: emojiFileName,
 			CreateTime:   collect.CreatedAt.String(),

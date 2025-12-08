@@ -74,11 +74,11 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 		List:  make([]types.MomentListItem, 0, len(moments)),
 	}
 
-	// 获取所有动态UUID，用于批量查询评论和点赞数量
-	momentUUIDs := make([]string, 0, len(moments))
+	// 获取所有动态ID，用于批量查询评论和点赞数量
+	momentIDs := make([]string, 0, len(moments))
 	userIds := make(map[string]bool) // 用于去重用户ID
 	for _, moment := range moments {
-		momentUUIDs = append(momentUUIDs, moment.UUID)
+		momentIDs = append(momentIDs, moment.MomentID)
 		userIds[moment.UserID] = true
 	}
 
@@ -90,13 +90,13 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 	// 批量查询评论数量
 	commentCounts := make(map[string]int64)
-	if len(momentUUIDs) > 0 {
+	if len(momentIDs) > 0 {
 		var commentStats []struct {
 			MomentID string
 			Count    int64
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
-			Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
+			Where("moment_id IN (?) AND is_deleted = false", momentIDs).
 			Select("moment_id, COUNT(*) as count").
 			Group("moment_id").
 			Scan(&commentStats)
@@ -108,13 +108,13 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 	// 批量查询点赞数量
 	likeCounts := make(map[string]int64)
-	if len(momentUUIDs) > 0 {
+	if len(momentIDs) > 0 {
 		var likeStats []struct {
 			MomentID string
 			Count    int64
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
-			Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
+			Where("moment_id IN (?) AND is_deleted = false", momentIDs).
 			Select("moment_id, COUNT(*) as count").
 			Group("moment_id").
 			Scan(&likeStats)
@@ -126,12 +126,12 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 	// 批量查询当前用户是否点赞
 	likedMap := make(map[string]bool)
-	if len(momentUUIDs) > 0 {
+	if len(momentIDs) > 0 {
 		var liked []struct {
 			MomentID string
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentLikeModel{}).
-			Where("moment_id IN (?) AND user_id = ? AND is_deleted = false", momentUUIDs, req.UserID).
+			Where("moment_id IN (?) AND user_id = ? AND is_deleted = false", momentIDs, req.UserID).
 			Select("moment_id").
 			Scan(&liked)
 		for _, item := range liked {
@@ -141,10 +141,10 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 	// 批量查询具体的评论数据（限制每条动态最多返回3条评论）
 	commentMap := make(map[string][]moment_models.MomentCommentModel)
-	if len(momentUUIDs) > 0 {
+	if len(momentIDs) > 0 {
 		var allComments []moment_models.MomentCommentModel
 		// 仅取顶层评论，直接查询所有相关的评论，然后按动态分组
-		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false AND parent_id = ''", momentUUIDs).
+		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false AND parent_id = ''", momentIDs).
 			Order("moment_id, created_at DESC").
 			Find(&allComments)
 
@@ -160,10 +160,10 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 
 	// 批量查询具体的点赞数据（限制每条动态最多返回10个点赞）
 	likeMap := make(map[string][]moment_models.MomentLikeModel)
-	if len(momentUUIDs) > 0 {
+	if len(momentIDs) > 0 {
 		var allLikes []moment_models.MomentLikeModel
 		// 直接查询所有相关的点赞，然后按动态分组
-		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false", momentUUIDs).
+		l.svcCtx.DB.Where("moment_id IN (?) AND is_deleted = false", momentIDs).
 			Order("moment_id, created_at DESC").
 			Find(&allLikes)
 
@@ -209,14 +209,14 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 		}
 
 		// 转换评论数据
-		comments := convertListComments(commentMap[moment.UUID], userInfoMap)
+		comments := convertListComments(commentMap[moment.MomentID], userInfoMap)
 
 		// 转换点赞数据
-		likes := convertListLikes(likeMap[moment.UUID], userInfoMap)
+		likes := convertListLikes(likeMap[moment.MomentID], userInfoMap)
 
 		// 构建完整响应
 		resp.List = append(resp.List, types.MomentListItem{
-			Id:           moment.UUID,
+			Id:           moment.MomentID,
 			UserID:       moment.UserID,
 			Content:      moment.Content,
 			Files:        files,
@@ -224,9 +224,9 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 			Likes:        likes,
 			UserName:     userName,
 			Avatar:       avatar,
-			CommentCount: commentCounts[moment.UUID],
-			LikeCount:    likeCounts[moment.UUID],
-			IsLiked:      likedMap[moment.UUID],
+			CommentCount: commentCounts[moment.MomentID],
+			LikeCount:    likeCounts[moment.MomentID],
+			IsLiked:      likedMap[moment.MomentID],
 			CreatedAt:    moment.CreatedAt.String(),
 		})
 	}
@@ -245,7 +245,7 @@ func convertListComments(comments []moment_models.MomentCommentModel, userInfoMa
 		}
 
 		result = append(result, types.GetMomentsCommentInfo{
-			Id:               comment.UUID,
+			Id:               comment.CommentID,
 			UserID:           comment.UserID,
 			UserName:         userName,
 			Avatar:           avatar,
@@ -270,7 +270,7 @@ func convertListLikes(likes []moment_models.MomentLikeModel, userInfoMap map[str
 		}
 
 		result = append(result, types.GetMomentsLikeInfo{
-			Id:        like.UUID,
+			Id:        like.LikeID,
 			UserID:    like.UserID,
 			CreatedAt: like.CreatedAt.String(),
 			UserName:  userName,

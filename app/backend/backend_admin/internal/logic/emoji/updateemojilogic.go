@@ -30,10 +30,10 @@ func NewUpdateEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.UpdateEmojiRes, err error) {
 	// 检查表情是否存在
 	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid = ?", req.UUID).First(&emoji).Error
+	err = l.svcCtx.DB.Where("emoji_id = ?", req.EmojiId).First(&emoji).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.UUID)
+			logx.Errorf("表情不存在: %s", req.EmojiId)
 			return nil, errors.New("表情不存在")
 		}
 		logx.Errorf("查询表情失败: %v", err)
@@ -50,7 +50,7 @@ func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.U
 		if *req.Title != emoji.Title {
 			var count int64
 			err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).
-				Where("title = ? AND uuid != ?", *req.Title, req.UUID).
+				Where("title = ? AND emoji_id != ?", *req.Title, req.EmojiId).
 				Count(&count).Error
 			if err != nil {
 				logx.Errorf("检查表情名称失败: %v", err)

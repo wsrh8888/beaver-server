@@ -64,7 +64,7 @@ func (l *GetAppsLogic) GetApps(req *types.GetAppsReq) (resp *types.GetAppsRes, e
 	for _, app := range apps {
 		appList = append(appList, types.GetAppsItem{
 			Id:          app.Id,
-			AppID:       app.UUID,
+			AppID:       app.AppID,
 			Name:        app.Name,
 			Description: app.Description,
 			IsActive:    app.IsActive,

@@ -33,11 +33,11 @@ func (l *GetEmojiPackageCollectsByIdsLogic) GetEmojiPackageCollectsByIds(req *ty
 		}, nil
 	}
 
-	// 根据UUID列表查询收藏记录详情
+	// 根据ID列表查询收藏记录详情
 	var collects []emoji_models.EmojiPackageCollect
-	err = l.svcCtx.DB.Where("uuid IN ? AND user_id = ?", req.Ids, req.UserID).Find(&collects).Error
+	err = l.svcCtx.DB.Where("package_collect_id IN ? AND user_id = ?", req.Ids, req.UserID).Find(&collects).Error
 	if err != nil {
-		l.Errorf("查询表情包收藏记录详情失败: uuids=%v, error=%v", req.Ids, err)
+		l.Errorf("查询表情包收藏记录详情失败: ids=%v, error=%v", req.Ids, err)
 		return nil, err
 	}
 
@@ -47,13 +47,13 @@ func (l *GetEmojiPackageCollectsByIdsLogic) GetEmojiPackageCollectsByIds(req *ty
 	var collectItems []types.EmojiPackageCollectDetailItem
 	for _, collect := range collects {
 		collectItems = append(collectItems, types.EmojiPackageCollectDetailItem{
-			UUID:      collect.UUID,
-			UserID:    collect.UserID,
-			PackageID: collect.PackageID,
-			IsDeleted: collect.IsDeleted,
-			Version:   collect.Version,
-			CreateAt:  time.Time(collect.CreatedAt).UnixMilli(),
-			UpdateAt:  time.Time(collect.UpdatedAt).UnixMilli(),
+			PackageCollectID: collect.PackageCollectID,
+			UserID:           collect.UserID,
+			PackageID:        collect.PackageID,
+			IsDeleted:        collect.IsDeleted,
+			Version:          collect.Version,
+			CreateAt:         time.Time(collect.CreatedAt).UnixMilli(),
+			UpdateAt:         time.Time(collect.UpdatedAt).UnixMilli(),
 		})
 	}
 

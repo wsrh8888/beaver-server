@@ -40,7 +40,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	}
 
 	// 调试日志：检查用户数据
-	logx.Infof("登录用户信息: UserID=%s, NickName=%s, Email=%s", user.UUID, user.NickName, user.Email)
+	logx.Infof("登录用户信息: UserID=%s, NickName=%s, Email=%s", user.UserID, user.NickName, user.Email)
 
 	// 验证密码
 	if !pwd.CheckPad(user.Password, req.Password) {
@@ -62,7 +62,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	// 生成token，包含设备信息
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
 		NickName: user.NickName,
-		UserID:   user.UUID,
+		UserID:   user.UserID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
 		logx.Errorf("生成token失败: %v", err)
@@ -70,7 +70,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	}
 
 	// 检查是否已有其他设备登录
-	key := fmt.Sprintf("login_%s_%s", user.UUID, deviceType)
+	key := fmt.Sprintf("login_%s_%s", user.UserID, deviceType)
 	oldLoginInfo, err := l.svcCtx.Redis.Get(key).Result()
 	if err == nil && oldLoginInfo != "" {
 		// 解析旧登录信息
@@ -103,6 +103,6 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 
 	return &types.EmailPasswordLoginRes{
 		Token:  token,
-		UserID: user.UUID,
+		UserID: user.UserID,
 	}, nil
 }

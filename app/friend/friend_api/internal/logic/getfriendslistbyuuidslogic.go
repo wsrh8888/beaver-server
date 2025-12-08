@@ -16,7 +16,7 @@ type GetFriendsListByUuidsLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 批量获取好友数据（通过UUID）
+// 批量获取好友数据（通过ID）
 func NewGetFriendsListByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendsListByUuidsLogic {
 	return &GetFriendsListByUuidsLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,17 +26,17 @@ func NewGetFriendsListByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *GetFriendsListByUuidsLogic) GetFriendsListByUuids(req *types.GetFriendsListByUuidsReq) (resp *types.GetFriendsListByUuidsRes, err error) {
-	if len(req.Uuids) == 0 {
+	if len(req.Ids) == 0 {
 		return &types.GetFriendsListByUuidsRes{
 			Friends: []types.FriendByUuid{},
 		}, nil
 	}
 
-	// 查询指定UUID列表中的好友信息
+	// 查询指定ID列表中的好友信息
 	var friends []friend_models.FriendModel
-	err = l.svcCtx.DB.Where("uuid IN (?)", req.Uuids).Find(&friends).Error
+	err = l.svcCtx.DB.Where("friend_id IN (?)", req.Ids).Find(&friends).Error
 	if err != nil {
-		l.Errorf("查询好友信息失败: uuids=%v, error=%v", req.Uuids, err)
+		l.Errorf("查询好友信息失败: ids=%v, error=%v", req.Ids, err)
 		return nil, err
 	}
 
@@ -45,9 +45,9 @@ func (l *GetFriendsListByUuidsLogic) GetFriendsListByUuids(req *types.GetFriends
 	// 转换为响应格式
 	var friendsList []types.FriendByUuid
 	for _, friend := range friends {
-		l.Infof("处理好友: UUID=%s, SendUserID=%s, RevUserID=%s", friend.UUID, friend.SendUserID, friend.RevUserID)
+		l.Infof("处理好友: ID=%s, SendUserID=%s, RevUserID=%s", friend.FriendID, friend.SendUserID, friend.RevUserID)
 		friendsList = append(friendsList, types.FriendByUuid{
-			Uuid:           friend.UUID,
+			FriendID:       friend.FriendID,
 			SendUserID:     friend.SendUserID,
 			RevUserID:      friend.RevUserID,
 			SendUserNotice: friend.SendUserNotice,

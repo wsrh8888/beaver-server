@@ -12,18 +12,17 @@ type AddEmojiRes struct {
 }
 
 type EmojiCollectDetailItem struct {
-	UUID      string `json:"uuid"`
-	UserID    string `json:"userId"`
-	EmojiID   string `json:"emojiId"`
-	IsDeleted bool   `json:"isDeleted"`
-	Version   int64  `json:"version"`
-	CreateAt  int64  `json:"createAt"`
-	UpdateAt  int64  `json:"updateAt"`
+	EmojiCollectID string `json:"emojiCollectId"`
+	UserID         string `json:"userId"`
+	EmojiID        string `json:"emojiId"`
+	IsDeleted      bool   `json:"isDeleted"`
+	Version        int64  `json:"version"`
+	CreateAt       int64  `json:"createAt"`
+	UpdateAt       int64  `json:"updateAt"`
 }
 
 type EmojiDetailItem struct {
 	EmojiID   string  `json:"emojiId"`
-	UUID      string  `json:"uuid"`
 	FileKey   string  `json:"fileKey"`
 	Title     string  `json:"title"`
 	Status    int8    `json:"status"`
@@ -41,13 +40,13 @@ type EmojiItem struct {
 }
 
 type EmojiPackageCollectDetailItem struct {
-	UUID      string `json:"uuid"`
-	UserID    string `json:"userId"`
-	PackageID string `json:"packageId"`
-	IsDeleted bool   `json:"isDeleted"`
-	Version   int64  `json:"version"`
-	CreateAt  int64  `json:"createAt"`
-	UpdateAt  int64  `json:"updateAt"`
+	PackageCollectID string `json:"packageCollectId"`
+	UserID           string `json:"userId"`
+	PackageID        string `json:"packageId"`
+	IsDeleted        bool   `json:"isDeleted"`
+	Version          int64  `json:"version"`
+	CreateAt         int64  `json:"createAt"`
+	UpdateAt         int64  `json:"updateAt"`
 }
 
 type EmojiPackageContentDetailItem struct {
@@ -61,7 +60,6 @@ type EmojiPackageContentDetailItem struct {
 
 type EmojiPackageDetailItem struct {
 	PackageID    string `json:"packageId"`
-	UUID         string `json:"uuid"`
 	Title        string `json:"title"`
 	CoverFile    string `json:"coverFile"`
 	UserID       string `json:"userId"`
@@ -96,7 +94,7 @@ type EmojiSimpleItem struct {
 
 type GetEmojiCollectsByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"`
-	Ids    []string `json:"ids"` // 收藏记录UUID列表
+	Ids    []string `json:"ids"` // 收藏记录ID列表
 }
 
 type GetEmojiCollectsByIdsRes struct {
@@ -104,7 +102,7 @@ type GetEmojiCollectsByIdsRes struct {
 }
 
 type GetEmojiCollectsByUuidsReq struct {
-	Uuids []string `json:"uuids"`
+	Ids []string `json:"ids"` // 收藏记录ID列表
 }
 
 type GetEmojiCollectsByUuidsRes struct {
@@ -113,7 +111,7 @@ type GetEmojiCollectsByUuidsRes struct {
 
 type GetEmojiPackageCollectsByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"`
-	Ids    []string `json:"ids"` // 收藏记录UUID列表
+	Ids    []string `json:"ids"` // 收藏记录ID列表
 }
 
 type GetEmojiPackageCollectsByIdsRes struct {
@@ -149,7 +147,7 @@ type GetEmojiPackageDetailRes struct {
 
 type GetEmojiPackagesByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"`
-	Ids    []string `json:"ids"` // 表情包UUID列表
+	Ids    []string `json:"ids"` // 表情包ID列表
 }
 
 type GetEmojiPackagesByIdsRes struct {
@@ -171,7 +169,7 @@ type GetEmojiPackagesRes struct {
 
 type GetEmojisByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"`
-	Ids    []string `json:"ids"` // 表情UUID列表
+	Ids    []string `json:"ids"` // 表情ID列表
 }
 
 type GetEmojisByIdsRes struct {
@@ -179,7 +177,7 @@ type GetEmojisByIdsRes struct {
 }
 
 type GetEmojisByUuidsReq struct {
-	Uuids []string `json:"uuids"`
+	Ids []string `json:"ids"` // 表情ID列表
 }
 
 type GetEmojisByUuidsRes struct {
