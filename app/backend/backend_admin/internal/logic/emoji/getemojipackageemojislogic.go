@@ -30,10 +30,10 @@ func NewGetEmojiPackageEmojisLogic(ctx context.Context, svcCtx *svc.ServiceConte
 func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPackageEmojisReq) (resp *types.GetEmojiPackageEmojisRes, err error) {
 	// 检查表情包是否存在
 	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("uuid = ?", req.PackageUUID).First(&pkg).Error
+	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.PackageUUID)
+			logx.Errorf("表情包不存在: %s", req.PackageId)
 			return nil, errors.New("表情包不存在")
 		}
 		logx.Errorf("查询表情包失败: %v", err)
@@ -42,7 +42,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 
 	// 先查询关联关系
 	var emojiPackageEmojis []emoji_models.EmojiPackageEmoji
-	err = l.svcCtx.DB.Where("package_id = ?", pkg.Id).
+	err = l.svcCtx.DB.Where("package_id = ?", pkg.PackageID).
 		Order("sort_order asc").
 		Find(&emojiPackageEmojis).Error
 	if err != nil {
@@ -66,7 +66,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 
 	// 查询表情详情
 	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("id IN ?", emojiIDs).Find(&emojis).Error
+	err = l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&emojis).Error
 	if err != nil {
 		logx.Errorf("查询表情详情失败: %v", err)
 		return nil, err
@@ -75,7 +75,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	// 创建表情ID到表情的映射
 	emojiMap := make(map[string]emoji_models.Emoji)
 	for _, emoji := range emojis {
-		emojiMap[emoji.UUID] = emoji
+		emojiMap[emoji.EmojiID] = emoji
 	}
 
 	// 按照关联表中的顺序构建结果
@@ -116,7 +116,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	var list []types.GetEmojiPackageEmojisItem
 	for _, emoji := range pagedEmojis {
 		list = append(list, types.GetEmojiPackageEmojisItem{
-			UUID:       emoji.UUID,
+			EmojiId:    emoji.EmojiID,
 			FileKey:    emoji.FileKey,
 			Title:      emoji.Title,
 			AuthorID:   "", // 暂时为空，后续可从其他途径获取

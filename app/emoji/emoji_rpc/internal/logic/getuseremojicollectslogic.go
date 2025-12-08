@@ -45,22 +45,22 @@ func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *emoji_rpc.GetUserEm
 
 	if len(collectRecords) == 0 {
 		return &emoji_rpc.GetUserEmojiCollectsRes{
-			EmojiVersions:   []*emoji_rpc.EmojiVersionItem{},
-			ServerTimestamp: time.Now().UnixMilli(),
+			EmojiCollectVersions: []*emoji_rpc.EmojiCollectVersionItem{},
+			ServerTimestamp:      time.Now().UnixMilli(),
 		}, nil
 	}
 
-	// 转换为收藏记录的版本摘要（使用收藏记录 UUID + 版本号）
-	var emojiCollectVersions []*emoji_rpc.EmojiVersionItem
+	// 转换为收藏记录的版本摘要（使用收藏记录ID + 版本号）
+	var emojiCollectVersions []*emoji_rpc.EmojiCollectVersionItem
 	for _, collect := range collectRecords {
-		emojiCollectVersions = append(emojiCollectVersions, &emoji_rpc.EmojiVersionItem{
-			Uuid:    collect.UUID,
-			Version: collect.Version,
+		emojiCollectVersions = append(emojiCollectVersions, &emoji_rpc.EmojiCollectVersionItem{
+			EmojiCollectId: collect.EmojiCollectID,
+			Version:        collect.Version,
 		})
 	}
 
 	return &emoji_rpc.GetUserEmojiCollectsRes{
-		EmojiVersions:   emojiCollectVersions,
-		ServerTimestamp: time.Now().UnixMilli(),
+		EmojiCollectVersions: emojiCollectVersions,
+		ServerTimestamp:      time.Now().UnixMilli(),
 	}, nil
 }

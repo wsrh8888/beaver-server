@@ -30,7 +30,7 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.UpdateUserRes, err error) {
 	// 检查用户是否存在
 	var user user_models.UserModel
-	err = l.svcCtx.DB.Where("uuid = ?", req.UserID).First(&user).Error
+	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			l.Logger.Errorf("用户不存在: %s", req.UserID)
@@ -43,7 +43,7 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.Upda
 	// 如果要更新邮箱，检查是否重复
 	if req.Email != nil && *req.Email != user.Email {
 		var existUser user_models.UserModel
-		err = l.svcCtx.DB.Where("email = ? AND uuid != ?", *req.Email, req.UserID).First(&existUser).Error
+		err = l.svcCtx.DB.Where("email = ? AND user_id != ?", *req.Email, req.UserID).First(&existUser).Error
 		if err == nil {
 			l.Logger.Errorf("邮箱已存在: %s", *req.Email)
 			return nil, errors.New("邮箱已存在")

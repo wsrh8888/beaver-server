@@ -69,7 +69,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 
 		// 查询对方用户信息
 		var user user_models.UserModel
-		err = l.svcCtx.DB.Where("uuid = ?", opponentID).First(&user).Error
+		err = l.svcCtx.DB.Where("user_id = ?", opponentID).First(&user).Error
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 	} else {
 		// 群聊会话
 		var group group_models.GroupModel
-		err = l.svcCtx.DB.Where("uuid = ?", req.ConversationID).First(&group).Error
+		err = l.svcCtx.DB.Where("group_id = ?", req.ConversationID).First(&group).Error
 		if err != nil {
 			return nil, err
 		}

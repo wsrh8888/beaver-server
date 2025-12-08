@@ -43,12 +43,12 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		return nil, err
 	}
 
-	// 转换用户收藏的表情数据（使用收藏记录UUID）
-	if emojiCollectResp.EmojiVersions != nil {
-		for _, item := range emojiCollectResp.EmojiVersions {
+	// 转换用户收藏的表情数据（使用收藏记录ID）
+	if emojiCollectResp.EmojiCollectVersions != nil {
+		for _, item := range emojiCollectResp.EmojiCollectVersions {
 			emojiCollectVersions = append(emojiCollectVersions, types.EmojiCollectVersionItem{
-				UUID:    item.Uuid,
-				Version: item.Version,
+				EmojiCollectId: item.EmojiCollectId,
+				Version:        item.Version,
 			})
 		}
 	}
@@ -63,12 +63,12 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		return nil, err
 	}
 
-	// 转换用户收藏的表情包数据（使用收藏记录UUID）
+	// 转换用户收藏的表情包数据（使用收藏记录ID）
 	if emojiPackageCollectResp.EmojiPackageCollectVersions != nil {
 		for _, item := range emojiPackageCollectResp.EmojiPackageCollectVersions {
 			emojiPackageCollectVersions = append(emojiPackageCollectVersions, types.EmojiPackageCollectVersionItem{
-				UUID:    item.Uuid,
-				Version: item.Version,
+				PackageCollectId: item.PackageCollectId,
+				Version:          item.Version,
 			})
 		}
 	}
@@ -87,8 +87,8 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	if emojiPackagesResp.EmojiPackageVersions != nil {
 		for _, item := range emojiPackagesResp.EmojiPackageVersions {
 			emojiPackageVersions = append(emojiPackageVersions, types.EmojiPackageVersionItem{
-				Id:      item.Id,
-				Version: item.Version,
+				PackageId: item.PackageId,
+				Version:   item.Version,
 			})
 		}
 	}

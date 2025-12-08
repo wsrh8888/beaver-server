@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
@@ -41,10 +40,10 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 检查表情包是否存在
 	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("uuid = ?", req.PackageUUID).First(&pkg).Error
+	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.PackageUUID)
+			logx.Errorf("表情包不存在: %s", req.PackageId)
 			return nil, errors.New("表情包不存在")
 		}
 		logx.Errorf("查询表情包失败: %v", err)
@@ -65,7 +64,7 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		UUID:    uuid.New().String(),
+		EmojiID: uuid.New().String(),
 		FileKey: req.FileKey,
 		Title:   req.Title,
 		Status:  1, // 默认状态为正常
@@ -81,7 +80,7 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 	// 获取当前表情包中表情的最大排序值
 	var maxSortOrder int
 	var emojiPackageEmojis []emoji_models.EmojiPackageEmoji
-	err = l.svcCtx.DB.Where("package_id = ?", pkg.Id).Find(&emojiPackageEmojis).Error
+	err = l.svcCtx.DB.Where("package_id = ?", pkg.PackageID).Find(&emojiPackageEmojis).Error
 	if err != nil {
 		logx.Errorf("查询表情包关联失败: %v", err)
 		return nil, errors.New("查询表情包关联失败")
@@ -97,11 +96,11 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 创建表情包与表情的关联
 	emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
-		UUID:      uuid.New().String(),
-		PackageID: strconv.Itoa(int(pkg.Id)),
-		EmojiID:   emoji.UUID,
-		SortOrder: maxSortOrder + 1, // 添加到末尾
-		Version:   0,                // 暂时设为0，后续需要实现版本控制
+		RelationID: uuid.New().String(),
+		PackageID:  pkg.PackageID,
+		EmojiID:    emoji.EmojiID,
+		SortOrder:  maxSortOrder + 1, // 添加到末尾
+		Version:    0,                // 暂时设为0，后续需要实现版本控制
 	}
 
 	err = l.svcCtx.DB.Create(&emojiPackageEmoji).Error
@@ -111,6 +110,6 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 	}
 
 	return &types.AddEmojiToPackageRes{
-		UUID: emojiPackageEmoji.UUID,
+		RelationId: emojiPackageEmoji.RelationID,
 	}, nil
 }

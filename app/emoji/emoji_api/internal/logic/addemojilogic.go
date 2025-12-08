@@ -44,7 +44,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 		}
 
 		emoji = emoji_models.Emoji{
-			UUID:    uuid.New().String(),
+			EmojiID: uuid.New().String(),
 			FileKey: req.FileKey,
 			Title:   req.Title,
 			Version: emojiVersion,
@@ -59,7 +59,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	// 如果指定了表情包ID，则添加到表情包
 	if req.PackageID != "" {
 		var existPkgEmoji emoji_models.EmojiPackageEmoji
-		err = l.svcCtx.DB.Where("package_id = ? AND emoji_id = ?", req.PackageID, emoji.UUID).First(&existPkgEmoji).Error
+		err = l.svcCtx.DB.Where("package_id = ? AND emoji_id = ?", req.PackageID, emoji.EmojiID).First(&existPkgEmoji).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
@@ -72,11 +72,11 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 			}
 
 			emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
-				UUID:      uuid.New().String(),
-				PackageID: req.PackageID,
-				EmojiID:   emoji.UUID,
-				SortOrder: 0,
-				Version:   packageEmojiVersion,
+				RelationID: uuid.New().String(),
+				PackageID:  req.PackageID,
+				EmojiID:    emoji.EmojiID,
+				SortOrder:  0,
+				Version:    packageEmojiVersion,
 			}
 
 			if err := l.svcCtx.DB.Create(&emojiPackageEmoji).Error; err != nil {
@@ -95,15 +95,15 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 
 	// 添加表情并收藏
 	favoriteEmoji := emoji_models.EmojiCollectEmoji{
-		UUID:    uuid.New().String(),
-		UserID:  req.UserID,
-		EmojiID: emoji.UUID,
-		Version: collectVersion,
+		EmojiCollectID: uuid.New().String(),
+		UserID:         req.UserID,
+		EmojiID:        emoji.EmojiID,
+		Version:        collectVersion,
 	}
 
 	// 去重：同一用户对同一 emoji 已收藏则跳过创建
 	var existFavorite emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", req.UserID, emoji.UUID).First(&existFavorite).Error
+	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", req.UserID, emoji.EmojiID).First(&existFavorite).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}

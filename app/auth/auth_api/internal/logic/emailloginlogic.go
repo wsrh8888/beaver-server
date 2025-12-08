@@ -64,7 +64,7 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 	// 生成token，包含设备信息
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
 		NickName: user.NickName,
-		UserID:   user.UUID,
+		UserID:   user.UserID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
 		logx.Errorf("生成token失败: %v", err)
@@ -72,7 +72,7 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 	}
 
 	// 检查是否已有其他设备登录
-	key := fmt.Sprintf("login_%s_%s", user.UUID, deviceType)
+	key := fmt.Sprintf("login_%s_%s", user.UserID, deviceType)
 	oldLoginInfo, err := l.svcCtx.Redis.Get(key).Result()
 	if err == nil && oldLoginInfo != "" {
 		// 解析旧登录信息
@@ -105,7 +105,7 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 
 	return &types.EmailLoginRes{
 		Token:  token,
-		UserID: user.UUID,
+		UserID: user.UserID,
 	}, nil
 }
 
@@ -118,7 +118,7 @@ func (l *EmailLoginLogic) createUserByEmail(email string) (user_models.UserModel
 	user := user_models.UserModel{
 		Email:    email,
 		NickName: nickName,
-		UUID:     generateUUID(),
+		UserID:   generateUUID(),
 		// 其他字段使用默认值
 	}
 

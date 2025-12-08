@@ -20,8 +20,8 @@ func DeleteEmojiHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 参数校验
-		if req.UUID == "" {
-			response.Response(r, w, nil, errors.New("表情UUID不能为空"))
+		if req.EmojiId == "" {
+			response.Response(r, w, nil, errors.New("表情ID不能为空"))
 			return
 		}
 

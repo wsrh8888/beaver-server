@@ -30,7 +30,7 @@ func NewAddArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *A
 func (l *AddArchitectureLogic) AddArchitecture(req *types.AddArchitectureReq) (resp *types.AddArchitectureRes, err error) {
 	// 检查应用是否存在
 	var app update_models.UpdateApp
-	if err := l.svcCtx.DB.Where("uuid = ?", req.AppID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("app not found")
 		}

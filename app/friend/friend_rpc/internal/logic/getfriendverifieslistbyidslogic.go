@@ -26,14 +26,14 @@ func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *friend_rpc.GetFriendVerifiesListByIdsReq) (*friend_rpc.GetFriendVerifiesListByIdsRes, error) {
-	if len(in.Uuids) == 0 {
-		l.Errorf("验证记录UUID列表为空")
+	if len(in.VerifyIds) == 0 {
+		l.Errorf("验证记录ID列表为空")
 		return &friend_rpc.GetFriendVerifiesListByIdsRes{FriendVerifies: []*friend_rpc.FriendVerifyListById{}}, nil
 	}
 
-	// 查询指定UUID列表中的好友验证信息
+	// 查询指定ID列表中的好友验证信息
 	var friendVerifies []friend_models.FriendVerifyModel
-	query := l.svcCtx.DB.Where("uuid IN (?)", in.Uuids)
+	query := l.svcCtx.DB.Where("verify_id IN (?)", in.VerifyIds)
 
 	// 增量同步：只返回版本号大于since的记录
 	if in.Since > 0 {
@@ -42,7 +42,7 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *friend_
 
 	err := query.Find(&friendVerifies).Error
 	if err != nil {
-		l.Errorf("查询好友验证信息失败: uuids=%v, since=%d, error=%v", in.Uuids, in.Since, err)
+		l.Errorf("查询好友验证信息失败: ids=%v, since=%d, error=%v", in.VerifyIds, in.Since, err)
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *friend_
 	var friendVerifiesList []*friend_rpc.FriendVerifyListById
 	for _, verify := range friendVerifies {
 		friendVerifiesList = append(friendVerifiesList, &friend_rpc.FriendVerifyListById{
-			Uuid:       verify.UUID,
+			VerifyId:   verify.VerifyID,
 			SendUserId: verify.SendUserID,
 			RevUserId:  verify.RevUserID,
 			SendStatus: int32(verify.SendStatus),

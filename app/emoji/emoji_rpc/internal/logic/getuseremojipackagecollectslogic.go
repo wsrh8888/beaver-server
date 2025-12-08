@@ -47,8 +47,8 @@ func (l *GetUserEmojiPackageCollectsLogic) GetUserEmojiPackageCollects(in *emoji
 	var packageCollectVersions []*emoji_rpc.EmojiPackageCollectVersionItem
 	for _, pkgCollect := range packageCollects {
 		packageCollectVersions = append(packageCollectVersions, &emoji_rpc.EmojiPackageCollectVersionItem{
-			Uuid:    pkgCollect.UUID,
-			Version: pkgCollect.Version,
+			PackageCollectId: pkgCollect.PackageCollectID,
+			Version:          pkgCollect.Version,
 		})
 	}
 

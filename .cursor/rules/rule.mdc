@@ -18,3 +18,7 @@ go+go-zero
 ### logic 规范
 - logic里是写一些业务逻辑相关的， 比如数据库操作、第三方接口调用等
 
+### 命名规范
+- .api 文件：使用 驼峰命名（CamelCase），与现代 API 设计和前端接口一致。
+- .rpc 文件：使用 下划线命名（snake_case），符合传统 RPC 和 Protobuf 的命名习惯。
+- 数据库表名使用 下划线命名（snake_case），符合传统数据库表的命名习惯。

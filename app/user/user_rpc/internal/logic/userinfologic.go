@@ -28,7 +28,7 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRes, error) {
 	var user user_models.UserModel
 
-	err := l.svcCtx.DB.Take(&user, "uuid = ?", in.UserID).Error
+	err := l.svcCtx.DB.Take(&user, "user_id = ?", in.UserID).Error
 
 	if err != nil {
 		logx.Errorf("查询用户失败: %s", err.Error())
@@ -37,7 +37,7 @@ func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRe
 
 	return &user_rpc.UserInfoRes{
 		UserInfo: &user_rpc.UserInfo{
-			UserId:   user.UUID,
+			UserId:   user.UserID,
 			NickName: user.NickName,
 			Avatar:   user.Avatar,
 			Version:  user.Version,

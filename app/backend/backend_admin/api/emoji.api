@@ -15,7 +15,7 @@ type (
 		Total int64              `json:"total"`
 	}
 	GetEmojiListItem {
-		UUID       string `json:"uuid"`
+		EmojiId    string `json:"emojiId"`
 		FileKey    string `json:"fileKey"`
 		Title      string `json:"title"`
 		AuthorID   string `json:"authorId"`
@@ -32,14 +32,14 @@ type (
 		AuthorID string `header:"Beaver-User-Id"`
 	}
 	CreateEmojiRes {
-		UUID string `json:"uuid"`
+		EmojiId string `json:"emojiId"`
 	}
 )
 
 // 更新表情图片
 type (
 	UpdateEmojiReq {
-		UUID    string  `path:"uuid"`
+		EmojiId string  `path:"emojiId"`
 		FileKey *string `json:"fileKey,optional"`
 		Title   *string `json:"title,optional"`
 	}
@@ -49,7 +49,7 @@ type (
 // 删除表情图片
 type (
 	DeleteEmojiReq {
-		UUID string `path:"uuid"`
+		EmojiId string `path:"emojiId"`
 	}
 	DeleteEmojiRes  {}
 )
@@ -71,7 +71,7 @@ type (
 		Total int64                     `json:"total"`
 	}
 	GetEmojiPackageListItem {
-		UUID        string `json:"uuid"`
+		PackageId   string `json:"packageId"`
 		Title       string `json:"title"`
 		CoverFile   string `json:"coverFile"`
 		UserID      string `json:"userId"`
@@ -93,14 +93,14 @@ type (
 		Type        string  `json:"type"`
 	}
 	CreateEmojiPackageRes {
-		UUID string `json:"uuid"`
+		PackageId string `json:"packageId"`
 	}
 )
 
 // 更新表情包集合
 type (
 	UpdateEmojiPackageReq {
-		UUID        string  `json:"uuid"`
+		PackageId   string  `json:"packageId"`
 		Title       *string `json:"title,optional"`
 		CoverFile   *string `json:"coverFile,optional"`
 		Description *string `json:"description,optional"`
@@ -113,7 +113,7 @@ type (
 // 删除表情包集合
 type (
 	DeleteEmojiPackageReq {
-		UUID string `json:"uuid"`
+		PackageId string `json:"packageId"`
 	}
 	DeleteEmojiPackageRes  {}
 )
@@ -121,7 +121,7 @@ type (
 // 获取表情包内的表情图片列表
 type (
 	GetEmojiPackageEmojisReq {
-		PackageUUID string `form:"packageUuid"`
+		PackageId string `form:"packageId"`
 		Page        int    `form:"page,default=1"`
 		PageSize    int    `form:"pageSize,default=50"`
 	}
@@ -130,7 +130,7 @@ type (
 		Total int64                       `json:"total"`
 	}
 	GetEmojiPackageEmojisItem {
-		UUID       string `json:"uuid"`
+		EmojiId    string `json:"emojiId"`
 		FileKey    string `json:"fileKey"`
 		Title      string `json:"title"`
 		AuthorID   string `json:"authorId"`
@@ -142,21 +142,21 @@ type (
 // 向表情包集合中添加表情图片
 type (
 	AddEmojiToPackageReq {
-		PackageUUID string `json:"packageUuid"`
+		PackageId string `json:"packageId"`
 		FileKey     string `json:"fileKey"`
 		Title       string `json:"title"`
 		AuthorID    string `header:"Beaver-User-Id"`
 	}
 	AddEmojiToPackageRes {
-		UUID string `json:"uuid"`
+		RelationId string `json:"relationId"`
 	}
 )
 
 // 从表情包集合中移除表情图片
 type (
 	RemoveEmojiFromPackageReq {
-		PackageUUID string `json:"packageUuid"`
-		EmojiUUID   string `json:"emojiUuid"`
+		PackageId string `json:"packageId"`
+		EmojiId   string `json:"emojiId"`
 	}
 	RemoveEmojiFromPackageRes  {}
 )
@@ -176,9 +176,9 @@ type (
 		Total int64                     `json:"total"`
 	}
 	GetEmojiCollectListItem {
-		UUID         string `json:"uuid"`
+		CollectId    string `json:"collectId"`
 		UserID       string `json:"userId"`
-		EmojiUUID    string `json:"emojiUuid"`
+		EmojiId      string `json:"emojiId"`
 		EmojiTitle   string `json:"emojiTitle"`
 		EmojiFileKey string `json:"emojiFileKey"`
 		CreateTime   string `json:"createTime"`
@@ -200,11 +200,11 @@ service backend {
 
 	@doc "更新表情图片"
 	@handler updateEmoji
-	put /admin/emoji/:uuid (UpdateEmojiReq) returns (UpdateEmojiRes)
+	put /admin/emoji/:emojiId (UpdateEmojiReq) returns (UpdateEmojiRes)
 
 	@doc "删除表情图片"
 	@handler deleteEmoji
-	delete /admin/emoji/:uuid (DeleteEmojiReq) returns (DeleteEmojiRes)
+	delete /admin/emoji/:emojiId (DeleteEmojiReq) returns (DeleteEmojiRes)
 
 	@doc "获取表情包集合列表"
 	@handler getEmojiPackageList

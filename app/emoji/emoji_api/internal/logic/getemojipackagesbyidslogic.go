@@ -33,11 +33,11 @@ func (l *GetEmojiPackagesByIdsLogic) GetEmojiPackagesByIds(req *types.GetEmojiPa
 		}, nil
 	}
 
-	// 根据UUID列表查询表情包详情
+	// 根据ID列表查询表情包详情
 	var packages []emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("uuid IN ? AND status = ?", req.Ids, 1).Find(&packages).Error
+	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", req.Ids, 1).Find(&packages).Error
 	if err != nil {
-		l.Errorf("查询表情包详情失败: uuids=%v, error=%v", req.Ids, err)
+		l.Errorf("查询表情包详情失败: ids=%v, error=%v", req.Ids, err)
 		return nil, err
 	}
 
@@ -48,11 +48,10 @@ func (l *GetEmojiPackagesByIdsLogic) GetEmojiPackagesByIds(req *types.GetEmojiPa
 	for _, pkg := range packages {
 		// 查询收藏数
 		var collectCount int64
-		l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).Where("package_id = ?", pkg.UUID).Count(&collectCount)
+		l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).Where("package_id = ?", pkg.PackageID).Count(&collectCount)
 
 		packageItems = append(packageItems, types.EmojiPackageDetailItem{
-			PackageID:    pkg.UUID,
-			UUID:         pkg.UUID,
+			PackageID:    pkg.PackageID,
 			Title:        pkg.Title,
 			CoverFile:    pkg.CoverFile,
 			UserID:       pkg.UserID,

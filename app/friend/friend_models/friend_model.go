@@ -12,7 +12,7 @@ import (
  */
 type FriendModel struct {
 	models.Model
-	UUID           string `gorm:"size:64;unique;index"`
+	FriendID       string `gorm:"column:friend_id;size:64;uniqueIndex" json:"friendId"`
 	FriendshipID   string `gorm:"size:64;unique;index" json:"friendshipId"` // 好友关系唯一ID (min_user_id_max_user_id)
 	SendUserID     string `gorm:"size:64;index" json:"sendUserId"`          // 发起验证方的 UserID
 	RevUserID      string `gorm:"size:64;index" json:"revUserId"`           // 接收验证方的 UserID
@@ -68,10 +68,7 @@ func MigrateFriendshipIDs(db *gorm.DB) error {
 
 func (f *FriendModel) IsFriend(db *gorm.DB, A, B string) bool {
 	err := db.Take(&f, "((send_user_id = ? and rev_user_id = ?) or (send_user_id = ? and rev_user_id = ?) ) and is_deleted = ?", A, B, B, A, false).Error
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 /**

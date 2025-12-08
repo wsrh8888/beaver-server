@@ -31,7 +31,7 @@ func NewGetMomentDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (resp *types.GetMomentDetailRes, err error) {
 	// 获取动态信息
 	var moment moment_models.MomentModel
-	if err := l.svcCtx.DB.Where("uuid = ? AND is_deleted = false", req.MomentID).First(&moment).Error; err != nil {
+	if err := l.svcCtx.DB.Where("moment_id = ? AND is_deleted = false", req.MomentID).First(&moment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("moment not found")
 		}
@@ -99,7 +99,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 		}
 		var parentIDs []string
 		for _, c := range topComments {
-			parentIDs = append(parentIDs, c.UUID)
+			parentIDs = append(parentIDs, c.CommentID)
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
 			Where("parent_id IN (?) AND is_deleted = false", parentIDs).
@@ -117,7 +117,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 	if len(topComments) > 0 {
 		var parentIDs []string
 		for _, c := range topComments {
-			parentIDs = append(parentIDs, c.UUID)
+			parentIDs = append(parentIDs, c.CommentID)
 		}
 		var children []moment_models.MomentCommentModel
 		l.svcCtx.DB.Where("parent_id IN (?) AND is_deleted = false", parentIDs).
@@ -198,7 +198,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 
 		// 子评论预览
 		var childInfos []types.GetMomentDetailCommentInfo
-		for _, ch := range childMap[comment.UUID] {
+		for _, ch := range childMap[comment.CommentID] {
 			chUser := userInfoMap[ch.UserID]
 			chName := ""
 			chAvatar := ""
@@ -211,12 +211,12 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 			replyName := ""
 			if ch.ReplyToCommentID != "" {
 				// 尝试从子列表或父评论获取
-				if ch.ReplyToCommentID == comment.UUID {
+				if ch.ReplyToCommentID == comment.CommentID {
 					replyName = userName
 				} else {
 					// 在当前 childMap 里查找
-					for _, other := range childMap[comment.UUID] {
-						if other.UUID == ch.ReplyToCommentID {
+					for _, other := range childMap[comment.CommentID] {
+						if other.CommentID == ch.ReplyToCommentID {
 							if u := userInfoMap[other.UserID]; u != nil {
 								replyName = u.NickName
 							}
@@ -227,7 +227,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 			}
 
 			childInfos = append(childInfos, types.GetMomentDetailCommentInfo{
-				Id:               ch.UUID,
+				Id:               ch.CommentID,
 				UserID:           ch.UserID,
 				UserName:         chName,
 				Avatar:           chAvatar,
@@ -242,7 +242,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 		}
 
 		commentInfos = append(commentInfos, types.GetMomentDetailCommentInfo{
-			Id:               comment.UUID,
+			Id:               comment.CommentID,
 			UserID:           comment.UserID,
 			UserName:         userName,
 			Avatar:           avatar,
@@ -250,7 +250,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 			ParentId:         "", // 顶层
 			ReplyToCommentId: "",
 			ReplyToUserName:  "",
-			ChildCount:       childCountMap[comment.UUID],
+			ChildCount:       childCountMap[comment.CommentID],
 			Children:         childInfos,
 			CreatedAt:        comment.CreatedAt.String(),
 		})
@@ -268,7 +268,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 		}
 
 		likeInfos = append(likeInfos, types.GetMomentDetailLikeInfo{
-			Id:        like.UUID,
+			Id:        like.LikeID,
 			UserID:    like.UserID,
 			UserName:  userName,
 			Avatar:    avatar,
@@ -278,7 +278,7 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 
 	// 构建响应
 	resp = &types.GetMomentDetailRes{
-		Id:           moment.UUID,
+		Id:           moment.MomentID,
 		UserID:       moment.UserID,
 		UserName:     userInfo.NickName,
 		Avatar:       userInfo.Avatar,

@@ -57,24 +57,24 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		}, nil
 	}
 
-	// 3. 获取所有收藏的表情包UUID
-	packageUUIDs := make([]string, len(packageCollects))
+	// 3. 获取所有收藏的表情包ID
+	packageIDs := make([]string, len(packageCollects))
 	for i, collect := range packageCollects {
-		packageUUIDs[i] = collect.PackageID
+		packageIDs[i] = collect.PackageID
 	}
 
 	// 4. 查询表情包详情
 	var packages []emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("uuid IN ? AND status = ?", packageUUIDs, 1).Find(&packages).Error
+	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", packageIDs, 1).Find(&packages).Error
 	if err != nil {
 		logx.Errorf("查询表情包详情失败: %v", err)
 		return nil, status.Error(codes.Internal, "查询表情包详情失败")
 	}
 
-	// 创建表情包UUID到对象的映射
+	// 创建表情包ID到对象的映射
 	packageMap := make(map[string]emoji_models.EmojiPackage)
 	for _, p := range packages {
-		packageMap[p.UUID] = p
+		packageMap[p.PackageID] = p
 	}
 
 	// 5. 获取每个表情包的表情数量
@@ -85,7 +85,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageEmoji{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ?", packageUUIDs).
+		Where("package_id IN ?", packageIDs).
 		Group("package_id").
 		Find(&emojiCountsData).Error
 	if err != nil {
@@ -104,7 +104,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 	}
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
 		Select("package_id, count(*) as count").
-		Where("package_id IN ?", packageUUIDs).
+		Where("package_id IN ?", packageIDs).
 		Group("package_id").
 		Find(&collectCountsData).Error
 	if err != nil {
@@ -127,7 +127,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		}
 
 		packageItems = append(packageItems, types.EmojiPackageItem{
-			PackageID:    package_.UUID,
+			PackageID:    package_.PackageID,
 			Title:        package_.Title,
 			CoverFile:    package_.CoverFile,
 			Description:  package_.Description,

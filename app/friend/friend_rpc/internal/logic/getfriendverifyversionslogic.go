@@ -46,8 +46,8 @@ func (l *GetFriendVerifyVersionsLogic) GetFriendVerifyVersions(in *friend_rpc.Ge
 	var friendVerifyVersions []*friend_rpc.GetFriendVerifyVersionsRes_FriendVerifyVersion
 	for _, verify := range friendVerifies {
 		friendVerifyVersions = append(friendVerifyVersions, &friend_rpc.GetFriendVerifyVersionsRes_FriendVerifyVersion{
-			Uuid:    verify.UUID,
-			Version: verify.Version,
+			VerifyId: verify.VerifyID,
+			Version:  verify.Version,
 		})
 	}
 

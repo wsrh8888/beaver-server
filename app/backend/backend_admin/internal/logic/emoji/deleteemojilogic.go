@@ -30,10 +30,10 @@ func NewDeleteEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 func (l *DeleteEmojiLogic) DeleteEmoji(req *types.DeleteEmojiReq) (resp *types.DeleteEmojiRes, err error) {
 	// 检查表情是否存在
 	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid = ?", req.UUID).First(&emoji).Error
+	err = l.svcCtx.DB.Where("emoji_id = ?", req.EmojiId).First(&emoji).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.UUID)
+			logx.Errorf("表情不存在: %s", req.EmojiId)
 			return nil, errors.New("表情不存在")
 		}
 		logx.Errorf("查询表情失败: %v", err)

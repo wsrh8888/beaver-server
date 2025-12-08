@@ -30,14 +30,14 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 
 	// 直接从数据库查询，避免RPC调用自身服务
 	var user user_models.UserModel
-	err = l.svcCtx.DB.Take(&user, "uuid = ?", req.UserID).Error
+	err = l.svcCtx.DB.Take(&user, "user_id = ?", req.UserID).Error
 	if err != nil {
 		fmt.Printf("[ERROR] 查询用户失败, UserID: %v, error: %v\n", req.UserID, err)
 		return nil, err
 	}
 
 	resp = &types.UserInfoRes{
-		UserID:   user.UUID,
+		UserID:   user.UserID,
 		NickName: user.NickName,
 		Avatar:   user.Avatar,
 		Abstract: user.Abstract,

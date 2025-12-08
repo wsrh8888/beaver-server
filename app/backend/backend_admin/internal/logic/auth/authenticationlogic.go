@@ -43,7 +43,7 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 
 	// 验证管理员用户状态
 	var adminUser backend_models.AdminUser
-	err = l.svcCtx.DB.Take(&adminUser, "uuid = ? AND status = ?", claims.UserID, 1).Error
+	err = l.svcCtx.DB.Take(&adminUser, "user_id = ? AND status = ?", claims.UserID, 1).Error
 	if err != nil {
 		err = errors.New("管理员用户不存在或已被禁用")
 		return

@@ -33,7 +33,7 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 	}
 
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&user_models.UserModel{}).Where("uuid IN ?", in.UserIdList)
+	query := l.svcCtx.DB.Model(&user_models.UserModel{}).Where("user_id IN ?", in.UserIdList)
 
 	// 如果提供了时间戳，则只返回该时间之后更新的用户
 	if in.SinceTimestamp > 0 {
@@ -53,8 +53,8 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 	}
 
 	for _, user := range userList {
-		resp.UserInfo[user.UUID] = &user_rpc.UserInfo{
-			UserId:   user.UUID, // 保持向后兼容
+		resp.UserInfo[user.UserID] = &user_rpc.UserInfo{
+			UserId:   user.UserID, // 保持向后兼容
 			NickName: user.NickName,
 			Avatar:   user.Avatar,
 			Version:  user.Version,

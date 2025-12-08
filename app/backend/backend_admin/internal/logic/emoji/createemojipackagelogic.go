@@ -41,7 +41,7 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 
 	// 创建表情包
 	pkg := emoji_models.EmojiPackage{
-		UUID:        uuid.New().String(),
+		PackageID:   uuid.New().String(),
 		Title:       req.Title,
 		UserID:      req.UserID,
 		Description: req.Description,
@@ -61,6 +61,6 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 	}
 
 	return &types.CreateEmojiPackageRes{
-		UUID: pkg.UUID,
+		PackageId: pkg.PackageID,
 	}, nil
 }

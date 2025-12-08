@@ -30,10 +30,10 @@ func NewUpdateEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 func (l *UpdateEmojiPackageLogic) UpdateEmojiPackage(req *types.UpdateEmojiPackageReq) (resp *types.UpdateEmojiPackageRes, err error) {
 	// 检查表情包是否存在
 	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("uuid = ?", req.UUID).First(&pkg).Error
+	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.UUID)
+			logx.Errorf("表情包不存在: %s", req.PackageId)
 			return nil, errors.New("表情包不存在")
 		}
 		logx.Errorf("查询表情包失败: %v", err)
@@ -47,7 +47,7 @@ func (l *UpdateEmojiPackageLogic) UpdateEmojiPackage(req *types.UpdateEmojiPacka
 		if *req.Title != pkg.Title {
 			var count int64
 			err = l.svcCtx.DB.Model(&emoji_models.EmojiPackage{}).
-				Where("title = ? AND user_id = ? AND uuid != ?", *req.Title, pkg.UserID, req.UUID).
+				Where("title = ? AND user_id = ? AND package_id != ?", *req.Title, pkg.UserID, req.PackageId).
 				Count(&count).Error
 			if err != nil {
 				logx.Errorf("检查表情包名称失败: %v", err)

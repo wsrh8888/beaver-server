@@ -16,7 +16,7 @@ type GetFriendVerifiesListByIdsLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 批量获取好友验证数据（通过UUID）
+// 批量获取好友验证数据（通过ID）
 func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendVerifiesListByIdsLogic {
 	return &GetFriendVerifiesListByIdsLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,17 +26,17 @@ func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(req *types.GetFriendVerifiesListByIdsReq) (resp *types.GetFriendVerifiesListByIdsRes, err error) {
-	if len(req.Uuids) == 0 {
+	if len(req.Ids) == 0 {
 		return &types.GetFriendVerifiesListByIdsRes{
 			FriendVerifies: []types.FriendVerifyById{},
 		}, nil
 	}
 
-	// 查询指定UUID列表中的好友验证信息
+	// 查询指定ID列表中的好友验证信息
 	var friendVerifies []friend_models.FriendVerifyModel
-	err = l.svcCtx.DB.Where("uuid IN (?)", req.Uuids).Find(&friendVerifies).Error
+	err = l.svcCtx.DB.Where("verify_id IN (?)", req.Ids).Find(&friendVerifies).Error
 	if err != nil {
-		l.Errorf("查询好友验证信息失败: uuids=%v, error=%v", req.Uuids, err)
+		l.Errorf("查询好友验证信息失败: ids=%v, error=%v", req.Ids, err)
 		return nil, err
 	}
 
@@ -46,7 +46,7 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(req *types.
 	var friendVerifiesList []types.FriendVerifyById
 	for _, verify := range friendVerifies {
 		friendVerifiesList = append(friendVerifiesList, types.FriendVerifyById{
-			UUID:       verify.UUID,
+			VerifyID:   verify.VerifyID,
 			SendUserID: verify.SendUserID,
 			RevUserID:  verify.RevUserID,
 			SendStatus: int32(verify.SendStatus),

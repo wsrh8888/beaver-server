@@ -1,0 +1,82 @@
+syntax = "proto3";
+package notification_rpc;
+
+option go_package = "./notification_rpc";
+
+// 仅用于同步（datasync 调用）：三张表的 uuid/version 摘要
+
+// 业务侧投递通知事件（好友申请、点赞等）
+message PushEventReq {
+  string event_type = 1;        // 必填：friend_request/moment_like/moment_comment/group_join/...
+  string category = 2;          // 必填：social/moment/group/system
+  string from_user_id = 3;      // 触发方
+  string target_id = 4;         // 目标对象ID（如动态ID、群ID、用户ID）
+  string target_type = 5;       // 目标类型：moment/group/user/other
+  string payload_json = 6;      // 扩展数据JSON（前端可渲染）
+  repeated string to_user_ids = 7; // 接收人列表
+  string dedup_hash = 8;        // 可选，幂等/合并用
+}
+
+message PushEventRes {
+  string event_id = 1;  // 生成的事件ID
+  int64 version = 2;    // 事件版本（全局序列）
+}
+
+// 表1：通知事件版本摘要（NotificationEvent）
+message EventVersion {
+  string event_id = 1;
+  int64 version = 2;
+}
+
+message GetEventVersionsReq {
+  int64 since_version = 1; // > since_version
+  int32 limit = 2;         // 可选分页
+}
+
+message GetEventVersionsRes {
+  repeated EventVersion event_versions = 1;
+  int64 max_version = 2; // 返回集中最大版本，便于下次同步
+}
+
+// 表2：收件箱版本摘要（NotificationInbox，按用户）
+message InboxVersion {
+  string event_id = 1;
+  int64 version = 2;
+}
+
+message GetInboxVersionsReq {
+  string user_id = 1;
+  int64 since_version = 2; // > since_version
+  int32 limit = 3;         // 可选分页
+}
+
+message GetInboxVersionsRes {
+  repeated InboxVersion inbox_versions = 1;
+  int64 max_version = 2;
+}
+
+// 表3：已读游标版本摘要（NotificationReadCursor，按用户+分类）
+message ReadCursorVersion {
+  string category = 1;
+  int64 version = 2;
+}
+
+message GetReadCursorVersionsReq {
+  string user_id = 1;
+  int64 since_version = 2; // > since_version
+}
+
+message GetReadCursorVersionsRes {
+  repeated ReadCursorVersion cursor_versions = 1;
+  int64 max_version = 2;
+}
+
+service notification {
+  rpc PushEvent(PushEventReq) returns (PushEventRes);                                   // 业务推事件
+  rpc GetEventVersions(GetEventVersionsReq) returns (GetEventVersionsRes);               // 表1：事件版本
+  rpc GetInboxVersions(GetInboxVersionsReq) returns (GetInboxVersionsRes);               // 表2：收件箱版本
+  rpc GetReadCursorVersions(GetReadCursorVersionsReq) returns (GetReadCursorVersionsRes); // 表3：游标版本
+}
+
+// goctl rpc protoc notification_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+

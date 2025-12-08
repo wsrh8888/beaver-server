@@ -30,10 +30,10 @@ func NewRemoveEmojiFromPackageLogic(ctx context.Context, svcCtx *svc.ServiceCont
 func (l *RemoveEmojiFromPackageLogic) RemoveEmojiFromPackage(req *types.RemoveEmojiFromPackageReq) (resp *types.RemoveEmojiFromPackageRes, err error) {
 	// 检查表情包是否存在
 	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("uuid = ?", req.PackageUUID).First(&pkg).Error
+	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.PackageUUID)
+			logx.Errorf("表情包不存在: %s", req.PackageId)
 			return nil, errors.New("表情包不存在")
 		}
 		logx.Errorf("查询表情包失败: %v", err)
@@ -42,10 +42,10 @@ func (l *RemoveEmojiFromPackageLogic) RemoveEmojiFromPackage(req *types.RemoveEm
 
 	// 检查表情是否存在
 	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid = ?", req.EmojiUUID).First(&emoji).Error
+	err = l.svcCtx.DB.Where("emoji_id = ?", req.EmojiId).First(&emoji).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.EmojiUUID)
+			logx.Errorf("表情不存在: %s", req.EmojiId)
 			return nil, errors.New("表情不存在")
 		}
 		logx.Errorf("查询表情失败: %v", err)
@@ -54,10 +54,10 @@ func (l *RemoveEmojiFromPackageLogic) RemoveEmojiFromPackage(req *types.RemoveEm
 
 	// 检查表情是否在表情包中
 	var emojiPackageEmoji emoji_models.EmojiPackageEmoji
-	err = l.svcCtx.DB.Where("package_id = ? AND emoji_id = ?", pkg.Id, emoji.Id).First(&emojiPackageEmoji).Error
+	err = l.svcCtx.DB.Where("package_id = ? AND emoji_id = ?", pkg.PackageID, emoji.EmojiID).First(&emojiPackageEmoji).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不在该表情包中: %s", req.EmojiUUID)
+			logx.Errorf("表情不在该表情包中: %s", req.EmojiId)
 			return nil, errors.New("表情不在该表情包中")
 		}
 		logx.Errorf("查询表情包关联失败: %v", err)

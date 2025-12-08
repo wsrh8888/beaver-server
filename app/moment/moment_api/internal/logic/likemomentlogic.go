@@ -33,7 +33,7 @@ func (l *LikeMomentLogic) LikeMoment(req *types.LikeMomentReq) (resp *types.Like
 	if req.Status {
 		// 点赞操作
 		like = moment_models.MomentLikeModel{
-			UUID:     uuid.New().String(),
+			LikeID:   uuid.New().String(),
 			MomentID: req.MomentID,
 			UserID:   req.UserID,
 		}

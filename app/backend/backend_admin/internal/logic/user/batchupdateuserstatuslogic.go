@@ -38,7 +38,7 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 
 	// 批量更新用户状态
 	err = l.svcCtx.DB.Model(&user_models.UserModel{}).
-		Where("uuid IN ?", req.Ids).
+		Where("user_id IN ?", req.Ids).
 		Update("status", int8(req.Status)).Error
 
 	if err != nil {

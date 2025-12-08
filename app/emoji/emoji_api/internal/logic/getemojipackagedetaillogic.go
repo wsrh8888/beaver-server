@@ -30,7 +30,7 @@ func NewGetEmojiPackageDetailLogic(ctx context.Context, svcCtx *svc.ServiceConte
 func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPackageDetailReq) (*types.GetEmojiPackageDetailRes, error) {
 	// 1. 获取表情包信息
 	var emojiPackage emoji_models.EmojiPackage
-	err := l.svcCtx.DB.Where("uuid = ?", req.PackageID).First(&emojiPackage).Error
+	err := l.svcCtx.DB.Where("package_id = ?", req.PackageID).First(&emojiPackage).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, status.Error(codes.NotFound, "表情包不存在")
@@ -58,7 +58,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 	// 没有找到表情，返回空列表
 	if len(emojiPackageEmojis) == 0 {
 		return &types.GetEmojiPackageDetailRes{
-			PackageID:    emojiPackage.UUID,
+			PackageID:    emojiPackage.PackageID,
 			Title:        emojiPackage.Title,
 			CoverFile:    emojiPackage.CoverFile,
 			Description:  emojiPackage.Description,
@@ -71,24 +71,24 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 		}, nil
 	}
 
-	// 获取所有表情UUID
-	emojiUUIDs := make([]string, len(emojiPackageEmojis))
+	// 获取所有表情ID
+	emojiIDs := make([]string, len(emojiPackageEmojis))
 	for i, emojiPackageEmoji := range emojiPackageEmojis {
-		emojiUUIDs[i] = emojiPackageEmoji.EmojiID
+		emojiIDs[i] = emojiPackageEmoji.EmojiID
 	}
 
 	// 查询表情详情
 	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("uuid IN ?", emojiUUIDs).Find(&emojis).Error
+	err = l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&emojis).Error
 	if err != nil {
 		logx.Errorf("查询表情详情失败: %v", err)
 		return nil, status.Error(codes.Internal, "获取表情详情失败")
 	}
 
-	// 创建表情UUID到表情的映射，方便后续使用
+	// 创建表情ID到表情的映射，方便后续使用
 	emojiMap := make(map[string]emoji_models.Emoji)
 	for _, emoji := range emojis {
-		emojiMap[emoji.UUID] = emoji
+		emojiMap[emoji.EmojiID] = emoji
 	}
 
 	// 4. 获取收藏状态
@@ -112,7 +112,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 
 	// 7. 构建返回数据
 	emojiItems := make([]types.EmojiItem, 0, len(emojiPackageEmojis))
-	packageUUID := emojiPackage.UUID
+	packageID := emojiPackage.PackageID
 
 	// 按照关联表中的顺序构建响应
 	for _, emojiPackageEmoji := range emojiPackageEmojis {
@@ -122,15 +122,15 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 		}
 
 		emojiItems = append(emojiItems, types.EmojiItem{
-			EmojiID:   emoji.UUID,
+			EmojiID:   emoji.EmojiID,
 			FileKey:   emoji.FileKey, // 使用FileKey字段
 			Title:     emoji.Title,
-			PackageID: &packageUUID,
+			PackageID: &packageID,
 		})
 	}
 
 	return &types.GetEmojiPackageDetailRes{
-		PackageID:    emojiPackage.UUID,
+		PackageID:    emojiPackage.PackageID,
 		Title:        emojiPackage.Title,
 		CoverFile:    emojiPackage.CoverFile,
 		Description:  emojiPackage.Description,

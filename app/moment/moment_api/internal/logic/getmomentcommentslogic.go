@@ -42,7 +42,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 	// 如果带 parentId，查询该顶层评论下的子回复（专用二级评论接口）
 	if req.ParentId != "" {
 		var parent moment_models.MomentCommentModel
-		if err := l.svcCtx.DB.Where("uuid = ? AND is_deleted = false", req.ParentId).First(&parent).Error; err != nil {
+		if err := l.svcCtx.DB.Where("comment_id = ? AND is_deleted = false", req.ParentId).First(&parent).Error; err != nil {
 			return nil, err
 		}
 		if parent.MomentID != req.MomentID {
@@ -83,9 +83,9 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 		replyTargetMap := make(map[string]moment_models.MomentCommentModel)
 		if len(replyIds) > 0 {
 			var replyTargets []moment_models.MomentCommentModel
-			l.svcCtx.DB.Where("uuid IN (?)", replyIds).Find(&replyTargets)
+			l.svcCtx.DB.Where("comment_id IN (?)", replyIds).Find(&replyTargets)
 			for _, rt := range replyTargets {
-				replyTargetMap[rt.UUID] = rt
+				replyTargetMap[rt.CommentID] = rt
 				userIds[rt.UserID] = true
 			}
 		}
@@ -126,7 +126,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 			}
 
 			commentInfos = append(commentInfos, types.GetMomentCommentsInfo{
-				Id:               c.UUID,
+				Id:               c.CommentID,
 				UserID:           c.UserID,
 				UserName:         userName,
 				Avatar:           avatar,
@@ -160,7 +160,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 	var topComments []moment_models.MomentCommentModel
 	if err := l.svcCtx.DB.Where(baseTopWhere, req.MomentID).
 		Order("created_at DESC").
-		Order("uuid DESC").
+		Order("comment_id DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&topComments).Error; err != nil {
@@ -178,7 +178,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 		}
 		var parentIDs []string
 		for _, c := range topComments {
-			parentIDs = append(parentIDs, c.UUID)
+			parentIDs = append(parentIDs, c.CommentID)
 		}
 		l.svcCtx.DB.Model(&moment_models.MomentCommentModel{}).
 			Where("parent_id IN (?) AND is_deleted = false", parentIDs).
@@ -225,9 +225,9 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 			replyIdList = append(replyIdList, id)
 		}
 		var replyTargets []moment_models.MomentCommentModel
-		l.svcCtx.DB.Where("uuid IN (?)", replyIdList).Find(&replyTargets)
+		l.svcCtx.DB.Where("comment_id IN (?)", replyIdList).Find(&replyTargets)
 		for _, rt := range replyTargets {
-			replyTargetMap[rt.UUID] = rt
+			replyTargetMap[rt.CommentID] = rt
 			userIds[rt.UserID] = true
 		}
 	}
@@ -261,7 +261,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 		}
 
 		var childInfos []types.GetMomentCommentsInfo
-		for _, ch := range childMap[comment.UUID] {
+		for _, ch := range childMap[comment.CommentID] {
 			chUser := userInfoMap[ch.UserID]
 			chName := ""
 			chAvatar := ""
@@ -278,7 +278,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 				}
 			}
 			childInfos = append(childInfos, types.GetMomentCommentsInfo{
-				Id:               ch.UUID,
+				Id:               ch.CommentID,
 				UserID:           ch.UserID,
 				UserName:         chName,
 				Avatar:           chAvatar,
@@ -296,7 +296,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 		}
 
 		commentInfos = append(commentInfos, types.GetMomentCommentsInfo{
-			Id:               comment.UUID,
+			Id:               comment.CommentID,
 			UserID:           comment.UserID,
 			UserName:         userName,
 			Avatar:           avatar,
@@ -304,7 +304,7 @@ func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsR
 			ParentId:         comment.ParentID,
 			ReplyToCommentId: comment.ReplyToCommentID,
 			ReplyToUserName:  "",
-			ChildCount:       childCountMap[comment.UUID],
+			ChildCount:       childCountMap[comment.CommentID],
 			Children:         childInfos,
 			CreatedAt:        comment.CreatedAt.String(),
 		})

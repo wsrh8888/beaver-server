@@ -44,8 +44,8 @@ func (l *GetSyncFriendVerifiesLogic) GetSyncFriendVerifies(req *types.GetSyncFri
 	if verifyResp.FriendVerifyVersions != nil {
 		for _, verify := range verifyResp.FriendVerifyVersions {
 			friendVerifyVersions = append(friendVerifyVersions, types.FriendVerifyVersionItem{
-				UUID:    verify.Uuid,
-				Version: verify.Version,
+				VerifyId: verify.VerifyId,
+				Version:  verify.Version,
 			})
 		}
 	}
