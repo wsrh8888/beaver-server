@@ -1,7 +1,6 @@
 syntax = "v1"
 
 // 通知同步 API：按 ID 拉取三张表的数据明细
-
 // 表1：通知事件（NotificationEvent）
 type (
 	getEventsByIdsReq {
@@ -15,12 +14,12 @@ type (
 		FromUserID string `json:"fromUserId,optional"`
 		TargetID   string `json:"targetId,optional"`
 		TargetType string `json:"targetType"`
-		Payload    string `json:"payload"`              // JSON 字符串
+		Payload    string `json:"payload"` // JSON 字符串
 		Priority   int32  `json:"priority"`
 		Status     int32  `json:"status"`
 		DedupHash  string `json:"dedupHash"`
-		CreatedAt  int64  `json:"createdAt"`            // ms
-		UpdatedAt  int64  `json:"updatedAt"`            // ms
+		CreatedAt  int64  `json:"createdAt"` // ms
+		UpdatedAt  int64  `json:"updatedAt"` // ms
 	}
 	getEventsByIdsRes {
 		Events []eventItem `json:"events"`
@@ -31,7 +30,7 @@ type (
 type (
 	getInboxByIdsReq {
 		UserID   string   `header:"Beaver-User-Id"` // 当前用户ID
-		EventIDs []string `json:"eventIds"`         // 必填
+		EventIDs []string `json:"eventIds"` // 必填
 	}
 	inboxItem {
 		EventID   string `json:"eventId"`
@@ -39,7 +38,7 @@ type (
 		Category  string `json:"category"`
 		Version   int64  `json:"version"`
 		IsRead    bool   `json:"isRead"`
-		ReadAt    int64  `json:"readAt"`  // ms，未读为0
+		ReadAt    int64  `json:"readAt"` // ms，未读为0
 		Status    int32  `json:"status"`
 		Silent    bool   `json:"silent"`
 		CreatedAt int64  `json:"createdAt"` // ms
@@ -53,15 +52,15 @@ type (
 // 表3：已读游标（NotificationReadCursor）
 type (
 	getReadCursorsReq {
-		UserID     string   `header:"Beaver-User-Id"`      // 当前用户ID
-		Categories []string `json:"categories,optional"`   // 可选过滤分类，不传则返回该用户全部
+		UserID     string   `header:"Beaver-User-Id"` // 当前用户ID
+		Categories []string `json:"categories,optional"` // 可选过滤分类，不传则返回该用户全部
 	}
 	readCursorItem {
 		Category     string `json:"category"`
 		Version      int64  `json:"version"`
 		LastEventID  string `json:"lastEventId"`
 		LastReadTime int64  `json:"lastReadTime"` // ms
-		LastReadAt   int64  `json:"lastReadAt"`   // ms
+		LastReadAt   int64  `json:"lastReadAt"` // ms
 	}
 	getReadCursorsRes {
 		Cursors []readCursorItem `json:"cursors"`
@@ -70,14 +69,13 @@ type (
 
 // 用户已读：按事件ID或按分类游标批量已读
 type (
-	markReadReq {
-		UserID     string   `header:"Beaver-User-Id"`           // 当前用户ID
-		EventIDs   []string `json:"eventIds,optional"`          // 批量事件ID（可选）
-		Category   string   `json:"category,optional"`          // 分类，用于光标清零
-		ToEventID  string   `json:"toEventId,optional"`         // 读到此事件ID（与分类配合使用）
-		ToVersion  int64    `json:"toVersion,optional"`         // 读到此版本（与分类配合使用）
+	markReadByCursorReq {
+		UserID    string `header:"Beaver-User-Id"` // 当前用户ID
+		Category  string `json:"category"` // 分类，会话级/业务分类
+		ToEventID string `json:"toEventId"` // 读到此事件ID
+		ToVersion int64  `json:"toVersion"` // 读到此版本
 	}
-	markReadRes {
+	markReadByCursorRes {
 		Affected int64 `json:"affected"` // 成功标记的条数
 	}
 )
@@ -85,15 +83,17 @@ type (
 // 未读汇总：各分类红点 + 总未读
 type (
 	getUnreadSummaryReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID
+		UserID     string   `header:"Beaver-User-Id"` // 当前用户ID
+		Categories []string `json:"categories,optional"` // 可选分类过滤
+		Scenes     []string `json:"scenes,optional"` // 可选场景过滤（如消息/系统/群公告等）
 	}
 	categoryUnreadItem {
 		Category string `json:"category"`
 		Unread   int64  `json:"unread"`
 	}
 	getUnreadSummaryRes {
-		Total    int64                 `json:"total"`
-		ByCat    []categoryUnreadItem  `json:"byCat"`
+		Total int64                `json:"total"`
+		ByCat []categoryUnreadItem `json:"byCat"`
 	}
 )
 
@@ -110,9 +110,9 @@ service notification {
 	@handler getReadCursors
 	post /api/notification/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
 
-	@doc "标记已读（按事件ID或按分类光标）"
-	@handler markRead
-	post /api/notification/markRead (markReadReq) returns (markReadRes)
+	@doc "按分类游标标记已读（高效批量，首版主路径）"
+	@handler markReadByCursor
+	post /api/notification/markReadByCursor (markReadByCursorReq) returns (markReadByCursorRes)
 
 	@doc "获取未读汇总（红点）"
 	@handler getUnreadSummary
@@ -120,4 +120,3 @@ service notification {
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template
-

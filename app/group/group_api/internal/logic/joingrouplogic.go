@@ -2,13 +2,17 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/notification/notification_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -90,6 +94,46 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				Version: requestVersion,
 			}
 			l.Infof("用户申请加入群组，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
+
+			// 异步投递通知给群主/管理员
+			go func() {
+				ctx := context.Background()
+
+				var admins []group_models.GroupMemberModel
+				if err := l.svcCtx.DB.WithContext(ctx).
+					Where("group_id = ? AND status = 1 AND role IN (?)", req.GroupID, []int{1, 2}).
+					Find(&admins).Error; err != nil {
+					l.Errorf("获取群管理员/群主失败(用于通知): %v", err)
+					return
+				}
+				var toUsers []string
+				for _, m := range admins {
+					toUsers = append(toUsers, m.UserID)
+				}
+				if len(toUsers) == 0 {
+					return
+				}
+				payload, _ := json.Marshal(map[string]interface{}{
+					"requestId": requestVersion,
+					"groupId":   req.GroupID,
+					"userId":    req.UserID,
+					"message":   req.Message,
+				})
+				_, err = l.svcCtx.NotifyRpc.PushEvent(ctx, &notification_rpc.PushEventReq{
+					EventType:   notification_models.EventTypeGroupJoinRequest,
+					Category:    notification_models.CategoryGroup,
+					FromUserId:  req.UserID,
+					TargetId:    req.GroupID,
+					TargetType:  notification_models.TargetTypeGroup,
+					PayloadJson: string(payload),
+					ToUserIds:   toUsers,
+					DedupHash:   fmt.Sprintf("%s_%d", req.GroupID, requestVersion),
+				})
+				if err != nil {
+					l.Errorf("投递入群申请通知失败: %v", err)
+				}
+			}()
+
 			return resp, nil
 		} else {
 			// 获取该群成员的版本号（按群独立递增）

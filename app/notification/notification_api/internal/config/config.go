@@ -7,16 +7,14 @@ import (
 
 type Config struct {
 	rest.RestConf
-	Etcd  string
 	Mysql struct {
 		DataSource string
 	}
+	Etcd  string
 	Redis struct {
 		Addr     string
 		Password string
 		Db       int
 	}
-	UserRpc         zrpc.RpcClientConf
-	FriendRpc       zrpc.RpcClientConf
-	NotificationRpc zrpc.RpcClientConf
+	UserRpc zrpc.RpcClientConf
 }

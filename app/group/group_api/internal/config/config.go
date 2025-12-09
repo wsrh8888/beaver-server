@@ -15,8 +15,9 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	Etcd     string
-	UserRpc  zrpc.RpcClientConf
-	GroupRpc zrpc.RpcClientConf
-	ChatRpc  zrpc.RpcClientConf
+	Etcd            string
+	UserRpc         zrpc.RpcClientConf
+	GroupRpc        zrpc.RpcClientConf
+	ChatRpc         zrpc.RpcClientConf
+	NotificationRpc zrpc.RpcClientConf
 }

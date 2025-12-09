@@ -2,12 +2,15 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
+	"beaver/app/notification/notification_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/google/uuid"
@@ -92,6 +95,13 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 		return nil, err
 	}
 
+	// 查询动态作者
+	var moment moment_models.MomentModel
+	if err := l.svcCtx.DB.Where("moment_id = ? AND is_deleted = false", req.MomentID).
+		First(&moment).Error; err != nil {
+		return nil, errors.New("moment not found")
+	}
+
 	// 查询用户信息用于展示昵称和头像
 	var userName, avatar string
 	replyToUserName := ""
@@ -128,6 +138,52 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 		ReplyToUserName:  replyToUserName,
 		CreatedAt:        comment.CreatedAt.String(),
 	}
+
+	// 异步投递通知：评论 + 回复
+	go func() {
+		payloadMap := map[string]interface{}{
+			"momentId":         req.MomentID,
+			"commentId":        comment.CommentID,
+			"content":          comment.Content,
+			"parentId":         comment.ParentID,
+			"replyToCommentId": comment.ReplyToCommentID,
+		}
+		payload, _ := json.Marshal(payloadMap)
+
+		// 通知动态作者（评论）
+		if moment.UserID != "" && moment.UserID != req.UserID {
+			_, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, &notification_rpc.PushEventReq{
+				EventType:   notification_models.EventTypeMomentComment,
+				Category:    notification_models.CategoryMoment,
+				FromUserId:  req.UserID,
+				TargetId:    req.MomentID,
+				TargetType:  notification_models.TargetTypeMoment,
+				PayloadJson: string(payload),
+				ToUserIds:   []string{moment.UserID},
+				DedupHash:   comment.CommentID,
+			})
+			if err != nil {
+				l.Logger.Errorf("推送评论通知失败: %v", err)
+			}
+		}
+
+		// 通知被回复的评论作者（回复）
+		if targetComment.UserID != "" && targetComment.UserID != req.UserID && targetComment.UserID != moment.UserID {
+			_, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, &notification_rpc.PushEventReq{
+				EventType:   notification_models.EventTypeMomentCommentReply,
+				Category:    notification_models.CategoryMoment,
+				FromUserId:  req.UserID,
+				TargetId:    targetComment.CommentID,
+				TargetType:  notification_models.TargetTypeMomentComment,
+				PayloadJson: string(payload),
+				ToUserIds:   []string{targetComment.UserID},
+				DedupHash:   comment.CommentID + "_reply",
+			})
+			if err != nil {
+				l.Logger.Errorf("推送回复通知失败: %v", err)
+			}
+		}
+	}()
 
 	return resp, nil
 }

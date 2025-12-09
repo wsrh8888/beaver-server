@@ -2,12 +2,16 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/notification/notification_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -87,6 +91,38 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 						},
 					},
 				}, "")
+			}
+		}
+
+		// 投递通知给群主/管理员
+		var toUsers []string
+		var admins []group_models.GroupMemberModel
+		if err := l.svcCtx.DB.WithContext(ctx).
+			Where("group_id = ? AND status = 1 AND role IN (?)", req.GroupID, []int{1, 2}).
+			Find(&admins).Error; err != nil {
+			l.Logger.Errorf("获取群管理员/群主失败(用于退出通知): %v", err)
+		} else {
+			for _, m := range admins {
+				toUsers = append(toUsers, m.UserID)
+			}
+		}
+		if len(toUsers) > 0 {
+			payload, _ := json.Marshal(map[string]interface{}{
+				"groupId": req.GroupID,
+				"userId":  req.UserID,
+			})
+			_, err = l.svcCtx.NotifyRpc.PushEvent(ctx, &notification_rpc.PushEventReq{
+				EventType:   notification_models.EventTypeGroupLeft,
+				Category:    notification_models.CategoryGroup,
+				FromUserId:  req.UserID,
+				TargetId:    req.GroupID,
+				TargetType:  notification_models.TargetTypeGroup,
+				PayloadJson: string(payload),
+				ToUserIds:   toUsers,
+				DedupHash:   fmt.Sprintf("%s_left_%s", req.GroupID, req.UserID),
+			})
+			if err != nil {
+				l.Logger.Errorf("投递退出群通知失败: %v", err)
 			}
 		}
 	}()

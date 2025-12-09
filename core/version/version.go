@@ -2,6 +2,8 @@ package core
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -26,8 +28,8 @@ func NewVersionGenerator(redisClient *redis.Client, db *gorm.DB) *VersionGenerat
 // GetNextVersion 获取下一个版本号（Redis缓存 + MySQL主存储）
 // 参数:
 //   - table: 表名或业务标识符 (必传)
-//   - field: 字段名，为空时表示全局版本
-//   - value: 字段值，为空时表示全局版本
+//   - field: 条件字段名；为空表示全局版本。若包含下划线，表示多字段组合键（如 user_id_category），会按下划线拆分为多列。
+//   - value: 条件字段值；为空表示全局版本。若 field 为组合键，value 也需用下划线分段（如 uid_cat），与 field 拆分后的段数一致。
 //
 // 返回: 版本号，失败时返回-1
 func (vg *VersionGenerator) GetNextVersion(table string, field string, value string) int64 {
@@ -95,10 +97,36 @@ func (vg *VersionGenerator) getMaxVersionFromMySQL(table string, field string, v
 	var err error
 
 	if isConditional {
-		// 条件版本：查询特定条件下的最大版本号
-		query := fmt.Sprintf("SELECT COALESCE(MAX(version), 0) FROM %s WHERE %s = ?", tableName, field)
-		err = vg.db.Raw(query, value).Scan(&maxVersion).Error
-		logx.Infof("查询条件版本历史: table=%s, field=%s, value=%s, maxVersion=%d", table, field, value, maxVersion)
+		if strings.Contains(field, "_") && strings.Contains(value, "_") {
+			fields := strings.Split(field, "_")
+			values := strings.Split(value, "_")
+			if len(fields) != len(values) {
+				logx.Errorf("组合键字段和值数量不匹配: fields=%v, values=%v", fields, values)
+				return -1
+			}
+			conds := make([]string, 0, len(fields))
+			args := make([]interface{}, 0, len(fields))
+			for i := range fields {
+				if !isSafeIdentifier(fields[i]) {
+					logx.Errorf("非法字段名: %s", fields[i])
+					return -1
+				}
+				conds = append(conds, fmt.Sprintf("%s = ?", fields[i]))
+				args = append(args, values[i])
+			}
+			query := fmt.Sprintf("SELECT COALESCE(MAX(version), 0) FROM %s WHERE %s", tableName, strings.Join(conds, " AND "))
+			err = vg.db.Raw(query, args...).Scan(&maxVersion).Error
+			logx.Infof("查询组合条件版本历史: table=%s, fields=%v, values=%v, maxVersion=%d", table, fields, values, maxVersion)
+		} else {
+			// 单字段条件
+			if !isSafeIdentifier(field) {
+				logx.Errorf("非法字段名: %s", field)
+				return -1
+			}
+			query := fmt.Sprintf("SELECT COALESCE(MAX(version), 0) FROM %s WHERE %s = ?", tableName, field)
+			err = vg.db.Raw(query, value).Scan(&maxVersion).Error
+			logx.Infof("查询条件版本历史: table=%s, field=%s, value=%s, maxVersion=%d", table, field, value, maxVersion)
+		}
 	} else {
 		// 全局版本：查询表中的最大版本号
 		err = vg.db.Raw("SELECT COALESCE(MAX(version), 0) FROM " + tableName).Scan(&maxVersion).Error
@@ -128,7 +156,19 @@ func (vg *VersionGenerator) getTableName(dataType string) string {
 		return "group_member_change_log_models"
 	case "chats":
 		return "chat_models"
+	case "notification_events":
+		return "notification_events"
+	case "notification_inboxes":
+		return "notification_inboxes"
+	case "notification_read_cursors":
+		return "notification_read_cursors"
 	default:
 		return dataType
 	}
+}
+
+var safeIdentRegexp = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
+
+func isSafeIdentifier(s string) bool {
+	return safeIdentRegexp.MatchString(s)
 }
