@@ -142,7 +142,7 @@ type (
 // 批量获取好友验证数据（通过ID）
 type (
 	GetFriendVerifiesListByIdsReq {
-		Ids []string `json:"ids"` // 验证记录ID列表
+		VerifyIds []string `json:"verifyIds"` // 验证记录ID列表
 	}
 	GetFriendVerifiesListByIdsRes {
 		FriendVerifies []FriendVerifyById `json:"friendVerifies"` // 好友验证列表
@@ -196,11 +196,11 @@ service friend {
 
 	@doc "批量获取好友数据（通过ID）"
 	@handler getFriendsListByUuids
-post /api/friend/getFriendsListByUuids (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
+	post /api/friend/getFriendsListByUuids (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
 
 	@doc "批量获取好友验证数据（通过ID）"
 	@handler getFriendVerifiesListByIds
-post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
+	post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
 }
 
 // goctl api go -api friend_api.api -dir . --home ../../../template

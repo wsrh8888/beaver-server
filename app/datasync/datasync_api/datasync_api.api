@@ -193,6 +193,58 @@ type (
 	}
 )
 
+// 同步通知事件版本（NotificationEvent）
+type (
+	GetSyncNotificationEventsReq {
+		SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
+		Limit        int32 `json:"limit,optional"` // 可选分页大小
+	}
+	GetSyncNotificationEventsRes {
+		EventVersions   []NotificationEventVersionItem `json:"eventVersions"` // 事件版本摘要
+		MaxVersion      int64                          `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	NotificationEventVersionItem {
+		EventID string `json:"eventId"` // 事件ID
+		Version int64  `json:"version"` // 事件版本
+	}
+)
+
+// 同步通知收件箱版本（NotificationInbox，按用户）
+type (
+	GetSyncNotificationInboxesReq {
+		UserID       string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
+		Limit        int32  `json:"limit,optional"` // 可选分页大小
+	}
+	GetSyncNotificationInboxesRes {
+		InboxVersions  []NotificationInboxVersionItem `json:"inboxVersions"` // 收件箱版本摘要
+		MaxVersion     int64                          `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                         `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	NotificationInboxVersionItem {
+		EventID string `json:"eventId"` // 事件ID
+		Version int64  `json:"version"` // 收件箱版本
+	}
+)
+
+// 同步通知已读游标版本（NotificationReadCursor，按用户+分类）
+type (
+	GetSyncNotificationReadCursorsReq {
+		UserID       string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
+	}
+	GetSyncNotificationReadCursorsRes {
+		CursorVersions []NotificationReadCursorVersionItem `json:"cursorVersions"` // 已读游标版本摘要
+		MaxVersion     int64                               `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                              `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	NotificationReadCursorVersionItem {
+		Category string `json:"category"` // 分类
+		Version  int64  `json:"version"` // 游标版本
+	}
+)
+
 // 同步服务
 service datasync {
 	@doc "获取所有需要更新的用户版本信息"
@@ -238,6 +290,18 @@ service datasync {
 	@doc "获取表情基础数据版本信息"
 	@handler getSyncEmojis
 	post /api/datasync/getSyncEmojis (GetSyncEmojisReq) returns (GetSyncEmojisRes)
+
+	@doc "获取通知事件版本摘要"
+	@handler getSyncNotificationEvents
+	post /api/datasync/getSyncNotificationEvents (GetSyncNotificationEventsReq) returns (GetSyncNotificationEventsRes)
+
+	@doc "获取通知收件箱版本摘要"
+	@handler getSyncNotificationInboxes
+	post /api/datasync/getSyncNotificationInboxes (GetSyncNotificationInboxesReq) returns (GetSyncNotificationInboxesRes)
+
+	@doc "获取通知已读游标版本摘要"
+	@handler getSyncNotificationReadCursors
+	post /api/datasync/getSyncNotificationReadCursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template
