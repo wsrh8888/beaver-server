@@ -67,7 +67,7 @@ type FriendVerifyById struct {
 }
 
 type GetFriendVerifiesListByIdsReq struct {
-	Ids []string `json:"ids"` // 验证记录ID列表
+	VerifyIds []string `json:"verifyIds"` // 验证记录ID列表
 }
 
 type GetFriendVerifiesListByIdsRes struct {

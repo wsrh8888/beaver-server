@@ -92,15 +92,34 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			}
 		}()
 
+		payload, _ := json.Marshal(map[string]interface{}{
+			"verifyId": verifyModel.VerifyID,
+			"message":  verifyModel.Message,
+			"source":   verifyModel.Source,
+		})
+		_, err := l.svcCtx.NotifyRpc.PushEvent(context.Background(), &notification_rpc.PushEventReq{
+			EventType:   notification_models.EventTypeFriendRequest,
+			Category:    notification_models.CategorySocial,
+			FromUserId:  req.UserID,
+			TargetId:    verifyModel.VerifyID,
+			TargetType:  notification_models.TargetTypeUser,
+			PayloadJson: string(payload),
+			ToUserIds:   []string{req.FriendID},
+			DedupHash:   verifyModel.VerifyID,
+		})
+		if err != nil {
+			l.Logger.Errorf("投递好友申请通知失败: %v", err)
+		}
+
 		// 获取发送者和接收者的用户信息
-		senderInfo, senderErr := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		senderInfo, senderErr := l.svcCtx.UserRpc.UserInfo(context.Background(), &user_rpc.UserInfoReq{
 			UserID: req.UserID,
 		})
 		if senderErr != nil {
 			l.Logger.Errorf("获取发送者用户信息失败: %v", senderErr)
 		}
 
-		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(context.Background(), &user_rpc.UserInfoReq{
 			UserID: req.FriendID,
 		})
 		if receiverErr != nil {
@@ -163,28 +182,6 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	resp = &types.AddFriendRes{
 		Version: nextVersion,
 	}
-
-	// 投递通知：好友申请（给接收方）
-	go func() {
-		payload, _ := json.Marshal(map[string]interface{}{
-			"verifyId": verifyModel.VerifyID,
-			"message":  verifyModel.Message,
-			"source":   verifyModel.Source,
-		})
-		_, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, &notification_rpc.PushEventReq{
-			EventType:   notification_models.EventTypeFriendRequest,
-			Category:    notification_models.CategorySocial,
-			FromUserId:  req.UserID,
-			TargetId:    verifyModel.VerifyID,
-			TargetType:  notification_models.TargetTypeUser,
-			PayloadJson: string(payload),
-			ToUserIds:   []string{req.FriendID},
-			DedupHash:   verifyModel.VerifyID,
-		})
-		if err != nil {
-			l.Logger.Errorf("投递好友申请通知失败: %v", err)
-		}
-	}()
 
 	return resp, nil
 }

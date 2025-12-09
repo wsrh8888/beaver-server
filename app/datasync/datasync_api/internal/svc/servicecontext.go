@@ -6,6 +6,7 @@ import (
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/core"
 	"time"
@@ -24,6 +25,7 @@ type ServiceContext struct {
 	UserRpc   user_rpc.UserClient
 	ChatRpc   chat_rpc.ChatClient
 	EmojiRpc  emoji_rpc.EmojiClient
+	NotificationRpc notification_rpc.NotificationClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -38,5 +40,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:   user_rpc.NewUserClient(zrpc.MustNewClient(c.UserRpc, zrpc.WithTimeout(time.Duration(c.UserRpc.Timeout)*time.Millisecond)).Conn()),
 		ChatRpc:   chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:  emoji_rpc.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
+		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
 	}
 }

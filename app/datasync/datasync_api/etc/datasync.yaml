@@ -48,3 +48,9 @@ EmojiRpc:
     - 127.0.0.1:2379
     Key: emojirpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
+NotificationRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: notificationrpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒

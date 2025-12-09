@@ -1,16 +1,21 @@
 Name: notificationrpc.rpc
 ListenOn: 0.0.0.0:31000
-Etcd: 127.0.0.1:2379
 Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: notificationrpc.rpc
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  # 增加超时控制，避免长时间阻塞
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local&timeout=5s&readTimeout=5s&writeTimeout=5s
 Log:
   Encoding: plain
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
+UserRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: userrpc.rpc
 RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'

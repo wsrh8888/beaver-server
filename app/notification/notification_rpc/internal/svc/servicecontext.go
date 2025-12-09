@@ -24,7 +24,7 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := core.InitGorm(c.Mysql.DataSource)
-	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	client := core.InitRedis(c.RedisConf.Addr, c.RedisConf.Password, c.RedisConf.Db)
 
 	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
 

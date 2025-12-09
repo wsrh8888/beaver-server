@@ -24,4 +24,5 @@ type Config struct {
 	MomentRpc   zrpc.RpcClientConf
 	EmojiRpc    zrpc.RpcClientConf
 	DatasyncRpc zrpc.RpcClientConf
+	NotificationRpc zrpc.RpcClientConf
 }

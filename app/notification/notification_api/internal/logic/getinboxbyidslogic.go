@@ -41,13 +41,18 @@ func (l *GetInboxByIdsLogic) GetInboxByIds(req *types.GetInboxByIdsReq) (resp *t
 	}
 
 	for _, row := range rows {
+		var readAt int64
+		if row.ReadAt != nil {
+			readAt = time.Time(*row.ReadAt).UnixMilli()
+		}
+
 		resp.Inbox = append(resp.Inbox, types.InboxItem{
 			EventID:   row.EventID,
 			EventType: row.EventType,
 			Category:  row.Category,
 			Version:   row.Version,
 			IsRead:    row.IsRead,
-			ReadAt:    time.Time(*row.ReadAt).UnixMilli(),
+			ReadAt:    readAt,
 			Status:    int32(row.Status),
 			Silent:    row.Silent,
 			CreatedAt: time.Time(row.CreatedAt).UnixMilli(),

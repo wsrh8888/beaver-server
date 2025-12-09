@@ -78,6 +78,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/datasync/getSyncGroupRequests",
 				Handler: getSyncGroupRequestsHandler(serverCtx),
 			},
+			{
+				// 获取通知事件版本摘要
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncNotificationEvents",
+				Handler: getSyncNotificationEventsHandler(serverCtx),
+			},
+			{
+				// 获取通知收件箱版本摘要
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncNotificationInboxes",
+				Handler: getSyncNotificationInboxesHandler(serverCtx),
+			},
+			{
+				// 获取通知已读游标版本摘要
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncNotificationReadCursors",
+				Handler: getSyncNotificationReadCursorsHandler(serverCtx),
+			},
 		},
 	)
 }

@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
@@ -32,6 +33,7 @@ func NewPushEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PushEve
 }
 
 func (l *PushEventLogic) PushEvent(in *notification_rpc.PushEventReq) (*notification_rpc.PushEventRes, error) {
+	fmt.Println("1111111111111111111111111111")
 	if len(in.ToUserIds) == 0 {
 		return nil, errors.New("to_user_ids 不能为空")
 	}
@@ -111,7 +113,7 @@ func (l *PushEventLogic) PushEvent(in *notification_rpc.PushEventReq) (*notifica
 		for _, uid := range toUsers {
 			ajax.SendMessageToWs(etcdAddr, wsCommandConst.NOTIFICATION, wsTypeConst.NotificationReceive, in.FromUserId, uid, payload, "")
 		}
-	}(l.svcCtx.Config.Etcd, in.ToUserIds, eventID)
+	}(l.svcCtx.Config.Etcd.Hosts[0], in.ToUserIds, eventID)
 
 	return &notification_rpc.PushEventRes{
 		EventId: eventID,
