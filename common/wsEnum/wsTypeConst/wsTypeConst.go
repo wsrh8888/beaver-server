@@ -36,3 +36,8 @@ const (
 	// --------------------------------------------------------
 	UserReceive Type = "user_receive" // 服务端->客户端 用户信息同步
 )
+
+const (
+	// 通知中心
+	NotificationReceive Type = "notification_receive" // 服务端->客户端 通知提醒
+)

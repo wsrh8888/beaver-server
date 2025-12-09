@@ -2,11 +2,14 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/notification/notification_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
@@ -157,7 +160,31 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	}()
 
 	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
-	return &types.AddFriendRes{
+	resp = &types.AddFriendRes{
 		Version: nextVersion,
-	}, nil
+	}
+
+	// 投递通知：好友申请（给接收方）
+	go func() {
+		payload, _ := json.Marshal(map[string]interface{}{
+			"verifyId": verifyModel.VerifyID,
+			"message":  verifyModel.Message,
+			"source":   verifyModel.Source,
+		})
+		_, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, &notification_rpc.PushEventReq{
+			EventType:   notification_models.EventTypeFriendRequest,
+			Category:    notification_models.CategorySocial,
+			FromUserId:  req.UserID,
+			TargetId:    verifyModel.VerifyID,
+			TargetType:  notification_models.TargetTypeUser,
+			PayloadJson: string(payload),
+			ToUserIds:   []string{req.FriendID},
+			DedupHash:   verifyModel.VerifyID,
+		})
+		if err != nil {
+			l.Logger.Errorf("投递好友申请通知失败: %v", err)
+		}
+	}()
+
+	return resp, nil
 }
