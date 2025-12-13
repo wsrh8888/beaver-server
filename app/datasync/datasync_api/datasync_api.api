@@ -228,7 +228,7 @@ type (
 	}
 )
 
-// 同步通知已读游标版本（NotificationReadCursor，按用户+分类）
+// 同步通知已读游标版本（NotificationRead，按用户+分类）
 type (
 	GetSyncNotificationReadCursorsReq {
 		UserID       string `header:"Beaver-User-Id"` // 用户ID，从请求头获取

@@ -54,6 +54,7 @@ func (l *GetInboxByIdsLogic) GetInboxByIds(req *types.GetInboxByIdsReq) (resp *t
 			IsRead:    row.IsRead,
 			ReadAt:    readAt,
 			Status:    int32(row.Status),
+			IsDeleted: row.IsDeleted,
 			Silent:    row.Silent,
 			CreatedAt: time.Time(row.CreatedAt).UnixMilli(),
 			UpdatedAt: time.Time(row.UpdatedAt).UnixMilli(),

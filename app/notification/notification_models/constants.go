@@ -39,6 +39,6 @@ const (
 	VersionScopeEventGlobal = "notification_events"
 	// NotificationInbox：按用户递增版本（per user）
 	VersionScopeInboxPerUser = "notification_inboxes"
-	// NotificationReadCursor：按用户递增版本（per user）
+	// NotificationRead：按用户递增版本（per user）
 	VersionScopeCursorPerUser = "notification_read_cursors"
 )

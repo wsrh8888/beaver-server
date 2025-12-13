@@ -35,7 +35,7 @@ func (l *GetReadCursorVersionsLogic) GetReadCursorVersions(in *notification_rpc.
 		return resp, nil
 	}
 
-	var rows []notification_models.NotificationReadCursor
+	var rows []notification_models.NotificationRead
 	query := l.svcCtx.DB.WithContext(l.ctx).
 		Where("user_id = ? AND version > ?", in.UserId, in.SinceVersion).
 		Order("version ASC")

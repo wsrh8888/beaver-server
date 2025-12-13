@@ -22,6 +22,29 @@ type EventItem struct {
 	UpdatedAt  int64  `json:"updatedAt"` // ms
 }
 
+type InboxItem struct {
+	EventID   string `json:"eventId"`
+	EventType string `json:"eventType"`
+	Category  string `json:"category"`
+	Version   int64  `json:"version"`
+	IsRead    bool   `json:"isRead"`
+	ReadAt    int64  `json:"readAt"` // ms，未读为0
+	Status    int32  `json:"status"`
+	IsDeleted bool   `json:"isDeleted"` // 用户是否删除该通知
+	Silent    bool   `json:"silent"`
+	CreatedAt int64  `json:"createdAt"` // ms
+	UpdatedAt int64  `json:"updatedAt"` // ms
+}
+
+type DeleteNotificationReq struct {
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+	EventID string `json:"eventId"`          // 通知事件ID
+}
+
+type DeleteNotificationRes struct {
+	Success bool `json:"success"`
+}
+
 type GetEventsByIdsReq struct {
 	EventIDs []string `json:"eventIds"` // 必填
 }
@@ -39,15 +62,6 @@ type GetInboxByIdsRes struct {
 	Inbox []InboxItem `json:"inbox"`
 }
 
-type GetReadCursorsReq struct {
-	UserID     string   `header:"Beaver-User-Id"`    // 当前用户ID
-	Categories []string `json:"categories,optional"` // 可选过滤分类，不传则返回该用户全部
-}
-
-type GetReadCursorsRes struct {
-	Cursors []ReadCursorItem `json:"cursors"`
-}
-
 type GetUnreadSummaryReq struct {
 	UserID     string   `header:"Beaver-User-Id"`    // 当前用户ID
 	Categories []string `json:"categories,optional"` // 可选分类过滤
@@ -55,21 +69,17 @@ type GetUnreadSummaryReq struct {
 }
 
 type GetUnreadSummaryRes struct {
-	Total int64                 `json:"total"`
-	ByCat []CategoryUnreadItem  `json:"byCat"`
+	Total int64                `json:"total"`
+	ByCat []CategoryUnreadItem `json:"byCat"`
 }
 
-type InboxItem struct {
-	EventID   string `json:"eventId"`
-	EventType string `json:"eventType"`
-	Category  string `json:"category"`
-	Version   int64  `json:"version"`
-	IsRead    bool   `json:"isRead"`
-	ReadAt    int64  `json:"readAt"` // ms，未读为0
-	Status    int32  `json:"status"`
-	Silent    bool   `json:"silent"`
-	CreatedAt int64  `json:"createdAt"` // ms
-	UpdatedAt int64  `json:"updatedAt"` // ms
+type MarkReadByCategoryReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	Category string `json:"category"`         // 分类，会话级/业务分类
+}
+
+type MarkReadByCategoryRes struct {
+	Affected int64 `json:"affected"` // 成功标记的条数
 }
 
 type MarkReadByCursorReq struct {
@@ -83,10 +93,10 @@ type MarkReadByCursorRes struct {
 	Affected int64 `json:"affected"` // 成功标记的条数
 }
 
-type ReadCursorItem struct {
-	Category     string `json:"category"`
-	Version      int64  `json:"version"`
-	LastEventID  string `json:"lastEventId"`
-	LastReadTime int64  `json:"lastReadTime"` // ms
-	LastReadAt   int64  `json:"lastReadAt"`   // ms
+type MarkReadByEventReq struct {
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+	EventID string `json:"eventId"`          // 通知事件ID
+}
+
+type MarkReadByEventRes struct {
 }

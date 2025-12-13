@@ -13,6 +13,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 按事件ID删除单个通知
+				Method:  http.MethodPost,
+				Path:    "/api/notification/deleteNotification",
+				Handler: deleteNotificationHandler(serverCtx),
+			},
+			{
 				// 按ID拉取通知事件明细
 				Method:  http.MethodPost,
 				Path:    "/api/notification/getEventsByIds",
@@ -25,22 +31,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getInboxByIdsHandler(serverCtx),
 			},
 			{
-				// 按分类拉取已读游标
-				Method:  http.MethodPost,
-				Path:    "/api/notification/getReadCursors",
-				Handler: getReadCursorsHandler(serverCtx),
-			},
-			{
 				// 获取未读汇总（红点）
 				Method:  http.MethodPost,
 				Path:    "/api/notification/getUnreadSummary",
 				Handler: getUnreadSummaryHandler(serverCtx),
 			},
 			{
-				// 按分类游标标记已读（高效批量，首版主路径）
+				// 按分类标记所有通知为已读
+				Method:  http.MethodPost,
+				Path:    "/api/notification/markReadByCategory",
+				Handler: markReadByCategoryHandler(serverCtx),
+			},
+			{
+				// 按分类游标标记已读（高效批量，高级用法）
 				Method:  http.MethodPost,
 				Path:    "/api/notification/markReadByCursor",
 				Handler: markReadByCursorHandler(serverCtx),
+			},
+			{
+				// 按事件ID标记单个通知已读
+				Method:  http.MethodPost,
+				Path:    "/api/notification/markReadByEvent",
+				Handler: markReadByEventHandler(serverCtx),
 			},
 		},
 	)

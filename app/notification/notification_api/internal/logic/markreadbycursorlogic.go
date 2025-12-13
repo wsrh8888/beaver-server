@@ -10,7 +10,6 @@ import (
 	"beaver/app/notification/notification_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type MarkReadByCursorLogic struct {
@@ -40,60 +39,26 @@ func (l *MarkReadByCursorLogic) MarkReadByCursor(req *types.MarkReadByCursorReq)
 
 	now := time.Now()
 
-	err = l.svcCtx.DB.WithContext(l.ctx).Transaction(func(tx *gorm.DB) error {
-		// 生成按用户+分类递增的光标版本（通过组合键）
-		cursorKey := req.UserID + "_" + req.Category
-		cursorVersion := l.svcCtx.VersionGen.GetNextVersion(notification_models.VersionScopeCursorPerUser, "user_category", cursorKey)
-		if cursorVersion == -1 {
-			return errors.New("生成游标版本失败")
-		}
+	// 直接更新通知为已读
+	query := l.svcCtx.DB.WithContext(l.ctx).Model(&notification_models.NotificationInbox{}).
+		Where("user_id = ? AND category = ?", req.UserID, req.Category)
 
-		query := tx.Model(&notification_models.NotificationInbox{}).
-			Where("user_id = ? AND category = ?", req.UserID, req.Category)
+	if req.ToVersion > 0 {
+		query = query.Where("version <= ?", req.ToVersion)
+	} else if req.ToEventID != "" {
+		query = query.Where("event_id = ?", req.ToEventID)
+	}
 
-		if req.ToVersion > 0 {
-			query = query.Where("version <= ?", req.ToVersion)
-		} else {
-			query = query.Where("event_id = ?", req.ToEventID)
-		}
+	update := map[string]interface{}{
+		"is_read": true,
+		"read_at": now,
+	}
 
-		update := map[string]interface{}{
-			"is_read": true,
-			"read_at": now,
-		}
+	result := query.Updates(update)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	resp.Affected = result.RowsAffected
 
-		result := query.Updates(update)
-		if result.Error != nil {
-			return result.Error
-		}
-		resp.Affected = result.RowsAffected
-
-		// upsert read cursor
-		var cursor notification_models.NotificationReadCursor
-		err := tx.Where("user_id = ? AND category = ?", req.UserID, req.Category).
-			First(&cursor).Error
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			cursor = notification_models.NotificationReadCursor{
-				UserID:       req.UserID,
-				Category:     req.Category,
-				Version:      cursorVersion,
-				LastEventID:  req.ToEventID,
-				LastReadAt:   &now,
-				LastReadTime: now.UnixMilli(),
-			}
-			return tx.Create(&cursor).Error
-		} else if err != nil {
-			return err
-		}
-
-		updateCursor := map[string]interface{}{
-			"version":        cursorVersion,
-			"last_event_id":  req.ToEventID,
-			"last_read_at":   now,
-			"last_read_time": now.UnixMilli(),
-		}
-		return tx.Model(&cursor).Updates(updateCursor).Error
-	})
-
-	return resp, err
+	return resp, nil
 }

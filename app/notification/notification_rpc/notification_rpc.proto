@@ -55,7 +55,7 @@ message GetInboxVersionsRes {
   int64 max_version = 2;
 }
 
-// 表3：已读游标版本摘要（NotificationReadCursor，按用户+分类）
+// 表3：已读游标版本摘要（NotificationRead，按用户+分类）
 message ReadCursorVersion {
   string category = 1;
   int64 version = 2;
