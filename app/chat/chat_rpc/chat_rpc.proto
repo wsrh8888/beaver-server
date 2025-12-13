@@ -193,6 +193,7 @@ message InitializeConversationReq {
   string conversationId = 1;    // 会话ID（调用方生成）
   int32 type = 2;               // 会话类型: 1=私聊 2=群聊 3=AI会话 4=客服会话
   repeated string userIds = 3;  // 参与用户ID列表
+  map<string, int64> initialReadSeqs = 4; // 用户初始已读序列号映射，可选，用于设置特定用户的初始已读状态
 }
 
 // 定义InitializeConversationRes消息

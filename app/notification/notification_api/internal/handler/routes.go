@@ -31,6 +31,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getInboxByIdsHandler(serverCtx),
 			},
 			{
+				// 按分类拉取通知已读游标
+				Method:  http.MethodPost,
+				Path:    "/api/notification/getReadCursors",
+				Handler: getReadCursorsHandler(serverCtx),
+			},
+			{
 				// 获取未读汇总（红点）
 				Method:  http.MethodPost,
 				Path:    "/api/notification/getUnreadSummary",

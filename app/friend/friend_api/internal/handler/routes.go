@@ -39,7 +39,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 批量获取好友数据（通过ID）
 				Method:  http.MethodPost,
-				Path:    "/api/friend/getFriendsListByUuids",
+				Path:    "/api/friend/getFriendsListByIds",
 				Handler: getFriendsListByUuidsHandler(serverCtx),
 			},
 			{

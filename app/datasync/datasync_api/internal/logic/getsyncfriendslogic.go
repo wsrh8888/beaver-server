@@ -44,8 +44,8 @@ func (l *GetSyncFriendsLogic) GetSyncFriends(req *types.GetSyncFriendsReq) (resp
 	if friendResp.FriendVersions != nil {
 		for _, friend := range friendResp.FriendVersions {
 			friendVersions = append(friendVersions, types.FriendVersionItem{
-				Id:      friend.Id,
-				Version: friend.Version,
+				FriendId: friend.FriendId,
+				Version:  friend.Version,
 			})
 		}
 	}

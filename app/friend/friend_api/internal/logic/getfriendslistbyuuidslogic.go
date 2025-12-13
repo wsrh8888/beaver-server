@@ -26,7 +26,7 @@ func NewGetFriendsListByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *GetFriendsListByUuidsLogic) GetFriendsListByUuids(req *types.GetFriendsListByUuidsReq) (resp *types.GetFriendsListByUuidsRes, err error) {
-	if len(req.Ids) == 0 {
+	if len(req.FriendIds) == 0 {
 		return &types.GetFriendsListByUuidsRes{
 			Friends: []types.FriendByUuid{},
 		}, nil
@@ -34,9 +34,9 @@ func (l *GetFriendsListByUuidsLogic) GetFriendsListByUuids(req *types.GetFriends
 
 	// 查询指定ID列表中的好友信息
 	var friends []friend_models.FriendModel
-	err = l.svcCtx.DB.Where("friend_id IN (?)", req.Ids).Find(&friends).Error
+	err = l.svcCtx.DB.Where("friend_id IN (?)", req.FriendIds).Find(&friends).Error
 	if err != nil {
-		l.Errorf("查询好友信息失败: ids=%v, error=%v", req.Ids, err)
+		l.Errorf("查询好友信息失败: ids=%v, error=%v", req.FriendIds, err)
 		return nil, err
 	}
 

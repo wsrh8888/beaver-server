@@ -75,7 +75,7 @@ type GetFriendVerifiesListByIdsRes struct {
 }
 
 type GetFriendsListByUuidsReq struct {
-	Ids []string `json:"ids"` // 好友记录ID列表
+	FriendIds []string `json:"friendIds"` // 好友记录ID列表
 }
 
 type GetFriendsListByUuidsRes struct {
