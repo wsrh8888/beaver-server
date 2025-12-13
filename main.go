@@ -80,7 +80,7 @@ func main() {
 			// 通知中心表
 			&notification_models.NotificationEvent{},
 			&notification_models.NotificationInbox{},
-			&notification_models.NotificationReadCursor{},
+			&notification_models.NotificationRead{},
 
 			// 后台管理相关表
 			&backend_models.AdminUser{},

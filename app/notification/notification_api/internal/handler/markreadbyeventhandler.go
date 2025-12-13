@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func getReadCursorsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func markReadByEventHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetReadCursorsReq
+		var req types.MarkReadByEventReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGetReadCursorsLogic(r.Context(), svcCtx)
-		resp, err := l.GetReadCursors(&req)
+		l := logic.NewMarkReadByEventLogic(r.Context(), svcCtx)
+		resp, err := l.MarkReadByEvent(&req)
 		response.Response(r, w, resp, err)
 	}
 }

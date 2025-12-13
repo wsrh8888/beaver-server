@@ -24,8 +24,3 @@ func CreateMomentCommentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		response.Response(r, w, resp, err)
 	}
 }
-
-
-
-
-

@@ -6,7 +6,7 @@ type (
 	getEventsByIdsReq {
 		EventIDs []string `json:"eventIds"` // 必填
 	}
-	eventItem {
+	EventItem {
 		EventID    string `json:"eventId"`
 		EventType  string `json:"eventType"`
 		Category   string `json:"category"`
@@ -22,7 +22,7 @@ type (
 		UpdatedAt  int64  `json:"updatedAt"` // ms
 	}
 	getEventsByIdsRes {
-		Events []eventItem `json:"events"`
+		Events []EventItem `json:"events"`
 	}
 )
 
@@ -32,7 +32,7 @@ type (
 		UserID   string   `header:"Beaver-User-Id"` // 当前用户ID
 		EventIDs []string `json:"eventIds"` // 必填
 	}
-	inboxItem {
+	InboxItem {
 		EventID   string `json:"eventId"`
 		EventType string `json:"eventType"`
 		Category  string `json:"category"`
@@ -40,34 +40,48 @@ type (
 		IsRead    bool   `json:"isRead"`
 		ReadAt    int64  `json:"readAt"` // ms，未读为0
 		Status    int32  `json:"status"`
+		IsDeleted bool   `json:"isDeleted"` // 用户是否删除该通知
 		Silent    bool   `json:"silent"`
 		CreatedAt int64  `json:"createdAt"` // ms
 		UpdatedAt int64  `json:"updatedAt"` // ms
 	}
 	getInboxByIdsRes {
-		Inbox []inboxItem `json:"inbox"`
+		Inbox []InboxItem `json:"inbox"`
 	}
 )
 
-// 表3：已读游标（NotificationReadCursor）
+// 用户已读：按事件ID标记单个通知已读
 type (
-	getReadCursorsReq {
-		UserID     string   `header:"Beaver-User-Id"` // 当前用户ID
-		Categories []string `json:"categories,optional"` // 可选过滤分类，不传则返回该用户全部
+	markReadByEventReq {
+		UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+		EventID string `json:"eventId"` // 通知事件ID
 	}
-	readCursorItem {
-		Category     string `json:"category"`
-		Version      int64  `json:"version"`
-		LastEventID  string `json:"lastEventId"`
-		LastReadTime int64  `json:"lastReadTime"` // ms
-		LastReadAt   int64  `json:"lastReadAt"` // ms
+	markReadByEventRes  {}
+)
+
+// 删除通知：按事件ID删除单个通知
+type (
+	deleteNotificationReq {
+		UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+		EventID string `json:"eventId"` // 通知事件ID
 	}
-	getReadCursorsRes {
-		Cursors []readCursorItem `json:"cursors"`
+	deleteNotificationRes {
+		Success bool `json:"success"`
 	}
 )
 
-// 用户已读：按事件ID或按分类游标批量已读
+// 用户已读：按分类标记所有通知为已读
+type (
+	markReadByCategoryReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		Category string `json:"category"` // 分类，会话级/业务分类
+	}
+	markReadByCategoryRes {
+		Affected int64 `json:"affected"` // 成功标记的条数
+	}
+)
+
+// 用户已读：按事件ID或按分类游标批量已读（高级用法）
 type (
 	markReadByCursorReq {
 		UserID    string `header:"Beaver-User-Id"` // 当前用户ID
@@ -87,13 +101,13 @@ type (
 		Categories []string `json:"categories,optional"` // 可选分类过滤
 		Scenes     []string `json:"scenes,optional"` // 可选场景过滤（如消息/系统/群公告等）
 	}
-	categoryUnreadItem {
+	CategoryUnreadItem {
 		Category string `json:"category"`
 		Unread   int64  `json:"unread"`
 	}
 	getUnreadSummaryRes {
 		Total int64                `json:"total"`
-		ByCat []categoryUnreadItem `json:"byCat"`
+		ByCat []CategoryUnreadItem `json:"byCat"`
 	}
 )
 
@@ -106,11 +120,19 @@ service notification {
 	@handler getInboxByIds
 	post /api/notification/getInboxByIds (getInboxByIdsReq) returns (getInboxByIdsRes)
 
-	@doc "按分类拉取已读游标"
-	@handler getReadCursors
-	post /api/notification/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
+	@doc "按事件ID标记单个通知已读"
+	@handler markReadByEvent
+	post /api/notification/markReadByEvent (markReadByEventReq) returns (markReadByEventRes)
 
-	@doc "按分类游标标记已读（高效批量，首版主路径）"
+	@doc "按事件ID删除单个通知"
+	@handler deleteNotification
+	post /api/notification/deleteNotification (deleteNotificationReq) returns (deleteNotificationRes)
+
+	@doc "按分类标记所有通知为已读"
+	@handler markReadByCategory
+	post /api/notification/markReadByCategory (markReadByCategoryReq) returns (markReadByCategoryRes)
+
+	@doc "按分类游标标记已读（高效批量，高级用法）"
 	@handler markReadByCursor
 	post /api/notification/markReadByCursor (markReadByCursorReq) returns (markReadByCursorRes)
 

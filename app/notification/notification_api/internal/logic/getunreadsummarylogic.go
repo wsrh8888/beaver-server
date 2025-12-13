@@ -48,7 +48,7 @@ func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq)
 	query := l.svcCtx.DB.WithContext(l.ctx).
 		Model(&notification_models.NotificationInbox{}).
 		Select("category, COUNT(*) as unread").
-		Where("user_id = ? AND is_read = ?", req.UserID, false).
+		Where("user_id = ? AND is_read = ? AND is_deleted = ?", req.UserID, false, false).
 		Group("category")
 
 	if len(cats) > 0 {
