@@ -120,7 +120,7 @@ type SearchValidInfoRes {
 // 批量获取好友数据（通过ID）
 type (
 	GetFriendsListByUuidsReq {
-		Ids []string `json:"ids"` // 好友记录ID列表
+		friendIds []string `json:"friendIds"` // 好友记录ID列表
 	}
 	GetFriendsListByUuidsRes {
 		Friends []FriendByUuid `json:"friends"` // 好友列表
@@ -196,7 +196,7 @@ service friend {
 
 	@doc "批量获取好友数据（通过ID）"
 	@handler getFriendsListByUuids
-	post /api/friend/getFriendsListByUuids (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
+	post /api/friend/getFriendsListByIds (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
 
 	@doc "批量获取好友验证数据（通过ID）"
 	@handler getFriendVerifiesListByIds

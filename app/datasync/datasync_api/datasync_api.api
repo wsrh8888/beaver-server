@@ -125,8 +125,8 @@ type (
 		ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	FriendVersionItem {
-		Id      string `json:"id"` // 好友关系唯一ID
-		Version int64  `json:"version"` // 好友关系版本号
+		FriendId string `json:"friendId"` // 好友ID
+		Version  int64  `json:"version"` // 好友关系版本号
 	}
 )
 
@@ -218,9 +218,9 @@ type (
 		Limit        int32  `json:"limit,optional"` // 可选分页大小
 	}
 	GetSyncNotificationInboxesRes {
-		InboxVersions  []NotificationInboxVersionItem `json:"inboxVersions"` // 收件箱版本摘要
-		MaxVersion     int64                          `json:"maxVersion"` // 本次返回的最大版本
-		ServerTimestamp int64                         `json:"serverTimestamp"` // 服务端处理时间戳
+		InboxVersions   []NotificationInboxVersionItem `json:"inboxVersions"` // 收件箱版本摘要
+		MaxVersion      int64                          `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	NotificationInboxVersionItem {
 		EventID string `json:"eventId"` // 事件ID
@@ -235,9 +235,9 @@ type (
 		SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
 	}
 	GetSyncNotificationReadCursorsRes {
-		CursorVersions []NotificationReadCursorVersionItem `json:"cursorVersions"` // 已读游标版本摘要
-		MaxVersion     int64                               `json:"maxVersion"` // 本次返回的最大版本
-		ServerTimestamp int64                              `json:"serverTimestamp"` // 服务端处理时间戳
+		CursorVersions  []NotificationReadCursorVersionItem `json:"cursorVersions"` // 已读游标版本摘要
+		MaxVersion      int64                               `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                               `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	NotificationReadCursorVersionItem {
 		Category string `json:"category"` // 分类

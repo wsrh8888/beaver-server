@@ -47,8 +47,8 @@ func (l *GetFriendVersionsLogic) GetFriendVersions(in *friend_rpc.GetFriendVersi
 	var friendVersions []*friend_rpc.GetFriendVersionsRes_FriendVersion
 	for _, friend := range friends {
 		friendVersions = append(friendVersions, &friend_rpc.GetFriendVersionsRes_FriendVersion{
-			Id:      friend.FriendID, // 使用数据库记录的ID作为唯一标识符
-			Version: friend.Version,
+			FriendId: friend.FriendID, // 使用数据库记录的ID作为唯一标识符
+			Version:  friend.Version,
 		})
 	}
 

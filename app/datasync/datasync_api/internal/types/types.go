@@ -47,8 +47,8 @@ type FriendVerifyVersionItem struct {
 }
 
 type FriendVersionItem struct {
-	Id      string `json:"id"`      // 好友关系唯一ID
-	Version int64  `json:"version"` // 好友关系版本号
+	FriendId string `json:"friendId"` // 好友ID
+	Version  int64  `json:"version"`  // 好友关系版本号
 }
 
 type GetSyncAllUsersReq struct {
@@ -165,6 +165,40 @@ type GetSyncGroupRequestsRes struct {
 	ServerTimestamp int64                      `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
+type GetSyncNotificationEventsReq struct {
+	SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
+	Limit        int32 `json:"limit,optional"`        // 可选分页大小
+}
+
+type GetSyncNotificationEventsRes struct {
+	EventVersions   []NotificationEventVersionItem `json:"eventVersions"`   // 事件版本摘要
+	MaxVersion      int64                          `json:"maxVersion"`      // 本次返回的最大版本
+	ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
+}
+
+type GetSyncNotificationInboxesReq struct {
+	UserID       string `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
+	SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
+	Limit        int32  `json:"limit,optional"`        // 可选分页大小
+}
+
+type GetSyncNotificationInboxesRes struct {
+	InboxVersions   []NotificationInboxVersionItem `json:"inboxVersions"`   // 收件箱版本摘要
+	MaxVersion      int64                          `json:"maxVersion"`      // 本次返回的最大版本
+	ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
+}
+
+type GetSyncNotificationReadCursorsReq struct {
+	UserID       string `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
+	SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
+}
+
+type GetSyncNotificationReadCursorsRes struct {
+	CursorVersions  []NotificationReadCursorVersionItem `json:"cursorVersions"`  // 已读游标版本摘要
+	MaxVersion      int64                               `json:"maxVersion"`      // 本次返回的最大版本
+	ServerTimestamp int64                               `json:"serverTimestamp"` // 服务端处理时间戳
+}
+
 type GroupInfoVersionItem struct {
 	GroupID string `json:"groupId"` // 群组ID
 	Version int64  `json:"version"` // 群资料版本
@@ -178,11 +212,6 @@ type GroupMembersVersionItem struct {
 type GroupRequestsVersionItem struct {
 	GroupID string `json:"groupId"` // 群组ID
 	Version int64  `json:"version"` // 入群申请版本
-}
-
-type UserVersionItem struct {
-	UserID  string `json:"userId"`  // 用户ID
-	Version int64  `json:"version"` // 最新版本号
 }
 
 type NotificationEventVersionItem struct {
@@ -200,36 +229,7 @@ type NotificationReadCursorVersionItem struct {
 	Version  int64  `json:"version"`  // 游标版本
 }
 
-type GetSyncNotificationEventsReq struct {
-	SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
-	Limit        int32 `json:"limit,optional"`        // 可选分页大小
-}
-
-type GetSyncNotificationEventsRes struct {
-	EventVersions   []NotificationEventVersionItem `json:"eventVersions"`   // 事件版本摘要
-	MaxVersion      int64                          `json:"maxVersion"`      // 本次返回的最大版本
-	ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
-}
-
-type GetSyncNotificationInboxesReq struct {
-	UserID       string `header:"Beaver-User-Id"`     // 用户ID，从请求头获取
-	SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
-	Limit        int32  `json:"limit,optional"`        // 可选分页大小
-}
-
-type GetSyncNotificationInboxesRes struct {
-	InboxVersions  []NotificationInboxVersionItem `json:"inboxVersions"`  // 收件箱版本摘要
-	MaxVersion     int64                          `json:"maxVersion"`     // 本次返回的最大版本
-	ServerTimestamp int64                         `json:"serverTimestamp"` // 服务端处理时间戳
-}
-
-type GetSyncNotificationReadCursorsReq struct {
-	UserID       string `header:"Beaver-User-Id"`     // 用户ID，从请求头获取
-	SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
-}
-
-type GetSyncNotificationReadCursorsRes struct {
-	CursorVersions []NotificationReadCursorVersionItem `json:"cursorVersions"` // 已读游标版本摘要
-	MaxVersion     int64                               `json:"maxVersion"`     // 本次返回的最大版本
-	ServerTimestamp int64                              `json:"serverTimestamp"` // 服务端处理时间戳
+type UserVersionItem struct {
+	UserID  string `json:"userId"`  // 用户ID
+	Version int64  `json:"version"` // 最新版本号
 }

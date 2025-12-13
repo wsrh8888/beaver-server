@@ -117,8 +117,8 @@ func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.Send
 	}
 
 	// 批量更新该会话所有用户的会话关系（恢复隐藏状态，更新版本号）
-	// 注意：通知消息没有发送者，所以不处理已读序列号
-	allUserConversationUpdates, err := chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, "", 0)
+	// 通知消息自动标记为已读，传入特殊标识符"*"表示所有用户都标记为已读
+	allUserConversationUpdates, err := chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, "*", nextSeq)
 	if err != nil {
 		l.Logger.Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
 		// 不影响消息发送成功，只记录错误

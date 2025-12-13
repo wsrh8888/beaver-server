@@ -39,32 +39,47 @@ func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq)
 		cats = req.Scenes
 	}
 
-	type aggRow struct {
-		Category string
-		Unread   int64
-	}
-	var rows []aggRow
-
-	query := l.svcCtx.DB.WithContext(l.ctx).
-		Model(&notification_models.NotificationInbox{}).
-		Select("category, COUNT(*) as unread").
-		Where("user_id = ? AND is_read = ? AND is_deleted = ?", req.UserID, false, false).
-		Group("category")
-
-	if len(cats) > 0 {
-		query = query.Having("category IN ?", cats)
+	// 如果没有指定分类，默认查询所有分类
+	if len(cats) == 0 {
+		cats = []string{notification_models.CategorySocial, notification_models.CategoryGroup, notification_models.CategoryMoment}
 	}
 
-	if err = query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
+	// 为每个分类计算结合游标时间的未读数
+	for _, category := range cats {
+		// 获取该分类的游标时间
+		var cursor notification_models.NotificationRead
+		err := l.svcCtx.DB.WithContext(l.ctx).
+			Where("user_id = ? AND category = ?", req.UserID, category).
+			First(&cursor).Error
 
-	for _, row := range rows {
-		resp.ByCat = append(resp.ByCat, types.CategoryUnreadItem{
-			Category: row.Category,
-			Unread:   row.Unread,
-		})
-		resp.Total += row.Unread
+		var lastReadAt int64
+		if err == nil && cursor.LastReadAt != nil {
+			lastReadAt = cursor.LastReadAt.Unix()
+		}
+
+		// 计算未读数：created_at > last_read_at 且 is_read = false
+		var unreadCount int64
+		query := l.svcCtx.DB.WithContext(l.ctx).
+			Model(&notification_models.NotificationInbox{}).
+			Where("user_id = ? AND category = ? AND is_read = ? AND is_deleted = ?",
+				req.UserID, category, false, false)
+
+		// 如果有游标时间，只统计游标时间之后的未读通知
+		if lastReadAt > 0 {
+			query = query.Where("created_at > ?", lastReadAt)
+		}
+
+		if err = query.Count(&unreadCount).Error; err != nil && err != gorm.ErrRecordNotFound {
+			return nil, err
+		}
+
+		if unreadCount > 0 {
+			resp.ByCat = append(resp.ByCat, types.CategoryUnreadItem{
+				Category: category,
+				Unread:   unreadCount,
+			})
+			resp.Total += unreadCount
+		}
 	}
 
 	return resp, nil

@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"beaver/app/notification/notification_api/internal/svc"
@@ -32,40 +33,44 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 
 	now := time.Now()
 
-	// 更新该用户该分类下所有未读通知为已读
-	result := l.svcCtx.DB.Model(&notification_models.NotificationInbox{}).
-		Where("user_id = ? AND category = ? AND is_read = ? AND is_deleted = ?",
-			userId, category, false, false).
+	// 生成游标版本号（按用户+分类分区）
+	cursorVersion := l.svcCtx.VersionGen.GetNextVersion(notification_models.VersionScopeCursorPerUser, "user_id", userId)
+	if cursorVersion == -1 {
+		l.Logger.Errorf("生成游标版本号失败")
+		return nil, errors.New("生成版本号失败")
+	}
+
+	// 更新或创建游标记录：优先更新，不存在则创建
+	result := l.svcCtx.DB.Model(&notification_models.NotificationRead{}).
+		Where("user_id = ? AND category = ?", userId, category).
 		Updates(map[string]interface{}{
-			"is_read": true,
-			"read_at": now,
+			"version":      cursorVersion,
+			"last_read_at": now,
+			"updated_at":   now,
 		})
 
 	if result.Error != nil {
-		l.Logger.Errorf("标记分类已读失败: %v", result.Error)
+		l.Logger.Errorf("更新游标失败: %v", result.Error)
 		return nil, result.Error
 	}
 
-	// 更新游标记录
-	cursor := &notification_models.NotificationRead{
-		UserID:     userId,
-		Category:   category,
-		Version:    1, // 简化版本管理
-		LastReadAt: &now,
+	// 如果没有更新到记录，说明记录不存在，需要创建
+	if result.RowsAffected == 0 {
+		cursor := &notification_models.NotificationRead{
+			UserID:     userId,
+			Category:   category,
+			Version:    cursorVersion,
+			LastReadAt: &now,
+		}
+
+		err = l.svcCtx.DB.Create(cursor).Error
+		if err != nil {
+			l.Logger.Errorf("创建游标失败: %v", err)
+			return nil, err
+		}
 	}
 
-	err = l.svcCtx.DB.Where("user_id = ? AND category = ?", userId, category).
-		Assign(cursor).
-		FirstOrCreate(cursor).Error
-
-	if err != nil {
-		l.Logger.Errorf("更新游标失败: %v", err)
-		return nil, err
-	}
-
-	resp = &types.MarkReadByCategoryRes{
-		Affected: result.RowsAffected,
-	}
+	resp = &types.MarkReadByCategoryRes{}
 
 	return resp, nil
 }

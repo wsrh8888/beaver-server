@@ -42,7 +42,8 @@ message GetFriendVersionsReq {
 
 message GetFriendVersionsRes {
   message FriendVersion {
-    string id = 1; // 唯一ID
+    string friendId = 1;
+
     int64 version = 2; // 版本号
   }
   repeated FriendVersion friendVersions = 1; // 好友版本列表

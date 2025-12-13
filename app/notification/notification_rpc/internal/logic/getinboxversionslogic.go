@@ -37,11 +37,13 @@ func (l *GetInboxVersionsLogic) GetInboxVersions(in *notification_rpc.GetInboxVe
 
 	var rows []notification_models.NotificationInbox
 	query := l.svcCtx.DB.WithContext(l.ctx).
-		Where("user_id = ? AND version > ?", in.UserId, in.SinceVersion).
+		Where("user_id = ? AND version >= ? AND is_deleted = ?", in.UserId, in.SinceVersion, false).
 		Order("version ASC")
 	if in.Limit > 0 {
 		query = query.Limit(int(in.Limit))
 	}
+
+	l.Infof("查询通知收件箱: userId=%s, sinceVersion=%d", in.UserId, in.SinceVersion)
 
 	if err := query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err

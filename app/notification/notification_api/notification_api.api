@@ -50,6 +50,22 @@ type (
 	}
 )
 
+// 表3：已读游标（NotificationRead）
+type (
+	getReadCursorsReq {
+		UserID     string   `header:"Beaver-User-Id"` // 当前用户ID
+		Categories []string `json:"categories,optional"` // 可选过滤分类，不传则返回该用户全部
+	}
+	ReadCursorItem {
+		Category   string `json:"category"`
+		Version    int64  `json:"version"`
+		LastReadAt int64  `json:"lastReadAt"` // ms，最后查看该分类的时间
+	}
+	getReadCursorsRes {
+		Cursors []ReadCursorItem `json:"cursors"`
+	}
+)
+
 // 用户已读：按事件ID标记单个通知已读
 type (
 	markReadByEventReq {
@@ -76,9 +92,7 @@ type (
 		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		Category string `json:"category"` // 分类，会话级/业务分类
 	}
-	markReadByCategoryRes {
-		Affected int64 `json:"affected"` // 成功标记的条数
-	}
+	markReadByCategoryRes  {}
 )
 
 // 用户已读：按事件ID或按分类游标批量已读（高级用法）
@@ -119,6 +133,10 @@ service notification {
 	@doc "按ID拉取收件箱明细"
 	@handler getInboxByIds
 	post /api/notification/getInboxByIds (getInboxByIdsReq) returns (getInboxByIdsRes)
+
+	@doc "按分类拉取通知已读游标"
+	@handler getReadCursors
+	post /api/notification/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
 
 	@doc "按事件ID标记单个通知已读"
 	@handler markReadByEvent

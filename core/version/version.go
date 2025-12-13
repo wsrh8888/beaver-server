@@ -160,8 +160,8 @@ func (vg *VersionGenerator) getTableName(dataType string) string {
 		return "notification_events"
 	case "notification_inboxes":
 		return "notification_inboxes"
-	case "notification_read_cursors":
-		return "notification_read_cursors"
+	case "notification_reads":
+		return "notification_reads"
 	default:
 		return dataType
 	}
