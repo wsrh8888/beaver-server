@@ -84,15 +84,16 @@ type EmojiPackageDetailItem struct {
 }
 
 type EmojiPackageItem struct {
-	PackageID    string `json:"packageId"`
-	Title        string `json:"title"`
-	CoverFile    string `json:"coverFile"`
-	Description  string `json:"description"`
-	Type         string `json:"type"` // 类型：official-官方，user-用户自定义
-	CollectCount int    `json:"collectCount"`
-	EmojiCount   int    `json:"emojiCount"`
-	IsCollected  bool   `json:"isCollected"` // 当前用户是否已收藏
-	IsAuthor     bool   `json:"isAuthor"`    // 当前用户是否是作者
+	PackageID    string                       `json:"packageId"`
+	Title        string                       `json:"title"`
+	CoverFile    string                       `json:"coverFile"`
+	Description  string                       `json:"description"`
+	Type         string                       `json:"type"` // 类型：official-官方，user-用户自定义
+	CollectCount int                          `json:"collectCount"`
+	EmojiCount   int                          `json:"emojiCount"`
+	IsCollected  bool                         `json:"isCollected"`  // 当前用户是否已收藏
+	IsAuthor     bool                         `json:"isAuthor"`     // 当前用户是否是作者
+	RecentEmojis []GetEmojiPackagesSimpleItem `json:"recentEmojis"` // 最近6个表情
 }
 
 type EmojiSimpleItem struct {
@@ -194,6 +195,11 @@ type GetEmojiPackagesByIdsRes struct {
 	Packages []EmojiPackageDetailItem `json:"packages"`
 }
 
+type GetEmojiPackagesInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
 type GetEmojiPackagesReq struct {
 	UserID     string `header:"Beaver-User-Id"`
 	CategoryID uint   `json:"categoryId,optional"` // 可选，按分类筛选
@@ -205,6 +211,15 @@ type GetEmojiPackagesReq struct {
 type GetEmojiPackagesRes struct {
 	Count int64              `json:"count"`
 	List  []EmojiPackageItem `json:"list"`
+}
+
+type GetEmojiPackagesSimpleItem struct {
+	EmojiID   string               `json:"emojiId"`
+	FileKey   string               `json:"fileKey"`
+	Title     string               `json:"title"`
+	Version   int64                `json:"version"`
+	Status    int8                 `json:"status"`
+	EmojiInfo GetEmojiPackagesInfo `json:"emojiInfo"`
 }
 
 type GetEmojisByIdsReq struct {

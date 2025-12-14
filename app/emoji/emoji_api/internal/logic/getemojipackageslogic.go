@@ -96,6 +96,74 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 		emojiCounts[c.PackageID] = c.Count
 	}
 
+	// 获取每个表情包的最近7个表情
+	recentEmojis := make(map[string][]types.GetEmojiPackagesSimpleItem)
+	if len(packageIDs) > 0 {
+		for _, packageID := range packageIDs {
+			var packageEmojis []emoji_models.EmojiPackageEmoji
+			err := l.svcCtx.DB.Where("package_id = ?", packageID).
+				Order("sort_order ASC").
+				Limit(7).
+				Find(&packageEmojis).Error
+			if err != nil {
+				continue
+			}
+
+			if len(packageEmojis) == 0 {
+				continue
+			}
+
+			// 获取表情ID列表
+			emojiIDs := make([]string, len(packageEmojis))
+			for i, pe := range packageEmojis {
+				emojiIDs[i] = pe.EmojiID
+			}
+
+			// 批量查询表情信息
+			var emojis []emoji_models.Emoji
+			err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", emojiIDs, 1).
+				Find(&emojis).Error
+			if err != nil {
+				continue
+			}
+
+			// 转换为map便于查找
+			emojiMap := make(map[string]emoji_models.Emoji)
+			for _, emoji := range emojis {
+				emojiMap[emoji.EmojiID] = emoji
+			}
+
+			recentItems := make([]types.GetEmojiPackagesSimpleItem, 0, len(packageEmojis))
+			for _, pe := range packageEmojis {
+				emoji, exists := emojiMap[pe.EmojiID]
+				if !exists {
+					continue
+				}
+
+				var emojiInfo types.GetEmojiPackagesInfo
+				emojiInfo.Width = 64  // 默认值
+				emojiInfo.Height = 64 // 默认值
+
+				if emoji.EmojiInfo.Width > 0 {
+					emojiInfo.Width = emoji.EmojiInfo.Width
+				}
+				if emoji.EmojiInfo.Height > 0 {
+					emojiInfo.Height = emoji.EmojiInfo.Height
+				}
+
+				recentItems = append(recentItems, types.GetEmojiPackagesSimpleItem{
+					EmojiID:   emoji.EmojiID,
+					FileKey:   emoji.FileKey,
+					Title:     emoji.Title,
+					Version:   emoji.Version,
+					Status:    emoji.Status,
+					EmojiInfo: emojiInfo,
+				})
+			}
+			recentEmojis[packageID] = recentItems
+		}
+	}
+
 	// 获取当前用户的收藏状态
 	userCollects := make(map[string]bool)
 	if len(packageIDs) > 0 {
@@ -123,6 +191,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 			EmojiCount:   int(emojiCounts[p.PackageID]),
 			IsCollected:  userCollects[p.PackageID],
 			IsAuthor:     p.UserID == req.UserID,
+			RecentEmojis: recentEmojis[p.PackageID],
 		}
 	}
 

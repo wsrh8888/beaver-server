@@ -51,7 +51,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 			FileKey: req.FileKey,
 			Title:   req.Title,
 			Version: emojiVersion,
-			EmojiInfo: &emoji_models.EmojiInfo{
+			EmojiInfo: emoji_models.EmojiInfo{
 				Width:  req.EmojiInfo.Width,
 				Height: req.EmojiInfo.Height,
 			},
