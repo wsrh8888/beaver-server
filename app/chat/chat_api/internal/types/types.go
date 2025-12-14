@@ -96,8 +96,8 @@ type EditMessageRes struct {
 
 type EmojiMsg struct {
 	FileKey   string `json:"fileKey"`   // 表情图片文件ID（Emoji.FileName）
-	EmojiID   uint32 `json:"emojiId"`   // 表情ID（Emoji.Id，单个表情时使用）
-	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
+	EmojiID   string `json:"emojiId"`   // 表情ID（Emoji.Id，单个表情时使用）
+	PackageID string `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
 }
 
 type FileMsg struct {

@@ -6,6 +6,8 @@ import (
 	"beaver/app/emoji/emoji_api/internal/logic"
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
+	"beaver/common/response"
+
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
@@ -20,10 +22,6 @@ func GetEmojiCollectsByIdsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := logic.NewGetEmojiCollectsByIdsLogic(r.Context(), svcCtx)
 		resp, err := l.GetEmojiCollectsByIds(&req)
-		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
-		}
+		response.Response(r, w, resp, err)
 	}
 }
