@@ -67,12 +67,16 @@ func (l *GetEmojisByIdsLogic) GetEmojisByIds(req *types.GetEmojisByIdsReq) (resp
 	var emojiItems []types.EmojiDetailItem
 	for _, emoji := range emojis {
 		emojiItems = append(emojiItems, types.EmojiDetailItem{
-			EmojiID:   emoji.EmojiID,
-			FileKey:   emoji.FileKey,
-			Title:     emoji.Title,
+			EmojiID: emoji.EmojiID,
+			FileKey: emoji.FileKey,
+			Title:   emoji.Title,
+			EmojiInfo: types.GetEmojiByIdsInfo{
+				Width:  emoji.EmojiInfo.Width,
+				Height: emoji.EmojiInfo.Height,
+			},
+			PackageID: emojiToPackage[emoji.EmojiID],
 			Status:    emoji.Status,
 			Version:   emoji.Version,
-			PackageID: emojiToPackage[emoji.EmojiID],
 			CreateAt:  time.Time(emoji.CreatedAt).UnixMilli(),
 			UpdateAt:  time.Time(emoji.UpdatedAt).UnixMilli(),
 		})

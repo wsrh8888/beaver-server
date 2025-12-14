@@ -15,6 +15,8 @@ const (
 	USER_PROFILE Command = "USER_PROFILE"
 	// 通知中心类
 	NOTIFICATION Command = "NOTIFICATION"
+	// 表情中心类
+	EMOJI Command = "EMOJI"
 	// 心跳消息类（应用级心跳）
 	HEARTBEAT Command = "HEARTBEAT"
 )

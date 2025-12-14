@@ -8,6 +8,9 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -69,6 +72,30 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 			return nil, err
 		}
 	}
+
+	// 异步通过 WS 通知用户其他客户端
+	go func(etcdAddr string, userId string, category string, cursorVersion int64) {
+		// 构建表更新数据
+		var tableUpdates []map[string]interface{}
+
+		// 通知已读游标表更新
+		cursorUpdates := map[string]interface{}{
+			"table":  "notification_read_cursor",
+			"userId": userId,
+			"data": []map[string]interface{}{
+				{
+					"version":  cursorVersion,
+					"category": category,
+				},
+			},
+		}
+		tableUpdates = append(tableUpdates, cursorUpdates)
+
+		// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
+		ajax.SendMessageToWs(etcdAddr, wsCommandConst.NOTIFICATION, wsTypeConst.NotificationMarkReadReceive, "", userId, map[string]interface{}{
+			"tableUpdates": tableUpdates,
+		}, "")
+	}(l.svcCtx.Config.Etcd, userId, category, cursorVersion)
 
 	resp = &types.MarkReadByCategoryRes{}
 

@@ -67,7 +67,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 			EmojiCount:   0,
 			IsCollected:  false,
 			IsAuthor:     emojiPackage.UserID == req.UserID,
-			Emojis:       make([]types.EmojiItem, 0),
+			Emojis:       make([]types.GetEmojiPackageEmojiItem, 0),
 		}, nil
 	}
 
@@ -111,7 +111,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 	isAuthor := emojiPackage.UserID == req.UserID
 
 	// 7. 构建返回数据
-	emojiItems := make([]types.EmojiItem, 0, len(emojiPackageEmojis))
+	emojiItems := make([]types.GetEmojiPackageEmojiItem, 0, len(emojiPackageEmojis))
 	packageID := emojiPackage.PackageID
 
 	// 按照关联表中的顺序构建响应
@@ -121,11 +121,11 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 			continue // 跳过不存在的表情
 		}
 
-		emojiItems = append(emojiItems, types.EmojiItem{
+		emojiItems = append(emojiItems, types.GetEmojiPackageEmojiItem{
 			EmojiID: emoji.EmojiID,
 			FileKey: emoji.FileKey, // 使用FileKey字段
 			Title:   emoji.Title,
-			EmojiInfo: &types.EmojiInfo{
+			EmojiInfo: &types.GetEmojiPackageInfo{
 				Width:  emoji.EmojiInfo.Width,
 				Height: emoji.EmojiInfo.Height,
 			},

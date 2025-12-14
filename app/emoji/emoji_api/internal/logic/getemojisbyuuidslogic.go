@@ -42,6 +42,10 @@ func (l *GetEmojisByUuidsLogic) GetEmojisByUuids(req *types.GetEmojisByUuidsReq)
 			Title:   e.Title,
 			Version: e.Version,
 			Status:  e.Status,
+			EmojiInfo: types.GetEmojiByUuidsInfo{
+				Width:  e.EmojiInfo.Width,
+				Height: e.EmojiInfo.Height,
+			},
 		})
 	}
 

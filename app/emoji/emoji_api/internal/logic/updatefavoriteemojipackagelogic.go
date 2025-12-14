@@ -6,6 +6,9 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -72,6 +75,30 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		if err != nil {
 			return nil, status.Error(codes.Internal, "收藏失败")
 		}
+
+		// 异步通过 WS 通知用户其他客户端
+		go func(etcdAddr string, userId string, packageCollectId string, version int64) {
+			// 构建表更新数据
+			var tableUpdates []map[string]interface{}
+
+			// 通知表情包收藏表更新
+			collectUpdates := map[string]interface{}{
+				"table":  "emoji_package_collect",
+				"userId": userId,
+				"data": []map[string]interface{}{
+					{
+						"version":          version,
+						"packageCollectId": packageCollectId,
+					},
+				},
+			}
+			tableUpdates = append(tableUpdates, collectUpdates)
+
+			// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
+			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			}, "")
+		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectVersion)
 	} else if req.Type == "unfavorite" {
 		// 取消收藏
 		if err != nil {
@@ -91,6 +118,30 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			logx.Error("软删除收藏失败", err)
 			return nil, status.Error(codes.Internal, "软删除收藏失败")
 		}
+
+		// 异步通过 WS 通知用户其他客户端
+		go func(etcdAddr string, userId string, packageCollectId string, version int64) {
+			// 构建表更新数据
+			var tableUpdates []map[string]interface{}
+
+			// 通知表情包收藏表更新
+			collectUpdates := map[string]interface{}{
+				"table":  "emoji_package_collect",
+				"userId": userId,
+				"data": []map[string]interface{}{
+					{
+						"version":          version,
+						"packageCollectId": packageCollectId,
+					},
+				},
+			}
+			tableUpdates = append(tableUpdates, collectUpdates)
+
+			// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
+			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			}, "")
+		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectRecord.Version)
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")
 	}

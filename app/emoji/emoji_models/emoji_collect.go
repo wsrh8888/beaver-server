@@ -10,5 +10,5 @@ type EmojiCollectEmoji struct {
 	EmojiID        string `gorm:"size:64;index" json:"emojiId"`                                      // 表情ID
 	IsDeleted      bool   `gorm:"default:false;index" json:"isDeleted"`                              // 是否已删除（软删除）
 	Version        int64  `gorm:"not null;default:0;index" json:"version"`                           //基于userId递增
-
+	PackageID      string `gorm:"size:64;index" json:"packageId"`                                    // 表情包ID
 }

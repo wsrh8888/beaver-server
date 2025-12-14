@@ -65,7 +65,7 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 				EmojiID: emoji.EmojiID,
 				FileKey: emoji.FileKey, // 使用FileKey字段
 				Title:   emoji.Title,
-				EmojiInfo: &types.EmojiInfo{
+				EmojiInfo: &types.GetEmojiInfo{
 					Width:  emoji.EmojiInfo.Width,
 					Height: emoji.EmojiInfo.Height,
 				},
