@@ -18,37 +18,36 @@ type AddEmojiRes struct {
 }
 
 type EmojiCollectDetailItem struct {
-	EmojiCollectID string `json:"emojiCollectId"`
-	UserID         string `json:"userId"`
-	EmojiID        string `json:"emojiId"`
-	IsDeleted      bool   `json:"isDeleted"`
-	Version        int64  `json:"version"`
-	CreateAt       int64  `json:"createAt"`
-	UpdateAt       int64  `json:"updateAt"`
+	EmojiCollectID string  `json:"emojiCollectId"`
+	UserID         string  `json:"userId"`
+	EmojiID        string  `json:"emojiId"`
+	FileKey        string  `json:"fileKey"`
+	Title          string  `json:"title"`
+	PackageID      *string `json:"packageId"`
+	IsDeleted      bool    `json:"isDeleted"`
+	Version        int64   `json:"version"`
+	CreateAt       int64   `json:"createAt"`
+	UpdateAt       int64   `json:"updateAt"`
 }
 
 type EmojiDetailItem struct {
-	EmojiID   string  `json:"emojiId"`
-	FileKey   string  `json:"fileKey"`
-	Title     string  `json:"title"`
-	Status    int8    `json:"status"`
-	Version   int64   `json:"version"`
-	PackageID *string `json:"packageId"`
-	CreateAt  int64   `json:"createAt"`
-	UpdateAt  int64   `json:"updateAt"`
-}
-
-type EmojiInfo struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
+	EmojiID   string            `json:"emojiId"`
+	FileKey   string            `json:"fileKey"`
+	Title     string            `json:"title"`
+	EmojiInfo GetEmojiByIdsInfo `json:"emojiInfo"`
+	PackageID *string           `json:"packageId"`
+	Status    int8              `json:"status"`
+	Version   int64             `json:"version"`
+	CreateAt  int64             `json:"createAt"`
+	UpdateAt  int64             `json:"updateAt"`
 }
 
 type EmojiItem struct {
-	EmojiID   string     `json:"emojiId"`
-	FileKey   string     `json:"fileKey"`
-	Title     string     `json:"title"`
-	EmojiInfo *EmojiInfo `json:"emojiInfo"`
-	PackageID *string    `json:"packageId"`
+	EmojiID   string        `json:"emojiId"`
+	FileKey   string        `json:"fileKey"`
+	Title     string        `json:"title"`
+	EmojiInfo *GetEmojiInfo `json:"emojiInfo"`
+	PackageID *string       `json:"packageId"`
 }
 
 type EmojiPackageCollectDetailItem struct {
@@ -97,11 +96,22 @@ type EmojiPackageItem struct {
 }
 
 type EmojiSimpleItem struct {
-	EmojiID string `json:"emojiId"`
-	FileKey string `json:"fileKey"`
-	Title   string `json:"title"`
-	Version int64  `json:"version"`
-	Status  int8   `json:"status"`
+	EmojiID   string              `json:"emojiId"`
+	FileKey   string              `json:"fileKey"`
+	Title     string              `json:"title"`
+	Version   int64               `json:"version"`
+	Status    int8                `json:"status"`
+	EmojiInfo GetEmojiByUuidsInfo `json:"emojiInfo"`
+}
+
+type GetEmojiByIdsInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type GetEmojiByUuidsInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 type GetEmojiCollectsByIdsReq struct {
@@ -119,6 +129,11 @@ type GetEmojiCollectsByUuidsReq struct {
 
 type GetEmojiCollectsByUuidsRes struct {
 	Collects []EmojiCollectDetailItem `json:"collects"`
+}
+
+type GetEmojiInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 type GetEmojiPackageCollectsByIdsReq struct {
@@ -145,16 +160,29 @@ type GetEmojiPackageDetailReq struct {
 }
 
 type GetEmojiPackageDetailRes struct {
-	PackageID    string      `json:"packageId"`
-	Title        string      `json:"title"`
-	CoverFile    string      `json:"coverFile"`
-	Description  string      `json:"description"`
-	Type         string      `json:"type"` // 类型：official-官方，user-用户自定义
-	CollectCount int         `json:"collectCount"`
-	EmojiCount   int         `json:"emojiCount"`
-	IsCollected  bool        `json:"isCollected"`
-	IsAuthor     bool        `json:"isAuthor"` // 当前用户是否是作者
-	Emojis       []EmojiItem `json:"emojis"`
+	PackageID    string                     `json:"packageId"`
+	Title        string                     `json:"title"`
+	CoverFile    string                     `json:"coverFile"`
+	Description  string                     `json:"description"`
+	Type         string                     `json:"type"` // 类型：official-官方，user-用户自定义
+	CollectCount int                        `json:"collectCount"`
+	EmojiCount   int                        `json:"emojiCount"`
+	IsCollected  bool                       `json:"isCollected"`
+	IsAuthor     bool                       `json:"isAuthor"` // 当前用户是否是作者
+	Emojis       []GetEmojiPackageEmojiItem `json:"emojis"`
+}
+
+type GetEmojiPackageEmojiItem struct {
+	EmojiID   string               `json:"emojiId"`
+	FileKey   string               `json:"fileKey"`
+	Title     string               `json:"title"`
+	EmojiInfo *GetEmojiPackageInfo `json:"emojiInfo"`
+	PackageID *string              `json:"packageId"`
+}
+
+type GetEmojiPackageInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 type GetEmojiPackagesByIdsReq struct {

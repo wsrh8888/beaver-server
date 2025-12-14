@@ -105,15 +105,47 @@ func (l *PushEventLogic) PushEvent(in *notification_rpc.PushEventReq) (*notifica
 	}
 
 	// 异步通过 WS 通知收件人有新通知
-	go func(etcdAddr string, toUsers []string, eventID string) {
-		payload := map[string]interface{}{
-			"eventId": eventID,
-			"hasNew":  true,
+	go func(etcdAddr string, toUsers []string, eventID string, eventVersion int64) {
+		// 构建表更新数据 - 包含版本号，让前端知道具体同步哪些数据
+		var tableUpdates []map[string]interface{}
+
+		// 通知事件表更新
+		eventUpdates := map[string]interface{}{
+			"table": "notification_event",
+			"data": []map[string]interface{}{
+				{
+					"version": eventVersion,
+					"eventId": eventID,
+				},
+			},
 		}
+		tableUpdates = append(tableUpdates, eventUpdates)
+
+		// 为每个收件人推送表更新通知
 		for _, uid := range toUsers {
-			ajax.SendMessageToWs(etcdAddr, wsCommandConst.NOTIFICATION, wsTypeConst.NotificationReceive, in.FromUserId, uid, payload, "")
+			// 为每个用户生成独立的收件箱版本号用于通知
+			inboxVersion := l.svcCtx.VersionGen.GetNextVersion(notification_models.VersionScopeInboxPerUser, "user_id", uid)
+
+			// 通知收件箱表更新
+			inboxUpdates := map[string]interface{}{
+				"table":  "notification_inbox",
+				"userId": uid,
+				"data": []map[string]interface{}{
+					{
+						"version": inboxVersion,
+						"eventId": eventID,
+					},
+				},
+			}
+			// 为每个用户创建独立的tableUpdates副本
+			userTableUpdates := append([]map[string]interface{}{}, tableUpdates...)
+			userTableUpdates = append(userTableUpdates, inboxUpdates)
+
+			ajax.SendMessageToWs(etcdAddr, wsCommandConst.NOTIFICATION, wsTypeConst.NotificationReceive, in.FromUserId, uid, map[string]interface{}{
+				"tableUpdates": userTableUpdates,
+			}, "")
 		}
-	}(l.svcCtx.Config.Etcd.Hosts[0], in.ToUserIds, eventID)
+	}(l.svcCtx.Config.Etcd.Hosts[0], in.ToUserIds, eventID, eventVersion)
 
 	return &notification_rpc.PushEventRes{
 		EventId: eventID,

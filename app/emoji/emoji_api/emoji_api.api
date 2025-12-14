@@ -35,13 +35,13 @@ type (
 		Size   int    `json:"size"`
 	}
 	EmojiItem {
-		EmojiID   string     `json:"emojiId"`
-		FileKey   string     `json:"fileKey"`
-		Title     string     `json:"title"`
-		EmojiInfo *EmojiInfo `json:"emojiInfo"`
-		PackageID *string    `json:"packageId"`
+		EmojiID   string        `json:"emojiId"`
+		FileKey   string        `json:"fileKey"`
+		Title     string        `json:"title"`
+		EmojiInfo *GetEmojiInfo `json:"emojiInfo"`
+		PackageID *string       `json:"packageId"`
 	}
-	EmojiInfo {
+	GetEmojiInfo {
 		Width  int `json:"width"`
 		Height int `json:"height"`
 	}
@@ -83,17 +83,28 @@ type (
 		UserID    string `header:"Beaver-User-Id"`
 		PackageID string `json:"packageId"`
 	}
+	GetEmojiPackageEmojiItem {
+		EmojiID   string               `json:"emojiId"`
+		FileKey   string               `json:"fileKey"`
+		Title     string               `json:"title"`
+		EmojiInfo *GetEmojiPackageInfo `json:"emojiInfo"`
+		PackageID *string              `json:"packageId"`
+	}
+	GetEmojiPackageInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
 	GetEmojiPackageDetailRes {
-		PackageID    string      `json:"packageId"`
-		Title        string      `json:"title"`
-		CoverFile    string      `json:"coverFile"`
-		Description  string      `json:"description"`
-		Type         string      `json:"type"` // 类型：official-官方，user-用户自定义
-		CollectCount int         `json:"collectCount"`
-		EmojiCount   int         `json:"emojiCount"`
-		IsCollected  bool        `json:"isCollected"`
-		IsAuthor     bool        `json:"isAuthor"` // 当前用户是否是作者
-		Emojis       []EmojiItem `json:"emojis"`
+		PackageID    string                     `json:"packageId"`
+		Title        string                     `json:"title"`
+		CoverFile    string                     `json:"coverFile"`
+		Description  string                     `json:"description"`
+		Type         string                     `json:"type"` // 类型：official-官方，user-用户自定义
+		CollectCount int                        `json:"collectCount"`
+		EmojiCount   int                        `json:"emojiCount"`
+		IsCollected  bool                       `json:"isCollected"`
+		IsAuthor     bool                       `json:"isAuthor"` // 当前用户是否是作者
+		Emojis       []GetEmojiPackageEmojiItem `json:"emojis"`
 	}
 )
 
@@ -129,15 +140,20 @@ type (
 	GetEmojisByIdsRes {
 		Emojis []EmojiDetailItem `json:"emojis"`
 	}
+	GetEmojiByIdsInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
 	EmojiDetailItem {
-		EmojiID   string  `json:"emojiId"`
-		FileKey   string  `json:"fileKey"`
-		Title     string  `json:"title"`
-		Status    int8    `json:"status"`
-		Version   int64   `json:"version"`
-		PackageID *string `json:"packageId"`
-		CreateAt  int64   `json:"createAt"`
-		UpdateAt  int64   `json:"updateAt"`
+		EmojiID   string            `json:"emojiId"`
+		FileKey   string            `json:"fileKey"`
+		Title     string            `json:"title"`
+		EmojiInfo GetEmojiByIdsInfo `json:"emojiInfo"`
+		PackageID *string           `json:"packageId"`
+		Status    int8              `json:"status"`
+		Version   int64             `json:"version"`
+		CreateAt  int64             `json:"createAt"`
+		UpdateAt  int64             `json:"updateAt"`
 	}
 )
 
@@ -146,12 +162,17 @@ type (
 	GetEmojisByUuidsReq {
 		Ids []string `json:"ids"` // 表情ID列表
 	}
+	GetEmojiByUuidsInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
 	EmojiSimpleItem {
-		EmojiID string `json:"emojiId"`
-		FileKey string `json:"fileKey"`
-		Title   string `json:"title"`
-		Version int64  `json:"version"`
-		Status  int8   `json:"status"`
+		EmojiID   string              `json:"emojiId"`
+		FileKey   string              `json:"fileKey"`
+		Title     string              `json:"title"`
+		Version   int64               `json:"version"`
+		Status    int8                `json:"status"`
+		EmojiInfo GetEmojiByUuidsInfo `json:"emojiInfo"`
 	}
 	GetEmojisByUuidsRes {
 		Emojis []EmojiSimpleItem `json:"emojis"`
@@ -192,13 +213,16 @@ type (
 		Collects []EmojiCollectDetailItem `json:"collects"`
 	}
 	EmojiCollectDetailItem {
-		EmojiCollectID string `json:"emojiCollectId"`
-		UserID         string `json:"userId"`
-		EmojiID        string `json:"emojiId"`
-		IsDeleted      bool   `json:"isDeleted"`
-		Version        int64  `json:"version"`
-		CreateAt       int64  `json:"createAt"`
-		UpdateAt       int64  `json:"updateAt"`
+		EmojiCollectID string  `json:"emojiCollectId"`
+		UserID         string  `json:"userId"`
+		EmojiID        string  `json:"emojiId"`
+		FileKey        string  `json:"fileKey"`
+		Title          string  `json:"title"`
+		PackageID      *string `json:"packageId"`
+		IsDeleted      bool    `json:"isDeleted"`
+		Version        int64   `json:"version"`
+		CreateAt       int64   `json:"createAt"`
+		UpdateAt       int64   `json:"updateAt"`
 	}
 )
 
@@ -280,31 +304,27 @@ service emoji {
 	@handler GetUserFavoritePackages
 	post /api/emoji/favoritePackageList (GetUserFavoritePackagesReq) returns (GetUserFavoritePackagesRes)
 
-	@doc "批量获取表情详情"
+	@doc "批量获取表情详情（数据库同步）"
 	@handler GetEmojisByIds
 	post /api/emoji/emojis-by-ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
 
-	@doc "按ID批量查询表情基础信息（用于版本同步后补齐）"
+	@doc "按ID批量查询表情基础信息（数据库同步）"
 	@handler GetEmojisByUuids
 	post /api/emoji/getEmojisByUuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
 
-	@doc "批量获取表情包详情"
+	@doc "批量获取表情包详情（数据库同步）"
 	@handler GetEmojiPackagesByIds
 	post /api/emoji/packages-by-ids (GetEmojiPackagesByIdsReq) returns (GetEmojiPackagesByIdsRes)
 
-	@doc "批量获取用户收藏的表情记录详情（同步用）"
+	@doc "批量获取用户收藏的表情记录详情（数据库同步）"
 	@handler GetEmojiCollectsByIds
 	post /api/emoji/collects-by-ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
 
-	@doc "按收藏ID批量获取表情收藏记录（同步补齐）"
-	@handler GetEmojiCollectsByUuids
-	post /api/emoji/getEmojiCollectsByUuids (GetEmojiCollectsByUuidsReq) returns (GetEmojiCollectsByUuidsRes)
-
-	@doc "批量获取用户收藏的表情包记录详情（同步用）"
+	@doc "批量获取用户收藏的表情包记录详情（数据库同步）"
 	@handler GetEmojiPackageCollectsByIds
 	post /api/emoji/package-collects-by-ids (GetEmojiPackageCollectsByIdsReq) returns (GetEmojiPackageCollectsByIdsRes)
 
-	@doc "批量获取表情包内容详情（同步用）"
+	@doc "批量获取表情包内容详情（数据库同步）"
 	@handler GetEmojiPackageContentsByPackageIds
 	post /api/emoji/package-contents-by-package-ids (GetEmojiPackageContentsByPackageIdsReq) returns (GetEmojiPackageContentsByPackageIdsRes)
 }

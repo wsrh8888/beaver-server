@@ -19,13 +19,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: AddEmojiHandler(serverCtx),
 			},
 			{
-				// 批量获取用户收藏的表情记录详情（同步用）
+				// 批量获取用户收藏的表情记录详情（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/collects-by-ids",
 				Handler: GetEmojiCollectsByIdsHandler(serverCtx),
 			},
 			{
-				// 批量获取表情详情
+				// 批量获取表情详情（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/emojis-by-ids",
 				Handler: GetEmojisByIdsHandler(serverCtx),
@@ -49,25 +49,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: GetUserFavoritePackagesHandler(serverCtx),
 			},
 			{
-				// 按收藏ID批量获取表情收藏记录（同步补齐）
-				Method:  http.MethodPost,
-				Path:    "/api/emoji/getEmojiCollectsByUuids",
-				Handler: GetEmojiCollectsByUuidsHandler(serverCtx),
-			},
-			{
-				// 按ID批量查询表情基础信息（用于版本同步后补齐）
+				// 按ID批量查询表情基础信息（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/getEmojisByUuids",
 				Handler: GetEmojisByUuidsHandler(serverCtx),
 			},
 			{
-				// 批量获取用户收藏的表情包记录详情（同步用）
+				// 批量获取用户收藏的表情包记录详情（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/package-collects-by-ids",
 				Handler: GetEmojiPackageCollectsByIdsHandler(serverCtx),
 			},
 			{
-				// 批量获取表情包内容详情（同步用）
+				// 批量获取表情包内容详情（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/package-contents-by-package-ids",
 				Handler: GetEmojiPackageContentsByPackageIdsHandler(serverCtx),
@@ -91,7 +85,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: GetEmojiPackagesHandler(serverCtx),
 			},
 			{
-				// 批量获取表情包详情
+				// 批量获取表情包详情（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/packages-by-ids",
 				Handler: GetEmojiPackagesByIdsHandler(serverCtx),
