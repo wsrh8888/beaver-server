@@ -1,6 +1,7 @@
 package chat_utils
 
 import (
+	"strings"
 	"time"
 
 	"beaver/app/chat/chat_models"
@@ -96,10 +97,25 @@ func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGener
 			updateFields["is_hidden"] = false
 		}
 
-		// 特殊处理发送者：更新已读序列号
-		if convo.UserID == senderID {
+		// 处理已读序列号更新
+		shouldUpdateReadSeq := false
+		if senderID == "*" {
+			// "*"表示所有用户都标记为已读
+			shouldUpdateReadSeq = true
+		} else {
+			// 检查用户是否在已读用户列表中（senderID可能包含多个用户ID，用逗号分隔）
+			readUserIDs := strings.Split(senderID, ",")
+			for _, readUserID := range readUserIDs {
+				if strings.TrimSpace(readUserID) == convo.UserID {
+					shouldUpdateReadSeq = true
+					break
+				}
+			}
+		}
+
+		if shouldUpdateReadSeq {
 			updateFields["user_read_seq"] = messageSeq
-			logx.Infof("为发送者更新已读序列号: userID=%s, conversationID=%s, readSeq=%d, version=%d", convo.UserID, conversationID, messageSeq, version)
+			logx.Infof("更新用户已读序列号: userID=%s, conversationID=%s, readSeq=%d, version=%d", convo.UserID, conversationID, messageSeq, version)
 		}
 
 		// 直接批量更新所有用户的会话关系
@@ -119,6 +135,72 @@ func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGener
 	}
 
 	logx.Infof("更新会话用户关系成功: conversationID=%s, 更新用户数=%d", conversationID, len(updates))
+	return updates, nil
+}
+
+// UpdateUserConversationsReadSeq 更新用户会话的已读序列号
+func UpdateUserConversationsReadSeq(db *gorm.DB, versionGen *core.VersionGenerator, conversationID string, readUserIDs []string, readSeq int64) ([]UserConversationUpdate, error) {
+	// 查询该会话相关的所有用户会话记录
+	var userConversations []chat_models.ChatUserConversation
+	err := db.Where("conversation_id = ?", conversationID).Find(&userConversations).Error
+	if err != nil {
+		logx.Errorf("查询会话用户关系失败: conversationID=%s, error=%v", conversationID, err)
+		return nil, err
+	}
+
+	var updates []UserConversationUpdate
+
+	// 更新每条记录，每个用户独立版本号
+	for _, convo := range userConversations {
+		// 总是更新版本号，因为发送消息会影响所有用户的会话状态
+		version := versionGen.GetNextVersion("chat_user_conversations", "user_id", convo.UserID)
+
+		updateFields := map[string]interface{}{
+			"updated_at": time.Now(),
+			"version":    version,
+		}
+
+		// 如果是隐藏状态，自动恢复显示
+		if convo.IsHidden {
+			updateFields["is_hidden"] = false
+		}
+
+		// 处理已读序列号更新
+		shouldUpdateReadSeq := false
+		if len(readUserIDs) == 0 {
+			// 如果readUserIDs为空，所有用户都标记为已读
+			shouldUpdateReadSeq = true
+		} else {
+			// 如果指定了readUserIDs，只有这些用户标记为已读
+			for _, readUserID := range readUserIDs {
+				if readUserID == convo.UserID {
+					shouldUpdateReadSeq = true
+					break
+				}
+			}
+		}
+
+		if shouldUpdateReadSeq {
+			updateFields["user_read_seq"] = readSeq
+			logx.Infof("更新用户已读序列号: userID=%s, conversationID=%s, readSeq=%d, version=%d", convo.UserID, conversationID, readSeq, version)
+		}
+
+		// 直接批量更新所有用户的会话关系
+		err = db.Model(&chat_models.ChatUserConversation{}).
+			Where("conversation_id = ? AND user_id = ?", conversationID, convo.UserID).
+			Updates(updateFields).Error
+		if err != nil {
+			logx.Errorf("更新用户会话失败: userID=%s, conversationID=%s, error=%v", convo.UserID, conversationID, err)
+			// 继续处理其他用户，不要因为一个失败而中断整个流程
+		} else {
+			updates = append(updates, UserConversationUpdate{
+				UserID:         convo.UserID,
+				ConversationID: conversationID,
+				Version:        version,
+			})
+		}
+	}
+
 	return updates, nil
 }
 

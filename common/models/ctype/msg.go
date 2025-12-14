@@ -162,9 +162,11 @@ type AudioFileMsg struct {
 
 // 表情消息结构
 type EmojiMsg struct {
-	FileKey   string `json:"fileKey"`   // 表情图片文件ID（Emoji.FileName）
-	EmojiID   uint32 `json:"emojiId"`   // 表情ID（Emoji.ID，单个表情时使用）
-	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+	FileKey   string `json:"fileKey"`          // 表情图片文件ID（Emoji.FileName）
+	EmojiID   string `json:"emojiId"`          // 表情ID（Emoji.ID，单个表情时使用）
+	PackageID string `json:"packageId"`        // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+	Width     int64  `json:"width,omitempty"`  // 表情图片宽度（可选）
+	Height    int64  `json:"height,omitempty"` // 表情图片高度（可选）
 }
 
 // 回复消息结构

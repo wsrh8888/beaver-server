@@ -3,10 +3,15 @@ syntax = "v1"
 // 添加表情
 type (
 	AddEmojiReq {
-		UserID    string `header:"Beaver-User-Id"`
-		FileKey   string `json:"fileKey"`
-		Title     string `json:"title"`
-		PackageID string `json:"packageId,optional"`
+		UserID    string       `header:"Beaver-User-Id"`
+		FileKey   string       `json:"fileKey"`
+		Title     string       `json:"title"`
+		PackageID string       `json:"packageId,optional"`
+		EmojiInfo AddEmojiInfo `json:"emojiInfo"`
+	}
+	AddEmojiInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
 	}
 	AddEmojiRes  {}
 )
@@ -14,9 +19,10 @@ type (
 // 更新表情收藏状态
 type (
 	UpdateFavoriteEmojiReq {
-		UserID  string `header:"Beaver-User-Id"`
-		EmojiID string `json:"emojiId"`
-		Type    string `json:"type"` // "favorite" or "unfavorite"
+		UserID    string  `header:"Beaver-User-Id"`
+		EmojiID   string  `json:"emojiId"`
+		PackageID *string `json:"packageId,optional"` // 可选，表情所属的表情包ID，用于扩展功能
+		Type      string  `json:"type"` // "favorite" or "unfavorite"
 	}
 	UpdateFavoriteEmojiRes  {}
 )
@@ -29,10 +35,15 @@ type (
 		Size   int    `json:"size"`
 	}
 	EmojiItem {
-		EmojiID   string  `json:"emojiId"`
-		FileKey   string  `json:"fileKey"`
-		Title     string  `json:"title"`
-		PackageID *string `json:"packageId"`
+		EmojiID   string     `json:"emojiId"`
+		FileKey   string     `json:"fileKey"`
+		Title     string     `json:"title"`
+		EmojiInfo *EmojiInfo `json:"emojiInfo"`
+		PackageID *string    `json:"packageId"`
+	}
+	EmojiInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
 	}
 	GetEmojisListRes {
 		Count int64       `json:"count"`

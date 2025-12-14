@@ -124,7 +124,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				ConversationId: conversationID,
 				MessageType:    1, // 好友添加成功欢迎消息
 				Content:        "我们已经是好友了，开始聊天吧",
-				RelatedUserId:  friendVerify.SendUserID, // 相关好友ID
+				RelatedUserId:  friendVerify.SendUserID,          // 相关好友ID
+				ReadUserIds:    []string{friendVerify.RevUserID}, // 只有同意方标记为已读
 			})
 			if err != nil {
 				l.Logger.Errorf("异步发送欢迎消息失败: %v", err)
