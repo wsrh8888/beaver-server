@@ -27,9 +27,14 @@ type (
 // 创建表情图片
 type (
 	CreateEmojiReq {
-		FileKey  string `json:"fileKey"`
-		Title    string `json:"title"`
-		AuthorID string `header:"Beaver-User-Id"`
+		FileKey   string    `json:"fileKey"`
+		Title     string    `json:"title"`
+		EmojiInfo EmojiInfo `json:"emojiInfo"`
+		AuthorID  string    `header:"Beaver-User-Id"`
+	}
+	EmojiInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
 	}
 	CreateEmojiRes {
 		EmojiId string `json:"emojiId"`
@@ -122,8 +127,8 @@ type (
 type (
 	GetEmojiPackageEmojisReq {
 		PackageId string `form:"packageId"`
-		Page        int    `form:"page,default=1"`
-		PageSize    int    `form:"pageSize,default=50"`
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=50"`
 	}
 	GetEmojiPackageEmojisRes {
 		List  []GetEmojiPackageEmojisItem `json:"list"`
@@ -142,10 +147,15 @@ type (
 // 向表情包集合中添加表情图片
 type (
 	AddEmojiToPackageReq {
-		PackageId string `json:"packageId"`
-		FileKey     string `json:"fileKey"`
-		Title       string `json:"title"`
-		AuthorID    string `header:"Beaver-User-Id"`
+		PackageId string       `json:"packageId"`
+		FileKey   string       `json:"fileKey"`
+		Title     string       `json:"title"`
+		EmojiInfo AddEmojiInfo `json:"emojiInfo"`
+		AuthorID  string       `header:"Beaver-User-Id"`
+	}
+	AddEmojiInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
 	}
 	AddEmojiToPackageRes {
 		RelationId string `json:"relationId"`
