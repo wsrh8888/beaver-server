@@ -62,13 +62,20 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 		return nil, errors.New("该创建者已存在同名表情")
 	}
 
+	// 生成表情版本号
+	emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+
 	// 创建表情
 	emoji := emoji_models.Emoji{
 		EmojiID: uuid.New().String(),
 		FileKey: req.FileKey,
 		Title:   req.Title,
+		EmojiInfo: emoji_models.EmojiInfo{
+			Width:  0, // 暂时设为0，后续可以通过图片处理获取实际尺寸
+			Height: 0,
+		},
 		Status:  1, // 默认状态为正常
-		Version: 0, // 暂时设为0
+		Version: emojiVersion,
 	}
 
 	err = l.svcCtx.DB.Create(&emoji).Error
@@ -94,13 +101,16 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 		}
 	}
 
+	// 生成表情包内容版本号
+	contentVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_emoji", "package_id", pkg.PackageID)
+
 	// 创建表情包与表情的关联
 	emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
 		RelationID: uuid.New().String(),
 		PackageID:  pkg.PackageID,
 		EmojiID:    emoji.EmojiID,
 		SortOrder:  maxSortOrder + 1, // 添加到末尾
-		Version:    0,                // 暂时设为0，后续需要实现版本控制
+		Version:    contentVersion,
 	}
 
 	err = l.svcCtx.DB.Create(&emojiPackageEmoji).Error

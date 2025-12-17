@@ -47,12 +47,13 @@ func (l *GetEmojiPackageContentsByPackageIdsLogic) GetEmojiPackageContentsByPack
 	var contentItems []types.EmojiPackageContentDetailItem
 	for _, content := range contents {
 		contentItems = append(contentItems, types.EmojiPackageContentDetailItem{
-			PackageID: content.PackageID,
-			EmojiID:   content.EmojiID,
-			SortOrder: content.SortOrder,
-			Version:   content.Version,
-			CreateAt:  time.Time(content.CreatedAt).UnixMilli(),
-			UpdateAt:  time.Time(content.UpdatedAt).UnixMilli(),
+			RelationID: content.RelationID,
+			PackageID:  content.PackageID,
+			EmojiID:    content.EmojiID,
+			SortOrder:  content.SortOrder,
+			Version:    content.Version,
+			CreateAt:   time.Time(content.CreatedAt).UnixMilli(),
+			UpdateAt:   time.Time(content.UpdatedAt).UnixMilli(),
 		})
 	}
 

@@ -26,37 +26,81 @@ func NewGetEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmoj
 
 // ========== 用户相关表情基础数据同步 ==========
 func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEmojisRes, error) {
-	// 根据时间戳找到用户新增收藏的表情记录
-	var collectRecords []struct {
-		EmojiID   string    `gorm:"column:emoji_id"`
-		UpdatedAt time.Time `gorm:"column:updated_at"`
+	// 获取用户相关的表情ID列表：
+	// 1. 用户直接收藏的表情
+	// 2. 用户收藏的表情包中包含的表情
+
+	var userEmojiIDs []string
+	var packageEmojiIDs []string
+
+	// 1. 查询用户收藏的表情ID
+	var userCollectRecords []struct {
+		EmojiID string `gorm:"column:emoji_id"`
 	}
-
-	collectQuery := l.svcCtx.DB.Table("emoji_collect_emojis").Where("user_id = ?", in.UserId)
-
-	// 时间戳过滤：只返回更新时间大于since的收藏记录
-	if in.Since > 0 {
-		sinceTime := time.UnixMilli(in.Since)
-		collectQuery = collectQuery.Where("updated_at > ?", sinceTime)
-	}
-
-	err := collectQuery.Select("emoji_id, updated_at").Find(&collectRecords).Error
+	err := l.svcCtx.DB.Table("emoji_collect_emojis").Where("user_id = ?", in.UserId).
+		Select("emoji_id").Find(&userCollectRecords).Error
 	if err != nil {
-		l.Errorf("查询用户新增收藏表情记录失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
+		l.Errorf("查询用户收藏表情失败: userId=%s, error=%v", in.UserId, err)
 		return nil, err
 	}
 
-	if len(collectRecords) == 0 {
+	for _, record := range userCollectRecords {
+		userEmojiIDs = append(userEmojiIDs, record.EmojiID)
+	}
+
+	// 2. 查询用户收藏的表情包中包含的表情ID
+	var packageCollectRecords []struct {
+		PackageID string `gorm:"column:package_id"`
+	}
+	err = l.svcCtx.DB.Table("emoji_package_collects").Where("user_id = ?", in.UserId).
+		Select("package_id").Find(&packageCollectRecords).Error
+	if err != nil {
+		l.Errorf("查询用户收藏表情包失败: userId=%s, error=%v", in.UserId, err)
+		return nil, err
+	}
+
+	if len(packageCollectRecords) > 0 {
+		packageIDs := make([]string, 0, len(packageCollectRecords))
+		for _, record := range packageCollectRecords {
+			packageIDs = append(packageIDs, record.PackageID)
+		}
+
+		// 查询这些表情包包含的所有表情ID
+		var packageContentRecords []struct {
+			EmojiID string `gorm:"column:emoji_id"`
+		}
+		err = l.svcCtx.DB.Table("emoji_package_emojis").Where("package_id IN ?", packageIDs).
+			Select("emoji_id").Find(&packageContentRecords).Error
+		if err != nil {
+			l.Errorf("查询表情包内容失败: userId=%s, packageIds=%v, error=%v", in.UserId, packageIDs, err)
+			return nil, err
+		}
+
+		for _, record := range packageContentRecords {
+			packageEmojiIDs = append(packageEmojiIDs, record.EmojiID)
+		}
+	}
+
+	// 合并并去重表情ID
+	emojiIDMap := make(map[string]bool)
+	for _, id := range userEmojiIDs {
+		emojiIDMap[id] = true
+	}
+	for _, id := range packageEmojiIDs {
+		emojiIDMap[id] = true
+	}
+
+	if len(emojiIDMap) == 0 {
 		return &emoji_rpc.GetEmojisRes{
 			EmojiVersions:   []*emoji_rpc.EmojiVersionItem{},
 			ServerTimestamp: time.Now().UnixMilli(),
 		}, nil
 	}
 
-	// 提取表情ID列表
-	emojiIDs := make([]string, 0, len(collectRecords))
-	for _, record := range collectRecords {
-		emojiIDs = append(emojiIDs, record.EmojiID)
+	// 转换为ID列表
+	allEmojiIDs := make([]string, 0, len(emojiIDMap))
+	for id := range emojiIDMap {
+		allEmojiIDs = append(allEmojiIDs, id)
 	}
 
 	// 获取这些表情的基础信息
@@ -65,14 +109,15 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 		Version int64  `gorm:"column:version"`
 	}
 
-	err = l.svcCtx.DB.Table("emojis").Where("emoji_id IN ? AND status = 1", emojiIDs).
+	err = l.svcCtx.DB.Table("emojis").Where("emoji_id IN ? AND status = 1", allEmojiIDs).
 		Select("emoji_id, version").Find(&emojis).Error
 	if err != nil {
-		l.Errorf("查询表情基础信息失败: emojiIds=%v, error=%v", emojiIDs, err)
+		l.Errorf("查询表情基础信息失败: userId=%s, emojiIds=%v, error=%v", in.UserId, allEmojiIDs, err)
 		return nil, err
 	}
 
-	l.Infof("用户 %s 新增表情数据: 收藏记录=%d, 表情信息=%d", in.UserId, len(collectRecords), len(emojis))
+	l.Infof("用户 %s 表情基础数据同步: 直接收藏=%d, 表情包包含=%d, 总计=%d, 有效表情=%d",
+		in.UserId, len(userEmojiIDs), len(packageEmojiIDs), len(emojiIDMap), len(emojis))
 
 	// 转换为版本摘要格式
 	var emojiVersions []*emoji_rpc.EmojiVersionItem

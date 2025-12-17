@@ -61,12 +61,13 @@ type EmojiPackageCollectDetailItem struct {
 }
 
 type EmojiPackageContentDetailItem struct {
-	PackageID string `json:"packageId"`
-	EmojiID   string `json:"emojiId"`
-	SortOrder int    `json:"sortOrder"`
-	Version   int64  `json:"version"`
-	CreateAt  int64  `json:"createAt"`
-	UpdateAt  int64  `json:"updateAt"`
+	RelationID string `json:"relationId"`
+	PackageID  string `json:"packageId"`
+	EmojiID    string `json:"emojiId"`
+	SortOrder  int    `json:"sortOrder"`
+	Version    int64  `json:"version"`
+	CreateAt   int64  `json:"createAt"`
+	UpdateAt   int64  `json:"updateAt"`
 }
 
 type EmojiPackageDetailItem struct {
