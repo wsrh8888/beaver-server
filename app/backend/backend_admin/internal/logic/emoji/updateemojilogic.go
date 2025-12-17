@@ -65,6 +65,10 @@ func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.U
 
 	// 更新表情信息
 	if len(updateData) > 0 {
+		// 生成新的版本号
+		newVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+		updateData["version"] = newVersion
+
 		err = l.svcCtx.DB.Model(&emoji).Updates(updateData).Error
 		if err != nil {
 			logx.Errorf("更新表情信息失败: %v", err)

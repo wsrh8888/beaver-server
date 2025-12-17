@@ -39,6 +39,9 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 		return nil, errors.New("该用户已存在同名表情包")
 	}
 
+	// 生成表情包版本号
+	packageVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package", "", "")
+
 	// 创建表情包
 	pkg := emoji_models.EmojiPackage{
 		PackageID:   uuid.New().String(),
@@ -47,6 +50,7 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 		Description: req.Description,
 		Type:        req.Type,
 		Status:      1, // 默认状态为1
+		Version:     packageVersion,
 	}
 
 	// 如果提供了封面文件，则设置

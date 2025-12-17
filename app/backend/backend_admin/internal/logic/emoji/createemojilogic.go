@@ -40,13 +40,20 @@ func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.C
 		return nil, errors.New("该创建者已存在同名表情")
 	}
 
+	// 生成表情版本号
+	emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+
 	// 创建表情
 	emoji := emoji_models.Emoji{
 		EmojiID: uuid.New().String(),
 		FileKey: req.FileKey,
 		Title:   req.Title,
+		EmojiInfo: emoji_models.EmojiInfo{
+			Width:  0, // 暂时设为0，后续可以通过图片处理获取实际尺寸
+			Height: 0,
+		},
 		Status:  1, // 默认状态为正常
-		Version: 0, // 暂时设为0
+		Version: emojiVersion,
 	}
 
 	err = l.svcCtx.DB.Create(&emoji).Error
