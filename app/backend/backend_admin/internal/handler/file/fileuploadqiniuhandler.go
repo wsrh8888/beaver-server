@@ -11,6 +11,7 @@ import (
 	"beaver/utils/md5"
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -43,6 +44,15 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		logx.Info("成功获取上传文件:", fileHead.Filename, "大小:", fileHead.Size)
+
+		// 获取fileInfo
+		fileInfoStr := r.FormValue("fileInfo")
+
+		// 确定文件来源
+		source := file_models.QiniuSource
+		if req.Source != "" && req.Source == "local" {
+			source = file_models.LocalSource
+		}
 
 		// 文件后缀白名单
 		originalName := fileHead.Filename
@@ -142,7 +152,23 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Md5:          fileMd5,
 			FileKey:      fileKeyWithSuffix,
 			Type:         fileType,
+			Source:       source,
 		}
+
+		// 解析fileInfo（必传字段）
+		if fileInfoStr == "" {
+			logx.Error("fileInfo不能为空")
+			response.Response(r, w, nil, errors.New("fileInfo不能为空"))
+			return
+		}
+
+		fileInfo := &file_models.FileInfo{}
+		if err := json.Unmarshal([]byte(fileInfoStr), fileInfo); err != nil {
+			logx.Errorf("解析fileInfo失败: %v, 原始数据: %s", err, fileInfoStr)
+			response.Response(r, w, nil, errors.New("fileInfo格式不正确"))
+			return
+		}
+		newFileModel.FileInfo = fileInfo
 		err = svcCtx.DB.Create(newFileModel).Error
 		if err != nil {
 			logx.Error("创建数据库记录失败:", err)

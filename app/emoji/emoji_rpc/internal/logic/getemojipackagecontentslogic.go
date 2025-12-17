@@ -28,16 +28,10 @@ func NewGetEmojiPackageContentsLogic(ctx context.Context, svcCtx *svc.ServiceCon
 func (l *GetEmojiPackageContentsLogic) GetEmojiPackageContents(in *emoji_rpc.GetEmojiPackageContentsReq) (*emoji_rpc.GetEmojiPackageContentsRes, error) {
 	var packageContents []emoji_models.EmojiPackageEmoji
 
-	// 时间戳过滤：只返回更新时间大于since的记录
-	query := l.svcCtx.DB
-	if in.Since > 0 {
-		sinceTime := time.UnixMilli(in.Since)
-		query = query.Where("updated_at > ?", sinceTime)
-	}
-
-	err := query.Find(&packageContents).Error
+	// 查询所有表情包内容（去掉时间戳过滤，确保同步所有数据）
+	err := l.svcCtx.DB.Find(&packageContents).Error
 	if err != nil {
-		l.Errorf("查询表情包内容版本失败: since=%d, error=%v", in.Since, err)
+		l.Errorf("查询表情包内容失败: error=%v", err)
 		return nil, err
 	}
 

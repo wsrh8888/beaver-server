@@ -71,8 +71,8 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 		FileKey: req.FileKey,
 		Title:   req.Title,
 		EmojiInfo: emoji_models.EmojiInfo{
-			Width:  0, // 暂时设为0，后续可以通过图片处理获取实际尺寸
-			Height: 0,
+			Width:  req.EmojiInfo.Width,
+			Height: req.EmojiInfo.Height,
 		},
 		Status:  1, // 默认状态为正常
 		Version: emojiVersion,
