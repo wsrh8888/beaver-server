@@ -1,5 +1,4 @@
 node_modules
 package.lock.json
 static/*
-.exe
-*./exe
+*.exe
