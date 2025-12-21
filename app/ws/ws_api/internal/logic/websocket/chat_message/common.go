@@ -159,7 +159,7 @@ func buildResponseData(rpcResp *chat_rpc.SendMsgRes, originalMsg json.RawMessage
 			"nickName": rpcResp.Sender.NickName,
 		},
 		"conversationType": rpcResp.ConversationType,
-		"createAt":         rpcResp.CreateAt,
+		"createdAt":        rpcResp.CreatedAt,
 		"msgPreview":       rpcResp.MsgPreview,
 		"status":           rpcResp.Status,
 		"seq":              rpcResp.Seq,

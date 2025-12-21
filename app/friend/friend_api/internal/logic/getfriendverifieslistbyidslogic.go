@@ -54,8 +54,8 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(req *types.
 			Message:    verify.Message,
 			Source:     verify.Source,
 			Version:    verify.Version,
-			CreateAt:   time.Time(verify.CreatedAt).UnixMilli(),
-			UpdateAt:   time.Time(verify.UpdatedAt).UnixMilli(),
+			CreatedAt:  time.Time(verify.CreatedAt).UnixMilli(),
+			UpdatedAt:  time.Time(verify.UpdatedAt).UnixMilli(),
 		})
 	}
 

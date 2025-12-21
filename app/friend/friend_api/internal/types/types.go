@@ -10,8 +10,8 @@ type FriendByUuid struct {
 	Source         string `json:"source"`         // 添加好友来源
 	IsDeleted      bool   `json:"isDeleted"`      // 是否已删除
 	Version        int64  `json:"version"`        // 版本号
-	CreateAt       int64  `json:"createAt"`       // 创建时间戳
-	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
+	CreatedAt      int64  `json:"createdAt"`      // 创建时间戳
+	UpdatedAt      int64  `json:"updatedAt"`      // 更新时间戳
 }
 
 type FriendInfoReq struct {
@@ -62,8 +62,8 @@ type FriendVerifyById struct {
 	Message    string `json:"message"`    // 附加消息
 	Source     string `json:"source"`     // 添加好友来源
 	Version    int64  `json:"version"`    // 版本号
-	CreateAt   int64  `json:"createAt"`   // 创建时间戳
-	UpdateAt   int64  `json:"updateAt"`   // 更新时间戳
+	CreatedAt  int64  `json:"createdAt"`  // 创建时间戳
+	UpdatedAt  int64  `json:"updatedAt"`  // 更新时间戳
 }
 
 type GetFriendVerifiesListByIdsReq struct {

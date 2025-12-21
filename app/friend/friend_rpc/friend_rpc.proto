@@ -26,8 +26,8 @@ message FriendListById {
   string source = 6; // 添加好友来源
   bool isDeleted = 7; // 是否已删除
   int64 version = 8; // 版本号
-  int64 createAt = 9; // 创建时间
-  int64 updateAt = 10; // 更新时间
+  int64 createdAt = 9; // 创建时间
+  int64 updatedAt = 10; // 更新时间
 }
 
 message GetFriendsListByIdsRes {
@@ -78,8 +78,8 @@ message FriendVerifyListById {
   string message = 6; // 附加消息
   string source = 7; // 添加好友来源
   int64 version = 8; // 版本号
-  int64 createAt = 9; // 创建时间
-  int64 updateAt = 10; // 更新时间
+  int64 createdAt = 9; // 创建时间
+  int64 updatedAt = 10; // 更新时间
 }
 
 message GetFriendVerifiesListByIdsRes {

@@ -26,6 +26,11 @@ type CreateMomentCommentRes struct {
 	CreatedAt        string `json:"createdAt"`        // 评论时间
 }
 
+type CreateMomentFileInfo struct {
+	FileKey string `json:"fileKey"` // 文件名
+	Type    uint32 `json:"type"`    // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
+}
+
 type CreateMomentReq struct {
 	UserID  string           `header:"Beaver-User-Id"` // 用户ID
 	Content string           `json:"content"`          // 动态内容
@@ -33,6 +38,18 @@ type CreateMomentReq struct {
 }
 
 type CreateMomentRes struct {
+	Id           string                 `json:"id"`           // 动态ID
+	UserID       string                 `json:"userId"`       // 用户ID
+	UserName     string                 `json:"userName"`     // 用户名
+	Avatar       string                 `json:"avatar"`       // 用户头像
+	Content      string                 `json:"content"`      // 动态内容
+	Files        []CreateMomentFileInfo `json:"files"`        // 文件信息列表
+	Comments     []interface{}          `json:"comments"`     // 评论列表（创建时为空）
+	Likes        []interface{}          `json:"likes"`        // 点赞列表（创建时为空）
+	CommentCount int64                  `json:"commentCount"` // 总评论数（创建时为0）
+	LikeCount    int64                  `json:"likeCount"`    // 总点赞数（创建时为0）
+	IsLiked      bool                   `json:"isLiked"`      // 当前用户是否已点赞（创建时为false）
+	CreatedAt    string                 `json:"createdAt"`    // 动态创建时间
 }
 
 type DeleteMomentReq struct {

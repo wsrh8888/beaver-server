@@ -77,8 +77,8 @@ func (l *GetEmojisByIdsLogic) GetEmojisByIds(req *types.GetEmojisByIdsReq) (resp
 			PackageID: emojiToPackage[emoji.EmojiID],
 			Status:    emoji.Status,
 			Version:   emoji.Version,
-			CreateAt:  time.Time(emoji.CreatedAt).UnixMilli(),
-			UpdateAt:  time.Time(emoji.UpdatedAt).UnixMilli(),
+			CreatedAt: time.Time(emoji.CreatedAt).UnixMilli(),
+			UpdatedAt: time.Time(emoji.UpdatedAt).UnixMilli(),
 		})
 	}
 

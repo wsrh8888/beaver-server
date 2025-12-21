@@ -52,8 +52,8 @@ func (l *GetEmojiPackageContentsByPackageIdsLogic) GetEmojiPackageContentsByPack
 			EmojiID:    content.EmojiID,
 			SortOrder:  content.SortOrder,
 			Version:    content.Version,
-			CreateAt:   time.Time(content.CreatedAt).UnixMilli(),
-			UpdateAt:   time.Time(content.UpdatedAt).UnixMilli(),
+			CreatedAt:  time.Time(content.CreatedAt).UnixMilli(),
+			UpdatedAt:  time.Time(content.UpdatedAt).UnixMilli(),
 		})
 	}
 

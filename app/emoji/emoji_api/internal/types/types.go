@@ -26,8 +26,8 @@ type EmojiCollectDetailItem struct {
 	PackageID      *string `json:"packageId"`
 	IsDeleted      bool    `json:"isDeleted"`
 	Version        int64   `json:"version"`
-	CreateAt       int64   `json:"createAt"`
-	UpdateAt       int64   `json:"updateAt"`
+	CreatedAt      int64   `json:"createdAt"`
+	UpdatedAt      int64   `json:"updatedAt"`
 }
 
 type EmojiDetailItem struct {
@@ -38,8 +38,8 @@ type EmojiDetailItem struct {
 	PackageID *string           `json:"packageId"`
 	Status    int8              `json:"status"`
 	Version   int64             `json:"version"`
-	CreateAt  int64             `json:"createAt"`
-	UpdateAt  int64             `json:"updateAt"`
+	CreatedAt int64             `json:"createdAt"`
+	UpdatedAt int64             `json:"updatedAt"`
 }
 
 type EmojiItem struct {
@@ -56,8 +56,8 @@ type EmojiPackageCollectDetailItem struct {
 	PackageID        string `json:"packageId"`
 	IsDeleted        bool   `json:"isDeleted"`
 	Version          int64  `json:"version"`
-	CreateAt         int64  `json:"createAt"`
-	UpdateAt         int64  `json:"updateAt"`
+	CreatedAt        int64  `json:"createdAt"`
+	UpdatedAt        int64  `json:"updatedAt"`
 }
 
 type EmojiPackageContentDetailItem struct {
@@ -66,8 +66,8 @@ type EmojiPackageContentDetailItem struct {
 	EmojiID    string `json:"emojiId"`
 	SortOrder  int    `json:"sortOrder"`
 	Version    int64  `json:"version"`
-	CreateAt   int64  `json:"createAt"`
-	UpdateAt   int64  `json:"updateAt"`
+	CreatedAt  int64  `json:"createdAt"`
+	UpdatedAt  int64  `json:"updatedAt"`
 }
 
 type EmojiPackageDetailItem struct {
@@ -79,8 +79,8 @@ type EmojiPackageDetailItem struct {
 	Type         string `json:"type"`
 	Status       int8   `json:"status"`
 	CollectCount int    `json:"collectCount"`
-	CreateAt     int64  `json:"createAt"`
-	UpdateAt     int64  `json:"updateAt"`
+	CreatedAt    int64  `json:"createdAt"`
+	UpdatedAt    int64  `json:"updatedAt"`
 	Version      int64  `json:"version"`
 }
 

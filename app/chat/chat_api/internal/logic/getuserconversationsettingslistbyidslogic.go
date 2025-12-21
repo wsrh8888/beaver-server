@@ -46,8 +46,8 @@ func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsL
 			IsMuted:        uc.IsMuted,
 			UserReadSeq:    uc.UserReadSeq,
 			Version:        uc.Version,
-			CreateAt:       time.Time(uc.CreatedAt).Unix(),
-			UpdateAt:       time.Time(uc.UpdatedAt).Unix(),
+			CreatedAt:      time.Time(uc.CreatedAt).Unix(),
+			UpdatedAt:      time.Time(uc.UpdatedAt).Unix(),
 		})
 	}
 
