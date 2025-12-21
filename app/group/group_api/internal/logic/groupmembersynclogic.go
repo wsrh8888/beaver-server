@@ -49,14 +49,14 @@ func (l *GroupMemberSyncLogic) GroupMemberSync(req *types.GroupMemberSyncReq) (r
 
 		for _, member := range members {
 			resp.GroupMembers = append(resp.GroupMembers, types.GroupMemberSyncItem{
-				GroupID:  member.GroupID,
-				UserID:   member.UserID,
-				Role:     member.Role,
-				Status:   member.Status,
-				JoinTime: member.JoinTime.Unix(),
-				Version:  member.Version,
-				CreateAt: time.Time(member.CreatedAt).Unix(),
-				UpdateAt: time.Time(member.UpdatedAt).Unix(),
+				GroupID:   member.GroupID,
+				UserID:    member.UserID,
+				Role:      member.Role,
+				Status:    member.Status,
+				JoinTime:  member.JoinTime.Unix(),
+				Version:   member.Version,
+				CreatedAt: time.Time(member.CreatedAt).Unix(),
+				UpdatedAt: time.Time(member.UpdatedAt).Unix(),
 			})
 		}
 	}

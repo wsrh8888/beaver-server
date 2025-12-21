@@ -94,7 +94,7 @@ type ConversationInfoRes {
 	Avatar         string `json:"avatar"`
 	NickName       string `json:"nickName"`
 	MsgPreview     string `json:"msg_preview"` //消息预览
-	UpdateAt       string `json:"update_at"` //消息时间
+	UpdatedAt       string `json:"updated_at"` //消息时间
 	IsTop          bool   `json:"is_top"` //是否置顶
 	ConversationID string `json:"conversationId"` //会话id
 	ChatType       int    `json:"chatType"` //会话类型 1:好友 2:群聊 3:AI机器人
@@ -112,7 +112,7 @@ type SendMsgRes {
 	ConversationID string `json:"conversationId"` //会话id
 	Msg            Msg    `json:"msg"`
 	Sender         Sender `json:"sender"` //发送者
-	CreateAt       string `json:"create_at"` //消息时间
+	CreatedAt       string `json:"created_at"` //消息时间
 	MsgPreview     string `json:"msgPreview"` //消息预览
 	Status         uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
 	Seq            int64  `json:"seq"` //消息序列号，用于数据同步
@@ -138,7 +138,7 @@ type Message {
 	ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
 	Msg              Msg    `json:"msg"`
 	Sender           Sender `json:"sender"` //发送者
-	CreateAt         string `json:"create_at"` //消息时间
+	CreatedAt         string `json:"created_at"` //消息时间
 	Status           uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
 	Seq              int64  `json:"seq"` //序列号，用于数据同步
 }
@@ -246,7 +246,7 @@ type (
 		Msg              string `json:"msg"` //消息内容JSON字符串
 		IsDeleted        bool   `json:"isDeleted"` //是否已删除
 		Seq              int64  `json:"seq"` //序列号，用于数据同步
-		CreateAt         int64  `json:"createAt"` //创建时间戳
+		CreatedAt         int64  `json:"createdAt"` //创建时间戳
 	}
 )
 
@@ -265,8 +265,8 @@ type (
 		MaxSeq         int64  `json:"maxSeq"` // 会话消息的最大Seq
 		LastMessage    string `json:"lastMessage"` // 会话最后一条消息预览
 		Version        int64  `json:"version"` // 版本号
-		CreateAt       int64  `json:"createAt"` // 创建时间戳
-		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt     int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 
@@ -287,8 +287,8 @@ type (
 		IsMuted        bool   `json:"isMuted"` // 是否免打扰
 		UserReadSeq    int64  `json:"userReadSeq"` // 用户已读序列号
 		Version        int64  `json:"version"` // 版本号
-		CreateAt       int64  `json:"createAt"` // 创建时间戳
-		UpdateAt       int64  `json:"updateAt"` // 更新时间戳
+		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt     int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 

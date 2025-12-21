@@ -280,7 +280,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Msg:              convertedMsg,
 		MsgPreview:       chatModel.MsgPreview,
 		Sender:           sender,
-		CreateAt:         chatModel.CreatedAt.String(),
+		CreatedAt:        chatModel.CreatedAt.String(),
 		Status:           1,
 		ConversationType: uint32(chatModel.ConversationType),
 		Seq:              chatModel.Seq,

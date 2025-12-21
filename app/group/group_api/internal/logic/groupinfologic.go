@@ -51,8 +51,8 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 		Notice:         group.Notice,
 		JoinType:       group.JoinType,
 		Status:         group.Status,
-		CreateAt:       time.Time(group.CreatedAt).Unix(),
-		UpdateAt:       time.Time(group.UpdatedAt).Unix(),
+		CreatedAt:      time.Time(group.CreatedAt).Unix(),
+		UpdatedAt:      time.Time(group.UpdatedAt).Unix(),
 		Version:        group.Version,
 	}, nil
 }

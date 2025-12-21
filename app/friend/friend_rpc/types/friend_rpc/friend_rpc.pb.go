@@ -7,11 +7,12 @@
 package friend_rpc
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -172,8 +173,8 @@ type FriendListById struct {
 	Source         string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`                 // 添加好友来源
 	IsDeleted      bool                   `protobuf:"varint,7,opt,name=isDeleted,proto3" json:"isDeleted,omitempty"`          // 是否已删除
 	Version        int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`              // 版本号
-	CreateAt       int64                  `protobuf:"varint,9,opt,name=createAt,proto3" json:"createAt,omitempty"`            // 创建时间
-	UpdateAt       int64                  `protobuf:"varint,10,opt,name=updateAt,proto3" json:"updateAt,omitempty"`           // 更新时间
+	CreatedAt      int64                  `protobuf:"varint,9,opt,name=createdAt,proto3" json:"createdAt,omitempty"`          // 创建时间
+	UpdatedAt      int64                  `protobuf:"varint,10,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`         // 更新时间
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -266,14 +267,14 @@ func (x *FriendListById) GetVersion() int64 {
 
 func (x *FriendListById) GetCreateAt() int64 {
 	if x != nil {
-		return x.CreateAt
+		return x.CreatedAt
 	}
 	return 0
 }
 
 func (x *FriendListById) GetUpdateAt() int64 {
 	if x != nil {
-		return x.UpdateAt
+		return x.UpdatedAt
 	}
 	return 0
 }
@@ -579,8 +580,8 @@ type FriendVerifyListById struct {
 	Message       string                 `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty"`                   // 附加消息
 	Source        string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`                     // 添加好友来源
 	Version       int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`                  // 版本号
-	CreateAt      int64                  `protobuf:"varint,9,opt,name=createAt,proto3" json:"createAt,omitempty"`                // 创建时间
-	UpdateAt      int64                  `protobuf:"varint,10,opt,name=updateAt,proto3" json:"updateAt,omitempty"`               // 更新时间
+	CreatedAt     int64                  `protobuf:"varint,9,opt,name=createdAt,proto3" json:"createdAt,omitempty"`              // 创建时间
+	UpdatedAt     int64                  `protobuf:"varint,10,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`             // 更新时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -673,14 +674,14 @@ func (x *FriendVerifyListById) GetVersion() int64 {
 
 func (x *FriendVerifyListById) GetCreateAt() int64 {
 	if x != nil {
-		return x.CreateAt
+		return x.CreatedAt
 	}
 	return 0
 }
 
 func (x *FriendVerifyListById) GetUpdateAt() int64 {
 	if x != nil {
-		return x.UpdateAt
+		return x.UpdatedAt
 	}
 	return 0
 }

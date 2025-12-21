@@ -60,8 +60,8 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *friend_rpc.GetFriends
 			Source:         friend.Source,
 			IsDeleted:      friend.IsDeleted,
 			Version:        friend.Version,
-			CreateAt:       time.Time(friend.CreatedAt).UnixMilli(),
-			UpdateAt:       time.Time(friend.UpdatedAt).UnixMilli(),
+			CreatedAt:      time.Time(friend.CreatedAt).UnixMilli(),
+			UpdatedAt:      time.Time(friend.UpdatedAt).UnixMilli(),
 		})
 	}
 

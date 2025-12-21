@@ -60,8 +60,8 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *friend_
 			Message:    verify.Message,
 			Source:     verify.Source,
 			Version:    verify.Version,
-			CreateAt:   time.Time(verify.CreatedAt).UnixMilli(),
-			UpdateAt:   time.Time(verify.UpdatedAt).UnixMilli(),
+			CreatedAt:  time.Time(verify.CreatedAt).UnixMilli(),
+			UpdatedAt:  time.Time(verify.UpdatedAt).UnixMilli(),
 		})
 	}
 

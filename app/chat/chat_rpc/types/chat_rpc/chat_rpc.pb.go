@@ -7,11 +7,12 @@
 package chat_rpc
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -804,7 +805,7 @@ type SendMsgRes struct {
 	ConversationId   string                 `protobuf:"bytes,3,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`         // 会话ID
 	Msg              *Msg                   `protobuf:"bytes,4,opt,name=msg,proto3" json:"msg,omitempty"`                                                     // 消息内容
 	Sender           *Sender                `protobuf:"bytes,5,opt,name=sender,proto3" json:"sender,omitempty"`                                               // 发送者
-	CreateAt         string                 `protobuf:"bytes,6,opt,name=create_at,json=createAt,proto3" json:"create_at,omitempty"`                           // 消息时间
+	CreatedAt        string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`                        // 消息时间
 	MsgPreview       string                 `protobuf:"bytes,7,opt,name=msg_preview,json=msgPreview,proto3" json:"msg_preview,omitempty"`                     // 消息预览
 	Status           uint32                 `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`                                              // 消息状态 1:正常 2:已撤回 3:已编辑
 	Seq              int64                  `protobuf:"varint,9,opt,name=seq,proto3" json:"seq,omitempty"`                                                    // 消息序列号，用于数据同步
@@ -880,7 +881,7 @@ func (x *SendMsgRes) GetSender() *Sender {
 
 func (x *SendMsgRes) GetCreateAt() string {
 	if x != nil {
-		return x.CreateAt
+		return x.CreatedAt
 	}
 	return ""
 }

@@ -52,8 +52,8 @@ func (l *GetEmojiPackageCollectsByIdsLogic) GetEmojiPackageCollectsByIds(req *ty
 			PackageID:        collect.PackageID,
 			IsDeleted:        collect.IsDeleted,
 			Version:          collect.Version,
-			CreateAt:         time.Time(collect.CreatedAt).UnixMilli(),
-			UpdateAt:         time.Time(collect.UpdatedAt).UnixMilli(),
+			CreatedAt:        time.Time(collect.CreatedAt).UnixMilli(),
+			UpdatedAt:        time.Time(collect.UpdatedAt).UnixMilli(),
 		})
 	}
 

@@ -48,8 +48,8 @@ func (l *GetEmojiCollectsByUuidsLogic) GetEmojiCollectsByUuids(req *types.GetEmo
 			EmojiID:        collect.EmojiID,
 			IsDeleted:      collect.IsDeleted,
 			Version:        collect.Version,
-			CreateAt:       time.Time(collect.CreatedAt).UnixMilli(),
-			UpdateAt:       time.Time(collect.UpdatedAt).UnixMilli(),
+			CreatedAt:      time.Time(collect.CreatedAt).UnixMilli(),
+			UpdatedAt:      time.Time(collect.UpdatedAt).UnixMilli(),
 		})
 	}
 

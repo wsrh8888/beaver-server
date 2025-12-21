@@ -38,7 +38,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 	resp = &types.ConversationInfoRes{
 		ConversationID: req.ConversationID,
 		MsgPreview:     "",
-		UpdateAt:       "",
+		UpdatedAt:      "",
 		IsTop:          false,
 	}
 
@@ -52,7 +52,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		if metaErr == nil {
 			resp.MsgPreview = conversationMeta.LastMessage
 		}
-		resp.UpdateAt = userConversation.UpdatedAt.String()
+		resp.UpdatedAt = userConversation.UpdatedAt.String()
 		resp.IsTop = userConversation.IsPinned
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err

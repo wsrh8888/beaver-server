@@ -55,8 +55,8 @@ func (l *GetFriendsListByUuidsLogic) GetFriendsListByUuids(req *types.GetFriends
 			Source:         friend.Source,
 			IsDeleted:      friend.IsDeleted,
 			Version:        friend.Version,
-			CreateAt:       time.Time(friend.CreatedAt).UnixMilli(),
-			UpdateAt:       time.Time(friend.UpdatedAt).UnixMilli(),
+			CreatedAt:      time.Time(friend.CreatedAt).UnixMilli(),
+			UpdatedAt:      time.Time(friend.UpdatedAt).UnixMilli(),
 		})
 	}
 
