@@ -22,15 +22,21 @@ type AddArchitectureRes struct {
 	Id uint `json:"id"` // 创建的记录ID
 }
 
+type AddEmojiInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
 type AddEmojiToPackageReq struct {
-	PackageID string `json:"packageId"`
-	FileName  string `json:"fileName"`
-	Title     string `json:"title"`
-	AuthorID  string `header:"Beaver-User-Id"`
+	PackageId string       `json:"packageId"`
+	FileKey   string       `json:"fileKey"`
+	Title     string       `json:"title"`
+	EmojiInfo AddEmojiInfo `json:"emojiInfo"`
+	AuthorID  string       `header:"Beaver-User-Id"`
 }
 
 type AddEmojiToPackageRes struct {
-	Id string `json:"id"`
+	RelationId string `json:"relationId"`
 }
 
 type AddVersionReq struct {
@@ -126,7 +132,7 @@ type CreateBucketReq struct {
 }
 
 type CreateBucketRes struct {
-	UUID string `json:"uuid"` // 创建的Bucket UUID
+	BucketId string `json:"bucketId"` // 创建的Bucket ID
 }
 
 type CreateEmojiPackageReq struct {
@@ -138,17 +144,18 @@ type CreateEmojiPackageReq struct {
 }
 
 type CreateEmojiPackageRes struct {
-	Id string `json:"id"`
+	PackageId string `json:"packageId"`
 }
 
 type CreateEmojiReq struct {
-	FileName string `json:"fileName"`
-	Title    string `json:"title"`
-	AuthorID string `header:"Beaver-User-Id"`
+	FileKey   string    `json:"fileKey"`
+	Title     string    `json:"title"`
+	EmojiInfo EmojiInfo `json:"emojiInfo"`
+	AuthorID  string    `header:"Beaver-User-Id"`
 }
 
 type CreateEmojiRes struct {
-	Id string `json:"id"`
+	EmojiId string `json:"emojiId"`
 }
 
 type CreateMenuReq struct {
@@ -178,8 +185,8 @@ type CreateUserRes struct {
 }
 
 type DeleteBucketReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID
-	UUID   string `json:"uuid"`             // Bucket UUID
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	BucketId string `json:"bucketId"`         // Bucket ID
 }
 
 type DeleteBucketRes struct {
@@ -193,14 +200,14 @@ type DeleteChatMessageRes struct {
 }
 
 type DeleteEmojiPackageReq struct {
-	PackageID string `json:"packageId"`
+	PackageId string `json:"packageId"`
 }
 
 type DeleteEmojiPackageRes struct {
 }
 
 type DeleteEmojiReq struct {
-	EmojiID string `path:"id"`
+	EmojiId string `path:"emojiId"`
 }
 
 type DeleteEmojiRes struct {
@@ -261,14 +268,14 @@ type DeleteMessagesByTypeRes struct {
 }
 
 type DeleteMomentCommentReq struct {
-	Id uint `path:"id"`
+	CommentId string `path:"commentId"`
 }
 
 type DeleteMomentCommentRes struct {
 }
 
 type DeleteMomentReq struct {
-	Id uint `path:"id"`
+	MomentId string `path:"momentId"`
 }
 
 type DeleteMomentRes struct {
@@ -281,8 +288,14 @@ type DeleteUserReq struct {
 type DeleteUserRes struct {
 }
 
+type EmojiInfo struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
 type FileUploadLocalReq struct {
 	UserID string `header:"Beaver-User-Id"`
+	Source string `form:"source"` // 文件来源：qiniu 或 local
 }
 
 type FileUploadLocalRes struct {
@@ -292,6 +305,7 @@ type FileUploadLocalRes struct {
 
 type FileUploadQiniuReq struct {
 	UserID string `header:"Beaver-User-Id"`
+	Source string `form:"source,optional"` // 文件来源：qiniu 或 local
 }
 
 type FileUploadQiniuRes struct {
@@ -368,7 +382,7 @@ type GetArchitecturesRes struct {
 }
 
 type GetBucketListItem struct {
-	UUID        string `json:"uuid"`        // Bucket UUID
+	BucketId    string `json:"bucketId"`    // Bucket ID
 	Name        string `json:"name"`        // Bucket名称
 	Description string `json:"description"` // Bucket描述
 	CreateUser  string `json:"createUser"`  // 创建者
@@ -469,13 +483,13 @@ type GetCityStrategiesStrategyItem struct {
 }
 
 type GetEmojiCollectListItem struct {
-	Id            string `json:"id"`
-	UserID        string `json:"userId"`
-	EmojiID       string `json:"emojiId"`
-	EmojiTitle    string `json:"emojiTitle"`
-	EmojiFileName string `json:"emojiFileName"`
-	CreateTime    string `json:"createTime"`
-	UpdateTime    string `json:"updateTime"`
+	CollectId    string `json:"collectId"`
+	UserID       string `json:"userId"`
+	EmojiId      string `json:"emojiId"`
+	EmojiTitle   string `json:"emojiTitle"`
+	EmojiFileKey string `json:"emojiFileKey"`
+	CreateTime   string `json:"createTime"`
+	UpdateTime   string `json:"updateTime"`
 }
 
 type GetEmojiCollectListReq struct {
@@ -493,8 +507,8 @@ type GetEmojiCollectListRes struct {
 }
 
 type GetEmojiListItem struct {
-	Id         string `json:"id"`
-	FileName   string `json:"fileName"`
+	EmojiId    string `json:"emojiId"`
+	FileKey    string `json:"fileKey"`
 	Title      string `json:"title"`
 	AuthorID   string `json:"authorId"`
 	CreateTime string `json:"createTime"`
@@ -516,8 +530,8 @@ type GetEmojiListRes struct {
 }
 
 type GetEmojiPackageEmojisItem struct {
-	Id         string `json:"id"`
-	FileName   string `json:"fileName"`
+	EmojiId    string `json:"emojiId"`
+	FileKey    string `json:"fileKey"`
 	Title      string `json:"title"`
 	AuthorID   string `json:"authorId"`
 	CreateTime string `json:"createTime"`
@@ -525,7 +539,7 @@ type GetEmojiPackageEmojisItem struct {
 }
 
 type GetEmojiPackageEmojisReq struct {
-	PackageID string `form:"packageId"`
+	PackageId string `form:"packageId"`
 	Page      int    `form:"page,default=1"`
 	PageSize  int    `form:"pageSize,default=50"`
 }
@@ -536,7 +550,7 @@ type GetEmojiPackageEmojisRes struct {
 }
 
 type GetEmojiPackageListItem struct {
-	Id          string `json:"id"`
+	PackageId   string `json:"packageId"`
 	Title       string `json:"title"`
 	CoverFile   string `json:"coverFile"`
 	UserID      string `json:"userId"`
@@ -782,7 +796,7 @@ type GetGroupDetailReq struct {
 
 type GetGroupDetailRes struct {
 	Id        uint   `json:"id"`
-	Uuid      string `json:"uuid"`
+	GroupId   string `json:"groupId"`
 	Type      int    `json:"type"`
 	Title     string `json:"title"`
 	FileName  string `json:"fileName"`
@@ -795,7 +809,7 @@ type GetGroupDetailRes struct {
 
 type GetGroupListItem struct {
 	Id        uint   `json:"id"`
-	Uuid      string `json:"uuid"`
+	GroupId   string `json:"groupId"`
 	Type      int    `json:"type"`
 	Title     string `json:"title"`
 	FileName  string `json:"fileName"`
@@ -867,8 +881,8 @@ type GetMenuListRes struct {
 }
 
 type GetMomentCommentListItem struct {
-	Id        uint   `json:"id"`
-	MomentId  uint   `json:"momentId"`
+	CommentId string `json:"commentId"`
+	MomentId  string `json:"momentId"`
 	UserId    string `json:"userId"`
 	Content   string `json:"content"`
 	CreatedAt string `json:"createdAt"`
@@ -876,9 +890,9 @@ type GetMomentCommentListItem struct {
 }
 
 type GetMomentCommentListReq struct {
-	Page     int  `form:"page,optional"`
-	Limit    int  `form:"limit,optional"`
-	MomentId uint `form:"momentId"`
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	MomentId string `form:"momentId"`
 }
 
 type GetMomentCommentListRes struct {
@@ -891,11 +905,11 @@ type GetMomentDetailFileInfo struct {
 }
 
 type GetMomentDetailReq struct {
-	Id uint `path:"id"`
+	MomentId string `path:"momentId"`
 }
 
 type GetMomentDetailRes struct {
-	Id        uint                      `json:"id"`
+	MomentId  string                    `json:"momentId"`
 	UserId    string                    `json:"userId"`
 	Content   string                    `json:"content"`
 	Files     []GetMomentDetailFileInfo `json:"files"`
@@ -909,7 +923,7 @@ type GetMomentListFileInfo struct {
 }
 
 type GetMomentListItem struct {
-	Id        uint                    `json:"id"`
+	MomentId  string                  `json:"momentId"`
 	UserId    string                  `json:"userId"`
 	Content   string                  `json:"content"`
 	Files     []GetMomentListFileInfo `json:"files"`
@@ -1056,8 +1070,8 @@ type QueryLogsRes struct {
 }
 
 type RemoveEmojiFromPackageReq struct {
-	PackageID string `json:"packageId"`
-	EmojiID   string `json:"emojiId"`
+	PackageId string `json:"packageId"`
+	EmojiId   string `json:"emojiId"`
 }
 
 type RemoveEmojiFromPackageRes struct {
@@ -1099,6 +1113,8 @@ type SaveFileReq struct {
 	Path         string `json:"path"`         // 文件在七牛云的路径
 	Md5          string `json:"md5"`          // 文件MD5
 	Type         string `json:"type"`         // 文件类型
+	Source       string `json:"source"`       // 文件来源：qiniu 或 local
+	FileInfo     string `json:"fileInfo"`     // 文件信息JSON
 }
 
 type SaveFileRes struct {
@@ -1129,7 +1145,7 @@ type UpdateAuthorityMenuRes struct {
 
 type UpdateBucketReq struct {
 	UserID      string `header:"Beaver-User-Id"`     // 用户ID
-	UUID        string `json:"uuid"`                 // Bucket UUID
+	BucketId    string `json:"bucketId"`             // Bucket ID
 	Name        string `json:"name,optional"`        // Bucket名称
 	Description string `json:"description,optional"` // Bucket描述
 	IsActive    *bool  `json:"isActive,optional"`    // 是否激活
@@ -1156,7 +1172,7 @@ type UpdateCityStrategyRes struct {
 }
 
 type UpdateEmojiPackageReq struct {
-	PackageID   string  `json:"packageId"`
+	PackageId   string  `json:"packageId"`
 	Title       *string `json:"title,optional"`
 	CoverFile   *string `json:"coverFile,optional"`
 	Description *string `json:"description,optional"`
@@ -1168,9 +1184,9 @@ type UpdateEmojiPackageRes struct {
 }
 
 type UpdateEmojiReq struct {
-	EmojiID  string  `path:"id"`
-	FileName *string `json:"fileName,optional"`
-	Title    *string `json:"title,optional"`
+	EmojiId string  `path:"emojiId"`
+	FileKey *string `json:"fileKey,optional"`
+	Title   *string `json:"title,optional"`
 }
 
 type UpdateEmojiRes struct {

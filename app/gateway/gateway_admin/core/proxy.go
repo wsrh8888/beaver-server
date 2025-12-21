@@ -46,6 +46,14 @@ type Proxy struct {
 	redisClient  *redis.Client // Redis 客户端（可选，用于验证 token）
 }
 
+func (p *Proxy) ensureRedis() {
+	if p.redisClient != nil || p.Config.Redis.Addr == "" {
+		return
+	}
+	p.redisClient = core.InitRedis(p.Config.Redis.Addr, p.Config.Redis.Password, p.Config.Redis.Db)
+	logx.Info("Redis 客户端初始化成功，将验证 token 在 Redis 中的有效性")
+}
+
 // isWhiteList 检查路径是否在白名单中
 func (p *Proxy) isWhiteList(path string) bool {
 	for _, whitePath := range p.Config.WhiteList {
@@ -195,17 +203,10 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// 检查后端服务是否已初始化，如果未初始化或需要更新，则尝试更新
-	p.mu.RLock()
-	needsUpdate := p.backendURL == nil || p.reverseProxy == nil ||
-		(p.Config.Etcd != "" && time.Since(p.lastUpdate) > 30*time.Second)
-	p.mu.RUnlock()
-
-	if needsUpdate {
-		if err := p.updateBackendAddr(); err != nil {
-			logx.Errorf("[%s] 更新后端服务地址失败: %v", uuid, err)
-			writeErrorResponse(res, "网关服务未就绪，请稍后重试", http.StatusServiceUnavailable, uuid)
-			return
-		}
+	if err := p.updateBackendAddr(); err != nil {
+		logx.Errorf("[%s] 更新后端服务地址失败: %v", uuid, err)
+		writeErrorResponse(res, "网关服务未就绪，请稍后重试", http.StatusServiceUnavailable, uuid)
+		return
 	}
 
 	// 检查白名单（登录等接口不需要认证）
@@ -219,6 +220,7 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	// 执行认证（白名单接口跳过）
 	if needAuth {
+		p.ensureRedis()
 		if !p.auth(res, req) {
 			writeErrorResponse(res, "认证失败，请先登录", http.StatusUnauthorized, uuid)
 			return
@@ -274,35 +276,4 @@ func getUuid(req *http.Request) string {
 		uuid = req.Header.Get("X-Request-Id")
 	}
 	return uuid
-}
-
-// Init 初始化代理，设置反向代理
-func (p *Proxy) Init() error {
-	// 初始化后端地址
-	if err := p.updateBackendAddr(); err != nil {
-		return fmt.Errorf("初始化后端服务地址失败: %v", err)
-	}
-
-	// 如果使用 etcd 服务发现，启动定期更新任务
-	if p.Config.Etcd != "" {
-		go func() {
-			ticker := time.NewTicker(30 * time.Second) // 每30秒更新一次
-			defer ticker.Stop()
-			for range ticker.C {
-				if err := p.updateBackendAddr(); err != nil {
-					logx.Errorf("定期更新后端服务地址失败: %v", err)
-				}
-			}
-		}()
-	}
-
-	// 初始化 Redis 客户端（如果配置了 Redis，用于验证 token 有效性）
-	if p.Config.Redis.Addr != "" {
-		p.redisClient = core.InitRedis(p.Config.Redis.Addr, p.Config.Redis.Password, p.Config.Redis.Db)
-		logx.Info("Redis 客户端初始化成功，将验证 token 在 Redis 中的有效性")
-	} else {
-		logx.Info("未配置 Redis，将仅验证 JWT 签名（建议配置 Redis 以提升安全性）")
-	}
-
-	return nil
 }

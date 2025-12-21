@@ -29,7 +29,7 @@ func NewUpdateEmailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.UpdateEmailRes, err error) {
 	// 获取要更新的用户信息
 	var user user_models.UserModel
-	if err := l.svcCtx.DB.Where("uuid = ?", req.UserID).First(&user).Error; err != nil {
+	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
@@ -50,7 +50,7 @@ func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.U
 
 	// 检查新邮箱是否已被其他用户使用
 	var existingUser user_models.UserModel
-	if err := l.svcCtx.DB.Where("email = ? AND uuid != ?", req.Email, req.UserID).First(&existingUser).Error; err == nil {
+	if err := l.svcCtx.DB.Where("email = ? AND user_id != ?", req.Email, req.UserID).First(&existingUser).Error; err == nil {
 		return nil, fmt.Errorf("email already exists")
 	} else if err != gorm.ErrRecordNotFound {
 		return nil, err

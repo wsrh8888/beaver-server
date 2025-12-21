@@ -48,7 +48,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 
 	// 先检查群组是否存在
 	var groupCount int64
-	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).Where("uuid = ?", req.GroupID).Count(&groupCount).Error
+	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).Where("group_id = ?", req.GroupID).Count(&groupCount).Error
 	if err != nil {
 		l.Logger.Errorf("查询群组失败: %v", err)
 		return nil, errors.New("查询群组失败")

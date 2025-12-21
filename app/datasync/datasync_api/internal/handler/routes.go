@@ -37,6 +37,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncChatUserConversationsHandler(serverCtx),
 			},
 			{
+				// 获取用户表情收藏的版本信息
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncEmojiCollects",
+				Handler: getSyncEmojiCollectsHandler(serverCtx),
+			},
+			{
+				// 获取表情基础数据版本信息
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncEmojis",
+				Handler: getSyncEmojisHandler(serverCtx),
+			},
+			{
 				// 获取所有需要更新的好友验证版本
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/getSyncFriendVerifies",
@@ -67,22 +79,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncGroupRequestsHandler(serverCtx),
 			},
 			{
-				// 获取所有需要更新的动态评论版本
+				// 获取通知事件版本摘要
 				Method:  http.MethodPost,
-				Path:    "/api/datasync/getSyncMomentComments",
-				Handler: getSyncMomentCommentsHandler(serverCtx),
+				Path:    "/api/datasync/getSyncNotificationEvents",
+				Handler: getSyncNotificationEventsHandler(serverCtx),
 			},
 			{
-				// 获取所有需要更新的动态点赞版本
+				// 获取通知收件箱版本摘要
 				Method:  http.MethodPost,
-				Path:    "/api/datasync/getSyncMomentLikes",
-				Handler: getSyncMomentLikesHandler(serverCtx),
+				Path:    "/api/datasync/getSyncNotificationInboxes",
+				Handler: getSyncNotificationInboxesHandler(serverCtx),
 			},
 			{
-				// 获取所有需要更新的动态版本
+				// 获取通知已读游标版本摘要
 				Method:  http.MethodPost,
-				Path:    "/api/datasync/getSyncMoments",
-				Handler: getSyncMomentsHandler(serverCtx),
+				Path:    "/api/datasync/getSyncNotificationReadCursors",
+				Handler: getSyncNotificationReadCursorsHandler(serverCtx),
 			},
 		},
 	)

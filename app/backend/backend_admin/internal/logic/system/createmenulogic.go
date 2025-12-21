@@ -5,6 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/backend/backend_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +26,29 @@ func NewCreateMenuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Create
 }
 
 func (l *CreateMenuLogic) CreateMenu(req *types.CreateMenuReq) (resp *types.CreateMenuRes, err error) {
-	// todo: add your logic here and delete this line
+	// 创建菜单数据
+	menu := backend_models.AdminSystemMenu{
+		Path:   req.Path,
+		Name:   req.Name,
+		Hidden: req.Hidden,
+		Sort:   req.Sort,
+		Title:  req.Title,
+		Icon:   req.Icon,
+		Status: 1, // 默认启用
+	}
 
-	return
+	// 处理parent_id
+	if req.ParentId != 0 {
+		menu.ParentID = &req.ParentId
+	}
+
+	// 创建菜单
+	err = l.svcCtx.DB.Create(&menu).Error
+	if err != nil {
+		logx.Errorf("创建菜单失败: %v", err)
+		return nil, err
+	}
+
+	logx.Infof("菜单创建成功: ID=%d, Name=%s", menu.Id, menu.Name)
+	return &types.CreateMenuRes{}, nil
 }

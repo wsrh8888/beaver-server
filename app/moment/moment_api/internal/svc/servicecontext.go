@@ -4,6 +4,7 @@ import (
 	"beaver/app/friend/friend_rpc/friend"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/moment/moment_api/internal/config"
+	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -20,7 +21,8 @@ type ServiceContext struct {
 	Redis     *redis.Client
 	FriendRpc friend_rpc.FriendClient
 
-	UserRpc user_rpc.UserClient
+	UserRpc   user_rpc.UserClient
+	NotifyRpc notification.Notification
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -32,5 +34,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:     client,
 		UserRpc:   user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		FriendRpc: friend.NewFriend(zrpc.MustNewClient(c.FriendRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		NotifyRpc: notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 	}
 }

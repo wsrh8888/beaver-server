@@ -44,8 +44,8 @@ func (l *GetConversationsListByIdsLogic) GetConversationsListByIds(req *types.Ge
 			MaxSeq:         conv.MaxSeq,
 			LastMessage:    conv.LastMessage,
 			Version:        conv.Version,
-			CreateAt:       time.Time(conv.CreatedAt).Unix(),
-			UpdateAt:       time.Time(conv.UpdatedAt).Unix(),
+			CreatedAt:      time.Time(conv.CreatedAt).Unix(),
+			UpdatedAt:      time.Time(conv.UpdatedAt).Unix(),
 		})
 	}
 

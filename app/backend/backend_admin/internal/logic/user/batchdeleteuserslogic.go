@@ -29,7 +29,7 @@ func NewBatchDeleteUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *BatchDeleteUsersLogic) BatchDeleteUsers(req *types.BatchDeleteUsersReq) (resp *types.BatchDeleteUsersRes, err error) {
 	// 批量逻辑删除用户（设置状态为删除状态）
 	err = l.svcCtx.DB.Model(&user_models.UserModel{}).
-		Where("uuid IN ?", req.Ids).
+		Where("user_id IN ?", req.Ids).
 		Update("status", 3).Error
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (l *BatchDeleteUsersLogic) BatchDeleteUsers(req *types.BatchDeleteUsersReq)
 	}
 
 	// 或者使用物理删除（根据业务需求选择）
-	// err = l.svcCtx.DB.Where("uuid IN ?", req.Ids).Delete(&user_models.UserModel{}).Error
+	// err = l.svcCtx.DB.Where("user_id IN ?", req.Ids).Delete(&user_models.UserModel{}).Error
 	// if err != nil {
 	//     logx.Errorf("批量删除用户失败: %v", err)
 	//     return nil, errors.New("批量删除用户失败")

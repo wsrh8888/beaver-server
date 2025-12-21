@@ -35,11 +35,20 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		defer file.Close()
 
+		// 获取fileInfo
+		fileInfoStr := r.FormValue("fileInfo")
+
 		// 使用公共工具函数验证和处理文件
 		fileReq, err := filecommon.ValidateAndProcessFile(file, fileHeader, svcCtx)
 		if err != nil {
 			response.Response(r, w, nil, err)
 			return
+		}
+
+		// 确定文件来源
+		source := file_models.LocalSource
+		if req.Source != "" && req.Source == "qiniu" {
+			source = file_models.QiniuSource
 		}
 
 		l := logic.NewFileUploadLocalLogic(r.Context(), svcCtx)
@@ -84,6 +93,8 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Path:         relativePath,
 			Md5:          fileReq.FileMd5,
 			Type:         fileReq.FileType,
+			Source:       string(source),
+			FileInfo:     fileInfoStr,
 		}
 
 		saveLogic := logic.NewSaveFileLogic(r.Context(), svcCtx)

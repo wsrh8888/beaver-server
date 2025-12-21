@@ -126,7 +126,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 			ConversationID:   chat.ConversationID,
 			ConversationType: chat.ConversationType,
 			Sender:           sender,
-			CreateAt:         chat.CreatedAt.String(),
+			CreatedAt:        chat.CreatedAt.String(),
 			Msg:              msg,
 		}
 		chatHistory = append(chatHistory, message)

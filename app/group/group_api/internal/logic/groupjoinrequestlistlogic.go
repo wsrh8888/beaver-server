@@ -93,7 +93,7 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 			ApplicantAvatar: "",                             // 临时值，需要从用户服务获取
 			Message:         request.Message,
 			Status:          request.Status,
-			CreateAt:        time.Time(request.CreatedAt).Unix(),
+			CreatedAt:       time.Time(request.CreatedAt).Unix(),
 			Version:         request.Version,
 		})
 	}

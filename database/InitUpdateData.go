@@ -44,7 +44,7 @@ func initCityStrategyData(db *gorm.DB) error {
 			var count int64
 			// 检查城市策略是否存在
 			db.Model(&update_models.UpdateStrategy{}).
-				Where("app_id = ? AND city_id = ?", app.UUID, city.Code).
+				Where("app_id = ? AND city_id = ?", app.AppID, city.Code).
 				Count(&count)
 
 			if count == 0 {
@@ -52,14 +52,14 @@ func initCityStrategyData(db *gorm.DB) error {
 				defaultStrategy := &update_models.Strategy{}
 
 				newStrategy := update_models.UpdateStrategy{
-					AppID:    app.UUID,
+					AppID:    app.AppID,
 					CityID:   city.Code,
 					Strategy: defaultStrategy,
 					IsActive: true,
 				}
 
 				if err := db.Create(&newStrategy).Error; err != nil {
-					return fmt.Errorf("创建城市策略失败 (App: %s, City: %s): %v", app.UUID, city.Code, err)
+					return fmt.Errorf("创建城市策略失败 (App: %s, City: %s): %v", app.AppID, city.Code, err)
 				}
 				fmt.Printf("已创建城市策略: %s - %s (%s)\n", app.Name, city.Name, city.Code)
 			} else {

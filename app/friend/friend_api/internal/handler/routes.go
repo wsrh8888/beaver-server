@@ -31,15 +31,15 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: friendListHandler(serverCtx),
 			},
 			{
-				// 批量获取好友验证数据（通过UUID）
+				// 批量获取好友验证数据（通过ID）
 				Method:  http.MethodPost,
 				Path:    "/api/friend/getFriendVerifiesListByIds",
 				Handler: getFriendVerifiesListByIdsHandler(serverCtx),
 			},
 			{
-				// 批量获取好友数据（通过UUID）
+				// 批量获取好友数据（通过ID）
 				Method:  http.MethodPost,
-				Path:    "/api/friend/getFriendsListByUuids",
+				Path:    "/api/friend/getFriendsListByIds",
 				Handler: getFriendsListByUuidsHandler(serverCtx),
 			},
 			{

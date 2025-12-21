@@ -16,14 +16,39 @@ type ChatUserConversationVersionItem struct {
 	Version        int64  `json:"version"`        // 用户会话设置版本号
 }
 
+type EmojiCollectVersionItem struct {
+	EmojiCollectId string `json:"emojiCollectId"` // 收藏记录ID
+	Version        int64  `json:"version"`        // 收藏版本号
+}
+
+type EmojiPackageCollectVersionItem struct {
+	PackageCollectId string `json:"packageCollectId"` // 收藏记录ID
+	Version          int64  `json:"version"`          // 收藏版本号
+}
+
+type EmojiPackageContentVersionItem struct {
+	PackageId string `json:"packageId"` // 表情包ID
+	Version   int64  `json:"version"`   // 表情包内容版本号
+}
+
+type EmojiPackageVersionItem struct {
+	PackageId string `json:"packageId"` // 表情包ID
+	Version   int64  `json:"version"`   // 表情包版本号
+}
+
+type EmojiVersionItem struct {
+	EmojiId string `json:"emojiId"` // 表情ID
+	Version int64  `json:"version"` // 表情版本号
+}
+
 type FriendVerifyVersionItem struct {
-	UUID    string `json:"uuid"`    // 验证记录UUID
-	Version int64  `json:"version"` // 验证记录版本号
+	VerifyId string `json:"verifyId"` // 验证记录ID
+	Version  int64  `json:"version"`  // 验证记录版本号
 }
 
 type FriendVersionItem struct {
-	Id      string `json:"id"`      // 好友关系唯一ID
-	Version int64  `json:"version"` // 好友关系版本号
+	FriendId string `json:"friendId"` // 好友ID
+	Version  int64  `json:"version"`  // 好友关系版本号
 }
 
 type GetSyncAllUsersReq struct {
@@ -65,6 +90,29 @@ type GetSyncChatUserConversationsReq struct {
 type GetSyncChatUserConversationsRes struct {
 	UserConversationVersions []ChatUserConversationVersionItem `json:"userConversationVersions"` // 变更的用户会话设置版本摘要
 	ServerTimestamp          int64                             `json:"serverTimestamp"`          // 服务端处理时间戳
+}
+
+type GetSyncEmojiCollectsReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+}
+
+type GetSyncEmojiCollectsRes struct {
+	EmojiCollectVersions        []EmojiCollectVersionItem        `json:"emojiCollectVersions"`        // 用户收藏的表情变更摘要
+	EmojiPackageCollectVersions []EmojiPackageCollectVersionItem `json:"emojiPackageCollectVersions"` // 用户收藏的表情包变更摘要
+	EmojiPackageVersions        []EmojiPackageVersionItem        `json:"emojiPackageVersions"`        // 表情包数据变更摘要
+	EmojiPackageContentVersions []EmojiPackageContentVersionItem `json:"emojiPackageContentVersions"` // 表情包内容变更摘要
+	ServerTimestamp             int64                            `json:"serverTimestamp"`             // 服务端处理时间戳
+}
+
+type GetSyncEmojisReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+}
+
+type GetSyncEmojisRes struct {
+	EmojiVersions   []EmojiVersionItem `json:"emojiVersions"`   // 表情基础数据摘要
+	ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
 type GetSyncFriendVerifiesReq struct {
@@ -117,34 +165,38 @@ type GetSyncGroupRequestsRes struct {
 	ServerTimestamp int64                      `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
-type GetSyncMomentCommentsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+type GetSyncNotificationEventsReq struct {
+	SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
+	Limit        int32 `json:"limit,optional"`        // 可选分页大小
 }
 
-type GetSyncMomentCommentsRes struct {
-	MomentCommentVersions []MomentCommentVersionItem `json:"momentCommentVersions"` // 变更的动态评论版本摘要
-	ServerTimestamp       int64                      `json:"serverTimestamp"`       // 服务端处理时间戳
+type GetSyncNotificationEventsRes struct {
+	EventVersions   []NotificationEventVersionItem `json:"eventVersions"`   // 事件版本摘要
+	MaxVersion      int64                          `json:"maxVersion"`      // 本次返回的最大版本
+	ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
-type GetSyncMomentLikesReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+type GetSyncNotificationInboxesReq struct {
+	UserID       string `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
+	SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
+	Limit        int32  `json:"limit,optional"`        // 可选分页大小
 }
 
-type GetSyncMomentLikesRes struct {
-	MomentLikeVersions []MomentLikeVersionItem `json:"momentLikeVersions"` // 变更的动态点赞版本摘要
-	ServerTimestamp    int64                   `json:"serverTimestamp"`    // 服务端处理时间戳
+type GetSyncNotificationInboxesRes struct {
+	InboxVersions   []NotificationInboxVersionItem `json:"inboxVersions"`   // 收件箱版本摘要
+	MaxVersion      int64                          `json:"maxVersion"`      // 本次返回的最大版本
+	ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
-type GetSyncMomentsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+type GetSyncNotificationReadCursorsReq struct {
+	UserID       string `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
+	SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
 }
 
-type GetSyncMomentsRes struct {
-	MomentVersions  []MomentVersionItem `json:"momentVersions"`  // 变更的动态版本摘要
-	ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
+type GetSyncNotificationReadCursorsRes struct {
+	CursorVersions  []NotificationReadCursorVersionItem `json:"cursorVersions"`  // 已读游标版本摘要
+	MaxVersion      int64                               `json:"maxVersion"`      // 本次返回的最大版本
+	ServerTimestamp int64                               `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
 type GroupInfoVersionItem struct {
@@ -162,19 +214,19 @@ type GroupRequestsVersionItem struct {
 	Version int64  `json:"version"` // 入群申请版本
 }
 
-type MomentCommentVersionItem struct {
-	UserID  string `json:"userId"`  // ⭐ 动态发布者ID（按发布者分组）
-	Version int64  `json:"version"` // 评论版本号
+type NotificationEventVersionItem struct {
+	EventID string `json:"eventId"` // 事件ID
+	Version int64  `json:"version"` // 事件版本
 }
 
-type MomentLikeVersionItem struct {
-	UserID  string `json:"userId"`  // ⭐ 动态发布者ID（按发布者分组）
-	Version int64  `json:"version"` // 点赞版本号
+type NotificationInboxVersionItem struct {
+	EventID string `json:"eventId"` // 事件ID
+	Version int64  `json:"version"` // 收件箱版本
 }
 
-type MomentVersionItem struct {
-	UserID  string `json:"userId"`  // 动态发布者ID
-	Version int64  `json:"version"` // 动态版本号
+type NotificationReadCursorVersionItem struct {
+	Category string `json:"category"` // 分类
+	Version  int64  `json:"version"`  // 游标版本
 }
 
 type UserVersionItem struct {

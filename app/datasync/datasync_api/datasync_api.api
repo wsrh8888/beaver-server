@@ -125,8 +125,8 @@ type (
 		ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	FriendVersionItem {
-		Id      string `json:"id"` // 好友关系唯一ID
-		Version int64  `json:"version"` // 好友关系版本号
+		FriendId string `json:"friendId"` // 好友ID
+		Version  int64  `json:"version"` // 好友关系版本号
 	}
 )
 
@@ -141,56 +141,107 @@ type (
 		ServerTimestamp      int64                     `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	FriendVerifyVersionItem {
-		UUID    string `json:"uuid"` // 验证记录UUID
-		Version int64  `json:"version"` // 验证记录版本号
+		VerifyId string `json:"verifyId"` // 验证记录ID
+		Version  int64  `json:"version"` // 验证记录版本号
 	}
 )
 
-// 同步动态信息
+// 同步表情相关数据（用户收藏的表情和表情包）
 type (
-	GetSyncMomentsReq {
+	GetSyncEmojiCollectsReq {
 		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 	}
-	GetSyncMomentsRes {
-		MomentVersions  []MomentVersionItem `json:"momentVersions"` // 变更的动态版本摘要
-		ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
+	GetSyncEmojiCollectsRes {
+		EmojiCollectVersions        []EmojiCollectVersionItem        `json:"emojiCollectVersions"` // 用户收藏的表情变更摘要
+		EmojiPackageCollectVersions []EmojiPackageCollectVersionItem `json:"emojiPackageCollectVersions"` // 用户收藏的表情包变更摘要
+		EmojiPackageVersions        []EmojiPackageVersionItem        `json:"emojiPackageVersions"` // 表情包数据变更摘要
+		EmojiPackageContentVersions []EmojiPackageContentVersionItem `json:"emojiPackageContentVersions"` // 表情包内容变更摘要
+		ServerTimestamp             int64                            `json:"serverTimestamp"` // 服务端处理时间戳
 	}
-	MomentVersionItem {
-		UserID  string `json:"userId"` // 动态发布者ID
-		Version int64  `json:"version"` // 动态版本号
+	EmojiCollectVersionItem {
+		EmojiCollectId string `json:"emojiCollectId"` // 收藏记录ID
+		Version        int64  `json:"version"` // 收藏版本号
+	}
+	EmojiPackageCollectVersionItem {
+		PackageCollectId string `json:"packageCollectId"` // 收藏记录ID
+		Version          int64  `json:"version"` // 收藏版本号
+	}
+	EmojiPackageVersionItem {
+		PackageId string `json:"packageId"` // 表情包ID
+		Version   int64  `json:"version"` // 表情包版本号
+	}
+	EmojiPackageContentVersionItem {
+		PackageId string `json:"packageId"` // 表情包ID
+		Version   int64  `json:"version"` // 表情包内容版本号
 	}
 )
 
-// 同步动态评论信息
+// 同步表情基础数据
 type (
-	GetSyncMomentCommentsReq {
+	GetSyncEmojisReq {
 		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 	}
-	GetSyncMomentCommentsRes {
-		MomentCommentVersions []MomentCommentVersionItem `json:"momentCommentVersions"` // 变更的动态评论版本摘要
-		ServerTimestamp       int64                      `json:"serverTimestamp"` // 服务端处理时间戳
+	GetSyncEmojisRes {
+		EmojiVersions   []EmojiVersionItem `json:"emojiVersions"` // 表情基础数据摘要
+		ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
 	}
-	MomentCommentVersionItem {
-		UserID  string `json:"userId"` // ⭐ 动态发布者ID（按发布者分组）
-		Version int64  `json:"version"` // 评论版本号
+	EmojiVersionItem {
+		EmojiId string `json:"emojiId"` // 表情ID
+		Version int64  `json:"version"` // 表情版本号
 	}
 )
 
-// 同步动态点赞信息
+// 同步通知事件版本（NotificationEvent）
 type (
-	GetSyncMomentLikesReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	GetSyncNotificationEventsReq {
+		SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
+		Limit        int32 `json:"limit,optional"` // 可选分页大小
 	}
-	GetSyncMomentLikesRes {
-		MomentLikeVersions []MomentLikeVersionItem `json:"momentLikeVersions"` // 变更的动态点赞版本摘要
-		ServerTimestamp    int64                   `json:"serverTimestamp"` // 服务端处理时间戳
+	GetSyncNotificationEventsRes {
+		EventVersions   []NotificationEventVersionItem `json:"eventVersions"` // 事件版本摘要
+		MaxVersion      int64                          `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
 	}
-	MomentLikeVersionItem {
-		UserID  string `json:"userId"` // ⭐ 动态发布者ID（按发布者分组）
-		Version int64  `json:"version"` // 点赞版本号
+	NotificationEventVersionItem {
+		EventID string `json:"eventId"` // 事件ID
+		Version int64  `json:"version"` // 事件版本
+	}
+)
+
+// 同步通知收件箱版本（NotificationInbox，按用户）
+type (
+	GetSyncNotificationInboxesReq {
+		UserID       string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
+		Limit        int32  `json:"limit,optional"` // 可选分页大小
+	}
+	GetSyncNotificationInboxesRes {
+		InboxVersions   []NotificationInboxVersionItem `json:"inboxVersions"` // 收件箱版本摘要
+		MaxVersion      int64                          `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                          `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	NotificationInboxVersionItem {
+		EventID string `json:"eventId"` // 事件ID
+		Version int64  `json:"version"` // 收件箱版本
+	}
+)
+
+// 同步通知已读游标版本（NotificationRead，按用户+分类）
+type (
+	GetSyncNotificationReadCursorsReq {
+		UserID       string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
+	}
+	GetSyncNotificationReadCursorsRes {
+		CursorVersions  []NotificationReadCursorVersionItem `json:"cursorVersions"` // 已读游标版本摘要
+		MaxVersion      int64                               `json:"maxVersion"` // 本次返回的最大版本
+		ServerTimestamp int64                               `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	NotificationReadCursorVersionItem {
+		Category string `json:"category"` // 分类
+		Version  int64  `json:"version"` // 游标版本
 	}
 )
 
@@ -232,17 +283,25 @@ service datasync {
 	@handler getSyncFriendVerifies
 	post /api/datasync/getSyncFriendVerifies (GetSyncFriendVerifiesReq) returns (GetSyncFriendVerifiesRes)
 
-	@doc "获取所有需要更新的动态版本"
-	@handler getSyncMoments
-	post /api/datasync/getSyncMoments (GetSyncMomentsReq) returns (GetSyncMomentsRes)
+	@doc "获取用户表情收藏的版本信息"
+	@handler getSyncEmojiCollects
+	post /api/datasync/getSyncEmojiCollects (GetSyncEmojiCollectsReq) returns (GetSyncEmojiCollectsRes)
 
-	@doc "获取所有需要更新的动态评论版本"
-	@handler getSyncMomentComments
-	post /api/datasync/getSyncMomentComments (GetSyncMomentCommentsReq) returns (GetSyncMomentCommentsRes)
+	@doc "获取表情基础数据版本信息"
+	@handler getSyncEmojis
+	post /api/datasync/getSyncEmojis (GetSyncEmojisReq) returns (GetSyncEmojisRes)
 
-	@doc "获取所有需要更新的动态点赞版本"
-	@handler getSyncMomentLikes
-	post /api/datasync/getSyncMomentLikes (GetSyncMomentLikesReq) returns (GetSyncMomentLikesRes)
+	@doc "获取通知事件版本摘要"
+	@handler getSyncNotificationEvents
+	post /api/datasync/getSyncNotificationEvents (GetSyncNotificationEventsReq) returns (GetSyncNotificationEventsRes)
+
+	@doc "获取通知收件箱版本摘要"
+	@handler getSyncNotificationInboxes
+	post /api/datasync/getSyncNotificationInboxes (GetSyncNotificationInboxesReq) returns (GetSyncNotificationInboxesRes)
+
+	@doc "获取通知已读游标版本摘要"
+	@handler getSyncNotificationReadCursors
+	post /api/datasync/getSyncNotificationReadCursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

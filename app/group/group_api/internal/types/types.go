@@ -35,8 +35,8 @@ type GroupInfoRes struct {
 	JoinType       int8   `json:"joinType"`       // 加入方式
 	Status         int8   `json:"status"`         // 群状态
 	ConversationID string `json:"conversationId"` // 会话ID
-	CreateAt       int64  `json:"createAt"`       // 创建时间戳
-	UpdateAt       int64  `json:"updateAt"`       // 更新时间戳
+	CreatedAt      int64  `json:"createdAt"`      // 创建时间戳
+	UpdatedAt      int64  `json:"updatedAt"`      // 更新时间戳
 	Version        int64  `json:"version"`        // 数据版本号
 }
 
@@ -75,7 +75,7 @@ type GroupJoinRequestItem struct {
 	ApplicantAvatar string `json:"applicantAvatar"` // 申请者头像
 	Message         string `json:"message"`         // 申请消息
 	Status          int8   `json:"status"`          // 状态：0待审 1同意 2拒绝
-	CreateAt        int64  `json:"createAt"`        // 申请时间戳
+	CreatedAt       int64  `json:"createdAt"`       // 申请时间戳
 	Version         int64  `json:"version"`         // 数据版本号
 }
 
@@ -98,8 +98,8 @@ type GroupJoinRequestSyncItem struct {
 	HandledBy       string `json:"handledBy"`       // 处理者ID
 	HandledAt       int64  `json:"handledAt"`       // 处理时间戳
 	Version         int64  `json:"version"`         // 版本号
-	CreateAt        int64  `json:"createAt"`        // 创建时间戳
-	UpdateAt        int64  `json:"updateAt"`        // 更新时间戳
+	CreatedAt       int64  `json:"createdAt"`       // 创建时间戳
+	UpdatedAt       int64  `json:"updatedAt"`       // 更新时间戳
 }
 
 type GroupJoinRequestSyncReq struct {
@@ -158,14 +158,14 @@ type GroupMemberRemoveRes struct {
 }
 
 type GroupMemberSyncItem struct {
-	GroupID  string `json:"groupId"`  // 群组ID
-	UserID   string `json:"userId"`   // 用户ID
-	Role     int8   `json:"role"`     // 成员角色：1群主 2管理员 3普通成员
-	Status   int8   `json:"status"`   // 成员状态：1正常 2退出 3被踢
-	JoinTime int64  `json:"joinTime"` // 加入时间戳
-	Version  int64  `json:"version"`  // 版本号
-	CreateAt int64  `json:"createAt"` // 创建时间戳
-	UpdateAt int64  `json:"updateAt"` // 更新时间戳
+	GroupID   string `json:"groupId"`   // 群组ID
+	UserID    string `json:"userId"`    // 用户ID
+	Role      int8   `json:"role"`      // 成员角色：1群主 2管理员 3普通成员
+	Status    int8   `json:"status"`    // 成员状态：1正常 2退出 3被踢
+	JoinTime  int64  `json:"joinTime"`  // 加入时间戳
+	Version   int64  `json:"version"`   // 版本号
+	CreatedAt int64  `json:"createdAt"` // 创建时间戳
+	UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 }
 
 type GroupMemberSyncReq struct {
@@ -236,8 +236,8 @@ type GroupSyncItem struct {
 	JoinType  int8   `json:"joinType"`  // 加入方式
 	Status    int8   `json:"status"`    // 群状态：1正常 2冻结 3解散
 	Version   int64  `json:"version"`   // 版本号
-	CreateAt  int64  `json:"createAt"`  // 创建时间戳
-	UpdateAt  int64  `json:"updateAt"`  // 更新时间戳
+	CreatedAt int64  `json:"createdAt"` // 创建时间戳
+	UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 }
 
 type GroupSyncReq struct {

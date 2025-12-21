@@ -6,6 +6,7 @@ import (
 	"beaver/app/group/group_api/internal/config"
 	"beaver/app/group/group_rpc/group"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -23,6 +24,7 @@ type ServiceContext struct {
 	UserRpc    user_rpc.UserClient
 	GroupRpc   group_rpc.GroupClient
 	ChatRpc    chat_rpc.ChatClient
+	NotifyRpc  notification.Notification
 	DB         *gorm.DB
 	VersionGen *versionPkg.VersionGenerator
 }
@@ -39,6 +41,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		GroupRpc:   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		ChatRpc:    chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		NotifyRpc:  notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 	}
 }

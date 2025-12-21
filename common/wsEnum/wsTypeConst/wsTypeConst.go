@@ -36,3 +36,14 @@ const (
 	// --------------------------------------------------------
 	UserReceive Type = "user_receive" // 服务端->客户端 用户信息同步
 )
+
+const (
+	// 通知中心
+	NotificationReceive         Type = "notification_receive"           // 服务端->客户端 通知推送
+	NotificationMarkReadReceive Type = "notification_mark_read_receive" // 服务端->客户端 标记已读同步
+)
+
+const (
+	// 表情中心
+	EmojiReceive Type = "emoji_receive" // 服务端->客户端 表情数据同步
+)

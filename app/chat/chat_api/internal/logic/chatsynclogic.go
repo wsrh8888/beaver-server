@@ -104,7 +104,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 			Msg:              msgJson,
 			IsDeleted:        isDeleted,
 			Seq:              chat.Seq,
-			CreateAt:         time.Time(chat.CreatedAt).Unix(),
+			CreatedAt:        time.Time(chat.CreatedAt).Unix(),
 		})
 
 		nextSeq = chat.Seq

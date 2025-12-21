@@ -7,6 +7,45 @@ import (
 
 type MsgType uint32
 
+// UnmarshalJSON 自定义JSON反序列化，支持字符串和数字格式
+func (m *MsgType) UnmarshalJSON(data []byte) error {
+	// 尝试作为数字解析
+	var num uint32
+	if err := json.Unmarshal(data, &num); err == nil {
+		*m = MsgType(num)
+		return nil
+	}
+
+	// 尝试作为字符串解析
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+
+	// 将字符串转换为数字
+	switch str {
+	case "1":
+		*m = TextMsgType
+	case "2":
+		*m = ImageMsgType
+	case "3":
+		*m = VideoMsgType
+	case "4":
+		*m = FileMsgType
+	case "5":
+		*m = VoiceMsgType
+	case "6":
+		*m = EmojiMsgType
+	case "7":
+		*m = NotificationMsgType
+	case "8":
+		*m = AudioFileMsgType
+	default:
+		*m = ImageMsgType
+	}
+	return nil
+}
+
 const (
 	/***
 	 * @description: 文本消息类型
@@ -123,9 +162,11 @@ type AudioFileMsg struct {
 
 // 表情消息结构
 type EmojiMsg struct {
-	FileKey   string `json:"fileKey"`   // 表情图片文件ID（Emoji.FileName）
-	EmojiID   uint32 `json:"emojiId"`   // 表情ID（Emoji.ID，单个表情时使用）
-	PackageID uint32 `json:"packageId"` // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+	FileKey   string `json:"fileKey"`          // 表情图片文件ID（Emoji.FileName）
+	EmojiID   string `json:"emojiId"`          // 表情ID（Emoji.ID，单个表情时使用）
+	PackageID string `json:"packageId"`        // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+	Width     int64  `json:"width,omitempty"`  // 表情图片宽度（可选）
+	Height    int64  `json:"height,omitempty"` // 表情图片高度（可选）
 }
 
 // 回复消息结构

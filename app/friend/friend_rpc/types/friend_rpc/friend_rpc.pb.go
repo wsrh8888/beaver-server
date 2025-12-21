@@ -173,8 +173,8 @@ type FriendListById struct {
 	Source         string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`                 // 添加好友来源
 	IsDeleted      bool                   `protobuf:"varint,7,opt,name=isDeleted,proto3" json:"isDeleted,omitempty"`          // 是否已删除
 	Version        int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`              // 版本号
-	CreateAt       int64                  `protobuf:"varint,9,opt,name=createAt,proto3" json:"createAt,omitempty"`            // 创建时间
-	UpdateAt       int64                  `protobuf:"varint,10,opt,name=updateAt,proto3" json:"updateAt,omitempty"`           // 更新时间
+	CreatedAt      int64                  `protobuf:"varint,9,opt,name=createdAt,proto3" json:"createdAt,omitempty"`          // 创建时间
+	UpdatedAt      int64                  `protobuf:"varint,10,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`         // 更新时间
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -267,14 +267,14 @@ func (x *FriendListById) GetVersion() int64 {
 
 func (x *FriendListById) GetCreateAt() int64 {
 	if x != nil {
-		return x.CreateAt
+		return x.CreatedAt
 	}
 	return 0
 }
 
 func (x *FriendListById) GetUpdateAt() int64 {
 	if x != nil {
-		return x.UpdateAt
+		return x.UpdatedAt
 	}
 	return 0
 }
@@ -520,8 +520,8 @@ func (x *GetFriendVerifyVersionsRes) GetFriendVerifyVersions() []*GetFriendVerif
 // 通过ID获取好友验证列表
 type GetFriendVerifiesListByIdsReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuids         []string               `protobuf:"bytes,1,rep,name=uuids,proto3" json:"uuids,omitempty"`  // 验证记录UUID列表
-	Since         int64                  `protobuf:"varint,2,opt,name=since,proto3" json:"since,omitempty"` // 时间戳，从此时间戳之后获取变更的记录
+	VerifyIds     []string               `protobuf:"bytes,1,rep,name=verify_ids,json=verifyIds,proto3" json:"verify_ids,omitempty"` // 验证记录ID列表
+	Since         int64                  `protobuf:"varint,2,opt,name=since,proto3" json:"since,omitempty"`                         // 时间戳，从此时间戳之后获取变更的记录
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -556,9 +556,9 @@ func (*GetFriendVerifiesListByIdsReq) Descriptor() ([]byte, []int) {
 	return file_friend_rpc_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *GetFriendVerifiesListByIdsReq) GetUuids() []string {
+func (x *GetFriendVerifiesListByIdsReq) GetVerifyIds() []string {
 	if x != nil {
-		return x.Uuids
+		return x.VerifyIds
 	}
 	return nil
 }
@@ -572,16 +572,16 @@ func (x *GetFriendVerifiesListByIdsReq) GetSince() int64 {
 
 type FriendVerifyListById struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`              // 验证记录UUID
-	SendUserId    string                 `protobuf:"bytes,2,opt,name=sendUserId,proto3" json:"sendUserId,omitempty"`  // 发送者用户ID
-	RevUserId     string                 `protobuf:"bytes,3,opt,name=revUserId,proto3" json:"revUserId,omitempty"`    // 接收者用户ID
-	SendStatus    int32                  `protobuf:"varint,4,opt,name=sendStatus,proto3" json:"sendStatus,omitempty"` // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
-	RevStatus     int32                  `protobuf:"varint,5,opt,name=revStatus,proto3" json:"revStatus,omitempty"`   // 接收方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
-	Message       string                 `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty"`        // 附加消息
-	Source        string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`          // 添加好友来源
-	Version       int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`       // 版本号
-	CreateAt      int64                  `protobuf:"varint,9,opt,name=createAt,proto3" json:"createAt,omitempty"`     // 创建时间
-	UpdateAt      int64                  `protobuf:"varint,10,opt,name=updateAt,proto3" json:"updateAt,omitempty"`    // 更新时间
+	VerifyId      string                 `protobuf:"bytes,1,opt,name=verify_id,json=verifyId,proto3" json:"verify_id,omitempty"` // 验证记录ID
+	SendUserId    string                 `protobuf:"bytes,2,opt,name=sendUserId,proto3" json:"sendUserId,omitempty"`             // 发送者用户ID
+	RevUserId     string                 `protobuf:"bytes,3,opt,name=revUserId,proto3" json:"revUserId,omitempty"`               // 接收者用户ID
+	SendStatus    int32                  `protobuf:"varint,4,opt,name=sendStatus,proto3" json:"sendStatus,omitempty"`            // 发送方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+	RevStatus     int32                  `protobuf:"varint,5,opt,name=revStatus,proto3" json:"revStatus,omitempty"`              // 接收方状态：0(未处理)/1(已通过)/2(已拒绝)/3(忽略)/4(删除)
+	Message       string                 `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty"`                   // 附加消息
+	Source        string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`                     // 添加好友来源
+	Version       int64                  `protobuf:"varint,8,opt,name=version,proto3" json:"version,omitempty"`                  // 版本号
+	CreatedAt     int64                  `protobuf:"varint,9,opt,name=createdAt,proto3" json:"createdAt,omitempty"`              // 创建时间
+	UpdatedAt     int64                  `protobuf:"varint,10,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`             // 更新时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -616,9 +616,9 @@ func (*FriendVerifyListById) Descriptor() ([]byte, []int) {
 	return file_friend_rpc_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *FriendVerifyListById) GetUuid() string {
+func (x *FriendVerifyListById) GetVerifyId() string {
 	if x != nil {
-		return x.Uuid
+		return x.VerifyId
 	}
 	return ""
 }
@@ -674,14 +674,14 @@ func (x *FriendVerifyListById) GetVersion() int64 {
 
 func (x *FriendVerifyListById) GetCreateAt() int64 {
 	if x != nil {
-		return x.CreateAt
+		return x.CreatedAt
 	}
 	return 0
 }
 
 func (x *FriendVerifyListById) GetUpdateAt() int64 {
 	if x != nil {
-		return x.UpdateAt
+		return x.UpdatedAt
 	}
 	return 0
 }
@@ -831,7 +831,7 @@ func (x *FriendDetailItem) GetUserId() string {
 	return ""
 }
 
-func (x *FriendDetailItem) GetNickname() string {
+func (x *FriendDetailItem) GetNickName() string {
 	if x != nil {
 		return x.NickName
 	}
@@ -905,7 +905,7 @@ func (x *GetFriendDetailRes) GetFriends() []*FriendDetailItem {
 
 type GetFriendVersionsRes_FriendVersion struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`            // 唯一ID
+	FriendId      string                 `protobuf:"bytes,1,opt,name=friendId,proto3" json:"friendId,omitempty"`
 	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -941,9 +941,9 @@ func (*GetFriendVersionsRes_FriendVersion) Descriptor() ([]byte, []int) {
 	return file_friend_rpc_proto_rawDescGZIP(), []int{6, 0}
 }
 
-func (x *GetFriendVersionsRes_FriendVersion) GetId() string {
+func (x *GetFriendVersionsRes_FriendVersion) GetFriendId() string {
 	if x != nil {
-		return x.Id
+		return x.FriendId
 	}
 	return ""
 }
@@ -957,8 +957,8 @@ func (x *GetFriendVersionsRes_FriendVersion) GetVersion() int64 {
 
 type GetFriendVerifyVersionsRes_FriendVerifyVersion struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`        // 验证记录UUID
-	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"` // 版本号
+	VerifyId      string                 `protobuf:"bytes,1,opt,name=verify_id,json=verifyId,proto3" json:"verify_id,omitempty"` // 验证记录ID
+	Version       int64                  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`                  // 版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -993,9 +993,9 @@ func (*GetFriendVerifyVersionsRes_FriendVerifyVersion) Descriptor() ([]byte, []i
 	return file_friend_rpc_proto_rawDescGZIP(), []int{8, 0}
 }
 
-func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) GetUuid() string {
+func (x *GetFriendVerifyVersionsRes_FriendVerifyVersion) GetVerifyId() string {
 	if x != nil {
-		return x.Uuid
+		return x.VerifyId
 	}
 	return ""
 }
@@ -1039,25 +1039,26 @@ const file_friend_rpc_proto_rawDesc = "" +
 	"\afriends\x18\x01 \x03(\v2\x1a.friend_rpc.FriendListByIdR\afriends\"D\n" +
 	"\x14GetFriendVersionsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"\xa9\x01\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xb5\x01\n" +
 	"\x14GetFriendVersionsRes\x12V\n" +
-	"\x0efriendVersions\x18\x01 \x03(\v2..friend_rpc.GetFriendVersionsRes.FriendVersionR\x0efriendVersions\x1a9\n" +
-	"\rFriendVersion\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\x0efriendVersions\x18\x01 \x03(\v2..friend_rpc.GetFriendVersionsRes.FriendVersionR\x0efriendVersions\x1aE\n" +
+	"\rFriendVersion\x12\x1a\n" +
+	"\bfriendId\x18\x01 \x01(\tR\bfriendId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"J\n" +
 	"\x1aGetFriendVerifyVersionsReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"\xd1\x01\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xda\x01\n" +
 	"\x1aGetFriendVerifyVersionsRes\x12n\n" +
-	"\x14friendVerifyVersions\x18\x01 \x03(\v2:.friend_rpc.GetFriendVerifyVersionsRes.FriendVerifyVersionR\x14friendVerifyVersions\x1aC\n" +
-	"\x13FriendVerifyVersion\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x03R\aversion\"K\n" +
-	"\x1dGetFriendVerifiesListByIdsReq\x12\x14\n" +
-	"\x05uuids\x18\x01 \x03(\tR\x05uuids\x12\x14\n" +
-	"\x05since\x18\x02 \x01(\x03R\x05since\"\xaa\x02\n" +
-	"\x14FriendVerifyListById\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x1e\n" +
+	"\x14friendVerifyVersions\x18\x01 \x03(\v2:.friend_rpc.GetFriendVerifyVersionsRes.FriendVerifyVersionR\x14friendVerifyVersions\x1aL\n" +
+	"\x13FriendVerifyVersion\x12\x1b\n" +
+	"\tverify_id\x18\x01 \x01(\tR\bverifyId\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"T\n" +
+	"\x1dGetFriendVerifiesListByIdsReq\x12\x1d\n" +
+	"\n" +
+	"verify_ids\x18\x01 \x03(\tR\tverifyIds\x12\x14\n" +
+	"\x05since\x18\x02 \x01(\x03R\x05since\"\xb3\x02\n" +
+	"\x14FriendVerifyListById\x12\x1b\n" +
+	"\tverify_id\x18\x01 \x01(\tR\bverifyId\x12\x1e\n" +
 	"\n" +
 	"sendUserId\x18\x02 \x01(\tR\n" +
 	"sendUserId\x12\x1c\n" +
@@ -1079,7 +1080,7 @@ const file_friend_rpc_proto_rawDesc = "" +
 	"\tfriendIds\x18\x02 \x03(\tR\tfriendIds\"\x92\x01\n" +
 	"\x10FriendDetailItem\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
-	"\bnickname\x18\x02 \x01(\tR\bnickname\x12\x16\n" +
+	"\bnickName\x18\x02 \x01(\tR\bnickName\x12\x16\n" +
 	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x12\x16\n" +
 	"\x06notice\x18\x04 \x01(\tR\x06notice\x12\x1a\n" +
 	"\bfriendAt\x18\x05 \x01(\x03R\bfriendAt\"L\n" +

@@ -29,12 +29,6 @@ func main() {
 		Config: config,
 	}
 
-	// 初始化反向代理
-	if err := proxy.Init(); err != nil {
-		fmt.Printf("初始化网关失败: %v\n", err)
-		os.Exit(1)
-	}
-
 	// 创建带有CORS设置的多路复用器
 	n := negroni.New()
 	n.Use(negroni.HandlerFunc(corsMiddleware))

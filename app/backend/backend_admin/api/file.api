@@ -71,6 +71,7 @@ type (
 type (
 	FileUploadLocalReq {
 		UserID string `header:"Beaver-User-Id"`
+		Source string `form:"source"` // 文件来源：qiniu 或 local
 	}
 	FileUploadLocalRes {
 		FileKey      string `json:"fileKey"`
@@ -82,6 +83,7 @@ type (
 type (
 	FileUploadQiniuReq {
 		UserID string `header:"Beaver-User-Id"`
+		Source string `form:"source,optional"` // 文件来源：qiniu 或 local
 	}
 	FileUploadQiniuRes {
 		FileKey      string `json:"fileKey"`
@@ -106,6 +108,8 @@ type (
 		Path         string `json:"path"`         // 文件在七牛云的路径
 		Md5          string `json:"md5"`          // 文件MD5
 		Type         string `json:"type"`         // 文件类型
+		Source       string `json:"source"`       // 文件来源：qiniu 或 local
+		FileInfo     string `json:"fileInfo"`     // 文件信息JSON
 	}
 	SaveFileRes {
 		FileKey string `json:"fileKey"`

@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
@@ -40,9 +39,7 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 
 	// 按表情ID筛选
 	if req.EmojiID != "" {
-		if emojiID, err := strconv.ParseUint(req.EmojiID, 10, 32); err == nil {
-			whereClause = whereClause.Where("emoji_id = ?", emojiID)
-		}
+		whereClause = whereClause.Where("emoji_id = ?", req.EmojiID)
 	}
 
 	// 时间范围筛选
@@ -58,11 +55,24 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 		}
 	}
 
+	// 分页参数校验
+	page := req.Page
+	pageSize := req.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
 	// 分页查询
 	collects, count, err := list_query.ListQuery(l.svcCtx.DB, emoji_models.EmojiCollectEmoji{}, list_query.Option{
 		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
+			Page:  page,
+			Limit: pageSize,
 			Sort:  "created_at desc",
 		},
 		Where: whereClause,
@@ -80,19 +90,19 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 		emojiFileName := ""
 		// 通过 EmojiID 查询 Emoji 信息
 		var emoji emoji_models.Emoji
-		if err := l.svcCtx.DB.Where("id = ?", collect.EmojiID).First(&emoji).Error; err == nil {
+		if err := l.svcCtx.DB.Where("emoji_id = ?", collect.EmojiID).First(&emoji).Error; err == nil {
 			emojiTitle = emoji.Title
-			emojiFileName = emoji.FileName
+			emojiFileName = emoji.FileKey
 		}
 
 		list = append(list, types.GetEmojiCollectListItem{
-			Id:            strconv.Itoa(int(collect.Id)),
-			UserID:        collect.UserID,
-			EmojiID:       strconv.Itoa(int(collect.EmojiID)),
-			EmojiTitle:    emojiTitle,
-			EmojiFileName: emojiFileName,
-			CreateTime:    collect.CreatedAt.String(),
-			UpdateTime:    collect.UpdatedAt.String(),
+			CollectId:    collect.EmojiCollectID,
+			UserID:       collect.UserID,
+			EmojiId:      collect.EmojiID,
+			EmojiTitle:   emojiTitle,
+			EmojiFileKey: emojiFileName,
+			CreateTime:   collect.CreatedAt.String(),
+			UpdateTime:   collect.UpdatedAt.String(),
 		})
 	}
 

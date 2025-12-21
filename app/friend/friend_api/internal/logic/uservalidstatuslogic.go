@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -10,6 +11,8 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/notification/notification_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -46,10 +49,11 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	var friendVerify friend_models.FriendVerifyModel
 	var conversationID string
 	var friendNextVersion int64
-	var friendUUID string
+	var friendID string
+	var decisionStatus int32
 
 	// 查询好友验证记录，确保当前用户是接收方
-	err = l.svcCtx.DB.Take(&friendVerify, "uuid = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&friendVerify, "verify_id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
 	if err != nil {
 		l.Logger.Errorf("好友验证记录不存在: verifyID=%s, userID=%s, error=%v", req.VerifyID, req.UserID, err)
 		return nil, errors.New("好友验证不存在")
@@ -65,6 +69,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	switch req.Status {
 	case 1: // 同意
 		friendVerify.RevStatus = 1
+		decisionStatus = 1
 
 		// 获取下一个版本号
 		friendNextVersion = l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
@@ -73,12 +78,12 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			return nil, errors.New("系统错误")
 		}
 
-		// 生成UUID
-		friendUUID = uuid.New().String()
+		// 生成好友记录ID
+		friendID = uuid.New().String()
 
 		// 创建好友关系，同步来源信息
 		err = l.svcCtx.DB.Create(&friend_models.FriendModel{
-			UUID:       friendUUID, // 使用预生成的UUID
+			FriendID:   friendID, // 使用预生成的ID
 			SendUserID: friendVerify.SendUserID,
 			RevUserID:  friendVerify.RevUserID,
 			Source:     friendVerify.Source, // 同步来源字段
@@ -119,7 +124,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				ConversationId: conversationID,
 				MessageType:    1, // 好友添加成功欢迎消息
 				Content:        "我们已经是好友了，开始聊天吧",
-				RelatedUserId:  friendVerify.SendUserID, // 相关好友ID
+				RelatedUserId:  friendVerify.SendUserID,          // 相关好友ID
+				ReadUserIds:    []string{friendVerify.RevUserID}, // 只有同意方标记为已读
 			})
 			if err != nil {
 				l.Logger.Errorf("异步发送欢迎消息失败: %v", err)
@@ -130,6 +136,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 
 	case 2: // 拒绝
 		friendVerify.RevStatus = 2
+		decisionStatus = 2
 
 	case 4: // 删除
 		// 直接删除验证记录
@@ -166,7 +173,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			}
 		}()
 
-		// 构建表更新数据 - 包含版本号和UUID，让前端知道具体同步哪些数据
+		// 构建表更新数据 - 包含版本号和ID，让前端知道具体同步哪些数据
 		var tableUpdates []map[string]interface{}
 
 		// 所有处理成功的状态都发送friend_verify表的更新
@@ -174,8 +181,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			"table": "friend_verify",
 			"data": []map[string]interface{}{
 				{
-					"version": nextVersion,
-					"uuid":    friendVerify.UUID,
+					"version":  nextVersion,
+					"verifyId": friendVerify.VerifyID,
 				},
 			},
 		}
@@ -187,8 +194,8 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				"table": "friends",
 				"data": []map[string]interface{}{
 					{
-						"version": friendNextVersion,
-						"uuid":    friendUUID, // 使用预生成的UUID
+						"version":  friendNextVersion,
+						"friendId": friendID, // 使用预生成的ID
 					},
 				},
 			}
@@ -206,7 +213,41 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	}()
 
 	l.Logger.Infof("处理好友验证成功: verifyID=%s, userID=%s, status=%d, source=%s", req.VerifyID, req.UserID, req.Status, friendVerify.Source)
-	return &types.FriendValidStatusRes{
+	resp = &types.FriendValidStatusRes{
 		Version: nextVersion,
-	}, nil
+	}
+
+	// 投递处理结果通知给申请人（send_user_id）
+	go func() {
+		eventType := ""
+		switch decisionStatus {
+		case 1:
+			eventType = notification_models.EventTypeFriendRequestAccept
+		case 2:
+			eventType = notification_models.EventTypeFriendRequestReject
+		default:
+			return
+		}
+
+		payload, _ := json.Marshal(map[string]interface{}{
+			"verifyId": req.VerifyID,
+			"status":   decisionStatus,
+		})
+
+		_, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, &notification_rpc.PushEventReq{
+			EventType:   eventType,
+			Category:    notification_models.CategorySocial,
+			FromUserId:  friendVerify.RevUserID, // 审核人
+			TargetId:    req.VerifyID,
+			TargetType:  notification_models.TargetTypeUser,
+			PayloadJson: string(payload),
+			ToUserIds:   []string{friendVerify.SendUserID}, // 申请人
+			DedupHash:   fmt.Sprintf("%s_%d", req.VerifyID, decisionStatus),
+		})
+		if err != nil {
+			l.Logger.Errorf("投递好友审核结果通知失败: %v", err)
+		}
+	}()
+
+	return resp, nil
 }

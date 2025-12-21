@@ -8,6 +8,9 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -77,6 +80,9 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 				return nil, err
 			}
 			l.Infof("更新已读序列号成功: userId=%s, conversationId=%s, readSeq=%d (原值: %d)", req.UserID, req.ConversationID, req.ReadSeq, userConvo.UserReadSeq)
+
+			// 异步推送WebSocket通知
+			go l.notifyReadSeqUpdate(req.UserID, req.ConversationID, version)
 		} else {
 			l.Infof("已读序列号无需更新: userId=%s, conversationId=%s, 当前readSeq=%d, 请求readSeq=%d", req.UserID, req.ConversationID, userConvo.UserReadSeq, req.ReadSeq)
 		}
@@ -85,4 +91,32 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 	return &types.UpdateReadSeqRes{
 		Success: true,
 	}, nil
+}
+
+// notifyReadSeqUpdate 推送已读序列号更新通知
+func (l *UpdateReadSeqLogic) notifyReadSeqUpdate(userID, conversationID string, version int64) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Errorf("推送已读序列号更新通知时发生panic: %v", r)
+		}
+	}()
+
+	// 构建 chat_user_conversations 表更新数据（WebSocket推送使用前端期望的表名）
+	userConversationsUpdate := map[string]interface{}{
+		"table":          "user_conversations", // 前端期望的表名
+		"userId":         userID,
+		"conversationId": conversationID,
+		"data": []map[string]interface{}{
+			{
+				"version": version,
+			},
+		},
+	}
+
+	// 推送WebSocket通知（给自己，同步到其他设备）
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.CHAT_MESSAGE, wsTypeConst.ChatUserConversationReceive, userID, userID, map[string]interface{}{
+		"tableUpdates": []map[string]interface{}{userConversationsUpdate},
+	}, conversationID)
+
+	l.Infof("推送已读序列号更新通知完成: userId=%s, conversationId=%s, version=%d", userID, conversationID, version)
 }
