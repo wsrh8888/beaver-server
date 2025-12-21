@@ -17,9 +17,12 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	FriendRpc zrpc.RpcClientConf
-	GroupRpc  zrpc.RpcClientConf
-	UserRpc   zrpc.RpcClientConf
-	ChatRpc   zrpc.RpcClientConf
-	MomentRpc zrpc.RpcClientConf
+	FriendRpc   zrpc.RpcClientConf
+	GroupRpc    zrpc.RpcClientConf
+	UserRpc     zrpc.RpcClientConf
+	ChatRpc     zrpc.RpcClientConf
+	MomentRpc   zrpc.RpcClientConf
+	EmojiRpc    zrpc.RpcClientConf
+	DatasyncRpc zrpc.RpcClientConf
+	NotificationRpc zrpc.RpcClientConf
 }

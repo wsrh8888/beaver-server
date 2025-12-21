@@ -53,8 +53,10 @@ message AudioFileMsg {
 // 定义EmojiMsg消息 - 表情相关消息
 message EmojiMsg {
   string fileKey = 1; // 表情图片文件ID（Emoji.FileName）
-  uint32 emojiId = 2; // 表情ID（Emoji.ID，单个表情时使用）
-  uint32 packageId = 3; // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+  string emojiId = 2; // 表情ID（Emoji.ID，单个表情时使用）
+  string packageId = 3; // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+  int64 width = 4; // 表情图片宽度（可选，用于保持比例显示）
+  int64 height = 5; // 表情图片高度（可选，用于保持比例显示）
 }
 
 // 定义NotificationMsg消息 - 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
@@ -99,7 +101,7 @@ message SendMsgRes {
   string conversation_id = 3; // 会话ID
   Msg msg = 4; // 消息内容
   Sender sender = 5; // 发送者
-  string create_at = 6; // 消息时间
+  string created_at = 6; // 消息时间
   string msg_preview = 7; // 消息预览
   uint32 status = 8; // 消息状态 1:正常 2:已撤回 3:已编辑
   int64 seq = 9; // 消息序列号，用于数据同步
@@ -206,6 +208,7 @@ message SendNotificationMessageReq {
   int32 messageType = 2;        // 通知消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
   string content = 3;           // 消息内容
   string relatedUserId = 4;     // 相关用户ID（如新加好友的ID）
+  repeated string readUserIds = 5; // 需要标记为已读的用户ID列表（为空表示所有用户都标记为已读）
 }
 
 // 定义SendNotificationMessageRes消息

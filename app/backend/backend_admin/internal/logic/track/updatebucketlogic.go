@@ -42,7 +42,7 @@ func (l *UpdateBucketLogic) UpdateBucket(req *types.UpdateBucketReq) (resp *type
 	}
 
 	// 执行更新操作
-	result := l.svcCtx.DB.Model(&track_models.TrackBucket{}).Where("uuid = ?", req.UUID).Updates(updates)
+	result := l.svcCtx.DB.Model(&track_models.TrackBucket{}).Where("bucket_id = ?", req.BucketId).Updates(updates)
 
 	if result.Error != nil {
 		logx.Errorf("更新Bucket失败: %v", result.Error)
@@ -51,7 +51,7 @@ func (l *UpdateBucketLogic) UpdateBucket(req *types.UpdateBucketReq) (resp *type
 
 	// 检查是否更新了记录
 	if result.RowsAffected == 0 {
-		logx.Errorf("未找到要更新的Bucket: %s", req.UUID)
+		logx.Errorf("未找到要更新的Bucket: %s", req.BucketId)
 		return nil, result.Error
 	}
 

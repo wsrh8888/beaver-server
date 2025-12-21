@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
@@ -29,19 +28,12 @@ func NewUpdateEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 }
 
 func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.UpdateEmojiRes, err error) {
-	// 转换EmojiID为uint
-	emojiID, err := strconv.ParseUint(req.EmojiID, 10, 32)
-	if err != nil {
-		logx.Errorf("表情ID格式错误: %s", req.EmojiID)
-		return nil, errors.New("表情ID格式错误")
-	}
-
 	// 检查表情是否存在
 	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("id = ?", emojiID).First(&emoji).Error
+	err = l.svcCtx.DB.Where("emoji_id = ?", req.EmojiId).First(&emoji).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.EmojiID)
+			logx.Errorf("表情不存在: %s", req.EmojiId)
 			return nil, errors.New("表情不存在")
 		}
 		logx.Errorf("查询表情失败: %v", err)
@@ -50,15 +42,15 @@ func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.U
 
 	// 构建更新数据
 	updateData := make(map[string]interface{})
-	if req.FileName != nil {
-		updateData["file_name"] = *req.FileName
+	if req.FileKey != nil {
+		updateData["file_name"] = *req.FileKey
 	}
 	if req.Title != nil {
 		// 检查同创建者下的表情名称是否重复
 		if *req.Title != emoji.Title {
 			var count int64
 			err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).
-				Where("title = ? AND author_id = ? AND id != ?", *req.Title, emoji.AuthorID, emojiID).
+				Where("title = ? AND emoji_id != ?", *req.Title, req.EmojiId).
 				Count(&count).Error
 			if err != nil {
 				logx.Errorf("检查表情名称失败: %v", err)
@@ -73,6 +65,10 @@ func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.U
 
 	// 更新表情信息
 	if len(updateData) > 0 {
+		// 生成新的版本号
+		newVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+		updateData["version"] = newVersion
+
 		err = l.svcCtx.DB.Model(&emoji).Updates(updateData).Error
 		if err != nil {
 			logx.Errorf("更新表情信息失败: %v", err)

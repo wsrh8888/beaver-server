@@ -49,7 +49,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 
 	// 3. 批量查询用户信息
 	var users []user_models.UserModel
-	err = l.svcCtx.DB.Where("uuid IN (?)", userIDs).Find(&users).Error
+	err = l.svcCtx.DB.Where("user_id IN (?)", userIDs).Find(&users).Error
 	if err != nil {
 		logx.Error("查询用户信息失败:", err)
 		return nil, err
@@ -58,7 +58,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 	// 4. 构建用户信息映射
 	userMap := make(map[string]user_models.UserModel)
 	for _, user := range users {
-		userMap[user.UUID] = user
+		userMap[user.UserID] = user
 	}
 
 	// 5. 构建返回结果
@@ -66,7 +66,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 	for _, member := range groupMembers {
 		if user, ok := userMap[member.UserID]; ok {
 			memberInfo := &group_rpc.GroupMemberInfo{
-				UserID:   user.UUID,
+				UserID:   user.UserID,
 				Username: user.NickName,
 				Avatar:   user.Avatar,
 			}

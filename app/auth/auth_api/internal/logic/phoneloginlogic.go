@@ -60,13 +60,13 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (resp *types.Phon
 	// 生成token，包含设备信息
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
 		NickName: user.NickName,
-		UserID:   user.UUID,
+		UserID:   user.UserID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
 		logx.Errorf("生成token失败: %v", err)
 		return nil, errors.New("服务内部异常")
 	}
-	key := fmt.Sprintf("login_%s_%s", user.UUID, deviceType)
+	key := fmt.Sprintf("login_%s_%s", user.UserID, deviceType)
 	oldLoginInfo, err := l.svcCtx.Redis.Get(key).Result()
 	if err == nil && oldLoginInfo != "" {
 		// 解析旧登录信息
@@ -99,6 +99,6 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (resp *types.Phon
 
 	return &types.PhoneLoginRes{
 		Token:  token,
-		UserID: user.UUID,
+		UserID: user.UserID,
 	}, nil
 }

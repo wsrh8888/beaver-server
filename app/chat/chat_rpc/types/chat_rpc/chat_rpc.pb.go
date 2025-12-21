@@ -423,9 +423,11 @@ func (x *AudioFileMsg) GetSize() int64 {
 // 定义EmojiMsg消息 - 表情相关消息
 type EmojiMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"`      // 表情图片文件ID（Emoji.FileName）
-	EmojiId       uint32                 `protobuf:"varint,2,opt,name=emojiId,proto3" json:"emojiId,omitempty"`     // 表情ID（Emoji.ID，单个表情时使用）
-	PackageId     uint32                 `protobuf:"varint,3,opt,name=packageId,proto3" json:"packageId,omitempty"` // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+	FileKey       string                 `protobuf:"bytes,1,opt,name=fileKey,proto3" json:"fileKey,omitempty"`     // 表情图片文件ID（Emoji.FileName）
+	EmojiId       string                 `protobuf:"bytes,2,opt,name=emojiId,proto3" json:"emojiId,omitempty"`     // 表情ID（Emoji.ID，单个表情时使用）
+	PackageId     string                 `protobuf:"bytes,3,opt,name=packageId,proto3" json:"packageId,omitempty"` // 表情包ID（EmojiPackage.ID，表情包分享时使用）
+	Width         int64                  `protobuf:"varint,4,opt,name=width,proto3" json:"width,omitempty"`        // 表情图片宽度（可选，用于保持比例显示）
+	Height        int64                  `protobuf:"varint,5,opt,name=height,proto3" json:"height,omitempty"`      // 表情图片高度（可选，用于保持比例显示）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -467,16 +469,30 @@ func (x *EmojiMsg) GetFileKey() string {
 	return ""
 }
 
-func (x *EmojiMsg) GetEmojiId() uint32 {
+func (x *EmojiMsg) GetEmojiId() string {
 	if x != nil {
 		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *EmojiMsg) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+func (x *EmojiMsg) GetWidth() int64 {
+	if x != nil {
+		return x.Width
 	}
 	return 0
 }
 
-func (x *EmojiMsg) GetPackageId() uint32 {
+func (x *EmojiMsg) GetHeight() int64 {
 	if x != nil {
-		return x.PackageId
+		return x.Height
 	}
 	return 0
 }
@@ -774,7 +790,7 @@ func (x *Sender) GetAvatar() string {
 	return ""
 }
 
-func (x *Sender) GetNickname() string {
+func (x *Sender) GetNickName() string {
 	if x != nil {
 		return x.NickName
 	}
@@ -789,7 +805,7 @@ type SendMsgRes struct {
 	ConversationId   string                 `protobuf:"bytes,3,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`         // 会话ID
 	Msg              *Msg                   `protobuf:"bytes,4,opt,name=msg,proto3" json:"msg,omitempty"`                                                     // 消息内容
 	Sender           *Sender                `protobuf:"bytes,5,opt,name=sender,proto3" json:"sender,omitempty"`                                               // 发送者
-	CreateAt         string                 `protobuf:"bytes,6,opt,name=create_at,json=createAt,proto3" json:"create_at,omitempty"`                           // 消息时间
+	CreatedAt        string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`                        // 消息时间
 	MsgPreview       string                 `protobuf:"bytes,7,opt,name=msg_preview,json=msgPreview,proto3" json:"msg_preview,omitempty"`                     // 消息预览
 	Status           uint32                 `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`                                              // 消息状态 1:正常 2:已撤回 3:已编辑
 	Seq              int64                  `protobuf:"varint,9,opt,name=seq,proto3" json:"seq,omitempty"`                                                    // 消息序列号，用于数据同步
@@ -865,7 +881,7 @@ func (x *SendMsgRes) GetSender() *Sender {
 
 func (x *SendMsgRes) GetCreateAt() string {
 	if x != nil {
-		return x.CreateAt
+		return x.CreatedAt
 	}
 	return ""
 }
@@ -1708,6 +1724,7 @@ type SendNotificationMessageReq struct {
 	MessageType    int32                  `protobuf:"varint,2,opt,name=messageType,proto3" json:"messageType,omitempty"`      // 通知消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
 	Content        string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`               // 消息内容
 	RelatedUserId  string                 `protobuf:"bytes,4,opt,name=relatedUserId,proto3" json:"relatedUserId,omitempty"`   // 相关用户ID（如新加好友的ID）
+	ReadUserIds    []string               `protobuf:"bytes,5,rep,name=readUserIds,proto3" json:"readUserIds,omitempty"`       // 需要标记为已读的用户ID列表（为空表示所有用户都标记为已读）
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1768,6 +1785,13 @@ func (x *SendNotificationMessageReq) GetRelatedUserId() string {
 		return x.RelatedUserId
 	}
 	return ""
+}
+
+func (x *SendNotificationMessageReq) GetReadUserIds() []string {
+	if x != nil {
+		return x.ReadUserIds
+	}
+	return nil
 }
 
 // 定义SendNotificationMessageRes消息
@@ -2284,11 +2308,13 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x1a\n" +
 	"\bfileName\x18\x02 \x01(\tR\bfileName\x12\x1a\n" +
 	"\bduration\x18\x03 \x01(\x05R\bduration\x12\x12\n" +
-	"\x04size\x18\x04 \x01(\x03R\x04size\"\\\n" +
+	"\x04size\x18\x04 \x01(\x03R\x04size\"\x8a\x01\n" +
 	"\bEmojiMsg\x12\x18\n" +
 	"\afileKey\x18\x01 \x01(\tR\afileKey\x12\x18\n" +
-	"\aemojiId\x18\x02 \x01(\rR\aemojiId\x12\x1c\n" +
-	"\tpackageId\x18\x03 \x01(\rR\tpackageId\"=\n" +
+	"\aemojiId\x18\x02 \x01(\tR\aemojiId\x12\x1c\n" +
+	"\tpackageId\x18\x03 \x01(\tR\tpackageId\x12\x14\n" +
+	"\x05width\x18\x04 \x01(\x03R\x05width\x12\x16\n" +
+	"\x06height\x18\x05 \x01(\x03R\x06height\"=\n" +
 	"\x0fNotificationMsg\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\x05R\x04type\x12\x16\n" +
 	"\x06actors\x18\x02 \x03(\tR\x06actors\"\xb4\x03\n" +
@@ -2313,7 +2339,7 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x06Sender\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06avatar\x18\x02 \x01(\tR\x06avatar\x12\x1a\n" +
-	"\bnickname\x18\x03 \x01(\tR\bnickname\"\xc4\x02\n" +
+	"\bnickName\x18\x03 \x01(\tR\bnickName\"\xc4\x02\n" +
 	"\n" +
 	"SendMsgRes\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x1d\n" +
@@ -2375,12 +2401,13 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x04type\x18\x02 \x01(\x05R\x04type\x12\x18\n" +
 	"\auserIds\x18\x03 \x03(\tR\auserIds\"C\n" +
 	"\x19InitializeConversationRes\x12&\n" +
-	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\"\xa6\x01\n" +
+	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\"\xc8\x01\n" +
 	"\x1aSendNotificationMessageReq\x12&\n" +
 	"\x0econversationId\x18\x01 \x01(\tR\x0econversationId\x12 \n" +
 	"\vmessageType\x18\x02 \x01(\x05R\vmessageType\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12$\n" +
-	"\rrelatedUserId\x18\x04 \x01(\tR\rrelatedUserId\":\n" +
+	"\rrelatedUserId\x18\x04 \x01(\tR\rrelatedUserId\x12 \n" +
+	"\vreadUserIds\x18\x05 \x03(\tR\vreadUserIds\":\n" +
 	"\x1aSendNotificationMessageRes\x12\x1c\n" +
 	"\tmessageId\x18\x01 \x01(\tR\tmessageId\"]\n" +
 	"\x19AddConversationMembersReq\x12&\n" +

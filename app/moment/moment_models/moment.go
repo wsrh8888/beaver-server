@@ -2,6 +2,7 @@ package moment_models
 
 import (
 	"beaver/common/models"
+	"beaver/common/models/ctype"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -9,7 +10,8 @@ import (
 
 // FileInfo 结构体，用于存储文件的信息
 type FileInfo struct {
-	FileKey string `json:"fileKey"` // 文件名
+	FileKey string        `json:"fileKey"` // 文件名
+	Type    ctype.MsgType `json:"type"`    // 文件类型：使用MsgType枚举，与消息系统保持一致
 }
 
 type Files []FileInfo
@@ -33,10 +35,9 @@ func (f *Files) Scan(value interface{}) error {
  */
 type MomentModel struct {
 	models.Model
-	UUID      string `gorm:"size:64;uniqueIndex;not null" json:"uuid"`      // 全局唯一ID (UUID，跨库同步用)
-	UserID    string `gorm:"size:64;not null;index" json:"userId"`          // 用户Id (索引，提升查询性能)
-	Content   string `gorm:"type:text;not null" json:"content"`             // 动态内容
-	Files     *Files `gorm:"type:longtext" json:"files"`                    // 文件信息（JSON数组）
-	IsDeleted bool   `gorm:"not null;default:false;index" json:"isDeleted"` // 软删除标记 (索引)
-	Version   int64  `gorm:"not null;default:0;index" json:"version"`       // 用户级版本号（基于UserID递增，每次数据变更都递增）
+	MomentID  string `gorm:"column:moment_id;size:64;uniqueIndex;not null" json:"momentId"` // 全局唯一ID
+	UserID    string `gorm:"size:64;not null;index" json:"userId"`                          // 用户Id (索引，提升查询性能)
+	Content   string `gorm:"type:text;not null" json:"content"`                             // 动态内容
+	Files     *Files `gorm:"type:longtext" json:"files"`                                    // 文件信息（JSON数组）
+	IsDeleted bool   `gorm:"not null;default:false;index" json:"isDeleted"`                 // 软删除标记 (索引)
 }

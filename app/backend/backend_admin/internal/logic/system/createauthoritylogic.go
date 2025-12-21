@@ -5,6 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/backend/backend_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +26,21 @@ func NewCreateAuthorityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 }
 
 func (l *CreateAuthorityLogic) CreateAuthority(req *types.CreateAuthorityReq) (resp *types.CreateAuthorityRes, err error) {
-	// todo: add your logic here and delete this line
+	// 创建权限数据
+	authority := backend_models.AdminSystemAuthority{
+		Name:        req.Name,
+		Description: req.Description,
+		Status:      1, // 默认启用
+		Sort:        0, // 默认排序
+	}
 
-	return
+	// 创建权限
+	err = l.svcCtx.DB.Create(&authority).Error
+	if err != nil {
+		logx.Errorf("创建权限失败: %v", err)
+		return nil, err
+	}
+
+	logx.Infof("权限创建成功: ID=%d, Name=%s", authority.Id, authority.Name)
+	return &types.CreateAuthorityRes{}, nil
 }

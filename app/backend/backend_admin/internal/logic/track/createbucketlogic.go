@@ -27,12 +27,12 @@ func NewCreateBucketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 }
 
 func (l *CreateBucketLogic) CreateBucket(req *types.CreateBucketReq) (resp *types.CreateBucketRes, err error) {
-	// 生成唯一 UUID
-	bucketUUID := uuid_util.NewV4().String()
+	// 生成唯一 Bucket ID
+	bucketID := uuid_util.NewV4().String()
 
 	// 创建 Bucket 记录
 	bucket := &track_models.TrackBucket{
-		UUID:        bucketUUID,
+		BucketID:    bucketID,
 		Name:        req.Name,
 		Description: req.Description,
 		CreateUser:  req.UserID,
@@ -46,7 +46,7 @@ func (l *CreateBucketLogic) CreateBucket(req *types.CreateBucketReq) (resp *type
 	}
 
 	resp = &types.CreateBucketRes{
-		UUID: bucketUUID,
+		BucketId: bucketID,
 	}
 
 	return

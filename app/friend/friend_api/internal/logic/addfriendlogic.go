@@ -2,11 +2,14 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/notification/notification_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
@@ -72,7 +75,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		Message:    req.Verify,
 		Source:     req.Source, // 添加来源字段
 		Version:    nextVersion,
-		UUID:       uuid.New().String(),
+		VerifyID:   uuid.New().String(),
 	}
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error
@@ -89,15 +92,34 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			}
 		}()
 
+		payload, _ := json.Marshal(map[string]interface{}{
+			"verifyId": verifyModel.VerifyID,
+			"message":  verifyModel.Message,
+			"source":   verifyModel.Source,
+		})
+		_, err := l.svcCtx.NotifyRpc.PushEvent(context.Background(), &notification_rpc.PushEventReq{
+			EventType:   notification_models.EventTypeFriendRequest,
+			Category:    notification_models.CategorySocial,
+			FromUserId:  req.UserID,
+			TargetId:    verifyModel.VerifyID,
+			TargetType:  notification_models.TargetTypeUser,
+			PayloadJson: string(payload),
+			ToUserIds:   []string{req.FriendID},
+			DedupHash:   verifyModel.VerifyID,
+		})
+		if err != nil {
+			l.Logger.Errorf("投递好友申请通知失败: %v", err)
+		}
+
 		// 获取发送者和接收者的用户信息
-		senderInfo, senderErr := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		senderInfo, senderErr := l.svcCtx.UserRpc.UserInfo(context.Background(), &user_rpc.UserInfoReq{
 			UserID: req.UserID,
 		})
 		if senderErr != nil {
 			l.Logger.Errorf("获取发送者用户信息失败: %v", senderErr)
 		}
 
-		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(context.Background(), &user_rpc.UserInfoReq{
 			UserID: req.FriendID,
 		})
 		if receiverErr != nil {
@@ -109,8 +131,8 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			"table": "friend_verify",
 			"data": []map[string]interface{}{
 				{
-					"version": nextVersion,
-					"uuid":    verifyModel.UUID,
+					"version":  nextVersion,
+					"verifyId": verifyModel.VerifyID,
 				},
 			},
 		}
@@ -153,11 +175,13 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			"tableUpdates": tableUpdates,
 		}, "")
 
-		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, uuid=%s", req.UserID, req.FriendID, nextVersion, verifyModel.UUID)
+		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, verifyId=%s", req.UserID, req.FriendID, nextVersion, verifyModel.VerifyID)
 	}()
 
 	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
-	return &types.AddFriendRes{
+	resp = &types.AddFriendRes{
 		Version: nextVersion,
-	}, nil
+	}
+
+	return resp, nil
 }

@@ -55,8 +55,8 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 				JoinType:  group.JoinType,
 				Status:    group.Status,
 				Version:   group.Version,
-				CreateAt:  time.Time(group.CreatedAt).Unix(),
-				UpdateAt:  time.Time(group.UpdatedAt).Unix(),
+				CreatedAt: time.Time(group.CreatedAt).Unix(),
+				UpdatedAt: time.Time(group.UpdatedAt).Unix(),
 			})
 		}
 	}

@@ -40,7 +40,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 		// 如果是超级管理员手机号且不存在，则创建
 		if req.Phone == "15383645663" {
 			adminUser = backend_models.AdminUser{
-				UUID:     fmt.Sprintf("admin_%d", time.Now().Unix()),
+				UserID:   fmt.Sprintf("admin_%d", time.Now().Unix()),
 				NickName: "超级管理员",
 				Password: pwd.HahPwd(req.Password),
 				Phone:    req.Phone,
@@ -69,7 +69,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 	// 生成JWT token
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
 		NickName: adminUser.NickName,
-		UserID:   adminUser.UUID,
+		UserID:   adminUser.UserID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
 		logx.Errorf("生成 token 失败: %v", err)
@@ -77,7 +77,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 	}
 
 	// 存储token到Redis
-	key := fmt.Sprintf("admin_login_%s", adminUser.UUID)
+	key := fmt.Sprintf("admin_login_%s", adminUser.UserID)
 	err = l.svcCtx.Redis.Set(key, token, time.Hour*48).Err()
 	if err != nil {
 		logx.Errorf("存储 token 失败: %v", err)
@@ -87,6 +87,6 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 	// 返回登录结果
 	return &types.LoginRes{
 		Token:  token,
-		UserID: adminUser.UUID,
+		UserID: adminUser.UserID,
 	}, nil
 }

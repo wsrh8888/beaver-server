@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -53,6 +54,14 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 	fileKey := req.Md5 + "." + suffix
 	l.Logger.Infof("使用MD5生成文件ID: %s", fileKey)
 
+	// 确定文件来源
+	source := file_models.QiniuSource // 默认七牛云
+	if req.Source == "local" {
+		source = file_models.LocalSource
+	} else if req.Source == "qiniu" {
+		source = file_models.QiniuSource
+	}
+
 	// 创建新的文件记录
 	newFileModel := &file_models.FileModel{
 		FileKey:      fileKey,
@@ -61,7 +70,20 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 		Path:         req.Path,
 		Md5:          req.Md5,
 		Type:         req.Type,
+		Source:       source,
 	}
+
+	// 解析fileInfo（必传字段）
+	if req.FileInfo == "" {
+		return nil, errors.New("fileInfo不能为空")
+	}
+
+	fileInfo := &file_models.FileInfo{}
+	if err := json.Unmarshal([]byte(req.FileInfo), fileInfo); err != nil {
+		l.Logger.Errorf("解析fileInfo失败: %v, 原始数据: %s", err, req.FileInfo)
+		return nil, errors.New("fileInfo格式不正确")
+	}
+	newFileModel.FileInfo = fileInfo
 
 	// 保存到数据库
 	err = l.svcCtx.DB.Create(newFileModel).Error

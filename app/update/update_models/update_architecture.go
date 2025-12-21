@@ -7,13 +7,13 @@ import (
 // 架构信息表 - 用于存储不同平台的架构信息
 type UpdateArchitecture struct {
 	models.Model
-	AppID       string          `json:"appId" gorm:"type:varchar(64);index"`         // 关联的应用ID
-	App         *UpdateApp      `json:"app" gorm:"foreignKey:AppID;references:UUID"` // 关联的应用信息
-	PlatformID  uint            `json:"platformId"`                                  // 平台ID：1=Windows, 2=MacOS, 3=iOS, 4=Android, 5=HarmonyOS
-	ArchID      uint            `json:"archId"`                                      // 架构类型 1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=iOS, 6=Android, 7=HarmonyOS
-	Description string          `json:"description"`                                 // 架构描述
-	Versions    []UpdateVersion `gorm:"foreignKey:ArchitectureID"`                   // 关联的版本信息
-	IsActive    bool            `json:"isActive"`                                    // 是否活跃
+	AppID       string          `json:"appId" gorm:"type:varchar(64);index"`          // 关联的应用ID
+	App         *UpdateApp      `json:"app" gorm:"foreignKey:AppID;references:AppID"` // 关联的应用信息
+	PlatformID  uint            `json:"platformId"`                                   // 平台ID：1=Windows, 2=MacOS, 3=iOS, 4=Android, 5=HarmonyOS
+	ArchID      uint            `json:"archId"`                                       // 架构类型 1=WinX64, 2=WinArm64, 3=MacIntel, 4=MacApple, 5=iOS, 6=Android, 7=HarmonyOS
+	Description string          `json:"description"`                                  // 架构描述
+	Versions    []UpdateVersion `gorm:"foreignKey:ArchitectureID"`                    // 关联的版本信息
+	IsActive    bool            `json:"isActive"`                                     // 是否活跃
 }
 
 // 预定义平台类型

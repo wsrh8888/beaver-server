@@ -28,6 +28,19 @@ func NewGetGroupListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetG
 }
 
 func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *types.GetGroupListRes, err error) {
+	// 分页参数校验
+	page := req.Page
+	limit := req.Limit
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
 	// 构建查询条件
 	whereClause := l.svcCtx.DB.Where("1 = 1")
 
@@ -44,8 +57,8 @@ func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *type
 	// 分页查询
 	groups, count, err := list_query.ListQuery(l.svcCtx.DB, group_models.GroupModel{}, list_query.Option{
 		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.Limit,
+			Page:  page,
+			Limit: limit,
 			Key:   req.Keywords,
 			Sort:  "created_at desc",
 		},
@@ -63,7 +76,7 @@ func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *type
 	for _, group := range groups {
 		list = append(list, types.GetGroupListItem{
 			Id:        group.Id,
-			Uuid:      group.GroupID,
+			GroupId:   group.GroupID,
 			Type:      int(group.Type),
 			Title:     group.Title,
 			FileName:  group.Avatar,

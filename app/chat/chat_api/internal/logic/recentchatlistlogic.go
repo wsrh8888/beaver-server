@@ -143,7 +143,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 
 		chatInfo.IsTop = convo.IsPinned
 		chatInfo.ConversationID = convo.ConversationID
-		chatInfo.UpdateAt = convo.UpdatedAt.String()
+		chatInfo.UpdatedAt = convo.UpdatedAt.String()
 		if strings.HasPrefix(convo.ConversationID, "private_") { // 私聊
 			ids := strings.Split(convo.ConversationID, "_")
 			// ids格式: ["private", "A", "B"]

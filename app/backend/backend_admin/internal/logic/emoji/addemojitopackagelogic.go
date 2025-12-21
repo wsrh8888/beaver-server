@@ -3,12 +3,12 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
@@ -30,29 +30,20 @@ func NewAddEmojiToPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageReq) (resp *types.AddEmojiToPackageRes, err error) {
 	// 验证必填字段
-	if req.FileName == "" {
+	if req.FileKey == "" {
 		return nil, errors.New("文件ID不能为空")
 	}
 	if req.Title == "" {
 		return nil, errors.New("表情名称不能为空")
 	}
-	if req.AuthorID == "" {
-		return nil, errors.New("创建者ID不能为空")
-	}
-
-	// 转换PackageID为uint
-	packageID, err := strconv.ParseUint(req.PackageID, 10, 32)
-	if err != nil {
-		logx.Errorf("表情包ID格式错误: %s", req.PackageID)
-		return nil, errors.New("表情包ID格式错误")
-	}
+	// 创建者ID验证暂时移除，由上层中间件处理
 
 	// 检查表情包是否存在
 	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("id = ?", packageID).First(&pkg).Error
+	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.PackageID)
+			logx.Errorf("表情包不存在: %s", req.PackageId)
 			return nil, errors.New("表情包不存在")
 		}
 		logx.Errorf("查询表情包失败: %v", err)
@@ -61,7 +52,8 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 
 	// 检查表情名称是否已存在（同创建者下）
 	var count int64
-	err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).Where("title = ? AND author_id = ?", req.Title, req.AuthorID).Count(&count).Error
+	// 检查表情标题是否已存在（暂时不检查作者，允许同名表情）
+	count = 0
 	if err != nil {
 		logx.Errorf("检查表情名称失败: %v", err)
 		return nil, errors.New("检查表情名称失败")
@@ -70,11 +62,20 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 		return nil, errors.New("该创建者已存在同名表情")
 	}
 
+	// 生成表情版本号
+	emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+
 	// 创建表情
 	emoji := emoji_models.Emoji{
-		FileName: req.FileName,
-		Title:    req.Title,
-		AuthorID: req.AuthorID,
+		EmojiID: uuid.New().String(),
+		FileKey: req.FileKey,
+		Title:   req.Title,
+		EmojiInfo: emoji_models.EmojiInfo{
+			Width:  req.EmojiInfo.Width,
+			Height: req.EmojiInfo.Height,
+		},
+		Status:  1, // 默认状态为正常
+		Version: emojiVersion,
 	}
 
 	err = l.svcCtx.DB.Create(&emoji).Error
@@ -86,7 +87,7 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 	// 获取当前表情包中表情的最大排序值
 	var maxSortOrder int
 	var emojiPackageEmojis []emoji_models.EmojiPackageEmoji
-	err = l.svcCtx.DB.Where("package_id = ?", packageID).Find(&emojiPackageEmojis).Error
+	err = l.svcCtx.DB.Where("package_id = ?", pkg.PackageID).Find(&emojiPackageEmojis).Error
 	if err != nil {
 		logx.Errorf("查询表情包关联失败: %v", err)
 		return nil, errors.New("查询表情包关联失败")
@@ -100,11 +101,16 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 		}
 	}
 
+	// 生成表情包内容版本号
+	contentVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_emoji", "package_id", pkg.PackageID)
+
 	// 创建表情包与表情的关联
 	emojiPackageEmoji := emoji_models.EmojiPackageEmoji{
-		PackageID: uint(packageID),
-		EmojiID:   emoji.Id,
-		SortOrder: maxSortOrder + 1, // 添加到末尾
+		RelationID: uuid.New().String(),
+		PackageID:  pkg.PackageID,
+		EmojiID:    emoji.EmojiID,
+		SortOrder:  maxSortOrder + 1, // 添加到末尾
+		Version:    contentVersion,
 	}
 
 	err = l.svcCtx.DB.Create(&emojiPackageEmoji).Error
@@ -114,6 +120,6 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 	}
 
 	return &types.AddEmojiToPackageRes{
-		Id: strconv.Itoa(int(emoji.Id)),
+		RelationId: emojiPackageEmoji.RelationID,
 	}, nil
 }

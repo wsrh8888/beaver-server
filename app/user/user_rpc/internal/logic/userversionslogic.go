@@ -34,7 +34,7 @@ func (l *UserVersionsLogic) UserVersions(in *user_rpc.UserVersionsReq) (*user_rp
 
 	// 查询指定用户ID列表的版本信息
 	var userList []user_models.UserModel
-	err := l.svcCtx.DB.Select("uuid, version").Where("uuid IN ?", in.UserIds).Find(&userList).Error
+	err := l.svcCtx.DB.Select("user_id, version").Where("user_id IN ?", in.UserIds).Find(&userList).Error
 
 	if err != nil {
 		l.Logger.Errorf("查询用户版本信息失败: %v", err)
@@ -47,7 +47,7 @@ func (l *UserVersionsLogic) UserVersions(in *user_rpc.UserVersionsReq) (*user_rp
 	}
 
 	for _, user := range userList {
-		resp.UserVersions[user.UUID] = user.Version
+		resp.UserVersions[user.UserID] = user.Version
 	}
 
 	// 为不存在的用户设置默认版本号0

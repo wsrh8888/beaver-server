@@ -59,9 +59,9 @@ func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinReq
 					}
 					return 0
 				}(),
-				Version:  request.Version,
-				CreateAt: time.Time(request.CreatedAt).Unix(),
-				UpdateAt: time.Time(request.UpdatedAt).Unix(),
+				Version:   request.Version,
+				CreatedAt: time.Time(request.CreatedAt).Unix(),
+				UpdatedAt: time.Time(request.UpdatedAt).Unix(),
 			})
 		}
 	}

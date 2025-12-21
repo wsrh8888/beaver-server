@@ -64,17 +64,17 @@ type UserInfoRes struct {
 }
 
 type UserSyncItem struct {
-	UserID   string `json:"userId"`   // 用户ID
-	NickName string `json:"nickName"` // 用户昵称
-	Avatar   string `json:"avatar"`   // 用户头像
-	Abstract string `json:"abstract"` // 个性签名
-	Phone    string `json:"phone"`    // 手机号
-	Email    string `json:"email"`    // 邮箱
-	Gender   int8   `json:"gender"`   // 性别
-	Status   int8   `json:"status"`   // 状态
-	Version  int64  `json:"version"`  // 版本号
-	CreateAt int64  `json:"createAt"` // 创建时间戳
-	UpdateAt int64  `json:"updateAt"` // 更新时间戳
+	UserID    string `json:"userId"`    // 用户ID
+	NickName  string `json:"nickName"`  // 用户昵称
+	Avatar    string `json:"avatar"`    // 用户头像
+	Abstract  string `json:"abstract"`  // 个性签名
+	Phone     string `json:"phone"`     // 手机号
+	Email     string `json:"email"`     // 邮箱
+	Gender    int8   `json:"gender"`    // 性别
+	Status    int8   `json:"status"`    // 状态
+	Version   int64  `json:"version"`   // 版本号
+	CreatedAt int64  `json:"createdAt"` // 创建时间戳
+	UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 }
 
 type UserSyncReq struct {

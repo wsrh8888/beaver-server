@@ -33,7 +33,7 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *friend_rpc.GetFriends
 
 	// 查询指定ID列表中的好友信息
 	var friends []friend_models.FriendModel
-	query := l.svcCtx.DB.Where("uuid IN (?)", in.Ids)
+	query := l.svcCtx.DB.Where("friend_id IN (?)", in.Ids)
 
 	// 增量同步：只返回版本号大于since的记录
 	if in.Since > 0 {
@@ -52,7 +52,7 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *friend_rpc.GetFriends
 	var friendsList []*friend_rpc.FriendListById
 	for _, friend := range friends {
 		friendsList = append(friendsList, &friend_rpc.FriendListById{
-			Id:             friend.UUID,
+			Id:             friend.FriendID,
 			SendUserId:     friend.SendUserID,
 			RevUserId:      friend.RevUserID,
 			SendUserNotice: friend.SendUserNotice,
@@ -60,8 +60,8 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *friend_rpc.GetFriends
 			Source:         friend.Source,
 			IsDeleted:      friend.IsDeleted,
 			Version:        friend.Version,
-			CreateAt:       time.Time(friend.CreatedAt).UnixMilli(),
-			UpdateAt:       time.Time(friend.UpdatedAt).UnixMilli(),
+			CreatedAt:      time.Time(friend.CreatedAt).UnixMilli(),
+			UpdatedAt:      time.Time(friend.UpdatedAt).UnixMilli(),
 		})
 	}
 

@@ -97,13 +97,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 更新表情图片
 				Method:  http.MethodPut,
-				Path:    "/admin/emoji/:id",
+				Path:    "/admin/emoji/:emojiId",
 				Handler: emoji.UpdateEmojiHandler(serverCtx),
 			},
 			{
 				// 删除表情图片
 				Method:  http.MethodDelete,
-				Path:    "/admin/emoji/:id",
+				Path:    "/admin/emoji/:emojiId",
 				Handler: emoji.DeleteEmojiHandler(serverCtx),
 			},
 			{
@@ -374,19 +374,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 获取动态详情
 				Method:  http.MethodGet,
-				Path:    "/admin/moment/:id",
+				Path:    "/admin/moment/:momentId",
 				Handler: moment.GetMomentDetailHandler(serverCtx),
 			},
 			{
 				// 删除动态
 				Method:  http.MethodDelete,
-				Path:    "/admin/moment/:id",
+				Path:    "/admin/moment/:momentId",
 				Handler: moment.DeleteMomentHandler(serverCtx),
 			},
 			{
 				// 删除动态评论
 				Method:  http.MethodDelete,
-				Path:    "/admin/moment/comment/:id",
+				Path:    "/admin/moment/comment/:commentId",
 				Handler: moment.DeleteMomentCommentHandler(serverCtx),
 			},
 			{

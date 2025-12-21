@@ -151,6 +151,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 				FileKey:   in.Msg.EmojiMsg.FileKey,
 				EmojiID:   in.Msg.EmojiMsg.EmojiId,
 				PackageID: in.Msg.EmojiMsg.PackageId,
+				Width:     in.Msg.EmojiMsg.Width,
+				Height:    in.Msg.EmojiMsg.Height,
 			},
 		}
 	case ctype.NotificationMsgType:
@@ -278,7 +280,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Msg:              convertedMsg,
 		MsgPreview:       chatModel.MsgPreview,
 		Sender:           sender,
-		CreateAt:         chatModel.CreatedAt.String(),
+		CreatedAt:        chatModel.CreatedAt.String(),
 		Status:           1,
 		ConversationType: uint32(chatModel.ConversationType),
 		Seq:              chatModel.Seq,

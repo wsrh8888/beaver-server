@@ -13,10 +13,10 @@ const (
 	GROUP_OPERATION Command = "GROUP_OPERATION"
 	// 用户信息类
 	USER_PROFILE Command = "USER_PROFILE"
-	// 系统通知类
-	SYSTEM_NOTIFICATION Command = "SYSTEM_NOTIFICATION"
-	// 消息同步类
-	MESSAGE_SYNC Command = "MESSAGE_SYNC"
+	// 通知中心类
+	NOTIFICATION Command = "NOTIFICATION"
+	// 表情中心类
+	EMOJI Command = "EMOJI"
 	// 心跳消息类（应用级心跳）
 	HEARTBEAT Command = "HEARTBEAT"
 )

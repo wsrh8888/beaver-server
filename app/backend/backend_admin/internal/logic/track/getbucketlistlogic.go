@@ -59,7 +59,7 @@ func (l *GetBucketListLogic) GetBucketList(req *types.GetBucketListReq) (resp *t
 	list := make([]types.GetBucketListItem, 0, len(buckets))
 	for _, bucket := range buckets {
 		list = append(list, types.GetBucketListItem{
-			UUID:        bucket.UUID,
+			BucketId:    bucket.BucketID,
 			Name:        bucket.Name,
 			Description: bucket.Description,
 			CreateUser:  bucket.CreateUser,

@@ -46,9 +46,14 @@ func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *type
 		},
 	}
 
-	// 分别给接收者和发送者发送消息
+	// 打印内容
+
+	fmt.Println("消息内容：", string(bodyBytes))
+	fmt.Println("发送者ID：", req.UserID, "，目标ID：", req.TargetID)
+
+	fmt.Println("命令类型：", req.Command, "，消息类型：", req.Type, "，会话ID：", req.ConversationId)
+
 	websocket_utils.SendMsgToUser(req.TargetID, wsCommandConst.Command(req.Command), content)
-	// websocket_utils.SendMsgToUser(req.UserID, wsCommandConst.Command(req.Command), content)
 
 	return
 }

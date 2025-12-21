@@ -3,12 +3,12 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_models"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -39,13 +39,18 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 		return nil, errors.New("该用户已存在同名表情包")
 	}
 
+	// 生成表情包版本号
+	packageVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package", "", "")
+
 	// 创建表情包
 	pkg := emoji_models.EmojiPackage{
+		PackageID:   uuid.New().String(),
 		Title:       req.Title,
 		UserID:      req.UserID,
 		Description: req.Description,
 		Type:        req.Type,
 		Status:      1, // 默认状态为1
+		Version:     packageVersion,
 	}
 
 	// 如果提供了封面文件，则设置
@@ -60,6 +65,6 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 	}
 
 	return &types.CreateEmojiPackageRes{
-		Id: strconv.Itoa(int(pkg.Id)),
+		PackageId: pkg.PackageID,
 	}, nil
 }
