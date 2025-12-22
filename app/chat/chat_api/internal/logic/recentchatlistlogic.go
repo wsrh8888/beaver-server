@@ -8,7 +8,8 @@ import (
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -61,25 +62,21 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 
 	// 获取会话Ids并根据命名规则区分私聊和群聊
 	for _, convo := range userConversations {
-		if strings.Contains(convo.ConversationID, "_") {
+		conversationType := conversation.GetConversationType(convo.ConversationID)
+		if conversationType == 1 { // 私聊
 			privateChatIds = append(privateChatIds, convo.ConversationID)
-		} else {
+		} else if conversationType == 2 { // 群聊
 			groupChatIds = append(groupChatIds, convo.ConversationID)
 		}
 	}
 
 	// 从私聊Id中提取用户Id进行去重
-	// 会话ID格式: private_A_B
 	userIdMap := make(map[string]struct{})
 	for _, chatID := range privateChatIds {
-		ids := strings.Split(chatID, "_")
-		// 跳过第一个元素 "private"，取后面两个用户ID
-		if len(ids) >= 3 {
-			for i := 1; i < len(ids); i++ {
-				id := ids[i]
-				if id != req.UserID && id != "private" {
-					userIdMap[id] = struct{}{}
-				}
+		_, userIds := conversation.ParseConversationWithType(chatID)
+		for _, userId := range userIds {
+			if userId != req.UserID {
+				userIdMap[userId] = struct{}{}
 			}
 		}
 	}
@@ -104,19 +101,36 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		friendDetails = friendDetailRes.Friends
 	}
 
-	// 批量查询群组信息
-	var groups []group_models.GroupModel
+	// 通过RPC批量获取群组信息
+	var groupDetails []*group_rpc.GroupListById
 	if len(groupChatIds) > 0 {
-		err = l.svcCtx.DB.Where("group_id IN (?)", groupChatIds).Find(&groups).Error
-		if err != nil {
-			return nil, err
+		// 从群聊会话ID中提取实际的群组ID（去掉group_前缀）
+		var actualGroupIds []string
+		for _, groupChatId := range groupChatIds {
+			_, userIds := conversation.ParseConversationWithType(groupChatId)
+			if len(userIds) > 0 {
+				actualGroupIds = append(actualGroupIds, userIds[0])
+			}
+		}
+
+		if len(actualGroupIds) > 0 {
+			groupRes, err := l.svcCtx.GroupRpc.GetGroupsListByIds(l.ctx, &group_rpc.GetGroupsListByIdsReq{
+				GroupIDs: actualGroupIds,
+			})
+			if err != nil {
+				logx.Errorf("获取群组详情失败: %v", err)
+				return nil, err
+			}
+			groupDetails = groupRes.Groups
 		}
 	}
 
-	// 构建数据映射
-	groupMap := make(map[string]group_models.GroupModel)
-	for _, group := range groups {
-		groupMap[group.GroupID] = group
+	// 构建群组数据映射 (key为完整的会话ID)
+	groupMap := make(map[string]*group_rpc.GroupListById)
+	for i, groupChatId := range groupChatIds {
+		if i < len(groupDetails) {
+			groupMap[groupChatId] = groupDetails[i]
+		}
 	}
 
 	// 构建好友详细信息映射
@@ -166,9 +180,14 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			}
 			chatInfo.ChatType = 1
 		} else { // 群聊
-			group := groupMap[convo.ConversationID]
-			chatInfo.NickName = group.Title
-			chatInfo.Avatar = group.Avatar
+			group, exists := groupMap[convo.ConversationID]
+			if exists {
+				chatInfo.NickName = group.Name
+				chatInfo.Avatar = group.Avatar
+			} else {
+				chatInfo.NickName = "未知群聊"
+				chatInfo.Avatar = ""
+			}
 			chatInfo.ChatType = 2
 			chatInfo.Notice = "" // 群聊暂时没有备注功能
 		}
