@@ -8,9 +8,10 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 # 移除配置文件复制，改为外部挂载
-# COPY system.yaml .
+# COPY datasync.yaml .
 
-COPY --from=builder /build/system_admin/system .
+COPY --from=builder /build/datasync_api/datasync .
 
 # 修改启动命令，使用外部配置文件路径
-CMD ["./system", "-f", "/etc/system.yaml"] 
+CMD ["./datasync", "-f", "/etc/datasync.yaml"]
+
