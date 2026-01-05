@@ -11,10 +11,10 @@ import (
  */
 func GenerateConversation(userIds []string) (string, error) {
 	if len(userIds) == 1 {
-		return userIds[0], nil
+		return "private_" + userIds[0], nil
 	} else if len(userIds) == 2 {
 		sort.Strings(userIds)
-		return strings.Join(userIds, "_"), nil
+		return "private_" + strings.Join(userIds, "_"), nil
 	} else {
 		return "", errors.New("userIds must have a length of 1 or 2")
 	}

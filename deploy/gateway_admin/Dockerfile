@@ -10,7 +10,8 @@ WORKDIR /app
 # 移除配置文件复制，改为外部挂载
 # COPY gateway.yaml .
 
-COPY --from=builder /build/gateway_admin/gateway .
+COPY --from=builder /build/gateway_admin/gateway_admin .
 
 # 修改启动命令，使用外部配置文件路径
-CMD ["./gateway", "-f", "/etc/gateway.yaml"] 
+CMD ["./gateway_admin", "-f", "/etc/gateway.yaml"]
+

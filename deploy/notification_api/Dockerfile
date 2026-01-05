@@ -8,9 +8,10 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 # 移除配置文件复制，改为外部挂载
-# COPY emoji_admin.yaml .
+# COPY notification.yaml .
 
-COPY --from=builder /build/emoji_admin/emoji .
+COPY --from=builder /build/notification_api/notification .
 
 # 修改启动命令，使用外部配置文件路径
-CMD ["./emoji", "-f", "/etc/emoji.yaml"] 
+CMD ["./notification", "-f", "/etc/notification.yaml"]
+

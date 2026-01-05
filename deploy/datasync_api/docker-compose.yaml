@@ -1,12 +1,12 @@
 
 services:
-  gateway_admin:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/gateway_admin:1.0.2
-    container_name: gateway_admin
+  datasync_api:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/datasync_api:1.0.2
+    container_name: datasync_api
     network_mode: "host"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./gateway.yaml:/etc/gateway.yaml:ro
+      - ./datasync.yaml:/etc/datasync.yaml:ro
     deploy:
       restart_policy:
         condition: any
