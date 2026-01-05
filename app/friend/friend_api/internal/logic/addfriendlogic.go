@@ -155,8 +155,8 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 				"table": "users",
 				"data": []map[string]interface{}{
 					{
-						"userId":  senderInfo.UserInfo.UserId,
-						"version": senderInfo.UserInfo.Version,
+						"userId":  receiverInfo.UserInfo.UserId,
+						"version": receiverInfo.UserInfo.Version,
 					},
 				},
 			})
