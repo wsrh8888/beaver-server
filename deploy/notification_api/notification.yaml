@@ -1,6 +1,6 @@
-Name: user
+Name: notification
 Host: 0.0.0.0
-Port: 40000
+Port: 21000
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
@@ -21,4 +21,10 @@ FriendRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: friendrpc.rpc 
+    Key: friendrpc.rpc
+ChatRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: chatrpc.rpc
+

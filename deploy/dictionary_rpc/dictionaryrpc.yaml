@@ -1,5 +1,5 @@
 Name: dictionaryrpc.rpc
-ListenOn: 0.0.0.0:30610
+ListenOn: 0.0.0.0:31100
 Etcd:
   Hosts:
   - 127.0.0.1:2379
@@ -13,4 +13,4 @@ Log:
 RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'
-  DB: 0 
+  DB: 0

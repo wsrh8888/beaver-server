@@ -8,9 +8,10 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 # 移除配置文件复制，改为外部挂载
-# COPY track.yaml .
+# COPY emojirpc.yaml .
 
-COPY --from=builder /build/track_admin/track .
+COPY --from=builder /build/emoji_rpc/emojirpc .
 
 # 修改启动命令，使用外部配置文件路径
-CMD ["./track", "-f", "/etc/track.yaml"] 
+CMD ["./emojirpc", "-f", "/etc/emojirpc.yaml"]
+
