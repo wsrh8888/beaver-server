@@ -1,12 +1,12 @@
 
 services:
-  gateway_admin:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/gateway_admin:1.0.2
-    container_name: gateway_admin
+  emoji_rpc:
+    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/emoji_rpc:1.0.2
+    container_name: emoji_rpc
     network_mode: "host"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./gateway.yaml:/etc/gateway.yaml:ro
+      - ./emojirpc.yaml:/etc/emojirpc.yaml:ro
     deploy:
       restart_policy:
         condition: any

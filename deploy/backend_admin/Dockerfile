@@ -8,9 +8,10 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 # 移除配置文件复制，改为外部挂载
-# COPY group.yaml .
+# COPY backend.yaml .
 
-COPY --from=builder /build/group_admin/group .
+COPY --from=builder /build/backend_admin/backend_admin .
 
 # 修改启动命令，使用外部配置文件路径
-CMD ["./group", "-f", "/etc/group.yaml"] 
+CMD ["./backend_admin", "-f", "/etc/backend.yaml"]
+
