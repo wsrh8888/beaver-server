@@ -51,9 +51,8 @@ func (l *GetSyncNotificationInboxesLogic) GetSyncNotificationInboxes(req *types.
 	}
 
 	return &types.GetSyncNotificationInboxesRes{
-		InboxVersions:  inboxVersions,
-		MaxVersion:     rpcResp.MaxVersion,
+		InboxVersions:   inboxVersions,
+		MaxVersion:      rpcResp.MaxVersion,
 		ServerTimestamp: time.Now().UnixMilli(),
 	}, nil
 }
-

@@ -77,11 +77,11 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 
 			// 通知表情收藏表更新
 			collectUpdates := map[string]interface{}{
-				"table": "emoji_collect",
+				"table":  "emoji_collect",
 				"userId": userId,
 				"data": []map[string]interface{}{
 					{
-						"version": version,
+						"version":        version,
 						"emojiCollectId": emojiCollectId,
 					},
 				},
@@ -122,11 +122,11 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 
 			// 通知表情收藏表更新
 			collectUpdates := map[string]interface{}{
-				"table": "emoji_collect",
+				"table":  "emoji_collect",
 				"userId": userId,
 				"data": []map[string]interface{}{
 					{
-						"version": version,
+						"version":        version,
 						"emojiCollectId": emojiCollectId,
 					},
 				},
