@@ -63,7 +63,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		suffix := strings.ToLower(nameList[len(nameList)-1])
-		if !utils.InList(svcCtx.Config.WhiteList, suffix) {
+		if !utils.InList(svcCtx.Config.File.WhiteList, suffix) {
 			logx.Error("文件类型不在白名单中:", suffix)
 			response.Response(r, w, nil, errors.New("文件类型不支持"))
 			return
@@ -126,7 +126,14 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		logx.Info("文件不存在，继续上传流程")
 
 		// 根据文件类型创建目录结构，并生成七牛云文件路径
-		qiniuFilePath := fmt.Sprintf("%s/%s", fileType, fileMd5Name)
+		// 如果配置了项目名称，则添加项目目录前缀；否则使用根目录
+		projectName := svcCtx.Config.Qiniu.ProjectName
+		var qiniuFilePath string
+		if projectName != "" {
+			qiniuFilePath = fmt.Sprintf("%s/%s/%s", projectName, fileType, fileMd5Name)
+		} else {
+			qiniuFilePath = fmt.Sprintf("%s/%s", fileType, fileMd5Name)
+		}
 		logx.Info("七牛云文件路径:", qiniuFilePath)
 
 		// 上传文件到七牛云

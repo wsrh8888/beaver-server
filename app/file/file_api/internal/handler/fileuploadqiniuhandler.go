@@ -72,7 +72,14 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 根据文件类型创建目录结构，并生成七牛云文件路径
 		fileMd5Name := fileReq.FileMd5 + "." + fileReq.Suffix
-		qiniuFilePath := fmt.Sprintf("%s/%s", fileReq.FileType, fileMd5Name)
+		// 如果配置了项目名称，则添加项目目录前缀；否则使用根目录
+		projectName := svcCtx.Config.Qiniu.ProjectName
+		var qiniuFilePath string
+		if projectName != "" {
+			qiniuFilePath = fmt.Sprintf("%s/%s/%s", projectName, fileReq.FileType, fileMd5Name)
+		} else {
+			qiniuFilePath = fmt.Sprintf("%s/%s", fileReq.FileType, fileMd5Name)
+		}
 
 		// 上传文件到七牛云
 		qiniuURL, err := uploadToQiniu(qiniuFilePath, fileReq.ByteData, svcCtx)

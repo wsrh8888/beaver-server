@@ -27,3 +27,8 @@ ChatRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: chatrpc.rpc
+NotificationRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: notificationrpc.rpc

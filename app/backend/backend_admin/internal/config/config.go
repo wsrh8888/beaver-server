@@ -29,14 +29,16 @@ type Config struct {
 		AccessExpire int
 	}
 	Local struct {
-		UploadDir string // 本地文件上传目录
+		UploadDir   string // 本地文件上传目录
+		ProjectName string // 项目名称，用于文件路径前缀
 	}
 	Qiniu struct {
-		AK         string
-		SK         string
-		Bucket     string
-		Domain     string
-		ExpireTime int64 // 签名URL有效期, 单位：秒
+		ProjectName string // 项目名称，用于文件路径前缀
+		AK          string
+		SK          string
+		Bucket      string
+		Domain      string
+		ExpireTime  int64 // 签名URL有效期, 单位：秒
 	}
 	FileRpc       zrpc.RpcClientConf
 	DictionaryRpc zrpc.RpcClientConf
