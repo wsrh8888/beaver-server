@@ -1,7 +1,7 @@
 
 services:
   notification_api:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/notification_api:1.0.2
+    image: wsrh8888/notification_api:1.0.2
     container_name: notification_api
     network_mode: "host"
     volumes:

@@ -50,4 +50,3 @@ func (l *GetSyncNotificationEventsLogic) GetSyncNotificationEvents(req *types.Ge
 		ServerTimestamp: time.Now().UnixMilli(),
 	}, nil
 }
-

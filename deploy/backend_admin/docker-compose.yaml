@@ -1,7 +1,7 @@
 
 services:
   backend_admin:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/backend_admin:1.0.2
+    image: wsrh8888/backend_admin:1.0.2
     container_name: backend_admin
     network_mode: "host"
     volumes:

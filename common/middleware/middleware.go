@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"beaver/common/ajax"
 	"context"
 	"fmt"
 	"net/http"
@@ -26,14 +25,7 @@ func LogMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 		ctx = context.WithValue(ctx, "Scheme", scheme)
 
-		// 获取城市信息并添加到header
-		cityName, err := ajax.GetCityByIP(ClientIP)
-		if err != nil {
-			cityName = "" // 默认返回"未知"
-		}
-		r.Header.Set("X-City-Name", cityName)
-
-		fmt.Println("scheme:", scheme, "ClientIP:", ClientIP, "ClientHost:", originalHost, "CityName:", cityName)
+		fmt.Println("scheme:", scheme, "ClientIP:", ClientIP, "ClientHost:", originalHost)
 		next(w, r.WithContext(ctx))
 	}
 }
