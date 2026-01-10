@@ -1,7 +1,7 @@
 
 services:
   file_rpc:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/file_rpc:1.0.2
+    image: wsrh8888/file_rpc:1.0.2
     container_name: file_rpc
     network_mode: "host"
     volumes:

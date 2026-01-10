@@ -9,11 +9,13 @@ modules=(
     "chat_rpc"
     "file_rpc"
     "dictionary_rpc"
-    "datasync_rpc"
+    "emoji_rpc"
+    "notification_rpc"
     
     # ==================== API 服务 ====================
     "auth_api"
     "chat_api"
+    "datasync_api"
     "dictionary_api"
     "emoji_api"
     "feedback_api"
@@ -21,29 +23,16 @@ modules=(
     "friend_api"
     "group_api"
     "moment_api"
+    "notification_api"
     "track_api"
     "update_api"
     "user_api"
     "ws_api"
     "gateway_api"
-    "datasync_api"
-    
-    
     
     # ==================== ADMIN 服务 ====================
-    "auth_admin"
-    "chat_admin"
-    "emoji_admin"
+    "backend_admin"
     "gateway_admin"
-    "group_admin"
-    "moment_admin"
-    "track_admin"
-    "user_admin"
-    "system_admin"
-    "update_admin"
-    "feedback_admin"
-    "file_admin"
-    "friend_admin"
 )
 
 # 在当前路径执行 docker build
@@ -80,7 +69,5 @@ done
 
 # 等待所有后台任务完成
 wait
-
-echo "🎉 所有模块构建完成！"
 
 echo "🎉 所有模块构建完成！"
