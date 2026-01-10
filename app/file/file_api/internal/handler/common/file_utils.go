@@ -267,16 +267,26 @@ func SaveFileToLocal(filePath string, data []byte) error {
 }
 
 // GenerateFilePath 生成文件路径（公共函数）
-func GenerateFilePath(uploadDir, fileType, fileMd5, suffix string) string {
+// projectName: 项目名称，如果为空则不加项目目录前缀
+func GenerateFilePath(uploadDir, projectName, fileType, fileMd5, suffix string) string {
 	fileMd5Name := fileMd5 + "." + suffix
+	if projectName != "" {
+		return filepath.Join(uploadDir, projectName, fileType, fileMd5Name)
+	}
 	return filepath.Join(uploadDir, fileType, fileMd5Name)
 }
 
 // GenerateRelativePath 生成相对路径（不包含uploadDir，用于数据库存储）
-func GenerateRelativePath(fileType, fileMd5, suffix string) string {
+// projectName: 项目名称，如果为空则不加项目目录前缀
+func GenerateRelativePath(projectName, fileType, fileMd5, suffix string) string {
 	fileMd5Name := fileMd5 + "." + suffix
+	var path string
+	if projectName != "" {
+		path = filepath.Join(projectName, fileType, fileMd5Name)
+	} else {
+		path = filepath.Join(fileType, fileMd5Name)
+	}
 	// 使用 filepath.Join 生成路径，然后转换为正斜杠格式，确保跨平台一致性
-	path := filepath.Join(fileType, fileMd5Name)
 	return filepath.ToSlash(path)
 }
 
