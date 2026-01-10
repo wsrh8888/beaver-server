@@ -16,6 +16,7 @@ func InitAllData(db *gorm.DB) error {
 		fn   func(*gorm.DB) error
 	}{
 		{"文件表", InitFileData},
+		{"升级应用表", InitUpdateApp},
 	}
 
 	// 逐个执行初始化
