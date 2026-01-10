@@ -58,9 +58,10 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 创建本地存储目录
 		uploadDir := svcCtx.Config.Local.UploadDir
+		projectName := svcCtx.Config.Local.ProjectName
 
-		// 生成本地文件路径
-		localFilePath := common.GenerateFilePath(uploadDir, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
+		// 生成本地文件路径（如果配置了项目名称，则添加项目目录前缀）
+		localFilePath := common.GenerateFilePath(uploadDir, projectName, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
 
 		// 保存文件到本地
 		if err := common.SaveFileToLocal(localFilePath, fileReq.ByteData); err != nil {
@@ -79,8 +80,8 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			}
 		}
 
-		// 生成相对路径用于数据库存储（不包含uploadDir）
-		relativePath := common.GenerateRelativePath(fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
+		// 生成相对路径用于数据库存储（如果配置了项目名称则包含项目目录，不包含uploadDir）
+		relativePath := common.GenerateRelativePath(projectName, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
 
 		// 创建文件记录
 		newFileModel, err := common.CreateFileRecord(fileReq, relativePath, file_models.LocalSource, svcCtx)
