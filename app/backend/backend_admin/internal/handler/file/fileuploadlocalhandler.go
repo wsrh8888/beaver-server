@@ -74,8 +74,11 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			uploadDir = "./uploads" // 默认目录
 		}
 
-		// 生成本地文件路径
-		localFilePath := generateFilePath(uploadDir, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
+		// 获取项目名称（如果为空则不加项目目录前缀）
+		projectName := svcCtx.Config.Local.ProjectName
+
+		// 生成本地文件路径（如果配置了项目名称，则添加项目目录前缀）
+		localFilePath := generateFilePath(uploadDir, projectName, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
 
 		// 保存文件到本地
 		if err := saveFileToLocal(localFilePath, fileReq.ByteData); err != nil {
@@ -83,8 +86,8 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// 生成相对路径用于数据库存储（不包含uploadDir）
-		relativePath := generateRelativePath(fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
+		// 生成相对路径用于数据库存储（如果配置了项目名称则包含项目目录，不包含uploadDir）
+		relativePath := generateRelativePath(projectName, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
 
 		// 保存文件信息到数据库
 		saveReq := &types.SaveFileReq{
@@ -140,14 +143,24 @@ func saveFileToLocal(filePath string, data []byte) error {
 }
 
 // generateFilePath 生成文件路径
-func generateFilePath(uploadDir, fileType, fileMd5, suffix string) string {
+// projectName: 项目名称，如果为空则不加项目目录前缀
+func generateFilePath(uploadDir, projectName, fileType, fileMd5, suffix string) string {
 	fileMd5Name := fileMd5 + "." + suffix
+	if projectName != "" {
+		return filepath.Join(uploadDir, projectName, fileType, fileMd5Name)
+	}
 	return filepath.Join(uploadDir, fileType, fileMd5Name)
 }
 
 // generateRelativePath 生成相对路径（不包含uploadDir，用于数据库存储）
-func generateRelativePath(fileType, fileMd5, suffix string) string {
+// projectName: 项目名称，如果为空则不加项目目录前缀
+func generateRelativePath(projectName, fileType, fileMd5, suffix string) string {
 	fileMd5Name := fileMd5 + "." + suffix
-	path := filepath.Join(fileType, fileMd5Name)
+	var path string
+	if projectName != "" {
+		path = filepath.Join(projectName, fileType, fileMd5Name)
+	} else {
+		path = filepath.Join(fileType, fileMd5Name)
+	}
 	return filepath.ToSlash(path)
 }
