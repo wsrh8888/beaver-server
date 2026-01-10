@@ -165,7 +165,7 @@ type (
 		PackageID *string           `json:"packageId"`
 		Status    int8              `json:"status"`
 		Version   int64             `json:"version"`
-		CreatedAt  int64             `json:"createdAt"`
+		CreatedAt int64             `json:"createdAt"`
 		UpdatedAt int64             `json:"updatedAt"`
 	}
 )
@@ -210,8 +210,8 @@ type (
 		Type         string `json:"type"`
 		Status       int8   `json:"status"`
 		CollectCount int    `json:"collectCount"`
-		CreatedAt     int64  `json:"createdAt"`
-		UpdatedAt   int64  `json:"updatedAt"`
+		CreatedAt    int64  `json:"createdAt"`
+		UpdatedAt    int64  `json:"updatedAt"`
 		Version      int64  `json:"version"`
 	}
 )
@@ -234,8 +234,8 @@ type (
 		PackageID      *string `json:"packageId"`
 		IsDeleted      bool    `json:"isDeleted"`
 		Version        int64   `json:"version"`
-		CreatedAt     int64   `json:"createdAt"`
-		UpdatedAt    int64   `json:"updatedAt"`
+		CreatedAt      int64   `json:"createdAt"`
+		UpdatedAt      int64   `json:"updatedAt"`
 	}
 )
 
@@ -264,8 +264,8 @@ type (
 		PackageID        string `json:"packageId"`
 		IsDeleted        bool   `json:"isDeleted"`
 		Version          int64  `json:"version"`
-		CreatedAt       int64  `json:"createdAt"`
-		UpdatedAt      int64  `json:"updatedAt"`
+		CreatedAt        int64  `json:"createdAt"`
+		UpdatedAt        int64  `json:"updatedAt"`
 	}
 )
 
@@ -284,8 +284,19 @@ type (
 		EmojiID    string `json:"emojiId"`
 		SortOrder  int    `json:"sortOrder"`
 		Version    int64  `json:"version"`
-		CreatedAt int64  `json:"createdAt"`
-		UpdatedAt int64  `json:"updatedAt"`
+		CreatedAt  int64  `json:"createdAt"`
+		UpdatedAt  int64  `json:"updatedAt"`
+	}
+)
+
+// 批量获取表情包内容详情（通过relationIds，同步用）
+type (
+	GetEmojiPackageContentsByRelationIdsReq {
+		UserID      string   `header:"Beaver-User-Id"`
+		RelationIds []string `json:"relationIds"` // 关联ID列表
+	}
+	GetEmojiPackageContentsByRelationIdsRes {
+		Contents []EmojiPackageContentDetailItem `json:"contents"`
 	}
 )
 
@@ -341,6 +352,10 @@ service emoji {
 	@doc "批量获取表情包内容详情（数据库同步）"
 	@handler GetEmojiPackageContentsByPackageIds
 	post /api/emoji/package-contents-by-package-ids (GetEmojiPackageContentsByPackageIdsReq) returns (GetEmojiPackageContentsByPackageIdsRes)
+
+	@doc "批量获取表情包内容详情（通过relationIds，数据库同步）"
+	@handler GetEmojiPackageContentsByRelationIds
+	post /api/emoji/package-contents-by-relation-ids (GetEmojiPackageContentsByRelationIdsReq) returns (GetEmojiPackageContentsByRelationIdsRes)
 }
 
 // goctl api go -api emoji_api.api -dir . --home ../../../template

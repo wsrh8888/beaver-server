@@ -50,9 +50,8 @@ func (l *GetSyncNotificationReadCursorsLogic) GetSyncNotificationReadCursors(req
 	}
 
 	return &types.GetSyncNotificationReadCursorsRes{
-		CursorVersions: cursorVersions,
-		MaxVersion:     rpcResp.MaxVersion,
+		CursorVersions:  cursorVersions,
+		MaxVersion:      rpcResp.MaxVersion,
 		ServerTimestamp: time.Now().UnixMilli(),
 	}, nil
 }
-

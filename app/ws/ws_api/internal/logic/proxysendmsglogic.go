@@ -55,5 +55,5 @@ func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *type
 
 	websocket_utils.SendMsgToUser(req.TargetID, wsCommandConst.Command(req.Command), content)
 
-	return
+	return &types.ProxySendMsgRes{}, nil
 }
