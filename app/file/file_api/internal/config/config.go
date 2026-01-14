@@ -21,13 +21,15 @@ type Config struct {
 	BlackList   []string
 	UserRpc     zrpc.RpcClientConf
 	Local       struct {
-		UploadDir string
+		UploadDir   string // 本地文件上传目录
+		ProjectName string // 项目名称，用于文件路径前缀（为空则使用根目录）
 	}
 	Qiniu struct {
-		AK         string
-		SK         string
-		Bucket     string
-		Domain     string
-		ExpireTime int64
+		ProjectName string // 项目名称，用于文件路径前缀（为空则使用根目录）
+		AK          string
+		SK          string
+		Bucket      string
+		Domain      string
+		ExpireTime  int64
 	}
 }

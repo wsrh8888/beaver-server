@@ -67,6 +67,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: GetEmojiPackageContentsByPackageIdsHandler(serverCtx),
 			},
 			{
+				// 批量获取表情包内容详情（通过relationIds，数据库同步）
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/package-contents-by-relation-ids",
+				Handler: GetEmojiPackageContentsByRelationIdsHandler(serverCtx),
+			},
+			{
 				// 收藏或取消收藏表情包
 				Method:  http.MethodPost,
 				Path:    "/api/emoji/packageFavorite",

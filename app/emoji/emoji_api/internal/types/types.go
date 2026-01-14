@@ -156,6 +156,15 @@ type GetEmojiPackageContentsByPackageIdsRes struct {
 	Contents []EmojiPackageContentDetailItem `json:"contents"`
 }
 
+type GetEmojiPackageContentsByRelationIdsReq struct {
+	UserID      string   `header:"Beaver-User-Id"`
+	RelationIds []string `json:"relationIds"` // 关联ID列表
+}
+
+type GetEmojiPackageContentsByRelationIdsRes struct {
+	Contents []EmojiPackageContentDetailItem `json:"contents"`
+}
+
 type GetEmojiPackageDetailReq struct {
 	UserID    string `header:"Beaver-User-Id"`
 	PackageID string `json:"packageId"`

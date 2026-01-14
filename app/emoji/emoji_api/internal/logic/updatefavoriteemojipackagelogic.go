@@ -77,7 +77,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		}
 
 		// 异步通过 WS 通知用户其他客户端
-		go func(etcdAddr string, userId string, packageCollectId string, version int64, packageId string) {
+		go func(etcdAddr string, userId string, packageCollectId string, version int64, packageId string, packageVersion int64) {
 			// 查询表情包包含的表情数据
 			var packageEmojis []emoji_models.EmojiPackageEmoji
 			err := l.svcCtx.DB.Where("package_id = ?", packageId).Find(&packageEmojis).Error
@@ -128,8 +128,8 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 				"userId": userId,
 				"data": []map[string]interface{}{
 					{
-						"packageId": emojiPackage.PackageID,
-						"version":   emojiPackage.Version,
+						"packageId": packageId,
+						"version":   packageVersion,
 					},
 				},
 			}
@@ -169,7 +169,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
 				"tableUpdates": tableUpdates,
 			}, "")
-		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectVersion, req.PackageID)
+		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectVersion, req.PackageID, emojiPackage.Version)
 	} else if req.Type == "unfavorite" {
 		// 取消收藏
 		if err != nil {
@@ -191,7 +191,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		}
 
 		// 异步通过 WS 通知用户其他客户端
-		go func(etcdAddr string, userId string, packageCollectId string, version int64, packageId string) {
+		go func(etcdAddr string, userId string, packageCollectId string, version int64, packageId string, packageVersion int64) {
 			// 构建表更新数据
 			var tableUpdates []map[string]interface{}
 
@@ -215,7 +215,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 				"data": []map[string]interface{}{
 					{
 						"packageId": packageId,
-						"version":   emojiPackage.Version,
+						"version":   packageVersion,
 					},
 				},
 			}
@@ -250,7 +250,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
 				"tableUpdates": tableUpdates,
 			}, "")
-		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectRecord.Version, req.PackageID)
+		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectRecord.Version, req.PackageID, emojiPackage.Version)
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")
 	}
