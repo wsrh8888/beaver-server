@@ -26,24 +26,48 @@ func NewGetEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *emoji_rpc.GetEmojiPackagesReq) (*emoji_rpc.GetEmojiPackagesRes, error) {
-	// 查询用户相关的所有表情包（官方表情包 + 用户创建的表情包）
-	var packages []emoji_models.EmojiPackage
-	query := l.svcCtx.DB.Where("(type = ? OR user_id = ?) AND status = ?",
-		"official", in.UserId, 1) // 1=正常状态
+	// 1. 先查询用户收藏的表情包ID列表
+	var collects []emoji_models.EmojiPackageCollect
+	collectQuery := l.svcCtx.DB.Where("user_id = ? AND is_deleted = ?",
+		in.UserId, false)
 
-	// 增量同步：只返回更新时间大于since的记录
+	// 增量同步：只返回更新时间大于since的收藏记录
 	if in.Since > 0 {
 		sinceTime := time.UnixMilli(in.Since)
-		query = query.Where("updated_at > ?", sinceTime)
+		collectQuery = collectQuery.Where("updated_at > ?", sinceTime)
 	}
 
-	err := query.Find(&packages).Error
+	err := collectQuery.Find(&collects).Error
 	if err != nil {
-		l.Errorf("查询表情包版本信息失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
+		l.Errorf("查询用户收藏表情包失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个表情包版本变更", len(packages))
+	// 如果没有收藏记录，直接返回空结果
+	if len(collects) == 0 {
+		l.Infof("用户 %s 没有收藏的表情包", in.UserId)
+		return &emoji_rpc.GetEmojiPackagesRes{
+			EmojiPackageVersions: []*emoji_rpc.EmojiPackageVersionItem{},
+			ServerTimestamp:      time.Now().UnixMilli(),
+		}, nil
+	}
+
+	// 2. 提取收藏的表情包ID列表
+	var packageIDs []string
+	for _, collect := range collects {
+		packageIDs = append(packageIDs, collect.PackageID)
+	}
+
+	// 3. 查询这些表情包的详细信息
+	var packages []emoji_models.EmojiPackage
+	err = l.svcCtx.DB.Where("package_id IN (?) AND status = ?",
+		packageIDs, 1).Find(&packages).Error // 1=正常状态
+	if err != nil {
+		l.Errorf("查询表情包详细信息失败: userId=%s, packageIds=%v, error=%v", in.UserId, packageIDs, err)
+		return nil, err
+	}
+
+	l.Infof("查询到用户 %s 收藏的 %d 个表情包版本变更", in.UserId, len(packages))
 
 	// 转换为版本摘要格式
 	var packageVersions []*emoji_rpc.EmojiPackageVersionItem

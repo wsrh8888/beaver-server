@@ -1,7 +1,7 @@
 
 services:
   gateway_admin:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/gateway_admin:1.0.2
+    image: wsrh8888/gateway_admin:1.0.2
     container_name: gateway_admin
     network_mode: "host"
     volumes:

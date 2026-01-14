@@ -1,7 +1,7 @@
 
 services:
   notification_rpc:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/notification_rpc:1.0.2
+    image: wsrh8888/notification_rpc:1.0.2
     container_name: notification_rpc
     network_mode: "host"
     volumes:

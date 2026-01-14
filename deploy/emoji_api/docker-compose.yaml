@@ -1,7 +1,7 @@
 
 services:
   emoji_api:
-    image: registry.cn-hangzhou.aliyuncs.com/beaver_im/emoji_api:1.0.2
+    image: wsrh8888/emoji_api:1.0.2
     container_name: emoji_api
     network_mode: "host"
     volumes:
