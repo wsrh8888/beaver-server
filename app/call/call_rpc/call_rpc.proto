@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package call_rpc;
+option go_package = "./call_rpc";
+
+// 获取用户通话状态
+message GetUserStatusReq {
+  string user_id = 1;
+}
+
+message GetUserStatusRes {
+  bool is_busy = 1;      // 是否通话中
+  string room_id = 2;    // 正在哪个房间
+}
+
+// 记录/更新通话信息 (供 API 调用)
+message CreateSessionReq {
+  string room_id = 1;
+  string caller_id = 2;
+  int32 call_type = 3;
+}
+
+message CreateSessionRes {
+  bool success = 1;
+}
+
+service call {
+  // 供 Chat/User 等服务查询用户是否忙碌
+  rpc GetUserStatus(GetUserStatusReq) returns (GetUserStatusRes);
+  // 供 Call-Api 调用，创建通话记录
+  rpc CreateSession(CreateSessionReq) returns (CreateSessionRes);
+}
+
+// goctl rpc protoc call_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+
