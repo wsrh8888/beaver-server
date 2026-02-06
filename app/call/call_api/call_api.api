@@ -1,0 +1,97 @@
+syntax = "v1"
+
+info (
+	title:   "Beaver IM 音视频服务"
+	desc:    "集成 LiveKit 的极简单组版音视频管理"
+	author:  "AI Partner"
+	version: "v1.0"
+)
+
+// 1. 发起通话接口 (由拨打方调用)
+type (
+	StartCallReq {
+		UserID   string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
+		CallType int8   `json:"callType"` // 通话类型，int8类型：1-单聊语音, 2-单聊视频, 3-群聊语音, 4-群聊视频
+		TargetId string `json:"targetId"` // 目标ID，string类型：单聊为对方ID，群聊为群ID
+	}
+	StartCallRes {
+		RoomID     string `json:"roomId"` // 业务生成的唯一房间ID，string类型
+		RoomToken  string `json:"roomToken"` // 发起者的LiveKit访问令牌，string类型
+		LiveKitUrl string `json:"liveKitUrl"` // LiveKit服务器地址，string类型
+	}
+)
+
+// 2. 接听通话接口 (由接听方点击"接听"后调用，用于获取令牌)
+type (
+	GetCallTokenReq {
+		UserID string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
+		RoomID string `json:"roomId"` // 目标房间ID，string类型
+	}
+	GetCallTokenRes {
+		RoomToken  string `json:"roomToken"` // LiveKit访问令牌，string类型
+		LiveKitUrl string `json:"liveKitUrl"` // LiveKit服务器地址，string类型
+	}
+)
+
+// 3. 挂断/拒绝通话接口 (业务指令，用于同步数据库状态)
+type (
+	HangupCallReq {
+		UserID string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
+		RoomID string `json:"roomId"` // 房间ID，string类型
+	}
+	HangupCallRes {
+		Success bool `json:"success"` // 操作是否成功，bool类型
+	}
+)
+
+// 4. 通话记录查询接口
+type (
+	CallHistoryReq {
+		UserID string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
+		Page   int    `form:"page,default=1"` // 页码，int类型，默认值为1
+		Size   int    `form:"size,default=20"` // 每页数量，int类型，默认值为20
+	}
+	CallHistoryRes {
+		List []CallHistoryResItem `json:"list"` // 通话记录列表，数组类型
+	}
+	CallHistoryResItem {
+		RoomID    string `json:"roomId"` // 房间ID，string类型
+		CallerID  string `json:"callerId"` // 拨打方用户ID，string类型
+		CallType  int8   `json:"callType"` // 通话类型，int8类型：1-单聊语音, 2-单聊视频, 3-群聊语音, 4-群聊视频
+		Status    int8   `json:"status"` // 通话状态，int8类型：1-进行中, 2-已结束, 3-未接听, 4-拒绝
+		StartTime int64  `json:"startTime"` // 开始时间，int64类型，Unix时间戳
+		Duration  int32  `json:"duration"` // 通话时长，int32类型，单位为秒
+	}
+)
+
+// 5. LiveKit服务器Webhook回调接口 (由服务器调用)
+// 注意：此接口虽在同组，但实际调用时不带Beaver-User-Id Header
+type (
+	LiveKitWebhookReq  {}
+	LiveKitWebhookRes  {}
+)
+
+// --- 服务接口定义 ---
+service call {
+	@doc "发起音视频通话"
+	@handler StartCall
+	post /api/call/v1/start (StartCallReq) returns (StartCallRes)
+
+	@doc "接听通话并获取令牌"
+	@handler GetToken
+	post /api/call/v1/token (GetCallTokenReq) returns (GetCallTokenRes)
+
+	@doc "主动挂断或拒绝通话"
+	@handler Hangup
+	post /api/call/v1/hangup (HangupCallReq) returns (HangupCallRes)
+
+	@doc "查询我的通话历史记录"
+	@handler GetHistory
+	get /history (CallHistoryReq) returns (CallHistoryRes)
+
+	@doc "LiveKit 服务器回调 (需在网关配置白名单)"
+	@handler LiveKitWebhook
+	post /api/call/v1/webhook (LiveKitWebhookReq) returns (LiveKitWebhookRes)
+}
+
+// goctl api go -api call_api.api -dir . --home ../../../template
