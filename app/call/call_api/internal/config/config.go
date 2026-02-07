@@ -10,6 +10,7 @@ type Config struct {
 	Mysql struct {
 		DataSource string
 	}
+	Etcd  string
 	Redis struct {
 		Addr     string
 		Password string
@@ -20,6 +21,8 @@ type Config struct {
 		ApiKey    string
 		ApiSecret string
 	}
-	UserRpc zrpc.RpcClientConf
-	CallRpc zrpc.RpcClientConf
+	UserRpc  zrpc.RpcClientConf
+	CallRpc  zrpc.RpcClientConf
+	ChatRpc  zrpc.RpcClientConf
+	GroupRpc zrpc.RpcClientConf
 }

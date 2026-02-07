@@ -34,3 +34,21 @@ func (s *CallServer) CreateSession(ctx context.Context, in *call_rpc.CreateSessi
 	l := logic.NewCreateSessionLogic(ctx, s.svcCtx)
 	return l.CreateSession(in)
 }
+
+// 更新参与者状态
+func (s *CallServer) UpdateParticipantStatus(ctx context.Context, in *call_rpc.UpdateParticipantStatusReq) (*call_rpc.UpdateParticipantStatusRes, error) {
+	l := logic.NewUpdateParticipantStatusLogic(ctx, s.svcCtx)
+	return l.UpdateParticipantStatus(in)
+}
+
+// 结束通话记录
+func (s *CallServer) FinalizeSession(ctx context.Context, in *call_rpc.FinalizeSessionReq) (*call_rpc.FinalizeSessionRes, error) {
+	l := logic.NewFinalizeSessionLogic(ctx, s.svcCtx)
+	return l.FinalizeSession(in)
+}
+
+// 获取通话信息
+func (s *CallServer) GetSession(ctx context.Context, in *call_rpc.GetSessionReq) (*call_rpc.GetSessionRes, error) {
+	l := logic.NewGetSessionLogic(ctx, s.svcCtx)
+	return l.GetSession(in)
+}

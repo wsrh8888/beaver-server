@@ -40,6 +40,8 @@ type HangupCallRes struct {
 }
 
 type LiveKitWebhookReq struct {
+	Body          []byte `json:"-"`
+	Authorization string `header:"Authorization"`
 }
 
 type LiveKitWebhookRes struct {

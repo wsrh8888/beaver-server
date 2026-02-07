@@ -17,11 +17,47 @@ message GetUserStatusRes {
 message CreateSessionReq {
   string room_id = 1;
   string caller_id = 2;
-  int32 call_type = 3;
+  string target_id = 3;
+  int32 call_type = 4;
 }
 
 message CreateSessionRes {
   bool success = 1;
+}
+
+// 更新参与者状态
+message UpdateParticipantStatusReq {
+  string room_id = 1;
+  string user_id = 2;
+  int32 status = 3; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+}
+
+message UpdateParticipantStatusRes {
+  bool success = 1;
+}
+
+// 结束通话记录
+message FinalizeSessionReq {
+  string room_id = 1;
+  int32 duration = 2;
+  int32 status = 3; // 3-已结束, 4-未接听, 5-拒接
+}
+
+message FinalizeSessionRes {
+  bool success = 1;
+}
+
+// 获取通话信息
+message GetSessionReq {
+  string room_id = 1;
+}
+
+message GetSessionRes {
+  string room_id = 1;
+  string caller_id = 2;
+  int32 call_type = 3;
+  int32 status = 4;
+  repeated string participant_ids = 5;
 }
 
 service call {
@@ -29,6 +65,12 @@ service call {
   rpc GetUserStatus(GetUserStatusReq) returns (GetUserStatusRes);
   // 供 Call-Api 调用，创建通话记录
   rpc CreateSession(CreateSessionReq) returns (CreateSessionRes);
+  // 更新参与者状态
+  rpc UpdateParticipantStatus(UpdateParticipantStatusReq) returns (UpdateParticipantStatusRes);
+  // 结束通话记录
+  rpc FinalizeSession(FinalizeSessionReq) returns (FinalizeSessionRes);
+  // 获取通话信息
+  rpc GetSession(GetSessionReq) returns (GetSessionRes);
 }
 
 // goctl rpc protoc call_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
