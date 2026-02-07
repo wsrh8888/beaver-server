@@ -37,3 +37,13 @@ CallRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: callrpc.rpc
+ChatRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: chatrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: grouprpc.rpc

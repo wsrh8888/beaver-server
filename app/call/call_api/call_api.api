@@ -67,7 +67,10 @@ type (
 // 5. LiveKit服务器Webhook回调接口 (由服务器调用)
 // 注意：此接口虽在同组，但实际调用时不带Beaver-User-Id Header
 type (
-	LiveKitWebhookReq  {}
+	LiveKitWebhookReq {
+		Body          []byte `json:"-"`
+		Authorization string `header:"Authorization"`
+	}
 	LiveKitWebhookRes  {}
 )
 

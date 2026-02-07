@@ -2,6 +2,7 @@ package main
 
 import (
 	"beaver/app/backend/backend_models"
+	"beaver/app/call/call_models"
 	"beaver/app/chat/chat_models"
 	"beaver/app/datasync/datasync_models"
 	"beaver/app/emoji/emoji_models"
@@ -81,6 +82,10 @@ func main() {
 			&notification_models.NotificationEvent{},
 			&notification_models.NotificationInbox{},
 			&notification_models.NotificationRead{},
+
+			// 音视频通话表
+			&call_models.CallSession{},
+			&call_models.CallParticipant{},
 
 			// 后台管理相关表
 			&backend_models.AdminUser{},
