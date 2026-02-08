@@ -562,6 +562,146 @@ func (x *GetSessionRes) GetParticipantIds() []string {
 	return nil
 }
 
+type Participant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"` // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Participant) Reset() {
+	*x = Participant{}
+	mi := &file_call_rpc_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Participant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Participant) ProtoMessage() {}
+
+func (x *Participant) ProtoReflect() protoreflect.Message {
+	mi := &file_call_rpc_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Participant.ProtoReflect.Descriptor instead.
+func (*Participant) Descriptor() ([]byte, []int) {
+	return file_call_rpc_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Participant) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Participant) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type GetParticipantsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetParticipantsReq) Reset() {
+	*x = GetParticipantsReq{}
+	mi := &file_call_rpc_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetParticipantsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetParticipantsReq) ProtoMessage() {}
+
+func (x *GetParticipantsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_call_rpc_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetParticipantsReq.ProtoReflect.Descriptor instead.
+func (*GetParticipantsReq) Descriptor() ([]byte, []int) {
+	return file_call_rpc_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetParticipantsReq) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+type GetParticipantsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Participants  []*Participant         `protobuf:"bytes,1,rep,name=participants,proto3" json:"participants,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetParticipantsRes) Reset() {
+	*x = GetParticipantsRes{}
+	mi := &file_call_rpc_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetParticipantsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetParticipantsRes) ProtoMessage() {}
+
+func (x *GetParticipantsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_call_rpc_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetParticipantsRes.ProtoReflect.Descriptor instead.
+func (*GetParticipantsRes) Descriptor() ([]byte, []int) {
+	return file_call_rpc_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetParticipantsRes) GetParticipants() []*Participant {
+	if x != nil {
+		return x.Participants
+	}
+	return nil
+}
+
 var File_call_rpc_proto protoreflect.FileDescriptor
 
 const file_call_rpc_proto_rawDesc = "" +
@@ -598,14 +738,22 @@ const file_call_rpc_proto_rawDesc = "" +
 	"\tcaller_id\x18\x02 \x01(\tR\bcallerId\x12\x1b\n" +
 	"\tcall_type\x18\x03 \x01(\x05R\bcallType\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\x12'\n" +
-	"\x0fparticipant_ids\x18\x05 \x03(\tR\x0eparticipantIds2\x8e\x03\n" +
+	"\x0fparticipant_ids\x18\x05 \x03(\tR\x0eparticipantIds\">\n" +
+	"\vParticipant\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\x05R\x06status\"-\n" +
+	"\x12GetParticipantsReq\x12\x17\n" +
+	"\aroom_id\x18\x01 \x01(\tR\x06roomId\"O\n" +
+	"\x12GetParticipantsRes\x129\n" +
+	"\fparticipants\x18\x01 \x03(\v2\x15.call_rpc.ParticipantR\fparticipants2\xdd\x03\n" +
 	"\x04call\x12G\n" +
 	"\rGetUserStatus\x12\x1a.call_rpc.GetUserStatusReq\x1a\x1a.call_rpc.GetUserStatusRes\x12G\n" +
 	"\rCreateSession\x12\x1a.call_rpc.CreateSessionReq\x1a\x1a.call_rpc.CreateSessionRes\x12e\n" +
 	"\x17UpdateParticipantStatus\x12$.call_rpc.UpdateParticipantStatusReq\x1a$.call_rpc.UpdateParticipantStatusRes\x12M\n" +
 	"\x0fFinalizeSession\x12\x1c.call_rpc.FinalizeSessionReq\x1a\x1c.call_rpc.FinalizeSessionRes\x12>\n" +
 	"\n" +
-	"GetSession\x12\x17.call_rpc.GetSessionReq\x1a\x17.call_rpc.GetSessionResB\fZ\n" +
+	"GetSession\x12\x17.call_rpc.GetSessionReq\x1a\x17.call_rpc.GetSessionRes\x12M\n" +
+	"\x0fGetParticipants\x12\x1c.call_rpc.GetParticipantsReq\x1a\x1c.call_rpc.GetParticipantsResB\fZ\n" +
 	"./call_rpcb\x06proto3"
 
 var (
@@ -620,7 +768,7 @@ func file_call_rpc_proto_rawDescGZIP() []byte {
 	return file_call_rpc_proto_rawDescData
 }
 
-var file_call_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_call_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_call_rpc_proto_goTypes = []any{
 	(*GetUserStatusReq)(nil),           // 0: call_rpc.GetUserStatusReq
 	(*GetUserStatusRes)(nil),           // 1: call_rpc.GetUserStatusRes
@@ -632,23 +780,29 @@ var file_call_rpc_proto_goTypes = []any{
 	(*FinalizeSessionRes)(nil),         // 7: call_rpc.FinalizeSessionRes
 	(*GetSessionReq)(nil),              // 8: call_rpc.GetSessionReq
 	(*GetSessionRes)(nil),              // 9: call_rpc.GetSessionRes
+	(*Participant)(nil),                // 10: call_rpc.Participant
+	(*GetParticipantsReq)(nil),         // 11: call_rpc.GetParticipantsReq
+	(*GetParticipantsRes)(nil),         // 12: call_rpc.GetParticipantsRes
 }
 var file_call_rpc_proto_depIdxs = []int32{
-	0, // 0: call_rpc.call.GetUserStatus:input_type -> call_rpc.GetUserStatusReq
-	2, // 1: call_rpc.call.CreateSession:input_type -> call_rpc.CreateSessionReq
-	4, // 2: call_rpc.call.UpdateParticipantStatus:input_type -> call_rpc.UpdateParticipantStatusReq
-	6, // 3: call_rpc.call.FinalizeSession:input_type -> call_rpc.FinalizeSessionReq
-	8, // 4: call_rpc.call.GetSession:input_type -> call_rpc.GetSessionReq
-	1, // 5: call_rpc.call.GetUserStatus:output_type -> call_rpc.GetUserStatusRes
-	3, // 6: call_rpc.call.CreateSession:output_type -> call_rpc.CreateSessionRes
-	5, // 7: call_rpc.call.UpdateParticipantStatus:output_type -> call_rpc.UpdateParticipantStatusRes
-	7, // 8: call_rpc.call.FinalizeSession:output_type -> call_rpc.FinalizeSessionRes
-	9, // 9: call_rpc.call.GetSession:output_type -> call_rpc.GetSessionRes
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	10, // 0: call_rpc.GetParticipantsRes.participants:type_name -> call_rpc.Participant
+	0,  // 1: call_rpc.call.GetUserStatus:input_type -> call_rpc.GetUserStatusReq
+	2,  // 2: call_rpc.call.CreateSession:input_type -> call_rpc.CreateSessionReq
+	4,  // 3: call_rpc.call.UpdateParticipantStatus:input_type -> call_rpc.UpdateParticipantStatusReq
+	6,  // 4: call_rpc.call.FinalizeSession:input_type -> call_rpc.FinalizeSessionReq
+	8,  // 5: call_rpc.call.GetSession:input_type -> call_rpc.GetSessionReq
+	11, // 6: call_rpc.call.GetParticipants:input_type -> call_rpc.GetParticipantsReq
+	1,  // 7: call_rpc.call.GetUserStatus:output_type -> call_rpc.GetUserStatusRes
+	3,  // 8: call_rpc.call.CreateSession:output_type -> call_rpc.CreateSessionRes
+	5,  // 9: call_rpc.call.UpdateParticipantStatus:output_type -> call_rpc.UpdateParticipantStatusRes
+	7,  // 10: call_rpc.call.FinalizeSession:output_type -> call_rpc.FinalizeSessionRes
+	9,  // 11: call_rpc.call.GetSession:output_type -> call_rpc.GetSessionRes
+	12, // 12: call_rpc.call.GetParticipants:output_type -> call_rpc.GetParticipantsRes
+	7,  // [7:13] is the sub-list for method output_type
+	1,  // [1:7] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_call_rpc_proto_init() }
@@ -662,7 +816,7 @@ func file_call_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_call_rpc_proto_rawDesc), len(file_call_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -65,9 +65,18 @@ message NotificationMsg {
   repeated string actors = 2; // 相关用户ID列表
 }
 
+// 定义CallMsg消息 - 音视频通话相关信息（信令与日志）
+message CallMsg {
+  string roomId = 1;     // 房间ID
+  int32 callType = 2;    // 通话类型: 1-私聊, 2-群聊
+  int32 status = 3;      // 状态: 1-呼叫中, 2-通话结束, 3-拒绝, 4-未接听, 5-超时
+  int64 duration = 4;    // 通话时长(秒)
+  string event = 5;      // 信令事件: "INVITE", "CANCEL", "ACCEPT", "REJECT"
+}
+
 // 定义Msg消息
 message Msg {
-  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
+  uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话
   TextMsg textMsg = 2; // 文本消息
   ImageMsg imageMsg = 3; // 图片
   VideoMsg videoMsg = 4; // 视频
@@ -76,6 +85,7 @@ message Msg {
   EmojiMsg emojiMsg = 7; // 表情（单个表情或表情包）
   NotificationMsg notificationMsg = 8; // 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
   AudioFileMsg audioFileMsg = 9; // 音频文件（用户上传的音频文件）
+  CallMsg callMsg = 10; // 音视频通话
 }
 
 // 定义SendMsgReq消息
