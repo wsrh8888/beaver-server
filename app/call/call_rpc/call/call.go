@@ -18,10 +18,13 @@ type (
 	CreateSessionRes           = call_rpc.CreateSessionRes
 	FinalizeSessionReq         = call_rpc.FinalizeSessionReq
 	FinalizeSessionRes         = call_rpc.FinalizeSessionRes
+	GetParticipantsReq         = call_rpc.GetParticipantsReq
+	GetParticipantsRes         = call_rpc.GetParticipantsRes
 	GetSessionReq              = call_rpc.GetSessionReq
 	GetSessionRes              = call_rpc.GetSessionRes
 	GetUserStatusReq           = call_rpc.GetUserStatusReq
 	GetUserStatusRes           = call_rpc.GetUserStatusRes
+	Participant                = call_rpc.Participant
 	UpdateParticipantStatusReq = call_rpc.UpdateParticipantStatusReq
 	UpdateParticipantStatusRes = call_rpc.UpdateParticipantStatusRes
 
@@ -36,6 +39,8 @@ type (
 		FinalizeSession(ctx context.Context, in *FinalizeSessionReq, opts ...grpc.CallOption) (*FinalizeSessionRes, error)
 		// 获取通话信息
 		GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error)
+		// 获取参与者列表及状态
+		GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error)
 	}
 
 	defaultCall struct {
@@ -77,4 +82,10 @@ func (m *defaultCall) FinalizeSession(ctx context.Context, in *FinalizeSessionRe
 func (m *defaultCall) GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error) {
 	client := call_rpc.NewCallClient(m.cli.Conn())
 	return client.GetSession(ctx, in, opts...)
+}
+
+// 获取参与者列表及状态
+func (m *defaultCall) GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error) {
+	client := call_rpc.NewCallClient(m.cli.Conn())
+	return client.GetParticipants(ctx, in, opts...)
 }

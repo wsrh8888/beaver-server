@@ -52,3 +52,9 @@ func (s *CallServer) GetSession(ctx context.Context, in *call_rpc.GetSessionReq)
 	l := logic.NewGetSessionLogic(ctx, s.svcCtx)
 	return l.GetSession(in)
 }
+
+// 获取参与者列表及状态
+func (s *CallServer) GetParticipants(ctx context.Context, in *call_rpc.GetParticipantsReq) (*call_rpc.GetParticipantsRes, error) {
+	l := logic.NewGetParticipantsLogic(ctx, s.svcCtx)
+	return l.GetParticipants(in)
+}

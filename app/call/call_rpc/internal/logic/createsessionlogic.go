@@ -50,15 +50,17 @@ func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call
 			return err
 		}
 
-		// 创建参与者 (受邀者)
-		target := &call_models.CallParticipant{
-			RoomID: in.RoomId,
-			UserID: in.TargetId,
-			Status: 1, // 1-待接听
-			Role:   2, // 2-受邀者
-		}
-		if err := tx.Create(target).Error; err != nil {
-			return err
+		// 创建参与者 (受邀者) - 仅单聊需要初始化对方状态
+		if in.CallType == 1 {
+			target := &call_models.CallParticipant{
+				RoomID: in.RoomId,
+				UserID: in.TargetId,
+				Status: 1, // 1-待接听
+				Role:   2, // 2-受邀者
+			}
+			if err := tx.Create(target).Error; err != nil {
+				return err
+			}
 		}
 
 		return nil

@@ -13,6 +13,7 @@ import (
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -32,36 +33,56 @@ func NewHangupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HangupLogi
 }
 
 func (l *HangupLogic) Hangup(req *types.HangupCallReq) (resp *types.HangupCallRes, err error) {
-	// 1. 获取会话信息，找到对方
+	// 1. 获取会话信息
 	session, err := l.svcCtx.CallRpc.GetSession(l.ctx, &call_rpc.GetSessionReq{RoomId: req.RoomID})
 	if err != nil {
 		return nil, errors.New("通话会话不存在")
 	}
 
-	// 2. 更新 RPC 状态为已结束
-	_, err = l.svcCtx.CallRpc.FinalizeSession(l.ctx, &call_rpc.FinalizeSessionReq{
-		RoomId: req.RoomID,
-		Status: 3, // 3-已结束
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// 3. 更新参与者状态
-	_, err = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
+	// 2. 更新当前参与者状态为已挂断
+	_, _ = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
 		RoomId: req.RoomID,
 		UserId: req.UserID,
 		Status: 5, // 5-已挂断
 	})
 
-	// 4. 发送信令告知对方挂断
+	// 3. 判断是否需要结束整个会话
+	shouldFinalize := false
+	if session.CallType == 1 {
+		// 私聊：任意一方挂断，整个通话结束
+		shouldFinalize = true
+	} else {
+		// 群聊：检查是否还有其他人在房间里 (joined 状态)
+		participants, pErr := l.svcCtx.CallRpc.GetParticipants(l.ctx, &call_rpc.GetParticipantsReq{RoomId: req.RoomID})
+		if pErr == nil {
+			activeCount := 0
+			for _, p := range participants.Participants {
+				if p.Status == 2 { // 2-已接听/加入中
+					activeCount++
+				}
+			}
+			// 如果房间里已经没有其他人了（刚才那个人已经退出了，所以这里 activeCount 为 0 则代表全空）
+			if activeCount == 0 {
+				shouldFinalize = true
+			}
+		}
+	}
+
+	if shouldFinalize {
+		_, _ = l.svcCtx.CallRpc.FinalizeSession(l.ctx, &call_rpc.FinalizeSessionReq{
+			RoomId: req.RoomID,
+			Status: 3, // 3-已结束
+		})
+	}
+
+	// 4. 发送信令告知其他人有人挂断/离开
 	for _, pid := range session.ParticipantIds {
 		if pid != req.UserID {
 			go l.sendHangupSignal(req.UserID, pid, req.RoomID)
 		}
 	}
 
-	return &types.HangupCallRes{Success: true}, nil
+	return &types.HangupCallRes{}, nil
 }
 
 func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID string) {
@@ -74,6 +95,7 @@ func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID string) {
 	_, err := l.svcCtx.ChatRpc.SendMsg(context.Background(), &chat_rpc.SendMsgReq{
 		UserId:         hanguperID,
 		ConversationId: l.getConversationID(hanguperID, targetID),
+		MessageId:      uuid.New().String(), // 注入唯一 ID
 		Msg: &chat_rpc.Msg{
 			Type: 7, // 7:通知消息/信令
 			NotificationMsg: &chat_rpc.NotificationMsg{
@@ -104,9 +126,14 @@ func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID string) {
 	)
 }
 
-func (l *HangupLogic) getConversationID(u1, u2 string) string {
-	if u1 < u2 {
-		return u1 + ":" + u2
+func (l *HangupLogic) getConversationID(callerID, targetID string) string {
+	// 如果 targetID 是群 ID
+	if len(targetID) > 6 && targetID[:6] == "group_" {
+		return targetID
 	}
-	return u2 + ":" + u1
+	// 私聊会话 ID 拼装
+	if callerID < targetID {
+		return callerID + ":" + targetID
+	}
+	return targetID + ":" + callerID
 }

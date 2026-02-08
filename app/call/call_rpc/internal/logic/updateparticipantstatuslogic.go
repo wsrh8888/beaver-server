@@ -29,33 +29,61 @@ func NewUpdateParticipantStatusLogic(ctx context.Context, svcCtx *svc.ServiceCon
 // 更新参与者状态
 func (l *UpdateParticipantStatusLogic) UpdateParticipantStatus(in *call_rpc.UpdateParticipantStatusReq) (*call_rpc.UpdateParticipantStatusRes, error) {
 	err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
-		var updates map[string]interface{}
-		if in.Status == 2 { // 2-已接听
-			now := time.Now()
-			updates = map[string]interface{}{
-				"status":    int8(in.Status),
-				"join_time": &now,
-			}
-		} else {
-			updates = map[string]interface{}{
-				"status": int8(in.Status),
-			}
-		}
+		now := time.Now()
 
-		err := tx.Model(&call_models.CallParticipant{}).
-			Where("room_id = ? AND user_id = ?", in.RoomId, in.UserId).
-			Updates(updates).Error
-		if err != nil {
+		// 1. 查找现有记录
+		var p call_models.CallParticipant
+		err := tx.Where("room_id = ? AND user_id = ?", in.RoomId, in.UserId).First(&p).Error
+
+		if err != nil && err != gorm.ErrRecordNotFound {
 			return err
 		}
 
-		// 如果状态是已接听，也将 session 状态改为进行中
+		// 2. 准备更新的数据
+		updates := make(map[string]interface{})
+		updates["status"] = in.Status
+
+		if in.Status == 2 { // 2-已接听 (joined)
+			updates["join_time"] = &now
+		} else if in.Status >= 3 && in.Status <= 5 { // 3-拒绝, 4-超时, 5-挂断
+			updates["leave_time"] = &now
+		}
+
+		if err == gorm.ErrRecordNotFound {
+			// 如果不存在且是由于邀请或加入产生，则新建
+			var session call_models.CallSession
+			tx.Where("room_id = ?", in.RoomId).First(&session)
+
+			role := int8(2) // 默认受邀者
+			if session.CallerID == in.UserId {
+				role = 1 // 发起者
+			}
+
+			p = call_models.CallParticipant{
+				RoomID: in.RoomId,
+				UserID: in.UserId,
+				Status: int8(in.Status),
+				Role:   role,
+			}
+			if in.Status == 2 {
+				p.JoinTime = &now
+			}
+			if err := tx.Create(&p).Error; err != nil {
+				return err
+			}
+		} else {
+			// 存在则更新
+			if err := tx.Model(&p).Updates(updates).Error; err != nil {
+				return err
+			}
+		}
+
+		// 3. 如果状态是"已接听" (2)，也将 session 状态改为进行中 (1)
 		if in.Status == 2 {
-			now := time.Now()
 			err = tx.Model(&call_models.CallSession{}).
 				Where("room_id = ?", in.RoomId).
 				Updates(map[string]interface{}{
-					"status":     2, // 2-进行中
+					"status":     1, // 1-进行中
 					"start_time": &now,
 				}).Error
 			if err != nil {

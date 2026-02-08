@@ -60,6 +60,19 @@ message GetSessionRes {
   repeated string participant_ids = 5;
 }
 
+message Participant {
+  string user_id = 1;
+  int32 status = 2; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+}
+
+message GetParticipantsReq {
+  string room_id = 1;
+}
+
+message GetParticipantsRes {
+  repeated Participant participants = 1;
+}
+
 service call {
   // 供 Chat/User 等服务查询用户是否忙碌
   rpc GetUserStatus(GetUserStatusReq) returns (GetUserStatusRes);
@@ -71,6 +84,8 @@ service call {
   rpc FinalizeSession(FinalizeSessionReq) returns (FinalizeSessionRes);
   // 获取通话信息
   rpc GetSession(GetSessionReq) returns (GetSessionRes);
+  // 获取参与者列表及状态
+  rpc GetParticipants(GetParticipantsReq) returns (GetParticipantsRes);
 }
 
 // goctl rpc protoc call_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -24,6 +24,7 @@ const (
 	Call_UpdateParticipantStatus_FullMethodName = "/call_rpc.call/UpdateParticipantStatus"
 	Call_FinalizeSession_FullMethodName         = "/call_rpc.call/FinalizeSession"
 	Call_GetSession_FullMethodName              = "/call_rpc.call/GetSession"
+	Call_GetParticipants_FullMethodName         = "/call_rpc.call/GetParticipants"
 )
 
 // CallClient is the client API for Call service.
@@ -40,6 +41,8 @@ type CallClient interface {
 	FinalizeSession(ctx context.Context, in *FinalizeSessionReq, opts ...grpc.CallOption) (*FinalizeSessionRes, error)
 	// 获取通话信息
 	GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error)
+	// 获取参与者列表及状态
+	GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error)
 }
 
 type callClient struct {
@@ -100,6 +103,16 @@ func (c *callClient) GetSession(ctx context.Context, in *GetSessionReq, opts ...
 	return out, nil
 }
 
+func (c *callClient) GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetParticipantsRes)
+	err := c.cc.Invoke(ctx, Call_GetParticipants_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CallServer is the server API for Call service.
 // All implementations must embed UnimplementedCallServer
 // for forward compatibility.
@@ -114,6 +127,8 @@ type CallServer interface {
 	FinalizeSession(context.Context, *FinalizeSessionReq) (*FinalizeSessionRes, error)
 	// 获取通话信息
 	GetSession(context.Context, *GetSessionReq) (*GetSessionRes, error)
+	// 获取参与者列表及状态
+	GetParticipants(context.Context, *GetParticipantsReq) (*GetParticipantsRes, error)
 	mustEmbedUnimplementedCallServer()
 }
 
@@ -138,6 +153,9 @@ func (UnimplementedCallServer) FinalizeSession(context.Context, *FinalizeSession
 }
 func (UnimplementedCallServer) GetSession(context.Context, *GetSessionReq) (*GetSessionRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSession not implemented")
+}
+func (UnimplementedCallServer) GetParticipants(context.Context, *GetParticipantsReq) (*GetParticipantsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetParticipants not implemented")
 }
 func (UnimplementedCallServer) mustEmbedUnimplementedCallServer() {}
 func (UnimplementedCallServer) testEmbeddedByValue()              {}
@@ -250,6 +268,24 @@ func _Call_GetSession_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Call_GetParticipants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetParticipantsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallServer).GetParticipants(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Call_GetParticipants_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallServer).GetParticipants(ctx, req.(*GetParticipantsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Call_ServiceDesc is the grpc.ServiceDesc for Call service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +312,10 @@ var Call_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSession",
 			Handler:    _Call_GetSession_Handler,
+		},
+		{
+			MethodName: "GetParticipants",
+			Handler:    _Call_GetParticipants_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

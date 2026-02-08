@@ -44,6 +44,28 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 	l.Infof("收到 LiveKit Webhook 事件: %s, Room: %s", event.Event, roomID)
 
 	switch event.Event {
+	case "participant_joined":
+		if event.Participant != nil {
+			_, err = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
+				RoomId: event.Room.Name,
+				UserId: event.Participant.Identity,
+				Status: 1, // 1-已加入/Active
+			})
+			if err != nil {
+				l.Errorf("更新参与者状态(Joined)失败: %v", err)
+			}
+		}
+	case "participant_left":
+		if event.Participant != nil {
+			_, err = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
+				RoomId: event.Room.Name,
+				UserId: event.Participant.Identity,
+				Status: 2, // 2-已离开/Ended
+			})
+			if err != nil {
+				l.Errorf("更新参与者状态(Left)失败: %v", err)
+			}
+		}
 	case "room_finished":
 		// 通话彻底结束，数据沉淀
 		var duration int32
@@ -54,7 +76,7 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 		_, err = l.svcCtx.CallRpc.FinalizeSession(l.ctx, &call_rpc.FinalizeSessionReq{
 			RoomId:   roomID,
 			Duration: duration,
-			Status:   3, // 3-已结束
+			Status:   2, // 2-已结束
 		})
 		if err != nil {
 			l.Errorf("FinalizeSession 失败: %v", err)

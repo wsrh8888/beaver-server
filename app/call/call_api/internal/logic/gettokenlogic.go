@@ -10,6 +10,9 @@ import (
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/livekit/protocol/auth"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -44,6 +47,13 @@ func (l *GetTokenLogic) GetToken(req *types.GetCallTokenReq) (resp *types.GetCal
 			break
 		}
 	}
+
+	// 核心逻辑：如果是群聊 (Type 2)，允许群内其他成员主动加入，
+	// 即便他们不在初始参与者名单（ParticipantIds）中。
+	if !isParticipant && session.CallType == 2 {
+		isParticipant = true
+	}
+
 	if !isParticipant {
 		return nil, errors.New("无权进入该通话")
 	}
@@ -67,9 +77,33 @@ func (l *GetTokenLogic) GetToken(req *types.GetCallTokenReq) (resp *types.GetCal
 	// 4. 发送信令告知发起者有人接听
 	go l.sendAcceptSignal(req.UserID, session.CallerId, req.RoomID)
 
+	// 5. 获取全量在线成员列表快照
+	participants := make([]types.Participant, 0)
+	rpcResp, pErr := l.svcCtx.CallRpc.GetParticipants(l.ctx, &call_rpc.GetParticipantsReq{
+		RoomId: req.RoomID,
+	})
+	if pErr == nil {
+		for _, p := range rpcResp.Participants {
+			// 核心逻辑：只返回当前活跃或呼叫中的参与者
+			if p.Status != 1 && p.Status != 2 {
+				continue
+			}
+
+			status := "calling"
+			if p.Status == 2 {
+				status = "joined"
+			}
+			participants = append(participants, types.Participant{
+				UserID: p.UserId,
+				Status: status,
+			})
+		}
+	}
+
 	return &types.GetCallTokenRes{
-		RoomToken:  token,
-		LiveKitUrl: l.svcCtx.Config.LiveKit.Host,
+		RoomToken:    token,
+		LiveKitUrl:   l.svcCtx.Config.LiveKit.Host,
+		Participants: participants,
 	}, nil
 }
 
@@ -107,6 +141,20 @@ func (l *GetTokenLogic) sendAcceptSignal(acceptorID, callerID, roomID string) {
 	if err != nil {
 		logx.Errorf("发送 RTC_ACCEPTED 信令失败: %v", err)
 	}
+
+	// 直接通过 WebSocket 发送 RTC 接听信令
+	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
+		wsCommandConst.CALL,
+		wsTypeConst.CallReceive,
+		acceptorID,
+		callerID,
+		map[string]interface{}{
+			"type":   "RTC_ACCEPTED",
+			"user":   acceptorID,
+			"roomId": roomID,
+		},
+		l.getConversationID(acceptorID, callerID),
+	)
 }
 
 func (l *GetTokenLogic) getConversationID(u1, u2 string) string {
