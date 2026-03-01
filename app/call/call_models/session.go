@@ -28,7 +28,6 @@ type CallSession struct {
 	models.Model
 	RoomID         string        `gorm:"type:varchar(64);uniqueIndex;not null;comment:LiveKit房间ID/业务唯一ID" json:"room_id"`
 	CallerID       string        `gorm:"type:varchar(64);index;not null;comment:发起者ID" json:"caller_id"`
-	MessageID      string        `gorm:"type:varchar(64);index;comment:锚点消息ID(同步Chat用)" json:"message_id"`
 	ConversationID string        `gorm:"type:varchar(64);index;comment:会话ID" json:"conversation_id"`
 	CallType       int8          `gorm:"type:tinyint;default:1;comment:通话类型:1-私聊,2-群聊" json:"call_type"`
 	Status         SessionStatus `gorm:"type:tinyint;default:1;index;comment:状态:1-待接听/进行中,3-已结束,4-未接听,5-拒接" json:"status"`

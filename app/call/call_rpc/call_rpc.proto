@@ -32,7 +32,7 @@ message CreateSessionRes {
 message UpdateParticipantStatusReq {
   string room_id = 1;
   string user_id = 2;
-  int32 status = 3; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+  int32 status = 3; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断
 }
 
 message UpdateParticipantStatusRes {
@@ -61,11 +61,12 @@ message GetSessionRes {
   int32 call_type = 3;
   int32 status = 4;
   repeated string participant_ids = 5;
+  string conversation_id = 6;
 }
 
 message Participant {
   string user_id = 1;
-  int32 status = 2; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+  int32 status = 2; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断
 }
 
 message GetParticipantsReq {

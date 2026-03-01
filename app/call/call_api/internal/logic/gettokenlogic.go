@@ -2,14 +2,13 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
 	"beaver/app/call/call_api/internal/svc"
 	"beaver/app/call/call_api/internal/types"
+	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -74,8 +73,8 @@ func (l *GetTokenLogic) GetToken(req *types.GetCallTokenReq) (resp *types.GetCal
 		return nil, err
 	}
 
-	// 4. 发送信令告知发起者有人接听
-	go l.sendAcceptSignal(req.UserID, session.CallerId, req.RoomID)
+	// 4. 发送信令告知发起者有人接听 (纯信令，不入库)
+	go l.sendAcceptSignal(req.UserID, session.CallerId, req.RoomID, session.ConversationId)
 
 	// 5. 获取全量在线成员列表快照
 	participants := make([]types.Participant, 0)
@@ -88,14 +87,9 @@ func (l *GetTokenLogic) GetToken(req *types.GetCallTokenReq) (resp *types.GetCal
 			if p.Status != 1 && p.Status != 2 {
 				continue
 			}
-
-			status := "calling"
-			if p.Status == 2 {
-				status = "joined"
-			}
 			participants = append(participants, types.Participant{
 				UserID: p.UserId,
-				Status: status,
+				Status: p.Status,
 			})
 		}
 	}
@@ -117,49 +111,17 @@ func (l *GetTokenLogic) generateToken(userID, roomID string) (string, error) {
 	return at.ToJWT()
 }
 
-func (l *GetTokenLogic) sendAcceptSignal(acceptorID, callerID, roomID string) {
-	payload, _ := json.Marshal(map[string]interface{}{
-		"type":   "RTC_ACCEPTED",
-		"user":   acceptorID,
-		"roomId": roomID,
-	})
-
-	_, err := l.svcCtx.ChatRpc.SendMsg(context.Background(), &chat_rpc.SendMsgReq{
-		UserId:         acceptorID,
-		ConversationId: l.getConversationID(acceptorID, callerID),
-		Msg: &chat_rpc.Msg{
-			Type: 7, // 7:通知消息/信令
-			NotificationMsg: &chat_rpc.NotificationMsg{
-				Type:   101, // RTC_ACCEPTED
-				Actors: []string{acceptorID},
-			},
-			TextMsg: &chat_rpc.TextMsg{
-				Content: string(payload),
-			},
-		},
-	})
-	if err != nil {
-		logx.Errorf("发送 RTC_ACCEPTED 信令失败: %v", err)
-	}
-
-	// 直接通过 WebSocket 发送 RTC 接听信令
+func (l *GetTokenLogic) sendAcceptSignal(acceptorID, callerID, roomID, convID string) {
 	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
 		wsCommandConst.CALL,
 		wsTypeConst.CallReceive,
 		acceptorID,
 		callerID,
 		map[string]interface{}{
-			"type":   "RTC_ACCEPTED",
+			"type":   call_models.SignalAccept,
 			"user":   acceptorID,
 			"roomId": roomID,
 		},
-		l.getConversationID(acceptorID, callerID),
+		convID,
 	)
-}
-
-func (l *GetTokenLogic) getConversationID(u1, u2 string) string {
-	if u1 < u2 {
-		return u1 + ":" + u2
-	}
-	return u2 + ":" + u1
 }

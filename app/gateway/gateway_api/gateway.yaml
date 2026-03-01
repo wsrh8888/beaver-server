@@ -25,3 +25,4 @@ WhiteList:
   - /api/track/events
   - /api/track/logs
   - /api/update/report
+  - /api/call/v1/webhook

@@ -36,9 +36,8 @@ func NewStartCallLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StartCa
 }
 
 func (l *StartCallLogic) StartCall(req *types.StartCallReq) (resp *types.StartCallRes, err error) {
-	// 1. 生成房间ID和消息ID
+	// 1. 生成房间ID (同时也作为通话记录在聊天中的初始消息ID)
 	roomID := uuid.New().String()
-	messageID := uuid.New().String()
 
 	// 2. 构造会话ID (私聊使用工具类，群聊直接使用群ID)
 	var convID string
@@ -54,7 +53,7 @@ func (l *StartCallLogic) StartCall(req *types.StartCallReq) (resp *types.StartCa
 		CallerId:       req.UserID,
 		TargetId:       req.TargetId,
 		CallType:       int32(req.CallType),
-		MessageId:      messageID,
+		MessageId:      roomID, // 使用 roomID 作为锚点消息ID
 		ConversationId: convID,
 	})
 	if err != nil {
@@ -68,19 +67,50 @@ func (l *StartCallLogic) StartCall(req *types.StartCallReq) (resp *types.StartCa
 	}
 
 	// 5. 同步发送第一条“进行中”聊天消息 (作为存证和后期状态补丁的锚点)
-	l.sendInitialCallMessage(req.UserID, convID, roomID, messageID, req.CallType)
+	l.sendInitialCallMessage(req.UserID, convID, roomID, roomID, req.CallType)
 
 	// 6. 异步发送 WebSocket 实时弹窗信号 (仅私聊受邀方需要唤起界面；群聊由用户按需进入)
 	if req.CallType == 1 {
 		go l.sendInviteSignals(req.UserID, req.TargetId, convID, roomID, req.CallType)
+		// 开启超时处理定时器
+		l.startTimeoutTimer(roomID, req.TargetId)
 	}
 
 	return &types.StartCallRes{
 		RoomID:     roomID,
 		RoomToken:  token,
 		LiveKitUrl: l.svcCtx.Config.LiveKit.Host,
-		MessageID:  messageID,
+		MessageID:  roomID,
 	}, nil
+}
+
+// startTimeoutTimer 异步计时器：如果用户在规定时间内未接听，则自动更新状态为超时
+func (l *StartCallLogic) startTimeoutTimer(roomID, userID string) {
+	time.AfterFunc(30*time.Second, func() {
+		ctx := context.Background()
+		// 1. 确认用户当前状态
+		participants, err := l.svcCtx.CallRpc.GetParticipants(ctx, &call_rpc.GetParticipantsReq{RoomId: roomID})
+		if err != nil {
+			return
+		}
+
+		isStillCalling := false
+		for _, p := range participants.Participants {
+			if p.UserId == userID && p.Status == 1 { // 1 代表 Calling
+				isStillCalling = true
+				break
+			}
+		}
+
+		// 2. 如果依然是待接听状态，则变更为超时
+		if isStillCalling {
+			_, _ = l.svcCtx.CallRpc.UpdateParticipantStatus(ctx, &call_rpc.UpdateParticipantStatusReq{
+				RoomId: roomID,
+				UserId: userID,
+				Status: 4, // 4 代表 Timeout
+			})
+		}
+	})
 }
 
 func (l *StartCallLogic) generateToken(userID, roomID string) (string, error) {
@@ -116,8 +146,9 @@ func (l *StartCallLogic) sendInviteSignals(callerID, targetID, convID, roomID st
 	callerInfo, _ := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{UserID: callerID})
 	if callerInfo != nil && callerInfo.GetUserInfo() != nil {
 		callerUserInfo = map[string]string{
-			"name":   callerInfo.GetUserInfo().NickName,
-			"avatar": callerInfo.GetUserInfo().Avatar,
+			"userId":   callerID,
+			"nickName": callerInfo.GetUserInfo().NickName,
+			"avatar":   callerInfo.GetUserInfo().Avatar,
 		}
 	}
 
