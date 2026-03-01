@@ -65,18 +65,18 @@ message NotificationMsg {
   repeated string actors = 2; // 相关用户ID列表
 }
 
-// 定义CallMsg消息 - 音视频通话相关信息（信令与日志）
+// 定义CallMsg消息 - 用于聊天记录展示
 message CallMsg {
   string roomId = 1;     // 房间ID
   int32 callType = 2;    // 通话类型: 1-私聊, 2-群聊
-  int32 status = 3;      // 状态: 1-呼叫中, 2-通话结束, 3-拒绝, 4-未接听, 5-超时
+  int32 status = 3;      // 状态: 1-进行中, 2-已结束
   int64 duration = 4;    // 通话时长(秒)
-  string event = 5;      // 信令事件: "INVITE", "CANCEL", "ACCEPT", "REJECT"
 }
 
 // 定义Msg消息
 message Msg {
   uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话
+  string targetMsgId = 11; // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
   TextMsg textMsg = 2; // 文本消息
   ImageMsg imageMsg = 3; // 图片
   VideoMsg videoMsg = 4; // 视频

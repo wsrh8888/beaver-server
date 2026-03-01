@@ -53,7 +53,7 @@ func (l *GetHistoryLogic) GetHistory(req *types.CallHistoryReq) (resp *types.Cal
 			RoomID:    s.RoomID,
 			CallerID:  s.CallerID,
 			CallType:  s.CallType,
-			Status:    s.Status,
+			Status:    int8(s.Status),
 			StartTime: startTime,
 			Duration:  s.Duration,
 		})

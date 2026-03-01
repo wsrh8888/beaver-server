@@ -23,8 +23,8 @@ const (
 	Call_CreateSession_FullMethodName           = "/call_rpc.call/CreateSession"
 	Call_UpdateParticipantStatus_FullMethodName = "/call_rpc.call/UpdateParticipantStatus"
 	Call_FinalizeSession_FullMethodName         = "/call_rpc.call/FinalizeSession"
-	Call_GetSession_FullMethodName              = "/call_rpc.call/GetSession"
 	Call_GetParticipants_FullMethodName         = "/call_rpc.call/GetParticipants"
+	Call_GetSession_FullMethodName              = "/call_rpc.call/GetSession"
 )
 
 // CallClient is the client API for Call service.
@@ -33,16 +33,16 @@ const (
 type CallClient interface {
 	// 供 Chat/User 等服务查询用户是否忙碌
 	GetUserStatus(ctx context.Context, in *GetUserStatusReq, opts ...grpc.CallOption) (*GetUserStatusRes, error)
-	// 供 Call-Api 调用，创建通话记录
+	// 核心：创建通话会话并初始化参与者名单
 	CreateSession(ctx context.Context, in *CreateSessionReq, opts ...grpc.CallOption) (*CreateSessionRes, error)
-	// 更新参与者状态
+	// 更新参与者状态 (接听/拒绝/挂断)
 	UpdateParticipantStatus(ctx context.Context, in *UpdateParticipantStatusReq, opts ...grpc.CallOption) (*UpdateParticipantStatusRes, error)
 	// 结束通话记录
 	FinalizeSession(ctx context.Context, in *FinalizeSessionReq, opts ...grpc.CallOption) (*FinalizeSessionRes, error)
-	// 获取通话信息
-	GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error)
 	// 获取参与者列表及状态
 	GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error)
+	// 获取会话基础信息
+	GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error)
 }
 
 type callClient struct {
@@ -93,20 +93,20 @@ func (c *callClient) FinalizeSession(ctx context.Context, in *FinalizeSessionReq
 	return out, nil
 }
 
-func (c *callClient) GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error) {
+func (c *callClient) GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetSessionRes)
-	err := c.cc.Invoke(ctx, Call_GetSession_FullMethodName, in, out, cOpts...)
+	out := new(GetParticipantsRes)
+	err := c.cc.Invoke(ctx, Call_GetParticipants_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *callClient) GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error) {
+func (c *callClient) GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetParticipantsRes)
-	err := c.cc.Invoke(ctx, Call_GetParticipants_FullMethodName, in, out, cOpts...)
+	out := new(GetSessionRes)
+	err := c.cc.Invoke(ctx, Call_GetSession_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,16 +119,16 @@ func (c *callClient) GetParticipants(ctx context.Context, in *GetParticipantsReq
 type CallServer interface {
 	// 供 Chat/User 等服务查询用户是否忙碌
 	GetUserStatus(context.Context, *GetUserStatusReq) (*GetUserStatusRes, error)
-	// 供 Call-Api 调用，创建通话记录
+	// 核心：创建通话会话并初始化参与者名单
 	CreateSession(context.Context, *CreateSessionReq) (*CreateSessionRes, error)
-	// 更新参与者状态
+	// 更新参与者状态 (接听/拒绝/挂断)
 	UpdateParticipantStatus(context.Context, *UpdateParticipantStatusReq) (*UpdateParticipantStatusRes, error)
 	// 结束通话记录
 	FinalizeSession(context.Context, *FinalizeSessionReq) (*FinalizeSessionRes, error)
-	// 获取通话信息
-	GetSession(context.Context, *GetSessionReq) (*GetSessionRes, error)
 	// 获取参与者列表及状态
 	GetParticipants(context.Context, *GetParticipantsReq) (*GetParticipantsRes, error)
+	// 获取会话基础信息
+	GetSession(context.Context, *GetSessionReq) (*GetSessionRes, error)
 	mustEmbedUnimplementedCallServer()
 }
 
@@ -151,11 +151,11 @@ func (UnimplementedCallServer) UpdateParticipantStatus(context.Context, *UpdateP
 func (UnimplementedCallServer) FinalizeSession(context.Context, *FinalizeSessionReq) (*FinalizeSessionRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FinalizeSession not implemented")
 }
-func (UnimplementedCallServer) GetSession(context.Context, *GetSessionReq) (*GetSessionRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSession not implemented")
-}
 func (UnimplementedCallServer) GetParticipants(context.Context, *GetParticipantsReq) (*GetParticipantsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetParticipants not implemented")
+}
+func (UnimplementedCallServer) GetSession(context.Context, *GetSessionReq) (*GetSessionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSession not implemented")
 }
 func (UnimplementedCallServer) mustEmbedUnimplementedCallServer() {}
 func (UnimplementedCallServer) testEmbeddedByValue()              {}
@@ -250,24 +250,6 @@ func _Call_FinalizeSession_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Call_GetSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSessionReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CallServer).GetSession(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Call_GetSession_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CallServer).GetSession(ctx, req.(*GetSessionReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Call_GetParticipants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetParticipantsReq)
 	if err := dec(in); err != nil {
@@ -282,6 +264,24 @@ func _Call_GetParticipants_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CallServer).GetParticipants(ctx, req.(*GetParticipantsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Call_GetSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSessionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallServer).GetSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Call_GetSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallServer).GetSession(ctx, req.(*GetSessionReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -310,12 +310,12 @@ var Call_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Call_FinalizeSession_Handler,
 		},
 		{
-			MethodName: "GetSession",
-			Handler:    _Call_GetSession_Handler,
-		},
-		{
 			MethodName: "GetParticipants",
 			Handler:    _Call_GetParticipants_Handler,
+		},
+		{
+			MethodName: "GetSession",
+			Handler:    _Call_GetSession_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

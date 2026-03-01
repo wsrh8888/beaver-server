@@ -25,42 +25,54 @@ func NewCreateSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
-// 供 Call-Api 调用，创建通话记录
+// 核心：创建通话会话并初始化参与者名单
 func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call_rpc.CreateSessionRes, error) {
+	var participants []*call_rpc.Participant
+
 	err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
-		// 创建会话
+		// 1. 创建会话
 		session := &call_models.CallSession{
-			RoomID:   in.RoomId,
-			CallerID: in.CallerId,
-			CallType: int8(in.CallType),
-			Status:   1, // 1-呼叫中
+			RoomID:         in.RoomId,
+			CallerID:       in.CallerId,
+			CallType:       int8(in.CallType),
+			MessageID:      in.MessageId,                     // 存入锚点消息ID
+			ConversationID: in.ConversationId,                // 存入会话ID
+			Status:         call_models.SessionStatusCalling, // 1-进行中
 		}
 		if err := tx.Create(session).Error; err != nil {
 			return err
 		}
 
-		// 创建参与者 (发起者)
+		// 2. 创建参与者 (发起者)
 		caller := &call_models.CallParticipant{
 			RoomID: in.RoomId,
 			UserID: in.CallerId,
-			Status: 2, // 2-已接听 (发起者默认已进入)
-			Role:   1, // 1-发起者
+			Status: call_models.ParticipantStatusJoined, // 2-已接听 (发起者默认已进入)
+			Role:   1,                                   // 1-发起者
 		}
 		if err := tx.Create(caller).Error; err != nil {
 			return err
 		}
+		participants = append(participants, &call_rpc.Participant{
+			UserId: in.CallerId,
+			Status: int32(call_models.ParticipantStatusJoined),
+		})
 
-		// 创建参与者 (受邀者) - 仅单聊需要初始化对方状态
+		// 3. 创建参与者 (受邀者) - 仅单聊初始化对方，群聊在邀请或主动加入时处理
 		if in.CallType == 1 {
 			target := &call_models.CallParticipant{
 				RoomID: in.RoomId,
 				UserID: in.TargetId,
-				Status: 1, // 1-待接听
-				Role:   2, // 2-受邀者
+				Status: call_models.ParticipantStatusCalling, // 1-待接听
+				Role:   2,                                    // 2-受邀者
 			}
 			if err := tx.Create(target).Error; err != nil {
 				return err
 			}
+			participants = append(participants, &call_rpc.Participant{
+				UserId: in.TargetId,
+				Status: int32(call_models.ParticipantStatusCalling),
+			})
 		}
 
 		return nil
@@ -70,5 +82,8 @@ func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call
 		return nil, err
 	}
 
-	return &call_rpc.CreateSessionRes{Success: true}, nil
+	return &call_rpc.CreateSessionRes{
+		Success:      true,
+		Participants: participants,
+	}, nil
 }

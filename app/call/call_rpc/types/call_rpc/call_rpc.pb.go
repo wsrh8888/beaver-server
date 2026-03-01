@@ -120,13 +120,15 @@ func (x *GetUserStatusRes) GetRoomId() string {
 
 // 记录/更新通话信息 (供 API 调用)
 type CreateSessionReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
-	CallerId      string                 `protobuf:"bytes,2,opt,name=caller_id,json=callerId,proto3" json:"caller_id,omitempty"`
-	TargetId      string                 `protobuf:"bytes,3,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
-	CallType      int32                  `protobuf:"varint,4,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RoomId         string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	CallerId       string                 `protobuf:"bytes,2,opt,name=caller_id,json=callerId,proto3" json:"caller_id,omitempty"`
+	TargetId       string                 `protobuf:"bytes,3,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`                   // 私聊为对方ID，群聊为群ID
+	CallType       int32                  `protobuf:"varint,4,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`                  // 1-私聊, 2-群聊
+	MessageId      string                 `protobuf:"bytes,5,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`                // 锚点消息ID
+	ConversationId string                 `protobuf:"bytes,6,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"` // 会话ID
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateSessionReq) Reset() {
@@ -187,9 +189,24 @@ func (x *CreateSessionReq) GetCallType() int32 {
 	return 0
 }
 
+func (x *CreateSessionReq) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+func (x *CreateSessionReq) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
 type CreateSessionRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Participants  []*Participant         `protobuf:"bytes,2,rep,name=participants,proto3" json:"participants,omitempty"` // 返回初始化的参与者快照
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -229,6 +246,13 @@ func (x *CreateSessionRes) GetSuccess() bool {
 		return x.Success
 	}
 	return false
+}
+
+func (x *CreateSessionRes) GetParticipants() []*Participant {
+	if x != nil {
+		return x.Participants
+	}
+	return nil
 }
 
 // 更新参与者状态
@@ -441,7 +465,7 @@ func (x *FinalizeSessionRes) GetSuccess() bool {
 	return false
 }
 
-// 获取通话信息
+// 获取会话信息
 type GetSessionReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
@@ -711,14 +735,18 @@ const file_call_rpc_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"D\n" +
 	"\x10GetUserStatusRes\x12\x17\n" +
 	"\ais_busy\x18\x01 \x01(\bR\x06isBusy\x12\x17\n" +
-	"\aroom_id\x18\x02 \x01(\tR\x06roomId\"\x82\x01\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\"\xca\x01\n" +
 	"\x10CreateSessionReq\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x1b\n" +
 	"\tcaller_id\x18\x02 \x01(\tR\bcallerId\x12\x1b\n" +
 	"\ttarget_id\x18\x03 \x01(\tR\btargetId\x12\x1b\n" +
-	"\tcall_type\x18\x04 \x01(\x05R\bcallType\",\n" +
+	"\tcall_type\x18\x04 \x01(\x05R\bcallType\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x05 \x01(\tR\tmessageId\x12'\n" +
+	"\x0fconversation_id\x18\x06 \x01(\tR\x0econversationId\"g\n" +
 	"\x10CreateSessionRes\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"f\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x129\n" +
+	"\fparticipants\x18\x02 \x03(\v2\x15.call_rpc.ParticipantR\fparticipants\"f\n" +
 	"\x1aUpdateParticipantStatusReq\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
@@ -750,10 +778,10 @@ const file_call_rpc_proto_rawDesc = "" +
 	"\rGetUserStatus\x12\x1a.call_rpc.GetUserStatusReq\x1a\x1a.call_rpc.GetUserStatusRes\x12G\n" +
 	"\rCreateSession\x12\x1a.call_rpc.CreateSessionReq\x1a\x1a.call_rpc.CreateSessionRes\x12e\n" +
 	"\x17UpdateParticipantStatus\x12$.call_rpc.UpdateParticipantStatusReq\x1a$.call_rpc.UpdateParticipantStatusRes\x12M\n" +
-	"\x0fFinalizeSession\x12\x1c.call_rpc.FinalizeSessionReq\x1a\x1c.call_rpc.FinalizeSessionRes\x12>\n" +
+	"\x0fFinalizeSession\x12\x1c.call_rpc.FinalizeSessionReq\x1a\x1c.call_rpc.FinalizeSessionRes\x12M\n" +
+	"\x0fGetParticipants\x12\x1c.call_rpc.GetParticipantsReq\x1a\x1c.call_rpc.GetParticipantsRes\x12>\n" +
 	"\n" +
-	"GetSession\x12\x17.call_rpc.GetSessionReq\x1a\x17.call_rpc.GetSessionRes\x12M\n" +
-	"\x0fGetParticipants\x12\x1c.call_rpc.GetParticipantsReq\x1a\x1c.call_rpc.GetParticipantsResB\fZ\n" +
+	"GetSession\x12\x17.call_rpc.GetSessionReq\x1a\x17.call_rpc.GetSessionResB\fZ\n" +
 	"./call_rpcb\x06proto3"
 
 var (
@@ -785,24 +813,25 @@ var file_call_rpc_proto_goTypes = []any{
 	(*GetParticipantsRes)(nil),         // 12: call_rpc.GetParticipantsRes
 }
 var file_call_rpc_proto_depIdxs = []int32{
-	10, // 0: call_rpc.GetParticipantsRes.participants:type_name -> call_rpc.Participant
-	0,  // 1: call_rpc.call.GetUserStatus:input_type -> call_rpc.GetUserStatusReq
-	2,  // 2: call_rpc.call.CreateSession:input_type -> call_rpc.CreateSessionReq
-	4,  // 3: call_rpc.call.UpdateParticipantStatus:input_type -> call_rpc.UpdateParticipantStatusReq
-	6,  // 4: call_rpc.call.FinalizeSession:input_type -> call_rpc.FinalizeSessionReq
-	8,  // 5: call_rpc.call.GetSession:input_type -> call_rpc.GetSessionReq
+	10, // 0: call_rpc.CreateSessionRes.participants:type_name -> call_rpc.Participant
+	10, // 1: call_rpc.GetParticipantsRes.participants:type_name -> call_rpc.Participant
+	0,  // 2: call_rpc.call.GetUserStatus:input_type -> call_rpc.GetUserStatusReq
+	2,  // 3: call_rpc.call.CreateSession:input_type -> call_rpc.CreateSessionReq
+	4,  // 4: call_rpc.call.UpdateParticipantStatus:input_type -> call_rpc.UpdateParticipantStatusReq
+	6,  // 5: call_rpc.call.FinalizeSession:input_type -> call_rpc.FinalizeSessionReq
 	11, // 6: call_rpc.call.GetParticipants:input_type -> call_rpc.GetParticipantsReq
-	1,  // 7: call_rpc.call.GetUserStatus:output_type -> call_rpc.GetUserStatusRes
-	3,  // 8: call_rpc.call.CreateSession:output_type -> call_rpc.CreateSessionRes
-	5,  // 9: call_rpc.call.UpdateParticipantStatus:output_type -> call_rpc.UpdateParticipantStatusRes
-	7,  // 10: call_rpc.call.FinalizeSession:output_type -> call_rpc.FinalizeSessionRes
-	9,  // 11: call_rpc.call.GetSession:output_type -> call_rpc.GetSessionRes
+	8,  // 7: call_rpc.call.GetSession:input_type -> call_rpc.GetSessionReq
+	1,  // 8: call_rpc.call.GetUserStatus:output_type -> call_rpc.GetUserStatusRes
+	3,  // 9: call_rpc.call.CreateSession:output_type -> call_rpc.CreateSessionRes
+	5,  // 10: call_rpc.call.UpdateParticipantStatus:output_type -> call_rpc.UpdateParticipantStatusRes
+	7,  // 11: call_rpc.call.FinalizeSession:output_type -> call_rpc.FinalizeSessionRes
 	12, // 12: call_rpc.call.GetParticipants:output_type -> call_rpc.GetParticipantsRes
-	7,  // [7:13] is the sub-list for method output_type
-	1,  // [1:7] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	9,  // 13: call_rpc.call.GetSession:output_type -> call_rpc.GetSessionRes
+	8,  // [8:14] is the sub-list for method output_type
+	2,  // [2:8] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_call_rpc_proto_init() }

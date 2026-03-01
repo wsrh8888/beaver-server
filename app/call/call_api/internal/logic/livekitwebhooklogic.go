@@ -7,6 +7,7 @@ import (
 
 	"beaver/app/call/call_api/internal/svc"
 	"beaver/app/call/call_api/internal/types"
+	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 
@@ -49,7 +50,7 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 			_, err = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
 				RoomId: event.Room.Name,
 				UserId: event.Participant.Identity,
-				Status: 1, // 1-已加入/Active
+				Status: int32(call_models.ParticipantStatusJoined),
 			})
 			if err != nil {
 				l.Errorf("更新参与者状态(Joined)失败: %v", err)
@@ -57,17 +58,43 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 		}
 	case "participant_left":
 		if event.Participant != nil {
+			// 1. 更新当前人状态为已挂断/离开
 			_, err = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
 				RoomId: event.Room.Name,
 				UserId: event.Participant.Identity,
-				Status: 2, // 2-已离开/Ended
+				Status: int32(call_models.ParticipantStatusLeft),
 			})
 			if err != nil {
 				l.Errorf("更新参与者状态(Left)失败: %v", err)
 			}
+
+			// 2. 检查房间是否已经没有“加入中”的活跃成员了 (掉线或主动退出)
+			pResp, pErr := l.svcCtx.CallRpc.GetParticipants(l.ctx, &call_rpc.GetParticipantsReq{RoomId: roomID})
+			if pErr == nil {
+				activeCount := 0
+				for _, p := range pResp.Participants {
+					if p.Status == int32(call_models.ParticipantStatusJoined) {
+						activeCount++
+					}
+				}
+				// 3. 如果活跃人数归零，说明大家都离开或掉线了，提前自动结束通话
+				if activeCount == 0 {
+					l.Infof("房间 %s 已无活跃成员，执行自动结算逻辑", roomID)
+					// 获取 session 信息
+					session, _ := l.svcCtx.CallRpc.GetSession(l.ctx, &call_rpc.GetSessionReq{RoomId: roomID})
+
+					// 标记通话结束
+					_, finalizeErr := l.svcCtx.CallRpc.FinalizeSession(l.ctx, &call_rpc.FinalizeSessionReq{
+						RoomId: roomID,
+						Status: int32(call_models.SessionStatusEnded),
+					})
+					if finalizeErr == nil && session != nil {
+						l.sendEndMessage(roomID, 0)
+					}
+				}
+			}
 		}
 	case "room_finished":
-		// 通话彻底结束，数据沉淀
 		var duration int32
 		if event.Room != nil {
 			duration = int32(event.CreatedAt - event.Room.CreationTime)
@@ -76,13 +103,12 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 		_, err = l.svcCtx.CallRpc.FinalizeSession(l.ctx, &call_rpc.FinalizeSessionReq{
 			RoomId:   roomID,
 			Duration: duration,
-			Status:   2, // 2-已结束
+			Status:   int32(call_models.SessionStatusEnded),
 		})
 		if err != nil {
 			l.Errorf("FinalizeSession 失败: %v", err)
 		}
 
-		// 写入聊天历史
 		l.sendEndMessage(roomID, duration)
 	}
 

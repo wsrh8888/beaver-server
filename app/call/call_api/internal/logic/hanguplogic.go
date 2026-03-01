@@ -7,6 +7,7 @@ import (
 
 	"beaver/app/call/call_api/internal/svc"
 	"beaver/app/call/call_api/internal/types"
+	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/ajax"
@@ -118,7 +119,7 @@ func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID string) {
 		hanguperID,
 		targetID,
 		map[string]interface{}{
-			"type":   "RTC_HANGUP",
+			"type":   call_models.SignalHangup,
 			"user":   hanguperID,
 			"roomId": roomID,
 		},
