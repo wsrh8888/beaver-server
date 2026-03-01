@@ -31,16 +31,16 @@ type (
 	Call interface {
 		// 供 Chat/User 等服务查询用户是否忙碌
 		GetUserStatus(ctx context.Context, in *GetUserStatusReq, opts ...grpc.CallOption) (*GetUserStatusRes, error)
-		// 供 Call-Api 调用，创建通话记录
+		// 核心：创建通话会话并初始化参与者名单
 		CreateSession(ctx context.Context, in *CreateSessionReq, opts ...grpc.CallOption) (*CreateSessionRes, error)
-		// 更新参与者状态
+		// 更新参与者状态 (接听/拒绝/挂断)
 		UpdateParticipantStatus(ctx context.Context, in *UpdateParticipantStatusReq, opts ...grpc.CallOption) (*UpdateParticipantStatusRes, error)
 		// 结束通话记录
 		FinalizeSession(ctx context.Context, in *FinalizeSessionReq, opts ...grpc.CallOption) (*FinalizeSessionRes, error)
-		// 获取通话信息
-		GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error)
 		// 获取参与者列表及状态
 		GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error)
+		// 获取会话基础信息
+		GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error)
 	}
 
 	defaultCall struct {
@@ -60,13 +60,13 @@ func (m *defaultCall) GetUserStatus(ctx context.Context, in *GetUserStatusReq, o
 	return client.GetUserStatus(ctx, in, opts...)
 }
 
-// 供 Call-Api 调用，创建通话记录
+// 核心：创建通话会话并初始化参与者名单
 func (m *defaultCall) CreateSession(ctx context.Context, in *CreateSessionReq, opts ...grpc.CallOption) (*CreateSessionRes, error) {
 	client := call_rpc.NewCallClient(m.cli.Conn())
 	return client.CreateSession(ctx, in, opts...)
 }
 
-// 更新参与者状态
+// 更新参与者状态 (接听/拒绝/挂断)
 func (m *defaultCall) UpdateParticipantStatus(ctx context.Context, in *UpdateParticipantStatusReq, opts ...grpc.CallOption) (*UpdateParticipantStatusRes, error) {
 	client := call_rpc.NewCallClient(m.cli.Conn())
 	return client.UpdateParticipantStatus(ctx, in, opts...)
@@ -78,14 +78,14 @@ func (m *defaultCall) FinalizeSession(ctx context.Context, in *FinalizeSessionRe
 	return client.FinalizeSession(ctx, in, opts...)
 }
 
-// 获取通话信息
-func (m *defaultCall) GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error) {
-	client := call_rpc.NewCallClient(m.cli.Conn())
-	return client.GetSession(ctx, in, opts...)
-}
-
 // 获取参与者列表及状态
 func (m *defaultCall) GetParticipants(ctx context.Context, in *GetParticipantsReq, opts ...grpc.CallOption) (*GetParticipantsRes, error) {
 	client := call_rpc.NewCallClient(m.cli.Conn())
 	return client.GetParticipants(ctx, in, opts...)
+}
+
+// 获取会话基础信息
+func (m *defaultCall) GetSession(ctx context.Context, in *GetSessionReq, opts ...grpc.CallOption) (*GetSessionRes, error) {
+	client := call_rpc.NewCallClient(m.cli.Conn())
+	return client.GetSession(ctx, in, opts...)
 }

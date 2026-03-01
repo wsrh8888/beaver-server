@@ -88,8 +88,8 @@ type StartCallReq struct {
 }
 
 type StartCallRes struct {
-	RoomID       string        `json:"roomId"`       // 业务生成的唯一房间ID
-	RoomToken    string        `json:"roomToken"`    // 发起者的LiveKit访问令牌
-	LiveKitUrl   string        `json:"liveKitUrl"`   // LiveKit服务器地址
-	Participants []Participant `json:"participants"` // 初始参与者快照
+	RoomID     string `json:"roomId"`     // 业务生成的唯一房间ID
+	RoomToken  string `json:"roomToken"`  // 发起者的LiveKit访问令牌
+	LiveKitUrl string `json:"liveKitUrl"` // LiveKit服务器地址
+	MessageID  string `json:"messageId"`  // 通话消息ID，用于后续补丁关联
 }

@@ -29,13 +29,13 @@ func (s *CallServer) GetUserStatus(ctx context.Context, in *call_rpc.GetUserStat
 	return l.GetUserStatus(in)
 }
 
-// 供 Call-Api 调用，创建通话记录
+// 核心：创建通话会话并初始化参与者名单
 func (s *CallServer) CreateSession(ctx context.Context, in *call_rpc.CreateSessionReq) (*call_rpc.CreateSessionRes, error) {
 	l := logic.NewCreateSessionLogic(ctx, s.svcCtx)
 	return l.CreateSession(in)
 }
 
-// 更新参与者状态
+// 更新参与者状态 (接听/拒绝/挂断)
 func (s *CallServer) UpdateParticipantStatus(ctx context.Context, in *call_rpc.UpdateParticipantStatusReq) (*call_rpc.UpdateParticipantStatusRes, error) {
 	l := logic.NewUpdateParticipantStatusLogic(ctx, s.svcCtx)
 	return l.UpdateParticipantStatus(in)
@@ -47,14 +47,14 @@ func (s *CallServer) FinalizeSession(ctx context.Context, in *call_rpc.FinalizeS
 	return l.FinalizeSession(in)
 }
 
-// 获取通话信息
-func (s *CallServer) GetSession(ctx context.Context, in *call_rpc.GetSessionReq) (*call_rpc.GetSessionRes, error) {
-	l := logic.NewGetSessionLogic(ctx, s.svcCtx)
-	return l.GetSession(in)
-}
-
 // 获取参与者列表及状态
 func (s *CallServer) GetParticipants(ctx context.Context, in *call_rpc.GetParticipantsReq) (*call_rpc.GetParticipantsRes, error) {
 	l := logic.NewGetParticipantsLogic(ctx, s.svcCtx)
 	return l.GetParticipants(in)
+}
+
+// 获取会话基础信息
+func (s *CallServer) GetSession(ctx context.Context, in *call_rpc.GetSessionReq) (*call_rpc.GetSessionRes, error) {
+	l := logic.NewGetSessionLogic(ctx, s.svcCtx)
+	return l.GetSession(in)
 }

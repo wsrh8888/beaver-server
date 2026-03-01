@@ -5,14 +5,36 @@ import (
 	"time"
 )
 
+/*
+ParticipantStatus 业务逻辑说明：
+1. 待接听 (1): 正在被呼叫，手机正在振铃中。
+2. 已接听 (2): 用户点击接听，成功进入音视频房间。
+3. 拒绝 (3): 振铃阶段用户手动点击“挂断”或“拒绝”。
+4. 超时未接 (4): 振铃超时，用户未操作，系统自动触发取消。
+5. 已退出 (5): 曾经进场，后续正常离开、手动挂断或掉线。
+6. 忙线 (6): 呼叫时检测到对方正在通话中。
+*/
+
+// ParticipantStatus 参与者状态
+type ParticipantStatus int8
+
+const (
+	ParticipantStatusCalling  ParticipantStatus = 1 // 待接听
+	ParticipantStatusJoined   ParticipantStatus = 2 // 已接听
+	ParticipantStatusRejected ParticipantStatus = 3 // 拒绝
+	ParticipantStatusTimeout  ParticipantStatus = 4 // 超时未接
+	ParticipantStatusLeft     ParticipantStatus = 5 // 已退出
+	ParticipantStatusBusy     ParticipantStatus = 6 // 忙线
+)
+
 // CallParticipant 通话参与者表
 type CallParticipant struct {
 	models.Model
 	RoomID string `gorm:"type:varchar(64);index:idx_room_user;not null;comment:关联RoomID" json:"room_id"`
 	UserID string `gorm:"type:varchar(64);index:idx_room_user;not null;comment:用户ID" json:"user_id"`
 	// 核心行为状态
-	Status int8 `gorm:"type:tinyint;default:1;comment:状态:1-进行中,2-已结束" json:"status"`
-	Role   int8 `gorm:"type:tinyint;default:1;comment:角色:1-发起者,2-受邀者" json:"role"`
+	Status ParticipantStatus `gorm:"type:tinyint;default:1;comment:状态:1-待接听,2-已接听,3-拒绝,4-超时,5-挂断,6-忙线" json:"status"`
+	Role   int8              `gorm:"type:tinyint;default:1;comment:角色:1-发起者,2-受邀者" json:"role"`
 
 	JoinTime  *time.Time `gorm:"type:datetime;comment:加入时间" json:"join_time"`
 	LeaveTime *time.Time `gorm:"type:datetime;comment:离开时间" json:"leave_time"`

@@ -43,9 +43,9 @@ func (l *UpdateParticipantStatusLogic) UpdateParticipantStatus(in *call_rpc.Upda
 		updates := make(map[string]interface{})
 		updates["status"] = in.Status
 
-		if in.Status == 2 { // 2-已接听 (joined)
+		if in.Status == int32(call_models.ParticipantStatusJoined) { // 2-已接听 (joined)
 			updates["join_time"] = &now
-		} else if in.Status >= 3 && in.Status <= 5 { // 3-拒绝, 4-超时, 5-挂断
+		} else if in.Status >= int32(call_models.ParticipantStatusRejected) && in.Status <= int32(call_models.ParticipantStatusLeft) { // 3-拒绝, 4-超时, 5-挂断
 			updates["leave_time"] = &now
 		}
 
@@ -62,10 +62,10 @@ func (l *UpdateParticipantStatusLogic) UpdateParticipantStatus(in *call_rpc.Upda
 			p = call_models.CallParticipant{
 				RoomID: in.RoomId,
 				UserID: in.UserId,
-				Status: int8(in.Status),
+				Status: call_models.ParticipantStatus(in.Status),
 				Role:   role,
 			}
-			if in.Status == 2 {
+			if in.Status == int32(call_models.ParticipantStatusJoined) {
 				p.JoinTime = &now
 			}
 			if err := tx.Create(&p).Error; err != nil {
@@ -79,11 +79,11 @@ func (l *UpdateParticipantStatusLogic) UpdateParticipantStatus(in *call_rpc.Upda
 		}
 
 		// 3. 如果状态是"已接听" (2)，也将 session 状态改为进行中 (1)
-		if in.Status == 2 {
+		if in.Status == int32(call_models.ParticipantStatusJoined) {
 			err = tx.Model(&call_models.CallSession{}).
 				Where("room_id = ?", in.RoomId).
 				Updates(map[string]interface{}{
-					"status":     1, // 1-进行中
+					"status":     call_models.SessionStatusCalling, // 1-进行中
 					"start_time": &now,
 				}).Error
 			if err != nil {

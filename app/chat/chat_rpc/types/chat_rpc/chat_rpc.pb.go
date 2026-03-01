@@ -549,14 +549,13 @@ func (x *NotificationMsg) GetActors() []string {
 	return nil
 }
 
-// 定义CallMsg消息 - 音视频通话相关信息（信令与日志）
+// 定义CallMsg消息 - 用于聊天记录展示
 type CallMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoomId        string                 `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`      // 房间ID
 	CallType      int32                  `protobuf:"varint,2,opt,name=callType,proto3" json:"callType,omitempty"` // 通话类型: 1-私聊, 2-群聊
-	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`     // 状态: 1-呼叫中, 2-通话结束, 3-拒绝, 4-未接听, 5-超时
+	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`     // 状态: 1-进行中, 2-已结束
 	Duration      int64                  `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty"` // 通话时长(秒)
-	Event         string                 `protobuf:"bytes,5,opt,name=event,proto3" json:"event,omitempty"`        // 信令事件: "INVITE", "CANCEL", "ACCEPT", "REJECT"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -619,17 +618,11 @@ func (x *CallMsg) GetDuration() int64 {
 	return 0
 }
 
-func (x *CallMsg) GetEvent() string {
-	if x != nil {
-		return x.Event
-	}
-	return ""
-}
-
 // 定义Msg消息
 type Msg struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Type            uint32                 `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话
+	TargetMsgId     string                 `protobuf:"bytes,11,opt,name=targetMsgId,proto3" json:"targetMsgId,omitempty"`        // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
 	TextMsg         *TextMsg               `protobuf:"bytes,2,opt,name=textMsg,proto3" json:"textMsg,omitempty"`                 // 文本消息
 	ImageMsg        *ImageMsg              `protobuf:"bytes,3,opt,name=imageMsg,proto3" json:"imageMsg,omitempty"`               // 图片
 	VideoMsg        *VideoMsg              `protobuf:"bytes,4,opt,name=videoMsg,proto3" json:"videoMsg,omitempty"`               // 视频
@@ -678,6 +671,13 @@ func (x *Msg) GetType() uint32 {
 		return x.Type
 	}
 	return 0
+}
+
+func (x *Msg) GetTargetMsgId() string {
+	if x != nil {
+		return x.TargetMsgId
+	}
+	return ""
 }
 
 func (x *Msg) GetTextMsg() *TextMsg {
@@ -2401,15 +2401,15 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x06height\x18\x05 \x01(\x03R\x06height\"=\n" +
 	"\x0fNotificationMsg\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\x05R\x04type\x12\x16\n" +
-	"\x06actors\x18\x02 \x03(\tR\x06actors\"\x87\x01\n" +
+	"\x06actors\x18\x02 \x03(\tR\x06actors\"q\n" +
 	"\aCallMsg\x12\x16\n" +
 	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12\x1a\n" +
 	"\bcallType\x18\x02 \x01(\x05R\bcallType\x12\x16\n" +
 	"\x06status\x18\x03 \x01(\x05R\x06status\x12\x1a\n" +
-	"\bduration\x18\x04 \x01(\x03R\bduration\x12\x14\n" +
-	"\x05event\x18\x05 \x01(\tR\x05event\"\xe1\x03\n" +
+	"\bduration\x18\x04 \x01(\x03R\bduration\"\x83\x04\n" +
 	"\x03Msg\x12\x12\n" +
-	"\x04type\x18\x01 \x01(\rR\x04type\x12+\n" +
+	"\x04type\x18\x01 \x01(\rR\x04type\x12 \n" +
+	"\vtargetMsgId\x18\v \x01(\tR\vtargetMsgId\x12+\n" +
 	"\atextMsg\x18\x02 \x01(\v2\x11.chat_rpc.TextMsgR\atextMsg\x12.\n" +
 	"\bimageMsg\x18\x03 \x01(\v2\x12.chat_rpc.ImageMsgR\bimageMsg\x12.\n" +
 	"\bvideoMsg\x18\x04 \x01(\v2\x12.chat_rpc.VideoMsgR\bvideoMsg\x12+\n" +
