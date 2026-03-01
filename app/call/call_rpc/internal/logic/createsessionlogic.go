@@ -35,7 +35,6 @@ func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call
 			RoomID:         in.RoomId,
 			CallerID:       in.CallerId,
 			CallType:       int8(in.CallType),
-			MessageID:      in.MessageId,                     // 存入锚点消息ID
 			ConversationID: in.ConversationId,                // 存入会话ID
 			Status:         call_models.SessionStatusCalling, // 1-进行中
 		}

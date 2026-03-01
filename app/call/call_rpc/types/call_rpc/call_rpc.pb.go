@@ -260,7 +260,7 @@ type UpdateParticipantStatusReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"` // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"` // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -517,6 +517,7 @@ type GetSessionRes struct {
 	CallType       int32                  `protobuf:"varint,3,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`
 	Status         int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
 	ParticipantIds []string               `protobuf:"bytes,5,rep,name=participant_ids,json=participantIds,proto3" json:"participant_ids,omitempty"`
+	ConversationId string                 `protobuf:"bytes,6,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -586,10 +587,17 @@ func (x *GetSessionRes) GetParticipantIds() []string {
 	return nil
 }
 
+func (x *GetSessionRes) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
 type Participant struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"` // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断, 6-忙线
+	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"` // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -760,13 +768,14 @@ const file_call_rpc_proto_rawDesc = "" +
 	"\x12FinalizeSessionRes\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"(\n" +
 	"\rGetSessionReq\x12\x17\n" +
-	"\aroom_id\x18\x01 \x01(\tR\x06roomId\"\xa3\x01\n" +
+	"\aroom_id\x18\x01 \x01(\tR\x06roomId\"\xcc\x01\n" +
 	"\rGetSessionRes\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x1b\n" +
 	"\tcaller_id\x18\x02 \x01(\tR\bcallerId\x12\x1b\n" +
 	"\tcall_type\x18\x03 \x01(\x05R\bcallType\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\x12'\n" +
-	"\x0fparticipant_ids\x18\x05 \x03(\tR\x0eparticipantIds\">\n" +
+	"\x0fparticipant_ids\x18\x05 \x03(\tR\x0eparticipantIds\x12'\n" +
+	"\x0fconversation_id\x18\x06 \x01(\tR\x0econversationId\">\n" +
 	"\vParticipant\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\x05R\x06status\"-\n" +

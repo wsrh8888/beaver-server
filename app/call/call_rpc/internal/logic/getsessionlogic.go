@@ -42,5 +42,6 @@ func (l *GetSessionLogic) GetSession(in *call_rpc.GetSessionReq) (*call_rpc.GetS
 		CallType:       int32(session.CallType),
 		Status:         int32(session.Status),
 		ParticipantIds: participantIDs,
+		ConversationId: session.ConversationID,
 	}, nil
 }

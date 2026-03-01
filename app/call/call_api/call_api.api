@@ -10,7 +10,7 @@ info (
 // --- 基础数据结构 ---
 type Participant {
 	UserID string `json:"userId"`
-	Status string `json:"status"` // calling, joined, left, rejected, busy
+	Status int32  `json:"status"` // 1-呼叫中, 2-已接听, 3-已拒绝, 4-超时, 5-已离开
 }
 
 // 1. 发起通话接口 (由拨打方调用)
@@ -84,26 +84,6 @@ type (
 	}
 )
 
-// 6. 通话记录查询接口
-type (
-	CallHistoryReq {
-		UserID string `header:"Beaver-User-Id"`
-		Page   int    `form:"page,default=1"`
-		Size   int    `form:"size,default=20"`
-	}
-	CallHistoryRes {
-		List []CallHistoryResItem `json:"list"`
-	}
-	CallHistoryResItem {
-		RoomID    string `json:"roomId"`
-		CallerID  string `json:"callerId"`
-		CallType  int8   `json:"callType"` // 通话类型：1-私聊, 2-群聊
-		Status    int8   `json:"status"` // 通话状态
-		StartTime int64  `json:"startTime"`
-		Duration  int32  `json:"duration"`
-	}
-)
-
 // 7. LiveKit服务器Webhook回调接口
 type (
 	LiveKitWebhookReq {
@@ -134,10 +114,6 @@ service call {
 	@doc "获取房间当前成员列表"
 	@handler GetParticipants
 	get /api/call/v1/participants (GetCallParticipantsReq) returns (GetCallParticipantsRes)
-
-	@doc "查询我的通话历史记录"
-	@handler GetHistory
-	get /history (CallHistoryReq) returns (CallHistoryRes)
 
 	@doc "群聊中邀请成员入场"
 	@handler InviteMember

@@ -2,19 +2,16 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"beaver/app/call/call_api/internal/svc"
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
-	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -76,43 +73,17 @@ func (l *HangupLogic) Hangup(req *types.HangupCallReq) (resp *types.HangupCallRe
 		})
 	}
 
-	// 4. 发送信令告知其他人有人挂断/离开
+	// 4. 发送信令告知其他人有人挂断/离开 (纯信令，不入库)
 	for _, pid := range session.ParticipantIds {
 		if pid != req.UserID {
-			go l.sendHangupSignal(req.UserID, pid, req.RoomID)
+			go l.sendHangupSignal(req.UserID, pid, req.RoomID, session.ConversationId)
 		}
 	}
 
 	return &types.HangupCallRes{}, nil
 }
 
-func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID string) {
-	payload, _ := json.Marshal(map[string]interface{}{
-		"type":   "RTC_HANGUP",
-		"user":   hanguperID,
-		"roomId": roomID,
-	})
-
-	_, err := l.svcCtx.ChatRpc.SendMsg(context.Background(), &chat_rpc.SendMsgReq{
-		UserId:         hanguperID,
-		ConversationId: l.getConversationID(hanguperID, targetID),
-		MessageId:      uuid.New().String(), // 注入唯一 ID
-		Msg: &chat_rpc.Msg{
-			Type: 7, // 7:通知消息/信令
-			NotificationMsg: &chat_rpc.NotificationMsg{
-				Type:   102, // RTC_HANGUP
-				Actors: []string{hanguperID},
-			},
-			TextMsg: &chat_rpc.TextMsg{
-				Content: string(payload),
-			},
-		},
-	})
-	if err != nil {
-		logx.Errorf("发送 RTC_HANGUP 信令失败: %v", err)
-	}
-
-	// 2. 直接通过 WebSocket 发送 RTC 信令
+func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID, convID string) {
 	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
 		wsCommandConst.CALL,
 		wsTypeConst.CallReceive,
@@ -123,18 +94,6 @@ func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID string) {
 			"user":   hanguperID,
 			"roomId": roomID,
 		},
-		l.getConversationID(hanguperID, targetID),
+		convID,
 	)
-}
-
-func (l *HangupLogic) getConversationID(callerID, targetID string) string {
-	// 如果 targetID 是群 ID
-	if len(targetID) > 6 && targetID[:6] == "group_" {
-		return targetID
-	}
-	// 私聊会话 ID 拼装
-	if callerID < targetID {
-		return callerID + ":" + targetID
-	}
-	return targetID + ":" + callerID
 }

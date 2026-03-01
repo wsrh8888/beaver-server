@@ -11,25 +11,6 @@ type AddCallMemberRes struct {
 	LiveKitUrl string `json:"liveKitUrl"`
 }
 
-type CallHistoryReq struct {
-	UserID string `header:"Beaver-User-Id"`
-	Page   int    `form:"page,default=1"`
-	Size   int    `form:"size,default=20"`
-}
-
-type CallHistoryRes struct {
-	List []CallHistoryResItem `json:"list"`
-}
-
-type CallHistoryResItem struct {
-	RoomID    string `json:"roomId"`
-	CallerID  string `json:"callerId"`
-	CallType  int8   `json:"callType"` // 通话类型：1-私聊, 2-群聊
-	Status    int8   `json:"status"`   // 通话状态
-	StartTime int64  `json:"startTime"`
-	Duration  int32  `json:"duration"`
-}
-
 type GetCallParticipantsReq struct {
 	UserID string `header:"Beaver-User-Id"`
 	RoomID string `form:"roomId"`
@@ -77,7 +58,7 @@ type LiveKitWebhookRes struct {
 
 type Participant struct {
 	UserID string `json:"userId"`
-	Status string `json:"status"` // calling, joined, left, rejected, busy
+	Status int32  `json:"status"` // 1-呼叫中, 2-已接听, 3-已拒绝, 4-超时, 5-已离开
 }
 
 type StartCallReq struct {

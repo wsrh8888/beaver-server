@@ -54,12 +54,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/call/v1/webhook",
 				Handler: LiveKitWebhookHandler(serverCtx),
 			},
-			{
-				// 查询我的通话历史记录
-				Method:  http.MethodGet,
-				Path:    "/history",
-				Handler: GetHistoryHandler(serverCtx),
-			},
 		},
 	)
 }

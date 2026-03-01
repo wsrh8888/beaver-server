@@ -32,22 +32,12 @@ func (l *GetParticipantsLogic) GetParticipants(req *types.GetCallParticipantsReq
 	if err != nil {
 		return nil, err
 	}
-
 	participants := make([]types.Participant, 0)
 	for _, p := range rpcResp.Participants {
-		// 统一过滤逻辑：只返回当前在该房间内（或受邀）的人
-		if p.Status != 1 && p.Status != 2 {
-			continue
-		}
-
-		status := "calling"
-		if p.Status == 2 {
-			status = "joined"
-		}
 
 		participants = append(participants, types.Participant{
 			UserID: p.UserId,
-			Status: status,
+			Status: p.Status,
 		})
 	}
 

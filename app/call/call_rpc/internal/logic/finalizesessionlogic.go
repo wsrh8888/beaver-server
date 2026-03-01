@@ -35,6 +35,13 @@ func (l *FinalizeSessionLogic) FinalizeSession(in *call_rpc.FinalizeSessionReq) 
 		return nil, err
 	}
 
+	// 1.1 防重校验：如果状态已经是结束状态(3,4,5)，直接返回成功，不再发补丁
+	if session.Status == call_models.SessionStatusEnded ||
+		session.Status == call_models.SessionStatusMissed ||
+		session.Status == call_models.SessionStatusRejected {
+		return &call_rpc.FinalizeSessionRes{Success: true}, nil
+	}
+
 	// 2. 更新数据库状态
 	now := time.Now()
 	err := l.svcCtx.DB.Model(&session).Updates(map[string]interface{}{
@@ -47,24 +54,22 @@ func (l *FinalizeSessionLogic) FinalizeSession(in *call_rpc.FinalizeSessionReq) 
 	}
 
 	// 3. 发送聊天记录“状态补丁”消息 (基于 TargetMsgID 追加法)
-	// 只有存在锚点 MessageID 时才发送
-	if session.MessageID != "" {
-		_, _ = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat.SendMsgReq{
-			UserId:         session.CallerID,
-			ConversationId: session.ConversationID,
-			MessageId:      uuid.New().String(),
-			Msg: &chat.Msg{
-				Type:        9,                 // CallMsg
-				TargetMsgId: session.MessageID, // 指向发起时的那条消息
-				CallMsg: &chat.CallMsg{
-					RoomId:   session.RoomID,
-					CallType: int32(session.CallType),
-					Status:   2, // 2-已结束
-					Duration: int64(in.Duration),
-				},
+	// 使用 RoomID 作为锚点消息的 ID (因为我们在发起时将 MessageID 设置为了 RoomID)
+	_, _ = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat.SendMsgReq{
+		UserId:         session.CallerID,
+		ConversationId: session.ConversationID,
+		MessageId:      uuid.New().String(),
+		Msg: &chat.Msg{
+			Type:        9,              // CallMsg
+			TargetMsgId: session.RoomID, // 指向发起时的那条消息 (RoomID == Initial MessageID)
+			CallMsg: &chat.CallMsg{
+				RoomId:   session.RoomID,
+				CallType: int32(session.CallType),
+				Status:   2, // 2-已结束
+				Duration: int64(in.Duration),
 			},
-		})
-	}
+		},
+	})
 
 	return &call_rpc.FinalizeSessionRes{Success: true}, nil
 }
