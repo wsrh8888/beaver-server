@@ -255,9 +255,9 @@ type RecentChatListRes struct {
 }
 
 type ReplyMsg struct {
-	OriginMsgId  string `json:"originMsgId"`        // 被回复的消息ID
-	OriginMsg    *Msg   `json:"originMsg,optional"` // 被回复的消息内容快照
-	ReplyContent string `json:"replyContent"`       // 回复的文本内容
+	OriginMsgId string `json:"originMsgId"`        // 被回复的消息ID
+	OriginMsg   *Msg   `json:"originMsg,optional"` // 被回复的消息内容快照
+	ReplyMsg    *Msg   `json:"replyMsg"`           // 回复的消息主体 (可以是文本、图片等)
 }
 
 type SendMsgReq struct {
@@ -326,6 +326,6 @@ type VoiceMsg struct {
 }
 
 type WithdrawMsg struct {
-	OriginMsgId string `json:"originMsgId"` // 被撤回的消息ID
-	Content     string `json:"content"`     // 提示内容
+	OriginMsgId string `json:"originMsgId"`        // 被撤回的消息ID
+	OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照，用于重新编辑
 }
