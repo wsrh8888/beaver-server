@@ -622,7 +622,7 @@ func (x *CallMsg) GetDuration() int64 {
 type WithdrawMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OriginMsgId   string                 `protobuf:"bytes,1,opt,name=origin_msg_id,json=originMsgId,proto3" json:"origin_msg_id,omitempty"` // 被撤回的消息ID
-	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`                              // 提示语
+	OriginMsg     *Msg                   `protobuf:"bytes,2,opt,name=origin_msg,json=originMsg,proto3" json:"origin_msg,omitempty"`         // 被撤回的消息内容快照
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -664,19 +664,19 @@ func (x *WithdrawMsg) GetOriginMsgId() string {
 	return ""
 }
 
-func (x *WithdrawMsg) GetContent() string {
+func (x *WithdrawMsg) GetOriginMsg() *Msg {
 	if x != nil {
-		return x.Content
+		return x.OriginMsg
 	}
-	return ""
+	return nil
 }
 
 // 定义ReplyMsg消息
 type ReplyMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OriginMsgId   string                 `protobuf:"bytes,1,opt,name=origin_msg_id,json=originMsgId,proto3" json:"origin_msg_id,omitempty"`  // 被回复的消息ID
-	OriginMsg     *Msg                   `protobuf:"bytes,2,opt,name=origin_msg,json=originMsg,proto3" json:"origin_msg,omitempty"`          // 被回复的消息内容快照
-	ReplyContent  string                 `protobuf:"bytes,3,opt,name=reply_content,json=replyContent,proto3" json:"reply_content,omitempty"` // 回复的内容
+	OriginMsgId   string                 `protobuf:"bytes,1,opt,name=origin_msg_id,json=originMsgId,proto3" json:"origin_msg_id,omitempty"` // 被回复的消息ID
+	OriginMsg     *Msg                   `protobuf:"bytes,2,opt,name=origin_msg,json=originMsg,proto3" json:"origin_msg,omitempty"`         // 被回复的消息内容快照
+	ReplyMsg      *Msg                   `protobuf:"bytes,3,opt,name=reply_msg,json=replyMsg,proto3" json:"reply_msg,omitempty"`            // 回复的消息主体 (也可以是图片、视频等)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -725,11 +725,11 @@ func (x *ReplyMsg) GetOriginMsg() *Msg {
 	return nil
 }
 
-func (x *ReplyMsg) GetReplyContent() string {
+func (x *ReplyMsg) GetReplyMsg() *Msg {
 	if x != nil {
-		return x.ReplyContent
+		return x.ReplyMsg
 	}
-	return ""
+	return nil
 }
 
 // 定义ForwardMsg消息
@@ -2606,15 +2606,16 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x1b\n" +
 	"\tcall_type\x18\x02 \x01(\x05R\bcallType\x12\x16\n" +
 	"\x06status\x18\x03 \x01(\x05R\x06status\x12\x1a\n" +
-	"\bduration\x18\x04 \x01(\x03R\bduration\"K\n" +
+	"\bduration\x18\x04 \x01(\x03R\bduration\"_\n" +
 	"\vWithdrawMsg\x12\"\n" +
-	"\rorigin_msg_id\x18\x01 \x01(\tR\voriginMsgId\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\"\x81\x01\n" +
+	"\rorigin_msg_id\x18\x01 \x01(\tR\voriginMsgId\x12,\n" +
+	"\n" +
+	"origin_msg\x18\x02 \x01(\v2\r.chat_rpc.MsgR\toriginMsg\"\x88\x01\n" +
 	"\bReplyMsg\x12\"\n" +
 	"\rorigin_msg_id\x18\x01 \x01(\tR\voriginMsgId\x12,\n" +
 	"\n" +
-	"origin_msg\x18\x02 \x01(\v2\r.chat_rpc.MsgR\toriginMsg\x12#\n" +
-	"\rreply_content\x18\x03 \x01(\tR\freplyContent\"U\n" +
+	"origin_msg\x18\x02 \x01(\v2\r.chat_rpc.MsgR\toriginMsg\x12*\n" +
+	"\treply_msg\x18\x03 \x01(\v2\r.chat_rpc.MsgR\breplyMsg\"U\n" +
 	"\n" +
 	"ForwardMsg\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x1b\n" +
@@ -2816,55 +2817,57 @@ var file_chat_rpc_proto_goTypes = []any{
 	(*GetUserConversationVersionsRes)(nil),          // 41: chat_rpc.GetUserConversationVersionsRes
 }
 var file_chat_rpc_proto_depIdxs = []int32{
-	12, // 0: chat_rpc.ReplyMsg.origin_msg:type_name -> chat_rpc.Msg
-	0,  // 1: chat_rpc.Msg.text_msg:type_name -> chat_rpc.TextMsg
-	1,  // 2: chat_rpc.Msg.image_msg:type_name -> chat_rpc.ImageMsg
-	2,  // 3: chat_rpc.Msg.video_msg:type_name -> chat_rpc.VideoMsg
-	3,  // 4: chat_rpc.Msg.file_msg:type_name -> chat_rpc.FileMsg
-	4,  // 5: chat_rpc.Msg.voice_msg:type_name -> chat_rpc.VoiceMsg
-	6,  // 6: chat_rpc.Msg.emoji_msg:type_name -> chat_rpc.EmojiMsg
-	7,  // 7: chat_rpc.Msg.notification_msg:type_name -> chat_rpc.NotificationMsg
-	5,  // 8: chat_rpc.Msg.audio_file_msg:type_name -> chat_rpc.AudioFileMsg
-	8,  // 9: chat_rpc.Msg.call_msg:type_name -> chat_rpc.CallMsg
-	9,  // 10: chat_rpc.Msg.withdraw_msg:type_name -> chat_rpc.WithdrawMsg
-	10, // 11: chat_rpc.Msg.reply_msg:type_name -> chat_rpc.ReplyMsg
-	11, // 12: chat_rpc.Msg.forward_msg:type_name -> chat_rpc.ForwardMsg
-	12, // 13: chat_rpc.SendMsgReq.msg:type_name -> chat_rpc.Msg
-	12, // 14: chat_rpc.SendMsgRes.msg:type_name -> chat_rpc.Msg
-	14, // 15: chat_rpc.SendMsgRes.sender:type_name -> chat_rpc.Sender
-	21, // 16: chat_rpc.GetUserConversationsRes.conversations:type_name -> chat_rpc.ConversationItem
-	24, // 17: chat_rpc.GetConversationsListByIdsRes.conversations:type_name -> chat_rpc.ConversationListById
-	27, // 18: chat_rpc.GetUserConversationSettingsListByIdsRes.user_conversation_settings:type_name -> chat_rpc.UserConversationSettingListById
-	40, // 19: chat_rpc.GetUserConversationVersionsRes.user_conversation_versions:type_name -> chat_rpc.UserConversationVersion
-	13, // 20: chat_rpc.Chat.SendMsg:input_type -> chat_rpc.SendMsgReq
-	16, // 21: chat_rpc.Chat.UpdateConversation:input_type -> chat_rpc.UpdateConversationReq
-	18, // 22: chat_rpc.Chat.BatchUpdateConversation:input_type -> chat_rpc.BatchUpdateConversationReq
-	20, // 23: chat_rpc.Chat.GetUserConversations:input_type -> chat_rpc.GetUserConversationsReq
-	23, // 24: chat_rpc.Chat.GetConversationsListByIds:input_type -> chat_rpc.GetConversationsListByIdsReq
-	26, // 25: chat_rpc.Chat.GetUserConversationSettingsListByIds:input_type -> chat_rpc.GetUserConversationSettingsListByIdsReq
-	39, // 26: chat_rpc.Chat.GetUserConversationVersions:input_type -> chat_rpc.GetUserConversationVersionsReq
-	29, // 27: chat_rpc.Chat.InitializeConversation:input_type -> chat_rpc.InitializeConversationReq
-	33, // 28: chat_rpc.Chat.AddConversationMembers:input_type -> chat_rpc.AddConversationMembersReq
-	35, // 29: chat_rpc.Chat.RemoveConversationMembers:input_type -> chat_rpc.RemoveConversationMembersReq
-	37, // 30: chat_rpc.Chat.DissolveConversation:input_type -> chat_rpc.DissolveConversationReq
-	31, // 31: chat_rpc.Chat.SendNotificationMessage:input_type -> chat_rpc.SendNotificationMessageReq
-	15, // 32: chat_rpc.Chat.SendMsg:output_type -> chat_rpc.SendMsgRes
-	17, // 33: chat_rpc.Chat.UpdateConversation:output_type -> chat_rpc.UpdateConversationRes
-	19, // 34: chat_rpc.Chat.BatchUpdateConversation:output_type -> chat_rpc.BatchUpdateConversationRes
-	22, // 35: chat_rpc.Chat.GetUserConversations:output_type -> chat_rpc.GetUserConversationsRes
-	25, // 36: chat_rpc.Chat.GetConversationsListByIds:output_type -> chat_rpc.GetConversationsListByIdsRes
-	28, // 37: chat_rpc.Chat.GetUserConversationSettingsListByIds:output_type -> chat_rpc.GetUserConversationSettingsListByIdsRes
-	41, // 38: chat_rpc.Chat.GetUserConversationVersions:output_type -> chat_rpc.GetUserConversationVersionsRes
-	30, // 39: chat_rpc.Chat.InitializeConversation:output_type -> chat_rpc.InitializeConversationRes
-	34, // 40: chat_rpc.Chat.AddConversationMembers:output_type -> chat_rpc.AddConversationMembersRes
-	36, // 41: chat_rpc.Chat.RemoveConversationMembers:output_type -> chat_rpc.RemoveConversationMembersRes
-	38, // 42: chat_rpc.Chat.DissolveConversation:output_type -> chat_rpc.DissolveConversationRes
-	32, // 43: chat_rpc.Chat.SendNotificationMessage:output_type -> chat_rpc.SendNotificationMessageRes
-	32, // [32:44] is the sub-list for method output_type
-	20, // [20:32] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	12, // 0: chat_rpc.WithdrawMsg.origin_msg:type_name -> chat_rpc.Msg
+	12, // 1: chat_rpc.ReplyMsg.origin_msg:type_name -> chat_rpc.Msg
+	12, // 2: chat_rpc.ReplyMsg.reply_msg:type_name -> chat_rpc.Msg
+	0,  // 3: chat_rpc.Msg.text_msg:type_name -> chat_rpc.TextMsg
+	1,  // 4: chat_rpc.Msg.image_msg:type_name -> chat_rpc.ImageMsg
+	2,  // 5: chat_rpc.Msg.video_msg:type_name -> chat_rpc.VideoMsg
+	3,  // 6: chat_rpc.Msg.file_msg:type_name -> chat_rpc.FileMsg
+	4,  // 7: chat_rpc.Msg.voice_msg:type_name -> chat_rpc.VoiceMsg
+	6,  // 8: chat_rpc.Msg.emoji_msg:type_name -> chat_rpc.EmojiMsg
+	7,  // 9: chat_rpc.Msg.notification_msg:type_name -> chat_rpc.NotificationMsg
+	5,  // 10: chat_rpc.Msg.audio_file_msg:type_name -> chat_rpc.AudioFileMsg
+	8,  // 11: chat_rpc.Msg.call_msg:type_name -> chat_rpc.CallMsg
+	9,  // 12: chat_rpc.Msg.withdraw_msg:type_name -> chat_rpc.WithdrawMsg
+	10, // 13: chat_rpc.Msg.reply_msg:type_name -> chat_rpc.ReplyMsg
+	11, // 14: chat_rpc.Msg.forward_msg:type_name -> chat_rpc.ForwardMsg
+	12, // 15: chat_rpc.SendMsgReq.msg:type_name -> chat_rpc.Msg
+	12, // 16: chat_rpc.SendMsgRes.msg:type_name -> chat_rpc.Msg
+	14, // 17: chat_rpc.SendMsgRes.sender:type_name -> chat_rpc.Sender
+	21, // 18: chat_rpc.GetUserConversationsRes.conversations:type_name -> chat_rpc.ConversationItem
+	24, // 19: chat_rpc.GetConversationsListByIdsRes.conversations:type_name -> chat_rpc.ConversationListById
+	27, // 20: chat_rpc.GetUserConversationSettingsListByIdsRes.user_conversation_settings:type_name -> chat_rpc.UserConversationSettingListById
+	40, // 21: chat_rpc.GetUserConversationVersionsRes.user_conversation_versions:type_name -> chat_rpc.UserConversationVersion
+	13, // 22: chat_rpc.Chat.SendMsg:input_type -> chat_rpc.SendMsgReq
+	16, // 23: chat_rpc.Chat.UpdateConversation:input_type -> chat_rpc.UpdateConversationReq
+	18, // 24: chat_rpc.Chat.BatchUpdateConversation:input_type -> chat_rpc.BatchUpdateConversationReq
+	20, // 25: chat_rpc.Chat.GetUserConversations:input_type -> chat_rpc.GetUserConversationsReq
+	23, // 26: chat_rpc.Chat.GetConversationsListByIds:input_type -> chat_rpc.GetConversationsListByIdsReq
+	26, // 27: chat_rpc.Chat.GetUserConversationSettingsListByIds:input_type -> chat_rpc.GetUserConversationSettingsListByIdsReq
+	39, // 28: chat_rpc.Chat.GetUserConversationVersions:input_type -> chat_rpc.GetUserConversationVersionsReq
+	29, // 29: chat_rpc.Chat.InitializeConversation:input_type -> chat_rpc.InitializeConversationReq
+	33, // 30: chat_rpc.Chat.AddConversationMembers:input_type -> chat_rpc.AddConversationMembersReq
+	35, // 31: chat_rpc.Chat.RemoveConversationMembers:input_type -> chat_rpc.RemoveConversationMembersReq
+	37, // 32: chat_rpc.Chat.DissolveConversation:input_type -> chat_rpc.DissolveConversationReq
+	31, // 33: chat_rpc.Chat.SendNotificationMessage:input_type -> chat_rpc.SendNotificationMessageReq
+	15, // 34: chat_rpc.Chat.SendMsg:output_type -> chat_rpc.SendMsgRes
+	17, // 35: chat_rpc.Chat.UpdateConversation:output_type -> chat_rpc.UpdateConversationRes
+	19, // 36: chat_rpc.Chat.BatchUpdateConversation:output_type -> chat_rpc.BatchUpdateConversationRes
+	22, // 37: chat_rpc.Chat.GetUserConversations:output_type -> chat_rpc.GetUserConversationsRes
+	25, // 38: chat_rpc.Chat.GetConversationsListByIds:output_type -> chat_rpc.GetConversationsListByIdsRes
+	28, // 39: chat_rpc.Chat.GetUserConversationSettingsListByIds:output_type -> chat_rpc.GetUserConversationSettingsListByIdsRes
+	41, // 40: chat_rpc.Chat.GetUserConversationVersions:output_type -> chat_rpc.GetUserConversationVersionsRes
+	30, // 41: chat_rpc.Chat.InitializeConversation:output_type -> chat_rpc.InitializeConversationRes
+	34, // 42: chat_rpc.Chat.AddConversationMembers:output_type -> chat_rpc.AddConversationMembersRes
+	36, // 43: chat_rpc.Chat.RemoveConversationMembers:output_type -> chat_rpc.RemoveConversationMembersRes
+	38, // 44: chat_rpc.Chat.DissolveConversation:output_type -> chat_rpc.DissolveConversationRes
+	32, // 45: chat_rpc.Chat.SendNotificationMessage:output_type -> chat_rpc.SendNotificationMessageRes
+	34, // [34:46] is the sub-list for method output_type
+	22, // [22:34] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_chat_rpc_proto_init() }

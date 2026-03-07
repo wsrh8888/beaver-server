@@ -16,15 +16,26 @@ type ChatMessage struct {
 	TargetMessageID  string        `gorm:"size:64;index" json:"targetMessageId,omitempty"` // 针对的原消息ID（撤回/删除/编辑事件）
 	MsgPreview       string        `gorm:"size:256" json:"msgPreview"`                     // 消息预览文本
 	Msg              *ctype.Msg    `gorm:"type:json" json:"msg"`                           // 消息内容（JSON）
-
-	// 数据状态管理
-	Status int8 `gorm:"not null;default:1;index" json:"status"` // 消息状态：1=正常 2=已撤回 3=已编辑 4=已删除
 }
 
 func (chat ChatMessage) MsgPreviewMethod() string {
-	switch chat.Msg.Type {
+	if chat.Msg == nil {
+		return "[消息]"
+	}
+	return getPreview(chat.Msg)
+}
+
+// getPreview 递归获取消息预览
+func getPreview(msg *ctype.Msg) string {
+	if msg == nil {
+		return ""
+	}
+
+	switch msg.Type {
 	case ctype.TextMsgType:
-		return chat.Msg.TextMsg.Content
+		if msg.TextMsg != nil {
+			return msg.TextMsg.Content
+		}
 	case ctype.ImageMsgType:
 		return "[图片消息]"
 	case ctype.VideoMsgType:
@@ -44,10 +55,11 @@ func (chat ChatMessage) MsgPreviewMethod() string {
 	case ctype.WithdrawMsgType:
 		return "[撤回消息]"
 	case ctype.ReplyMsgType:
-		return "[回复]" + chat.Msg.ReplyMsg.ReplyContent
+		if msg.ReplyMsg != nil {
+			return getPreview(msg.ReplyMsg.ReplyMsg)
+		}
 	case ctype.ForwardMsgType:
 		return "[聊天记录]"
-	default:
-		return "[未知消息]"
 	}
+	return "[未知消息]"
 }

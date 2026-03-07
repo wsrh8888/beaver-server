@@ -163,8 +163,11 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			if originMsgId, ok := withdrawMsg["originMsgId"].(string); ok {
 				rpcMsg.WithdrawMsg.OriginMsgId = originMsgId
 			}
-			if content, ok := withdrawMsg["content"].(string); ok {
-				rpcMsg.WithdrawMsg.Content = content
+			if originMsgMap, ok := withdrawMsg["originMsg"].(map[string]interface{}); ok {
+				// 递归转换快照内容
+				jsonData, _ := json.Marshal(originMsgMap)
+				originMsg, _ := convertToRpcMsg(jsonData)
+				rpcMsg.WithdrawMsg.OriginMsg = originMsg
 			}
 		}
 	case 11: // 回复消息
@@ -173,10 +176,18 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			if originMsgId, ok := replyMsg["originMsgId"].(string); ok {
 				rpcMsg.ReplyMsg.OriginMsgId = originMsgId
 			}
-			if replyContent, ok := replyMsg["replyContent"].(string); ok {
-				rpcMsg.ReplyMsg.ReplyContent = replyContent
+			if originMsgMap, ok := replyMsg["originMsg"].(map[string]interface{}); ok {
+				// 递归转换被引用的消息快照
+				jsonData, _ := json.Marshal(originMsgMap)
+				originMsg, _ := convertToRpcMsg(jsonData)
+				rpcMsg.ReplyMsg.OriginMsg = originMsg
 			}
-			// originMsg 递归解析可以在这里添加，或者让 RPC 侧查询
+			if replyMsgInnerMap, ok := replyMsg["replyMsg"].(map[string]interface{}); ok {
+				// 递归转换回复的具体消息内容
+				jsonData, _ := json.Marshal(replyMsgInnerMap)
+				replyInnerMsg, _ := convertToRpcMsg(jsonData)
+				rpcMsg.ReplyMsg.ReplyMsg = replyInnerMsg
+			}
 		}
 	case 12: // 转发消息
 		if forwardMsg, ok := msgData["forwardMsg"].(map[string]interface{}); ok {
@@ -194,32 +205,4 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 	}
 
 	return rpcMsg, nil
-}
-
-// buildResponseData 构建响应数据
-func buildResponseData(rpcResp *chat_rpc.SendMsgRes, originalMsg json.RawMessage) ([]byte, error) {
-	responseData := map[string]interface{}{
-		"id":             rpcResp.Id,
-		"messageId":      rpcResp.MessageId,
-		"conversationId": rpcResp.ConversationId,
-		"msg":            originalMsg, // 使用原始消息数据
-		"sender": map[string]interface{}{
-			"userId":   rpcResp.Sender.UserId,
-			"avatar":   rpcResp.Sender.Avatar,
-			"nickName": rpcResp.Sender.NickName,
-		},
-		"conversationType": rpcResp.ConversationType,
-		"createdAt":        rpcResp.CreatedAt,
-		"msgPreview":       rpcResp.MsgPreview,
-		"status":           rpcResp.Status,
-		"seq":              rpcResp.Seq,
-	}
-
-	// 将响应数据转换为 JSON 格式
-	responseJSON, err := json.Marshal(responseData)
-	if err != nil {
-		return nil, err
-	}
-
-	return responseJSON, nil
 }

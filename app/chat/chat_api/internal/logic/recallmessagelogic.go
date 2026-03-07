@@ -61,7 +61,14 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 			Type: uint32(ctype.WithdrawMsgType),
 			WithdrawMsg: &chat_rpc.WithdrawMsg{
 				OriginMsgId: req.MessageID,
-				Content:     "你撤回了一条消息",
+				// 关键点：将被撤回的消息快照带上，方便前端撤回后“重新编辑”
+				OriginMsg: func() *chat_rpc.Msg {
+					res := &chat_rpc.Msg{Type: uint32(msg.MsgType)}
+					if msg.MsgType == ctype.TextMsgType && msg.Msg != nil && msg.Msg.TextMsg != nil {
+						res.TextMsg = &chat_rpc.TextMsg{Content: msg.Msg.TextMsg.Content}
+					}
+					return res
+				}(),
 			},
 		},
 	})

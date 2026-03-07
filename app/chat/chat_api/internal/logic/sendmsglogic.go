@@ -5,7 +5,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -29,145 +28,149 @@ func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLo
 	}
 }
 
+// BuildMsgToRpc 将 API 的 Msg 类型转换为 RPC 的 Msg 类型（支持递归）
+func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
+	if apiMsg == nil {
+		return nil
+	}
+
+	rpcMsg := &chat_rpc.Msg{
+		Type: apiMsg.Type,
+	}
+
+	msgType := ctype.MsgType(apiMsg.Type)
+	switch msgType {
+	case ctype.TextMsgType:
+		if apiMsg.TextMsg != nil {
+			rpcMsg.TextMsg = &chat_rpc.TextMsg{Content: apiMsg.TextMsg.Content}
+		}
+	case ctype.ImageMsgType:
+		if apiMsg.ImageMsg != nil {
+			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
+				FileKey: apiMsg.ImageMsg.FileKey,
+				Width:   int32(apiMsg.ImageMsg.Width),
+				Height:  int32(apiMsg.ImageMsg.Height),
+				Size:    apiMsg.ImageMsg.Size,
+			}
+		}
+	case ctype.VideoMsgType:
+		if apiMsg.VideoMsg != nil {
+			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
+				FileKey:      apiMsg.VideoMsg.FileKey,
+				Width:        int32(apiMsg.VideoMsg.Width),
+				Height:       int32(apiMsg.VideoMsg.Height),
+				Duration:     int32(apiMsg.VideoMsg.Duration),
+				ThumbnailKey: apiMsg.VideoMsg.ThumbnailKey,
+				Size:         apiMsg.VideoMsg.Size,
+			}
+		}
+	case ctype.FileMsgType:
+		if apiMsg.FileMsg != nil {
+			rpcMsg.FileMsg = &chat_rpc.FileMsg{
+				FileKey:  apiMsg.FileMsg.FileKey,
+				FileName: apiMsg.FileMsg.FileName,
+				Size:     apiMsg.FileMsg.Size,
+				MimeType: apiMsg.FileMsg.MimeType,
+			}
+		}
+	case ctype.VoiceMsgType:
+		if apiMsg.VoiceMsg != nil {
+			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
+				FileKey:  apiMsg.VoiceMsg.FileKey,
+				Duration: int32(apiMsg.VoiceMsg.Duration),
+				Size:     apiMsg.VoiceMsg.Size,
+			}
+		}
+	case ctype.EmojiMsgType:
+		if apiMsg.EmojiMsg != nil {
+			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
+				FileKey:   apiMsg.EmojiMsg.FileKey,
+				EmojiId:   apiMsg.EmojiMsg.EmojiID,
+				PackageId: apiMsg.EmojiMsg.PackageID,
+			}
+		}
+	case ctype.NotificationMsgType:
+		if apiMsg.NotificationMsg != nil {
+			rpcMsg.NotificationMsg = &chat_rpc.NotificationMsg{
+				Type:   int32(apiMsg.NotificationMsg.Type),
+				Actors: apiMsg.NotificationMsg.Actors,
+			}
+		}
+	case ctype.AudioFileMsgType:
+		if apiMsg.AudioFileMsg != nil {
+			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
+				FileKey:  apiMsg.AudioFileMsg.FileKey,
+				FileName: apiMsg.AudioFileMsg.FileName,
+				Duration: int32(apiMsg.AudioFileMsg.Duration),
+				Size:     apiMsg.AudioFileMsg.Size,
+			}
+		}
+	case ctype.CallMsgType:
+		if apiMsg.CallMsg != nil {
+			rpcMsg.CallMsg = &chat_rpc.CallMsg{
+				RoomId:   apiMsg.CallMsg.RoomId,
+				CallType: int32(apiMsg.CallMsg.CallType),
+				Status:   int32(apiMsg.CallMsg.Status),
+				Duration: apiMsg.CallMsg.Duration,
+			}
+		}
+	case ctype.WithdrawMsgType:
+		if apiMsg.WithdrawMsg != nil {
+			rpcMsg.WithdrawMsg = &chat_rpc.WithdrawMsg{
+				OriginMsgId: apiMsg.WithdrawMsg.OriginMsgId,
+				// 递归转换快照
+				OriginMsg: l.BuildMsgToRpc(apiMsg.WithdrawMsg.OriginMsg),
+			}
+		}
+	case ctype.ReplyMsgType:
+		if apiMsg.ReplyMsg != nil {
+			rpcMsg.ReplyMsg = &chat_rpc.ReplyMsg{
+				OriginMsgId: apiMsg.ReplyMsg.OriginMsgId,
+				// 递归转换快照
+				OriginMsg: l.BuildMsgToRpc(apiMsg.ReplyMsg.OriginMsg),
+				// 递归转换回复的主体消息
+				ReplyMsg: l.BuildMsgToRpc(apiMsg.ReplyMsg.ReplyMsg),
+			}
+		}
+	case ctype.ForwardMsgType:
+		if apiMsg.ForwardMsg != nil {
+			rpcMsg.ForwardMsg = &chat_rpc.ForwardMsg{
+				Title:    apiMsg.ForwardMsg.Title,
+				RecordId: apiMsg.ForwardMsg.RecordID,
+				Count:    int32(apiMsg.ForwardMsg.Count),
+			}
+		}
+	}
+	return rpcMsg
+}
+
 func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error) {
-	// 构建RPC请求
+	// 构建 RPC 请求的消息内容（使用递归转换逻辑）
+	rpcMsg := l.BuildMsgToRpc(&req.Msg)
+
 	rpcReq := &chat_rpc.SendMsgReq{
 		UserId:         req.UserID,
 		MessageId:      req.MessageID,
 		ConversationId: req.ConversationID,
-		Msg: &chat_rpc.Msg{
-			Type: req.Msg.Type,
-		},
+		Msg:            rpcMsg,
 	}
-	msgType := ctype.MsgType(req.Msg.Type)
-	switch msgType {
-	case ctype.TextMsgType:
-		rpcReq.Msg.TextMsg = &chat_rpc.TextMsg{Content: req.Msg.TextMsg.Content}
-	case ctype.ImageMsgType:
-		imageMsg := &chat_rpc.ImageMsg{FileKey: req.Msg.ImageMsg.FileKey}
-		// 设置可选字段（打平后的结构）
-		if req.Msg.ImageMsg.Width > 0 {
-			imageMsg.Width = int32(req.Msg.ImageMsg.Width)
-		}
-		if req.Msg.ImageMsg.Height > 0 {
-			imageMsg.Height = int32(req.Msg.ImageMsg.Height)
-		}
-		if req.Msg.ImageMsg.Size > 0 {
-			imageMsg.Size = req.Msg.ImageMsg.Size
-		}
-		rpcReq.Msg.ImageMsg = imageMsg
-	case ctype.VideoMsgType:
-		videoMsg := &chat_rpc.VideoMsg{FileKey: req.Msg.VideoMsg.FileKey}
-		// 设置可选字段（打平后的结构）
-		if req.Msg.VideoMsg.Width > 0 {
-			videoMsg.Width = int32(req.Msg.VideoMsg.Width)
-		}
-		if req.Msg.VideoMsg.Height > 0 {
-			videoMsg.Height = int32(req.Msg.VideoMsg.Height)
-		}
-		if req.Msg.VideoMsg.Duration > 0 {
-			videoMsg.Duration = int32(req.Msg.VideoMsg.Duration)
-		}
-		if req.Msg.VideoMsg.ThumbnailKey != "" {
-			videoMsg.ThumbnailKey = req.Msg.VideoMsg.ThumbnailKey
-		}
-		if req.Msg.VideoMsg.Size > 0 {
-			videoMsg.Size = req.Msg.VideoMsg.Size
-		}
-		rpcReq.Msg.VideoMsg = videoMsg
-	case ctype.FileMsgType:
-		fileMsg := &chat_rpc.FileMsg{FileKey: req.Msg.FileMsg.FileKey}
-		// 设置可选字段
-		if req.Msg.FileMsg.FileName != "" {
-			fileMsg.FileName = req.Msg.FileMsg.FileName
-		}
-		if req.Msg.FileMsg.Size > 0 {
-			fileMsg.Size = req.Msg.FileMsg.Size
-		}
-		if req.Msg.FileMsg.MimeType != "" {
-			fileMsg.MimeType = req.Msg.FileMsg.MimeType
-		}
-		rpcReq.Msg.FileMsg = fileMsg
-	case ctype.VoiceMsgType:
-		voiceMsg := &chat_rpc.VoiceMsg{FileKey: req.Msg.VoiceMsg.FileKey}
-		// 设置可选字段（打平后的结构）
-		if req.Msg.VoiceMsg.Duration > 0 {
-			voiceMsg.Duration = int32(req.Msg.VoiceMsg.Duration)
-		}
-		if req.Msg.VoiceMsg.Size > 0 {
-			voiceMsg.Size = req.Msg.VoiceMsg.Size
-		}
-		rpcReq.Msg.VoiceMsg = voiceMsg
-	case ctype.EmojiMsgType:
-		rpcReq.Msg.EmojiMsg = &chat_rpc.EmojiMsg{
-			FileKey:   req.Msg.EmojiMsg.FileKey,
-			EmojiId:   req.Msg.EmojiMsg.EmojiID,
-			PackageId: req.Msg.EmojiMsg.PackageID,
-		}
-	case ctype.NotificationMsgType:
-		rpcReq.Msg.NotificationMsg = &chat_rpc.NotificationMsg{
-			Type:   int32(req.Msg.NotificationMsg.Type),
-			Actors: req.Msg.NotificationMsg.Actors,
-		}
-	case ctype.AudioFileMsgType:
-		audioFileMsg := &chat_rpc.AudioFileMsg{FileKey: req.Msg.AudioFileMsg.FileKey}
-		// 设置可选字段（打平后的结构）
-		if req.Msg.AudioFileMsg.FileName != "" {
-			audioFileMsg.FileName = req.Msg.AudioFileMsg.FileName
-		}
-		if req.Msg.AudioFileMsg.Duration > 0 {
-			audioFileMsg.Duration = int32(req.Msg.AudioFileMsg.Duration)
-		}
-		if req.Msg.AudioFileMsg.Size > 0 {
-			audioFileMsg.Size = req.Msg.AudioFileMsg.Size
-		}
-		rpcReq.Msg.AudioFileMsg = audioFileMsg
-	case ctype.CallMsgType:
-		rpcReq.Msg.CallMsg = &chat_rpc.CallMsg{
-			RoomId:   req.Msg.CallMsg.RoomId,
-			CallType: int32(req.Msg.CallMsg.CallType),
-			Status:   int32(req.Msg.CallMsg.Status),
-			Duration: req.Msg.CallMsg.Duration,
-		}
-	case ctype.WithdrawMsgType:
-		rpcReq.Msg.WithdrawMsg = &chat_rpc.WithdrawMsg{
-			OriginMsgId: req.Msg.WithdrawMsg.OriginMsgId,
-			Content:     req.Msg.WithdrawMsg.Content,
-		}
-	case ctype.ReplyMsgType:
-		var originMsg *chat_rpc.Msg
-		if req.Msg.ReplyMsg.OriginMsg != nil {
-			originMsg = &chat_rpc.Msg{
-				Type: req.Msg.ReplyMsg.OriginMsg.Type,
-			}
-		}
-		rpcReq.Msg.ReplyMsg = &chat_rpc.ReplyMsg{
-			OriginMsgId:  req.Msg.ReplyMsg.OriginMsgId,
-			OriginMsg:    originMsg,
-			ReplyContent: req.Msg.ReplyMsg.ReplyContent,
-		}
-	case ctype.ForwardMsgType:
-		rpcReq.Msg.ForwardMsg = &chat_rpc.ForwardMsg{
-			Title:    req.Msg.ForwardMsg.Title,
-			RecordId: req.Msg.ForwardMsg.RecordID,
-			Count:    int32(req.Msg.ForwardMsg.Count),
-		}
-	default:
-		return nil, errors.New("invalid message type")
-	}
-	fmt.Println("rpcReq:", rpcReq)
-	// 调用RPC服务
+
+	// 记录请求（仅调试用）
+	l.Logger.Infof("Sending message via RPC: userId=%s, conversationId=%s, type=%d", req.UserID, req.ConversationID, req.Msg.Type)
+
+	// 调用 RPC 服务
 	rpcResp, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, rpcReq)
 	if err != nil {
 		l.Logger.Errorf("failed to send message via RPC: %v", err)
 		return nil, errors.New("failed to send message")
 	}
 
-	// 构建API响应
+	// 构建 API 响应
 	resp := &types.SendMsgRes{
 		Id:             uint(rpcResp.Id),
+		MessageID:      rpcResp.MessageId,
 		ConversationID: rpcResp.ConversationId,
-		Msg:            req.Msg,
+		Msg:            req.Msg, // 返回原始发送的消息对象
 		Sender: types.Sender{
 			UserID:   rpcResp.Sender.UserId,
 			Avatar:   rpcResp.Sender.Avatar,

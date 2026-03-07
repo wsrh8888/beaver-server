@@ -205,17 +205,17 @@ type CallMsg struct {
 	Duration int64  `json:"duration,omitempty"` // 通话时长(秒)
 }
 
-// WithdrawMsg 撤回消息结构
+// WithdrawMsg 撤回消息结构 (Type: 10)
 type WithdrawMsg struct {
-	OriginMsgID string `json:"originMsgId"` // 被撤回的消息ID
-	Content     string `json:"content"`     // 提示内容，如 "你撤回了一条消息"
+	OriginMsgID string `json:"originMsgId"`         // 被撤回的消息ID
+	OriginMsg   *Msg   `json:"originMsg,omitempty"` // 被撤回的消息内容快照（用于重新编辑或审计）
 }
 
-// ReplyMsg 回复消息结构
+// ReplyMsg 回复消息结构 (Type: 11)
 type ReplyMsg struct {
-	OriginMsgID  string `json:"originMsgId"`         // 被回复的消息ID
-	OriginMsg    *Msg   `json:"originMsg,omitempty"` // 被回复的消息内容快照
-	ReplyContent string `json:"replyContent"`        // 回复的文本内容
+	OriginMsgID string `json:"originMsgId"`         // 被回复的消息ID
+	OriginMsg   *Msg   `json:"originMsg,omitempty"` // 被回复的消息内容快照
+	ReplyMsg    *Msg   `json:"replyMsg"`            // 回复的消息主体对象 (可以是文本、图片等)
 }
 
 // ForwardMsg 转发消息结构（大厂标准：轻量化卡片 + 延迟加载）

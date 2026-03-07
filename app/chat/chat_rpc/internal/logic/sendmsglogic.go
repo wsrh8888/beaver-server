@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 
 	chat_models "beaver/app/chat/chat_models"
@@ -36,6 +35,185 @@ func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLo
 	}
 }
 
+// BuildMsgFromProto 将 Proto 的消息结构转换/映射为 ctype.Msg 逻辑（支持回复模式递归）
+func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
+	if protoMsg == nil {
+		return nil
+	}
+
+	msgType := ctype.MsgType(protoMsg.Type)
+	var msg ctype.Msg
+
+	switch msgType {
+	case ctype.TextMsgType:
+		msg = ctype.Msg{
+			Type: ctype.TextMsgType,
+			TextMsg: &ctype.TextMsg{
+				Content: protoMsg.TextMsg.Content,
+			},
+		}
+	case ctype.ImageMsgType:
+		imageMsg := &ctype.ImageMsg{
+			FileKey: protoMsg.ImageMsg.FileKey,
+		}
+		if protoMsg.ImageMsg.Width > 0 {
+			imageMsg.Width = int(protoMsg.ImageMsg.Width)
+		}
+		if protoMsg.ImageMsg.Height > 0 {
+			imageMsg.Height = int(protoMsg.ImageMsg.Height)
+		}
+		if protoMsg.ImageMsg.Size > 0 {
+			imageMsg.Size = protoMsg.ImageMsg.Size
+		}
+		msg = ctype.Msg{
+			Type:     ctype.ImageMsgType,
+			ImageMsg: imageMsg,
+		}
+	case ctype.VideoMsgType:
+		videoMsg := &ctype.VideoMsg{
+			FileKey: protoMsg.VideoMsg.FileKey,
+		}
+		if protoMsg.VideoMsg.Width > 0 {
+			videoMsg.Width = int(protoMsg.VideoMsg.Width)
+		}
+		if protoMsg.VideoMsg.Height > 0 {
+			videoMsg.Height = int(protoMsg.VideoMsg.Height)
+		}
+		if protoMsg.VideoMsg.Duration > 0 {
+			videoMsg.Duration = int(protoMsg.VideoMsg.Duration)
+		}
+		if protoMsg.VideoMsg.ThumbnailKey != "" {
+			videoMsg.ThumbnailKey = protoMsg.VideoMsg.ThumbnailKey
+		}
+		if protoMsg.VideoMsg.Size > 0 {
+			videoMsg.Size = protoMsg.VideoMsg.Size
+		}
+		msg = ctype.Msg{
+			Type:     ctype.VideoMsgType,
+			VideoMsg: videoMsg,
+		}
+	case ctype.FileMsgType:
+		fileMsg := &ctype.FileMsg{
+			FileKey: protoMsg.FileMsg.FileKey,
+		}
+		if protoMsg.FileMsg.FileName != "" {
+			fileMsg.FileName = protoMsg.FileMsg.FileName
+		}
+		if protoMsg.FileMsg.Size > 0 {
+			fileMsg.Size = protoMsg.FileMsg.Size
+		}
+		if protoMsg.FileMsg.MimeType != "" {
+			fileMsg.MimeType = protoMsg.FileMsg.MimeType
+		}
+		msg = ctype.Msg{
+			Type:    ctype.FileMsgType,
+			FileMsg: fileMsg,
+		}
+	case ctype.VoiceMsgType:
+		voiceMsg := &ctype.VoiceMsg{
+			FileKey: protoMsg.VoiceMsg.FileKey,
+		}
+		if protoMsg.VoiceMsg.Duration > 0 {
+			voiceMsg.Duration = int(protoMsg.VoiceMsg.Duration)
+		}
+		if protoMsg.VoiceMsg.Size > 0 {
+			voiceMsg.Size = protoMsg.VoiceMsg.Size
+		}
+		msg = ctype.Msg{
+			Type:     ctype.VoiceMsgType,
+			VoiceMsg: voiceMsg,
+		}
+	case ctype.EmojiMsgType:
+		msg = ctype.Msg{
+			Type: ctype.EmojiMsgType,
+			EmojiMsg: &ctype.EmojiMsg{
+				FileKey:   protoMsg.EmojiMsg.FileKey,
+				EmojiID:   protoMsg.EmojiMsg.EmojiId,
+				PackageID: protoMsg.EmojiMsg.PackageId,
+				Width:     protoMsg.EmojiMsg.Width,
+				Height:    protoMsg.EmojiMsg.Height,
+			},
+		}
+	case ctype.NotificationMsgType:
+		notificationMsg := &ctype.NotificationMsg{
+			Type:   int(protoMsg.NotificationMsg.Type),
+			Actors: protoMsg.NotificationMsg.Actors,
+		}
+		msg = ctype.Msg{
+			Type:            ctype.NotificationMsgType,
+			NotificationMsg: notificationMsg,
+		}
+	case ctype.AudioFileMsgType:
+		audioFileMsg := &ctype.AudioFileMsg{
+			FileKey: protoMsg.AudioFileMsg.FileKey,
+		}
+		if protoMsg.AudioFileMsg.FileName != "" {
+			audioFileMsg.FileName = protoMsg.AudioFileMsg.FileName
+		}
+		if protoMsg.AudioFileMsg.Duration > 0 {
+			audioFileMsg.Duration = int(protoMsg.AudioFileMsg.Duration)
+		}
+		if protoMsg.AudioFileMsg.Size > 0 {
+			audioFileMsg.Size = protoMsg.AudioFileMsg.Size
+		}
+		msg = ctype.Msg{
+			Type:         ctype.AudioFileMsgType,
+			AudioFileMsg: audioFileMsg,
+		}
+	case ctype.CallMsgType:
+		msg = ctype.Msg{
+			Type: ctype.CallMsgType,
+			CallMsg: &ctype.CallMsg{
+				RoomID:   protoMsg.CallMsg.RoomId,
+				CallType: int(protoMsg.CallMsg.CallType),
+				Status:   int(protoMsg.CallMsg.Status),
+				Duration: protoMsg.CallMsg.Duration,
+			},
+		}
+	case ctype.WithdrawMsgType:
+		if protoMsg.WithdrawMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.WithdrawMsgType,
+				WithdrawMsg: &ctype.WithdrawMsg{
+					OriginMsgID: protoMsg.WithdrawMsg.OriginMsgId,
+					OriginMsg:   l.BuildMsgFromProto(protoMsg.WithdrawMsg.OriginMsg), // 支持快照递归
+				},
+			}
+		}
+	case ctype.ReplyMsgType:
+		// 这里递归转换被回复的消息 (引用部分)
+		var originMsg *ctype.Msg
+		if protoMsg.ReplyMsg != nil && protoMsg.ReplyMsg.OriginMsg != nil {
+			originMsg = l.BuildMsgFromProto(protoMsg.ReplyMsg.OriginMsg)
+		}
+
+		// 这里递归转换回复的具体内容 (回复内容部分)
+		var replyMsg *ctype.Msg
+		if protoMsg.ReplyMsg != nil && protoMsg.ReplyMsg.ReplyMsg != nil {
+			replyMsg = l.BuildMsgFromProto(protoMsg.ReplyMsg.ReplyMsg)
+		}
+
+		msg = ctype.Msg{
+			Type: ctype.ReplyMsgType,
+			ReplyMsg: &ctype.ReplyMsg{
+				OriginMsgID: protoMsg.ReplyMsg.OriginMsgId,
+				OriginMsg:   originMsg,
+				ReplyMsg:    replyMsg,
+			},
+		}
+	case ctype.ForwardMsgType:
+		msg = ctype.Msg{
+			Type: ctype.ForwardMsgType,
+			ForwardMsg: &ctype.ForwardMsg{
+				Title:    protoMsg.ForwardMsg.Title,
+				RecordID: protoMsg.ForwardMsg.RecordId,
+				Count:    int(protoMsg.ForwardMsg.Count),
+			},
+		}
+	}
+	return &msg
+}
+
 func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, error) {
 	conversationType, userIds := conversation.ParseConversationWithType(in.ConversationId)
 
@@ -58,180 +236,9 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		}
 	}
 
-	msgType := ctype.MsgType(in.Msg.Type)
-	var msg ctype.Msg
-	switch msgType {
-	case ctype.TextMsgType:
-		msg = ctype.Msg{
-			Type: ctype.TextMsgType,
-			TextMsg: &ctype.TextMsg{
-				Content: in.Msg.TextMsg.Content,
-			},
-		}
-	case ctype.ImageMsgType:
-		imageMsg := &ctype.ImageMsg{
-			FileKey: in.Msg.ImageMsg.FileKey,
-		}
-		// 设置可选字段（proto 字段名是小写开头，但 Go 生成的是大写开头）
-		// 注意：需要重新生成 proto 后，字段名会是 Width, Height, Size
-		if in.Msg.ImageMsg.Width > 0 {
-			imageMsg.Width = int(in.Msg.ImageMsg.Width)
-		}
-		if in.Msg.ImageMsg.Height > 0 {
-			imageMsg.Height = int(in.Msg.ImageMsg.Height)
-		}
-		if in.Msg.ImageMsg.Size > 0 {
-			imageMsg.Size = in.Msg.ImageMsg.Size
-		}
-		msg = ctype.Msg{
-			Type:     ctype.ImageMsgType,
-			ImageMsg: imageMsg,
-		}
-	case ctype.VideoMsgType:
-		videoMsg := &ctype.VideoMsg{
-			FileKey: in.Msg.VideoMsg.FileKey,
-		}
-		// 设置可选字段
-		if in.Msg.VideoMsg.Width > 0 {
-			videoMsg.Width = int(in.Msg.VideoMsg.Width)
-		}
-		if in.Msg.VideoMsg.Height > 0 {
-			videoMsg.Height = int(in.Msg.VideoMsg.Height)
-		}
-		if in.Msg.VideoMsg.Duration > 0 {
-			videoMsg.Duration = int(in.Msg.VideoMsg.Duration)
-		}
-		if in.Msg.VideoMsg.ThumbnailKey != "" {
-			videoMsg.ThumbnailKey = in.Msg.VideoMsg.ThumbnailKey
-		}
-		if in.Msg.VideoMsg.Size > 0 {
-			videoMsg.Size = in.Msg.VideoMsg.Size
-		}
-		msg = ctype.Msg{
-			Type:     ctype.VideoMsgType,
-			VideoMsg: videoMsg,
-		}
-	case ctype.FileMsgType:
-		fileMsg := &ctype.FileMsg{
-			FileKey: in.Msg.FileMsg.FileKey,
-		}
-		// 设置可选字段
-		if in.Msg.FileMsg.FileName != "" {
-			fileMsg.FileName = in.Msg.FileMsg.FileName
-		}
-		if in.Msg.FileMsg.Size > 0 {
-			fileMsg.Size = in.Msg.FileMsg.Size
-		}
-		if in.Msg.FileMsg.MimeType != "" {
-			fileMsg.MimeType = in.Msg.FileMsg.MimeType
-		}
-		msg = ctype.Msg{
-			Type:    ctype.FileMsgType,
-			FileMsg: fileMsg,
-		}
-	case ctype.VoiceMsgType:
-		voiceMsg := &ctype.VoiceMsg{
-			FileKey: in.Msg.VoiceMsg.FileKey,
-		}
-		// 设置可选字段
-		if in.Msg.VoiceMsg.Duration > 0 {
-			voiceMsg.Duration = int(in.Msg.VoiceMsg.Duration)
-		}
-		if in.Msg.VoiceMsg.Size > 0 {
-			voiceMsg.Size = in.Msg.VoiceMsg.Size
-		}
-		msg = ctype.Msg{
-			Type:     ctype.VoiceMsgType,
-			VoiceMsg: voiceMsg,
-		}
-	case ctype.EmojiMsgType:
-		msg = ctype.Msg{
-			Type: ctype.EmojiMsgType,
-			EmojiMsg: &ctype.EmojiMsg{
-				FileKey:   in.Msg.EmojiMsg.FileKey,
-				EmojiID:   in.Msg.EmojiMsg.EmojiId,
-				PackageID: in.Msg.EmojiMsg.PackageId,
-				Width:     in.Msg.EmojiMsg.Width,
-				Height:    in.Msg.EmojiMsg.Height,
-			},
-		}
-	case ctype.NotificationMsgType:
-		notificationMsg := &ctype.NotificationMsg{
-			Type:   int(in.Msg.NotificationMsg.Type),
-			Actors: in.Msg.NotificationMsg.Actors,
-		}
-		msg = ctype.Msg{
-			Type:            ctype.NotificationMsgType,
-			NotificationMsg: notificationMsg,
-		}
-	case ctype.AudioFileMsgType:
-		audioFileMsg := &ctype.AudioFileMsg{
-			FileKey: in.Msg.AudioFileMsg.FileKey,
-		}
-		// 设置可选字段
-		if in.Msg.AudioFileMsg.FileName != "" {
-			audioFileMsg.FileName = in.Msg.AudioFileMsg.FileName
-		}
-		if in.Msg.AudioFileMsg.Duration > 0 {
-			audioFileMsg.Duration = int(in.Msg.AudioFileMsg.Duration)
-		}
-		if in.Msg.AudioFileMsg.Size > 0 {
-			audioFileMsg.Size = in.Msg.AudioFileMsg.Size
-		}
-		msg = ctype.Msg{
-			Type:         ctype.AudioFileMsgType,
-			AudioFileMsg: audioFileMsg,
-		}
-	case ctype.CallMsgType:
-		msg = ctype.Msg{
-			Type: ctype.CallMsgType,
-			CallMsg: &ctype.CallMsg{
-				RoomID:   in.Msg.CallMsg.RoomId,
-				CallType: int(in.Msg.CallMsg.CallType),
-				Status:   int(in.Msg.CallMsg.Status),
-				Duration: in.Msg.CallMsg.Duration,
-			},
-		}
-	case ctype.WithdrawMsgType:
-		msg = ctype.Msg{
-			Type: ctype.WithdrawMsgType,
-			WithdrawMsg: &ctype.WithdrawMsg{
-				OriginMsgID: in.Msg.WithdrawMsg.OriginMsgId,
-				Content:     in.Msg.WithdrawMsg.Content,
-			},
-		}
-	case ctype.ReplyMsgType:
-		// 这里递归转换被回复的消息
-		var originMsg *ctype.Msg
-		if in.Msg.ReplyMsg.OriginMsg != nil {
-			// 由于 proto 到 ctype 的转换较为复杂，这里简单处理或者重新反射
-			// 实际上通常只需要 ID 和 预览，这里我们尝试填充
-			originMsg = &ctype.Msg{
-				Type:        ctype.MsgType(in.Msg.ReplyMsg.OriginMsg.Type),
-				TargetMsgID: in.Msg.ReplyMsg.OriginMsg.TargetMsgId,
-			}
-		}
-
-		msg = ctype.Msg{
-			Type: ctype.ReplyMsgType,
-			ReplyMsg: &ctype.ReplyMsg{
-				OriginMsgID:  in.Msg.ReplyMsg.OriginMsgId,
-				OriginMsg:    originMsg,
-				ReplyContent: in.Msg.ReplyMsg.ReplyContent,
-			},
-		}
-	case ctype.ForwardMsgType:
-		msg = ctype.Msg{
-			Type: ctype.ForwardMsgType,
-			ForwardMsg: &ctype.ForwardMsg{
-				Title:    in.Msg.ForwardMsg.Title,
-				RecordID: in.Msg.ForwardMsg.RecordId,
-				Count:    int(in.Msg.ForwardMsg.Count),
-			},
-		}
-	default:
-		return nil, fmt.Errorf("未识别到该类型: %d", msgType)
-	}
+	// 调用抽离好的递归转换函数
+	msg := l.BuildMsgFromProto(in.Msg)
+	msgType := msg.Type
 
 	// 获取下一个消息序列号（消息表内部序列号）
 	var maxSeq int64
@@ -253,7 +260,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		ConversationType: conversationType,
 		Seq:              nextSeq, // 设置正确的序列号
 		MsgType:          msgType,
-		Msg:              &msg,
+		Msg:              msg,
 	}
 
 	// 1. 创建消息记录并设置预览
@@ -302,7 +309,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	// 转换消息格式
-	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(msg)
+	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(*msg)
 	if err != nil {
 		l.Logger.Errorf("转换消息格式失败: %v", err)
 		return nil, err
@@ -342,7 +349,7 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 		}
 	}()
 
-	// 获取该会话的所有用户ID（包括发送者，给所有人推送）
+	// 获取该会话的所有用户ID
 	var recipientIds []string
 	for _, update := range allUserConversationUpdates {
 		if update.ConversationID == conversationId {
@@ -356,7 +363,7 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 		conversationsUpdate, // 已经构建好的 Conversations 更新
 	}
 
-	// 3. User_conversations 表更新（直接循环 allUserConversationUpdates）
+	// 3. User_conversations 表更新
 	for _, update := range allUserConversationUpdates {
 		userConversationsUpdate := map[string]interface{}{
 			"table":          "user_conversations",
@@ -374,15 +381,11 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 	// 为每个接收者推送批量更新
 	messageType := wsTypeConst.ChatConversationMessageReceive
 
-	// 打印tableUpdates的值
-	fmt.Println("tableUpdates: ", tableUpdates)
-
 	for _, recipientId := range recipientIds {
 		// 一次性推送所有表的更新信息
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd.Hosts[0], wsCommandConst.CHAT_MESSAGE, messageType, senderId, recipientId, map[string]interface{}{
 			"tableUpdates": tableUpdates, // 按表分组的更新数组
 		}, conversationId)
-
 	}
 }
 
@@ -408,7 +411,6 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 	})
 	if err != nil {
 		l.Logger.Errorf("获取用户信息失败: userId=%s, error=%v", sendUserID, err)
-		// 返回默认发送者信息，不影响消息发送
 		return &chat_rpc.Sender{
 			UserId:   sendUserID,
 			NickName: "未知用户",
@@ -416,7 +418,6 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		}, nil
 	}
 
-	// 使用结构化用户信息
 	userInfo := userInfoResp.UserInfo
 	return &chat_rpc.Sender{
 		UserId:   sendUserID,
@@ -426,18 +427,14 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 }
 
 func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(msg ctype.Msg) (*chat_rpc.Msg, error) {
-	// 将 ctype.Msg 转换为 JSON
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		return nil, err
 	}
-
-	// 将 JSON 解析为 chat_rpc.Msg
 	var convertedMsg chat_rpc.Msg
 	err = json.Unmarshal(jsonData, &convertedMsg)
 	if err != nil {
 		return nil, err
 	}
-
 	return &convertedMsg, nil
 }

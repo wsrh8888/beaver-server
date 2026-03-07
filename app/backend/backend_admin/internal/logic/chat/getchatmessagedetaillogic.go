@@ -74,7 +74,6 @@ func (l *GetChatMessageDetailLogic) GetChatMessageDetail(req *types.GetChatMessa
 		MsgType:          int(message.MsgType),
 		MsgPreview:       message.MsgPreview,
 		MsgContent:       msgContent,
-		IsDeleted:        message.Status == 4, // 4=已删除
 		CreateTime:       message.CreatedAt.String(),
 		UpdateTime:       message.UpdatedAt.String(),
 	}, nil

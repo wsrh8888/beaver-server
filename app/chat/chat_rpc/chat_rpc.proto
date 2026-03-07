@@ -76,15 +76,16 @@ message CallMsg {
 // 定义WithdrawMsg消息
 message WithdrawMsg {
   string origin_msg_id = 1; // 被撤回的消息ID
-  string content = 2;     // 提示语
+  Msg origin_msg = 2;       // 被撤回的消息内容快照
 }
 
 // 定义ReplyMsg消息
 message ReplyMsg {
   string origin_msg_id = 1;  // 被回复的消息ID
   Msg origin_msg = 2;       // 被回复的消息内容快照
-  string reply_content = 3; // 回复的内容
+  Msg reply_msg = 3;        // 回复的消息主体 (也可以是图片、视频等)
 }
+
 
 // 定义ForwardMsg消息
 message ForwardMsg {
