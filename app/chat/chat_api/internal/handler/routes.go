@@ -13,6 +13,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 批量删除消息(仅自己不可见)
+				Method:  http.MethodPost,
+				Path:    "/api/chat/deleteMessages",
+				Handler: deleteMessagesHandler(serverCtx),
+			},
+			{
 				// 删除某个最近会话
 				Method:  http.MethodPost,
 				Path:    "/api/chat/deleteRecentChat",
@@ -29,6 +35,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/chat/forward",
 				Handler: forwardMessageHandler(serverCtx),
+			},
+			{
+				// 获取合并转发详情
+				Method:  http.MethodGet,
+				Path:    "/api/chat/forward/details",
+				Handler: getForwardDetailsHandler(serverCtx),
 			},
 			{
 				// 获取聊天记录

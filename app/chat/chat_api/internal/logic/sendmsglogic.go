@@ -122,6 +122,36 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 			audioFileMsg.Size = req.Msg.AudioFileMsg.Size
 		}
 		rpcReq.Msg.AudioFileMsg = audioFileMsg
+	case ctype.CallMsgType:
+		rpcReq.Msg.CallMsg = &chat_rpc.CallMsg{
+			RoomId:   req.Msg.CallMsg.RoomId,
+			CallType: int32(req.Msg.CallMsg.CallType),
+			Status:   int32(req.Msg.CallMsg.Status),
+			Duration: req.Msg.CallMsg.Duration,
+		}
+	case ctype.WithdrawMsgType:
+		rpcReq.Msg.WithdrawMsg = &chat_rpc.WithdrawMsg{
+			OriginMsgId: req.Msg.WithdrawMsg.OriginMsgId,
+			Content:     req.Msg.WithdrawMsg.Content,
+		}
+	case ctype.ReplyMsgType:
+		var originMsg *chat_rpc.Msg
+		if req.Msg.ReplyMsg.OriginMsg != nil {
+			originMsg = &chat_rpc.Msg{
+				Type: req.Msg.ReplyMsg.OriginMsg.Type,
+			}
+		}
+		rpcReq.Msg.ReplyMsg = &chat_rpc.ReplyMsg{
+			OriginMsgId:  req.Msg.ReplyMsg.OriginMsgId,
+			OriginMsg:    originMsg,
+			ReplyContent: req.Msg.ReplyMsg.ReplyContent,
+		}
+	case ctype.ForwardMsgType:
+		rpcReq.Msg.ForwardMsg = &chat_rpc.ForwardMsg{
+			Title:    req.Msg.ForwardMsg.Title,
+			RecordId: req.Msg.ForwardMsg.RecordID,
+			Count:    int32(req.Msg.ForwardMsg.Count),
+		}
 	default:
 		return nil, errors.New("invalid message type")
 	}
@@ -145,7 +175,6 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		},
 		CreatedAt:  rpcResp.CreatedAt,
 		MsgPreview: rpcResp.MsgPreview,
-		Status:     uint32(rpcResp.Status),
 		Seq:        rpcResp.Seq,
 	}
 

@@ -34,13 +34,18 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 
 	fmt.Println("当前的会话Id是:", req.ConversationID)
 
+	// 过滤掉当前用户主动删除的消息
+	subQuery := l.svcCtx.DB.Model(&chat_models.ChatUserDelete{}).
+		Select("message_id").
+		Where("user_id = ?", req.UserID)
+
 	chatMessages, count, err := list_query.ListQuery(l.svcCtx.DB, chat_models.ChatMessage{}, list_query.Option{
 		PageInfo: models.PageInfo{
 			Page:  req.Page,
 			Limit: req.Limit,
 			Sort:  "created_at desc",
 		},
-		Where: l.svcCtx.DB.Where("conversation_id = ?", req.ConversationID),
+		Where: l.svcCtx.DB.Where("conversation_id = ? AND message_id NOT IN (?)", req.ConversationID, subQuery),
 		// 移除Preload，因为微服务架构中不使用跨服务外键
 	})
 
@@ -123,11 +128,13 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 
 		message := types.Message{
 			Id:               chat.Id,
+			MessageID:        chat.MessageID,
 			ConversationID:   chat.ConversationID,
 			ConversationType: chat.ConversationType,
 			Sender:           sender,
 			CreatedAt:        chat.CreatedAt.String(),
 			Msg:              msg,
+			Seq:              chat.Seq,
 		}
 		chatHistory = append(chatHistory, message)
 	}

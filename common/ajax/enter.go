@@ -11,8 +11,6 @@ import (
 
 	"beaver/common/wsEnum/wsCommandConst" // Import the wsCommandConst package
 	"beaver/common/wsEnum/wsTypeConst"    // Import the wsCommandConst package
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ForwardRequest struct {
@@ -115,8 +113,5 @@ func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {
 	if authResponse.Code != 0 {
 		return nil, fmt.Errorf("消息转发失败: %v", authResponse.Msg)
 	}
-	sendAjaxJSON, _ := json.Marshal(authResponse.Result)
-
-	logx.Infof("消息转发成功: %s", string(sendAjaxJSON))
 	return authResponse.Result, nil
 }

@@ -20,8 +20,8 @@ func StartCallHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 参数校验
-		if req.TargetId == "" {
-			response.Response(r, w, nil, errors.New("目标ID不能为空"))
+		if req.ConversationId == "" {
+			response.Response(r, w, nil, errors.New("会话ID不能为空"))
 			return
 		}
 		if req.CallType != 1 && req.CallType != 2 {

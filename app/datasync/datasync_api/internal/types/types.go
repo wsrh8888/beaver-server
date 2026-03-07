@@ -92,6 +92,16 @@ type GetSyncChatUserConversationsRes struct {
 	ServerTimestamp          int64                             `json:"serverTimestamp"`          // 服务端处理时间戳
 }
 
+type GetSyncDeletedMessagesReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步
+}
+
+type GetSyncDeletedMessagesRes struct {
+	MessageIDs      []string `json:"messageIds"`      // 被删除的消息ID列表
+	ServerTimestamp int64    `json:"serverTimestamp"` // 服务端同步时间戳
+}
+
 type GetSyncEmojiCollectsReq struct {
 	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有

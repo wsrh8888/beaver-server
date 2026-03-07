@@ -39,19 +39,15 @@ func (l *StartCallLogic) StartCall(req *types.StartCallReq) (resp *types.StartCa
 	// 1. 生成房间ID (同时也作为通话记录在聊天中的初始消息ID)
 	roomID := uuid.New().String()
 
-	// 2. 构造会话ID (私聊使用工具类，群聊直接使用群ID)
-	var convID string
-	if req.CallType == 1 {
-		convID, _ = conversation.GenerateConversation([]string{req.UserID, req.TargetId})
-	} else {
-		convID = req.TargetId
-	}
+	// 2. 解析会话ID获取目标ID (使用工具类统一处理)
+	convID := req.ConversationId
+	targetID := conversation.GetTargetIDByConversation(convID, req.UserID)
 
 	// 3. 调用 RPC 创建会话
 	_, err = l.svcCtx.CallRpc.CreateSession(l.ctx, &call_rpc.CreateSessionReq{
 		RoomId:         roomID,
 		CallerId:       req.UserID,
-		TargetId:       req.TargetId,
+		TargetId:       targetID,
 		CallType:       int32(req.CallType),
 		MessageId:      roomID, // 使用 roomID 作为锚点消息ID
 		ConversationId: convID,
@@ -71,9 +67,9 @@ func (l *StartCallLogic) StartCall(req *types.StartCallReq) (resp *types.StartCa
 
 	// 6. 异步发送 WebSocket 实时弹窗信号 (仅私聊受邀方需要唤起界面；群聊由用户按需进入)
 	if req.CallType == 1 {
-		go l.sendInviteSignals(req.UserID, req.TargetId, convID, roomID, req.CallType)
+		go l.sendInviteSignals(req.UserID, targetID, convID, roomID, req.CallType)
 		// 开启超时处理定时器
-		l.startTimeoutTimer(roomID, req.TargetId)
+		l.startTimeoutTimer(roomID, targetID)
 	}
 
 	return &types.StartCallRes{

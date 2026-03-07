@@ -73,20 +73,18 @@ func (l *GetTokenLogic) GetToken(req *types.GetCallTokenReq) (resp *types.GetCal
 		return nil, err
 	}
 
-	// 4. 发送信令告知发起者有人接听 (纯信令，不入库)
-	go l.sendAcceptSignal(req.UserID, session.CallerId, req.RoomID, session.ConversationId)
+	// 4. [核心修复] 发送信令告知所有参与者有人接听 (同步多端状态并更新其他人的成员列表)
+	for _, pid := range session.ParticipantIds {
+		go l.sendAcceptSignal(req.UserID, pid, req.RoomID, session.ConversationId)
+	}
 
-	// 5. 获取全量在线成员列表快照
+	// 5. 获取全量成员列表快照 (包含呼叫中、已加入、已拒绝等)
 	participants := make([]types.Participant, 0)
 	rpcResp, pErr := l.svcCtx.CallRpc.GetParticipants(l.ctx, &call_rpc.GetParticipantsReq{
 		RoomId: req.RoomID,
 	})
 	if pErr == nil {
 		for _, p := range rpcResp.Participants {
-			// 核心逻辑：只返回当前活跃或呼叫中的参与者
-			if p.Status != 1 && p.Status != 2 {
-				continue
-			}
 			participants = append(participants, types.Participant{
 				UserID: p.UserId,
 				Status: p.Status,
@@ -119,7 +117,7 @@ func (l *GetTokenLogic) sendAcceptSignal(acceptorID, callerID, roomID, convID st
 		callerID,
 		map[string]interface{}{
 			"type":   call_models.SignalAccept,
-			"user":   acceptorID,
+			"userId": acceptorID,
 			"roomId": roomID,
 		},
 		convID,

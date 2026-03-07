@@ -45,9 +45,12 @@ func main() {
 			&user_models.UserChangeLogModel{},
 			&friend_models.FriendModel{},
 			&friend_models.FriendVerifyModel{},
+
 			&chat_models.ChatMessage{},
 			&chat_models.ChatConversationMeta{},
 			&chat_models.ChatUserConversation{},
+			&chat_models.ChatUserDelete{},
+			&chat_models.ChatForward{},
 
 			&file_models.FileModel{},
 			&moment_models.MomentModel{},

@@ -37,6 +37,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncChatUserConversationsHandler(serverCtx),
 			},
 			{
+				// 获取所有需要更新的已删除消息ID列表
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/getSyncDeletedMessages",
+				Handler: getSyncDeletedMessagesHandler(serverCtx),
+			},
+			{
 				// 获取用户表情收藏的版本信息
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/getSyncEmojiCollects",

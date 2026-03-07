@@ -11,21 +11,21 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func recallMessageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func getForwardDetailsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.RecallMessageReq
+		var req types.GetForwardDetailsReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		if req.MessageID == "" {
-			response.Response(r, w, nil, errors.New("messageId不能为空"))
+		if req.RecordID == "" {
+			response.Response(r, w, nil, errors.New("recordId不能为空"))
 			return
 		}
 
-		l := logic.NewRecallMessageLogic(r.Context(), svcCtx)
-		resp, err := l.RecallMessage(&req)
+		l := logic.NewGetForwardDetailsLogic(r.Context(), svcCtx)
+		resp, err := l.GetForwardDetails(&req)
 		response.Response(r, w, resp, err)
 	}
 }

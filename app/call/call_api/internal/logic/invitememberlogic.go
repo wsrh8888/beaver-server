@@ -58,7 +58,7 @@ func (l *InviteMemberLogic) InviteMember(req *types.InviteCallMemberReq) (resp *
 			Status: 1, // 1-待接听 (ParticipantStatusCalling)
 		})
 
-		// 通过 WebSocket 发送 RTC_INVITE 信令
+		// 通过 WebSocket 发送 RTC_INVITE 信令给受邀方 (告知来电)
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
 			wsCommandConst.CALL,
 			wsTypeConst.CallReceive,
@@ -75,7 +75,26 @@ func (l *InviteMemberLogic) InviteMember(req *types.InviteCallMemberReq) (resp *
 			session.ConversationId,
 		)
 
-		// 4. 开启超时处理定时器 (60秒未接听则自动设为超时)
+		// 4. [核心修复] 通知房间里的所有人：有新成员正在被呼叫中 (包括自己的其他设备同步)
+		for _, pid := range session.ParticipantIds {
+			if pid != targetID {
+				ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
+					wsCommandConst.CALL,
+					wsTypeConst.CallReceive,
+					req.UserID,
+					pid,
+					map[string]interface{}{
+						"type":   call_models.SignalInvite,
+						"userId": targetID, // 告知谁被邀请了
+						"roomId": req.RoomID,
+						"status": 1, // 1-Calling
+					},
+					session.ConversationId,
+				)
+			}
+		}
+
+		// 5. 开启超时处理定时器 (60秒未接听则自动设为超时)
 		l.startTimeoutTimer(req.RoomID, targetID)
 	}
 

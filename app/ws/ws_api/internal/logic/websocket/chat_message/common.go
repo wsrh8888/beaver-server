@@ -141,6 +141,56 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.AudioFileMsg.Size = int64(size)
 			}
 		}
+	case 9: // 音视频通话
+		if callMsg, ok := msgData["callMsg"].(map[string]interface{}); ok {
+			rpcMsg.CallMsg = &chat_rpc.CallMsg{}
+			if roomId, ok := callMsg["roomId"].(string); ok {
+				rpcMsg.CallMsg.RoomId = roomId
+			}
+			if callType, ok := callMsg["callType"].(float64); ok {
+				rpcMsg.CallMsg.CallType = int32(callType)
+			}
+			if status, ok := callMsg["status"].(float64); ok {
+				rpcMsg.CallMsg.Status = int32(status)
+			}
+			if duration, ok := callMsg["duration"].(float64); ok {
+				rpcMsg.CallMsg.Duration = int64(duration)
+			}
+		}
+	case 10: // 撤回消息
+		if withdrawMsg, ok := msgData["withdrawMsg"].(map[string]interface{}); ok {
+			rpcMsg.WithdrawMsg = &chat_rpc.WithdrawMsg{}
+			if originMsgId, ok := withdrawMsg["originMsgId"].(string); ok {
+				rpcMsg.WithdrawMsg.OriginMsgId = originMsgId
+			}
+			if content, ok := withdrawMsg["content"].(string); ok {
+				rpcMsg.WithdrawMsg.Content = content
+			}
+		}
+	case 11: // 回复消息
+		if replyMsg, ok := msgData["replyMsg"].(map[string]interface{}); ok {
+			rpcMsg.ReplyMsg = &chat_rpc.ReplyMsg{}
+			if originMsgId, ok := replyMsg["originMsgId"].(string); ok {
+				rpcMsg.ReplyMsg.OriginMsgId = originMsgId
+			}
+			if replyContent, ok := replyMsg["replyContent"].(string); ok {
+				rpcMsg.ReplyMsg.ReplyContent = replyContent
+			}
+			// originMsg 递归解析可以在这里添加，或者让 RPC 侧查询
+		}
+	case 12: // 转发消息
+		if forwardMsg, ok := msgData["forwardMsg"].(map[string]interface{}); ok {
+			rpcMsg.ForwardMsg = &chat_rpc.ForwardMsg{}
+			if title, ok := forwardMsg["title"].(string); ok {
+				rpcMsg.ForwardMsg.Title = title
+			}
+			if recordId, ok := forwardMsg["recordId"].(string); ok {
+				rpcMsg.ForwardMsg.RecordId = recordId
+			}
+			if count, ok := forwardMsg["count"].(float64); ok {
+				rpcMsg.ForwardMsg.Count = int32(count)
+			}
+		}
 	}
 
 	return rpcMsg, nil

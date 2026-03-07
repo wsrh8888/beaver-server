@@ -62,10 +62,10 @@ type Participant struct {
 }
 
 type StartCallReq struct {
-	UserID   string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
-	CallType int8   `json:"callType"`         // 通话类型：1-私聊, 2-群聊
-	CallMode int8   `json:"callMode"`         // 初始通话模式：1-语音起手, 2-视频起手
-	TargetId string `json:"targetId"`         // 目标ID：单聊为对方ID，群聊为群ID
+	UserID         string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
+	CallType       int8   `json:"callType"`         // 通话类型：1-私聊, 2-群聊
+	CallMode       int8   `json:"callMode"`         // 初始通话模式：1-语音起手, 2-视频起手
+	ConversationId string `json:"conversationId"`   // 会话ID：带前缀的完整格式
 }
 
 type StartCallRes struct {
