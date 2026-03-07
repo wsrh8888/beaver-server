@@ -26,6 +26,7 @@ type (
 	DissolveConversationRes                 = chat_rpc.DissolveConversationRes
 	EmojiMsg                                = chat_rpc.EmojiMsg
 	FileMsg                                 = chat_rpc.FileMsg
+	ForwardMsg                              = chat_rpc.ForwardMsg
 	GetConversationsListByIdsReq            = chat_rpc.GetConversationsListByIdsReq
 	GetConversationsListByIdsRes            = chat_rpc.GetConversationsListByIdsRes
 	GetUserConversationSettingsListByIdsReq = chat_rpc.GetUserConversationSettingsListByIdsReq
@@ -41,6 +42,7 @@ type (
 	NotificationMsg                         = chat_rpc.NotificationMsg
 	RemoveConversationMembersReq            = chat_rpc.RemoveConversationMembersReq
 	RemoveConversationMembersRes            = chat_rpc.RemoveConversationMembersRes
+	ReplyMsg                                = chat_rpc.ReplyMsg
 	SendMsgReq                              = chat_rpc.SendMsgReq
 	SendMsgRes                              = chat_rpc.SendMsgRes
 	SendNotificationMessageReq              = chat_rpc.SendNotificationMessageReq
@@ -53,6 +55,7 @@ type (
 	UserConversationVersion                 = chat_rpc.UserConversationVersion
 	VideoMsg                                = chat_rpc.VideoMsg
 	VoiceMsg                                = chat_rpc.VoiceMsg
+	WithdrawMsg                             = chat_rpc.WithdrawMsg
 
 	Chat interface {
 		SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error)

@@ -37,61 +37,48 @@ func (l *HangupLogic) Hangup(req *types.HangupCallReq) (resp *types.HangupCallRe
 		return nil, errors.New("通话会话不存在")
 	}
 
-	// 2. 更新当前参与者状态为已挂断
+	// 2. 根据通话类型决定状态和信令
+	status := int32(5) // 默认挂断 (Left)
+	signalType := call_models.SignalHangup
+
+	if session.CallType == 2 {
+		// 群聊：统一视为拒绝/退出，不结束会话
+		status = 3 // 拒绝 (Rejected)
+		signalType = call_models.SignalReject
+	}
+
+	// 3. 更新当前参与者状态
 	_, _ = l.svcCtx.CallRpc.UpdateParticipantStatus(l.ctx, &call_rpc.UpdateParticipantStatusReq{
 		RoomId: req.RoomID,
 		UserId: req.UserID,
-		Status: 5, // 5-已挂断
+		Status: status,
 	})
 
-	// 3. 判断是否需要结束整个会话
-	shouldFinalize := false
-	if session.CallType == 1 {
-		// 私聊：任意一方挂断，整个通话结束
-		shouldFinalize = true
-	} else {
-		// 群聊：检查是否还有其他人在房间里 (joined 状态)
-		participants, pErr := l.svcCtx.CallRpc.GetParticipants(l.ctx, &call_rpc.GetParticipantsReq{RoomId: req.RoomID})
-		if pErr == nil {
-			activeCount := 0
-			for _, p := range participants.Participants {
-				if p.Status == 2 { // 2-已接听/加入中
-					activeCount++
-				}
-			}
-			// 如果房间里已经没有其他人了（刚才那个人已经退出了，所以这里 activeCount 为 0 则代表全空）
-			if activeCount == 0 {
-				shouldFinalize = true
-			}
-		}
-	}
-
-	if shouldFinalize {
+	// 4. 判断是否需要结束整个会话 (私聊或发起者主动挂断)
+	if session.CallType == 1 || req.UserID == session.CallerId {
 		_, _ = l.svcCtx.CallRpc.FinalizeSession(l.ctx, &call_rpc.FinalizeSessionReq{
 			RoomId: req.RoomID,
 			Status: 3, // 3-已结束
 		})
 	}
 
-	// 4. 发送信令告知其他人有人挂断/离开 (纯信令，不入库)
+	// 5. [核心修复] 发送信令告知所有人 (包括自己的其他设备同步)
 	for _, pid := range session.ParticipantIds {
-		if pid != req.UserID {
-			go l.sendHangupSignal(req.UserID, pid, req.RoomID, session.ConversationId)
-		}
+		go l.sendSignal(req.UserID, pid, req.RoomID, session.ConversationId, signalType)
 	}
 
 	return &types.HangupCallRes{}, nil
 }
 
-func (l *HangupLogic) sendHangupSignal(hanguperID, targetID, roomID, convID string) {
+func (l *HangupLogic) sendSignal(hanguperID, targetID, roomID, convID, signalType string) {
 	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
 		wsCommandConst.CALL,
 		wsTypeConst.CallReceive,
 		hanguperID,
 		targetID,
 		map[string]interface{}{
-			"type":   call_models.SignalHangup,
-			"user":   hanguperID,
+			"type":   signalType,
+			"userId": hanguperID,
 			"roomId": roomID,
 		},
 		convID,

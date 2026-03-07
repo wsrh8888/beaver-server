@@ -17,28 +17,36 @@ type ChatMessage struct {
 	MsgPreview       string        `gorm:"size:256" json:"msgPreview"`                     // 消息预览文本
 	Msg              *ctype.Msg    `gorm:"type:json" json:"msg"`                           // 消息内容（JSON）
 
-	// 数据状态管理 - 处理违规内容等情况
-	Status int8 `gorm:"not null;default:1;index" json:"status"` // 消息状态：1=正常 2=违规待审核 3=违规已屏蔽 4=已删除
+	// 数据状态管理
+	Status int8 `gorm:"not null;default:1;index" json:"status"` // 消息状态：1=正常 2=已撤回 3=已编辑 4=已删除
 }
 
 func (chat ChatMessage) MsgPreviewMethod() string {
 	switch chat.Msg.Type {
-	case 1:
+	case ctype.TextMsgType:
 		return chat.Msg.TextMsg.Content
-	case 2:
+	case ctype.ImageMsgType:
 		return "[图片消息]"
-	case 3:
+	case ctype.VideoMsgType:
 		return "[视频消息]"
-	case 4:
+	case ctype.FileMsgType:
 		return "[文件消息]"
-	case 5:
+	case ctype.VoiceMsgType:
 		return "[语音消息]"
-	case 6:
+	case ctype.EmojiMsgType:
 		return "[表情消息]"
-	case 7:
+	case ctype.NotificationMsgType:
 		return "[通知消息]"
-	case 8:
+	case ctype.AudioFileMsgType:
 		return "[音频文件]"
+	case ctype.CallMsgType:
+		return "[音视频通话]"
+	case ctype.WithdrawMsgType:
+		return "[撤回消息]"
+	case ctype.ReplyMsgType:
+		return "[回复]" + chat.Msg.ReplyMsg.ReplyContent
+	case ctype.ForwardMsgType:
+		return "[聊天记录]"
 	default:
 		return "[未知消息]"
 	}

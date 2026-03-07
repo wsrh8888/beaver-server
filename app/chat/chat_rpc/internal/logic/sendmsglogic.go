@@ -182,6 +182,53 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			Type:         ctype.AudioFileMsgType,
 			AudioFileMsg: audioFileMsg,
 		}
+	case ctype.CallMsgType:
+		msg = ctype.Msg{
+			Type: ctype.CallMsgType,
+			CallMsg: &ctype.CallMsg{
+				RoomID:   in.Msg.CallMsg.RoomId,
+				CallType: int(in.Msg.CallMsg.CallType),
+				Status:   int(in.Msg.CallMsg.Status),
+				Duration: in.Msg.CallMsg.Duration,
+			},
+		}
+	case ctype.WithdrawMsgType:
+		msg = ctype.Msg{
+			Type: ctype.WithdrawMsgType,
+			WithdrawMsg: &ctype.WithdrawMsg{
+				OriginMsgID: in.Msg.WithdrawMsg.OriginMsgId,
+				Content:     in.Msg.WithdrawMsg.Content,
+			},
+		}
+	case ctype.ReplyMsgType:
+		// 这里递归转换被回复的消息
+		var originMsg *ctype.Msg
+		if in.Msg.ReplyMsg.OriginMsg != nil {
+			// 由于 proto 到 ctype 的转换较为复杂，这里简单处理或者重新反射
+			// 实际上通常只需要 ID 和 预览，这里我们尝试填充
+			originMsg = &ctype.Msg{
+				Type:        ctype.MsgType(in.Msg.ReplyMsg.OriginMsg.Type),
+				TargetMsgID: in.Msg.ReplyMsg.OriginMsg.TargetMsgId,
+			}
+		}
+
+		msg = ctype.Msg{
+			Type: ctype.ReplyMsgType,
+			ReplyMsg: &ctype.ReplyMsg{
+				OriginMsgID:  in.Msg.ReplyMsg.OriginMsgId,
+				OriginMsg:    originMsg,
+				ReplyContent: in.Msg.ReplyMsg.ReplyContent,
+			},
+		}
+	case ctype.ForwardMsgType:
+		msg = ctype.Msg{
+			Type: ctype.ForwardMsgType,
+			ForwardMsg: &ctype.ForwardMsg{
+				Title:    in.Msg.ForwardMsg.Title,
+				RecordID: in.Msg.ForwardMsg.RecordId,
+				Count:    int(in.Msg.ForwardMsg.Count),
+			},
+		}
 	default:
 		return nil, fmt.Errorf("未识别到该类型: %d", msgType)
 	}
@@ -327,20 +374,15 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 	// 为每个接收者推送批量更新
 	messageType := wsTypeConst.ChatConversationMessageReceive
 
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println("推送消息更新给会话成员: ", recipientIds)
+	// 打印tableUpdates的值
+	fmt.Println("tableUpdates: ", tableUpdates)
+
 	for _, recipientId := range recipientIds {
 		// 一次性推送所有表的更新信息
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd.Hosts[0], wsCommandConst.CHAT_MESSAGE, messageType, senderId, recipientId, map[string]interface{}{
 			"tableUpdates": tableUpdates, // 按表分组的更新数组
 		}, conversationId)
 
-		l.Logger.Infof("分组推送消息相关更新: recipient=%s, conversation=%s, tableUpdateCount=%d",
-			recipientId, conversationId, len(tableUpdates))
 	}
 }
 

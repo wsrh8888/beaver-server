@@ -57,8 +57,9 @@ func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call
 			Status: int32(call_models.ParticipantStatusJoined),
 		})
 
-		// 3. 创建参与者 (受邀者) - 仅单聊初始化对方，群聊在邀请或主动加入时处理
+		// 3. 创建参与者 (受邀者)
 		if in.CallType == 1 {
+			// 单聊：初始化对方
 			target := &call_models.CallParticipant{
 				RoomID: in.RoomId,
 				UserID: in.TargetId,
@@ -72,6 +73,9 @@ func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call
 				UserId: in.TargetId,
 				Status: int32(call_models.ParticipantStatusCalling),
 			})
+		} else {
+			// 群聊：目前 TargetId 是群 ID，初始参与者仅发起人。
+			// 后续参与者通过 Invite 会话接口加入，此时 GetParticipants 会返回最新名单。
 		}
 
 		return nil

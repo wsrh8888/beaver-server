@@ -10,9 +10,9 @@ RTC 实时信令事件说明 (用于 WebSocket 瞬时通知，不进入持久化
 */
 
 const (
-	SignalInvite = "RTC_INVITE" // 呼叫邀请
-	SignalCancel = "RTC_CANCEL" // 取消呼叫
-	SignalAccept = "RTC_ACCEPT" // 接听通话
-	SignalReject = "RTC_REJECT" // 拒绝接听
-	SignalHangup = "RTC_HANGUP" // 通话中挂断
+	SignalInvite = "RTC_INVITE"   // 呼叫邀请
+	SignalCancel = "RTC_CANCEL"   // 取消呼叫
+	SignalAccept = "RTC_ACCEPTED" // 接听通话
+	SignalReject = "RTC_REJECT"   // 拒绝接听
+	SignalHangup = "RTC_HANGUP"   // 通话中挂断
 )

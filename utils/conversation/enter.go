@@ -71,3 +71,27 @@ func ParseConversationWithType(conversationID string) (int, []string) {
 
 	return conversationType, userIds
 }
+
+/**
+ * @description: 从会话ID中提取对应的目标ID（对方UID或群组ID）
+ * @return: targetId (对方UID或群组UUID)
+ */
+func GetTargetIDByConversation(conversationID string, currentUserID string) string {
+	convType, ids := ParseConversationWithType(conversationID)
+	if convType == 1 { // 私聊
+		if len(ids) == 2 {
+			if ids[0] == currentUserID {
+				return ids[1]
+			}
+			return ids[0]
+		}
+		if len(ids) == 1 {
+			return ids[0]
+		}
+	} else if convType == 2 { // 群聊
+		if len(ids) > 0 {
+			return ids[0]
+		}
+	}
+	return ""
+}
