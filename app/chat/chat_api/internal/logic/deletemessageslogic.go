@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"errors"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -43,8 +42,8 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 	// 3. 执行入库 (使用 Create 批量插入)
 	err = l.svcCtx.DB.Create(&deleteRecords).Error
 	if err != nil {
-		l.Logger.Errorf("批量删除消息失败: %v", err)
-		return nil, errors.New("删除失败")
+		l.Logger.Errorf("用户 %s 批量删除消息失败: %v", req.UserID, err)
+		return nil, err
 	}
 
 	return &types.DeleteMessagesRes{}, nil
