@@ -151,7 +151,7 @@ type GetConversationsListByIdsRes struct {
 
 type GetForwardDetailsReq struct {
 	UserID   string `header:"Beaver-User-Id"`
-	RecordID string `json:"recordId"`
+	RecordID string `form:"recordId"`
 }
 
 type GetForwardDetailsRes struct {

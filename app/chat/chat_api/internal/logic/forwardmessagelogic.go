@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -110,9 +109,111 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	if m == nil {
 		return nil
 	}
-	// 这里最简单的方式是 JSON 中转，或者手动构建
-	jsonData, _ := json.Marshal(m)
-	var protoMsg chat_rpc.Msg
-	json.Unmarshal(jsonData, &protoMsg)
-	return &protoMsg
+
+	rpcMsg := &chat_rpc.Msg{
+		Type: uint32(m.Type),
+	}
+
+	switch m.Type {
+	case ctype.TextMsgType:
+		if m.TextMsg != nil {
+			rpcMsg.TextMsg = &chat_rpc.TextMsg{Content: m.TextMsg.Content}
+		}
+	case ctype.ImageMsgType:
+		if m.ImageMsg != nil {
+			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
+				FileKey: m.ImageMsg.FileKey,
+				Width:   int32(m.ImageMsg.Width),
+				Height:  int32(m.ImageMsg.Height),
+				Size:    m.ImageMsg.Size,
+			}
+		}
+	case ctype.VideoMsgType:
+		if m.VideoMsg != nil {
+			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
+				FileKey:      m.VideoMsg.FileKey,
+				Width:        int32(m.VideoMsg.Width),
+				Height:       int32(m.VideoMsg.Height),
+				Duration:     int32(m.VideoMsg.Duration),
+				ThumbnailKey: m.VideoMsg.ThumbnailKey,
+				Size:         m.VideoMsg.Size,
+			}
+		}
+	case ctype.FileMsgType:
+		if m.FileMsg != nil {
+			rpcMsg.FileMsg = &chat_rpc.FileMsg{
+				FileKey:  m.FileMsg.FileKey,
+				FileName: m.FileMsg.FileName,
+				Size:     m.FileMsg.Size,
+				MimeType: m.FileMsg.MimeType,
+			}
+		}
+	case ctype.VoiceMsgType:
+		if m.VoiceMsg != nil {
+			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
+				FileKey:  m.VoiceMsg.FileKey,
+				Duration: int32(m.VoiceMsg.Duration),
+				Size:     m.VoiceMsg.Size,
+			}
+		}
+	case ctype.EmojiMsgType:
+		if m.EmojiMsg != nil {
+			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
+				FileKey:   m.EmojiMsg.FileKey,
+				EmojiId:   m.EmojiMsg.EmojiID,
+				PackageId: m.EmojiMsg.PackageID,
+				Width:     m.EmojiMsg.Width,
+				Height:    m.EmojiMsg.Height,
+			}
+		}
+	case ctype.NotificationMsgType:
+		if m.NotificationMsg != nil {
+			rpcMsg.NotificationMsg = &chat_rpc.NotificationMsg{
+				Type:   int32(m.NotificationMsg.Type),
+				Actors: m.NotificationMsg.Actors,
+			}
+		}
+	case ctype.AudioFileMsgType:
+		if m.AudioFileMsg != nil {
+			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
+				FileKey:  m.AudioFileMsg.FileKey,
+				FileName: m.AudioFileMsg.FileName,
+				Duration: int32(m.AudioFileMsg.Duration),
+				Size:     m.AudioFileMsg.Size,
+			}
+		}
+	case ctype.CallMsgType:
+		if m.CallMsg != nil {
+			rpcMsg.CallMsg = &chat_rpc.CallMsg{
+				RoomId:   m.CallMsg.RoomID,
+				CallType: int32(m.CallMsg.CallType),
+				Status:   int32(m.CallMsg.Status),
+				Duration: m.CallMsg.Duration,
+			}
+		}
+	case ctype.WithdrawMsgType:
+		if m.WithdrawMsg != nil {
+			rpcMsg.WithdrawMsg = &chat_rpc.WithdrawMsg{
+				OriginMsgId: m.WithdrawMsg.OriginMsgID,
+				OriginMsg:   l.convertModelToProtoMsg(m.WithdrawMsg.OriginMsg),
+			}
+		}
+	case ctype.ReplyMsgType:
+		if m.ReplyMsg != nil {
+			rpcMsg.ReplyMsg = &chat_rpc.ReplyMsg{
+				OriginMsgId: m.ReplyMsg.OriginMsgID,
+				OriginMsg:   l.convertModelToProtoMsg(m.ReplyMsg.OriginMsg),
+				ReplyMsg:    l.convertModelToProtoMsg(m.ReplyMsg.ReplyMsg),
+			}
+		}
+	case ctype.ForwardMsgType:
+		if m.ForwardMsg != nil {
+			rpcMsg.ForwardMsg = &chat_rpc.ForwardMsg{
+				Title:    m.ForwardMsg.Title,
+				RecordId: m.ForwardMsg.RecordID,
+				Count:    int32(m.ForwardMsg.Count),
+			}
+		}
+	}
+	return rpcMsg
 }

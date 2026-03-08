@@ -255,7 +255,7 @@ type (
 type (
 	GetForwardDetailsReq {
 		UserID   string `header:"Beaver-User-Id"`
-		RecordID string `json:"recordId"`
+		RecordID string `form:"recordId"`
 	}
 	GetForwardDetailsRes {
 		List []Message `json:"list"` // 返回完整的消息快照列表
@@ -411,7 +411,7 @@ service chat {
 
 	@doc "获取合并转发详情"
 	@handler getForwardDetails
-	get /api/chat/forward/details (GetForwardDetailsReq) returns (GetForwardDetailsRes)
+	get /api/chat/getForwardDetails (GetForwardDetailsReq) returns (GetForwardDetailsRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template

@@ -37,12 +37,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: forwardMessageHandler(serverCtx),
 			},
 			{
-				// 获取合并转发详情
-				Method:  http.MethodGet,
-				Path:    "/api/chat/forward/details",
-				Handler: getForwardDetailsHandler(serverCtx),
-			},
-			{
 				// 获取聊天记录
 				Method:  http.MethodPost,
 				Path:    "/api/chat/getChatHistory",
@@ -59,6 +53,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/chat/getConversationsListByIds",
 				Handler: getConversationsListByIdsHandler(serverCtx),
+			},
+			{
+				// 获取合并转发详情
+				Method:  http.MethodGet,
+				Path:    "/api/chat/getForwardDetails",
+				Handler: getForwardDetailsHandler(serverCtx),
 			},
 			{
 				// 获取最近会话列表
