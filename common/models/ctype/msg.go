@@ -40,8 +40,16 @@ func (m *MsgType) UnmarshalJSON(data []byte) error {
 		*m = NotificationMsgType
 	case "8":
 		*m = AudioFileMsgType
+	case "9":
+		*m = CallMsgType
+	case "10":
+		*m = WithdrawMsgType
+	case "11":
+		*m = ReplyMsgType
+	case "12":
+		*m = ForwardMsgType
 	default:
-		*m = ImageMsgType
+		*m = TextMsgType
 	}
 	return nil
 }
@@ -79,19 +87,39 @@ const (
 	 * @description: 音频文件消息类型（用户上传的音频文件）
 	 */
 	AudioFileMsgType
+	/**
+	 * @description: 音视频通话消息类型
+	 */
+	CallMsgType
+	/**
+	 * @description: 撤回消息类型
+	 */
+	WithdrawMsgType
+	/**
+	 * @description: 回复消息类型
+	 */
+	ReplyMsgType
+	/**
+	 * @description: 转发消息类型（合并转发/消息集合）
+	 */
+	ForwardMsgType
 )
 
 type Msg struct {
-	Type            MsgType          `json:"type"`                      //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
-	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         //文本消息
-	ImageMsg        *ImageMsg        `json:"imageMsg,omitempty"`        //图片消息
-	VideoMsg        *VideoMsg        `json:"videoMsg,omitempty"`        //视频消息
-	FileMsg         *FileMsg         `json:"fileMsg,omitempty"`         //文件消息
-	VoiceMsg        *VoiceMsg        `json:"voiceMsg,omitempty"`        //语音消息（移动端录制的短语音）
-	EmojiMsg        *EmojiMsg        `json:"emojiMsg,omitempty"`        //表情消息
-	NotificationMsg *NotificationMsg `json:"notificationMsg,omitempty"` //通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
-	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,omitempty"`    //音频文件消息（用户上传的音频文件）
-	ReplyMsg        *ReplyMsg        `json:"replyMsg,omitempty"`        //回复消息
+	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
+	TargetMsgID     string           `json:"targetMsgId,omitempty"`     // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
+	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         // 文本消息
+	ImageMsg        *ImageMsg        `json:"imageMsg,omitempty"`        // 图片消息
+	VideoMsg        *VideoMsg        `json:"videoMsg,omitempty"`        // 视频消息
+	FileMsg         *FileMsg         `json:"fileMsg,omitempty"`         // 文件消息
+	VoiceMsg        *VoiceMsg        `json:"voiceMsg,omitempty"`        // 语音消息（移动端录制的短语音）
+	EmojiMsg        *EmojiMsg        `json:"emojiMsg,omitempty"`        // 表情消息
+	NotificationMsg *NotificationMsg `json:"notificationMsg,omitempty"` // 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,omitempty"`    // 音频文件消息（用户上传的音频文件）
+	CallMsg         *CallMsg         `json:"callMsg,omitempty"`         // 音视频通话
+	WithdrawMsg     *WithdrawMsg     `json:"withdrawMsg,omitempty"`     // 撤回消息
+	ReplyMsg        *ReplyMsg        `json:"replyMsg,omitempty"`        // 回复消息
+	ForwardMsg      *ForwardMsg      `json:"forwardMsg,omitempty"`      // 转发消息（集合）
 }
 
 /**
@@ -169,9 +197,30 @@ type EmojiMsg struct {
 	Height    int64  `json:"height,omitempty"` // 表情图片高度（可选）
 }
 
-// 回复消息结构
+// CallMsg 音视频通话消息结构 (用于聊天记录显示)
+type CallMsg struct {
+	RoomID   string `json:"roomId"`             // 房间ID
+	CallType int    `json:"callType"`           // 通话类型: 1-私聊, 2-群聊
+	Status   int    `json:"status"`             // 状态: 1-进行中, 2-已结束
+	Duration int64  `json:"duration,omitempty"` // 通话时长(秒)
+}
+
+// WithdrawMsg 撤回消息结构 (Type: 10)
+type WithdrawMsg struct {
+	OriginMsgID string `json:"originMsgId"`         // 被撤回的消息ID
+	OriginMsg   *Msg   `json:"originMsg,omitempty"` // 被撤回的消息内容快照（用于重新编辑或审计）
+}
+
+// ReplyMsg 回复消息结构 (Type: 11)
 type ReplyMsg struct {
-	ReplyToMessageID string `json:"replyToMessageId"` // 被回复的消息ID
-	ReplyToContent   string `json:"replyToContent"`   // 被回复的消息内容预览
-	ReplyToSender    string `json:"replyToSender"`    // 被回复消息的发送者昵称
+	OriginMsgID string `json:"originMsgId"`         // 被回复的消息ID
+	OriginMsg   *Msg   `json:"originMsg,omitempty"` // 被回复的消息内容快照
+	ReplyMsg    *Msg   `json:"replyMsg"`            // 回复的消息主体对象 (可以是文本、图片等)
+}
+
+// ForwardMsg 转发消息结构（大厂标准：轻量化卡片 + 延迟加载）
+type ForwardMsg struct {
+	Title    string `json:"title"`    // 转发的标题，如 "群聊的聊天记录"
+	RecordID string `json:"recordId"` // 核心：指向完整详情的聚合ID（存入独立详情表或OSS）
+	Count    int    `json:"count"`    // 包含的消息总数
 }

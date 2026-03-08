@@ -8,6 +8,13 @@ type AudioFileMsg struct {
 	Size     int64  `json:"size,optional"`     //文件大小（字节，可选）
 }
 
+type CallMsg struct {
+	RoomId   string `json:"roomId"`            // 房间ID
+	CallType int    `json:"callType"`          // 通话类型: 1-私聊, 2-群聊
+	Status   int    `json:"status"`            // 状态: 1-进行中, 2-已结束
+	Duration int64  `json:"duration,optional"` // 通话时长(秒)
+}
+
 type ChatHistoryReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` // 会话Id
@@ -73,6 +80,14 @@ type ConversationInfoRes struct {
 	Notice         string `json:"notice"`         //备注
 }
 
+type DeleteMessagesReq struct {
+	UserID     string   `header:"Beaver-User-Id"`
+	MessageIDs []string `json:"messageIds"` // 支持批量删除，最多100条
+}
+
+type DeleteMessagesRes struct {
+}
+
 type DeleteRecentReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
@@ -108,16 +123,21 @@ type FileMsg struct {
 }
 
 type ForwardMessageReq struct {
-	UserID      string `header:"Beaver-User-Id"`
-	MessageID   string `json:"messageId"`   //客户端消息ID
-	TargetID    string `json:"targetId"`    // 目标会话ID
-	ForwardType int    `json:"forwardType"` // 1: 单聊 2: 群聊
+	UserID      string   `header:"Beaver-User-Id"`
+	MessageIDs  []string `json:"messageIds"`  // 原始消息ID列表
+	TargetID    string   `json:"targetId"`    // 目标会话ID
+	ForwardType int      `json:"forwardType"` // 1: 单聊 2: 群聊
+	ForwardMode int      `json:"forwardMode"` // 1: 逐条转发 2: 合并转发
 }
 
 type ForwardMessageRes struct {
-	Id          uint   `json:"id"`        //数据库自增ID
-	MessageID   string `json:"messageId"` //客户端消息ID
 	ForwardTime string `json:"forwardTime"`
+}
+
+type ForwardMsg struct {
+	Title    string `json:"title"`             // 标题
+	RecordID string `json:"recordId,optional"` // 详情记录ID
+	Count    int    `json:"count"`             // 消息总数
 }
 
 type GetConversationsListByIdsReq struct {
@@ -127,6 +147,15 @@ type GetConversationsListByIdsReq struct {
 
 type GetConversationsListByIdsRes struct {
 	Conversations []ConversationById `json:"conversations"` // 会话列表
+}
+
+type GetForwardDetailsReq struct {
+	UserID   string `header:"Beaver-User-Id"`
+	RecordID string `form:"recordId"`
+}
+
+type GetForwardDetailsRes struct {
+	List []Message `json:"list"` // 返回完整的消息快照列表
 }
 
 type GetUserConversationSettingsListByIdsReq struct {
@@ -162,21 +191,23 @@ type Message struct {
 	Msg              Msg    `json:"msg"`
 	Sender           Sender `json:"sender"`     //发送者
 	CreatedAt        string `json:"created_at"` //消息时间
-	Status           uint32 `json:"status"`     //消息状态 1:正常 2:已撤回 3:已编辑
 	Seq              int64  `json:"seq"`        //序列号，用于数据同步
 }
 
 type Msg struct {
-	Type            uint32           `json:"type"`                     //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
-	TextMsg         *TextMsg         `json:"textMsg,optional"`         //文本消息
-	ImageMsg        *ImageMsg        `json:"imageMsg,optional"`        //图片
-	VideoMsg        *VideoMsg        `json:"videoMsg,optional"`        //视频
-	FileMsg         *FileMsg         `json:"fileMsg,optional"`         //文件
-	VoiceMsg        *VoiceMsg        `json:"voiceMsg,optional"`        //语音
-	EmojiMsg        *EmojiMsg        `json:"emojiMsg,optional"`        //表情
-	NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` //通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
-	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,optional"`    //音频文件
-	ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"`        //回复消息
+	Type            uint32           `json:"type"`                     // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
+	TextMsg         *TextMsg         `json:"textMsg,optional"`         // 文本消息
+	ImageMsg        *ImageMsg        `json:"imageMsg,optional"`        // 图片
+	VideoMsg        *VideoMsg        `json:"videoMsg,optional"`        // 视频
+	FileMsg         *FileMsg         `json:"fileMsg,optional"`         // 文件
+	VoiceMsg        *VoiceMsg        `json:"voiceMsg,optional"`        // 语音
+	EmojiMsg        *EmojiMsg        `json:"emojiMsg,optional"`        // 表情
+	NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` // 通知消息
+	AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,optional"`    // 音频文件
+	CallMsg         *CallMsg         `json:"callMsg,optional"`         // 音视频通话
+	WithdrawMsg     *WithdrawMsg     `json:"withdrawMsg,optional"`     // 撤回消息
+	ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"`        // 回复消息
+	ForwardMsg      *ForwardMsg      `json:"forwardMsg,optional"`      // 转发消息（集合）
 }
 
 type MuteChatReq struct {
@@ -204,13 +235,12 @@ type PinnedChatRes struct {
 
 type RecallMessageReq struct {
 	UserID    string `header:"Beaver-User-Id"`
-	MessageID string `json:"messageId"` //客户端消息ID
+	MessageID string `json:"messageId"` // 客户端消息ID
 }
 
 type RecallMessageRes struct {
-	Id         uint   `json:"id"`         //数据库自增ID
-	MessageID  string `json:"messageId"`  //客户端消息ID
-	RecallTime string `json:"recallTime"` //撤回时间
+	MessageID  string `json:"messageId"`  // 客户端消息ID
+	RecallTime string `json:"recallTime"` // 撤回时间
 }
 
 type RecentChatListReq struct {
@@ -225,9 +255,9 @@ type RecentChatListRes struct {
 }
 
 type ReplyMsg struct {
-	ReplyToMessageID string `json:"replyToMessageId"` // 被回复的消息ID
-	ReplyToContent   string `json:"replyToContent"`   // 被回复的消息内容预览
-	ReplyToSender    string `json:"replyToSender"`    // 被回复消息的发送者昵称
+	OriginMsgId string `json:"originMsgId"`        // 被回复的消息ID
+	OriginMsg   *Msg   `json:"originMsg,optional"` // 被回复的消息内容快照
+	ReplyMsg    *Msg   `json:"replyMsg"`           // 回复的消息主体 (可以是文本、图片等)
 }
 
 type SendMsgReq struct {
@@ -245,7 +275,6 @@ type SendMsgRes struct {
 	Sender         Sender `json:"sender"`     //发送者
 	CreatedAt      string `json:"created_at"` //消息时间
 	MsgPreview     string `json:"msgPreview"` //消息预览
-	Status         uint32 `json:"status"`     //消息状态 1:正常 2:已撤回 3:已编辑
 	Seq            int64  `json:"seq"`        //消息序列号，用于数据同步
 }
 
@@ -294,4 +323,9 @@ type VoiceMsg struct {
 	FileKey  string `json:"fileKey"`           //语音文件ID
 	Duration int    `json:"duration,optional"` //语音时长（秒，可选）
 	Size     int64  `json:"size,optional"`     //文件大小（字节，可选）
+}
+
+type WithdrawMsg struct {
+	OriginMsgId string `json:"originMsgId"`        // 被撤回的消息ID
+	OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照，用于重新编辑
 }

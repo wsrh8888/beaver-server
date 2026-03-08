@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package call_rpc;
+option go_package = "./call_rpc";
+
+// 获取用户通话状态
+message GetUserStatusReq {
+  string user_id = 1;
+}
+
+message GetUserStatusRes {
+  bool is_busy = 1;      // 是否通话中
+  string room_id = 2;    // 正在哪个房间
+}
+
+// 记录/更新通话信息 (供 API 调用)
+message CreateSessionReq {
+  string room_id = 1;
+  string caller_id = 2;
+  string target_id = 3;  // 私聊为对方ID，群聊为群ID
+  int32 call_type = 4;   // 1-私聊, 2-群聊
+  string message_id = 5; // 锚点消息ID
+  string conversation_id = 6; // 会话ID
+}
+
+message CreateSessionRes {
+  bool success = 1;
+  repeated Participant participants = 2; // 返回初始化的参与者快照
+}
+
+// 更新参与者状态
+message UpdateParticipantStatusReq {
+  string room_id = 1;
+  string user_id = 2;
+  int32 status = 3; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断
+}
+
+message UpdateParticipantStatusRes {
+  bool success = 1;
+}
+
+// 结束通话记录
+message FinalizeSessionReq {
+  string room_id = 1;
+  int32 duration = 2;
+  int32 status = 3; // 3-已结束, 4-未接听, 5-拒接
+}
+
+message FinalizeSessionRes {
+  bool success = 1;
+}
+
+// 获取会话信息
+message GetSessionReq {
+  string room_id = 1;
+}
+
+message GetSessionRes {
+  string room_id = 1;
+  string caller_id = 2;
+  int32 call_type = 3;
+  int32 status = 4;
+  repeated string participant_ids = 5;
+  string conversation_id = 6;
+}
+
+message Participant {
+  string user_id = 1;
+  int32 status = 2; // 1-待接听, 2-已接听, 3-已拒绝, 4-超时未接, 5-已挂断
+}
+
+message GetParticipantsReq {
+  string room_id = 1;
+}
+
+message GetParticipantsRes {
+  repeated Participant participants = 1;
+}
+
+service call {
+  // 供 Chat/User 等服务查询用户是否忙碌
+  rpc GetUserStatus(GetUserStatusReq) returns (GetUserStatusRes);
+  
+  // 核心：创建通话会话并初始化参与者名单
+  rpc CreateSession(CreateSessionReq) returns (CreateSessionRes);
+  
+  // 更新参与者状态 (接听/拒绝/挂断)
+  rpc UpdateParticipantStatus(UpdateParticipantStatusReq) returns (UpdateParticipantStatusRes);
+  
+  // 结束通话记录
+  rpc FinalizeSession(FinalizeSessionReq) returns (FinalizeSessionRes);
+  
+  // 获取参与者列表及状态
+  rpc GetParticipants(GetParticipantsReq) returns (GetParticipantsRes);
+
+  // 获取会话基础信息
+  rpc GetSession(GetSessionReq) returns (GetSessionRes);
+}
+
+// goctl rpc protoc call_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

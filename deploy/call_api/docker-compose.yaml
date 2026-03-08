@@ -1,0 +1,12 @@
+services:
+  call_api:
+    image: wsrh8888/call_api:1.0.0
+    container_name: call_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./call.yaml:/etc/call.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

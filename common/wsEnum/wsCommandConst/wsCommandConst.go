@@ -19,4 +19,6 @@ const (
 	EMOJI Command = "EMOJI"
 	// 心跳消息类（应用级心跳）
 	HEARTBEAT Command = "HEARTBEAT"
+	// 音视频通话类
+	CALL Command = "CALL"
 )

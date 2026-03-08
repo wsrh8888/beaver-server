@@ -99,6 +99,14 @@ RUN go build -ldflags="-s -w" -o user_api/user app/user/user_api/user.go
 # user_rpc
 RUN go build -ldflags="-s -w" -o user_rpc/userrpc app/user/user_rpc/userrpc.go
 
+
+# ==================== CALL 相关服务 ====================
+# call_api
+RUN go build -ldflags="-s -w" -o call_api/call app/call/call_api/call.go
+# call_rpc
+RUN go build -ldflags="-s -w" -o call_rpc/callrpc app/call/call_rpc/callrpc.go
+
+
 # ==================== WS 相关服务 ====================
 # ws_api
 RUN go build -ldflags="-s -w" -o ws_api/ws app/ws/ws_api/ws.go

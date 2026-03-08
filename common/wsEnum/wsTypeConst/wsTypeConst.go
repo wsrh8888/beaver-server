@@ -47,3 +47,8 @@ const (
 	// 表情中心
 	EmojiReceive Type = "emoji_receive" // 服务端->客户端 表情数据同步
 )
+
+const (
+	// 音视频通话
+	CallReceive Type = "call_receive" // 服务端->客户端 通话信令同步
+)

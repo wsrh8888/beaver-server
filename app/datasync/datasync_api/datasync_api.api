@@ -82,6 +82,18 @@ type (
 	}
 )
 
+// 同步被删除的消息 ID 列表（仅自己可见的删除动作同步）
+type (
+	GetSyncDeletedMessagesReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步
+	}
+	GetSyncDeletedMessagesRes {
+		MessageIDs      []string `json:"messageIds"` // 被删除的消息ID列表
+		ServerTimestamp int64    `json:"serverTimestamp"` // 服务端同步时间戳
+	}
+)
+
 // 同步会话元信息
 type (
 	GetSyncChatConversationsReq {
@@ -266,6 +278,10 @@ service datasync {
 	@doc "获取所有需要更新的聊天消息版本"
 	@handler getSyncChatMessages
 	post /api/datasync/getSyncChatMessages (GetSyncChatMessagesReq) returns (GetSyncChatMessagesRes)
+
+	@doc "获取所有需要更新的已删除消息ID列表"
+	@handler getSyncDeletedMessages
+	post /api/datasync/getSyncDeletedMessages (GetSyncDeletedMessagesReq) returns (GetSyncDeletedMessagesRes)
 
 	@doc "获取所有需要更新的会话元信息版本"
 	@handler getSyncChatConversations

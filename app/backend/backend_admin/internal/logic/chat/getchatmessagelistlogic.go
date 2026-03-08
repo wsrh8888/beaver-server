@@ -102,7 +102,6 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 			SendUserName:   sendUserName,
 			MsgType:        int(message.MsgType),
 			MsgPreview:     message.MsgPreview,
-			IsDeleted:      message.Status == 4, // 4=已删除
 			CreateTime:     message.CreatedAt.String(),
 			UpdateTime:     message.UpdatedAt.String(),
 		})

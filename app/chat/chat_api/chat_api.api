@@ -46,21 +46,39 @@ type (
 		PackageID string `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
 	}
 	ReplyMsg {
-		ReplyToMessageID string `json:"replyToMessageId"` // 被回复的消息ID
-		ReplyToContent   string `json:"replyToContent"` // 被回复的消息内容预览
-		ReplyToSender    string `json:"replyToSender"` // 被回复消息的发送者昵称
+		OriginMsgId string `json:"originMsgId"` // 被回复的消息ID
+		OriginMsg   *Msg   `json:"originMsg,optional"` // 被回复的消息内容快照
+		ReplyMsg    *Msg   `json:"replyMsg"` // 回复的消息主体 (可以是文本、图片等)
+	}
+	WithdrawMsg {
+		OriginMsgId string `json:"originMsgId"` // 被撤回的消息ID
+		OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照，用于重新编辑
+	}
+	CallMsg {
+		RoomId   string `json:"roomId"` // 房间ID
+		CallType int    `json:"callType"` // 通话类型: 1-私聊, 2-群聊
+		Status   int    `json:"status"` // 状态: 1-进行中, 2-已结束
+		Duration int64  `json:"duration,optional"` // 通话时长(秒)
+	}
+	ForwardMsg {
+		Title    string `json:"title"` // 标题
+		RecordID string `json:"recordId,optional"` // 详情记录ID
+		Count    int    `json:"count"` // 消息总数
 	}
 	Msg {
-		Type            uint32           `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件
-		TextMsg         *TextMsg         `json:"textMsg,optional"` //文本消息
-		ImageMsg        *ImageMsg        `json:"imageMsg,optional"` //图片
-		VideoMsg        *VideoMsg        `json:"videoMsg,optional"` //视频
-		FileMsg         *FileMsg         `json:"fileMsg,optional"` //文件
-		VoiceMsg        *VoiceMsg        `json:"voiceMsg,optional"` //语音
-		EmojiMsg        *EmojiMsg        `json:"emojiMsg,optional"` //表情
-		NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` //通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
-		AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,optional"` //音频文件
-		ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"` //回复消息
+		Type            uint32           `json:"type"` // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
+		TextMsg         *TextMsg         `json:"textMsg,optional"` // 文本消息
+		ImageMsg        *ImageMsg        `json:"imageMsg,optional"` // 图片
+		VideoMsg        *VideoMsg        `json:"videoMsg,optional"` // 视频
+		FileMsg         *FileMsg         `json:"fileMsg,optional"` // 文件
+		VoiceMsg        *VoiceMsg        `json:"voiceMsg,optional"` // 语音
+		EmojiMsg        *EmojiMsg        `json:"emojiMsg,optional"` // 表情
+		NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` // 通知消息
+		AudioFileMsg    *AudioFileMsg    `json:"audioFileMsg,optional"` // 音频文件
+		CallMsg         *CallMsg         `json:"callMsg,optional"` // 音视频通话
+		WithdrawMsg     *WithdrawMsg     `json:"withdrawMsg,optional"` // 撤回消息
+		ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"` // 回复消息
+		ForwardMsg      *ForwardMsg      `json:"forwardMsg,optional"` // 转发消息（集合）
 	}
 	Sender {
 		UserID   string `json:"userId"`
@@ -83,9 +101,8 @@ type (
 		ConversationID string `json:"conversationId"` //会话id
 		Msg            Msg    `json:"msg"`
 		Sender         Sender `json:"sender"` //发送者
-		CreatedAt       string `json:"created_at"` //消息时间
+		CreatedAt      string `json:"created_at"` //消息时间
 		MsgPreview     string `json:"msgPreview"` //消息预览
-		Status         uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
 		Seq            int64  `json:"seq"` //消息序列号，用于数据同步
 	}
 )
@@ -100,7 +117,7 @@ type (
 		Avatar         string `json:"avatar"`
 		NickName       string `json:"nickName"`
 		MsgPreview     string `json:"msg_preview"` //消息预览
-		UpdatedAt       string `json:"updated_at"` //消息时间
+		UpdatedAt      string `json:"updated_at"` //消息时间
 		IsTop          bool   `json:"is_top"` //是否置顶
 		ConversationID string `json:"conversationId"` //会话id
 		ChatType       int    `json:"chatType"` //会话类型 1:好友 2:群聊 3:AI机器人
@@ -136,8 +153,7 @@ type (
 		ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
 		Msg              Msg    `json:"msg"`
 		Sender           Sender `json:"sender"` //发送者
-		CreatedAt         string `json:"created_at"` //消息时间
-		Status           uint32 `json:"status"` //消息状态 1:正常 2:已撤回 3:已编辑
+		CreatedAt        string `json:"created_at"` //消息时间
 		Seq              int64  `json:"seq"` //序列号，用于数据同步
 	}
 	ChatHistoryRes {
@@ -152,7 +168,7 @@ type (
 		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 	}
-	DeleteRecentRes {}
+	DeleteRecentRes  {}
 )
 
 // 置顶会话
@@ -162,7 +178,7 @@ type (
 		ConversationID string `json:"conversationId"` //会话id
 		IsPinned       bool   `json:"isPinned"` // true表示置顶 false表示不置顶
 	}
-	PinnedChatRes {}
+	PinnedChatRes  {}
 )
 
 // 设置会话免打扰
@@ -172,7 +188,7 @@ type (
 		ConversationID string `json:"conversationId"` //会话id
 		IsMuted        bool   `json:"isMuted"` // true表示免打扰 false表示取消免打扰
 	}
-	MuteChatRes {}
+	MuteChatRes  {}
 )
 
 // 隐藏/显示会话
@@ -182,7 +198,7 @@ type (
 		ConversationID string `json:"conversationId"` //会话id
 		IsHidden       bool   `json:"isHidden"` // true表示隐藏 false表示显示
 	}
-	HideChatRes {}
+	HideChatRes  {}
 )
 
 // 消息编辑
@@ -204,27 +220,45 @@ type (
 type (
 	RecallMessageReq {
 		UserID    string `header:"Beaver-User-Id"`
-		MessageID string `json:"messageId"` //客户端消息ID
+		MessageID string `json:"messageId"` // 客户端消息ID
 	}
 	RecallMessageRes {
-		Id         uint   `json:"id"` //数据库自增ID
-		MessageID  string `json:"messageId"` //客户端消息ID
-		RecallTime string `json:"recallTime"` //撤回时间
+		MessageID  string `json:"messageId"` // 客户端消息ID
+		RecallTime string `json:"recallTime"` // 撤回时间
 	}
+)
+
+// 批量删除消息
+type (
+	DeleteMessagesReq {
+		UserID     string   `header:"Beaver-User-Id"`
+		MessageIDs []string `json:"messageIds"` // 支持批量删除，最多100条
+	}
+	DeleteMessagesRes  {}
 )
 
 // 消息转发
 type (
 	ForwardMessageReq {
-		UserID      string `header:"Beaver-User-Id"`
-		MessageID   string `json:"messageId"` //客户端消息ID
-		TargetID    string `json:"targetId"` // 目标会话ID
-		ForwardType int    `json:"forwardType"` // 1: 单聊 2: 群聊
+		UserID      string   `header:"Beaver-User-Id"`
+		MessageIDs  []string `json:"messageIds"` // 原始消息ID列表
+		TargetID    string   `json:"targetId"` // 目标会话ID
+		ForwardType int      `json:"forwardType"` // 1: 单聊 2: 群聊
+		ForwardMode int      `json:"forwardMode"` // 1: 逐条转发 2: 合并转发
 	}
 	ForwardMessageRes {
-		Id          uint   `json:"id"` //数据库自增ID
-		MessageID   string `json:"messageId"` //客户端消息ID
 		ForwardTime string `json:"forwardTime"`
+	}
+)
+
+// 获取合并转发详情
+type (
+	GetForwardDetailsReq {
+		UserID   string `header:"Beaver-User-Id"`
+		RecordID string `form:"recordId"`
+	}
+	GetForwardDetailsRes {
+		List []Message `json:"list"` // 返回完整的消息快照列表
 	}
 )
 
@@ -252,7 +286,7 @@ type (
 		Msg              string `json:"msg"` //消息内容JSON字符串
 		IsDeleted        bool   `json:"isDeleted"` //是否已删除
 		Seq              int64  `json:"seq"` //序列号，用于数据同步
-		CreatedAt         int64  `json:"createdAt"` //创建时间戳
+		CreatedAt        int64  `json:"createdAt"` //创建时间戳
 	}
 )
 
@@ -271,8 +305,8 @@ type (
 		MaxSeq         int64  `json:"maxSeq"` // 会话消息的最大Seq
 		LastMessage    string `json:"lastMessage"` // 会话最后一条消息预览
 		Version        int64  `json:"version"` // 版本号
-		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
-		UpdatedAt     int64  `json:"updatedAt"` // 更新时间戳
+		CreatedAt      int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt      int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 
@@ -293,8 +327,8 @@ type (
 		IsMuted        bool   `json:"isMuted"` // 是否免打扰
 		UserReadSeq    int64  `json:"userReadSeq"` // 用户已读序列号
 		Version        int64  `json:"version"` // 版本号
-		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
-		UpdatedAt     int64  `json:"updatedAt"` // 更新时间戳
+		CreatedAt      int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt      int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 
@@ -351,6 +385,10 @@ service chat {
 	@handler recallMessage
 	post /api/chat/recall (RecallMessageReq) returns (RecallMessageRes)
 
+	@doc "批量删除消息(仅自己不可见)"
+	@handler deleteMessages
+	post /api/chat/deleteMessages (DeleteMessagesReq) returns (DeleteMessagesRes)
+
 	@doc "转发消息"
 	@handler forwardMessage
 	post /api/chat/forward (ForwardMessageReq) returns (ForwardMessageRes)
@@ -370,6 +408,10 @@ service chat {
 	@doc "更新会话已读序列号"
 	@handler updateReadSeq
 	post /api/chat/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
+
+	@doc "获取合并转发详情"
+	@handler getForwardDetails
+	get /api/chat/getForwardDetails (GetForwardDetailsReq) returns (GetForwardDetailsRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template
