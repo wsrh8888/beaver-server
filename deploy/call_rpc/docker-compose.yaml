@@ -1,13 +1,12 @@
-
 services:
-  track_api:
-    image: wsrh8888/track_api:1.0.0
-    container_name: track_api
+  call_rpc:
+    image: wsrh8888/call_rpc:1.0.0
+    container_name: call_rpc
     network_mode: "host"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./track.yaml:/etc/track.yaml:ro
+      - ./callrpc.yaml:/etc/callrpc.yaml:ro
     deploy:
       restart_policy:
         condition: any
-    pull_policy: always 
+    pull_policy: always
