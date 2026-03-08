@@ -1,0 +1,127 @@
+syntax = "v1"
+
+info (
+	title:   "Beaver IM 音视频服务"
+	desc:    "集成 LiveKit 的极简单组版音视频管理"
+	author:  "AI Partner"
+	version: "v1.0"
+)
+
+// --- 基础数据结构 ---
+type Participant {
+	UserID string `json:"userId"`
+	Status int32  `json:"status"` // 1-呼叫中, 2-已接听, 3-已拒绝, 4-超时, 5-已离开
+}
+
+// 1. 发起通话接口 (由拨打方调用)
+type (
+	StartCallReq {
+		UserID         string `header:"Beaver-User-Id"` // 网关透传的用户ID，string类型
+		CallType       int8   `json:"callType"` // 通话类型：1-私聊, 2-群聊
+		CallMode       int8   `json:"callMode"` // 初始通话模式：1-语音起手, 2-视频起手
+		ConversationId string `json:"conversationId"` // 会话ID：带前缀的完整格式
+	}
+	StartCallRes {
+		RoomID     string `json:"roomId"` // 业务生成的唯一房间ID
+		RoomToken  string `json:"roomToken"` // 发起者的LiveKit访问令牌
+		LiveKitUrl string `json:"liveKitUrl"` // LiveKit服务器地址
+		MessageID  string `json:"messageId"` // 通话消息ID，用于后续补丁关联
+	}
+)
+
+// 2. 接听通话接口 (由接听方点击"接听"后调用，用于获取令牌)
+type (
+	GetCallTokenReq {
+		UserID string `header:"Beaver-User-Id"`
+		RoomID string `json:"roomId"`
+	}
+	GetCallTokenRes {
+		RoomToken    string        `json:"roomToken"`
+		LiveKitUrl   string        `json:"liveKitUrl"`
+		Participants []Participant `json:"participants"` // 房间内当前所有成员快照
+	}
+)
+
+// 3. 挂断/拒绝通话接口
+type (
+	HangupCallReq {
+		UserID string `header:"Beaver-User-Id"`
+		RoomID string `json:"roomId"`
+	}
+	HangupCallRes  {}
+)
+
+// 4. 新增成员（仅群聊中途加入使用）
+type (
+	AddCallMemberReq {
+		UserID string `header:"Beaver-User-Id"`
+		RoomID string `json:"roomId"`
+	}
+	AddCallMemberRes {
+		RoomToken  string `json:"roomToken"`
+		LiveKitUrl string `json:"liveKitUrl"`
+	}
+)
+
+// 6. 邀请成员通话
+type (
+	InviteCallMemberReq {
+		UserID    string   `header:"Beaver-User-Id"`
+		RoomID    string   `json:"roomId"`
+		TargetIds []string `json:"targetIds"`
+	}
+	InviteCallMemberRes  {}
+)
+
+// 5. 获取房间成员清单 (用于页面重载或状态校验)
+type (
+	GetCallParticipantsReq {
+		UserID string `header:"Beaver-User-Id"`
+		RoomID string `form:"roomId"`
+	}
+	GetCallParticipantsRes {
+		Participants []Participant `json:"participants"`
+	}
+)
+
+// 7. LiveKit服务器Webhook回调接口
+type (
+	LiveKitWebhookReq {
+		Body          []byte `json:"-"`
+		Authorization string `header:"Authorization"`
+	}
+	LiveKitWebhookRes  {}
+)
+
+// --- 服务接口定义 ---
+service call {
+	@doc "发起音视频通话"
+	@handler StartCall
+	post /api/call/v1/start (StartCallReq) returns (StartCallRes)
+
+	@doc "接听通话并获取令牌"
+	@handler GetToken
+	post /api/call/v1/token (GetCallTokenReq) returns (GetCallTokenRes)
+
+	@doc "挂断或拒绝通话"
+	@handler Hangup
+	post /api/call/v1/hangup (HangupCallReq) returns (HangupCallRes)
+
+	@doc "群聊中途加入通话"
+	@handler AddMember
+	post /api/call/v1/add_member (AddCallMemberReq) returns (AddCallMemberRes)
+
+	@doc "获取房间当前成员列表"
+	@handler GetParticipants
+	get /api/call/v1/participants (GetCallParticipantsReq) returns (GetCallParticipantsRes)
+
+	@doc "群聊中邀请成员入场"
+	@handler InviteMember
+	post /api/call/v1/invite (InviteCallMemberReq) returns (InviteCallMemberRes)
+
+	@doc "LiveKit 服务器回调"
+	@handler LiveKitWebhook
+	post /api/call/v1/webhook (LiveKitWebhookReq) returns (LiveKitWebhookRes)
+}
+
+// goctl api go -api call_api.api -dir . --home ../../../template

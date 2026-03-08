@@ -1,0 +1,49 @@
+Name: call
+Host: 0.0.0.0
+Port: 21800 
+
+# 数据库配置
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+
+# Redis 配置 (用于存放通话临时状态或缓存)
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  DB: 0
+
+# 日志配置
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false
+
+Etcd: 127.0.0.1:2379
+
+# LiveKit 核心配置 (这是新增的)
+LiveKit:
+  Host: http://127.0.0.1:7880 # 你的 LiveKit Server 地址
+  ApiKey: devkey             # 必须与 livekit.yaml 一致
+  ApiSecret: apisecret_32char_standard_12345678 # 必须与 livekit.yaml 一致
+
+# 依赖的其他微服务 RPC
+UserRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: userrpc.rpc
+CallRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: callrpc.rpc
+ChatRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: chatrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: grouprpc.rpc

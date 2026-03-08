@@ -19,4 +19,5 @@ wt new-tab --title "Auth API" cmd /k "cd /d !ROOT_DIR!\app\auth\auth_api && go r
   ; new-tab --title "Track API" cmd /k "cd /d !ROOT_DIR!\app\track\track_api && go run track.go" ^
   ; new-tab --title "Update API" cmd /k "cd /d !ROOT_DIR!\app\update\update_api && go run update.go" ^
   ; new-tab --title "Datasync API" cmd /k "cd /d !ROOT_DIR!\app\datasync\datasync_api && go run datasync.go" ^
-  ; new-tab --title "Notification API" cmd /k "cd /d !ROOT_DIR!\app\notification\notification_api && go run notification.go" 
+  ; new-tab --title "Notification API" cmd /k "cd /d !ROOT_DIR!\app\notification\notification_api && go run notification.go" ^
+  ; new-tab --title "Call API" cmd /k "cd /d !ROOT_DIR!\app\call\call_api && go run call.go"

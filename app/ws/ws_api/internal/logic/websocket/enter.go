@@ -9,7 +9,6 @@ import (
 	"beaver/app/ws/ws_api/internal/logic/websocket/chat_message"
 	"beaver/app/ws/ws_api/internal/logic/websocket/heartbeat"
 	"beaver/app/ws/ws_api/internal/logic/websocket/proxy_message"
-	"beaver/app/ws/ws_api/internal/logic/websocket/webrtc_message"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
@@ -51,8 +50,6 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 			chat_message.HandleChatMessageTypes(ctx, svcCtx, req, r, conn, wsMessage.Content)
 		case wsCommandConst.FRIEND_OPERATION:
 			proxy_message.HandleProxyMessageTypes(ctx, svcCtx, req, r, conn, wsMessage.Content)
-		case wsCommandConst.GROUP_OPERATION:
-			webrtc_message.HandleWebRTCAnswer(ctx, svcCtx, req, r, conn, wsMessage.Content)
 		case wsCommandConst.HEARTBEAT:
 			// 添加调试信息
 			fmt.Printf("处理心跳消息, 用户: %s, 命令: %s\n", req.UserID, wsMessage.Command)

@@ -1,7 +1,7 @@
 
 services:
   track_api:
-    image: wsrh8888/track_api:1.0.2
+    image: wsrh8888/track_api:1.0.0
     container_name: track_api
     network_mode: "host"
     volumes:

@@ -30,8 +30,13 @@ func NewChatSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatSync
 func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRes, err error) {
 	var chats []chat_models.ChatMessage
 
+	// 过滤掉当前用户主动删除的消息
+	deleteSubQuery := l.svcCtx.DB.Model(&chat_models.ChatUserDelete{}).
+		Select("message_id").
+		Where("user_id = ?", req.UserID)
+
 	// 构建基础查询条件 - 查询指定seq范围的消息（包含起始seq）
-	var query = l.svcCtx.DB.Where("seq >= ? AND seq <= ?", req.FromSeq, req.ToSeq)
+	var query = l.svcCtx.DB.Where("seq >= ? AND seq <= ? AND message_id NOT IN (?)", req.FromSeq, req.ToSeq, deleteSubQuery)
 
 	// 如果指定了会话ID，则只同步该会话的消息
 	if req.ConversationID != "" {
@@ -83,8 +88,9 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 			}
 		}
 
-		// 根据消息类型判断是否已删除（撤回或删除类型）
-		isDeleted := chat.MsgType == 7 || chat.MsgType == 8 // 假设7=REVOKE, 8=DELETE
+		// 原始消息不修改（只增不改原则），撤回状态由同步流中的 WithdrawMsg 指令消息表达
+		// isDeleted 保留字段兼容，始终为 false（原始消息不变）
+		isDeleted := false
 
 		// 处理发送者ID
 		sendUserID := ""

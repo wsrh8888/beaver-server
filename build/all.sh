@@ -11,6 +11,7 @@ modules=(
     "dictionary_rpc"
     "emoji_rpc"
     "notification_rpc"
+    "call_rpc"
     
     # ==================== API 服务 ====================
     "auth_api"
@@ -29,6 +30,7 @@ modules=(
     "user_api"
     "ws_api"
     "gateway_api"
+    "call_api"
     
     # ==================== ADMIN 服务 ====================
     "backend_admin"
