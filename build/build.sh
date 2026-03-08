@@ -2,7 +2,7 @@
 
 # 配置变量
 REGISTRY_URL="wsrh8888"
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 # 函数：获取Docker镜像的Id
 get_image_id() {
