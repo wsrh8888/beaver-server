@@ -7,7 +7,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)]()
 [![Stars](https://img.shields.io/badge/stars-50+-yellow.svg)](https://github.com/wsrh8888/beaver-server/stargazers)
 
-> 🚀 **企业级即时通讯平台** - 基于Go-Zero微服务架构构建，支持移动端（UniApp）、桌面端（Electron）和Web端，提供实时通信能力。
+> 🚀 **企业级即时通讯平台** - 基于Go-Zero微服务架构构建，支持移动端（Flutter）、桌面端（Electron）和Web端，提供实时通信能力。
 
 [English](README_EN.md) | [中文](README.md)
 
@@ -42,7 +42,7 @@
 - **熔断器** - 故障容忍和弹性
 
 ### 📱 **跨平台支持**
-- **移动应用** - 通过UniApp框架支持iOS/Android
+- **移动应用** - 通过Flutter框架支持iOS/Android (推荐)
 - **桌面应用** - 通过Electron支持Windows/macOS/Linux
 - **API网关** - 第三方集成的RESTful API
 
@@ -62,7 +62,7 @@
 ### 前端技术
 | 平台 | 框架 | 特性 |
 |------|------|------|
-| **移动端** | UniApp + Vue 3 | 跨平台移动应用 |
+| **移动端** | Flutter 3.x | 跨平台移动应用 (推荐) |
 | **桌面端** | Electron + Vue 3 | 原生桌面体验 |
 
 ## 📊 性能指标
@@ -78,7 +78,7 @@
 ```
 ┌─────────────────┐    ┌─────────────────┐
 │   移动端应用     │    │   桌面端应用     │
-│   (UniApp)      │    │   (Electron)    │
+│   (Flutter)     │    │   (Electron)    │
 └─────────┬───────┘    └─────────┬───────┘
           │                      │
           └──────────────────────┘
@@ -133,8 +133,9 @@
 | 项目 | 仓库地址 | 说明 |
 |------|----------|------|
 | **beaver-server** | [GitHub](https://github.com/wsrh8888/beaver-server) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-server) | 后端微服务 |
-| **beaver-mobile** | [GitHub](https://github.com/wsrh8888/beaver-mobile) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-mobile) | 移动端应用 |
+| **beaver-flutter** | [GitHub](https://github.com/wsrh8888/beaver-flutter) | 移动端应用 (Flutter - 推荐) |
 | **beaver-desktop** | [GitHub](https://github.com/wsrh8888/beaver-desktop) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-desktop) | 桌面端应用 |
+| **beaver-uniapp** | [GitHub](https://github.com/wsrh8888/beaver-uniapp) | 移动端应用 (Uniapp - 已废弃) |
 
 
 
