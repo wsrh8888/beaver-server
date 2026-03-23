@@ -7,7 +7,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)]()
 [![Stars](https://img.shields.io/badge/stars-50+-yellow.svg)](https://github.com/wsrh8888/beaver-server/stargazers)
 
-> 🚀 **Enterprise-Grade Instant Messaging Platform** - Built with Go-Zero microservices, supporting mobile (UniApp), desktop (Electron), and web clients with real-time communication capabilities.
+> 🚀 **Enterprise-Grade Instant Messaging Platform** - Built with Go-Zero microservices, supporting mobile (Flutter), desktop (Electron), and web clients with real-time communication capabilities.
 
 [English](README_EN.md) | [中文](README.md)
 
@@ -42,7 +42,7 @@
 - **Circuit Breaker** - Fault tolerance and resilience
 
 ### 📱 **Cross-Platform Support**
-- **Mobile Apps** - iOS/Android via UniApp framework
+- **Mobile Apps** - iOS/Android via Flutter framework (Recommended)
 - **Desktop Apps** - Windows/macOS/Linux via Electron
 - **API Gateway** - RESTful APIs for third-party integration
 
@@ -62,7 +62,7 @@
 ### Frontend Technologies
 | Platform | Framework | Features |
 |----------|-----------|----------|
-| **Mobile** | UniApp + Vue 3 | Cross-platform mobile apps |
+| **Mobile** | Flutter 3.x | Cross-platform mobile app (Recommended) |
 | **Desktop** | Electron + Vue 3 | Native desktop experience |
 
 ## 📊 Performance Metrics
@@ -78,7 +78,7 @@
 ```
 ┌─────────────────┐    ┌─────────────────┐
 │   Mobile App    │    │  Desktop App    │
-│   (UniApp)      │    │   (Electron)    │
+│   (Flutter)     │    │   (Electron)    │
 └─────────┬───────┘    └─────────┬───────┘
           │                      │
           └──────────────────────┘
@@ -133,8 +133,9 @@
 | Project | Repository | Description |
 |---------|------------|-------------|
 | **beaver-server** | [GitHub](https://github.com/wsrh8888/beaver-server) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-server) | Backend microservices |
-| **beaver-mobile** | [GitHub](https://github.com/wsrh8888/beaver-mobile) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-mobile) | Mobile applications |
+| **beaver-flutter** | [GitHub](https://github.com/wsrh8888/beaver-flutter) | Mobile application (Flutter - Recommended) |
 | **beaver-desktop** | [GitHub](https://github.com/wsrh8888/beaver-desktop) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-desktop) | Desktop applications |
+| **beaver-uniapp** | [GitHub](https://github.com/wsrh8888/beaver-uniapp) | Mobile application (Uniapp - Deprecated) |
 
 
 
