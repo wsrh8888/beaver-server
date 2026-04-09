@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/moment/moment_api/internal/svc"
@@ -51,22 +52,42 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 	offset := (page - 1) * limit
 
 	// 获取自己的动态和好友的动态
+	// 可见性过滤：自己的动态全部可见；好友的动态只看 visibility=0(所有人) 或 1(仅好友)
 	var moments []moment_models.MomentModel
-	if err := l.svcCtx.DB.Where("user_id IN (?) AND is_deleted = false", friendIds).
-		Order("created_at DESC").
-		Offset(offset).
-		Limit(limit).
-		Find(&moments).Error; err != nil {
+	if err := l.svcCtx.DB.Where(
+		"user_id IN (?) AND is_deleted = false AND (user_id = ? OR visibility IN (0, 1))",
+		friendIds, req.UserID,
+	).Order("created_at DESC").Offset(offset).Limit(limit).Find(&moments).Error; err != nil {
 		return nil, err
 	}
 
-	// 获取总数
+	// 获取总数（同样过滤可见性）
 	var count int64
 	if err := l.svcCtx.DB.Model(&moment_models.MomentModel{}).
-		Where("user_id IN (?) AND is_deleted = false", friendIds).
+		Where("user_id IN (?) AND is_deleted = false AND (user_id = ? OR visibility IN (0, 1))",
+			friendIds, req.UserID).
 		Count(&count).Error; err != nil {
 		return nil, err
 	}
+
+	// 过滤：当前用户被某条动态加入了 BlockList，则不显示该动态
+	filtered := moments[:0]
+	for _, m := range moments {
+		if m.BlockList != "" && m.UserID != req.UserID {
+			blocked := false
+			for _, uid := range strings.Split(m.BlockList, ",") {
+				if uid == req.UserID {
+					blocked = true
+					break
+				}
+			}
+			if blocked {
+				continue
+			}
+		}
+		filtered = append(filtered, m)
+	}
+	moments = filtered
 
 	// 准备响应数据
 	resp = &types.GetMomentsRes{

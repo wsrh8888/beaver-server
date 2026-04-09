@@ -19,6 +19,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: addFriendHandler(serverCtx),
 			},
 			{
+				// 拉黑用户
+				Method:  http.MethodPost,
+				Path:    "/api/friend/block",
+				Handler: blockUserHandler(serverCtx),
+			},
+			{
+				// 取消拉黑
+				Method:  http.MethodDelete,
+				Path:    "/api/friend/block",
+				Handler: unblockUserHandler(serverCtx),
+			},
+			{
+				// 获取黑名单列表
+				Method:  http.MethodGet,
+				Path:    "/api/friend/block_list",
+				Handler: blockListHandler(serverCtx),
+			},
+			{
 				// 获取好友详细信息
 				Method:  http.MethodGet,
 				Path:    "/api/friend/friend_info",
