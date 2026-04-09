@@ -108,6 +108,7 @@ const (
 type Msg struct {
 	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
 	TargetMsgID     string           `json:"targetMsgId,omitempty"`     // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
+	AtUserIDs       []string         `json:"atUserIds,omitempty"`       // @的用户ID列表，服务端据此触发定向推送；文本中用@昵称占位，前端扫描渲染高亮
 	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         // 文本消息
 	ImageMsg        *ImageMsg        `json:"imageMsg,omitempty"`        // 图片消息
 	VideoMsg        *VideoMsg        `json:"videoMsg,omitempty"`        // 视频消息
@@ -142,7 +143,7 @@ func (c *Msg) Value() (driver.Value, error) {
 }
 
 type TextMsg struct {
-	Content string `json:"content"` //文本消息内容
+	Content string `json:"content"` // 文本消息内容
 }
 
 // NotificationMsg 通知消息结构（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）

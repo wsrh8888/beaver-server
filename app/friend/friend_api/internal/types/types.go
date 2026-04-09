@@ -12,6 +12,32 @@ type AddFriendRes struct {
 	Version int64 `json:"version"` // 好友验证版本号
 }
 
+type BlockListReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID
+	Page   int    `form:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `form:"limit,optional"`   // 每页数量，可选，默认20
+}
+
+type BlockListRes struct {
+	List  []BlockUserInfo `json:"list"`  // 黑名单列表
+	Count int64           `json:"count"` // 总数
+}
+
+type BlockUserInfo struct {
+	UserID   string `json:"userId"`   // 被拉黑用户ID
+	NickName string `json:"nickName"` // 用户昵称
+	Avatar   string `json:"avatar"`   // 用户头像文件名
+	BlockID  string `json:"blockId"`  // 黑名单记录ID
+}
+
+type BlockUserReq struct {
+	UserID        string `header:"Beaver-User-Id"` // 当前用户ID
+	BlockedUserID string `json:"blockedUserId"`    // 被拉黑的用户ID
+}
+
+type BlockUserRes struct {
+}
+
 type FriendByUuid struct {
 	FriendID       string `json:"friendId"`       // 好友记录ID
 	SendUserID     string `json:"sendUserId"`     // 发送者用户ID
@@ -137,6 +163,14 @@ type SearchValidInfoReq struct {
 
 type SearchValidInfoRes struct {
 	ValidID string `json:"validId"` // 验证记录ID
+}
+
+type UnblockUserReq struct {
+	UserID        string `header:"Beaver-User-Id"` // 当前用户ID
+	BlockedUserID string `json:"blockedUserId"`    // 要取消拉黑的用户ID
+}
+
+type UnblockUserRes struct {
 }
 
 type ValidListReq struct {

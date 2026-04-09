@@ -67,6 +67,7 @@ type (
 	}
 	Msg {
 		Type            uint32           `json:"type"` // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
+		AtUserIds       []string         `json:"atUserIds,optional"` // @的用户ID列表，服务端据此触发定向推送（与消息类型无关）
 		TextMsg         *TextMsg         `json:"textMsg,optional"` // 文本消息
 		ImageMsg        *ImageMsg        `json:"imageMsg,optional"` // 图片
 		VideoMsg        *VideoMsg        `json:"videoMsg,optional"` // 视频
