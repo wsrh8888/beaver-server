@@ -70,10 +70,17 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 		return nil, err
 	}
 
-	// 过滤：当前用户被某条动态加入了 BlockList，则不显示该动态
+	// 可见性过滤（内存阶段）
 	filtered := moments[:0]
 	for _, m := range moments {
-		if m.BlockList != "" && m.UserID != req.UserID {
+		// 自己的动态始终可见
+		if m.UserID == req.UserID {
+			filtered = append(filtered, m)
+			continue
+		}
+
+		// BlockList 过滤：当前用户在发布者的屏蔽名单中
+		if m.BlockList != "" {
 			blocked := false
 			for _, uid := range strings.Split(m.BlockList, ",") {
 				if uid == req.UserID {
@@ -85,6 +92,24 @@ func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *ty
 				continue
 			}
 		}
+
+		// AllowList 过滤（Visibility=3 自定义可见）：不在允许列表中则跳过
+		if m.Visibility == 3 {
+			if m.AllowList == "" {
+				continue
+			}
+			allowed := false
+			for _, uid := range strings.Split(m.AllowList, ",") {
+				if uid == req.UserID {
+					allowed = true
+					break
+				}
+			}
+			if !allowed {
+				continue
+			}
+		}
+
 		filtered = append(filtered, m)
 	}
 	moments = filtered

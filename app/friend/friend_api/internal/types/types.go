@@ -38,6 +38,14 @@ type BlockUserReq struct {
 type BlockUserRes struct {
 }
 
+type DeleteFriendReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+	FriendID string `json:"friendId"`         // 要删除的好友用户ID
+}
+
+type DeleteFriendRes struct {
+}
+
 type FriendByUuid struct {
 	FriendID       string `json:"friendId"`       // 好友记录ID
 	SendUserID     string `json:"sendUserId"`     // 发送者用户ID

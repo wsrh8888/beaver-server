@@ -37,6 +37,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: blockListHandler(serverCtx),
 			},
 			{
+				// 删除好友
+				Method:  http.MethodDelete,
+				Path:    "/api/friend/friend",
+				Handler: deleteFriendHandler(serverCtx),
+			},
+			{
 				// 获取好友详细信息
 				Method:  http.MethodGet,
 				Path:    "/api/friend/friend_info",

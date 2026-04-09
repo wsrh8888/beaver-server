@@ -166,6 +166,15 @@ type (
 	}
 )
 
+// 删除好友
+type (
+	DeleteFriendReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		FriendID string `json:"friendId"` // 要删除的好友用户ID
+	}
+	DeleteFriendRes  {}
+)
+
 // 拉黑用户
 type (
 	BlockUserReq {
@@ -243,6 +252,10 @@ service friend {
 	@doc "批量获取好友验证数据（通过ID）"
 	@handler getFriendVerifiesListByIds
 	post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
+
+	@doc "删除好友"
+	@handler deleteFriend
+	delete /api/friend/friend (DeleteFriendReq) returns (DeleteFriendRes)
 
 	@doc "拉黑用户"
 	@handler blockUser
