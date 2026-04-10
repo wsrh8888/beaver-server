@@ -13,6 +13,13 @@ import (
 	"beaver/common/wsEnum/wsTypeConst"    // Import the wsCommandConst package
 )
 
+// WsInternalSecret 内部服务密钥，各服务启动时调用 SetWsInternalSecret 初始化
+var WsInternalSecret string
+
+func SetWsInternalSecret(secret string) {
+	WsInternalSecret = secret
+}
+
 type ForwardRequest struct {
 	ApiEndpoint string
 	Method      string
@@ -83,8 +90,9 @@ func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Token", forwardReq.Token)           // 使用Token进行鉴权
-	req.Header.Set("Beaver-User-Id", forwardReq.UserID) // 使用Token进行鉴权
+	req.Header.Set("Token", forwardReq.Token)
+	req.Header.Set("Beaver-User-Id", forwardReq.UserID)
+	req.Header.Set("X-Internal-Secret", WsInternalSecret)
 
 	resp, err := client.Do(req)
 	if err != nil {

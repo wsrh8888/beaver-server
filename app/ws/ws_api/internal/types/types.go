@@ -25,6 +25,7 @@ type Msg struct {
 
 type ProxySendMsgReq struct {
 	UserID         string                 `header:"Beaver-User-Id"`        // 发送者ID
+	InternalSecret string                 `header:"X-Internal-Secret"`     // 内部服务密钥
 	Command        string                 `json:"command"`                 // 命令类型：send（发送）、recall（撤回）
 	TargetID       string                 `json:"targetId"`                // 目标ID（用户ID或群ID）
 	Type           string                 `json:"type"`                    // 消息类型
