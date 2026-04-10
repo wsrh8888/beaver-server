@@ -7,6 +7,7 @@ import (
 	"beaver/app/ws/ws_api/internal/config"
 	"beaver/app/ws/ws_api/internal/handler"
 	"beaver/app/ws/ws_api/internal/svc"
+	"beaver/common/ajax"
 	"beaver/common/etcd"
 	"beaver/common/middleware"
 
@@ -27,6 +28,8 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	ajax.SetWsInternalSecret(c.InternalSecret)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

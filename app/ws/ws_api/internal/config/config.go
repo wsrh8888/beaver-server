@@ -15,9 +15,13 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	Etcd      string
-	GroupRpc  zrpc.RpcClientConf
-	ChatRpc   zrpc.RpcClientConf
+	Auth struct {
+		AccessSecret string
+	}
+	InternalSecret string
+	Etcd           string
+	GroupRpc       zrpc.RpcClientConf
+	ChatRpc        zrpc.RpcClientConf
 	WebSocket struct {
 		PongWait             int
 		WriteWait            int

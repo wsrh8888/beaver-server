@@ -27,9 +27,10 @@ type Msg {
 
 type wsRes {}
 
-// 代理发送消息请求（用于HTTP API发送消息）
+// 代理发送消息请求（仅限内部服务调用，需携带 X-Internal-Secret）
 type ProxySendMsgReq {
-	UserID         string                 `header:"Beaver-User-Id"` // 发送者ID
+	UserID         string                 `header:"Beaver-User-Id"`    // 发送者ID
+	InternalSecret string                 `header:"X-Internal-Secret"` // 内部服务密钥
 	Command        string                 `json:"command"` // 命令类型：send（发送）、recall（撤回）
 	TargetID       string                 `json:"targetId"` // 目标ID（用户ID或群ID）
 	Type           string                 `json:"type"` // 消息类型
