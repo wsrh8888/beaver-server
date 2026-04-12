@@ -18,7 +18,6 @@ type Config struct {
 	Auth struct {
 		AccessSecret string
 	}
-	InternalSecret string
 	Etcd           string
 	GroupRpc       zrpc.RpcClientConf
 	ChatRpc        zrpc.RpcClientConf

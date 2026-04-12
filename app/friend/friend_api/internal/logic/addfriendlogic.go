@@ -190,11 +190,13 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 
 		// 通知接收方
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.UserID, req.FriendID, map[string]interface{}{
+			"messageId":    uuid.New().String(),
 			"tableUpdates": tableUpdates,
 		}, "")
 
 		// 通知发送方
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.FriendID, req.UserID, map[string]interface{}{
+			"messageId":    uuid.New().String(),
 			"tableUpdates": tableUpdates,
 		}, "")
 

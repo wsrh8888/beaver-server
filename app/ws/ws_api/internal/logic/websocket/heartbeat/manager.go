@@ -2,7 +2,6 @@ package heartbeat
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
@@ -23,15 +22,13 @@ func HandleClientPing(client *ws_conn.Client, timestamp int64) {
 }
 
 // Manager 服务端主动心跳管理器
-// 定时向客户端发送应用级 PING，并维护协议级 WebSocket ping 帧
-// 仅在 chatwebsocketlogic.go 中创建和管理，不参与消息循环
+// 维护协议级 WebSocket ping 帧，确保链路不被中间件（如 Nginx/ELB）超时断开
 type Manager struct {
 	client *ws_conn.Client
 	userID string
 	svcCtx *svc.ServiceContext
 	ctx    context.Context
 	cancel context.CancelFunc
-	mu     sync.Mutex // 仅用于协议级 ping（直接写原始帧，不经过 SafeSend）
 }
 
 func NewManager(client *ws_conn.Client, userID string, svcCtx *svc.ServiceContext) *Manager {
@@ -46,17 +43,23 @@ func NewManager(client *ws_conn.Client, userID string, svcCtx *svc.ServiceContex
 }
 
 func (m *Manager) Start() {
+	// 仅保留底层协议级 ping
 	go m.startProtocolPing()
-	go m.startApplicationPing()
+	
+	// 注意：此处不再启动 startApplicationPing，因为移动端(Flutter)已实现主动心跳。
+	// 减少心跳噪声，降低 Socket 并发冲突风险。
 }
 
 func (m *Manager) Stop() {
 	m.cancel()
 }
 
-// startProtocolPing 协议级 ping（原始 WebSocket 帧，gorilla 自动处理 pong 维持连接）
+// startProtocolPing 协议级 ping（原始 WebSocket 帧）
 func (m *Manager) startProtocolPing() {
 	pingPeriod := time.Duration(m.svcCtx.Config.WebSocket.PingPeriod) * time.Second
+	if pingPeriod <= 0 {
+		pingPeriod = 30 * time.Second
+	}
 	ticker := time.NewTicker(pingPeriod)
 	defer ticker.Stop()
 
@@ -73,38 +76,18 @@ func (m *Manager) startProtocolPing() {
 	}
 }
 
-// startApplicationPing 应用级 PING，客户端收到后应回复 PONG
-func (m *Manager) startApplicationPing() {
-	interval := m.getAppPingInterval()
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-m.ctx.Done():
-			return
-		case <-ticker.C:
-			m.client.SafeSendControl(type_struct.WsControlFrame{
-				Command:   wsCommandConst.PING,
-				Timestamp: time.Now().UnixMilli(),
-			})
-		}
-	}
-}
-
 func (m *Manager) sendProtocolPing() error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	// 重要：使用 Client 统一的互斥锁，严禁并发写 Conn
+	m.client.Mu.Lock()
+	defer m.client.Mu.Unlock()
+
 	writeWait := time.Duration(m.svcCtx.Config.WebSocket.WriteWait) * time.Second
+	if writeWait <= 0 {
+		writeWait = 10 * time.Second
+	}
+
 	if err := m.client.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
 		return err
 	}
 	return m.client.Conn.WriteMessage(websocket.PingMessage, []byte{})
-}
-
-func (m *Manager) getAppPingInterval() time.Duration {
-	if m.svcCtx.Config.WebSocket.AppHeartbeatInterval > 0 {
-		return time.Duration(m.svcCtx.Config.WebSocket.AppHeartbeatInterval) * time.Second
-	}
-	return time.Duration(m.svcCtx.Config.WebSocket.PingPeriod*2) * time.Second
 }

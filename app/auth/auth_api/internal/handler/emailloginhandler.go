@@ -7,6 +7,7 @@ import (
 	"beaver/common/response"
 	"beaver/utils/device"
 	"beaver/utils/email"
+	"context"
 	"errors"
 	"net/http"
 
@@ -39,7 +40,9 @@ func emailLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewEmailLoginLogic(r.Context(), svcCtx)
+		// 将 User-Agent 注入 Context，供 Logic 层识别设备分类
+		ctx := context.WithValue(r.Context(), "user-agent", r.Header.Get("User-Agent"))
+		l := logic.NewEmailLoginLogic(ctx, svcCtx)
 		resp, err := l.EmailLogin(&req)
 		response.Response(r, w, resp, err)
 	}
