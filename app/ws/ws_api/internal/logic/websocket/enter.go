@@ -48,10 +48,12 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		// 控制帧：PING/PONG 直接处理，不发 ACK
 		switch cmd {
 		case wsCommandConst.PING:
+			fmt.Printf("收到 PING: 用户: %s, 原始时间戳: %d\n", req.UserID, wsMessage.Content.Timestamp)
 			heartbeat.HandleClientPing(client, wsMessage.Content.Timestamp)
 			continue
 		case wsCommandConst.PONG:
 			// 收到客户端对服务端 PING 的回复，无需处理
+			fmt.Printf("收到 PONG: 用户: %s, 时间戳: %d\n", req.UserID, wsMessage.Content.Timestamp)
 			continue
 		case wsCommandConst.USER_PROFILE, wsCommandConst.NOTIFICATION, wsCommandConst.EMOJI:
 			// 仅服务端推送，客户端不应发送

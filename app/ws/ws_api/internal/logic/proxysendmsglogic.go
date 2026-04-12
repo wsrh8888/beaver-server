@@ -3,13 +3,11 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
-	"beaver/common/ajax"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -31,11 +29,6 @@ func NewProxySendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Prox
 }
 
 func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *types.ProxySendMsgRes, err error) {
-	// 内部接口鉴权：只允许内部服务调用
-	if req.InternalSecret != ajax.InternalSecret {
-		return nil, errors.New("unauthorized")
-	}
-
 	bodyBytes, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, err

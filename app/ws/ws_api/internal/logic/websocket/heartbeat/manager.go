@@ -2,6 +2,7 @@ package heartbeat
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
@@ -15,10 +16,15 @@ import (
 
 // HandleClientPing 收到客户端 PING，立即回复 PONG（无状态，echo timestamp）
 func HandleClientPing(client *ws_conn.Client, timestamp int64) {
-	client.SafeSendControl(type_struct.WsControlFrame{
+	err := client.SafeSendControl(type_struct.WsControlFrame{
 		Command:   wsCommandConst.PONG,
 		Timestamp: timestamp,
 	})
+	if err != nil {
+		fmt.Printf("回复 PONG 失败: 错误: %v, 时间戳: %d\n", err, timestamp)
+	} else {
+		fmt.Printf("已回复 PONG: 时间戳: %d\n", timestamp)
+	}
 }
 
 // Manager 服务端主动心跳管理器

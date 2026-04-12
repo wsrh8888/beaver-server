@@ -2,13 +2,14 @@ package conn
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
+	"time"
 
 	ws_response "beaver/app/ws/ws_api/response"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/gorilla/websocket"
 )
 
@@ -35,8 +36,19 @@ func (c *Client) SafeSendControl(frame type_struct.WsControlFrame) error {
 	defer c.Mu.Unlock()
 	data, err := json.Marshal(frame)
 	if err != nil {
-		logx.Errorf("序列化控制帧失败: %v", err)
+		fmt.Printf("序列化控制帧失败: %v\n", err)
 		return err
 	}
-	return c.Conn.WriteMessage(websocket.TextMessage, data)
+	// 设置写入超时，防止受之前写入留下的 deadline 影响
+	_ = c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+	err = c.Conn.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		fmt.Printf("发送控制帧失败: %v, 数据: %s\n", err, string(data))
+	} else {
+		// 仅在调试 PONG 时开启，或者保留少量核心日志
+		if frame.Command == wsCommandConst.PONG {
+			fmt.Printf("发送 PONG 成功: %s\n", string(data))
+		}
+	}
+	return err
 }
