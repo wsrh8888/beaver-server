@@ -18,19 +18,18 @@ type MomentNotification struct {
 }
 
 type Msg struct {
-	Type    uint   `json:"type"`             //消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
-	TextMsg string `json:"textMsg,optional"` //文本消息
-	ImgMsg  string `json:"imgMsg,optional"`  //图片消息
+	Type    uint   `json:"type"`              //消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+	TextMsg string `json:"textMsg,omitempty"` //文本消息
+	ImgMsg  string `json:"imgMsg,omitempty"`  //图片消息
 }
 
 type ProxySendMsgReq struct {
-	UserID         string                 `header:"Beaver-User-Id"`        // 发送者ID
-	InternalSecret string                 `header:"X-Internal-Secret"`     // 内部服务密钥
-	Command        string                 `json:"command"`                 // 命令类型：send（发送）、recall（撤回）
-	TargetID       string                 `json:"targetId"`                // 目标ID（用户ID或群ID）
-	Type           string                 `json:"type"`                    // 消息类型
-	ConversationId string                 `json:"conversationId,optional"` // 会话ID
-	Body           map[string]interface{} `json:"body"`                    // 消息内容，需要包含 messageId
+	UserID         string                 `header:"Beaver-User-Id"`         // 发送者ID
+	Command        string                 `json:"command"`                  // 命令类型：send（发送）、recall（撤回）
+	TargetID       string                 `json:"targetId"`                 // 目标ID（用户ID或群ID）
+	Type           string                 `json:"type"`                     // 消息类型
+	ConversationId string                 `json:"conversationId,omitempty"` // 会话ID
+	Body           map[string]interface{} `json:"body"`                     // 消息内容，需要包含 messageId
 }
 
 type ProxySendMsgRes struct {
