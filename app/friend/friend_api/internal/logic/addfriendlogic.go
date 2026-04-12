@@ -34,11 +34,34 @@ func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFrie
 }
 
 func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFriendRes, err error) {
+	// 不能添加自己为好友
+	if req.UserID == req.FriendID {
+		return nil, errors.New("不能添加自己为好友")
+	}
+
 	var friend friend_models.FriendModel
 
 	// 检查是否已经是好友
 	if friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
 		return nil, errors.New("已经是好友了")
+	}
+
+	// 黑名单检查：我拉黑了对方，提示错误
+	var iBlockedCount int64
+	l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).
+		Where("user_id = ? AND blocked_user_id = ?", req.UserID, req.FriendID).
+		Count(&iBlockedCount)
+	if iBlockedCount > 0 {
+		return nil, errors.New("你已屏蔽该用户，请先解除屏蔽后再添加")
+	}
+
+	// 黑名单检查：对方拉黑了我，静默返回成功（保护对方隐私）
+	var theyBlockedCount int64
+	l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).
+		Where("user_id = ? AND blocked_user_id = ?", req.FriendID, req.UserID).
+		Count(&theyBlockedCount)
+	if theyBlockedCount > 0 {
+		return &types.AddFriendRes{}, nil
 	}
 
 	// 检查目标用户是否存在（通过RPC）
@@ -167,11 +190,13 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 
 		// 通知接收方
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.UserID, req.FriendID, map[string]interface{}{
+			"messageId":    uuid.New().String(),
 			"tableUpdates": tableUpdates,
 		}, "")
 
 		// 通知发送方
 		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.FriendID, req.UserID, map[string]interface{}{
+			"messageId":    uuid.New().String(),
 			"tableUpdates": tableUpdates,
 		}, "")
 

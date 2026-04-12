@@ -7,9 +7,12 @@ type (
 		Type    uint32 `json:"type"` // 文件类型：2=图片 3=视频 8=音频 4=文件 (与MsgType枚举保持一致)
 	}
 	CreateMomentReq {
-		UserID  string           `header:"Beaver-User-Id"` // 用户ID
-		Content string           `json:"content"` // 动态内容
-		Files   []CreateFileInfo `json:"files"` // 文件信息列表
+		UserID     string           `header:"Beaver-User-Id"` // 用户ID
+		Content    string           `json:"content"` // 动态内容
+		Files      []CreateFileInfo `json:"files"` // 文件信息列表
+		Visibility int64            `json:"visibility,optional"` // 可见性：0=所有人（默认）1=仅好友 2=仅自己
+		AllowList  []string         `json:"allowList,optional"` // 白名单用户ID（可见性=3时指定可见人）
+		BlockList  []string         `json:"blockList,optional"` // 黑名单用户ID（不让谁看）
 	}
 	CreateMomentFileInfo {
 		FileKey string `json:"fileKey"` // 文件名

@@ -1,0 +1,73 @@
+package logic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/friend/friend_api/internal/svc"
+	"beaver/app/friend/friend_api/internal/types"
+	"beaver/app/friend/friend_models"
+	"beaver/common/ajax"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type DeleteFriendLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+// 删除好友
+func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFriendLogic {
+	return &DeleteFriendLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *types.DeleteFriendRes, err error) {
+	// 查找好友关系
+	var friendModel friend_models.FriendModel
+	if err := l.svcCtx.DB.Where(
+		"((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = false",
+		req.UserID, req.FriendID, req.FriendID, req.UserID,
+	).First(&friendModel).Error; err != nil {
+		return nil, errors.New("好友关系不存在")
+	}
+
+	// 获取下一个版本号并软删除
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend", "", "")
+	if nextVersion == -1 {
+		return nil, errors.New("系统错误")
+	}
+
+	if err := l.svcCtx.DB.Model(&friendModel).Updates(map[string]interface{}{
+		"is_deleted": true,
+		"version":    nextVersion,
+	}).Error; err != nil {
+		return nil, errors.New("删除好友失败")
+	}
+
+	// 异步通知双方同步好友数据
+	go func() {
+		tableUpdates := []map[string]interface{}{
+			{
+				"table": "friends",
+				"data": []map[string]interface{}{
+					{"friendId": friendModel.FriendID, "version": nextVersion},
+				},
+			},
+		}
+		payload := map[string]interface{}{"tableUpdates": tableUpdates}
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive,
+			req.UserID, req.FriendID, payload, "")
+		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive,
+			req.FriendID, req.UserID, payload, "")
+	}()
+
+	return &types.DeleteFriendRes{}, nil
+}

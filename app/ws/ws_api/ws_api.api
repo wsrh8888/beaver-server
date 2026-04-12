@@ -1,8 +1,10 @@
 syntax = "v1"
 
 type wsReq {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，用于身份识别
-	Token  string `header:"token"` // 用户token，用于验证
+	UserID   string `form:"userId"` // 用户ID
+	Token    string `form:"token"` // 用户token
+	Platform string `form:"platform"` // 平台类型
+	DeviceID string `form:"deviceId"` // 设备唯一标识 (GUID)
 }
 
 type IBodySendMsg {
@@ -27,7 +29,7 @@ type Msg {
 
 type wsRes {}
 
-// 代理发送消息请求（用于HTTP API发送消息）
+// 代理发送消息请求（仅限内部服务调用）
 type ProxySendMsgReq {
 	UserID         string                 `header:"Beaver-User-Id"` // 发送者ID
 	Command        string                 `json:"command"` // 命令类型：send（发送）、recall（撤回）

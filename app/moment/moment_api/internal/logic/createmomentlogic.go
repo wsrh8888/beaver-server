@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/app/moment/moment_api/internal/types"
@@ -32,10 +33,13 @@ func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *type
 	// 构造MomentModel实例
 	momentID := uuid.New().String()
 	moment := moment_models.MomentModel{
-		UserID:   req.UserID,
-		Content:  req.Content,
-		MomentID: momentID,
-		Files:    convertFiles(req.Files),
+		UserID:     req.UserID,
+		Content:    req.Content,
+		MomentID:   momentID,
+		Files:      convertFiles(req.Files),
+		Visibility: int8(req.Visibility),
+		AllowList:  strings.Join(req.AllowList, ","),
+		BlockList:  strings.Join(req.BlockList, ","),
 	}
 
 	// 插入数据库

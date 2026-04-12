@@ -164,7 +164,6 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.WithdrawMsg.OriginMsgId = originMsgId
 			}
 			if originMsgMap, ok := withdrawMsg["originMsg"].(map[string]interface{}); ok {
-				// 递归转换快照内容
 				jsonData, _ := json.Marshal(originMsgMap)
 				originMsg, _ := convertToRpcMsg(jsonData)
 				rpcMsg.WithdrawMsg.OriginMsg = originMsg
@@ -177,13 +176,11 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.ReplyMsg.OriginMsgId = originMsgId
 			}
 			if originMsgMap, ok := replyMsg["originMsg"].(map[string]interface{}); ok {
-				// 递归转换被引用的消息快照
 				jsonData, _ := json.Marshal(originMsgMap)
 				originMsg, _ := convertToRpcMsg(jsonData)
 				rpcMsg.ReplyMsg.OriginMsg = originMsg
 			}
 			if replyMsgInnerMap, ok := replyMsg["replyMsg"].(map[string]interface{}); ok {
-				// 递归转换回复的具体消息内容
 				jsonData, _ := json.Marshal(replyMsgInnerMap)
 				replyInnerMsg, _ := convertToRpcMsg(jsonData)
 				rpcMsg.ReplyMsg.ReplyMsg = replyInnerMsg

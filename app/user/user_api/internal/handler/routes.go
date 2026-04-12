@@ -13,10 +13,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 注销账号
+				Method:  http.MethodPost,
+				Path:    "/api/user/deactivate",
+				Handler: deactivateAccountHandler(serverCtx),
+			},
+			{
 				// 获取用户设备列表
 				Method:  http.MethodGet,
 				Path:    "/api/user/devices",
 				Handler: getDevicesHandler(serverCtx),
+			},
+			{
+				// 强制下线指定设备
+				Method:  http.MethodPost,
+				Path:    "/api/user/kick_device",
+				Handler: kickDeviceHandler(serverCtx),
 			},
 			{
 				// 用户数据增量同步（基于用户独立版本号，大厂标准方式）

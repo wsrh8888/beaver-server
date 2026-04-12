@@ -67,6 +67,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getPhoneCodeHandler(serverCtx),
 			},
 			{
+				// 扫码登录-生成二维码（PC 端调用）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/qrcode/generate",
+				Handler: qrcodeGenerateHandler(serverCtx),
+			},
+			{
+				// 扫码登录-确认扫码（移动端调用，需登录）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/qrcode/scan",
+				Handler: qrcodeScanHandler(serverCtx),
+			},
+			{
+				// 扫码登录-轮询状态（PC 端调用）
+				Method:  http.MethodGet,
+				Path:    "/api/auth/qrcode/status",
+				Handler: qrcodeStatusHandler(serverCtx),
+			},
+			{
 				// 找回密码（通过邮箱验证码重置密码）
 				Method:  http.MethodPost,
 				Path:    "/api/auth/reset_password",
