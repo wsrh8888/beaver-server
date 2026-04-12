@@ -30,20 +30,30 @@ func NewChatWebsocketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cha
 		svcCtx: svcCtx,
 	}
 }
-
 func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWriter, r *http.Request) (resp *types.WsRes, err error) {
-	// 1. 升级 HTTP → WebSocket
-	conn, err := upgradeToWebSocket(w, r)
-	if err != nil {
-		logx.Errorf("WebSocket升级失败, 用户: %s, 错误: %v", req.UserID, err)
+	// 1. 基础入口校验：精准识别设备
+	userAgent := r.Header.Get("User-Agent")
+	preciseType := device.GetDeviceType(userAgent)
+	if preciseType == device.DeviceUnknown {
+		logx.Errorf("连接拒绝：非法设备接入, 用户: %s, UA: %s", req.UserID, userAgent)
+		http.Error(w, "Illegal Device", http.StatusForbidden)
 		return nil, nil
 	}
 
-	// 2. 鉴权：JWT 签名 + Redis 登录态
-	if authErr := ws_auth.VerifyWsToken(req.Token, l.svcCtx.Config.Auth.AccessSecret, req.UserID, l.svcCtx.Redis); authErr != nil {
-		logx.Errorf("WS鉴权失败, 用户: %s, 错误: %v", req.UserID, authErr)
-		conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, authErr.Error()))
-		conn.Close()
+	// 2. 获取所属槽位 (Group: mobile/desktop)，用于检索 Redis 登录态
+	deviceGroup := device.GetDeviceGroup(preciseType)
+
+	// 3. 鉴权：先于升级执行。使用槽位 (Group) 进行登录态比对
+	if authErr := ws_auth.VerifyWsToken(req.Token, l.svcCtx.Config.Auth.AccessSecret, req.UserID, deviceGroup, l.svcCtx.Redis); authErr != nil {
+		logx.Errorf("WS鉴权失败, 用户: %s, 精准设备: %s, 槽位: %s, 错误: %v", req.UserID, preciseType, deviceGroup, authErr)
+		http.Error(w, authErr.Error(), http.StatusUnauthorized)
+		return nil, nil
+	}
+
+	// 2. 升级 HTTP → WebSocket
+	conn, err := upgradeToWebSocket(w, r)
+	if err != nil {
+		logx.Errorf("WebSocket升级失败, 用户: %s, 错误: %v", req.UserID, err)
 		return nil, nil
 	}
 
@@ -53,13 +63,12 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	// 4. 封装为 Client（带写 mutex）
 	client := ws_conn.NewClient(conn)
 
-	// 5. 注册连接，从 User-Agent 识别设备类型
-	userAgent := r.Header.Get("User-Agent")
-	deviceType := device.GetDeviceType(userAgent)
-	userKey := ws_conn.GetUserKey(req.UserID, deviceType)
+	// 5. 注册连接：统一使用槽位 (Group) 管理，确保互踢逻辑闭合
+	// 无论具体的 OS 是 windows、macos 还是 linux，在 WS 路由层统一视为 desktop 槽位
+	userKey := ws_conn.GetUserKey(req.UserID, deviceGroup)
 
-	logx.Infof("用户上线: %s, 设备: %s, 地址: %s", req.UserID, deviceType, conn.RemoteAddr().String())
-	manageUserConnection(userKey, client, req.UserID, deviceType)
+	logx.Infof("用户上线: %s, 槽位: %s (%s), 地址: %s", req.UserID, deviceGroup, preciseType, conn.RemoteAddr().String())
+	manageUserConnection(userKey, client, req.UserID, deviceGroup)
 	defer cleanupConnection(req.UserID, conn)
 
 	// 6. 启动心跳
@@ -67,13 +76,13 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	defer heartbeatManager.Stop()
 	heartbeatManager.Start()
 
-	// 7. 消息循环（阻塞直到连接断开）
+	// 7. 消息循环
 	ws.HandleWebSocketMessages(l.ctx, l.svcCtx, req, r, client)
 
 	return nil, nil
 }
 
-func manageUserConnection(userKey string, client *ws_conn.Client, userID, deviceType string) {
+func manageUserConnection(userKey string, client *ws_conn.Client, userID, deviceGroup string) {
 	ws_conn.WsMapMutex.Lock()
 	defer ws_conn.WsMapMutex.Unlock()
 
@@ -81,10 +90,10 @@ func manageUserConnection(userKey string, client *ws_conn.Client, userID, device
 	userWsInfo, ok := ws_conn.UserOnlineWsMap[userKey]
 
 	if ok {
-		// desktop/mobile 限制单连接，关闭旧连接
-		if deviceType == "desktop" || deviceType == "mobile" {
+		// 槽位级互踢：目前 desktop 和 mobile 均限制单物理设备在线
+		if deviceGroup == "desktop" || deviceGroup == "mobile" {
 			for oldAddr, oldClient := range userWsInfo.WsClientMap {
-				logx.Infof("关闭旧连接, 用户: %s, 设备: %s, 地址: %s", userID, deviceType, oldAddr)
+				logx.Infof("【槽位互踢】关闭旧连接, 用户: %s, 槽位: %s, 地址: %s", userID, deviceGroup, oldAddr)
 				oldClient.Conn.Close()
 				delete(userWsInfo.WsClientMap, oldAddr)
 			}
@@ -96,7 +105,7 @@ func manageUserConnection(userKey string, client *ws_conn.Client, userID, device
 		}
 	}
 
-	logx.Infof("连接注册成功, 用户: %s, 设备: %s", userID, deviceType)
+	logx.Infof("连接注册成功, 用户: %s, 槽位: %s", userID, deviceGroup)
 }
 
 func configureWebSocketConn(conn *websocket.Conn, svcCtx *svc.ServiceContext) {
@@ -125,6 +134,7 @@ func cleanupConnection(userID string, conn *websocket.Conn) {
 	ws_conn.WsMapMutex.Lock()
 	defer ws_conn.WsMapMutex.Unlock()
 
+	// 清理所有潜在槽位
 	for _, dt := range []string{"desktop", "mobile", "web", "unknown"} {
 		userKey := ws_conn.GetUserKey(userID, dt)
 		userWsInfo, ok := ws_conn.UserOnlineWsMap[userKey]
@@ -134,7 +144,7 @@ func cleanupConnection(userID string, conn *websocket.Conn) {
 		delete(userWsInfo.WsClientMap, addr)
 		if len(userWsInfo.WsClientMap) == 0 {
 			delete(ws_conn.UserOnlineWsMap, userKey)
-			logx.Infof("用户下线, 用户: %s, 设备: %s", userID, dt)
+			logx.Infof("用户下线, 用户: %s, 槽位: %s", userID, dt)
 		}
 	}
 }

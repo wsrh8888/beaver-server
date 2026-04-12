@@ -15,7 +15,7 @@ import (
 // Client 单个 WebSocket 连接封装，带独立写互斥锁，解决并发写问题
 type Client struct {
 	Conn *websocket.Conn
-	mu   sync.Mutex
+	Mu   sync.Mutex
 }
 
 func NewClient(conn *websocket.Conn) *Client {
@@ -24,15 +24,15 @@ func NewClient(conn *websocket.Conn) *Client {
 
 // SafeSend 线程安全发送业务消息（含 content/data 层）
 func (c *Client) SafeSend(command wsCommandConst.Command, content type_struct.WsContent) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
 	return ws_response.WsResponse(c.Conn, command, content)
 }
 
 // SafeSendControl 线程安全发送控制帧（PING/PONG/ACK，无 content/data 层）
 func (c *Client) SafeSendControl(frame type_struct.WsControlFrame) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
 	data, err := json.Marshal(frame)
 	if err != nil {
 		logx.Errorf("序列化控制帧失败: %v", err)
