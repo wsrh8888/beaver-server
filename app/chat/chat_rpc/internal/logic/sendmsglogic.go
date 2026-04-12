@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/chat/chat_utils"
 	"beaver/app/friend/friend_models"
+	"beaver/app/group/group_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/ajax"
 	"beaver/common/models/ctype"
@@ -250,10 +252,44 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			return nil, errors.New("无效的私聊会话ID")
 		}
 
-		var friend friend_models.FriendModel
-		if !friend.IsFriend(l.svcCtx.DB, userIds[0], userIds[1]) {
+		var friendModel friend_models.FriendModel
+		if !friendModel.IsFriend(l.svcCtx.DB, userIds[0], userIds[1]) {
 			logx.Errorf("不是好友关系，用户IDs: %v", userIds)
 			return nil, errors.New("不是好友关系")
+		}
+
+		// 黑名单检查（双向）：任一方拉黑对方均无法发消息
+		var blockCount int64
+		l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).
+			Where("(user_id = ? AND blocked_user_id = ?) OR (user_id = ? AND blocked_user_id = ?)",
+				userIds[0], userIds[1], userIds[1], userIds[0]).
+			Count(&blockCount)
+		if blockCount > 0 {
+			return nil, errors.New("无法发送消息")
+		}
+	} else if conversationType == 2 {
+		// 群聊：禁言检查
+		groupID := conversation.GetTargetIDByConversation(in.ConversationId, in.UserId)
+
+		var member group_models.GroupMemberModel
+		if err := l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", groupID, in.UserId).
+			First(&member).Error; err != nil {
+			return nil, errors.New("你不是该群成员")
+		}
+
+		// 群主(1)和管理员(2)不受禁言限制
+		if member.Role != 1 && member.Role != 2 {
+			// 全员禁言检查
+			var group group_models.GroupModel
+			if err := l.svcCtx.DB.Where("group_id = ?", groupID).First(&group).Error; err == nil {
+				if group.IsMuteAll {
+					return nil, errors.New("当前群已开启全员禁言")
+				}
+			}
+			// 个人禁言检查
+			if member.MutedUntil != nil && member.MutedUntil.After(time.Now()) {
+				return nil, errors.New("你已被禁言")
+			}
 		}
 	}
 

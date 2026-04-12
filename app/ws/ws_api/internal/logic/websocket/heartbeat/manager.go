@@ -2,13 +2,11 @@ package heartbeat
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
+	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
-	ws_response "beaver/app/ws/ws_api/response"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
 
@@ -16,21 +14,33 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// Manager 心跳管理器
+// HandleClientPing 收到客户端 PING，立即回复 PONG（无状态，echo timestamp）
+func HandleClientPing(client *ws_conn.Client, timestamp int64) {
+	err := client.SafeSendControl(type_struct.WsControlFrame{
+		Command:   wsCommandConst.PONG,
+		Timestamp: timestamp,
+	})
+	if err != nil {
+		fmt.Printf("回复 PONG 失败: 错误: %v, 时间戳: %d\n", err, timestamp)
+	} else {
+		fmt.Printf("已回复 PONG: 时间戳: %d\n", timestamp)
+	}
+}
+
+// Manager 服务端主动心跳管理器
+// 维护协议级 WebSocket ping 帧，确保链路不被中间件（如 Nginx/ELB）超时断开
 type Manager struct {
-	conn   *websocket.Conn
+	client *ws_conn.Client
 	userID string
 	svcCtx *svc.ServiceContext
 	ctx    context.Context
 	cancel context.CancelFunc
-	mu     sync.Mutex // 添加互斥锁保护并发写入
 }
 
-// NewManager 创建心跳管理器
-func NewManager(conn *websocket.Conn, userID string, svcCtx *svc.ServiceContext) *Manager {
+func NewManager(client *ws_conn.Client, userID string, svcCtx *svc.ServiceContext) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Manager{
-		conn:   conn,
+		client: client,
 		userID: userID,
 		svcCtx: svcCtx,
 		ctx:    ctx,
@@ -38,41 +48,26 @@ func NewManager(conn *websocket.Conn, userID string, svcCtx *svc.ServiceContext)
 	}
 }
 
-// Start 启动心跳管理
 func (m *Manager) Start() {
-	go m.startProtocolHeartbeat()
-	go m.startApplicationHeartbeat()
+	// 仅保留底层协议级 ping
+	go m.startProtocolPing()
+	
+	// 注意：此处不再启动 startApplicationPing，因为移动端(Flutter)已实现主动心跳。
+	// 减少心跳噪声，降低 Socket 并发冲突风险。
 }
 
-// Stop 停止心跳管理
 func (m *Manager) Stop() {
 	m.cancel()
 }
 
-// HandleClientHeartbeat 处理客户端心跳
-func (m *Manager) HandleClientHeartbeat(content type_struct.WsContent) {
-	logx.Infof("收到客户端心跳, 用户: %s", m.userID)
-
-	responseContent := type_struct.WsContent{
-		Timestamp: time.Now().UnixMilli(),
-		MessageID: m.generateMessageID("heartbeat_response"),
-		Data: type_struct.WsData{
-			Type: "heartbeat_response",
-			Body: json.RawMessage(fmt.Sprintf(`{"server_time": %d}`, time.Now().UnixMilli())),
-		},
-	}
-
-	m.sendMessage(wsCommandConst.HEARTBEAT, responseContent)
-	logx.Infof("💗 心跳响应发送成功, 用户: %s", m.userID)
-}
-
-// startProtocolHeartbeat 启动协议级心跳
-func (m *Manager) startProtocolHeartbeat() {
+// startProtocolPing 协议级 ping（原始 WebSocket 帧）
+func (m *Manager) startProtocolPing() {
 	pingPeriod := time.Duration(m.svcCtx.Config.WebSocket.PingPeriod) * time.Second
+	if pingPeriod <= 0 {
+		pingPeriod = 30 * time.Second
+	}
 	ticker := time.NewTicker(pingPeriod)
 	defer ticker.Stop()
-
-	logx.Infof("启动协议级心跳, 用户: %s, 间隔: %v", m.userID, pingPeriod)
 
 	for {
 		select {
@@ -80,91 +75,25 @@ func (m *Manager) startProtocolHeartbeat() {
 			return
 		case <-ticker.C:
 			if err := m.sendProtocolPing(); err != nil {
-				logx.Errorf("协议级心跳失败, 用户: %s, 错误: %v", m.userID, err)
+				logx.Errorf("协议级 ping 失败, 用户: %s, 错误: %v", m.userID, err)
 				return
 			}
 		}
 	}
 }
 
-// startApplicationHeartbeat 启动应用级心跳
-func (m *Manager) startApplicationHeartbeat() {
-	interval := m.getAppHeartbeatInterval()
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	logx.Infof("启动应用级心跳, 用户: %s, 间隔: %v", m.userID, interval)
-
-	for {
-		select {
-		case <-m.ctx.Done():
-			return
-		case <-ticker.C:
-			m.sendApplicationHeartbeat()
-		}
-	}
-}
-
-// sendProtocolPing 发送协议级ping
 func (m *Manager) sendProtocolPing() error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	// 重要：使用 Client 统一的互斥锁，严禁并发写 Conn
+	m.client.Mu.Lock()
+	defer m.client.Mu.Unlock()
 
 	writeWait := time.Duration(m.svcCtx.Config.WebSocket.WriteWait) * time.Second
-	if err := m.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+	if writeWait <= 0 {
+		writeWait = 10 * time.Second
+	}
+
+	if err := m.client.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
 		return err
 	}
-
-	if err := m.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-		return err
-	}
-
-	logx.Debugf("💗 协议级心跳成功, 用户: %s", m.userID)
-	return nil
-}
-
-// sendApplicationHeartbeat 发送应用级心跳
-func (m *Manager) sendApplicationHeartbeat() {
-	content := type_struct.WsContent{
-		Timestamp: time.Now().UnixMilli(),
-		MessageID: m.generateMessageID("server_heartbeat"),
-		Data: type_struct.WsData{
-			Type: "server_heartbeat",
-			Body: json.RawMessage(fmt.Sprintf(`{"server_time": %d}`, time.Now().UnixMilli())),
-		},
-	}
-
-	m.sendMessage(wsCommandConst.HEARTBEAT, content)
-	logx.Infof("💓 应用级心跳成功, 用户: %s", m.userID)
-}
-
-// sendMessage 安全发送消息（带锁保护）
-func (m *Manager) sendMessage(command wsCommandConst.Command, content type_struct.WsContent) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	// 检查连接是否已关闭
-	if m.conn == nil {
-		logx.Errorf("WebSocket连接已关闭, 用户: %s", m.userID)
-		return
-	}
-
-	if err := ws_response.WsResponse(m.conn, command, content); err != nil {
-		logx.Errorf("发送WebSocket消息失败, 用户: %s, 错误: %v", m.userID, err)
-		// 如果发送失败，可能需要关闭连接
-		m.conn.Close()
-	}
-}
-
-// getAppHeartbeatInterval 获取应用级心跳间隔
-func (m *Manager) getAppHeartbeatInterval() time.Duration {
-	if m.svcCtx.Config.WebSocket.AppHeartbeatInterval > 0 {
-		return time.Duration(m.svcCtx.Config.WebSocket.AppHeartbeatInterval) * time.Second
-	}
-	return time.Duration(m.svcCtx.Config.WebSocket.PingPeriod*2) * time.Second
-}
-
-// generateMessageID 生成消息ID
-func (m *Manager) generateMessageID(prefix string) string {
-	return fmt.Sprintf("%s_%d_%s", prefix, time.Now().UnixNano(), m.userID)
+	return m.client.Conn.WriteMessage(websocket.PingMessage, []byte{})
 }

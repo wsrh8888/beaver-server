@@ -166,6 +166,52 @@ type (
 	}
 )
 
+// 删除好友
+type (
+	DeleteFriendReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		FriendID string `json:"friendId"` // 要删除的好友用户ID
+	}
+	DeleteFriendRes  {}
+)
+
+// 拉黑用户
+type (
+	BlockUserReq {
+		UserID        string `header:"Beaver-User-Id"` // 当前用户ID
+		BlockedUserID string `json:"blockedUserId"` // 被拉黑的用户ID
+	}
+	BlockUserRes  {}
+)
+
+// 取消拉黑
+type (
+	UnblockUserReq {
+		UserID        string `header:"Beaver-User-Id"` // 当前用户ID
+		BlockedUserID string `json:"blockedUserId"` // 要取消拉黑的用户ID
+	}
+	UnblockUserRes  {}
+)
+
+// 获取黑名单列表
+type (
+	BlockListReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID
+		Page   int    `form:"page,optional"` // 页码，可选，默认1
+		Limit  int    `form:"limit,optional"` // 每页数量，可选，默认20
+	}
+	BlockUserInfo {
+		UserID   string `json:"userId"` // 被拉黑用户ID
+		NickName string `json:"nickName"` // 用户昵称
+		Avatar   string `json:"avatar"` // 用户头像文件名
+		BlockID  string `json:"blockId"` // 黑名单记录ID
+	}
+	BlockListRes {
+		List  []BlockUserInfo `json:"list"` // 黑名单列表
+		Count int64           `json:"count"` // 总数
+	}
+)
+
 service friend {
 	@doc "发送好友验证请求"
 	@handler addFriend
@@ -206,6 +252,22 @@ service friend {
 	@doc "批量获取好友验证数据（通过ID）"
 	@handler getFriendVerifiesListByIds
 	post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
+
+	@doc "删除好友"
+	@handler deleteFriend
+	delete /api/friend/friend (DeleteFriendReq) returns (DeleteFriendRes)
+
+	@doc "拉黑用户"
+	@handler blockUser
+	post /api/friend/block (BlockUserReq) returns (BlockUserRes)
+
+	@doc "取消拉黑"
+	@handler unblockUser
+	delete /api/friend/block (UnblockUserReq) returns (UnblockUserRes)
+
+	@doc "获取黑名单列表"
+	@handler blockList
+	get /api/friend/block_list (BlockListReq) returns (BlockListRes)
 }
 
 // goctl api go -api friend_api.api -dir . --home ../../../template

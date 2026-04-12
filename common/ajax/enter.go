@@ -13,6 +13,17 @@ import (
 	"beaver/common/wsEnum/wsTypeConst"    // Import the wsCommandConst package
 )
 
+// 内部通讯密钥中心
+const (
+	// InternalSecret 内部服务互访密钥（如：Friend -> WS）
+	InternalSecret = "beaver-internal-shared-secret-2026"
+	// ExternalSecret 外部业务安全密钥
+	ExternalSecret = "beaver-external-security-key-2026"
+)
+
+// WsInternalSecret 兼容旧逻辑，实际优先使用常量
+var WsInternalSecret = InternalSecret
+
 type ForwardRequest struct {
 	ApiEndpoint string
 	Method      string
@@ -27,7 +38,7 @@ type Response struct {
 	Result json.RawMessage `json:"result"`
 }
 type WsProxyReq struct {
-	UserID         string                 `header:"Beaver-User-Id"`
+	UserID         string                 `header:"Beaver-User-Id" json:"-"`
 	Command        wsCommandConst.Command `json:"command"`
 	TargetID       string                 `json:"targetId"`
 	Type           wsTypeConst.Type       `json:"type"`
@@ -83,8 +94,9 @@ func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Token", forwardReq.Token)           // 使用Token进行鉴权
-	req.Header.Set("Beaver-User-Id", forwardReq.UserID) // 使用Token进行鉴权
+	req.Header.Set("Token", forwardReq.Token)
+	req.Header.Set("Beaver-User-Id", forwardReq.UserID)
+	req.Header.Set("X-Internal-Secret", WsInternalSecret)
 
 	resp, err := client.Do(req)
 	if err != nil {

@@ -1,33 +1,51 @@
-﻿package device
+package device
 
 import (
 	"strings"
 )
 
-// 根据User-Agent识别设备类型
+const (
+	DeviceIOS     = "ios"
+	DeviceAndroid = "android"
+	DeviceWindows = "windows"
+	DeviceMacOS   = "macos"
+	DeviceLinux   = "linux"
+	DeviceUnknown = "illegal" // 不再使用 unknown，改用 illegal 标识非法接入
+)
+
+// GetDeviceType 根据 User-Agent 识别精准 OS
 func GetDeviceType(userAgent string) string {
-	userAgent = strings.ToLower(userAgent)
+	ua := strings.ToLower(userAgent)
 
-	// 识别桌面端
-	if strings.Contains(userAgent, "beaver_desktop_windows") {
-		return "desktop"
-	} else if strings.Contains(userAgent, "beaver_desktop_macos") {
-		return "desktop"
-	} else if strings.Contains(userAgent, "beaver_desktop_linux") {
-		return "desktop"
+	if strings.Contains(ua, "beaver_desktop_windows") {
+		return DeviceWindows
+	}
+	if strings.Contains(ua, "beaver_desktop_macos") {
+		return DeviceMacOS
+	}
+	if strings.Contains(ua, "beaver_desktop_linux") {
+		return DeviceLinux
+	}
+	if strings.Contains(ua, "beaver_mobile_ios") {
+		return DeviceIOS
+	}
+	if strings.Contains(ua, "beaver_mobile_android") {
+		return DeviceAndroid
 	}
 
-	// 识别移动端
-	if strings.Contains(userAgent, "beaver_mobile_android") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "beaver_mobile_ios") {
-		return "mobile"
-	} else if strings.Contains(userAgent, "beaver_mobile_harmonyos") {
-		return "mobile"
-	}
+	return DeviceUnknown
+}
 
-	// 不是桌面端和移动端的，剩下的都是web端
-	return "web"
+// GetDeviceGroup 获取设备族群，用于同族互踢（大厂通用逻辑：1个手机 + 1个电脑在线）
+func GetDeviceGroup(deviceType string) string {
+	switch deviceType {
+	case DeviceWindows, DeviceMacOS, DeviceLinux:
+		return "desktop"
+	case DeviceIOS, DeviceAndroid:
+		return "mobile"
+	default:
+		return "unknown"
+	}
 }
 
 // 验证设备ID格式

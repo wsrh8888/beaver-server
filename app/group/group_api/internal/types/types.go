@@ -254,6 +254,26 @@ type GroupVersionSyncItem struct {
 	Version int64  `json:"version"` // 本地版本号
 }
 
+type MuteAllGroupReq struct {
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（群主或管理员）
+	GroupID   string `json:"groupId"`          // 群ID
+	IsMuteAll bool   `json:"isMuteAll"`        // true=开启全员禁言，false=关闭
+}
+
+type MuteAllGroupRes struct {
+	Version int64 `json:"version"` // 群组新版本号
+}
+
+type MuteGroupMemberReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（群主或管理员）
+	GroupID  string `json:"groupId"`          // 群ID
+	MemberID string `json:"memberId"`         // 被操作的成员ID
+	Duration int64  `json:"duration"`         // 禁言时长（分钟），0=解禁
+}
+
+type MuteGroupMemberRes struct {
+}
+
 type TransferOwnerReq struct {
 	UserID     string `header:"Beaver-User-Id"` // 当前群主ID
 	GroupID    string `json:"groupId"`          // 群组ID

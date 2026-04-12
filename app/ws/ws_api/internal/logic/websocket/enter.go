@@ -6,58 +6,84 @@ import (
 	"fmt"
 	"net/http"
 
-	"beaver/app/ws/ws_api/internal/logic/websocket/chat_message"
+	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
+	"beaver/app/ws/ws_api/internal/logic/websocket/handler/call"
+	"beaver/app/ws/ws_api/internal/logic/websocket/handler/chat_message"
+	"beaver/app/ws/ws_api/internal/logic/websocket/handler/friend_operation"
+	"beaver/app/ws/ws_api/internal/logic/websocket/handler/group_operation"
 	"beaver/app/ws/ws_api/internal/logic/websocket/heartbeat"
-	"beaver/app/ws/ws_api/internal/logic/websocket/proxy_message"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
 
 	"github.com/gorilla/websocket"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
-func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r *http.Request, conn *websocket.Conn, heartbeatManager *heartbeat.Manager) {
+func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r *http.Request, client *ws_conn.Client) {
 	for {
-		_, p, err := conn.ReadMessage()
+		_, p, err := client.Conn.ReadMessage()
 		if err != nil {
-			// 检查是否是正常关闭或网络错误
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				fmt.Printf("WebSocket连接异常关闭, 用户: %s, 错误: %v\n", req.UserID, err)
 			} else {
-				// 正常关闭包括 CloseNormalClosure (1000)
-				fmt.Printf("WebSocket连接正常关闭, 用户: %s, 错误: %v\n", req.UserID, err)
+				fmt.Printf("WebSocket连接正常关闭, 用户: %s\n", req.UserID)
 			}
 			break
 		}
 
 		var wsMessage type_struct.WsMessage
-		fmt.Printf("收到ws消息, 用户: %s, 内容: %s\n", req.UserID, string(p))
-
-		err = json.Unmarshal(p, &wsMessage)
-		if err != nil {
-			fmt.Printf("消息解析错误, 用户: %s, 错误: %s, 原始消息: %s\n", req.UserID, err.Error(), string(p))
+		if err = json.Unmarshal(p, &wsMessage); err != nil {
+			fmt.Printf("消息解析错误, 用户: %s, 错误: %s\n", req.UserID, err.Error())
 			continue
 		}
 
 		if wsMessage.Command == "" {
-			fmt.Printf("command不能为空, 用户: %s, 消息: %s\n", req.UserID, string(p))
 			continue
 		}
 
-		switch wsCommandConst.Command(wsMessage.Command) {
+		cmd := wsCommandConst.Command(wsMessage.Command)
+
+		// 控制帧：PING/PONG 直接处理，不发 ACK
+		switch cmd {
+		case wsCommandConst.PING:
+			fmt.Printf("收到 PING: 用户: %s, 原始时间戳: %d\n", req.UserID, wsMessage.Content.Timestamp)
+			heartbeat.HandleClientPing(client, wsMessage.Content.Timestamp)
+			continue
+		case wsCommandConst.PONG:
+			// 收到客户端对服务端 PING 的回复，无需处理
+			fmt.Printf("收到 PONG: 用户: %s, 时间戳: %d\n", req.UserID, wsMessage.Content.Timestamp)
+			continue
+		case wsCommandConst.USER_PROFILE, wsCommandConst.NOTIFICATION, wsCommandConst.EMOJI:
+			// 仅服务端推送，客户端不应发送
+			fmt.Printf("客户端不应发送此命令, 用户: %s, 命令: %s\n", req.UserID, cmd)
+			continue
+		}
+
+		// 业务命令：立即发送 ACK（表示服务端已收到），再处理
+		msgId := wsMessage.Content.MessageID
+		client.SafeSendControl(type_struct.WsControlFrame{
+			Command:   wsCommandConst.ACK,
+			MessageID: msgId,
+		})
+
+		var handlerErr error
+		switch cmd {
 		case wsCommandConst.CHAT_MESSAGE:
-			chat_message.HandleChatMessageTypes(ctx, svcCtx, req, r, conn, wsMessage.Content)
+			handlerErr = chat_message.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
 		case wsCommandConst.FRIEND_OPERATION:
-			proxy_message.HandleProxyMessageTypes(ctx, svcCtx, req, r, conn, wsMessage.Content)
-		case wsCommandConst.HEARTBEAT:
-			// 添加调试信息
-			fmt.Printf("处理心跳消息, 用户: %s, 命令: %s\n", req.UserID, wsMessage.Command)
-			// 使用心跳管理器处理心跳
-			heartbeatManager.HandleClientHeartbeat(wsMessage.Content)
+			handlerErr = friend_operation.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
+		case wsCommandConst.GROUP_OPERATION:
+			handlerErr = group_operation.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
+		case wsCommandConst.CALL:
+			handlerErr = call.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
 		default:
-			fmt.Printf("未支持的消息类型, 用户: %s, 命令: %s, 命令类型: %T\n", req.UserID, wsMessage.Command, wsMessage.Command)
-			fmt.Printf("HEARTBEAT常量值: %s, 命令值: %s, 是否相等: %v\n", wsCommandConst.HEARTBEAT, wsMessage.Command, wsCommandConst.HEARTBEAT == wsCommandConst.Command(wsMessage.Command))
+			fmt.Printf("未支持的命令类型, 用户: %s, 命令: %s\n", req.UserID, wsMessage.Command)
+		}
+
+		if handlerErr != nil {
+			logx.Errorf("处理命令失败, 用户: %s, 命令: %s, 错误: %v", req.UserID, cmd, handlerErr)
 		}
 	}
 }

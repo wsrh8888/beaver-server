@@ -170,8 +170,8 @@ type (
 		JoinType       int8   `json:"joinType"` // 加入方式
 		Status         int8   `json:"status"` // 群状态
 		ConversationID string `json:"conversationId"` // 会话ID
-		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
-		UpdatedAt       int64  `json:"updatedAt"` // 更新时间戳
+		CreatedAt      int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt      int64  `json:"updatedAt"` // 更新时间戳
 		Version        int64  `json:"version"` // 数据版本号
 	}
 )
@@ -197,8 +197,8 @@ type (
 		JoinType  int8   `json:"joinType"` // 加入方式
 		Status    int8   `json:"status"` // 群状态：1正常 2冻结 3解散
 		Version   int64  `json:"version"` // 版本号
-		CreatedAt  int64  `json:"createdAt"` // 创建时间戳
-		UpdatedAt  int64  `json:"updatedAt"` // 更新时间戳
+		CreatedAt int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 
@@ -212,12 +212,12 @@ type (
 		GroupMembers []GroupMemberSyncItem `json:"groupMembers"` // 群成员变化
 	}
 	GroupMemberSyncItem {
-		GroupID  string `json:"groupId"` // 群组ID
-		UserID   string `json:"userId"` // 用户ID
-		Role     int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
-		Status   int8   `json:"status"` // 成员状态：1正常 2退出 3被踢
-		JoinTime int64  `json:"joinTime"` // 加入时间戳
-		Version  int64  `json:"version"` // 版本号
+		GroupID   string `json:"groupId"` // 群组ID
+		UserID    string `json:"userId"` // 用户ID
+		Role      int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
+		Status    int8   `json:"status"` // 成员状态：1正常 2退出 3被踢
+		JoinTime  int64  `json:"joinTime"` // 加入时间戳
+		Version   int64  `json:"version"` // 版本号
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
@@ -240,8 +240,8 @@ type (
 		HandledBy       string `json:"handledBy"` // 处理者ID
 		HandledAt       int64  `json:"handledAt"` // 处理时间戳
 		Version         int64  `json:"version"` // 版本号
-		CreatedAt        int64  `json:"createdAt"` // 创建时间戳
-		UpdatedAt        int64  `json:"updatedAt"` // 更新时间戳
+		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
+		UpdatedAt       int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 
@@ -283,7 +283,7 @@ type (
 		ApplicantAvatar string `json:"applicantAvatar"` // 申请者头像
 		Message         string `json:"message"` // 申请消息
 		Status          int8   `json:"status"` // 状态：0待审 1同意 2拒绝
-		CreatedAt        int64  `json:"createdAt"` // 申请时间戳
+		CreatedAt       int64  `json:"createdAt"` // 申请时间戳
 		Version         int64  `json:"version"` // 数据版本号
 	}
 	GroupJoinRequestListRes {
@@ -301,6 +301,29 @@ type (
 	}
 	GroupJoinRequestHandleRes {
 		Version int64 `json:"version"` // 入群申请新版本号
+	}
+)
+
+// 禁言/解禁群成员（duration=0 解禁，正值=禁言分钟数）
+type (
+	MuteGroupMemberReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID（群主或管理员）
+		GroupID  string `json:"groupId"` // 群ID
+		MemberID string `json:"memberId"` // 被操作的成员ID
+		Duration int64  `json:"duration"` // 禁言时长（分钟），0=解禁
+	}
+	MuteGroupMemberRes  {}
+)
+
+// 全员禁言/解禁
+type (
+	MuteAllGroupReq {
+		UserID    string `header:"Beaver-User-Id"` // 当前用户ID（群主或管理员）
+		GroupID   string `json:"groupId"` // 群ID
+		IsMuteAll bool   `json:"isMuteAll"` // true=开启全员禁言，false=关闭
+	}
+	MuteAllGroupRes {
+		Version int64 `json:"version"` // 群组新版本号
 	}
 )
 
@@ -393,6 +416,14 @@ service group {
 	@doc "搜索群组"
 	@handler searchGroups
 	get /api/group/search (GroupSearchReq) returns (GroupSearchRes)
+
+	@doc "禁言/解禁群成员"
+	@handler muteGroupMember
+	post /api/group/member/mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
+
+	@doc "全员禁言/解禁"
+	@handler muteAllGroup
+	put /api/group/mute-all (MuteAllGroupReq) returns (MuteAllGroupRes)
 }
 
 // goctl api go -api group_api.api -dir . --home ../../../template

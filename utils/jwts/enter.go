@@ -9,6 +9,7 @@ import (
 type JwtPayLoad struct {
 	NickName string `json:"nickName"`
 	UserID   string `json:"userId"`
+	DeviceID string `json:"deviceId"` // 绑定的物理设备唯一标识 (GUID)
 }
 
 type CustomClaims struct {

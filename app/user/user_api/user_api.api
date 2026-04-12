@@ -82,18 +82,36 @@ type (
 		Users []UserSyncItem `json:"users"` // 用户列表
 	}
 	UserSyncItem {
-		UserID   string `json:"userId"` // 用户ID
-		NickName string `json:"nickName"` // 用户昵称
-		Avatar   string `json:"avatar"` // 用户头像
-		Abstract string `json:"abstract"` // 个性签名
-		Phone    string `json:"phone"` // 手机号
-		Email    string `json:"email"` // 邮箱
-		Gender   int8   `json:"gender"` // 性别
-		Status   int8   `json:"status"` // 状态
-		Version  int64  `json:"version"` // 版本号
+		UserID    string `json:"userId"` // 用户ID
+		NickName  string `json:"nickName"` // 用户昵称
+		Avatar    string `json:"avatar"` // 用户头像
+		Abstract  string `json:"abstract"` // 个性签名
+		Phone     string `json:"phone"` // 手机号
+		Email     string `json:"email"` // 邮箱
+		Gender    int8   `json:"gender"` // 性别
+		Status    int8   `json:"status"` // 状态
+		Version   int64  `json:"version"` // 版本号
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
+)
+
+// 强制下线指定设备
+type (
+	KickDeviceReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		DeviceID string `json:"deviceId"` // 要踢下线的设备ID
+	}
+	KickDeviceRes  {}
+)
+
+// 注销账号
+type (
+	DeactivateAccountReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		Password string `json:"password"` // 确认密码，防止误操作
+	}
+	DeactivateAccountRes  {}
 )
 
 // 用户服务
@@ -121,6 +139,14 @@ service user {
 	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
 	post /api/user/sync (UserSyncReq) returns (UserSyncRes)
+
+	@doc "强制下线指定设备"
+	@handler kickDevice
+	post /api/user/kick_device (KickDeviceReq) returns (KickDeviceRes)
+
+	@doc "注销账号"
+	@handler deactivateAccount
+	post /api/user/deactivate (DeactivateAccountReq) returns (DeactivateAccountRes)
 }
 
 // 生成代码命令

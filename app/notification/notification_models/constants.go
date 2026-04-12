@@ -16,6 +16,7 @@ const (
 	// 群相关
 	EventTypeGroupJoinRequest = "group_join_request"
 	EventTypeGroupLeft        = "group_left"
+
 )
 
 // 分类常量

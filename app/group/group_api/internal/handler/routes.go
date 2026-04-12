@@ -73,6 +73,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: groupMemberSyncHandler(serverCtx),
 			},
 			{
+				// 禁言/解禁群成员
+				Method:  http.MethodPost,
+				Path:    "/api/group/member/mute",
+				Handler: muteGroupMemberHandler(serverCtx),
+			},
+			{
 				// 更新群成员角色
 				Method:  http.MethodPost,
 				Path:    "/api/group/member/role",
@@ -95,6 +101,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/group/members",
 				Handler: getGroupMembersHandler(serverCtx),
+			},
+			{
+				// 全员禁言/解禁
+				Method:  http.MethodPut,
+				Path:    "/api/group/mute-all",
+				Handler: muteAllGroupHandler(serverCtx),
 			},
 			{
 				// 退出群组
