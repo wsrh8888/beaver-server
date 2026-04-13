@@ -15,14 +15,14 @@ jobs:
         with:
           fetch-depth: 0  # 获取完整历史
       
-      - name: 安装 Python 和依赖
+      - name: 安装 Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'  # 使用 3.11 避免版本警告
       
       - name: 安装扫描工具
         run: |
-          pip install semgrep google-generativeai
+          pip install semgrep google-genai  # 使用新版 API
       
       - name: 运行代码扫描
         run: |
@@ -35,22 +35,26 @@ jobs:
           python << 'PYTHON_SCRIPT'
           import json
           import os
-          import google.generativeai as genai
+          from google import genai
           
-          # 配置 Gemini
-          genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-          model = genai.GenerativeModel('gemini-1.5-flash')
+          # 配置 Gemini 3
+          client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
           
           # 读取扫描结果
-          with open('scan_results.json', 'r') as f:
-              data = json.load(f)
+          try:
+              with open('scan_results.json', 'r') as f:
+                  data = json.load(f)
+          except FileNotFoundError:
+              print("没有扫描结果文件")
+              exit(0)
           
           if not data.get('results'):
               print("没有发现问题")
               exit(0)
           
           # 只处理前3个高危问题（避免刷屏）
-          issues = [r for r in data['results'] if r.get('extra', {}).get('severity') in ['ERROR', 'WARNING']][:3]
+          issues = [r for r in data['results'] 
+                   if r.get('extra', {}).get('severity') in ['ERROR', 'WARNING']][:3]
           
           if not issues:
               print("没有高危问题")
@@ -73,8 +77,12 @@ jobs:
           - 包含文件路径、行号等信息
           """
           
-          # 调用 Gemini
-          response = model.generate_content(prompt)
+          # 调用 Gemini 3 Pro
+          response = client.models.generate_content(
+              model='gemini-3-pro',  # 使用 Gemini 3
+              contents=prompt
+          )
+          
           fix_content = response.text
           
           # 保存修复补丁
@@ -100,7 +108,7 @@ jobs:
           if git apply fix.patch 2>/dev/null; then
             git add .
             git commit -m "🤖 [AI自动修复] 安全漏洞修复
-
+            
             本 PR 由 AI 自动生成，请仔细审核后再合并。
             
             修复内容：
