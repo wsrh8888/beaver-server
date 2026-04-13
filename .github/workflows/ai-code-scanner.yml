@@ -45,6 +45,65 @@ jobs:
           import os
           import time
           
+          def strip_git_ab_prefix(path_token):
+              if path_token.startswith(("a/", "b/")):
+                  return path_token[2:]
+              return path_token
+          
+          def resolve_repo_file_path(rel):
+              """若补丁路径与仓库不一致（常见缺少 app/），映射到真实存在的文件路径。"""
+              if rel == "/dev/null":
+                  return rel
+              candidates = []
+              seen = set()
+              def add(p):
+                  if p and p not in seen:
+                      seen.add(p)
+                      candidates.append(p)
+              add(rel)
+              if not rel.startswith("app/"):
+                  add("app/" + rel)
+              if rel.startswith("app/"):
+                  add(rel[4:])
+              for c in candidates:
+                  if os.path.isfile(c):
+                      return c
+              return rel
+          
+          def parse_diff_header_rest(rest):
+              """rest 为 ---/+++ 行去掉前缀后的内容，含可选 \\t 时间戳。"""
+              if rest.startswith("/dev/null"):
+                  return "/dev/null", rest[len("/dev/null") :]
+              tab = rest.find("\t")
+              if tab == -1:
+                  return rest.strip(), ""
+              return rest[:tab].strip(), rest[tab:]
+          
+          def rebuild_diff_header(kind, resolved_path, suffix):
+              if resolved_path == "/dev/null":
+                  return f"{kind} /dev/null{suffix}"
+              side = "a" if kind == "---" else "b"
+              return f"{kind} {side}/{resolved_path}{suffix}"
+          
+          def remap_unified_diff_paths(patch_text):
+              out = []
+              for line in patch_text.splitlines():
+                  if line.startswith("---"):
+                      kind = "---"
+                      rest = line[3:].lstrip()
+                  elif line.startswith("+++"):
+                      kind = "+++"
+                      rest = line[3:].lstrip()
+                  else:
+                      out.append(line)
+                      continue
+                  path_token, sfx = parse_diff_header_rest(rest)
+                  raw = strip_git_ab_prefix(path_token)
+                  fixed = resolve_repo_file_path(raw)
+                  out.append(rebuild_diff_header(kind, fixed, sfx))
+              body = "\n".join(out).strip()
+              return (body + "\n") if body else ""
+          
           MAX_ATTEMPTS = 5
           BASE_DELAY_SEC = 5
           
@@ -159,7 +218,8 @@ jobs:
           
           要求：
           - 只修复确认的漏洞，不要改动其他代码
-          - diff 格式必须严格遵守 Git unified diff（以 --- 行开头），路径与仓库内相对路径一致
+          - diff 格式必须严格遵守 Git unified diff（以 --- 行开头）
+          - --- / +++ 中的文件路径必须与上方 JSON 里每条 finding 的 path 字段完全一致（相对仓库根目录；本仓库代码多在 app/ 下）
           - 不要输出任何说明文字、不要用 markdown 代码块（不要用三个反引号包裹），只输出可被 git apply 的补丁正文
           """
           
@@ -168,6 +228,9 @@ jobs:
           if not fix_content.strip():
               print("模型未返回可用的补丁内容")
               exit(0)
+          
+          # 将模型省略的 app/ 等前缀纠正为仓库内真实路径，避免 git apply 找不到文件
+          fix_content = remap_unified_diff_paths(fix_content)
           
           # 保存修复补丁
           with open('fix.patch', 'w', encoding="utf-8") as f:
