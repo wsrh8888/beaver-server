@@ -79,7 +79,7 @@ jobs:
           
           # 调用 Gemini 3 Pro
           response = client.models.generate_content(
-              model='gemini-2.0-flash',  # 使用 Gemini 3
+              model='gemini-1.5-flash',  # 使用 Gemini 3
               contents=prompt
           )
           
