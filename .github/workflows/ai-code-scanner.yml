@@ -35,10 +35,33 @@ jobs:
           python << 'PYTHON_SCRIPT'
           import json
           import os
+          import time
           from google import genai
+          from google.genai.errors import ServerError
           
           # 配置 Gemini 3
           client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+          
+          # API 瞬时过载（503 等）时重试：最多 5 次，指数退避，单次等待上限 60 秒
+          MAX_ATTEMPTS = 5
+          BASE_DELAY_SEC = 5
+          
+          def generate_with_retry(model, contents):
+              for attempt in range(MAX_ATTEMPTS):
+                  try:
+                      return client.models.generate_content(model=model, contents=contents)
+                  except ServerError as e:
+                      status = getattr(e, "status_code", None) or getattr(e, "code", None)
+                      transient = status in (429, 500, 502, 503, 504)
+                      if transient and attempt < MAX_ATTEMPTS - 1:
+                          delay = min(60, BASE_DELAY_SEC * (2 ** attempt))
+                          print(
+                              f"API 暂不可用 (HTTP {status})，"
+                              f"第 {attempt + 1}/{MAX_ATTEMPTS} 次尝试，{delay} 秒后重试..."
+                          )
+                          time.sleep(delay)
+                      else:
+                          raise
           
           # 读取扫描结果
           try:
@@ -77,10 +100,10 @@ jobs:
           - 包含文件路径、行号等信息
           """
           
-          # 调用 Gemini 3 Pro
-          response = client.models.generate_content(
-              model='gemini-2.5-flash',  # 使用 Gemini 3
-              contents=prompt
+          # 调用 Gemini（含 503/过载 重试）
+          response = generate_with_retry(
+              model='gemini-2.5-flash',
+              contents=prompt,
           )
           
           fix_content = response.text
