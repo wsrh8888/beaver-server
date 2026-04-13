@@ -78,6 +78,17 @@ jobs:
                       else:
                           raise
           
+          def normalize_unified_diff(text):
+              """去掉模型常加的 markdown 围栏，统一换行，便于 git apply。"""
+              t = (text or "").strip().replace("\r\n", "\n")
+              lines = t.split("\n")
+              if lines and lines[0].strip().startswith("```"):
+                  lines = lines[1:]
+                  while lines and lines[-1].strip().startswith("```"):
+                      lines = lines[:-1]
+              body = "\n".join(lines).strip()
+              return (body + "\n") if body else ""
+          
           def generate_text(prompt):
               provider = env_default("AI_PROVIDER", "deepseek").lower()
               if provider == "gemini":
@@ -148,15 +159,18 @@ jobs:
           
           要求：
           - 只修复确认的漏洞，不要改动其他代码
-          - diff 格式必须严格遵守 Git 标准
-          - 包含文件路径、行号等信息
+          - diff 格式必须严格遵守 Git unified diff（以 --- 行开头），路径与仓库内相对路径一致
+          - 不要输出任何说明文字、不要用 markdown 代码块（不要用三个反引号包裹），只输出可被 git apply 的补丁正文
           """
           
           # 按 AI_PROVIDER 调用对应 API（含瞬时过载重试）
-          fix_content = generate_text(prompt)
+          fix_content = normalize_unified_diff(generate_text(prompt))
+          if not fix_content.strip():
+              print("模型未返回可用的补丁内容")
+              exit(0)
           
           # 保存修复补丁
-          with open('fix.patch', 'w') as f:
+          with open('fix.patch', 'w', encoding="utf-8") as f:
               f.write(fix_content)
           
           print("AI 分析完成")
@@ -174,8 +188,8 @@ jobs:
           BRANCH_NAME="ai-security-fix-$(date +%Y%m%d-%H%M%S)"
           git checkout -b $BRANCH_NAME
           
-          # 尝试应用补丁
-          if git apply fix.patch 2>/dev/null; then
+          # 尝试应用补丁（勿屏蔽 stderr，便于在日志中看到 git 的具体报错）
+          if git apply --verbose fix.patch; then
             git add .
             git commit -m "🤖 [AI自动修复] 安全漏洞修复
             
@@ -211,7 +225,9 @@ jobs:
               *由 GitHub Actions 自动触发*" \
               --label "security,ai-generated,needs-review"
           else
-            echo "❌ 补丁应用失败，请手动检查"
+            echo "❌ git apply 失败。常见原因：补丁不是标准 unified diff、文件路径与仓库不一致、上下文不匹配。"
+            echo "---- fix.patch 前 120 行（便于对照）----"
+            head -n 120 fix.patch || true
             exit 1
           fi
         env:
