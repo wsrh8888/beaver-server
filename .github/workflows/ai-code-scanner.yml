@@ -43,6 +43,7 @@ jobs:
           python << 'PYTHON_SCRIPT'
           import json
           import os
+          import re
           import time
           
           def strip_git_ab_prefix(path_token):
@@ -101,6 +102,81 @@ jobs:
                   raw = strip_git_ab_prefix(path_token)
                   fixed = resolve_repo_file_path(raw)
                   out.append(rebuild_diff_header(kind, fixed, sfx))
+              body = "\n".join(out).strip()
+              return (body + "\n") if body else ""
+          
+          def merge_duplicate_file_headers(patch_text):
+              """同一文件重复出现 ---/+++ 时 git apply 会判损坏；应合并为单头 + 多个 @@。"""
+              lines = patch_text.splitlines()
+              out = []
+              prev_pair = None
+              i = 0
+              while i < len(lines):
+                  line = lines[i]
+                  if (
+                      i + 1 < len(lines)
+                      and line.startswith("---")
+                      and lines[i + 1].startswith("+++")
+                  ):
+                      pair = (line, lines[i + 1])
+                      if pair == prev_pair:
+                          i += 2
+                          continue
+                      prev_pair = pair
+                  out.append(line)
+                  i += 1
+              body = "\n".join(out).strip()
+              return (body + "\n") if body else ""
+          
+          def fix_unified_diff_hunk_counts(patch_text):
+              """按 hunk 正文重算 @@ 中的行数，修正模型写错的 old/new line count（否则报 corrupt patch）。"""
+              lines = patch_text.splitlines()
+              hunk_hdr = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$")
+              out = []
+              i = 0
+              while i < len(lines):
+                  line = lines[i]
+                  m = hunk_hdr.match(line)
+                  if not m:
+                      out.append(line)
+                      i += 1
+                      continue
+                  old_s, new_s = m.group(1), m.group(3)
+                  trail = m.group(5) or ""
+                  i += 1
+                  o_cnt = 0
+                  n_cnt = 0
+                  chunk = []
+                  while i < len(lines):
+                      l = lines[i]
+                      if hunk_hdr.match(l):
+                          break
+                      if l.startswith("---"):
+                          break
+                      if l.startswith("diff --git"):
+                          break
+                      chunk.append(l)
+                      if len(l) == 0:
+                          o_cnt += 1
+                          n_cnt += 1
+                      else:
+                          c = l[0]
+                          if c == " ":
+                              o_cnt += 1
+                              n_cnt += 1
+                          elif c == "-":
+                              o_cnt += 1
+                          elif c == "+":
+                              n_cnt += 1
+                          elif c == "\\":
+                              pass
+                          else:
+                              o_cnt += 1
+                              n_cnt += 1
+                      i += 1
+                  hdr = f"@@ -{old_s},{o_cnt} +{new_s},{n_cnt} @@{trail}"
+                  out.append(hdr)
+                  out.extend(chunk)
               body = "\n".join(out).strip()
               return (body + "\n") if body else ""
           
@@ -220,6 +296,8 @@ jobs:
           - 只修复确认的漏洞，不要改动其他代码
           - diff 格式必须严格遵守 Git unified diff（以 --- 行开头）
           - --- / +++ 中的文件路径必须与上方 JSON 里每条 finding 的 path 字段完全一致（相对仓库根目录；本仓库代码多在 app/ 下）
+          - 每个文件只写一对 --- / +++，同一文件多处修改请用多个 @@ 连续排列，不要重复写 --- / +++
+          - @@ 行中的行数必须与下方 hunk 内空格/+/- 行严格一致（否则 git apply 会报 corrupt patch）
           - 不要输出任何说明文字、不要用 markdown 代码块（不要用三个反引号包裹），只输出可被 git apply 的补丁正文
           """
           
@@ -231,6 +309,8 @@ jobs:
           
           # 将模型省略的 app/ 等前缀纠正为仓库内真实路径，避免 git apply 找不到文件
           fix_content = remap_unified_diff_paths(fix_content)
+          fix_content = merge_duplicate_file_headers(fix_content)
+          fix_content = fix_unified_diff_hunk_counts(fix_content)
           
           # 保存修复补丁
           with open('fix.patch', 'w', encoding="utf-8") as f:
@@ -288,7 +368,7 @@ jobs:
               *由 GitHub Actions 自动触发*" \
               --label "security,ai-generated,needs-review"
           else
-            echo "❌ git apply 失败。常见原因：补丁不是标准 unified diff、文件路径与仓库不一致、上下文不匹配。"
+            echo "❌ git apply 失败。常见原因：@@ 行数与 hunk 不一致（corrupt patch）、同一文件重复 ---/+++、路径或上下文不匹配。"
             echo "---- fix.patch 前 120 行（便于对照）----"
             head -n 120 fix.patch || true
             exit 1
