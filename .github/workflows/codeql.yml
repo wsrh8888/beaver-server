@@ -57,12 +57,13 @@ jobs:
 
       # 不用 scherersebastian/issue-injector 的 marketplace Action：它在仓库根目录执行
       # python issue-injector.py，脚本实际在 Action 包里，会报「找不到 issue-injector.py」。
-      # 这里改为拉取同版本脚本到 /tmp 再跑。
+      # 这里改为拉取同版本脚本到 /tmp 再跑（非 AI，无 prompt；按 SARIF 里规则的 severity 过滤）。
       - name: 根据 SARIF 创建或更新 Issue
         if: success() && steps.codeql_sarif.outputs.file != ''
         env:
           SARIF_FILE: ${{ steps.codeql_sarif.outputs.file }}
-          SEVERITY: warning # 只处理规则级别为 warning 的项；没 Issue 可改成 error 试
+          # CodeQL 多数告警在 SARIF 里是 error；之前用 warning 会筛成 0 条、不建 Issue
+          SEVERITY: error
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPO: ${{ github.repository }}
         shell: bash
