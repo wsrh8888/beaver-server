@@ -1,377 +1,675 @@
 name: AI Code Security Scanner
 
+
+
 on:
+
   schedule:
+
     - cron: '0 2 * * 0'  # 每周日凌晨2点运行
+
   workflow_dispatch:      # 也可以手动触发
 
+
+
 jobs:
+
   scan-and-fix:
+
     runs-on: ubuntu-latest
-    
+
+
+
     steps:
+
       - name: 检出代码
+
         uses: actions/checkout@v3
+
         with:
-          fetch-depth: 0  # 获取完整历史
-      
+
+          fetch-depth: 0
+
+
+
       - name: 安装 Python
+
         uses: actions/setup-python@v4
+
         with:
-          python-version: '3.11'  # 使用 3.11 避免版本警告
-      
+
+          python-version: '3.11'
+
+
+
       - name: 安装扫描工具
+
         run: |
+
           pip install semgrep google-genai openai
-      
+
+
+
       - name: 运行代码扫描
+
         run: |
+
           semgrep --config=auto --json -o scan_results.json || true
-      
-      # 密钥与切换方式（Settings → Secrets and variables）
-      # - Secrets: DEEPSEEK_API_KEY、GEMINI_API_KEY（按 AI_PROVIDER 二选一必填；默认 deepseek）
-      # - Variables（可选）: AI_PROVIDER=deepseek|gemini，GEMINI_MODEL，DEEPSEEK_MODEL，DEEPSEEK_BASE_URL
-      - name: AI 分析并生成修复
+
+
+
+      # Secrets: DEEPSEEK_API_KEY / GEMINI_API_KEY；Variables: AI_PROVIDER、各 MODEL、DEEPSEEK_BASE_URL
+
+      - name: AI 分析并写回修复
+
         env:
+
           AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+
           DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+
           DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL }}
+
         run: |
+
           python << 'PYTHON_SCRIPT'
+
           import json
+
           import os
-          import re
+
           import time
-          
-          def strip_git_ab_prefix(path_token):
-              if path_token.startswith(("a/", "b/")):
-                  return path_token[2:]
-              return path_token
-          
+
+
+
           def resolve_repo_file_path(rel):
-              """若补丁路径与仓库不一致（常见缺少 app/），映射到真实存在的文件路径。"""
-              if rel == "/dev/null":
+
+              if not rel or rel == "/dev/null":
+
                   return rel
+
               candidates = []
+
               seen = set()
+
               def add(p):
+
                   if p and p not in seen:
+
                       seen.add(p)
+
                       candidates.append(p)
+
               add(rel)
+
               if not rel.startswith("app/"):
+
                   add("app/" + rel)
+
               if rel.startswith("app/"):
+
                   add(rel[4:])
+
               for c in candidates:
+
                   if os.path.isfile(c):
+
                       return c
+
               return rel
-          
-          def parse_diff_header_rest(rest):
-              """rest 为 ---/+++ 行去掉前缀后的内容，含可选 \\t 时间戳。"""
-              if rest.startswith("/dev/null"):
-                  return "/dev/null", rest[len("/dev/null") :]
-              tab = rest.find("\t")
-              if tab == -1:
-                  return rest.strip(), ""
-              return rest[:tab].strip(), rest[tab:]
-          
-          def rebuild_diff_header(kind, resolved_path, suffix):
-              if resolved_path == "/dev/null":
-                  return f"{kind} /dev/null{suffix}"
-              side = "a" if kind == "---" else "b"
-              return f"{kind} {side}/{resolved_path}{suffix}"
-          
-          def remap_unified_diff_paths(patch_text):
-              out = []
-              for line in patch_text.splitlines():
-                  if line.startswith("---"):
-                      kind = "---"
-                      rest = line[3:].lstrip()
-                  elif line.startswith("+++"):
-                      kind = "+++"
-                      rest = line[3:].lstrip()
-                  else:
-                      out.append(line)
-                      continue
-                  path_token, sfx = parse_diff_header_rest(rest)
-                  raw = strip_git_ab_prefix(path_token)
-                  fixed = resolve_repo_file_path(raw)
-                  out.append(rebuild_diff_header(kind, fixed, sfx))
-              body = "\n".join(out).strip()
-              return (body + "\n") if body else ""
-          
-          def merge_duplicate_file_headers(patch_text):
-              """同一文件重复出现 ---/+++ 时 git apply 会判损坏；应合并为单头 + 多个 @@。"""
-              lines = patch_text.splitlines()
-              out = []
-              prev_pair = None
-              i = 0
-              while i < len(lines):
-                  line = lines[i]
-                  if (
-                      i + 1 < len(lines)
-                      and line.startswith("---")
-                      and lines[i + 1].startswith("+++")
-                  ):
-                      pair = (line, lines[i + 1])
-                      if pair == prev_pair:
-                          i += 2
-                          continue
-                      prev_pair = pair
-                  out.append(line)
-                  i += 1
-              body = "\n".join(out).strip()
-              return (body + "\n") if body else ""
-          
-          def fix_unified_diff_hunk_counts(patch_text):
-              """按 hunk 正文重算 @@ 中的行数，修正模型写错的 old/new line count（否则报 corrupt patch）。"""
-              lines = patch_text.splitlines()
-              hunk_hdr = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$")
-              out = []
-              i = 0
-              while i < len(lines):
-                  line = lines[i]
-                  m = hunk_hdr.match(line)
-                  if not m:
-                      out.append(line)
-                      i += 1
-                      continue
-                  old_s, new_s = m.group(1), m.group(3)
-                  trail = m.group(5) or ""
-                  i += 1
-                  o_cnt = 0
-                  n_cnt = 0
-                  chunk = []
-                  while i < len(lines):
-                      l = lines[i]
-                      if hunk_hdr.match(l):
-                          break
-                      if l.startswith("---"):
-                          break
-                      if l.startswith("diff --git"):
-                          break
-                      chunk.append(l)
-                      if len(l) == 0:
-                          o_cnt += 1
-                          n_cnt += 1
-                      else:
-                          c = l[0]
-                          if c == " ":
-                              o_cnt += 1
-                              n_cnt += 1
-                          elif c == "-":
-                              o_cnt += 1
-                          elif c == "+":
-                              n_cnt += 1
-                          elif c == "\\":
-                              pass
-                          else:
-                              o_cnt += 1
-                              n_cnt += 1
-                      i += 1
-                  hdr = f"@@ -{old_s},{o_cnt} +{new_s},{n_cnt} @@{trail}"
-                  out.append(hdr)
-                  out.extend(chunk)
-              body = "\n".join(out).strip()
-              return (body + "\n") if body else ""
-          
+
+
+
           MAX_ATTEMPTS = 5
+
           BASE_DELAY_SEC = 5
-          
+
+
+
           def env_default(name, default):
+
               v = os.environ.get(name)
+
               if v is None:
+
                   return default
+
               v = v.strip()
+
               return v if v else default
-          
+
+
+
           def retry_transient(attempt_fn, exc_types):
+
               for attempt in range(MAX_ATTEMPTS):
+
                   try:
+
                       return attempt_fn()
+
                   except exc_types as e:
+
                       try:
+
                           from openai import APIConnectionError
+
                           conn_err = isinstance(e, APIConnectionError)
+
                       except ImportError:
+
                           conn_err = False
+
                       status = getattr(e, "status_code", None) or getattr(e, "code", None)
+
                       transient = conn_err or status in (429, 500, 502, 503, 504)
+
                       if transient and attempt < MAX_ATTEMPTS - 1:
+
                           delay = min(60, BASE_DELAY_SEC * (2 ** attempt))
+
                           reason = f"HTTP {status}" if status is not None else "网络或连接异常"
+
                           print(
+
                               f"API 暂不可用 ({reason})，"
+
                               f"第 {attempt + 1}/{MAX_ATTEMPTS} 次尝试，{delay} 秒后重试..."
+
                           )
+
                           time.sleep(delay)
+
                       else:
+
                           raise
-          
-          def normalize_unified_diff(text):
-              """去掉模型常加的 markdown 围栏，统一换行，便于 git apply。"""
+
+
+
+          def strip_text_fence(text):
+
               t = (text or "").strip().replace("\r\n", "\n")
-              lines = t.split("\n")
+
+              lines = t.splitlines()
+
               if lines and lines[0].strip().startswith("```"):
+
                   lines = lines[1:]
+
                   while lines and lines[-1].strip().startswith("```"):
+
                       lines = lines[:-1]
-              body = "\n".join(lines).strip()
-              return (body + "\n") if body else ""
-          
+
+              return "\n".join(lines).strip()
+
+
+
           def generate_text(prompt):
+
               provider = env_default("AI_PROVIDER", "deepseek").lower()
+
               if provider == "gemini":
+
                   from google import genai
+
                   from google.genai.errors import ServerError
+
                   key = env_default("GEMINI_API_KEY", "")
+
                   if not key:
+
                       raise SystemExit("已选择 gemini 但未设置 GEMINI_API_KEY")
+
                   model = env_default("GEMINI_MODEL", "gemini-2.5-flash")
+
                   client = genai.Client(api_key=key)
-                  
+
+
+
                   def once():
+
                       return client.models.generate_content(model=model, contents=prompt)
-                  
+
+
+
                   resp = retry_transient(once, ServerError)
+
                   return (resp.text or "").strip()
-              
+
+
+
               if provider == "deepseek":
+
                   from openai import APIConnectionError, APIStatusError, OpenAI
+
                   key = env_default("DEEPSEEK_API_KEY", "")
+
                   if not key:
+
                       raise SystemExit("已选择 deepseek 但未设置 DEEPSEEK_API_KEY")
+
                   model = env_default("DEEPSEEK_MODEL", "deepseek-chat")
+
                   base_url = env_default("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+
                   client = OpenAI(api_key=key, base_url=base_url)
-                  
+
+
+
                   def once():
+
                       comp = client.chat.completions.create(
+
                           model=model,
+
                           messages=[{"role": "user", "content": prompt}],
+
                       )
+
                       return (comp.choices[0].message.content or "").strip()
-                  
+
+
+
                   return retry_transient(once, (APIStatusError, APIConnectionError))
-              
+
+
+
               raise SystemExit(f"不支持的 AI_PROVIDER: {provider}，请使用 gemini 或 deepseek")
-          
-          # 读取扫描结果
+
+
+
+          def load_issue_files(issues):
+
+              seen = set()
+
+              paths = []
+
+              for r in issues:
+
+                  raw = (r.get("path") or "").strip()
+
+                  if not raw:
+
+                      continue
+
+                  resolved = resolve_repo_file_path(raw)
+
+                  if not os.path.isfile(resolved):
+
+                      print(f"跳过（文件不存在）: {raw} -> {resolved}")
+
+                      continue
+
+                  if resolved not in seen:
+
+                      seen.add(resolved)
+
+                      paths.append(resolved)
+
+              bundle = {}
+
+              for p in paths:
+
+                  with open(p, "r", encoding="utf-8", errors="replace") as fh:
+
+                      bundle[p] = fh.read()
+
+              return paths, bundle
+
+
+
+          def parse_fixes_json(text):
+
+              t = strip_text_fence(text)
+
+              lo, hi = t.find("["), t.rfind("]")
+
+              if lo == -1 or hi <= lo:
+
+                  raise ValueError("响应中未找到 JSON 数组")
+
+              return json.loads(t[lo : hi + 1])
+
+
+
+          def match_allowed_path(model_path, allowed_paths):
+
+              if not model_path or not model_path.strip():
+
+                  return None
+
+              mp = model_path.strip()
+
+              candidates = [mp, resolve_repo_file_path(mp)]
+
+              allowed_norm = {os.path.normpath(a): a for a in allowed_paths}
+
+              for c in candidates:
+
+                  if c in allowed_paths:
+
+                      return c
+
+                  n = os.path.normpath(c)
+
+                  if n in allowed_norm:
+
+                      return allowed_norm[n]
+
+              return None
+
+
+
           try:
-              with open('scan_results.json', 'r') as f:
+
+              with open("scan_results.json", "r") as f:
+
                   data = json.load(f)
+
           except FileNotFoundError:
+
               print("没有扫描结果文件")
+
               exit(0)
-          
-          if not data.get('results'):
+
+
+
+          if not data.get("results"):
+
               print("没有发现问题")
+
               exit(0)
-          
-          # 只处理前3个高危问题（避免刷屏）
-          issues = [r for r in data['results'] 
-                   if r.get('extra', {}).get('severity') in ['ERROR', 'WARNING']][:3]
-          
+
+
+
+          issues = [
+
+              r
+
+              for r in data["results"]
+
+              if r.get("extra", {}).get("severity") in ["ERROR", "WARNING"]
+
+          ][:3]
+
+
+
           if not issues:
+
               print("没有高危问题")
+
               exit(0)
-          
-          # 构建 AI 提示词
-          prompt = f"""
-          你是一个专业的代码安全专家。以下是代码扫描发现的安全问题：
-          
-          {json.dumps(issues, indent=2, ensure_ascii=False)}
-          
-          请针对每个问题：
-          1. 判断是否为真实的安全漏洞（排除误报）
-          2. 如果是真实漏洞，生成修复后的完整代码
-          3. 输出格式必须是标准的 unified diff 格式
-          
-          要求：
-          - 只修复确认的漏洞，不要改动其他代码
-          - diff 格式必须严格遵守 Git unified diff（以 --- 行开头）
-          - --- / +++ 中的文件路径必须与上方 JSON 里每条 finding 的 path 字段完全一致（相对仓库根目录；本仓库代码多在 app/ 下）
-          - 每个文件只写一对 --- / +++，同一文件多处修改请用多个 @@ 连续排列，不要重复写 --- / +++
-          - @@ 行中的行数必须与下方 hunk 内空格/+/- 行严格一致（否则 git apply 会报 corrupt patch）
-          - 不要输出任何说明文字、不要用 markdown 代码块（不要用三个反引号包裹），只输出可被 git apply 的补丁正文
-          """
-          
-          # 按 AI_PROVIDER 调用对应 API（含瞬时过载重试）
-          fix_content = normalize_unified_diff(generate_text(prompt))
-          if not fix_content.strip():
-              print("模型未返回可用的补丁内容")
+
+
+
+          paths, bundle = load_issue_files(issues)
+
+          if not paths:
+
+              print("没有可读取的本地文件，无法生成基于实盘的修复")
+
               exit(0)
-          
-          # 将模型省略的 app/ 等前缀纠正为仓库内真实路径，避免 git apply 找不到文件
-          fix_content = remap_unified_diff_paths(fix_content)
-          fix_content = merge_duplicate_file_headers(fix_content)
-          fix_content = fix_unified_diff_hunk_counts(fix_content)
-          
-          # 保存修复补丁
-          with open('fix.patch', 'w', encoding="utf-8") as f:
-              f.write(fix_content)
-          
-          print("AI 分析完成")
-          print(fix_content)
+
+
+
+          file_sections = []
+
+          for p in paths:
+
+              file_sections.append(
+
+                  "===== FILE: " + p + " =====\n" + bundle[p] + "\n===== END " + p + " ====="
+
+              )
+
+
+
+          nl = "\n"
+
+          fmt_line = (
+
+              "每个元素格式："
+
+              '{"path":"<与上方 FILE 行一致>","content":"<该文件修复后的完整内容>"}'
+
+              "\n"
+
+          )
+
+          prompt = (
+
+              "你是代码安全专家。下面包含 Semgrep 报告，以及**当前仓库里这些文件的完整原文**（以 FILE/END 为界）。\n"
+
+              "你必须**只根据这些原文**设计修复，禁止臆造不存在的代码行或格式。\n\n"
+
+              "Semgrep 结果（JSON）：\n"
+
+              + json.dumps(issues, indent=2, ensure_ascii=False)
+
+              + "\n\n仓库文件原文：\n"
+
+              + nl.join(file_sections)
+
+              + "\n\n请判断哪些是真实漏洞（排除误报）。对需要修改的文件，输出**一个 JSON 数组**，且仅包含需要改动的文件。\n"
+
+              + fmt_line
+
+              + "要求：\n"
+
+              + "- path 必须与「FILE:」后的路径字符串完全一致（含 app/ 等前缀）\n"
+
+              + "- content 为整文件全文，UTF-8 文本\n"
+
+              + "- 不要改动与漏洞无关的逻辑；若某文件无需修改，不要出现在数组中\n"
+
+              + "- 若无需任何修改，输出空数组 []\n"
+
+              + "- 只输出 JSON，不要 markdown 代码块、不要任何解释文字\n"
+
+          )
+
+
+
+          raw = generate_text(prompt)
+
+          try:
+
+              fixes = parse_fixes_json(raw)
+
+          except (json.JSONDecodeError, ValueError) as e:
+
+              print("模型返回无法解析为 JSON：", e)
+
+              print("---- 原始响应前 2000 字 ----")
+
+              print((raw or "")[:2000])
+
+              raise SystemExit(1)
+
+
+
+          if not isinstance(fixes, list):
+
+              raise SystemExit("JSON 顶层必须是数组")
+
+
+
+          if len(fixes) == 0:
+
+              print("模型判定无需修改或返回空数组")
+
+              with open("ai_fix_applied.flag", "w") as ff:
+
+                  ff.write("0")
+
+              exit(0)
+
+
+
+          allowed = set(paths)
+
+          for item in fixes:
+
+              if not isinstance(item, dict):
+
+                  raise SystemExit("数组元素必须为对象")
+
+              mp = item.get("path")
+
+              content = item.get("content")
+
+              if content is None:
+
+                  raise SystemExit("缺少 content 字段")
+
+              if not isinstance(content, str):
+
+                  raise SystemExit("content 必须为字符串")
+
+              target = match_allowed_path(mp, allowed)
+
+              if not target:
+
+                  raise SystemExit(f"path 不在允许列表内: {mp}")
+
+              with open(target, "w", encoding="utf-8", newline="\n") as out:
+
+                  out.write(content)
+
+              print(f"已写入: {target}")
+
+
+
+          with open("ai_fix_applied.flag", "w") as ff:
+
+              ff.write("1")
+
+          print("AI 修复已写入工作区")
+
           PYTHON_SCRIPT
-      
-      - name: 应用修复并创建 PR
+
+
+
+      - name: 提交并创建 PR
+
         if: success()
+
         run: |
-          # 配置 Git
+
           git config user.name "AI Security Bot"
+
           git config user.email "bot@github-actions"
-          
-          # 创建新分支
-          BRANCH_NAME="ai-security-fix-$(date +%Y%m%d-%H%M%S)"
-          git checkout -b $BRANCH_NAME
-          
-          # 尝试应用补丁（勿屏蔽 stderr，便于在日志中看到 git 的具体报错）
-          if git apply --verbose fix.patch; then
-            git add .
-            git commit -m "🤖 [AI自动修复] 安全漏洞修复
-            
-            本 PR 由 AI 自动生成，请仔细审核后再合并。
-            
-            修复内容：
-            $(cat fix.patch | head -n 20)
-            
-            ---
-            ⚠️ 重要提示：
-            - 此 PR 必须经过人工审核
-            - 请运行完整的测试套件
-            - 确认修复不会引入新问题"
-            
-            git push origin $BRANCH_NAME
-            
-            # 创建 Pull Request
-            gh pr create \
-              --title "🤖 [AI自动修复] 代码安全漏洞" \
-              --body "**⚠️ 此 PR 由 AI 自动生成，请务必仔细审核！**
-              
-              ## 修复内容
-              \`\`\`diff
-              $(cat fix.patch | head -n 50)
-              \`\`\`
-              
-              ## 检查清单
-              - [ ] 已审核所有代码改动
-              - [ ] 已运行测试套件
-              - [ ] 确认修复有效且安全
-              
-              ---
-              *由 GitHub Actions 自动触发*" \
-              --label "security,ai-generated,needs-review"
-          else
-            echo "❌ git apply 失败。常见原因：@@ 行数与 hunk 不一致（corrupt patch）、同一文件重复 ---/+++、路径或上下文不匹配。"
-            echo "---- fix.patch 前 120 行（便于对照）----"
-            head -n 120 fix.patch || true
-            exit 1
+
+
+
+          if [ ! -f ai_fix_applied.flag ] || [ "$(cat ai_fix_applied.flag)" != "1" ]; then
+
+            echo "本次未产生需提交的 AI 文件修改，跳过 PR"
+
+            exit 0
+
           fi
+
+
+
+          if git diff --quiet && git diff --cached --quiet; then
+
+            echo "工作区无改动，跳过"
+
+            exit 0
+
+          fi
+
+
+
+          BRANCH_NAME="ai-security-fix-$(date +%Y%m%d-%H%M%S)"
+
+          git checkout -b "$BRANCH_NAME"
+
+          git add -A
+
+          git status
+
+
+
+          git diff --cached --stat > _diff_stat.txt
+
+          git diff --cached | head -n 120 > _diff_head.txt
+
+
+
+          python << 'WRITE_FILES'
+
+          ds = open("_diff_stat.txt", encoding="utf-8").read()
+
+          dh = open("_diff_head.txt", encoding="utf-8").read()
+
+          commit_msg = (
+
+              "\U0001f916 [AI自动修复] 安全漏洞修复\n\n"
+
+              "本 PR 由 AI 自动生成，请仔细审核后再合并。\n\n"
+
+              "变更统计：\n"
+
+              + ds
+
+              + "\n\n---\n重要提示：请人工审核并运行测试。\n"
+
+          )
+
+          pr_body = (
+
+              "**\u26a0\ufe0f 此 PR 由 AI 自动生成，请务必仔细审核。**\n\n"
+
+              "## 变更统计\n```\n"
+
+              + ds
+
+              + "\n```\n\n## 差异预览（前 120 行）\n```diff\n"
+
+              + dh
+
+              + "\n```\n\n## 检查清单\n"
+
+              + "- [ ] 已审核所有代码改动\n"
+
+              + "- [ ] 已运行测试套件\n"
+
+              + "- [ ] 确认修复有效且安全\n"
+
+          )
+
+          open("_commit_msg.txt", "w", encoding="utf-8").write(commit_msg)
+
+          open("_pr_body.txt", "w", encoding="utf-8").write(pr_body)
+
+          WRITE_FILES
+
+
+
+          git commit -F _commit_msg.txt
+
+          git push origin "$BRANCH_NAME"
+
+
+
+          gh pr create \
+
+            --title "🤖 [AI自动修复] 代码安全漏洞" \
+
+            --body-file _pr_body.txt \
+
+            --label "security,ai-generated,needs-review"
+
         env:
+
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
