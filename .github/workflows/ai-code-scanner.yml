@@ -6,9 +6,9 @@ on:
 
   schedule:
 
-    - cron: '0 2 * * 0'  # 每周日凌晨2点运行
+    - cron: '0 2 * * 0'
 
-  workflow_dispatch:      # 也可以手动触发
+  workflow_dispatch:
 
 
 
@@ -58,13 +58,13 @@ jobs:
 
 
 
-      # Secrets: DEEPSEEK_API_KEY / GEMINI_API_KEY；Variables: AI_PROVIDER、各 MODEL、DEEPSEEK_BASE_URL
-
       - name: AI 分析并写回修复
 
         env:
 
           AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+
+          AI_MAX_OUTPUT_TOKENS: ${{ vars.AI_MAX_OUTPUT_TOKENS }}
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
@@ -79,6 +79,10 @@ jobs:
         run: |
 
           python << 'PYTHON_SCRIPT'
+
+          import base64
+
+          import binascii
 
           import json
 
@@ -143,6 +147,20 @@ jobs:
               v = v.strip()
 
               return v if v else default
+
+
+
+          def max_output_tokens():
+
+              try:
+
+                  v = int(env_default("AI_MAX_OUTPUT_TOKENS", "64000"))
+
+              except ValueError:
+
+                  v = 64000
+
+              return max(4096, min(v, 128000))
 
 
 
@@ -212,11 +230,15 @@ jobs:
 
           def generate_text(prompt):
 
+              mo = max_output_tokens()
+
               provider = env_default("AI_PROVIDER", "deepseek").lower()
 
               if provider == "gemini":
 
                   from google import genai
+
+                  from google.genai import types
 
                   from google.genai.errors import ServerError
 
@@ -230,11 +252,17 @@ jobs:
 
                   client = genai.Client(api_key=key)
 
+                  cfg = types.GenerateContentConfig(max_output_tokens=mo)
+
 
 
                   def once():
 
-                      return client.models.generate_content(model=model, contents=prompt)
+                      return client.models.generate_content(
+
+                          model=model, contents=prompt, config=cfg
+
+                      )
 
 
 
@@ -264,23 +292,63 @@ jobs:
 
                   def once():
 
-                      comp = client.chat.completions.create(
+                      return client.chat.completions.create(
 
                           model=model,
 
                           messages=[{"role": "user", "content": prompt}],
 
-                      )
+                          max_tokens=mo,
 
-                      return (comp.choices[0].message.content or "").strip()
-
-
-
-                  return retry_transient(once, (APIStatusError, APIConnectionError))
+                      ).choices[0].message.content or ""
 
 
 
-              raise SystemExit(f"不支持的 AI_PROVIDER: {provider}，请使用 gemini 或 deepseek")
+                  return retry_transient(once, (APIStatusError, APIConnectionError)).strip()
+
+
+
+              raise SystemExit(f"不支持的 AI_PROVIDER: {provider}")
+
+
+
+          def parse_skip_or_b64(text):
+
+              t = strip_text_fence(text)
+
+              lo, hi = t.find("{"), t.rfind("}")
+
+              if lo == -1 or hi <= lo:
+
+                  raise ValueError("响应中未找到 JSON 对象")
+
+              obj = json.loads(t[lo : hi + 1])
+
+              if not isinstance(obj, dict):
+
+                  raise ValueError("JSON 根须为对象")
+
+              if obj.get("skip") is True:
+
+                  return None
+
+              b64 = obj.get("content_b64")
+
+              if not isinstance(b64, str) or not b64.strip():
+
+                  raise ValueError("缺少 content_b64 或格式错误")
+
+              raw_b64 = "".join(b64.split())
+
+              try:
+
+                  data = base64.b64decode(raw_b64, validate=True)
+
+              except binascii.Error as e:
+
+                  raise ValueError(f"Base64 无效: {e}") from e
+
+              return data.decode("utf-8")
 
 
 
@@ -321,48 +389,6 @@ jobs:
                       bundle[p] = fh.read()
 
               return paths, bundle
-
-
-
-          def parse_fixes_json(text):
-
-              t = strip_text_fence(text)
-
-              lo, hi = t.find("["), t.rfind("]")
-
-              if lo == -1 or hi <= lo:
-
-                  raise ValueError("响应中未找到 JSON 数组")
-
-              return json.loads(t[lo : hi + 1])
-
-
-
-          def match_allowed_path(model_path, allowed_paths):
-
-              if not model_path or not model_path.strip():
-
-                  return None
-
-              mp = model_path.strip()
-
-              candidates = [mp, resolve_repo_file_path(mp)]
-
-              allowed_norm = {os.path.normpath(a): a for a in allowed_paths}
-
-              for c in candidates:
-
-                  if c in allowed_paths:
-
-                      return c
-
-                  n = os.path.normpath(c)
-
-                  if n in allowed_norm:
-
-                      return allowed_norm[n]
-
-              return None
 
 
 
@@ -412,145 +438,105 @@ jobs:
 
           if not paths:
 
-              print("没有可读取的本地文件，无法生成基于实盘的修复")
+              print("没有可读取的本地文件")
 
               exit(0)
 
 
 
-          file_sections = []
+          any_change = False
 
-          for p in paths:
+          for path in paths:
 
-              file_sections.append(
+              rel = [
 
-                  "===== FILE: " + p + " =====\n" + bundle[p] + "\n===== END " + p + " ====="
+                  r
+
+                  for r in issues
+
+                  if resolve_repo_file_path((r.get("path") or "").strip()) == path
+
+              ]
+
+              src = bundle[path]
+
+              prompt = (
+
+                  "你是代码安全专家。下面仅针对**一个文件**。\n"
+
+                  "你必须只根据给出的原文修改，禁止臆造不存在的代码。\n\n"
+
+                  "与本文件相关的 Semgrep 告警（JSON）：\n"
+
+                  + json.dumps(rel, indent=2, ensure_ascii=False)
+
+                  + "\n\n===== 文件路径（必须与之一致）=====\n"
+
+                  + path
+
+                  + "\n===== 文件全文 =====\n"
+
+                  + src
+
+                  + "\n===== END =====\n\n"
+
+                  "判断是否为真实漏洞并仅修改本文件。\n"
+
+                  "【输出格式】只输出一个 JSON 对象，禁止 markdown、禁止其它文字：\n"
+
+                  "1) 若本文件无需修改：{\"skip\":true}\n"
+
+                  "2) 若需修改：将修复后的**完整文件**先做 UTF-8 编码，再做 Base64，"
+
+                  "放入唯一字段 content_b64（单行、不要换行分段）。\n"
+
+                  "禁止在 JSON 里嵌套源码明文（不要用 content 传源码）。\n"
 
               )
 
+              raw = generate_text(prompt)
 
+              try:
 
-          nl = "\n"
+                  new_src = parse_skip_or_b64(raw)
 
-          fmt_line = (
+              except (json.JSONDecodeError, ValueError, UnicodeDecodeError) as e:
 
-              "每个元素格式："
+                  print(f"解析失败 ({path}): {e}")
 
-              '{"path":"<与上方 FILE 行一致>","content":"<该文件修复后的完整内容>"}'
+                  print("---- 模型响应前 2500 字 ----")
 
-              "\n"
+                  print((raw or "")[:2500])
 
-          )
+                  raise SystemExit(1)
 
-          prompt = (
+              if new_src is None:
 
-              "你是代码安全专家。下面包含 Semgrep 报告，以及**当前仓库里这些文件的完整原文**（以 FILE/END 为界）。\n"
+                  print(f"跳过（模型判定不改）: {path}")
 
-              "你必须**只根据这些原文**设计修复，禁止臆造不存在的代码行或格式。\n\n"
+                  continue
 
-              "Semgrep 结果（JSON）：\n"
+              if new_src == src:
 
-              + json.dumps(issues, indent=2, ensure_ascii=False)
+                  print(f"内容与原文相同: {path}")
 
-              + "\n\n仓库文件原文：\n"
+                  continue
 
-              + nl.join(file_sections)
+              with open(path, "w", encoding="utf-8", newline="\n") as out:
 
-              + "\n\n请判断哪些是真实漏洞（排除误报）。对需要修改的文件，输出**一个 JSON 数组**，且仅包含需要改动的文件。\n"
+                  out.write(new_src)
 
-              + fmt_line
+              any_change = True
 
-              + "要求：\n"
-
-              + "- path 必须与「FILE:」后的路径字符串完全一致（含 app/ 等前缀）\n"
-
-              + "- content 为整文件全文，UTF-8 文本\n"
-
-              + "- 不要改动与漏洞无关的逻辑；若某文件无需修改，不要出现在数组中\n"
-
-              + "- 若无需任何修改，输出空数组 []\n"
-
-              + "- 只输出 JSON，不要 markdown 代码块、不要任何解释文字\n"
-
-          )
-
-
-
-          raw = generate_text(prompt)
-
-          try:
-
-              fixes = parse_fixes_json(raw)
-
-          except (json.JSONDecodeError, ValueError) as e:
-
-              print("模型返回无法解析为 JSON：", e)
-
-              print("---- 原始响应前 2000 字 ----")
-
-              print((raw or "")[:2000])
-
-              raise SystemExit(1)
-
-
-
-          if not isinstance(fixes, list):
-
-              raise SystemExit("JSON 顶层必须是数组")
-
-
-
-          if len(fixes) == 0:
-
-              print("模型判定无需修改或返回空数组")
-
-              with open("ai_fix_applied.flag", "w") as ff:
-
-                  ff.write("0")
-
-              exit(0)
-
-
-
-          allowed = set(paths)
-
-          for item in fixes:
-
-              if not isinstance(item, dict):
-
-                  raise SystemExit("数组元素必须为对象")
-
-              mp = item.get("path")
-
-              content = item.get("content")
-
-              if content is None:
-
-                  raise SystemExit("缺少 content 字段")
-
-              if not isinstance(content, str):
-
-                  raise SystemExit("content 必须为字符串")
-
-              target = match_allowed_path(mp, allowed)
-
-              if not target:
-
-                  raise SystemExit(f"path 不在允许列表内: {mp}")
-
-              with open(target, "w", encoding="utf-8", newline="\n") as out:
-
-                  out.write(content)
-
-              print(f"已写入: {target}")
+              print(f"已写入: {path}")
 
 
 
           with open("ai_fix_applied.flag", "w") as ff:
 
-              ff.write("1")
+              ff.write("1" if any_change else "0")
 
-          print("AI 修复已写入工作区")
+          print("AI 步骤结束，有改动=" + str(any_change))
 
           PYTHON_SCRIPT
 
@@ -570,7 +556,7 @@ jobs:
 
           if [ ! -f ai_fix_applied.flag ] || [ "$(cat ai_fix_applied.flag)" != "1" ]; then
 
-            echo "本次未产生需提交的 AI 文件修改，跳过 PR"
+            echo "本次未产生需提交的修改，跳过 PR"
 
             exit 0
 
