@@ -1,171 +1,140 @@
-# Semgrep 扫描 + Google Gemini 分析，尝试生成补丁并推分支开 PR（需配置 Secret：GEMINI_API_KEY）
 name: AI Code Security Scanner
 
 on:
   schedule:
-    - cron: "0 2 * * 0"
-  workflow_dispatch:
-
-concurrency:
-  group: ai-code-security-${{ github.repository }}
-  cancel-in-progress: false
+    - cron: '0 2 * * 0'  # 每周日凌晨2点运行
+  workflow_dispatch:      # 也可以手动触发
 
 jobs:
   scan-and-fix:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-
+    
     steps:
       - name: 检出代码
-        uses: actions/checkout@v5
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-
-      - name: 安装 Python
-        uses: actions/setup-python@v5
+          fetch-depth: 0  # 获取完整历史
+      
+      - name: 安装 Python 和依赖
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
-
-      - name: 安装 Semgrep 与 Gemini SDK
-        run: python3 -m pip install --upgrade pip semgrep google-generativeai
-
-      - name: 运行 Semgrep（auto 规则，含 Go 等）
+          python-version: '3.10'
+      
+      - name: 安装扫描工具
         run: |
-          semgrep --config=auto --json -o scan_results.json . || true
-          test -f scan_results.json || echo '{"results":[]}' > scan_results.json
-
-      - name: AI 分析并生成 fix.patch
-        id: gemini_fix
+          pip install semgrep google-generativeai
+      
+      - name: 运行代码扫描
+        run: |
+          semgrep --config=auto --json -o scan_results.json || true
+      
+      - name: AI 分析并生成修复
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python3 << 'PYTHON_SCRIPT'
+          python << 'PYTHON_SCRIPT'
           import json
           import os
           import google.generativeai as genai
-
-          def set_output(name: str, value: str) -> None:
-              out = os.environ.get("GITHUB_OUTPUT")
-              if out:
-                  with open(out, "a", encoding="utf-8") as fh:
-                      fh.write(f"{name}={value}\n")
-
-          key = os.environ.get("GEMINI_API_KEY", "").strip()
-          if not key:
-              print("错误：未配置 Secret GEMINI_API_KEY（Settings → Secrets and variables → Actions）")
-              set_output("has_fix", "false")
-              raise SystemExit(1)
-
-          genai.configure(api_key=key)
-          # 与 Google AI Studio 中名称一致；不可用时可改为 gemini-2.0-flash 等
-          model = genai.GenerativeModel("gemini-1.5-flash")
-
-          with open("scan_results.json", "r", encoding="utf-8") as f:
-              raw = f.read().strip() or "{}"
-          try:
-              data = json.loads(raw)
-          except json.JSONDecodeError:
-              print("scan_results.json 不是合法 JSON，跳过 AI")
-              set_output("has_fix", "false")
-              raise SystemExit(0)
-
-          results = data.get("results") or []
-          if not results:
-              print("Semgrep 无命中，跳过 AI")
-              set_output("has_fix", "false")
-              raise SystemExit(0)
-
-          def sev(r):
-              return str(r.get("extra", {}).get("severity") or "").upper()
-
-          issues = [r for r in results if sev(r) in ("ERROR", "WARNING")][:3]
-
+          
+          # 配置 Gemini
+          genai.configure(api_key=os.environ['GEMINI_API_KEY'])
+          model = genai.GenerativeModel('gemini-1.5-flash')
+          
+          # 读取扫描结果
+          with open('scan_results.json', 'r') as f:
+              data = json.load(f)
+          
+          if not data.get('results'):
+              print("没有发现问题")
+              exit(0)
+          
+          # 只处理前3个高危问题（避免刷屏）
+          issues = [r for r in data['results'] if r.get('extra', {}).get('severity') in ['ERROR', 'WARNING']][:3]
+          
           if not issues:
-              print("无 ERROR/WARNING 级别问题（或已被截断逻辑筛掉）")
-              set_output("has_fix", "false")
-              raise SystemExit(0)
-
-          prompt = f"""你是资深代码安全工程师。以下为 Semgrep 扫描结果（JSON）：
-
-{json.dumps(issues, indent=2, ensure_ascii=False)}
-
-请完成：
-1. 判断每条是否为真实安全问题（排除明显误报）。
-2. 对确认的问题，给出可应用的修复，输出**唯一**一段符合 Git 规范的 unified diff（git apply 可用）。
-3. 不要输出 markdown 代码块标记，不要解释性文字包在 diff 外；若无法给出可靠 diff，只输出一行：NO_PATCH
-
-diff 要求：
-- 以 diff --git 或统一格式开头，路径与仓库相对路径一致。
-- 只改必要行，不要无关格式化。"""
-
+              print("没有高危问题")
+              exit(0)
+          
+          # 构建 AI 提示词
+          prompt = f"""
+          你是一个专业的代码安全专家。以下是代码扫描发现的安全问题：
+          
+          {json.dumps(issues, indent=2, ensure_ascii=False)}
+          
+          请针对每个问题：
+          1. 判断是否为真实的安全漏洞（排除误报）
+          2. 如果是真实漏洞，生成修复后的完整代码
+          3. 输出格式必须是标准的 unified diff 格式
+          
+          要求：
+          - 只修复确认的漏洞，不要改动其他代码
+          - diff 格式必须严格遵守 Git 标准
+          - 包含文件路径、行号等信息
+          """
+          
+          # 调用 Gemini
           response = model.generate_content(prompt)
-          text = (response.text or "").strip()
-          first_line = text.splitlines()[0].strip() if text else ""
-          if not text or text == "NO_PATCH" or first_line == "NO_PATCH":
-              print("模型未返回可用补丁")
-              set_output("has_fix", "false")
-              raise SystemExit(0)
-
-          if text.startswith("```"):
-              lines = text.splitlines()
-              if lines[0].startswith("```"):
-                  lines = lines[1:]
-              if lines and lines[-1].strip() == "```":
-                  lines = lines[:-1]
-              text = "\n".join(lines).strip()
-
-          with open("fix.patch", "w", encoding="utf-8") as f:
-              f.write(text)
-              if not text.endswith("\n"):
-                  f.write("\n")
-
-          print("已写入 fix.patch")
-          set_output("has_fix", "true")
+          fix_content = response.text
+          
+          # 保存修复补丁
+          with open('fix.patch', 'w') as f:
+              f.write(fix_content)
+          
+          print("AI 分析完成")
+          print(fix_content)
           PYTHON_SCRIPT
-
-      - name: 应用补丁并创建 PR
-        if: success() && steps.gemini_fix.outputs.has_fix == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
+      
+      - name: 应用修复并创建 PR
+        if: success()
         run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 配置 Git
+          git config user.name "AI Security Bot"
+          git config user.email "bot@github-actions"
+          
+          # 创建新分支
+          BRANCH_NAME="ai-security-fix-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          
+          # 尝试应用补丁
+          if git apply fix.patch 2>/dev/null; then
+            git add .
+            git commit -m "🤖 [AI自动修复] 安全漏洞修复
 
-          BRANCH_NAME="ai-security-fix-$(date -u +%Y%m%d-%H%M%S)"
-          git checkout -b "$BRANCH_NAME"
-
-          if ! git apply --check fix.patch; then
-            echo "::error::补丁无法通过 git apply --check，请检查 Gemini 输出的 diff 格式"
+            本 PR 由 AI 自动生成，请仔细审核后再合并。
+            
+            修复内容：
+            $(cat fix.patch | head -n 20)
+            
+            ---
+            ⚠️ 重要提示：
+            - 此 PR 必须经过人工审核
+            - 请运行完整的测试套件
+            - 确认修复不会引入新问题"
+            
+            git push origin $BRANCH_NAME
+            
+            # 创建 Pull Request
+            gh pr create \
+              --title "🤖 [AI自动修复] 代码安全漏洞" \
+              --body "**⚠️ 此 PR 由 AI 自动生成，请务必仔细审核！**
+              
+              ## 修复内容
+              \`\`\`diff
+              $(cat fix.patch | head -n 50)
+              \`\`\`
+              
+              ## 检查清单
+              - [ ] 已审核所有代码改动
+              - [ ] 已运行测试套件
+              - [ ] 确认修复有效且安全
+              
+              ---
+              *由 GitHub Actions 自动触发*" \
+              --label "security,ai-generated,needs-review"
+          else
+            echo "❌ 补丁应用失败，请手动检查"
             exit 1
           fi
-          git apply fix.patch
-          git add -A
-          if git diff --cached --quiet; then
-            echo "无有效变更，跳过 PR"
-            exit 0
-          fi
-
-          git commit -m "chore(security): AI 建议的安全修复（需人工审核）" \
-            -m "由 Semgrep + Gemini 工作流生成，合并前请完整测试与代码审查。"
-
-          git push origin "HEAD:refs/heads/$BRANCH_NAME"
-
-          {
-            echo "## 说明"
-            echo "本 PR 由 **Semgrep + Gemini** 自动生成，合并前请人工审核并跑完测试。"
-            echo ""
-            echo "### 补丁预览（前 80 行）"
-            echo '```diff'
-            head -n 80 fix.patch
-            echo '```'
-          } > /tmp/pr-body.md
-
-          gh pr create \
-            --base "${{ github.ref_name }}" \
-            --head "$BRANCH_NAME" \
-            --title "[AI] Semgrep/Gemini 建议的安全修复" \
-            --body-file /tmp/pr-body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
