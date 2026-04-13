@@ -22,46 +22,98 @@ jobs:
       
       - name: 安装扫描工具
         run: |
-          pip install semgrep google-genai  # 使用新版 API
+          pip install semgrep google-genai openai
       
       - name: 运行代码扫描
         run: |
           semgrep --config=auto --json -o scan_results.json || true
       
+      # 密钥与切换方式（Settings → Secrets and variables）
+      # - Secrets: DEEPSEEK_API_KEY、GEMINI_API_KEY（按 AI_PROVIDER 二选一必填；默认 deepseek）
+      # - Variables（可选）: AI_PROVIDER=deepseek|gemini，GEMINI_MODEL，DEEPSEEK_MODEL，DEEPSEEK_BASE_URL
       - name: AI 分析并生成修复
         env:
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+          DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL }}
         run: |
           python << 'PYTHON_SCRIPT'
           import json
           import os
           import time
-          from google import genai
-          from google.genai.errors import ServerError
           
-          # 配置 Gemini 3
-          client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
-          
-          # API 瞬时过载（503 等）时重试：最多 5 次，指数退避，单次等待上限 60 秒
           MAX_ATTEMPTS = 5
           BASE_DELAY_SEC = 5
           
-          def generate_with_retry(model, contents):
+          def env_default(name, default):
+              v = os.environ.get(name)
+              if v is None:
+                  return default
+              v = v.strip()
+              return v if v else default
+          
+          def retry_transient(attempt_fn, exc_types):
               for attempt in range(MAX_ATTEMPTS):
                   try:
-                      return client.models.generate_content(model=model, contents=contents)
-                  except ServerError as e:
+                      return attempt_fn()
+                  except exc_types as e:
+                      try:
+                          from openai import APIConnectionError
+                          conn_err = isinstance(e, APIConnectionError)
+                      except ImportError:
+                          conn_err = False
                       status = getattr(e, "status_code", None) or getattr(e, "code", None)
-                      transient = status in (429, 500, 502, 503, 504)
+                      transient = conn_err or status in (429, 500, 502, 503, 504)
                       if transient and attempt < MAX_ATTEMPTS - 1:
                           delay = min(60, BASE_DELAY_SEC * (2 ** attempt))
+                          reason = f"HTTP {status}" if status is not None else "网络或连接异常"
                           print(
-                              f"API 暂不可用 (HTTP {status})，"
+                              f"API 暂不可用 ({reason})，"
                               f"第 {attempt + 1}/{MAX_ATTEMPTS} 次尝试，{delay} 秒后重试..."
                           )
                           time.sleep(delay)
                       else:
                           raise
+          
+          def generate_text(prompt):
+              provider = env_default("AI_PROVIDER", "deepseek").lower()
+              if provider == "gemini":
+                  from google import genai
+                  from google.genai.errors import ServerError
+                  key = env_default("GEMINI_API_KEY", "")
+                  if not key:
+                      raise SystemExit("已选择 gemini 但未设置 GEMINI_API_KEY")
+                  model = env_default("GEMINI_MODEL", "gemini-2.5-flash")
+                  client = genai.Client(api_key=key)
+                  
+                  def once():
+                      return client.models.generate_content(model=model, contents=prompt)
+                  
+                  resp = retry_transient(once, ServerError)
+                  return (resp.text or "").strip()
+              
+              if provider == "deepseek":
+                  from openai import APIConnectionError, APIStatusError, OpenAI
+                  key = env_default("DEEPSEEK_API_KEY", "")
+                  if not key:
+                      raise SystemExit("已选择 deepseek 但未设置 DEEPSEEK_API_KEY")
+                  model = env_default("DEEPSEEK_MODEL", "deepseek-chat")
+                  base_url = env_default("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+                  client = OpenAI(api_key=key, base_url=base_url)
+                  
+                  def once():
+                      comp = client.chat.completions.create(
+                          model=model,
+                          messages=[{"role": "user", "content": prompt}],
+                      )
+                      return (comp.choices[0].message.content or "").strip()
+                  
+                  return retry_transient(once, (APIStatusError, APIConnectionError))
+              
+              raise SystemExit(f"不支持的 AI_PROVIDER: {provider}，请使用 gemini 或 deepseek")
           
           # 读取扫描结果
           try:
@@ -100,13 +152,8 @@ jobs:
           - 包含文件路径、行号等信息
           """
           
-          # 调用 Gemini（含 503/过载 重试）
-          response = generate_with_retry(
-              model='gemini-2.5-flash',
-              contents=prompt,
-          )
-          
-          fix_content = response.text
+          # 按 AI_PROVIDER 调用对应 API（含瞬时过载重试）
+          fix_content = generate_text(prompt)
           
           # 保存修复补丁
           with open('fix.patch', 'w') as f:
