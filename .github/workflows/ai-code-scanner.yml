@@ -63,7 +63,7 @@ jobs:
         env:
 
           AI_PROVIDER: ${{ vars.AI_PROVIDER }}
-
+          # DeepSeek 仅支持 1～8192；Gemini 可更高（脚本内会按提供商封顶）
           AI_MAX_OUTPUT_TOKENS: ${{ vars.AI_MAX_OUTPUT_TOKENS }}
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -150,17 +150,21 @@ jobs:
 
 
 
-          def max_output_tokens():
-
+          def max_output_tokens(provider):
+              """DeepSeek 官方限制 max_tokens 为 [1, 8192]；Gemini 可用更大上限。"""
+              if provider == "gemini":
+                  cap_hi = 65536
+                  default = "32768"
+                  floor = 1024
+              else:
+                  cap_hi = 8192
+                  default = "8192"
+                  floor = 1
               try:
-
-                  v = int(env_default("AI_MAX_OUTPUT_TOKENS", "64000"))
-
+                  v = int(env_default("AI_MAX_OUTPUT_TOKENS", default))
               except ValueError:
-
-                  v = 64000
-
-              return max(4096, min(v, 128000))
+                  v = int(default)
+              return max(floor, min(v, cap_hi))
 
 
 
@@ -230,9 +234,9 @@ jobs:
 
           def generate_text(prompt):
 
-              mo = max_output_tokens()
-
               provider = env_default("AI_PROVIDER", "deepseek").lower()
+
+              mo = max_output_tokens(provider)
 
               if provider == "gemini":
 
