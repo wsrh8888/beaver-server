@@ -2,12 +2,13 @@ package svc
 
 import (
 	"beaver/app/call/call_rpc/internal/config"
-	"beaver/core"
+	"beaver/core/coregorm"
+	"beaver/core/coreredis"
 
 	"beaver/app/chat/chat_rpc/chat"
 	"beaver/app/user/user_rpc/user"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -21,12 +22,8 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysqlDb := core.InitGorm(c.Mysql.DataSource)
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     c.RedisConf.Addr,
-		Password: c.RedisConf.Password,
-		DB:       c.RedisConf.Db,
-	})
+	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
+	rdb := coreredis.InitRedis(c.RedisConf.Addr, c.RedisConf.Password, c.RedisConf.Db)
 
 	return &ServiceContext{
 		Config:  c,

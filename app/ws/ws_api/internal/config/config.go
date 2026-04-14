@@ -18,9 +18,12 @@ type Config struct {
 	Auth struct {
 		AccessSecret string
 	}
-	Etcd           string
-	GroupRpc       zrpc.RpcClientConf
-	ChatRpc        zrpc.RpcClientConf
+	Etcd     string
+	GroupRpc zrpc.RpcClientConf
+	ChatRpc  zrpc.RpcClientConf
+	RocketMQ struct {
+		Addr string
+	}
 	WebSocket struct {
 		PongWait             int
 		WriteWait            int

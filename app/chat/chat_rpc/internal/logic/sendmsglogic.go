@@ -13,7 +13,7 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -441,9 +441,17 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 			tableUpdates = append(tableUpdates, uc)
 		}
 
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd.Hosts[0], wsCommandConst.CHAT_MESSAGE, messageType, senderId, recipientId, map[string]interface{}{
-			"tableUpdates": tableUpdates,
-		}, conversationId)
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CHAT_MESSAGE,
+			"type":     messageType,
+			"senderId": senderId,
+			"targetId": recipientId,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": conversationId,
+		}
+		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 	}
 }
 

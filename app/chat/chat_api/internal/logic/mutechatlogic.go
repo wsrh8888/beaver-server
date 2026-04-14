@@ -6,7 +6,7 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -79,10 +79,17 @@ func (l *MuteChatLogic) notifyMutedUpdate(conversationId, userId string, version
 	// 发送给自己
 	tableUpdates := []map[string]interface{}{userConversationsUpdate}
 	messageType := wsTypeConst.ChatUserConversationReceive
-
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.CHAT_MESSAGE, messageType, userId, userId, map[string]interface{}{
-		"tableUpdates": tableUpdates,
-	}, conversationId)
+	payload := map[string]interface{}{
+		"command":  wsCommandConst.CHAT_MESSAGE,
+		"type":     messageType,
+		"senderId": userId,
+		"targetId": userId,
+		"body": map[string]interface{}{
+			"tableUpdates": tableUpdates,
+		},
+		"conversationId": conversationId,
+	}
+	l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 
 	l.Logger.Infof("发送免打扰状态更新通知: user=%s, conversation=%s, version=%d",
 		userId, conversationId, version)

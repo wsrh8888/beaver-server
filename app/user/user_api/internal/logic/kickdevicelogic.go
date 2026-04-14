@@ -8,7 +8,7 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -45,13 +45,20 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (resp *types.Kick
 	// 标记设备为非活跃
 	l.svcCtx.DB.Model(&device).Update("is_active", false)
 
-	// 异步通过 WS 推送强制下线通知（客户端收到后比对 deviceId，执行本地登出）
+	// 异步通过 RocketMQ 推送强制下线通知（客户端收到后比对 deviceId，执行本地登出）
 	go func() {
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.UserKickReceive,
-			req.UserID, req.UserID, map[string]interface{}{
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.USER_PROFILE,
+			"type":     wsTypeConst.UserKickReceive,
+			"senderId": req.UserID,
+			"targetId": req.UserID,
+			"body": map[string]interface{}{
 				"deviceId": req.DeviceID,
 				"reason":   "kicked_by_user",
-			}, "")
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 	}()
 
 	return &types.KickDeviceRes{}, nil

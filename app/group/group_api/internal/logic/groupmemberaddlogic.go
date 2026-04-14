@@ -10,7 +10,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -181,36 +181,52 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 		for _, member := range response.Members {
 			if !newMemberIds[member.UserID] { // 不通知新加入的成员（已在群的所有成员都要收到通知，包括操作者自己）
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
-					"tables": []map[string]interface{}{
-						{
-							"table": "group_members",
-							"data":  newMemberData, // 推送所有新加入成员的信息列表
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.GROUP_OPERATION,
+					"type":     wsTypeConst.GroupMemberReceive,
+					"senderId": req.UserID,
+					"targetId": member.UserID,
+					"body": map[string]interface{}{
+						"tables": []map[string]interface{}{
+							{
+								"table": "group_members",
+								"data":  newMemberData, // 推送所有新加入成员的信息列表
+							},
 						},
 					},
-				}, "")
+					"conversationId": "",
+				}
+				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}
 
 		// 2. 通知新加入的成员：group_members变化（他们成为了成员）+ groups变化（群基本信息）
 		for _, newMemberID := range req.UserIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, newMemberID, map[string]interface{}{
-				"tables": []map[string]interface{}{
-					{
-						"table": "groups",
-						"data": []map[string]interface{}{
-							{
-								"version": groupVersion,
-								"groupId": req.GroupID,
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.UserID,
+				"targetId": newMemberID,
+				"body": map[string]interface{}{
+					"tables": []map[string]interface{}{
+						{
+							"table": "groups",
+							"data": []map[string]interface{}{
+								{
+									"version": groupVersion,
+									"groupId": req.GroupID,
+								},
 							},
 						},
-					},
-					{
-						"table": "group_members",
-						"data":  newMemberData, // 推送所有新加入成员的信息列表
+						{
+							"table": "group_members",
+							"data":  newMemberData, // 推送所有新加入成员的信息列表
+						},
 					},
 				},
-			}, "")
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
 	}()
 

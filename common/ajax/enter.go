@@ -1,16 +1,11 @@
 package ajax
 
 import (
-	"beaver/common/etcd"
-
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-
-	"beaver/common/wsEnum/wsCommandConst" // Import the wsCommandConst package
-	"beaver/common/wsEnum/wsTypeConst"    // Import the wsCommandConst package
 )
 
 // 内部通讯密钥中心
@@ -36,42 +31,6 @@ type Response struct {
 	Code   int             `json:"code"`
 	Msg    string          `json:"msg"`
 	Result json.RawMessage `json:"result"`
-}
-type WsProxyReq struct {
-	UserID         string                 `header:"Beaver-User-Id" json:"-"`
-	Command        wsCommandConst.Command `json:"command"`
-	TargetID       string                 `json:"targetId"`
-	Type           wsTypeConst.Type       `json:"type"`
-	Body           map[string]interface{} `json:"body"`
-	ConversationId string                 `json:"conversationId"`
-}
-
-func SendMessageToWs(etcdUrl string, command wsCommandConst.Command, types wsTypeConst.Type, senderID string, targetID string, requestBody map[string]interface{}, conversationId string) error {
-	addr := etcd.GetServiceAddr(etcdUrl, "ws_api")
-	if addr == "" {
-		return fmt.Errorf("未匹配到服务")
-	}
-	apiEndpoint := fmt.Sprintf("http://%s/api/ws/proxySendMsg", addr)
-
-	wsProxyReq := WsProxyReq{
-		UserID:         senderID,
-		Command:        command,
-		TargetID:       targetID,
-		Type:           types,
-		Body:           requestBody,
-		ConversationId: conversationId,
-	}
-	fmt.Println("会话id是:", conversationId)
-	body, _ := json.Marshal(wsProxyReq)
-
-	_, err := ForwardMessage(ForwardRequest{
-		ApiEndpoint: apiEndpoint,
-		Method:      "POST",
-		Token:       "",
-		UserID:      senderID,
-		Body:        bytes.NewBuffer(body),
-	})
-	return err
 }
 
 func ForwardMessage(forwardReq ForwardRequest) (json.RawMessage, error) {

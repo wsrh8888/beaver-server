@@ -1,0 +1,97 @@
+services:
+  mysql:
+    image: docker.m.daocloud.io/library/mysql:5.7
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+    command:
+      [
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_general_ci",
+        "--max_connections=3000",
+      ]
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/log:/var/log/mysql
+
+  redis:
+    image: docker.m.daocloud.io/library/redis:4
+    container_name: redis
+    command: redis-server --appendonly yes --requirepass "123456"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis:/data
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.4.13
+    container_name: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    volumes:
+      - ./etcd:/etcd-data
+  livekit:
+    image: docker.m.daocloud.io/livekit/livekit-server:latest
+    container_name: livekit
+    restart: always
+    command: --config /etc/livekit.yaml
+    volumes:
+      # 遵循你 ./目录:/容器内目录 的映射习惯
+      - ./livekit/livekit.yaml:/etc/livekit.yaml
+    ports:
+      - "7880:7880"   # 信令与 API
+      - "7881:7881"   # RTC over TCP
+      - "50000-50050:50000-50050/udp" # WebRTC 媒体流
+    depends_on:
+      - redis
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.1
+    container_name: rocketmq-namesrv
+    restart: always
+    ports:
+      - "9876:9876"
+    environment:
+      - JAVA_OPT_EXT=-Xms256m -Xmx256m
+    command: sh mqnamesrv
+    volumes:
+      - ./rocketmq/namesrv/logs:/home/rocketmq/logs
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.1
+    container_name: rocketmq-broker
+    restart: always
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    environment:
+      - NAMESRV_ADDR=rocketmq-namesrv:9876
+      - JAVA_OPT_EXT=-Xms512m -Xmx512m
+    command: sh mqbroker -c /home/rocketmq/conf/broker.conf
+    volumes:
+      - ./rocketmq/broker/logs:/home/rocketmq/logs
+      - ./rocketmq/broker/store:/home/rocketmq/store
+      - ./rocketmq/broker/conf/broker.conf:/home/rocketmq/conf/broker.conf
+    depends_on:
+      - rocketmq-namesrv
+
+  rocketmq-console:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: rocketmq-console
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=rocketmq-namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
+    depends_on:
+      - rocketmq-namesrv

@@ -8,7 +8,7 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -92,9 +92,17 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 		tableUpdates = append(tableUpdates, cursorUpdates)
 
 		// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
-		ajax.SendMessageToWs(etcdAddr, wsCommandConst.NOTIFICATION, wsTypeConst.NotificationMarkReadReceive, "", userId, map[string]interface{}{
-			"tableUpdates": tableUpdates,
-		}, "")
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.NOTIFICATION,
+			"type":     wsTypeConst.NotificationMarkReadReceive,
+			"senderId": "",
+			"targetId": userId,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 	}(l.svcCtx.Config.Etcd, userId, category, cursorVersion)
 
 	resp = &types.MarkReadByCategoryRes{}

@@ -8,7 +8,9 @@ import (
 	"beaver/app/user/user_api/internal/config"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
-	"beaver/core"
+	"beaver/core/coregorm"
+	"beaver/core/coreredis"
+	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
 
 	"beaver/common/zrpc_interceptor"
@@ -26,12 +28,15 @@ type ServiceContext struct {
 	FriendRpc  friend_rpc.FriendClient
 	GroupRpc   group_rpc.GroupClient
 	VersionGen *versionPkg.VersionGenerator
+	RocketMQ   *corerocketmq.Client
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysqlDb := core.InitGorm(c.Mysql.DataSource)
-	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
+	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
+
+	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 
 	return &ServiceContext{
 		Config:     c,
@@ -41,5 +46,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		FriendRpc:  friend.NewFriend(zrpc.MustNewClient(c.FriendRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		GroupRpc:   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
+		RocketMQ:   mqClient,
 	}
 }

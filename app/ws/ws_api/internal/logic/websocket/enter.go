@@ -7,10 +7,7 @@ import (
 	"net/http"
 
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
-	"beaver/app/ws/ws_api/internal/logic/websocket/handler/call"
 	"beaver/app/ws/ws_api/internal/logic/websocket/handler/chat_message"
-	"beaver/app/ws/ws_api/internal/logic/websocket/handler/friend_operation"
-	"beaver/app/ws/ws_api/internal/logic/websocket/handler/group_operation"
 	"beaver/app/ws/ws_api/internal/logic/websocket/heartbeat"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
@@ -72,12 +69,6 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		switch cmd {
 		case wsCommandConst.CHAT_MESSAGE:
 			handlerErr = chat_message.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
-		case wsCommandConst.FRIEND_OPERATION:
-			handlerErr = friend_operation.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
-		case wsCommandConst.GROUP_OPERATION:
-			handlerErr = group_operation.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
-		case wsCommandConst.CALL:
-			handlerErr = call.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
 		default:
 			fmt.Printf("未支持的命令类型, 用户: %s, 命令: %s\n", req.UserID, wsMessage.Command)
 		}

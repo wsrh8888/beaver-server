@@ -8,7 +8,7 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -114,9 +114,17 @@ func (l *UpdateReadSeqLogic) notifyReadSeqUpdate(userID, conversationID string, 
 	}
 
 	// 推送WebSocket通知（给自己，同步到其他设备）
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.CHAT_MESSAGE, wsTypeConst.ChatUserConversationReceive, userID, userID, map[string]interface{}{
-		"tableUpdates": []map[string]interface{}{userConversationsUpdate},
-	}, conversationID)
+	payload := map[string]interface{}{
+		"command":  wsCommandConst.CHAT_MESSAGE,
+		"type":     wsTypeConst.ChatUserConversationReceive,
+		"senderId": userID,
+		"targetId": userID,
+		"body": map[string]interface{}{
+			"tableUpdates": []map[string]interface{}{userConversationsUpdate},
+		},
+		"conversationId": conversationID,
+	}
+	l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 
 	l.Infof("推送已读序列号更新通知完成: userId=%s, conversationId=%s, version=%d", userID, conversationID, version)
 }

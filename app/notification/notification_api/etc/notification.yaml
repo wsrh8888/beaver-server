@@ -27,3 +27,5 @@ ChatRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: chatrpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

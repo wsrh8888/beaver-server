@@ -7,7 +7,7 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -114,9 +114,17 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			},
 		}
 
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive, req.UserID, req.UserID, map[string]interface{}{
-			"tableUpdates": []map[string]interface{}{friendUpdates},
-		}, "")
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.FRIEND_OPERATION,
+			"type":     wsTypeConst.FriendReceive,
+			"senderId": req.UserID,
+			"targetId": req.UserID,
+			"body": map[string]interface{}{
+				"tableUpdates": []map[string]interface{}{friendUpdates},
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 
 		l.Logger.Infof("异步发送好友备注更新通知完成: userId=%s, friendId=%s, version=%d", req.UserID, friend.FriendID, nextVersion)
 	}()

@@ -21,6 +21,9 @@ type Config struct {
 		ApiKey    string
 		ApiSecret string
 	}
+	RocketMQ struct {
+		Addr string
+	}
 	UserRpc  zrpc.RpcClientConf
 	CallRpc  zrpc.RpcClientConf
 	ChatRpc  zrpc.RpcClientConf

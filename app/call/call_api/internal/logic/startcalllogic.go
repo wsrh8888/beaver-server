@@ -10,7 +10,7 @@ import (
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	user_rpc "beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
@@ -148,13 +148,13 @@ func (l *StartCallLogic) sendInviteSignals(callerID, targetID, convID, roomID st
 		}
 	}
 
-	// 2. 发送 WebSocket 实时弹窗信号 (纯信令，不入库)
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
-		wsCommandConst.CALL,
-		wsTypeConst.CallReceive,
-		callerID,
-		targetID,
-		map[string]interface{}{
+	// 2. 通过 RocketMQ 异步发送 WebSocket 实时弹窗信号 (纯信令，不入库)
+	payload := map[string]interface{}{
+		"command":  wsCommandConst.CALL,
+		"type":     wsTypeConst.CallReceive,
+		"senderId": callerID,
+		"targetId": targetID,
+		"body": map[string]interface{}{
 			"type":           call_models.SignalInvite,
 			"roomId":         roomID,
 			"callerId":       callerID,
@@ -162,6 +162,7 @@ func (l *StartCallLogic) sendInviteSignals(callerID, targetID, convID, roomID st
 			"callerUserInfo": callerUserInfo,
 			"timestamp":      time.Now().Unix(),
 		},
-		convID,
-	)
+		"conversationId": convID,
+	}
+	l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 }

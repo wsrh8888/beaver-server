@@ -9,7 +9,7 @@ import (
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/chat/chat_utils"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -200,9 +200,17 @@ func (l *SendNotificationMessageLogic) notifyNotificationUpdateGrouped(conversat
 
 	for _, recipientId := range recipientIds {
 		// 一次性推送所有表的更新信息
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd.Hosts[0], wsCommandConst.CHAT_MESSAGE, messageType, "", recipientId, map[string]interface{}{
-			"tableUpdates": tableUpdates, // 按表分组的更新数组
-		}, conversationId)
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CHAT_MESSAGE,
+			"type":     messageType,
+			"senderId": "",
+			"targetId": recipientId,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates, // 按表分组的更新数组
+			},
+			"conversationId": conversationId,
+		}
+		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 
 		l.Logger.Infof("分组推送通知相关更新: recipient=%s, conversation=%s, tableUpdateCount=%d",
 			recipientId, conversationId, len(tableUpdates))

@@ -8,7 +8,8 @@ import (
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/core"
+	"beaver/core/coregorm"
+	"beaver/core/coreredis"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -17,29 +18,29 @@ import (
 )
 
 type ServiceContext struct {
-	Config    config.Config
-	DB        *gorm.DB
-	Redis     *redis.Client
-	FriendRpc friend_rpc.FriendClient
-	GroupRpc  group_rpc.GroupClient
-	UserRpc   user_rpc.UserClient
-	ChatRpc   chat_rpc.ChatClient
-	EmojiRpc  emoji_rpc.EmojiClient
+	Config          config.Config
+	DB              *gorm.DB
+	Redis           *redis.Client
+	FriendRpc       friend_rpc.FriendClient
+	GroupRpc        group_rpc.GroupClient
+	UserRpc         user_rpc.UserClient
+	ChatRpc         chat_rpc.ChatClient
+	EmojiRpc        emoji_rpc.EmojiClient
 	NotificationRpc notification_rpc.NotificationClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysqlDb := core.InitGorm(c.Mysql.DataSource)
-	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
+	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 	return &ServiceContext{
-		Config:    c,
-		DB:        mysqlDb,
-		Redis:     client,
-		FriendRpc: friend_rpc.NewFriendClient(zrpc.MustNewClient(c.FriendRpc, zrpc.WithTimeout(time.Duration(c.FriendRpc.Timeout)*time.Millisecond)).Conn()),
-		GroupRpc:  group_rpc.NewGroupClient(zrpc.MustNewClient(c.GroupRpc, zrpc.WithTimeout(time.Duration(c.GroupRpc.Timeout)*time.Millisecond)).Conn()),
-		UserRpc:   user_rpc.NewUserClient(zrpc.MustNewClient(c.UserRpc, zrpc.WithTimeout(time.Duration(c.UserRpc.Timeout)*time.Millisecond)).Conn()),
-		ChatRpc:   chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
-		EmojiRpc:  emoji_rpc.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
+		Config:          c,
+		DB:              mysqlDb,
+		Redis:           client,
+		FriendRpc:       friend_rpc.NewFriendClient(zrpc.MustNewClient(c.FriendRpc, zrpc.WithTimeout(time.Duration(c.FriendRpc.Timeout)*time.Millisecond)).Conn()),
+		GroupRpc:        group_rpc.NewGroupClient(zrpc.MustNewClient(c.GroupRpc, zrpc.WithTimeout(time.Duration(c.GroupRpc.Timeout)*time.Millisecond)).Conn()),
+		UserRpc:         user_rpc.NewUserClient(zrpc.MustNewClient(c.UserRpc, zrpc.WithTimeout(time.Duration(c.UserRpc.Timeout)*time.Millisecond)).Conn()),
+		ChatRpc:         chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
+		EmojiRpc:        emoji_rpc.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
 		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
 	}
 }

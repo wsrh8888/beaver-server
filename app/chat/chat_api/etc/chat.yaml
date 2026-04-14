@@ -32,3 +32,5 @@ GroupRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

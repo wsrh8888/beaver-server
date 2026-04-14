@@ -8,7 +8,7 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -141,9 +141,17 @@ func (l *PushEventLogic) PushEvent(in *notification_rpc.PushEventReq) (*notifica
 			userTableUpdates := append([]map[string]interface{}{}, tableUpdates...)
 			userTableUpdates = append(userTableUpdates, inboxUpdates)
 
-			ajax.SendMessageToWs(etcdAddr, wsCommandConst.NOTIFICATION, wsTypeConst.NotificationReceive, in.FromUserId, uid, map[string]interface{}{
-				"tableUpdates": userTableUpdates,
-			}, "")
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.NOTIFICATION,
+				"type":     wsTypeConst.NotificationReceive,
+				"senderId": in.FromUserId,
+				"targetId": uid,
+				"body": map[string]interface{}{
+					"tableUpdates": userTableUpdates,
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}
 	}(l.svcCtx.Config.Etcd.Hosts[0], in.ToUserIds, eventID, eventVersion)
 

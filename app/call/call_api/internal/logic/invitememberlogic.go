@@ -9,7 +9,7 @@ import (
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -58,13 +58,13 @@ func (l *InviteMemberLogic) InviteMember(req *types.InviteCallMemberReq) (resp *
 			Status: 1, // 1-待接听 (ParticipantStatusCalling)
 		})
 
-		// 通过 WebSocket 发送 RTC_INVITE 信令给受邀方 (告知来电)
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
-			wsCommandConst.CALL,
-			wsTypeConst.CallReceive,
-			req.UserID,
-			targetID,
-			map[string]interface{}{
+		// 通过 RocketMQ 异步发送 WebSocket RTC_INVITE 信令给受邀方 (告知来电)
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CALL,
+			"type":     wsTypeConst.CallReceive,
+			"senderId": req.UserID,
+			"targetId": targetID,
+			"body": map[string]interface{}{
 				"type":           call_models.SignalInvite,
 				"roomId":         req.RoomID,
 				"callerId":       req.UserID,
@@ -72,25 +72,27 @@ func (l *InviteMemberLogic) InviteMember(req *types.InviteCallMemberReq) (resp *
 				"callerUserInfo": callerUserInfo,
 				"timestamp":      time.Now().Unix(),
 			},
-			session.ConversationId,
-		)
+			"conversationId": session.ConversationId,
+		}
+		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 
 		// 4. [核心修复] 通知房间里的所有人：有新成员正在被呼叫中 (包括自己的其他设备同步)
 		for _, pid := range session.ParticipantIds {
 			if pid != targetID {
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
-					wsCommandConst.CALL,
-					wsTypeConst.CallReceive,
-					req.UserID,
-					pid,
-					map[string]interface{}{
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.CALL,
+					"type":     wsTypeConst.CallReceive,
+					"senderId": req.UserID,
+					"targetId": pid,
+					"body": map[string]interface{}{
 						"type":   call_models.SignalInvite,
-						"userId": targetID, // 告知谁被邀请了
+						"userId": targetID,
 						"roomId": req.RoomID,
-						"status": 1, // 1-Calling
+						"status": 1,
 					},
-					session.ConversationId,
-				)
+					"conversationId": session.ConversationId,
+				}
+				l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}
 

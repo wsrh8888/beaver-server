@@ -7,7 +7,7 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/rocketmq"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -89,9 +89,17 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 			tableUpdates = append(tableUpdates, collectUpdates)
 
 			// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
-			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
-				"tableUpdates": tableUpdates,
-			}, "")
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.EMOJI,
+				"type":     wsTypeConst.EmojiReceive,
+				"senderId": "",
+				"targetId": userId,
+				"body": map[string]interface{}{
+					"tableUpdates": tableUpdates,
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, newFavoriteEmoji.EmojiCollectID, collectVersion)
 
 	case "unfavorite":
@@ -134,9 +142,17 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 			tableUpdates = append(tableUpdates, collectUpdates)
 
 			// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
-			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
-				"tableUpdates": tableUpdates,
-			}, "")
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.EMOJI,
+				"type":     wsTypeConst.EmojiReceive,
+				"senderId": "",
+				"targetId": userId,
+				"body": map[string]interface{}{
+					"tableUpdates": tableUpdates,
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, favoriteEmoji.EmojiCollectID, favoriteEmoji.Version)
 
 	default:
