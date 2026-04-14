@@ -10,7 +10,7 @@ import (
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	user_rpc "beaver/app/user/user_rpc/types/user_rpc"
-	mqwsconst "beaver/common/const/rocketmq"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"

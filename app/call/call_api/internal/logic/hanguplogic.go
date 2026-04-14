@@ -8,7 +8,7 @@ import (
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
-	mqwsconst "beaver/common/const/rocketmq"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 

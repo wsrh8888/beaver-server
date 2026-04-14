@@ -1,7 +1,7 @@
 package corerocketmq
 
 import (
-	mqwsconst "beaver/common/const/rocketmq"
+	"beaver/common/const/mqwsconst"
 	"context"
 	"encoding/json"
 	"fmt"

@@ -1,7 +1,7 @@
 package logic
 
 import (
-	mqwsconst "beaver/common/const/rocketmq"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"context"
 	"errors"
 

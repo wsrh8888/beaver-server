@@ -7,8 +7,10 @@ import (
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/core/corerocketmq"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,8 +35,8 @@ func (l *MqConsumerLogic) StartConsumer() error {
 		return nil
 	}
 
-	handler := func(msg *corerocketmq.WsMessage) error {
-		bodyBytes, err := json.Marshal(msg.Body)
+	handler := func(msg *corerocketmq.Message) error {
+		bodyBytes, err := json.Marshal(msg.Payload)
 		if err != nil {
 			logx.Errorf("序列化消息体失败: %v", err)
 			return err
@@ -42,13 +44,13 @@ func (l *MqConsumerLogic) StartConsumer() error {
 
 		content := type_struct.WsContent{
 			Data: type_struct.WsData{
-				Type:           wsTypeConst.Type(msg.Type),
+				Type:           wsTypeConst.Type(msg.Payload["type"].(string)),
 				Body:           bodyBytes,
-				ConversationID: msg.ConversationID,
+				ConversationID: msg.Payload["conversationId"].(string),
 			},
 		}
 
-		ws_conn.SendMsgToUser(msg.TargetID, wsCommandConst.Command(msg.Command), content)
+		ws_conn.SendMsgToUser(msg.Payload["targetId"].(string), wsCommandConst.Command(msg.Payload["command"].(string)), content)
 		return nil
 	}
 

@@ -13,7 +13,7 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	mqwsconst "beaver/common/const/rocketmq"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
