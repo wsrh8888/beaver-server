@@ -1,0 +1,60 @@
+syntax = "v1"
+
+// ==================== 群组接口 ====================
+
+type (
+	CreateGroupReq {
+		Name      string   `json:"name"`
+		MemberIDs []string `json:"memberIds"`
+		Avatar    string   `json:"avatar,optional"`
+	}
+	
+	CreateGroupRes {
+		GroupID string `json:"groupId"`
+	}
+)
+
+type (
+	AddGroupMemberReq {
+		GroupID   string   `json:"groupId"`
+		MemberIDs []string `json:"memberIds"`
+	}
+	
+	AddGroupMemberRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	GetGroupInfoReq {
+		GroupID string `path:"groupId"`
+	}
+	
+	GroupInfo {
+		GroupID   string `json:"groupId"`
+		Name      string `json:"name"`
+		Avatar    string `json:"avatar,optional"`
+		MemberCount int  `json:"memberCount"`
+	}
+	
+	GetGroupInfoRes {
+		Group GroupInfo `json:"group"`
+	}
+)
+
+@server (
+	group: group
+)
+service open {
+	@doc "创建群组"
+	@handler CreateGroup
+	post /api/open/v1/group/create (CreateGroupReq) returns (CreateGroupRes)
+	
+	@doc "添加群成员"
+	@handler AddGroupMember
+	post /api/open/v1/group/member/add (AddGroupMemberReq) returns (AddGroupMemberRes)
+	
+	@doc "获取群组信息"
+	@handler GetGroupInfo
+	get /api/open/v1/group/:groupId (GetGroupInfoReq) returns (GetGroupInfoRes)
+}

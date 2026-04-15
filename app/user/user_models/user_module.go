@@ -17,4 +17,6 @@ type UserModel struct {
 	Gender   int8   `gorm:"default:3"`                                             // 1:男 2:女 3:未知
 	Source   int32  // 注册来源
 	Version  int64  `gorm:"not null;default:0;index"` // 版本号（用户独立递增）
+	IsBot    int8   `gorm:"default:0;index"`          // 是否为机器人 0:否 1:是
+	BotAppID string `gorm:"size:64;index"`            // 关联的开放平台应用ID
 }

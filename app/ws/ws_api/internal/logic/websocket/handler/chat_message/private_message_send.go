@@ -45,5 +45,27 @@ func HandlePrivateMessageSend(
 		return err
 	}
 
+	// 检查是否是 Bot 对话，如果是则触发流式 Webhook
+	// 异步执行，不阻塞消息发送
+	go func() {
+		// 提取消息内容
+		var msgContent string
+		var msgMap map[string]interface{}
+		if err := json.Unmarshal(body.Msg, &msgMap); err == nil {
+			if content, ok := msgMap["content"].(string); ok {
+				msgContent = content
+			}
+		}
+
+		handleBotStreaming(
+			ctx,
+			svcCtx.DB,
+			client,
+			body.ConversationID,
+			msgContent,
+			req.UserID,
+		)
+	}()
+
 	return nil
 }

@@ -1,0 +1,47 @@
+syntax = "v1"
+
+type (
+	// Bot 发送消息请求（对标飞书/钉钉）
+	BotSendMessageReq {
+		AppID          string                 `json:"app_id" header:"X-App-ID"`           // 应用 ID
+		ConversationID string                 `json:"conversation_id"`                    // 会话 ID（私聊或群聊）
+		MsgType        string                 `json:"msg_type"`                           // 消息类型：text/markdown/richtext/html
+		Content        string                 `json:"content"`                            // 消息内容
+		Metadata       map[string]interface{} `json:"metadata,omitempty"`                 // 元数据（@、附件等）
+		IdempotentKey  string                 `json:"idempotent_key,omitempty"`           // 幂等键
+	}
+
+	// Bot 发送消息响应
+	BotSendMessageRes {
+		MessageID string `json:"message_id"` // 消息 ID
+	}
+
+	// Bot 流式发送消息请求
+	BotStreamMessageReq {
+		AppID          string `json:"app_id" header:"X-App-ID"`           // 应用 ID
+		ConversationID string `json:"conversation_id"`                    // 会话 ID
+		MsgType        string `json:"msg_type"`                           // 消息类型
+	}
+
+	// Bot 流式消息片段
+	BotStreamChunk {
+		Type     string                 `json:"type"`     // text/markdown/richtext
+		Content  string                 `json:"content"`  // 内容片段
+		Metadata map[string]interface{} `json:"metadata,omitempty"` // 元数据
+	}
+)
+
+@server (
+	group: bot
+	middleware: AuthMiddleware
+)
+
+service open {
+	@doc "Bot 主动发送消息（对标飞书/钉钉 Bot API）"
+	@handler BotSendMessage
+	post /api/open/v1/bot/message/send (BotSendMessageReq) returns (BotSendMessageRes)
+
+	@doc "Bot 流式发送消息（SSE）"
+	@handler BotStreamMessage
+	post /api/open/v1/bot/message/stream (BotStreamMessageReq) returns (BotStreamChunk)
+}

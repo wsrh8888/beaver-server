@@ -52,3 +52,20 @@ func (c *Client) SafeSendControl(frame type_struct.WsControlFrame) error {
 	}
 	return err
 }
+
+// SafeSendJSON 线程安全发送自定义 JSON 数据
+func (c *Client) SafeSendJSON(frame type_struct.WsControlFrame) error {
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+	data, err := json.Marshal(frame)
+	if err != nil {
+		fmt.Printf("序列化消息失败: %v\n", err)
+		return err
+	}
+	_ = c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+	err = c.Conn.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		fmt.Printf("发送消息失败: %v\n", err)
+	}
+	return err
+}

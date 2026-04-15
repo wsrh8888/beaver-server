@@ -51,6 +51,27 @@ type AddVersionRes struct {
 	VersionID uint `json:"versionId"` // 创建的版本ID
 }
 
+type ApplyDeveloperReq struct {
+	RealName    string `json:"realName"`
+	CompanyName string `json:"companyName,optional"`
+	Phone       string `json:"phone"`
+	Email       string `json:"email"`
+	Description string `json:"description,optional"`
+}
+
+type ApplyDeveloperRes struct {
+	ID string `json:"id"`
+}
+
+type AuditDeveloperReq struct {
+	ID          string `json:"id"`
+	Status      int    `json:"status"` // 1通过 2拒绝
+	AuditRemark string `json:"auditRemark,optional"`
+}
+
+type AuditDeveloperRes struct {
+}
+
 type AuthenticationReq struct {
 	Token     string `header:"Token,optional"`
 	ValidPath string `header:"ValidPath,optional"`
@@ -288,6 +309,21 @@ type DeleteUserReq struct {
 type DeleteUserRes struct {
 }
 
+type DeveloperInfo struct {
+	ID          string `json:"id"`
+	UserID      string `json:"userId"`
+	RealName    string `json:"realName"`
+	CompanyName string `json:"companyName"`
+	Phone       string `json:"phone"`
+	Email       string `json:"email"`
+	Description string `json:"description"`
+	Status      int    `json:"status"`
+	AuditBy     string `json:"auditBy"`
+	AuditTime   int64  `json:"auditTime"`
+	AuditRemark string `json:"auditRemark"`
+	CreatedAt   int64  `json:"createdAt"`
+}
+
 type EmojiInfo struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
@@ -480,6 +516,17 @@ type GetCityStrategiesStrategyItem struct {
 	Version        string `json:"version"`        // 版本号
 	ForceUpdate    bool   `json:"forceUpdate"`    // 是否强制更新
 	IsActive       bool   `json:"isActive"`       // 是否启用
+}
+
+type GetDeveloperListReq struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"pageSize,default=10"`
+	Status   int `form:"status,optional"` // 0待审核 1已通过 2已拒绝
+}
+
+type GetDeveloperListRes struct {
+	Total int64           `json:"total"`
+	List  []DeveloperInfo `json:"list"`
 }
 
 type GetEmojiCollectListItem struct {

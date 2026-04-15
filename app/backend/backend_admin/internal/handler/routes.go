@@ -12,6 +12,7 @@ import (
 	friend "beaver/app/backend/backend_admin/internal/handler/friend"
 	group "beaver/app/backend/backend_admin/internal/handler/group"
 	moment "beaver/app/backend/backend_admin/internal/handler/moment"
+	open "beaver/app/backend/backend_admin/internal/handler/open"
 	system "beaver/app/backend/backend_admin/internal/handler/system"
 	track "beaver/app/backend/backend_admin/internal/handler/track"
 	update "beaver/app/backend/backend_admin/internal/handler/update"
@@ -400,6 +401,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/admin/moment/list",
 				Handler: moment.GetMomentListHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/open/developer/apply",
+				Handler: open.ApplyDeveloperHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/open/developer/audit",
+				Handler: open.AuditDeveloperHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/open/developer/list",
+				Handler: open.GetDeveloperListHandler(serverCtx),
 			},
 		},
 	)

@@ -1,0 +1,44 @@
+syntax = "v1"
+
+// ==================== 用户接口 ====================
+
+type (
+	GetUserInfoReq {
+		UserID string `path:"userId"`
+	}
+	
+	UserInfo {
+		UserID   string `json:"userId"`
+		Nickname string `json:"nickname"`
+		Avatar   string `json:"avatar,optional"`
+		Phone    string `json:"phone,optional"`
+		Email    string `json:"email,optional"`
+	}
+	
+	GetUserInfoRes {
+		User UserInfo `json:"user"`
+	}
+)
+
+type (
+	GetUserListReq {
+		UserIDs []string `json:"userIds"`
+	}
+	
+	GetUserListRes {
+		Users []UserInfo `json:"users"`
+	}
+)
+
+@server (
+	group: user
+)
+service open {
+	@doc "获取用户信息"
+	@handler GetUserInfo
+	get /api/open/v1/user/:userId (GetUserInfoReq) returns (GetUserInfoRes)
+	
+	@doc "批量获取用户信息"
+	@handler GetUserList
+	post /api/open/v1/user/list (GetUserListReq) returns (GetUserListRes)
+}

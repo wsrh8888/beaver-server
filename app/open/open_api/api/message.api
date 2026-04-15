@@ -1,0 +1,40 @@
+syntax = "v1"
+
+// ==================== 消息接口 ====================
+
+type (
+	SendMessageReq {
+		TargetID   string `json:"targetId"`           // 接收者ID
+		Content    string `json:"content"`            // 消息内容
+		MsgType    string `json:"msgType,optional"`   // 消息类型 text/image/file
+		ConversationType int `json:"conversationType,optional"` // 会话类型 1单聊 2群聊
+	}
+	
+	SendMessageRes {
+		MsgID      string `json:"msgId"`
+		SendTime   int64  `json:"sendTime"`
+	}
+)
+
+type (
+	RecallMessageReq {
+		MsgID string `json:"msgId"`
+	}
+	
+	RecallMessageRes {
+		Success bool `json:"success"`
+	}
+)
+
+@server (
+	group: message
+)
+service open {
+	@doc "发送消息"
+	@handler SendMessage
+	post /api/open/v1/message/send (SendMessageReq) returns (SendMessageRes)
+	
+	@doc "撤回消息"
+	@handler RecallMessage
+	post /api/open/v1/message/recall (RecallMessageReq) returns (RecallMessageRes)
+}
