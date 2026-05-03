@@ -6,6 +6,7 @@ import (
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
+	"beaver/core/corewebhook"
 	versionPkg "beaver/core/version"
 
 	"github.com/go-redis/redis"
@@ -18,8 +19,9 @@ type ServiceContext struct {
 	DB         *gorm.DB
 	Redis      *redis.Client
 	VersionGen *versionPkg.VersionGenerator
-	UserRpc    user.User
-	RocketMQ   *corerocketmq.Client
+	UserRpc       user.User
+	RocketMQ      *corerocketmq.Client
+	WebhookSender *corewebhook.WebhookSender
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -38,7 +40,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:      client,
 		DB:         mysqlDb,
 		VersionGen: versionGen,
-		UserRpc:    userRpc,
-		RocketMQ:   mqClient,
+		UserRpc:       userRpc,
+		RocketMQ:      mqClient,
+		WebhookSender: corewebhook.NewWebhookSender(mysqlDb, corewebhook.Config{Timeout: 10, RetryCount: 3}),
 	}
 }

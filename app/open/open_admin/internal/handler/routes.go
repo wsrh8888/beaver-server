@@ -6,7 +6,9 @@ import (
 
 	app "beaver/app/open/open_admin/internal/handler/app"
 	auth "beaver/app/open/open_admin/internal/handler/auth"
-	stats "beaver/app/open/open_admin/internal/handler/stats"
+	developer "beaver/app/open/open_admin/internal/handler/developer"
+	permission "beaver/app/open/open_admin/internal/handler/permission"
+	quota "beaver/app/open/open_admin/internal/handler/quota"
 	webhook "beaver/app/open/open_admin/internal/handler/webhook"
 	"beaver/app/open/open_admin/internal/svc"
 
@@ -52,6 +54,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 重置应用密钥
+				Method:  http.MethodPost,
+				Path:    "/admin/open/app/secret/reset",
+				Handler: app.ResetAppSecretHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
 				Method:  http.MethodPost,
 				Path:    "/admin/open/auth/login",
 				Handler: auth.LoginHandler(serverCtx),
@@ -62,16 +75,56 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取 API 调用统计
+				// 获取开发者详情
 				Method:  http.MethodGet,
-				Path:    "/admin/open/stats/api_calls",
-				Handler: stats.GetAPICallsStatsHandler(serverCtx),
+				Path:    "/admin/open/developer/:id",
+				Handler: developer.GetDeveloperDetailHandler(serverCtx),
 			},
 			{
-				// 获取 Webhook 统计
+				// 审核开发者申请
+				Method:  http.MethodPost,
+				Path:    "/admin/open/developer/audit",
+				Handler: developer.AuditDeveloperHandler(serverCtx),
+			},
+			{
+				// 获取开发者列表
 				Method:  http.MethodGet,
-				Path:    "/admin/open/stats/webhook",
-				Handler: stats.GetWebhookStatsHandler(serverCtx),
+				Path:    "/admin/open/developer/list",
+				Handler: developer.GetDeveloperListHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 获取应用权限列表
+				Method:  http.MethodGet,
+				Path:    "/admin/open/app/:appId/permissions",
+				Handler: permission.GetAppPermissionsHandler(serverCtx),
+			},
+			{
+				// 配置应用权限
+				Method:  http.MethodPost,
+				Path:    "/admin/open/app/permission/config",
+				Handler: permission.ConfigAppPermissionHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 配置应用配额
+				Method:  http.MethodPost,
+				Path:    "/admin/open/quota/config",
+				Handler: quota.ConfigQuotaHandler(serverCtx),
+			},
+			{
+				// 获取配额列表
+				Method:  http.MethodGet,
+				Path:    "/admin/open/quota/list",
+				Handler: quota.GetQuotaListHandler(serverCtx),
 			},
 		},
 	)

@@ -2,10 +2,8 @@ package bot
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/open/open_api/internal/svc"
@@ -58,34 +56,20 @@ func (l *BotSendMessageLogic) BotSendMessage(req *types.BotSendMessageReq) (resp
 	// 4. 调用 chat_rpc 发送消息
 	messageID := uuid.New().String()
 
+	// TODO: 构造正确的消息格式
 	// 将消息内容序列化为 JSON
-	contentJSON, _ := json.Marshal(msgContent)
+	// contentJSON, _ := json.Marshal(msgContent)
 
 	_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-		UserId:         app.BotUserID,      // Bot 作为发送者
-		ConversationId: req.ConversationID, // 目标会话（私聊或群聊）
-		MessageId:      messageID,
-		Msg:            contentJSON,
+		UserId:    app.BotUserID, // Bot 作为发送者
+		MessageId: messageID,
+		// ConversationId: req.ConversationID, // 目标会话（私聊或群聊）
+		// Msg:            contentJSON,
 	})
 
 	if err != nil {
 		return nil, fmt.Errorf("发送消息失败: %w", err)
 	}
-
-	// 5. 记录 API 调用日志
-	now := time.Now().UnixMilli()
-	apiLog := open_models.OpenAPILog{
-		Model: open_models.Model{
-			ID:        uuid.New().String(),
-			CreatedAt: now,
-		},
-		AppID:      req.AppID,
-		APIPath:    "/api/open/v1/bot/message/send",
-		Method:     "POST",
-		StatusCode: 200,
-		RequestIP:  "",
-	}
-	l.svcCtx.DB.Create(&apiLog)
 
 	return &types.BotSendMessageRes{
 		MessageID: messageID,

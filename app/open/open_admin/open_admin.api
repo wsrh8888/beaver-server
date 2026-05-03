@@ -1,6 +1,6 @@
 import "api/auth.api"
 import "api/app.api"
 import "api/webhook.api"
-import "api/stats.api"
+import "api/extended.api"
 
 // goctl api go -api open_admin.api -dir . --home ../../../template

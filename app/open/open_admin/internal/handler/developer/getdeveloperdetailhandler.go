@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_admin/internal/logic/stats"
+	"beaver/app/open/open_admin/internal/logic/developer"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/app/open/open_admin/internal/types"
 	"beaver/common/response"
@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetAPICallsStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetDeveloperDetailHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetAPICallsStatsReq
+		var req types.GetDeveloperDetailReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := stats.NewGetAPICallsStatsLogic(r.Context(), svcCtx)
-		resp, err := l.GetAPICallsStats(&req)
+		l := developer.NewGetDeveloperDetailLogic(r.Context(), svcCtx)
+		resp, err := l.GetDeveloperDetail(&req)
 		response.Response(r, w, resp, err)
 	}
 }

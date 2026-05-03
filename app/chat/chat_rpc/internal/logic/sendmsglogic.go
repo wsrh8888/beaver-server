@@ -16,9 +16,9 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
-	common_webhook "beaver/common/webhook"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/core/corewebhook"
 	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -682,10 +682,17 @@ func (l *SendMsgLogic) triggerBotWebhookIfNeeded(chatModel chat_models.ChatMessa
 		},
 	}
 
-	// 6. 异步发送 Webhook
-	go func() {
-		common_webhook.SendCallback(webhookConfig.URL, payload, webhookConfig.Secret)
-	}()
+	// 6. 发送 Webhook
+	l.svcCtx.WebhookSender.Send("message.receive", payload, []corewebhook.WebhookTargetConfig{
+		{
+			ID:         webhookConfig.ID,
+			AppID:      webhookConfig.AppID,
+			TargetURL:  webhookConfig.TargetURL,
+			Secret:     webhookConfig.Secret,
+			RetryCount: webhookConfig.RetryCount,
+			Timeout:    webhookConfig.Timeout,
+		},
+	})
 
 	l.Logger.Infof("触发 Bot Webhook: appId=%s, messageId=%s", app.AppID, chatModel.MessageID)
 }

@@ -1,0 +1,190 @@
+syntax = "v1"
+
+// ==================== 应用密钥管理 ====================
+
+type (
+	ResetAppSecretReq {
+		AppID string `json:"appId"`
+	}
+	
+	ResetAppSecretRes {
+		AppID     string `json:"appId"`
+		AppSecret string `json:"appSecret"`
+		Message   string `json:"message"` // 提示信息：请妥善保管新密钥
+	}
+)
+
+// ==================== 应用权限管理 ====================
+
+type (
+	GetAppPermissionsReq {
+		AppID string `path:"appId"`
+	}
+	
+	AppPermission {
+		ID        uint   `json:"id"`
+		Scope     string `json:"scope"`
+		GrantedAt int64  `json:"grantedAt"`
+		GrantedBy string `json:"grantedBy"`
+		ExpiresAt int64  `json:"expiresAt"`
+	}
+	
+	GetAppPermissionsRes {
+		Permissions []AppPermission `json:"permissions"`
+	}
+)
+
+type (
+	ConfigAppPermissionReq {
+		AppID     string   `json:"appId"`
+		Scopes    []string `json:"scopes"`     // 权限范围列表
+		ExpiresAt int64    `json:"expiresAt,optional"` // 过期时间
+	}
+	
+	ConfigAppPermissionRes {
+		Success bool `json:"success"`
+	}
+)
+
+// ==================== 开发者管理 ====================
+
+type (
+	GetDeveloperListReq {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"pageSize,default=10"`
+		Status   int `form:"status,optional"` // 0待审核 1已通过 2已拒绝
+	}
+	
+	DeveloperInfo {
+		ID          uint   `json:"id"`
+		UserID      string `json:"userId"`
+		RealName    string `json:"realName"`
+		CompanyName string `json:"companyName"`
+		Phone       string `json:"phone"`
+		Email       string `json:"email"`
+		Description string `json:"description"`
+		Status      int    `json:"status"`
+		AuditBy     string `json:"auditBy"`
+		AuditTime   int64  `json:"auditTime"`
+		AuditRemark string `json:"auditRemark"`
+		CreatedAt   int64  `json:"createdAt"`
+	}
+	
+	GetDeveloperListRes {
+		Total int64           `json:"total"`
+		List  []DeveloperInfo `json:"list"`
+	}
+)
+
+type (
+	GetDeveloperDetailReq {
+		ID uint `path:"id"`
+	}
+	
+	GetDeveloperDetailRes {
+		Developer DeveloperInfo `json:"developer"`
+	}
+)
+
+type (
+	AuditDeveloperReq {
+		ID          uint   `json:"id"`
+		Status      int    `json:"status"` // 1通过 2拒绝
+		AuditRemark string `json:"auditRemark,optional"`
+	}
+	
+	AuditDeveloperRes {
+		Success bool `json:"success"`
+	}
+)
+
+// ==================== 配额管理 ====================
+
+type (
+	GetQuotaListReq {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"pageSize,default=10"`
+		AppID    string `form:"appId,optional"`
+	}
+	
+	QuotaInfo {
+		ID             uint   `json:"id"`
+		AppID          string `json:"appId"`
+		DailyAPILimit  int64  `json:"dailyApiLimit"`   // 每日 API 调用限制
+		MonthlyAPILimit int64 `json:"monthlyApiLimit"` // 每月 API 调用限制
+		DailyWebhookLimit int64 `json:"dailyWebhookLimit"` // 每日 Webhook 推送限制
+		UsedToday      int64  `json:"usedToday"`       // 今日已使用
+		UsedThisMonth  int64  `json:"usedThisMonth"`   // 本月已使用
+		UpdatedAt      int64  `json:"updatedAt"`
+	}
+	
+	GetQuotaListRes {
+		Total int64      `json:"total"`
+		List  []QuotaInfo `json:"list"`
+	}
+)
+
+type (
+	ConfigQuotaReq {
+		AppID           string `json:"appId"`
+		DailyAPILimit   int64  `json:"dailyApiLimit,optional"`
+		MonthlyAPILimit int64  `json:"monthlyApiLimit,optional"`
+		DailyWebhookLimit int64 `json:"dailyWebhookLimit,optional"`
+	}
+	
+	ConfigQuotaRes {
+		Success bool `json:"success"`
+	}
+)
+
+@server (
+	group: app
+)
+service open_admin {
+	@doc "重置应用密钥"
+	@handler ResetAppSecret
+	post /open/app/secret/reset (ResetAppSecretReq) returns (ResetAppSecretRes)
+}
+
+@server (
+	group: permission
+)
+service open_admin {
+	@doc "获取应用权限列表"
+	@handler GetAppPermissions
+	get /open/app/:appId/permissions (GetAppPermissionsReq) returns (GetAppPermissionsRes)
+	
+	@doc "配置应用权限"
+	@handler ConfigAppPermission
+	post /open/app/permission/config (ConfigAppPermissionReq) returns (ConfigAppPermissionRes)
+}
+
+@server (
+	group: developer
+)
+service open_admin {
+	@doc "获取开发者列表"
+	@handler GetDeveloperList
+	get /open/developer/list (GetDeveloperListReq) returns (GetDeveloperListRes)
+	
+	@doc "获取开发者详情"
+	@handler GetDeveloperDetail
+	get /open/developer/:id (GetDeveloperDetailReq) returns (GetDeveloperDetailRes)
+	
+	@doc "审核开发者申请"
+	@handler AuditDeveloper
+	post /open/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
+}
+
+@server (
+	group: quota
+)
+service open_admin {
+	@doc "获取配额列表"
+	@handler GetQuotaList
+	get /open/quota/list (GetQuotaListReq) returns (GetQuotaListRes)
+	
+	@doc "配置应用配额"
+	@handler ConfigQuota
+	post /open/quota/config (ConfigQuotaReq) returns (ConfigQuotaRes)
+}

@@ -3,7 +3,6 @@ package message
 import (
 	"context"
 	"errors"
-	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/open/open_api/internal/svc"
@@ -51,31 +50,15 @@ func (l *SendMessageLogic) SendMessage(req *types.SendMessageReq) (resp *types.S
 	// 3. 调用 chat_rpc 发送消息
 	messageId := uuid.New().String()
 	_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-		UserId:         botUserID,
-		MessageId:      messageId,
-		ConversationId: req.ConversationId,
-		Msg:            req.Msg, // 需要转换格式
+		UserId:    botUserID,
+		MessageId: messageId,
+		// TODO: 根据 req 构造正确的消息内容
 	})
 	if err != nil {
 		return nil, errors.New("发送消息失败")
 	}
 
-	// 4. 记录 API 调用日志
-	now := time.Now().UnixMilli()
-	apiLog := open_models.OpenAPILog{
-		Model: open_models.Model{
-			ID:        uuid.New().String(),
-			CreatedAt: now,
-		},
-		AppID:      appID.(string),
-		APIPath:    "/api/open/v1/message/send",
-		Method:     "POST",
-		StatusCode: 200,
-		RequestIP:  "",
-	}
-	l.svcCtx.DB.Create(&apiLog)
-
 	return &types.SendMessageRes{
-		MessageId: messageId,
+		MsgID: messageId,
 	}, nil
 }

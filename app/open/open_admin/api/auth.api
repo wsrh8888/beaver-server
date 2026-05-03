@@ -14,5 +14,5 @@ type (
 @server (group: auth)
 service open_admin {
 	@handler Login
-	post /admin/open/auth/login (LoginReq) returns (LoginRes)
+	post /open/auth/login (LoginReq) returns (LoginRes)
 }

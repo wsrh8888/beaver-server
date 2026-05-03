@@ -47,9 +47,9 @@ type (
 service open_admin {
 	@doc "配置 Webhook"
 	@handler ConfigWebhook
-	post /admin/open/webhook/config (ConfigWebhookReq) returns (ConfigWebhookRes)
+	post /open/webhook/config (ConfigWebhookReq) returns (ConfigWebhookRes)
 	
 	@doc "获取 Webhook 日志"
 	@handler GetWebhookLogs
-	get /admin/open/webhook/logs (GetWebhookLogsReq) returns (GetWebhookLogsRes)
+	get /open/webhook/logs (GetWebhookLogsReq) returns (GetWebhookLogsRes)
 }
