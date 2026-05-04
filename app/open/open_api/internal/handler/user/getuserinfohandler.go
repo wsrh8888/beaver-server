@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_api/internal/logic/user"
+	logic "beaver/app/open/open_api/internal/logic/user"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func GetUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := user.NewGetUserInfoLogic(r.Context(), svcCtx)
+		l := logic.NewGetUserInfoLogic(r.Context(), svcCtx)
 		resp, err := l.GetUserInfo(&req)
 		response.Response(r, w, resp, err)
 	}

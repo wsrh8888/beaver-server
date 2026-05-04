@@ -1,7 +1,7 @@
 package handler
 
 import (
-	logic "beaver/app/open/open_api/internal/logic/group"
+	logic "beaver/app/open/open_api/internal/logic/webhook"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetGroupInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GenerateWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetGroupInfoReq
+		var req types.GenerateWebhookReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGetGroupInfoLogic(r.Context(), svcCtx)
-		resp, err := l.GetGroupInfo(&req)
+		l := logic.NewGenerateWebhookLogic(r.Context(), svcCtx)
+		resp, err := l.GenerateWebhook(&req)
 		response.Response(r, w, resp, err)
 	}
 }

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_api/internal/logic/bot"
+	logic "beaver/app/open/open_api/internal/logic/bot"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func BotSendMessageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := bot.NewBotSendMessageLogic(r.Context(), svcCtx)
+		l := logic.NewBotSendMessageLogic(r.Context(), svcCtx)
 		resp, err := l.BotSendMessage(&req)
 		response.Response(r, w, resp, err)
 	}

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_api/internal/logic/auth"
+	logic "beaver/app/open/open_api/internal/logic/auth"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func RefreshTokenHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := auth.NewRefreshTokenLogic(r.Context(), svcCtx)
+		l := logic.NewRefreshTokenLogic(r.Context(), svcCtx)
 		resp, err := l.RefreshToken(&req)
 		response.Response(r, w, resp, err)
 	}

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_api/internal/logic/group"
+	logic "beaver/app/open/open_api/internal/logic/group"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func AddGroupMemberHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := group.NewAddGroupMemberLogic(r.Context(), svcCtx)
+		l := logic.NewAddGroupMemberLogic(r.Context(), svcCtx)
 		resp, err := l.AddGroupMember(&req)
 		response.Response(r, w, resp, err)
 	}
