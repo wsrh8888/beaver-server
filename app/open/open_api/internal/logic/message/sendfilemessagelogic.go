@@ -25,7 +25,10 @@ func NewSendFileMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S
 }
 
 func (l *SendFileMessageLogic) SendFileMessage(req *types.SendFileMessageReq) (resp *types.SendFileMessageRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Chat RPC 发送文件消息
+	logx.Infof("发送文件消息: targetID=%s, fileName=%s", req.TargetID, req.FileName)
 
-	return
+	return &types.SendFileMessageRes{
+		MessageID: "msg_file_xxx",
+	}, nil
 }

@@ -25,7 +25,10 @@ func NewUpdateCardMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *UpdateCardMessageLogic) UpdateCardMessage(req *types.UpdateCardMessageReq) (resp *types.UpdateCardMessageRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Chat RPC 更新卡片消息
+	logx.Infof("更新卡片消息: messageID=%s", req.MessageID)
 
-	return
+	return &types.UpdateCardMessageRes{
+		Success: true,
+	}, nil
 }

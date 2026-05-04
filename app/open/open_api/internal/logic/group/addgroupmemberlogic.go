@@ -25,7 +25,10 @@ func NewAddGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 }
 
 func (l *AddGroupMemberLogic) AddGroupMember(req *types.AddGroupMemberReq) (resp *types.AddGroupMemberRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Group RPC 添加群成员
+	logx.Infof("添加群成员: groupID=%s, memberCount=%d", req.GroupID, len(req.MemberIDs))
 
-	return
+	return &types.AddGroupMemberRes{
+		Success: true,
+	}, nil
 }

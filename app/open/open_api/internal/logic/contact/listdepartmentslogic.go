@@ -25,7 +25,10 @@ func NewListDepartmentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 }
 
 func (l *ListDepartmentsLogic) ListDepartments(req *types.ListDepartmentsReq) (resp *types.ListDepartmentsRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 目前返回空列表，需要根据实际的部门模型实现
+	// 这里应该查询部门表并返回分页数据
 
-	return
+	return &types.ListDepartmentsRes{
+		Departments: []types.DepartmentInfo{},
+	}, nil
 }

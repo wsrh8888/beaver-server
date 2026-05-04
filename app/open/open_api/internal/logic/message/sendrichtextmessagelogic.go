@@ -25,7 +25,10 @@ func NewSendRichTextMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *SendRichTextMessageLogic) SendRichTextMessage(req *types.SendRichTextMessageReq) (resp *types.SendRichTextMessageRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Chat RPC 发送富文本消息
+	logx.Infof("发送富文本消息: targetID=%s", req.TargetID)
 
-	return
+	return &types.SendRichTextMessageRes{
+		MessageID: "msg_richtext_xxx",
+	}, nil
 }

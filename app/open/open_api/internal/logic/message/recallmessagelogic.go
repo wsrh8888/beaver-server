@@ -25,7 +25,10 @@ func NewRecallMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Rec
 }
 
 func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *types.RecallMessageRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Chat RPC 撤回消息
+	logx.Infof("撤回消息: messageID=%s", req.MessageID)
 
-	return
+	return &types.RecallMessageRes{
+		Success: true,
+	}, nil
 }

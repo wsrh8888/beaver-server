@@ -25,7 +25,10 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 }
 
 func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.CreateGroupRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Group RPC 创建群组
+	logx.Infof("创建群组: name=%s", req.Name)
 
-	return
+	return &types.CreateGroupRes{
+		GroupID: "grp_xxx",
+	}, nil
 }

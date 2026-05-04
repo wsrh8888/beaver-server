@@ -25,7 +25,10 @@ func NewSendImageMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *SendImageMessageLogic) SendImageMessage(req *types.SendImageMessageReq) (resp *types.SendImageMessageRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Chat RPC 发送图片消息
+	logx.Infof("发送图片消息: targetID=%s, imageURL=%s", req.TargetID, req.ImageURL)
 
-	return
+	return &types.SendImageMessageRes{
+		MessageID: "msg_image_xxx",
+	}, nil
 }

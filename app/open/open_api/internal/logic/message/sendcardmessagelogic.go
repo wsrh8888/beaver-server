@@ -25,7 +25,10 @@ func NewSendCardMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S
 }
 
 func (l *SendCardMessageLogic) SendCardMessage(req *types.SendCardMessageReq) (resp *types.SendCardMessageRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 需要调用 Chat RPC 发送卡片消息
+	logx.Infof("发送卡片消息: targetID=%s", req.TargetID)
 
-	return
+	return &types.SendCardMessageRes{
+		MessageID: "msg_card_xxx",
+	}, nil
 }

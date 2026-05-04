@@ -25,7 +25,11 @@ func NewGetEventSubscriptionsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *GetEventSubscriptionsLogic) GetEventSubscriptions(req *types.GetEventSubscriptionsReq) (resp *types.GetEventSubscriptionsRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 获取事件订阅列表
+	logx.Infof("获取事件订阅列表: appID=%s", req.AppID)
 
-	return
+	return &types.GetEventSubscriptionsRes{
+		Total: 0,
+		List:  []types.EventSubscriptionInfo{},
+	}, nil
 }

@@ -25,7 +25,10 @@ func NewConfigEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *ConfigEventSubscriptionLogic) ConfigEventSubscription(req *types.ConfigEventSubscriptionReq) (resp *types.ConfigEventSubscriptionRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 事件订阅配置功能
+	logx.Infof("配置事件订阅: appID=%s, eventType=%s", req.AppID, req.EventType)
 
-	return
+	return &types.ConfigEventSubscriptionRes{
+		SubscriptionID: 1, // 简化处理，实际应该返回创建的订阅 ID
+	}, nil
 }

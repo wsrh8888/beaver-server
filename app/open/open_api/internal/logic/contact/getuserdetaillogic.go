@@ -2,9 +2,11 @@ package contact
 
 import (
 	"context"
+	"errors"
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
+	user_models "beaver/app/user/user_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +27,20 @@ func NewGetUserDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 }
 
 func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *types.GetUserDetailRes, err error) {
-	// todo: add your logic here and delete this line
+	// 1. 查询用户信息
+	var user user_models.UserModel
+	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error; err != nil {
+		return nil, errors.New("用户不存在")
+	}
 
-	return
+	// 2. 转换为响应格式
+	return &types.GetUserDetailRes{
+		User: types.UserDetailInfo{
+			UserID:   user.UserID,
+			Nickname: user.NickName,
+			Avatar:   user.Avatar,
+			Phone:    user.Phone,
+			Email:    user.Email,
+		},
+	}, nil
 }

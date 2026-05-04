@@ -25,7 +25,11 @@ func NewGetEventLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetE
 }
 
 func (l *GetEventLogsLogic) GetEventLogs(req *types.GetEventLogsReq) (resp *types.GetEventLogsRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 获取事件日志
+	logx.Infof("获取事件日志: appID=%s", req.AppID)
 
-	return
+	return &types.GetEventLogsRes{
+		Total: 0,
+		List:  []types.EventLogInfo{},
+	}, nil
 }

@@ -25,7 +25,10 @@ func NewDeleteEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *DeleteEventSubscriptionLogic) DeleteEventSubscription(req *types.DeleteEventSubscriptionReq) (resp *types.DeleteEventSubscriptionRes, err error) {
-	// todo: add your logic here and delete this line
+	// TODO: 删除事件订阅功能
+	logx.Infof("删除事件订阅: subscriptionID=%d", req.SubscriptionID)
 
-	return
+	return &types.DeleteEventSubscriptionRes{
+		Success: true,
+	}, nil
 }

@@ -2,6 +2,7 @@ package contact
 
 import (
 	"context"
+	"errors"
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
@@ -25,7 +26,6 @@ func NewCreateDepartmentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *CreateDepartmentLogic) CreateDepartment(req *types.CreateDepartmentReq) (resp *types.CreateDepartmentRes, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// TODO: 目前返回错误，需要根据实际的部门模型实现
+	return nil, errors.New("部门功能暂未实现")
 }

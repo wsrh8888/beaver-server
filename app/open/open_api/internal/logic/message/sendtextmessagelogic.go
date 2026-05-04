@@ -2,6 +2,7 @@ package message
 
 import (
 	"context"
+	"errors"
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
@@ -25,7 +26,7 @@ func NewSendTextMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S
 }
 
 func (l *SendTextMessageLogic) SendTextMessage(req *types.SendTextMessageReq) (resp *types.SendTextMessageRes, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// TODO: 需要构造会话 ID 和获取发送者 ID
+	// 目前开放平台的消息发送主要通过 Bot API，这个接口保留作为扩展
+	return nil, errors.New("请使用 Bot API 发送消息")
 }
