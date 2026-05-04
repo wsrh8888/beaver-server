@@ -228,6 +228,9 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			}
 			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
+
+		// 3. 触发开放平台 Webhook 事件(群成员变更)
+		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, req.UserIds, "added")
 	}()
 
 	// 创建并返回响应
@@ -237,4 +240,18 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 	l.Logger.Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)
 	return resp, nil
+}
+
+// triggerOpenPlatformWebhook 触发开放平台 Webhook 事件
+func (l *GroupMemberAddLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Logger.Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
+		}
+	}()
+
+	// 查询该群关联的应用(如果有的话)
+	// TODO: 这里需要根据实际业务逻辑确定如何关联群和应用
+	// 暂时先不实现,等待后续需求明确
+	l.Logger.Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
 }

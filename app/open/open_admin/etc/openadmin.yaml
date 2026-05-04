@@ -1,3 +1,17 @@
 Name: open_admin
 Host: 0.0.0.0
-Port: 8888
+Port: 22000
+Etcd: 127.0.0.1:2379
+
+Mysql:
+  DataSource: root:password@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=true&loc=Local
+
+Auth:
+  AccessSecret: robert
+  AccessExpire: 43200
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+  Key: user_rpc

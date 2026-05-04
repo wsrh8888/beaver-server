@@ -1,0 +1,106 @@
+syntax = "v1"
+
+// ==================== Webhook 事件订阅接口 ====================
+
+type (
+	// 配置事件订阅请求
+	ConfigEventSubscriptionReq {
+		AppID      string `json:"appId"`
+		EventType  string `json:"eventType"` // 事件类型: user.join_group/user.leave_group/message.send等
+		TargetURL  string `json:"targetUrl"` // 推送目标URL
+		Secret     string `json:"secret,optional"` // 签名密钥
+		RetryCount int    `json:"retryCount,optional"` // 重试次数
+		Timeout    int    `json:"timeout,optional"` // 超时时间(秒)
+	}
+
+	ConfigEventSubscriptionRes {
+		SubscriptionID uint64 `json:"subscriptionId"`
+	}
+)
+
+type (
+	// 获取事件订阅列表请求
+	GetEventSubscriptionsReq {
+		AppID     string `form:"appId"`
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=20"`
+		EventType string `form:"eventType,optional"`
+	}
+
+	EventSubscriptionInfo {
+		ID         uint64 `json:"id"`
+		EventType  string `json:"eventType"`
+		TargetURL  string `json:"targetUrl"`
+		Status     int    `json:"status"` // 0禁用 1启用
+		RetryCount int    `json:"retryCount"`
+		Timeout    int    `json:"timeout"`
+		CreatedAt  int64  `json:"createdAt"`
+	}
+
+	GetEventSubscriptionsRes {
+		Total int64                   `json:"total"`
+		List  []EventSubscriptionInfo `json:"list"`
+	}
+)
+
+type (
+	// 删除事件订阅请求
+	DeleteEventSubscriptionReq {
+		AppID          string `json:"appId"`
+		SubscriptionID uint64 `json:"subscriptionId"`
+	}
+
+	DeleteEventSubscriptionRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 获取事件推送日志请求
+	GetEventLogsReq {
+		AppID          string `form:"appId"`
+		SubscriptionID uint64 `form:"subscriptionId,optional"`
+		Page           int    `form:"page,default=1"`
+		PageSize       int    `form:"pageSize,default=20"`
+	}
+
+	EventLogInfo {
+		ID           uint64 `json:"id"`
+		EventID      string `json:"eventId"`
+		EventType    string `json:"eventType"`
+		Payload      string `json:"payload"`
+		ResponseCode int    `json:"responseCode"`
+		ResponseTime int    `json:"responseTime"`
+		RetryCount   int    `json:"retryCount"`
+		Status       int    `json:"status"` // 0待推送 1成功 2失败
+		ErrorMsg     string `json:"errorMsg,optional"`
+		CreatedAt    int64  `json:"createdAt"`
+	}
+
+	GetEventLogsRes {
+		Total int64        `json:"total"`
+		List  []EventLogInfo `json:"list"`
+	}
+)
+
+@server (
+	group: event
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "配置事件订阅"
+	@handler ConfigEventSubscription
+	post /api/open/v1/event/subscribe (ConfigEventSubscriptionReq) returns (ConfigEventSubscriptionRes)
+
+	@doc "获取事件订阅列表"
+	@handler GetEventSubscriptions
+	get /api/open/v1/event/subscriptions (GetEventSubscriptionsReq) returns (GetEventSubscriptionsRes)
+
+	@doc "删除事件订阅"
+	@handler DeleteEventSubscription
+	post /api/open/v1/event/unsubscribe (DeleteEventSubscriptionReq) returns (DeleteEventSubscriptionRes)
+
+	@doc "获取事件推送日志"
+	@handler GetEventLogs
+	get /api/open/v1/event/logs (GetEventLogsReq) returns (GetEventLogsRes)
+}

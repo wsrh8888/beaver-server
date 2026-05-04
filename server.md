@@ -15,8 +15,10 @@
 | track           | 21500    | -        | 埋点/日志 |
 | update          | 21600    | -        | 更新上报 |
 | datasync        | 21700    | -        | 数据同步 |
+| open_api        | 21900    | -        | 开放平台API |
+| open_admin      | 22000    | -        | 开放平台管理 |
 | backend         | 40000    | -        | 后台管理 |
-| gateway_admin   | 40800    | -        | 后台管理 |
+| gateway_admin   | 40800    | -        | 后台管理网关 |
 | gateway_api     | 20800    | -        | API 网关 |
 | call            | 21800    | 31800    | 通话 |
 

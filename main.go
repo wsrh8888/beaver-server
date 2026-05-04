@@ -12,6 +12,7 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
+	"beaver/app/open/open_models"
 	"beaver/app/track/track_models"
 	"beaver/app/update/update_models"
 	"beaver/app/user/user_models"
@@ -96,6 +97,21 @@ func main() {
 			&backend_models.AdminSystemAuthorityMenu{},
 			&backend_models.AdminSystemAuthorityUser{},
 			&backend_models.AdminSystemMenu{},
+
+			// 开放平台相关表
+			&open_models.OpenDeveloper{},
+			&open_models.OpenApp{},
+			&open_models.OpenAppPermission{},
+			&open_models.OpenAppVersion{},
+			&open_models.OpenAccessToken{},
+			&open_models.OpenRefreshToken{},
+			&open_models.OpenWebhookConfig{},
+			&open_models.OpenWebhookLog{},
+			&open_models.OpenAuthCode{},
+			&open_models.OpenQrCode{},
+			&open_models.OpenH5AuthCode{}, // H5 免登授权码表
+			&open_models.OpenEventSubscription{}, // 事件订阅配置表
+			&open_models.OpenEventLog{}, // 事件推送日志表
 		)
 
 		if err != nil {

@@ -1,0 +1,126 @@
+syntax = "v1"
+
+// ==================== OAuth 2.0 授权接口 ====================
+type (
+	// 获取授权码请求
+	GetAuthorizeCodeReq {
+		AppID       string `form:"appId"`
+		RedirectURI string `form:"redirectUri"`
+		Scope       string `form:"scope,optional"`
+		State       string `form:"state,optional"` // CSRF 防护
+	}
+	AuthorizeCodeRes {
+		Code  string `json:"code"`
+		State string `json:"state,optional"`
+	}
+)
+
+type (
+	// 用授权码换取 Token
+	GetTokenByCodeReq {
+		AppID     string `json:"appId"`
+		AppSecret string `json:"appSecret"`
+		Code      string `json:"code"`
+	}
+	GetTokenByCodeRes {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken,optional"`
+		ExpiresIn    int64  `json:"expiresIn"`
+		TokenType    string `json:"tokenType"`
+	}
+)
+
+type (
+	// 生成扫码登录二维码
+	GenerateQrCodeReq {
+		AppID string `json:"appId"` // 应用ID
+	}
+	GenerateQrCodeRes {
+		QrCodeURL string `json:"qrCodeUrl"` // 二维码URL
+		SceneID   string `json:"sceneId"` // 场景ID(用于轮询状态)
+		ExpireIn  int64  `json:"expireIn"` // 过期时间(秒)
+	}
+)
+
+type (
+	// 查询扫码状态
+	CheckQrCodeStatusReq {
+		SceneID string `form:"sceneId"` // 场景ID
+	}
+	CheckQrCodeStatusRes {
+		Status string `json:"status"` // 状态: waiting/scanned/confirmed/cancelled/expired
+		UserId string `json:"userId,optional"` // 用户ID(确认后返回)
+	}
+)
+
+type (
+	// 确认扫码登录
+	ConfirmQrCodeLoginReq {
+		SceneID string `json:"sceneId"` // 场景ID
+	}
+	ConfirmQrCodeLoginRes {
+		Success bool `json:"success"` // 是否成功
+	}
+)
+
+type (
+	// H5 免登获取 authCode（对标钉钉/飞书）
+	GetH5AuthCodeReq {
+		AppID string `json:"appId"` // 应用ID
+	}
+	GetH5AuthCodeRes {
+		AuthCode string `json:"authCode"` // 临时授权码（5分钟有效）
+		ExpireIn int64  `json:"expireIn"` // 过期时间（秒）
+	}
+)
+
+type (
+	// 用 H5 authCode 换取用户信息
+	GetUserInfoByH5CodeReq {
+		AppID     string `json:"appId"`
+		AppSecret string `json:"appSecret"`
+		AuthCode  string `json:"authCode"`
+	}
+	GetUserInfoByH5CodeRes {
+		UserID   string `json:"userId"`
+		NickName string `json:"nickName"`
+		Avatar   string `json:"avatar,optional"`
+		Phone    string `json:"phone,optional"`
+		Email    string `json:"email,optional"`
+	}
+)
+
+@server (
+	group:      oauth
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "获取授权码"
+	@handler GetAuthorizeCode
+	get /api/open/v1/oauth/authorize (GetAuthorizeCodeReq) returns (AuthorizeCodeRes)
+
+	@doc "用授权码换取 Token"
+	@handler GetTokenByCode
+	post /api/open/v1/oauth/token (GetTokenByCodeReq) returns (GetTokenByCodeRes)
+
+	@doc "生成扫码登录二维码"
+	@handler GenerateQrCode
+	post /api/open/v1/oauth/qrcode (GenerateQrCodeReq) returns (GenerateQrCodeRes)
+
+	@doc "查询扫码状态"
+	@handler CheckQrCodeStatus
+	get /api/open/v1/oauth/qrcode/status (CheckQrCodeStatusReq) returns (CheckQrCodeStatusRes)
+
+	@doc "确认扫码登录"
+	@handler ConfirmQrCodeLogin
+	post /api/open/v1/oauth/qrcode/confirm (ConfirmQrCodeLoginReq) returns (ConfirmQrCodeLoginRes)
+
+	@doc "H5 免登获取 authCode（需在 WebView 环境中调用）"
+	@handler GetH5AuthCode
+	post /api/open/v1/oauth/h5/authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
+
+	@doc "用 H5 authCode 换取用户信息"
+	@handler GetUserInfoByH5Code
+	post /api/open/v1/oauth/h5/userinfo (GetUserInfoByH5CodeReq) returns (GetUserInfoByH5CodeRes)
+}
+

@@ -11,9 +11,9 @@ type Config struct {
 		DataSource string
 	}
 	Etcd string
-	JWT  struct {
-		SecretKey   string
-		ExpireHours int
+	Auth struct {
+		AccessSecret string
+		AccessExpire int
 	}
 	UserRpc zrpc.RpcClientConf
 }

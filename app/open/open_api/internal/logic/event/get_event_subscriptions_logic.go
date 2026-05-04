@@ -1,0 +1,34 @@
+// Code scaffolded by goctl. Safe to edit.
+// goctl 1.10.1
+
+package event
+
+import (
+	"context"
+
+	"beaver/app/open/open_api/internal/svc"
+	"beaver/app/open/open_api/internal/types"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type GetEventSubscriptionsLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+// 获取事件订阅列表
+func NewGetEventSubscriptionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEventSubscriptionsLogic {
+	return &GetEventSubscriptionsLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *GetEventSubscriptionsLogic) GetEventSubscriptions(req *types.GetEventSubscriptionsReq) (resp *types.GetEventSubscriptionsRes, err error) {
+	// todo: add your logic here and delete this line
+
+	return
+}

@@ -1,0 +1,207 @@
+syntax = "v1"
+
+// ==================== 通讯录管理接口（对标钉钉/飞书） ====================
+
+type (
+	// 创建用户
+	CreateUserReq {
+		UserID     string `json:"userId,optional"`           // 用户ID（可选，不传则自动生成）
+		Nickname   string `json:"nickname"`                  // 昵称
+		Avatar     string `json:"avatar,optional"`           // 头像URL
+		Phone      string `json:"phone,optional"`            // 手机号
+		Email      string `json:"email,optional"`            // 邮箱
+		JobTitle   string `json:"jobTitle,optional"`         // 职位
+		Department string `json:"department,optional"`       // 部门
+		Status     int    `json:"status,optional"`           // 状态 0禁用 1启用
+	}
+	
+	CreateUserRes {
+		UserID string `json:"userId"`
+	}
+)
+
+type (
+	// 更新用户
+	UpdateUserReq {
+		UserID     string `json:"userId"`
+		Nickname   string `json:"nickname,optional"`
+		Avatar     string `json:"avatar,optional"`
+		Phone      string `json:"phone,optional"`
+		Email      string `json:"email,optional"`
+		JobTitle   string `json:"jobTitle,optional"`
+		Department string `json:"department,optional"`
+		Status     int    `json:"status,optional"`
+	}
+	
+	UpdateUserRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 删除用户
+	DeleteUserReq {
+		UserID string `path:"userId"`
+	}
+	
+	DeleteUserRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 获取用户详情
+	GetUserDetailReq {
+		UserID string `path:"userId"`
+	}
+	
+	UserDetailInfo {
+		UserID     string `json:"userId"`
+		Nickname   string `json:"nickname"`
+		Avatar     string `json:"avatar,optional"`
+		Phone      string `json:"phone,optional"`
+		Email      string `json:"email,optional"`
+		JobTitle   string `json:"jobTitle,optional"`
+		Department string `json:"department,optional"`
+		Status     int    `json:"status"`
+		CreatedAt  int64  `json:"createdAt"`
+		UpdatedAt  int64  `json:"updatedAt"`
+	}
+	
+	GetUserDetailRes {
+		User UserDetailInfo `json:"user"`
+	}
+)
+
+type (
+	// 批量获取用户
+	BatchGetUsersReq {
+		UserIDs []string `json:"userIds"`
+	}
+	
+	BatchGetUsersRes {
+		Users []UserDetailInfo `json:"users"`
+	}
+)
+
+type (
+	// 分页查询用户列表
+	ListUsersReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=20"`
+		Keyword  string `form:"keyword,optional"`      // 搜索关键词（昵称/手机号/邮箱）
+		Department string `form:"department,optional"` // 部门筛选
+		Status   int    `form:"status,optional"`       // 状态筛选
+	}
+	
+	ListUsersRes {
+		Total int64             `json:"total"`
+		Users []UserDetailInfo  `json:"users"`
+	}
+)
+
+type (
+	// 创建部门
+	CreateDepartmentReq {
+		Name        string `json:"name"`                // 部门名称
+		ParentID    string `json:"parentId,optional"`   // 父部门ID
+		Order       int    `json:"order,optional"`      // 排序
+		Description string `json:"description,optional"` // 描述
+	}
+	
+	CreateDepartmentRes {
+		DepartmentID string `json:"departmentId"`
+	}
+)
+
+type (
+	// 更新部门
+	UpdateDepartmentReq {
+		DepartmentID string `json:"departmentId"`
+		Name         string `json:"name,optional"`
+		ParentID     string `json:"parentId,optional"`
+		Order        int    `json:"order,optional"`
+		Description  string `json:"description,optional"`
+	}
+	
+	UpdateDepartmentRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 删除部门
+	DeleteDepartmentReq {
+		DepartmentID string `path:"departmentId"`
+	}
+	
+	DeleteDepartmentRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 获取部门列表
+	ListDepartmentsReq {
+		ParentID string `form:"parentId,optional"` // 父部门ID，不传则获取根部门
+	}
+	
+	DepartmentInfo {
+		DepartmentID string `json:"departmentId"`
+		Name         string `json:"name"`
+		ParentID     string `json:"parentId,optional"`
+		Order        int    `json:"order"`
+		Description  string `json:"description,optional"`
+		MemberCount  int    `json:"memberCount"` // 成员数量
+	}
+	
+	ListDepartmentsRes {
+		Departments []DepartmentInfo `json:"departments"`
+	}
+)
+
+@server (
+	group: contact
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "创建用户"
+	@handler CreateUser
+	post /api/open/v1/contact/user/create (CreateUserReq) returns (CreateUserRes)
+	
+	@doc "更新用户"
+	@handler UpdateUser
+	post /api/open/v1/contact/user/update (UpdateUserReq) returns (UpdateUserRes)
+	
+	@doc "删除用户"
+	@handler DeleteUser
+	delete /api/open/v1/contact/user/:userId (DeleteUserReq) returns (DeleteUserRes)
+	
+	@doc "获取用户详情"
+	@handler GetUserDetail
+	get /api/open/v1/contact/user/:userId (GetUserDetailReq) returns (GetUserDetailRes)
+	
+	@doc "批量获取用户"
+	@handler BatchGetUsers
+	post /api/open/v1/contact/user/batch (BatchGetUsersReq) returns (BatchGetUsersRes)
+	
+	@doc "分页查询用户列表"
+	@handler ListUsers
+	get /api/open/v1/contact/users (ListUsersReq) returns (ListUsersRes)
+	
+	@doc "创建部门"
+	@handler CreateDepartment
+	post /api/open/v1/contact/department/create (CreateDepartmentReq) returns (CreateDepartmentRes)
+	
+	@doc "更新部门"
+	@handler UpdateDepartment
+	post /api/open/v1/contact/department/update (UpdateDepartmentReq) returns (UpdateDepartmentRes)
+	
+	@doc "删除部门"
+	@handler DeleteDepartment
+	delete /api/open/v1/contact/department/:departmentId (DeleteDepartmentReq) returns (DeleteDepartmentRes)
+	
+	@doc "获取部门列表"
+	@handler ListDepartments
+	get /api/open/v1/contact/departments (ListDepartmentsReq) returns (ListDepartmentsRes)
+}

@@ -49,6 +49,21 @@ type (
 // ==================== 开发者管理 ====================
 
 type (
+	ApplyDeveloperReq {
+		RealName    string `json:"realName"`     // 真实姓名
+		CompanyName string `json:"companyName,optional"` // 公司名称
+		Phone       string `json:"phone"`        // 联系电话
+		Email       string `json:"email"`        // 联系邮箱
+		Description string `json:"description"`  // 应用场景描述
+	}
+	
+	ApplyDeveloperRes {
+		Success bool   `json:"success"`
+		Message string `json:"message"` // 提示信息
+	}
+)
+
+type (
 	GetDeveloperListReq {
 		Page     int `form:"page,default=1"`
 		PageSize int `form:"pageSize,default=10"`
@@ -163,6 +178,10 @@ service open_admin {
 	group: developer
 )
 service open_admin {
+	@doc "申请成为开发者"
+	@handler ApplyDeveloper
+	post /open/developer/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
+	
 	@doc "获取开发者列表"
 	@handler GetDeveloperList
 	get /open/developer/list (GetDeveloperListReq) returns (GetDeveloperListRes)

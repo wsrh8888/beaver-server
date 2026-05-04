@@ -8,6 +8,10 @@ Log:
 Auth:
   AccessSecret: robert
   AccessExpire: 3600
+Limit:
+  Enable: true
+  Rate: 100    # 每秒请求数
+  Burst: 200   # 峰值容忍
 WhiteList:
   - /api/auth/phone_register
   - /api/auth/email_register
@@ -26,3 +30,6 @@ WhiteList:
   - /api/track/logs
   - /api/update/report
   - /api/call/v1/webhook
+  # 开放平台认证接口（无需token）
+  - /api/open/v1/auth/token
+  - /api/open/v1/auth/refresh

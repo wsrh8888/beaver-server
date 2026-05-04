@@ -1,7 +1,11 @@
 import "api/auth.api"
+import "api/oauth.api"
 import "api/message.api"
 import "api/user.api"
 import "api/group.api"
 import "api/bot.api"
+import "api/contact.api"
+import "api/webhook.api"
+import "api/event.api"
 
 // goctl api go -api open_api.api -dir . --home ../../../template
