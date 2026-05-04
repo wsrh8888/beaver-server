@@ -3,8 +3,8 @@ package core
 import (
 	"beaver/app/gateway/gateway_api/types"
 	"beaver/common/etcd"
-	"beaver/utils"
 	"beaver/utils/jwts"
+	utils "beaver/utils/list"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -69,7 +69,7 @@ func (p Proxy) oauthAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	// TODO: 这里应该调用 open_api 验证 token 的有效性
 	// 目前先透传 token，由 open_api 自己验证
 	req.Header.Set("Authorization", "Bearer "+token)
-	
+
 	logx.Info("OAuth请求，透传token到open_api")
 	return true
 }

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_admin/internal/logic/permission"
+	logic "beaver/app/open/open_admin/internal/logic/permission"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/app/open/open_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func ConfigAppPermissionHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := permission.NewConfigAppPermissionLogic(r.Context(), svcCtx)
+		l := logic.NewConfigAppPermissionLogic(r.Context(), svcCtx)
 		resp, err := l.ConfigAppPermission(&req)
 		response.Response(r, w, resp, err)
 	}

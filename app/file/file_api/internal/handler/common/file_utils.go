@@ -15,7 +15,7 @@ import (
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
 	"beaver/app/file/file_models"
-	"beaver/utils"
+	utils "beaver/utils/list"
 	"beaver/utils/md5"
 
 	"github.com/zeromicro/go-zero/core/logx"

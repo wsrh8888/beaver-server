@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"beaver/app/backend/backend_admin/internal/logic/open"
+	"net/http"
+
+	openLogic "beaver/app/backend/backend_admin/internal/logic/open"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/common/response"
-	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
@@ -18,7 +19,7 @@ func AuditDeveloperHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewAuditDeveloperLogic(r.Context(), svcCtx)
+		l := openLogic.NewAuditDeveloperLogic(r.Context(), svcCtx)
 		resp, err := l.AuditDeveloper(&req)
 		response.Response(r, w, resp, err)
 	}

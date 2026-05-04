@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_admin/internal/logic/developer"
+	logic "beaver/app/open/open_admin/internal/logic/developer"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/app/open/open_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func AuditDeveloperHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := developer.NewAuditDeveloperLogic(r.Context(), svcCtx)
+		l := logic.NewAuditDeveloperLogic(r.Context(), svcCtx)
 		resp, err := l.AuditDeveloper(&req)
 		response.Response(r, w, resp, err)
 	}

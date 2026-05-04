@@ -9,9 +9,9 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
-	"beaver/utils"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
+	utils "beaver/utils/list"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

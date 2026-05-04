@@ -5,7 +5,6 @@ import (
 	"beaver/app/notification/notification_api/internal/handler"
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/common/etcd"
-	"beaver/common/middleware"
 	"flag"
 	"fmt"
 
@@ -27,7 +26,6 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	server.Use(middleware.RequestLogMiddleware)
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

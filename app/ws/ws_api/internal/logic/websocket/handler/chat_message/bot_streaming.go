@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"beaver/app/open/open_models"
-	"beaver/app/open/open_utils"
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
@@ -67,12 +66,12 @@ func handleBotStreaming(
 	var messageFormat string = "text" // 默认纯文本
 
 	// 5. 创建流式处理器
-	handler := &open_utils.BotStreamHandler{
+	handler := &open_models.BotStreamHandler{
 		WebhookURL: webhookConfig.TargetURL,
 		Secret:     webhookConfig.Secret,
 		Timeout:    webhookConfig.Timeout,
 		Payload:    payload,
-		OnChunk: func(chunk *open_utils.BotChunk) error {
+		OnChunk: func(chunk *open_models.BotChunk) error {
 			// 记录格式类型（取第一个片段的格式）
 			if messageFormat == "text" && chunk.Type != "" {
 				messageFormat = chunk.Type
@@ -124,7 +123,7 @@ func sendBotMessageStart(client *ws_conn.Client, msgID, convID, botID string) {
 }
 
 // sendBotMessageChunk 发送 Bot 消息片段（支持多格式）
-func sendBotMessageChunk(client *ws_conn.Client, msgID, convID, botID string, chunk *open_utils.BotChunk) {
+func sendBotMessageChunk(client *ws_conn.Client, msgID, convID, botID string, chunk *open_models.BotChunk) {
 	bodyMap := map[string]interface{}{
 		"sender_id": botID,
 		"format":    chunk.Type,

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_admin/internal/logic/app"
+	logic "beaver/app/open/open_admin/internal/logic/app"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/app/open/open_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func CreateAppHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := app.NewCreateAppLogic(r.Context(), svcCtx)
+		l := logic.NewCreateAppLogic(r.Context(), svcCtx)
 		resp, err := l.CreateApp(&req)
 		response.Response(r, w, resp, err)
 	}

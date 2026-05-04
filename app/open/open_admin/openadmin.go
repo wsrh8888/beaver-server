@@ -6,7 +6,6 @@ import (
 	"beaver/app/open/open_admin/internal/middleware"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/common/etcd"
-	commonMiddleware "beaver/common/middleware"
 	"flag"
 	"fmt"
 	"net/http"
@@ -31,7 +30,6 @@ func main() {
 	handler.RegisterHandlers(server, ctx)
 
 	// 注册全局中间件（日志）
-	server.Use(commonMiddleware.RequestLogMiddleware)
 
 	// 开发者认证中间件（排除登录和申请接口）
 	devAuthMiddleware := middleware.DeveloperAuthMiddleware(c.Auth.AccessSecret, ctx.DB)
@@ -56,8 +54,8 @@ func main() {
 // isWhiteListPath 判断是否是白名单路径
 func isWhiteListPath(path string) bool {
 	whiteList := []string{
-		"/admin/open/auth/login",           // 登录接口
-		"/admin/open/developer/apply",      // 申请开发者资质
+		"/admin/open/auth/login",      // 登录接口
+		"/admin/open/developer/apply", // 申请开发者资质
 	}
 	for _, whitePath := range whiteList {
 		if strings.HasPrefix(path, whitePath) {

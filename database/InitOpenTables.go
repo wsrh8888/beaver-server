@@ -1,8 +1,9 @@
 package database
 
 import (
-	"beaver-server/app/open/open_models"
+	"beaver/app/open/open_models"
 	"fmt"
+
 	"gorm.io/gorm"
 )
 

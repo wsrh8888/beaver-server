@@ -8,8 +8,8 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-	"beaver/utils"
 	"beaver/utils/jwts"
+	utils "beaver/utils/list"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

@@ -7,7 +7,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/file/file_models"
 	"beaver/common/response"
-	"beaver/utils"
+	utils "beaver/utils/list"
 	"beaver/utils/md5"
 	"bytes"
 	"context"

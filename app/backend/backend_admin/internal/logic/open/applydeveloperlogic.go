@@ -3,11 +3,10 @@ package open
 import (
 	"context"
 	"errors"
-	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/backend/backend_models"
+	"beaver/app/open/open_models"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -35,7 +34,7 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(req *types.ApplyDeveloperReq) (resp
 	}
 
 	// 2. 检查是否已经申请过
-	var existing backend_models.OpenDeveloper
+	var existing open_models.OpenDeveloper
 	err = l.svcCtx.DB.Where("user_id = ?", userID).First(&existing).Error
 	if err == nil {
 		return nil, errors.New("您已经提交过申请，请等待审核")
@@ -43,12 +42,7 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(req *types.ApplyDeveloperReq) (resp
 
 	// 3. 创建申请记录
 	id := uuid.New().String()
-	developer := backend_models.OpenDeveloper{
-		Model: backend_models.Model{
-			ID:        id,
-			CreatedAt: time.Now().UnixMilli(),
-			UpdatedAt: time.Now().UnixMilli(),
-		},
+	developer := open_models.OpenDeveloper{
 		UserID:      userID.(string),
 		RealName:    req.RealName,
 		CompanyName: req.CompanyName,

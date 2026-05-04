@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_admin/internal/logic/developer"
+	logic "beaver/app/open/open_admin/internal/logic/developer"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/app/open/open_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func GetDeveloperListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := developer.NewGetDeveloperListLogic(r.Context(), svcCtx)
+		l := logic.NewGetDeveloperListLogic(r.Context(), svcCtx)
 		resp, err := l.GetDeveloperList(&req)
 		response.Response(r, w, resp, err)
 	}

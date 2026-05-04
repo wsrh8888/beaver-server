@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_admin/internal/logic/app"
+	logic "beaver/app/open/open_admin/internal/logic/app"
 	"beaver/app/open/open_admin/internal/svc"
 	"beaver/app/open/open_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func DeleteAppHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := app.NewDeleteAppLogic(r.Context(), svcCtx)
+		l := logic.NewDeleteAppLogic(r.Context(), svcCtx)
 		resp, err := l.DeleteApp(&req)
 		response.Response(r, w, resp, err)
 	}

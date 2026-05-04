@@ -2,10 +2,12 @@ package open
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/backend/backend_models"
+	"beaver/app/open/open_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,7 +28,7 @@ func NewGetDeveloperListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq) (resp *types.GetDeveloperListRes, err error) {
 	// 1. 构建查询
-	query := l.svcCtx.DB.Model(&backend_models.OpenDeveloper{})
+	query := l.svcCtx.DB.Model(&open_models.OpenDeveloper{})
 	if req.Status > 0 {
 		query = query.Where("status = ?", req.Status)
 	}
@@ -36,7 +38,7 @@ func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq)
 	query.Count(&total)
 
 	// 3. 分页查询
-	var developers []backend_models.OpenDeveloper
+	var developers []open_models.OpenDeveloper
 	offset := (req.Page - 1) * req.PageSize
 	query.Order("created_at DESC").Offset(offset).Limit(req.PageSize).Find(&developers)
 
@@ -44,7 +46,7 @@ func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq)
 	list := make([]types.DeveloperInfo, 0, len(developers))
 	for _, dev := range developers {
 		list = append(list, types.DeveloperInfo{
-			ID:          dev.ID,
+			ID:          fmt.Sprintf("%d", dev.Id),
 			UserID:      dev.UserID,
 			RealName:    dev.RealName,
 			CompanyName: dev.CompanyName,
@@ -55,7 +57,7 @@ func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq)
 			AuditBy:     dev.AuditBy,
 			AuditTime:   dev.AuditTime,
 			AuditRemark: dev.AuditRemark,
-			CreatedAt:   dev.CreatedAt,
+			CreatedAt:   time.Time(dev.CreatedAt).UnixMilli(),
 		})
 	}
 

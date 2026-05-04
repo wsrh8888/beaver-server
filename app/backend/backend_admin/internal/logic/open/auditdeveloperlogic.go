@@ -7,7 +7,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/backend/backend_models"
+	"beaver/app/open/open_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -34,7 +34,7 @@ func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp
 	}
 
 	// 2. 查询申请记录
-	var developer backend_models.OpenDeveloper
+	var developer open_models.OpenDeveloper
 	err = l.svcCtx.DB.Where("id = ?", req.ID).First(&developer).Error
 	if err != nil {
 		return nil, errors.New("申请记录不存在")
