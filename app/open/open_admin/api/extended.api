@@ -113,45 +113,6 @@ type (
 	}
 )
 
-// ==================== 配额管理 ====================
-
-type (
-	GetQuotaListReq {
-		Page     int `form:"page,default=1"`
-		PageSize int `form:"pageSize,default=10"`
-		AppID    string `form:"appId,optional"`
-	}
-	
-	QuotaInfo {
-		ID             uint   `json:"id"`
-		AppID          string `json:"appId"`
-		DailyAPILimit  int64  `json:"dailyApiLimit"`   // 每日 API 调用限制
-		MonthlyAPILimit int64 `json:"monthlyApiLimit"` // 每月 API 调用限制
-		DailyWebhookLimit int64 `json:"dailyWebhookLimit"` // 每日 Webhook 推送限制
-		UsedToday      int64  `json:"usedToday"`       // 今日已使用
-		UsedThisMonth  int64  `json:"usedThisMonth"`   // 本月已使用
-		UpdatedAt      int64  `json:"updatedAt"`
-	}
-	
-	GetQuotaListRes {
-		Total int64      `json:"total"`
-		List  []QuotaInfo `json:"list"`
-	}
-)
-
-type (
-	ConfigQuotaReq {
-		AppID           string `json:"appId"`
-		DailyAPILimit   int64  `json:"dailyApiLimit,optional"`
-		MonthlyAPILimit int64  `json:"monthlyApiLimit,optional"`
-		DailyWebhookLimit int64 `json:"dailyWebhookLimit,optional"`
-	}
-	
-	ConfigQuotaRes {
-		Success bool `json:"success"`
-	}
-)
-
 @server (
 	group: app
 )
@@ -195,15 +156,3 @@ service open_admin {
 	post /open/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
 }
 
-@server (
-	group: quota
-)
-service open_admin {
-	@doc "获取配额列表"
-	@handler GetQuotaList
-	get /open/quota/list (GetQuotaListReq) returns (GetQuotaListRes)
-	
-	@doc "配置应用配额"
-	@handler ConfigQuota
-	post /open/quota/config (ConfigQuotaReq) returns (ConfigQuotaRes)
-}
