@@ -27,9 +27,8 @@ func NewAuditDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 }
 
 func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp *types.AuditDeveloperRes, err error) {
-	// 1. 获取审核人 ID（从 header）
-	auditorID := l.ctx.Value("userId")
-	if auditorID == nil {
+	// 1. 获取审核人 ID（从 request header，由网关注入）
+	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
 
@@ -51,11 +50,11 @@ func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp
 	}
 
 	// 5. 更新审核信息
-	now := time.Now().UnixMilli()
+	now := time.Now()
 	updates := map[string]interface{}{
 		"status":       req.Status,
-		"audit_by":     auditorID.(string),
-		"audit_time":   now,
+		"audit_by":     req.UserID,
+		"audit_time":   now.UnixMilli(),
 		"audit_remark": req.AuditRemark,
 		"updated_at":   now,
 	}
@@ -65,7 +64,7 @@ func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp
 		return nil, errors.New("审核失败")
 	}
 
-	// TODO: 如果审核通过，可以自动创建 Bot 用户和应用
+	logx.Infof("开发者审核成功: id=%s, status=%d, auditor=%s", req.ID, req.Status, req.UserID)
 
 	return &types.AuditDeveloperRes{}, nil
 }

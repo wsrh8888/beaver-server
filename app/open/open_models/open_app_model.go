@@ -11,6 +11,7 @@ type OpenApp struct {
 	AppSecret         string `gorm:"type:varchar(128);not null;comment:应用密钥"`
 	Name              string `gorm:"type:varchar(100);not null;comment:应用名称"`
 	Description       string `gorm:"type:text;comment:应用描述"`
+	Icon              string `gorm:"type:varchar(500);comment:应用图标URL"`
 	OwnerUserID       string `gorm:"type:varchar(64);index;comment:所属用户ID"`
 	BotUserID         string `gorm:"type:varchar(64);index;comment:Bot用户ID"`
 	BotConversationID string `gorm:"type:varchar(64);index;comment:Bot对话ID"`

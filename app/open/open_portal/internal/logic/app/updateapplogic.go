@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"errors"
 
+	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 
@@ -25,7 +27,44 @@ func NewUpdateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateA
 }
 
 func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateAppRes, err error) {
-	// todo: add your logic here and delete this line
+	// 1. 从 header 获取当前用户 ID
+	userID := l.ctx.Value("userId")
+	if userID == nil {
+		return nil, errors.New("未登录")
+	}
 
-	return
+	// 2. 查询应用并验证权限
+	var app open_models.OpenApp
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, userID).First(&app).Error; err != nil {
+		return nil, errors.New("应用不存在或无权限")
+	}
+
+	// 3. 构建更新字段
+	updates := make(map[string]interface{})
+	if req.Name != "" {
+		updates["name"] = req.Name
+	}
+	if req.Description != "" {
+		updates["description"] = req.Description
+	}
+	if req.Icon != "" {
+		updates["icon"] = req.Icon
+	}
+	if req.Status != 0 {
+		updates["status"] = req.Status
+	}
+
+	// 4. 执行更新
+	if len(updates) == 0 {
+		return &types.UpdateAppRes{}, nil
+	}
+
+	if err := l.svcCtx.DB.Model(&app).Updates(updates).Error; err != nil {
+		logx.Errorf("更新应用失败: %v", err)
+		return nil, errors.New("更新失败")
+	}
+
+	logx.Infof("应用更新成功: app_id=%s", req.AppID)
+
+	return &types.UpdateAppRes{}, nil
 }

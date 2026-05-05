@@ -18,6 +18,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 获取 Bot 配置
+				Method:  http.MethodGet,
+				Path:    "/portal/open/v1/app/bot/config",
+				Handler: app.GetBotConfigHandler(serverCtx),
+			},
+			{
+				// 更新 Bot 配置
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/app/bot/config/update",
+				Handler: app.UpdateBotConfigHandler(serverCtx),
+			},
+			{
 				// 创建应用
 				Method:  http.MethodPost,
 				Path:    "/portal/open/v1/app/create",
@@ -42,6 +54,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: app.GetAppListHandler(serverCtx),
 			},
 			{
+				// 获取 OAuth 配置
+				Method:  http.MethodGet,
+				Path:    "/portal/open/v1/app/oauth/config",
+				Handler: app.GetOAuthConfigHandler(serverCtx),
+			},
+			{
+				// 更新 OAuth 配置
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/app/oauth/config/update",
+				Handler: app.UpdateOAuthConfigHandler(serverCtx),
+			},
+			{
+				// 重置应用密钥
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/app/reset_secret",
+				Handler: app.ResetAppSecretHandler(serverCtx),
+			},
+			{
 				// 获取应用权限列表
 				Method:  http.MethodGet,
 				Path:    "/portal/open/v1/app/scopes",
@@ -58,17 +88,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/portal/open/v1/app/update",
 				Handler: app.UpdateAppHandler(serverCtx),
-			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 重置应用密钥
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/secret/reset",
-				Handler: app.ResetAppSecretHandler(serverCtx),
 			},
 		},
 	)

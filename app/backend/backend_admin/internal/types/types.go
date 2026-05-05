@@ -57,6 +57,7 @@ type ApplyDeveloperReq struct {
 	Phone       string `json:"phone"`
 	Email       string `json:"email"`
 	Description string `json:"description,optional"`
+	UserID      string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type ApplyDeveloperRes struct {
@@ -67,6 +68,7 @@ type AuditDeveloperReq struct {
 	ID          string `json:"id"`
 	Status      int    `json:"status"` // 1通过 2拒绝
 	AuditRemark string `json:"auditRemark,optional"`
+	UserID      string `header:"Beaver-User-Id"` // 审核人ID（由网关注入）
 }
 
 type AuditDeveloperRes struct {

@@ -5,6 +5,7 @@ type AppInfo struct {
 	AppID       string `json:"appId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Icon        string `json:"icon,optional"` // 应用图标 URL
 	Status      int    `json:"status"`
 	WebhookURL  string `json:"webhookUrl"`
 	CreatedAt   int64  `json:"createdAt"`
@@ -41,6 +42,19 @@ type AuditDeveloperRes struct {
 	Success bool `json:"success"`
 }
 
+type BotConfigInfo struct {
+	AppID            string   `json:"appId"`
+	BotName          string   `json:"botName"`
+	BotAvatar        string   `json:"botAvatar"`
+	BotDescription   string   `json:"botDescription"`
+	EnableSingleChat bool     `json:"enableSingleChat"`
+	EnableGroupChat  bool     `json:"enableGroupChat"`
+	EnableAtMention  bool     `json:"enableAtMention"`
+	AutoReplyRules   []string `json:"autoReplyRules"`
+	Commands         []string `json:"commands"`
+	Status           int      `json:"status"`
+}
+
 type ConfigAppPermissionReq struct {
 	AppID     string   `json:"appId"`
 	Scopes    []string `json:"scopes"`             // 权限范围列表
@@ -67,7 +81,8 @@ type ConfigWebhookRes struct {
 type CreateAppReq struct {
 	Name        string `json:"name" validate:"required,min=2,max=50"`
 	Description string `json:"description,optional" validate:"max=200"`
-	Icon        string `json:"icon,optional"` // 应用图标 URL
+	Icon        string `json:"icon,optional"`    // 应用图标 URL
+	UserID      string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type CreateAppRes struct {
@@ -77,7 +92,8 @@ type CreateAppRes struct {
 }
 
 type DeleteAppReq struct {
-	AppID string `json:"appId"`
+	AppID  string `json:"appId"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type DeleteAppRes struct {
@@ -99,7 +115,8 @@ type DeveloperInfo struct {
 }
 
 type GetAppDetailReq struct {
-	AppID string `json:"appId"`
+	AppID  string `form:"appId"`            // 应用ID
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type GetAppDetailRes struct {
@@ -107,9 +124,10 @@ type GetAppDetailRes struct {
 }
 
 type GetAppListReq struct {
-	Page     int `form:"page,default=1"`
-	PageSize int `form:"pageSize,default=10"`
-	Status   int `form:"status,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=10"`
+	Status   int    `form:"status,optional"`
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type GetAppListRes struct {
@@ -126,11 +144,21 @@ type GetAppPermissionsRes struct {
 }
 
 type GetAppScopesReq struct {
-	AppID string `json:"appId"`
+	AppID  string `form:"appId"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type GetAppScopesRes struct {
 	Scopes []ScopeInfo `json:"scopes"`
+}
+
+type GetBotConfigReq struct {
+	AppID  string `form:"appId"`
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type GetBotConfigRes struct {
+	Config BotConfigInfo `json:"config"`
 }
 
 type GetDeveloperDetailReq struct {
@@ -150,6 +178,15 @@ type GetDeveloperListReq struct {
 type GetDeveloperListRes struct {
 	Total int64           `json:"total"`
 	List  []DeveloperInfo `json:"list"`
+}
+
+type GetOAuthConfigReq struct {
+	AppID  string `form:"appId"`
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type GetOAuthConfigRes struct {
+	Config OAuthConfigInfo `json:"config"`
 }
 
 type GetWebhookLogsReq struct {
@@ -176,14 +213,25 @@ type LoginRes struct {
 	ExpireAt int64  `json:"expireAt"`
 }
 
+type OAuthConfigInfo struct {
+	AppID           string   `json:"appId"`
+	RedirectURIs    []string `json:"redirectUris"`
+	Scopes          []string `json:"scopes"`
+	CustomLogo      string   `json:"customLogo"`
+	CustomTitle     string   `json:"customTitle"`
+	CustomColor     string   `json:"customColor"`
+	EnablePKCE      bool     `json:"enablePkce"`
+	TokenExpiration int      `json:"tokenExpiration"`
+	Status          int      `json:"status"`
+}
+
 type ResetAppSecretReq struct {
-	AppID string `json:"appId"`
+	AppID  string `json:"appId"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type ResetAppSecretRes struct {
-	AppID     string `json:"appId"`
 	AppSecret string `json:"appSecret"`
-	Message   string `json:"message"` // 提示信息：请妥善保管新密钥
 }
 
 type ScopeInfo struct {
@@ -198,8 +246,10 @@ type UpdateAppReq struct {
 	AppID       string `json:"appId"`
 	Name        string `json:"name,optional"`
 	Description string `json:"description,optional"`
+	Icon        string `json:"icon,optional"` // 应用图标 URL
 	WebhookURL  string `json:"webhookUrl,optional"`
 	Status      int    `json:"status,optional"`
+	UserID      string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type UpdateAppRes struct {
@@ -207,10 +257,44 @@ type UpdateAppRes struct {
 
 type UpdateAppScopesReq struct {
 	AppID  string   `json:"appId"`
-	Scopes []string `json:"scopes"` // 权限标识列表
+	Scopes []string `json:"scopes"`           // 权限标识列表
+	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
 }
 
 type UpdateAppScopesRes struct {
+}
+
+type UpdateBotConfigReq struct {
+	AppID            string   `json:"appId"`
+	BotName          string   `json:"botName,optional"`
+	BotAvatar        string   `json:"botAvatar,optional"`
+	BotDescription   string   `json:"botDescription,optional"`
+	EnableSingleChat *bool    `json:"enableSingleChat,optional"`
+	EnableGroupChat  *bool    `json:"enableGroupChat,optional"`
+	EnableAtMention  *bool    `json:"enableAtMention,optional"`
+	AutoReplyRules   []string `json:"autoReplyRules,optional"`
+	Commands         []string `json:"commands,optional"`
+	Status           *int     `json:"status,optional"`
+	UserID           string   `header:"Beaver-User-Id"`
+}
+
+type UpdateBotConfigRes struct {
+}
+
+type UpdateOAuthConfigReq struct {
+	AppID           string   `json:"appId"`
+	RedirectURIs    []string `json:"redirectUris,optional"`
+	Scopes          []string `json:"scopes,optional"`
+	CustomLogo      string   `json:"customLogo,optional"`
+	CustomTitle     string   `json:"customTitle,optional"`
+	CustomColor     string   `json:"customColor,optional"`
+	EnablePKCE      *bool    `json:"enablePkce,optional"`
+	TokenExpiration *int     `json:"tokenExpiration,optional"`
+	Status          *int     `json:"status,optional"`
+	UserID          string   `header:"Beaver-User-Id"`
+}
+
+type UpdateOAuthConfigRes struct {
 }
 
 type WebhookLogItem struct {
