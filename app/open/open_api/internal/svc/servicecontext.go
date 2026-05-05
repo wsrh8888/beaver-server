@@ -40,6 +40,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:        user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		ChatRpc:        chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		GroupRpc:       group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		AuthMiddleware: middleware.NewAuthMiddleware().Handle,
+		AuthMiddleware: middleware.NewAuthMiddleware(mysqlDb).Handle,
 	}
 }

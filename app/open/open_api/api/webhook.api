@@ -1,21 +1,19 @@
 syntax = "v1"
 
 // ==================== 群机器人 Webhook 接口 ====================
-
 type (
 	// Webhook 发送消息请求（对标钉钉/企业微信群机器人）
 	WebhookSendMessageReq {
-		WebhookURL string `json:"webhook_url"`                    // Webhook URL
-		MsgType    string `json:"msg_type"`                       // 消息类型：text/markdown/link/action_card
-		Text       string `json:"text,optional"`                  // 文本内容（msg_type=text 时必填）
-		Title      string `json:"title,optional"`                 // 标题（msg_type=markdown/link 时使用）
-		URL        string `json:"url,optional"`                   // 链接地址（msg_type=link 时必填）
-		PicURL     string `json:"pic_url,optional"`               // 图片URL（msg_type=link 时使用）
-		AtMobiles  []string `json:"at_mobiles,omitempty"`         // @手机号列表
-		AtUserIDs  []string `json:"at_user_ids,omitempty"`        // @用户ID列表
-		IsAtAll    bool   `json:"is_at_all,optional"`             // 是否@所有人
+		WebhookURL string   `json:"webhook_url"` // Webhook URL
+		MsgType    string   `json:"msg_type"` // 消息类型：text/markdown/link/action_card
+		Text       string   `json:"text,optional"` // 文本内容（msg_type=text 时必填）
+		Title      string   `json:"title,optional"` // 标题（msg_type=markdown/link 时使用）
+		URL        string   `json:"url,optional"` // 链接地址（msg_type=link 时必填）
+		PicURL     string   `json:"pic_url,optional"` // 图片URL（msg_type=link 时使用）
+		AtMobiles  []string `json:"at_mobiles,omitempty"` // @手机号列表
+		AtUserIDs  []string `json:"at_user_ids,omitempty"` // @用户ID列表
+		IsAtAll    bool     `json:"is_at_all,optional"` // 是否@所有人
 	}
-
 	WebhookSendMessageRes {
 		Success bool   `json:"success"`
 		Message string `json:"message,optional"` // 错误信息
@@ -25,20 +23,32 @@ type (
 type (
 	// 生成 Webhook URL 请求
 	GenerateWebhookReq {
-		AppID     string `json:"app_id"`                           // 应用 ID
-		GroupID   string `json:"group_id"`                         // 群组 ID
-		SecretKey string `json:"secret_key,optional"`              // 自定义密钥（用于签名验证）
+		AppID     string `json:"app_id"` // 应用 ID
+		GroupID   string `json:"group_id"` // 群组 ID
+		SecretKey string `json:"secret_key,optional"` // 自定义密钥（用于签名验证）
 	}
-
 	GenerateWebhookRes {
-		WebhookURL string `json:"webhook_url"`                    // Webhook URL
-		Secret     string `json:"secret"`                         // 签名密钥
-		ExpireAt   int64  `json:"expire_at"`                      // 过期时间
+		WebhookURL string `json:"webhook_url"` // Webhook URL
+		Secret     string `json:"secret"` // 签名密钥
+		ExpireAt   int64  `json:"expire_at"` // 过期时间
+	}
+)
+
+type (
+	// Incoming Webhook 请求（用于 Jenkins/GitHub 等外部集成）
+	IncomingWebhookReq {
+		Token   string                 `form:"token"` // Webhook Token（从 URL 参数获取）
+		MsgType string                 `json:"msg_type"` // 消息类型：text/markdown
+		Content map[string]interface{} `json:"content"` // 消息内容
+	}
+	IncomingWebhookRes {
+		Success bool   `json:"success"`
+		Message string `json:"message,optional"`
 	}
 )
 
 @server (
-	group: webhook
+	group:      webhook
 	middleware: AuthMiddleware
 )
 service open {
@@ -50,3 +60,14 @@ service open {
 	@handler WebhookSendMessage
 	post /api/open/v1/webhook/send (WebhookSendMessageReq) returns (WebhookSendMessageRes)
 }
+
+// Incoming Webhook 不需要鉴权，通过 Token 验证
+@server (
+	group: webhook
+)
+service open {
+	@doc "接收外部 Webhook（用于 Jenkins/GitHub 等集成，无需鉴权）"
+	@handler IncomingWebhook
+	post /api/open/v1/webhook/incoming (IncomingWebhookReq) returns (IncomingWebhookRes)
+}
+

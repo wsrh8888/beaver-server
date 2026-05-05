@@ -1,4 +1,5 @@
 type (
+	// ==================== 开发者管理 ====================
 	// 开发者申请
 	ApplyDeveloperReq {
 		RealName    string `json:"realName"`
@@ -10,7 +11,6 @@ type (
 	ApplyDeveloperRes {
 		ID string `json:"id"`
 	}
-
 	// 获取开发者申请列表
 	GetDeveloperListReq {
 		Page     int `form:"page,default=1"`
@@ -18,8 +18,8 @@ type (
 		Status   int `form:"status,optional"` // 0待审核 1已通过 2已拒绝
 	}
 	GetDeveloperListRes {
-		Total int64            `json:"total"`
-		List  []DeveloperInfo  `json:"list"`
+		Total int64           `json:"total"`
+		List  []DeveloperInfo `json:"list"`
 	}
 	DeveloperInfo {
 		ID          string `json:"id"`
@@ -35,19 +35,20 @@ type (
 		AuditRemark string `json:"auditRemark"`
 		CreatedAt   int64  `json:"createdAt"`
 	}
-
 	// 审核开发者申请
 	AuditDeveloperReq {
 		ID          string `json:"id"`
 		Status      int    `json:"status"` // 1通过 2拒绝
 		AuditRemark string `json:"auditRemark,optional"`
 	}
-	AuditDeveloperRes {
-	}
+	AuditDeveloperRes  {}
 )
 
-@server (group: open)
+@server (
+	group: open
+)
 service backend {
+	// 开发者管理
 	@handler ApplyDeveloper
 	post /admin/open/developer/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
 
@@ -57,3 +58,4 @@ service backend {
 	@handler AuditDeveloper
 	post /admin/open/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
 }
+

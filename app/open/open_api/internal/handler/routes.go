@@ -315,4 +315,15 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 接收外部 Webhook（用于 Jenkins/GitHub 等集成，无需鉴权）
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/webhook/incoming",
+				Handler: webhook.IncomingWebhookHandler(serverCtx),
+			},
+		},
+	)
 }

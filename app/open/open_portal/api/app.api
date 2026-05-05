@@ -1,0 +1,123 @@
+syntax = "v1"
+
+// ==================== 应用管理 ====================
+type (
+	CreateAppReq {
+		Name        string `json:"name" validate:"required,min=2,max=50"`
+		Description string `json:"description,optional" validate:"max=200"`
+		Icon        string `json:"icon,optional"` // 应用图标 URL
+	}
+	CreateAppRes {
+		AppID     string `json:"appId"`
+		AppSecret string `json:"appSecret"`
+		BotUserID string `json:"botUserId,optional"` // 自动创建的 Bot 用户ID（如果启用Bot权限）
+	}
+)
+
+type (
+	UpdateAppReq {
+		AppID       string `json:"appId"`
+		Name        string `json:"name,optional"`
+		Description string `json:"description,optional"`
+		WebhookURL  string `json:"webhookUrl,optional"`
+		Status      int    `json:"status,optional"`
+	}
+	UpdateAppRes  {}
+)
+
+type (
+	DeleteAppReq {
+		AppID string `json:"appId"`
+	}
+	DeleteAppRes  {}
+)
+
+type (
+	GetAppDetailReq {
+		AppID string `json:"appId"`
+	}
+	AppInfo {
+		AppID       string `json:"appId"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Status      int    `json:"status"`
+		WebhookURL  string `json:"webhookUrl"`
+		CreatedAt   int64  `json:"createdAt"`
+	}
+	GetAppDetailRes {
+		App AppInfo `json:"app"`
+	}
+)
+
+type (
+	GetAppListReq {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"pageSize,default=10"`
+		Status   int `form:"status,optional"`
+	}
+	GetAppListRes {
+		Total int64     `json:"total"`
+		List  []AppInfo `json:"list"`
+	}
+)
+
+// ==================== 权限管理（对标飞书/钉钉）====================
+type (
+	// 获取应用权限列表
+	GetAppScopesReq {
+		AppID string `json:"appId"`
+	}
+	ScopeInfo {
+		Scope       string `json:"scope"` // 权限标识
+		Name        string `json:"name"` // 权限名称
+		Description string `json:"description"` // 权限描述
+		Enabled     bool   `json:"enabled"` // 是否已启用
+		Required    bool   `json:"required"` // 是否需要审核
+	}
+	GetAppScopesRes {
+		Scopes []ScopeInfo `json:"scopes"`
+	}
+)
+
+type (
+	// 更新应用权限
+	UpdateAppScopesReq {
+		AppID  string   `json:"appId"`
+		Scopes []string `json:"scopes"` // 权限标识列表
+	}
+	UpdateAppScopesRes  {}
+)
+
+@server (
+	group: app
+)
+service open {
+	@doc "创建应用"
+	@handler CreateApp
+	post /portal/open/v1/app/create (CreateAppReq) returns (CreateAppRes)
+
+	@doc "更新应用"
+	@handler UpdateApp
+	post /portal/open/v1/app/update (UpdateAppReq) returns (UpdateAppRes)
+
+	@doc "删除应用"
+	@handler DeleteApp
+	post /portal/open/v1/app/delete (DeleteAppReq) returns (DeleteAppRes)
+
+	@doc "获取应用详情"
+	@handler GetAppDetail
+	get /portal/open/v1/app/detail (GetAppDetailReq) returns (GetAppDetailRes)
+
+	@doc "获取应用列表"
+	@handler GetAppList
+	get /portal/open/v1/app/list (GetAppListReq) returns (GetAppListRes)
+
+	@doc "获取应用权限列表"
+	@handler GetAppScopes
+	get /portal/open/v1/app/scopes (GetAppScopesReq) returns (GetAppScopesRes)
+
+	@doc "更新应用权限"
+	@handler UpdateAppScopes
+	post /portal/open/v1/app/scopes/update (UpdateAppScopesReq) returns (UpdateAppScopesRes)
+}
+

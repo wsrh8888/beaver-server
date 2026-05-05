@@ -22,7 +22,8 @@ func InitOpenTables(db *gorm.DB) error {
 		&open_models.OpenWebhookLog{},
 		&open_models.OpenAppPermission{},
 		&open_models.OpenAppVersion{},
-		&open_models.OpenH5AuthCode{}, // H5 免登授权码表
+		&open_models.OpenH5AuthCode{},      // H5 免登授权码表
+		&open_models.OpenIncomingWebhook{}, // Incoming Webhook Token 表
 	}
 
 	for _, table := range tables {

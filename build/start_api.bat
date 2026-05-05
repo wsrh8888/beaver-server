@@ -1,8 +1,6 @@
 @echo off
-REM 启动所有API服务
 setlocal enabledelayedexpansion
 
-REM 获取脚本所在目录的上级目录（beaver-server根目录）
 for %%i in ("%~dp0..") do set "ROOT_DIR=%%~fi"
 
 wt new-tab --title "Auth API" cmd /k "cd /d !ROOT_DIR!\app\auth\auth_api && go run auth.go" ^

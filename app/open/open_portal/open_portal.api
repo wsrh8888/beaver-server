@@ -1,0 +1,8 @@
+import "api/auth.api"
+import "api/app.api"
+import "api/webhook.api"
+import "api/secret.api"
+import "api/permission.api"
+import "api/developer.api"
+
+// goctl api go -api open_portal.api -dir . --home ../../../template

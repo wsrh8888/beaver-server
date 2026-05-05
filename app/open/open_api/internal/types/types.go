@@ -343,6 +343,17 @@ type ImageContent struct {
 	ImageKey string `json:"image_key"` // 图片 key（需先上传）
 }
 
+type IncomingWebhookReq struct {
+	Token   string                 `form:"token"`    // Webhook Token（从 URL 参数获取）
+	MsgType string                 `json:"msg_type"` // 消息类型：text/markdown
+	Content map[string]interface{} `json:"content"`  // 消息内容
+}
+
+type IncomingWebhookRes struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,optional"`
+}
+
 type ListDepartmentsReq struct {
 	ParentID string `form:"parentId,optional"` // 父部门ID，不传则获取根部门
 }
