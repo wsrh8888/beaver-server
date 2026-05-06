@@ -1,0 +1,52 @@
+syntax = "v1"
+
+// ==================== OAuth 配置 ====================
+type (
+	GetOAuthConfigReq {
+		AppID  string `form:"appId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	OAuthConfigInfo {
+		AppID           string   `json:"appId"`
+		RedirectURIs    []string `json:"redirectUris"`
+		Scopes          []string `json:"scopes"`
+		CustomLogo      string   `json:"customLogo"`
+		CustomTitle     string   `json:"customTitle"`
+		CustomColor     string   `json:"customColor"`
+		EnablePKCE      bool     `json:"enablePkce"`
+		TokenExpiration int      `json:"tokenExpiration"`
+		Status          int      `json:"status"`
+	}
+	GetOAuthConfigRes {
+		Config OAuthConfigInfo `json:"config"`
+	}
+)
+
+type (
+	UpdateOAuthConfigReq {
+		AppID           string   `json:"appId"`
+		RedirectURIs    []string `json:"redirectUris,optional"`
+		Scopes          []string `json:"scopes,optional"`
+		CustomLogo      string   `json:"customLogo,optional"`
+		CustomTitle     string   `json:"customTitle,optional"`
+		CustomColor     string   `json:"customColor,optional"`
+		EnablePKCE      *bool    `json:"enablePkce,optional"`
+		TokenExpiration *int     `json:"tokenExpiration,optional"`
+		Status          *int     `json:"status,optional"`
+		UserID          string   `header:"Beaver-User-Id"`
+	}
+	UpdateOAuthConfigRes {}
+)
+
+@server (
+	group: oauth
+)
+service open {
+	@doc "获取 OAuth 配置"
+	@handler GetOAuthConfig
+	get /portal/open/v1/oauth/config (GetOAuthConfigReq) returns (GetOAuthConfigRes)
+
+	@doc "更新 OAuth 配置"
+	@handler UpdateOAuthConfig
+	post /portal/open/v1/oauth/config_update (UpdateOAuthConfigReq) returns (UpdateOAuthConfigRes)
+}

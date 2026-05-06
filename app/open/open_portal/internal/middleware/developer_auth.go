@@ -16,6 +16,13 @@ import (
 func DeveloperAuthMiddleware(secretKey string, db *gorm.DB) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			// 0. 判断是否是公开接口（如登录接口），如果是则直接放行
+			if isPublicPath(r.URL.Path) {
+				logx.Infof("访问公开接口: path=%s", r.URL.Path)
+				next(w, r)
+				return
+			}
+
 			// 1. 提取 Token
 			token := getTokenFromRequest(r)
 			if token == "" {
@@ -99,6 +106,21 @@ func getTokenFromRequest(r *http.Request) string {
 // isApplyDeveloperPath 判断是否是申请开发者接口
 func isApplyDeveloperPath(path string) bool {
 	return strings.HasPrefix(path, "/portal/open/v1/developer/apply")
+}
+
+// isPublicPath 判断是否是公开接口（不需要认证）
+func isPublicPath(path string) bool {
+	publicPaths := []string{
+		"/portal/open/v1/auth/login", // 登录接口
+	}
+
+	for _, p := range publicPaths {
+		if path == p || strings.HasPrefix(path, p+"?") {
+			return true
+		}
+	}
+
+	return false
 }
 
 // isReadOnlyPath 判断是否是只读接口 (不需要开发者资质)

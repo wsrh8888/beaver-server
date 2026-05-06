@@ -1,7 +1,7 @@
 package handler
 
 import (
-	logic "beaver/app/open/open_portal/internal/logic/app"
+	logic "beaver/app/open/open_portal/internal/logic/oauth"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/common/response"

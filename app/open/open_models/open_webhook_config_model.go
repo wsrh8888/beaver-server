@@ -8,9 +8,10 @@ import (
 type OpenWebhookConfig struct {
 	gorm.Model
 	AppID      string `gorm:"type:varchar(64);index;not null;comment:应用ID"`
-	EventType  string `gorm:"type:varchar(50);index;not null;comment:事件类型"`
+	EventType  string `gorm:"type:varchar(50);index;not null;comment:主事件类型（兼容旧接口）"`
 	TargetURL  string `gorm:"type:varchar(500);not null;comment:回调地址"`
 	Secret     string `gorm:"type:varchar(128);comment:签名密钥"`
+	Events     string `gorm:"type:text;comment:订阅的事件列表（JSON 字符串）"`
 	Status     int    `gorm:"type:tinyint;default:1;comment:状态 1启用 0禁用"`
 	RetryCount int    `gorm:"type:int;default:3;comment:重试次数"`
 	Timeout    int    `gorm:"type:int;default:5;comment:超时秒数"`

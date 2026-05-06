@@ -1,17 +1,16 @@
 syntax = "v1"
 
 // ==================== Webhook 配置 ====================
-
 type (
 	ConfigWebhookReq {
 		AppID      string `path:"appId"`
-		EventType  string `json:"eventType"`
+		EventType  string `json:"eventType"` // 主事件类型（兼容旧接口）
 		TargetURL  string `json:"targetUrl"`
 		Secret     string `json:"secret,optional"`
+		Events     string `json:"events,optional"` // 订阅的事件列表（JSON 字符串）
 		RetryCount int    `json:"retryCount,optional"`
 		Timeout    int    `json:"timeout,optional"`
 	}
-	
 	ConfigWebhookRes {
 		ConfigID string `json:"configId"`
 	}
@@ -24,7 +23,6 @@ type (
 		Page      int    `form:"page,default=1"`
 		PageSize  int    `form:"pageSize,default=20"`
 	}
-	
 	WebhookLogItem {
 		ID           string `json:"id"`
 		EventType    string `json:"eventType"`
@@ -34,7 +32,6 @@ type (
 		Status       int    `json:"status"`
 		CreatedAt    int64  `json:"createdAt"`
 	}
-	
 	GetWebhookLogsRes {
 		Total int64            `json:"total"`
 		List  []WebhookLogItem `json:"list"`
@@ -48,8 +45,9 @@ service open {
 	@doc "配置 Webhook"
 	@handler ConfigWebhook
 	post /portal/open/v1/webhook/config (ConfigWebhookReq) returns (ConfigWebhookRes)
-	
+
 	@doc "获取 Webhook 日志"
 	@handler GetWebhookLogs
 	get /portal/open/v1/webhook/logs (GetWebhookLogsReq) returns (GetWebhookLogsRes)
 }
+

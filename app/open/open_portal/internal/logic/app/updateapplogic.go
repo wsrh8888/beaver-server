@@ -50,10 +50,6 @@ func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateA
 	if req.Icon != "" {
 		updates["icon"] = req.Icon
 	}
-	if req.Status != 0 {
-		updates["status"] = req.Status
-	}
-
 	// 4. 执行更新
 	if len(updates) == 0 {
 		return &types.UpdateAppRes{}, nil

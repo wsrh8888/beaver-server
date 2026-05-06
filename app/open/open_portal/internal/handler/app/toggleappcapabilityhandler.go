@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetBotConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func ToggleAppCapabilityHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetBotConfigReq
+		var req types.ToggleAppCapabilityReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGetBotConfigLogic(r.Context(), svcCtx)
-		resp, err := l.GetBotConfig(&req)
+		l := logic.NewToggleAppCapabilityLogic(r.Context(), svcCtx)
+		resp, err := l.ToggleAppCapability(&req)
 		response.Response(r, w, resp, err)
 	}
 }

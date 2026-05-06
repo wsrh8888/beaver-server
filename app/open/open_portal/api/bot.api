@@ -1,0 +1,61 @@
+syntax = "v1"
+
+// ==================== Bot 机器人配置 ====================
+type (
+	GetBotConfigReq {
+		AppID  string `form:"appId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	BotConfigInfo {
+		AppID            string   `json:"appId"`
+		BotName          string   `json:"botName"`
+		BotAvatar        string   `json:"botAvatar"`
+		BotDescription   string   `json:"botDescription"`
+		UsageGuide       string   `json:"usageGuide"` // 使用说明
+		EnableSingleChat bool     `json:"enableSingleChat"`
+		EnableGroupChat  bool     `json:"enableGroupChat"`
+		EnableAtMention  bool     `json:"enableAtMention"`
+		EnableMenu       bool     `json:"enableMenu"` // 是否启用自定义菜单
+		MenuItems        string   `json:"menuItems"` // JSON 字符串，菜单项配置
+		AutoReplyRules   []string `json:"autoReplyRules"`
+		Commands         []string `json:"commands"`
+		Status           int      `json:"status"`
+	}
+	GetBotConfigRes {
+		Config BotConfigInfo `json:"config"`
+	}
+)
+
+type (
+	UpdateBotConfigReq {
+		AppID            string   `json:"appId"`
+		BotName          string   `json:"botName,optional"`
+		BotAvatar        string   `json:"botAvatar,optional"`
+		BotDescription   string   `json:"botDescription,optional"`
+		UsageGuide       string   `json:"usageGuide,optional"` // 使用说明
+		EnableSingleChat *bool    `json:"enableSingleChat,optional"`
+		EnableGroupChat  *bool    `json:"enableGroupChat,optional"`
+		EnableAtMention  *bool    `json:"enableAtMention,optional"`
+		EnableMenu       *bool    `json:"enableMenu,optional"` // 是否启用自定义菜单
+		MenuItems        string   `json:"menuItems,optional"` // JSON 字符串，菜单项配置
+		AutoReplyRules   []string `json:"autoReplyRules,optional"`
+		Commands         []string `json:"commands,optional"`
+		Status           *int     `json:"status,optional"`
+		UserID           string   `header:"Beaver-User-Id"`
+	}
+	UpdateBotConfigRes  {}
+)
+
+@server (
+	group: bot
+)
+service open {
+	@doc "获取 Bot 配置"
+	@handler GetBotConfig
+	get /portal/open/v1/bot/config (GetBotConfigReq) returns (GetBotConfigRes)
+
+	@doc "更新 Bot 配置"
+	@handler UpdateBotConfig
+	post /portal/open/v1/bot/config_update (UpdateBotConfigReq) returns (UpdateBotConfigRes)
+}
+

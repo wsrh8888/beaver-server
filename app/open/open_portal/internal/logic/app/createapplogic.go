@@ -38,14 +38,14 @@ func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateA
 	appID := fmt.Sprintf("app_%s", uuid.New().String()[:8])
 	appSecret := uuid.New().String() + uuid.New().String()
 
-	// 3. 创建应用记录
+	// 3. 创建应用记录（状态为草稿，需要发布后才能被用户搜索到）
 	app := open_models.OpenApp{
 		AppID:       appID,
 		AppSecret:   appSecret,
 		Name:        req.Name,
 		Description: req.Description,
 		OwnerUserID: req.UserID,
-		Status:      1, // 默认启用
+		Status:      0, // 0=草稿，1=已发布，2=禁用
 		// Icon:        req.Icon, // TODO: 数据库添加 icon 字段后启用
 	}
 

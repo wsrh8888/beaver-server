@@ -3,5 +3,7 @@ import "api/app.api"
 import "api/webhook.api"
 import "api/permission.api"
 import "api/developer.api"
+import "api/oauth.api"
+import "api/bot.api"
 
 // goctl api go -api open_portal.api -dir . --home ../../../template

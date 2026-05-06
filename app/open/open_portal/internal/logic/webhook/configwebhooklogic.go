@@ -62,6 +62,9 @@ func (l *ConfigWebhookLogic) ConfigWebhook(req *types.ConfigWebhookReq) (resp *t
 		// 更新现有配置
 		existingConfig.TargetURL = req.TargetURL
 		existingConfig.Secret = secret
+		if req.Events != "" {
+			existingConfig.Events = req.Events
+		}
 		existingConfig.RetryCount = retryCount
 		existingConfig.Timeout = timeout
 		existingConfig.Status = 1
@@ -80,6 +83,7 @@ func (l *ConfigWebhookLogic) ConfigWebhook(req *types.ConfigWebhookReq) (resp *t
 		EventType:  req.EventType,
 		TargetURL:  req.TargetURL,
 		Secret:     secret,
+		Events:     req.Events,
 		Status:     1,
 		RetryCount: retryCount,
 		Timeout:    timeout,

@@ -109,9 +109,11 @@ func main() {
 			&open_models.OpenWebhookLog{},
 			&open_models.OpenAuthCode{},
 			&open_models.OpenQrCode{},
-			&open_models.OpenH5AuthCode{}, // H5 免登授权码表
+			&open_models.OpenH5AuthCode{},        // H5 免登授权码表
 			&open_models.OpenEventSubscription{}, // 事件订阅配置表
-			&open_models.OpenEventLog{}, // 事件推送日志表
+			&open_models.OpenEventLog{},          // 事件推送日志表
+			&open_models.OpenBotConfig{},         // Bot 配置表
+			&open_models.OpenOAuthConfig{},       // OAuth 配置表
 		)
 
 		if err != nil {
