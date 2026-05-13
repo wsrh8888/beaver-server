@@ -1,7 +1,7 @@
 package handler
 
 import (
-	logic "beaver/app/open/open_api/internal/logic/oauth"
+	logic "beaver/app/open/open_api/internal/logic/oauth_public"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GenerateQrCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func PasswordLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GenerateQrCodeReq
+		var req types.PasswordLoginReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGenerateQrCodeLogic(r.Context(), svcCtx)
-		resp, err := l.GenerateQrCode(&req)
+		l := logic.NewPasswordLoginLogic(r.Context(), svcCtx)
+		resp, err := l.PasswordLogin(&req)
 		response.Response(r, w, resp, err)
 	}
 }

@@ -1,8 +1,11 @@
-package oauth
+// Code scaffolded by goctl. Safe to edit.
+// goctl 1.9.2
+
+package oauth_public
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	"beaver/app/open/open_api/internal/svc"
@@ -28,10 +31,11 @@ func NewCheckQrCodeStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *CheckQrCodeStatusLogic) CheckQrCodeStatus(req *types.CheckQrCodeStatusReq) (resp *types.CheckQrCodeStatusRes, err error) {
-	// 1. 查询二维码记录
+	// 1. 查询扫码记录
 	var qrCode open_models.OpenQrCode
 	if err := l.svcCtx.DB.Where("scene_id = ?", req.SceneID).First(&qrCode).Error; err != nil {
-		return nil, errors.New("二维码不存在")
+		logx.Errorf("扫码记录不存在: sceneId=%s, err=%v", req.SceneID, err)
+		return nil, fmt.Errorf("二维码不存在或已过期")
 	}
 
 	// 2. 检查是否过期
@@ -43,26 +47,33 @@ func (l *CheckQrCodeStatusLogic) CheckQrCodeStatus(req *types.CheckQrCodeStatusR
 		}, nil
 	}
 
-	// 3. 映射状态码到字符串
-	var statusStr string
+	// 3. 根据状态返回结果
+	var status string
 	switch qrCode.Status {
 	case 0:
-		statusStr = "waiting"
+		status = "waiting" // 等待扫码
 	case 1:
-		statusStr = "scanned"
+		status = "scanned" // 已扫码，待确认
 	case 2:
-		statusStr = "confirmed"
+		status = "confirmed" // 已确认
 	case 3:
-		statusStr = "cancelled"
+		status = "cancelled" // 已取消
 	case 4:
-		statusStr = "expired"
+		status = "expired" // 已过期
 	default:
-		statusStr = "unknown"
+		status = "waiting"
 	}
 
-	// 4. 返回状态
+	// 4. 如果已确认，返回用户ID
+	var userId string
+	if qrCode.Status == 2 {
+		userId = qrCode.UserID
+	}
+
+	logx.Infof("查询扫码状态: sceneId=%s, status=%s", req.SceneID, status)
+
 	return &types.CheckQrCodeStatusRes{
-		Status: statusStr,
-		UserId: qrCode.UserID,
+		Status: status,
+		UserId: userId,
 	}, nil
 }

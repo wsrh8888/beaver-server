@@ -5,5 +5,7 @@ import "api/permission.api"
 import "api/developer.api"
 import "api/oauth.api"
 import "api/bot.api"
+import "api/security.api"
+import "api/version.api"
 
 // goctl api go -api open_portal.api -dir . --home ../../../template

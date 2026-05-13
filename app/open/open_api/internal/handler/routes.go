@@ -11,6 +11,7 @@ import (
 	group "beaver/app/open/open_api/internal/handler/group"
 	message "beaver/app/open/open_api/internal/handler/message"
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
+	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
 	user "beaver/app/open/open_api/internal/handler/user"
 	webhook "beaver/app/open/open_api/internal/handler/webhook"
 	"beaver/app/open/open_api/internal/svc"
@@ -240,34 +241,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: oauth.GetAuthorizeCodeHandler(serverCtx),
 				},
 				{
-					// H5 免登获取 authCode（需在 WebView 环境中调用）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/h5/authcode",
-					Handler: oauth.GetH5AuthCodeHandler(serverCtx),
-				},
-				{
 					// 用 H5 authCode 换取用户信息
 					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/h5/userinfo",
+					Path:    "/api/open/v1/oauth/h5_userinfo",
 					Handler: oauth.GetUserInfoByH5CodeHandler(serverCtx),
-				},
-				{
-					// 生成扫码登录二维码
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/qrcode",
-					Handler: oauth.GenerateQrCodeHandler(serverCtx),
-				},
-				{
-					// 确认扫码登录
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/qrcode/confirm",
-					Handler: oauth.ConfirmQrCodeLoginHandler(serverCtx),
-				},
-				{
-					// 查询扫码状态
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/oauth/qrcode/status",
-					Handler: oauth.CheckQrCodeStatusHandler(serverCtx),
 				},
 				{
 					// 用授权码换取 Token
@@ -277,6 +254,41 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// H5 免登获取 authCode（需在 WebView 环境中调用）
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/oauth/h5_authcode",
+				Handler: oauth_public.GetH5AuthCodeHandler(serverCtx),
+			},
+			{
+				// 账号密码登录
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/oauth/password_login",
+				Handler: oauth_public.PasswordLoginHandler(serverCtx),
+			},
+			{
+				// 生成扫码登录二维码
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/oauth/qrcode",
+				Handler: oauth_public.GenerateQrCodeHandler(serverCtx),
+			},
+			{
+				// 确认扫码登录
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/oauth/qrcode_confirm",
+				Handler: oauth_public.ConfirmQrCodeLoginHandler(serverCtx),
+			},
+			{
+				// 查询扫码状态
+				Method:  http.MethodGet,
+				Path:    "/api/open/v1/oauth/qrcode_status",
+				Handler: oauth_public.CheckQrCodeStatusHandler(serverCtx),
+			},
+		},
 	)
 
 	server.AddRoutes(

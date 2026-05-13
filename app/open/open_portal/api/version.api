@@ -1,0 +1,79 @@
+syntax = "v1"
+
+// ==================== 版本管理 ====================
+type (
+	// 创建新版本
+	CreateVersionReq {
+		AppID       string `json:"appId"`
+		Version     string `json:"version" validate:"required,max=20"` // 版本号，如 1.0.0
+		Description string `json:"description,optional" validate:"max=500"` // 版本说明
+		Visibility  string `json:"visibility" validate:"required,oneof=self partial all"` // 可见范围：self/partial/all
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	CreateVersionRes {
+		VersionID string `json:"versionId"`
+	}
+)
+
+type (
+	// 获取版本列表
+	GetVersionListReq {
+		AppID    string `form:"appId"`
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=10"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	VersionInfo {
+		ID           string   `json:"id"`
+		Version      string   `json:"version"`
+		Description  string   `json:"description"`
+		Visibility   string   `json:"visibility"` // self/partial/all
+		Status       string   `json:"status"` // draft/reviewing/approved/rejected/published
+		Capabilities []string `json:"capabilities"` // 该版本包含的能力
+		CreatedAt    int64    `json:"createdAt"`
+	}
+	GetVersionListRes {
+		Total int64         `json:"total"`
+		List  []VersionInfo `json:"list"`
+	}
+)
+
+type (
+	// 提交版本审核
+	SubmitVersionReviewReq {
+		VersionID string `json:"versionId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	SubmitVersionReviewRes {}
+)
+
+type (
+	// 发布版本
+	PublishVersionReq {
+		VersionID string `json:"versionId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	PublishVersionRes {}
+)
+
+@server (
+	group: version
+)
+service open {
+	@doc "创建新版本"
+	@handler CreateVersion
+	post /portal/open/v1/version/create (CreateVersionReq) returns (CreateVersionRes)
+
+	@doc "获取版本列表"
+	@handler GetVersionList
+	get /portal/open/v1/version/list (GetVersionListReq) returns (GetVersionListRes)
+
+	@doc "提交版本审核"
+	@handler SubmitVersionReview
+	post /portal/open/v1/version/submit_review (SubmitVersionReviewReq) returns (SubmitVersionReviewRes)
+
+	@doc "发布版本"
+	@handler PublishVersion
+	post /portal/open/v1/version/publish (PublishVersionReq) returns (PublishVersionRes)
+}
+

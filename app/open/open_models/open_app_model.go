@@ -19,7 +19,8 @@ type OpenApp struct {
 	EnableOAuth   int `gorm:"type:tinyint;default:0;comment:是否启用OAuth能力 1是 0否"`
 	EnableWebhook int `gorm:"type:tinyint;default:0;comment:是否启用Webhook能力 1是 0否"`
 	// 其他配置
-	WebhookURL  string `gorm:"type:varchar(500);comment:Webhook回调地址"`
-	IPWhitelist string `gorm:"type:text;comment:IP白名单(JSON数组)"`
-	Scopes      string `gorm:"type:text;comment:权限范围(JSON数组)"`
+	WebhookURL     string `gorm:"type:varchar(500);comment:Webhook回调地址"`
+	IPWhitelist    string `gorm:"type:text;comment:IP白名单(JSON数组)"`
+	TrustedDomains string `gorm:"type:text;comment:H5可信域名(JSON数组)"`
+	Scopes         string `gorm:"type:text;comment:权限范围(JSON数组)"`
 }

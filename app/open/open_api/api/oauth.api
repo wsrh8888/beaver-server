@@ -75,6 +75,23 @@ type (
 )
 
 type (
+	// 账号密码登录请求
+	PasswordLoginReq {
+		AppID    string `json:"appId"`    // 应用ID
+		Account  string `json:"account"`  // 账号（邮箱或工号）
+		Password string `json:"password"` // 密码
+	}
+	PasswordLoginRes {
+		AccessToken  string `json:"accessToken"`  // 访问令牌
+		RefreshToken string `json:"refreshToken"` // 刷新令牌
+		ExpiresIn    int64  `json:"expiresIn"`    // 过期时间（秒）
+		UserID       string `json:"userId"`       // 用户ID
+		NickName     string `json:"nickName"`     // 昵称
+		Avatar       string `json:"avatar,optional"` // 头像
+	}
+)
+
+type (
 	// 用 H5 authCode 换取用户信息
 	GetUserInfoByH5CodeReq {
 		AppID     string `json:"appId"`
@@ -90,6 +107,33 @@ type (
 	}
 )
 
+// ==================== 无需认证的接口（扫码登录等）====================
+@server (
+	group: oauth_public
+)
+service open {
+	@doc "生成扫码登录二维码"
+	@handler GenerateQrCode
+	post /api/open/v1/oauth/qrcode (GenerateQrCodeReq) returns (GenerateQrCodeRes)
+
+	@doc "查询扫码状态"
+	@handler CheckQrCodeStatus
+	get /api/open/v1/oauth/qrcode_status (CheckQrCodeStatusReq) returns (CheckQrCodeStatusRes)
+
+	@doc "确认扫码登录"
+	@handler ConfirmQrCodeLogin
+	post /api/open/v1/oauth/qrcode_confirm (ConfirmQrCodeLoginReq) returns (ConfirmQrCodeLoginRes)
+
+	@doc "账号密码登录"
+	@handler PasswordLogin
+	post /api/open/v1/oauth/password_login (PasswordLoginReq) returns (PasswordLoginRes)
+
+	@doc "H5 免登获取 authCode（需在 WebView 环境中调用）"
+	@handler GetH5AuthCode
+	post /api/open/v1/oauth/h5_authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
+}
+
+// ==================== 需要认证的接口 ====================
 @server (
 	group:      oauth
 	middleware: AuthMiddleware
@@ -103,24 +147,8 @@ service open {
 	@handler GetTokenByCode
 	post /api/open/v1/oauth/token (GetTokenByCodeReq) returns (GetTokenByCodeRes)
 
-	@doc "生成扫码登录二维码"
-	@handler GenerateQrCode
-	post /api/open/v1/oauth/qrcode (GenerateQrCodeReq) returns (GenerateQrCodeRes)
-
-	@doc "查询扫码状态"
-	@handler CheckQrCodeStatus
-	get /api/open/v1/oauth/qrcode/status (CheckQrCodeStatusReq) returns (CheckQrCodeStatusRes)
-
-	@doc "确认扫码登录"
-	@handler ConfirmQrCodeLogin
-	post /api/open/v1/oauth/qrcode/confirm (ConfirmQrCodeLoginReq) returns (ConfirmQrCodeLoginRes)
-
-	@doc "H5 免登获取 authCode（需在 WebView 环境中调用）"
-	@handler GetH5AuthCode
-	post /api/open/v1/oauth/h5/authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
-
 	@doc "用 H5 authCode 换取用户信息"
 	@handler GetUserInfoByH5Code
-	post /api/open/v1/oauth/h5/userinfo (GetUserInfoByH5CodeReq) returns (GetUserInfoByH5CodeRes)
+	post /api/open/v1/oauth/h5_userinfo (GetUserInfoByH5CodeReq) returns (GetUserInfoByH5CodeRes)
 }
 

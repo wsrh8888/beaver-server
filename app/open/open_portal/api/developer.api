@@ -47,7 +47,7 @@ type (
 
 type (
 	GetDeveloperDetailReq {
-		ID uint `path:"id"`
+		ID uint `form:"id"`
 	}
 	
 	GetDeveloperDetailRes {
@@ -81,7 +81,7 @@ service open {
 	
 	@doc "获取开发者详情"
 	@handler GetDeveloperDetail
-	get /portal/open/v1/developer/:id (GetDeveloperDetailReq) returns (GetDeveloperDetailRes)
+	get /portal/open/v1/developer/detail (GetDeveloperDetailReq) returns (GetDeveloperDetailRes)
 	
 	@doc "审核开发者申请"
 	@handler AuditDeveloper

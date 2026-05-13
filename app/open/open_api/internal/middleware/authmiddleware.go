@@ -24,8 +24,31 @@ func NewAuthMiddleware(db *gorm.DB) *AuthMiddleware {
 	}
 }
 
+// isPublicOAuthPath 判断是否是公开 OAuth 接口（无需认证）
+func isPublicOAuthPath(path string) bool {
+	// 扫码登录相关接口
+	if strings.HasPrefix(path, "/api/open/v1/oauth/qrcode") {
+		return true
+	}
+	// 账号密码登录
+	if path == "/api/open/v1/oauth/password_login" {
+		return true
+	}
+	// H5 免登获取 authCode
+	if path == "/api/open/v1/oauth/h5_authcode" {
+		return true
+	}
+	return false
+}
+
 func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// 0. 检查是否是公开接口（扫码登录等），如果是则跳过认证
+		if isPublicOAuthPath(r.URL.Path) {
+			next(w, r)
+			return
+		}
+
 		// 1. 从 Header 中获取 Authorization
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {

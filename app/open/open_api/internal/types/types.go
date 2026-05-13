@@ -379,6 +379,21 @@ type MarkdownContent struct {
 	Content string `json:"content"` // Markdown 内容
 }
 
+type PasswordLoginReq struct {
+	AppID    string `json:"appId"`    // 应用ID
+	Account  string `json:"account"`  // 账号（邮箱或工号）
+	Password string `json:"password"` // 密码
+}
+
+type PasswordLoginRes struct {
+	AccessToken  string `json:"accessToken"`     // 访问令牌
+	RefreshToken string `json:"refreshToken"`    // 刷新令牌
+	ExpiresIn    int64  `json:"expiresIn"`       // 过期时间（秒）
+	UserID       string `json:"userId"`          // 用户ID
+	NickName     string `json:"nickName"`        // 昵称
+	Avatar       string `json:"avatar,optional"` // 头像
+}
+
 type RecallMessageReq struct {
 	MessageID string `json:"messageId"`
 }

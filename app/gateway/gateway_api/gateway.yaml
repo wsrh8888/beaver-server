@@ -33,3 +33,11 @@ WhiteList:
   # 开放平台认证接口（无需token）
   - /api/open/v1/auth/token
   - /api/open/v1/auth/refresh
+  # 开放平台扫码登录接口（无需token）
+  - /api/open/v1/oauth/qrcode
+  - /api/open/v1/oauth/qrcode_status
+  - /api/open/v1/oauth/qrcode_confirm
+  # 开放平台账号密码登录接口（无需token）
+  - /api/open/v1/oauth/password_login
+  # 开放平台 H5 免登接口（无需token）
+  - /api/open/v1/oauth/h5_authcode

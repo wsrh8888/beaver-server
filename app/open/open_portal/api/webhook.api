@@ -3,13 +3,15 @@ syntax = "v1"
 // ==================== Webhook 配置 ====================
 type (
 	ConfigWebhookReq {
-		AppID      string `path:"appId"`
-		EventType  string `json:"eventType"` // 主事件类型（兼容旧接口）
-		TargetURL  string `json:"targetUrl"`
-		Secret     string `json:"secret,optional"`
-		Events     string `json:"events,optional"` // 订阅的事件列表（JSON 字符串）
-		RetryCount int    `json:"retryCount,optional"`
-		Timeout    int    `json:"timeout,optional"`
+		AppID         string `form:"appId"`
+		EventType     string `json:"eventType"` // 主事件类型（兼容旧接口）
+		TargetURL     string `json:"targetUrl,optional"`
+		Secret        string `json:"secret,optional"`
+		Events        string `json:"events,optional"` // 订阅的事件列表（JSON 字符串）
+		RetryCount    int    `json:"retryCount,optional"`
+		Timeout       int    `json:"timeout,optional"`
+		SubscribeMode string `json:"subscribeMode,optional"` // 订阅方式：websocket/webhook
+		UserID        string `header:"Beaver-User-Id"`
 	}
 	ConfigWebhookRes {
 		ConfigID string `json:"configId"`
@@ -18,10 +20,11 @@ type (
 
 type (
 	GetWebhookLogsReq {
-		AppID     string `path:"appId"`
+		AppID     string `form:"appId"`
 		EventType string `form:"eventType,optional"`
 		Page      int    `form:"page,default=1"`
 		PageSize  int    `form:"pageSize,default=20"`
+		UserID    string `header:"Beaver-User-Id"`
 	}
 	WebhookLogItem {
 		ID           string `json:"id"`
