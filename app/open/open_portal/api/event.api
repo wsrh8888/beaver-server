@@ -1,0 +1,85 @@
+syntax = "v1"
+
+// ==================== 事件订阅管理 ====================
+type (
+	CreateEventSubscriptionReq {
+		AppID      string `json:"appId"`
+		EventType  string `json:"eventType"` // 事件类型
+		TargetURL  string `json:"targetUrl"` // 推送目标URL
+		Secret     string `json:"secret,optional"` // 签名密钥
+		RetryCount int    `json:"retryCount,optional"` // 重试次数
+		Timeout    int    `json:"timeout,optional"` // 超时时间(秒)
+		UserID     string `header:"Beaver-User-Id"`
+	}
+	EventSubscriptionInfo {
+		ID         string `json:"id"`
+		AppID      string `json:"appId"`
+		EventType  string `json:"eventType"`
+		TargetURL  string `json:"targetUrl"`
+		Secret     string `json:"secret"`
+		Status     int    `json:"status"` // 0禁用 1启用
+		RetryCount int    `json:"retryCount"`
+		Timeout    int    `json:"timeout"`
+		CreatedAt  int64  `json:"createdAt"`
+		UpdatedAt  int64  `json:"updatedAt"`
+	}
+	CreateEventSubscriptionRes {
+		Subscription EventSubscriptionInfo `json:"subscription"`
+	}
+)
+
+type (
+	ListEventSubscriptionsReq {
+		AppID     string `form:"appId"`
+		EventType string `form:"eventType,optional"`
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=20"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	ListEventSubscriptionsRes {
+		Total int64                    `json:"total"`
+		List  []EventSubscriptionInfo `json:"list"`
+	}
+)
+
+type (
+	UpdateEventSubscriptionReq {
+		ID         string `json:"id"`
+		TargetURL  string `json:"targetUrl,optional"`
+		Secret     string `json:"secret,optional"`
+		Status     *int   `json:"status,optional"` // 0禁用 1启用
+		RetryCount *int   `json:"retryCount,optional"`
+		Timeout    *int   `json:"timeout,optional"`
+		UserID     string `header:"Beaver-User-Id"`
+	}
+	UpdateEventSubscriptionRes {}
+)
+
+type (
+	DeleteEventSubscriptionReq {
+		ID     string `json:"id"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DeleteEventSubscriptionRes {}
+)
+
+@server (
+	group: event
+)
+service open {
+	@doc "创建事件订阅"
+	@handler CreateEventSubscription
+	post /portal/open/v1/event/create (CreateEventSubscriptionReq) returns (CreateEventSubscriptionRes)
+
+	@doc "获取事件订阅列表"
+	@handler ListEventSubscriptions
+	get /portal/open/v1/event/list (ListEventSubscriptionsReq) returns (ListEventSubscriptionsRes)
+
+	@doc "更新事件订阅"
+	@handler UpdateEventSubscription
+	post /portal/open/v1/event/update (UpdateEventSubscriptionReq) returns (UpdateEventSubscriptionRes)
+
+	@doc "删除事件订阅"
+	@handler DeleteEventSubscription
+	post /portal/open/v1/event/delete (DeleteEventSubscriptionReq) returns (DeleteEventSubscriptionRes)
+}

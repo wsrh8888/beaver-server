@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"beaver/app/open/constants"
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
@@ -47,31 +48,27 @@ func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *type
 	}
 
 	// 4. 构建所有权限列表（标记是否已启用）
-	scopes := make([]types.ScopeInfo, 0)
-	for _, scope := range open_models.AllScopes {
-		enabled := false
-		for _, s := range enabledScopes {
-			if string(scope) == s {
-				enabled = true
-				break
-			}
-		}
+	// 创建 enabledScopes map 提高查找效率
+	enabledMap := make(map[string]bool)
+	for _, s := range enabledScopes {
+		enabledMap[s] = true
+	}
 
-		// 判断是否是必需权限（默认权限）
-		required := false
-		for _, s := range open_models.DefaultScopes {
-			if scope == s {
-				required = true
-				break
-			}
-		}
+	// 创建 defaultScopes map 提高查找效率
+	defaultMap := make(map[string]bool)
+	for _, s := range constants.DefaultScopes {
+		defaultMap[string(s)] = true
+	}
 
+	scopes := make([]types.ScopeInfo, 0, len(constants.AllScopes))
+	for _, scope := range constants.AllScopes {
+		scopeStr := string(scope)
 		scopes = append(scopes, types.ScopeInfo{
-			Scope:       string(scope),
-			Name:        string(scope),
-			Description: open_models.ScopeDescription[scope],
-			Enabled:     enabled,
-			Required:    required,
+			Scope:       scopeStr,
+			Name:        scopeStr,
+			Description: constants.ScopeDescription[scope],
+			Enabled:     enabledMap[scopeStr],
+			Required:    defaultMap[scopeStr],
 		})
 	}
 

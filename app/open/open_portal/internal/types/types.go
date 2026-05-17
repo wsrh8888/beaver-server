@@ -72,22 +72,6 @@ type ConfigAppPermissionRes struct {
 	Success bool `json:"success"`
 }
 
-type ConfigWebhookReq struct {
-	AppID         string `form:"appId"`
-	EventType     string `json:"eventType"` // 主事件类型（兼容旧接口）
-	TargetURL     string `json:"targetUrl,optional"`
-	Secret        string `json:"secret,optional"`
-	Events        string `json:"events,optional"` // 订阅的事件列表（JSON 字符串）
-	RetryCount    int    `json:"retryCount,optional"`
-	Timeout       int    `json:"timeout,optional"`
-	SubscribeMode string `json:"subscribeMode,optional"` // 订阅方式：websocket/webhook
-	UserID        string `header:"Beaver-User-Id"`
-}
-
-type ConfigWebhookRes struct {
-	ConfigID string `json:"configId"`
-}
-
 type CreateAppReq struct {
 	Name        string `json:"name" validate:"required,min=2,max=50"`
 	Description string `json:"description,optional" validate:"max=200"`
@@ -98,6 +82,31 @@ type CreateAppReq struct {
 type CreateAppRes struct {
 	AppID     string `json:"appId"`
 	AppSecret string `json:"appSecret"`
+}
+
+type CreateEventSubscriptionReq struct {
+	AppID      string `json:"appId"`
+	EventType  string `json:"eventType"`           // 事件类型
+	TargetURL  string `json:"targetUrl"`           // 推送目标URL
+	Secret     string `json:"secret,optional"`     // 签名密钥
+	RetryCount int    `json:"retryCount,optional"` // 重试次数
+	Timeout    int    `json:"timeout,optional"`    // 超时时间(秒)
+	UserID     string `header:"Beaver-User-Id"`
+}
+
+type CreateEventSubscriptionRes struct {
+	Subscription EventSubscriptionInfo `json:"subscription"`
+}
+
+type CreateIncomingWebhookReq struct {
+	AppID   string `json:"appId"`
+	GroupID string `json:"groupId"`
+	Name    string `json:"name,optional"`
+	UserID  string `header:"Beaver-User-Id"`
+}
+
+type CreateIncomingWebhookRes struct {
+	Webhook IncomingWebhookInfo `json:"webhook"`
 }
 
 type CreateVersionReq struct {
@@ -120,6 +129,28 @@ type DeleteAppReq struct {
 type DeleteAppRes struct {
 }
 
+type DeleteEventSubscriptionReq struct {
+	ID     string `json:"id"`
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type DeleteEventSubscriptionRes struct {
+}
+
+type DeleteIncomingWebhookReq struct {
+	ID     string `json:"id"`
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type DeleteIncomingWebhookRes struct {
+}
+
+type DesktopOAuthConfigInfo struct {
+	Enabled      bool   `json:"enabled"`
+	CustomScheme string `json:"customScheme"`
+	AuthPageURL  string `json:"authPageUrl"` // 授权页面完整 URL（服务端生成）
+}
+
 type DeveloperInfo struct {
 	ID          uint   `json:"id"`
 	UserID      string `json:"userId"`
@@ -133,6 +164,19 @@ type DeveloperInfo struct {
 	AuditTime   int64  `json:"auditTime"`
 	AuditRemark string `json:"auditRemark"`
 	CreatedAt   int64  `json:"createdAt"`
+}
+
+type EventSubscriptionInfo struct {
+	ID         string `json:"id"`
+	AppID      string `json:"appId"`
+	EventType  string `json:"eventType"`
+	TargetURL  string `json:"targetUrl"`
+	Secret     string `json:"secret"`
+	Status     int    `json:"status"` // 0禁用 1启用
+	RetryCount int    `json:"retryCount"`
+	Timeout    int    `json:"timeout"`
+	CreatedAt  int64  `json:"createdAt"`
+	UpdatedAt  int64  `json:"updatedAt"`
 }
 
 type GetAppDetailReq struct {
@@ -202,12 +246,16 @@ type GetDeveloperListRes struct {
 }
 
 type GetOAuthConfigReq struct {
-	AppID  string `form:"appId"`
-	UserID string `header:"Beaver-User-Id"`
+	AppID     string `form:"appId"`
+	OAuthType string `form:"oauthType"` // h5 | desktop | mobile
+	UserID    string `header:"Beaver-User-Id"`
 }
 
 type GetOAuthConfigRes struct {
-	Config OAuthConfigInfo `json:"config"`
+	OAuthType     string                  `json:"oauthType"`
+	H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"`
+	DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"`
+	MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`
 }
 
 type GetSecurityConfigReq struct {
@@ -231,7 +279,26 @@ type GetVersionListRes struct {
 	List  []VersionInfo `json:"list"`
 }
 
-type GetWebhookLogsReq struct {
+type H5OAuthConfigInfo struct {
+	Enabled      bool     `json:"enabled"`
+	RedirectURIs []string `json:"redirectUris"`
+	JsSdkDomains []string `json:"jsSdkDomains"` // JS-SDK 安全域名
+	EnablePKCE   bool     `json:"enablePKCE"`
+}
+
+type IncomingWebhookInfo struct {
+	ID         string `json:"id"`
+	Token      string `json:"token"`
+	AppID      string `json:"appId"`
+	GroupID    string `json:"groupId"`
+	BotUserID  string `json:"botUserId"`
+	Name       string `json:"name"`
+	WebhookURL string `json:"webhookUrl"` // 完整的 Webhook URL
+	Status     int    `json:"status"`
+	CreatedAt  int64  `json:"createdAt"`
+}
+
+type ListEventSubscriptionsReq struct {
 	AppID     string `form:"appId"`
 	EventType string `form:"eventType,optional"`
 	Page      int    `form:"page,default=1"`
@@ -239,9 +306,21 @@ type GetWebhookLogsReq struct {
 	UserID    string `header:"Beaver-User-Id"`
 }
 
-type GetWebhookLogsRes struct {
-	Total int64            `json:"total"`
-	List  []WebhookLogItem `json:"list"`
+type ListEventSubscriptionsRes struct {
+	Total int64                   `json:"total"`
+	List  []EventSubscriptionInfo `json:"list"`
+}
+
+type ListIncomingWebhooksReq struct {
+	AppID    string `form:"appId"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	UserID   string `header:"Beaver-User-Id"`
+}
+
+type ListIncomingWebhooksRes struct {
+	Total int64                 `json:"total"`
+	List  []IncomingWebhookInfo `json:"list"`
 }
 
 type LoginReq struct {
@@ -256,16 +335,13 @@ type LoginRes struct {
 	ExpireAt int64  `json:"expireAt"`
 }
 
-type OAuthConfigInfo struct {
-	AppID           string   `json:"appId"`
-	RedirectURIs    []string `json:"redirectUris"`
-	Scopes          []string `json:"scopes"`
-	CustomLogo      string   `json:"customLogo"`
-	CustomTitle     string   `json:"customTitle"`
-	CustomColor     string   `json:"customColor"`
-	EnablePKCE      bool     `json:"enablePkce"`
-	TokenExpiration int      `json:"tokenExpiration"`
-	Status          int      `json:"status"`
+type MobileOAuthConfigInfo struct {
+	Enabled            bool   `json:"enabled"`
+	IOSBundleID        string `json:"iosBundleId"`
+	AndroidPackageName string `json:"androidPackageName"`
+	UniversalLink      string `json:"universalLink"`
+	CustomScheme       string `json:"customScheme"`
+	EnablePKCE         bool   `json:"enablePKCE"`
 }
 
 type PublishAppReq struct {
@@ -307,7 +383,6 @@ type ScopeInfo struct {
 type SecurityConfigInfo struct {
 	AppID          string   `json:"appId"`
 	IPWhitelist    []string `json:"ipWhitelist"`    // IP白名单
-	RedirectURIs   []string `json:"redirectUris"`   // OAuth重定向URL
 	TrustedDomains []string `json:"trustedDomains"` // H5可信域名
 }
 
@@ -371,17 +446,24 @@ type UpdateBotConfigReq struct {
 type UpdateBotConfigRes struct {
 }
 
+type UpdateEventSubscriptionReq struct {
+	ID         string `json:"id"`
+	TargetURL  string `json:"targetUrl,optional"`
+	Secret     string `json:"secret,optional"`
+	Status     *int   `json:"status,optional"` // 0禁用 1启用
+	RetryCount *int   `json:"retryCount,optional"`
+	Timeout    *int   `json:"timeout,optional"`
+	UserID     string `header:"Beaver-User-Id"`
+}
+
+type UpdateEventSubscriptionRes struct {
+}
+
 type UpdateOAuthConfigReq struct {
-	AppID           string   `json:"appId"`
-	RedirectURIs    []string `json:"redirectUris,optional"`
-	Scopes          []string `json:"scopes,optional"`
-	CustomLogo      string   `json:"customLogo,optional"`
-	CustomTitle     string   `json:"customTitle,optional"`
-	CustomColor     string   `json:"customColor,optional"`
-	EnablePKCE      *bool    `json:"enablePkce,optional"`
-	TokenExpiration *int     `json:"tokenExpiration,optional"`
-	Status          *int     `json:"status,optional"`
-	UserID          string   `header:"Beaver-User-Id"`
+	AppID     string `json:"appId"`
+	OAuthType string `json:"oauthType"` // h5 | desktop | mobile
+	Config    string `json:"config"`    // JSON 字符串，根据不同类型包含不同字段
+	UserID    string `header:"Beaver-User-Id"`
 }
 
 type UpdateOAuthConfigRes struct {
@@ -390,7 +472,6 @@ type UpdateOAuthConfigRes struct {
 type UpdateSecurityConfigReq struct {
 	AppID          string   `json:"appId"`
 	IPWhitelist    []string `json:"ipWhitelist,optional"`    // IP白名单
-	RedirectURIs   []string `json:"redirectUris,optional"`   // OAuth重定向URL白名单
 	TrustedDomains []string `json:"trustedDomains,optional"` // H5可信域名
 	UserID         string   `header:"Beaver-User-Id"`
 }
@@ -406,14 +487,4 @@ type VersionInfo struct {
 	Status       string   `json:"status"`       // draft/reviewing/approved/rejected/published
 	Capabilities []string `json:"capabilities"` // 该版本包含的能力
 	CreatedAt    int64    `json:"createdAt"`
-}
-
-type WebhookLogItem struct {
-	ID           string `json:"id"`
-	EventType    string `json:"eventType"`
-	Payload      string `json:"payload"`
-	ResponseCode int    `json:"responseCode"`
-	RetryCount   int    `json:"retryCount"`
-	Status       int    `json:"status"`
-	CreatedAt    int64  `json:"createdAt"`
 }

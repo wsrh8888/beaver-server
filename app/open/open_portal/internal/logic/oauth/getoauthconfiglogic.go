@@ -3,6 +3,9 @@ package oauth
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"net/url"
 
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
@@ -27,47 +30,64 @@ func NewGetOAuthConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetOAuthConfigLogic) GetOAuthConfig(req *types.GetOAuthConfigReq) (resp *types.GetOAuthConfigRes, err error) {
-	// 1. 查询 OAuth 配置
-	var oauthConfig open_models.OpenOAuthConfig
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err != nil {
-		// 如果不存在，返回默认配置
-		return &types.GetOAuthConfigRes{
-			Config: types.OAuthConfigInfo{
-				AppID:           req.AppID,
-				RedirectURIs:    []string{},
-				Scopes:          []string{},
-				CustomLogo:      "",
-				CustomTitle:     "",
-				CustomColor:     "",
-				EnablePKCE:      false,
-				TokenExpiration: 7200,
-				Status:          1,
-			},
-		}, nil
+	// 查询应用信息
+	var app open_models.OpenApp
+	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
+		return nil, err
 	}
 
-	// 2. 解析 JSON 字段
-	var redirectURIs []string
-	var scopes []string
-	if oauthConfig.RedirectURIs != "" {
-		json.Unmarshal([]byte(oauthConfig.RedirectURIs), &redirectURIs)
-	}
-	if oauthConfig.Scopes != "" {
-		json.Unmarshal([]byte(oauthConfig.Scopes), &scopes)
+	// 验证 UserID 是否为应用所有者
+	if app.OwnerUserID != req.UserID {
+		return nil, errors.New("无权查看此应用")
 	}
 
-	// 3. 返回配置
-	return &types.GetOAuthConfigRes{
-		Config: types.OAuthConfigInfo{
-			AppID:           oauthConfig.AppID,
-			RedirectURIs:    redirectURIs,
-			Scopes:          scopes,
-			CustomLogo:      oauthConfig.CustomLogo,
-			CustomTitle:     oauthConfig.CustomTitle,
-			CustomColor:     oauthConfig.CustomColor,
-			EnablePKCE:      oauthConfig.EnablePKCE == 1,
-			TokenExpiration: oauthConfig.TokenExpiration,
-			Status:          oauthConfig.Status,
-		},
-	}, nil
+	resp = &types.GetOAuthConfigRes{
+		OAuthType: req.OAuthType,
+	}
+
+	// 解析 OAuthConfig JSON
+	if app.OauthConfig == "" {
+		return resp, nil
+	}
+
+	var oauthConfig open_models.OAuthClientConfig
+	if err := json.Unmarshal([]byte(app.OauthConfig), &oauthConfig); err != nil {
+		l.Errorf("解析 OAuthConfig 失败: %v", err)
+		return resp, nil
+	}
+
+	// 根据类型返回对应配置
+	switch req.OAuthType {
+	case "h5":
+		resp.H5Config = &types.H5OAuthConfigInfo{
+			Enabled:      oauthConfig.H5.Enabled,
+			RedirectURIs: oauthConfig.H5.RedirectURIs,
+			JsSdkDomains: oauthConfig.H5.JsSdkDomains,
+		}
+	case "desktop":
+		// 生成授权页面 URL
+		authPageURL := ""
+		if oauthConfig.Desktop.Enabled && oauthConfig.Desktop.CustomScheme != "" {
+			oauthBaseUrl := l.svcCtx.Config.OAuth.BaseUrl
+			redirectURI := oauthConfig.Desktop.CustomScheme
+			authPageURL = fmt.Sprintf("%s/desktop/auth?appId=%s&redirectUri=%s",
+				oauthBaseUrl, req.AppID, url.QueryEscape(redirectURI))
+		}
+
+		resp.DesktopConfig = &types.DesktopOAuthConfigInfo{
+			Enabled:      oauthConfig.Desktop.Enabled,
+			CustomScheme: oauthConfig.Desktop.CustomScheme,
+			AuthPageURL:  authPageURL,
+		}
+	case "mobile":
+		resp.MobileConfig = &types.MobileOAuthConfigInfo{
+			Enabled:            oauthConfig.Mobile.Enabled,
+			IOSBundleID:        oauthConfig.Mobile.IOSBundleID,
+			AndroidPackageName: oauthConfig.Mobile.AndroidPackageName,
+			UniversalLink:      oauthConfig.Mobile.UniversalLink,
+			CustomScheme:       oauthConfig.Mobile.CustomScheme,
+		}
+	}
+
+	return resp, nil
 }

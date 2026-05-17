@@ -7,6 +7,8 @@ import (
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/open/open_api/internal/config"
 	"beaver/app/open/open_api/internal/middleware"
+	"beaver/app/open/open_rpc/open"
+	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -26,6 +28,7 @@ type ServiceContext struct {
 	UserRpc        user_rpc.UserClient
 	ChatRpc        chat_rpc.ChatClient
 	GroupRpc       group_rpc.GroupClient
+	OAuthRpc       open_rpc.OpenClient // OAuth RPC 客户端
 	AuthMiddleware rest.Middleware
 }
 
@@ -40,6 +43,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:        user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		ChatRpc:        chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		GroupRpc:       group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		OAuthRpc:       open.NewOpen(zrpc.MustNewClient(c.OAuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		AuthMiddleware: middleware.NewAuthMiddleware(mysqlDb).Handle,
 	}
 }

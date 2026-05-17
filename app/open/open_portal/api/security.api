@@ -4,13 +4,12 @@ syntax = "v1"
 type (
 	// 更新安全配置
 	UpdateSecurityConfigReq {
-		AppID         string   `json:"appId"`
-		IPWhitelist   []string `json:"ipWhitelist,optional"` // IP白名单
-		RedirectURIs  []string `json:"redirectUris,optional"` // OAuth重定向URL白名单
+		AppID          string   `json:"appId"`
+		IPWhitelist    []string `json:"ipWhitelist,optional"` // IP白名单
 		TrustedDomains []string `json:"trustedDomains,optional"` // H5可信域名
-		UserID        string   `header:"Beaver-User-Id"`
+		UserID         string   `header:"Beaver-User-Id"`
 	}
-	UpdateSecurityConfigRes {}
+	UpdateSecurityConfigRes  {}
 )
 
 type (
@@ -22,7 +21,6 @@ type (
 	SecurityConfigInfo {
 		AppID          string   `json:"appId"`
 		IPWhitelist    []string `json:"ipWhitelist"` // IP白名单
-		RedirectURIs   []string `json:"redirectUris"` // OAuth重定向URL
 		TrustedDomains []string `json:"trustedDomains"` // H5可信域名
 	}
 	GetSecurityConfigRes {

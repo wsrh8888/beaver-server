@@ -53,7 +53,7 @@ func (l *UpdateSecurityConfigLogic) UpdateSecurityConfig(req *types.UpdateSecuri
 		trustedDomainsJSON = string(data)
 	}
 
-	// 更新应用表
+	// 更新应用表（只更新 IP 白名单和 H5 可信域名）
 	appUpdates := map[string]interface{}{
 		"ip_whitelist":    ipWhitelistJSON,
 		"trusted_domains": trustedDomainsJSON,
@@ -61,34 +61,6 @@ func (l *UpdateSecurityConfigLogic) UpdateSecurityConfig(req *types.UpdateSecuri
 
 	if err := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("app_id = ?", req.AppID).Updates(appUpdates).Error; err != nil {
 		return nil, err
-	}
-
-	// 更新 OAuth 配置表中的 redirectUris
-	if len(req.RedirectURIs) > 0 {
-		redirectURIsJSON, _ := json.Marshal(req.RedirectURIs)
-		oauthUpdates := map[string]interface{}{
-			"redirect_uris": string(redirectURIsJSON),
-		}
-
-		// 先查询是否存在
-		var oauthConfig open_models.OpenOAuthConfig
-		if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil {
-			// 存在则更新
-			if err := l.svcCtx.DB.Model(&oauthConfig).Updates(oauthUpdates).Error; err != nil {
-				return nil, err
-			}
-		} else {
-			// 不存在则创建
-			newOAuthConfig := open_models.OpenOAuthConfig{
-				AppID:        req.AppID,
-				RedirectURIs: string(redirectURIsJSON),
-				Scopes:       "[]",
-				Status:       1,
-			}
-			if err := l.svcCtx.DB.Create(&newOAuthConfig).Error; err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	return &types.UpdateSecurityConfigRes{}, nil

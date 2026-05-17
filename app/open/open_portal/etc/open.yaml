@@ -24,3 +24,7 @@ UserRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: userrpc.rpc
+
+# OAuth 授权页面配置
+OAuth:
+  BaseUrl: http://127.0.0.1:20800

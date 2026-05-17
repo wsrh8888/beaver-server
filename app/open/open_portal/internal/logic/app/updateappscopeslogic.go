@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"beaver/app/open/constants"
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
@@ -42,7 +43,7 @@ func (l *UpdateAppScopesLogic) UpdateAppScopes(req *types.UpdateAppScopesReq) (r
 
 	// 3. 验证权限合法性
 	validScopes := make(map[string]bool)
-	for _, scope := range open_models.AllScopes {
+	for _, scope := range constants.AllScopes {
 		validScopes[string(scope)] = true
 	}
 
@@ -53,38 +54,28 @@ func (l *UpdateAppScopesLogic) UpdateAppScopes(req *types.UpdateAppScopesReq) (r
 	}
 
 	// 4. 确保默认权限始终存在
-	hasDefaultScopes := make(map[string]bool)
-	for _, s := range open_models.DefaultScopes {
-		hasDefaultScopes[string(s)] = true
-	}
-
-	finalScopes := make([]string, 0)
+	// 创建 req.Scopes 的 set
+	scopeSet := make(map[string]bool)
 	for _, s := range req.Scopes {
-		finalScopes = append(finalScopes, s)
+		scopeSet[s] = true
 	}
 
 	// 添加缺失的默认权限
-	for _, s := range open_models.DefaultScopes {
-		found := false
-		for _, fs := range finalScopes {
-			if fs == string(s) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			finalScopes = append(finalScopes, string(s))
+	for _, s := range constants.DefaultScopes {
+		scopeStr := string(s)
+		if !scopeSet[scopeStr] {
+			req.Scopes = append(req.Scopes, scopeStr)
 		}
 	}
 
 	// 5. 序列化并保存
-	scopesJSON, _ := json.Marshal(finalScopes)
+	scopesJSON, _ := json.Marshal(req.Scopes)
 	if err := l.svcCtx.DB.Model(&app).Update("scopes", string(scopesJSON)).Error; err != nil {
 		logx.Errorf("更新权限失败: %v", err)
 		return nil, errors.New("更新权限失败")
 	}
 
-	logx.Infof("应用权限更新成功: app_id=%s, scopes=%v", req.AppID, finalScopes)
+	logx.Infof("应用权限更新成功: app_id=%s, scopes=%v", req.AppID, req.Scopes)
 
 	return &types.UpdateAppScopesRes{}, nil
 }

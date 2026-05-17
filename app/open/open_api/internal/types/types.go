@@ -95,6 +95,7 @@ type ConfigEventSubscriptionRes struct {
 
 type ConfirmQrCodeLoginReq struct {
 	SceneID string `json:"sceneId"` // 场景ID
+	UserID  string `json:"userId"`  // 用户ID（从 App 登录态获取）
 }
 
 type ConfirmQrCodeLoginRes struct {
@@ -222,10 +223,19 @@ type GenerateWebhookRes struct {
 }
 
 type GetAuthorizeCodeReq struct {
-	AppID       string `form:"appId"`
-	RedirectURI string `form:"redirectUri"`
-	Scope       string `form:"scope,optional"`
-	State       string `form:"state,optional"` // CSRF 防护
+	AppID        string `form:"appId"`
+	RedirectURI  string `form:"redirectUri"`
+	Scope        string `form:"scope,optional"`
+	State        string `form:"state,optional"`        // CSRF 防护
+	ResponseType string `form:"responseType,optional"` // 固定为 "code"
+}
+
+type GetDesktopQuickLoginSignReq struct {
+	AccessToken string `header:"Authorization"` // 访问令牌
+}
+
+type GetDesktopQuickLoginSignRes struct {
+	QuickSign string `json:"quickSign"` // 快捷登录签名
 }
 
 type GetEventLogsReq struct {

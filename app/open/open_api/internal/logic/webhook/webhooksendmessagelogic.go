@@ -40,18 +40,7 @@ func (l *WebhookSendMessageLogic) WebhookSendMessage(req *types.WebhookSendMessa
 	_ = parts[len(parts)-1] // token（暂时未使用）
 	appID := parts[len(parts)-2]
 
-	// 2. 验证 Webhook Token
-	var webhookConfig open_models.OpenWebhookConfig
-	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", appID, 1).First(&webhookConfig).Error; err != nil {
-		return &types.WebhookSendMessageRes{
-			Success: false,
-			Message: "Webhook 配置不存在或已禁用",
-		}, nil
-	}
-
-	// TODO: 这里应该验证 token，目前简化处理
-
-	// 3. 获取应用信息
+	// 2. 验证应用是否存在
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", appID, 1).First(&app).Error; err != nil {
 		return &types.WebhookSendMessageRes{
@@ -59,6 +48,8 @@ func (l *WebhookSendMessageLogic) WebhookSendMessage(req *types.WebhookSendMessa
 			Message: "应用不存在或已禁用",
 		}, nil
 	}
+
+	// TODO: 这里应该验证 Webhook Token，目前简化处理
 
 	// 4. 根据消息类型发送消息
 	// TODO: 这里需要调用 Bot 发送消息的逻辑

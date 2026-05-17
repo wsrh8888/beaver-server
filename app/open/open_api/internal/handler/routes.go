@@ -241,6 +241,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: oauth.GetAuthorizeCodeHandler(serverCtx),
 				},
 				{
+					// 获取 PC 端快捷登录签名
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/oauth/desktop/quick_login_sign",
+					Handler: oauth.GetDesktopQuickLoginSignHandler(serverCtx),
+				},
+				{
 					// 用 H5 authCode 换取用户信息
 					Method:  http.MethodPost,
 					Path:    "/api/open/v1/oauth/h5_userinfo",

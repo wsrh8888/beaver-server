@@ -51,20 +51,10 @@ func (l *GetSecurityConfigLogic) GetSecurityConfig(req *types.GetSecurityConfigR
 		json.Unmarshal([]byte(app.TrustedDomains), &trustedDomains)
 	}
 
-	// 从 OAuth 配置表中读取 redirectUris
-	var oauthConfig open_models.OpenOAuthConfig
-	var redirectUris []string
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil {
-		if oauthConfig.RedirectURIs != "" {
-			json.Unmarshal([]byte(oauthConfig.RedirectURIs), &redirectUris)
-		}
-	}
-
 	return &types.GetSecurityConfigRes{
 		Config: types.SecurityConfigInfo{
 			AppID:          app.AppID,
 			IPWhitelist:    ipWhitelist,
-			RedirectURIs:   redirectUris,
 			TrustedDomains: trustedDomains,
 		},
 	}, nil

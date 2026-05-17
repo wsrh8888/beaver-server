@@ -103,17 +103,15 @@ func main() {
 			&open_models.OpenApp{},
 			&open_models.OpenAppPermission{},
 			&open_models.OpenAppVersion{},
+			&open_models.OpenAppToken{}, // 应用 Token
 			&open_models.OpenAccessToken{},
 			&open_models.OpenRefreshToken{},
-			&open_models.OpenWebhookConfig{},
-			&open_models.OpenWebhookLog{},
 			&open_models.OpenAuthCode{},
 			&open_models.OpenQrCode{},
 			&open_models.OpenH5AuthCode{},        // H5 免登授权码表
 			&open_models.OpenEventSubscription{}, // 事件订阅配置表
-			&open_models.OpenEventLog{},          // 事件推送日志表
 			&open_models.OpenBotConfig{},         // Bot 配置表
-			&open_models.OpenOAuthConfig{},       // OAuth 配置表
+			&open_models.OpenIncomingWebhook{},   // Incoming Webhook 配置表
 		)
 
 		if err != nil {

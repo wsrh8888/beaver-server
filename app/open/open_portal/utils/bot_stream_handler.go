@@ -1,4 +1,4 @@
-package open_models
+package open_portal
 
 import (
 	"bufio"

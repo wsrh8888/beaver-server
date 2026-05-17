@@ -19,4 +19,11 @@ type Config struct {
 	UserRpc  zrpc.RpcClientConf
 	ChatRpc  zrpc.RpcClientConf
 	GroupRpc zrpc.RpcClientConf
+	OAuthRpc zrpc.RpcClientConf // OAuth RPC 服务
+	OAuth    OAuthConf          // OAuth 授权页面配置
+}
+
+// OAuthConf OAuth 授权页面配置
+type OAuthConf struct {
+	BaseUrl string // OAuth 服务基础 URL（授权页面地址）
 }

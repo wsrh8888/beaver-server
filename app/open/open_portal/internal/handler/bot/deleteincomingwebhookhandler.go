@@ -1,7 +1,7 @@
 package handler
 
 import (
-	logic "beaver/app/open/open_portal/internal/logic/webhook"
+	logic "beaver/app/open/open_portal/internal/logic/bot"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/common/response"
@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func ConfigWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func DeleteIncomingWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ConfigWebhookReq
+		var req types.DeleteIncomingWebhookReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewConfigWebhookLogic(r.Context(), svcCtx)
-		resp, err := l.ConfigWebhook(&req)
+		l := logic.NewDeleteIncomingWebhookLogic(r.Context(), svcCtx)
+		resp, err := l.DeleteIncomingWebhook(&req)
 		response.Response(r, w, resp, err)
 	}
 }

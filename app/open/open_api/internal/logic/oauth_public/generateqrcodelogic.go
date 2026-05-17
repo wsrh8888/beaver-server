@@ -64,13 +64,17 @@ func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
-	// 6. 返回结果
-	// 注意：QrCodeURL 字段用于兼容，实际前端应该使用 sceneId 自己生成二维码
-	logx.Infof("生成扫码二维码成功: sceneId=%s, appId=%s", sceneID, req.AppID)
+	// 6. 生成短链接（TODO: 实现短链接服务）
+	// 暂时使用完整 URL
+	oauthBaseUrl := l.svcCtx.Config.OAuth.BaseUrl
+	qrCodeURL := fmt.Sprintf("%s/scan?sceneId=%s", oauthBaseUrl, sceneID)
+
+	// 7. 返回结果
+	logx.Infof("生成扫码二维码成功: sceneId=%s, appId=%s, qrCodeUrl=%s", sceneID, req.AppID, qrCodeURL)
 
 	return &types.GenerateQrCodeRes{
-		QrCodeURL: "",      // 不使用，前端用 sceneId 生成二维码
-		SceneID:   sceneID, // 前端用这个生成二维码
-		ExpireIn:  300,     // 5分钟 = 300秒
+		QrCodeURL: qrCodeURL, // 二维码 URL（短链接或完整 URL）
+		SceneID:   sceneID,
+		ExpireIn:  300, // 5分钟 = 300秒
 	}, nil
 }

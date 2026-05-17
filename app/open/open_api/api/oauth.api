@@ -2,12 +2,13 @@ syntax = "v1"
 
 // ==================== OAuth 2.0 授权接口 ====================
 type (
-	// 获取授权码请求
+	// 获取授权码请求（OAuth 2.0 标准）
 	GetAuthorizeCodeReq {
 		AppID       string `form:"appId"`
 		RedirectURI string `form:"redirectUri"`
 		Scope       string `form:"scope,optional"`
 		State       string `form:"state,optional"` // CSRF 防护
+		ResponseType string `form:"responseType,optional"` // 固定为 "code"
 	}
 	AuthorizeCodeRes {
 		Code  string `json:"code"`
@@ -54,9 +55,10 @@ type (
 )
 
 type (
-	// 确认扫码登录
+	// 确认扫码登录（由移动端 App 调用）
 	ConfirmQrCodeLoginReq {
 		SceneID string `json:"sceneId"` // 场景ID
+		UserID  string `json:"userId"`  // 用户ID（从 App 登录态获取）
 	}
 	ConfirmQrCodeLoginRes {
 		Success bool `json:"success"` // 是否成功
@@ -107,6 +109,16 @@ type (
 	}
 )
 
+type (
+	// PC 端快捷登录签名请求
+	GetDesktopQuickLoginSignReq {
+		AccessToken string `header:"Authorization"` // 访问令牌
+	}
+	GetDesktopQuickLoginSignRes {
+		QuickSign string `json:"quickSign"` // 快捷登录签名
+	}
+)
+
 // ==================== 无需认证的接口（扫码登录等）====================
 @server (
 	group: oauth_public
@@ -150,5 +162,9 @@ service open {
 	@doc "用 H5 authCode 换取用户信息"
 	@handler GetUserInfoByH5Code
 	post /api/open/v1/oauth/h5_userinfo (GetUserInfoByH5CodeReq) returns (GetUserInfoByH5CodeRes)
+
+	@doc "获取 PC 端快捷登录签名"
+	@handler GetDesktopQuickLoginSign
+	post /api/open/v1/oauth/desktop/quick_login_sign (GetDesktopQuickLoginSignReq) returns (GetDesktopQuickLoginSignRes)
 }
 

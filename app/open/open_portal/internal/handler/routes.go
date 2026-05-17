@@ -8,11 +8,11 @@ import (
 	auth "beaver/app/open/open_portal/internal/handler/auth"
 	bot "beaver/app/open/open_portal/internal/handler/bot"
 	developer "beaver/app/open/open_portal/internal/handler/developer"
+	event "beaver/app/open/open_portal/internal/handler/event"
 	oauth "beaver/app/open/open_portal/internal/handler/oauth"
 	permission "beaver/app/open/open_portal/internal/handler/permission"
 	security "beaver/app/open/open_portal/internal/handler/security"
 	version "beaver/app/open/open_portal/internal/handler/version"
-	webhook "beaver/app/open/open_portal/internal/handler/webhook"
 	"beaver/app/open/open_portal/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -108,6 +108,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/portal/open/v1/bot/config_update",
 				Handler: bot.UpdateBotConfigHandler(serverCtx),
 			},
+			{
+				// 创建 Incoming Webhook
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/bot/incoming_create",
+				Handler: bot.CreateIncomingWebhookHandler(serverCtx),
+			},
+			{
+				// 删除 Incoming Webhook
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/bot/incoming_delete",
+				Handler: bot.DeleteIncomingWebhookHandler(serverCtx),
+			},
+			{
+				// 获取 Incoming Webhook 列表
+				Method:  http.MethodGet,
+				Path:    "/portal/open/v1/bot/incoming_list",
+				Handler: bot.ListIncomingWebhooksHandler(serverCtx),
+			},
 		},
 	)
 
@@ -136,6 +154,35 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/portal/open/v1/developer/list",
 				Handler: developer.GetDeveloperListHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 创建事件订阅
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/event/create",
+				Handler: event.CreateEventSubscriptionHandler(serverCtx),
+			},
+			{
+				// 删除事件订阅
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/event/delete",
+				Handler: event.DeleteEventSubscriptionHandler(serverCtx),
+			},
+			{
+				// 获取事件订阅列表
+				Method:  http.MethodGet,
+				Path:    "/portal/open/v1/event/list",
+				Handler: event.ListEventSubscriptionsHandler(serverCtx),
+			},
+			{
+				// 更新事件订阅
+				Method:  http.MethodPost,
+				Path:    "/portal/open/v1/event/update",
+				Handler: event.UpdateEventSubscriptionHandler(serverCtx),
 			},
 		},
 	)
@@ -216,23 +263,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/portal/open/v1/version/submit_review",
 				Handler: version.SubmitVersionReviewHandler(serverCtx),
-			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 配置 Webhook
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/webhook/config",
-				Handler: webhook.ConfigWebhookHandler(serverCtx),
-			},
-			{
-				// 获取 Webhook 日志
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/webhook/logs",
-				Handler: webhook.GetWebhookLogsHandler(serverCtx),
 			},
 		},
 	)

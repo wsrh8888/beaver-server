@@ -1,41 +1,53 @@
 syntax = "v1"
 
-// ==================== OAuth 配置 ====================
+// ==================== OAuth 配置管理 ====================
 type (
-	GetOAuthConfigReq {
-		AppID  string `form:"appId"`
-		UserID string `header:"Beaver-User-Id"`
+	// 更新 OAuth 配置
+	UpdateOAuthConfigReq {
+		AppID     string `json:"appId"`
+		OAuthType string `json:"oauthType"` // h5 | desktop | mobile
+		Config    string `json:"config"` // JSON 字符串，根据不同类型包含不同字段
+		UserID    string `header:"Beaver-User-Id"`
 	}
-	OAuthConfigInfo {
-		AppID           string   `json:"appId"`
-		RedirectURIs    []string `json:"redirectUris"`
-		Scopes          []string `json:"scopes"`
-		CustomLogo      string   `json:"customLogo"`
-		CustomTitle     string   `json:"customTitle"`
-		CustomColor     string   `json:"customColor"`
-		EnablePKCE      bool     `json:"enablePkce"`
-		TokenExpiration int      `json:"tokenExpiration"`
-		Status          int      `json:"status"`
-	}
-	GetOAuthConfigRes {
-		Config OAuthConfigInfo `json:"config"`
-	}
+	UpdateOAuthConfigRes  {}
 )
 
 type (
-	UpdateOAuthConfigReq {
-		AppID           string   `json:"appId"`
-		RedirectURIs    []string `json:"redirectUris,optional"`
-		Scopes          []string `json:"scopes,optional"`
-		CustomLogo      string   `json:"customLogo,optional"`
-		CustomTitle     string   `json:"customTitle,optional"`
-		CustomColor     string   `json:"customColor,optional"`
-		EnablePKCE      *bool    `json:"enablePkce,optional"`
-		TokenExpiration *int     `json:"tokenExpiration,optional"`
-		Status          *int     `json:"status,optional"`
-		UserID          string   `header:"Beaver-User-Id"`
+	// 获取 OAuth 配置
+	GetOAuthConfigReq {
+		AppID     string `form:"appId"`
+		OAuthType string `form:"oauthType"` // h5 | desktop | mobile
+		UserID    string `header:"Beaver-User-Id"`
 	}
-	UpdateOAuthConfigRes {}
+	// H5 OAuth 配置
+	H5OAuthConfigInfo {
+		Enabled      bool     `json:"enabled"`
+		RedirectURIs []string `json:"redirectUris"`
+		JsSdkDomains []string `json:"jsSdkDomains"` // JS-SDK 安全域名
+		EnablePKCE   bool     `json:"enablePKCE"`
+	}
+	// 桌面端 OAuth 配置
+	DesktopOAuthConfigInfo {
+		Enabled      bool   `json:"enabled"`
+		CustomScheme string `json:"customScheme"`
+		AuthPageURL  string `json:"authPageUrl"` // 授权页面完整 URL（服务端生成）
+	}
+	// 移动端 OAuth 配置
+	MobileOAuthConfigInfo {
+		Enabled            bool   `json:"enabled"`
+		IOSBundleID        string `json:"iosBundleId"`
+		AndroidPackageName string `json:"androidPackageName"`
+		UniversalLink      string `json:"universalLink"`
+		CustomScheme       string `json:"customScheme"`
+		EnablePKCE         bool   `json:"enablePKCE"`
+	}
+	GetOAuthConfigRes {
+		OAuthType string `json:"oauthType"`
+		// 根据 oauthType 返回对应的配置
+		H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"`
+		DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"`
+		MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`
+	}
 )
 
 @server (
@@ -50,3 +62,4 @@ service open {
 	@handler UpdateOAuthConfig
 	post /portal/open/v1/oauth/config_update (UpdateOAuthConfigReq) returns (UpdateOAuthConfigRes)
 }
+

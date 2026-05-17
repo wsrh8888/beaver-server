@@ -28,72 +28,63 @@ func NewUpdateOAuthConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *UpdateOAuthConfigLogic) UpdateOAuthConfig(req *types.UpdateOAuthConfigReq) (resp *types.UpdateOAuthConfigRes, err error) {
-	// 1. 检查应用是否存在且属于当前用户
+	// 查询应用信息
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
-		return nil, errors.New("应用不存在或无权限操作")
+	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
+		return nil, err
 	}
 
-	// 2. 查询或创建 OAuth 配置
-	var oauthConfig open_models.OpenOAuthConfig
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err != nil {
-		// 不存在则创建
-		oauthConfig = open_models.OpenOAuthConfig{
-			AppID:           req.AppID,
-			RedirectURIs:    "[]",
-			Scopes:          "[]",
-			CustomLogo:      "",
-			CustomTitle:     "",
-			CustomColor:     "",
-			EnablePKCE:      0,
-			TokenExpiration: 7200,
-			Status:          1,
+	// 验证 UserID 是否为应用所有者
+	if app.OwnerUserID != req.UserID {
+		return nil, errors.New("无权修改此应用")
+	}
+
+	// 解析现有的 OAuthConfig
+	var oauthConfig open_models.OAuthClientConfig
+	if app.OauthConfig != "" {
+		if err := json.Unmarshal([]byte(app.OauthConfig), &oauthConfig); err != nil {
+			l.Errorf("解析现有 OAuthConfig 失败: %v", err)
+			// 如果解析失败，使用空配置
+			oauthConfig = open_models.OAuthClientConfig{}
 		}
 	}
 
-	// 3. 更新字段（只更新传入的字段）
-	if req.RedirectURIs != nil {
-		redirectURIsJSON, _ := json.Marshal(req.RedirectURIs)
-		oauthConfig.RedirectURIs = string(redirectURIsJSON)
-	}
-	if req.Scopes != nil {
-		scopesJSON, _ := json.Marshal(req.Scopes)
-		oauthConfig.Scopes = string(scopesJSON)
-	}
-	if req.CustomLogo != "" {
-		oauthConfig.CustomLogo = req.CustomLogo
-	}
-	if req.CustomTitle != "" {
-		oauthConfig.CustomTitle = req.CustomTitle
-	}
-	if req.CustomColor != "" {
-		oauthConfig.CustomColor = req.CustomColor
-	}
-	if req.EnablePKCE != nil {
-		if *req.EnablePKCE {
-			oauthConfig.EnablePKCE = 1
-		} else {
-			oauthConfig.EnablePKCE = 0
+	// 根据类型更新对应配置
+	switch req.OAuthType {
+	case "h5":
+		var h5Config open_models.H5OAuthConfig
+		if err := json.Unmarshal([]byte(req.Config), &h5Config); err != nil {
+			return nil, errors.New("H5 配置格式错误")
 		}
-	}
-	if req.TokenExpiration != nil {
-		oauthConfig.TokenExpiration = *req.TokenExpiration
-	}
-	if req.Status != nil {
-		oauthConfig.Status = *req.Status
+		oauthConfig.H5 = h5Config
+
+	case "desktop":
+		var desktopConfig open_models.DesktopOAuthConfig
+		if err := json.Unmarshal([]byte(req.Config), &desktopConfig); err != nil {
+			return nil, errors.New("桌面端配置格式错误")
+		}
+		oauthConfig.Desktop = desktopConfig
+
+	case "mobile":
+		var mobileConfig open_models.MobileOAuthConfig
+		if err := json.Unmarshal([]byte(req.Config), &mobileConfig); err != nil {
+			return nil, errors.New("移动端配置格式错误")
+		}
+		oauthConfig.Mobile = mobileConfig
+
+	default:
+		return nil, errors.New("不支持的 OAuth 类型")
 	}
 
-	// 4. 保存配置
-	if oauthConfig.ID == 0 {
-		// 新建
-		if err := l.svcCtx.DB.Create(&oauthConfig).Error; err != nil {
-			return nil, errors.New("创建 OAuth 配置失败")
-		}
-	} else {
-		// 更新
-		if err := l.svcCtx.DB.Save(&oauthConfig).Error; err != nil {
-			return nil, errors.New("更新 OAuth 配置失败")
-		}
+	// 序列化回 JSON
+	configJSON, err := json.Marshal(oauthConfig)
+	if err != nil {
+		return nil, errors.New("配置序列化失败")
+	}
+
+	// 更新数据库
+	if err := l.svcCtx.DB.Model(&app).Update("oauth_config", string(configJSON)).Error; err != nil {
+		return nil, err
 	}
 
 	return &types.UpdateOAuthConfigRes{}, nil

@@ -1,11 +1,11 @@
 import "api/auth.api"
 import "api/app.api"
-import "api/webhook.api"
 import "api/permission.api"
 import "api/developer.api"
-import "api/oauth.api"
 import "api/bot.api"
 import "api/security.api"
 import "api/version.api"
+import "api/event.api"
+import "api/oauth.api"
 
 // goctl api go -api open_portal.api -dir . --home ../../../template

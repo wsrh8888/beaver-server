@@ -46,6 +46,51 @@ type (
 	UpdateBotConfigRes  {}
 )
 
+// ==================== Incoming Webhook 管理 ====================
+type (
+	CreateIncomingWebhookReq {
+		AppID     string `json:"appId"`
+		GroupID   string `json:"groupId"`
+		Name      string `json:"name,optional"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	IncomingWebhookInfo {
+		ID        string `json:"id"`
+		Token     string `json:"token"`
+		AppID     string `json:"appId"`
+		GroupID   string `json:"groupId"`
+		BotUserID string `json:"botUserId"`
+		Name      string `json:"name"`
+		WebhookURL string `json:"webhookUrl"` // 完整的 Webhook URL
+		Status    int    `json:"status"`
+		CreatedAt int64  `json:"createdAt"`
+	}
+	CreateIncomingWebhookRes {
+		Webhook IncomingWebhookInfo `json:"webhook"`
+	}
+)
+
+type (
+	ListIncomingWebhooksReq {
+		AppID  string `form:"appId"`
+		Page   int    `form:"page,default=1"`
+		PageSize int  `form:"pageSize,default=20"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ListIncomingWebhooksRes {
+		Total int64                 `json:"total"`
+		List  []IncomingWebhookInfo `json:"list"`
+	}
+)
+
+type (
+	DeleteIncomingWebhookReq {
+		ID     string `json:"id"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DeleteIncomingWebhookRes {}
+)
+
 @server (
 	group: bot
 )
@@ -57,5 +102,17 @@ service open {
 	@doc "更新 Bot 配置"
 	@handler UpdateBotConfig
 	post /portal/open/v1/bot/config_update (UpdateBotConfigReq) returns (UpdateBotConfigRes)
+
+	@doc "创建 Incoming Webhook"
+	@handler CreateIncomingWebhook
+	post /portal/open/v1/bot/incoming_create (CreateIncomingWebhookReq) returns (CreateIncomingWebhookRes)
+
+	@doc "获取 Incoming Webhook 列表"
+	@handler ListIncomingWebhooks
+	get /portal/open/v1/bot/incoming_list (ListIncomingWebhooksReq) returns (ListIncomingWebhooksRes)
+
+	@doc "删除 Incoming Webhook"
+	@handler DeleteIncomingWebhook
+	post /portal/open/v1/bot/incoming_delete (DeleteIncomingWebhookReq) returns (DeleteIncomingWebhookRes)
 }
 

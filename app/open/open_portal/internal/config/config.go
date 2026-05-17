@@ -16,4 +16,9 @@ type Config struct {
 		AccessExpire int
 	}
 	UserRpc zrpc.RpcClientConf
+	OAuth   struct {
+		BaseUrl string // OAuth 服务基础 URL（授权页面地址）
+	}
 }
+
+// OAuthConf OAuth 授权页面配置

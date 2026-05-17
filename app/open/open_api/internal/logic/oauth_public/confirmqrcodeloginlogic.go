@@ -31,11 +31,10 @@ func NewConfirmQrCodeLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *ConfirmQrCodeLoginLogic) ConfirmQrCodeLogin(req *types.ConfirmQrCodeLoginReq) (resp *types.ConfirmQrCodeLoginRes, err error) {
-	// 1. 从 context 中获取当前用户 ID（由 AuthMiddleware 注入）
-	userID, ok := l.ctx.Value("userID").(string)
-	if !ok || userID == "" {
-		logx.Error("确认扫码登录失败：未获取到用户ID")
-		return nil, fmt.Errorf("未登录")
+	// 1. 验证 userId
+	if req.UserID == "" {
+		logx.Error("确认扫码登录失败：userId为空")
+		return nil, fmt.Errorf("用户ID不能为空")
 	}
 
 	// 2. 查询扫码记录
@@ -58,14 +57,14 @@ func (l *ConfirmQrCodeLoginLogic) ConfirmQrCodeLogin(req *types.ConfirmQrCodeLog
 
 	// 5. 更新扫码记录：设置用户ID和状态为已确认
 	if err := l.svcCtx.DB.Model(&qrCode).Updates(map[string]interface{}{
-		"user_id": userID,
+		"user_id": req.UserID,
 		"status":  2, // 2-已确认
 	}).Error; err != nil {
 		logx.Errorf("更新扫码记录失败: err=%v", err)
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
-	logx.Infof("确认扫码登录成功: sceneId=%s, userId=%s", req.SceneID, userID)
+	logx.Infof("确认扫码登录成功: sceneId=%s, userId=%s", req.SceneID, req.UserID)
 
 	return &types.ConfirmQrCodeLoginRes{
 		Success: true,
