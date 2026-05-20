@@ -31,11 +31,9 @@ func NewGetDesktopQuickLoginSignLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *GetDesktopQuickLoginSignLogic) GetDesktopQuickLoginSign(req *types.GetDesktopQuickLoginSignReq) (resp *types.GetDesktopQuickLoginSignRes, err error) {
-	// 1. 从 Authorization header 中提取 token（去掉 "Bearer " 前缀）
-	token := req.AccessToken
-	if len(token) > 7 && token[:7] == "Bearer " {
-		token = token[7:]
-	}
+	// 1. token 已由中间件验证，从 context 取 appID
+	appID, _ := l.ctx.Value("appID").(string)
+	_ = appID
 
 	// 2. 验证 token 有效性（调用 OAuth RPC）
 	validateResp, err := l.svcCtx.OAuthRpc.ValidateToken(l.ctx, nil) // TODO: 需要传入 token

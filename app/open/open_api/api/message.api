@@ -1,88 +1,19 @@
 syntax = "v1"
 
-// ==================== 消息内容类型定义（对标飞书/钉钉）====================
-
-type (
-	// 文本消息内容
-	TextContent {
-		Text string `json:"text"` // 文本内容
-	}
-
-	// Markdown 消息内容
-	MarkdownContent {
-		Content string `json:"content"` // Markdown 内容
-	}
-
-	// 富文本消息内容（结构化）
-	RichTextContent {
-		Title string           `json:"title"`           // 标题
-		Lang  string           `json:"lang,omitempty"`  // 语言：zh_cn/en_us/ja_jp
-		Nodes []RichTextNode   `json:"nodes"`           // 节点列表
-	}
-
-	// 富文本节点
-	RichTextNode {
-		Tag      string                 `json:"tag"`                // 节点类型：text/a/img/at
-		Text     string                 `json:"text,omitempty"`    // 文本
-		Href     string                 `json:"href,omitempty"`    // 链接
-		ImageKey string                 `json:"image_key,omitempty"` // 图片 key
-		UserID   string                 `json:"user_id,omitempty"`   // @用户 ID
-		Style    map[string]interface{} `json:"style,omitempty"`     // 样式
-	}
-
-	// 图片消息内容
-	ImageContent {
-		ImageKey string `json:"image_key"` // 图片 key（需先上传）
-	}
-
-	// 文件消息内容
-	FileContent {
-		FileKey  string `json:"file_key"`            // 文件 key（需先上传）
-		FileName string `json:"file_name,omitempty"` // 文件名
-	}
-
-	// 卡片消息内容（简化版）
-	CardContent {
-		Header   CardHeader     `json:"header"`    // 卡片头部
-		Elements []CardElement  `json:"elements"`  // 卡片元素
-		Actions  []CardAction   `json:"actions,omitempty"` // 交互动作
-	}
-
-	// 卡片头部
-	CardHeader {
-		Title    string `json:"title"`              // 标题
-		Template string `json:"template,omitempty"` // 模板：blue/green/orange/red
-	}
-
-	// 卡片元素
-	CardElement {
-		Type    string                 `json:"type"`    // 元素类型：div/img/action
-		Content map[string]interface{} `json:"content"` // 内容
-	}
-
-	// 卡片动作
-	CardAction {
-		Type  string                 `json:"type"`   // 动作类型：button/link
-		Text  string                 `json:"text"`   // 按钮文本
-		URL   string                 `json:"url,omitempty"`  // 链接
-		Value map[string]interface{} `json:"value,omitempty"` // 回调值
-	}
-)
-
-// ==================== 消息接口（对标飞书/钉钉）====================
+// ==================== 消息接口 ====================
 
 type (
 	// 发送文本消息
 	SendTextMessageReq {
-		TargetID         string `json:"targetId"`                    // 接收者ID（用户ID或群ID）
-		ConversationType int    `json:"conversationType,default=1"`  // 会话类型 1单聊 2群聊
-		Content          string `json:"content"`                     // 文本内容
-		MentionUsers     []string `json:"mentionUsers,optional"`    // @的用户ID列表
+		TargetID         string   `json:"targetId"`                   // 接收者ID（用户ID或群ID）
+		ConversationType int      `json:"conversationType,default=1"` // 会话类型 1单聊 2群聊
+		Content          string   `json:"content"`                    // 文本内容
+		MentionUsers     []string `json:"mentionUsers,optional"`      // @的用户ID列表
 	}
-	
+
 	SendTextMessageRes {
-		MessageID string `json:"messageId"`
-		SendTime  int64  `json:"sendTime"`
+		MessageID string `json:"messageId"` // 消息ID
+		SendTime  int64  `json:"sendTime"`  // 发送时间戳（毫秒）
 	}
 )
 
@@ -91,10 +22,10 @@ type (
 	SendRichTextMessageReq {
 		TargetID         string `json:"targetId"`
 		ConversationType int    `json:"conversationType,default=1"`
-		Title            string `json:"title,optional"`           // 标题
-		Content          string `json:"content"`                  // Markdown 内容
+		Title            string `json:"title,optional"`  // 消息标题
+		Content          string `json:"content"`         // Markdown 内容
 	}
-	
+
 	SendRichTextMessageRes {
 		MessageID string `json:"messageId"`
 		SendTime  int64  `json:"sendTime"`
@@ -106,11 +37,11 @@ type (
 	SendImageMessageReq {
 		TargetID         string `json:"targetId"`
 		ConversationType int    `json:"conversationType,default=1"`
-		ImageURL         string `json:"imageUrl"`                 // 图片URL
-		Width            int    `json:"width,optional"`           // 图片宽度
-		Height           int    `json:"height,optional"`          // 图片高度
+		ImageURL         string `json:"imageUrl"`          // 图片URL
+		Width            int    `json:"width,optional"`    // 图片宽度（像素）
+		Height           int    `json:"height,optional"`   // 图片高度（像素）
 	}
-	
+
 	SendImageMessageRes {
 		MessageID string `json:"messageId"`
 		SendTime  int64  `json:"sendTime"`
@@ -122,12 +53,12 @@ type (
 	SendFileMessageReq {
 		TargetID         string `json:"targetId"`
 		ConversationType int    `json:"conversationType,default=1"`
-		FileURL          string `json:"fileUrl"`                  // 文件URL
-		FileName         string `json:"fileName"`                 // 文件名
-		FileSize         int64  `json:"fileSize"`                 // 文件大小（字节）
-		FileType         string `json:"fileType,optional"`        // 文件类型
+		FileURL          string `json:"fileUrl"`           // 文件URL
+		FileName         string `json:"fileName"`          // 文件名
+		FileSize         int64  `json:"fileSize"`          // 文件大小（字节）
+		FileType         string `json:"fileType,optional"` // 文件MIME类型
 	}
-	
+
 	SendFileMessageRes {
 		MessageID string `json:"messageId"`
 		SendTime  int64  `json:"sendTime"`
@@ -139,10 +70,10 @@ type (
 	SendCardMessageReq {
 		TargetID         string `json:"targetId"`
 		ConversationType int    `json:"conversationType,default=1"`
-		CardTemplateID   string `json:"cardTemplateId,optional"`  // 卡片模板ID
-		CardData         string `json:"cardData"`                 // 卡片数据（JSON字符串）
+		CardTemplateID   string `json:"cardTemplateId,optional"` // 卡片模板ID
+		CardData         string `json:"cardData"`                 // 卡片内容（JSON字符串）
 	}
-	
+
 	SendCardMessageRes {
 		MessageID string `json:"messageId"`
 		SendTime  int64  `json:"sendTime"`
@@ -152,56 +83,56 @@ type (
 type (
 	// 撤回消息
 	RecallMessageReq {
-		MessageID string `json:"messageId"`
+		MessageID string `json:"messageId"` // 要撤回的消息ID
 	}
-	
+
 	RecallMessageRes {
 		Success bool `json:"success"`
 	}
 )
 
 type (
-	// 更新卡片消息（用于动态更新卡片内容）
+	// 更新卡片消息内容（用于动态刷新卡片数据）
 	UpdateCardMessageReq {
-		MessageID string `json:"messageId"`
-		CardData  string `json:"cardData"` // 新的卡片数据
+		MessageID string `json:"messageId"` // 要更新的消息ID
+		CardData  string `json:"cardData"`  // 新的卡片数据（JSON字符串）
 	}
-	
+
 	UpdateCardMessageRes {
 		Success bool `json:"success"`
 	}
 )
 
 @server (
-	group: message
+	group:      message
 	middleware: AuthMiddleware
 )
 service open {
 	@doc "发送文本消息"
 	@handler SendTextMessage
-	post /api/open/v1/message/send/text (SendTextMessageReq) returns (SendTextMessageRes)
-	
+	post /api/open/v1/message/send_text (SendTextMessageReq) returns (SendTextMessageRes)
+
 	@doc "发送富文本消息（Markdown）"
 	@handler SendRichTextMessage
-	post /api/open/v1/message/send/richtext (SendRichTextMessageReq) returns (SendRichTextMessageRes)
-	
+	post /api/open/v1/message/send_richtext (SendRichTextMessageReq) returns (SendRichTextMessageRes)
+
 	@doc "发送图片消息"
 	@handler SendImageMessage
-	post /api/open/v1/message/send/image (SendImageMessageReq) returns (SendImageMessageRes)
-	
+	post /api/open/v1/message/send_image (SendImageMessageReq) returns (SendImageMessageRes)
+
 	@doc "发送文件消息"
 	@handler SendFileMessage
-	post /api/open/v1/message/send/file (SendFileMessageReq) returns (SendFileMessageRes)
-	
+	post /api/open/v1/message/send_file (SendFileMessageReq) returns (SendFileMessageRes)
+
 	@doc "发送交互式卡片消息"
 	@handler SendCardMessage
-	post /api/open/v1/message/send/card (SendCardMessageReq) returns (SendCardMessageRes)
-	
+	post /api/open/v1/message/send_card (SendCardMessageReq) returns (SendCardMessageRes)
+
 	@doc "撤回消息"
 	@handler RecallMessage
 	post /api/open/v1/message/recall (RecallMessageReq) returns (RecallMessageRes)
-	
-	@doc "更新卡片消息"
+
+	@doc "更新卡片消息内容"
 	@handler UpdateCardMessage
-	post /api/open/v1/message/update/card (UpdateCardMessageReq) returns (UpdateCardMessageRes)
+	post /api/open/v1/message/update_card (UpdateCardMessageReq) returns (UpdateCardMessageRes)
 }

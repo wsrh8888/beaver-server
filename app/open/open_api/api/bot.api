@@ -1,47 +1,65 @@
 syntax = "v1"
 
+// ==================== Bot 接口 ====================
+// Bot 是运行在开发者本机（如 OpenClaw）的程序，通过 Webhook 收消息、通过此 API 回消息
+// 流程: 用户发消息/@Bot → Beaver 推送到 Bot 注册的 Webhook URL → Bot 调此 API 回复
+
 type (
-	// Bot 发送消息请求（对标飞书/钉钉）
+	// 获取 Bot 自身信息（Bot 启动后用来确认自己的 UserID / 昵称）
+	GetBotInfoReq {}
+
+	GetBotInfoRes {
+		BotUserID string `json:"botUserId"` // Bot 在 IM 中的用户 ID，用于识别 @提及
+		BotName   string `json:"botName"`   // Bot 昵称
+		Avatar    string `json:"avatar,optional"`
+		AppID     string `json:"appId"`
+	}
+)
+
+type (
+	// Bot 发送消息（Bot 处理完消息后，通过此接口将回复发回 IM）
 	BotSendMessageReq {
-		AppID          string                 `json:"app_id" header:"X-App-ID"`           // 应用 ID
-		ConversationID string                 `json:"conversation_id"`                    // 会话 ID（私聊或群聊）
-		MsgType        string                 `json:"msg_type"`                           // 消息类型：text/markdown/richtext/html
-		Content        string                 `json:"content"`                            // 消息内容
-		Metadata       map[string]interface{} `json:"metadata,omitempty"`                 // 元数据（@、附件等）
-		IdempotentKey  string                 `json:"idempotent_key,omitempty"`           // 幂等键
+		ConversationID string `json:"conversationId"` // 会话 ID（私聊或群聊，从 Webhook 事件中获取）
+		MsgType        string `json:"msgType"`        // 消息类型: text / markdown / richtext / card
+		Content        string `json:"content"`        // 消息内容（JSON 字符串或纯文本）
+		ReplyMsgID     string `json:"replyMsgId,optional"` // 引用回复的消息 ID（可选）
+		IdempotentKey  string `json:"idempotentKey,optional"` // 幂等键，防重复发送
 	}
 
-	// Bot 发送消息响应
 	BotSendMessageRes {
-		MessageID string `json:"message_id"` // 消息 ID
+		MessageID string `json:"messageId"`
+		SendTime  int64  `json:"sendTime"`
 	}
+)
 
-	// Bot 流式发送消息请求
+type (
+	// Bot 流式发送消息（SSE，适合 AI 打字机效果）
 	BotStreamMessageReq {
-		AppID          string `json:"app_id" header:"X-App-ID"`           // 应用 ID
-		ConversationID string `json:"conversation_id"`                    // 会话 ID
-		MsgType        string `json:"msg_type"`                           // 消息类型
+		ConversationID string `json:"conversationId"`
+		MsgType        string `json:"msgType"`
 	}
 
-	// Bot 流式消息片段
 	BotStreamChunk {
-		Type     string                 `json:"type"`     // text/markdown/richtext
-		Content  string                 `json:"content"`  // 内容片段
-		Metadata map[string]interface{} `json:"metadata,omitempty"` // 元数据
+		Type    string `json:"type"`    // text / end
+		Content string `json:"content"` // 内容片段
+		MsgID   string `json:"msgId,optional"` // 最终消息 ID（type=end 时返回）
 	}
 )
 
 @server (
-	group: bot
+	group:      bot
 	middleware: AuthMiddleware
 )
-
 service open {
-	@doc "Bot 主动发送消息（对标飞书/钉钉 Bot API）"
-	@handler BotSendMessage
-	post /api/open/v1/bot/message/send (BotSendMessageReq) returns (BotSendMessageRes)
+	@doc "获取 Bot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Bot 身份）"
+	@handler GetBotInfo
+	get /api/open/v1/bot/info (GetBotInfoReq) returns (GetBotInfoRes)
 
-	@doc "Bot 流式发送消息（SSE）"
+	@doc "Bot 发送消息到 IM 会话（私聊或群聊）"
+	@handler BotSendMessage
+	post /api/open/v1/bot/send_message (BotSendMessageReq) returns (BotSendMessageRes)
+
+	@doc "Bot 流式发送消息（SSE，适合 AI 流式输出）"
 	@handler BotStreamMessage
-	post /api/open/v1/bot/message/stream (BotStreamMessageReq) returns (BotStreamChunk)
+	post /api/open/v1/bot/stream_message (BotStreamMessageReq) returns (BotStreamChunk)
 }

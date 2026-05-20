@@ -1,60 +1,40 @@
 syntax = "v1"
 
-// ==================== 群组接口 ====================
+// ==================== 群组 Bot 管理接口 ====================
+// 仅限 Bot 相关的群操作（群的创建/管理在主 App 里进行，不在 Open API）
 
 type (
-	CreateGroupReq {
-		Name      string   `json:"name"`
-		MemberIDs []string `json:"memberIds"`
-		Avatar    string   `json:"avatar,optional"`
-	}
-	
-	CreateGroupRes {
+	// 将 Bot 加入群（群管理员授权后，Bot 可接收该群消息和 @ 提及）
+	AddBotToGroupReq {
 		GroupID string `json:"groupId"`
+	}
+
+	AddBotToGroupRes {
+		BotUserID string `json:"botUserId"` // Bot 在群里的 UserID，事件 payload 里用来识别 @ 提及
 	}
 )
 
 type (
-	AddGroupMemberReq {
-		GroupID   string   `json:"groupId"`
-		MemberIDs []string `json:"memberIds"`
+	// 将 Bot 从群移除
+	RemoveBotFromGroupReq {
+		GroupID string `json:"groupId"`
 	}
-	
-	AddGroupMemberRes {
+
+	RemoveBotFromGroupRes {
 		Success bool `json:"success"`
 	}
 )
 
-type (
-	GetGroupInfoReq {
-		GroupID string `path:"groupId"`
-	}
-	
-	GroupInfo {
-		GroupID   string `json:"groupId"`
-		Name      string `json:"name"`
-		Avatar    string `json:"avatar,optional"`
-		MemberCount int  `json:"memberCount"`
-	}
-	
-	GetGroupInfoRes {
-		Group GroupInfo `json:"group"`
-	}
-)
-
 @server (
-	group: group
+	group:      group
+	middleware: AuthMiddleware
 )
 service open {
-	@doc "创建群组"
-	@handler CreateGroup
-	post /api/open/v1/group/create (CreateGroupReq) returns (CreateGroupRes)
-	
-	@doc "添加群成员"
-	@handler AddGroupMember
-	post /api/open/v1/group/member/add (AddGroupMemberReq) returns (AddGroupMemberRes)
-	
-	@doc "获取群组信息"
-	@handler GetGroupInfo
-	get /api/open/v1/group/:groupId (GetGroupInfoReq) returns (GetGroupInfoRes)
+	@doc "将 Bot 加入群（Bot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Bot 的 Webhook URL）"
+	@handler AddBotToGroup
+	post /api/open/v1/group/add_bot (AddBotToGroupReq) returns (AddBotToGroupRes)
+
+	@doc "将 Bot 从群移除"
+	@handler RemoveBotFromGroup
+	post /api/open/v1/group/remove_bot (RemoveBotFromGroupReq) returns (RemoveBotFromGroupRes)
 }

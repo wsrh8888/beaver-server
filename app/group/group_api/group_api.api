@@ -17,7 +17,7 @@ type (
 type (
 	GroupDeleteReq {
 		UserID  string `header:"Beaver-User-Id"` // 操作者用户ID
-		GroupID string `path:"groupId"` // 要删除的群组ID
+		GroupID string `json:"groupId"` // 要删除的群组ID
 	}
 	GroupDeleteRes {
 		Version int64 `json:"version"` // 群组新版本号
@@ -340,90 +340,162 @@ type (
 	}
 )
 
+// ==================== 群通知机器人（Incoming Webhook）====================
+// 群管理员在群设置里创建，外部系统（Jenkins/GitHub/Grafana）用来向群推消息。
+// 机器人只推不收，完全单向。每个群可创建多个通知机器人。
+type (
+	// 创建通知机器人
+	CreateNotificationBotReq {
+		UserID  string `header:"Beaver-User-Id"` // 操作者（需是群主或管理员）
+		GroupID string `json:"groupId"` // 目标群 ID
+		Name    string `json:"name"` // 机器人名称，如 "Jenkins Bot"
+	}
+	CreateNotificationBotRes {
+		ID         int64  `json:"id"`
+		WebhookURL string `json:"webhookUrl"` // 完整 Webhook URL，直接配到 Jenkins
+		Secret     string `json:"secret"` // HMAC 密钥，只在创建时返回一次，请立即保存
+	}
+)
+
+type (
+	// 列出群内通知机器人
+	ListNotificationBotsReq {
+		UserID  string `header:"Beaver-User-Id"`
+		GroupID string `json:"groupId"`
+	}
+	NotificationBotItem {
+		ID         int64  `json:"id"`
+		Name       string `json:"name"`
+		WebhookURL string `json:"webhookUrl"`
+		CreatedAt  int64  `json:"createdAt"`
+	}
+	ListNotificationBotsRes {
+		List []NotificationBotItem `json:"list"`
+	}
+)
+
+type (
+	// 删除通知机器人
+	DeleteNotificationBotReq {
+		UserID string `header:"Beaver-User-Id"`
+		ID     int64  `json:"id"`
+	}
+	DeleteNotificationBotRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 重置签名密钥
+	ResetNotificationBotSecretReq {
+		UserID string `header:"Beaver-User-Id"`
+		ID     int64  `json:"id"`
+	}
+	ResetNotificationBotSecretRes {
+		Secret string `json:"secret"` // 新密钥，只返回一次
+	}
+)
+
 service group {
 	@doc "创建群组"
 	@handler groupCreate
-	post /api/group/create (GroupCreateReq) returns (GroupCreateRes)
+	post /api/group/v1/create (GroupCreateReq) returns (GroupCreateRes)
 
 	@doc "解散群组"
 	@handler groupDelete
-	delete /api/group/delete/:groupId (GroupDeleteReq) returns (GroupDeleteRes)
+	post /api/group/v1/delete (GroupDeleteReq) returns (GroupDeleteRes)
 
 	@doc "移除群成员"
 	@handler groupMemberRemove
-	post /api/group/memberRemove (GroupMemberRemoveReq) returns (GroupMemberRemoveRes)
+	post /api/group/v1/member_remove (GroupMemberRemoveReq) returns (GroupMemberRemoveRes)
 
 	@doc "添加群成员"
 	@handler groupMemberAdd
-	post /api/group/memberAdd (GroupMemberAddReq) returns (GroupMemberAddRes)
+	post /api/group/v1/member_add (GroupMemberAddReq) returns (GroupMemberAddRes)
 
 	@doc "退出群组"
 	@handler quitGroup
-	post /api/group/quit (GroupQuitReq) returns (GroupQuitRes)
+	post /api/group/v1/quit (GroupQuitReq) returns (GroupQuitRes)
 
 	@doc "更新群组信息"
 	@handler updateGroupInfo
-	post /api/group/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
+	post /api/group/v1/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
 
 	@doc "获取群信息"
 	@handler groupInfo
-	post /api/group/groupInfo (GroupInfoReq) returns (GroupInfoRes)
+	post /api/group/v1/info (GroupInfoReq) returns (GroupInfoRes)
 
 	@doc "获取我加入的群组列表"
 	@handler groupMine
-	post /api/group/group_mine (GroupMineReq) returns (GroupMineRes)
+	post /api/group/v1/mine (GroupMineReq) returns (GroupMineRes)
 
 	@doc "获取群成员列表"
 	@handler getGroupMembers
-	post /api/group/members (GroupMemberListReq) returns (GroupMemberListRes)
+	post /api/group/v1/members (GroupMemberListReq) returns (GroupMemberListRes)
 
 	@doc "更新群成员角色"
 	@handler updateMemberRole
-	post /api/group/member/role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
+	post /api/group/v1/member_role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
 
 	@doc "申请加入群组"
 	@handler joinGroup
-	post /api/group/join (GroupJoinReq) returns (GroupJoinRes)
+	post /api/group/v1/join (GroupJoinReq) returns (GroupJoinRes)
 
 	@doc "转让群主"
 	@handler transferOwner
-	post /api/group/transfer (TransferOwnerReq) returns (TransferOwnerRes)
+	post /api/group/v1/transfer (TransferOwnerReq) returns (TransferOwnerRes)
 
 	@doc "获取用户管理的群组申请列表"
 	@handler groupJoinRequestList
-	post /api/group/joinRequest-list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
+	post /api/group/v1/join_request_list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
 
 	@doc "处理群组申请"
 	@handler groupJoinRequestHandle
-	post /api/group/joinRequest-handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
+	post /api/group/v1/join_request_handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
 
 	@doc "邀请用户加入群组"
 	@handler groupInvite
-	post /api/group/invite (GroupInviteReq) returns (GroupInviteRes)
+	post /api/group/v1/invite (GroupInviteReq) returns (GroupInviteRes)
 
 	@doc "群资料同步"
 	@handler groupSync
-	post /api/group/sync (GroupSyncReq) returns (GroupSyncRes)
+	post /api/group/v1/sync (GroupSyncReq) returns (GroupSyncRes)
 
 	@doc "群成员同步"
 	@handler groupMemberSync
-	post /api/group/member-sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
+	post /api/group/v1/member_sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
 
 	@doc "入群申请同步"
 	@handler groupJoinRequestSync
-	post /api/group/join-request-sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
+	post /api/group/v1/join_request_sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
 
 	@doc "搜索群组"
 	@handler searchGroups
-	get /api/group/search (GroupSearchReq) returns (GroupSearchRes)
+	get /api/group/v1/search (GroupSearchReq) returns (GroupSearchRes)
 
 	@doc "禁言/解禁群成员"
 	@handler muteGroupMember
-	post /api/group/member/mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
+	post /api/group/v1/member_mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
 
 	@doc "全员禁言/解禁"
 	@handler muteAllGroup
-	put /api/group/mute-all (MuteAllGroupReq) returns (MuteAllGroupRes)
+	post /api/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
+
+	@doc "在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）"
+	@handler createNotificationBot
+	post /api/group/v1/notification_bot/create (CreateNotificationBotReq) returns (CreateNotificationBotRes)
+
+	@doc "获取群内所有通知机器人列表"
+	@handler listNotificationBots
+	post /api/group/v1/notification_bot/list (ListNotificationBotsReq) returns (ListNotificationBotsRes)
+
+	@doc "删除通知机器人"
+	@handler deleteNotificationBot
+	post /api/group/v1/notification_bot/delete (DeleteNotificationBotReq) returns (DeleteNotificationBotRes)
+
+	@doc "重置通知机器人的签名密钥（旧 Secret 立即失效）"
+	@handler resetNotificationBotSecret
+	post /api/group/v1/notification_bot/reset_secret (ResetNotificationBotSecretReq) returns (ResetNotificationBotSecretRes)
 }
 
 // goctl api go -api group_api.api -dir . --home ../../../template

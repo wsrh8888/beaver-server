@@ -35,7 +35,7 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 
 	// 2. 返回用户信息
 	return &types.GetUserInfoRes{
-		User: types.UserInfo{
+		User: types.GetUserInfoUserItem{
 			UserID:   user.UserID,
 			Nickname: user.NickName,
 			Avatar:   user.Avatar,

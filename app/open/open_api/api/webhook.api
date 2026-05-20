@@ -1,73 +1,52 @@
 syntax = "v1"
 
-// ==================== 群机器人 Webhook 接口 ====================
-type (
-	// Webhook 发送消息请求（对标钉钉/企业微信群机器人）
-	WebhookSendMessageReq {
-		WebhookURL string   `json:"webhook_url"` // Webhook URL
-		MsgType    string   `json:"msg_type"` // 消息类型：text/markdown/link/action_card
-		Text       string   `json:"text,optional"` // 文本内容（msg_type=text 时必填）
-		Title      string   `json:"title,optional"` // 标题（msg_type=markdown/link 时使用）
-		URL        string   `json:"url,optional"` // 链接地址（msg_type=link 时必填）
-		PicURL     string   `json:"pic_url,optional"` // 图片URL（msg_type=link 时使用）
-		AtMobiles  []string `json:"at_mobiles,omitempty"` // @手机号列表
-		AtUserIDs  []string `json:"at_user_ids,omitempty"` // @用户ID列表
-		IsAtAll    bool     `json:"is_at_all,optional"` // 是否@所有人
-	}
-	WebhookSendMessageRes {
-		Success bool   `json:"success"`
-		Message string `json:"message,optional"` // 错误信息
-	}
-)
+// ==================== 群通知机器人推送入口 ====================
+//
+// 此接口由外部系统（Jenkins / GitHub Actions / Grafana 等）直接调用，
+// 无需 AppToken，通过 token + HMAC-SHA256 签名验证身份。
+//
+// Webhook URL 和 Secret 由群管理员在群设置里创建（group 模块负责），
+// 创建后得到：
+//   WebhookURL = https://<domain>/api/open/v1/webhook/incoming?token=<token>
+//   Secret     = <64位十六进制密钥>
+//
+// 调用方签名方式（与钉钉自定义机器人相同）：
+//   1. 取当前 Unix 时间戳（秒）
+//   2. stringToSign = timestamp + "\n" + secret
+//   3. sign = Base64( HMAC-SHA256( stringToSign, secret ) )
+//   4. sign 需 URL-encode 后作为 query 参数传入
+//
+// 请求示例：
+//   POST /api/open/v1/webhook/incoming?token=xxx&timestamp=1700000000&sign=xxx
+//   {"msgtype":"markdown","title":"构建结果","content":"**#123 成功** ✅"}
 
 type (
-	// 生成 Webhook URL 请求
-	GenerateWebhookReq {
-		AppID     string `json:"app_id"` // 应用 ID
-		GroupID   string `json:"group_id"` // 群组 ID
-		SecretKey string `json:"secret_key,optional"` // 自定义密钥（用于签名验证）
-	}
-	GenerateWebhookRes {
-		WebhookURL string `json:"webhook_url"` // Webhook URL
-		Secret     string `json:"secret"` // 签名密钥
-		ExpireAt   int64  `json:"expire_at"` // 过期时间
-	}
-)
-
-type (
-	// Incoming Webhook 请求（用于 Jenkins/GitHub 等外部集成）
 	IncomingWebhookReq {
-		Token   string                 `form:"token"` // Webhook Token（从 URL 参数获取）
-		MsgType string                 `json:"msg_type"` // 消息类型：text/markdown
-		Content map[string]interface{} `json:"content"` // 消息内容
+		// Query 参数（鉴权）
+		Token     string `form:"token"`     // Webhook Token
+		Timestamp int64  `form:"timestamp"` // Unix 时间戳（秒），5分钟内有效
+		Sign      string `form:"sign"`      // Base64(HMAC-SHA256(timestamp+"\n"+secret))
+
+		// Body（消息内容）
+		MsgType string   `json:"msgtype"`          // text / markdown
+		Content string   `json:"content"`          // 消息正文
+		Title   string   `json:"title,optional"`   // 标题（markdown 时使用）
+		AtUsers []string `json:"atUsers,optional"` // @指定用户 ID
+		AtAll   bool     `json:"atAll,optional"`   // @所有人
 	}
+
 	IncomingWebhookRes {
 		Success bool   `json:"success"`
-		Message string `json:"message,optional"`
+		ErrMsg  string `json:"errMsg,optional"`
 	}
 )
 
-@server (
-	group:      webhook
-	middleware: AuthMiddleware
-)
-service open {
-	@doc "生成群机器人 Webhook URL（对标钉钉/企业微信）"
-	@handler GenerateWebhook
-	post /api/open/v1/webhook/generate (GenerateWebhookReq) returns (GenerateWebhookRes)
-
-	@doc "通过 Webhook 发送消息（无需鉴权，通过 URL 中的 token 验证）"
-	@handler WebhookSendMessage
-	post /api/open/v1/webhook/send (WebhookSendMessageReq) returns (WebhookSendMessageRes)
-}
-
-// Incoming Webhook 不需要鉴权，通过 Token 验证
+// 无需任何认证，外部系统直接调用
 @server (
 	group: webhook
 )
 service open {
-	@doc "接收外部 Webhook（用于 Jenkins/GitHub 等集成，无需鉴权）"
+	@doc "接收外部系统消息推送（Jenkins/GitHub/Grafana 等）"
 	@handler IncomingWebhook
 	post /api/open/v1/webhook/incoming (IncomingWebhookReq) returns (IncomingWebhookRes)
 }
-

@@ -15,127 +15,151 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 创建群组
 				Method:  http.MethodPost,
-				Path:    "/api/group/create",
+				Path:    "/api/group/v1/create",
 				Handler: groupCreateHandler(serverCtx),
 			},
 			{
 				// 解散群组
-				Method:  http.MethodDelete,
-				Path:    "/api/group/delete/:groupId",
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/delete",
 				Handler: groupDeleteHandler(serverCtx),
 			},
 			{
 				// 获取群信息
 				Method:  http.MethodPost,
-				Path:    "/api/group/groupInfo",
+				Path:    "/api/group/v1/info",
 				Handler: groupInfoHandler(serverCtx),
-			},
-			{
-				// 获取我加入的群组列表
-				Method:  http.MethodPost,
-				Path:    "/api/group/group_mine",
-				Handler: groupMineHandler(serverCtx),
 			},
 			{
 				// 邀请用户加入群组
 				Method:  http.MethodPost,
-				Path:    "/api/group/invite",
+				Path:    "/api/group/v1/invite",
 				Handler: groupInviteHandler(serverCtx),
 			},
 			{
 				// 申请加入群组
 				Method:  http.MethodPost,
-				Path:    "/api/group/join",
+				Path:    "/api/group/v1/join",
 				Handler: joinGroupHandler(serverCtx),
-			},
-			{
-				// 入群申请同步
-				Method:  http.MethodPost,
-				Path:    "/api/group/join-request-sync",
-				Handler: groupJoinRequestSyncHandler(serverCtx),
 			},
 			{
 				// 处理群组申请
 				Method:  http.MethodPost,
-				Path:    "/api/group/joinRequest-handle",
+				Path:    "/api/group/v1/join_request_handle",
 				Handler: groupJoinRequestHandleHandler(serverCtx),
 			},
 			{
 				// 获取用户管理的群组申请列表
 				Method:  http.MethodPost,
-				Path:    "/api/group/joinRequest-list",
+				Path:    "/api/group/v1/join_request_list",
 				Handler: groupJoinRequestListHandler(serverCtx),
 			},
 			{
-				// 群成员同步
+				// 入群申请同步
 				Method:  http.MethodPost,
-				Path:    "/api/group/member-sync",
-				Handler: groupMemberSyncHandler(serverCtx),
-			},
-			{
-				// 禁言/解禁群成员
-				Method:  http.MethodPost,
-				Path:    "/api/group/member/mute",
-				Handler: muteGroupMemberHandler(serverCtx),
-			},
-			{
-				// 更新群成员角色
-				Method:  http.MethodPost,
-				Path:    "/api/group/member/role",
-				Handler: updateMemberRoleHandler(serverCtx),
+				Path:    "/api/group/v1/join_request_sync",
+				Handler: groupJoinRequestSyncHandler(serverCtx),
 			},
 			{
 				// 添加群成员
 				Method:  http.MethodPost,
-				Path:    "/api/group/memberAdd",
+				Path:    "/api/group/v1/member_add",
 				Handler: groupMemberAddHandler(serverCtx),
+			},
+			{
+				// 禁言/解禁群成员
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/member_mute",
+				Handler: muteGroupMemberHandler(serverCtx),
 			},
 			{
 				// 移除群成员
 				Method:  http.MethodPost,
-				Path:    "/api/group/memberRemove",
+				Path:    "/api/group/v1/member_remove",
 				Handler: groupMemberRemoveHandler(serverCtx),
+			},
+			{
+				// 更新群成员角色
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/member_role",
+				Handler: updateMemberRoleHandler(serverCtx),
+			},
+			{
+				// 群成员同步
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/member_sync",
+				Handler: groupMemberSyncHandler(serverCtx),
 			},
 			{
 				// 获取群成员列表
 				Method:  http.MethodPost,
-				Path:    "/api/group/members",
+				Path:    "/api/group/v1/members",
 				Handler: getGroupMembersHandler(serverCtx),
 			},
 			{
+				// 获取我加入的群组列表
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/mine",
+				Handler: groupMineHandler(serverCtx),
+			},
+			{
 				// 全员禁言/解禁
-				Method:  http.MethodPut,
-				Path:    "/api/group/mute-all",
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/mute_all",
 				Handler: muteAllGroupHandler(serverCtx),
+			},
+			{
+				// 在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/notification_bot/create",
+				Handler: createNotificationBotHandler(serverCtx),
+			},
+			{
+				// 删除通知机器人
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/notification_bot/delete",
+				Handler: deleteNotificationBotHandler(serverCtx),
+			},
+			{
+				// 获取群内所有通知机器人列表
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/notification_bot/list",
+				Handler: listNotificationBotsHandler(serverCtx),
+			},
+			{
+				// 重置通知机器人的签名密钥（旧 Secret 立即失效）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/notification_bot/reset_secret",
+				Handler: resetNotificationBotSecretHandler(serverCtx),
 			},
 			{
 				// 退出群组
 				Method:  http.MethodPost,
-				Path:    "/api/group/quit",
+				Path:    "/api/group/v1/quit",
 				Handler: quitGroupHandler(serverCtx),
 			},
 			{
 				// 搜索群组
 				Method:  http.MethodGet,
-				Path:    "/api/group/search",
+				Path:    "/api/group/v1/search",
 				Handler: searchGroupsHandler(serverCtx),
 			},
 			{
 				// 群资料同步
 				Method:  http.MethodPost,
-				Path:    "/api/group/sync",
+				Path:    "/api/group/v1/sync",
 				Handler: groupSyncHandler(serverCtx),
 			},
 			{
 				// 转让群主
 				Method:  http.MethodPost,
-				Path:    "/api/group/transfer",
+				Path:    "/api/group/v1/transfer",
 				Handler: transferOwnerHandler(serverCtx),
 			},
 			{
 				// 更新群组信息
 				Method:  http.MethodPost,
-				Path:    "/api/group/update",
+				Path:    "/api/group/v1/update",
 				Handler: updateGroupInfoHandler(serverCtx),
 			},
 		},

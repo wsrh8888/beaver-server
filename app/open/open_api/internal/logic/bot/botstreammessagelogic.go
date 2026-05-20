@@ -27,7 +27,8 @@ func NewBotStreamMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *BotStreamMessageLogic) BotStreamMessage(req *types.BotStreamMessageReq) (resp *types.BotStreamChunk, err error) {
 	// TODO: 流式消息发送，需要 WebSocket/SSE 支持
-	logx.Infof("Bot 流式发送消息: appID=%s, conversationID=%s", req.AppID, req.ConversationID)
+	appID, _ := l.ctx.Value("appID").(string)
+	logx.Infof("Bot 流式发送消息: appID=%s, conversationID=%s", appID, req.ConversationID)
 
 	return nil, errors.New("流式消息功能暂未实现")
 }

@@ -33,9 +33,9 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 	}
 
 	// 2. 转换为响应格式
-	var userList []types.UserInfo
+	var userList []types.GetUserListUserItem
 	for _, user := range users {
-		userList = append(userList, types.UserInfo{
+		userList = append(userList, types.GetUserListUserItem{
 			UserID:   user.UserID,
 			Nickname: user.NickName,
 			Avatar:   user.Avatar,

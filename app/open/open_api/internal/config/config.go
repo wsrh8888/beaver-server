@@ -15,12 +15,13 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	Etcd     string
-	UserRpc  zrpc.RpcClientConf
-	ChatRpc  zrpc.RpcClientConf
-	GroupRpc zrpc.RpcClientConf
-	OAuthRpc zrpc.RpcClientConf // OAuth RPC 服务
-	OAuth    OAuthConf          // OAuth 授权页面配置
+	Etcd       string
+	ApiBaseUrl string // 对外暴露的 API 根地址，如 https://api.example.com
+	UserRpc    zrpc.RpcClientConf
+	ChatRpc    zrpc.RpcClientConf
+	GroupRpc   zrpc.RpcClientConf
+	OAuthRpc   zrpc.RpcClientConf
+	OAuth      OAuthConf
 }
 
 // OAuthConf OAuth 授权页面配置
