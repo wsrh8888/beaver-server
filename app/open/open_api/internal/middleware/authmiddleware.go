@@ -38,6 +38,10 @@ func isPublicOAuthPath(path string) bool {
 	if path == "/api/open/v1/oauth/h5_authcode" {
 		return true
 	}
+	// 群自定义机器人推送（access_token + 加签，无需 Bearer）
+	if path == "/api/open/v1/webhook/incoming" {
+		return true
+	}
 	return false
 }
 

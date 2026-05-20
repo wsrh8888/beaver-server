@@ -36,7 +36,7 @@ func (l *GetDesktopQuickLoginSignLogic) GetDesktopQuickLoginSign(req *types.GetD
 	_ = appID
 
 	// 2. 验证 token 有效性（调用 OAuth RPC）
-	validateResp, err := l.svcCtx.OAuthRpc.ValidateToken(l.ctx, nil) // TODO: 需要传入 token
+	validateResp, err := l.svcCtx.OpenRpc.ValidateToken(l.ctx, nil) // TODO: 需要传入 token
 	if err != nil || !validateResp.Valid {
 		return nil, errors.New("无效的访问令牌")
 	}

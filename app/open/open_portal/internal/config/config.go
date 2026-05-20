@@ -19,6 +19,7 @@ type Config struct {
 	OAuth   struct {
 		BaseUrl string // OAuth 服务基础 URL（授权页面地址）
 	}
+	ApiBaseUrl string // open_api 对外根地址，用于拼接 Incoming Webhook URL
 }
 
 // OAuthConf OAuth 授权页面配置

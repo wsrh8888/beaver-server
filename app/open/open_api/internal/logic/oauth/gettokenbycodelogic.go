@@ -27,7 +27,7 @@ func NewGetTokenByCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 
 func (l *GetTokenByCodeLogic) GetTokenByCode(req *types.GetTokenByCodeReq) (resp *types.GetTokenByCodeRes, err error) {
 	// 调用 OAuth RPC 服务
-	rpcResp, err := l.svcCtx.OAuthRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
+	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
 		AppId: req.AppID,
 		Code:  req.Code,
 	})

@@ -55,15 +55,16 @@ type (
 		UserID    string `header:"Beaver-User-Id"`
 	}
 	IncomingWebhookInfo {
-		ID        string `json:"id"`
-		Token     string `json:"token"`
-		AppID     string `json:"appId"`
-		GroupID   string `json:"groupId"`
-		BotUserID string `json:"botUserId"`
-		Name      string `json:"name"`
-		WebhookURL string `json:"webhookUrl"` // 完整的 Webhook URL
-		Status    int    `json:"status"`
-		CreatedAt int64  `json:"createdAt"`
+		ID         string `json:"id"`
+		Token      string `json:"token"` // access_token
+		Secret     string `json:"secret,optional"` // 加签密钥，仅创建时返回
+		AppID      string `json:"appId"`
+		GroupID    string `json:"groupId"`
+		BotUserID  string `json:"botUserId"`
+		Name       string `json:"name"`
+		WebhookURL string `json:"webhookUrl"` // 基址含 access_token，调用时另拼 timestamp、sign
+		Status     int    `json:"status"`
+		CreatedAt  int64  `json:"createdAt"`
 	}
 	CreateIncomingWebhookRes {
 		Webhook IncomingWebhookInfo `json:"webhook"`

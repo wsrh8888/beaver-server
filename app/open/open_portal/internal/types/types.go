@@ -289,11 +289,12 @@ type H5OAuthConfigInfo struct {
 type IncomingWebhookInfo struct {
 	ID         string `json:"id"`
 	Token      string `json:"token"`
+	Secret     string `json:"secret,optional"`
 	AppID      string `json:"appId"`
 	GroupID    string `json:"groupId"`
 	BotUserID  string `json:"botUserId"`
 	Name       string `json:"name"`
-	WebhookURL string `json:"webhookUrl"` // 完整的 Webhook URL
+	WebhookURL string `json:"webhookUrl"`
 	Status     int    `json:"status"`
 	CreatedAt  int64  `json:"createdAt"`
 }

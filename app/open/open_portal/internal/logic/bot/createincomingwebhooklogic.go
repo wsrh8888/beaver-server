@@ -2,6 +2,8 @@ package bot
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -9,7 +11,6 @@ import (
 	models "beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
-	util "beaver/utils/uuid"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -20,7 +21,7 @@ type CreateIncomingWebhookLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 创建 Incoming Webhook
+// 创建 Incoming Webhook（开放平台应用维度）
 func NewCreateIncomingWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateIncomingWebhookLogic {
 	return &CreateIncomingWebhookLogic{
 		Logger: logx.WithContext(ctx),
@@ -30,15 +31,21 @@ func NewCreateIncomingWebhookLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateIncomingWebhookReq) (resp *types.CreateIncomingWebhookRes, err error) {
-	// 1. 生成 Token
-	token := util.NewV4().String()
+	tokenBytes := make([]byte, 32)
+	if _, err = rand.Read(tokenBytes); err != nil {
+		return nil, errors.New("生成 access_token 失败")
+	}
+	secretBytes := make([]byte, 32)
+	if _, err = rand.Read(secretBytes); err != nil {
+		return nil, errors.New("生成 secret 失败")
+	}
+	token := hex.EncodeToString(tokenBytes)
+	secret := hex.EncodeToString(secretBytes)
 
-	// 2. 获取 BotUserID（这里简化处理，实际应该从应用配置中获取）
 	botUserID := "bot_" + req.AppID
-
-	// 3. 创建 Incoming Webhook 记录
 	webhook := models.OpenIncomingWebhook{
 		Token:     token,
+		Secret:    secret,
 		AppID:     req.AppID,
 		GroupID:   req.GroupID,
 		BotUserID: botUserID,
@@ -50,14 +57,13 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 		return nil, errors.New("创建 Incoming Webhook 失败")
 	}
 
-	// 4. 构造完整的 Webhook URL
-	webhookURL := fmt.Sprintf("/api/open/v1/webhook/incoming/%s", token)
+	webhookURL := fmt.Sprintf("%s/api/open/v1/webhook/incoming?access_token=%s", l.svcCtx.Config.ApiBaseUrl, token)
 
-	// 5. 返回结果
 	return &types.CreateIncomingWebhookRes{
 		Webhook: types.IncomingWebhookInfo{
 			ID:         fmt.Sprintf("%d", webhook.ID),
 			Token:      webhook.Token,
+			Secret:     secret,
 			AppID:      webhook.AppID,
 			GroupID:    webhook.GroupID,
 			BotUserID:  webhook.BotUserID,

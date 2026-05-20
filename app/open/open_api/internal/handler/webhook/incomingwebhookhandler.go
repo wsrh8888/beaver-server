@@ -13,12 +13,15 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// 接收外部 Webhook（用于 Jenkins/GitHub 等集成，无需鉴权）
+// 群自定义机器人 Webhook（响应为 code/msg，不走统一 result 包装）
 func IncomingWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.IncomingWebhookReq
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			httpx.OkJsonCtx(r.Context(), w, &types.IncomingWebhookRes{
+				Code: 403,
+				Msg:  "请求参数解析失败",
+			})
 			return
 		}
 
@@ -26,8 +29,8 @@ func IncomingWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		resp, err := l.IncomingWebhook(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			return
 		}
+		httpx.OkJsonCtx(r.Context(), w, resp)
 	}
 }

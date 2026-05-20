@@ -28,3 +28,6 @@ UserRpc:
 # OAuth 授权页面配置
 OAuth:
   BaseUrl: http://127.0.0.1:20800
+
+# open_api 对外地址（Incoming Webhook 推送入口）
+ApiBaseUrl: http://127.0.0.1:21900

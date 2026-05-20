@@ -13,8 +13,10 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
 	open_models "beaver/app/open/open_models"
+	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/const/webhookconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -642,34 +644,40 @@ func (l *SendMsgLogic) triggerBotWebhookIfNeeded(chatModel chat_models.ChatMessa
 		return
 	}
 
-	// 2. 检查接收者是否是 Bot（查数据库）
-	var userInfo struct {
-		IsBot int `gorm:"column:is_bot"`
+	// 2. 查询 Bot 用户及其关联应用
+	var botUser user_models.UserModel
+	err := l.svcCtx.DB.Where("user_id = ? AND is_bot = 1", receiverID).First(&botUser).Error
+	if err != nil || botUser.BotAppID == "" {
+		return
 	}
-	err := l.svcCtx.DB.Table("users").Where("user_id = ?", receiverID).First(&userInfo).Error
-	if err != nil || userInfo.IsBot != 1 {
-		return // 不是 Bot 或查询失败
+	// 群通知机器人（Jenkins 单向推送）无 Outgoing 回调
+	if botUser.BotAppID == "GROUP_NOTIFICATION" {
+		return
 	}
 
-	// 3. 查询 Bot 关联的应用
 	var app open_models.OpenApp
-	err = l.svcCtx.DB.Where("bot_user_id = ? AND status = ?", receiverID, 1).First(&app).Error
+	err = l.svcCtx.DB.Where("app_id = ? AND status = 1", botUser.BotAppID).First(&app).Error
 	if err != nil {
-		l.Logger.Errorf("Bot 未关联应用或应用已禁用: botUserId=%s, error=%v", receiverID, err)
+		l.Logger.Errorf("Bot 关联应用不存在或已禁用: botUserId=%s appId=%s err=%v", receiverID, botUser.BotAppID, err)
 		return
 	}
 
-	// 4. 查询 Webhook 配置
-	var webhookConfig open_models.OpenWebhookConfig
-	err = l.svcCtx.DB.Where("app_id = ? AND event_type = ? AND status = ?", app.AppID, "message.receive", 1).First(&webhookConfig).Error
+	eventType := webhookconst.EventBotMessageReceive
+	if chatModel.ConversationType == 1 {
+		eventType = "im.message.receive"
+	}
+
+	// 3. 查询事件订阅配置
+	var subscription open_models.OpenEventSubscription
+	err = l.svcCtx.DB.Where("app_id = ? AND event_type = ? AND status = ?", app.AppID, eventType, 1).First(&subscription).Error
 	if err != nil {
-		l.Logger.Infof("Bot 未配置 Webhook: appId=%s", app.AppID)
+		l.Logger.Infof("Bot 未配置事件订阅: appId=%s eventType=%s", app.AppID, eventType)
 		return
 	}
 
-	// 5. 构建 Webhook 载荷
+	// 4. 构建 Webhook 载荷
 	payload := map[string]interface{}{
-		"eventType": "message.receive",
+		"eventType": eventType,
 		"timestamp": time.Now().UnixMilli(),
 		"data": map[string]interface{}{
 			"messageId":      chatModel.MessageID,
@@ -682,17 +690,17 @@ func (l *SendMsgLogic) triggerBotWebhookIfNeeded(chatModel chat_models.ChatMessa
 		},
 	}
 
-	// 6. 发送 Webhook
-	l.svcCtx.WebhookSender.Send("message.receive", payload, []corewebhook.WebhookTargetConfig{
+	// 5. 发送 Webhook
+	l.svcCtx.WebhookSender.Send(eventType, payload, []corewebhook.WebhookTargetConfig{
 		{
-			ID:         webhookConfig.ID,
-			AppID:      webhookConfig.AppID,
-			TargetURL:  webhookConfig.TargetURL,
-			Secret:     webhookConfig.Secret,
-			RetryCount: webhookConfig.RetryCount,
-			Timeout:    webhookConfig.Timeout,
+			ID:         subscription.ID,
+			AppID:      subscription.AppID,
+			TargetURL:  subscription.TargetURL,
+			Secret:     subscription.Secret,
+			RetryCount: subscription.RetryCount,
+			Timeout:    subscription.Timeout,
 		},
 	})
 
-	l.Logger.Infof("触发 Bot Webhook: appId=%s, messageId=%s", app.AppID, chatModel.MessageID)
+	l.Logger.Infof("触发 Bot Webhook: appId=%s messageId=%s", app.AppID, chatModel.MessageID)
 }

@@ -14,6 +14,9 @@ type OpenIncomingWebhook struct {
 	AppID     string `gorm:"type:varchar(64);index;not null;comment:应用ID"`
 	GroupID   string `gorm:"type:varchar(64);index;not null;comment:目标群组ID"`
 	BotUserID string `gorm:"type:varchar(64);not null;comment:Bot的UserID（发消息时的发件人身份）"`
-	Name      string `gorm:"type:varchar(100);comment:机器人名称（如 Jenkins Bot）"`
-	Status    int    `gorm:"type:tinyint;default:1;comment:状态 1启用 0禁用"`
+	Name          string `gorm:"type:varchar(100);comment:机器人名称（如 Jenkins Bot）"`
+	Description   string `gorm:"type:varchar(500);comment:机器人简介"`
+	Avatar        string `gorm:"type:varchar(256);comment:机器人头像文件ID"`
+	CreatorUserID string `gorm:"type:varchar(64);comment:创建者用户ID"`
+	Status        int    `gorm:"type:tinyint;default:1;comment:状态 1启用 0禁用"`
 }

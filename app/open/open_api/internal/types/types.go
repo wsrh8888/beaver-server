@@ -229,20 +229,47 @@ type GetWebhookListRes struct {
 	List  []WebhookSubscriptionInfo `json:"list"`
 }
 
+type IncomingWebhookAt struct {
+	AtMobiles []string `json:"atMobiles,optional"` // 被@用户手机号
+	AtUserIds []string `json:"atUserIds,optional"` // 被@用户 ID
+	IsAtAll   bool     `json:"isAtAll,optional"`   // 是否@所有人
+}
+
+type IncomingWebhookImageBody struct {
+	Url          string `json:"url"` // 图片 URL
+	Width        string `json:"width,optional"`
+	Height       string `json:"height,optional"`
+	OriginUrl    string `json:"origin_url,optional"`
+	OriginWidth  string `json:"origin_width,optional"`
+	OriginHeight string `json:"origin_height,optional"`
+	FileName     string `json:"file_name,optional"`
+	FileSize     string `json:"file_size,optional"`
+}
+
+type IncomingWebhookMarkdownBody struct {
+	Title string `json:"title"`          // 会话列表摘要
+	Text  string `json:"text"`           // markdown 正文
+	Image string `json:"image,optional"` // 头图 URL
+}
+
 type IncomingWebhookReq struct {
-	Token     string   `form:"token"`            // Webhook Token
-	Timestamp int64    `form:"timestamp"`        // Unix 时间戳（秒），5分钟内有效
-	Sign      string   `form:"sign"`             // Base64(HMAC-SHA256(timestamp+"\n"+secret))
-	MsgType   string   `json:"msgtype"`          // text / markdown
-	Content   string   `json:"content"`          // 消息正文
-	Title     string   `json:"title,optional"`   // 标题（markdown 时使用）
-	AtUsers   []string `json:"atUsers,optional"` // @指定用户 ID
-	AtAll     bool     `json:"atAll,optional"`   // @所有人
+	AccessToken string                      `form:"access_token"` // Webhook 令牌
+	Timestamp   int64                       `form:"timestamp"`    // Unix 毫秒，与服务器误差不超过 1 小时
+	Sign        string                      `form:"sign"`         // 加签结果（需 URL 编码）
+	Msgtype     string                      `json:"msgtype"`      // text / markdown / image
+	Text        IncomingWebhookTextBody     `json:"text,optional"`
+	Markdown    IncomingWebhookMarkdownBody `json:"markdown,optional"`
+	Image       IncomingWebhookImageBody    `json:"image,optional"`
+	At          IncomingWebhookAt           `json:"at,optional"`
 }
 
 type IncomingWebhookRes struct {
-	Success bool   `json:"success"`
-	ErrMsg  string `json:"errMsg,optional"`
+	Code int    `json:"code"` // 0 成功；401 令牌无效；408 请求过期；403 验签失败
+	Msg  string `json:"msg"`
+}
+
+type IncomingWebhookTextBody struct {
+	Content string `json:"content"` // 文本内容
 }
 
 type PasswordLoginReq struct {

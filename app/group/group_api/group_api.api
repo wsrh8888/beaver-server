@@ -348,20 +348,21 @@ type (
 	}
 )
 
-// ==================== 群通知机器人（Incoming Webhook）====================
-// 群管理员在群设置里创建，外部系统（Jenkins/GitHub/Grafana）用来向群推消息。
-// 机器人只推不收，完全单向。每个群可创建多个通知机器人。
+// ==================== 群自定义机器人 Webhook ====================
+// 群管理员在群设置里创建；外部系统用 access_token + 加签 POST 推送，仅支持 text/markdown/image。
 type (
 	// 创建通知机器人
 	CreateNotificationBotReq {
-		UserID  string `header:"Beaver-User-Id"` // 操作者（需是群主或管理员）
-		GroupID string `json:"groupId"` // 目标群 ID
-		Name    string `json:"name"` // 机器人名称，如 "Jenkins Bot"
+		UserID      string `header:"Beaver-User-Id"` // 操作者（需是群主或管理员）
+		GroupID     string `json:"groupId"` // 目标群 ID
+		Name        string `json:"name"` // 机器人名称
+		Description string `json:"description,optional"` // 简介
+		Avatar      string `json:"avatar,optional"` // 头像文件 ID
 	}
 	CreateNotificationBotRes {
 		ID         int64  `json:"id"`
-		WebhookURL string `json:"webhookUrl"` // 完整 Webhook URL，直接配到 Jenkins
-		Secret     string `json:"secret"` // HMAC 密钥，只在创建时返回一次，请立即保存
+		WebhookURL string `json:"webhookUrl"` // 基址含 access_token，调用时另拼 timestamp、sign
+		Secret     string `json:"secret"` // 加签密钥，仅创建时返回一次
 	}
 )
 
@@ -372,10 +373,14 @@ type (
 		GroupID string `json:"groupId"`
 	}
 	ListNotificationBotsItem {
-		ID         int64  `json:"id"` // 机器人ID
-		Name       string `json:"name"` // 机器人名称
-		WebhookURL string `json:"webhookUrl"` // Webhook 推送 URL
-		CreatedAt  int64  `json:"createdAt"` // 创建时间戳
+		ID            int64  `json:"id"` // 机器人ID
+		Name          string `json:"name"` // 机器人名称
+		Description   string `json:"description"` // 简介
+		Avatar        string `json:"avatar"` // 头像文件 ID
+		WebhookURL    string `json:"webhookUrl"` // Webhook 推送 URL
+		Status        int    `json:"status"` // 1 启用 0 禁用
+		CreatorUserID string `json:"creatorUserId"` // 创建者
+		CreatedAt     int64  `json:"createdAt"` // 创建时间戳
 	}
 	ListNotificationBotsRes {
 		List []ListNotificationBotsItem `json:"list"` // 机器人列表
@@ -401,6 +406,21 @@ type (
 	}
 	ResetNotificationBotSecretRes {
 		Secret string `json:"secret"` // 新密钥，只返回一次
+	}
+)
+
+type (
+	// 更新通知机器人
+	UpdateNotificationBotReq {
+		UserID      string `header:"Beaver-User-Id"`
+		ID          int64  `json:"id"`
+		Name        string `json:"name,optional"`
+		Description string `json:"description,optional"`
+		Avatar      string `json:"avatar,optional"`
+		Status      *int   `json:"status,optional"` // 1 启用 0 禁用
+	}
+	UpdateNotificationBotRes {
+		Success bool `json:"success"`
 	}
 )
 
@@ -504,6 +524,10 @@ service group {
 	@doc "重置通知机器人的签名密钥（旧 Secret 立即失效）"
 	@handler resetNotificationBotSecret
 	post /api/group/v1/notification_bot/reset_secret (ResetNotificationBotSecretReq) returns (ResetNotificationBotSecretRes)
+
+	@doc "更新通知机器人（名称/简介/头像/启用状态）"
+	@handler updateNotificationBot
+	post /api/group/v1/notification_bot/update (UpdateNotificationBotReq) returns (UpdateNotificationBotRes)
 }
 
 // goctl api go -api group_api.api -dir . --home ../../../template

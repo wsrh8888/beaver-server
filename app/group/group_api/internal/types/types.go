@@ -2,15 +2,17 @@
 package types
 
 type CreateNotificationBotReq struct {
-	UserID  string `header:"Beaver-User-Id"` // 操作者（需是群主或管理员）
-	GroupID string `json:"groupId"`          // 目标群 ID
-	Name    string `json:"name"`             // 机器人名称，如 "Jenkins Bot"
+	UserID      string `header:"Beaver-User-Id"`     // 操作者（需是群主或管理员）
+	GroupID     string `json:"groupId"`              // 目标群 ID
+	Name        string `json:"name"`                 // 机器人名称
+	Description string `json:"description,optional"` // 简介
+	Avatar      string `json:"avatar,optional"`      // 头像文件 ID
 }
 
 type CreateNotificationBotRes struct {
 	ID         int64  `json:"id"`
-	WebhookURL string `json:"webhookUrl"` // 完整 Webhook URL，直接配到 Jenkins
-	Secret     string `json:"secret"`     // HMAC 密钥，只在创建时返回一次，请立即保存
+	WebhookURL string `json:"webhookUrl"` // 基址含 access_token，调用时另拼 timestamp、sign
+	Secret     string `json:"secret"`     // 加签密钥，仅创建时返回一次
 }
 
 type DeleteNotificationBotReq struct {
@@ -286,10 +288,14 @@ type GroupSyncVersionItem struct {
 }
 
 type ListNotificationBotsItem struct {
-	ID         int64  `json:"id"`         // 机器人ID
-	Name       string `json:"name"`       // 机器人名称
-	WebhookURL string `json:"webhookUrl"` // Webhook 推送 URL
-	CreatedAt  int64  `json:"createdAt"`  // 创建时间戳
+	ID            int64  `json:"id"`            // 机器人ID
+	Name          string `json:"name"`          // 机器人名称
+	Description   string `json:"description"`   // 简介
+	Avatar        string `json:"avatar"`        // 头像文件 ID
+	WebhookURL    string `json:"webhookUrl"`    // Webhook 推送 URL
+	Status        int    `json:"status"`        // 1 启用 0 禁用
+	CreatorUserID string `json:"creatorUserId"` // 创建者
+	CreatedAt     int64  `json:"createdAt"`     // 创建时间戳
 }
 
 type ListNotificationBotsReq struct {
@@ -362,4 +368,17 @@ type UpdateMemberRoleReq struct {
 
 type UpdateMemberRoleRes struct {
 	Version int64 `json:"version"` // 群成员新版本号
+}
+
+type UpdateNotificationBotReq struct {
+	UserID      string `header:"Beaver-User-Id"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+	Avatar      string `json:"avatar,optional"`
+	Status      *int   `json:"status,optional"` // 1 启用 0 禁用
+}
+
+type UpdateNotificationBotRes struct {
+	Success bool `json:"success"`
 }

@@ -1,3 +1,7 @@
+//go:build ignore
+
+// 暂禁用：依赖 OpenWebhookConfig 等模型，待开放平台 Bot 流式能力补齐后再启用
+
 package chat_message
 
 import (

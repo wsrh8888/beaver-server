@@ -133,6 +133,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: resetNotificationBotSecretHandler(serverCtx),
 			},
 			{
+				// 更新通知机器人（名称/简介/头像/启用状态）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/notification_bot/update",
+				Handler: updateNotificationBotHandler(serverCtx),
+			},
+			{
 				// 退出群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/quit",
