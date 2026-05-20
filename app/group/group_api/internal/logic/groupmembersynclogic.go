@@ -28,7 +28,7 @@ func NewGroupMemberSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GroupMemberSyncLogic) GroupMemberSync(req *types.GroupMemberSyncReq) (resp *types.GroupMemberSyncRes, err error) {
 	resp = &types.GroupMemberSyncRes{
-		GroupMembers: []types.GroupMemberSyncItem{},
+		GroupMembers: []types.GroupMemberSyncDataItem{},
 	}
 
 	if len(req.Groups) == 0 {
@@ -48,7 +48,7 @@ func (l *GroupMemberSyncLogic) GroupMemberSync(req *types.GroupMemberSyncReq) (r
 		}
 
 		for _, member := range members {
-			resp.GroupMembers = append(resp.GroupMembers, types.GroupMemberSyncItem{
+			resp.GroupMembers = append(resp.GroupMembers, types.GroupMemberSyncDataItem{
 				GroupID:   member.GroupID,
 				UserID:    member.UserID,
 				Role:      member.Role,

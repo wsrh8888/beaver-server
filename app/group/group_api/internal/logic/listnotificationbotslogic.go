@@ -34,9 +34,9 @@ func (l *ListNotificationBotsLogic) ListNotificationBots(req *types.ListNotifica
 	}
 
 	baseURL := l.svcCtx.Config.ApiBaseUrl
-	items := make([]types.NotificationBotItem, 0, len(records))
+	items := make([]types.ListNotificationBotsItem, 0, len(records))
 	for _, w := range records {
-		items = append(items, types.NotificationBotItem{
+		items = append(items, types.ListNotificationBotsItem{
 			ID:         int64(w.ID),
 			Name:       w.Name,
 			WebhookURL: fmt.Sprintf("%s/api/open/v1/webhook/incoming?token=%s", baseURL, w.Token),

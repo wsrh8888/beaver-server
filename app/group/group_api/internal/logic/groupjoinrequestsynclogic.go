@@ -28,7 +28,7 @@ func NewGroupJoinRequestSyncLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinRequestSyncReq) (resp *types.GroupJoinRequestSyncRes, err error) {
 	resp = &types.GroupJoinRequestSyncRes{
-		GroupJoinRequests: []types.GroupJoinRequestSyncItem{},
+		GroupJoinRequests: []types.GroupJoinRequestSyncDataItem{},
 	}
 
 	if len(req.Groups) == 0 {
@@ -47,7 +47,7 @@ func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinReq
 		}
 
 		for _, request := range requests {
-			resp.GroupJoinRequests = append(resp.GroupJoinRequests, types.GroupJoinRequestSyncItem{
+			resp.GroupJoinRequests = append(resp.GroupJoinRequests, types.GroupJoinRequestSyncDataItem{
 				GroupID:         request.GroupID,
 				ApplicantUserID: request.ApplicantUserID,
 				Message:         request.Message,

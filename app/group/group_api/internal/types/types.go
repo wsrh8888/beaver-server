@@ -111,7 +111,7 @@ type GroupJoinRequestListRes struct {
 	Count int64                  `json:"count"` // 总数
 }
 
-type GroupJoinRequestSyncItem struct {
+type GroupJoinRequestSyncDataItem struct {
 	GroupID         string `json:"groupId"`         // 群组ID
 	ApplicantUserID string `json:"applicantUserId"` // 申请者用户ID
 	Message         string `json:"message"`         // 申请消息
@@ -124,12 +124,17 @@ type GroupJoinRequestSyncItem struct {
 }
 
 type GroupJoinRequestSyncReq struct {
-	UserID string                 `header:"Beaver-User-Id"`
-	Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
+	UserID string                            `header:"Beaver-User-Id"`
+	Groups []GroupJoinRequestSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 }
 
 type GroupJoinRequestSyncRes struct {
-	GroupJoinRequests []GroupJoinRequestSyncItem `json:"groupJoinRequests"` // 入群申请变化
+	GroupJoinRequests []GroupJoinRequestSyncDataItem `json:"groupJoinRequests"` // 入群申请变化
+}
+
+type GroupJoinRequestSyncVersionItem struct {
+	GroupID string `json:"groupId"` // 群组ID
+	Version int64  `json:"version"` // 本地版本号
 }
 
 type GroupJoinRes struct {
@@ -178,7 +183,7 @@ type GroupMemberRemoveRes struct {
 	Version int64 `json:"version"` // 群成员新版本号
 }
 
-type GroupMemberSyncItem struct {
+type GroupMemberSyncDataItem struct {
 	GroupID   string `json:"groupId"`   // 群组ID
 	UserID    string `json:"userId"`    // 用户ID
 	Role      int8   `json:"role"`      // 成员角色：1群主 2管理员 3普通成员
@@ -190,12 +195,17 @@ type GroupMemberSyncItem struct {
 }
 
 type GroupMemberSyncReq struct {
-	UserID string                 `header:"Beaver-User-Id"`
-	Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
+	UserID string                       `header:"Beaver-User-Id"`
+	Groups []GroupMemberSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 }
 
 type GroupMemberSyncRes struct {
-	GroupMembers []GroupMemberSyncItem `json:"groupMembers"` // 群成员变化
+	GroupMembers []GroupMemberSyncDataItem `json:"groupMembers"` // 群成员变化
+}
+
+type GroupMemberSyncVersionItem struct {
+	GroupID string `json:"groupId"` // 群组ID
+	Version int64  `json:"version"` // 本地版本号
 }
 
 type GroupMineItem struct {
@@ -249,7 +259,7 @@ type GroupSearchRes struct {
 	Count int64             `json:"count"` // 总数
 }
 
-type GroupSyncItem struct {
+type GroupSyncDataItem struct {
 	GroupID   string `json:"groupId"`   // 群组ID
 	Title     string `json:"title"`     // 群组名称
 	Avatar    string `json:"avatar"`    // 群组头像
@@ -263,16 +273,23 @@ type GroupSyncItem struct {
 
 type GroupSyncReq struct {
 	UserID string                 `header:"Beaver-User-Id"`
-	Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
+	Groups []GroupSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 }
 
 type GroupSyncRes struct {
-	Groups []GroupSyncItem `json:"groups"` // 群组资料变化
+	Groups []GroupSyncDataItem `json:"groups"` // 群组资料变化
 }
 
-type GroupVersionSyncItem struct {
+type GroupSyncVersionItem struct {
 	GroupID string `json:"groupId"` // 群组ID
 	Version int64  `json:"version"` // 本地版本号
+}
+
+type ListNotificationBotsItem struct {
+	ID         int64  `json:"id"`         // 机器人ID
+	Name       string `json:"name"`       // 机器人名称
+	WebhookURL string `json:"webhookUrl"` // Webhook 推送 URL
+	CreatedAt  int64  `json:"createdAt"`  // 创建时间戳
 }
 
 type ListNotificationBotsReq struct {
@@ -281,7 +298,7 @@ type ListNotificationBotsReq struct {
 }
 
 type ListNotificationBotsRes struct {
-	List []NotificationBotItem `json:"list"`
+	List []ListNotificationBotsItem `json:"list"` // 机器人列表
 }
 
 type MuteAllGroupReq struct {
@@ -302,13 +319,6 @@ type MuteGroupMemberReq struct {
 }
 
 type MuteGroupMemberRes struct {
-}
-
-type NotificationBotItem struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	WebhookURL string `json:"webhookUrl"`
-	CreatedAt  int64  `json:"createdAt"`
 }
 
 type ResetNotificationBotSecretReq struct {

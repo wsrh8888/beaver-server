@@ -178,18 +178,15 @@ type (
 
 // 群资料同步（基于群组版本对象）
 type (
-	GroupSyncReq {
-		UserID string                 `header:"Beaver-User-Id"`
-		Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
-	}
-	GroupVersionSyncItem {
+	GroupSyncVersionItem {
 		GroupID string `json:"groupId"` // 群组ID
 		Version int64  `json:"version"` // 本地版本号
 	}
-	GroupSyncRes {
-		Groups []GroupSyncItem `json:"groups"` // 群组资料变化
+	GroupSyncReq {
+		UserID string                 `header:"Beaver-User-Id"`
+		Groups []GroupSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
-	GroupSyncItem {
+	GroupSyncDataItem {
 		GroupID   string `json:"groupId"` // 群组ID
 		Title     string `json:"title"` // 群组名称
 		Avatar    string `json:"avatar"` // 群组头像
@@ -200,18 +197,22 @@ type (
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
+	GroupSyncRes {
+		Groups []GroupSyncDataItem `json:"groups"` // 群组资料变化
+	}
 )
 
 // 群成员同步（基于群组版本对象）
 type (
+	GroupMemberSyncVersionItem {
+		GroupID string `json:"groupId"` // 群组ID
+		Version int64  `json:"version"` // 本地版本号
+	}
 	GroupMemberSyncReq {
-		UserID string                 `header:"Beaver-User-Id"`
-		Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
+		UserID string                       `header:"Beaver-User-Id"`
+		Groups []GroupMemberSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
-	GroupMemberSyncRes {
-		GroupMembers []GroupMemberSyncItem `json:"groupMembers"` // 群成员变化
-	}
-	GroupMemberSyncItem {
+	GroupMemberSyncDataItem {
 		GroupID   string `json:"groupId"` // 群组ID
 		UserID    string `json:"userId"` // 用户ID
 		Role      int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
@@ -221,18 +222,22 @@ type (
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
+	GroupMemberSyncRes {
+		GroupMembers []GroupMemberSyncDataItem `json:"groupMembers"` // 群成员变化
+	}
 )
 
 // 入群申请同步（基于群组版本对象）
 type (
+	GroupJoinRequestSyncVersionItem {
+		GroupID string `json:"groupId"` // 群组ID
+		Version int64  `json:"version"` // 本地版本号
+	}
 	GroupJoinRequestSyncReq {
-		UserID string                 `header:"Beaver-User-Id"`
-		Groups []GroupVersionSyncItem `json:"groups"` // 要同步的群组版本信息
+		UserID string                            `header:"Beaver-User-Id"`
+		Groups []GroupJoinRequestSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
-	GroupJoinRequestSyncRes {
-		GroupJoinRequests []GroupJoinRequestSyncItem `json:"groupJoinRequests"` // 入群申请变化
-	}
-	GroupJoinRequestSyncItem {
+	GroupJoinRequestSyncDataItem {
 		GroupID         string `json:"groupId"` // 群组ID
 		ApplicantUserID string `json:"applicantUserId"` // 申请者用户ID
 		Message         string `json:"message"` // 申请消息
@@ -242,6 +247,9 @@ type (
 		Version         int64  `json:"version"` // 版本号
 		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt       int64  `json:"updatedAt"` // 更新时间戳
+	}
+	GroupJoinRequestSyncRes {
+		GroupJoinRequests []GroupJoinRequestSyncDataItem `json:"groupJoinRequests"` // 入群申请变化
 	}
 )
 
@@ -363,14 +371,14 @@ type (
 		UserID  string `header:"Beaver-User-Id"`
 		GroupID string `json:"groupId"`
 	}
-	NotificationBotItem {
-		ID         int64  `json:"id"`
-		Name       string `json:"name"`
-		WebhookURL string `json:"webhookUrl"`
-		CreatedAt  int64  `json:"createdAt"`
+	ListNotificationBotsItem {
+		ID         int64  `json:"id"` // 机器人ID
+		Name       string `json:"name"` // 机器人名称
+		WebhookURL string `json:"webhookUrl"` // Webhook 推送 URL
+		CreatedAt  int64  `json:"createdAt"` // 创建时间戳
 	}
 	ListNotificationBotsRes {
-		List []NotificationBotItem `json:"list"`
+		List []ListNotificationBotsItem `json:"list"` // 机器人列表
 	}
 )
 
