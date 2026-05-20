@@ -1,0 +1,229 @@
+syntax = "v1"
+
+// ==================== OAuth 2.0 授权接口 ====================
+// Beaver 作为 OAuth2 授权服务器，支持第三方应用「用 Beaver 账号登录」
+//
+// 标准 Authorization Code Flow（适合服务端应用）:
+//   1. GET  /oauth/authorize?appId=&redirectUri=&scope=&state=  → 用户授权页
+//   2. 用户同意 → Beaver 回调 redirectUri?code=xxx&state=yyy
+//   3. POST /oauth/token  (appId + appSecret + code)          → access_token
+//   4. GET  /oauth/userinfo  (Bearer token)                   → 用户信息
+//
+// Authorization Code + PKCE（适合 SPA / 移动端 / OpenClaw 等本地应用）:
+//   1. App 生成 code_verifier（随机串）和 code_challenge = BASE64URL(SHA256(verifier))
+//   2. GET  /oauth/authorize?...&code_challenge=&code_challenge_method=S256
+//   3. POST /oauth/token  (appId + code + code_verifier，不需要 appSecret)
+//   4. GET  /oauth/userinfo
+
+type (
+	// 获取授权码（引导用户到授权页）
+	GetAuthorizeCodeReq {
+		AppID               string `form:"appId"`
+		RedirectURI         string `form:"redirectUri"`
+		Scope               string `form:"scope,optional"`        // 空格分隔的权限列表
+		State               string `form:"state,optional"`        // CSRF 防护，原样返回
+		ResponseType        string `form:"responseType,optional"` // 固定 "code"
+		// PKCE 参数（移动端/SPA 必填）
+		CodeChallenge       string `form:"codeChallenge,optional"`
+		CodeChallengeMethod string `form:"codeChallengeMethod,optional"` // 固定 "S256"
+	}
+
+	AuthorizeCodeRes {
+		Code  string `json:"code"`
+		State string `json:"state,optional"`
+	}
+)
+
+type (
+	// 用授权码换取 Token
+	GetTokenByCodeReq {
+		AppID        string `json:"appId"`
+		AppSecret    string `json:"appSecret,optional"`  // 服务端应用必填；PKCE 公开客户端不需要
+		Code         string `json:"code"`
+		RedirectURI  string `json:"redirectUri,optional"`
+		CodeVerifier string `json:"codeVerifier,optional"` // PKCE 必填
+	}
+
+	GetTokenByCodeRes {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken,optional"`
+		ExpiresIn    int64  `json:"expiresIn"`
+		TokenType    string `json:"tokenType"`
+		Scope        string `json:"scope,optional"`
+	}
+)
+
+type (
+	// OIDC 用户信息（标准 /userinfo 端点，用 access_token 换用户信息）
+	GetOIDCUserInfoReq {}
+
+	GetOIDCUserInfoRes {
+		Sub      string `json:"sub"`               // 用户唯一 ID（对应 userId）
+		Name     string `json:"name"`              // 昵称
+		Picture  string `json:"picture,optional"`  // 头像 URL
+		Email    string `json:"email,optional"`
+		Phone    string `json:"phone,optional"`
+	}
+)
+
+type (
+	// 撤销 Token（用户登出或应用解除授权时调用）
+	RevokeTokenReq {
+		Token         string `json:"token"`
+		TokenTypeHint string `json:"tokenTypeHint,optional"` // access_token 或 refresh_token
+	}
+
+	RevokeTokenRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 生成扫码登录二维码
+	GenerateQrCodeReq {
+		AppID string `json:"appId"`
+	}
+
+	GenerateQrCodeRes {
+		QrCodeURL string `json:"qrCodeUrl"`
+		SceneID   string `json:"sceneId"`
+		ExpireIn  int64  `json:"expireIn"`
+	}
+)
+
+type (
+	// 查询扫码状态
+	CheckQrCodeStatusReq {
+		SceneID string `form:"sceneId"`
+	}
+
+	CheckQrCodeStatusRes {
+		Status string `json:"status"` // waiting / scanned / confirmed / cancelled / expired
+		UserId string `json:"userId,optional"`
+	}
+)
+
+type (
+	// 确认扫码登录（由已登录的移动端 App 调用）
+	ConfirmQrCodeLoginReq {
+		SceneID string `json:"sceneId"`
+		UserID  string `json:"userId"`
+	}
+
+	ConfirmQrCodeLoginRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// H5 免登获取 authCode
+	GetH5AuthCodeReq {
+		AppID string `json:"appId"`
+	}
+
+	GetH5AuthCodeRes {
+		AuthCode string `json:"authCode"`
+		ExpireIn int64  `json:"expireIn"`
+	}
+)
+
+type (
+	// 账号密码登录
+	PasswordLoginReq {
+		AppID    string `json:"appId"`
+		Account  string `json:"account"`
+		Password string `json:"password"`
+	}
+
+	PasswordLoginRes {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken"`
+		ExpiresIn    int64  `json:"expiresIn"`
+		UserID       string `json:"userId"`
+		NickName     string `json:"nickName"`
+		Avatar       string `json:"avatar,optional"`
+	}
+)
+
+type (
+	// 用 H5 authCode 换取用户信息
+	GetUserInfoByH5CodeReq {
+		AppID     string `json:"appId"`
+		AppSecret string `json:"appSecret"`
+		AuthCode  string `json:"authCode"`
+	}
+
+	GetUserInfoByH5CodeRes {
+		UserID   string `json:"userId"`
+		NickName string `json:"nickName"`
+		Avatar   string `json:"avatar,optional"`
+		Phone    string `json:"phone,optional"`
+		Email    string `json:"email,optional"`
+	}
+)
+
+type (
+	// PC 端快捷登录签名
+	GetDesktopQuickLoginSignReq {}
+
+	GetDesktopQuickLoginSignRes {
+		QuickSign string `json:"quickSign"`
+	}
+)
+
+// ==================== 无需认证的公开接口 ====================
+@server (
+	group: oauth_public
+)
+service open {
+	@doc "生成扫码登录二维码"
+	@handler GenerateQrCode
+	post /api/open/v1/oauth/qrcode (GenerateQrCodeReq) returns (GenerateQrCodeRes)
+
+	@doc "查询扫码状态（轮询）"
+	@handler CheckQrCodeStatus
+	get /api/open/v1/oauth/qrcode_status (CheckQrCodeStatusReq) returns (CheckQrCodeStatusRes)
+
+	@doc "确认扫码登录（移动端调用）"
+	@handler ConfirmQrCodeLogin
+	post /api/open/v1/oauth/qrcode_confirm (ConfirmQrCodeLoginReq) returns (ConfirmQrCodeLoginRes)
+
+	@doc "账号密码登录"
+	@handler PasswordLogin
+	post /api/open/v1/oauth/password_login (PasswordLoginReq) returns (PasswordLoginRes)
+
+	@doc "H5 免登获取 authCode"
+	@handler GetH5AuthCode
+	post /api/open/v1/oauth/h5_authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
+
+	@doc "用授权码换取 Token（支持 PKCE）"
+	@handler GetTokenByCode
+	post /api/open/v1/oauth/token (GetTokenByCodeReq) returns (GetTokenByCodeRes)
+
+	@doc "撤销 Token（登出 / 解除授权）"
+	@handler RevokeToken
+	post /api/open/v1/oauth/revoke (RevokeTokenReq) returns (RevokeTokenRes)
+}
+
+// ==================== 需要认证的接口 ====================
+@server (
+	group:      oauth
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "获取授权码（引导用户授权，支持 PKCE 的 code_challenge）"
+	@handler GetAuthorizeCode
+	get /api/open/v1/oauth/authorize (GetAuthorizeCodeReq) returns (AuthorizeCodeRes)
+
+	@doc "获取当前用户信息（OIDC 标准 userinfo 端点）"
+	@handler GetOIDCUserInfo
+	get /api/open/v1/oauth/userinfo (GetOIDCUserInfoReq) returns (GetOIDCUserInfoRes)
+
+	@doc "用 H5 authCode 换取用户信息"
+	@handler GetUserInfoByH5Code
+	post /api/open/v1/oauth/h5_userinfo (GetUserInfoByH5CodeReq) returns (GetUserInfoByH5CodeRes)
+
+	@doc "获取 PC 端快捷登录签名"
+	@handler GetDesktopQuickLoginSign
+	post /api/open/v1/oauth/desktop_quick_login (GetDesktopQuickLoginSignReq) returns (GetDesktopQuickLoginSignRes)
+}

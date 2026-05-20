@@ -12,10 +12,11 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
+	"beaver/app/open/open_models"
 	"beaver/app/track/track_models"
 	"beaver/app/update/update_models"
 	"beaver/app/user/user_models"
-	"beaver/core"
+	"beaver/core/coregorm"
 	"beaver/database"
 	"flag"
 	"fmt"
@@ -32,7 +33,7 @@ func main() {
 	flag.Parse()
 
 	if opt.DB {
-		db := core.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local")
+		db := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local")
 
 		// 禁用外键检查
 		db.Exec("SET FOREIGN_KEY_CHECKS = 0")
@@ -96,6 +97,21 @@ func main() {
 			&backend_models.AdminSystemAuthorityMenu{},
 			&backend_models.AdminSystemAuthorityUser{},
 			&backend_models.AdminSystemMenu{},
+
+			// 开放平台相关表
+			&open_models.OpenDeveloper{},
+			&open_models.OpenApp{},
+			&open_models.OpenAppPermission{},
+			&open_models.OpenAppVersion{},
+			&open_models.OpenAppToken{}, // 应用 Token
+			&open_models.OpenAccessToken{},
+			&open_models.OpenRefreshToken{},
+			&open_models.OpenAuthCode{},
+			&open_models.OpenQrCode{},
+			&open_models.OpenH5AuthCode{},        // H5 免登授权码表
+			&open_models.OpenEventSubscription{}, // 事件订阅配置表
+			&open_models.OpenBotConfig{},         // Bot 配置表
+			&open_models.OpenIncomingWebhook{},   // Incoming Webhook 配置表
 		)
 
 		if err != nil {

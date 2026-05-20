@@ -1,0 +1,65 @@
+syntax = "proto3"; //指定proto版本
+package open_rpc;
+
+option go_package = "./open_rpc";
+
+// ==================== OAuth 服务定义 ====================
+
+// 用授权码换取 Token 请求
+message ExchangeTokenReq {
+  string app_id = 1; // 应用 ID
+  string code = 2; // 授权码
+}
+
+message ExchangeTokenRes {
+  string access_token = 1; // 访问令牌
+  string refresh_token = 2; // 刷新令牌
+  int64 expires_in = 3; // 过期时间（秒）
+  string token_type = 4; // Token 类型（Bearer）
+  string user_id = 5; // 用户 ID
+}
+
+// 获取用户信息请求
+message GetUserInfoReq {
+  string access_token = 1; // 访问令牌
+}
+
+message GetUserInfoRes {
+  string user_id = 1; // 用户 ID
+  string nick_name = 2; // 昵称
+  string avatar = 3; // 头像 URL
+  string phone = 4; // 手机号
+  string email = 5; // 邮箱
+}
+
+// 验证 Token 请求
+message ValidateTokenReq {
+  string access_token = 1; // 访问令牌
+}
+
+message ValidateTokenRes {
+  bool valid = 1; // 是否有效
+  string user_id = 2; // 用户 ID（如果有效）
+  string app_id = 3; // 应用 ID
+}
+
+// 刷新 Token 请求
+message RefreshTokenReq {
+  string app_id = 1; // 应用 ID
+  string refresh_token = 2; // 刷新令牌
+}
+
+message RefreshTokenRes {
+  string access_token = 1; // 新的访问令牌
+  string refresh_token = 2; // 新的刷新令牌
+  int64 expires_in = 3; // 过期时间（秒）
+}
+
+service open {
+  rpc ExchangeToken(ExchangeTokenReq) returns (ExchangeTokenRes); // 用授权码换取 Token
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
+  rpc ValidateToken(ValidateTokenReq) returns (ValidateTokenRes); // 验证 Token
+  rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenRes); // 刷新 Token
+}
+
+// goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --style=goZero

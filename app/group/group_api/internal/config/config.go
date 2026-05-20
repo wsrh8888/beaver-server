@@ -15,7 +15,11 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	Etcd            string
+	Etcd       string
+	ApiBaseUrl string
+	RocketMQ   struct {
+		Addr string
+	}
 	UserRpc         zrpc.RpcClientConf
 	GroupRpc        zrpc.RpcClientConf
 	ChatRpc         zrpc.RpcClientConf

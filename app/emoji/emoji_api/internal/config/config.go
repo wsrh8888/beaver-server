@@ -13,4 +13,7 @@ type Config struct {
 		Password string
 		Db       int
 	}
+	RocketMQ struct {
+		Addr string
+	}
 }

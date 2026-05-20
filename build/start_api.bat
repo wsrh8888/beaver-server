@@ -1,8 +1,6 @@
 @echo off
-REM 启动所有API服务
 setlocal enabledelayedexpansion
 
-REM 获取脚本所在目录的上级目录（beaver-server根目录）
 for %%i in ("%~dp0..") do set "ROOT_DIR=%%~fi"
 
 wt new-tab --title "Auth API" cmd /k "cd /d !ROOT_DIR!\app\auth\auth_api && go run auth.go" ^
@@ -20,4 +18,5 @@ wt new-tab --title "Auth API" cmd /k "cd /d !ROOT_DIR!\app\auth\auth_api && go r
   ; new-tab --title "Update API" cmd /k "cd /d !ROOT_DIR!\app\update\update_api && go run update.go" ^
   ; new-tab --title "Datasync API" cmd /k "cd /d !ROOT_DIR!\app\datasync\datasync_api && go run datasync.go" ^
   ; new-tab --title "Notification API" cmd /k "cd /d !ROOT_DIR!\app\notification\notification_api && go run notification.go" ^
-  ; new-tab --title "Call API" cmd /k "cd /d !ROOT_DIR!\app\call\call_api && go run call.go"
+  ; new-tab --title "Call API" cmd /k "cd /d !ROOT_DIR!\app\call\call_api && go run call.go" ^
+  ; new-tab --title "Open API" cmd /k "cd /d !ROOT_DIR!\app\open\open_api && go run open.go"

@@ -1,0 +1,53 @@
+syntax = "v1"
+
+// ==================== 用户接口 ====================
+
+type (
+	GetUserInfoReq {
+		UserID string `form:"userId"` // 要查询的用户ID
+	}
+
+	GetUserInfoUserItem {
+		UserID   string `json:"userId"`           // 用户ID
+		Nickname string `json:"nickname"`         // 用户昵称
+		Avatar   string `json:"avatar,optional"`  // 头像URL
+		Phone    string `json:"phone,optional"`   // 手机号
+		Email    string `json:"email,optional"`   // 邮箱
+	}
+
+	GetUserInfoRes {
+		User GetUserInfoUserItem `json:"user"` // 用户信息
+	}
+)
+
+type (
+	GetUserListReq {
+		UserIDs []string `json:"userIds"` // 用户ID列表（批量查询）
+	}
+
+	GetUserListUserItem {
+		UserID   string `json:"userId"`          // 用户ID
+		Nickname string `json:"nickname"`        // 用户昵称
+		Avatar   string `json:"avatar,optional"` // 头像URL
+		Phone    string `json:"phone,optional"`  // 手机号
+		Email    string `json:"email,optional"`  // 邮箱
+	}
+
+	GetUserListRes {
+		Users []GetUserListUserItem `json:"users"` // 用户列表
+	}
+)
+
+@server (
+	group:      user
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "获取单个用户信息"
+	@handler GetUserInfo
+	get /api/open/v1/user/get_info (GetUserInfoReq) returns (GetUserInfoRes)
+
+	@doc "批量获取用户信息"
+	@handler GetUserList
+	post /api/open/v1/user/list (GetUserListReq) returns (GetUserListRes)
+}

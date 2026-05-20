@@ -7,7 +7,7 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -62,11 +62,25 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 				},
 			},
 		}
-		payload := map[string]interface{}{"tableUpdates": tableUpdates}
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive,
-			req.UserID, req.FriendID, payload, "")
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendReceive,
-			req.FriendID, req.UserID, payload, "")
+		payload1 := map[string]interface{}{
+			"command":        wsCommandConst.FRIEND_OPERATION,
+			"type":           wsTypeConst.FriendReceive,
+			"senderId":       req.UserID,
+			"targetId":       req.FriendID,
+			"body":           map[string]interface{}{"tableUpdates": tableUpdates},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload1)
+
+		payload2 := map[string]interface{}{
+			"command":        wsCommandConst.FRIEND_OPERATION,
+			"type":           wsTypeConst.FriendReceive,
+			"senderId":       req.FriendID,
+			"targetId":       req.UserID,
+			"body":           map[string]interface{}{"tableUpdates": tableUpdates},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload2)
 	}()
 
 	return &types.DeleteFriendRes{}, nil

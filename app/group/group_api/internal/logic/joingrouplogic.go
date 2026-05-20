@@ -13,7 +13,7 @@ import (
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -202,15 +202,23 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		// 推送给所有群成员 - 群成员变动通知
 		for _, member := range response.Members {
 			if member.UserID != req.UserID { // 不通知操作者自己
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
-					"table": "group_members",
-					"data": []map[string]interface{}{
-						{
-							"version": memberVersion,
-							"groupId": req.GroupID,
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.GROUP_OPERATION,
+					"type":     wsTypeConst.GroupMemberReceive,
+					"senderId": req.UserID,
+					"targetId": member.UserID,
+					"body": map[string]interface{}{
+						"table": "group_members",
+						"data": []map[string]interface{}{
+							{
+								"version": memberVersion,
+								"groupId": req.GroupID,
+							},
 						},
 					},
-				}, "")
+					"conversationId": "",
+				}
+				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}
 	}()

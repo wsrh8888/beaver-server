@@ -1,0 +1,665 @@
+name: AI Code Security Scanner
+
+
+
+on:
+
+  schedule:
+
+    - cron: '0 2 * * 0'
+
+  workflow_dispatch:
+
+
+
+jobs:
+
+  scan-and-fix:
+
+    runs-on: ubuntu-latest
+
+
+
+    steps:
+
+      - name: 检出代码
+
+        uses: actions/checkout@v3
+
+        with:
+
+          fetch-depth: 0
+
+
+
+      - name: 安装 Python
+
+        uses: actions/setup-python@v4
+
+        with:
+
+          python-version: '3.11'
+
+
+
+      - name: 安装扫描工具
+
+        run: |
+
+          pip install semgrep google-genai openai
+
+
+
+      - name: 运行代码扫描
+
+        run: |
+
+          semgrep --config=auto --json -o scan_results.json || true
+
+
+
+      - name: AI 分析并写回修复
+
+        env:
+
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          # DeepSeek 仅支持 1～8192；Gemini 可更高（脚本内会按提供商封顶）
+          AI_MAX_OUTPUT_TOKENS: ${{ vars.AI_MAX_OUTPUT_TOKENS }}
+
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+
+          DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL }}
+
+        run: |
+
+          python << 'PYTHON_SCRIPT'
+
+          import base64
+
+          import binascii
+
+          import json
+
+          import os
+
+          import time
+
+
+
+          def resolve_repo_file_path(rel):
+
+              if not rel or rel == "/dev/null":
+
+                  return rel
+
+              candidates = []
+
+              seen = set()
+
+              def add(p):
+
+                  if p and p not in seen:
+
+                      seen.add(p)
+
+                      candidates.append(p)
+
+              add(rel)
+
+              if not rel.startswith("app/"):
+
+                  add("app/" + rel)
+
+              if rel.startswith("app/"):
+
+                  add(rel[4:])
+
+              for c in candidates:
+
+                  if os.path.isfile(c):
+
+                      return c
+
+              return rel
+
+
+
+          MAX_ATTEMPTS = 5
+
+          BASE_DELAY_SEC = 5
+
+
+
+          def env_default(name, default):
+
+              v = os.environ.get(name)
+
+              if v is None:
+
+                  return default
+
+              v = v.strip()
+
+              return v if v else default
+
+
+
+          def max_output_tokens(provider):
+              """DeepSeek 官方限制 max_tokens 为 [1, 8192]；Gemini 可用更大上限。"""
+              if provider == "gemini":
+                  cap_hi = 65536
+                  default = "32768"
+                  floor = 1024
+              else:
+                  cap_hi = 8192
+                  default = "8192"
+                  floor = 1
+              try:
+                  v = int(env_default("AI_MAX_OUTPUT_TOKENS", default))
+              except ValueError:
+                  v = int(default)
+              return max(floor, min(v, cap_hi))
+
+
+
+          def retry_transient(attempt_fn, exc_types):
+
+              for attempt in range(MAX_ATTEMPTS):
+
+                  try:
+
+                      return attempt_fn()
+
+                  except exc_types as e:
+
+                      try:
+
+                          from openai import APIConnectionError
+
+                          conn_err = isinstance(e, APIConnectionError)
+
+                      except ImportError:
+
+                          conn_err = False
+
+                      status = getattr(e, "status_code", None) or getattr(e, "code", None)
+
+                      transient = conn_err or status in (429, 500, 502, 503, 504)
+
+                      if transient and attempt < MAX_ATTEMPTS - 1:
+
+                          delay = min(60, BASE_DELAY_SEC * (2 ** attempt))
+
+                          reason = f"HTTP {status}" if status is not None else "网络或连接异常"
+
+                          print(
+
+                              f"API 暂不可用 ({reason})，"
+
+                              f"第 {attempt + 1}/{MAX_ATTEMPTS} 次尝试，{delay} 秒后重试..."
+
+                          )
+
+                          time.sleep(delay)
+
+                      else:
+
+                          raise
+
+
+
+          def strip_text_fence(text):
+
+              t = (text or "").strip().replace("\r\n", "\n")
+
+              lines = t.splitlines()
+
+              if lines and lines[0].strip().startswith("```"):
+
+                  lines = lines[1:]
+
+                  while lines and lines[-1].strip().startswith("```"):
+
+                      lines = lines[:-1]
+
+              return "\n".join(lines).strip()
+
+
+
+          def generate_text(prompt):
+
+              provider = env_default("AI_PROVIDER", "deepseek").lower()
+
+              mo = max_output_tokens(provider)
+
+              if provider == "gemini":
+
+                  from google import genai
+
+                  from google.genai import types
+
+                  from google.genai.errors import ServerError
+
+                  key = env_default("GEMINI_API_KEY", "")
+
+                  if not key:
+
+                      raise SystemExit("已选择 gemini 但未设置 GEMINI_API_KEY")
+
+                  model = env_default("GEMINI_MODEL", "gemini-2.5-flash")
+
+                  client = genai.Client(api_key=key)
+
+                  cfg = types.GenerateContentConfig(max_output_tokens=mo)
+
+
+
+                  def once():
+
+                      return client.models.generate_content(
+
+                          model=model, contents=prompt, config=cfg
+
+                      )
+
+
+
+                  resp = retry_transient(once, ServerError)
+
+                  return (resp.text or "").strip()
+
+
+
+              if provider == "deepseek":
+
+                  from openai import APIConnectionError, APIStatusError, OpenAI
+
+                  key = env_default("DEEPSEEK_API_KEY", "")
+
+                  if not key:
+
+                      raise SystemExit("已选择 deepseek 但未设置 DEEPSEEK_API_KEY")
+
+                  model = env_default("DEEPSEEK_MODEL", "deepseek-chat")
+
+                  base_url = env_default("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+
+                  client = OpenAI(api_key=key, base_url=base_url)
+
+
+
+                  def once():
+
+                      return client.chat.completions.create(
+
+                          model=model,
+
+                          messages=[{"role": "user", "content": prompt}],
+
+                          max_tokens=mo,
+
+                      ).choices[0].message.content or ""
+
+
+
+                  return retry_transient(once, (APIStatusError, APIConnectionError)).strip()
+
+
+
+              raise SystemExit(f"不支持的 AI_PROVIDER: {provider}")
+
+
+
+          def parse_skip_or_b64(text):
+
+              t = strip_text_fence(text)
+
+              lo, hi = t.find("{"), t.rfind("}")
+
+              if lo == -1 or hi <= lo:
+
+                  raise ValueError("响应中未找到 JSON 对象")
+
+              obj = json.loads(t[lo : hi + 1])
+
+              if not isinstance(obj, dict):
+
+                  raise ValueError("JSON 根须为对象")
+
+              if obj.get("skip") is True:
+
+                  return None
+
+              b64 = obj.get("content_b64")
+
+              if not isinstance(b64, str) or not b64.strip():
+
+                  raise ValueError("缺少 content_b64 或格式错误")
+
+              raw_b64 = "".join(b64.split())
+
+              try:
+
+                  data = base64.b64decode(raw_b64, validate=True)
+
+              except binascii.Error as e:
+
+                  raise ValueError(f"Base64 无效: {e}") from e
+
+              return data.decode("utf-8")
+
+
+
+          def load_issue_files(issues):
+
+              seen = set()
+
+              paths = []
+
+              for r in issues:
+
+                  raw = (r.get("path") or "").strip()
+
+                  if not raw:
+
+                      continue
+
+                  resolved = resolve_repo_file_path(raw)
+
+                  if not os.path.isfile(resolved):
+
+                      print(f"跳过（文件不存在）: {raw} -> {resolved}")
+
+                      continue
+
+                  if resolved not in seen:
+
+                      seen.add(resolved)
+
+                      paths.append(resolved)
+
+              bundle = {}
+
+              for p in paths:
+
+                  with open(p, "r", encoding="utf-8", errors="replace") as fh:
+
+                      bundle[p] = fh.read()
+
+              return paths, bundle
+
+
+
+          try:
+
+              with open("scan_results.json", "r") as f:
+
+                  data = json.load(f)
+
+          except FileNotFoundError:
+
+              print("没有扫描结果文件")
+
+              exit(0)
+
+
+
+          if not data.get("results"):
+
+              print("没有发现问题")
+
+              exit(0)
+
+
+
+          issues = [
+
+              r
+
+              for r in data["results"]
+
+              if r.get("extra", {}).get("severity") in ["ERROR", "WARNING"]
+
+          ][:3]
+
+
+
+          if not issues:
+
+              print("没有高危问题")
+
+              exit(0)
+
+
+
+          paths, bundle = load_issue_files(issues)
+
+          if not paths:
+
+              print("没有可读取的本地文件")
+
+              exit(0)
+
+
+
+          any_change = False
+
+          for path in paths:
+
+              rel = [
+
+                  r
+
+                  for r in issues
+
+                  if resolve_repo_file_path((r.get("path") or "").strip()) == path
+
+              ]
+
+              src = bundle[path]
+
+              prompt = (
+
+                  "你是代码安全专家。下面仅针对**一个文件**。\n"
+
+                  "你必须只根据给出的原文修改，禁止臆造不存在的代码。\n\n"
+
+                  "与本文件相关的 Semgrep 告警（JSON）：\n"
+
+                  + json.dumps(rel, indent=2, ensure_ascii=False)
+
+                  + "\n\n===== 文件路径（必须与之一致）=====\n"
+
+                  + path
+
+                  + "\n===== 文件全文 =====\n"
+
+                  + src
+
+                  + "\n===== END =====\n\n"
+
+                  "判断是否为真实漏洞并仅修改本文件。\n"
+
+                  "【输出格式】只输出一个 JSON 对象，禁止 markdown、禁止其它文字：\n"
+
+                  "1) 若本文件无需修改：{\"skip\":true}\n"
+
+                  "2) 若需修改：将修复后的**完整文件**先做 UTF-8 编码，再做 Base64，"
+
+                  "放入唯一字段 content_b64（单行、不要换行分段）。\n"
+
+                  "禁止在 JSON 里嵌套源码明文（不要用 content 传源码）。\n"
+
+              )
+
+              raw = generate_text(prompt)
+
+              try:
+
+                  new_src = parse_skip_or_b64(raw)
+
+              except (json.JSONDecodeError, ValueError, UnicodeDecodeError) as e:
+
+                  print(f"解析失败 ({path}): {e}")
+
+                  print("---- 模型响应前 2500 字 ----")
+
+                  print((raw or "")[:2500])
+
+                  raise SystemExit(1)
+
+              if new_src is None:
+
+                  print(f"跳过（模型判定不改）: {path}")
+
+                  continue
+
+              if new_src == src:
+
+                  print(f"内容与原文相同: {path}")
+
+                  continue
+
+              with open(path, "w", encoding="utf-8", newline="\n") as out:
+
+                  out.write(new_src)
+
+              any_change = True
+
+              print(f"已写入: {path}")
+
+
+
+          with open("ai_fix_applied.flag", "w") as ff:
+
+              ff.write("1" if any_change else "0")
+
+          print("AI 步骤结束，有改动=" + str(any_change))
+
+          PYTHON_SCRIPT
+
+
+
+      - name: 提交并创建 PR
+
+        if: success()
+
+        run: |
+
+          git config user.name "AI Security Bot"
+
+          git config user.email "bot@github-actions"
+
+
+
+          if [ ! -f ai_fix_applied.flag ] || [ "$(cat ai_fix_applied.flag)" != "1" ]; then
+
+            echo "本次未产生需提交的修改，跳过 PR"
+
+            exit 0
+
+          fi
+
+
+
+          if git diff --quiet && git diff --cached --quiet; then
+
+            echo "工作区无改动，跳过"
+
+            exit 0
+
+          fi
+
+
+
+          BRANCH_NAME="ai-security-fix-$(date +%Y%m%d-%H%M%S)"
+
+          git checkout -b "$BRANCH_NAME"
+
+          git add -A
+
+          git status
+
+
+
+          git diff --cached --stat > _diff_stat.txt
+
+          git diff --cached | head -n 120 > _diff_head.txt
+
+
+
+          python << 'WRITE_FILES'
+
+          ds = open("_diff_stat.txt", encoding="utf-8").read()
+
+          dh = open("_diff_head.txt", encoding="utf-8").read()
+
+          commit_msg = (
+
+              "\U0001f916 [AI自动修复] 安全漏洞修复\n\n"
+
+              "本 PR 由 AI 自动生成，请仔细审核后再合并。\n\n"
+
+              "变更统计：\n"
+
+              + ds
+
+              + "\n\n---\n重要提示：请人工审核并运行测试。\n"
+
+          )
+
+          pr_body = (
+
+              "**\u26a0\ufe0f 此 PR 由 AI 自动生成，请务必仔细审核。**\n\n"
+
+              "## 变更统计\n```\n"
+
+              + ds
+
+              + "\n```\n\n## 差异预览（前 120 行）\n```diff\n"
+
+              + dh
+
+              + "\n```\n\n## 检查清单\n"
+
+              + "- [ ] 已审核所有代码改动\n"
+
+              + "- [ ] 已运行测试套件\n"
+
+              + "- [ ] 确认修复有效且安全\n"
+
+          )
+
+          open("_commit_msg.txt", "w", encoding="utf-8").write(commit_msg)
+
+          open("_pr_body.txt", "w", encoding="utf-8").write(pr_body)
+
+          WRITE_FILES
+
+
+
+          git commit -F _commit_msg.txt
+
+          git push origin "$BRANCH_NAME"
+
+
+
+          gh pr create \
+
+            --title "🤖 [AI自动修复] 代码安全漏洞" \
+
+            --body-file _pr_body.txt \
+
+            --label "security,ai-generated,needs-review"
+
+        env:
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+

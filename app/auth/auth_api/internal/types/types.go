@@ -112,10 +112,11 @@ type QrcodeStatusReq struct {
 }
 
 type QrcodeStatusRes struct {
-	Status string `json:"status"`           // 当前状态：pending（待扫码）| confirmed（扫码已确认）| expired（已过期或已使用）
-	Token  string `json:"token,omitempty"`  // 仅 status=confirmed 时返回，PC 端后续请求携带的 JWT，有效期由 generate 时的 source 决定
-	UserID string `json:"userId,omitempty"` // 仅 status=confirmed 时返回，扫码用户的 ID
-	Source string `json:"source,omitempty"` // 仅 status=confirmed 时返回，透传 generate 时的来源标识，下游可据此做差异化处理
+	Status    string `json:"status"`              // 当前状态：pending（待扫码）| confirmed（扫码已确认）| expired（已过期或已使用）
+	Token     string `json:"token,omitempty"`     // 仅 status=confirmed 时返回，PC 端后续请求携带的 JWT
+	UserID    string `json:"userId,omitempty"`    // 仅 status=confirmed 时返回，扫码用户的 ID
+	ExpiresIn int64  `json:"expiresIn,omitempty"` // 仅 status=confirmed 时返回，token 有效期（秒）
+	Source    string `json:"source,omitempty"`    // 仅 status=confirmed 时返回，透传 generate 时的来源标识
 }
 
 type ResetPasswordReq struct {

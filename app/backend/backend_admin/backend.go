@@ -5,7 +5,6 @@ import (
 	"beaver/app/backend/backend_admin/internal/handler"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/common/etcd"
-	"beaver/common/middleware"
 	"flag"
 	"fmt"
 
@@ -26,8 +25,6 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
-
-	server.Use(middleware.RequestLogMiddleware)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_admin", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

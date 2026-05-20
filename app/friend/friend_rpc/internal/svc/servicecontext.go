@@ -5,7 +5,7 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
-	"beaver/core"
+	"beaver/core/coregorm"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
@@ -18,7 +18,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysqlDb := core.InitGorm(c.Mysql.DataSource)
+	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
 
 	return &ServiceContext{
 		Config:  c,

@@ -12,11 +12,13 @@ import (
 	"beaver/app/chat/chat_utils"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
+	open_models "beaver/app/open/open_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/core/corewebhook"
 	"beaver/utils/conversation"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -328,6 +330,9 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		return nil, err
 	}
 
+	// 1.5 检查接收者是否是 Bot，触发 Webhook 回调
+	l.triggerBotWebhookIfNeeded(chatModel, userIds)
+
 	// 1.1 构建 Messages 表更新数据
 	messagesUpdate := map[string]interface{}{
 		"table":          "messages",
@@ -441,9 +446,17 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 			tableUpdates = append(tableUpdates, uc)
 		}
 
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd.Hosts[0], wsCommandConst.CHAT_MESSAGE, messageType, senderId, recipientId, map[string]interface{}{
-			"tableUpdates": tableUpdates,
-		}, conversationId)
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CHAT_MESSAGE,
+			"type":     messageType,
+			"senderId": senderId,
+			"targetId": recipientId,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": conversationId,
+		}
+		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 	}
 }
 
@@ -600,4 +613,86 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 		}
 	}
 	return rpcMsg, nil
+}
+
+// triggerBotWebhookIfNeeded 检查接收者是否是 Bot，如果是则触发 Webhook 回调
+func (l *SendMsgLogic) triggerBotWebhookIfNeeded(chatModel chat_models.ChatMessage, userIds []string) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Logger.Errorf("触发 Bot Webhook 时发生 panic: %v", r)
+		}
+	}()
+
+	// 1. 确定接收者 ID
+	var receiverID string
+	if chatModel.ConversationType == 1 && len(userIds) == 2 {
+		// 私聊：找到不是发送者的那个用户
+		for _, uid := range userIds {
+			if uid != *chatModel.SendUserID {
+				receiverID = uid
+				break
+			}
+		}
+	} else if chatModel.ConversationType == 2 {
+		// 群聊：暂不处理（群 Bot 需要更复杂的逻辑）
+		return
+	}
+
+	if receiverID == "" {
+		return
+	}
+
+	// 2. 检查接收者是否是 Bot（查数据库）
+	var userInfo struct {
+		IsBot int `gorm:"column:is_bot"`
+	}
+	err := l.svcCtx.DB.Table("users").Where("user_id = ?", receiverID).First(&userInfo).Error
+	if err != nil || userInfo.IsBot != 1 {
+		return // 不是 Bot 或查询失败
+	}
+
+	// 3. 查询 Bot 关联的应用
+	var app open_models.OpenApp
+	err = l.svcCtx.DB.Where("bot_user_id = ? AND status = ?", receiverID, 1).First(&app).Error
+	if err != nil {
+		l.Logger.Errorf("Bot 未关联应用或应用已禁用: botUserId=%s, error=%v", receiverID, err)
+		return
+	}
+
+	// 4. 查询 Webhook 配置
+	var webhookConfig open_models.OpenWebhookConfig
+	err = l.svcCtx.DB.Where("app_id = ? AND event_type = ? AND status = ?", app.AppID, "message.receive", 1).First(&webhookConfig).Error
+	if err != nil {
+		l.Logger.Infof("Bot 未配置 Webhook: appId=%s", app.AppID)
+		return
+	}
+
+	// 5. 构建 Webhook 载荷
+	payload := map[string]interface{}{
+		"eventType": "message.receive",
+		"timestamp": time.Now().UnixMilli(),
+		"data": map[string]interface{}{
+			"messageId":      chatModel.MessageID,
+			"conversationId": chatModel.ConversationID,
+			"senderId":       *chatModel.SendUserID,
+			"receiverId":     receiverID,
+			"msgType":        chatModel.MsgType,
+			"msg":            chatModel.Msg,
+			"createdAt":      chatModel.CreatedAt,
+		},
+	}
+
+	// 6. 发送 Webhook
+	l.svcCtx.WebhookSender.Send("message.receive", payload, []corewebhook.WebhookTargetConfig{
+		{
+			ID:         webhookConfig.ID,
+			AppID:      webhookConfig.AppID,
+			TargetURL:  webhookConfig.TargetURL,
+			Secret:     webhookConfig.Secret,
+			RetryCount: webhookConfig.RetryCount,
+			Timeout:    webhookConfig.Timeout,
+		},
+	})
+
+	l.Logger.Infof("触发 Bot Webhook: appId=%s, messageId=%s", app.AppID, chatModel.MessageID)
 }

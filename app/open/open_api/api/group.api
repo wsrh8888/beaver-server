@@ -1,0 +1,40 @@
+syntax = "v1"
+
+// ==================== 群组 Bot 管理接口 ====================
+// 仅限 Bot 相关的群操作（群的创建/管理在主 App 里进行，不在 Open API）
+
+type (
+	// 将 Bot 加入群（群管理员授权后，Bot 可接收该群消息和 @ 提及）
+	AddBotToGroupReq {
+		GroupID string `json:"groupId"`
+	}
+
+	AddBotToGroupRes {
+		BotUserID string `json:"botUserId"` // Bot 在群里的 UserID，事件 payload 里用来识别 @ 提及
+	}
+)
+
+type (
+	// 将 Bot 从群移除
+	RemoveBotFromGroupReq {
+		GroupID string `json:"groupId"`
+	}
+
+	RemoveBotFromGroupRes {
+		Success bool `json:"success"`
+	}
+)
+
+@server (
+	group:      group
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "将 Bot 加入群（Bot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Bot 的 Webhook URL）"
+	@handler AddBotToGroup
+	post /api/open/v1/group/add_bot (AddBotToGroupReq) returns (AddBotToGroupRes)
+
+	@doc "将 Bot 从群移除"
+	@handler RemoveBotFromGroup
+	post /api/open/v1/group/remove_bot (RemoveBotFromGroupReq) returns (RemoveBotFromGroupRes)
+}

@@ -12,6 +12,9 @@ type Config struct {
 		Password string
 		Db       int
 	}
+	RocketMQ struct {
+		Addr string
+	}
 	DatasyncRpc zrpc.RpcClientConf
 	UserRpc     zrpc.RpcClientConf
 }

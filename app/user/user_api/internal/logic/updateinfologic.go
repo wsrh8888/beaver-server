@@ -11,7 +11,7 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -98,13 +98,21 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 
 			logx.Infof("推送用户信息变更给 %d 个用户: %v", len(allRecipients), allRecipients)
 
-			// 通过ws推送给所有相关用户
+			// 通过 RocketMQ 异步推送给所有相关用户
 			for _, recipientID := range allRecipients {
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.USER_PROFILE, wsTypeConst.UserReceive, req.UserID, recipientID, map[string]interface{}{
-					"table":    "users",        // 涉及的数据库表
-					"version":  int32(version), // 最新版本号（转换为int32类型）
-					"targetId": req.UserID,     // 变更的记录ID
-				}, "")
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.USER_PROFILE,
+					"type":     wsTypeConst.UserReceive,
+					"senderId": req.UserID,
+					"targetId": recipientID,
+					"body": map[string]interface{}{
+						"table":    "users",        // 涉及的数据库表
+						"version":  int32(version), // 最新版本号（转换为int32类型）
+						"targetId": req.UserID,     // 变更的记录ID
+					},
+					"conversationId": "",
+				}
+				l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}()
 	}

@@ -9,7 +9,7 @@ import (
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -110,16 +110,17 @@ func (l *GetTokenLogic) generateToken(userID, roomID string) (string, error) {
 }
 
 func (l *GetTokenLogic) sendAcceptSignal(acceptorID, callerID, roomID, convID string) {
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
-		wsCommandConst.CALL,
-		wsTypeConst.CallReceive,
-		acceptorID,
-		callerID,
-		map[string]interface{}{
+	payload := map[string]interface{}{
+		"command":  wsCommandConst.CALL,
+		"type":     wsTypeConst.CallReceive,
+		"senderId": acceptorID,
+		"targetId": callerID,
+		"body": map[string]interface{}{
 			"type":   call_models.SignalAccept,
 			"userId": acceptorID,
 			"roomId": roomID,
 		},
-		convID,
-	)
+		"conversationId": convID,
+	}
+	l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 }

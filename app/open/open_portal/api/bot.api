@@ -1,0 +1,118 @@
+syntax = "v1"
+
+// ==================== Bot 机器人配置 ====================
+type (
+	GetBotConfigReq {
+		AppID  string `form:"appId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	BotConfigInfo {
+		AppID            string   `json:"appId"`
+		BotName          string   `json:"botName"`
+		BotAvatar        string   `json:"botAvatar"`
+		BotDescription   string   `json:"botDescription"`
+		UsageGuide       string   `json:"usageGuide"` // 使用说明
+		EnableSingleChat bool     `json:"enableSingleChat"`
+		EnableGroupChat  bool     `json:"enableGroupChat"`
+		EnableAtMention  bool     `json:"enableAtMention"`
+		EnableMenu       bool     `json:"enableMenu"` // 是否启用自定义菜单
+		MenuItems        string   `json:"menuItems"` // JSON 字符串，菜单项配置
+		AutoReplyRules   []string `json:"autoReplyRules"`
+		Commands         []string `json:"commands"`
+		Status           int      `json:"status"`
+	}
+	GetBotConfigRes {
+		Config BotConfigInfo `json:"config"`
+	}
+)
+
+type (
+	UpdateBotConfigReq {
+		AppID            string   `json:"appId"`
+		BotName          string   `json:"botName,optional"`
+		BotAvatar        string   `json:"botAvatar,optional"`
+		BotDescription   string   `json:"botDescription,optional"`
+		UsageGuide       string   `json:"usageGuide,optional"` // 使用说明
+		EnableSingleChat *bool    `json:"enableSingleChat,optional"`
+		EnableGroupChat  *bool    `json:"enableGroupChat,optional"`
+		EnableAtMention  *bool    `json:"enableAtMention,optional"`
+		EnableMenu       *bool    `json:"enableMenu,optional"` // 是否启用自定义菜单
+		MenuItems        string   `json:"menuItems,optional"` // JSON 字符串，菜单项配置
+		AutoReplyRules   []string `json:"autoReplyRules,optional"`
+		Commands         []string `json:"commands,optional"`
+		Status           *int     `json:"status,optional"`
+		UserID           string   `header:"Beaver-User-Id"`
+	}
+	UpdateBotConfigRes  {}
+)
+
+// ==================== Incoming Webhook 管理 ====================
+type (
+	CreateIncomingWebhookReq {
+		AppID     string `json:"appId"`
+		GroupID   string `json:"groupId"`
+		Name      string `json:"name,optional"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	IncomingWebhookInfo {
+		ID        string `json:"id"`
+		Token     string `json:"token"`
+		AppID     string `json:"appId"`
+		GroupID   string `json:"groupId"`
+		BotUserID string `json:"botUserId"`
+		Name      string `json:"name"`
+		WebhookURL string `json:"webhookUrl"` // 完整的 Webhook URL
+		Status    int    `json:"status"`
+		CreatedAt int64  `json:"createdAt"`
+	}
+	CreateIncomingWebhookRes {
+		Webhook IncomingWebhookInfo `json:"webhook"`
+	}
+)
+
+type (
+	ListIncomingWebhooksReq {
+		AppID  string `form:"appId"`
+		Page   int    `form:"page,default=1"`
+		PageSize int  `form:"pageSize,default=20"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ListIncomingWebhooksRes {
+		Total int64                 `json:"total"`
+		List  []IncomingWebhookInfo `json:"list"`
+	}
+)
+
+type (
+	DeleteIncomingWebhookReq {
+		ID     string `json:"id"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DeleteIncomingWebhookRes {}
+)
+
+@server (
+	group: bot
+)
+service open {
+	@doc "获取 Bot 配置"
+	@handler GetBotConfig
+	get /portal/open/v1/bot/config (GetBotConfigReq) returns (GetBotConfigRes)
+
+	@doc "更新 Bot 配置"
+	@handler UpdateBotConfig
+	post /portal/open/v1/bot/config_update (UpdateBotConfigReq) returns (UpdateBotConfigRes)
+
+	@doc "创建 Incoming Webhook"
+	@handler CreateIncomingWebhook
+	post /portal/open/v1/bot/incoming_create (CreateIncomingWebhookReq) returns (CreateIncomingWebhookRes)
+
+	@doc "获取 Incoming Webhook 列表"
+	@handler ListIncomingWebhooks
+	get /portal/open/v1/bot/incoming_list (ListIncomingWebhooksReq) returns (ListIncomingWebhooksRes)
+
+	@doc "删除 Incoming Webhook"
+	@handler DeleteIncomingWebhook
+	post /portal/open/v1/bot/incoming_delete (DeleteIncomingWebhookReq) returns (DeleteIncomingWebhookRes)
+}
+

@@ -11,7 +11,7 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -188,17 +188,32 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		// 合并所有表更新
 		tableUpdates := append([]map[string]interface{}{verifyUpdates}, userUpdates...)
 
-		// 通知接收方
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.UserID, req.FriendID, map[string]interface{}{
-			"messageId":    uuid.New().String(),
-			"tableUpdates": tableUpdates,
-		}, "")
+		// 通过 RocketMQ 异步通知
+		payload1 := map[string]interface{}{
+			"command":  wsCommandConst.FRIEND_OPERATION,
+			"type":     wsTypeConst.FriendVerifyReceive,
+			"senderId": req.UserID,
+			"targetId": req.FriendID,
+			"body": map[string]interface{}{
+				"messageId":    uuid.New().String(),
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload1)
 
-		// 通知发送方
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, req.FriendID, req.UserID, map[string]interface{}{
-			"messageId":    uuid.New().String(),
-			"tableUpdates": tableUpdates,
-		}, "")
+		payload2 := map[string]interface{}{
+			"command":  wsCommandConst.FRIEND_OPERATION,
+			"type":     wsTypeConst.FriendVerifyReceive,
+			"senderId": req.FriendID,
+			"targetId": req.UserID,
+			"body": map[string]interface{}{
+				"messageId":    uuid.New().String(),
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload2)
 
 		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, verifyId=%s", req.UserID, req.FriendID, nextVersion, verifyModel.VerifyID)
 	}()

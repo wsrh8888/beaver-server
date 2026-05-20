@@ -45,5 +45,25 @@ func HandleGroupMessageSend(
 		return err
 	}
 
+	// 检查是否是 Bot 对话，如果是则触发流式 Webhook
+	go func() {
+		var msgContent string
+		var msgMap map[string]interface{}
+		if err := json.Unmarshal(body.Msg, &msgMap); err == nil {
+			if content, ok := msgMap["content"].(string); ok {
+				msgContent = content
+			}
+		}
+
+		handleBotStreaming(
+			ctx,
+			svcCtx.DB,
+			client,
+			body.ConversationID,
+			msgContent,
+			req.UserID,
+		)
+	}()
+
 	return nil
 }

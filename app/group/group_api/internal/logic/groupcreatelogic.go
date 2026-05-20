@@ -11,7 +11,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	utils "beaver/utils/rand"
@@ -186,23 +186,31 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 
 		// 推送给每个群成员相同的完整数据
 		for _, member := range response.Members {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
-				"tables": []map[string]interface{}{
-					{
-						"table": "groups",
-						"data": []map[string]interface{}{
-							{
-								"version": groupVersion,
-								"groupId": groupModel.GroupID,
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupReceive,
+				"senderId": req.UserID,
+				"targetId": member.UserID,
+				"body": map[string]interface{}{
+					"tables": []map[string]interface{}{
+						{
+							"table": "groups",
+							"data": []map[string]interface{}{
+								{
+									"version": groupVersion,
+									"groupId": groupModel.GroupID,
+								},
 							},
 						},
-					},
-					{
-						"table": "group_members",
-						"data":  memberData, // 推送所有群成员的信息
+						{
+							"table": "group_members",
+							"data":  memberData, // 推送所有群成员的信息
+						},
 					},
 				},
-			}, groupModel.GroupID)
+				"conversationId": groupModel.GroupID,
+			}
+			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
 	}()
 

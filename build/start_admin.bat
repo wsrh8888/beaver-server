@@ -8,4 +8,4 @@ for %%i in ("%~dp0..") do set "ROOT_DIR=%%~fi"
 REM 启动所有Admin服务
 wt new-tab --title "Gateway Admin" cmd /k "cd /d !ROOT_DIR!\app\gateway\gateway_admin && go run gateway.go" ^
   ; new-tab --title "Backend Admin" cmd /k "cd /d !ROOT_DIR!\app\backend\backend_admin && go run backend.go" ^
-
+  ; new-tab --title "Open Portal" cmd /k "cd /d !ROOT_DIR!\app\open\open_portal && go run open.go"

@@ -1,0 +1,19 @@
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 50050
+  # 如果你在本地局域网测试，可以不写；
+  # 如果部署在云服务器，这里必须填你的服务器公网 IP
+  # use_external_ip: true 
+
+keys:
+  devkey: "apisecret_32char_standard_12345678"
+
+redis:
+  address: redis:6379
+  password: "123456"
+  db: 0
+
+logging:
+  level: info

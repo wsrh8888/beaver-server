@@ -1,0 +1,30 @@
+Name: open_portal
+Host: 0.0.0.0
+Port: 22000
+Etcd: 127.0.0.1:2379
+
+# CORS 配置
+CORS:
+  AllowOrigin: '*'
+  AllowMethods: 'GET,POST,PUT,DELETE,OPTIONS'
+  AllowHeaders: 'Content-Type,Token,deviceId,Authorization'
+  ExposeHeaders: 'Content-Length,Access-Control-Allow-Origin,Access-Control-Allow-Headers,Access-Control-Allow-Methods'
+  MaxAge: 86400
+  AllowCredentials: true
+
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=true&loc=Local
+
+Auth:
+  AccessSecret: robert
+  AccessExpire: 43200
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: userrpc.rpc
+
+# OAuth 授权页面配置
+OAuth:
+  BaseUrl: http://127.0.0.1:20800

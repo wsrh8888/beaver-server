@@ -8,7 +8,7 @@ import (
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -71,16 +71,17 @@ func (l *HangupLogic) Hangup(req *types.HangupCallReq) (resp *types.HangupCallRe
 }
 
 func (l *HangupLogic) sendSignal(hanguperID, targetID, roomID, convID, signalType string) {
-	ajax.SendMessageToWs(l.svcCtx.Config.Etcd,
-		wsCommandConst.CALL,
-		wsTypeConst.CallReceive,
-		hanguperID,
-		targetID,
-		map[string]interface{}{
+	payload := map[string]interface{}{
+		"command":  wsCommandConst.CALL,
+		"type":     wsTypeConst.CallReceive,
+		"senderId": hanguperID,
+		"targetId": targetID,
+		"body": map[string]interface{}{
 			"type":   signalType,
 			"userId": hanguperID,
 			"roomId": roomID,
 		},
-		convID,
-	)
+		"conversationId": convID,
+	}
+	l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
 }

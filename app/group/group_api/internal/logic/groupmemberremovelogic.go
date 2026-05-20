@@ -8,7 +8,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -134,14 +134,22 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 
 		// 统一给所有人发送相同的消息
 		for _, memberID := range allMembers {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, memberID, map[string]interface{}{
-				"tables": []map[string]interface{}{
-					{
-						"table": "group_members",
-						"data":  removedMemberData, // 推送所有被移除成员的信息列表
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.UserID,
+				"targetId": memberID,
+				"body": map[string]interface{}{
+					"tables": []map[string]interface{}{
+						{
+							"table": "group_members",
+							"data":  removedMemberData, // 推送所有被移除成员的信息列表
+						},
 					},
 				},
-			}, "")
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
 	}()
 

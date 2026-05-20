@@ -1,0 +1,46 @@
+syntax = "v1"
+
+// ==================== 应用权限管理 ====================
+
+type (
+	GetAppPermissionsReq {
+		AppID string `form:"appId"`
+	}
+	
+	AppPermissionInfo {
+		ID        uint   `json:"id"`
+		Scope     string `json:"scope"`
+		GrantedAt int64  `json:"grantedAt"`
+		GrantedBy string `json:"grantedBy"`
+		ExpiresAt int64  `json:"expiresAt"`
+	}
+	
+	GetAppPermissionsRes {
+		Permissions []AppPermissionInfo `json:"permissions"`
+	}
+)
+
+type (
+	ConfigAppPermissionReq {
+		AppID     string   `json:"appId"`
+		Scopes    []string `json:"scopes"`     // 权限范围列表
+		ExpiresAt int64    `json:"expiresAt,optional"` // 过期时间
+	}
+	
+	ConfigAppPermissionRes {
+		Success bool `json:"success"`
+	}
+)
+
+@server (
+	group: permission
+)
+service open {
+	@doc "获取应用权限列表"
+	@handler GetAppPermissions
+	get /portal/open/v1/app/permissions (GetAppPermissionsReq) returns (GetAppPermissionsRes)
+	
+	@doc "配置应用权限"
+	@handler ConfigAppPermission
+	post /portal/open/v1/app/permission/config (ConfigAppPermissionReq) returns (ConfigAppPermissionRes)
+}

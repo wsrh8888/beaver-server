@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(goctl api *)",
+      "WebFetch(domain:open.feishu.cn)",
+      "WebSearch",
+      "WebFetch(domain:open.dingtalk.com)",
+      "WebFetch(domain:developers.dingtalk.com)",
+      "WebFetch(domain:open.larksuite.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}

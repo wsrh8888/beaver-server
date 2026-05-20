@@ -13,7 +13,7 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -202,12 +202,28 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			tableUpdates = append(tableUpdates, friendUpdates)
 		}
 
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.SendUserID, friendVerify.RevUserID, map[string]interface{}{
-			"tableUpdates": tableUpdates,
-		}, conversationID)
-		ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.FRIEND_OPERATION, wsTypeConst.FriendVerifyReceive, friendVerify.RevUserID, friendVerify.SendUserID, map[string]interface{}{
-			"tableUpdates": tableUpdates,
-		}, conversationID)
+		payload1 := map[string]interface{}{
+			"command":  wsCommandConst.FRIEND_OPERATION,
+			"type":     wsTypeConst.FriendVerifyReceive,
+			"senderId": friendVerify.SendUserID,
+			"targetId": friendVerify.RevUserID,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": conversationID,
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload1)
+		payload2 := map[string]interface{}{
+			"command":  wsCommandConst.FRIEND_OPERATION,
+			"type":     wsTypeConst.FriendVerifyReceive,
+			"senderId": friendVerify.RevUserID,
+			"targetId": friendVerify.SendUserID,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": conversationID,
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload2)
 
 		l.Logger.Infof("异步发送WebSocket通知完成: verifyID=%s, status=%d", req.VerifyID, friendVerify.RevStatus)
 	}()

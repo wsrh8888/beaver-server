@@ -6,7 +6,7 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -166,9 +166,17 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			tableUpdates = append(tableUpdates, emojiUpdates)
 
 			// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
-			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
-				"tableUpdates": tableUpdates,
-			}, "")
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.EMOJI,
+				"type":     wsTypeConst.EmojiReceive,
+				"senderId": "",
+				"targetId": userId,
+				"body": map[string]interface{}{
+					"tableUpdates": tableUpdates,
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectVersion, req.PackageID, emojiPackage.Version)
 	} else if req.Type == "unfavorite" {
 		// 取消收藏
@@ -247,9 +255,17 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			tableUpdates = append(tableUpdates, emojiUpdates)
 
 			// 通知给自己（用户ID作为接收者，空字符串作为发送者表示系统操作）
-			ajax.SendMessageToWs(etcdAddr, wsCommandConst.EMOJI, wsTypeConst.EmojiReceive, "", userId, map[string]interface{}{
-				"tableUpdates": tableUpdates,
-			}, "")
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.EMOJI,
+				"type":     wsTypeConst.EmojiReceive,
+				"senderId": "",
+				"targetId": userId,
+				"body": map[string]interface{}{
+					"tableUpdates": tableUpdates,
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectRecord.Version, req.PackageID, emojiPackage.Version)
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")

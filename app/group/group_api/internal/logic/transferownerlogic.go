@@ -8,7 +8,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -103,15 +103,23 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 
 		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.GroupID, member.UserID, map[string]interface{}{
-				"table": "group_members",
-				"data": []map[string]interface{}{
-					{
-						"version": memberVersion,
-						"groupId": req.GroupID,
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.GroupID,
+				"targetId": member.UserID,
+				"body": map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": memberVersion,
+							"groupId": req.GroupID,
+						},
 					},
 				},
-			}, "")
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
 	}()
 

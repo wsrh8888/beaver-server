@@ -10,7 +10,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -181,37 +181,56 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 		for _, member := range response.Members {
 			if !newMemberIds[member.UserID] { // 不通知新加入的成员（已在群的所有成员都要收到通知，包括操作者自己）
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
-					"tables": []map[string]interface{}{
-						{
-							"table": "group_members",
-							"data":  newMemberData, // 推送所有新加入成员的信息列表
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.GROUP_OPERATION,
+					"type":     wsTypeConst.GroupMemberReceive,
+					"senderId": req.UserID,
+					"targetId": member.UserID,
+					"body": map[string]interface{}{
+						"tables": []map[string]interface{}{
+							{
+								"table": "group_members",
+								"data":  newMemberData, // 推送所有新加入成员的信息列表
+							},
 						},
 					},
-				}, "")
+					"conversationId": "",
+				}
+				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}
 
 		// 2. 通知新加入的成员：group_members变化（他们成为了成员）+ groups变化（群基本信息）
 		for _, newMemberID := range req.UserIds {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, newMemberID, map[string]interface{}{
-				"tables": []map[string]interface{}{
-					{
-						"table": "groups",
-						"data": []map[string]interface{}{
-							{
-								"version": groupVersion,
-								"groupId": req.GroupID,
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.UserID,
+				"targetId": newMemberID,
+				"body": map[string]interface{}{
+					"tables": []map[string]interface{}{
+						{
+							"table": "groups",
+							"data": []map[string]interface{}{
+								{
+									"version": groupVersion,
+									"groupId": req.GroupID,
+								},
 							},
 						},
-					},
-					{
-						"table": "group_members",
-						"data":  newMemberData, // 推送所有新加入成员的信息列表
+						{
+							"table": "group_members",
+							"data":  newMemberData, // 推送所有新加入成员的信息列表
+						},
 					},
 				},
-			}, "")
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
+
+		// 3. 触发开放平台 Webhook 事件(群成员变更)
+		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, req.UserIds, "added")
 	}()
 
 	// 创建并返回响应
@@ -221,4 +240,18 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 	l.Logger.Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)
 	return resp, nil
+}
+
+// triggerOpenPlatformWebhook 触发开放平台 Webhook 事件
+func (l *GroupMemberAddLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Logger.Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
+		}
+	}()
+
+	// 查询该群关联的应用(如果有的话)
+	// TODO: 这里需要根据实际业务逻辑确定如何关联群和应用
+	// 暂时先不实现,等待后续需求明确
+	l.Logger.Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
 }

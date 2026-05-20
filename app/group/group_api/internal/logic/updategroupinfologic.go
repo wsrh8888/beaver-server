@@ -8,7 +8,7 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -90,18 +90,26 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 				return
 			}
 
-			// 通过ws推送给自己和群成员 - 群组信息同步
+			// 通过 RocketMQ 异步推送给自己和群成员 - 群组信息同步
 			allRecipients := append(response.Members, &group_rpc.GroupMemberInfo{UserID: req.UserID}) // 包含自己
 			for _, member := range allRecipients {
-				ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupReceive, req.UserID, member.UserID, map[string]interface{}{
-					"table": "groups",
-					"data": []map[string]interface{}{
-						{
-							"version": newVersion,
-							"groupId": req.GroupID,
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.GROUP_OPERATION,
+					"type":     wsTypeConst.GroupReceive,
+					"senderId": req.UserID,
+					"targetId": member.UserID,
+					"body": map[string]interface{}{
+						"table": "groups",
+						"data": []map[string]interface{}{
+							{
+								"version": newVersion,
+								"groupId": req.GroupID,
+							},
 						},
 					},
-				}, req.GroupID)
+					"conversationId": req.GroupID,
+				}
+				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}()
 	}

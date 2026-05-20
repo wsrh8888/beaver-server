@@ -3,9 +3,9 @@ package core
 import (
 	"beaver/app/gateway/gateway_admin/types"
 	"beaver/common/etcd"
-	"beaver/core"
-	"beaver/utils"
+	"beaver/core/coreredis"
 	"beaver/utils/jwts"
+	utils "beaver/utils/list"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -50,7 +50,7 @@ func (p *Proxy) ensureRedis() {
 	if p.redisClient != nil || p.Config.Redis.Addr == "" {
 		return
 	}
-	p.redisClient = core.InitRedis(p.Config.Redis.Addr, p.Config.Redis.Password, p.Config.Redis.Db)
+	p.redisClient = coreredis.InitRedis(p.Config.Redis.Addr, p.Config.Redis.Password, p.Config.Redis.Db)
 	logx.Info("Redis 客户端初始化成功，将验证 token 在 Redis 中的有效性")
 }
 

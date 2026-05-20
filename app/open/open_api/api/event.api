@@ -1,0 +1,152 @@
+syntax = "v1"
+
+// ==================== Bot Webhook 事件订阅接口 ====================
+//
+// 用途: Bot（如 OpenClaw）在本机启动后，向 Beaver 注册 Webhook URL。
+// 当用户向 Bot 发消息或在群里 @Bot 时，Beaver 将消息 POST 到该 URL。
+//
+// 注册时 Beaver 会先向 TargetURL 发送一次 URL 验证请求（Challenge）：
+//   POST <TargetURL>
+//   {"type":"url_verification","challenge":"<随机字符串>","token":"<签名token>"}
+// Bot 服务器必须原样返回 {"challenge":"<随机字符串>"} 才能注册成功。
+//
+// 支持的事件类型（EventType）:
+//   im.message.receive          - Bot 收到私聊消息
+//   im.message.receive.group_at - Bot 在群里被 @ 提及
+//   im.bot.followed             - 用户将 Bot 添加为好友/关注
+//   im.bot.unfollowed           - 用户将 Bot 从好友中移除
+//   im.chat.member.bot.added    - Bot 被邀请进群
+//   im.chat.member.bot.removed  - Bot 被移出群
+//
+// Webhook 推送给 Bot 的事件 Payload 示例（im.message.receive）:
+//   {
+//     "type": "event_callback",
+//     "event_id": "xxx",
+//     "event_type": "im.message.receive",
+//     "timestamp": 1700000000,
+//     "token": "<HMAC签名>",
+//     "event": {
+//       "sender_id": "user_xxx",
+//       "conversation_id": "conv_xxx",
+//       "msg_type": "text",
+//       "content": "你好",
+//       "mentions": []
+//     }
+//   }
+
+type (
+	// 注册 Webhook URL（同时触发 Challenge 验证）
+	RegisterWebhookReq {
+		EventType  string `json:"eventType"` // 订阅的事件类型，见上方说明
+		TargetURL  string `json:"targetUrl"` // Webhook URL（Bot 本机可通过内网穿透暴露）
+		Secret     string `json:"secret,optional"` // HMAC 签名密钥，用于验证推送来源
+		RetryCount int    `json:"retryCount,optional"` // 推送失败重试次数，默认 3
+		Timeout    int    `json:"timeout,optional"`    // 推送超时（秒），默认 5
+	}
+
+	RegisterWebhookRes {
+		SubscriptionID uint64 `json:"subscriptionId"`
+		Status         string `json:"status"` // active（验证通过）/ pending（验证中）
+	}
+)
+
+type (
+	// 获取当前应用的 Webhook 订阅列表
+	GetWebhookListReq {
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=20"`
+		EventType string `form:"eventType,optional"`
+	}
+
+	WebhookSubscriptionInfo {
+		ID         uint64 `json:"id"`
+		EventType  string `json:"eventType"`
+		TargetURL  string `json:"targetUrl"`
+		Status     int    `json:"status"` // 0 禁用 1 启用
+		RetryCount int    `json:"retryCount"`
+		Timeout    int    `json:"timeout"`
+		CreatedAt  int64  `json:"createdAt"`
+	}
+
+	GetWebhookListRes {
+		Total int64                     `json:"total"`
+		List  []WebhookSubscriptionInfo `json:"list"`
+	}
+)
+
+type (
+	// 删除 Webhook 订阅
+	DeleteWebhookReq {
+		SubscriptionID uint64 `json:"subscriptionId"`
+	}
+
+	DeleteWebhookRes {
+		Success bool `json:"success"`
+	}
+)
+
+type (
+	// 触发测试事件推送（开发调试用，验证 Bot 服务器收到格式是否正确）
+	TestEventPushReq {
+		SubscriptionID uint64 `json:"subscriptionId"` // 要测试的订阅 ID
+	}
+
+	TestEventPushRes {
+		Success      bool   `json:"success"`
+		ResponseCode int    `json:"responseCode,optional"` // Bot 服务器返回的 HTTP 状态码
+		ResponseBody string `json:"responseBody,optional"` // Bot 服务器返回的内容（截取前 500 字符）
+		CostMs       int64  `json:"costMs"`                // 推送耗时（毫秒）
+	}
+)
+
+type (
+	// 获取事件推送日志（查看哪些推送成功/失败）
+	GetEventLogsReq {
+		SubscriptionID uint64 `form:"subscriptionId,optional"`
+		Page           int    `form:"page,default=1"`
+		PageSize       int    `form:"pageSize,default=20"`
+	}
+
+	EventLogInfo {
+		ID           uint64 `json:"id"`
+		EventID      string `json:"eventId"`
+		EventType    string `json:"eventType"`
+		ResponseCode int    `json:"responseCode"`
+		CostMs       int64  `json:"costMs"`
+		RetryCount   int    `json:"retryCount"`
+		Status       int    `json:"status"` // 0 推送中 1 成功 2 失败
+		ErrorMsg     string `json:"errorMsg,optional"`
+		CreatedAt    int64  `json:"createdAt"`
+	}
+
+	GetEventLogsRes {
+		Total int64          `json:"total"`
+		List  []EventLogInfo `json:"list"`
+	}
+)
+
+@server (
+	group:      event
+	middleware: AuthMiddleware
+)
+service open {
+	@doc "注册 Bot Webhook URL（注册后 Beaver 立即向该 URL 发送 Challenge 验证请求）"
+	@handler RegisterWebhook
+	post /api/open/v1/event/register_webhook (RegisterWebhookReq) returns (RegisterWebhookRes)
+
+	@doc "获取当前应用的 Webhook 订阅列表"
+	@handler GetWebhookList
+	get /api/open/v1/event/webhook_list (GetWebhookListReq) returns (GetWebhookListRes)
+
+	@doc "删除 Webhook 订阅"
+	@handler DeleteWebhook
+	post /api/open/v1/event/delete_webhook (DeleteWebhookReq) returns (DeleteWebhookRes)
+
+	@doc "触发测试事件推送（调试用，向 Bot 服务器发一条测试事件）"
+	@handler TestEventPush
+	post /api/open/v1/event/test_webhook (TestEventPushReq) returns (TestEventPushRes)
+
+	@doc "获取事件推送日志"
+	@handler GetEventLogs
+	get /api/open/v1/event/logs (GetEventLogsReq) returns (GetEventLogsRes)
+}

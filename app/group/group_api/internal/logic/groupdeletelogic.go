@@ -7,7 +7,7 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-	"beaver/common/ajax"
+	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 
@@ -68,19 +68,27 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 	go func() {
 		// 推送给所有成员 - 群组信息同步（标记为删除状态）
 		for _, member := range memberList {
-			ajax.SendMessageToWs(l.svcCtx.Config.Etcd, wsCommandConst.GROUP_OPERATION, wsTypeConst.GroupMemberReceive, req.UserID, member.UserID, map[string]interface{}{
-				"tables": []map[string]interface{}{
-					{
-						"table": "groups",
-						"data": []map[string]interface{}{
-							{
-								"version": groupVersion,
-								"groupId": req.GroupID,
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.UserID,
+				"targetId": member.UserID,
+				"body": map[string]interface{}{
+					"tables": []map[string]interface{}{
+						{
+							"table": "groups",
+							"data": []map[string]interface{}{
+								{
+									"version": groupVersion,
+									"groupId": req.GroupID,
+								},
 							},
 						},
 					},
 				},
-			}, "")
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}
 	}()
 

@@ -6,6 +6,7 @@ import (
 
 	"beaver/app/ws/ws_api/internal/config"
 	"beaver/app/ws/ws_api/internal/handler"
+	"beaver/app/ws/ws_api/internal/logic"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/common/etcd"
 	"beaver/common/middleware"
@@ -27,6 +28,16 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	// 启动 RocketMQ Consumer
+	if ctx.RocketMQ != nil {
+		mqConsumer := logic.NewMqConsumerLogic(ctx)
+		go func() {
+			if err := mqConsumer.StartConsumer(); err != nil {
+				fmt.Printf("RocketMQ Consumer 启动失败: %v\n", err)
+			}
+		}()
+	}
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

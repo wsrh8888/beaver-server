@@ -5,7 +5,8 @@ import (
 	"beaver/app/file/file_rpc/types/file_rpc"
 	"beaver/app/update/update_api/internal/config"
 	"beaver/common/zrpc_interceptor"
-	"beaver/core"
+	"beaver/core/coregorm"
+	"beaver/core/coreredis"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -20,8 +21,8 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysqlDb := core.InitGorm(c.Mysql.DataSource)
-	client := core.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
+	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 	return &ServiceContext{
 		Config:  c,
 		DB:      mysqlDb,

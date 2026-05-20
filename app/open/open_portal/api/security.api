@@ -1,0 +1,43 @@
+syntax = "v1"
+
+// ==================== 安全设置 ====================
+type (
+	// 更新安全配置
+	UpdateSecurityConfigReq {
+		AppID          string   `json:"appId"`
+		IPWhitelist    []string `json:"ipWhitelist,optional"` // IP白名单
+		TrustedDomains []string `json:"trustedDomains,optional"` // H5可信域名
+		UserID         string   `header:"Beaver-User-Id"`
+	}
+	UpdateSecurityConfigRes  {}
+)
+
+type (
+	// 获取安全配置
+	GetSecurityConfigReq {
+		AppID  string `form:"appId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	SecurityConfigInfo {
+		AppID          string   `json:"appId"`
+		IPWhitelist    []string `json:"ipWhitelist"` // IP白名单
+		TrustedDomains []string `json:"trustedDomains"` // H5可信域名
+	}
+	GetSecurityConfigRes {
+		Config SecurityConfigInfo `json:"config"`
+	}
+)
+
+@server (
+	group: security
+)
+service open {
+	@doc "获取安全配置"
+	@handler GetSecurityConfig
+	get /portal/open/v1/security/config (GetSecurityConfigReq) returns (GetSecurityConfigRes)
+
+	@doc "更新安全配置"
+	@handler UpdateSecurityConfig
+	post /portal/open/v1/security/config_update (UpdateSecurityConfigReq) returns (UpdateSecurityConfigRes)
+}
+
