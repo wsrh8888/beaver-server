@@ -36,8 +36,8 @@ func (l *GetUserInfoByH5CodeLogic) GetUserInfoByH5Code(req *types.GetUserInfoByH
 	}
 
 	// 2. 查询 H5 AuthCode
-	var h5AuthCode open_models.OpenH5AuthCode
-	if err := l.svcCtx.DB.Where("code = ? AND app_id = ?", req.AuthCode, req.AppID).First(&h5AuthCode).Error; err != nil {
+	var h5AuthCode open_models.OpenOAuthCode
+	if err := l.svcCtx.DB.Where("code = ? AND app_id = ? AND scene = ?", req.AuthCode, req.AppID, "h5_sso").First(&h5AuthCode).Error; err != nil {
 		return nil, errors.New("授权码无效")
 	}
 

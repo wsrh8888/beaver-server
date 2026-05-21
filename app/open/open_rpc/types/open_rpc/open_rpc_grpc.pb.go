@@ -19,10 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Open_ExchangeToken_FullMethodName = "/open_rpc.open/ExchangeToken"
-	Open_GetUserInfo_FullMethodName   = "/open_rpc.open/GetUserInfo"
-	Open_ValidateToken_FullMethodName = "/open_rpc.open/ValidateToken"
-	Open_RefreshToken_FullMethodName  = "/open_rpc.open/RefreshToken"
+	Open_ExchangeToken_FullMethodName      = "/open_rpc.open/ExchangeToken"
+	Open_GetUserInfo_FullMethodName        = "/open_rpc.open/GetUserInfo"
+	Open_ValidateToken_FullMethodName      = "/open_rpc.open/ValidateToken"
+	Open_RefreshToken_FullMethodName       = "/open_rpc.open/RefreshToken"
+	Open_CreateWebhook_FullMethodName      = "/open_rpc.open/CreateWebhook"
+	Open_DeleteWebhook_FullMethodName      = "/open_rpc.open/DeleteWebhook"
+	Open_UpdateWebhook_FullMethodName      = "/open_rpc.open/UpdateWebhook"
+	Open_ResetWebhookSecret_FullMethodName = "/open_rpc.open/ResetWebhookSecret"
 )
 
 // OpenClient is the client API for Open service.
@@ -33,6 +37,10 @@ type OpenClient interface {
 	GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoRes, error)
 	ValidateToken(ctx context.Context, in *ValidateTokenReq, opts ...grpc.CallOption) (*ValidateTokenRes, error)
 	RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error)
+	CreateWebhook(ctx context.Context, in *CreateWebhookReq, opts ...grpc.CallOption) (*CreateWebhookRes, error)
+	DeleteWebhook(ctx context.Context, in *DeleteWebhookReq, opts ...grpc.CallOption) (*DeleteWebhookRes, error)
+	UpdateWebhook(ctx context.Context, in *UpdateWebhookReq, opts ...grpc.CallOption) (*UpdateWebhookRes, error)
+	ResetWebhookSecret(ctx context.Context, in *ResetWebhookSecretReq, opts ...grpc.CallOption) (*ResetWebhookSecretRes, error)
 }
 
 type openClient struct {
@@ -83,6 +91,46 @@ func (c *openClient) RefreshToken(ctx context.Context, in *RefreshTokenReq, opts
 	return out, nil
 }
 
+func (c *openClient) CreateWebhook(ctx context.Context, in *CreateWebhookReq, opts ...grpc.CallOption) (*CreateWebhookRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateWebhookRes)
+	err := c.cc.Invoke(ctx, Open_CreateWebhook_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) DeleteWebhook(ctx context.Context, in *DeleteWebhookReq, opts ...grpc.CallOption) (*DeleteWebhookRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteWebhookRes)
+	err := c.cc.Invoke(ctx, Open_DeleteWebhook_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) UpdateWebhook(ctx context.Context, in *UpdateWebhookReq, opts ...grpc.CallOption) (*UpdateWebhookRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateWebhookRes)
+	err := c.cc.Invoke(ctx, Open_UpdateWebhook_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) ResetWebhookSecret(ctx context.Context, in *ResetWebhookSecretReq, opts ...grpc.CallOption) (*ResetWebhookSecretRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResetWebhookSecretRes)
+	err := c.cc.Invoke(ctx, Open_ResetWebhookSecret_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OpenServer is the server API for Open service.
 // All implementations must embed UnimplementedOpenServer
 // for forward compatibility.
@@ -91,6 +139,10 @@ type OpenServer interface {
 	GetUserInfo(context.Context, *GetUserInfoReq) (*GetUserInfoRes, error)
 	ValidateToken(context.Context, *ValidateTokenReq) (*ValidateTokenRes, error)
 	RefreshToken(context.Context, *RefreshTokenReq) (*RefreshTokenRes, error)
+	CreateWebhook(context.Context, *CreateWebhookReq) (*CreateWebhookRes, error)
+	DeleteWebhook(context.Context, *DeleteWebhookReq) (*DeleteWebhookRes, error)
+	UpdateWebhook(context.Context, *UpdateWebhookReq) (*UpdateWebhookRes, error)
+	ResetWebhookSecret(context.Context, *ResetWebhookSecretReq) (*ResetWebhookSecretRes, error)
 	mustEmbedUnimplementedOpenServer()
 }
 
@@ -112,6 +164,18 @@ func (UnimplementedOpenServer) ValidateToken(context.Context, *ValidateTokenReq)
 }
 func (UnimplementedOpenServer) RefreshToken(context.Context, *RefreshTokenReq) (*RefreshTokenRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedOpenServer) CreateWebhook(context.Context, *CreateWebhookReq) (*CreateWebhookRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWebhook not implemented")
+}
+func (UnimplementedOpenServer) DeleteWebhook(context.Context, *DeleteWebhookReq) (*DeleteWebhookRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteWebhook not implemented")
+}
+func (UnimplementedOpenServer) UpdateWebhook(context.Context, *UpdateWebhookReq) (*UpdateWebhookRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWebhook not implemented")
+}
+func (UnimplementedOpenServer) ResetWebhookSecret(context.Context, *ResetWebhookSecretReq) (*ResetWebhookSecretRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetWebhookSecret not implemented")
 }
 func (UnimplementedOpenServer) mustEmbedUnimplementedOpenServer() {}
 func (UnimplementedOpenServer) testEmbeddedByValue()              {}
@@ -206,6 +270,78 @@ func _Open_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_CreateWebhook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateWebhookReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).CreateWebhook(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_CreateWebhook_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).CreateWebhook(ctx, req.(*CreateWebhookReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_DeleteWebhook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteWebhookReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).DeleteWebhook(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_DeleteWebhook_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).DeleteWebhook(ctx, req.(*DeleteWebhookReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_UpdateWebhook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWebhookReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).UpdateWebhook(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_UpdateWebhook_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).UpdateWebhook(ctx, req.(*UpdateWebhookReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_ResetWebhookSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetWebhookSecretReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ResetWebhookSecret(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ResetWebhookSecret_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ResetWebhookSecret(ctx, req.(*ResetWebhookSecretReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Open_ServiceDesc is the grpc.ServiceDesc for Open service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +364,22 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RefreshToken",
 			Handler:    _Open_RefreshToken_Handler,
+		},
+		{
+			MethodName: "CreateWebhook",
+			Handler:    _Open_CreateWebhook_Handler,
+		},
+		{
+			MethodName: "DeleteWebhook",
+			Handler:    _Open_DeleteWebhook_Handler,
+		},
+		{
+			MethodName: "UpdateWebhook",
+			Handler:    _Open_UpdateWebhook_Handler,
+		},
+		{
+			MethodName: "ResetWebhookSecret",
+			Handler:    _Open_ResetWebhookSecret_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

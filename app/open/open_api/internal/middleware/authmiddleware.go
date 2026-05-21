@@ -85,7 +85,7 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// 3. 查询 Token 是否有效
-		var accessToken open_models.OpenAccessToken
+		var accessToken open_models.OpenOAuthToken
 		if err := m.DB.Where("token = ?", token).First(&accessToken).Error; err != nil {
 			logx.Errorf("Token 查询失败: %v", err)
 			httpx.WriteJson(w, http.StatusUnauthorized, map[string]interface{}{

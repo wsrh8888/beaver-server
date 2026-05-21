@@ -3,12 +3,11 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
+	"time"
 
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-	"beaver/app/open/open_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -37,24 +36,25 @@ func (l *ListNotificationBotsLogic) ListNotificationBots(req *types.ListNotifica
 		return nil, errors.New("无权限，仅群主或管理员可查看通知机器人")
 	}
 
-	var records []open_models.OpenIncomingWebhook
-	if err = l.svcCtx.DB.Where("group_id = ? AND app_id = ?", req.GroupID, "GROUP_NOTIFICATION").
-		Order("id DESC").Find(&records).Error; err != nil {
+	// 直接读本地引用表，无需跨服务调用
+	var bots []group_models.GroupNotificationBotModel
+	if err = l.svcCtx.DB.Where("group_id = ?", req.GroupID).
+		Order("id DESC").Find(&bots).Error; err != nil {
 		return nil, err
 	}
 
-	baseURL := l.svcCtx.Config.ApiBaseUrl
-	items := make([]types.ListNotificationBotsItem, 0, len(records))
-	for _, w := range records {
+	items := make([]types.ListNotificationBotsItem, 0, len(bots))
+	for _, b := range bots {
 		items = append(items, types.ListNotificationBotsItem{
-			ID:            int64(w.ID),
-			Name:          w.Name,
-			Description:   w.Description,
-			Avatar:        w.Avatar,
-			WebhookURL:    fmt.Sprintf("%s/api/open/v1/webhook/incoming?access_token=%s", baseURL, w.Token),
-			Status:        w.Status,
-			CreatorUserID: w.CreatorUserID,
-			CreatedAt:     w.CreatedAt.Unix(),
+			ID:            int64(b.Id),
+			Name:          b.Name,
+			Description:   b.Description,
+			Avatar:        b.Avatar,
+			WebhookURL:    b.WebhookURL,
+			Type:          b.Type,
+			Status:        b.Status,
+			CreatorUserID: b.CreatorUserID,
+			CreatedAt:     time.Time(b.CreatedAt).Unix(),
 		})
 	}
 

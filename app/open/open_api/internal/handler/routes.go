@@ -11,8 +11,8 @@ import (
 	message "beaver/app/open/open_api/internal/handler/message"
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
 	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
+	robot "beaver/app/open/open_api/internal/handler/robot"
 	user "beaver/app/open/open_api/internal/handler/user"
-	webhook "beaver/app/open/open_api/internal/handler/webhook"
 	"beaver/app/open/open_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -250,6 +250,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 群自定义机器人消息推送（Jenkins/GitHub/Grafana 等）
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/robot/send",
+				Handler: robot.RobotSendHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
@@ -267,16 +278,5 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 群自定义机器人消息推送（Jenkins/GitHub/Grafana 等）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/webhook/incoming",
-				Handler: webhook.IncomingWebhookHandler(serverCtx),
-			},
-		},
 	)
 }

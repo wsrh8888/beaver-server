@@ -35,14 +35,14 @@ func (l *UpdateBotConfigLogic) UpdateBotConfig(req *types.UpdateBotConfigReq) (r
 	}
 
 	// 2. 查询或创建 Bot 配置
-	var botConfig open_models.OpenBotConfig
+	var botConfig open_models.OpenBotModel
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&botConfig).Error; err != nil {
 		// 不存在则创建
-		botConfig = open_models.OpenBotConfig{
-			AppID:            req.AppID,
-			BotName:          "",
-			BotAvatar:        "",
-			BotDescription:   "",
+		botConfig = open_models.OpenBotModel{
+			AppID:       req.AppID,
+			Name:        "",
+			Avatar:      "",
+			Description: "",
 			UsageGuide:       "",
 			EnableSingleChat: 1,
 			EnableGroupChat:  1,
@@ -57,13 +57,13 @@ func (l *UpdateBotConfigLogic) UpdateBotConfig(req *types.UpdateBotConfigReq) (r
 
 	// 3. 更新字段（只更新传入的字段）
 	if req.BotName != "" {
-		botConfig.BotName = req.BotName
+		botConfig.Name = req.BotName
 	}
 	if req.BotAvatar != "" {
-		botConfig.BotAvatar = req.BotAvatar
+		botConfig.Avatar = req.BotAvatar
 	}
 	if req.BotDescription != "" {
-		botConfig.BotDescription = req.BotDescription
+		botConfig.Description = req.BotDescription
 	}
 	if req.UsageGuide != "" {
 		botConfig.UsageGuide = req.UsageGuide

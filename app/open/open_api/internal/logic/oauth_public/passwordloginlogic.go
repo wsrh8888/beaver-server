@@ -67,7 +67,7 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 
 	// 7. 存储 token 到数据库
 	now := time.Now()
-	tokenRecord := open_models.OpenAccessToken{
+	tokenRecord := open_models.OpenOAuthToken{
 		AppID:        req.AppID,
 		UserID:       user.UserID,
 		Token:        accessToken,

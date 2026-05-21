@@ -7,6 +7,7 @@ type CreateNotificationBotReq struct {
 	Name        string `json:"name"`                 // 机器人名称
 	Description string `json:"description,optional"` // 简介
 	Avatar      string `json:"avatar,optional"`      // 头像文件 ID
+	Type        string `json:"type"`                 // 集成类型：custom(默认)/github/gitlab/jenkins/grafana/prometheus
 }
 
 type CreateNotificationBotRes struct {
@@ -293,6 +294,7 @@ type ListNotificationBotsItem struct {
 	Description   string `json:"description"`   // 简介
 	Avatar        string `json:"avatar"`        // 头像文件 ID
 	WebhookURL    string `json:"webhookUrl"`    // Webhook 推送 URL
+	Type          string `json:"botType"`       // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
 	Status        int    `json:"status"`        // 1 启用 0 禁用
 	CreatorUserID string `json:"creatorUserId"` // 创建者
 	CreatedAt     int64  `json:"createdAt"`     // 创建时间戳
@@ -376,6 +378,7 @@ type UpdateNotificationBotReq struct {
 	Name        string `json:"name,optional"`
 	Description string `json:"description,optional"`
 	Avatar      string `json:"avatar,optional"`
+	Type        string `json:"type,optional"`   // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
 	Status      *int   `json:"status,optional"` // 1 启用 0 禁用
 }
 

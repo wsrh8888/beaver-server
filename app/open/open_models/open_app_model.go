@@ -32,5 +32,7 @@ type OpenApp struct {
 	WebhookURL     string `gorm:"type:varchar(500);comment:Webhook回调地址"`
 	IPWhitelist    string `gorm:"type:text;comment:IP白名单(JSON数组)"`
 	TrustedDomains string `gorm:"type:text;comment:H5可信域名(JSON数组)"`
-	Scopes         string `gorm:"type:text;comment:权限范围(JSON数组)"`
+	// 应用级令牌（client_credentials 流程）
+	AppToken          string `gorm:"type:varchar(256);comment:应用访问令牌"`
+	AppTokenExpiresAt int64  `gorm:"type:bigint;default:0;comment:应用令牌过期时间戳"`
 }

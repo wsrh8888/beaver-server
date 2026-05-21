@@ -11,13 +11,13 @@ type OAuthClientConfig struct {
 type H5OAuthConfig struct {
 	Enabled      bool     `json:"enabled"`
 	RedirectURIs []string `json:"redirect_uris"`
-	JsSdkDomains []string `json:"js_sdk_domains"` // JS-SDK 安全域名
+	JsSdkDomains []string `json:"js_sdk_domains"`
 }
 
 // DesktopOAuthConfig 桌面端 OAuth 配置
 type DesktopOAuthConfig struct {
 	Enabled      bool   `json:"enabled"`
-	CustomScheme string `json:"custom_scheme"` // 如: beaver://oauth/callback
+	CustomScheme string `json:"custom_scheme"`
 }
 
 // MobileOAuthConfig 移动端 OAuth 配置
@@ -25,6 +25,6 @@ type MobileOAuthConfig struct {
 	Enabled            bool   `json:"enabled"`
 	IOSBundleID        string `json:"ios_bundle_id"`
 	AndroidPackageName string `json:"android_package_name"`
-	UniversalLink      string `json:"universal_link"` // iOS Universal Link
-	CustomScheme       string `json:"custom_scheme"`  // 如: beaver://oauth/callback
+	UniversalLink      string `json:"universal_link"`
+	CustomScheme       string `json:"custom_scheme"`
 }

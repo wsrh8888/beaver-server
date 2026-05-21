@@ -49,7 +49,7 @@ func (l *GetAuthorizeCodeLogic) GetAuthorizeCode(req *types.GetAuthorizeCodeReq)
 
 	// 4. 保存授权码到数据库
 	now := time.Now()
-	authCode := open_models.OpenAuthCode{
+	authCode := open_models.OpenOAuthCode{
 		Code:        code,
 		AppID:       req.AppID,
 		UserID:      userID,

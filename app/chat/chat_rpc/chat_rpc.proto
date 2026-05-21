@@ -94,6 +94,20 @@ message ForwardMsg {
   int32 count = 4;              // 消息总数
 }
 
+// 定义MarkdownMsg消息 - Markdown 富文本消息
+message MarkdownMsg {
+  string content = 1; // Markdown 正文
+  string title = 2;   // 会话列表预览标题（可选）
+}
+
+// 定义LinkMsg消息 - 链接卡片消息
+message LinkMsg {
+  string url = 1;       // 跳转链接
+  string title = 2;     // 标题
+  string desc = 3;      // 摘要描述（可选）
+  string image_url = 4; // 封面图 URL（可选）
+}
+
 // 定义Msg消息
 message Msg {
   uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
@@ -110,6 +124,9 @@ message Msg {
   WithdrawMsg withdraw_msg = 12; // 撤回消息
   ReplyMsg reply_msg = 13; // 回复消息
   ForwardMsg forward_msg = 14; // 转发消息（集合）
+  MarkdownMsg markdown_msg = 15; // Markdown 富文本消息
+  LinkMsg link_msg = 16; // 链接卡片消息
+  repeated string at_user_ids = 17; // @提及的用户ID列表（空=不@任何人）
 }
 
 // 定义SendMsgReq消息

@@ -43,13 +43,12 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 	secret := hex.EncodeToString(secretBytes)
 
 	botUserID := "bot_" + req.AppID
-	webhook := models.OpenIncomingWebhook{
+	webhook := models.OpenGroupBotModel{
 		Token:     token,
 		Secret:    secret,
 		AppID:     req.AppID,
 		GroupID:   req.GroupID,
 		BotUserID: botUserID,
-		Name:      req.Name,
 		Status:    1,
 	}
 
@@ -67,7 +66,7 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 			AppID:      webhook.AppID,
 			GroupID:    webhook.GroupID,
 			BotUserID:  webhook.BotUserID,
-			Name:       webhook.Name,
+
 			WebhookURL: webhookURL,
 			Status:     webhook.Status,
 			CreatedAt:  time.Now().Unix(),

@@ -55,11 +55,53 @@ message RefreshTokenRes {
   int64 expires_in = 3; // 过期时间（秒）
 }
 
+// ==================== 群通知机器人 Webhook 管理 ====================
+
+// 创建 Webhook（open 负责生成 token/secret/bot_user_id，构建 webhook_url）
+message CreateWebhookReq {
+  string group_id = 1; // 目标群组 ID
+}
+
+message CreateWebhookRes {
+  uint32 id = 1;          // 新记录 ID
+  string bot_user_id = 2; // 机器人用户 ID（group 侧用于建群成员）
+  string webhook_url = 3; // 完整 Webhook URL（含 access_token）
+  string secret = 4;      // HMAC-SHA256 签名密钥（一次性返回）
+}
+
+// 删除 Webhook
+message DeleteWebhookReq {
+  uint32 id = 1; // open_incoming_webhooks.id
+}
+
+message DeleteWebhookRes {}
+
+// 更新 Webhook 状态（-1=不修改 0=禁用 1=启用）
+message UpdateWebhookReq {
+  uint32 id = 1;
+  int32  status = 2;
+}
+
+message UpdateWebhookRes {}
+
+// 重置签名密钥（旧 secret 立即失效）
+message ResetWebhookSecretReq {
+  uint32 id = 1;
+}
+
+message ResetWebhookSecretRes {
+  string secret = 1; // 新密钥
+}
+
 service open {
   rpc ExchangeToken(ExchangeTokenReq) returns (ExchangeTokenRes); // 用授权码换取 Token
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
   rpc ValidateToken(ValidateTokenReq) returns (ValidateTokenRes); // 验证 Token
   rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenRes); // 刷新 Token
+  rpc CreateWebhook(CreateWebhookReq) returns (CreateWebhookRes); // 创建群通知机器人 Webhook
+  rpc DeleteWebhook(DeleteWebhookReq) returns (DeleteWebhookRes); // 删除 Webhook
+  rpc UpdateWebhook(UpdateWebhookReq) returns (UpdateWebhookRes); // 更新 Webhook 元信息
+  rpc ResetWebhookSecret(ResetWebhookSecretReq) returns (ResetWebhookSecretRes); // 重置签名密钥
 }
 
 // goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --style=goZero

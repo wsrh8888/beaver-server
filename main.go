@@ -81,6 +81,7 @@ func main() {
 			&group_models.GroupMemberModel{},
 			&group_models.GroupJoinRequestModel{},
 			&group_models.GroupMemberChangeLogModel{},
+			&group_models.GroupNotificationBotModel{},
 
 			// 通知中心表
 			&notification_models.NotificationEvent{},
@@ -101,17 +102,12 @@ func main() {
 			// 开放平台相关表
 			&open_models.OpenDeveloper{},
 			&open_models.OpenApp{},
-			&open_models.OpenAppPermission{},
-			&open_models.OpenAppVersion{},
-			&open_models.OpenAppToken{}, // 应用 Token
-			&open_models.OpenAccessToken{},
-			&open_models.OpenRefreshToken{},
-			&open_models.OpenAuthCode{},
-			&open_models.OpenQrCode{},
-			&open_models.OpenH5AuthCode{},        // H5 免登授权码表
-			&open_models.OpenEventSubscription{}, // 事件订阅配置表
-			&open_models.OpenBotConfig{},         // Bot 配置表
-			&open_models.OpenIncomingWebhook{},   // Incoming Webhook 配置表
+			&open_models.OpenOAuthToken{},
+			&open_models.OpenOAuthCode{},
+			&open_models.OpenOAuthQrCode{},
+			&open_models.OpenEventSubscription{},
+			&open_models.OpenBotModel{},
+			&open_models.OpenGroupBotModel{},
 		)
 
 		if err != nil {

@@ -28,7 +28,7 @@ func NewGetBotConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetB
 
 func (l *GetBotConfigLogic) GetBotConfig(req *types.GetBotConfigReq) (resp *types.GetBotConfigRes, err error) {
 	// 1. 查询 Bot 配置
-	var botConfig open_models.OpenBotConfig
+	var botConfig open_models.OpenBotModel
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&botConfig).Error; err != nil {
 		// 如果不存在，返回默认配置
 		return &types.GetBotConfigRes{
@@ -64,9 +64,9 @@ func (l *GetBotConfigLogic) GetBotConfig(req *types.GetBotConfigReq) (resp *type
 	return &types.GetBotConfigRes{
 		Config: types.BotConfigInfo{
 			AppID:            botConfig.AppID,
-			BotName:          botConfig.BotName,
-			BotAvatar:        botConfig.BotAvatar,
-			BotDescription:   botConfig.BotDescription,
+			BotName:          botConfig.Name,
+			BotAvatar:        botConfig.Avatar,
+			BotDescription:   botConfig.Description,
 			UsageGuide:       botConfig.UsageGuide,
 			EnableSingleChat: botConfig.EnableSingleChat == 1,
 			EnableGroupChat:  botConfig.EnableGroupChat == 1,

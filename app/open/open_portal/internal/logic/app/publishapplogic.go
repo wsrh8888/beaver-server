@@ -34,15 +34,15 @@ func (l *PublishAppLogic) PublishApp(req *types.PublishAppReq) (resp *types.Publ
 	}
 
 	// 2. 检查是否已配置 Bot（如果启用了 Bot 能力）
-	var botConfig open_models.OpenBotConfig
+	var botConfig open_models.OpenBotModel
 	err = l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&botConfig).Error
 	if err != nil {
 		// 如果没有 Bot 配置，创建默认配置
-		botConfig = open_models.OpenBotConfig{
+		botConfig = open_models.OpenBotModel{
 			AppID:            req.AppID,
-			BotName:          app.Name,
-			BotAvatar:        app.Icon,
-			BotDescription:   app.Description,
+			Name:        app.Name,
+			Avatar:      app.Icon,
+			Description: app.Description,
 			EnableSingleChat: 1, // int 类型：1是 0否
 			EnableGroupChat:  1,
 			EnableAtMention:  1,

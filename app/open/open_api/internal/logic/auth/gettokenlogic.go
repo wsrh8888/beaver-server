@@ -49,12 +49,12 @@ func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRe
 	// 4. 保存 Access Token（客户端凭证模式没有用户ID）
 	now := time.Now()
 	expiresAt := now.Add(2 * time.Hour).Unix() // 2小时过期
-	tokenRecord := open_models.OpenAccessToken{
+	tokenRecord := open_models.OpenOAuthToken{
 		AppID:        req.AppID,
 		Token:        accessToken,
 		RefreshToken: refreshToken,
 		ExpiresAt:    expiresAt,
-		Scope:        app.Scopes,
+		Scope:        app.SupportedScopes,
 		UserID:       "", // 客户端凭证模式没有用户
 	}
 

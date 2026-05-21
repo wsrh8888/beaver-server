@@ -14,14 +14,12 @@ func InitOpenTables(db *gorm.DB) error {
 	tables := []interface{}{
 		&open_models.OpenApp{},
 		&open_models.OpenDeveloper{},
-		&open_models.OpenAuthCode{},
-		&open_models.OpenAccessToken{},
-		&open_models.OpenRefreshToken{},
-		&open_models.OpenQrCode{},
-		&open_models.OpenAppPermission{},
-		&open_models.OpenAppVersion{},
-		&open_models.OpenH5AuthCode{},      // H5 免登授权码表
-		&open_models.OpenIncomingWebhook{}, // Incoming Webhook Token 表
+		&open_models.OpenOAuthToken{},
+		&open_models.OpenOAuthCode{},
+		&open_models.OpenOAuthQrCode{},
+		&open_models.OpenEventSubscription{},
+		&open_models.OpenBotModel{},
+		&open_models.OpenGroupBotModel{},
 	}
 
 	for _, table := range tables {

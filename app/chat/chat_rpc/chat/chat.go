@@ -38,6 +38,8 @@ type (
 	ImageMsg                                = chat_rpc.ImageMsg
 	InitializeConversationReq               = chat_rpc.InitializeConversationReq
 	InitializeConversationRes               = chat_rpc.InitializeConversationRes
+	LinkMsg                                 = chat_rpc.LinkMsg
+	MarkdownMsg                             = chat_rpc.MarkdownMsg
 	Msg                                     = chat_rpc.Msg
 	NotificationMsg                         = chat_rpc.NotificationMsg
 	RemoveConversationMembersReq            = chat_rpc.RemoveConversationMembersReq

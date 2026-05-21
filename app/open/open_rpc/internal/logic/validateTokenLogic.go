@@ -27,7 +27,7 @@ func NewValidateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 
 func (l *ValidateTokenLogic) ValidateToken(in *open_rpc.ValidateTokenReq) (*open_rpc.ValidateTokenRes, error) {
 	// 查询 Access Token
-	var token open_models.OpenAccessToken
+	var token open_models.OpenOAuthToken
 	if err := l.svcCtx.DB.Where("token = ?", in.AccessToken).First(&token).Error; err != nil {
 		return &open_rpc.ValidateTokenRes{
 			Valid: false,

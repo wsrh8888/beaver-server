@@ -36,7 +36,7 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 	}
 
 	// 2. 查询授权码
-	var authCode open_models.OpenAuthCode
+	var authCode open_models.OpenOAuthCode
 	if err := l.svcCtx.DB.Where("code = ? AND app_id = ? AND used = ?", in.Code, in.AppId, false).First(&authCode).Error; err != nil {
 		return nil, errors.New("授权码无效或已使用")
 	}
@@ -66,7 +66,7 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 	now := time.Now()
 	expiresAt := now.Add(2 * time.Hour).Unix()                    // access_token 2小时过期
 	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour).Unix() // refresh_token 180天过期
-	tokenRecord := open_models.OpenAccessToken{
+	tokenRecord := open_models.OpenOAuthToken{
 		AppID:                 in.AppId,
 		Token:                 accessToken,
 		RefreshToken:          refreshToken,

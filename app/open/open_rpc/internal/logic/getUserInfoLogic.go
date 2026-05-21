@@ -29,7 +29,7 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 
 func (l *GetUserInfoLogic) GetUserInfo(in *open_rpc.GetUserInfoReq) (*open_rpc.GetUserInfoRes, error) {
 	// 1. 查询 Access Token
-	var token open_models.OpenAccessToken
+	var token open_models.OpenOAuthToken
 	if err := l.svcCtx.DB.Where("token = ?", in.AccessToken).First(&token).Error; err != nil {
 		return nil, errors.New("无效的访问令牌")
 	}

@@ -31,7 +31,7 @@ func NewRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Refr
 
 func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (resp *types.RefreshTokenRes, err error) {
 	// 1. 查询旧的 Access Token
-	var oldToken open_models.OpenAccessToken
+	var oldToken open_models.OpenOAuthToken
 	if err := l.svcCtx.DB.Where("refresh_token = ?", req.RefreshToken).First(&oldToken).Error; err != nil {
 		return nil, errors.New("刷新令牌无效")
 	}
@@ -59,7 +59,7 @@ func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (resp *type
 	// 6. 保存新令牌
 	now := time.Now()
 	expiresAt := now.Add(2 * time.Hour).Unix()
-	newTokenRecord := open_models.OpenAccessToken{
+	newTokenRecord := open_models.OpenOAuthToken{
 		AppID:        oldToken.AppID,
 		Token:        newAccessToken,
 		RefreshToken: newRefreshToken,

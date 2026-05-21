@@ -42,3 +42,23 @@ func (s *OpenServer) RefreshToken(ctx context.Context, in *open_rpc.RefreshToken
 	l := logic.NewRefreshTokenLogic(ctx, s.svcCtx)
 	return l.RefreshToken(in)
 }
+
+func (s *OpenServer) CreateWebhook(ctx context.Context, in *open_rpc.CreateWebhookReq) (*open_rpc.CreateWebhookRes, error) {
+	l := logic.NewCreateWebhookLogic(ctx, s.svcCtx)
+	return l.CreateWebhook(in)
+}
+
+func (s *OpenServer) DeleteWebhook(ctx context.Context, in *open_rpc.DeleteWebhookReq) (*open_rpc.DeleteWebhookRes, error) {
+	l := logic.NewDeleteWebhookLogic(ctx, s.svcCtx)
+	return l.DeleteWebhook(in)
+}
+
+func (s *OpenServer) UpdateWebhook(ctx context.Context, in *open_rpc.UpdateWebhookReq) (*open_rpc.UpdateWebhookRes, error) {
+	l := logic.NewUpdateWebhookLogic(ctx, s.svcCtx)
+	return l.UpdateWebhook(in)
+}
+
+func (s *OpenServer) ResetWebhookSecret(ctx context.Context, in *open_rpc.ResetWebhookSecretReq) (*open_rpc.ResetWebhookSecretRes, error) {
+	l := logic.NewResetWebhookSecretLogic(ctx, s.svcCtx)
+	return l.ResetWebhookSecret(in)
+}

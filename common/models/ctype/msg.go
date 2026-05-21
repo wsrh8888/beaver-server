@@ -48,6 +48,10 @@ func (m *MsgType) UnmarshalJSON(data []byte) error {
 		*m = ReplyMsgType
 	case "12":
 		*m = ForwardMsgType
+	case "13":
+		*m = MarkdownMsgType
+	case "14":
+		*m = LinkMsgType
 	default:
 		*m = TextMsgType
 	}
@@ -103,10 +107,18 @@ const (
 	 * @description: 转发消息类型（合并转发/消息集合）
 	 */
 	ForwardMsgType
+	/**
+	 * @description: Markdown 富文本消息类型
+	 */
+	MarkdownMsgType
+	/**
+	 * @description: 链接卡片消息类型
+	 */
+	LinkMsgType
 )
 
 type Msg struct {
-	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
+	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发 13:markdown 14:链接卡片
 	TargetMsgID     string           `json:"targetMsgId,omitempty"`     // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
 	AtUserIDs       []string         `json:"atUserIds,omitempty"`       // @的用户ID列表，服务端据此触发定向推送；文本中用@昵称占位，前端扫描渲染高亮
 	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         // 文本消息
@@ -121,6 +133,8 @@ type Msg struct {
 	WithdrawMsg     *WithdrawMsg     `json:"withdrawMsg,omitempty"`     // 撤回消息
 	ReplyMsg        *ReplyMsg        `json:"replyMsg,omitempty"`        // 回复消息
 	ForwardMsg      *ForwardMsg      `json:"forwardMsg,omitempty"`      // 转发消息（集合）
+	MarkdownMsg     *MarkdownMsg     `json:"markdownMsg,omitempty"`     // Markdown 富文本消息
+	LinkMsg         *LinkMsg         `json:"linkMsg,omitempty"`         // 链接卡片消息
 }
 
 /**
@@ -224,4 +238,18 @@ type ForwardMsg struct {
 	Title    string `json:"title"`    // 转发的标题，如 "群聊的聊天记录"
 	RecordID string `json:"recordId"` // 核心：指向完整详情的聚合ID（存入独立详情表或OSS）
 	Count    int    `json:"count"`    // 包含的消息总数
+}
+
+// MarkdownMsg Markdown 富文本消息结构（Type: 13）
+type MarkdownMsg struct {
+	Content string `json:"content"`          // Markdown 正文
+	Title   string `json:"title,omitempty"`  // 会话列表预览标题（可选，为空时取 Content 前50字）
+}
+
+// LinkMsg 链接卡片消息结构（Type: 14）
+type LinkMsg struct {
+	URL      string `json:"url"`               // 跳转链接
+	Title    string `json:"title"`             // 标题
+	Desc     string `json:"desc,omitempty"`    // 摘要描述
+	ImageURL string `json:"imageUrl,omitempty"` // 封面图 URL（可选）
 }

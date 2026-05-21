@@ -237,6 +237,31 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 				},
 			}
 		}
+	case ctype.MarkdownMsgType:
+		if protoMsg.MarkdownMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.MarkdownMsgType,
+				MarkdownMsg: &ctype.MarkdownMsg{
+					Content: protoMsg.MarkdownMsg.Content,
+					Title:   protoMsg.MarkdownMsg.Title,
+				},
+			}
+		}
+	case ctype.LinkMsgType:
+		if protoMsg.LinkMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.LinkMsgType,
+				LinkMsg: &ctype.LinkMsg{
+					URL:      protoMsg.LinkMsg.Url,
+					Title:    protoMsg.LinkMsg.Title,
+					Desc:     protoMsg.LinkMsg.Desc,
+					ImageURL: protoMsg.LinkMsg.ImageUrl,
+				},
+			}
+		}
+	}
+	if len(protoMsg.AtUserIds) > 0 {
+		msg.AtUserIDs = protoMsg.AtUserIds
 	}
 	return &msg
 }
@@ -281,8 +306,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			return nil, errors.New("你不是该群成员")
 		}
 
-		// 群主(1)和管理员(2)不受禁言限制
-		if member.Role != 1 && member.Role != 2 {
+		// 群主(1)和管理员(2)不受禁言限制；群通知机器人（nbot_前缀）也跳过禁言校验
+		if member.Role != 1 && member.Role != 2 && !strings.HasPrefix(in.UserId, "nbot_") {
 			// 全员禁言检查
 			var group group_models.GroupModel
 			if err := l.svcCtx.DB.Where("group_id = ?", groupID).First(&group).Error; err == nil {
@@ -611,6 +636,22 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 				Title:    m.ForwardMsg.Title,
 				RecordId: m.ForwardMsg.RecordID,
 				Count:    int32(m.ForwardMsg.Count),
+			}
+		}
+	case ctype.MarkdownMsgType:
+		if m.MarkdownMsg != nil {
+			rpcMsg.MarkdownMsg = &chat_rpc.MarkdownMsg{
+				Content: m.MarkdownMsg.Content,
+				Title:   m.MarkdownMsg.Title,
+			}
+		}
+	case ctype.LinkMsgType:
+		if m.LinkMsg != nil {
+			rpcMsg.LinkMsg = &chat_rpc.LinkMsg{
+				Url:      m.LinkMsg.URL,
+				Title:    m.LinkMsg.Title,
+				Desc:     m.LinkMsg.Desc,
+				ImageUrl: m.LinkMsg.ImageURL,
 			}
 		}
 	}

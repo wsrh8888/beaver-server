@@ -229,49 +229,6 @@ type GetWebhookListRes struct {
 	List  []WebhookSubscriptionInfo `json:"list"`
 }
 
-type IncomingWebhookAt struct {
-	AtMobiles []string `json:"atMobiles,optional"` // 被@用户手机号
-	AtUserIds []string `json:"atUserIds,optional"` // 被@用户 ID
-	IsAtAll   bool     `json:"isAtAll,optional"`   // 是否@所有人
-}
-
-type IncomingWebhookImageBody struct {
-	Url          string `json:"url"` // 图片 URL
-	Width        string `json:"width,optional"`
-	Height       string `json:"height,optional"`
-	OriginUrl    string `json:"origin_url,optional"`
-	OriginWidth  string `json:"origin_width,optional"`
-	OriginHeight string `json:"origin_height,optional"`
-	FileName     string `json:"file_name,optional"`
-	FileSize     string `json:"file_size,optional"`
-}
-
-type IncomingWebhookMarkdownBody struct {
-	Title string `json:"title"`          // 会话列表摘要
-	Text  string `json:"text"`           // markdown 正文
-	Image string `json:"image,optional"` // 头图 URL
-}
-
-type IncomingWebhookReq struct {
-	AccessToken string                      `form:"access_token"` // Webhook 令牌
-	Timestamp   int64                       `form:"timestamp"`    // Unix 毫秒，与服务器误差不超过 1 小时
-	Sign        string                      `form:"sign"`         // 加签结果（需 URL 编码）
-	Msgtype     string                      `json:"msgtype"`      // text / markdown / image
-	Text        IncomingWebhookTextBody     `json:"text,optional"`
-	Markdown    IncomingWebhookMarkdownBody `json:"markdown,optional"`
-	Image       IncomingWebhookImageBody    `json:"image,optional"`
-	At          IncomingWebhookAt           `json:"at,optional"`
-}
-
-type IncomingWebhookRes struct {
-	Code int    `json:"code"` // 0 成功；401 令牌无效；408 请求过期；403 验签失败
-	Msg  string `json:"msg"`
-}
-
-type IncomingWebhookTextBody struct {
-	Content string `json:"content"` // 文本内容
-}
-
 type PasswordLoginReq struct {
 	AppID    string `json:"appId"`
 	Account  string `json:"account"`
@@ -332,6 +289,126 @@ type RevokeTokenReq struct {
 
 type RevokeTokenRes struct {
 	Success bool `json:"success"`
+}
+
+type RobotSendActionCardBody struct {
+	Title           string                    `json:"title"`                  // 会话列表展示内容，限制 100 字符
+	Markdown        string                    `json:"markdown"`               // 卡片正文（markdown），限制 5000 字符
+	Image           string                    `json:"image,optional"`         // 封面图 URL
+	ContentTitle    string                    `json:"content_title,optional"` // 内容体 title
+	SingleTitle     string                    `json:"single_title,optional"`  // 整体跳转按钮文字，与 single_url 同时设置
+	SingleUrl       string                    `json:"single_url,optional"`    // 整体跳转链接
+	SinglePcUrl     string                    `json:"single_pc_url,optional"`
+	SingleMobileUrl string                    `json:"single_mobile_url,optional"`
+	IconUrl         string                    `json:"icon_url,optional"`
+	BtnType         int64                     `json:"btn_type,optional"`
+	BtnOrientation  string                    `json:"btn_orientation,optional"` // "0" 竖排 / "1" 横排
+	BtnJsonList     []RobotSendActionCardBtn  `json:"btn_json_list,optional"`   // 独立跳转按钮列表
+	Remind          RobotSendActionCardRemind `json:"remind,optional"`
+}
+
+type RobotSendActionCardBtn struct {
+	Title           string `json:"title,optional"`
+	ActionUrl       string `json:"action_url,optional"`
+	ActionPcUrl     string `json:"action_pc_url,optional"`
+	ActionMobileUrl string `json:"action_mobile_url,optional"`
+	IconUrl         string `json:"icon_url,optional"`
+	BtnType         int64  `json:"btn_type,optional"` // 1:跳转链接 2:触发回调 3:唤起应用
+}
+
+type RobotSendActionCardRemind struct {
+	Title    string `json:"title,optional"`
+	SubTitle string `json:"sub_title,optional"`
+	Content  string `json:"content,optional"`
+	BtnType  int64  `json:"btn_type,optional"`
+	BtnUrl   string `json:"btn_url,optional"`
+}
+
+type RobotSendAt struct {
+	AtMobiles   []string `json:"atMobiles,optional"`   // 被@用户手机号
+	AtUserIds   []string `json:"atUserIds,optional"`   // 被@用户 ID
+	AtWorkCodes []string `json:"atWorkCodes,optional"` // 被@用户工号（作为用户ID处理）
+	IsAtAll     bool     `json:"isAtAll,optional"`     // 是否@所有人
+}
+
+type RobotSendAudioBody struct {
+	Url      string `json:"url"`          // 语音文件公网链接
+	Duration int64  `json:"duration"`     // 时长（秒），须小于 60
+	Size     int64  `json:"size"`         // 文件大小（KB）
+	Ext      string `json:"ext,optional"` // 扩展名，如 aac / amr
+}
+
+type RobotSendCustomBody struct {
+	Type    string `json:"type"`     // 类型，目前固定传 "1"（跳转链接）
+	BodyUrl string `json:"body_url"` // 需要跳转的 URL（请提前 url_encode）
+}
+
+type RobotSendFileBody struct {
+	Name string `json:"name"` // 文件名称
+	Url  string `json:"url"`  // 文件公网链接（pdf 需 https）
+	Size int64  `json:"size"` // 文件大小（KB），必填，影响下载进度条
+}
+
+type RobotSendImageBody struct {
+	Url          string `json:"url"` // 图片 URL
+	Width        string `json:"width,optional"`
+	Height       string `json:"height,optional"`
+	OriginUrl    string `json:"origin_url,optional"` // 原图 URL
+	OriginWidth  string `json:"origin_width,optional"`
+	OriginHeight string `json:"origin_height,optional"`
+	FileName     string `json:"file_name,optional"`
+	FileSize     string `json:"file_size,optional"`
+}
+
+type RobotSendLinkBody struct {
+	MessageUrl string `json:"message_url"`      // 消息跳转链接
+	PicUrl     string `json:"pic_url,optional"` // 封面图 URL
+	Title      string `json:"title"`            // 消息标题，建议 100 字符以内
+	Text       string `json:"text"`             // 消息描述，建议 500 字符以内
+}
+
+type RobotSendMarkdownBody struct {
+	Title string `json:"title"`          // 会话列表摘要，限制 100 字符
+	Text  string `json:"text"`           // markdown 正文，限制 5000 字符
+	Image string `json:"image,optional"` // 头图 URL（宽:高 = 2:1）
+}
+
+type RobotSendReq struct {
+	AccessToken string                  `form:"access_token"` // Webhook 令牌
+	Timestamp   int64                   `form:"timestamp"`    // Unix 毫秒，与服务器误差不超过 1 小时
+	Sign        string                  `form:"sign"`         // 加签结果（需 URL 编码）
+	Msgtype     string                  `json:"msgtype"`      // 消息类型
+	Text        RobotSendTextBody       `json:"text,optional"`
+	Markdown    RobotSendMarkdownBody   `json:"markdown,optional"`
+	Image       RobotSendImageBody      `json:"image,optional"`
+	Link        RobotSendLinkBody       `json:"link,optional"`
+	Audio       RobotSendAudioBody      `json:"audio,optional"`
+	File        RobotSendFileBody       `json:"file,optional"`
+	Video       RobotSendVideoBody      `json:"video,optional"`
+	Custom      RobotSendCustomBody     `json:"custom,optional"`
+	Tips        RobotSendTipsBody       `json:"tips,optional"`
+	ActionCard  RobotSendActionCardBody `json:"action_card,optional"`
+	At          RobotSendAt             `json:"at,optional"`
+}
+
+type RobotSendRes struct {
+}
+
+type RobotSendTextBody struct {
+	Content string `json:"content"` // 文本内容，限制 5000 字符
+}
+
+type RobotSendTipsBody struct {
+	Text string `json:"text"` // 灰色提示文案
+}
+
+type RobotSendVideoBody struct {
+	Name     string `json:"name"`              // 文件名称
+	Url      string `json:"url"`               // 视频公网链接
+	Duration int64  `json:"duration,optional"` // 时长（秒）
+	Size     string `json:"size,optional"`     // 视频大小（KB）
+	Width    string `json:"width,optional"`
+	Height   string `json:"height,optional"`
 }
 
 type SendCardMessageReq struct {

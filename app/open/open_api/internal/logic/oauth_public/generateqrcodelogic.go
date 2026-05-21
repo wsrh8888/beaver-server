@@ -52,7 +52,7 @@ func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp
 	expiresAt := now.Add(5 * time.Minute)
 
 	// 5. 创建扫码记录
-	qrCode := open_models.OpenQrCode{
+	qrCode := open_models.OpenOAuthQrCode{
 		SceneID:   sceneID,
 		AppID:     req.AppID,
 		Status:    0, // 0-等待扫码

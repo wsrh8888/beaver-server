@@ -38,7 +38,7 @@ func (l *ConfirmQrCodeLoginLogic) ConfirmQrCodeLogin(req *types.ConfirmQrCodeLog
 	}
 
 	// 2. 查询扫码记录
-	var qrCode open_models.OpenQrCode
+	var qrCode open_models.OpenOAuthQrCode
 	if err := l.svcCtx.DB.Where("scene_id = ?", req.SceneID).First(&qrCode).Error; err != nil {
 		logx.Errorf("扫码记录不存在: sceneId=%s, err=%v", req.SceneID, err)
 		return nil, fmt.Errorf("二维码不存在或已过期")
