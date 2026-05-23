@@ -53,9 +53,7 @@ func (l *GetPhoneCodeLogic) GetPhoneCode(req *types.GetPhoneCodeReq) (resp *type
 		logx.Errorf("设置发送频率限制失败: %v", err)
 	}
 
-	return &types.GetPhoneCodeRes{
-		Message: "验证码发送成功",
-	}, nil
+	return &types.GetPhoneCodeRes{}, nil
 }
 
 // 发送短信验证码

@@ -11,6 +11,13 @@ const (
 	UserTypeRobot  int8 = 3 // 智能机器人（AI 对话机器人）
 )
 
+// 注册来源常量
+const (
+	SourcePhone int32 = 1 // 手机号注册
+	SourceEmail int32 = 2 // 邮箱注册
+	SourceGroup int32 = 3 // 群内创建（机器人）
+)
+
 // UserModel 用户基础信息模型（包括普通用户和机器人）
 type UserModel struct {
 	models.Model

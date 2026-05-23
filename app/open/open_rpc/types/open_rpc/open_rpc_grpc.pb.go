@@ -26,6 +26,7 @@ const (
 	Open_CreateBot_FullMethodName      = "/open_rpc.open/CreateBot"
 	Open_DeleteBot_FullMethodName      = "/open_rpc.open/DeleteBot"
 	Open_ResetBotSecret_FullMethodName = "/open_rpc.open/ResetBotSecret"
+	Open_GetBotInfo_FullMethodName     = "/open_rpc.open/GetBotInfo"
 )
 
 // OpenClient is the client API for Open service.
@@ -39,6 +40,7 @@ type OpenClient interface {
 	CreateBot(ctx context.Context, in *CreateBotReq, opts ...grpc.CallOption) (*CreateBotRes, error)
 	DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
 	ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
+	GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 }
 
 type openClient struct {
@@ -119,6 +121,16 @@ func (c *openClient) ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, 
 	return out, nil
 }
 
+func (c *openClient) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBotInfoRes)
+	err := c.cc.Invoke(ctx, Open_GetBotInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OpenServer is the server API for Open service.
 // All implementations must embed UnimplementedOpenServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type OpenServer interface {
 	CreateBot(context.Context, *CreateBotReq) (*CreateBotRes, error)
 	DeleteBot(context.Context, *DeleteBotReq) (*DeleteBotRes, error)
 	ResetBotSecret(context.Context, *ResetBotSecretReq) (*ResetBotSecretRes, error)
+	GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error)
 	mustEmbedUnimplementedOpenServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedOpenServer) DeleteBot(context.Context, *DeleteBotReq) (*Delet
 }
 func (UnimplementedOpenServer) ResetBotSecret(context.Context, *ResetBotSecretReq) (*ResetBotSecretRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetBotSecret not implemented")
+}
+func (UnimplementedOpenServer) GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBotInfo not implemented")
 }
 func (UnimplementedOpenServer) mustEmbedUnimplementedOpenServer() {}
 func (UnimplementedOpenServer) testEmbeddedByValue()              {}
@@ -308,6 +324,24 @@ func _Open_ResetBotSecret_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_GetBotInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBotInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).GetBotInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_GetBotInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).GetBotInfo(ctx, req.(*GetBotInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Open_ServiceDesc is the grpc.ServiceDesc for Open service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetBotSecret",
 			Handler:    _Open_ResetBotSecret_Handler,
+		},
+		{
+			MethodName: "GetBotInfo",
+			Handler:    _Open_GetBotInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

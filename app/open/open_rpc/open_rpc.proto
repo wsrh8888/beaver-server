@@ -60,11 +60,12 @@ message RefreshTokenRes {
 // 创建推送机器人
 message CreateBotReq {
   string group_id = 1; // 目标群组 ID
+  string bot_id = 2; // 机器人用户 ID（由 user_rpc 生成）
 }
 
 message CreateBotRes {
   uint32 id = 1; // 机器人 ID（open_bots.id）
-  string bot_user_id = 2; // 机器人用户 ID
+  string bot_id = 2; // 机器人用户 ID
   string token = 3; // Webhook Token
   string webhook_url = 4; // Webhook 基础 URL（不含 token）
 }
@@ -85,6 +86,27 @@ message ResetBotSecretRes {
   string signature_secret = 1; // 新密钥
 }
 
+// 获取推送机器人信息
+message GetBotInfoReq {
+  string bot_id = 1; // 机器人用户ID
+}
+
+message BotSecurity {
+  bool keywords_enabled = 1;
+  repeated string keywords = 2;
+  bool ip_whitelist_enabled = 3;
+  repeated string ip_whitelist = 4;
+  bool signature_enabled = 5;
+  string signature_secret = 6;
+}
+
+message GetBotInfoRes {
+  uint32 id = 1; // open_bots.id
+  string bot_id = 2; // 机器人用户ID
+  string token = 3; // Webhook Token
+  BotSecurity security = 4; // 安全设置
+}
+
 service open {
   rpc ExchangeToken(ExchangeTokenReq) returns (ExchangeTokenRes); // 用授权码换取 Token
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
@@ -93,6 +115,7 @@ service open {
   rpc CreateBot(CreateBotReq) returns (CreateBotRes); // 创建推送机器人
   rpc DeleteBot(DeleteBotReq) returns (DeleteBotRes); // 删除推送机器人（软删除）
   rpc ResetBotSecret(ResetBotSecretReq) returns (ResetBotSecretRes); // 重置签名密钥
+  rpc GetBotInfo(GetBotInfoReq) returns (GetBotInfoRes); // 获取推送机器人信息
 }
 
 // goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --style=goZero

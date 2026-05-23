@@ -12,26 +12,26 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type DeleteNotificationBotLogic struct {
+type DeleteBotLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-// 删除通知机器人
-func NewDeleteNotificationBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteNotificationBotLogic {
-	return &DeleteNotificationBotLogic{
+// 删除机器人
+func NewDeleteBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteBotLogic {
+	return &DeleteBotLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *DeleteNotificationBotLogic) DeleteNotificationBot(req *types.DeleteNotificationBotReq) (resp *types.DeleteNotificationBotRes, err error) {
-	// 1. 从本地引用表查
+func (l *DeleteBotLogic) DeleteBot(req *types.DeleteBotReq) (resp *types.DeleteBotRes, err error) {
+	// 1. 从本地引用表查（通过 bot_id）
 	var ref group_models.GroupBotModel
-	if err = l.svcCtx.DB.First(&ref, req.ID).Error; err != nil {
-		return nil, errors.New("通知机器人不存在")
+	if err = l.svcCtx.DB.Where("bot_id = ?", req.BotID).First(&ref).Error; err != nil {
+		return nil, errors.New("机器人不存在")
 	}
 
 	// 2. 校验权限
@@ -40,12 +40,19 @@ func (l *DeleteNotificationBotLogic) DeleteNotificationBot(req *types.DeleteNoti
 		return nil, errors.New("不是群成员")
 	}
 	if member.Role != 1 && member.Role != 2 {
-		return nil, errors.New("无权限，仅群主或管理员可删除通知机器人")
+		return nil, errors.New("无权限，仅群主或管理员可删除机器人")
 	}
 
-	// 3. 调 open_rpc 删除 master 记录
+	// 3. 通过 open_rpc 获取 Bot ID，然后删除
+	botInfoRes, err := l.svcCtx.OpenRpc.GetBotInfo(l.ctx, &open_rpc.GetBotInfoReq{
+		BotId: ref.BotID,
+	})
+	if err != nil {
+		return nil, errors.New("Open Bot 记录不存在")
+	}
+
 	if _, err = l.svcCtx.OpenRpc.DeleteBot(l.ctx, &open_rpc.DeleteBotReq{
-		Id: uint32(ref.BotID),
+		Id: botInfoRes.Id,
 	}); err != nil {
 		return nil, errors.New("删除失败")
 	}
@@ -58,5 +65,5 @@ func (l *DeleteNotificationBotLogic) DeleteNotificationBot(req *types.DeleteNoti
 		Where("group_id = ? AND user_id = ?", ref.GroupID, ref.BotID).
 		Update("status", 0)
 
-	return &types.DeleteNotificationBotRes{Success: true}, nil
+	return &types.DeleteBotRes{}, nil
 }

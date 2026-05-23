@@ -42,6 +42,10 @@ func isPublicOAuthPath(path string) bool {
 	if path == "/api/open/v1/webhook/incoming" {
 		return true
 	}
+	// Bot 推送接口（通过 token + sign 验证，无需 Bearer）
+	if path == "/api/open/v1/bot/send" {
+		return true
+	}
 	return false
 }
 

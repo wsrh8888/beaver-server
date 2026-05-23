@@ -41,3 +41,5 @@ WhiteList:
   - /api/open/v1/oauth/password_login
   # 开放平台 H5 免登接口（无需token）
   - /api/open/v1/oauth/h5_authcode
+  # Bot 推送接口（通过 token + sign 验证，无需 JWT）
+  - /api/open/v1/bot/send

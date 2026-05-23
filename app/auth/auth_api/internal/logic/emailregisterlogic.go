@@ -8,8 +8,10 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	auth_models "beaver/app/auth/auth_models"
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -45,11 +47,10 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (resp *t
 	// 生成随机昵称
 	nickName := fmt.Sprintf("用户%s", req.Email[:strings.Index(req.Email, "@")])
 
-	// 创建用户
-	_, err = l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
+	// 1. 调用 user_rpc 创建用户基础信息（不包含密码）
+	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
 		Email:    req.Email,
 		NickName: nickName,
-		Password: req.Password,
 		Source:   2,  // 2: 邮箱注册
 		Phone:    "", // 邮箱注册时不传手机号
 	})
@@ -58,9 +59,26 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (resp *t
 		return nil, errors.New("注册失败")
 	}
 
-	return &types.EmailRegisterRes{
-		Message: "注册成功",
-	}, nil
+	userID := createRes.UserID
+
+	// 2. 在 auth_api 中创建用户凭证（密码）
+	hashedPassword := pwd.HahPwd(req.Password)
+
+	credential := auth_models.AuthCredentialModel{
+		UserID:   userID,
+		Password: hashedPassword,
+	}
+
+	if err := l.svcCtx.DB.Create(&credential).Error; err != nil {
+		logx.Errorf("创建用户凭证失败: %v", err)
+		// 回滚：删除已创建的用户
+		l.svcCtx.DB.Where("user_id = ?", userID).Delete(&user_models.UserModel{})
+		return nil, errors.New("创建用户凭证失败")
+	}
+
+	logx.Infof("用户注册成功: userID=%s, email=%s", userID, req.Email)
+
+	return &types.EmailRegisterRes{}, nil
 }
 
 // 验证邮箱验证码

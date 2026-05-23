@@ -2,9 +2,9 @@ syntax = "v1"
 
 type wsReq {
 	UserID   string `form:"userId"` // 用户ID
-	Token    string `form:"token"` // 用户token
-	Platform string `form:"platform"` // 平台类型
-	DeviceID string `form:"deviceId"` // 设备唯一标识 (GUID)
+	Token    string `form:"token"` // 用户token（JWT）
+	Platform string `form:"platform"` // 平台类型：windows/macos/linux/ios/android（后端通过 User-Agent 二次校验）
+	DeviceID string `form:"deviceId"` // 设备唯一标识 (GUID)，用于设备指纹校验
 }
 
 type IBodySendMsg {

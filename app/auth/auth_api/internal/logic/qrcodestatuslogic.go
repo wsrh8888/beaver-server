@@ -99,11 +99,10 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (resp *type
 		l.svcCtx.Redis.Del(key)
 
 		return &types.QrcodeStatusRes{
-			Status:    QrcodeStatusConfirmed,
-			Token:     token,
-			UserID:    user.UserID,
-			ExpiresIn: 7200, // Token 有效期 2 小时（秒）
-			Source:    session.Source,
+			Status: QrcodeStatusConfirmed,
+			Token:  token,
+			UserID: user.UserID,
+			Source: session.Source,
 		}, nil
 	}
 

@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func deleteNotificationBotHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func deleteBotHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.DeleteNotificationBotReq
+		var req types.DeleteBotReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewDeleteNotificationBotLogic(r.Context(), svcCtx)
-		resp, err := l.DeleteNotificationBot(&req)
+		l := logic.NewDeleteBotLogic(r.Context(), svcCtx)
+		resp, err := l.DeleteBot(&req)
 		response.Response(r, w, resp, err)
 	}
 }

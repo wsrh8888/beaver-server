@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func updateNotificationBotHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func createBotHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateNotificationBotReq
+		var req types.CreateBotReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewUpdateNotificationBotLogic(r.Context(), svcCtx)
-		resp, err := l.UpdateNotificationBot(&req)
+		l := logic.NewCreateBotLogic(r.Context(), svcCtx)
+		resp, err := l.CreateBot(&req)
 		response.Response(r, w, resp, err)
 	}
 }

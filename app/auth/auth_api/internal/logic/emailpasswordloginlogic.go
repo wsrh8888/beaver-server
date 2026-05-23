@@ -11,6 +11,7 @@ import (
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_models"
+	ua "beaver/common/middleware/ua"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
 	"beaver/utils/pwd"
@@ -56,11 +57,10 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	}
 
 	// 1. 获取 User-Agent
-	userAgent, _ := l.ctx.Value("user-agent").(string)
-	preciseType := device.GetDeviceType(userAgent)
+	preciseType, _ := l.ctx.Value(ua.KeyDeviceType).(string)
 
 	if preciseType == "" || preciseType == device.DeviceUnknown {
-		logx.WithContext(l.ctx).Errorf("非法请求：无法解析设备类型, UA: %s", userAgent)
+		logx.WithContext(l.ctx).Errorf("非法请求：无法解析设备类型")
 		return nil, errors.New("不支持的设备类型")
 	}
 
@@ -71,7 +71,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	}
 
 	// 3. 确定登录槽位 (Group: desktop/mobile)
-	deviceGroup := device.GetDeviceGroup(preciseType)
+	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
 	key := fmt.Sprintf("user_authentication_session:%s:%s", user.UserID, deviceGroup)
 
 	// 4. 生成 token，包含基本信息 + 设备唯一标识 (DeviceID/GUID)
@@ -105,7 +105,6 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 		"device_type":  preciseType,
 		"device_group": deviceGroup,
 		"login_time":   time.Now().Format("2006-01-02 15:04:05"),
-		"user_agent":   userAgent,
 	}
 
 	loginInfoJson, _ := json.Marshal(loginInfo)

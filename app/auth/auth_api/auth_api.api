@@ -1,151 +1,143 @@
 syntax = "v1"
 
-type PhoneLoginReq {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
-}
+// 手机号登录
+type (
+	PhoneLoginReq {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+		DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	}
+	PhoneLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
 
-type PhoneLoginRes {
-	Token  string `json:"token"`
-	UserID string `json:"userId"`
-}
+// 邮箱密码登录
+type (
+	EmailPasswordLoginReq {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	}
+	EmailPasswordLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
 
-// 邮箱密码登录请求
-type EmailPasswordLoginReq {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
-}
+// 用户认证
+type (
+	AuthenticationReq {
+		Token     string `header:"Token,optional"`
+		ValidPath string `header:"ValidPath,optional"` // 验证路径
+	}
+	AuthenticationRes {
+		UserID string `json:"userId"`
+	}
+)
 
-// 邮箱密码登录响应
-type EmailPasswordLoginRes {
-	Token  string `json:"token"`
-	UserID string `json:"userId"`
-}
+// 手机号注册
+type (
+	PhoneRegisterReq {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+		Code     string `json:"code"` // 手机验证码
+	}
+	PhoneRegisterRes {}
+)
 
-type AuthenticationReq {
-	Token string `header:"Token,optional"`
-	/**
-* @description: 验证路径
-*/
-	ValidPath string `header:"ValidPath,optional"`
-}
+// 邮箱注册
+type (
+	EmailRegisterReq {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Code     string `json:"code"` // 邮箱验证码
+	}
+	EmailRegisterRes {}
+)
 
-type AuthenticationRes {
-	UserID string `json:"userId"`
-}
+// 用户登出
+type (
+	LogoutReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	LogoutRes {}
+)
 
-// 手机号注册请求
-type PhoneRegisterReq {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	Code     string `json:"code"` // 手机验证码
-}
+// 获取手机验证码
+type (
+	GetPhoneCodeReq {
+		Phone string `json:"phone"`
+		Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
+	}
+	GetPhoneCodeRes {}
+)
 
-// 手机号注册响应
-type PhoneRegisterRes {
-	Message string `json:"message"`
-}
+// 获取邮箱验证码
+type (
+	GetEmailCodeReq {
+		Email string `json:"email"`
+		Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
+	}
+	GetEmailCodeRes {}
+)
 
-// 邮箱注册请求
-type EmailRegisterReq {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Code     string `json:"code"` // 邮箱验证码
-}
+// 邮箱登录
+type (
+	EmailLoginReq {
+		Email    string `json:"email"`
+		Code     string `json:"code"` // 验证码
+		DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	}
+	EmailLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
 
-// 邮箱注册响应
-type EmailRegisterRes {
-	Message string `json:"message"`
-}
+// 找回密码
+type (
+	ResetPasswordReq {
+		Email    string `json:"email"` // 用户邮箱地址
+		Code     string `json:"code"` // 邮箱验证码
+		Password string `json:"password"` // 新密码
+	}
+	ResetPasswordRes {}
+)
 
-// 用户登出请求
-type LogoutReq {
-	UserID string `header:"Beaver-User-Id"`
-}
-
-// 用户登出响应
-type LogoutRes {}
-
-// 获取手机验证码请求
-type GetPhoneCodeReq {
-	Phone string `json:"phone"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
-}
-
-// 获取手机验证码响应
-type GetPhoneCodeRes {
-	Message string `json:"message"`
-}
-
-// 获取邮箱验证码请求
-type GetEmailCodeReq {
-	Email string `json:"email"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
-}
-
-// 获取邮箱验证码响应
-type GetEmailCodeRes {
-	Message string `json:"message"`
-}
-
-// 邮箱登录请求
-type EmailLoginReq {
-	Email    string `json:"email"`
-	Code     string `json:"code"` // 验证码
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
-}
-
-// 邮箱登录响应
-type EmailLoginRes {
-	Token  string `json:"token"`
-	UserID string `json:"userId"`
-}
-
-// 找回密码请求
-type ResetPasswordReq {
-	Email    string `json:"email"` // 用户邮箱地址
-	Code     string `json:"code"` // 邮箱验证码
-	Password string `json:"password"` // 新密码
-}
-
-// 找回密码响应
-type ResetPasswordRes {}
-
-// -------------------- 扫码登录 --------------------
-// 扫码登录-生成二维码（PC 端调用，无需登录）
+// 扫码登录-生成二维码
 type (
 	QrcodeGenerateReq {
 		DeviceID string `header:"deviceId"` // PC 端设备唯一标识，客户端本地生成
-		Source   string `json:"source,optional"` // 来源标识，服务端据此决定 JWT 有效期。枚举：login（默认，完整登录 48h）、web（网页端 24h）、temp（临时授权 12h）、其他自定义（12h）
+		Source   string `json:"source,optional"` // 来源标识：login(默认48h)、web(24h)、temp(12h)、其他(12h)
 	}
 	QrcodeGenerateRes {
-		Token    string `json:"token"` // 二维码唯一 token（UUID），前端将此值渲染成二维码图片供移动端扫描
-		ExpireAt int64  `json:"expireAt"` // 二维码过期时间戳（Unix 秒），前端用于展示倒计时
+		Token    string `json:"token"` // 二维码唯一 token（UUID）
+		ExpireAt int64  `json:"expireAt"` // 二维码过期时间戳（Unix 秒）
 	}
 )
 
-// 扫码登录-确认扫码（移动端调用，Header 需携带已登录用户的 JWT）
+// 扫码登录-确认扫码
 type (
 	QrcodeScanReq {
-		Token     string `json:"token"` // 扫描二维码后解析出的 token，即 generate 接口返回的 token
-		AuthToken string `header:"Token"` // 移动端当前登录用户的 JWT，服务端用于识别扫码人身份
+		Token     string `json:"token"` // 扫描二维码后解析出的 token
+		AuthToken string `header:"Token"` // 移动端当前登录用户的 JWT
 	}
-	QrcodeScanRes  {}
+	QrcodeScanRes {}
 )
 
-// 扫码登录-轮询状态（PC 端调用，无需登录，建议每 2 秒轮询一次直到 confirmed 或 expired）
+// 扫码登录-轮询状态
 type (
 	QrcodeStatusReq {
-		Token    string `form:"token"` // 生成二维码时获得的 token，作为查询 key
-		DeviceID string `header:"deviceId"` // PC 端设备唯一标识，登录成功后写入 Redis 登录态使用
+		Token    string `form:"token"` // 生成二维码时获得的 token
+		DeviceID string `header:"deviceId"` // PC 端设备唯一标识
 	}
 	QrcodeStatusRes {
-		Status string `json:"status"` // 当前状态：pending（待扫码）| confirmed（扫码已确认）| expired（已过期或已使用）
-		Token  string `json:"token,omitempty"` // 仅 status=confirmed 时返回，PC 端后续请求携带的 JWT，有效期由 generate 时的 source 决定
-		UserID string `json:"userId,omitempty"` // 仅 status=confirmed 时返回，扫码用户的 ID
-		Source string `json:"source,omitempty"` // 仅 status=confirmed 时返回，透传 generate 时的来源标识，下游可据此做差异化处理
+		Status string `json:"status"` // 状态：pending|confirmed|expired
+		Token  string `json:"token,omitempty"` // 仅 confirmed 时返回，PC 端后续请求的 JWT
+		UserID string `json:"userId,omitempty"` // 仅 confirmed 时返回，扫码用户 ID
+		Source string `json:"source,omitempty"` // 仅 confirmed 时返回，透传 generate 时的来源标识
 	}
 )
 

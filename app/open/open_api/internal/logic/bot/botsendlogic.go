@@ -32,8 +32,11 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 	// 1. 根据 Token 查询机器人信息
 	var bot open_models.OpenBotModel
 	if err := l.svcCtx.DB.Where("token = ?", req.Token).First(&bot).Error; err != nil {
+		l.Errorf("BotSend: query bot failed, token=%s, error=%v", req.Token, err)
 		return nil, fmt.Errorf("invalid token")
 	}
+
+	l.Infof("BotSend: found bot, botID=%s, groupID=%s, status=%d", bot.BotID, bot.GroupID, bot.Status)
 
 	// 2. 校验机器人状态
 	if bot.Status != 1 {
@@ -268,9 +271,10 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 	messageId := fmt.Sprintf("bot_%d_%d", bot.ID, time.Now().UnixNano())
 
 	// 8. 调用 chat_rpc 发送消息
+	// ConversationId 增加 group_ 前缀表示群聊
 	chatReq := &chat_rpc.SendMsgReq{
 		UserId:         bot.BotID, // 使用机器人的 UserID 作为发送者
-		ConversationId: bot.GroupID,
+		ConversationId: "group_" + bot.GroupID,
 		MessageId:      messageId,
 		Msg:            msg,
 		DeviceId:       "webhook",

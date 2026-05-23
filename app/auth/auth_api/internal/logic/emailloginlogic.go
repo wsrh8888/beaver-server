@@ -11,6 +11,7 @@ import (
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/app/user/user_models"
+	"beaver/common/middleware/ua"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
 
@@ -49,13 +50,12 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 		}
 	}
 
-	// 1. 获取精准设备信息（由 UserAgentMiddleware 预处理注入）
-	preciseType, _ := l.ctx.Value("precise-type").(string)
-	deviceGroup, _ := l.ctx.Value("device-group").(string)
-	userAgent, _ := l.ctx.Value("user-agent").(string)
+	// 1. 获取精准设备信息（由 UA 中间件预处理注入）
+	preciseType, _ := l.ctx.Value(ua.KeyDeviceType).(string)
+	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
 
 	if preciseType == "" || preciseType == device.DeviceUnknown {
-		logx.WithContext(l.ctx).Errorf("非法请求：无法解析设备类型, UA: %s", userAgent)
+		logx.WithContext(l.ctx).Errorf("非法请求：无法解析设备类型")
 		return nil, errors.New("不支持的设备类型")
 	}
 
@@ -103,7 +103,6 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (resp *types.Emai
 		"device_type":  preciseType, // 存入精准类型，方便展示和定位
 		"device_group": deviceGroup,
 		"login_time":   time.Now().Format("2006-01-02 15:04:05"),
-		"user_agent":   userAgent,
 	}
 
 	loginInfoJson, _ := json.Marshal(loginInfo)

@@ -493,6 +493,7 @@ func (x *RefreshTokenRes) GetExpiresIn() int64 {
 type CreateBotReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // 目标群组 ID
+	BotId         string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`       // 机器人用户 ID（由 user_rpc 生成）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -534,10 +535,17 @@ func (x *CreateBotReq) GetGroupId() string {
 	return ""
 }
 
+func (x *CreateBotReq) GetBotId() string {
+	if x != nil {
+		return x.BotId
+	}
+	return ""
+}
+
 type CreateBotRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                  // 机器人 ID（open_bots.id）
-	BotUserId     string                 `protobuf:"bytes,2,opt,name=bot_user_id,json=botUserId,proto3" json:"bot_user_id,omitempty"`  // 机器人用户 ID
+	BotId         string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`                // 机器人用户 ID
 	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`                             // Webhook Token
 	WebhookUrl    string                 `protobuf:"bytes,4,opt,name=webhook_url,json=webhookUrl,proto3" json:"webhook_url,omitempty"` // Webhook 基础 URL（不含 token）
 	unknownFields protoimpl.UnknownFields
@@ -581,9 +589,9 @@ func (x *CreateBotRes) GetId() uint32 {
 	return 0
 }
 
-func (x *CreateBotRes) GetBotUserId() string {
+func (x *CreateBotRes) GetBotId() string {
 	if x != nil {
-		return x.BotUserId
+		return x.BotId
 	}
 	return ""
 }
@@ -772,6 +780,203 @@ func (x *ResetBotSecretRes) GetSignatureSecret() string {
 	return ""
 }
 
+// 获取推送机器人信息
+type GetBotInfoReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"` // 机器人用户ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBotInfoReq) Reset() {
+	*x = GetBotInfoReq{}
+	mi := &file_open_rpc_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBotInfoReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBotInfoReq) ProtoMessage() {}
+
+func (x *GetBotInfoReq) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBotInfoReq.ProtoReflect.Descriptor instead.
+func (*GetBotInfoReq) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetBotInfoReq) GetBotId() string {
+	if x != nil {
+		return x.BotId
+	}
+	return ""
+}
+
+type BotSecurity struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	KeywordsEnabled    bool                   `protobuf:"varint,1,opt,name=keywords_enabled,json=keywordsEnabled,proto3" json:"keywords_enabled,omitempty"`
+	Keywords           []string               `protobuf:"bytes,2,rep,name=keywords,proto3" json:"keywords,omitempty"`
+	IpWhitelistEnabled bool                   `protobuf:"varint,3,opt,name=ip_whitelist_enabled,json=ipWhitelistEnabled,proto3" json:"ip_whitelist_enabled,omitempty"`
+	IpWhitelist        []string               `protobuf:"bytes,4,rep,name=ip_whitelist,json=ipWhitelist,proto3" json:"ip_whitelist,omitempty"`
+	SignatureEnabled   bool                   `protobuf:"varint,5,opt,name=signature_enabled,json=signatureEnabled,proto3" json:"signature_enabled,omitempty"`
+	SignatureSecret    string                 `protobuf:"bytes,6,opt,name=signature_secret,json=signatureSecret,proto3" json:"signature_secret,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *BotSecurity) Reset() {
+	*x = BotSecurity{}
+	mi := &file_open_rpc_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BotSecurity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BotSecurity) ProtoMessage() {}
+
+func (x *BotSecurity) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BotSecurity.ProtoReflect.Descriptor instead.
+func (*BotSecurity) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *BotSecurity) GetKeywordsEnabled() bool {
+	if x != nil {
+		return x.KeywordsEnabled
+	}
+	return false
+}
+
+func (x *BotSecurity) GetKeywords() []string {
+	if x != nil {
+		return x.Keywords
+	}
+	return nil
+}
+
+func (x *BotSecurity) GetIpWhitelistEnabled() bool {
+	if x != nil {
+		return x.IpWhitelistEnabled
+	}
+	return false
+}
+
+func (x *BotSecurity) GetIpWhitelist() []string {
+	if x != nil {
+		return x.IpWhitelist
+	}
+	return nil
+}
+
+func (x *BotSecurity) GetSignatureEnabled() bool {
+	if x != nil {
+		return x.SignatureEnabled
+	}
+	return false
+}
+
+func (x *BotSecurity) GetSignatureSecret() string {
+	if x != nil {
+		return x.SignatureSecret
+	}
+	return ""
+}
+
+type GetBotInfoRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                   // open_bots.id
+	BotId         string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"` // 机器人用户ID
+	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`              // Webhook Token
+	Security      *BotSecurity           `protobuf:"bytes,4,opt,name=security,proto3" json:"security,omitempty"`        // 安全设置
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBotInfoRes) Reset() {
+	*x = GetBotInfoRes{}
+	mi := &file_open_rpc_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBotInfoRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBotInfoRes) ProtoMessage() {}
+
+func (x *GetBotInfoRes) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBotInfoRes.ProtoReflect.Descriptor instead.
+func (*GetBotInfoRes) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetBotInfoRes) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GetBotInfoRes) GetBotId() string {
+	if x != nil {
+		return x.BotId
+	}
+	return ""
+}
+
+func (x *GetBotInfoRes) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *GetBotInfoRes) GetSecurity() *BotSecurity {
+	if x != nil {
+		return x.Security
+	}
+	return nil
+}
+
 var File_open_rpc_proto protoreflect.FileDescriptor
 
 const file_open_rpc_proto_rawDesc = "" +
@@ -809,12 +1014,13 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x03 \x01(\x03R\texpiresIn\")\n" +
+	"expires_in\x18\x03 \x01(\x03R\texpiresIn\"@\n" +
 	"\fCreateBotReq\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"u\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x15\n" +
+	"\x06bot_id\x18\x02 \x01(\tR\x05botId\"l\n" +
 	"\fCreateBotRes\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\x12\x1e\n" +
-	"\vbot_user_id\x18\x02 \x01(\tR\tbotUserId\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x15\n" +
+	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x14\n" +
 	"\x05token\x18\x03 \x01(\tR\x05token\x12\x1f\n" +
 	"\vwebhook_url\x18\x04 \x01(\tR\n" +
 	"webhookUrl\"\x1e\n" +
@@ -824,7 +1030,21 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\x11ResetBotSecretReq\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\">\n" +
 	"\x11ResetBotSecretRes\x12)\n" +
-	"\x10signature_secret\x18\x01 \x01(\tR\x0fsignatureSecret2\xe7\x03\n" +
+	"\x10signature_secret\x18\x01 \x01(\tR\x0fsignatureSecret\"&\n" +
+	"\rGetBotInfoReq\x12\x15\n" +
+	"\x06bot_id\x18\x01 \x01(\tR\x05botId\"\x81\x02\n" +
+	"\vBotSecurity\x12)\n" +
+	"\x10keywords_enabled\x18\x01 \x01(\bR\x0fkeywordsEnabled\x12\x1a\n" +
+	"\bkeywords\x18\x02 \x03(\tR\bkeywords\x120\n" +
+	"\x14ip_whitelist_enabled\x18\x03 \x01(\bR\x12ipWhitelistEnabled\x12!\n" +
+	"\fip_whitelist\x18\x04 \x03(\tR\vipWhitelist\x12+\n" +
+	"\x11signature_enabled\x18\x05 \x01(\bR\x10signatureEnabled\x12)\n" +
+	"\x10signature_secret\x18\x06 \x01(\tR\x0fsignatureSecret\"\x7f\n" +
+	"\rGetBotInfoRes\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x15\n" +
+	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x14\n" +
+	"\x05token\x18\x03 \x01(\tR\x05token\x121\n" +
+	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity2\xa7\x04\n" +
 	"\x04open\x12G\n" +
 	"\rExchangeToken\x12\x1a.open_rpc.ExchangeTokenReq\x1a\x1a.open_rpc.ExchangeTokenRes\x12A\n" +
 	"\vGetUserInfo\x12\x18.open_rpc.GetUserInfoReq\x1a\x18.open_rpc.GetUserInfoRes\x12G\n" +
@@ -832,7 +1052,9 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\fRefreshToken\x12\x19.open_rpc.RefreshTokenReq\x1a\x19.open_rpc.RefreshTokenRes\x12;\n" +
 	"\tCreateBot\x12\x16.open_rpc.CreateBotReq\x1a\x16.open_rpc.CreateBotRes\x12;\n" +
 	"\tDeleteBot\x12\x16.open_rpc.DeleteBotReq\x1a\x16.open_rpc.DeleteBotRes\x12J\n" +
-	"\x0eResetBotSecret\x12\x1b.open_rpc.ResetBotSecretReq\x1a\x1b.open_rpc.ResetBotSecretResB\fZ\n" +
+	"\x0eResetBotSecret\x12\x1b.open_rpc.ResetBotSecretReq\x1a\x1b.open_rpc.ResetBotSecretRes\x12>\n" +
+	"\n" +
+	"GetBotInfo\x12\x17.open_rpc.GetBotInfoReq\x1a\x17.open_rpc.GetBotInfoResB\fZ\n" +
 	"./open_rpcb\x06proto3"
 
 var (
@@ -847,7 +1069,7 @@ func file_open_rpc_proto_rawDescGZIP() []byte {
 	return file_open_rpc_proto_rawDescData
 }
 
-var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_open_rpc_proto_goTypes = []any{
 	(*ExchangeTokenReq)(nil),  // 0: open_rpc.ExchangeTokenReq
 	(*ExchangeTokenRes)(nil),  // 1: open_rpc.ExchangeTokenRes
@@ -863,27 +1085,33 @@ var file_open_rpc_proto_goTypes = []any{
 	(*DeleteBotRes)(nil),      // 11: open_rpc.DeleteBotRes
 	(*ResetBotSecretReq)(nil), // 12: open_rpc.ResetBotSecretReq
 	(*ResetBotSecretRes)(nil), // 13: open_rpc.ResetBotSecretRes
+	(*GetBotInfoReq)(nil),     // 14: open_rpc.GetBotInfoReq
+	(*BotSecurity)(nil),       // 15: open_rpc.BotSecurity
+	(*GetBotInfoRes)(nil),     // 16: open_rpc.GetBotInfoRes
 }
 var file_open_rpc_proto_depIdxs = []int32{
-	0,  // 0: open_rpc.open.ExchangeToken:input_type -> open_rpc.ExchangeTokenReq
-	2,  // 1: open_rpc.open.GetUserInfo:input_type -> open_rpc.GetUserInfoReq
-	4,  // 2: open_rpc.open.ValidateToken:input_type -> open_rpc.ValidateTokenReq
-	6,  // 3: open_rpc.open.RefreshToken:input_type -> open_rpc.RefreshTokenReq
-	8,  // 4: open_rpc.open.CreateBot:input_type -> open_rpc.CreateBotReq
-	10, // 5: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
-	12, // 6: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
-	1,  // 7: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
-	3,  // 8: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
-	5,  // 9: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
-	7,  // 10: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
-	9,  // 11: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
-	11, // 12: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
-	13, // 13: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
-	7,  // [7:14] is the sub-list for method output_type
-	0,  // [0:7] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	15, // 0: open_rpc.GetBotInfoRes.security:type_name -> open_rpc.BotSecurity
+	0,  // 1: open_rpc.open.ExchangeToken:input_type -> open_rpc.ExchangeTokenReq
+	2,  // 2: open_rpc.open.GetUserInfo:input_type -> open_rpc.GetUserInfoReq
+	4,  // 3: open_rpc.open.ValidateToken:input_type -> open_rpc.ValidateTokenReq
+	6,  // 4: open_rpc.open.RefreshToken:input_type -> open_rpc.RefreshTokenReq
+	8,  // 5: open_rpc.open.CreateBot:input_type -> open_rpc.CreateBotReq
+	10, // 6: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
+	12, // 7: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
+	14, // 8: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
+	1,  // 9: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
+	3,  // 10: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
+	5,  // 11: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
+	7,  // 12: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
+	9,  // 13: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
+	11, // 14: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
+	13, // 15: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
+	16, // 16: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
+	9,  // [9:17] is the sub-list for method output_type
+	1,  // [1:9] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_open_rpc_proto_init() }
@@ -897,7 +1125,7 @@ func file_open_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_open_rpc_proto_rawDesc), len(file_open_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

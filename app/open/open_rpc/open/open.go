@@ -14,12 +14,15 @@ import (
 )
 
 type (
+	BotSecurity       = open_rpc.BotSecurity
 	CreateBotReq      = open_rpc.CreateBotReq
 	CreateBotRes      = open_rpc.CreateBotRes
 	DeleteBotReq      = open_rpc.DeleteBotReq
 	DeleteBotRes      = open_rpc.DeleteBotRes
 	ExchangeTokenReq  = open_rpc.ExchangeTokenReq
 	ExchangeTokenRes  = open_rpc.ExchangeTokenRes
+	GetBotInfoReq     = open_rpc.GetBotInfoReq
+	GetBotInfoRes     = open_rpc.GetBotInfoRes
 	GetUserInfoReq    = open_rpc.GetUserInfoReq
 	GetUserInfoRes    = open_rpc.GetUserInfoRes
 	RefreshTokenReq   = open_rpc.RefreshTokenReq
@@ -37,6 +40,7 @@ type (
 		CreateBot(ctx context.Context, in *CreateBotReq, opts ...grpc.CallOption) (*CreateBotRes, error)
 		DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
 		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
+		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 	}
 
 	defaultOpen struct {
@@ -83,4 +87,9 @@ func (m *defaultOpen) DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...g
 func (m *defaultOpen) ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
 	return client.ResetBotSecret(ctx, in, opts...)
+}
+
+func (m *defaultOpen) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.GetBotInfo(ctx, in, opts...)
 }

@@ -57,3 +57,8 @@ func (s *OpenServer) ResetBotSecret(ctx context.Context, in *open_rpc.ResetBotSe
 	l := logic.NewResetBotSecretLogic(ctx, s.svcCtx)
 	return l.ResetBotSecret(in)
 }
+
+func (s *OpenServer) GetBotInfo(ctx context.Context, in *open_rpc.GetBotInfoReq) (*open_rpc.GetBotInfoRes, error) {
+	l := logic.NewGetBotInfoLogic(ctx, s.svcCtx)
+	return l.GetBotInfo(in)
+}

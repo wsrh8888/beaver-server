@@ -17,20 +17,27 @@ const (
 func GetDeviceType(userAgent string) string {
 	ua := strings.ToLower(userAgent)
 
-	if strings.Contains(ua, "beaver_desktop_windows") {
-		return DeviceWindows
+	// 桌面端识别
+	if strings.Contains(ua, "beaverdesktop") {
+		if strings.Contains(ua, "windows") {
+			return DeviceWindows
+		}
+		if strings.Contains(ua, "mac") {
+			return DeviceMacOS
+		}
+		if strings.Contains(ua, "linux") {
+			return DeviceLinux
+		}
 	}
-	if strings.Contains(ua, "beaver_desktop_macos") {
-		return DeviceMacOS
-	}
-	if strings.Contains(ua, "beaver_desktop_linux") {
-		return DeviceLinux
-	}
-	if strings.Contains(ua, "beaver_mobile_ios") {
-		return DeviceIOS
-	}
-	if strings.Contains(ua, "beaver_mobile_android") {
-		return DeviceAndroid
+
+	// 移动端识别
+	if strings.Contains(ua, "beavermobile") {
+		if strings.Contains(ua, "ios") {
+			return DeviceIOS
+		}
+		if strings.Contains(ua, "android") {
+			return DeviceAndroid
+		}
 	}
 
 	return DeviceUnknown

@@ -55,9 +55,7 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 		logx.Errorf("设置发送频率限制失败: %v", err)
 	}
 
-	return &types.GetEmailCodeRes{
-		Message: "验证码发送成功",
-	}, nil
+	return &types.GetEmailCodeRes{}, nil
 }
 
 // 发送邮件

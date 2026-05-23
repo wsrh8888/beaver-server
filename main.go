@@ -96,6 +96,7 @@ func main() {
 			&group_models.GroupMemberModel{},
 			&group_models.GroupJoinRequestModel{},
 			&group_models.GroupMemberChangeLogModel{},
+			&group_models.GroupBotModel{},
 
 			// 通知中心表
 			&notification_models.NotificationEvent{},
