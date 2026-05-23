@@ -29,16 +29,6 @@ type (
 	UpdateInfoRes  {}
 )
 
-// 修改密码
-type (
-	UpdatePasswordReq {
-		UserID      string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		OldPassword string `json:"oldPassword"` // 旧密码
-		NewPassword string `json:"newPassword"` // 新密码
-	}
-	UpdatePasswordRes  {}
-)
-
 // 修改邮箱
 type (
 	UpdateEmailReq {
@@ -105,15 +95,6 @@ type (
 	KickDeviceRes  {}
 )
 
-// 注销账号
-type (
-	DeactivateAccountReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-		Password string `json:"password"` // 确认密码，防止误操作
-	}
-	DeactivateAccountRes  {}
-)
-
 // 用户服务
 service user {
 	@doc "获取用户基础信息"
@@ -123,10 +104,6 @@ service user {
 	@doc "更新用户基础信息（昵称、头像、个性签名、性别）"
 	@handler updateInfo
 	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes)
-
-	@doc "修改用户密码"
-	@handler updatePassword
-	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
 
 	@doc "修改用户邮箱（需要验证码）"
 	@handler updateEmail
@@ -143,10 +120,6 @@ service user {
 	@doc "强制下线指定设备"
 	@handler kickDevice
 	post /api/user/kick_device (KickDeviceReq) returns (KickDeviceRes)
-
-	@doc "注销账号"
-	@handler deactivateAccount
-	post /api/user/deactivate (DeactivateAccountReq) returns (DeactivateAccountRes)
 }
 
 // 生成代码命令

@@ -3,15 +3,14 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-	"beaver/app/user/user_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
-	"beaver/utils/pwd"
-	utils "beaver/utils/rand"
+	"beaver/app/user/user_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -33,6 +32,7 @@ func NewCreateNotificationBotLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *CreateNotificationBotLogic) CreateNotificationBot(req *types.CreateNotificationBotReq) (resp *types.CreateNotificationBotRes, err error) {
+	// 1. 校验权限
 	var member group_models.GroupMemberModel
 	if err = l.svcCtx.DB.Take(&member, "group_id = ? AND user_id = ?", req.GroupID, req.UserID).Error; err != nil {
 		return nil, errors.New("不是群成员")
@@ -41,36 +41,40 @@ func (l *CreateNotificationBotLogic) CreateNotificationBot(req *types.CreateNoti
 		return nil, errors.New("无权限，仅群主或管理员可创建通知机器人")
 	}
 
-	// 调 open_rpc 创建 Webhook 主记录（open 服务是 webhook 数据的 master）
-	rpcRes, rpcErr := l.svcCtx.OpenRpc.CreateWebhook(l.ctx, &open_rpc.CreateWebhookReq{
+	// 2. 调 open_rpc 创建推送机器人（open 服务负责生成 Token、BotUserID 等）
+	rpcRes, rpcErr := l.svcCtx.OpenRpc.CreateBot(l.ctx, &open_rpc.CreateBotReq{
 		GroupId: req.GroupID,
 	})
 	if rpcErr != nil {
 		return nil, errors.New("创建失败")
 	}
 
-	// 本地事务：建机器人用户 + 加群 + 写引用表
+	// 3. 本地事务：建机器人用户 + 加群 + 写引用表
 	botUser, memberRow := l.prepareBotResources(req.GroupID, rpcRes.BotUserId, req.Name)
 
 	txErr := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		// 创建机器人用户
 		if botUser != nil {
 			if err := tx.Create(botUser).Error; err != nil {
 				return errors.New("创建机器人用户失败")
 			}
 		}
+
+		// 添加机器人为群成员
 		if memberRow != nil {
 			if err := tx.Create(memberRow).Error; err != nil {
 				return errors.New("机器人入群失败")
 			}
 		}
+
+		// 写入群内展示信息
 		botType := req.Type
 		if botType == "" {
 			botType = "custom"
 		}
-		ref := &group_models.GroupNotificationBotModel{
+		ref := &group_models.GroupBotModel{
 			GroupID:       req.GroupID,
-			WebhookID:     uint(rpcRes.Id),
-			BotUserID:     rpcRes.BotUserId,
+			BotID:         uint(rpcRes.Id), // 关联 open_bots.id
 			Name:          req.Name,
 			Description:   req.Description,
 			Avatar:        req.Avatar,
@@ -84,16 +88,25 @@ func (l *CreateNotificationBotLogic) CreateNotificationBot(req *types.CreateNoti
 		}
 		return nil
 	})
+
 	if txErr != nil {
-		// Saga 补偿：回滚 open 侧的 webhook 记录
-		_, _ = l.svcCtx.OpenRpc.DeleteWebhook(l.ctx, &open_rpc.DeleteWebhookReq{Id: rpcRes.Id})
+		// Saga 补偿：回滚 open 侧的机器人记录
+		_, _ = l.svcCtx.OpenRpc.DeleteBot(l.ctx, &open_rpc.DeleteBotReq{Id: rpcRes.Id})
 		return nil, txErr
+	}
+
+	// 4. 调用 open_rpc 获取 Secret（只在创建时返回一次）
+	secretRes, err := l.svcCtx.OpenRpc.ResetBotSecret(l.ctx, &open_rpc.ResetBotSecretReq{
+		Id: rpcRes.Id,
+	})
+	if err != nil {
+		return nil, errors.New("获取密钥失败")
 	}
 
 	return &types.CreateNotificationBotRes{
 		ID:         int64(rpcRes.Id),
-		WebhookURL: rpcRes.WebhookUrl,
-		Secret:     rpcRes.Secret,
+		WebhookURL: fmt.Sprintf("%s?token=%s", rpcRes.WebhookUrl, rpcRes.Token),
+		Secret:     secretRes.SignatureSecret,
 	}, nil
 }
 
@@ -103,15 +116,13 @@ func (l *CreateNotificationBotLogic) prepareBotResources(groupID, botUserID, bot
 	if l.svcCtx.DB.Where("user_id = ?", botUserID).First(&existUser).Error != nil {
 		version := l.svcCtx.VersionGen.GetNextVersion("users", "user_id", botUserID)
 		if version != -1 {
-			randomPwd := utils.GenerateRandomString(32)
+			// 机器人不需要密码，由 auth 服务管理
 			botUser = &user_models.UserModel{
 				UserID:   botUserID,
+				UserType: user_models.UserTypeBot, // 标记为推送机器人
 				NickName: botName,
-				Password: pwd.HahPwd(randomPwd),
 				Email:    botUserID + "@beaver.bot",
 				Status:   1,
-				IsBot:    1,
-				BotAppID: "GROUP_NOTIFICATION",
 				Version:  version,
 			}
 		}

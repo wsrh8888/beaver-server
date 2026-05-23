@@ -1,6 +1,7 @@
 Name: file
 Host: 0.0.0.0
 Port: 20600
+Domain: "http://127.0.0.1:20800"
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
@@ -22,13 +23,14 @@ MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 Local:
   UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
   ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+  
 # 七牛云配置
 Qiniu: 
   ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
   AK: your_qiniu_access_key
   SK: your_qiniu_secret_key
   Bucket: your_qiniu_bucket_name
-  Domain: 'your_qiniu_domain'
+  Domain: "your_qiniu_domain" # 七牛云文件访问域名（必填，用于拼接完整URL）
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
 WhiteList:
   - png

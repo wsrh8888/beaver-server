@@ -25,6 +25,24 @@ type DeleteNotificationBotRes struct {
 	Success bool `json:"success"`
 }
 
+type GetNotificationBotDetailReq struct {
+	UserID string `header:"Beaver-User-Id"`
+	ID     int64  `json:"id"`
+}
+
+type GetNotificationBotDetailRes struct {
+	ID            int64                   `json:"id"`            // 机器人ID
+	Name          string                  `json:"name"`          // 机器人名称
+	Description   string                  `json:"description"`   // 简介
+	Avatar        string                  `json:"avatar"`        // 头像文件 ID
+	WebhookURL    string                  `json:"webhookUrl"`    // Webhook 推送 URL
+	Type          string                  `json:"botType"`       // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
+	Status        int                     `json:"status"`        // 1 启用 0 禁用
+	CreatorUserID string                  `json:"creatorUserId"` // 创建者
+	CreatedAt     int64                   `json:"createdAt"`     // 创建时间戳
+	Security      NotificationBotSecurity `json:"security"`      // 安全设置
+}
+
 type GroupCreateReq struct {
 	UserID     string   `header:"Beaver-User-Id"`    // 创建者用户ID
 	Title      string   `json:"title,optional"`      // 群组名称，可选
@@ -289,15 +307,13 @@ type GroupSyncVersionItem struct {
 }
 
 type ListNotificationBotsItem struct {
-	ID            int64  `json:"id"`            // 机器人ID
-	Name          string `json:"name"`          // 机器人名称
-	Description   string `json:"description"`   // 简介
-	Avatar        string `json:"avatar"`        // 头像文件 ID
-	WebhookURL    string `json:"webhookUrl"`    // Webhook 推送 URL
-	Type          string `json:"botType"`       // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
-	Status        int    `json:"status"`        // 1 启用 0 禁用
-	CreatorUserID string `json:"creatorUserId"` // 创建者
-	CreatedAt     int64  `json:"createdAt"`     // 创建时间戳
+	ID          int64  `json:"id"`          // 机器人ID
+	Name        string `json:"name"`        // 机器人名称
+	Description string `json:"description"` // 简介
+	Avatar      string `json:"avatar"`      // 头像文件 ID
+	Type        string `json:"botType"`     // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
+	Status      int    `json:"status"`      // 1 启用 0 禁用
+	CreatedAt   int64  `json:"createdAt"`   // 创建时间戳
 }
 
 type ListNotificationBotsReq struct {
@@ -327,6 +343,16 @@ type MuteGroupMemberReq struct {
 }
 
 type MuteGroupMemberRes struct {
+}
+
+type NotificationBotSecurity struct {
+	KeywordsEnabled    bool     `json:"keywordsEnabled"`    // 是否启用关键词校验
+	Keywords           []string `json:"keywords"`           // 关键词列表（最多10个）
+	IPWhitelistEnabled bool     `json:"ipWhitelistEnabled"` // 是否启用IP白名单
+	IPWhitelist        []string `json:"ipWhitelist"`        // IP地址列表
+	SignatureEnabled   bool     `json:"signatureEnabled"`   // 是否启用签名校验
+	SignatureSecret    string   `json:"signatureSecret"`    // 签名密钥
+	SignatureUpdated   int64    `json:"signatureUpdated"`   // 密钥最后更新时间戳
 }
 
 type ResetNotificationBotSecretReq struct {
@@ -373,13 +399,14 @@ type UpdateMemberRoleRes struct {
 }
 
 type UpdateNotificationBotReq struct {
-	UserID      string `header:"Beaver-User-Id"`
-	ID          int64  `json:"id"`
-	Name        string `json:"name,optional"`
-	Description string `json:"description,optional"`
-	Avatar      string `json:"avatar,optional"`
-	Type        string `json:"type,optional"`   // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
-	Status      *int   `json:"status,optional"` // 1 启用 0 禁用
+	UserID      string                   `header:"Beaver-User-Id"`
+	ID          int64                    `json:"id"`
+	Name        string                   `json:"name,optional"`
+	Description string                   `json:"description,optional"`
+	Avatar      string                   `json:"avatar,optional"`
+	Type        string                   `json:"type,optional"`     // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
+	Status      *int                     `json:"status,optional"`   // 1 启用 0 禁用
+	Security    *NotificationBotSecurity `json:"security,optional"` // 安全设置
 }
 
 type UpdateNotificationBotRes struct {

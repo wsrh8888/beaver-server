@@ -14,32 +14,29 @@ import (
 )
 
 type (
-	CreateWebhookReq      = open_rpc.CreateWebhookReq
-	CreateWebhookRes      = open_rpc.CreateWebhookRes
-	DeleteWebhookReq      = open_rpc.DeleteWebhookReq
-	DeleteWebhookRes      = open_rpc.DeleteWebhookRes
-	ExchangeTokenReq      = open_rpc.ExchangeTokenReq
-	ExchangeTokenRes      = open_rpc.ExchangeTokenRes
-	GetUserInfoReq        = open_rpc.GetUserInfoReq
-	GetUserInfoRes        = open_rpc.GetUserInfoRes
-	RefreshTokenReq       = open_rpc.RefreshTokenReq
-	RefreshTokenRes       = open_rpc.RefreshTokenRes
-	ResetWebhookSecretReq = open_rpc.ResetWebhookSecretReq
-	ResetWebhookSecretRes = open_rpc.ResetWebhookSecretRes
-	UpdateWebhookReq      = open_rpc.UpdateWebhookReq
-	UpdateWebhookRes      = open_rpc.UpdateWebhookRes
-	ValidateTokenReq      = open_rpc.ValidateTokenReq
-	ValidateTokenRes      = open_rpc.ValidateTokenRes
+	CreateBotReq      = open_rpc.CreateBotReq
+	CreateBotRes      = open_rpc.CreateBotRes
+	DeleteBotReq      = open_rpc.DeleteBotReq
+	DeleteBotRes      = open_rpc.DeleteBotRes
+	ExchangeTokenReq  = open_rpc.ExchangeTokenReq
+	ExchangeTokenRes  = open_rpc.ExchangeTokenRes
+	GetUserInfoReq    = open_rpc.GetUserInfoReq
+	GetUserInfoRes    = open_rpc.GetUserInfoRes
+	RefreshTokenReq   = open_rpc.RefreshTokenReq
+	RefreshTokenRes   = open_rpc.RefreshTokenRes
+	ResetBotSecretReq = open_rpc.ResetBotSecretReq
+	ResetBotSecretRes = open_rpc.ResetBotSecretRes
+	ValidateTokenReq  = open_rpc.ValidateTokenReq
+	ValidateTokenRes  = open_rpc.ValidateTokenRes
 
 	Open interface {
 		ExchangeToken(ctx context.Context, in *ExchangeTokenReq, opts ...grpc.CallOption) (*ExchangeTokenRes, error)
 		GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoRes, error)
 		ValidateToken(ctx context.Context, in *ValidateTokenReq, opts ...grpc.CallOption) (*ValidateTokenRes, error)
 		RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error)
-		CreateWebhook(ctx context.Context, in *CreateWebhookReq, opts ...grpc.CallOption) (*CreateWebhookRes, error)
-		DeleteWebhook(ctx context.Context, in *DeleteWebhookReq, opts ...grpc.CallOption) (*DeleteWebhookRes, error)
-		UpdateWebhook(ctx context.Context, in *UpdateWebhookReq, opts ...grpc.CallOption) (*UpdateWebhookRes, error)
-		ResetWebhookSecret(ctx context.Context, in *ResetWebhookSecretReq, opts ...grpc.CallOption) (*ResetWebhookSecretRes, error)
+		CreateBot(ctx context.Context, in *CreateBotReq, opts ...grpc.CallOption) (*CreateBotRes, error)
+		DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
+		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 	}
 
 	defaultOpen struct {
@@ -73,22 +70,17 @@ func (m *defaultOpen) RefreshToken(ctx context.Context, in *RefreshTokenReq, opt
 	return client.RefreshToken(ctx, in, opts...)
 }
 
-func (m *defaultOpen) CreateWebhook(ctx context.Context, in *CreateWebhookReq, opts ...grpc.CallOption) (*CreateWebhookRes, error) {
+func (m *defaultOpen) CreateBot(ctx context.Context, in *CreateBotReq, opts ...grpc.CallOption) (*CreateBotRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
-	return client.CreateWebhook(ctx, in, opts...)
+	return client.CreateBot(ctx, in, opts...)
 }
 
-func (m *defaultOpen) DeleteWebhook(ctx context.Context, in *DeleteWebhookReq, opts ...grpc.CallOption) (*DeleteWebhookRes, error) {
+func (m *defaultOpen) DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
-	return client.DeleteWebhook(ctx, in, opts...)
+	return client.DeleteBot(ctx, in, opts...)
 }
 
-func (m *defaultOpen) UpdateWebhook(ctx context.Context, in *UpdateWebhookReq, opts ...grpc.CallOption) (*UpdateWebhookRes, error) {
+func (m *defaultOpen) ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
-	return client.UpdateWebhook(ctx, in, opts...)
-}
-
-func (m *defaultOpen) ResetWebhookSecret(ctx context.Context, in *ResetWebhookSecretReq, opts ...grpc.CallOption) (*ResetWebhookSecretRes, error) {
-	client := open_rpc.NewOpenClient(m.cli.Conn())
-	return client.ResetWebhookSecret(ctx, in, opts...)
+	return client.ResetBotSecret(ctx, in, opts...)
 }

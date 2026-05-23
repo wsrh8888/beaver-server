@@ -5,11 +5,10 @@ option go_package = "./user_rpc";
 
 
 message UserCreateReq {
-  string phone = 1;    // 手机号（与email二选一）
-  string password = 2; // 密码
-  int32 source = 3;    // 注册来源：1-手机号注册，2-邮箱注册
-  string email = 4;    // 邮箱（与phone二选一）
-  string nick_name = 5; // 昵称（可选）
+  string phone = 1; // 手机号（与email二选一）
+  int32 source = 2; // 注册来源：1-手机号注册，2-邮箱注册
+  string email = 3; // 邮箱（与phone二选一）
+  string nick_name = 4; // 昵称（可选）
 }
 
 message UserCreateRes {
@@ -21,7 +20,7 @@ message UserInfoReq {
 }
 
 message UserInfoRes {
-  UserInfo user_info = 1;  // 用户信息
+  UserInfo user_info = 1; // 用户信息
 }
  
 
@@ -35,10 +34,10 @@ message IsFriendRes {
 }
 
 message UserInfo {
-  string user_id = 1;   // 用户ID
+  string user_id = 1; // 用户ID
   string nick_name = 2;
   string avatar = 3;
-  int64 version = 4;    // 用户版本号，用于同步
+  int64 version = 4; // 用户版本号，用于同步
   string email = 5;
   string abstract = 6;
 }
@@ -67,7 +66,7 @@ message UserListInfoRes {
 
 message SearchUserReq {
   string keyword = 1; // 搜索关键词（邮箱或用户ID）
-  string type = 2;    // 搜索类型：email 或 userId
+  string type = 2; // 搜索类型：email 或 userId
 }
 
 message SearchUserRes {

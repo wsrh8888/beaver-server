@@ -28,11 +28,13 @@ func NewResetNotificationBotSecretLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *ResetNotificationBotSecretLogic) ResetNotificationBotSecret(req *types.ResetNotificationBotSecretReq) (resp *types.ResetNotificationBotSecretRes, err error) {
-	var ref group_models.GroupNotificationBotModel
+	// 1. 查询本地展示信息
+	var ref group_models.GroupBotModel
 	if err = l.svcCtx.DB.First(&ref, req.ID).Error; err != nil {
 		return nil, errors.New("通知机器人不存在")
 	}
 
+	// 2. 校验权限
 	var member group_models.GroupMemberModel
 	if err = l.svcCtx.DB.Take(&member, "group_id = ? AND user_id = ?", ref.GroupID, req.UserID).Error; err != nil {
 		return nil, errors.New("不是群成员")
@@ -41,13 +43,13 @@ func (l *ResetNotificationBotSecretLogic) ResetNotificationBotSecret(req *types.
 		return nil, errors.New("无权限，仅群主或管理员可重置密钥")
 	}
 
-	// 调 open_rpc 重置密钥（open 是 secret 的 master）
-	rpcRes, err := l.svcCtx.OpenRpc.ResetWebhookSecret(l.ctx, &open_rpc.ResetWebhookSecretReq{
-		Id: uint32(ref.WebhookID),
+	// 3. 调 open_rpc 重置密钥（open 是 secret 的 master）
+	rpcRes, err := l.svcCtx.OpenRpc.ResetBotSecret(l.ctx, &open_rpc.ResetBotSecretReq{
+		Id: uint32(ref.BotID),
 	})
 	if err != nil {
 		return nil, errors.New("重置失败")
 	}
 
-	return &types.ResetNotificationBotSecretRes{Secret: rpcRes.Secret}, nil
+	return &types.ResetNotificationBotSecretRes{Secret: rpcRes.SignatureSecret}, nil
 }

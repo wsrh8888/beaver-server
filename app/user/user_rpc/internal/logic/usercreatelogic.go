@@ -10,7 +10,6 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/utils/pwd"
 	utils "beaver/utils/rand"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -91,9 +90,6 @@ func (l *UserCreateLogic) initializeRedisCounter() error {
 
 func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.UserCreateRes, error) {
 	// 验证必填字段
-	if in.Password == "" {
-		return nil, errors.New("密码不能为空")
-	}
 	if in.Phone == "" && in.Email == "" {
 		return nil, errors.New("手机号或邮箱至少需要提供一个")
 	}
@@ -117,9 +113,6 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		return nil, errors.New("用户已存在")
 	}
 
-	// 加密密码
-	hashedPassword := pwd.HahPwd(in.Password)
-
 	// 生成随机昵称
 	nickName := utils.GenerateRandomString(8)
 	if in.NickName != "" {
@@ -141,9 +134,9 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 	logx.Infof("获取用户版本号: userID=%s, version=%d", userID, version)
 
+	// 创建用户基础信息（不包含密码）
 	user = user_models.UserModel{
 		UserID:   userID,
-		Password: hashedPassword,
 		Email:    in.Email,
 		Phone:    in.Phone,
 		Source:   in.Source,
@@ -157,6 +150,10 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		logx.Errorf("创建用户失败: %v", err)
 		return nil, errors.New("创建用户失败")
 	}
+
+	// TODO: 调用 auth 服务创建用户凭证（密码）
+	// 这里需要通过 RPC 调用 auth 服务的 CreateCredential 接口
+	// 暂时留空，等待 auth 服务实现后补充
 
 	// 记录用户创建的变更日志
 	l.recordUserCreateLog(user.UserID, version)

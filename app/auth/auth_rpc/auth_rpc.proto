@@ -1,0 +1,63 @@
+syntax = "proto3"; //指定proto版本
+package auth_rpc;
+
+option go_package = "./auth_rpc";
+
+// 创建用户凭证
+message CreateCredentialReq {
+  string user_id = 1; // 用户ID
+  string password = 2; // 密码（明文，服务端会加密）
+}
+
+message CreateCredentialRes {
+  bool success = 1; // 是否成功
+}
+
+// 验证密码
+message VerifyPasswordReq {
+  string user_id = 1; // 用户ID
+  string password = 2; // 密码（明文）
+}
+
+message VerifyPasswordRes {
+  bool valid = 1; // 密码是否正确
+}
+
+// 修改密码
+message UpdatePasswordReq {
+  string user_id = 1; // 用户ID
+  string old_password = 2; // 旧密码
+  string new_password = 3; // 新密码
+}
+
+message UpdatePasswordRes {
+  bool success = 1; // 是否成功
+}
+
+// 获取最后登录时间
+message GetLastLoginAtReq {
+  string user_id = 1; // 用户ID
+}
+
+message GetLastLoginAtRes {
+  int64 last_login_at = 1; // 最后登录时间戳（秒）
+}
+
+// 更新登录记录
+message UpdateLoginRecordReq {
+  string user_id = 1; // 用户ID
+}
+
+message UpdateLoginRecordRes {
+  bool success = 1; // 是否成功
+}
+
+service auth {
+  rpc CreateCredential(CreateCredentialReq) returns(CreateCredentialRes);     // 创建用户凭证
+  rpc VerifyPassword(VerifyPasswordReq) returns(VerifyPasswordRes);           // 验证密码
+  rpc UpdatePassword(UpdatePasswordReq) returns(UpdatePasswordRes);           // 修改密码
+  rpc GetLastLoginAt(GetLastLoginAtReq) returns(GetLastLoginAtRes);           // 获取最后登录时间
+  rpc UpdateLoginRecord(UpdateLoginRecordReq) returns(UpdateLoginRecordRes);  // 更新登录记录
+}
+
+// goctl rpc protoc auth_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

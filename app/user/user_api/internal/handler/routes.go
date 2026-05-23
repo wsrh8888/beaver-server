@@ -13,12 +13,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 注销账号
-				Method:  http.MethodPost,
-				Path:    "/api/user/deactivate",
-				Handler: deactivateAccountHandler(serverCtx),
-			},
-			{
 				// 获取用户设备列表
 				Method:  http.MethodGet,
 				Path:    "/api/user/devices",
@@ -47,12 +41,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/user/update_info",
 				Handler: updateInfoHandler(serverCtx),
-			},
-			{
-				// 修改用户密码
-				Method:  http.MethodPost,
-				Path:    "/api/user/update_password",
-				Handler: updatePasswordHandler(serverCtx),
 			},
 			{
 				// 获取用户基础信息

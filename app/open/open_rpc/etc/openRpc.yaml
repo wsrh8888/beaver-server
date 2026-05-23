@@ -14,3 +14,4 @@ RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
+ApiBaseUrl: http://127.0.0.1:20800

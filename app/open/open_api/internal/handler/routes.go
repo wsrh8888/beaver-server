@@ -7,8 +7,6 @@ import (
 	auth "beaver/app/open/open_api/internal/handler/auth"
 	bot "beaver/app/open/open_api/internal/handler/bot"
 	event "beaver/app/open/open_api/internal/handler/event"
-	group "beaver/app/open/open_api/internal/handler/group"
-	message "beaver/app/open/open_api/internal/handler/message"
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
 	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
 	robot "beaver/app/open/open_api/internal/handler/robot"
@@ -37,29 +35,14 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 获取 Bot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Bot 身份）
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/bot/info",
-					Handler: bot.GetBotInfoHandler(serverCtx),
-				},
-				{
-					// Bot 发送消息到 IM 会话（私聊或群聊）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/bot/send_message",
-					Handler: bot.BotSendMessageHandler(serverCtx),
-				},
-				{
-					// Bot 流式发送消息（SSE，适合 AI 流式输出）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/bot/stream_message",
-					Handler: bot.BotStreamMessageHandler(serverCtx),
-				},
-			}...,
-		),
+		[]rest.Route{
+			{
+				// 推送机器人发送消息到群（第三方服务如 Jenkins/GitLab 调用此接口）
+				Method:  http.MethodPost,
+				Path:    "/api/open/v1/bot/send",
+				Handler: bot.BotSendHandler(serverCtx),
+			},
+		},
 	)
 
 	server.AddRoutes(
@@ -95,76 +78,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/open/v1/event/webhook_list",
 					Handler: event.GetWebhookListHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 将 Bot 加入群（Bot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Bot 的 Webhook URL）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/group/add_bot",
-					Handler: group.AddBotToGroupHandler(serverCtx),
-				},
-				{
-					// 将 Bot 从群移除
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/group/remove_bot",
-					Handler: group.RemoveBotFromGroupHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 撤回消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/recall",
-					Handler: message.RecallMessageHandler(serverCtx),
-				},
-				{
-					// 发送交互式卡片消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_card",
-					Handler: message.SendCardMessageHandler(serverCtx),
-				},
-				{
-					// 发送文件消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_file",
-					Handler: message.SendFileMessageHandler(serverCtx),
-				},
-				{
-					// 发送图片消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_image",
-					Handler: message.SendImageMessageHandler(serverCtx),
-				},
-				{
-					// 发送富文本消息（Markdown）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_richtext",
-					Handler: message.SendRichTextMessageHandler(serverCtx),
-				},
-				{
-					// 发送文本消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_text",
-					Handler: message.SendTextMessageHandler(serverCtx),
-				},
-				{
-					// 更新卡片消息内容
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/update_card",
-					Handler: message.UpdateCardMessageHandler(serverCtx),
 				},
 			}...,
 		),
@@ -250,14 +163,41 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 群自定义机器人消息推送（Jenkins/GitHub/Grafana 等）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/robot/send",
-				Handler: robot.RobotSendHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 将 Robot 加入群（Robot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Robot 的 Webhook URL）
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/robot/add_to_group",
+					Handler: robot.AddRobotToGroupHandler(serverCtx),
+				},
+				{
+					// 获取 Robot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Robot 身份）
+					Method:  http.MethodGet,
+					Path:    "/api/open/v1/robot/info",
+					Handler: robot.GetRobotInfoHandler(serverCtx),
+				},
+				{
+					// 将 Robot 从群移除
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/robot/remove_from_group",
+					Handler: robot.RemoveRobotFromGroupHandler(serverCtx),
+				},
+				{
+					// Robot 发送消息到 IM 会话（私聊或群聊）
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/robot/send_message",
+					Handler: robot.RobotSendMessageHandler(serverCtx),
+				},
+				{
+					// Robot 流式发送消息（SSE，适合 AI 流式输出）
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/robot/stream_message",
+					Handler: robot.RobotStreamMessageHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(

@@ -1,130 +1,95 @@
 syntax = "v1"
 
-// ==================== 群自定义机器人消息推送 ====================
-//
-// 群管理员在 group 模块创建机器人后获得：
-//   Webhook 基址: https://<domain>/api/open/v1/robot/send?access_token=<token>
-//   Secret: 创建/重置时一次性返回，用于 HMAC 加签
-//
-// 每次请求在 URL 上追加 timestamp、sign：
-//   1. timestamp = Unix 毫秒时间戳（13 位）
-//   2. stringToSign = timestamp + "\n" + secret
-//   3. sign = URLEncode( Base64( HMAC-SHA256( stringToSign, secret ) ) )
-//
-// 支持 msgtype: text / markdown / image / link / audio / file / video / custom / tips / action_card
+// ==================== Robot 接口 ====================
+// Robot 是运行在开发者本机（如 OpenClaw）的程序，通过 Webhook 收消息、通过此 API 回消息
+// 流程: 用户发消息/@Robot → Beaver 推送到 Robot 注册的 Webhook URL → Robot 调此 API 回复
 
 type (
-	RobotSendAt {
-		AtMobiles   []string `json:"atMobiles,optional"`   // 被@用户手机号
-		AtUserIds   []string `json:"atUserIds,optional"`   // 被@用户 ID
-		AtWorkCodes []string `json:"atWorkCodes,optional"` // 被@用户工号（作为用户ID处理）
-		IsAtAll     bool     `json:"isAtAll,optional"`     // 是否@所有人
+	// 获取 Robot 自身信息（Robot 启动后用来确认自己的 UserID / 昵称）
+	GetRobotInfoReq {}
+
+	GetRobotInfoRes {
+		RobotID string `json:"robotId"` // Robot 在 IM 中的用户 ID，用于识别 @提及
+		RobotName   string `json:"robotName"`   // Robot 昵称
+		Avatar    string `json:"avatar,optional"`
+		AppID     string `json:"appId"`
 	}
-	RobotSendTextBody {
-		Content string `json:"content"` // 文本内容，限制 5000 字符
+)
+
+type (
+	// Robot 发送消息（Robot 处理完消息后，通过此接口将回复发回 IM）
+	RobotSendMessageReq {
+		ConversationID string `json:"conversationId"` // 会话 ID（私聊或群聊，从 Webhook 事件中获取）
+		MsgType        string `json:"msgType"`        // 消息类型: text / markdown / richtext / card
+		Content        string `json:"content"`        // 消息内容（JSON 字符串或纯文本）
+		ReplyMsgID     string `json:"replyMsgId,optional"` // 引用回复的消息 ID（可选）
+		IdempotentKey  string `json:"idempotentKey,optional"` // 幂等键，防重复发送
 	}
-	RobotSendMarkdownBody {
-		Title string `json:"title"`          // 会话列表摘要，限制 100 字符
-		Text  string `json:"text"`           // markdown 正文，限制 5000 字符
-		Image string `json:"image,optional"` // 头图 URL（宽:高 = 2:1）
+
+	RobotSendMessageRes {
+		MessageID string `json:"messageId"`
+		SendTime  int64  `json:"sendTime"`
 	}
-	RobotSendImageBody {
-		Url          string `json:"url"`                   // 图片 URL
-		Width        string `json:"width,optional"`
-		Height       string `json:"height,optional"`
-		OriginUrl    string `json:"origin_url,optional"`   // 原图 URL
-		OriginWidth  string `json:"origin_width,optional"`
-		OriginHeight string `json:"origin_height,optional"`
-		FileName     string `json:"file_name,optional"`
-		FileSize     string `json:"file_size,optional"`
+)
+
+type (
+	// Robot 流式发送消息（SSE，适合 AI 打字机效果）
+	RobotStreamMessageReq {
+		ConversationID string `json:"conversationId"`
+		MsgType        string `json:"msgType"`
 	}
-	RobotSendLinkBody {
-		MessageUrl string `json:"message_url"`          // 消息跳转链接
-		PicUrl     string `json:"pic_url,optional"`     // 封面图 URL
-		Title      string `json:"title"`                // 消息标题，建议 100 字符以内
-		Text       string `json:"text"`                 // 消息描述，建议 500 字符以内
+
+	RobotStreamChunk {
+		Type    string `json:"type"`    // text / end
+		Content string `json:"content"` // 内容片段
+		MsgID   string `json:"msgId,optional"` // 最终消息 ID（type=end 时返回）
 	}
-	RobotSendAudioBody {
-		Url      string `json:"url"`             // 语音文件公网链接
-		Duration int64  `json:"duration"`        // 时长（秒），须小于 60
-		Size     int64  `json:"size"`            // 文件大小（KB）
-		Ext      string `json:"ext,optional"`    // 扩展名，如 aac / amr
+)
+
+type (
+	// 将 Robot 加入群（群管理员授权后，Robot 可接收该群消息和 @ 提及）
+	AddRobotToGroupReq {
+		GroupID string `json:"groupId"`
 	}
-	RobotSendFileBody {
-		Name string `json:"name"` // 文件名称
-		Url  string `json:"url"`  // 文件公网链接（pdf 需 https）
-		Size int64  `json:"size"` // 文件大小（KB），必填，影响下载进度条
+
+	AddRobotToGroupRes {
+		RobotID string `json:"robotId"` // Robot 在群里的 UserID，事件 payload 里用来识别 @ 提及
 	}
-	RobotSendVideoBody {
-		Name     string `json:"name"`              // 文件名称
-		Url      string `json:"url"`               // 视频公网链接
-		Duration int64  `json:"duration,optional"` // 时长（秒）
-		Size     string `json:"size,optional"`     // 视频大小（KB）
-		Width    string `json:"width,optional"`
-		Height   string `json:"height,optional"`
+)
+
+type (
+	// 将 Robot 从群移除
+	RemoveRobotFromGroupReq {
+		GroupID string `json:"groupId"`
 	}
-	RobotSendCustomBody {
-		Type    string `json:"type"`     // 类型，目前固定传 "1"（跳转链接）
-		BodyUrl string `json:"body_url"` // 需要跳转的 URL（请提前 url_encode）
+
+	RemoveRobotFromGroupRes {
+		Success bool `json:"success"`
 	}
-	RobotSendTipsBody {
-		Text string `json:"text"` // 灰色提示文案
-	}
-	RobotSendActionCardBtn {
-		Title           string `json:"title,optional"`
-		ActionUrl       string `json:"action_url,optional"`
-		ActionPcUrl     string `json:"action_pc_url,optional"`
-		ActionMobileUrl string `json:"action_mobile_url,optional"`
-		IconUrl         string `json:"icon_url,optional"`
-		BtnType         int64  `json:"btn_type,optional"` // 1:跳转链接 2:触发回调 3:唤起应用
-	}
-	RobotSendActionCardRemind {
-		Title    string `json:"title,optional"`
-		SubTitle string `json:"sub_title,optional"`
-		Content  string `json:"content,optional"`
-		BtnType  int64  `json:"btn_type,optional"`
-		BtnUrl   string `json:"btn_url,optional"`
-	}
-	RobotSendActionCardBody {
-		Title           string                     `json:"title"`                      // 会话列表展示内容，限制 100 字符
-		Markdown        string                     `json:"markdown"`                   // 卡片正文（markdown），限制 5000 字符
-		Image           string                     `json:"image,optional"`             // 封面图 URL
-		ContentTitle    string                     `json:"content_title,optional"`     // 内容体 title
-		SingleTitle     string                     `json:"single_title,optional"`      // 整体跳转按钮文字，与 single_url 同时设置
-		SingleUrl       string                     `json:"single_url,optional"`        // 整体跳转链接
-		SinglePcUrl     string                     `json:"single_pc_url,optional"`
-		SingleMobileUrl string                     `json:"single_mobile_url,optional"`
-		IconUrl         string                     `json:"icon_url,optional"`
-		BtnType         int64                      `json:"btn_type,optional"`
-		BtnOrientation  string                     `json:"btn_orientation,optional"`   // "0" 竖排 / "1" 横排
-		BtnJsonList     []RobotSendActionCardBtn    `json:"btn_json_list,optional"`     // 独立跳转按钮列表
-		Remind          RobotSendActionCardRemind   `json:"remind,optional"`
-	}
-	RobotSendReq {
-		AccessToken string                   `form:"access_token"` // Webhook 令牌
-		Timestamp   int64                    `form:"timestamp"`    // Unix 毫秒，与服务器误差不超过 1 小时
-		Sign        string                   `form:"sign"`         // 加签结果（需 URL 编码）
-		Msgtype     string                   `json:"msgtype"`      // 消息类型
-		Text        RobotSendTextBody        `json:"text,optional"`
-		Markdown    RobotSendMarkdownBody    `json:"markdown,optional"`
-		Image       RobotSendImageBody       `json:"image,optional"`
-		Link        RobotSendLinkBody        `json:"link,optional"`
-		Audio       RobotSendAudioBody       `json:"audio,optional"`
-		File        RobotSendFileBody        `json:"file,optional"`
-		Video       RobotSendVideoBody       `json:"video,optional"`
-		Custom      RobotSendCustomBody      `json:"custom,optional"`
-		Tips        RobotSendTipsBody        `json:"tips,optional"`
-		ActionCard  RobotSendActionCardBody  `json:"action_card,optional"`
-		At          RobotSendAt              `json:"at,optional"`
-	}
-	RobotSendRes {}
 )
 
 @server (
-	group: robot
+	group:      robot
+	middleware: AuthMiddleware
 )
 service open {
-	@doc "群自定义机器人消息推送（Jenkins/GitHub/Grafana 等）"
-	@handler RobotSend
-	post /api/open/v1/robot/send (RobotSendReq) returns (RobotSendRes)
+	@doc "获取 Robot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Robot 身份）"
+	@handler GetRobotInfo
+	get /api/open/v1/robot/info (GetRobotInfoReq) returns (GetRobotInfoRes)
+
+	@doc "Robot 发送消息到 IM 会话（私聊或群聊）"
+	@handler RobotSendMessage
+	post /api/open/v1/robot/send_message (RobotSendMessageReq) returns (RobotSendMessageRes)
+
+	@doc "Robot 流式发送消息（SSE，适合 AI 流式输出）"
+	@handler RobotStreamMessage
+	post /api/open/v1/robot/stream_message (RobotStreamMessageReq) returns (RobotStreamChunk)
+
+	@doc "将 Robot 加入群（Robot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Robot 的 Webhook URL）"
+	@handler AddRobotToGroup
+	post /api/open/v1/robot/add_to_group (AddRobotToGroupReq) returns (AddRobotToGroupRes)
+
+	@doc "将 Robot 从群移除"
+	@handler RemoveRobotFromGroup
+	post /api/open/v1/robot/remove_from_group (RemoveRobotFromGroupReq) returns (RemoveRobotFromGroupRes)
 }

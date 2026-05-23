@@ -16,6 +16,7 @@ type Config struct {
 		Password string
 		Db       int
 	}
+	Domain      string // 项目对外访问域名（用于生成本地文件完整URL）
 	FileMaxSize map[string]float64
 	WhiteList   []string
 	BlackList   []string
@@ -29,7 +30,7 @@ type Config struct {
 		AK          string
 		SK          string
 		Bucket      string
-		Domain      string
+		Domain      string // 七牛云文件访问域名
 		ExpireTime  int64
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	auth_models "beaver/app/auth/auth_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 	user_models "beaver/app/user/user_models"
@@ -37,8 +38,15 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 		return nil, errors.New("用户名或密码错误")
 	}
 
-	// 2. 验证密码
-	if !pwd.CheckPad(user.Password, req.Password) {
+	// 2. 查询用户凭证并验证密码
+	var credential auth_models.AuthCredentialModel
+	err = l.svcCtx.DB.Take(&credential, "user_id = ?", user.UserID).Error
+	if err != nil {
+		logx.Errorf("用户凭证不存在: userId=%s, err=%v", user.UserID, err)
+		return nil, errors.New("用户名或密码错误")
+	}
+
+	if !pwd.CheckPad(credential.Password, req.Password) {
 		logx.Errorf("密码错误: user_id=%s", user.UserID)
 		return nil, errors.New("用户名或密码错误")
 	}

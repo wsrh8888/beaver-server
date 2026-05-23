@@ -1,22 +1,52 @@
 package open_models
 
-import "gorm.io/gorm"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 
+	"gorm.io/gorm"
+)
+
+// OpenBotSecurity 通知机器人安全设置（JSON 结构）
+type OpenBotSecurity struct {
+	KeywordsEnabled    bool     `json:"keywordsEnabled"`    // 是否启用关键词校验
+	Keywords           []string `json:"keywords"`           // 关键词列表（最多10个）
+	IPWhitelistEnabled bool     `json:"ipWhitelistEnabled"` // 是否启用IP白名单
+	IPWhitelist        []string `json:"ipWhitelist"`        // IP地址列表
+	SignatureEnabled   bool     `json:"signatureEnabled"`   // 是否启用签名校验
+	SignatureSecret    string   `json:"signatureSecret"`    // 签名密钥
+}
+
+// Value 实现 driver.Valuer 接口
+func (s OpenBotSecurity) Value() (driver.Value, error) {
+	if !s.KeywordsEnabled && !s.IPWhitelistEnabled && !s.SignatureEnabled {
+		return "{}", nil
+	}
+	return json.Marshal(s)
+}
+
+// Scan 实现 sql.Scanner 接口
+func (s *OpenBotSecurity) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(bytes, s)
+}
+
+// OpenBotModel 推送机器人模型（群内创建的通知机器人，用于接收 Webhook 推送）
+// 例如：Jenkins、GitLab、监控告警等第三方服务推送消息到群
 type OpenBotModel struct {
 	gorm.Model
-	AppID             string `gorm:"type:varchar(64);uniqueIndex;not null;comment:应用ID"`
-	BotID             string `gorm:"type:varchar(64);uniqueIndex;comment:Bot的UserID"`
-	MessageReceiveURL string `gorm:"type:varchar(512);comment:消息接收回调地址"`
-	Name        string `gorm:"type:varchar(100);comment:Bot名称"`
-	Avatar      string `gorm:"type:varchar(500);comment:Bot头像URL"`
-	Description string `gorm:"type:text;comment:Bot简介"`
-	UsageGuide        string `gorm:"type:text;comment:使用说明"`
-	EnableSingleChat  int    `gorm:"type:tinyint;default:1;comment:是否启用单聊 1是 0否"`
-	EnableGroupChat   int    `gorm:"type:tinyint;default:1;comment:是否启用群聊 1是 0否"`
-	EnableAtMention   int    `gorm:"type:tinyint;default:1;comment:是否允许@提及 1是 0否"`
-	EnableMenu        int    `gorm:"type:tinyint;default:0;comment:是否启用自定义菜单 1是 0否"`
-	MenuItems         string `gorm:"type:text;comment:菜单项配置(JSON)"`
-	AutoReplyRules    string `gorm:"type:text;comment:自动回复规则(JSON)"`
-	Commands          string `gorm:"type:text;comment:命令列表(JSON)"`
-	Status            int    `gorm:"type:tinyint;default:1;comment:状态 1启用 0禁用"`
+	BotID   string `gorm:"type:varchar(64);uniqueIndex;comment:Bot的UserID"`
+	GroupID string `gorm:"type:varchar(64);index;not null;comment:目标群组ID"`
+	Token   string `gorm:"type:varchar(128);uniqueIndex;comment:Webhook Token（URL参数）"`
+	Status  int    `gorm:"type:tinyint;default:1;comment:状态 1启用 0禁用"`
+
+	// 安全设置（JSON 格式，用于 Webhook 推送时校验）
+	Security OpenBotSecurity `gorm:"type:json;comment:安全设置"`
 }

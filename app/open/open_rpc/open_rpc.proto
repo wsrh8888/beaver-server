@@ -55,42 +55,34 @@ message RefreshTokenRes {
   int64 expires_in = 3; // 过期时间（秒）
 }
 
-// ==================== 群通知机器人 Webhook 管理 ====================
+// ==================== 推送机器人（Bot）管理 ====================
 
-// 创建 Webhook（open 负责生成 token/secret/bot_user_id，构建 webhook_url）
-message CreateWebhookReq {
+// 创建推送机器人
+message CreateBotReq {
   string group_id = 1; // 目标群组 ID
 }
 
-message CreateWebhookRes {
-  uint32 id = 1;          // 新记录 ID
-  string bot_user_id = 2; // 机器人用户 ID（group 侧用于建群成员）
-  string webhook_url = 3; // 完整 Webhook URL（含 access_token）
-  string secret = 4;      // HMAC-SHA256 签名密钥（一次性返回）
+message CreateBotRes {
+  uint32 id = 1; // 机器人 ID（open_bots.id）
+  string bot_user_id = 2; // 机器人用户 ID
+  string token = 3; // Webhook Token
+  string webhook_url = 4; // Webhook 基础 URL（不含 token）
 }
 
-// 删除 Webhook
-message DeleteWebhookReq {
-  uint32 id = 1; // open_incoming_webhooks.id
+// 删除推送机器人（软删除，设置 status=0）
+message DeleteBotReq {
+  uint32 id = 1; // open_bots.id
 }
 
-message DeleteWebhookRes {}
+message DeleteBotRes {}
 
-// 更新 Webhook 状态（-1=不修改 0=禁用 1=启用）
-message UpdateWebhookReq {
-  uint32 id = 1;
-  int32  status = 2;
-}
-
-message UpdateWebhookRes {}
-
-// 重置签名密钥（旧 secret 立即失效）
-message ResetWebhookSecretReq {
+// 重置签名密钥
+message ResetBotSecretReq {
   uint32 id = 1;
 }
 
-message ResetWebhookSecretRes {
-  string secret = 1; // 新密钥
+message ResetBotSecretRes {
+  string signature_secret = 1; // 新密钥
 }
 
 service open {
@@ -98,10 +90,9 @@ service open {
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
   rpc ValidateToken(ValidateTokenReq) returns (ValidateTokenRes); // 验证 Token
   rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenRes); // 刷新 Token
-  rpc CreateWebhook(CreateWebhookReq) returns (CreateWebhookRes); // 创建群通知机器人 Webhook
-  rpc DeleteWebhook(DeleteWebhookReq) returns (DeleteWebhookRes); // 删除 Webhook
-  rpc UpdateWebhook(UpdateWebhookReq) returns (UpdateWebhookRes); // 更新 Webhook 元信息
-  rpc ResetWebhookSecret(ResetWebhookSecretReq) returns (ResetWebhookSecretRes); // 重置签名密钥
+  rpc CreateBot(CreateBotReq) returns (CreateBotRes); // 创建推送机器人
+  rpc DeleteBot(DeleteBotReq) returns (DeleteBotRes); // 删除推送机器人（软删除）
+  rpc ResetBotSecret(ResetBotSecretReq) returns (ResetBotSecretRes); // 重置签名密钥
 }
 
 // goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --style=goZero

@@ -18,6 +18,7 @@ type FileReq struct {
 
 type FileRes struct {
 	FileKey      string    `json:"fileKey"`
+	FileURL      string    `json:"fileUrl,optional"`
 	OriginalName string    `json:"originalName"`
 	FileInfo     *FileInfo `json:"fileInfo,optional"`
 }

@@ -9,6 +9,7 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_models"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
@@ -39,8 +40,15 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (resp *types.Phon
 		return nil, errors.New("用户不存在")
 	}
 
-	// 验证密码
-	if !pwd.CheckPad(user.Password, req.Password) {
+	// 查询用户凭证并验证密码
+	var credential auth_models.AuthCredentialModel
+	err = l.svcCtx.DB.Take(&credential, "user_id = ?", user.UserID).Error
+	if err != nil {
+		logx.Errorf("查询用户凭证失败: %v", err)
+		return nil, errors.New("用户凭证不存在")
+	}
+
+	if !pwd.CheckPad(credential.Password, req.Password) {
 		return nil, errors.New("密码错误")
 	}
 
@@ -96,6 +104,12 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (resp *types.Phon
 		logx.Errorf("存储登录信息失败: %v", err)
 		return nil, errors.New("服务内部异常")
 	}
+
+	// 更新登录记录
+	now := time.Now()
+	credential.LastLoginAt = &now
+	credential.LoginCount++
+	l.svcCtx.DB.Save(&credential)
 
 	return &types.PhoneLoginRes{
 		Token:  token,

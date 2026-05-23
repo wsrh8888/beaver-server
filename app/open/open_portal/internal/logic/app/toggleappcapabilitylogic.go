@@ -40,26 +40,8 @@ func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapab
 		if req.Enable {
 			app.EnableBot = 1
 			enabled = true
-			// 如果启用 Bot 能力，检查是否存在 Bot 配置，不存在则创建默认配置
-			var botConfig open_models.OpenBotModel
-			if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&botConfig).Error; err != nil {
-				// 创建默认 Bot 配置
-				botConfig = open_models.OpenBotModel{
-					AppID:            req.AppID,
-					Name:        app.Name,
-					Avatar:      app.Icon,
-					Description: app.Description,
-					EnableSingleChat: 1,
-					EnableGroupChat:  1,
-					EnableAtMention:  1,
-					Status:           1,
-				}
-				if err := l.svcCtx.DB.Create(&botConfig).Error; err != nil {
-					logx.Errorf("创建默认 Bot 配置失败: %v", err)
-					return nil, errors.New("创建 Bot 配置失败")
-				}
-				logx.Infof("为应用 %s 创建默认 Bot 配置", req.AppID)
-			}
+			// TODO: OpenBotModel 已重构为群机器人模型，应用维度的 Bot 配置功能暂时禁用
+			logx.Infof("应用 %s 启用 Bot 能力（配置功能待实现）", req.AppID)
 		} else {
 			app.EnableBot = 0
 			enabled = false

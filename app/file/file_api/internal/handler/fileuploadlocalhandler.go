@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -46,6 +47,14 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err == nil {
 			resp.FileKey = existingFile.FileKey
 			resp.OriginalName = existingFile.OriginalName
+
+			// 生成完整URL（使用项目域名）
+			if svcCtx.Config.Domain != "" {
+				resp.FileURL = fmt.Sprintf("%s/api/file/preview/%s", svcCtx.Config.Domain, existingFile.FileKey)
+			} else {
+				// 如果未配置域名，返回相对路径
+				resp.FileURL = fmt.Sprintf("/api/file/preview/%s", existingFile.FileKey)
+			}
 
 			// 转换FileInfo为API响应格式
 			if existingFile.FileInfo != nil {
@@ -100,6 +109,14 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
+
+		// 生成完整URL（使用项目域名）
+		if svcCtx.Config.Domain != "" {
+			resp.FileURL = fmt.Sprintf("%s/api/file/preview/%s", svcCtx.Config.Domain, newFileModel.FileKey)
+		} else {
+			// 如果未配置域名，返回相对路径
+			resp.FileURL = fmt.Sprintf("/api/file/preview/%s", newFileModel.FileKey)
+		}
 
 		// 转换FileInfo为API响应格式
 		if fileInfo != nil {

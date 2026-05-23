@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"beaver/app/open/constants"
@@ -41,19 +40,6 @@ func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *type
 		return nil, errors.New("应用不存在或无权限")
 	}
 
-	// 3. 解析已授权的权限列表
-	var enabledScopes []string
-	if app.Scopes != "" {
-		json.Unmarshal([]byte(app.Scopes), &enabledScopes)
-	}
-
-	// 4. 构建所有权限列表（标记是否已启用）
-	// 创建 enabledScopes map 提高查找效率
-	enabledMap := make(map[string]bool)
-	for _, s := range enabledScopes {
-		enabledMap[s] = true
-	}
-
 	// 创建 defaultScopes map 提高查找效率
 	defaultMap := make(map[string]bool)
 	for _, s := range constants.DefaultScopes {
@@ -67,7 +53,6 @@ func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *type
 			Scope:       scopeStr,
 			Name:        scopeStr,
 			Description: constants.ScopeDescription[scope],
-			Enabled:     enabledMap[scopeStr],
 			Required:    defaultMap[scopeStr],
 		})
 	}

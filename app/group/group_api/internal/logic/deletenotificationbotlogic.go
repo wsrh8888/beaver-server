@@ -28,12 +28,13 @@ func NewDeleteNotificationBotLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *DeleteNotificationBotLogic) DeleteNotificationBot(req *types.DeleteNotificationBotReq) (resp *types.DeleteNotificationBotRes, err error) {
-	// 从本地引用表查（group 侧自有数据，无需跨服务）
-	var ref group_models.GroupNotificationBotModel
+	// 1. 从本地引用表查
+	var ref group_models.GroupBotModel
 	if err = l.svcCtx.DB.First(&ref, req.ID).Error; err != nil {
 		return nil, errors.New("通知机器人不存在")
 	}
 
+	// 2. 校验权限
 	var member group_models.GroupMemberModel
 	if err = l.svcCtx.DB.Take(&member, "group_id = ? AND user_id = ?", ref.GroupID, req.UserID).Error; err != nil {
 		return nil, errors.New("不是群成员")
@@ -42,19 +43,19 @@ func (l *DeleteNotificationBotLogic) DeleteNotificationBot(req *types.DeleteNoti
 		return nil, errors.New("无权限，仅群主或管理员可删除通知机器人")
 	}
 
-	// 调 open_rpc 删除 master 记录
-	if _, err = l.svcCtx.OpenRpc.DeleteWebhook(l.ctx, &open_rpc.DeleteWebhookReq{
-		Id: uint32(ref.WebhookID),
+	// 3. 调 open_rpc 删除 master 记录
+	if _, err = l.svcCtx.OpenRpc.DeleteBot(l.ctx, &open_rpc.DeleteBotReq{
+		Id: uint32(ref.BotID),
 	}); err != nil {
 		return nil, errors.New("删除失败")
 	}
 
-	// 删本地引用表
+	// 4. 删本地引用表
 	l.svcCtx.DB.Delete(&ref)
 
-	// 将机器人移出群（软删除）
+	// 5. 将机器人移出群（软删除）
 	l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
-		Where("group_id = ? AND user_id = ?", ref.GroupID, ref.BotUserID).
+		Where("group_id = ? AND user_id = ?", ref.GroupID, ref.BotID).
 		Update("status", 0)
 
 	return &types.DeleteNotificationBotRes{Success: true}, nil

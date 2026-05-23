@@ -1,6 +1,7 @@
 package main
 
 import (
+	"beaver/app/auth/auth_models"
 	"beaver/app/backend/backend_models"
 	"beaver/app/call/call_models"
 	"beaver/app/chat/chat_models"
@@ -44,28 +45,42 @@ func main() {
 			// 基础表
 			&user_models.UserModel{},
 			&user_models.UserChangeLogModel{},
+
+			// 认证相关表
+			&auth_models.AuthCredentialModel{},
+
+			// 好友相关表
 			&friend_models.FriendModel{},
 			&friend_models.FriendVerifyModel{},
 
+			// 聊天相关表
 			&chat_models.ChatMessage{},
 			&chat_models.ChatConversationMeta{},
 			&chat_models.ChatUserConversation{},
 			&chat_models.ChatUserDelete{},
 			&chat_models.ChatForward{},
 
+			// 文件相关表
 			&file_models.FileModel{},
+
+			// 动态相关表
 			&moment_models.MomentModel{},
 			&moment_models.MomentLikeModel{},
 			&moment_models.MomentCommentModel{},
+
+			// 表情相关表
 			&emoji_models.EmojiPackage{},
 			&emoji_models.Emoji{},
 			&emoji_models.EmojiPackageEmoji{},
 			&emoji_models.EmojiPackageCollect{},
 			&emoji_models.EmojiCollectEmoji{},
 
+			// 埋点相关的
 			&track_models.TrackBucket{},
 			&track_models.TrackEvent{},
 			&track_models.TrackLogger{},
+
+			// 反馈相关表
 			&feedback_models.FeedbackModel{},
 
 			// 版本管理相关表
@@ -81,7 +96,6 @@ func main() {
 			&group_models.GroupMemberModel{},
 			&group_models.GroupJoinRequestModel{},
 			&group_models.GroupMemberChangeLogModel{},
-			&group_models.GroupNotificationBotModel{},
 
 			// 通知中心表
 			&notification_models.NotificationEvent{},
@@ -107,7 +121,6 @@ func main() {
 			&open_models.OpenOAuthQrCode{},
 			&open_models.OpenEventSubscription{},
 			&open_models.OpenBotModel{},
-			&open_models.OpenGroupBotModel{},
 		)
 
 		if err != nil {

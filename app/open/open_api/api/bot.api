@@ -1,65 +1,160 @@
 syntax = "v1"
 
-// ==================== Bot 接口 ====================
-// Bot 是运行在开发者本机（如 OpenClaw）的程序，通过 Webhook 收消息、通过此 API 回消息
-// 流程: 用户发消息/@Bot → Beaver 推送到 Bot 注册的 Webhook URL → Bot 调此 API 回复
+// ==================== Bot 发送消息接口 ====================
+// 推送机器人通过此接口发送消息到群（第三方服务调用）
+// 此接口不需要 JWT 认证，通过 Token + 签名校验身份
 
 type (
-	// 获取 Bot 自身信息（Bot 启动后用来确认自己的 UserID / 昵称）
-	GetBotInfoReq {}
+	// @提及信息
+	BotAtInfo {
+		AtMobiles   []string `json:"atMobiles,optional"`   // 被@人的手机号列表
+		AtUserIDs   []string `json:"atUserIds,optional"`   // 被@人的用户ID列表
+		IsAtAll     bool     `json:"isAtAll,optional"`     // 是否@所有人
+	}
 
-	GetBotInfoRes {
-		BotUserID string `json:"botUserId"` // Bot 在 IM 中的用户 ID，用于识别 @提及
-		BotName   string `json:"botName"`   // Bot 昵称
-		Avatar    string `json:"avatar,optional"`
-		AppID     string `json:"appId"`
+	// 文本消息内容
+	BotTextContent {
+		Content string    `json:"content"` // 文本内容
+		At      *BotAtInfo `json:"at,optional"` // @信息（只有 text、markdown 支持）
+	}
+
+	// Markdown 消息内容
+	BotMarkdownContent {
+		Title   string    `json:"title"`   // 首屏会话透出的展示内容
+		Content string    `json:"text"`    // Markdown 格式的消息内容
+		Image   string    `json:"image,optional"` // 图片 URL（宽:高 = 2:1）
+		At      *BotAtInfo `json:"at,optional"` // @信息
+	}
+
+	// 图片消息内容
+	BotImageContent {
+		URL    string `json:"url"`    // 图片URL
+		Width  int32  `json:"width,optional"`  // 图片宽度（像素）
+		Height int32  `json:"height,optional"` // 图片高度（像素）
+	}
+
+	// 视频消息内容
+	BotVideoContent {
+		URL          string `json:"url"`          // 视频URL
+		Width        int32  `json:"width,optional"`  // 视频宽度
+		Height       int32  `json:"height,optional"` // 视频高度
+		Duration     int32  `json:"duration,optional"` // 视频时长（秒）
+		ThumbnailURL string `json:"thumbnailUrl,optional"` // 封面图URL
+	}
+
+	// 文件消息内容
+	BotFileContent {
+		URL      string `json:"url"`      // 文件URL
+		FileName string `json:"fileName"` // 文件名
+		FileSize int64  `json:"fileSize"` // 文件大小（字节）
+		MimeType string `json:"mimeType,optional"` // MIME类型
+	}
+
+	// 语音消息内容
+	BotVoiceContent {
+		URL      string `json:"url"`      // 语音URL
+		Duration int32  `json:"duration,optional"` // 语音时长（秒）
+		FileSize int64  `json:"fileSize,optional"` // 文件大小（字节）
+	}
+
+	// 音频文件消息内容
+	BotAudioFileContent {
+		URL      string `json:"url"`      // 音频URL
+		FileName string `json:"fileName"` // 文件名
+		Duration int32  `json:"duration,optional"` // 音频时长（秒）
+		FileSize int64  `json:"fileSize,optional"` // 文件大小（字节）
+	}
+
+	// 表情消息内容
+	BotEmojiContent {
+		URL    string `json:"url"`    // 表情图片URL
+		Width  int64  `json:"width,optional"`  // 表情宽度
+		Height int64  `json:"height,optional"` // 表情高度
+	}
+
+	// 通知消息内容
+	BotNotificationContent {
+		Type   int32    `json:"type"`   // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主
+		Actors []string `json:"actors"` // 相关用户ID列表
+	}
+
+	// 通话消息内容
+	BotCallContent {
+		RoomID   string `json:"roomId"`   // 房间ID
+		CallType int32  `json:"callType"` // 通话类型: 1-私聊, 2-群聊
+		Status   int32  `json:"status"`   // 状态: 1-进行中, 2-已结束
+		Duration int64  `json:"duration"` // 通话时长(秒)
+	}
+
+	// 撤回消息内容
+	BotWithdrawContent {
+		OriginMsgID string `json:"originMsgId"` // 被撤回的消息ID
+	}
+
+	// 回复消息内容
+	BotReplyContent {
+		OriginMsgID string `json:"originMsgId"` // 被回复的消息ID
+		MsgType     string `json:"msgType"`     // 回复的消息类型
+		Content     string `json:"content"`     // 回复的内容
+	}
+
+	// 转发消息内容
+	BotForwardContent {
+		Title    string `json:"title"`    // 标题
+		RecordID string `json:"recordId"` // 详情记录ID
+		Count    int32  `json:"count"`    // 消息总数
+	}
+
+	// 链接卡片消息内容
+	BotLinkContent {
+		URL      string `json:"url"`      // 跳转链接
+		Title    string `json:"title"`    // 标题
+		Desc     string `json:"desc,optional"` // 摘要描述
+		ImageURL string `json:"imageUrl,optional"` // 封面图 URL
+	}
+
+	// 卡片消息内容（交互式卡片）
+	BotCardContent {
+		TemplateID string `json:"templateId"` // 卡片模板ID
+		Data       string `json:"data"`       // 卡片数据（JSON字符串）
 	}
 )
 
 type (
-	// Bot 发送消息（Bot 处理完消息后，通过此接口将回复发回 IM）
-	BotSendMessageReq {
-		ConversationID string `json:"conversationId"` // 会话 ID（私聊或群聊，从 Webhook 事件中获取）
-		MsgType        string `json:"msgType"`        // 消息类型: text / markdown / richtext / card
-		Content        string `json:"content"`        // 消息内容（JSON 字符串或纯文本）
-		ReplyMsgID     string `json:"replyMsgId,optional"` // 引用回复的消息 ID（可选）
-		IdempotentKey  string `json:"idempotentKey,optional"` // 幂等键，防重复发送
+	// 发送消息请求
+	BotSendReq {
+		Token       string                 `form:"token"`               // Webhook Token
+		Timestamp   int64                  `form:"timestamp,optional"`  // 时间戳（毫秒）
+		Sign        string                 `form:"sign,optional"`       // 签名
+		MsgType     string                 `json:"msgtype"`             // 消息类型: text/markdown/image/video/file/voice/audio_file/emoji/notification/call/withdraw/reply/forward/link/card
+		Text        *BotTextContent        `json:"text,optional"`       // 文本消息
+		Markdown    *BotMarkdownContent    `json:"markdown,optional"`   // Markdown 消息
+		Image       *BotImageContent       `json:"image,optional"`      // 图片消息
+		Video       *BotVideoContent       `json:"video,optional"`      // 视频消息
+		File        *BotFileContent        `json:"file,optional"`       // 文件消息
+		Voice       *BotVoiceContent       `json:"voice,optional"`      // 语音消息
+		AudioFile   *BotAudioFileContent   `json:"audioFile,optional"`  // 音频文件消息
+		Emoji       *BotEmojiContent       `json:"emoji,optional"`      // 表情消息
+		Notification *BotNotificationContent `json:"notification,optional"` // 通知消息
+		Call        *BotCallContent        `json:"call,optional"`       // 通话消息
+		Withdraw    *BotWithdrawContent    `json:"withdraw,optional"`   // 撤回消息
+		Reply       *BotReplyContent       `json:"reply,optional"`      // 回复消息
+		Forward     *BotForwardContent     `json:"forward,optional"`    // 转发消息
+		Link        *BotLinkContent        `json:"link,optional"`       // 链接卡片消息
+		Card        *BotCardContent        `json:"card,optional"`       // 交互式卡片消息
 	}
 
-	BotSendMessageRes {
-		MessageID string `json:"messageId"`
-		SendTime  int64  `json:"sendTime"`
-	}
-)
-
-type (
-	// Bot 流式发送消息（SSE，适合 AI 打字机效果）
-	BotStreamMessageReq {
-		ConversationID string `json:"conversationId"`
-		MsgType        string `json:"msgType"`
-	}
-
-	BotStreamChunk {
-		Type    string `json:"type"`    // text / end
-		Content string `json:"content"` // 内容片段
-		MsgID   string `json:"msgId,optional"` // 最终消息 ID（type=end 时返回）
+	BotSendRes {
+		MessageID string `json:"messageId"` // 消息ID
+		SendTime  int64  `json:"sendTime"`  // 发送时间戳（毫秒）
 	}
 )
 
 @server (
-	group:      bot
-	middleware: AuthMiddleware
+	group: bot
 )
 service open {
-	@doc "获取 Bot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Bot 身份）"
-	@handler GetBotInfo
-	get /api/open/v1/bot/info (GetBotInfoReq) returns (GetBotInfoRes)
-
-	@doc "Bot 发送消息到 IM 会话（私聊或群聊）"
-	@handler BotSendMessage
-	post /api/open/v1/bot/send_message (BotSendMessageReq) returns (BotSendMessageRes)
-
-	@doc "Bot 流式发送消息（SSE，适合 AI 流式输出）"
-	@handler BotStreamMessage
-	post /api/open/v1/bot/stream_message (BotStreamMessageReq) returns (BotStreamChunk)
+	@doc "推送机器人发送消息到群（第三方服务如 Jenkins/GitLab 调用此接口）"
+	@handler BotSend
+	post /api/open/v1/bot/send (BotSendReq) returns (BotSendRes)
 }

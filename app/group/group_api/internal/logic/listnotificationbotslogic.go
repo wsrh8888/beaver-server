@@ -37,7 +37,7 @@ func (l *ListNotificationBotsLogic) ListNotificationBots(req *types.ListNotifica
 	}
 
 	// 直接读本地引用表，无需跨服务调用
-	var bots []group_models.GroupNotificationBotModel
+	var bots []group_models.GroupBotModel
 	if err = l.svcCtx.DB.Where("group_id = ?", req.GroupID).
 		Order("id DESC").Find(&bots).Error; err != nil {
 		return nil, err
@@ -46,15 +46,13 @@ func (l *ListNotificationBotsLogic) ListNotificationBots(req *types.ListNotifica
 	items := make([]types.ListNotificationBotsItem, 0, len(bots))
 	for _, b := range bots {
 		items = append(items, types.ListNotificationBotsItem{
-			ID:            int64(b.Id),
-			Name:          b.Name,
-			Description:   b.Description,
-			Avatar:        b.Avatar,
-			WebhookURL:    b.WebhookURL,
-			Type:          b.Type,
-			Status:        b.Status,
-			CreatorUserID: b.CreatorUserID,
-			CreatedAt:     time.Time(b.CreatedAt).Unix(),
+			ID:          int64(b.Id),
+			Name:        b.Name,
+			Description: b.Description,
+			Avatar:      b.Avatar,
+			Type:        b.Type,
+			Status:      b.Status,
+			CreatedAt:   time.Time(b.CreatedAt).Unix(),
 		})
 	}
 

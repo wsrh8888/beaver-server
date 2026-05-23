@@ -33,27 +33,9 @@ func (l *PublishAppLogic) PublishApp(req *types.PublishAppReq) (resp *types.Publ
 		return nil, errors.New("应用不存在或无权限访问")
 	}
 
-	// 2. 检查是否已配置 Bot（如果启用了 Bot 能力）
-	var botConfig open_models.OpenBotModel
-	err = l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&botConfig).Error
-	if err != nil {
-		// 如果没有 Bot 配置，创建默认配置
-		botConfig = open_models.OpenBotModel{
-			AppID:            req.AppID,
-			Name:        app.Name,
-			Avatar:      app.Icon,
-			Description: app.Description,
-			EnableSingleChat: 1, // int 类型：1是 0否
-			EnableGroupChat:  1,
-			EnableAtMention:  1,
-			Status:           1,
-		}
-		if err := l.svcCtx.DB.Create(&botConfig).Error; err != nil {
-			logx.Errorf("创建默认 Bot 配置失败: %v", err)
-			return nil, errors.New("创建 Bot 配置失败")
-		}
-		logx.Infof("为应用 %s 创建默认 Bot 配置", req.AppID)
-	}
+	// 2. TODO: OpenBotModel 已重构为群机器人模型，应用维度的 Bot 配置功能暂时禁用
+	// 原逻辑：检查并创建默认 Bot 配置
+	logx.Infof("应用发布前检查（Bot 配置功能待实现）: app_id=%s", req.AppID)
 
 	// 3. 更新应用状态为已发布
 	if err := l.svcCtx.DB.Model(&app).Update("status", 1).Error; err != nil {

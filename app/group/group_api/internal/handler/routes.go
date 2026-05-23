@@ -111,31 +111,37 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）
 				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/create",
+				Path:    "/api/group/v1/notification_bot_create",
 				Handler: createNotificationBotHandler(serverCtx),
 			},
 			{
 				// 删除通知机器人
 				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/delete",
+				Path:    "/api/group/v1/notification_bot_delete",
 				Handler: deleteNotificationBotHandler(serverCtx),
+			},
+			{
+				// 获取通知机器人详情
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/notification_bot_detail",
+				Handler: getNotificationBotDetailHandler(serverCtx),
 			},
 			{
 				// 获取群内所有通知机器人列表
 				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/list",
+				Path:    "/api/group/v1/notification_bot_list",
 				Handler: listNotificationBotsHandler(serverCtx),
 			},
 			{
 				// 重置通知机器人的签名密钥（旧 Secret 立即失效）
 				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/reset_secret",
+				Path:    "/api/group/v1/notification_bot_reset_secret",
 				Handler: resetNotificationBotSecretHandler(serverCtx),
 			},
 			{
 				// 更新通知机器人（名称/简介/头像/启用状态）
 				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/update",
+				Path:    "/api/group/v1/notification_bot_update",
 				Handler: updateNotificationBotHandler(serverCtx),
 			},
 			{
