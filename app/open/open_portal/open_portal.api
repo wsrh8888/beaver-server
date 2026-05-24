@@ -1,6 +1,5 @@
 import "api/auth.api"
 import "api/app.api"
-import "api/permission.api"
 import "api/developer.api"
 import "api/bot.api"
 import "api/security.api"

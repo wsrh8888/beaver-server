@@ -36,14 +36,12 @@ func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapab
 	// 2. 根据能力类型更新对应的开关
 	var enabled bool
 	switch req.Capability {
-	case "bot":
+	case "robot":
 		if req.Enable {
-			app.EnableBot = 1
+			app.EnableRobot = 1
 			enabled = true
-			// TODO: OpenBotModel 已重构为群机器人模型，应用维度的 Bot 配置功能暂时禁用
-			logx.Infof("应用 %s 启用 Bot 能力（配置功能待实现）", req.AppID)
 		} else {
-			app.EnableBot = 0
+			app.EnableRobot = 0
 			enabled = false
 		}
 	case "oauth":

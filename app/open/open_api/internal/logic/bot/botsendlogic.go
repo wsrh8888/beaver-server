@@ -2,6 +2,9 @@ package bot
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -55,8 +58,12 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 			return nil, fmt.Errorf("timestamp expired")
 		}
 
-		// TODO: 验证签名（需要根据实际签名算法实现）
-		// 这里简化处理，实际应该计算 HMAC-SHA256 签名并比对
+		// 验证签名：HMAC-SHA256 + Base64
+		expectedSign := generateSignature(req.Timestamp, bot.Security.SignatureSecret)
+		if req.Sign != expectedSign {
+			l.Errorf("BotSend: signature mismatch, received=%s, expected=%s", req.Sign, expectedSign)
+			return nil, fmt.Errorf("invalid signature")
+		}
 	}
 
 	// 4. 校验关键词（如果启用了关键词校验）
@@ -115,7 +122,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 		if req.Markdown == nil {
 			return nil, fmt.Errorf("markdown content is required")
 		}
-		msg.Type = 15 // Markdown 消息
+		msg.Type = 13 // Markdown 消息
 		msg.MarkdownMsg = &chat_rpc.MarkdownMsg{
 			Title:   req.Markdown.Title,
 			Content: req.Markdown.Content,
@@ -314,4 +321,15 @@ func parseTime(timeStr string) int64 {
 		return time.Now().UnixMilli()
 	}
 	return t.UnixMilli()
+}
+
+// generateSignature 生成签名（HMAC-SHA256 + Base64）
+// 签名字符串 = timestamp + "\n" + secret
+func generateSignature(timestamp int64, secret string) string {
+
+	stringToSign := fmt.Sprintf("%d\n%s", timestamp, secret)
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(stringToSign))
+	signature := mac.Sum(nil)
+	return base64.StdEncoding.EncodeToString(signature)
 }

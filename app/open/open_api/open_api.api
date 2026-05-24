@@ -1,5 +1,7 @@
 import "api/auth.api"
+import "api/oauth_public.api"
 import "api/oauth.api"
+import "api/oauth_secret.api"
 import "api/user.api"
 import "api/robot.api"
 import "api/bot.api"

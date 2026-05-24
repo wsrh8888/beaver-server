@@ -39,16 +39,29 @@ func (l *GetSecurityConfigLogic) GetSecurityConfig(req *types.GetSecurityConfigR
 		return nil, errors.New("无权查看此应用")
 	}
 
+	// 查询安全配置
+	var security open_models.OpenAppSecurity
+	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&security).Error; err != nil {
+		// 如果没有配置，返回空配置
+		return &types.GetSecurityConfigRes{
+			Config: types.SecurityConfigInfo{
+				AppID:          app.AppID,
+				IPWhitelist:    []string{},
+				TrustedDomains: []string{},
+			},
+		}, nil
+	}
+
 	// 解析 IP 白名单
 	var ipWhitelist []string
-	if app.IPWhitelist != "" {
-		json.Unmarshal([]byte(app.IPWhitelist), &ipWhitelist)
+	if security.IPWhitelist != "" {
+		json.Unmarshal([]byte(security.IPWhitelist), &ipWhitelist)
 	}
 
 	// 解析 H5 可信域名
 	var trustedDomains []string
-	if app.TrustedDomains != "" {
-		json.Unmarshal([]byte(app.TrustedDomains), &trustedDomains)
+	if security.TrustedDomains != "" {
+		json.Unmarshal([]byte(security.TrustedDomains), &trustedDomains)
 	}
 
 	return &types.GetSecurityConfigRes{

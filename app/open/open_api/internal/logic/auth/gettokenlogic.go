@@ -36,17 +36,24 @@ func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRe
 		return nil, errors.New("应用 ID 或密钥错误")
 	}
 
-	// 2. 生成 Access Token
+	// 2. 查询 OAuth 配置获取权限范围
+	var oauthConfig open_models.OpenAppOAuth
+	var supportedScopes string
+	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil {
+		supportedScopes = oauthConfig.SupportedScopes
+	}
+
+	// 3. 生成 Access Token
 	accessTokenBytes := make([]byte, 32)
 	_, _ = rand.Read(accessTokenBytes)
 	accessToken := hex.EncodeToString(accessTokenBytes)
 
-	// 3. 生成 Refresh Token
+	// 4. 生成 Refresh Token
 	refreshTokenBytes := make([]byte, 32)
 	_, _ = rand.Read(refreshTokenBytes)
 	refreshToken := hex.EncodeToString(refreshTokenBytes)
 
-	// 4. 保存 Access Token（客户端凭证模式没有用户ID）
+	// 5. 保存 Access Token（客户端凭证模式没有用户ID）
 	now := time.Now()
 	expiresAt := now.Add(2 * time.Hour).Unix() // 2小时过期
 	tokenRecord := open_models.OpenOAuthToken{
@@ -54,7 +61,7 @@ func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRe
 		Token:        accessToken,
 		RefreshToken: refreshToken,
 		ExpiresAt:    expiresAt,
-		Scope:        app.SupportedScopes,
+		Scope:        supportedScopes,
 		UserID:       "", // 客户端凭证模式没有用户
 	}
 

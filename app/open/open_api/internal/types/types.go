@@ -9,11 +9,6 @@ type AddRobotToGroupRes struct {
 	RobotID string `json:"robotId"` // Robot 在群里的 UserID，事件 payload 里用来识别 @ 提及
 }
 
-type AuthorizeCodeRes struct {
-	Code  string `json:"code"`
-	State string `json:"state,optional"`
-}
-
 type BotAtInfo struct {
 	AtMobiles []string `json:"atMobiles,optional"` // 被@人的手机号列表
 	AtUserIDs []string `json:"atUserIds,optional"` // 被@人的用户ID列表
@@ -187,23 +182,6 @@ type GenerateQrCodeRes struct {
 	ExpireIn  int64  `json:"expireIn"`
 }
 
-type GetAuthorizeCodeReq struct {
-	AppID               string `form:"appId"`
-	RedirectURI         string `form:"redirectUri"`
-	Scope               string `form:"scope,optional"`        // 空格分隔的权限列表
-	State               string `form:"state,optional"`        // CSRF 防护，原样返回
-	ResponseType        string `form:"responseType,optional"` // 固定 "code"
-	CodeChallenge       string `form:"codeChallenge,optional"`
-	CodeChallengeMethod string `form:"codeChallengeMethod,optional"` // 固定 "S256"
-}
-
-type GetDesktopQuickLoginSignReq struct {
-}
-
-type GetDesktopQuickLoginSignRes struct {
-	QuickSign string `json:"quickSign"`
-}
-
 type GetEventLogsReq struct {
 	SubscriptionID uint64 `form:"subscriptionId,optional"`
 	Page           int    `form:"page,default=1"`
@@ -216,23 +194,13 @@ type GetEventLogsRes struct {
 }
 
 type GetH5AuthCodeReq struct {
-	AppID string `json:"appId"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由 Gateway 注入）
+	AppID  string `json:"appId"`
 }
 
 type GetH5AuthCodeRes struct {
 	AuthCode string `json:"authCode"`
 	ExpireIn int64  `json:"expireIn"`
-}
-
-type GetOIDCUserInfoReq struct {
-}
-
-type GetOIDCUserInfoRes struct {
-	Sub     string `json:"sub"`              // 用户唯一 ID（对应 userId）
-	Name    string `json:"name"`             // 昵称
-	Picture string `json:"picture,optional"` // 头像 URL
-	Email   string `json:"email,optional"`
-	Phone   string `json:"phone,optional"`
 }
 
 type GetRobotInfoReq struct {
@@ -280,6 +248,20 @@ type GetUserInfoByH5CodeReq struct {
 }
 
 type GetUserInfoByH5CodeRes struct {
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Avatar   string `json:"avatar,optional"`
+	Phone    string `json:"phone,optional"`
+	Email    string `json:"email,optional"`
+}
+
+type GetUserInfoByQuickLoginReq struct {
+	AppID     string `json:"appId"`
+	AppSecret string `json:"appSecret"`
+	AuthCode  string `json:"authCode"`
+}
+
+type GetUserInfoByQuickLoginRes struct {
 	UserID   string `json:"userId"`
 	NickName string `json:"nickName"`
 	Avatar   string `json:"avatar,optional"`

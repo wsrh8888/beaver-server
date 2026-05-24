@@ -10,7 +10,6 @@ import (
 	developer "beaver/app/open/open_portal/internal/handler/developer"
 	event "beaver/app/open/open_portal/internal/handler/event"
 	oauth "beaver/app/open/open_portal/internal/handler/oauth"
-	permission "beaver/app/open/open_portal/internal/handler/permission"
 	security "beaver/app/open/open_portal/internal/handler/security"
 	version "beaver/app/open/open_portal/internal/handler/version"
 	"beaver/app/open/open_portal/internal/svc"
@@ -200,23 +199,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/portal/open/v1/oauth/config_update",
 				Handler: oauth.UpdateOAuthConfigHandler(serverCtx),
-			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 配置应用权限
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/permission/config",
-				Handler: permission.ConfigAppPermissionHandler(serverCtx),
-			},
-			{
-				// 获取应用权限列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/app/permissions",
-				Handler: permission.GetAppPermissionsHandler(serverCtx),
 			},
 		},
 	)

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -15,7 +14,6 @@ func InListByRegex(list []string, key string) (ok bool) {
 			logx.Errorf("compile regex error: %v", err)
 			return
 		}
-		fmt.Println(key, s)
 		if regex.MatchString(key) {
 			return true
 		}

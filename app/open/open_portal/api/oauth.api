@@ -15,9 +15,8 @@ type (
 type (
 	// 获取 OAuth 配置
 	GetOAuthConfigReq {
-		AppID     string `form:"appId"`
-		OAuthType string `form:"oauthType"` // h5 | desktop | mobile
-		UserID    string `header:"Beaver-User-Id"`
+		AppID  string `form:"appId"`
+		UserID string `header:"Beaver-User-Id"`
 	}
 	// H5 OAuth 配置
 	H5OAuthConfigInfo {
@@ -42,8 +41,7 @@ type (
 		EnablePKCE         bool   `json:"enablePKCE"`
 	}
 	GetOAuthConfigRes {
-		OAuthType string `json:"oauthType"`
-		// 根据 oauthType 返回对应的配置
+		// 所有平台的 OAuth 配置（一次性返回）
 		H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"`
 		DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"`
 		MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`

@@ -62,7 +62,6 @@ func (l *GetAppListLogic) GetAppList(req *types.GetAppListReq) (resp *types.GetA
 			Name:        app.Name,
 			Description: app.Description,
 			Status:      app.Status,
-			WebhookURL:  app.WebhookURL,
 			CreatedAt:   app.CreatedAt.Unix(),
 		})
 	}

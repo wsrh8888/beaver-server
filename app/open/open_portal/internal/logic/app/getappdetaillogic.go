@@ -45,10 +45,9 @@ func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *type
 			AppSecret:   maskedSecret,
 			Status:      app.Status,
 			// 能力开关
-			EnableBot:     app.EnableBot,
+			EnableRobot:   app.EnableRobot,
 			EnableOAuth:   app.EnableOAuth,
 			EnableWebhook: app.EnableWebhook,
-			WebhookURL:    app.WebhookURL,
 			CreatedAt:     app.CreatedAt.Unix(),
 		},
 	}, nil

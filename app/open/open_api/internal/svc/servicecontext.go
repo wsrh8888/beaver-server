@@ -22,14 +22,15 @@ import (
 )
 
 type ServiceContext struct {
-	Config         config.Config
-	DB             *gorm.DB
-	Redis          *redis.Client
-	UserRpc        user_rpc.UserClient
-	ChatRpc        chat_rpc.ChatClient
-	GroupRpc       group_rpc.GroupClient
-	OpenRpc        open_rpc.OpenClient // OAuth RPC 客户端
-	AuthMiddleware rest.Middleware
+	Config            config.Config
+	DB                *gorm.DB
+	Redis             *redis.Client
+	UserRpc           user_rpc.UserClient
+	ChatRpc           chat_rpc.ChatClient
+	GroupRpc          group_rpc.GroupClient
+	OpenRpc           open_rpc.OpenClient // OAuth RPC 客户端
+	AuthMiddleware    rest.Middleware
+	AppAuthMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -37,13 +38,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 
 	return &ServiceContext{
-		Config:         c,
-		DB:             mysqlDb,
-		Redis:          client,
-		UserRpc:        user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		ChatRpc:        chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		GroupRpc:       group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		OpenRpc:        open.NewOpen(zrpc.MustNewClient(c.OpenRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		AuthMiddleware: middleware.NewAuthMiddleware(mysqlDb).Handle,
+		Config:            c,
+		DB:                mysqlDb,
+		Redis:             client,
+		UserRpc:           user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		ChatRpc:           chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		GroupRpc:          group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		OpenRpc:           open.NewOpen(zrpc.MustNewClient(c.OpenRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		AuthMiddleware:    middleware.NewAuthMiddleware().Handle,
+		AppAuthMiddleware: middleware.NewAppAuthMiddleware(mysqlDb).Handle,
 	}
 }

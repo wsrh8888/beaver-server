@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetOIDCUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetH5AuthCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetOIDCUserInfoReq
+		var req types.GetH5AuthCodeReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewGetOIDCUserInfoLogic(r.Context(), svcCtx)
-		resp, err := l.GetOIDCUserInfo(&req)
+		l := logic.NewGetH5AuthCodeLogic(r.Context(), svcCtx)
+		resp, err := l.GetH5AuthCode(&req)
 		response.Response(r, w, resp, err)
 	}
 }

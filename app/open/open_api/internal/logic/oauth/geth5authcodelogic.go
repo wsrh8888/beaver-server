@@ -1,7 +1,7 @@
 // Code scaffolded by goctl. Safe to edit.
 // goctl 1.9.2
 
-package oauth_public
+package oauth
 
 import (
 	"context"
@@ -31,11 +31,10 @@ func NewGetH5AuthCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 }
 
 func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *types.GetH5AuthCodeRes, err error) {
-	// 1. 从 context 中获取当前用户 ID（由 AuthMiddleware 注入）
-	userID, ok := l.ctx.Value("userID").(string)
-	if !ok || userID == "" {
-		logx.Error("H5免登失败：未获取到用户ID")
-		return nil, fmt.Errorf("未登录")
+	// 1. 验证 userId 是否存在（由 Gateway 注入）
+	if req.UserID == "" {
+		logx.Error("PC快捷登录失败：未获取到用户ID")
+		return nil, fmt.Errorf("未登录11")
 	}
 
 	// 2. 验证 appId 是否存在
@@ -56,7 +55,7 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 	// 5. 存储 authCode 到数据库（用于后续换取用户信息）
 	// TODO: 需要创建 open_auth_code 表来存储 authCode
 	// 这里暂时返回成功，实际应该存储到数据库
-	logx.Infof("生成 H5 authCode: authCode=%s, appId=%s, userId=%s", authCode, req.AppID, userID)
+	logx.Infof("生成 PC 快捷登录 authCode: authCode=%s, appId=%s, userId=%s", authCode, req.AppID, req.UserID)
 
 	return &types.GetH5AuthCodeRes{
 		AuthCode: authCode,

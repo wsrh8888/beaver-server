@@ -30,14 +30,14 @@ func NewCreateEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceCon
 
 func (l *CreateEventSubscriptionLogic) CreateEventSubscription(req *types.CreateEventSubscriptionReq) (resp *types.CreateEventSubscriptionRes, err error) {
 	// 1. 创建事件订阅记录
-	subscription := models.OpenEventSubscription{
-		AppID:      req.AppID,
-		EventType:  req.EventType,
-		TargetURL:  req.TargetURL,
-		Secret:     req.Secret,
-		Status:     1,
-		RetryCount: req.RetryCount,
-		Timeout:    req.Timeout,
+	subscription := models.OpenAppEventSubscription{
+		AppID:       req.AppID,
+		EventType:   req.EventType,
+		CallbackURL: req.TargetURL,
+		Secret:      req.Secret,
+		Status:      1,
+		RetryCount:  req.RetryCount,
+		Timeout:     req.Timeout,
 	}
 
 	if req.RetryCount == 0 {
@@ -57,7 +57,7 @@ func (l *CreateEventSubscriptionLogic) CreateEventSubscription(req *types.Create
 			ID:         fmt.Sprintf("%d", subscription.ID),
 			AppID:      subscription.AppID,
 			EventType:  subscription.EventType,
-			TargetURL:  subscription.TargetURL,
+			TargetURL:  subscription.CallbackURL,
 			Secret:     subscription.Secret,
 			Status:     subscription.Status,
 			RetryCount: subscription.RetryCount,

@@ -11,6 +11,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -39,39 +40,59 @@ type Proxy struct {
 func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	// 1. 检查白名单
 	if utils.InListByRegex(p.Config.WhiteList, req.URL.Path) {
-		logx.Infof("白名单请求：%s", req.URL.Path)
 		return true
 	}
 
-	// 2. 判断是否是开放平台请求
+	// 2. 判断是否是开放平台请求，根据不同路径使用不同认证策略
 	if isOAuthRequest(req.URL.Path) {
-		return p.oauthAuth(res, req)
+		return p.openApiAuth(res, req)
 	}
-
 	// 3. 普通用户请求，使用JWT验证
 	return p.jwtAuth(res, req)
+}
+
+// openApiAuth 开放平台认证（根据路径选择不同策略）
+func (p Proxy) openApiAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
+	path := req.URL.Path
+
+	// 1. 公开接口（无需认证）
+	if strings.HasPrefix(path, "/api/open/v1/oauth_public") {
+		logx.Infof("公开接口：%s", path)
+		return true
+	}
+
+	// 2. JWT 认证接口（Gateway 验证 JWT，注入 Beaver-User-Id）
+	if strings.HasPrefix(path, "/api/open/v1/oauth/") {
+		logx.Infof("JWT认证接口：%s", path)
+		return p.jwtAuth(res, req)
+	}
+
+	// 3. 应用级认证接口（透传到 open_api，由 AppAuthMiddleware 处理）
+	if strings.HasPrefix(path, "/api/open/v1/oauth_secret") {
+		logx.Infof("应用级认证接口：%s", path)
+		return true
+	}
+
+	// 4. Bot/Webhook 接口（需要 access_token + sign 或仅 sign）
+	if isBotOrWebhookPath(path) {
+		// TODO: 实现 Bot/Webhook 认证逻辑
+		logx.Infof("Bot/Webhook 接口：%s", path)
+		return true
+	}
+
+	// 默认放行（由 open_api 内部中间件处理）
+	return true
+}
+
+// isBotOrWebhookPath 判断是否是 Bot/Webhook 接口
+func isBotOrWebhookPath(path string) bool {
+	return strings.HasPrefix(path, "/api/open/v1/bot") ||
+		strings.HasPrefix(path, "/api/open/v1/webhook")
 }
 
 // isOAuthRequest 判断是否是开放平台OAuth请求
 func isOAuthRequest(path string) bool {
 	return len(path) >= 9 && path[:9] == "/api/open"
-}
-
-// oauthAuth OAuth认证（开放平台）
-func (p Proxy) oauthAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
-	// 获取 Access Token
-	token := getToken(req)
-	if token == "" {
-		logx.Error("OAuth token为空")
-		return false
-	}
-
-	// TODO: 这里应该调用 open_api 验证 token 的有效性
-	// 目前先透传 token，由 open_api 自己验证
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	logx.Info("OAuth请求，透传token到open_api")
-	return true
 }
 
 // jwtAuth JWT认证（普通用户）
@@ -110,7 +131,6 @@ func (p Proxy) jwtAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
 
 func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	uuid := getUuid(req)
-	logx.Info("request: ", "唯一标识: ", uuid, req.URL.Path)
 
 	// 限流检查
 	if p.Config.Limit.Enable {
@@ -155,8 +175,6 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		writeErrorResponse(res, "服务暂时不可用", http.StatusServiceUnavailable, uuid)
 		return
 	}
-
-	logx.Infof("路由到服务: %s -> %s", service, addr)
 
 	remote, _ := url.Parse(fmt.Sprintf("http://%s", addr))
 	reverseProxy := httputil.NewSingleHostReverseProxy(remote)

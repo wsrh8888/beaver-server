@@ -8,19 +8,11 @@ type AppInfo struct {
 	Icon          string `json:"icon,optional"` // 应用图标 URL
 	AppSecret     string `json:"appSecret"`     // 应用密钥（掩码形式）
 	Status        int    `json:"status"`        // 0=草稿，1=已发布，2=禁用
-	EnableBot     int    `json:"enableBot"`     // 是否启用机器人能力
+	EnableRobot   int    `json:"enableRobot"`   // 是否启用智能机器人能力
 	EnableOAuth   int    `json:"enableOAuth"`   // 是否启用OAuth能力
 	EnableWebhook int    `json:"enableWebhook"` // 是否启用Webhook能力
 	WebhookURL    string `json:"webhookUrl"`
 	CreatedAt     int64  `json:"createdAt"`
-}
-
-type AppPermissionInfo struct {
-	ID        uint   `json:"id"`
-	Scope     string `json:"scope"`
-	GrantedAt int64  `json:"grantedAt"`
-	GrantedBy string `json:"grantedBy"`
-	ExpiresAt int64  `json:"expiresAt"`
 }
 
 type ApplyDeveloperReq struct {
@@ -60,16 +52,6 @@ type BotConfigInfo struct {
 	AutoReplyRules   []string `json:"autoReplyRules"`
 	Commands         []string `json:"commands"`
 	Status           int      `json:"status"`
-}
-
-type ConfigAppPermissionReq struct {
-	AppID     string   `json:"appId"`
-	Scopes    []string `json:"scopes"`             // 权限范围列表
-	ExpiresAt int64    `json:"expiresAt,optional"` // 过期时间
-}
-
-type ConfigAppPermissionRes struct {
-	Success bool `json:"success"`
 }
 
 type CreateAppReq struct {
@@ -200,14 +182,6 @@ type GetAppListRes struct {
 	List  []AppInfo `json:"list"`
 }
 
-type GetAppPermissionsReq struct {
-	AppID string `form:"appId"`
-}
-
-type GetAppPermissionsRes struct {
-	Permissions []AppPermissionInfo `json:"permissions"`
-}
-
 type GetAppScopesReq struct {
 	AppID  string `form:"appId"`
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
@@ -246,13 +220,11 @@ type GetDeveloperListRes struct {
 }
 
 type GetOAuthConfigReq struct {
-	AppID     string `form:"appId"`
-	OAuthType string `form:"oauthType"` // h5 | desktop | mobile
-	UserID    string `header:"Beaver-User-Id"`
+	AppID  string `form:"appId"`
+	UserID string `header:"Beaver-User-Id"`
 }
 
 type GetOAuthConfigRes struct {
-	OAuthType     string                  `json:"oauthType"`
 	H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"`
 	DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"`
 	MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`
@@ -288,13 +260,13 @@ type H5OAuthConfigInfo struct {
 
 type IncomingWebhookInfo struct {
 	ID         string `json:"id"`
-	Token      string `json:"token"`
-	Secret     string `json:"secret,optional"`
+	Token      string `json:"token"`           // access_token
+	Secret     string `json:"secret,optional"` // 加签密钥，仅创建时返回
 	AppID      string `json:"appId"`
 	GroupID    string `json:"groupId"`
 	BotUserID  string `json:"botUserId"`
 	Name       string `json:"name"`
-	WebhookURL string `json:"webhookUrl"`
+	WebhookURL string `json:"webhookUrl"` // 基址含 access_token，调用时另拼 timestamp、sign
 	Status     int    `json:"status"`
 	CreatedAt  int64  `json:"createdAt"`
 }
@@ -397,9 +369,9 @@ type SubmitVersionReviewRes struct {
 
 type ToggleAppCapabilityReq struct {
 	AppID      string `json:"appId"`
-	Capability string `json:"capability" validate:"required,oneof=bot oauth webhook"` // 能力类型：bot/oauth/webhook
-	Enable     bool   `json:"enable"`                                                 // true=启用，false=禁用
-	UserID     string `header:"Beaver-User-Id"`                                       // 当前用户ID（由网关注入）
+	Capability string `json:"capability" validate:"required,oneof=robot oauth webhook"` // 能力类型：robot/oauth/webhook
+	Enable     bool   `json:"enable"`                                                   // true=启用，false=禁用
+	UserID     string `header:"Beaver-User-Id"`                                         // 当前用户ID（由网关注入）
 }
 
 type ToggleAppCapabilityRes struct {

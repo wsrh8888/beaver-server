@@ -9,6 +9,7 @@ import (
 	event "beaver/app/open/open_api/internal/handler/event"
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
 	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
+	oauth_secret "beaver/app/open/open_api/internal/handler/oauth_secret"
 	robot "beaver/app/open/open_api/internal/handler/robot"
 	user "beaver/app/open/open_api/internal/handler/user"
 	"beaver/app/open/open_api/internal/svc"
@@ -88,28 +89,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
-					// 获取授权码（引导用户授权，支持 PKCE 的 code_challenge）
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/oauth/authorize",
-					Handler: oauth.GetAuthorizeCodeHandler(serverCtx),
-				},
-				{
-					// 获取 PC 端快捷登录签名
+					// PC 客户端生成 authCode（用于快捷登录）
 					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/desktop_quick_login",
-					Handler: oauth.GetDesktopQuickLoginSignHandler(serverCtx),
-				},
-				{
-					// 用 H5 authCode 换取用户信息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/h5_userinfo",
-					Handler: oauth.GetUserInfoByH5CodeHandler(serverCtx),
-				},
-				{
-					// 获取当前用户信息（OIDC 标准 userinfo 端点）
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/oauth/userinfo",
-					Handler: oauth.GetOIDCUserInfoHandler(serverCtx),
+					Path:    "/api/open/v1/oauth/h5_authcode",
+					Handler: oauth.GetH5AuthCodeHandler(serverCtx),
 				},
 			}...,
 		),
@@ -118,48 +101,62 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// H5 免登获取 authCode
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/h5_authcode",
-				Handler: oauth_public.GetH5AuthCodeHandler(serverCtx),
-			},
-			{
 				// 账号密码登录
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/password_login",
+				Path:    "/api/open/v1/oauth_public/password_login",
 				Handler: oauth_public.PasswordLoginHandler(serverCtx),
 			},
 			{
 				// 生成扫码登录二维码
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/qrcode",
+				Path:    "/api/open/v1/oauth_public/qrcode",
 				Handler: oauth_public.GenerateQrCodeHandler(serverCtx),
 			},
 			{
 				// 确认扫码登录（移动端调用）
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/qrcode_confirm",
+				Path:    "/api/open/v1/oauth_public/qrcode_confirm",
 				Handler: oauth_public.ConfirmQrCodeLoginHandler(serverCtx),
 			},
 			{
 				// 查询扫码状态（轮询）
 				Method:  http.MethodGet,
-				Path:    "/api/open/v1/oauth/qrcode_status",
+				Path:    "/api/open/v1/oauth_public/qrcode_status",
 				Handler: oauth_public.CheckQrCodeStatusHandler(serverCtx),
 			},
-			{
-				// 撤销 Token（登出 / 解除授权）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/revoke",
-				Handler: oauth_public.RevokeTokenHandler(serverCtx),
-			},
-			{
-				// 用授权码换取 Token（支持 PKCE）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/token",
-				Handler: oauth_public.GetTokenByCodeHandler(serverCtx),
-			},
 		},
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AppAuthMiddleware},
+			[]rest.Route{
+				{
+					// 用 H5 authCode 换取用户信息
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/oauth_secret/h5_userinfo",
+					Handler: oauth_secret.GetUserInfoByH5CodeHandler(serverCtx),
+				},
+				{
+					// PC 端快捷登录（用 authCode 换取用户信息）
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/oauth_secret/quick_login",
+					Handler: oauth_secret.GetUserInfoByQuickLoginHandler(serverCtx),
+				},
+				{
+					// 撤销 Token（登出 / 解除授权）
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/oauth_secret/revoke",
+					Handler: oauth_secret.RevokeTokenHandler(serverCtx),
+				},
+				{
+					// 用授权码换取 Token（支持 PKCE）
+					Method:  http.MethodPost,
+					Path:    "/api/open/v1/oauth_secret/token",
+					Handler: oauth_secret.GetTokenByCodeHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(

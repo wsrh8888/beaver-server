@@ -117,10 +117,13 @@ func main() {
 			// 开放平台相关表
 			&open_models.OpenDeveloper{},
 			&open_models.OpenApp{},
+			&open_models.OpenAppOAuth{},             // OAuth 配置表
+			&open_models.OpenAppRobot{},             // Robot 配置表
+			&open_models.OpenAppSecurity{},          // Security 配置表
+			&open_models.OpenAppEventSubscription{}, // 事件订阅表
 			&open_models.OpenOAuthToken{},
 			&open_models.OpenOAuthCode{},
 			&open_models.OpenOAuthQrCode{},
-			&open_models.OpenEventSubscription{},
 			&open_models.OpenBotModel{},
 		)
 

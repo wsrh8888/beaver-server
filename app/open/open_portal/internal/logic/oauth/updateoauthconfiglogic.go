@@ -39,52 +39,53 @@ func (l *UpdateOAuthConfigLogic) UpdateOAuthConfig(req *types.UpdateOAuthConfigR
 		return nil, errors.New("无权修改此应用")
 	}
 
-	// 解析现有的 OAuthConfig
-	var oauthConfig open_models.OAuthClientConfig
-	if app.OauthConfig != "" {
-		if err := json.Unmarshal([]byte(app.OauthConfig), &oauthConfig); err != nil {
-			l.Errorf("解析现有 OAuthConfig 失败: %v", err)
-			// 如果解析失败，使用空配置
-			oauthConfig = open_models.OAuthClientConfig{}
+	// 查询或创建 OAuth 配置
+	var oauth open_models.OpenAppOAuth
+	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauth).Error; err != nil {
+		// 如果不存在，创建新记录
+		oauth = open_models.OpenAppOAuth{
+			AppID: req.AppID,
 		}
 	}
 
 	// 根据类型更新对应配置
 	switch req.OAuthType {
 	case "h5":
-		var h5Config open_models.H5OAuthConfig
+		var h5Config open_models.H5OAuth
 		if err := json.Unmarshal([]byte(req.Config), &h5Config); err != nil {
 			return nil, errors.New("H5 配置格式错误")
 		}
-		oauthConfig.H5 = h5Config
+		oauth.H5 = &h5Config
 
 	case "desktop":
-		var desktopConfig open_models.DesktopOAuthConfig
+		var desktopConfig open_models.DesktopOAuth
 		if err := json.Unmarshal([]byte(req.Config), &desktopConfig); err != nil {
 			return nil, errors.New("桌面端配置格式错误")
 		}
-		oauthConfig.Desktop = desktopConfig
+		oauth.Desktop = &desktopConfig
 
 	case "mobile":
-		var mobileConfig open_models.MobileOAuthConfig
+		var mobileConfig open_models.MobileOAuth
 		if err := json.Unmarshal([]byte(req.Config), &mobileConfig); err != nil {
 			return nil, errors.New("移动端配置格式错误")
 		}
-		oauthConfig.Mobile = mobileConfig
+		oauth.Mobile = &mobileConfig
 
 	default:
 		return nil, errors.New("不支持的 OAuth 类型")
 	}
 
-	// 序列化回 JSON
-	configJSON, err := json.Marshal(oauthConfig)
-	if err != nil {
-		return nil, errors.New("配置序列化失败")
-	}
-
-	// 更新数据库
-	if err := l.svcCtx.DB.Model(&app).Update("oauth_config", string(configJSON)).Error; err != nil {
-		return nil, err
+	// 保存或更新
+	if oauth.ID == 0 {
+		// 新建
+		if err := l.svcCtx.DB.Create(&oauth).Error; err != nil {
+			return nil, errors.New("保存 OAuth 配置失败")
+		}
+	} else {
+		// 更新
+		if err := l.svcCtx.DB.Save(&oauth).Error; err != nil {
+			return nil, errors.New("更新 OAuth 配置失败")
+		}
 	}
 
 	return &types.UpdateOAuthConfigRes{}, nil
