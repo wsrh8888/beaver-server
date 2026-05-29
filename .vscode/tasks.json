@@ -43,23 +43,14 @@
       ]
     },
     {
-      "label": "dictionary_rpc",
+      "label": "platform_api",
       "type": "shell",
-      "command": "cd app/dictionary/dictionary_rpc;  go run dictionaryrpc.go",
+      "command": "cd app/platform/platform_api;  go run platform.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "dictionary_api",
-      "type": "shell",
-      "command": "cd app/dictionary/dictionary_api;  go run dictionary.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-
       "label": "emoji_api",
       "type": "shell",
       "command": "cd app/emoji/emoji_api;  go run emoji.go",
@@ -150,25 +141,9 @@
       ]
     },
     {
-      "label": "feedback_api",
-      "type": "shell",
-      "command": "cd app/feedback/feedback_api;  go run feedback.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
       "label": "datasync_api",
       "type": "shell",
       "command": "cd app/datasync/datasync_api;  go run datasync.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "track_api",
-      "type": "shell",
-      "command": "cd app/track/track_api;  go run track.go",
       "problemMatcher": [
         "$go"
       ]
@@ -193,7 +168,7 @@
       "label": "启动RPC服务",
       "type": "shell",
       "command": "echo Running all services",
-      "dependsOn": ["user_rpc", "group_rpc", "friend_rpc", "chat_rpc", "dictionary_rpc", "file_rpc"],
+      "dependsOn": ["user_rpc", "group_rpc", "friend_rpc", "chat_rpc", "file_rpc"],
       "dependsOrder": "parallel",
       "problemMatcher": []
     },
@@ -201,7 +176,7 @@
       "label": "启动Api全部任务",
       "type": "shell",
       "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "dictionary_api","track_api","update_api",],
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "platform_api","update_api",],
       "dependsOrder": "parallel",
       "problemMatcher": []
     },

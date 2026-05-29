@@ -1,0 +1,13 @@
+
+services:
+  document_api:
+    image: wsrh8888/document_api:1.0.0
+    container_name: document_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./document.yaml:/etc/document.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

@@ -35,21 +35,15 @@ RUN go build -ldflags="-s -w" -o chat_rpc/chatrpc app/chat/chat_rpc/chatrpc.go
 # datasync_api
 RUN go build -ldflags="-s -w" -o datasync_api/datasync app/datasync/datasync_api/datasync.go
 
-# ==================== DICTIONARY 相关服务 ====================
-# dictionary_api
-RUN go build -ldflags="-s -w" -o dictionary_api/dictionary app/dictionary/dictionary_api/dictionary.go
-# dictionary_rpc
-RUN go build -ldflags="-s -w" -o dictionary_rpc/dictionaryrpc app/dictionary/dictionary_rpc/dictionaryrpc.go
+# ==================== PLATFORM 相关服务 ====================
+# platform_api
+RUN go build -ldflags="-s -w" -o platform_api/platform app/platform/platform_api/platform.go
 
 # ==================== EMOJI 相关服务 ====================
 # emoji_api
 RUN go build -ldflags="-s -w" -o emoji_api/emoji app/emoji/emoji_api/emoji.go
 # emoji_rpc
 RUN go build -ldflags="-s -w" -o emoji_rpc/emojirpc app/emoji/emoji_rpc/emojirpc.go
-
-# ==================== FEEDBACK 相关服务 ====================
-# feedback_api
-RUN go build -ldflags="-s -w" -o feedback_api/feedback app/feedback/feedback_api/feedback.go
 
 # ==================== FILE 相关服务 ====================
 # file_api
@@ -79,15 +73,16 @@ RUN go build -ldflags="-s -w" -o group_rpc/grouprpc app/group/group_rpc/grouprpc
 # moment_api
 RUN go build -ldflags="-s -w" -o moment_api/moment app/moment/moment_api/moment.go
 
+# ==================== DOCUMENT 相关服务 ====================
+# document_api
+RUN go build -ldflags="-s -w" -o document_api/document app/document/document_api/document.go
+
 # ==================== NOTIFICATION 相关服务 ====================
 # notification_api
 RUN go build -ldflags="-s -w" -o notification_api/notification app/notification/notification_api/notification.go
 # notification_rpc
 RUN go build -ldflags="-s -w" -o notification_rpc/notificationrpc app/notification/notification_rpc/notificationrpc.go
 
-# ==================== TRACK 相关服务 ====================
-# track_api
-RUN go build -ldflags="-s -w" -o track_api/track app/track/track_api/track.go
 
 # ==================== UPDATE 相关服务 ====================
 # update_api

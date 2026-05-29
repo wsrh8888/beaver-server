@@ -40,6 +40,5 @@ type Config struct {
 		Domain      string
 		ExpireTime  int64 // 签名URL有效期, 单位：秒
 	}
-	FileRpc       zrpc.RpcClientConf
-	DictionaryRpc zrpc.RpcClientConf
+	FileRpc zrpc.RpcClientConf
 }

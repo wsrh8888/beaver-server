@@ -52,6 +52,8 @@ func (m *MsgType) UnmarshalJSON(data []byte) error {
 		*m = MarkdownMsgType
 	case "14":
 		*m = LinkMsgType
+	case "15":
+		*m = CloudDocMsgType
 	default:
 		*m = TextMsgType
 	}
@@ -115,10 +117,23 @@ const (
 	 * @description: 链接卡片消息类型
 	 */
 	LinkMsgType
+	/**
+	 * @description: 云文档消息类型（会话内分享云文档卡片，对标飞书云文档 document_token）
+	 */
+	CloudDocMsgType
+)
+
+// 云文档类型（对标飞书 folder / docx / sheet / slides 等）
+const (
+	CloudDocTypeFolder = 0 // 文件夹
+	CloudDocTypeDoc    = 1 // 文档
+	CloudDocTypeSheet = 2 // 表格
+	CloudDocTypeSlide = 3 // 幻灯片
+	CloudDocTypeMind  = 4 // 思维笔记
 )
 
 type Msg struct {
-	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发 13:markdown 14:链接卡片
+	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频文件 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接卡片 15:云文档
 	TargetMsgID     string           `json:"targetMsgId,omitempty"`     // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
 	AtUserIDs       []string         `json:"atUserIds,omitempty"`       // @的用户ID列表，服务端据此触发定向推送；文本中用@昵称占位，前端扫描渲染高亮
 	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         // 文本消息
@@ -135,6 +150,7 @@ type Msg struct {
 	ForwardMsg      *ForwardMsg      `json:"forwardMsg,omitempty"`      // 转发消息（集合）
 	MarkdownMsg     *MarkdownMsg     `json:"markdownMsg,omitempty"`     // Markdown 富文本消息
 	LinkMsg         *LinkMsg         `json:"linkMsg,omitempty"`         // 链接卡片消息
+	CloudDocMsg     *CloudDocMsg     `json:"cloudDocMsg,omitempty"`     // 云文档消息（分享卡片，正文在文档服务）
 }
 
 /**
@@ -183,10 +199,24 @@ type VideoMsg struct {
 }
 
 type FileMsg struct {
-	FileKey  string `json:"fileKey"`            //文件ID
-	FileName string `json:"fileName,omitempty"` //原始文件名（可选，用于显示）
-	Size     int64  `json:"size,omitempty"`     //文件大小（字节，可选）
-	MimeType string `json:"mimeType,omitempty"` //MIME类型（可选，如 application/pdf）
+	FileKey   string `json:"fileKey"`             // 文件ID（对标飞书 file_key / file_token）
+	FileName  string `json:"fileName,omitempty"`  // 原始文件名
+	Size      int64  `json:"size,omitempty"`      // 文件大小（字节）
+	MimeType  string `json:"mimeType,omitempty"`  // MIME 类型
+	Extension string `json:"extension,omitempty"` // 扩展名：docx、pptx、xlsx、pdf 等
+	OpenMode  int    `json:"openMode,omitempty"`  // 打开方式：1=下载 2=预览 3=在线编辑（Office）
+}
+
+// CloudDocMsg 云文档消息（Type: 15，对标飞书会话内分享云文档）
+// IM 仅存引用卡片，文档正文与协同状态由独立文档服务维护。
+type CloudDocMsg struct {
+	DocID    string `json:"docId"`              // 文档唯一标识
+	DocType  int    `json:"docType"`            // 文档类型：见 CloudDocType* 常量
+	Title    string `json:"title"`              // 标题（会话列表/卡片展示）
+	OwnerID  string `json:"ownerId,omitempty"`  // 文档所有者用户ID
+	Perm     int    `json:"perm,omitempty"`     // 接收者权限快照：1=可阅读 2=可编辑 3=可管理
+	CoverURL string `json:"coverUrl,omitempty"` // 封面/缩略图
+	Revision int64  `json:"revision,omitempty"` // 文档版本号（协同冲突提示）
 }
 
 type VoiceMsg struct {

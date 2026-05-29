@@ -113,6 +113,12 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			if protoMsg.FileMsg.MimeType != "" {
 				fileMsg.MimeType = protoMsg.FileMsg.MimeType
 			}
+			if protoMsg.FileMsg.Extension != "" {
+				fileMsg.Extension = protoMsg.FileMsg.Extension
+			}
+			if protoMsg.FileMsg.OpenMode > 0 {
+				fileMsg.OpenMode = int(protoMsg.FileMsg.OpenMode)
+			}
 			msg = ctype.Msg{
 				Type:    ctype.FileMsgType,
 				FileMsg: fileMsg,
@@ -252,6 +258,21 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 					Title:    protoMsg.LinkMsg.Title,
 					Desc:     protoMsg.LinkMsg.Desc,
 					ImageURL: protoMsg.LinkMsg.ImageUrl,
+				},
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if protoMsg.CloudDocMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.CloudDocMsgType,
+				CloudDocMsg: &ctype.CloudDocMsg{
+					DocID:    protoMsg.CloudDocMsg.DocId,
+					DocType:  int(protoMsg.CloudDocMsg.DocType),
+					Title:    protoMsg.CloudDocMsg.Title,
+					OwnerID:  protoMsg.CloudDocMsg.OwnerId,
+					Perm:     int(protoMsg.CloudDocMsg.Perm),
+					CoverURL: protoMsg.CloudDocMsg.CoverUrl,
+					Revision: protoMsg.CloudDocMsg.Revision,
 				},
 			}
 		}
@@ -550,10 +571,12 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.FileMsgType:
 		if m.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:  m.FileMsg.FileKey,
-				FileName: m.FileMsg.FileName,
-				Size:     m.FileMsg.Size,
-				MimeType: m.FileMsg.MimeType,
+				FileKey:   m.FileMsg.FileKey,
+				FileName:  m.FileMsg.FileName,
+				Size:      m.FileMsg.Size,
+				MimeType:  m.FileMsg.MimeType,
+				Extension: m.FileMsg.Extension,
+				OpenMode:  int32(m.FileMsg.OpenMode),
 			}
 		}
 	case ctype.VoiceMsgType:
@@ -645,6 +668,18 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 				Title:    m.LinkMsg.Title,
 				Desc:     m.LinkMsg.Desc,
 				ImageUrl: m.LinkMsg.ImageURL,
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if m.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId:    m.CloudDocMsg.DocID,
+				DocType:  int32(m.CloudDocMsg.DocType),
+				Title:    m.CloudDocMsg.Title,
+				OwnerId:  m.CloudDocMsg.OwnerID,
+				Perm:     int32(m.CloudDocMsg.Perm),
+				CoverUrl: m.CloudDocMsg.CoverURL,
+				Revision: m.CloudDocMsg.Revision,
 			}
 		}
 	}

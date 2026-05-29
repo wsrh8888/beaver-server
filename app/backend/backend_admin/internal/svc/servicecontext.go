@@ -2,8 +2,6 @@ package svc
 
 import (
 	"beaver/app/backend/backend_admin/internal/config"
-	"beaver/app/dictionary/dictionary_rpc/dictionary"
-	"beaver/app/dictionary/dictionary_rpc/types/dictionary_rpc"
 	"beaver/app/file/file_rpc/file"
 	"beaver/app/file/file_rpc/types/file_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
@@ -19,13 +17,12 @@ import (
 )
 
 type ServiceContext struct {
-	Config        config.Config
-	DB            *gorm.DB
-	Redis         *redis.Client
-	VersionGen    *versionPkg.VersionGenerator
-	UserRpc       user_rpc.UserClient
-	FileRpc       file_rpc.FileClient
-	DictionaryRpc dictionary_rpc.DictionaryClient
+	Config     config.Config
+	DB         *gorm.DB
+	Redis      *redis.Client
+	VersionGen *versionPkg.VersionGenerator
+	UserRpc    user_rpc.UserClient
+	FileRpc    file_rpc.FileClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -34,12 +31,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
 
 	return &ServiceContext{
-		Config:        c,
-		DB:            mysqlDb,
-		Redis:         client,
-		VersionGen:    versionGen,
-		FileRpc:       file.NewFile(zrpc.MustNewClient(c.FileRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		DictionaryRpc: dictionary.NewDictionary(zrpc.MustNewClient(c.DictionaryRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		UserRpc:       user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		Config:     c,
+		DB:         mysqlDb,
+		Redis:      client,
+		VersionGen: versionGen,
+		FileRpc:    file.NewFile(zrpc.MustNewClient(c.FileRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 	}
 }

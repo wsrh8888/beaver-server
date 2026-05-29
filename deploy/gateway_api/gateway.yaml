@@ -21,7 +21,6 @@ WhiteList:
   - /api/settings/open_login_info
   - /api/auth/email_password_login
   - /api/file/preview/.*
-  - /api/dictionary/cities
-  - /api/track/events
-  - /api/track/logs
+  - /api/platform/v1/track/report_events
+  - /api/platform/v1/track/log_events
   - /api/update/report

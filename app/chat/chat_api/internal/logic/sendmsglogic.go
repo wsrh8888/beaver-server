@@ -67,10 +67,12 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.FileMsgType:
 		if apiMsg.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:  apiMsg.FileMsg.FileKey,
-				FileName: apiMsg.FileMsg.FileName,
-				Size:     apiMsg.FileMsg.Size,
-				MimeType: apiMsg.FileMsg.MimeType,
+				FileKey:   apiMsg.FileMsg.FileKey,
+				FileName:  apiMsg.FileMsg.FileName,
+				Size:      apiMsg.FileMsg.Size,
+				MimeType:  apiMsg.FileMsg.MimeType,
+				Extension: apiMsg.FileMsg.Extension,
+				OpenMode:  int32(apiMsg.FileMsg.OpenMode),
 			}
 		}
 	case ctype.VoiceMsgType:
@@ -138,6 +140,18 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 				Title:    apiMsg.ForwardMsg.Title,
 				RecordId: apiMsg.ForwardMsg.RecordID,
 				Count:    int32(apiMsg.ForwardMsg.Count),
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if apiMsg.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId: apiMsg.CloudDocMsg.DocID,
+				DocType:  int32(apiMsg.CloudDocMsg.DocType),
+				Title:    apiMsg.CloudDocMsg.Title,
+				OwnerId:  apiMsg.CloudDocMsg.OwnerID,
+				Perm:     int32(apiMsg.CloudDocMsg.Perm),
+				CoverUrl: apiMsg.CloudDocMsg.CoverURL,
+				Revision: apiMsg.CloudDocMsg.Revision,
 			}
 		}
 	}

@@ -142,10 +142,12 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.FileMsgType:
 		if m.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:  m.FileMsg.FileKey,
-				FileName: m.FileMsg.FileName,
-				Size:     m.FileMsg.Size,
-				MimeType: m.FileMsg.MimeType,
+				FileKey:   m.FileMsg.FileKey,
+				FileName:  m.FileMsg.FileName,
+				Size:      m.FileMsg.Size,
+				MimeType:  m.FileMsg.MimeType,
+				Extension: m.FileMsg.Extension,
+				OpenMode:  int32(m.FileMsg.OpenMode),
 			}
 		}
 	case ctype.VoiceMsgType:
@@ -212,6 +214,34 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 				Title:    m.ForwardMsg.Title,
 				RecordId: m.ForwardMsg.RecordID,
 				Count:    int32(m.ForwardMsg.Count),
+			}
+		}
+	case ctype.MarkdownMsgType:
+		if m.MarkdownMsg != nil {
+			rpcMsg.MarkdownMsg = &chat_rpc.MarkdownMsg{
+				Content: m.MarkdownMsg.Content,
+				Title:   m.MarkdownMsg.Title,
+			}
+		}
+	case ctype.LinkMsgType:
+		if m.LinkMsg != nil {
+			rpcMsg.LinkMsg = &chat_rpc.LinkMsg{
+				Url:      m.LinkMsg.URL,
+				Title:    m.LinkMsg.Title,
+				Desc:     m.LinkMsg.Desc,
+				ImageUrl: m.LinkMsg.ImageURL,
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if m.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId: m.CloudDocMsg.DocID,
+				DocType:  int32(m.CloudDocMsg.DocType),
+				Title:    m.CloudDocMsg.Title,
+				OwnerId:  m.CloudDocMsg.OwnerID,
+				Perm:     int32(m.CloudDocMsg.Perm),
+				CoverUrl: m.CloudDocMsg.CoverURL,
+				Revision: m.CloudDocMsg.Revision,
 			}
 		}
 	}

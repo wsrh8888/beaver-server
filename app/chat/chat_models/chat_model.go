@@ -42,7 +42,10 @@ func getPreview(msg *ctype.Msg) string {
 	case ctype.VideoMsgType:
 		return "[视频消息]"
 	case ctype.FileMsgType:
-		return "[文件消息]"
+		if msg.FileMsg != nil && msg.FileMsg.FileName != "" {
+			return "[文件] " + msg.FileMsg.FileName
+		}
+		return "[文件]"
 	case ctype.VoiceMsgType:
 		return "[语音消息]"
 	case ctype.EmojiMsgType:
@@ -72,8 +75,30 @@ func getPreview(msg *ctype.Msg) string {
 		if msg.LinkMsg != nil {
 			return "[链接] " + msg.LinkMsg.Title
 		}
+	case ctype.CloudDocMsgType:
+		if msg.CloudDocMsg != nil {
+			prefix := cloudDocPreviewLabel(msg.CloudDocMsg.DocType)
+			if msg.CloudDocMsg.Title != "" {
+				return prefix + msg.CloudDocMsg.Title
+			}
+			return prefix + "云文档"
+		}
+		return "[云文档]"
 	}
 	return "[未知消息]"
+}
+
+func cloudDocPreviewLabel(docType int) string {
+	switch docType {
+	case ctype.CloudDocTypeSheet:
+		return "[表格] "
+	case ctype.CloudDocTypeSlide:
+		return "[幻灯片] "
+	case ctype.CloudDocTypeMind:
+		return "[思维笔记] "
+	default:
+		return "[文档] "
+	}
 }
 
 func truncatePreview(s string, maxRunes int) string {

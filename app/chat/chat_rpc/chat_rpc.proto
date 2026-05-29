@@ -27,12 +27,25 @@ message VideoMsg {
   int64 size = 6;          // 文件大小（字节，可选）
 }
 
-// 定义FileMsg消息
+// 定义FileMsg消息（对标飞书 msg_type=file，聊天内 Office/PDF 等附件）
 message FileMsg {
-  string file_key = 1;  // 文件ID
-  string file_name = 2; // 原始文件名（可选，用于显示）
-  int64 size = 3;      // 文件大小（字节，可选）
-  string mime_type = 4; // MIME类型（可选，如 application/pdf）
+  string file_key = 1;   // 文件ID（file_key / file_token）
+  string file_name = 2;  // 原始文件名
+  int64 size = 3;        // 文件大小（字节）
+  string mime_type = 4;  // MIME 类型
+  string extension = 5;  // 扩展名：docx、pptx、xlsx、pdf
+  int32 open_mode = 6;   // 打开方式：1=下载 2=预览 3=在线编辑
+}
+
+// 定义CloudDocMsg消息（会话内分享云文档卡片）
+message CloudDocMsg {
+  string doc_id = 1;  // 文档唯一标识
+  int32 doc_type = 2;    // 1=文档 2=表格 3=幻灯片 4=思维笔记
+  string title = 3;      // 标题
+  string owner_id = 4;   // 所有者用户ID
+  int32 perm = 5;        // 权限快照：1=只读 2=可评论 3=可编辑
+  string cover_url = 6;  // 封面图
+  int64 revision = 7;    // 版本号
 }
 
 // 定义VoiceMsg消息
@@ -127,6 +140,7 @@ message Msg {
   MarkdownMsg markdown_msg = 15; // Markdown 富文本消息
   LinkMsg link_msg = 16; // 链接卡片消息
   repeated string at_user_ids = 17; // @提及的用户ID列表（空=不@任何人）
+  CloudDocMsg cloud_doc_msg = 18; // 云文档消息（分享卡片）
 }
 
 // 定义SendMsgReq消息

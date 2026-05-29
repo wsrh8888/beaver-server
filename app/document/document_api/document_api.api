@@ -1,0 +1,146 @@
+syntax = "v1"
+
+// 创建云文档或文件夹
+type (
+	CreateDocumentReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		Title    string `json:"title,optional"` // 名称，可选；文件夹默认「新建文件夹」，文档按类型默认「未命名xxx」
+		DocType  *int   `json:"docType,optional"` // 类型：0文件夹 1文档 2表格 3幻灯片 4思维笔记，省略默认1
+		SpaceID  string `json:"spaceId,optional"` // 空间ID，默认个人空间 user:{userId}
+		ParentID string `json:"parentId,optional"` // 父文件夹 docId，空为空间根目录
+		FileKey  string `json:"fileKey,optional"` // 初始正文文件 key，仅文档类型可用
+	}
+	CreateDocumentRes {
+		DocID    string `json:"docId"` // 节点唯一标识
+		Title    string `json:"title"` // 名称
+		DocType  int    `json:"docType"` // 类型：0文件夹 1文档 2表格 3幻灯片 4思维笔记
+		Revision int64  `json:"revision"` // 版本号，初始为1
+	}
+)
+
+// 获取云文档详情
+type (
+	GetDocumentReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID
+		DocID  string `json:"docId"` // 文档唯一标识
+	}
+	GetDocumentRes {
+		DocID     string `json:"docId"` // 文档唯一标识
+		OwnerID   string `json:"ownerId"` // 文档所有者用户ID
+		Title     string `json:"title"` // 文档标题
+		DocType   int    `json:"docType"` // 文档类型
+		FileKey   string `json:"fileKey"` // 正文文件 key
+		FileSize  int64  `json:"fileSize"` // 正文字节数，来自 file 服务
+		FileMd5   string `json:"fileMd5,optional"` // 正文 md5，来自 file 服务
+		Revision  int64  `json:"revision"` // 当前版本号
+		Perm      int    `json:"perm"` // 当前用户权限：1可阅读 2可编辑 3可管理
+		UpdatedAt string `json:"updatedAt"` // 最后更新时间
+	}
+)
+
+// 保存云文档正文
+type (
+	SaveDocumentContentReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		DocID    string `json:"docId"` // 文档唯一标识
+		FileKey  string `json:"fileKey"` // 正文文件 key
+		Revision int64  `json:"revision,optional"` // 客户端持有的版本号，用于乐观锁
+	}
+	SaveDocumentContentRes {
+		Revision  int64  `json:"revision"` // 保存后的新版本号
+		UpdatedAt string `json:"updatedAt"` // 最后更新时间
+	}
+)
+
+// 分享云文档到会话
+type (
+	ShareDocumentReq {
+		UserID         string `header:"Beaver-User-Id"` // 当前用户ID
+		DocID          string `json:"docId"` // 文档唯一标识
+		ConversationID string `json:"conversationId"` // 目标会话ID
+		MessageID      string `json:"messageId"` // 客户端生成的消息ID
+	}
+	ShareDocumentRes {
+		MessageID string `json:"messageId"` // 发送到会话的消息ID
+		Seq       int64  `json:"seq"` // 消息在会话内的序列号
+	}
+)
+
+// 列目录
+type (
+	ListDocumentChildrenReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		SpaceID  string `json:"spaceId,optional"` // 空间ID，默认个人空间 user:{userId}
+		ParentID string `json:"parentId,optional"` // 父文件夹 docId，空为空间根目录
+	}
+	ListDocumentChildrenItem {
+		DocID     string `json:"docId"` // 节点业务 ID
+		Title     string `json:"title"` // 名称
+		DocType   int    `json:"docType"` // 类型：0文件夹 1文档 2表格 3幻灯片 4思维笔记
+		SortOrder int    `json:"sortOrder"` // 同级排序权重
+		UpdatedAt string `json:"updatedAt"` // 最后更新时间
+	}
+	ListDocumentChildrenRes {
+		SpaceID  string                     `json:"spaceId"` // 空间 ID
+		ParentID string                     `json:"parentId"` // 父文件夹 docId，空为根目录
+		List     []ListDocumentChildrenItem `json:"list"` // 子节点列表
+	}
+)
+
+// 移动云文档或文件夹
+type (
+	MoveDocumentReq {
+		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
+		DocID    string `json:"docId"` // 要移动的节点 docId
+		ParentID string `json:"parentId,optional"` // 目标父文件夹 docId，空为根目录
+	}
+	MoveDocumentRes {
+		DocID    string `json:"docId"` // 节点 docId
+		ParentID string `json:"parentId"` // 移动后的父文件夹 docId
+	}
+)
+
+// 重命名云文档或文件夹
+type (
+	RenameDocumentReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID
+		DocID  string `json:"docId"` // 节点 docId
+		Title  string `json:"title"` // 新名称
+	}
+	RenameDocumentRes {
+		DocID string `json:"docId"` // 节点 docId
+		Title string `json:"title"` // 新名称
+	}
+)
+
+service document {
+	@doc "创建云文档或文件夹"
+	@handler CreateDocument
+	post /api/document/v1/create (CreateDocumentReq) returns (CreateDocumentRes)
+
+	@doc "获取云文档详情"
+	@handler GetDocument
+	post /api/document/v1/get (GetDocumentReq) returns (GetDocumentRes)
+
+	@doc "保存云文档正文"
+	@handler SaveDocumentContent
+	post /api/document/v1/save_content (SaveDocumentContentReq) returns (SaveDocumentContentRes)
+
+	@doc "分享云文档到会话"
+	@handler ShareDocument
+	post /api/document/v1/share (ShareDocumentReq) returns (ShareDocumentRes)
+
+	@doc "列目录"
+	@handler ListDocumentChildren
+	post /api/document/v1/list (ListDocumentChildrenReq) returns (ListDocumentChildrenRes)
+
+	@doc "移动云文档或文件夹"
+	@handler MoveDocument
+	post /api/document/v1/move (MoveDocumentReq) returns (MoveDocumentRes)
+
+	@doc "重命名云文档或文件夹"
+	@handler RenameDocument
+	post /api/document/v1/rename (RenameDocumentReq) returns (RenameDocumentRes)
+}
+
+// goctl api go -api document_api.api -dir . --home ../../../template
