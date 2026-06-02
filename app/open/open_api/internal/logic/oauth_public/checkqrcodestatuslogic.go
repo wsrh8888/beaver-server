@@ -64,16 +64,25 @@ func (l *CheckQrCodeStatusLogic) CheckQrCodeStatus(req *types.CheckQrCodeStatusR
 		status = "waiting"
 	}
 
-	// 4. 如果已确认，返回用户ID
+	// 4. 如果已确认，返回用户ID和 authCode
 	var userId string
+	var authCode string
 	if qrCode.Status == 2 {
 		userId = qrCode.UserID
+		var oauthCode open_models.OpenOAuthCode
+		if err := l.svcCtx.DB.Where(
+			"app_id = ? AND user_id = ? AND scene = ? AND used = ?",
+			qrCode.AppID, qrCode.UserID, "pc_scan", false,
+		).Order("id DESC").First(&oauthCode).Error; err == nil {
+			authCode = oauthCode.Code
+		}
 	}
 
 	logx.Infof("查询扫码状态: sceneId=%s, status=%s", req.SceneID, status)
 
 	return &types.CheckQrCodeStatusRes{
-		Status: status,
-		UserId: userId,
+		Status:   status,
+		UserId:   userId,
+		AuthCode: authCode,
 	}, nil
 }

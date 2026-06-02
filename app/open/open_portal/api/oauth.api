@@ -50,14 +50,15 @@ type (
 
 @server (
 	group: oauth
+	middleware: DeveloperAuthMiddleware
 )
 service open {
 	@doc "获取 OAuth 配置"
 	@handler GetOAuthConfig
-	get /portal/open/v1/oauth/config (GetOAuthConfigReq) returns (GetOAuthConfigRes)
+	get /api/open_portal/oauth/v1/config (GetOAuthConfigReq) returns (GetOAuthConfigRes)
 
 	@doc "更新 OAuth 配置"
 	@handler UpdateOAuthConfig
-	post /portal/open/v1/oauth/config_update (UpdateOAuthConfigReq) returns (UpdateOAuthConfigRes)
+	post /api/open_portal/oauth/v1/config_update (UpdateOAuthConfigReq) returns (UpdateOAuthConfigRes)
 }
 

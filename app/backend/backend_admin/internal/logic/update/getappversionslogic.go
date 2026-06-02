@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"fmt"
 
@@ -28,7 +28,7 @@ func NewGetAppVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 
 func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp *types.GetAppVersionsRes, err error) {
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&update_models.UpdateArchitecture{})
+	query := l.svcCtx.DB.Model(&platform_models.UpdateArchitecture{})
 
 	// 应用ID过滤
 	if req.AppID != "" {
@@ -55,7 +55,7 @@ func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp
 	offset := (req.Page - 1) * req.PageSize
 
 	// 查询架构列表
-	var architectures []update_models.UpdateArchitecture
+	var architectures []platform_models.UpdateArchitecture
 	if err := query.Offset(offset).Limit(req.PageSize).Order("created_at DESC").Find(&architectures).Error; err != nil {
 		logx.Errorf("Failed to get architectures: %v", err)
 		return nil, fmt.Errorf("获取架构列表失败")
@@ -65,7 +65,7 @@ func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp
 	var architectureInfos []types.GetAppVersionsItem
 	for _, arch := range architectures {
 		// 查询该架构下的版本
-		var versions []update_models.UpdateVersion
+		var versions []platform_models.UpdateVersion
 		if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").Find(&versions).Error; err != nil {
 			logx.Errorf("Failed to get versions for architecture %d: %v", arch.Id, err)
 			continue

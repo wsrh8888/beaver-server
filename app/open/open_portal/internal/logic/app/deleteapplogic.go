@@ -27,14 +27,12 @@ func NewDeleteAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteA
 }
 
 func (l *DeleteAppLogic) DeleteApp(req *types.DeleteAppReq) (resp *types.DeleteAppRes, err error) {
-	// 1. 从 header 获取当前用户 ID
-	userID := l.ctx.Value("userId")
-	if userID == nil {
-		return nil, errors.New("未登录")
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
 	}
 
-	// 2. 软删除应用（GORM 的 Delete 会设置 deleted_at）
-	result := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, userID).Delete(&open_models.OpenApp{})
+	// 软删除应用（GORM 的 Delete 会设置 deleted_at）
+	result := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).Delete(&open_models.OpenApp{})
 	if result.Error != nil {
 		logx.Errorf("删除应用失败: %v", result.Error)
 		return nil, errors.New("删除失败")

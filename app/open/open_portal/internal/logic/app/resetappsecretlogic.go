@@ -28,18 +28,16 @@ func NewResetAppSecretLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Re
 }
 
 func (l *ResetAppSecretLogic) ResetAppSecret(req *types.ResetAppSecretReq) (resp *types.ResetAppSecretRes, err error) {
-	// 1. 从 header 获取当前用户 ID
-	userID := l.ctx.Value("userId")
-	if userID == nil {
-		return nil, errors.New("未登录")
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
 	}
 
-	// 2. 生成新密钥
+	// 生成新密钥
 	newSecret := uuid.New().String() + uuid.New().String()
 
-	// 3. 更新密钥
+	// 更新密钥
 	result := l.svcCtx.DB.Model(&open_models.OpenApp{}).
-		Where("app_id = ? AND owner_user_id = ?", req.AppID, userID).
+		Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).
 		Update("app_secret", newSecret)
 
 	if result.Error != nil {

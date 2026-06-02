@@ -69,21 +69,22 @@ type (
 
 @server (
 	group: developer
+	middleware: DeveloperAuthMiddleware
 )
 service open {
 	@doc "申请成为开发者"
 	@handler ApplyDeveloper
-	post /portal/open/v1/developer/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
+	post /api/open_portal/developer/v1/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
 	
 	@doc "获取开发者列表"
 	@handler GetDeveloperList
-	get /portal/open/v1/developer/list (GetDeveloperListReq) returns (GetDeveloperListRes)
+	get /api/open_portal/developer/v1/list (GetDeveloperListReq) returns (GetDeveloperListRes)
 	
 	@doc "获取开发者详情"
 	@handler GetDeveloperDetail
-	get /portal/open/v1/developer/detail (GetDeveloperDetailReq) returns (GetDeveloperDetailRes)
+	get /api/open_portal/developer/v1/detail (GetDeveloperDetailReq) returns (GetDeveloperDetailRes)
 	
 	@doc "审核开发者申请"
 	@handler AuditDeveloper
-	post /portal/open/v1/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
+	post /api/open_portal/developer/v1/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
 }

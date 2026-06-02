@@ -25,6 +25,10 @@ func NewGetVersionListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp *types.GetVersionListRes, err error) {
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
+	}
+
 	return &types.GetVersionListRes{
 		Total: 0,
 		List:  []types.VersionInfo{},

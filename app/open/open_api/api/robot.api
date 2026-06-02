@@ -69,27 +69,26 @@ type (
 )
 
 @server (
-	group:      robot
-	middleware: AuthMiddleware
+	group: robot
 )
 service open {
 	@doc "获取 Robot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Robot 身份）"
 	@handler GetRobotInfo
-	get /api/open/v1/robot/info (GetRobotInfoReq) returns (GetRobotInfoRes)
+	get /api/open/robot/v1/info (GetRobotInfoReq) returns (GetRobotInfoRes)
 
 	@doc "Robot 发送消息到 IM 会话（私聊或群聊）"
 	@handler RobotSendMessage
-	post /api/open/v1/robot/send_message (RobotSendMessageReq) returns (RobotSendMessageRes)
+	post /api/open/robot/v1/send_message (RobotSendMessageReq) returns (RobotSendMessageRes)
 
 	@doc "Robot 流式发送消息（SSE，适合 AI 流式输出）"
 	@handler RobotStreamMessage
-	post /api/open/v1/robot/stream_message (RobotStreamMessageReq) returns (RobotStreamChunk)
+	post /api/open/robot/v1/stream_message (RobotStreamMessageReq) returns (RobotStreamChunk)
 
 	@doc "将 Robot 加入群（Robot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Robot 的 Webhook URL）"
 	@handler AddRobotToGroup
-	post /api/open/v1/robot/add_to_group (AddRobotToGroupReq) returns (AddRobotToGroupRes)
+	post /api/open/robot/v1/add_to_group (AddRobotToGroupReq) returns (AddRobotToGroupRes)
 
 	@doc "将 Robot 从群移除"
 	@handler RemoveRobotFromGroup
-	post /api/open/v1/robot/remove_from_group (RemoveRobotFromGroupReq) returns (RemoveRobotFromGroupRes)
+	post /api/open/robot/v1/remove_from_group (RemoveRobotFromGroupReq) returns (RemoveRobotFromGroupRes)
 }

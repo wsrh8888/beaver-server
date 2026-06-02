@@ -27,7 +27,11 @@ func NewGetAppDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetA
 }
 
 func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *types.GetAppDetailRes, err error) {
-	// 1. 查询应用详情
+	if req.UserID == "" {
+		return nil, errors.New("未登录")
+	}
+
+	// 查询应用详情
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限访问")

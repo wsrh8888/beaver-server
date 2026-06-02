@@ -12,17 +12,8 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /api/auth/phone_register
-  - /api/auth/email_register
-  - /api/auth/phonecode
-  - /api/auth/emailcode
-  - /api/auth/phone_login
-  - /api/auth/reset_password
-  - /api/auth/email_login
-  - /api/auth/open_login
-  - /api/auth/authentication
+  - /api/auth/auth_public/.*
   - /api/settings/open_login_info
-  - /api/auth/email_password_login
   - /api/file/preview
   - /api/update/report
 Email:

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	auth_models "beaver/app/auth/auth_models"
+	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
@@ -76,11 +77,13 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 	// 7. 存储 token 到数据库
 	now := time.Now()
 	tokenRecord := open_models.OpenOAuthToken{
-		AppID:        req.AppID,
-		UserID:       user.UserID,
-		Token:        accessToken,
-		RefreshToken: refreshToken,
-		ExpiresAt:    now.Add(time.Duration(accessExpiresIn) * time.Second).Unix(),
+		AppID:                 req.AppID,
+		UserID:                user.UserID,
+		Token:                 accessToken,
+		RefreshToken:          refreshToken,
+		ExpiresAt:             now.Add(time.Duration(accessExpiresIn) * time.Second).Unix(),
+		RefreshTokenExpiresAt: now.Add(180 * 24 * time.Hour).Unix(),
+		Scope:                 oauthutil.ResolveAppScope(l.svcCtx.DB, req.AppID),
 	}
 
 	if err := l.svcCtx.DB.Create(&tokenRecord).Error; err != nil {

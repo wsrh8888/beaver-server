@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
@@ -58,10 +59,15 @@ func (l *ConfirmQrCodeLoginLogic) ConfirmQrCodeLogin(req *types.ConfirmQrCodeLog
 	// 5. 更新扫码记录：设置用户ID和状态为已确认
 	if err := l.svcCtx.DB.Model(&qrCode).Updates(map[string]interface{}{
 		"user_id": req.UserID,
-		"status":  2, // 2-已确认
+		"status":  2,
 	}).Error; err != nil {
 		logx.Errorf("更新扫码记录失败: err=%v", err)
 		return nil, fmt.Errorf("服务内部异常")
+	}
+
+	if _, _, err := oauthutil.CreateOAuthCode(l.svcCtx.DB, qrCode.AppID, req.UserID, "pc_scan"); err != nil {
+		logx.Errorf("生成扫码 authCode 失败: sceneId=%s, err=%v", req.SceneID, err)
+		return nil, fmt.Errorf("生成授权码失败")
 	}
 
 	logx.Infof("确认扫码登录成功: sceneId=%s, userId=%s", req.SceneID, req.UserID)

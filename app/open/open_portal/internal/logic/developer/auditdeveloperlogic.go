@@ -2,6 +2,7 @@ package developer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -27,6 +28,14 @@ func NewAuditDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 }
 
 func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp *types.AuditDeveloperRes, err error) {
+	userID, ok := l.ctx.Value("userId").(string)
+	if !ok || userID == "" {
+		return nil, errors.New("未登录")
+	}
+	if _, err := l.svcCtx.RequireDeveloper(userID); err != nil {
+		return nil, err
+	}
+
 	// 验证状态
 	if req.Status != 1 && req.Status != 2 {
 		return nil, fmt.Errorf("无效的状态值")

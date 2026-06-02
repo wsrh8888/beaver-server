@@ -58,22 +58,23 @@ type (
 
 @server (
 	group: version
+	middleware: DeveloperAuthMiddleware
 )
 service open {
 	@doc "创建新版本"
 	@handler CreateVersion
-	post /portal/open/v1/version/create (CreateVersionReq) returns (CreateVersionRes)
+	post /api/open_portal/version/v1/create (CreateVersionReq) returns (CreateVersionRes)
 
 	@doc "获取版本列表"
 	@handler GetVersionList
-	get /portal/open/v1/version/list (GetVersionListReq) returns (GetVersionListRes)
+	get /api/open_portal/version/v1/list (GetVersionListReq) returns (GetVersionListRes)
 
 	@doc "提交版本审核"
 	@handler SubmitVersionReview
-	post /portal/open/v1/version/submit_review (SubmitVersionReviewReq) returns (SubmitVersionReviewRes)
+	post /api/open_portal/version/v1/submit_review (SubmitVersionReviewReq) returns (SubmitVersionReviewRes)
 
 	@doc "发布版本"
 	@handler PublishVersion
-	post /portal/open/v1/version/publish (PublishVersionReq) returns (PublishVersionRes)
+	post /api/open_portal/version/v1/publish (PublishVersionReq) returns (PublishVersionRes)
 }
 

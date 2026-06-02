@@ -1,4 +1,4 @@
-import "api/auth.api"
+import "api/auth_public.api"
 import "api/app.api"
 import "api/developer.api"
 import "api/bot.api"

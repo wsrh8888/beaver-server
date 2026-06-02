@@ -2,7 +2,7 @@ package logic
 
 import (
 	"beaver/app/dictionary/dictionary_rpc/types/dictionary_rpc"
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"errors"
 	"fmt"
@@ -32,13 +32,13 @@ func NewAddAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAppLogi
 
 func (l *AddAppLogic) AddApp(req *types.AddAppReq) (resp *types.AddAppRes, err error) {
 	// 检查应用名称是否已存在
-	var existingApp update_models.UpdateApp
+	var existingApp platform_models.UpdateApp
 	if err := l.svcCtx.DB.Where("name = ?", req.Name).First(&existingApp).Error; err == nil {
 		return nil, fmt.Errorf("应用名称已存在")
 	}
 
 	// 创建新应用
-	app := update_models.UpdateApp{
+	app := platform_models.UpdateApp{
 		Name:        req.Name,
 		AppID:       strings.Replace(uuid.New().String(), "-", "", -1),
 		Description: req.Description,
@@ -74,15 +74,15 @@ func (l *AddAppLogic) initCityStrategiesForApp(appID string) error {
 	for _, city := range citiesRes.Cities {
 		// 检查城市策略是否已存在
 		var count int64
-		l.svcCtx.DB.Model(&update_models.UpdateStrategy{}).
+		l.svcCtx.DB.Model(&platform_models.UpdateStrategy{}).
 			Where("app_id = ? AND city_id = ?", appID, city.CityId).
 			Count(&count)
 
 		if count == 0 {
 			// 城市策略不存在，创建默认策略
-			defaultStrategy := &update_models.Strategy{}
+			defaultStrategy := &platform_models.Strategy{}
 
-			newStrategy := update_models.UpdateStrategy{
+			newStrategy := platform_models.UpdateStrategy{
 				AppID:    appID,
 				CityID:   city.CityId,
 				Strategy: defaultStrategy,

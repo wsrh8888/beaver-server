@@ -30,9 +30,6 @@ func main() {
 	// 注册全局中间件（日志）
 	server.Use(commonMiddleware.RequestLogMiddleware)
 
-	// 使用 ServiceContext 中的 AuthMiddleware
-	server.Use(ctx.AuthMiddleware)
-
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

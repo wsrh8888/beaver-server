@@ -8,19 +8,12 @@ Log:
 Auth:
   AccessSecret: robert
   AccessExpire: 3600
-WhiteList:
-  - /api/auth/phone_register
-  - /api/auth/email_register
-  - /api/auth/phonecode
-  - /api/auth/emailcode
-  - /api/auth/phone_login
-  - /api/auth/reset_password
-  - /api/auth/email_login
-  - /api/auth/open_login
-  - /api/auth/authentication
+PublicList:
+  - /api/auth/auth_public/.*
+  - /api/platform/track_public/.*
+  - /api/platform/update_public/.*
+  - /api/open/.*_public/.*
   - /api/settings/open_login_info
-  - /api/auth/email_password_login
   - /api/file/preview/.*
-  - /api/platform/v1/track/report_events
-  - /api/platform/v1/track/log_events
-  - /api/update/report
+CustomAuthList:
+  - /api/open_portal/.*

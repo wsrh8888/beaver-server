@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	app "beaver/app/open/open_portal/internal/handler/app"
-	auth "beaver/app/open/open_portal/internal/handler/auth"
+	auth_public "beaver/app/open/open_portal/internal/handler/auth_public"
 	bot "beaver/app/open/open_portal/internal/handler/bot"
 	developer "beaver/app/open/open_portal/internal/handler/developer"
 	event "beaver/app/open/open_portal/internal/handler/event"
@@ -19,233 +19,255 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 启用/禁用应用能力（对标飞书）
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/capability/toggle",
-				Handler: app.ToggleAppCapabilityHandler(serverCtx),
-			},
-			{
-				// 创建应用
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/create",
-				Handler: app.CreateAppHandler(serverCtx),
-			},
-			{
-				// 删除应用
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/delete",
-				Handler: app.DeleteAppHandler(serverCtx),
-			},
-			{
-				// 获取应用详情
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/app/detail",
-				Handler: app.GetAppDetailHandler(serverCtx),
-			},
-			{
-				// 获取应用列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/app/list",
-				Handler: app.GetAppListHandler(serverCtx),
-			},
-			{
-				// 发布应用（对标飞书版本发布）
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/publish",
-				Handler: app.PublishAppHandler(serverCtx),
-			},
-			{
-				// 重置应用密钥
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/reset_secret",
-				Handler: app.ResetAppSecretHandler(serverCtx),
-			},
-			{
-				// 获取应用权限列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/app/scopes",
-				Handler: app.GetAppScopesHandler(serverCtx),
-			},
-			{
-				// 更新应用权限
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/scopes/update",
-				Handler: app.UpdateAppScopesHandler(serverCtx),
-			},
-			{
-				// 更新应用
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/app/update",
-				Handler: app.UpdateAppHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 启用/禁用应用能力（对标飞书）
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/capability/toggle",
+					Handler: app.ToggleAppCapabilityHandler(serverCtx),
+				},
+				{
+					// 创建应用
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/create",
+					Handler: app.CreateAppHandler(serverCtx),
+				},
+				{
+					// 删除应用
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/delete",
+					Handler: app.DeleteAppHandler(serverCtx),
+				},
+				{
+					// 获取应用详情
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/app/v1/detail",
+					Handler: app.GetAppDetailHandler(serverCtx),
+				},
+				{
+					// 获取应用列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/app/v1/list",
+					Handler: app.GetAppListHandler(serverCtx),
+				},
+				{
+					// 发布应用（对标飞书版本发布）
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/publish",
+					Handler: app.PublishAppHandler(serverCtx),
+				},
+				{
+					// 重置应用密钥
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/reset_secret",
+					Handler: app.ResetAppSecretHandler(serverCtx),
+				},
+				{
+					// 获取应用权限列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/app/v1/scopes",
+					Handler: app.GetAppScopesHandler(serverCtx),
+				},
+				{
+					// 更新应用权限
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/scopes/update",
+					Handler: app.UpdateAppScopesHandler(serverCtx),
+				},
+				{
+					// 更新应用
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/app/v1/update",
+					Handler: app.UpdateAppHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 开发者 Portal 登录
 				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/auth/login",
-				Handler: auth.LoginHandler(serverCtx),
+				Path:    "/api/open_portal/auth_public/v1/login",
+				Handler: auth_public.LoginHandler(serverCtx),
 			},
 		},
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取 Bot 配置
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/bot/config",
-				Handler: bot.GetBotConfigHandler(serverCtx),
-			},
-			{
-				// 更新 Bot 配置
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/bot/config_update",
-				Handler: bot.UpdateBotConfigHandler(serverCtx),
-			},
-			{
-				// 创建 Incoming Webhook
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/bot/incoming_create",
-				Handler: bot.CreateIncomingWebhookHandler(serverCtx),
-			},
-			{
-				// 删除 Incoming Webhook
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/bot/incoming_delete",
-				Handler: bot.DeleteIncomingWebhookHandler(serverCtx),
-			},
-			{
-				// 获取 Incoming Webhook 列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/bot/incoming_list",
-				Handler: bot.ListIncomingWebhooksHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取 Bot 配置
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/bot/v1/config",
+					Handler: bot.GetBotConfigHandler(serverCtx),
+				},
+				{
+					// 更新 Bot 配置
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/bot/v1/config_update",
+					Handler: bot.UpdateBotConfigHandler(serverCtx),
+				},
+				{
+					// 创建 Incoming Webhook
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/bot/v1/incoming_create",
+					Handler: bot.CreateIncomingWebhookHandler(serverCtx),
+				},
+				{
+					// 删除 Incoming Webhook
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/bot/v1/incoming_delete",
+					Handler: bot.DeleteIncomingWebhookHandler(serverCtx),
+				},
+				{
+					// 获取 Incoming Webhook 列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/bot/v1/incoming_list",
+					Handler: bot.ListIncomingWebhooksHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 申请成为开发者
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/developer/apply",
-				Handler: developer.ApplyDeveloperHandler(serverCtx),
-			},
-			{
-				// 审核开发者申请
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/developer/audit",
-				Handler: developer.AuditDeveloperHandler(serverCtx),
-			},
-			{
-				// 获取开发者详情
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/developer/detail",
-				Handler: developer.GetDeveloperDetailHandler(serverCtx),
-			},
-			{
-				// 获取开发者列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/developer/list",
-				Handler: developer.GetDeveloperListHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 申请成为开发者
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/developer/v1/apply",
+					Handler: developer.ApplyDeveloperHandler(serverCtx),
+				},
+				{
+					// 审核开发者申请
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/developer/v1/audit",
+					Handler: developer.AuditDeveloperHandler(serverCtx),
+				},
+				{
+					// 获取开发者详情
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/developer/v1/detail",
+					Handler: developer.GetDeveloperDetailHandler(serverCtx),
+				},
+				{
+					// 获取开发者列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/developer/v1/list",
+					Handler: developer.GetDeveloperListHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 创建事件订阅
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/event/create",
-				Handler: event.CreateEventSubscriptionHandler(serverCtx),
-			},
-			{
-				// 删除事件订阅
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/event/delete",
-				Handler: event.DeleteEventSubscriptionHandler(serverCtx),
-			},
-			{
-				// 获取事件订阅列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/event/list",
-				Handler: event.ListEventSubscriptionsHandler(serverCtx),
-			},
-			{
-				// 更新事件订阅
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/event/update",
-				Handler: event.UpdateEventSubscriptionHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建事件订阅
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/event/v1/create",
+					Handler: event.CreateEventSubscriptionHandler(serverCtx),
+				},
+				{
+					// 删除事件订阅
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/event/v1/delete",
+					Handler: event.DeleteEventSubscriptionHandler(serverCtx),
+				},
+				{
+					// 获取事件订阅列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/event/v1/list",
+					Handler: event.ListEventSubscriptionsHandler(serverCtx),
+				},
+				{
+					// 更新事件订阅
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/event/v1/update",
+					Handler: event.UpdateEventSubscriptionHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取 OAuth 配置
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/oauth/config",
-				Handler: oauth.GetOAuthConfigHandler(serverCtx),
-			},
-			{
-				// 更新 OAuth 配置
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/oauth/config_update",
-				Handler: oauth.UpdateOAuthConfigHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取 OAuth 配置
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/oauth/v1/config",
+					Handler: oauth.GetOAuthConfigHandler(serverCtx),
+				},
+				{
+					// 更新 OAuth 配置
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/oauth/v1/config_update",
+					Handler: oauth.UpdateOAuthConfigHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取安全配置
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/security/config",
-				Handler: security.GetSecurityConfigHandler(serverCtx),
-			},
-			{
-				// 更新安全配置
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/security/config_update",
-				Handler: security.UpdateSecurityConfigHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取安全配置
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/security/v1/config",
+					Handler: security.GetSecurityConfigHandler(serverCtx),
+				},
+				{
+					// 更新安全配置
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/security/v1/config_update",
+					Handler: security.UpdateSecurityConfigHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 创建新版本
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/version/create",
-				Handler: version.CreateVersionHandler(serverCtx),
-			},
-			{
-				// 获取版本列表
-				Method:  http.MethodGet,
-				Path:    "/portal/open/v1/version/list",
-				Handler: version.GetVersionListHandler(serverCtx),
-			},
-			{
-				// 发布版本
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/version/publish",
-				Handler: version.PublishVersionHandler(serverCtx),
-			},
-			{
-				// 提交版本审核
-				Method:  http.MethodPost,
-				Path:    "/portal/open/v1/version/submit_review",
-				Handler: version.SubmitVersionReviewHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建新版本
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/version/v1/create",
+					Handler: version.CreateVersionHandler(serverCtx),
+				},
+				{
+					// 获取版本列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/version/v1/list",
+					Handler: version.GetVersionListHandler(serverCtx),
+				},
+				{
+					// 发布版本
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/version/v1/publish",
+					Handler: version.PublishVersionHandler(serverCtx),
+				},
+				{
+					// 提交版本审核
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/version/v1/submit_review",
+					Handler: version.SubmitVersionReviewHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 }

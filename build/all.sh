@@ -24,7 +24,6 @@ modules=(
     "document_api"
     "notification_api"
     "platform_api"
-    "update_api"
     "user_api"
     "ws_api"
     "gateway_api"

@@ -29,7 +29,11 @@ func NewCreateEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *CreateEventSubscriptionLogic) CreateEventSubscription(req *types.CreateEventSubscriptionReq) (resp *types.CreateEventSubscriptionRes, err error) {
-	// 1. 创建事件订阅记录
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
+	}
+
+	// 创建事件订阅记录
 	subscription := models.OpenAppEventSubscription{
 		AppID:       req.AppID,
 		EventType:   req.EventType,

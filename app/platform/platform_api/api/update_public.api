@@ -1,0 +1,48 @@
+syntax = "v1"
+
+// ==================== 版本升级公开接口（无需认证，Gateway 白名单）====================
+
+type ReportVersionReq {
+	UserID     string `header:"Beaver-User-Id,optional"`
+	DeviceID   string `header:"deviceId"`
+	Version    string `header:"version"`
+	AppID      string `json:"appId"`
+	PlatformID uint   `json:"platformId"`
+	ArchID     uint   `json:"archId"`
+}
+
+type ReportVersionRes {}
+
+type GetLatestVersionReq {
+	UserID     string `header:"Beaver-User-Id,optional"`
+	CityName   string `header:"X-City-Name,optional"`
+	DeviceID   string `header:"deviceId"`
+	AppID      string `json:"appId"`
+	PlatformID uint   `json:"platformId"`
+	ArchID     uint   `json:"archId"`
+	Version    string `header:"version"`
+}
+
+type GetLatestVersionRes {
+	HasUpdate      bool   `json:"hasUpdate"`
+	ArchitectureID uint   `json:"architectureId,omitempty"`
+	Version        string `json:"version,omitempty"`
+	FileKey        string `json:"fileKey"`
+	Size           int64  `json:"size"`
+	MD5            string `json:"md5"`
+	Description    string `json:"description,omitempty"`
+	ReleaseNotes   string `json:"releaseNotes,omitempty"`
+}
+
+@server (
+	group: update_public
+)
+service platform {
+	@doc "上报版本信息"
+	@handler ReportVersion
+	post /api/platform/update_public/v1/report (ReportVersionReq) returns (ReportVersionRes)
+
+	@doc "获取最新版本"
+	@handler GetLatestVersion
+	post /api/platform/update_public/v1/latest (GetLatestVersionReq) returns (GetLatestVersionRes)
+}

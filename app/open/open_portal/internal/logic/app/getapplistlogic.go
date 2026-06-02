@@ -27,14 +27,12 @@ func NewGetAppListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetApp
 }
 
 func (l *GetAppListLogic) GetAppList(req *types.GetAppListReq) (resp *types.GetAppListRes, err error) {
-	// 1. 从 header 获取当前用户 ID（由中间件注入）
-	userID := l.ctx.Value("userId")
-	if userID == nil {
+	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
 
-	// 2. 构建查询条件
-	query := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("owner_user_id = ?", userID)
+	// 构建查询条件
+	query := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("owner_user_id = ?", req.UserID)
 
 	// 3. 如果指定了状态，添加状态过滤
 	if req.Status != 0 {

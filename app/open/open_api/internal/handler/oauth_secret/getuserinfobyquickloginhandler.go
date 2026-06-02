@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_api/internal/logic/oauth_secret"
+	logic "beaver/app/open/open_api/internal/logic/oauth_secret"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func GetUserInfoByQuickLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc
 			return
 		}
 
-		l := oauth_secret.NewGetUserInfoByQuickLoginLogic(r.Context(), svcCtx)
+		l := logic.NewGetUserInfoByQuickLoginLogic(r.Context(), svcCtx)
 		resp, err := l.GetUserInfoByQuickLogin(&req)
 		response.Response(r, w, resp, err)
 	}

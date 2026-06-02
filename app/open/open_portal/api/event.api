@@ -65,21 +65,22 @@ type (
 
 @server (
 	group: event
+	middleware: DeveloperAuthMiddleware
 )
 service open {
 	@doc "创建事件订阅"
 	@handler CreateEventSubscription
-	post /portal/open/v1/event/create (CreateEventSubscriptionReq) returns (CreateEventSubscriptionRes)
+	post /api/open_portal/event/v1/create (CreateEventSubscriptionReq) returns (CreateEventSubscriptionRes)
 
 	@doc "获取事件订阅列表"
 	@handler ListEventSubscriptions
-	get /portal/open/v1/event/list (ListEventSubscriptionsReq) returns (ListEventSubscriptionsRes)
+	get /api/open_portal/event/v1/list (ListEventSubscriptionsReq) returns (ListEventSubscriptionsRes)
 
 	@doc "更新事件订阅"
 	@handler UpdateEventSubscription
-	post /portal/open/v1/event/update (UpdateEventSubscriptionReq) returns (UpdateEventSubscriptionRes)
+	post /api/open_portal/event/v1/update (UpdateEventSubscriptionReq) returns (UpdateEventSubscriptionRes)
 
 	@doc "删除事件订阅"
 	@handler DeleteEventSubscription
-	post /portal/open/v1/event/delete (DeleteEventSubscriptionReq) returns (DeleteEventSubscriptionRes)
+	post /api/open_portal/event/v1/delete (DeleteEventSubscriptionReq) returns (DeleteEventSubscriptionRes)
 }

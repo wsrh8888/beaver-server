@@ -2,6 +2,7 @@ package developer
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"beaver/app/open/open_models"
@@ -26,6 +27,14 @@ func NewGetDeveloperListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq) (resp *types.GetDeveloperListRes, err error) {
+	userID, ok := l.ctx.Value("userId").(string)
+	if !ok || userID == "" {
+		return nil, errors.New("未登录")
+	}
+	if _, err := l.svcCtx.RequireDeveloper(userID); err != nil {
+		return nil, err
+	}
+
 	// 构建查询
 	query := l.svcCtx.DB.Model(&open_models.OpenDeveloper{})
 

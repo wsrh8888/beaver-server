@@ -38,61 +38,67 @@ type Proxy struct {
 }
 
 func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
-	// 1. 检查白名单
-	if utils.InListByRegex(p.Config.WhiteList, req.URL.Path) {
+	path := req.URL.Path
+
+	// 1. 公开接口，无需鉴权
+	if utils.InListByRegex(p.Config.PublicList, path) {
 		return true
 	}
 
-	// 2. 判断是否是开放平台请求，根据不同路径使用不同认证策略
-	if isOAuthRequest(req.URL.Path) {
-		return p.openApiAuth(res, req)
+	// 2. 自定义鉴权，透传到下游服务 middleware 处理
+	if utils.InListByRegex(p.Config.CustomAuthList, path) {
+		return true
 	}
-	// 3. 普通用户请求，使用JWT验证
+
+	// 3. open oauth_secret：Gateway 校验 App-Id / App-Secret 请求头
+	if strings.HasPrefix(path, "/api/open/oauth_secret/") {
+		return p.oauthSecretAuth(res, req, path)
+	}
+
+	// 4. open_api：Gateway 默认不鉴权，各接口 logic 自行校验；仅 Beaver JWT 路由例外
+	if isOpenApiPassThrough(path) {
+		return true
+	}
+
+	// 5. 统一 JWT 鉴权
 	return p.jwtAuth(res, req)
 }
 
-// openApiAuth 开放平台认证（根据路径选择不同策略）
-func (p Proxy) openApiAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
-	path := req.URL.Path
+func (p Proxy) oauthSecretAuth(res http.ResponseWriter, req *http.Request, path string) bool {
+	uuid := getUuid(req)
+	appID := req.Header.Get("App-Id")
+	if appID == "" {
+		writeErrorResponse(res, "缺少 App-Id 请求头", http.StatusUnauthorized, uuid)
+		return false
+	}
 
-	// 1. 公开接口（无需认证）
-	if strings.HasPrefix(path, "/api/open/v1/oauth_public") {
-		logx.Infof("公开接口：%s", path)
+	appSecret := req.Header.Get("App-Secret")
+	switch {
+	case strings.HasSuffix(path, "/revoke"):
 		return true
-	}
-
-	// 2. JWT 认证接口（Gateway 验证 JWT，注入 Beaver-User-Id）
-	if strings.HasPrefix(path, "/api/open/v1/oauth/") {
-		logx.Infof("JWT认证接口：%s", path)
-		return p.jwtAuth(res, req)
-	}
-
-	// 3. 应用级认证接口（透传到 open_api，由 AppAuthMiddleware 处理）
-	if strings.HasPrefix(path, "/api/open/v1/oauth_secret") {
-		logx.Infof("应用级认证接口：%s", path)
+	case strings.HasSuffix(path, "/token"):
 		return true
+	default:
+		if appSecret == "" {
+			writeErrorResponse(res, "缺少 App-Secret 请求头", http.StatusUnauthorized, uuid)
+			return false
+		}
 	}
-
-	// 4. Bot/Webhook 接口（需要 access_token + sign 或仅 sign）
-	if isBotOrWebhookPath(path) {
-		// TODO: 实现 Bot/Webhook 认证逻辑
-		logx.Infof("Bot/Webhook 接口：%s", path)
-		return true
-	}
-
-	// 默认放行（由 open_api 内部中间件处理）
 	return true
 }
 
-// isBotOrWebhookPath 判断是否是 Bot/Webhook 接口
-func isBotOrWebhookPath(path string) bool {
-	return strings.HasPrefix(path, "/api/open/v1/bot") ||
-		strings.HasPrefix(path, "/api/open/v1/webhook")
+var openApiJwtRoutes = []string{
+	`/api/open/oauth/v1/h5_authcode`,
 }
 
-// isOAuthRequest 判断是否是开放平台OAuth请求
-func isOAuthRequest(path string) bool {
-	return len(path) >= 9 && path[:9] == "/api/open"
+func isOpenApiPassThrough(path string) bool {
+	if !strings.HasPrefix(path, "/api/open/") {
+		return false
+	}
+	if utils.InListByRegex(openApiJwtRoutes, path) {
+		return false
+	}
+	return true
 }
 
 // jwtAuth JWT认证（普通用户）

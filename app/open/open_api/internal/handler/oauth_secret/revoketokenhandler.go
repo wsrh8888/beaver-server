@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/open/open_api/internal/logic/oauth_secret"
+	logic "beaver/app/open/open_api/internal/logic/oauth_secret"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func RevokeTokenHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := oauth_secret.NewRevokeTokenLogic(r.Context(), svcCtx)
+		l := logic.NewRevokeTokenLogic(r.Context(), svcCtx)
 		resp, err := l.RevokeToken(&req)
 		response.Response(r, w, resp, err)
 	}

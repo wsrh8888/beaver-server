@@ -18,10 +18,9 @@ type (
 
 @server (
 	group: oauth
-	middleware: AuthMiddleware
 )
 service open {
 	@doc "PC 客户端生成 authCode（用于快捷登录）"
 	@handler GetH5AuthCode
-	post /api/open/v1/oauth/h5_authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
+	post /api/open/oauth/v1/h5_authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
 }

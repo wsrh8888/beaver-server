@@ -1,7 +1,7 @@
 package database
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -12,7 +12,7 @@ func InitUpdateApp(db *gorm.DB) error {
 	fmt.Println("=== 开始初始化升级应用表 ===")
 
 	// 默认应用配置
-	defaultApp := update_models.UpdateApp{
+	defaultApp := platform_models.UpdateApp{
 		Name:        "海狸IM",
 		Description: "海狸IM",
 		AppID:       "87c9dc499cc34f32896a4537e66cf65e",
@@ -22,7 +22,7 @@ func InitUpdateApp(db *gorm.DB) error {
 
 	// 检查应用是否已存在
 	var count int64
-	if err := db.Model(&update_models.UpdateApp{}).Where("app_id = ?", defaultApp.AppID).Count(&count).Error; err != nil {
+	if err := db.Model(&platform_models.UpdateApp{}).Where("app_id = ?", defaultApp.AppID).Count(&count).Error; err != nil {
 		return fmt.Errorf("检查应用数据失败: %v", err)
 	}
 

@@ -9,7 +9,7 @@ import (
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	"beaver/app/chat/chat_utils"
+	chatrpcutils "beaver/app/chat/chat_rpc/internal/utils"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
@@ -386,7 +386,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	// 2. 更新会话级别的信息
-	conversationVersion, err := chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
+	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
 	if err != nil {
 		l.Logger.Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
@@ -404,11 +404,11 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	// 3. 批量更新该会话所有用户的会话关系（包括发送者：恢复隐藏状态，更新版本号，更新已读序列号）
-	allUserConversationUpdates, err := chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
+	allUserConversationUpdates, err := chatrpcutils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
 	if err != nil {
 		l.Logger.Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
 		// 不影响消息发送成功，只记录错误
-		allUserConversationUpdates = []chat_utils.UserConversationUpdate{}
+		allUserConversationUpdates = []chatrpcutils.UserConversationUpdate{}
 	}
 
 	// 转换消息格式
@@ -445,14 +445,13 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 }
 
 // notifyMessageUpdateGrouped 按会话分组推送消息更新（给该会话的所有用户推送）
-func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chat_utils.UserConversationUpdate) {
+func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chatrpcutils.UserConversationUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
 			l.Logger.Errorf("推送消息更新时发生panic: %v", r)
 		}
 	}()
 
-	// 获取该会话的所有用户ID
 	var recipientIds []string
 	for _, update := range allUserConversationUpdates {
 		if update.ConversationID == conversationId {
@@ -497,7 +496,9 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 			},
 			"conversationId": conversationId,
 		}
-		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
+		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+			l.Logger.Errorf("MQ 推送失败: recipient=%s, conversation=%s, error=%v", recipientId, conversationId, err)
+		}
 	}
 }
 

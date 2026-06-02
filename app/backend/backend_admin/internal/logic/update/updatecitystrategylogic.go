@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"fmt"
 
@@ -54,16 +54,16 @@ func (l *UpdateCityStrategyLogic) UpdateCityStrategy(req *types.UpdateCityStrate
 // updateSingleCityStrategy 更新单个城市的策略
 func (l *UpdateCityStrategyLogic) updateSingleCityStrategy(appID, cityID string, newStrategy []types.UpdateCityStrategyItem, updateType string) error {
 	// 查找或创建城市策略记录
-	var strategy update_models.UpdateStrategy
+	var strategy platform_models.UpdateStrategy
 	err := l.svcCtx.DB.Where("app_id = ? AND city_id = ?", appID, cityID).First(&strategy).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// 创建新的城市策略记录
-			strategy = update_models.UpdateStrategy{
+			strategy = platform_models.UpdateStrategy{
 				AppID:    appID,
 				CityID:   cityID,
-				Strategy: &update_models.Strategy{},
+				Strategy: &platform_models.Strategy{},
 				IsActive: true,
 			}
 		} else {
@@ -72,9 +72,9 @@ func (l *UpdateCityStrategyLogic) updateSingleCityStrategy(appID, cityID string,
 	}
 
 	// 转换新的策略数据
-	var newStrategyInfos []update_models.StrategyInfo
+	var newStrategyInfos []platform_models.StrategyInfo
 	for _, s := range newStrategy {
-		newStrategyInfos = append(newStrategyInfos, update_models.StrategyInfo{
+		newStrategyInfos = append(newStrategyInfos, platform_models.StrategyInfo{
 			ArchitectureID: s.ArchitectureID,
 			VersionID:      s.VersionID,
 			ForceUpdate:    s.ForceUpdate,
@@ -82,20 +82,20 @@ func (l *UpdateCityStrategyLogic) updateSingleCityStrategy(appID, cityID string,
 		})
 	}
 
-	var updatedStrategy update_models.Strategy
+	var updatedStrategy platform_models.Strategy
 
 	if updateType == "global" {
 		// 全局更新：直接替换所有策略
-		updatedStrategy = update_models.Strategy(newStrategyInfos)
+		updatedStrategy = platform_models.Strategy(newStrategyInfos)
 	} else {
 		// 单个架构更新：合并现有策略和新策略
 		existingStrategy := strategy.Strategy
 		if existingStrategy == nil {
-			existingStrategy = &update_models.Strategy{}
+			existingStrategy = &platform_models.Strategy{}
 		}
 
 		// 创建架构ID到策略的映射
-		strategyMap := make(map[uint]update_models.StrategyInfo)
+		strategyMap := make(map[uint]platform_models.StrategyInfo)
 		for _, s := range *existingStrategy {
 			strategyMap[s.ArchitectureID] = s
 		}
@@ -106,11 +106,11 @@ func (l *UpdateCityStrategyLogic) updateSingleCityStrategy(appID, cityID string,
 		}
 
 		// 转换回数组
-		var mergedStrategy []update_models.StrategyInfo
+		var mergedStrategy []platform_models.StrategyInfo
 		for _, s := range strategyMap {
 			mergedStrategy = append(mergedStrategy, s)
 		}
-		updatedStrategy = update_models.Strategy(mergedStrategy)
+		updatedStrategy = platform_models.Strategy(mergedStrategy)
 	}
 
 	// 更新数据库

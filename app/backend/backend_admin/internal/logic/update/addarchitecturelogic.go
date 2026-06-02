@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"fmt"
 
@@ -29,7 +29,7 @@ func NewAddArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *A
 
 func (l *AddArchitectureLogic) AddArchitecture(req *types.AddArchitectureReq) (resp *types.AddArchitectureRes, err error) {
 	// 检查应用是否存在
-	var app update_models.UpdateApp
+	var app platform_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("app not found")
@@ -38,7 +38,7 @@ func (l *AddArchitectureLogic) AddArchitecture(req *types.AddArchitectureReq) (r
 	}
 	fmt.Println("1111111111111111111111111111111")
 	// 检查是否已存在相同的架构
-	var existingArch update_models.UpdateArchitecture
+	var existingArch platform_models.UpdateArchitecture
 	if err := l.svcCtx.DB.Where("app_id = ? AND platform_id = ? AND arch_id = ?",
 		req.AppID, req.PlatformID, req.ArchID).First(&existingArch).Error; err == nil {
 		return nil, fmt.Errorf("architecture already exists")
@@ -48,7 +48,7 @@ func (l *AddArchitectureLogic) AddArchitecture(req *types.AddArchitectureReq) (r
 	fmt.Println("22222222222222222222222222222222222")
 
 	// 创建新架构
-	arch := update_models.UpdateArchitecture{
+	arch := platform_models.UpdateArchitecture{
 		AppID:       req.AppID,
 		PlatformID:  req.PlatformID,
 		ArchID:      req.ArchID,

@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"fmt"
 
@@ -29,7 +29,7 @@ func NewUpdateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *UpdateArchitectureLogic) UpdateArchitecture(req *types.UpdateArchitectureReq) (resp *types.UpdateArchitectureRes, err error) {
 	// 检查架构是否存在
-	var arch update_models.UpdateArchitecture
+	var arch platform_models.UpdateArchitecture
 	if err := l.svcCtx.DB.First(&arch, req.Id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("architecture not found")

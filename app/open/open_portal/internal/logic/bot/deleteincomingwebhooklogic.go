@@ -25,6 +25,10 @@ func NewDeleteIncomingWebhookLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *DeleteIncomingWebhookLogic) DeleteIncomingWebhook(req *types.DeleteIncomingWebhookReq) (resp *types.DeleteIncomingWebhookRes, err error) {
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
+	}
+
 	// todo: add your logic here and delete this line
 
 	return

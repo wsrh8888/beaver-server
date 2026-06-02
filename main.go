@@ -15,7 +15,7 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
 	"beaver/app/track/track_models"
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
 	"beaver/database"
@@ -84,11 +84,11 @@ func main() {
 			&feedback_models.FeedbackModel{},
 
 			// 版本管理相关表
-			&update_models.UpdateApp{},
-			&update_models.UpdateArchitecture{},
-			&update_models.UpdateVersion{},
-			&update_models.UpdateStrategy{},
-			&update_models.UpdateReport{},
+			&platform_models.UpdateApp{},
+			&platform_models.UpdateArchitecture{},
+			&platform_models.UpdateVersion{},
+			&platform_models.UpdateStrategy{},
+			&platform_models.UpdateReport{},
 
 			&datasync_models.DatasyncModel{},
 

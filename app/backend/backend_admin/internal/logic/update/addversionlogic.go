@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"fmt"
 
@@ -29,7 +29,7 @@ func NewAddVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddVer
 
 func (l *AddVersionLogic) AddVersion(req *types.AddVersionReq) (resp *types.AddVersionRes, err error) {
 	// 检查架构是否存在
-	var arch update_models.UpdateArchitecture
+	var arch platform_models.UpdateArchitecture
 	if err := l.svcCtx.DB.First(&arch, req.ArchitectureID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("architecture not found")
@@ -43,7 +43,7 @@ func (l *AddVersionLogic) AddVersion(req *types.AddVersionReq) (resp *types.AddV
 	}
 
 	// 创建新版本
-	version := update_models.UpdateVersion{
+	version := platform_models.UpdateVersion{
 		ArchitectureID: req.ArchitectureID,
 		Version:        req.Version,
 		FileKey:        req.FileKey,

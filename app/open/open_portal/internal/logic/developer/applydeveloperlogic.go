@@ -26,13 +26,12 @@ func NewApplyDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ap
 }
 
 func (l *ApplyDeveloperLogic) ApplyDeveloper(req *types.ApplyDeveloperReq) (resp *types.ApplyDeveloperRes, err error) {
-	// 1. 从 context 获取用户ID (由中间件注入)
 	userID, ok := l.ctx.Value("userId").(string)
 	if !ok || userID == "" {
 		return nil, errors.New("未登录或登录已过期")
 	}
 
-	// 2. 检查是否已经申请过
+	// 检查是否已经申请过
 	var existingDeveloper models.OpenDeveloper
 	err = l.svcCtx.DB.Where("user_id = ?", userID).First(&existingDeveloper).Error
 	if err == nil {

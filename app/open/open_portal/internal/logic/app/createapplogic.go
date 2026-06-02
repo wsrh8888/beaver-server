@@ -29,12 +29,11 @@ func NewCreateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateA
 }
 
 func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateAppRes, err error) {
-	// 1. 验证用户ID（由网关注入到 header）
-	if req.UserID == "" {
-		return nil, errors.New("未登录")
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
 	}
 
-	// 2. 生成 AppID 和 AppSecret
+	// 生成 AppID 和 AppSecret
 	appID := fmt.Sprintf("app_%s", uuid.New().String()[:8])
 	appSecret := uuid.New().String() + uuid.New().String()
 

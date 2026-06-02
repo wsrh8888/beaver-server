@@ -1,0 +1,31 @@
+syntax = "v1"
+
+// ==================== 认证接口（需 Gateway JWT，注入 Beaver-User-Id 或 Header Token）====================
+
+type (
+	LogoutReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	LogoutRes {}
+)
+
+type (
+	QrcodeScanReq {
+		Token     string `json:"token"`
+		AuthToken string `header:"Token"`
+	}
+	QrcodeScanRes {}
+)
+
+@server (
+	group: auth
+)
+service auth {
+	@doc "用户登出"
+	@handler logout
+	post /api/auth/auth/v1/logout (LogoutReq) returns (LogoutRes)
+
+	@doc "扫码登录-确认扫码（移动端，Header Token）"
+	@handler qrcodeScan
+	post /api/auth/auth/v1/qrcode/scan (QrcodeScanReq) returns (QrcodeScanRes)
+}

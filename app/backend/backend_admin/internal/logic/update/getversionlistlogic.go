@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"beaver/common/list_query"
 	"beaver/common/models"
 	"context"
@@ -37,7 +37,7 @@ func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp
 	}
 
 	// 使用 list_query 进行查询
-	list, total, err := list_query.ListQuery(l.svcCtx.DB.Preload("Architecture"), update_models.UpdateVersion{}, list_query.Option{
+	list, total, err := list_query.ListQuery(l.svcCtx.DB.Preload("Architecture"), platform_models.UpdateVersion{}, list_query.Option{
 		PageInfo: models.PageInfo{
 			Page:  req.Page,
 			Limit: req.PageSize,

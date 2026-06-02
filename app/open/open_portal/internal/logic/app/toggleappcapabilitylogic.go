@@ -27,7 +27,11 @@ func NewToggleAppCapabilityLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapabilityReq) (resp *types.ToggleAppCapabilityRes, err error) {
-	// 1. 查询应用
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
+	}
+
+	// 查询应用
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限操作")

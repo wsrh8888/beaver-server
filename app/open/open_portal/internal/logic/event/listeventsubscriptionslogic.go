@@ -25,6 +25,10 @@ func NewListEventSubscriptionsLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *ListEventSubscriptionsLogic) ListEventSubscriptions(req *types.ListEventSubscriptionsReq) (resp *types.ListEventSubscriptionsRes, err error) {
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
+	}
+
 	// todo: add your logic here and delete this line
 
 	return

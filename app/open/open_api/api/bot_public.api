@@ -1,0 +1,141 @@
+syntax = "v1"
+
+// ==================== 推送机器人公开接口（Gateway *_public 放行，logic 校验 Token + 签名）====================
+
+type (
+	BotAtInfo {
+		AtMobiles []string `json:"atMobiles,optional"`
+		AtUserIDs []string `json:"atUserIds,optional"`
+		IsAtAll   bool     `json:"isAtAll,optional"`
+	}
+
+	BotTextContent {
+		Content string     `json:"content"`
+		At      *BotAtInfo `json:"at,optional"`
+	}
+
+	BotMarkdownContent {
+		Title   string     `json:"title"`
+		Content string     `json:"text"`
+		Image   string     `json:"image,optional"`
+		At      *BotAtInfo `json:"at,optional"`
+	}
+
+	BotImageContent {
+		URL    string `json:"url"`
+		Width  int32  `json:"width,optional"`
+		Height int32  `json:"height,optional"`
+	}
+
+	BotVideoContent {
+		URL          string `json:"url"`
+		Width        int32  `json:"width,optional"`
+		Height       int32  `json:"height,optional"`
+		Duration     int32  `json:"duration,optional"`
+		ThumbnailURL string `json:"thumbnailUrl,optional"`
+	}
+
+	BotFileContent {
+		URL      string `json:"url"`
+		FileName string `json:"fileName"`
+		FileSize int64  `json:"fileSize"`
+		MimeType string `json:"mimeType,optional"`
+	}
+
+	BotVoiceContent {
+		URL      string `json:"url"`
+		Duration int32  `json:"duration,optional"`
+		FileSize int64  `json:"fileSize,optional"`
+	}
+
+	BotAudioFileContent {
+		URL      string `json:"url"`
+		FileName string `json:"fileName"`
+		Duration int32  `json:"duration,optional"`
+		FileSize int64  `json:"fileSize,optional"`
+	}
+
+	BotEmojiContent {
+		URL    string `json:"url"`
+		Width  int64  `json:"width,optional"`
+		Height int64  `json:"height,optional"`
+	}
+
+	BotNotificationContent {
+		Type   int32    `json:"type"`
+		Actors []string `json:"actors"`
+	}
+
+	BotCallContent {
+		RoomID   string `json:"roomId"`
+		CallType int32  `json:"callType"`
+		Status   int32  `json:"status"`
+		Duration int64  `json:"duration"`
+	}
+
+	BotWithdrawContent {
+		OriginMsgID string `json:"originMsgId"`
+	}
+
+	BotReplyContent {
+		OriginMsgID string `json:"originMsgId"`
+		MsgType     string `json:"msgType"`
+		Content     string `json:"content"`
+	}
+
+	BotForwardContent {
+		Title    string `json:"title"`
+		RecordID string `json:"recordId"`
+		Count    int32  `json:"count"`
+	}
+
+	BotLinkContent {
+		URL      string `json:"url"`
+		Title    string `json:"title"`
+		Desc     string `json:"desc,optional"`
+		ImageURL string `json:"imageUrl,optional"`
+	}
+
+	BotCardContent {
+		TemplateID string `json:"templateId"`
+		Data       string `json:"data"`
+	}
+)
+
+type (
+	BotSendReq {
+		Token        string                    `form:"token"`
+		Timestamp    int64                     `form:"timestamp,optional"`
+		Sign         string                    `form:"sign,optional"`
+		MsgType      string                    `json:"msgtype"`
+		Text         *BotTextContent           `json:"text,optional"`
+		Markdown     *BotMarkdownContent       `json:"markdown,optional"`
+		Image        *BotImageContent          `json:"image,optional"`
+		Video        *BotVideoContent          `json:"video,optional"`
+		File         *BotFileContent           `json:"file,optional"`
+		Voice        *BotVoiceContent          `json:"voice,optional"`
+		AudioFile    *BotAudioFileContent      `json:"audioFile,optional"`
+		Emoji        *BotEmojiContent          `json:"emoji,optional"`
+		Notification *BotNotificationContent   `json:"notification,optional"`
+		Call         *BotCallContent           `json:"call,optional"`
+		Withdraw     *BotWithdrawContent       `json:"withdraw,optional"`
+		Reply        *BotReplyContent          `json:"reply,optional"`
+		Forward      *BotForwardContent        `json:"forward,optional"`
+		Link         *BotLinkContent           `json:"link,optional"`
+		Card         *BotCardContent           `json:"card,optional"`
+	}
+
+	BotSendRes {
+		MessageID string `json:"messageId"`
+		SendTime  int64  `json:"sendTime"`
+	}
+)
+
+@server (
+	group: bot_public
+)
+service open {
+	@doc "推送机器人发送消息到群（第三方服务如 Jenkins/GitLab 调用此接口）"
+	@handler BotSend
+	post /api/open/bot_public/v1/send (BotSendReq) returns (BotSendRes)
+}

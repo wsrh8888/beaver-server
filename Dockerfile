@@ -84,10 +84,6 @@ RUN go build -ldflags="-s -w" -o notification_api/notification app/notification/
 RUN go build -ldflags="-s -w" -o notification_rpc/notificationrpc app/notification/notification_rpc/notificationrpc.go
 
 
-# ==================== UPDATE 相关服务 ====================
-# update_api
-RUN go build -ldflags="-s -w" -o update_api/update app/update/update_api/update.go
-
 # ==================== USER 相关服务 ====================
 # user_api
 RUN go build -ldflags="-s -w" -o user_api/user app/user/user_api/user.go

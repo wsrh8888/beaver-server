@@ -27,15 +27,13 @@ func NewUpdateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateA
 }
 
 func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateAppRes, err error) {
-	// 1. 从 header 获取当前用户 ID
-	userID := l.ctx.Value("userId")
-	if userID == nil {
-		return nil, errors.New("未登录")
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
 	}
 
-	// 2. 查询应用并验证权限
+	// 查询应用并验证权限
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, userID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限")
 	}
 

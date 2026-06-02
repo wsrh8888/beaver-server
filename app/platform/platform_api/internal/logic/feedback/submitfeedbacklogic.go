@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,6 +26,16 @@ func NewSubmitFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Su
 }
 
 func (l *SubmitFeedbackLogic) SubmitFeedback(req *types.SubmitFeedbackReq) (*types.SubmitFeedbackRes, error) {
+	if req.UserID == "" {
+		return nil, errors.New("用户ID不能为空")
+	}
+	if req.Content == "" {
+		return nil, errors.New("反馈内容不能为空")
+	}
+	if req.Type < 1 || req.Type > 4 {
+		return nil, errors.New("反馈类型不合法")
+	}
+
 	feedback := &platform_models.FeedbackModel{
 		UserID:    req.UserID,
 		Content:   req.Content,

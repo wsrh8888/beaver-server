@@ -3,7 +3,6 @@ package main
 import (
 	"beaver/app/open/open_portal/internal/config"
 	"beaver/app/open/open_portal/internal/handler"
-	"beaver/app/open/open_portal/internal/middleware"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/common/etcd"
 	"flag"
@@ -30,12 +29,6 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
-
-	// 注册全局中间件（日志）
-
-	// 开发者认证中间件（所有接口都需要登录，但部分接口不需要开发者资质）
-	devAuthMiddleware := middleware.DeveloperAuthMiddleware(c.Auth.AccessSecret, ctx.DB)
-	server.Use(devAuthMiddleware)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

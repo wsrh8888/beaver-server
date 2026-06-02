@@ -1,12 +1,13 @@
 syntax = "v1"
 
-// 提交用户反馈
+// ==================== 用户反馈（需登录，由 Gateway 鉴权并注入 Beaver-User-Id）====================
+
 type (
 	SubmitFeedbackReq {
-		UserID    string   `header:"Beaver-User-Id"` // 反馈人用户ID
-		Content   string   `json:"content"` // 反馈内容
-		Type      int      `json:"type"` // 反馈类型：1功能异常 2功能建议 3使用体验 4其他问题
-		FileNames []string `json:"fileNames,optional"` // 反馈图片 URL 列表，可选
+		UserID    string   `header:"Beaver-User-Id"`
+		Content   string   `json:"content"`
+		Type      int      `json:"type"`
+		FileNames []string `json:"fileNames,optional"`
 	}
 	SubmitFeedbackRes {}
 )
@@ -17,5 +18,5 @@ type (
 service platform {
 	@doc "提交用户反馈"
 	@handler SubmitFeedback
-	post /api/platform/v1/feedback/submit_feedback (SubmitFeedbackReq) returns (SubmitFeedbackRes)
+	post /api/platform/feedback/v1/submit_feedback (SubmitFeedbackReq) returns (SubmitFeedbackRes)
 }

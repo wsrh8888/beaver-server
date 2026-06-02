@@ -304,7 +304,7 @@ type LoginReq struct {
 type LoginRes struct {
 	Token    string `json:"token"`
 	UserID   string `json:"userId"`
-	NickName string `json:"nickName"` // 用户昵称
+	NickName string `json:"nickName"`
 	ExpireAt int64  `json:"expireAt"`
 }
 

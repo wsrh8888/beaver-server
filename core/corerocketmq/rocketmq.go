@@ -62,6 +62,10 @@ func generateMessageID() string {
 
 // SendMessage 发送消息到 MQ
 func (c *Client) SendMessage(ctx context.Context, topic mqwsconst.TopicType, payload map[string]interface{}) error {
+	if c == nil || c.Producer == nil {
+		return fmt.Errorf("RocketMQ 未初始化")
+	}
+
 	msg := &Message{
 		MessageID: generateMessageID(),
 		Timestamp: time.Now().UnixMilli(),
@@ -86,12 +90,17 @@ func (c *Client) SendMessage(ctx context.Context, topic mqwsconst.TopicType, pay
 	return nil
 }
 
-// RegisterConsumer 注册消费者
-func (c *Client) RegisterConsumer(group mqwsconst.GroupType, addr string, topic mqwsconst.TopicType, handler func(msg *Message) error) error {
+// RegisterConsumer 注册消费者；broadcast=true 时每个 WS 实例都会收到推送（内存连接表不共享）
+func (c *Client) RegisterConsumer(group mqwsconst.GroupType, addr string, topic mqwsconst.TopicType, broadcast bool, handler func(msg *Message) error) error {
+	model := consumer.Clustering
+	if broadcast {
+		model = consumer.BroadCasting
+	}
+
 	c2, err := rocketmq.NewPushConsumer(
 		consumer.WithGroupName(string(group)),
 		consumer.WithNameServer([]string{addr}),
-		consumer.WithConsumerModel(consumer.Clustering), // 集群模式，负载均衡
+		consumer.WithConsumerModel(model),
 	)
 	if err != nil {
 		return fmt.Errorf("创建 Consumer 失败: %v", err)

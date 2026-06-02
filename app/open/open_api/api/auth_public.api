@@ -1,0 +1,42 @@
+syntax = "v1"
+
+// ==================== 客户端凭证（Gateway *_public 放行，logic 校验 appSecret）====================
+
+type (
+	GetTokenReq {
+		AppID     string `json:"appId"`
+		AppSecret string `json:"appSecret"`
+	}
+
+	GetTokenRes {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken,optional"`
+		ExpiresIn    int64  `json:"expiresIn"`
+		TokenType    string `json:"tokenType"`
+	}
+)
+
+type (
+	RefreshTokenReq {
+		RefreshToken string `json:"refreshToken"`
+	}
+
+	RefreshTokenRes {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken,optional"`
+		ExpiresIn    int64  `json:"expiresIn"`
+	}
+)
+
+@server (
+	group: auth_public
+)
+service open {
+	@doc "获取访问令牌（客户端凭证模式）"
+	@handler GetToken
+	post /api/open/auth_public/v1/token (GetTokenReq) returns (GetTokenRes)
+
+	@doc "刷新访问令牌"
+	@handler RefreshToken
+	post /api/open/auth_public/v1/refresh (RefreshTokenReq) returns (RefreshTokenRes)
+}

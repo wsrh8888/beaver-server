@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 
 	"beaver/app/backend/backend_admin/internal/svc"
@@ -37,7 +37,7 @@ func (l *GetAppsLogic) GetApps(req *types.GetAppsReq) (resp *types.GetAppsRes, e
 	}
 
 	// 构建查询
-	query := l.svcCtx.DB.Model(&update_models.UpdateApp{})
+	query := l.svcCtx.DB.Model(&platform_models.UpdateApp{})
 	if req.IsActive {
 		query = query.Where("is_active = ?", true)
 	}
@@ -50,7 +50,7 @@ func (l *GetAppsLogic) GetApps(req *types.GetAppsReq) (resp *types.GetAppsRes, e
 	}
 
 	// 获取分页数据
-	var apps []update_models.UpdateApp
+	var apps []platform_models.UpdateApp
 	if err := query.Offset(int((page - 1) * pageSize)).
 		Limit(int(pageSize)).
 		Order("created_at DESC").

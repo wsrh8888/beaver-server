@@ -1,10 +1,11 @@
 syntax = "v1"
 
-// ==================== 用户接口 ====================
+// ==================== 用户接口（Gateway 不鉴权，logic 校验 access_token + scope）====================
 
 type (
 	GetUserInfoReq {
-		UserID string `form:"userId"` // 要查询的用户ID
+		UserID        string `form:"userId"` // 要查询的用户ID
+		Authorization string `header:"Authorization"` // Bearer {access_token}
 	}
 
 	GetUserInfoUserItem {
@@ -22,7 +23,8 @@ type (
 
 type (
 	GetUserListReq {
-		UserIDs []string `json:"userIds"` // 用户ID列表（批量查询）
+		UserIDs       []string `json:"userIds"` // 用户ID列表（批量查询）
+		Authorization string   `header:"Authorization"` // Bearer {access_token}
 	}
 
 	GetUserListUserItem {
@@ -39,15 +41,14 @@ type (
 )
 
 @server (
-	group:      user
-	middleware: AuthMiddleware
+	group: user
 )
 service open {
 	@doc "获取单个用户信息"
 	@handler GetUserInfo
-	get /api/open/v1/user/get_info (GetUserInfoReq) returns (GetUserInfoRes)
+	get /api/open/user/v1/get_info (GetUserInfoReq) returns (GetUserInfoRes)
 
 	@doc "批量获取用户信息"
 	@handler GetUserList
-	post /api/open/v1/user/list (GetUserListReq) returns (GetUserListRes)
+	post /api/open/user/v1/list (GetUserListReq) returns (GetUserListRes)
 }

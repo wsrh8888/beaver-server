@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"context"
 	"fmt"
 
@@ -28,7 +28,7 @@ func NewGetCityStrategiesLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 func (l *GetCityStrategiesLogic) GetCityStrategies(req *types.GetCityStrategiesReq) (resp *types.GetCityStrategiesRes, err error) {
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&update_models.UpdateStrategy{})
+	query := l.svcCtx.DB.Model(&platform_models.UpdateStrategy{})
 
 	// 应用ID过滤
 	if req.AppID != "" {
@@ -57,7 +57,7 @@ func (l *GetCityStrategiesLogic) GetCityStrategies(req *types.GetCityStrategiesR
 	offset := (req.Page - 1) * req.PageSize
 
 	// 查询策略列表
-	var strategies []update_models.UpdateStrategy
+	var strategies []platform_models.UpdateStrategy
 	if err := query.Offset(offset).Limit(req.PageSize).Order("created_at DESC").Find(&strategies).Error; err != nil {
 		logx.Errorf("Failed to get city strategies: %v", err)
 		return nil, fmt.Errorf("获取城市策略列表失败")
@@ -71,7 +71,7 @@ func (l *GetCityStrategiesLogic) GetCityStrategies(req *types.GetCityStrategiesR
 		if strategy.Strategy != nil {
 			for _, s := range *strategy.Strategy {
 				// 查询版本信息
-				var version update_models.UpdateVersion
+				var version platform_models.UpdateVersion
 				versionStr := "未知版本"
 				if err := l.svcCtx.DB.Where("id = ?", s.VersionID).First(&version).Error; err == nil {
 					versionStr = version.Version

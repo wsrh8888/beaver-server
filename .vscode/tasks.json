@@ -149,14 +149,6 @@
       ]
     },
     {
-      "label": "update_api",
-      "type": "shell",
-      "command": "cd app/update/update_api;  go run update.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
       "label": "backend_admin",
       "type": "shell",
       "command": "cd app/backend/backend_admin;  go run backend_admin.go",
@@ -176,7 +168,7 @@
       "label": "启动Api全部任务",
       "type": "shell",
       "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "platform_api","update_api",],
+      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "platform_api"],
       "dependsOrder": "parallel",
       "problemMatcher": []
     },

@@ -1,0 +1,25 @@
+syntax = "v1"
+
+// ==================== 开发者 Portal 公开接口（无需登录，Gateway PublicList）====================
+
+type (
+	LoginReq {
+		Username string `json:"username"` // 手机号或邮箱
+		Password string `json:"password"`
+	}
+	LoginRes {
+		Token    string `json:"token"`
+		UserID   string `json:"userId"`
+		NickName string `json:"nickName"`
+		ExpireAt int64  `json:"expireAt"`
+	}
+)
+
+@server (
+	group: auth_public
+)
+service open {
+	@doc "开发者 Portal 登录"
+	@handler Login
+	post /api/open_portal/auth_public/v1/login (LoginReq) returns (LoginRes)
+}

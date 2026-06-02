@@ -25,6 +25,10 @@ func NewListIncomingWebhooksLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *ListIncomingWebhooksLogic) ListIncomingWebhooks(req *types.ListIncomingWebhooksReq) (resp *types.ListIncomingWebhooksRes, err error) {
+	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
+		return nil, err
+	}
+
 	// todo: add your logic here and delete this line
 
 	return

@@ -94,26 +94,27 @@ type (
 
 @server (
 	group: bot
+	middleware: DeveloperAuthMiddleware
 )
 service open {
 	@doc "获取 Bot 配置"
 	@handler GetBotConfig
-	get /portal/open/v1/bot/config (GetBotConfigReq) returns (GetBotConfigRes)
+	get /api/open_portal/bot/v1/config (GetBotConfigReq) returns (GetBotConfigRes)
 
 	@doc "更新 Bot 配置"
 	@handler UpdateBotConfig
-	post /portal/open/v1/bot/config_update (UpdateBotConfigReq) returns (UpdateBotConfigRes)
+	post /api/open_portal/bot/v1/config_update (UpdateBotConfigReq) returns (UpdateBotConfigRes)
 
 	@doc "创建 Incoming Webhook"
 	@handler CreateIncomingWebhook
-	post /portal/open/v1/bot/incoming_create (CreateIncomingWebhookReq) returns (CreateIncomingWebhookRes)
+	post /api/open_portal/bot/v1/incoming_create (CreateIncomingWebhookReq) returns (CreateIncomingWebhookRes)
 
 	@doc "获取 Incoming Webhook 列表"
 	@handler ListIncomingWebhooks
-	get /portal/open/v1/bot/incoming_list (ListIncomingWebhooksReq) returns (ListIncomingWebhooksRes)
+	get /api/open_portal/bot/v1/incoming_list (ListIncomingWebhooksReq) returns (ListIncomingWebhooksRes)
 
 	@doc "删除 Incoming Webhook"
 	@handler DeleteIncomingWebhook
-	post /portal/open/v1/bot/incoming_delete (DeleteIncomingWebhookReq) returns (DeleteIncomingWebhookRes)
+	post /api/open_portal/bot/v1/incoming_delete (DeleteIncomingWebhookReq) returns (DeleteIncomingWebhookRes)
 }
 

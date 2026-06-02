@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"beaver/app/update/update_models"
+	"beaver/app/platform/platform_models"
 	"beaver/common/list_query"
 	"beaver/common/models"
 	"context"
@@ -40,7 +40,7 @@ func (l *GetArchitecturesLogic) GetArchitectures(req *types.GetArchitecturesReq)
 	}
 
 	// 使用 list_query 进行查询
-	list, total, err := list_query.ListQuery(l.svcCtx.DB.Preload("App"), update_models.UpdateArchitecture{}, list_query.Option{
+	list, total, err := list_query.ListQuery(l.svcCtx.DB.Preload("App"), platform_models.UpdateArchitecture{}, list_query.Option{
 		PageInfo: models.PageInfo{
 			Page:  req.Page,
 			Limit: req.PageSize,

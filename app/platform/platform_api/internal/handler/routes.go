@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	feedback "beaver/app/platform/platform_api/internal/handler/feedback"
-	track "beaver/app/platform/platform_api/internal/handler/track"
+	track_public "beaver/app/platform/platform_api/internal/handler/track_public"
+	update_public "beaver/app/platform/platform_api/internal/handler/update_public"
 	"beaver/app/platform/platform_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -17,7 +18,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 提交用户反馈
 				Method:  http.MethodPost,
-				Path:    "/api/platform/v1/feedback/submit_feedback",
+				Path:    "/api/platform/feedback/v1/submit_feedback",
 				Handler: feedback.SubmitFeedbackHandler(serverCtx),
 			},
 		},
@@ -28,14 +29,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 记录客户端日志
 				Method:  http.MethodPost,
-				Path:    "/api/platform/v1/track/log_events",
-				Handler: track.LogEventsHandler(serverCtx),
+				Path:    "/api/platform/track_public/v1/log_events",
+				Handler: track_public.LogEventsHandler(serverCtx),
 			},
 			{
 				// 上报统计埋点事件
 				Method:  http.MethodPost,
-				Path:    "/api/platform/v1/track/report_events",
-				Handler: track.ReportEventsHandler(serverCtx),
+				Path:    "/api/platform/track_public/v1/report_events",
+				Handler: track_public.ReportEventsHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 获取最新版本
+				Method:  http.MethodPost,
+				Path:    "/api/platform/update_public/v1/latest",
+				Handler: update_public.GetLatestVersionHandler(serverCtx),
+			},
+			{
+				// 上报版本信息
+				Method:  http.MethodPost,
+				Path:    "/api/platform/update_public/v1/report",
+				Handler: update_public.ReportVersionHandler(serverCtx),
 			},
 		},
 	)

@@ -3,6 +3,7 @@ package oauth_secret
 import (
 	"context"
 
+	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 
@@ -15,7 +16,6 @@ type RevokeTokenLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 撤销 Token（登出 / 解除授权）
 func NewRevokeTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RevokeTokenLogic {
 	return &RevokeTokenLogic{
 		Logger: logx.WithContext(ctx),
@@ -25,7 +25,9 @@ func NewRevokeTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Revok
 }
 
 func (l *RevokeTokenLogic) RevokeToken(req *types.RevokeTokenReq) (resp *types.RevokeTokenRes, err error) {
-	// todo: add your logic here and delete this line
+	if err := oauthutil.RevokeOAuthToken(l.svcCtx.DB, req.Token); err != nil {
+		return nil, err
+	}
 
-	return
+	return &types.RevokeTokenRes{Success: true}, nil
 }
