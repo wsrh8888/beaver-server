@@ -7,8 +7,7 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
-	auth_models "beaver/app/auth/auth_models"
-	"beaver/app/user/user_models"
+	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/pwd"
 
@@ -34,34 +33,29 @@ func (l *PhoneRegisterLogic) PhoneRegister(req *types.PhoneRegisterReq) (*types.
 		return nil, err
 	}
 
-	var user user_models.UserModel
-	if err := l.svcCtx.DB.Take(&user, "phone = ?", req.Phone).Error; err == nil {
+	if _, err := l.svcCtx.UserRpc.SearchUser(l.ctx, &user_rpc.SearchUserReq{
+		Keyword: req.Phone,
+		Type:    "phone",
+	}); err == nil {
 		return nil, errors.New("该手机号已被注册")
 	}
 
 	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
-		Phone:  req.Phone,
-		Source: 1,
+		Phone: req.Phone, Source: 1,
 	})
 	if err != nil {
 		logx.Errorf("创建用户失败: %v", err)
 		return nil, errors.New("注册失败")
 	}
 
-	userID := createRes.UserID
-	hashedPassword := pwd.HahPwd(req.Password)
-	credential := auth_models.AuthCredentialModel{
-		UserID:   userID,
-		Password: hashedPassword,
-	}
-
-	if err := l.svcCtx.DB.Create(&credential).Error; err != nil {
+	if err := l.svcCtx.DB.Create(&auth_models.AuthCredentialModel{
+		UserID: createRes.UserID, Password: pwd.HahPwd(req.Password),
+	}).Error; err != nil {
 		logx.Errorf("创建用户凭证失败: %v", err)
-		l.svcCtx.DB.Where("user_id = ?", userID).Delete(&user_models.UserModel{})
 		return nil, errors.New("创建用户凭证失败")
 	}
 
-	logx.Infof("用户注册成功: userID=%s, phone=%s", userID, req.Phone)
+	logx.Infof("用户注册成功: userID=%s, phone=%s", createRes.UserID, req.Phone)
 	return &types.PhoneRegisterRes{}, nil
 }
 

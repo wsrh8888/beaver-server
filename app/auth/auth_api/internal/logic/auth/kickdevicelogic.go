@@ -1,13 +1,14 @@
-package logic
+package auth
 
 import (
 	"context"
 	"errors"
 	"fmt"
 
-	"beaver/app/user/user_api/internal/svc"
-	"beaver/app/user/user_api/internal/types"
-	"beaver/app/user/user_models"
+	"beaver/app/auth/auth_api/internal/svc"
+	"beaver/app/auth/auth_api/internal/types"
+	"beaver/app/auth/auth_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -21,7 +22,6 @@ type KickDeviceLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 强制下线指定设备
 func NewKickDeviceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *KickDeviceLogic {
 	return &KickDeviceLogic{
 		Logger: logx.WithContext(ctx),
@@ -30,22 +30,25 @@ func NewKickDeviceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *KickDe
 	}
 }
 
-func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (resp *types.KickDeviceRes, err error) {
-	// 查询设备，确认归属于当前用户
-	var device user_models.UserDeviceModel
+func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDeviceRes, error) {
+	var device auth_models.AuthDeviceModel
 	if err := l.svcCtx.DB.Where("user_id = ? AND device_id = ?", req.UserID, req.DeviceID).
 		First(&device).Error; err != nil {
 		return nil, errors.New("设备不存在")
 	}
 
-	// 删除该设备类型对应的 Redis 登录态，使 token 立即失效
-	redisKey := fmt.Sprintf("login_%s_%s", req.UserID, device.DeviceType)
+	redisKey := fmt.Sprintf("user_authentication_session:%s:%s", req.UserID, device.DeviceType)
 	l.svcCtx.Redis.Del(redisKey)
 
-	// 标记设备为非活跃
 	l.svcCtx.DB.Model(&device).Update("is_active", false)
 
-	// 异步通过 RocketMQ 推送强制下线通知（客户端收到后比对 deviceId，执行本地登出）
+	if _, err := l.svcCtx.NotificationRpc.DisablePushToken(l.ctx, &notification_rpc.DisablePushTokenReq{
+		UserId:   req.UserID,
+		DeviceId: req.DeviceID,
+	}); err != nil {
+		l.Errorf("禁用 Push Token 失败: userId=%s, deviceId=%s, err=%v", req.UserID, req.DeviceID, err)
+	}
+
 	go func() {
 		payload := map[string]interface{}{
 			"command":  wsCommandConst.USER_PROFILE,

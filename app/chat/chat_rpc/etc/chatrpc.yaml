@@ -24,5 +24,23 @@ UserRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+NotificationRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: notificationrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
+Push:
+  Enabled: false
+  FCM:
+    Enabled: false
+    ProjectID: ""
+    CredentialsFile: ""
+  APNs:
+    Enabled: false
+    KeyFile: ""
+    KeyID: ""
+    TeamID: ""
+    BundleID: ""
+    Production: false

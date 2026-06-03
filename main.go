@@ -48,6 +48,7 @@ func main() {
 
 			// 认证相关表
 			&auth_models.AuthCredentialModel{},
+			&auth_models.AuthDeviceModel{},
 
 			// 好友相关表
 			&friend_models.FriendModel{},
@@ -102,6 +103,7 @@ func main() {
 			&notification_models.NotificationEvent{},
 			&notification_models.NotificationInbox{},
 			&notification_models.NotificationRead{},
+			&notification_models.PushRegistrationModel{},
 
 			// 音视频通话表
 			&call_models.CallSession{},

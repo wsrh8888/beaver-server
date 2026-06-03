@@ -26,19 +26,11 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 }
 
 func (l *LogoutLogic) Logout(req *types.LogoutReq) (*types.LogoutRes, error) {
-	tokenKey := fmt.Sprintf("login_%s", req.UserID)
-	if err := l.svcCtx.Redis.Del(tokenKey).Err(); err != nil {
-		l.Logger.Errorf("删除用户token失败: %v", err)
-		return nil, fmt.Errorf("登出失败")
-	}
-
-	deviceKey := fmt.Sprintf("device_%s", req.UserID)
-	if err := l.svcCtx.Redis.Del(deviceKey).Err(); err != nil {
-		l.Logger.Errorf("删除设备信息失败: %v", err)
-		return nil, fmt.Errorf("登出失败")
+	for _, group := range []string{"desktop", "mobile"} {
+		key := fmt.Sprintf("user_authentication_session:%s:%s", req.UserID, group)
+		l.svcCtx.Redis.Del(key)
 	}
 
 	l.Logger.Infof("用户 %s 登出成功,时间: %s", req.UserID, time.Now().Format("2006-01-02 15:04:05"))
-
 	return &types.LogoutRes{}, nil
 }

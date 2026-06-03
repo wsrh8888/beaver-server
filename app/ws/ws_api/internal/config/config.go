@@ -24,6 +24,7 @@ type Config struct {
 	RocketMQ struct {
 		Addr string
 	}
+	InstanceID string `json:",optional"`
 	WebSocket struct {
 		PongWait             int
 		WriteWait            int

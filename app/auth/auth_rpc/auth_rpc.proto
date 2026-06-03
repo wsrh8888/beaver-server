@@ -52,12 +52,48 @@ message UpdateLoginRecordRes {
   bool success = 1; // 是否成功
 }
 
-service auth {
-  rpc CreateCredential(CreateCredentialReq) returns(CreateCredentialRes);     // 创建用户凭证
-  rpc VerifyPassword(VerifyPasswordReq) returns(VerifyPasswordRes);           // 验证密码
-  rpc UpdatePassword(UpdatePasswordReq) returns(UpdatePasswordRes);           // 修改密码
-  rpc GetLastLoginAt(GetLastLoginAtReq) returns(GetLastLoginAtRes);           // 获取最后登录时间
-  rpc UpdateLoginRecord(UpdateLoginRecordReq) returns(UpdateLoginRecordRes);  // 更新登录记录
+// 重置密码（已通过验证码等校验，无需旧密码）
+message ResetPasswordReq {
+  string user_id = 1;
+  string new_password = 2;
 }
 
-// goctl rpc protoc auth_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+message ResetPasswordRes {
+  bool success = 1;
+}
+
+// 登录登记设备（auth 库）
+message UpsertDeviceReq {
+  string user_id = 1;
+  string device_id = 2;
+  string device_type = 3;
+  string device_os = 4;
+  string device_name = 5;
+  string last_login_ip = 6;
+}
+
+message UpsertDeviceRes {
+  bool success = 1;
+}
+
+message CheckDeviceActiveReq {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+message CheckDeviceActiveRes {
+  bool active = 1;
+}
+
+service auth {
+  rpc CreateCredential(CreateCredentialReq) returns(CreateCredentialRes);
+  rpc VerifyPassword(VerifyPasswordReq) returns(VerifyPasswordRes);
+  rpc UpdatePassword(UpdatePasswordReq) returns(UpdatePasswordRes);
+  rpc GetLastLoginAt(GetLastLoginAtReq) returns(GetLastLoginAtRes);
+  rpc UpdateLoginRecord(UpdateLoginRecordReq) returns(UpdateLoginRecordRes);
+  rpc ResetPassword(ResetPasswordReq) returns(ResetPasswordRes);
+  rpc UpsertDevice(UpsertDeviceReq) returns(UpsertDeviceRes);
+  rpc CheckDeviceActive(CheckDeviceActiveReq) returns(CheckDeviceActiveRes);
+}
+
+// goctl rpc protoc auth_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

@@ -1,16 +1,16 @@
 package handler
 
 import (
-	"beaver/app/user/user_api/internal/logic"
-	"beaver/app/user/user_api/internal/svc"
-	"beaver/app/user/user_api/internal/types"
+	"beaver/app/auth/auth_api/internal/logic/auth"
+	"beaver/app/auth/auth_api/internal/svc"
+	"beaver/app/auth/auth_api/internal/types"
 	"beaver/common/response"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func getDevicesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetDevicesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.GetDevicesReq
 		if err := httpx.Parse(r, &req); err != nil {

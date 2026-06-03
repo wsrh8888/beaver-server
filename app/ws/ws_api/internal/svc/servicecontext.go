@@ -1,6 +1,9 @@
 package svc
 
 import (
+	"fmt"
+	"os"
+
 	"beaver/app/chat/chat_rpc/chat"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_rpc/group"
@@ -17,12 +20,13 @@ import (
 )
 
 type ServiceContext struct {
-	Config   config.Config
-	Redis    *redis.Client
-	DB       *gorm.DB
-	GroupRpc group_rpc.GroupClient
-	ChatRpc  chat_rpc.ChatClient
-	RocketMQ *corerocketmq.Client
+	Config     config.Config
+	Redis      *redis.Client
+	DB         *gorm.DB
+	GroupRpc   group_rpc.GroupClient
+	ChatRpc    chat_rpc.ChatClient
+	RocketMQ   *corerocketmq.Client
+	InstanceID string
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -31,11 +35,20 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 
 	return &ServiceContext{
-		DB:       mysqlDb,
-		Redis:    client,
-		Config:   c,
-		GroupRpc: group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		ChatRpc:  chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		RocketMQ: mqClient,
+		DB:         mysqlDb,
+		Redis:      client,
+		Config:     c,
+		GroupRpc:   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		ChatRpc:    chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		RocketMQ:   mqClient,
+		InstanceID: buildInstanceID(c.InstanceID),
 	}
+}
+
+func buildInstanceID(configured string) string {
+	if configured != "" {
+		return configured
+	}
+	host, _ := os.Hostname()
+	return fmt.Sprintf("%s-%d", host, os.Getpid())
 }

@@ -16,8 +16,12 @@ type Config struct {
 		Db       int
 	}
 	Etcd      string
-	WhiteList []string //白名单
-	UserRpc   zrpc.RpcClientConf
+	WhiteList []string
+	UserRpc         zrpc.RpcClientConf
+	NotificationRpc zrpc.RpcClientConf
+	RocketMQ        struct {
+		Addr string
+	}
 	Auth      struct {
 		AccessSecret string
 		AccessExpire int

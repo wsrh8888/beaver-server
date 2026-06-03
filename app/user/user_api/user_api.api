@@ -39,25 +39,6 @@ type (
 	UpdateEmailRes  {}
 )
 
-// 获取设备列表
-type (
-	GetDevicesReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID
-	}
-	GetDevicesRes {
-		Devices []DeviceInfo `json:"devices"` // 设备列表
-	}
-	DeviceInfo {
-		DeviceID      string `json:"deviceId"` // 设备ID
-		DeviceType    string `json:"deviceType"` // 设备类型：desktop/mobile/web
-		DeviceOS      string `json:"deviceOs"` // 操作系统：windows/macos/linux/android/ios/harmonyos
-		DeviceName    string `json:"deviceName"` // 设备名称
-		LastLoginTime string `json:"lastLoginTime"` // 最后登录时间
-		IsActive      bool   `json:"isActive"` // 是否活跃
-		LastLoginIP   string `json:"lastLoginIp"` // 最后登录IP
-	}
-)
-
 // 用户数据同步（大厂用户独立版本号方式）
 type (
 	UserVersion {
@@ -86,15 +67,6 @@ type (
 	}
 )
 
-// 强制下线指定设备
-type (
-	KickDeviceReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-		DeviceID string `json:"deviceId"` // 要踢下线的设备ID
-	}
-	KickDeviceRes  {}
-)
-
 // 用户服务
 service user {
 	@doc "获取用户基础信息"
@@ -109,18 +81,9 @@ service user {
 	@handler updateEmail
 	post /api/user/update_email (UpdateEmailReq) returns (UpdateEmailRes)
 
-	@doc "获取用户设备列表"
-	@handler getDevices
-	get /api/user/devices (GetDevicesReq) returns (GetDevicesRes)
-
 	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
 	post /api/user/sync (UserSyncReq) returns (UserSyncRes)
-
-	@doc "强制下线指定设备"
-	@handler kickDevice
-	post /api/user/kick_device (KickDeviceReq) returns (KickDeviceRes)
 }
 
-// 生成代码命令
 // goctl api go -api user_api.api -dir . --home ../../../template

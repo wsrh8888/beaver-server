@@ -428,6 +428,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	// 5. 异步推送消息更新给会话成员（按表分组，一次推送包含所有相关更新）
 	go func() {
 		l.notifyMessageUpdateGrouped(in.ConversationId, in.UserId, conversationType, messagesUpdate, conversationsUpdate, allUserConversationUpdates)
+		l.sendOfflinePushIfNeeded(in.ConversationId, in.UserId, chatModel, recipientIdsFromUpdates(allUserConversationUpdates, in.ConversationId))
 	}()
 
 	return &chat_rpc.SendMsgRes{
@@ -500,6 +501,16 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 			l.Logger.Errorf("MQ 推送失败: recipient=%s, conversation=%s, error=%v", recipientId, conversationId, err)
 		}
 	}
+}
+
+func recipientIdsFromUpdates(updates []chatrpcutils.UserConversationUpdate, conversationID string) []string {
+	var ids []string
+	for _, update := range updates {
+		if update.ConversationID == conversationID {
+			ids = append(ids, update.UserID)
+		}
+	}
+	return ids
 }
 
 // getSenderInfo 获取发送者信息

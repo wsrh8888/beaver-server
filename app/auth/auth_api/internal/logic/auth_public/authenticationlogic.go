@@ -4,12 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
-	"beaver/utils/device"
+	"beaver/common/middleware/ua"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
 
@@ -30,53 +29,60 @@ func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 	}
 }
 
-func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp *types.AuthenticationRes, err error) {
+func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (*types.AuthenticationRes, error) {
 	if utils.InListByRegex(l.svcCtx.Config.WhiteList, req.ValidPath) {
-		return
+		return &types.AuthenticationRes{}, nil
 	}
 	if req.Token == "" {
 		return nil, errors.New("token不能为空")
 	}
+
 	claims, err := jwts.ParseToken(req.Token, l.svcCtx.Config.Auth.AccessSecret)
 	if err != nil {
-		logx.Errorf("解析token失败: %v", err)
 		return nil, errors.New("认证失败")
 	}
 
-	userAgent := l.ctx.Value("user-agent")
-	logx.Infof("User-Agent: %s", userAgent)
-	var deviceType string
-	if userAgent == nil {
-		deviceType = "unknown"
-		logx.Errorf("User-Agent为空，用户: %s", claims.UserID)
-	} else {
-		deviceType = device.GetDeviceType(userAgent.(string))
-		logx.Infof("认证设备类型识别 - 用户: %s, User-Agent: %s, 识别结果: %s", claims.UserID, userAgent.(string), deviceType)
+	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
+	groups := []string{deviceGroup}
+	if deviceGroup == "" {
+		groups = []string{"desktop", "mobile"}
 	}
 
-	key := fmt.Sprintf("login_%s_%s", claims.UserID, deviceType)
-	loginInfoStr, err := l.svcCtx.Redis.Get(key).Result()
-	if err != nil {
-		logx.Errorf("获取登录信息失败: %v, Key: %s", err, key)
+	var sessionKey string
+	var loginInfo map[string]interface{}
+	for _, g := range groups {
+		if g == "" {
+			continue
+		}
+		key := "user_authentication_session:" + claims.UserID + ":" + g
+		val, err := l.svcCtx.Redis.Get(key).Result()
+		if err != nil {
+			continue
+		}
+		var info map[string]interface{}
+		if json.Unmarshal([]byte(val), &info) != nil {
+			continue
+		}
+		storedToken, _ := info["token"].(string)
+		if storedToken != req.Token {
+			continue
+		}
+		if claims.DeviceID != "" {
+			if storedDeviceID, ok := info["device_id"].(string); ok && storedDeviceID != claims.DeviceID {
+				return nil, errors.New("设备标识符不匹配")
+			}
+		}
+		sessionKey = key
+		loginInfo = info
+		break
+	}
+	if loginInfo == nil {
 		return nil, errors.New("token已失效")
 	}
 
-	var loginInfo map[string]interface{}
-	if err := json.Unmarshal([]byte(loginInfoStr), &loginInfo); err != nil {
-		return nil, errors.New("登录信息格式错误")
-	}
-
-	storedToken, ok := loginInfo["token"].(string)
-	if !ok || storedToken != req.Token {
-		return nil, errors.New("token已失效或不匹配")
-	}
-
 	loginInfo["last_active"] = time.Now().Format("2006-01-02 15:04:05")
-	updatedInfo, _ := json.Marshal(loginInfo)
-	l.svcCtx.Redis.Set(key, string(updatedInfo), time.Hour*48)
+	updated, _ := json.Marshal(loginInfo)
+	l.svcCtx.Redis.Set(sessionKey, string(updated), time.Hour*time.Duration(l.svcCtx.Config.Auth.AccessExpire))
 
-	resp = &types.AuthenticationRes{
-		UserID: claims.UserID,
-	}
-	return resp, nil
+	return &types.AuthenticationRes{UserID: claims.UserID}, nil
 }

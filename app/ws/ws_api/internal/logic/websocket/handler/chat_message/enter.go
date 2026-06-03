@@ -18,6 +18,8 @@ func Handle(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r
 		return HandleGroupMessageSend(ctx, svcCtx, req, r, client, content.MessageID, content.Data.Body)
 	case wsTypeConst.PrivateMessageSend:
 		return HandlePrivateMessageSend(ctx, svcCtx, req, r, client, content.MessageID, content.Data.Body)
+	case wsTypeConst.TypingSend:
+		return HandleTypingSend(ctx, svcCtx, req, r, client, content.Data.Body)
 	default:
 		fmt.Println("未支持的消息类型:", content.Data.Type)
 		return fmt.Errorf("unsupported message type: %s", content.Data.Type)

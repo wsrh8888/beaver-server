@@ -9,6 +9,7 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/core/corepush"
 
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,21 +31,23 @@ func HandleClientPing(client *ws_conn.Client, timestamp int64) {
 // Manager 服务端主动心跳管理器
 // 维护协议级 WebSocket ping 帧，确保链路不被中间件（如 Nginx/ELB）超时断开
 type Manager struct {
-	client *ws_conn.Client
-	userID string
-	svcCtx *svc.ServiceContext
-	ctx    context.Context
-	cancel context.CancelFunc
+	client      *ws_conn.Client
+	userID      string
+	deviceGroup string
+	svcCtx      *svc.ServiceContext
+	ctx         context.Context
+	cancel      context.CancelFunc
 }
 
-func NewManager(client *ws_conn.Client, userID string, svcCtx *svc.ServiceContext) *Manager {
+func NewManager(client *ws_conn.Client, userID, deviceGroup string, svcCtx *svc.ServiceContext) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Manager{
-		client: client,
-		userID: userID,
-		svcCtx: svcCtx,
-		ctx:    ctx,
-		cancel: cancel,
+		client:      client,
+		userID:      userID,
+		deviceGroup: deviceGroup,
+		svcCtx:      svcCtx,
+		ctx:         ctx,
+		cancel:      cancel,
 	}
 }
 
@@ -74,6 +77,7 @@ func (m *Manager) startProtocolPing() {
 		case <-m.ctx.Done():
 			return
 		case <-ticker.C:
+			corepush.RefreshOnline(m.svcCtx.Redis, m.userID)
 			if err := m.sendProtocolPing(); err != nil {
 				logx.Errorf("协议级 ping 失败, 用户: %s, 错误: %v", m.userID, err)
 				return

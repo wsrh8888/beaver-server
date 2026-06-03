@@ -19,19 +19,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: deleteNotificationHandler(serverCtx),
 			},
 			{
-				// 按ID拉取通知事件明细
+				// 按ID拉取通知事件明细（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/notification/getEventsByIds",
 				Handler: getEventsByIdsHandler(serverCtx),
 			},
 			{
-				// 按ID拉取收件箱明细
+				// 按ID拉取收件箱明细（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/notification/getInboxByIds",
 				Handler: getInboxByIdsHandler(serverCtx),
 			},
 			{
-				// 按分类拉取通知已读游标
+				// 按分类拉取通知已读游标（数据库同步）
 				Method:  http.MethodPost,
 				Path:    "/api/notification/getReadCursors",
 				Handler: getReadCursorsHandler(serverCtx),
@@ -59,6 +59,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/notification/markReadByEvent",
 				Handler: markReadByEventHandler(serverCtx),
+			},
+			{
+				// 注册或更新离线推送 Token（FCM/APNs）
+				Method:  http.MethodPost,
+				Path:    "/api/notification/register_push_token",
+				Handler: registerPushTokenHandler(serverCtx),
 			},
 		},
 	)

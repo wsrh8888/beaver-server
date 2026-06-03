@@ -125,6 +125,16 @@ type (
 	}
 )
 
+type (
+	RegisterPushTokenReq {
+		UserID       string `header:"Beaver-User-Id"`
+		DeviceID     string `header:"deviceId"`
+		PushToken    string `json:"pushToken"`
+		PushPlatform string `json:"pushPlatform"`
+	}
+	RegisterPushTokenRes  {}
+)
+
 service notification {
 	@doc "按ID拉取通知事件明细（数据库同步）"
 	@handler getEventsByIds
@@ -157,6 +167,10 @@ service notification {
 	@doc "获取未读汇总（红点）"
 	@handler getUnreadSummary
 	post /api/notification/getUnreadSummary (getUnreadSummaryReq) returns (getUnreadSummaryRes)
+
+	@doc "注册或更新离线推送 Token（FCM/APNs）"
+	@handler registerPushToken
+	post /api/notification/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template

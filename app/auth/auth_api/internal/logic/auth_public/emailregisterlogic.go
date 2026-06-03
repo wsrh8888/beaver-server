@@ -8,8 +8,7 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
-	auth_models "beaver/app/auth/auth_models"
-	"beaver/app/user/user_models"
+	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/pwd"
 
@@ -35,37 +34,30 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (*types.
 		return nil, err
 	}
 
-	var user user_models.UserModel
-	if err := l.svcCtx.DB.Take(&user, "email = ?", req.Email).Error; err == nil {
+	if _, err := l.svcCtx.UserRpc.SearchUser(l.ctx, &user_rpc.SearchUserReq{
+		Keyword: req.Email,
+		Type:    "email",
+	}); err == nil {
 		return nil, errors.New("该邮箱已被注册")
 	}
 
 	nickName := fmt.Sprintf("用户%s", req.Email[:strings.Index(req.Email, "@")])
 	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
-		Email:    req.Email,
-		NickName: nickName,
-		Source:   2,
-		Phone:    "",
+		Email: req.Email, NickName: nickName, Source: 2,
 	})
 	if err != nil {
 		logx.Errorf("创建用户失败: %v", err)
 		return nil, errors.New("注册失败")
 	}
 
-	userID := createRes.UserID
-	hashedPassword := pwd.HahPwd(req.Password)
-	credential := auth_models.AuthCredentialModel{
-		UserID:   userID,
-		Password: hashedPassword,
-	}
-
-	if err := l.svcCtx.DB.Create(&credential).Error; err != nil {
+	if err := l.svcCtx.DB.Create(&auth_models.AuthCredentialModel{
+		UserID: createRes.UserID, Password: pwd.HahPwd(req.Password),
+	}).Error; err != nil {
 		logx.Errorf("创建用户凭证失败: %v", err)
-		l.svcCtx.DB.Where("user_id = ?", userID).Delete(&user_models.UserModel{})
 		return nil, errors.New("创建用户凭证失败")
 	}
 
-	logx.Infof("用户注册成功: userID=%s, email=%s", userID, req.Email)
+	logx.Infof("用户注册成功: userID=%s, email=%s", createRes.UserID, req.Email)
 	return &types.EmailRegisterRes{}, nil
 }
 

@@ -1,12 +1,11 @@
 syntax = "v1"
 
 // ==================== 认证接口（需 Gateway JWT，注入 Beaver-User-Id 或 Header Token）====================
-
 type (
 	LogoutReq {
 		UserID string `header:"Beaver-User-Id"`
 	}
-	LogoutRes {}
+	LogoutRes  {}
 )
 
 type (
@@ -14,7 +13,33 @@ type (
 		Token     string `json:"token"`
 		AuthToken string `header:"Token"`
 	}
-	QrcodeScanRes {}
+	QrcodeScanRes  {}
+)
+
+type (
+	GetDevicesReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	GetDevicesRes {
+		Devices []DeviceInfo `json:"devices"`
+	}
+	DeviceInfo {
+		DeviceID      string `json:"deviceId"`
+		DeviceType    string `json:"deviceType"`
+		DeviceOS      string `json:"deviceOs"`
+		DeviceName    string `json:"deviceName"`
+		LastLoginTime string `json:"lastLoginTime"`
+		IsActive      bool   `json:"isActive"`
+		LastLoginIP   string `json:"lastLoginIp"`
+	}
+)
+
+type (
+	KickDeviceReq {
+		UserID   string `header:"Beaver-User-Id"`
+		DeviceID string `json:"deviceId"`
+	}
+	KickDeviceRes  {}
 )
 
 @server (
@@ -28,4 +53,14 @@ service auth {
 	@doc "扫码登录-确认扫码（移动端，Header Token）"
 	@handler qrcodeScan
 	post /api/auth/auth/v1/qrcode/scan (QrcodeScanReq) returns (QrcodeScanRes)
+
+	@doc "获取登录设备列表"
+	@handler getDevices
+	get /api/auth/auth/v1/devices (GetDevicesReq) returns (GetDevicesRes)
+
+	@doc "强制下线指定设备"
+	@handler kickDevice
+	post /api/auth/auth/v1/kick_device (KickDeviceReq) returns (KickDeviceRes)
 }
+
+// goctl api go -api auth_api.api -dir . --home ../../../template

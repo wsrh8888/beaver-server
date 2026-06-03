@@ -32,10 +32,11 @@ func (l *SearchUserLogic) SearchUser(in *user_rpc.SearchUserReq) (*user_rpc.Sear
 	switch in.Type {
 	case "email":
 		err = l.svcCtx.DB.Take(&user, "email = ?", in.Keyword).Error
+	case "phone":
+		err = l.svcCtx.DB.Take(&user, "phone = ?", in.Keyword).Error
 	case "userId":
 		err = l.svcCtx.DB.Take(&user, "user_id = ?", in.Keyword).Error
 	default:
-		// 默认按邮箱搜索
 		err = l.svcCtx.DB.Take(&user, "email = ?", in.Keyword).Error
 	}
 

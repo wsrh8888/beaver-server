@@ -75,13 +75,12 @@ message SearchUserRes {
 }
 
 service user {
-  rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
-  rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
-  rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友
-  rpc SearchUser(SearchUserReq) returns(SearchUserRes); // 根据邮箱或用户ID搜索用户
-  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息
-  rpc UserVersions(UserVersionsReq) returns(UserVersionsRes); // 批量获取用户版本信息
-
+  rpc UserCreate(UserCreateReq) returns(UserCreateRes);
+  rpc UserInfo(UserInfoReq) returns(UserInfoRes);
+  rpc IsFriend(IsFriendReq) returns(IsFriendRes);
+  rpc SearchUser(SearchUserReq) returns(SearchUserRes);
+  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes);
+  rpc UserVersions(UserVersionsReq) returns(UserVersionsRes);
 }
 
-// goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+// goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

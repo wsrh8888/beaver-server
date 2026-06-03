@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"beaver/app/auth/auth_rpc/auth"
 	"beaver/app/notification/notification_api/internal/config"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
@@ -21,6 +22,7 @@ type ServiceContext struct {
 	DB         *gorm.DB
 	Redis      *redis.Client
 	UserRpc    user_rpc.UserClient
+	AuthRpc    auth.Auth
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client
 }
@@ -38,7 +40,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:     c,
 		DB:         mysqlDb,
 		Redis:      client,
-		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		UserRpc: user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		AuthRpc: auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
 	}
