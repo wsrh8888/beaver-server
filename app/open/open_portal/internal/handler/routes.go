@@ -94,6 +94,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/open_portal/auth_public/v1/login",
 				Handler: auth_public.LoginHandler(serverCtx),
 			},
+			{
+				// OAuth 授权码登录
+				Method:  http.MethodPost,
+				Path:    "/api/open_portal/auth_public/v1/oauth_login",
+				Handler: auth_public.OAuthLoginHandler(serverCtx),
+			},
 		},
 	)
 

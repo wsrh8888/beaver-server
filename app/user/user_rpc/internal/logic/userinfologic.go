@@ -43,6 +43,7 @@ func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRe
 			Version:  user.Version,
 			Email:    user.Email,
 			Abstract: user.Abstract,
+			Phone:    user.Phone,
 		},
 	}, nil
 }

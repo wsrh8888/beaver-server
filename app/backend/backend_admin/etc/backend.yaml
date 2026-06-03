@@ -7,7 +7,7 @@ Auth:
   AccessExpire: 3600
 Etcd: 127.0.0.1:2379
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_backend?charset=utf8mb4&parseTime=True&loc=Local
 Etcd: 127.0.0.1:2379
 Redis:
   Addr: 127.0.0.1:6379

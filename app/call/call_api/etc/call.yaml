@@ -4,7 +4,7 @@ Port: 21800
 
 # 数据库配置
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_call?charset=utf8mb4&parseTime=True&loc=Local
 
 # Redis 配置 (用于存放通话临时状态或缓存)
 Redis:

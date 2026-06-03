@@ -104,6 +104,24 @@ message GetFriendDetailRes {
   repeated FriendDetailItem friends = 1; // 好友详细信息列表
 }
 
+message IsFriendReq {
+  string user_a = 1;
+  string user_b = 2;
+}
+
+message IsFriendRes {
+  bool is_friend = 1;
+}
+
+message IsBlockedReq {
+  string user_a = 1;
+  string user_b = 2;
+}
+
+message IsBlockedRes {
+  bool is_blocked = 1; // 任一方拉黑对方
+}
+
 service friend {
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
   rpc GetFriendVersions(GetFriendVersionsReq) returns (GetFriendVersionsRes); //获取用户好友版本信息
@@ -111,6 +129,8 @@ service friend {
   rpc GetFriendsListByIds(GetFriendsListByIdsReq) returns (GetFriendsListByIdsRes); //通过ID获取好友列表
   rpc GetFriendVerifiesListByIds(GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes); //通过ID获取好友验证列表
   rpc GetFriendDetail(GetFriendDetailReq) returns (GetFriendDetailRes); //获取好友详细信息
+  rpc IsFriend(IsFriendReq) returns (IsFriendRes);
+  rpc IsBlocked(IsBlockedReq) returns (IsBlockedRes);
 }
 
 // goctl rpc protoc friend_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

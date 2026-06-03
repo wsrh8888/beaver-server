@@ -2,17 +2,22 @@ package svc
 
 import (
 	"beaver/app/group/group_rpc/internal/config"
+	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/app/user/user_rpc/user"
+	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 
 	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
 
 type ServiceContext struct {
-	Config config.Config
-	DB     *gorm.DB
-	Redis  *redis.Client
+	Config  config.Config
+	DB      *gorm.DB
+	Redis   *redis.Client
+	UserRpc user_rpc.UserClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -23,5 +28,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config: c,
 		Redis:  client,
 		DB:     mysqlDb,
+		UserRpc: user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 	}
 }

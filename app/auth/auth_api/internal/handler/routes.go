@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	auth "beaver/app/auth/auth_api/internal/handler/auth"
+	auth_public "beaver/app/auth/auth_api/internal/handler/auth_public"
 	"beaver/app/auth/auth_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -36,6 +37,77 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/auth/auth/v1/qrcode/scan",
 				Handler: auth.QrcodeScanHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 用户认证（Gateway 内部校验 Token）
+				Method:  http.MethodGet,
+				Path:    "/api/auth/auth_public/v1/authentication",
+				Handler: auth_public.AuthenticationHandler(serverCtx),
+			},
+			{
+				// 邮箱验证码登录
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/email_login",
+				Handler: auth_public.EmailLoginHandler(serverCtx),
+			},
+			{
+				// 邮箱密码登录
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/email_password_login",
+				Handler: auth_public.EmailPasswordLoginHandler(serverCtx),
+			},
+			{
+				// 邮箱注册
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/email_register",
+				Handler: auth_public.EmailRegisterHandler(serverCtx),
+			},
+			{
+				// 获取邮箱验证码
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/emailcode",
+				Handler: auth_public.GetEmailCodeHandler(serverCtx),
+			},
+			{
+				// 手机号登录
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/phone_login",
+				Handler: auth_public.PhoneLoginHandler(serverCtx),
+			},
+			{
+				// 手机号注册
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/phone_register",
+				Handler: auth_public.PhoneRegisterHandler(serverCtx),
+			},
+			{
+				// 获取手机验证码
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/phonecode",
+				Handler: auth_public.GetPhoneCodeHandler(serverCtx),
+			},
+			{
+				// 扫码登录-生成二维码（PC）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/qrcode/generate",
+				Handler: auth_public.QrcodeGenerateHandler(serverCtx),
+			},
+			{
+				// 扫码登录-轮询状态（PC）
+				Method:  http.MethodGet,
+				Path:    "/api/auth/auth_public/v1/qrcode/status",
+				Handler: auth_public.QrcodeStatusHandler(serverCtx),
+			},
+			{
+				// 找回密码
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/reset_password",
+				Handler: auth_public.ResetPasswordHandler(serverCtx),
 			},
 		},
 	)

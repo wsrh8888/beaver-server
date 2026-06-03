@@ -6,7 +6,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/feedback/feedback_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -41,7 +41,7 @@ func (l *GetFeedbackListLogic) GetFeedbackList(req *types.GetFeedbackListReq) (r
 	}
 
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&feedback_models.FeedbackModel{})
+	query := l.svcCtx.DB.Model(&platform_models.FeedbackModel{})
 
 	// 状态筛选
 	if req.Status > 0 {
@@ -72,7 +72,7 @@ func (l *GetFeedbackListLogic) GetFeedbackList(req *types.GetFeedbackListReq) (r
 	}
 
 	// 查询列表
-	var feedbacks []feedback_models.FeedbackModel
+	var feedbacks []platform_models.FeedbackModel
 	err = query.Order("created_at DESC").
 		Offset((page - 1) * limit).
 		Limit(limit).

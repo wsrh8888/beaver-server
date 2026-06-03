@@ -1,7 +1,7 @@
 Name: filerpc.rpc
 ListenOn: 0.0.0.0:30600
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_file?charset=utf8mb4&parseTime=True&loc=Local
 Log:
   Encoding: plain
   TimeFormat: 2006-01-02T15:04:05

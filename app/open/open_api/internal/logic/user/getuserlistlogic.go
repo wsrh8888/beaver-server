@@ -8,7 +8,7 @@ import (
 	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	user_models "beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -48,24 +48,29 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 		}
 	}
 
-	var users []user_models.UserModel
-	if err := l.svcCtx.DB.Where("user_id IN ?", req.UserIDs).Find(&users).Error; err != nil {
+	listRes, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+		UserIdList: req.UserIDs,
+	})
+	if err != nil {
 		return nil, err
 	}
 
 	scopes := oauthutil.ParseScopes(tokenRecord.Scope)
-	userList := make([]types.GetUserListUserItem, 0, len(users))
-	for _, user := range users {
+	userList := make([]types.GetUserListUserItem, 0, len(req.UserIDs))
+	for _, uid := range req.UserIDs {
+		info, ok := listRes.UserInfo[uid]
+		if !ok {
+			continue
+		}
 		item := types.GetUserListUserItem{
-			UserID:   user.UserID,
-			Nickname: user.NickName,
-			Phone:    user.Phone,
+			UserID:   info.UserId,
+			Nickname: info.NickName,
 		}
 		if oauthutil.HasScope(scopes, constants.ScopeUserAvatarRead) {
-			item.Avatar = user.Avatar
+			item.Avatar = info.Avatar
 		}
 		if oauthutil.HasScope(scopes, constants.ScopeUserEmailRead) {
-			item.Email = user.Email
+			item.Email = info.Email
 		}
 		userList = append(userList, item)
 	}

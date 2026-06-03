@@ -7,7 +7,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/feedback/feedback_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -35,7 +35,7 @@ func (l *HandleFeedbackLogic) HandleFeedback(req *types.HandleFeedbackReq) (resp
 	}
 
 	// 查询反馈记录
-	var feedback feedback_models.FeedbackModel
+	var feedback platform_models.FeedbackModel
 	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&feedback).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -49,7 +49,7 @@ func (l *HandleFeedbackLogic) HandleFeedback(req *types.HandleFeedbackReq) (resp
 	// 更新反馈状态
 	now := time.Now()
 	updates := map[string]interface{}{
-		"status":        feedback_models.FeedbackStatus(req.Status),
+		"status":        platform_models.FeedbackStatus(req.Status),
 		"handle_result": req.HandleResult,
 		"handler_id":    req.UserID,
 		"handle_time":   &now,

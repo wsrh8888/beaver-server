@@ -139,9 +139,8 @@ type CheckQrCodeStatusReq struct {
 }
 
 type CheckQrCodeStatusRes struct {
-	Status   string `json:"status"` // waiting / scanned / confirmed / cancelled / expired
-	UserId   string `json:"userId,optional"`
-	AuthCode string `json:"authCode,optional"`
+	Status string `json:"status"` // waiting / scanned / confirmed / cancelled / expired
+	Code   string `json:"code,optional"`
 }
 
 type ConfirmQrCodeLoginReq struct {
@@ -322,12 +321,8 @@ type PasswordLoginReq struct {
 }
 
 type PasswordLoginRes struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresIn    int64  `json:"expiresIn"`
-	UserID       string `json:"userId"`
-	NickName     string `json:"nickName"`
-	Avatar       string `json:"avatar,optional"`
+	Code     string `json:"code"`
+	ExpireIn int64  `json:"expireIn"`
 }
 
 type RefreshTokenReq struct {

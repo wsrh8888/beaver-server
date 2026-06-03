@@ -2,7 +2,7 @@ Name: open
 Host: 0.0.0.0
 Port: 21900
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
   Addr: 127.0.0.1:6379
   Password: '123456'
@@ -21,6 +21,11 @@ UserRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+AuthRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: authrpc.rpc
 ChatRpc:
   Etcd:
     Hosts:

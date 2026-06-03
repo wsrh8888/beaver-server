@@ -6,7 +6,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +28,7 @@ func NewGetBucketListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 func (l *GetBucketListLogic) GetBucketList(req *types.GetBucketListReq) (resp *types.GetBucketListRes, err error) {
 	// 构建查询条件
-	db := l.svcCtx.DB.Model(&track_models.TrackBucket{})
+	db := l.svcCtx.DB.Model(&platform_models.TrackBucket{})
 
 	// 关键词搜索 (名称或描述)
 	if req.Keyword != "" {
@@ -48,7 +48,7 @@ func (l *GetBucketListLogic) GetBucketList(req *types.GetBucketListReq) (resp *t
 	}
 
 	// 分页查询
-	var buckets []track_models.TrackBucket
+	var buckets []platform_models.TrackBucket
 	offset := (req.Page - 1) * req.PageSize
 	if err = db.Offset(offset).Limit(req.PageSize).Order("created_at DESC").Find(&buckets).Error; err != nil {
 		logx.Errorf("查询Bucket列表失败: %v", err)

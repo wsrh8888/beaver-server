@@ -26,6 +26,7 @@ const (
 	Group_GetGroupMembersListByIds_FullMethodName      = "/group_rpc.group/GetGroupMembersListByIds"
 	Group_GetGroupJoinRequestsListByIds_FullMethodName = "/group_rpc.group/GetGroupJoinRequestsListByIds"
 	Group_GetUserGroupRequestVersions_FullMethodName   = "/group_rpc.group/GetUserGroupRequestVersions"
+	Group_CanSendGroupMessage_FullMethodName           = "/group_rpc.group/CanSendGroupMessage"
 )
 
 // GroupClient is the client API for Group service.
@@ -39,6 +40,7 @@ type GroupClient interface {
 	GetGroupMembersListByIds(ctx context.Context, in *GetGroupMembersListByIdsReq, opts ...grpc.CallOption) (*GetGroupMembersListByIdsRes, error)
 	GetGroupJoinRequestsListByIds(ctx context.Context, in *GetGroupJoinRequestsListByIdsReq, opts ...grpc.CallOption) (*GetGroupJoinRequestsListByIdsRes, error)
 	GetUserGroupRequestVersions(ctx context.Context, in *GetUserGroupRequestVersionsReq, opts ...grpc.CallOption) (*GetUserGroupRequestVersionsRes, error)
+	CanSendGroupMessage(ctx context.Context, in *CanSendGroupMessageReq, opts ...grpc.CallOption) (*CanSendGroupMessageRes, error)
 }
 
 type groupClient struct {
@@ -119,6 +121,16 @@ func (c *groupClient) GetUserGroupRequestVersions(ctx context.Context, in *GetUs
 	return out, nil
 }
 
+func (c *groupClient) CanSendGroupMessage(ctx context.Context, in *CanSendGroupMessageReq, opts ...grpc.CallOption) (*CanSendGroupMessageRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CanSendGroupMessageRes)
+	err := c.cc.Invoke(ctx, Group_CanSendGroupMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupServer is the server API for Group service.
 // All implementations must embed UnimplementedGroupServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type GroupServer interface {
 	GetGroupMembersListByIds(context.Context, *GetGroupMembersListByIdsReq) (*GetGroupMembersListByIdsRes, error)
 	GetGroupJoinRequestsListByIds(context.Context, *GetGroupJoinRequestsListByIdsReq) (*GetGroupJoinRequestsListByIdsRes, error)
 	GetUserGroupRequestVersions(context.Context, *GetUserGroupRequestVersionsReq) (*GetUserGroupRequestVersionsRes, error)
+	CanSendGroupMessage(context.Context, *CanSendGroupMessageReq) (*CanSendGroupMessageRes, error)
 	mustEmbedUnimplementedGroupServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedGroupServer) GetGroupJoinRequestsListByIds(context.Context, *
 }
 func (UnimplementedGroupServer) GetUserGroupRequestVersions(context.Context, *GetUserGroupRequestVersionsReq) (*GetUserGroupRequestVersionsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserGroupRequestVersions not implemented")
+}
+func (UnimplementedGroupServer) CanSendGroupMessage(context.Context, *CanSendGroupMessageReq) (*CanSendGroupMessageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CanSendGroupMessage not implemented")
 }
 func (UnimplementedGroupServer) mustEmbedUnimplementedGroupServer() {}
 func (UnimplementedGroupServer) testEmbeddedByValue()               {}
@@ -308,6 +324,24 @@ func _Group_GetUserGroupRequestVersions_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Group_CanSendGroupMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CanSendGroupMessageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).CanSendGroupMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Group_CanSendGroupMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).CanSendGroupMessage(ctx, req.(*CanSendGroupMessageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Group_ServiceDesc is the grpc.ServiceDesc for Group service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var Group_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserGroupRequestVersions",
 			Handler:    _Group_GetUserGroupRequestVersions_Handler,
+		},
+		{
+			MethodName: "CanSendGroupMessage",
+			Handler:    _Group_CanSendGroupMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

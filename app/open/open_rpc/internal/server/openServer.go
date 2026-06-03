@@ -62,3 +62,8 @@ func (s *OpenServer) GetBotInfo(ctx context.Context, in *open_rpc.GetBotInfoReq)
 	l := logic.NewGetBotInfoLogic(ctx, s.svcCtx)
 	return l.GetBotInfo(in)
 }
+
+func (s *OpenServer) SaveWebhookLog(ctx context.Context, in *open_rpc.SaveWebhookLogReq) (*open_rpc.SaveWebhookLogRes, error) {
+	l := logic.NewSaveWebhookLogLogic(ctx, s.svcCtx)
+	return l.SaveWebhookLog(in)
+}

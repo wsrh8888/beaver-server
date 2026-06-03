@@ -8,7 +8,7 @@ import (
 	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	user_models "beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -47,22 +47,21 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 		return nil, errors.New("无权查询该用户信息")
 	}
 
-	var user user_models.UserModel
-	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error; err != nil {
+	userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{UserID: req.UserID})
+	if err != nil {
 		return nil, errors.New("用户不存在")
 	}
 
 	scopes := oauthutil.ParseScopes(tokenRecord.Scope)
 	item := types.GetUserInfoUserItem{
-		UserID:   user.UserID,
-		Nickname: user.NickName,
-		Phone:    user.Phone,
+		UserID:   userRes.UserInfo.UserId,
+		Nickname: userRes.UserInfo.NickName,
 	}
 	if oauthutil.HasScope(scopes, constants.ScopeUserAvatarRead) {
-		item.Avatar = user.Avatar
+		item.Avatar = userRes.UserInfo.Avatar
 	}
 	if oauthutil.HasScope(scopes, constants.ScopeUserEmailRead) {
-		item.Email = user.Email
+		item.Email = userRes.UserInfo.Email
 	}
 
 	return &types.GetUserInfoRes{User: item}, nil

@@ -5,7 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,7 +27,7 @@ func NewDeleteBucketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 
 func (l *DeleteBucketLogic) DeleteBucket(req *types.DeleteBucketReq) (resp *types.DeleteBucketRes, err error) {
 	// 执行软删除
-	result := l.svcCtx.DB.Where("bucket_id = ?", req.BucketId).Delete(&track_models.TrackBucket{})
+	result := l.svcCtx.DB.Where("bucket_id = ?", req.BucketId).Delete(&platform_models.TrackBucket{})
 
 	if result.Error != nil {
 		logx.Errorf("删除Bucket失败: %v", result.Error)

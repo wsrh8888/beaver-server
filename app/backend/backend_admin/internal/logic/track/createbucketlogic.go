@@ -5,7 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_models"
 	uuid_util "beaver/utils/uuid"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,7 +31,7 @@ func (l *CreateBucketLogic) CreateBucket(req *types.CreateBucketReq) (resp *type
 	bucketID := uuid_util.NewV4().String()
 
 	// 创建 Bucket 记录
-	bucket := &track_models.TrackBucket{
+	bucket := &platform_models.TrackBucket{
 		BucketID:    bucketID,
 		Name:        req.Name,
 		Description: req.Description,

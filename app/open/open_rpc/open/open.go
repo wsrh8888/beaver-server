@@ -29,6 +29,8 @@ type (
 	RefreshTokenRes   = open_rpc.RefreshTokenRes
 	ResetBotSecretReq = open_rpc.ResetBotSecretReq
 	ResetBotSecretRes = open_rpc.ResetBotSecretRes
+	SaveWebhookLogReq = open_rpc.SaveWebhookLogReq
+	SaveWebhookLogRes = open_rpc.SaveWebhookLogRes
 	ValidateTokenReq  = open_rpc.ValidateTokenReq
 	ValidateTokenRes  = open_rpc.ValidateTokenRes
 
@@ -41,6 +43,7 @@ type (
 		DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
 		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
+		SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
 	}
 
 	defaultOpen struct {
@@ -92,4 +95,9 @@ func (m *defaultOpen) ResetBotSecret(ctx context.Context, in *ResetBotSecretReq,
 func (m *defaultOpen) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
 	return client.GetBotInfo(ctx, in, opts...)
+}
+
+func (m *defaultOpen) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.SaveWebhookLog(ctx, in, opts...)
 }

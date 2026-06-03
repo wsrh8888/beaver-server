@@ -17,8 +17,11 @@ type Config struct {
 	RocketMQ struct {
 		Addr string
 	}
-	DatasyncRpc zrpc.RpcClientConf
-	UserRpc     zrpc.RpcClientConf
+	DatasyncRpc     zrpc.RpcClientConf
+	UserRpc         zrpc.RpcClientConf
+	FriendRpc       zrpc.RpcClientConf
+	GroupRpc        zrpc.RpcClientConf
+	OpenRpc         zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf
 	Push        struct {
 		Enabled bool

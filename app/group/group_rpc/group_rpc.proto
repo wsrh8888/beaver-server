@@ -108,6 +108,15 @@ message GroupRequestVersionItem {
   int64 version = 2; // 最新版本号
 }
 
+message CanSendGroupMessageReq {
+  string group_id = 1;
+  string user_id = 2;
+}
+
+message CanSendGroupMessageRes {
+  bool allowed = 1;
+  string reason = 2;
+}
 
 service group {
   rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
@@ -117,6 +126,7 @@ service group {
   rpc GetGroupMembersListByIds(GetGroupMembersListByIdsReq) returns (GetGroupMembersListByIdsRes); // 通过ID获取群成员列表
   rpc GetGroupJoinRequestsListByIds(GetGroupJoinRequestsListByIdsReq) returns (GetGroupJoinRequestsListByIdsRes); // 通过ID获取入群申请列表
   rpc GetUserGroupRequestVersions(GetUserGroupRequestVersionsReq) returns (GetUserGroupRequestVersionsRes); // 获取用户群组申请版本信息
+  rpc CanSendGroupMessage(CanSendGroupMessageReq) returns (CanSendGroupMessageRes);
 }
 
 // goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

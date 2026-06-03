@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"beaver/app/chat/chat_models"
-	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
@@ -36,7 +36,7 @@ func HandleTypingSend(
 		return fmt.Errorf("conversationId 不能为空")
 	}
 
-	peerIDs, err := getTypingPeerIDs(svcCtx, req.UserID, body.ConversationID)
+	peerIDs, err := getTypingPeerIDs(ctx, svcCtx, req.UserID, body.ConversationID)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func HandleTypingSend(
 	return nil
 }
 
-func getTypingPeerIDs(svcCtx *svc.ServiceContext, currentUserID, conversationID string) ([]string, error) {
+func getTypingPeerIDs(ctx context.Context, svcCtx *svc.ServiceContext, currentUserID, conversationID string) ([]string, error) {
 	convType, userIDs := conversation.ParseConversationWithType(conversationID)
 	if convType == 1 {
 		var peers []string
@@ -77,18 +77,20 @@ func getTypingPeerIDs(svcCtx *svc.ServiceContext, currentUserID, conversationID 
 	}
 
 	groupID := conversation.GetTargetIDByConversation(conversationID, currentUserID)
-	var members []group_models.GroupMemberModel
-	if err := svcCtx.DB.Where("group_id = ? AND status = 1 AND user_id <> ?", groupID, currentUserID).
-		Find(&members).Error; err != nil {
+	membersRes, err := svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+		GroupID: groupID,
+	})
+	if err != nil {
 		return nil, fmt.Errorf("查询群成员失败: %w", err)
 	}
 
-	peers := make([]string, 0, len(members))
-	for _, m := range members {
-		peers = append(peers, m.UserID)
+	peers := make([]string, 0, len(membersRes.Members))
+	for _, m := range membersRes.Members {
+		if m.UserID != currentUserID {
+			peers = append(peers, m.UserID)
+		}
 	}
 	if len(peers) == 0 {
-		// 兜底：从 user_conversations 查成员
 		var userConversations []chat_models.ChatUserConversation
 		if err := svcCtx.DB.Where("conversation_id = ? AND user_id <> ?", conversationID, currentUserID).
 			Find(&userConversations).Error; err != nil {

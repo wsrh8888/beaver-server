@@ -5,8 +5,12 @@ Etcd:
   - 127.0.0.1:2379
   Key: authrpc.rpc
 Mysql:
-  DataSource: root:password@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=true&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false
 RedisConf:
   Addr: 127.0.0.1:6379
-  Password: ""
-  Db: 0
+  Password: '123456'
+  DB: 0

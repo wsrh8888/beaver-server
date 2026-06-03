@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/auth/auth_api/internal/logic/auth"
+	logic "beaver/app/auth/auth_api/internal/logic/auth"
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/common/response"

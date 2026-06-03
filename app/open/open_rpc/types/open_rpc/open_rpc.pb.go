@@ -977,6 +977,111 @@ func (x *GetBotInfoRes) GetSecurity() *BotSecurity {
 	return nil
 }
 
+// 记录 Webhook 回调日志（供 chat 等域通过 RPC 写入，不直连 beaver_open）
+type SaveWebhookLogReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ConfigId      string                 `protobuf:"bytes,1,opt,name=config_id,json=configId,proto3" json:"config_id,omitempty"`    // 配置 ID
+	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`             // 应用 ID
+	EventType     string                 `protobuf:"bytes,3,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // 事件类型
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`                       // 0 失败 1 成功
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveWebhookLogReq) Reset() {
+	*x = SaveWebhookLogReq{}
+	mi := &file_open_rpc_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveWebhookLogReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveWebhookLogReq) ProtoMessage() {}
+
+func (x *SaveWebhookLogReq) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveWebhookLogReq.ProtoReflect.Descriptor instead.
+func (*SaveWebhookLogReq) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SaveWebhookLogReq) GetConfigId() string {
+	if x != nil {
+		return x.ConfigId
+	}
+	return ""
+}
+
+func (x *SaveWebhookLogReq) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *SaveWebhookLogReq) GetEventType() string {
+	if x != nil {
+		return x.EventType
+	}
+	return ""
+}
+
+func (x *SaveWebhookLogReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type SaveWebhookLogRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveWebhookLogRes) Reset() {
+	*x = SaveWebhookLogRes{}
+	mi := &file_open_rpc_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveWebhookLogRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveWebhookLogRes) ProtoMessage() {}
+
+func (x *SaveWebhookLogRes) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveWebhookLogRes.ProtoReflect.Descriptor instead.
+func (*SaveWebhookLogRes) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{18}
+}
+
 var File_open_rpc_proto protoreflect.FileDescriptor
 
 const file_open_rpc_proto_rawDesc = "" +
@@ -1044,7 +1149,14 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x15\n" +
 	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x14\n" +
 	"\x05token\x18\x03 \x01(\tR\x05token\x121\n" +
-	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity2\xa7\x04\n" +
+	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"~\n" +
+	"\x11SaveWebhookLogReq\x12\x1b\n" +
+	"\tconfig_id\x18\x01 \x01(\tR\bconfigId\x12\x15\n" +
+	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12\x1d\n" +
+	"\n" +
+	"event_type\x18\x03 \x01(\tR\teventType\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\"\x13\n" +
+	"\x11SaveWebhookLogRes2\xf3\x04\n" +
 	"\x04open\x12G\n" +
 	"\rExchangeToken\x12\x1a.open_rpc.ExchangeTokenReq\x1a\x1a.open_rpc.ExchangeTokenRes\x12A\n" +
 	"\vGetUserInfo\x12\x18.open_rpc.GetUserInfoReq\x1a\x18.open_rpc.GetUserInfoRes\x12G\n" +
@@ -1054,7 +1166,8 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\tDeleteBot\x12\x16.open_rpc.DeleteBotReq\x1a\x16.open_rpc.DeleteBotRes\x12J\n" +
 	"\x0eResetBotSecret\x12\x1b.open_rpc.ResetBotSecretReq\x1a\x1b.open_rpc.ResetBotSecretRes\x12>\n" +
 	"\n" +
-	"GetBotInfo\x12\x17.open_rpc.GetBotInfoReq\x1a\x17.open_rpc.GetBotInfoResB\fZ\n" +
+	"GetBotInfo\x12\x17.open_rpc.GetBotInfoReq\x1a\x17.open_rpc.GetBotInfoRes\x12J\n" +
+	"\x0eSaveWebhookLog\x12\x1b.open_rpc.SaveWebhookLogReq\x1a\x1b.open_rpc.SaveWebhookLogResB\fZ\n" +
 	"./open_rpcb\x06proto3"
 
 var (
@@ -1069,7 +1182,7 @@ func file_open_rpc_proto_rawDescGZIP() []byte {
 	return file_open_rpc_proto_rawDescData
 }
 
-var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_open_rpc_proto_goTypes = []any{
 	(*ExchangeTokenReq)(nil),  // 0: open_rpc.ExchangeTokenReq
 	(*ExchangeTokenRes)(nil),  // 1: open_rpc.ExchangeTokenRes
@@ -1088,6 +1201,8 @@ var file_open_rpc_proto_goTypes = []any{
 	(*GetBotInfoReq)(nil),     // 14: open_rpc.GetBotInfoReq
 	(*BotSecurity)(nil),       // 15: open_rpc.BotSecurity
 	(*GetBotInfoRes)(nil),     // 16: open_rpc.GetBotInfoRes
+	(*SaveWebhookLogReq)(nil), // 17: open_rpc.SaveWebhookLogReq
+	(*SaveWebhookLogRes)(nil), // 18: open_rpc.SaveWebhookLogRes
 }
 var file_open_rpc_proto_depIdxs = []int32{
 	15, // 0: open_rpc.GetBotInfoRes.security:type_name -> open_rpc.BotSecurity
@@ -1099,16 +1214,18 @@ var file_open_rpc_proto_depIdxs = []int32{
 	10, // 6: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
 	12, // 7: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
 	14, // 8: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
-	1,  // 9: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
-	3,  // 10: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
-	5,  // 11: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
-	7,  // 12: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
-	9,  // 13: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
-	11, // 14: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
-	13, // 15: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
-	16, // 16: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
-	9,  // [9:17] is the sub-list for method output_type
-	1,  // [1:9] is the sub-list for method input_type
+	17, // 9: open_rpc.open.SaveWebhookLog:input_type -> open_rpc.SaveWebhookLogReq
+	1,  // 10: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
+	3,  // 11: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
+	5,  // 12: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
+	7,  // 13: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
+	9,  // 14: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
+	11, // 15: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
+	13, // 16: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
+	16, // 17: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
+	18, // 18: open_rpc.open.SaveWebhookLog:output_type -> open_rpc.SaveWebhookLogRes
+	10, // [10:19] is the sub-list for method output_type
+	1,  // [1:10] is the sub-list for method input_type
 	1,  // [1:1] is the sub-list for extension type_name
 	1,  // [1:1] is the sub-list for extension extendee
 	0,  // [0:1] is the sub-list for field type_name
@@ -1125,7 +1242,7 @@ func file_open_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_open_rpc_proto_rawDesc), len(file_open_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

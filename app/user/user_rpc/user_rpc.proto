@@ -25,15 +25,6 @@ message UserInfoRes {
 }
  
 
- message IsFriendReq {
-  string user1 = 1;
-  string user2 = 2;
-}
-
-message IsFriendRes {
-  bool is_friend = 1;
-}
-
 message UserInfo {
   string user_id = 1; // 用户ID
   string nick_name = 2;
@@ -41,6 +32,7 @@ message UserInfo {
   int64 version = 4; // 用户版本号，用于同步
   string email = 5;
   string abstract = 6;
+  string phone = 7;
 }
 
 message UserVersionInfo {
@@ -77,7 +69,6 @@ message SearchUserRes {
 service user {
   rpc UserCreate(UserCreateReq) returns(UserCreateRes);
   rpc UserInfo(UserInfoReq) returns(UserInfoRes);
-  rpc IsFriend(IsFriendReq) returns(IsFriendRes);
   rpc SearchUser(SearchUserReq) returns(SearchUserRes);
   rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes);
   rpc UserVersions(UserVersionsReq) returns(UserVersionsRes);

@@ -6,7 +6,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +28,7 @@ func NewGetEventListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetE
 
 func (l *GetEventListLogic) GetEventList(req *types.GetEventListReq) (resp *types.GetEventListRes, err error) {
 	// 构建查询条件
-	db := l.svcCtx.DB.Model(&track_models.TrackEvent{}).Preload("BucketModel")
+	db := l.svcCtx.DB.Model(&platform_models.TrackEvent{}).Preload("BucketModel")
 
 	// Bucket Id 筛选
 	if req.BucketID != "" {
@@ -72,7 +72,7 @@ func (l *GetEventListLogic) GetEventList(req *types.GetEventListReq) (resp *type
 	}
 
 	// 分页查询
-	var events []track_models.TrackEvent
+	var events []platform_models.TrackEvent
 	offset := (req.Page - 1) * req.PageSize
 	if err = db.Offset(offset).Limit(req.PageSize).Order("timestamp DESC").Find(&events).Error; err != nil {
 		logx.Errorf("查询事件列表失败: %v", err)

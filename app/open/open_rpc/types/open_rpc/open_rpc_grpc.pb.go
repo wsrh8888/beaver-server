@@ -27,6 +27,7 @@ const (
 	Open_DeleteBot_FullMethodName      = "/open_rpc.open/DeleteBot"
 	Open_ResetBotSecret_FullMethodName = "/open_rpc.open/ResetBotSecret"
 	Open_GetBotInfo_FullMethodName     = "/open_rpc.open/GetBotInfo"
+	Open_SaveWebhookLog_FullMethodName = "/open_rpc.open/SaveWebhookLog"
 )
 
 // OpenClient is the client API for Open service.
@@ -41,6 +42,7 @@ type OpenClient interface {
 	DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
 	ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 	GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
+	SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
 }
 
 type openClient struct {
@@ -131,6 +133,16 @@ func (c *openClient) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...
 	return out, nil
 }
 
+func (c *openClient) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveWebhookLogRes)
+	err := c.cc.Invoke(ctx, Open_SaveWebhookLog_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OpenServer is the server API for Open service.
 // All implementations must embed UnimplementedOpenServer
 // for forward compatibility.
@@ -143,6 +155,7 @@ type OpenServer interface {
 	DeleteBot(context.Context, *DeleteBotReq) (*DeleteBotRes, error)
 	ResetBotSecret(context.Context, *ResetBotSecretReq) (*ResetBotSecretRes, error)
 	GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error)
+	SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error)
 	mustEmbedUnimplementedOpenServer()
 }
 
@@ -176,6 +189,9 @@ func (UnimplementedOpenServer) ResetBotSecret(context.Context, *ResetBotSecretRe
 }
 func (UnimplementedOpenServer) GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBotInfo not implemented")
+}
+func (UnimplementedOpenServer) SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveWebhookLog not implemented")
 }
 func (UnimplementedOpenServer) mustEmbedUnimplementedOpenServer() {}
 func (UnimplementedOpenServer) testEmbeddedByValue()              {}
@@ -342,6 +358,24 @@ func _Open_GetBotInfo_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_SaveWebhookLog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveWebhookLogReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).SaveWebhookLog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_SaveWebhookLog_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).SaveWebhookLog(ctx, req.(*SaveWebhookLogReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Open_ServiceDesc is the grpc.ServiceDesc for Open service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +414,10 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBotInfo",
 			Handler:    _Open_GetBotInfo_Handler,
+		},
+		{
+			MethodName: "SaveWebhookLog",
+			Handler:    _Open_SaveWebhookLog_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

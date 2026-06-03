@@ -5,7 +5,7 @@ Etcd:
   - 127.0.0.1:2379
   Key: callrpc.rpc
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_call?charset=utf8mb4&parseTime=True&loc=Local
 Log:
   Encoding: plain
   TimeFormat: 2006-01-02T15:04:05

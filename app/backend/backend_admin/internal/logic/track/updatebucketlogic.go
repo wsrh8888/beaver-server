@@ -5,7 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -42,7 +42,7 @@ func (l *UpdateBucketLogic) UpdateBucket(req *types.UpdateBucketReq) (resp *type
 	}
 
 	// 执行更新操作
-	result := l.svcCtx.DB.Model(&track_models.TrackBucket{}).Where("bucket_id = ?", req.BucketId).Updates(updates)
+	result := l.svcCtx.DB.Model(&platform_models.TrackBucket{}).Where("bucket_id = ?", req.BucketId).Updates(updates)
 
 	if result.Error != nil {
 		logx.Errorf("更新Bucket失败: %v", result.Error)

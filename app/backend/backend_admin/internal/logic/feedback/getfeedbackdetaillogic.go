@@ -7,7 +7,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/feedback/feedback_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -29,7 +29,7 @@ func NewGetFeedbackDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetFeedbackDetailLogic) GetFeedbackDetail(req *types.GetFeedbackDetailReq) (resp *types.GetFeedbackDetailRes, err error) {
-	var feedback feedback_models.FeedbackModel
+	var feedback platform_models.FeedbackModel
 	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&feedback).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

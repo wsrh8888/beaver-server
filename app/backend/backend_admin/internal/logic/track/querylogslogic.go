@@ -6,7 +6,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +28,7 @@ func NewQueryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QueryLo
 
 func (l *QueryLogsLogic) QueryLogs(req *types.QueryLogsReq) (resp *types.QueryLogsRes, err error) {
 	// 构建查询条件
-	db := l.svcCtx.DB.Model(&track_models.TrackLogger{}).Preload("BucketModel")
+	db := l.svcCtx.DB.Model(&platform_models.TrackLogger{}).Preload("BucketModel")
 
 	// Bucket Id 筛选
 	db = db.Where("bucket_id = ?", req.BucketID)
@@ -65,7 +65,7 @@ func (l *QueryLogsLogic) QueryLogs(req *types.QueryLogsReq) (resp *types.QueryLo
 	}
 
 	// 分页查询
-	var logs []track_models.TrackLogger
+	var logs []platform_models.TrackLogger
 	offset := (req.Page - 1) * req.PageSize
 	if err = db.Offset(offset).Limit(req.PageSize).Order("timestamp DESC").Find(&logs).Error; err != nil {
 		logx.Errorf("查询日志列表失败: %v", err)

@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"beaver/app/auth/auth_rpc/auth"
 	"beaver/app/chat/chat_rpc/chat"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_rpc/group"
@@ -24,6 +25,7 @@ type ServiceContext struct {
 	DB       *gorm.DB
 	Redis    *redis.Client
 	UserRpc  user_rpc.UserClient
+	AuthRpc  auth.Auth
 	ChatRpc  chat_rpc.ChatClient
 	GroupRpc group_rpc.GroupClient
 	OpenRpc  open_rpc.OpenClient
@@ -38,6 +40,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:       mysqlDb,
 		Redis:    client,
 		UserRpc:  user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		AuthRpc:  auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		ChatRpc:  chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		GroupRpc: group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		OpenRpc:  open.NewOpen(zrpc.MustNewClient(c.OpenRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),

@@ -52,6 +52,7 @@ func (l *SearchUserLogic) SearchUser(in *user_rpc.SearchUserReq) (*user_rpc.Sear
 			Avatar:   user.Avatar,
 			Version:  user.Version,
 			Email:    user.Email,
+			Phone:    user.Phone,
 		},
 	}, nil
 }

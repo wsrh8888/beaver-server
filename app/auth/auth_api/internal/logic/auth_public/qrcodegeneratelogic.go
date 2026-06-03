@@ -18,8 +18,8 @@ const (
 	QrcodeStatusConfirmed = "confirmed"
 	QrcodeStatusExpired   = "expired"
 
-	QrcodeTTL            = 3 * time.Minute
-	QrcodeKeyFmt         = "qrcode:%s"
+	QrcodeTTL              = 3 * time.Minute
+	QrcodeKeyFmt           = "qrcode:%s"
 	QrcodeTokenExpireHours = 12
 )
 

@@ -18,6 +18,7 @@ type Config struct {
 	Etcd       string
 	ApiBaseUrl string // 对外暴露的 API 根地址，如 https://api.example.com
 	UserRpc    zrpc.RpcClientConf
+	AuthRpc    zrpc.RpcClientConf
 	ChatRpc    zrpc.RpcClientConf
 	GroupRpc   zrpc.RpcClientConf
 	OpenRpc    zrpc.RpcClientConf

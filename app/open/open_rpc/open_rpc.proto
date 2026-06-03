@@ -107,6 +107,16 @@ message GetBotInfoRes {
   BotSecurity security = 4; // 安全设置
 }
 
+// 记录 Webhook 回调日志（供 chat 等域通过 RPC 写入，不直连 beaver_open）
+message SaveWebhookLogReq {
+  string config_id = 1; // 配置 ID
+  string app_id = 2; // 应用 ID
+  string event_type = 3; // 事件类型
+  int32 status = 4; // 0 失败 1 成功
+}
+
+message SaveWebhookLogRes {}
+
 service open {
   rpc ExchangeToken(ExchangeTokenReq) returns (ExchangeTokenRes); // 用授权码换取 Token
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
@@ -116,6 +126,7 @@ service open {
   rpc DeleteBot(DeleteBotReq) returns (DeleteBotRes); // 删除推送机器人（软删除）
   rpc ResetBotSecret(ResetBotSecretReq) returns (ResetBotSecretRes); // 重置签名密钥
   rpc GetBotInfo(GetBotInfoReq) returns (GetBotInfoRes); // 获取推送机器人信息
+  rpc SaveWebhookLog(SaveWebhookLogReq) returns (SaveWebhookLogRes); // 记录 Webhook 回调日志
 }
 
-// goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --style=goZero
+// goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

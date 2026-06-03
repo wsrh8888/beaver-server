@@ -308,6 +308,17 @@ type LoginRes struct {
 	ExpireAt int64  `json:"expireAt"`
 }
 
+type OAuthLoginReq struct {
+	Code string `json:"code"`
+}
+
+type OAuthLoginRes struct {
+	Token    string `json:"token"`
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	ExpireAt int64  `json:"expireAt"`
+}
+
 type MobileOAuthConfigInfo struct {
 	Enabled            bool   `json:"enabled"`
 	IOSBundleID        string `json:"iosBundleId"`
