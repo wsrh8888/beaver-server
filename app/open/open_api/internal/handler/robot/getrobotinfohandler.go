@@ -19,7 +19,7 @@ func GetRobotInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewGetRobotInfoLogic(r.Context(), svcCtx)
-		resp, err := l.GetRobotInfo(&req)
+		resp, err := l.GetRobotInfo(r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

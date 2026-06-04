@@ -26,9 +26,6 @@ func NewCreateVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 }
 
 func (l *CreateVersionLogic) CreateVersion(req *types.CreateVersionReq) (resp *types.CreateVersionRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	return nil, errors.New("功能暂未开放")
 }

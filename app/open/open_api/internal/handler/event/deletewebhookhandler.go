@@ -19,7 +19,7 @@ func DeleteWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewDeleteWebhookLogic(r.Context(), svcCtx)
-		resp, err := l.DeleteWebhook(&req)
+		resp, err := l.DeleteWebhook(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

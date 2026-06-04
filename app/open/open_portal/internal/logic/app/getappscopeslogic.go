@@ -28,9 +28,6 @@ func NewGetAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetA
 }
 
 func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *types.GetAppScopesRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 查询应用
 	var app open_models.OpenApp

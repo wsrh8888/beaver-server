@@ -19,7 +19,7 @@ func RemoveRobotFromGroupHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewRemoveRobotFromGroupLogic(r.Context(), svcCtx)
-		resp, err := l.RemoveRobotFromGroup(&req)
+		resp, err := l.RemoveRobotFromGroup(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

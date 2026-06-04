@@ -42,6 +42,8 @@ func (s *OpenBotSecurity) Scan(value interface{}) error {
 // 例如：Jenkins、GitLab、监控告警等第三方服务推送消息到群
 type OpenBotModel struct {
 	gorm.Model
+	AppID   string `gorm:"type:varchar(64);index;comment:开放平台应用ID（Portal 创建时写入）"`
+	Name    string `gorm:"type:varchar(100);comment:显示名称"`
 	BotID   string `gorm:"type:varchar(64);uniqueIndex;comment:Bot的UserID"`
 	GroupID string `gorm:"type:varchar(64);index;not null;comment:目标群组ID"`
 	Token   string `gorm:"type:varchar(128);uniqueIndex;comment:Webhook Token（URL参数）"`

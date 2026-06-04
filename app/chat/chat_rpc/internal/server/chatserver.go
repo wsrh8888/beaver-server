@@ -82,3 +82,8 @@ func (s *ChatServer) SendNotificationMessage(ctx context.Context, in *chat_rpc.S
 	l := logic.NewSendNotificationMessageLogic(ctx, s.svcCtx)
 	return l.SendNotificationMessage(in)
 }
+
+func (s *ChatServer) GetChatMessage(ctx context.Context, in *chat_rpc.GetChatMessageReq) (*chat_rpc.GetChatMessageRes, error) {
+	l := logic.NewGetChatMessageLogic(ctx, s.svcCtx)
+	return l.GetChatMessage(in)
+}

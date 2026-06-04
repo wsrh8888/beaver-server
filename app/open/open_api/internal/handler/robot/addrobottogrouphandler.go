@@ -19,7 +19,7 @@ func AddRobotToGroupHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewAddRobotToGroupLogic(r.Context(), svcCtx)
-		resp, err := l.AddRobotToGroup(&req)
+		resp, err := l.AddRobotToGroup(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

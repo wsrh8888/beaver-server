@@ -330,6 +330,17 @@ message GetUserConversationVersionsRes {
   repeated UserConversationVersion user_conversation_versions = 1; // 用户会话设置版本列表
 }
 
+// 按会话 + 消息 ID 查询消息（用于回复引用原消息快照）
+message GetChatMessageReq {
+  string conversation_id = 1; // string 会话 ID，如 group_xxx 或 private_a_b
+  string message_id = 2; // string 消息 ID
+}
+
+message GetChatMessageRes {
+  bool found = 1; // bool 是否查到消息
+  Msg msg = 2; // object 消息内容（ctype 转 Msg），未找到时为空
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
@@ -344,6 +355,7 @@ service Chat {
     rpc RemoveConversationMembers(RemoveConversationMembersReq) returns (RemoveConversationMembersRes); //移除会话成员
     rpc DissolveConversation(DissolveConversationReq) returns (DissolveConversationRes); //解散会话
     rpc SendNotificationMessage(SendNotificationMessageReq) returns (SendNotificationMessageRes); //发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
+    rpc GetChatMessage(GetChatMessageReq) returns (GetChatMessageRes); //按消息ID查询消息内容
 }
 
 // goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

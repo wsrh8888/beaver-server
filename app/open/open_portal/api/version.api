@@ -1,80 +1,80 @@
 syntax = "v1"
 
-// ==================== 版本管理 ====================
+// ==================== 应用版本管理（暂未开放，请使用 app/v1/publish）====================
+
 type (
-	// 创建新版本
+	// 创建新版本（暂未开放）
 	CreateVersionReq {
-		AppID       string `json:"appId"`
-		Version     string `json:"version" validate:"required,max=20"` // 版本号，如 1.0.0
-		Description string `json:"description,optional" validate:"max=500"` // 版本说明
-		Visibility  string `json:"visibility" validate:"required,oneof=self partial all"` // 可见范围：self/partial/all
-		UserID      string `header:"Beaver-User-Id"`
+		AppID       string `json:"appId"` // string 应用 ID
+		Version     string `json:"version" validate:"required,max=20"` // string 版本号，如 1.0.0
+		Description string `json:"description,optional" validate:"max=500"` // string 版本说明，可选
+		Visibility  string `json:"visibility" validate:"required,oneof=self partial all"` // string 可见范围：self / partial / all
+		UserID      string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	CreateVersionRes {
-		VersionID string `json:"versionId"`
+		VersionID string `json:"versionId"` // string 版本记录 ID
 	}
 )
 
 type (
-	// 获取版本列表
+	// 获取版本列表（暂未开放）
 	GetVersionListReq {
-		AppID    string `form:"appId"`
-		Page     int    `form:"page,default=1"`
-		PageSize int    `form:"pageSize,default=10"`
-		UserID   string `header:"Beaver-User-Id"`
+		AppID    string `form:"appId"` // string 应用 ID
+		Page     int    `form:"page,default=1"` // int 页码，从 1 开始
+		PageSize int    `form:"pageSize,default=10"` // int 每页条数
+		UserID   string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	VersionInfo {
-		ID           string   `json:"id"`
-		Version      string   `json:"version"`
-		Description  string   `json:"description"`
-		Visibility   string   `json:"visibility"` // self/partial/all
-		Status       string   `json:"status"` // draft/reviewing/approved/rejected/published
-		Capabilities []string `json:"capabilities"` // 该版本包含的能力
-		CreatedAt    int64    `json:"createdAt"`
+		ID           string   `json:"id"` // string 版本记录 ID
+		Version      string   `json:"version"` // string 版本号
+		Description  string   `json:"description"` // string 版本说明
+		Visibility   string   `json:"visibility"` // string 可见范围：self / partial / all
+		Status       string   `json:"status"` // string 状态：draft / reviewing / approved / rejected / published
+		Capabilities []string `json:"capabilities"` // []string 该版本包含的能力列表
+		CreatedAt    int64    `json:"createdAt"` // int64 创建时间 Unix 秒
 	}
 	GetVersionListRes {
-		Total int64         `json:"total"`
-		List  []VersionInfo `json:"list"`
+		Total int64         `json:"total"` // int64 总条数
+		List  []VersionInfo `json:"list"` // array 版本列表
 	}
 )
 
 type (
-	// 提交版本审核
+	// 提交版本审核（暂未开放）
 	SubmitVersionReviewReq {
-		VersionID string `json:"versionId"`
-		UserID    string `header:"Beaver-User-Id"`
+		VersionID string `json:"versionId"` // string 版本记录 ID
+		UserID    string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	SubmitVersionReviewRes {}
 )
 
 type (
-	// 发布版本
+	// 发布版本（暂未开放）
 	PublishVersionReq {
-		VersionID string `json:"versionId"`
-		UserID    string `header:"Beaver-User-Id"`
+		VersionID string `json:"versionId"` // string 版本记录 ID
+		UserID    string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	PublishVersionRes {}
 )
 
 @server (
 	group: version
-	middleware: DeveloperAuthMiddleware
+	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
 )
 service open {
-	@doc "创建新版本"
+	@doc "创建新版本（暂未开放）"
 	@handler CreateVersion
 	post /api/open_portal/version/v1/create (CreateVersionReq) returns (CreateVersionRes)
 
-	@doc "获取版本列表"
+	@doc "获取版本列表（暂未开放）"
 	@handler GetVersionList
 	get /api/open_portal/version/v1/list (GetVersionListReq) returns (GetVersionListRes)
 
-	@doc "提交版本审核"
+	@doc "提交版本审核（暂未开放）"
 	@handler SubmitVersionReview
 	post /api/open_portal/version/v1/submit_review (SubmitVersionReviewReq) returns (SubmitVersionReviewRes)
 
-	@doc "发布版本"
+	@doc "发布版本（暂未开放）"
 	@handler PublishVersion
 	post /api/open_portal/version/v1/publish (PublishVersionReq) returns (PublishVersionRes)
 }
-

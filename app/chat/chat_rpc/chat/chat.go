@@ -28,6 +28,8 @@ type (
 	EmojiMsg                                = chat_rpc.EmojiMsg
 	FileMsg                                 = chat_rpc.FileMsg
 	ForwardMsg                              = chat_rpc.ForwardMsg
+	GetChatMessageReq                       = chat_rpc.GetChatMessageReq
+	GetChatMessageRes                       = chat_rpc.GetChatMessageRes
 	GetConversationsListByIdsReq            = chat_rpc.GetConversationsListByIdsReq
 	GetConversationsListByIdsRes            = chat_rpc.GetConversationsListByIdsRes
 	GetUserConversationSettingsListByIdsReq = chat_rpc.GetUserConversationSettingsListByIdsReq
@@ -73,6 +75,7 @@ type (
 		RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error)
 		DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
 		SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
+		GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error)
 	}
 
 	defaultChat struct {
@@ -144,4 +147,9 @@ func (m *defaultChat) DissolveConversation(ctx context.Context, in *DissolveConv
 func (m *defaultChat) SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
 	return client.SendNotificationMessage(ctx, in, opts...)
+}
+
+func (m *defaultChat) GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.GetChatMessage(ctx, in, opts...)
 }

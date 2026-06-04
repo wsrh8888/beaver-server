@@ -47,3 +47,8 @@ func (s *UserServer) UserVersions(ctx context.Context, in *user_rpc.UserVersions
 	l := logic.NewUserVersionsLogic(ctx, s.svcCtx)
 	return l.UserVersions(in)
 }
+
+func (s *UserServer) UserUpdateDisplay(ctx context.Context, in *user_rpc.UserUpdateDisplayReq) (*user_rpc.UserUpdateDisplayRes, error) {
+	l := logic.NewUserUpdateDisplayLogic(ctx, s.svcCtx)
+	return l.UserUpdateDisplay(in)
+}

@@ -19,7 +19,7 @@ func RobotSendMessageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewRobotSendMessageLogic(r.Context(), svcCtx)
-		resp, err := l.RobotSendMessage(&req)
+		resp, err := l.RobotSendMessage(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

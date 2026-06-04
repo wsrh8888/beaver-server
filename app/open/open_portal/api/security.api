@@ -1,36 +1,37 @@
 syntax = "v1"
 
-// ==================== 安全设置 ====================
+// ==================== 应用安全设置（开发者门户）====================
+
 type (
-	// 更新安全配置
+	// 更新应用安全配置
 	UpdateSecurityConfigReq {
-		AppID          string   `json:"appId"`
-		IPWhitelist    []string `json:"ipWhitelist,optional"` // IP白名单
-		TrustedDomains []string `json:"trustedDomains,optional"` // H5可信域名
-		UserID         string   `header:"Beaver-User-Id"`
+		AppID          string   `json:"appId"` // string 应用 ID
+		IPWhitelist    []string `json:"ipWhitelist,optional"` // []string 服务端调用 IP 白名单，可选
+		TrustedDomains []string `json:"trustedDomains,optional"` // []string H5/OAuth 可信域名列表，可选
+		UserID         string   `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
-	UpdateSecurityConfigRes  {}
+	UpdateSecurityConfigRes {}
 )
 
 type (
-	// 获取安全配置
+	// 获取应用安全配置
 	GetSecurityConfigReq {
-		AppID  string `form:"appId"`
-		UserID string `header:"Beaver-User-Id"`
+		AppID  string `form:"appId"` // string 应用 ID
+		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	SecurityConfigInfo {
-		AppID          string   `json:"appId"`
-		IPWhitelist    []string `json:"ipWhitelist"` // IP白名单
-		TrustedDomains []string `json:"trustedDomains"` // H5可信域名
+		AppID          string   `json:"appId"` // string 应用 ID
+		IPWhitelist    []string `json:"ipWhitelist"` // []string IP 白名单
+		TrustedDomains []string `json:"trustedDomains"` // []string 可信域名列表
 	}
 	GetSecurityConfigRes {
-		Config SecurityConfigInfo `json:"config"`
+		Config SecurityConfigInfo `json:"config"` // object 安全配置
 	}
 )
 
 @server (
 	group: security
-	middleware: DeveloperAuthMiddleware
+	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
 )
 service open {
 	@doc "获取安全配置"
@@ -41,4 +42,3 @@ service open {
 	@handler UpdateSecurityConfig
 	post /api/open_portal/security/v1/config_update (UpdateSecurityConfigReq) returns (UpdateSecurityConfigRes)
 }
-

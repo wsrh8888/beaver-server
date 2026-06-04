@@ -29,9 +29,6 @@ func NewUpdateAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 }
 
 func (l *UpdateAppScopesLogic) UpdateAppScopes(req *types.UpdateAppScopesReq) (resp *types.UpdateAppScopesRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 查询应用
 	var app open_models.OpenApp

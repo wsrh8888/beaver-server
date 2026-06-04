@@ -13,6 +13,8 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	"beaver/app/open/openevent"
+	"beaver/app/open/open_rpc/types/open_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -131,6 +133,39 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				l.Logger.Errorf("异步发送欢迎消息失败: %v", err)
 			} else {
 				l.Logger.Infof("异步发送欢迎消息成功: conversationID=%s", conversationID)
+			}
+		}()
+
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					l.Logger.Errorf("Robot 好友事件推送 panic: %v", r)
+				}
+			}()
+			ctx := context.Background()
+			res, err := l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: friendVerify.RevUserID})
+			if err == nil && res != nil && res.Found {
+				body, _ := json.Marshal(map[string]interface{}{
+					"robot_id": friendVerify.RevUserID,
+					"user_id":  friendVerify.SendUserID,
+				})
+				_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
+					AppId:     res.AppId,
+					EventType: openevent.EventIMBotFollowed,
+					EventJson: string(body),
+				})
+			}
+			res, err = l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: friendVerify.SendUserID})
+			if err == nil && res != nil && res.Found {
+				body, _ := json.Marshal(map[string]interface{}{
+					"robot_id": friendVerify.SendUserID,
+					"user_id":  friendVerify.RevUserID,
+				})
+				_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
+					AppId:     res.AppId,
+					EventType: openevent.EventIMBotFollowed,
+					EventJson: string(body),
+				})
 			}
 		}()
 

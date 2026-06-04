@@ -1,22 +1,18 @@
 syntax = "v1"
 
-// ==================== Bot Webhook 事件订阅接口 ====================
+// ==================== 智能机器人 Robot Webhook 事件订阅（Open API） ====================
 //
-// 用途: Bot（如 OpenClaw）在本机启动后，向 Beaver 注册 Webhook URL。
-// 当用户向 Bot 发消息或在群里 @Bot 时，Beaver 将消息 POST 到该 URL。
-//
-// 注册时 Beaver 会先向 TargetURL 发送一次 URL 验证请求（Challenge）：
-//   POST <TargetURL>
-//   {"type":"url_verification","challenge":"<随机字符串>","token":"<签名token>"}
-// Bot 服务器必须原样返回 {"challenge":"<随机字符串>"} 才能注册成功。
+// 应用需已发布且具备 Webhook 能力。注册时向 TargetURL 发送 URL 验证（Challenge）：
+//   POST <TargetURL>  {"type":"url_verification","challenge":"..."}
+// 服务端需原样返回 {"challenge":"..."}。
 //
 // 支持的事件类型（EventType）:
-//   im.message.receive          - Bot 收到私聊消息
-//   im.message.receive.group_at - Bot 在群里被 @ 提及
-//   im.bot.followed             - 用户将 Bot 添加为好友/关注
-//   im.bot.unfollowed           - 用户将 Bot 从好友中移除
-//   im.chat.member.bot.added    - Bot 被邀请进群
-//   im.chat.member.bot.removed  - Bot 被移出群
+//   im.message.receive           - 用户向 Robot 发私聊消息（IM 触发）
+//   im.message.receive.group_at  - 群内 @ Robot（IM 触发）
+//   im.bot.followed              - 用户与 Robot 建立好友关系
+//   im.bot.unfollowed            - 用户删除 Robot 好友
+//   im.chat.member.bot.added     - Robot 被加入群（Open API add_to_group）
+//   im.chat.member.bot.removed   - Robot 被移出群（Open API remove_from_group）
 //
 // Webhook 推送给 Bot 的事件 Payload 示例（im.message.receive）:
 //   {
@@ -37,91 +33,80 @@ syntax = "v1"
 type (
 	// 注册 Webhook URL（同时触发 Challenge 验证）
 	RegisterWebhookReq {
-		EventType  string `json:"eventType"` // 订阅的事件类型，见上方说明
-		TargetURL  string `json:"targetUrl"` // Webhook URL（Bot 本机可通过内网穿透暴露）
-		Secret     string `json:"secret,optional"` // HMAC 签名密钥，用于验证推送来源
-		RetryCount int    `json:"retryCount,optional"` // 推送失败重试次数，默认 3
-		Timeout    int    `json:"timeout,optional"`    // 推送超时（秒），默认 5
+		EventType  string `json:"eventType"` // string 订阅的事件类型，如 im.message.receive
+		TargetURL  string `json:"targetUrl"` // string Webhook 推送目标 URL
+		Secret     string `json:"secret,optional"` // string HMAC 签名密钥，可选
+		RetryCount int    `json:"retryCount,optional"` // int 推送失败重试次数，默认 3
+		Timeout    int    `json:"timeout,optional"` // int 推送超时秒数，默认 5
 	}
 
 	RegisterWebhookRes {
-		SubscriptionID uint64 `json:"subscriptionId"`
-		Status         string `json:"status"` // active（验证通过）/ pending（验证中）
+		SubscriptionID uint64 `json:"subscriptionId"` // uint64 订阅 ID
+		Status         string `json:"status"` // string 状态：active 验证通过 / pending 待验证
 	}
 )
 
 type (
 	// 获取当前应用的 Webhook 订阅列表
 	GetWebhookListReq {
-		Page      int    `form:"page,default=1"`
-		PageSize  int    `form:"pageSize,default=20"`
-		EventType string `form:"eventType,optional"`
+		Page      int    `form:"page,default=1"` // int 页码，从 1 开始
+		PageSize  int    `form:"pageSize,default=20"` // int 每页条数
+		EventType string `form:"eventType,optional"` // string 事件类型筛选，可选
 	}
 
 	WebhookSubscriptionInfo {
-		ID         uint64 `json:"id"`
-		EventType  string `json:"eventType"`
-		TargetURL  string `json:"targetUrl"`
-		Status     int    `json:"status"` // 0 禁用 1 启用
-		RetryCount int    `json:"retryCount"`
-		Timeout    int    `json:"timeout"`
-		CreatedAt  int64  `json:"createdAt"`
+		ID             uint64 `json:"id"` // uint64 订阅 ID
+		EventType      string `json:"eventType"` // string 事件类型
+		TargetURL      string `json:"targetUrl"` // string Webhook 推送目标 URL
+		Status         int    `json:"status"` // int 0 禁用 1 启用（且 URL 验证通过才可推送）
+		VerifyStatus   int    `json:"verifyStatus"` // int 0 待验证 1 已通过 2 失败
+		LastError      string `json:"lastError,optional"` // string 上次验证或推送失败原因，可选
+		LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间 Unix 秒，可选
+		RetryCount     int    `json:"retryCount"` // int 推送失败重试次数
+		Timeout        int    `json:"timeout"` // int 推送超时秒数
+		CreatedAt      int64  `json:"createdAt"` // int64 创建时间 Unix 秒
 	}
 
 	GetWebhookListRes {
-		Total int64                     `json:"total"`
-		List  []WebhookSubscriptionInfo `json:"list"`
+		Total int64                     `json:"total"` // int64 总条数
+		List  []WebhookSubscriptionInfo `json:"list"` // array 订阅列表
 	}
 )
 
 type (
 	// 删除 Webhook 订阅
 	DeleteWebhookReq {
-		SubscriptionID uint64 `json:"subscriptionId"`
+		SubscriptionID uint64 `json:"subscriptionId"` // uint64 订阅 ID
 	}
 
 	DeleteWebhookRes {
-		Success bool `json:"success"`
-	}
-)
-
-type (
-	// 触发测试事件推送（开发调试用，验证 Bot 服务器收到格式是否正确）
-	TestEventPushReq {
-		SubscriptionID uint64 `json:"subscriptionId"` // 要测试的订阅 ID
-	}
-
-	TestEventPushRes {
-		Success      bool   `json:"success"`
-		ResponseCode int    `json:"responseCode,optional"` // Bot 服务器返回的 HTTP 状态码
-		ResponseBody string `json:"responseBody,optional"` // Bot 服务器返回的内容（截取前 500 字符）
-		CostMs       int64  `json:"costMs"`                // 推送耗时（毫秒）
+		Success bool `json:"success"` // bool 是否删除成功
 	}
 )
 
 type (
 	// 获取事件推送日志（查看哪些推送成功/失败）
 	GetEventLogsReq {
-		SubscriptionID uint64 `form:"subscriptionId,optional"`
-		Page           int    `form:"page,default=1"`
-		PageSize       int    `form:"pageSize,default=20"`
+		SubscriptionID uint64 `form:"subscriptionId,optional"` // uint64 订阅 ID 筛选，可选
+		Page           int    `form:"page,default=1"` // int 页码，从 1 开始
+		PageSize       int    `form:"pageSize,default=20"` // int 每页条数
 	}
 
 	EventLogInfo {
-		ID           uint64 `json:"id"`
-		EventID      string `json:"eventId"`
-		EventType    string `json:"eventType"`
-		ResponseCode int    `json:"responseCode"`
-		CostMs       int64  `json:"costMs"`
-		RetryCount   int    `json:"retryCount"`
-		Status       int    `json:"status"` // 0 推送中 1 成功 2 失败
-		ErrorMsg     string `json:"errorMsg,optional"`
-		CreatedAt    int64  `json:"createdAt"`
+		ID           uint64 `json:"id"` // uint64 日志 ID
+		EventID      string `json:"eventId"` // string 平台事件 ID
+		EventType    string `json:"eventType"` // string 事件类型
+		ResponseCode int    `json:"responseCode"` // int 开发者服务器 HTTP 状态码
+		CostMs       int64  `json:"costMs"` // int64 推送耗时毫秒
+		RetryCount   int    `json:"retryCount"` // int 重试次数
+		Status       int    `json:"status"` // int 0 失败 1 成功
+		ErrorMsg     string `json:"errorMsg,optional"` // string 错误信息，可选
+		CreatedAt    int64  `json:"createdAt"` // int64 创建时间 Unix 秒
 	}
 
 	GetEventLogsRes {
-		Total int64          `json:"total"`
-		List  []EventLogInfo `json:"list"`
+		Total int64          `json:"total"` // int64 总条数
+		List  []EventLogInfo `json:"list"` // array 日志列表
 	}
 )
 
@@ -140,10 +125,6 @@ service open {
 	@doc "删除 Webhook 订阅"
 	@handler DeleteWebhook
 	post /api/open/event/v1/delete_webhook (DeleteWebhookReq) returns (DeleteWebhookRes)
-
-	@doc "触发测试事件推送（调试用，向 Bot 服务器发一条测试事件）"
-	@handler TestEventPush
-	post /api/open/event/v1/test_webhook (TestEventPushReq) returns (TestEventPushRes)
 
 	@doc "获取事件推送日志"
 	@handler GetEventLogs

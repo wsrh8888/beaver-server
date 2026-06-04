@@ -27,6 +27,8 @@ const (
 	Group_GetGroupJoinRequestsListByIds_FullMethodName = "/group_rpc.group/GetGroupJoinRequestsListByIds"
 	Group_GetUserGroupRequestVersions_FullMethodName   = "/group_rpc.group/GetUserGroupRequestVersions"
 	Group_CanSendGroupMessage_FullMethodName           = "/group_rpc.group/CanSendGroupMessage"
+	Group_AddGroupMember_FullMethodName                = "/group_rpc.group/AddGroupMember"
+	Group_RemoveGroupMember_FullMethodName             = "/group_rpc.group/RemoveGroupMember"
 )
 
 // GroupClient is the client API for Group service.
@@ -41,6 +43,8 @@ type GroupClient interface {
 	GetGroupJoinRequestsListByIds(ctx context.Context, in *GetGroupJoinRequestsListByIdsReq, opts ...grpc.CallOption) (*GetGroupJoinRequestsListByIdsRes, error)
 	GetUserGroupRequestVersions(ctx context.Context, in *GetUserGroupRequestVersionsReq, opts ...grpc.CallOption) (*GetUserGroupRequestVersionsRes, error)
 	CanSendGroupMessage(ctx context.Context, in *CanSendGroupMessageReq, opts ...grpc.CallOption) (*CanSendGroupMessageRes, error)
+	AddGroupMember(ctx context.Context, in *AddGroupMemberReq, opts ...grpc.CallOption) (*AddGroupMemberRes, error)
+	RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, opts ...grpc.CallOption) (*RemoveGroupMemberRes, error)
 }
 
 type groupClient struct {
@@ -131,6 +135,26 @@ func (c *groupClient) CanSendGroupMessage(ctx context.Context, in *CanSendGroupM
 	return out, nil
 }
 
+func (c *groupClient) AddGroupMember(ctx context.Context, in *AddGroupMemberReq, opts ...grpc.CallOption) (*AddGroupMemberRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddGroupMemberRes)
+	err := c.cc.Invoke(ctx, Group_AddGroupMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, opts ...grpc.CallOption) (*RemoveGroupMemberRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveGroupMemberRes)
+	err := c.cc.Invoke(ctx, Group_RemoveGroupMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupServer is the server API for Group service.
 // All implementations must embed UnimplementedGroupServer
 // for forward compatibility.
@@ -143,6 +167,8 @@ type GroupServer interface {
 	GetGroupJoinRequestsListByIds(context.Context, *GetGroupJoinRequestsListByIdsReq) (*GetGroupJoinRequestsListByIdsRes, error)
 	GetUserGroupRequestVersions(context.Context, *GetUserGroupRequestVersionsReq) (*GetUserGroupRequestVersionsRes, error)
 	CanSendGroupMessage(context.Context, *CanSendGroupMessageReq) (*CanSendGroupMessageRes, error)
+	AddGroupMember(context.Context, *AddGroupMemberReq) (*AddGroupMemberRes, error)
+	RemoveGroupMember(context.Context, *RemoveGroupMemberReq) (*RemoveGroupMemberRes, error)
 	mustEmbedUnimplementedGroupServer()
 }
 
@@ -176,6 +202,12 @@ func (UnimplementedGroupServer) GetUserGroupRequestVersions(context.Context, *Ge
 }
 func (UnimplementedGroupServer) CanSendGroupMessage(context.Context, *CanSendGroupMessageReq) (*CanSendGroupMessageRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CanSendGroupMessage not implemented")
+}
+func (UnimplementedGroupServer) AddGroupMember(context.Context, *AddGroupMemberReq) (*AddGroupMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddGroupMember not implemented")
+}
+func (UnimplementedGroupServer) RemoveGroupMember(context.Context, *RemoveGroupMemberReq) (*RemoveGroupMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveGroupMember not implemented")
 }
 func (UnimplementedGroupServer) mustEmbedUnimplementedGroupServer() {}
 func (UnimplementedGroupServer) testEmbeddedByValue()               {}
@@ -342,6 +374,42 @@ func _Group_CanSendGroupMessage_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Group_AddGroupMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddGroupMemberReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).AddGroupMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Group_AddGroupMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).AddGroupMember(ctx, req.(*AddGroupMemberReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Group_RemoveGroupMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveGroupMemberReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).RemoveGroupMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Group_RemoveGroupMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).RemoveGroupMember(ctx, req.(*RemoveGroupMemberReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Group_ServiceDesc is the grpc.ServiceDesc for Group service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +448,14 @@ var Group_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CanSendGroupMessage",
 			Handler:    _Group_CanSendGroupMessage_Handler,
+		},
+		{
+			MethodName: "AddGroupMember",
+			Handler:    _Group_AddGroupMember_Handler,
+		},
+		{
+			MethodName: "RemoveGroupMember",
+			Handler:    _Group_RemoveGroupMember_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

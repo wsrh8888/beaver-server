@@ -28,9 +28,6 @@ func NewUpdateOAuthConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *UpdateOAuthConfigLogic) UpdateOAuthConfig(req *types.UpdateOAuthConfigReq) (resp *types.UpdateOAuthConfigRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 查询应用信息
 	var app open_models.OpenApp

@@ -2,11 +2,14 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/open/openevent"
+	"beaver/app/open/open_rpc/types/open_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -81,6 +84,39 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 			"conversationId": "",
 		}
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload2)
+	}()
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.Logger.Errorf("Robot 好友事件推送 panic: %v", r)
+			}
+		}()
+		ctx := context.Background()
+		res, err := l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.FriendID})
+		if err == nil && res != nil && res.Found {
+			body, _ := json.Marshal(map[string]interface{}{
+				"robot_id": req.FriendID,
+				"user_id":  req.UserID,
+			})
+			_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
+				AppId:     res.AppId,
+				EventType: openevent.EventIMBotUnfollowed,
+				EventJson: string(body),
+			})
+		}
+		res, err = l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.UserID})
+		if err == nil && res != nil && res.Found {
+			body, _ := json.Marshal(map[string]interface{}{
+				"robot_id": req.UserID,
+				"user_id":  req.FriendID,
+			})
+			_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
+				AppId:     res.AppId,
+				EventType: openevent.EventIMBotUnfollowed,
+				EventJson: string(body),
+			})
+		}
 	}()
 
 	return &types.DeleteFriendRes{}, nil

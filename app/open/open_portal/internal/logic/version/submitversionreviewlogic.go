@@ -26,9 +26,6 @@ func NewSubmitVersionReviewLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *SubmitVersionReviewLogic) SubmitVersionReview(req *types.SubmitVersionReviewReq) (resp *types.SubmitVersionReviewRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	return nil, errors.New("功能暂未开放")
 }

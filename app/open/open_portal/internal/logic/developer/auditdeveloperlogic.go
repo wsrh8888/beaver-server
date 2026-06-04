@@ -32,9 +32,6 @@ func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp
 	if !ok || userID == "" {
 		return nil, errors.New("未登录")
 	}
-	if _, err := l.svcCtx.RequireDeveloper(userID); err != nil {
-		return nil, err
-	}
 
 	// 验证状态
 	if req.Status != 1 && req.Status != 2 {

@@ -31,9 +31,6 @@ func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq)
 	if !ok || userID == "" {
 		return nil, errors.New("未登录")
 	}
-	if _, err := l.svcCtx.RequireDeveloper(userID); err != nil {
-		return nil, err
-	}
 
 	// 构建查询
 	query := l.svcCtx.DB.Model(&open_models.OpenDeveloper{})

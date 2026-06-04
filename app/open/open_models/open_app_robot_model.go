@@ -4,32 +4,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// ==================== Robot 配置表 ====================
-
-// OpenAppRobot 应用智能机器人配置表（对标飞书开放平台）
-// 注意：这是应用级的智能机器人配置（AI 对话），不是群内的 Webhook 推送机器人（bot）
+// OpenAppRobot 应用智能机器人配置（一个 App 对应一个 Robot IM 用户）
 type OpenAppRobot struct {
 	gorm.Model
-	AppID string `gorm:"type:varchar(64);uniqueIndex;not null;comment:应用ID"`
+	AppID       string `gorm:"type:varchar(64);uniqueIndex;not null;comment:应用ID"`
+	RobotID string `gorm:"column:robot_user_id;type:varchar(64);uniqueIndex;comment:Robot IM 用户ID"`
+	RobotName   string `gorm:"type:varchar(100);comment:Robot 昵称"`
+	Avatar      string `gorm:"type:varchar(500);comment:Robot 头像"`
+	Status      int    `gorm:"type:tinyint;default:1;comment:1启用 0禁用"`
 
-	// 消息接收配置
-	MessageReceiveURL string `gorm:"type:varchar(512);comment:消息接收回调地址"`
+	EnableSingleChat int `gorm:"type:tinyint;default:1;comment:是否启用单聊"`
+	EnableGroupChat  int `gorm:"type:tinyint;default:1;comment:是否启用群聊"`
+	EnableAtMention  int `gorm:"type:tinyint;default:1;comment:是否允许@提及"`
 
-	// 功能开关
-	EnableSingleChat int `gorm:"type:tinyint;default:1;comment:是否启用单聊 1是 0否"`
-	EnableGroupChat  int `gorm:"type:tinyint;default:1;comment:是否启用群聊 1是 0否"`
-	EnableAtMention  int `gorm:"type:tinyint;default:1;comment:是否允许@提及 1是 0否"`
-
-	// 自动回复配置
-	AutoReplyRules string `gorm:"type:text;comment:自动回复规则(JSON)"`
 	WelcomeMessage string `gorm:"type:text;comment:欢迎语"`
 	CommandPrefix  string `gorm:"type:varchar(10);default:/;comment:命令前缀"`
-
-	// 事件订阅
-	EventSubscriptions string `gorm:"type:text;comment:订阅的事件列表(JSON数组)"`
-
-	// 安全配置
-	VerifyToken string `gorm:"type:varchar(128);comment:验证 Token"`
-	EncryptKey  string `gorm:"type:varchar(128);comment:加密密钥（可选）"`
-	IPWhitelist string `gorm:"type:text;comment:IP白名单(JSON数组)"`
 }

@@ -27,9 +27,6 @@ func NewUpdateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateA
 }
 
 func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateAppRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 查询应用并验证权限
 	var app open_models.OpenApp

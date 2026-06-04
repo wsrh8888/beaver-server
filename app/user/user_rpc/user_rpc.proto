@@ -66,12 +66,24 @@ message SearchUserRes {
   UserInfo user_info = 1; // 用户信息
 }
 
+// 更新用户展示信息（昵称/头像，供开放平台 Robot/Bot 等内部服务调用）
+message UserUpdateDisplayReq {
+  string user_id = 1; // string IM 用户 ID
+  string nick_name = 2; // string 新昵称，空表示不修改
+  string avatar = 3; // string 新头像 URL，空表示不修改
+}
+
+message UserUpdateDisplayRes {
+  int64 version = 1; // int64 更新后的用户资料版本号
+}
+
 service user {
   rpc UserCreate(UserCreateReq) returns(UserCreateRes);
   rpc UserInfo(UserInfoReq) returns(UserInfoRes);
   rpc SearchUser(SearchUserReq) returns(SearchUserRes);
   rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes);
   rpc UserVersions(UserVersionsReq) returns(UserVersionsRes);
+  rpc UserUpdateDisplay(UserUpdateDisplayReq) returns(UserUpdateDisplayRes);
 }
 
 // goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

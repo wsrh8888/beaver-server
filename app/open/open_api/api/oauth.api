@@ -1,18 +1,16 @@
 syntax = "v1"
 
-// ==================== OAuth 用户级认证接口（JWT，默认）====================
-// Gateway 负责验证 JWT 并注入 Beaver-User-Id
+// ==================== OAuth 用户级接口（JWT，Gateway 注入 Beaver-User-Id）====================
 
 type (
-	// PC 客户端生成 authCode
+	// PC 客户端生成 H5 快捷登录 authCode
 	GetH5AuthCodeReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（由 Gateway 注入）
-		AppID  string `json:"appId"`
+		UserID string `header:"Beaver-User-Id"` // string 当前登录用户 ID（Gateway 注入）
+		AppID  string `json:"appId"` // string 第三方应用 ID
 	}
-
 	GetH5AuthCodeRes {
-		AuthCode string `json:"authCode"`
-		ExpireIn int64  `json:"expireIn"`
+		AuthCode string `json:"authCode"` // string 一次性授权码
+		ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
 	}
 )
 

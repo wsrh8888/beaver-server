@@ -14,6 +14,8 @@ import (
 )
 
 type (
+	AddGroupMemberReq                = group_rpc.AddGroupMemberReq
+	AddGroupMemberRes                = group_rpc.AddGroupMemberRes
 	CanSendGroupMessageReq           = group_rpc.CanSendGroupMessageReq
 	CanSendGroupMessageRes           = group_rpc.CanSendGroupMessageRes
 	GetGroupJoinRequestsListByIdsReq = group_rpc.GetGroupJoinRequestsListByIdsReq
@@ -35,6 +37,8 @@ type (
 	GroupMemberInfo                  = group_rpc.GroupMemberInfo
 	GroupMemberListById              = group_rpc.GroupMemberListById
 	GroupRequestVersionItem          = group_rpc.GroupRequestVersionItem
+	RemoveGroupMemberReq             = group_rpc.RemoveGroupMemberReq
+	RemoveGroupMemberRes             = group_rpc.RemoveGroupMemberRes
 
 	Group interface {
 		GetGroupMembers(ctx context.Context, in *GetGroupMembersReq, opts ...grpc.CallOption) (*GetGroupMembersRes, error)
@@ -45,6 +49,8 @@ type (
 		GetGroupJoinRequestsListByIds(ctx context.Context, in *GetGroupJoinRequestsListByIdsReq, opts ...grpc.CallOption) (*GetGroupJoinRequestsListByIdsRes, error)
 		GetUserGroupRequestVersions(ctx context.Context, in *GetUserGroupRequestVersionsReq, opts ...grpc.CallOption) (*GetUserGroupRequestVersionsRes, error)
 		CanSendGroupMessage(ctx context.Context, in *CanSendGroupMessageReq, opts ...grpc.CallOption) (*CanSendGroupMessageRes, error)
+		AddGroupMember(ctx context.Context, in *AddGroupMemberReq, opts ...grpc.CallOption) (*AddGroupMemberRes, error)
+		RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, opts ...grpc.CallOption) (*RemoveGroupMemberRes, error)
 	}
 
 	defaultGroup struct {
@@ -96,4 +102,14 @@ func (m *defaultGroup) GetUserGroupRequestVersions(ctx context.Context, in *GetU
 func (m *defaultGroup) CanSendGroupMessage(ctx context.Context, in *CanSendGroupMessageReq, opts ...grpc.CallOption) (*CanSendGroupMessageRes, error) {
 	client := group_rpc.NewGroupClient(m.cli.Conn())
 	return client.CanSendGroupMessage(ctx, in, opts...)
+}
+
+func (m *defaultGroup) AddGroupMember(ctx context.Context, in *AddGroupMemberReq, opts ...grpc.CallOption) (*AddGroupMemberRes, error) {
+	client := group_rpc.NewGroupClient(m.cli.Conn())
+	return client.AddGroupMember(ctx, in, opts...)
+}
+
+func (m *defaultGroup) RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, opts ...grpc.CallOption) (*RemoveGroupMemberRes, error) {
+	client := group_rpc.NewGroupClient(m.cli.Conn())
+	return client.RemoveGroupMember(ctx, in, opts...)
 }

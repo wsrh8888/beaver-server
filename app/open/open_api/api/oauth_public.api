@@ -5,51 +5,47 @@ syntax = "v1"
 type (
 	// 生成扫码登录二维码
 	GenerateQrCodeReq {
-		AppID string `json:"appId"`
+		AppID string `json:"appId"` // string 第三方应用 ID
 	}
-
 	GenerateQrCodeRes {
-		QrCodeURL string `json:"qrCodeUrl"`
-		SceneID   string `json:"sceneId"`
-		ExpireIn  int64  `json:"expireIn"`
+		QrCodeURL string `json:"qrCodeUrl"` // string 二维码图片或跳转 URL
+		SceneID   string `json:"sceneId"` // string 扫码场景 ID，用于轮询状态
+		ExpireIn  int64  `json:"expireIn"` // int64 二维码有效期秒
 	}
 )
 
 type (
-	// 查询扫码状态
+	// 查询扫码登录状态
 	CheckQrCodeStatusReq {
-		SceneID string `form:"sceneId"`
+		SceneID string `form:"sceneId"` // string 扫码场景 ID
 	}
-
 	CheckQrCodeStatusRes {
-		Status string `json:"status"` // waiting / scanned / confirmed / cancelled / expired
-		Code   string `json:"code,optional"`
+		Status string `json:"status"` // string 状态：waiting / scanned / confirmed / cancelled / expired
+		Code   string `json:"code,optional"` // string 授权码，confirmed 时返回
 	}
 )
 
 type (
-	// 确认扫码登录（由已登录的移动端 App 调用）
+	// 确认扫码登录（已登录移动端调用）
 	ConfirmQrCodeLoginReq {
-		SceneID string `json:"sceneId"`
-		UserID  string `json:"userId"`
+		SceneID string `json:"sceneId"` // string 扫码场景 ID
+		UserID  string `json:"userId"` // string 确认登录的 IM 用户 ID
 	}
-
 	ConfirmQrCodeLoginRes {
-		Success bool `json:"success"`
+		Success bool `json:"success"` // bool 是否确认成功
 	}
 )
 
 type (
-	// 账号密码登录
+	// 账号密码登录获取授权码
 	PasswordLoginReq {
-		AppID    string `json:"appId"`
-		Account  string `json:"account"`
-		Password string `json:"password"`
+		AppID    string `json:"appId"` // string 第三方应用 ID
+		Account  string `json:"account"` // string 手机号或邮箱
+		Password string `json:"password"` // string 登录密码
 	}
-
 	PasswordLoginRes {
-		Code     string `json:"code"`
-		ExpireIn int64  `json:"expireIn"`
+		Code     string `json:"code"` // string OAuth 授权码
+		ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
 	}
 )
 

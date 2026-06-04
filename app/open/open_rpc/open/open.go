@@ -14,25 +14,29 @@ import (
 )
 
 type (
-	BotSecurity       = open_rpc.BotSecurity
-	CreateBotReq      = open_rpc.CreateBotReq
-	CreateBotRes      = open_rpc.CreateBotRes
-	DeleteBotReq      = open_rpc.DeleteBotReq
-	DeleteBotRes      = open_rpc.DeleteBotRes
-	ExchangeTokenReq  = open_rpc.ExchangeTokenReq
-	ExchangeTokenRes  = open_rpc.ExchangeTokenRes
-	GetBotInfoReq     = open_rpc.GetBotInfoReq
-	GetBotInfoRes     = open_rpc.GetBotInfoRes
-	GetUserInfoReq    = open_rpc.GetUserInfoReq
-	GetUserInfoRes    = open_rpc.GetUserInfoRes
-	RefreshTokenReq   = open_rpc.RefreshTokenReq
-	RefreshTokenRes   = open_rpc.RefreshTokenRes
-	ResetBotSecretReq = open_rpc.ResetBotSecretReq
-	ResetBotSecretRes = open_rpc.ResetBotSecretRes
-	SaveWebhookLogReq = open_rpc.SaveWebhookLogReq
-	SaveWebhookLogRes = open_rpc.SaveWebhookLogRes
-	ValidateTokenReq  = open_rpc.ValidateTokenReq
-	ValidateTokenRes  = open_rpc.ValidateTokenRes
+	BotSecurity              = open_rpc.BotSecurity
+	CreateBotReq             = open_rpc.CreateBotReq
+	CreateBotRes             = open_rpc.CreateBotRes
+	DeleteBotReq             = open_rpc.DeleteBotReq
+	DeleteBotRes             = open_rpc.DeleteBotRes
+	DispatchPlatformEventReq = open_rpc.DispatchPlatformEventReq
+	DispatchPlatformEventRes = open_rpc.DispatchPlatformEventRes
+	ExchangeTokenReq         = open_rpc.ExchangeTokenReq
+	ExchangeTokenRes         = open_rpc.ExchangeTokenRes
+	GetBotInfoReq            = open_rpc.GetBotInfoReq
+	GetBotInfoRes            = open_rpc.GetBotInfoRes
+	GetRobotByUserIDReq      = open_rpc.GetRobotByUserIDReq
+	GetRobotByUserIDRes      = open_rpc.GetRobotByUserIDRes
+	GetUserInfoReq           = open_rpc.GetUserInfoReq
+	GetUserInfoRes           = open_rpc.GetUserInfoRes
+	RefreshTokenReq          = open_rpc.RefreshTokenReq
+	RefreshTokenRes          = open_rpc.RefreshTokenRes
+	ResetBotSecretReq        = open_rpc.ResetBotSecretReq
+	ResetBotSecretRes        = open_rpc.ResetBotSecretRes
+	SaveWebhookLogReq        = open_rpc.SaveWebhookLogReq
+	SaveWebhookLogRes        = open_rpc.SaveWebhookLogRes
+	ValidateTokenReq         = open_rpc.ValidateTokenReq
+	ValidateTokenRes         = open_rpc.ValidateTokenRes
 
 	Open interface {
 		ExchangeToken(ctx context.Context, in *ExchangeTokenReq, opts ...grpc.CallOption) (*ExchangeTokenRes, error)
@@ -44,6 +48,8 @@ type (
 		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 		SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
+		GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
+		DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
 	}
 
 	defaultOpen struct {
@@ -100,4 +106,14 @@ func (m *defaultOpen) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ..
 func (m *defaultOpen) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
 	return client.SaveWebhookLog(ctx, in, opts...)
+}
+
+func (m *defaultOpen) GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.GetRobotByUserID(ctx, in, opts...)
+}
+
+func (m *defaultOpen) DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.DispatchPlatformEvent(ctx, in, opts...)
 }

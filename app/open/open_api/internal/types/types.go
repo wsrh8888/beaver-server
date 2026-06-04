@@ -2,11 +2,11 @@
 package types
 
 type AddRobotToGroupReq struct {
-	GroupID string `json:"groupId"`
+	GroupID string `json:"groupId"` // string 群组 ID
 }
 
 type AddRobotToGroupRes struct {
-	RobotID string `json:"robotId"` // Robot 在群里的 UserID，事件 payload 里用来识别 @ 提及
+	RobotID string `json:"robotId"` // string Robot 在群内的用户 ID
 }
 
 type BotAtInfo struct {
@@ -27,11 +27,6 @@ type BotCallContent struct {
 	CallType int32  `json:"callType"`
 	Status   int32  `json:"status"`
 	Duration int64  `json:"duration"`
-}
-
-type BotCardContent struct {
-	TemplateID string `json:"templateId"`
-	Data       string `json:"data"`
 }
 
 type BotEmojiContent struct {
@@ -103,7 +98,6 @@ type BotSendReq struct {
 	Reply        *BotReplyContent        `json:"reply,optional"`
 	Forward      *BotForwardContent      `json:"forward,optional"`
 	Link         *BotLinkContent         `json:"link,optional"`
-	Card         *BotCardContent         `json:"card,optional"`
 }
 
 type BotSendRes struct {
@@ -207,10 +201,10 @@ type GetRobotInfoReq struct {
 }
 
 type GetRobotInfoRes struct {
-	RobotID   string `json:"robotId"`   // Robot 在 IM 中的用户 ID，用于识别 @提及
-	RobotName string `json:"robotName"` // Robot 昵称
-	Avatar    string `json:"avatar,optional"`
-	AppID     string `json:"appId"`
+	RobotID   string `json:"robotId"`         // string Robot 在 IM 中的用户 ID，用于 @ 提及
+	RobotName string `json:"robotName"`       // string Robot 昵称
+	Avatar    string `json:"avatar,optional"` // string 头像 URL，可选
+	AppID     string `json:"appId"`           // string 所属应用 ID
 }
 
 type GetTokenByCodeReq struct {
@@ -349,11 +343,11 @@ type RegisterWebhookRes struct {
 }
 
 type RemoveRobotFromGroupReq struct {
-	GroupID string `json:"groupId"`
+	GroupID string `json:"groupId"` // string 群组 ID
 }
 
 type RemoveRobotFromGroupRes struct {
-	Success bool `json:"success"`
+	Success bool `json:"success"` // bool 是否成功
 }
 
 type RevokeTokenReq struct {
@@ -366,46 +360,27 @@ type RevokeTokenRes struct {
 }
 
 type RobotSendMessageReq struct {
-	ConversationID string `json:"conversationId"`         // 会话 ID（私聊或群聊，从 Webhook 事件中获取）
-	MsgType        string `json:"msgType"`                // 消息类型: text / markdown / richtext / card
-	Content        string `json:"content"`                // 消息内容（JSON 字符串或纯文本）
-	ReplyMsgID     string `json:"replyMsgId,optional"`    // 引用回复的消息 ID（可选）
-	IdempotentKey  string `json:"idempotentKey,optional"` // 幂等键，防重复发送
+	ConversationID string `json:"conversationId"`         // string 会话 ID，从 Webhook 事件中获取
+	MsgType        string `json:"msgType"`                // string 消息类型：text / markdown
+	Content        string `json:"content"`                // string 消息内容
+	ReplyMsgID     string `json:"replyMsgId,optional"`    // string 引用回复的消息 ID，可选
+	IdempotentKey  string `json:"idempotentKey,optional"` // string 幂等键，防重复发送，可选
 }
 
 type RobotSendMessageRes struct {
-	MessageID string `json:"messageId"`
-	SendTime  int64  `json:"sendTime"`
-}
-
-type RobotStreamChunk struct {
-	Type    string `json:"type"`           // text / end
-	Content string `json:"content"`        // 内容片段
-	MsgID   string `json:"msgId,optional"` // 最终消息 ID（type=end 时返回）
-}
-
-type RobotStreamMessageReq struct {
-	ConversationID string `json:"conversationId"`
-	MsgType        string `json:"msgType"`
-}
-
-type TestEventPushReq struct {
-	SubscriptionID uint64 `json:"subscriptionId"` // 要测试的订阅 ID
-}
-
-type TestEventPushRes struct {
-	Success      bool   `json:"success"`
-	ResponseCode int    `json:"responseCode,optional"` // Bot 服务器返回的 HTTP 状态码
-	ResponseBody string `json:"responseBody,optional"` // Bot 服务器返回的内容（截取前 500 字符）
-	CostMs       int64  `json:"costMs"`                // 推送耗时（毫秒）
+	MessageID string `json:"messageId"` // string 消息 ID
+	SendTime  int64  `json:"sendTime"`  // int64 发送时间 Unix 秒
 }
 
 type WebhookSubscriptionInfo struct {
-	ID         uint64 `json:"id"`
-	EventType  string `json:"eventType"`
-	TargetURL  string `json:"targetUrl"`
-	Status     int    `json:"status"` // 0 禁用 1 启用
-	RetryCount int    `json:"retryCount"`
-	Timeout    int    `json:"timeout"`
-	CreatedAt  int64  `json:"createdAt"`
+	ID             uint64 `json:"id"`
+	EventType      string `json:"eventType"`
+	TargetURL      string `json:"targetUrl"`
+	Status         int    `json:"status"` // 0 禁用 1 启用
+	VerifyStatus   int    `json:"verifyStatus"`
+	LastError      string `json:"lastError,optional"`
+	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"`
+	RetryCount     int    `json:"retryCount"`
+	Timeout        int    `json:"timeout"`
+	CreatedAt      int64  `json:"createdAt"`
 }

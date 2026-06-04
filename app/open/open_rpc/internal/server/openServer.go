@@ -67,3 +67,13 @@ func (s *OpenServer) SaveWebhookLog(ctx context.Context, in *open_rpc.SaveWebhoo
 	l := logic.NewSaveWebhookLogLogic(ctx, s.svcCtx)
 	return l.SaveWebhookLog(in)
 }
+
+func (s *OpenServer) GetRobotByUserID(ctx context.Context, in *open_rpc.GetRobotByUserIDReq) (*open_rpc.GetRobotByUserIDRes, error) {
+	l := logic.NewGetRobotByUserIDLogic(ctx, s.svcCtx)
+	return l.GetRobotByUserID(in)
+}
+
+func (s *OpenServer) DispatchPlatformEvent(ctx context.Context, in *open_rpc.DispatchPlatformEventReq) (*open_rpc.DispatchPlatformEventRes, error) {
+	l := logic.NewDispatchPlatformEventLogic(ctx, s.svcCtx)
+	return l.DispatchPlatformEvent(in)
+}

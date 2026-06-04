@@ -1,71 +1,124 @@
 syntax = "v1"
 
-// ==================== 事件订阅管理 ====================
+// ==================== 事件订阅管理（开发者门户，智能机器人 Robot） ====================
+//
+// 支持事件类型: im.message.receive / im.message.receive.group_at /
+// im.bot.followed / im.bot.unfollowed / im.chat.member.bot.added / im.chat.member.bot.removed
+
 type (
+	// 创建事件订阅
 	CreateEventSubscriptionReq {
-		AppID      string `json:"appId"`
-		EventType  string `json:"eventType"` // 事件类型
-		TargetURL  string `json:"targetUrl"` // 推送目标URL
-		Secret     string `json:"secret,optional"` // 签名密钥
-		RetryCount int    `json:"retryCount,optional"` // 重试次数
-		Timeout    int    `json:"timeout,optional"` // 超时时间(秒)
-		UserID     string `header:"Beaver-User-Id"`
+		AppID      string `json:"appId"` // string 应用 ID
+		EventType  string `json:"eventType"` // string 事件类型，如 im.message.receive
+		TargetURL  string `json:"targetUrl"` // string Webhook 推送目标 URL
+		Secret     string `json:"secret,optional"` // string HMAC 签名密钥，可选
+		RetryCount int    `json:"retryCount,optional"` // int 推送失败重试次数，默认 3
+		Timeout    int    `json:"timeout,optional"` // int 推送超时秒数，默认 5
+		UserID     string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
-	EventSubscriptionInfo {
-		ID         string `json:"id"`
-		AppID      string `json:"appId"`
-		EventType  string `json:"eventType"`
-		TargetURL  string `json:"targetUrl"`
-		Secret     string `json:"secret"`
-		Status     int    `json:"status"` // 0禁用 1启用
-		RetryCount int    `json:"retryCount"`
-		Timeout    int    `json:"timeout"`
-		CreatedAt  int64  `json:"createdAt"`
-		UpdatedAt  int64  `json:"updatedAt"`
+	CreateEventSubscriptionResSubscription {
+		ID             string `json:"id"` // string 订阅 ID
+		AppID          string `json:"appId"` // string 应用 ID
+		EventType      string `json:"eventType"` // string 事件类型
+		TargetURL      string `json:"targetUrl"` // string Webhook 推送目标 URL
+		Secret         string `json:"secret"` // string 签名密钥
+		Status         int    `json:"status"` // int 0 未就绪/禁用 1 启用
+		VerifyStatus   int    `json:"verifyStatus"` // int 0 待验证 1 已通过 2 失败
+		LastError      string `json:"lastError,optional"` // string 验证或推送失败原因
+		LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间
+		RetryCount     int    `json:"retryCount"` // int 重试次数
+		Timeout        int    `json:"timeout"` // int 超时秒数
+		CreatedAt      int64  `json:"createdAt"` // int64 创建时间 Unix 秒
+		UpdatedAt      int64  `json:"updatedAt"` // int64 更新时间 Unix 秒
 	}
 	CreateEventSubscriptionRes {
-		Subscription EventSubscriptionInfo `json:"subscription"`
+		Subscription CreateEventSubscriptionResSubscription `json:"subscription"` // 创建的订阅信息
 	}
 )
 
 type (
+	// 获取事件订阅列表
 	ListEventSubscriptionsReq {
-		AppID     string `form:"appId"`
-		EventType string `form:"eventType,optional"`
-		Page      int    `form:"page,default=1"`
-		PageSize  int    `form:"pageSize,default=20"`
-		UserID    string `header:"Beaver-User-Id"`
+		AppID     string `form:"appId"` // string 应用 ID
+		EventType string `form:"eventType,optional"` // string 事件类型筛选，可选
+		Page      int    `form:"page,default=1"` // int 页码，从 1 开始
+		PageSize  int    `form:"pageSize,default=20"` // int 每页条数
+		UserID    string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	}
+	ListEventSubscriptionsResItem {
+		ID             string `json:"id"` // string 订阅 ID
+		AppID          string `json:"appId"` // string 应用 ID
+		EventType      string `json:"eventType"` // string 事件类型
+		TargetURL      string `json:"targetUrl"` // string Webhook 推送目标 URL
+		Secret         string `json:"secret"` // string 签名密钥
+		Status         int    `json:"status"` // int 0 未就绪/禁用 1 启用
+		VerifyStatus   int    `json:"verifyStatus"` // int 0 待验证 1 已通过 2 失败
+		LastError      string `json:"lastError,optional"` // string 失败原因
+		LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间
+		RetryCount     int    `json:"retryCount"` // int 重试次数
+		Timeout        int    `json:"timeout"` // int 超时秒数
+		CreatedAt      int64  `json:"createdAt"` // int64 创建时间 Unix 秒
+		UpdatedAt      int64  `json:"updatedAt"` // int64 更新时间 Unix 秒
 	}
 	ListEventSubscriptionsRes {
-		Total int64                    `json:"total"`
-		List  []EventSubscriptionInfo `json:"list"`
+		Total int64                           `json:"total"` // int64 总条数
+		List  []ListEventSubscriptionsResItem `json:"list"` // 订阅列表
 	}
 )
 
 type (
+	// 更新事件订阅
 	UpdateEventSubscriptionReq {
-		ID         string `json:"id"`
-		TargetURL  string `json:"targetUrl,optional"`
-		Secret     string `json:"secret,optional"`
-		Status     *int   `json:"status,optional"` // 0禁用 1启用
-		RetryCount *int   `json:"retryCount,optional"`
-		Timeout    *int   `json:"timeout,optional"`
-		UserID     string `header:"Beaver-User-Id"`
+		ID         string `json:"id"` // string 订阅 ID
+		TargetURL  string `json:"targetUrl,optional"` // string 新的 Webhook URL，可选
+		Secret     string `json:"secret,optional"` // string 新的签名密钥，可选
+		Status     *int   `json:"status,optional"` // int 状态：0 禁用 1 启用，可选
+		RetryCount *int   `json:"retryCount,optional"` // int 重试次数，可选
+		Timeout    *int   `json:"timeout,optional"` // int 超时秒数，可选
+		UserID     string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	UpdateEventSubscriptionRes {}
 )
 
 type (
+	// 删除事件订阅
 	DeleteEventSubscriptionReq {
-		ID     string `json:"id"`
-		UserID string `header:"Beaver-User-Id"`
+		ID     string `json:"id"` // string 订阅 ID
+		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}
 	DeleteEventSubscriptionRes {}
 )
 
+type (
+	// 获取事件推送日志
+	GetEventLogsReq {
+		AppID          string `form:"appId"` // string 应用 ID
+		SubscriptionID uint64 `form:"subscriptionId,optional"` // uint64 订阅 ID 筛选，可选
+		Page           int    `form:"page,default=1"` // int 页码，从 1 开始
+		PageSize       int    `form:"pageSize,default=20"` // int 每页条数
+		UserID         string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	}
+	GetEventLogsResItem {
+		ID           uint64 `json:"id"` // uint64 日志 ID
+		EventID      string `json:"eventId"` // string 事件 ID
+		EventType    string `json:"eventType"` // string 事件类型
+		TargetURL    string `json:"targetUrl"` // string 推送目标 URL
+		ResponseCode int    `json:"responseCode"` // int HTTP 响应状态码
+		CostMs       int64  `json:"costMs"` // int64 推送耗时毫秒
+		RetryCount   int    `json:"retryCount"` // int 重试次数
+		Status       int    `json:"status"` // int 状态：0 失败 1 成功
+		ErrorMsg     string `json:"errorMsg,optional"` // string 错误信息，可选
+		CreatedAt    int64  `json:"createdAt"` // int64 创建时间 Unix 秒
+	}
+	GetEventLogsRes {
+		Total int64               `json:"total"` // int64 总条数
+		List  []GetEventLogsResItem `json:"list"` // 日志列表
+	}
+)
+
 @server (
 	group: event
-	middleware: DeveloperAuthMiddleware
+	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
 )
 service open {
 	@doc "创建事件订阅"
@@ -83,4 +136,8 @@ service open {
 	@doc "删除事件订阅"
 	@handler DeleteEventSubscription
 	post /api/open_portal/event/v1/delete (DeleteEventSubscriptionReq) returns (DeleteEventSubscriptionRes)
+
+	@doc "获取事件推送日志"
+	@handler GetEventLogs
+	get /api/open_portal/event/v1/logs (GetEventLogsReq) returns (GetEventLogsRes)
 }

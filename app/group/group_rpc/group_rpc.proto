@@ -118,6 +118,29 @@ message CanSendGroupMessageRes {
   string reason = 2;
 }
 
+// 添加群成员（供开放平台 Robot 入群等内部调用）
+message AddGroupMemberReq {
+  string group_id = 1; // string 群组 ID
+  string user_id = 2; // string 要加入的用户 ID
+  string operated_by = 3; // string 操作者 ID（如 app_id），可为空
+}
+
+message AddGroupMemberRes {
+  bool added = 1; // bool 是否新加入（已在群内则为 false）
+  int64 member_version = 2; // int64 群成员列表版本号
+}
+
+// 移除群成员（成员主动退出）
+message RemoveGroupMemberReq {
+  string group_id = 1; // string 群组 ID
+  string user_id = 2; // string 要移除的用户 ID
+  string operated_by = 3; // string 操作者 ID（如 app_id），可为空
+}
+
+message RemoveGroupMemberRes {
+  int64 member_version = 1; // int64 群成员列表版本号
+}
+
 service group {
   rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
   rpc GetUserGroupMembers(GetUserGroupMembersReq) returns (GetUserGroupMembersRes); // 获取用户群组中的其他成员ID列表
@@ -126,7 +149,9 @@ service group {
   rpc GetGroupMembersListByIds(GetGroupMembersListByIdsReq) returns (GetGroupMembersListByIdsRes); // 通过ID获取群成员列表
   rpc GetGroupJoinRequestsListByIds(GetGroupJoinRequestsListByIdsReq) returns (GetGroupJoinRequestsListByIdsRes); // 通过ID获取入群申请列表
   rpc GetUserGroupRequestVersions(GetUserGroupRequestVersionsReq) returns (GetUserGroupRequestVersionsRes); // 获取用户群组申请版本信息
-  rpc CanSendGroupMessage(CanSendGroupMessageReq) returns (CanSendGroupMessageRes);
+  rpc CanSendGroupMessage(CanSendGroupMessageReq) returns (CanSendGroupMessageRes); // 校验用户是否可在群内发消息
+  rpc AddGroupMember(AddGroupMemberReq) returns (AddGroupMemberRes); // 添加群成员
+  rpc RemoveGroupMember(RemoveGroupMemberReq) returns (RemoveGroupMemberRes); // 移除群成员
 }
 
 // goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

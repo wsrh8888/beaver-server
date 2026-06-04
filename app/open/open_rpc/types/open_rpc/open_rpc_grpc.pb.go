@@ -19,15 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Open_ExchangeToken_FullMethodName  = "/open_rpc.open/ExchangeToken"
-	Open_GetUserInfo_FullMethodName    = "/open_rpc.open/GetUserInfo"
-	Open_ValidateToken_FullMethodName  = "/open_rpc.open/ValidateToken"
-	Open_RefreshToken_FullMethodName   = "/open_rpc.open/RefreshToken"
-	Open_CreateBot_FullMethodName      = "/open_rpc.open/CreateBot"
-	Open_DeleteBot_FullMethodName      = "/open_rpc.open/DeleteBot"
-	Open_ResetBotSecret_FullMethodName = "/open_rpc.open/ResetBotSecret"
-	Open_GetBotInfo_FullMethodName     = "/open_rpc.open/GetBotInfo"
-	Open_SaveWebhookLog_FullMethodName = "/open_rpc.open/SaveWebhookLog"
+	Open_ExchangeToken_FullMethodName         = "/open_rpc.open/ExchangeToken"
+	Open_GetUserInfo_FullMethodName           = "/open_rpc.open/GetUserInfo"
+	Open_ValidateToken_FullMethodName         = "/open_rpc.open/ValidateToken"
+	Open_RefreshToken_FullMethodName          = "/open_rpc.open/RefreshToken"
+	Open_CreateBot_FullMethodName             = "/open_rpc.open/CreateBot"
+	Open_DeleteBot_FullMethodName             = "/open_rpc.open/DeleteBot"
+	Open_ResetBotSecret_FullMethodName        = "/open_rpc.open/ResetBotSecret"
+	Open_GetBotInfo_FullMethodName            = "/open_rpc.open/GetBotInfo"
+	Open_SaveWebhookLog_FullMethodName        = "/open_rpc.open/SaveWebhookLog"
+	Open_GetRobotByUserID_FullMethodName      = "/open_rpc.open/GetRobotByUserID"
+	Open_DispatchPlatformEvent_FullMethodName = "/open_rpc.open/DispatchPlatformEvent"
 )
 
 // OpenClient is the client API for Open service.
@@ -43,6 +45,8 @@ type OpenClient interface {
 	ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 	GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 	SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
+	GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
+	DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
 }
 
 type openClient struct {
@@ -143,6 +147,26 @@ func (c *openClient) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, 
 	return out, nil
 }
 
+func (c *openClient) GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRobotByUserIDRes)
+	err := c.cc.Invoke(ctx, Open_GetRobotByUserID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DispatchPlatformEventRes)
+	err := c.cc.Invoke(ctx, Open_DispatchPlatformEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OpenServer is the server API for Open service.
 // All implementations must embed UnimplementedOpenServer
 // for forward compatibility.
@@ -156,6 +180,8 @@ type OpenServer interface {
 	ResetBotSecret(context.Context, *ResetBotSecretReq) (*ResetBotSecretRes, error)
 	GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error)
 	SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error)
+	GetRobotByUserID(context.Context, *GetRobotByUserIDReq) (*GetRobotByUserIDRes, error)
+	DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error)
 	mustEmbedUnimplementedOpenServer()
 }
 
@@ -192,6 +218,12 @@ func (UnimplementedOpenServer) GetBotInfo(context.Context, *GetBotInfoReq) (*Get
 }
 func (UnimplementedOpenServer) SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveWebhookLog not implemented")
+}
+func (UnimplementedOpenServer) GetRobotByUserID(context.Context, *GetRobotByUserIDReq) (*GetRobotByUserIDRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRobotByUserID not implemented")
+}
+func (UnimplementedOpenServer) DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DispatchPlatformEvent not implemented")
 }
 func (UnimplementedOpenServer) mustEmbedUnimplementedOpenServer() {}
 func (UnimplementedOpenServer) testEmbeddedByValue()              {}
@@ -376,6 +408,42 @@ func _Open_SaveWebhookLog_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_GetRobotByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRobotByUserIDReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).GetRobotByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_GetRobotByUserID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).GetRobotByUserID(ctx, req.(*GetRobotByUserIDReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_DispatchPlatformEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DispatchPlatformEventReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).DispatchPlatformEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_DispatchPlatformEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).DispatchPlatformEvent(ctx, req.(*DispatchPlatformEventReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Open_ServiceDesc is the grpc.ServiceDesc for Open service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +486,14 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveWebhookLog",
 			Handler:    _Open_SaveWebhookLog_Handler,
+		},
+		{
+			MethodName: "GetRobotByUserID",
+			Handler:    _Open_GetRobotByUserID_Handler,
+		},
+		{
+			MethodName: "DispatchPlatformEvent",
+			Handler:    _Open_DispatchPlatformEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

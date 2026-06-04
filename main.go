@@ -174,6 +174,7 @@ func main() {
 					&open_models.OpenOAuthQrCode{},
 					&open_models.OpenBotModel{},
 					&open_models.OpenWebhookLog{},
+					&open_models.OpenRobotSendLog{},
 				)
 			},
 		},

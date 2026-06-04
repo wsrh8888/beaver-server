@@ -117,6 +117,33 @@ message SaveWebhookLogReq {
 
 message SaveWebhookLogRes {}
 
+// ==================== 智能机器人 Webhook ====================
+
+// 根据 IM 用户 ID 反查智能机器人
+message GetRobotByUserIDReq {
+  string robot_user_id = 1; // string Robot 的 IM 用户 ID
+}
+
+message GetRobotByUserIDRes {
+  bool found = 1; // bool 是否找到对应 Robot
+  string app_id = 2; // string 所属应用 ID
+  string robot_user_id = 3; // string Robot 的 IM 用户 ID
+  bool enable_single_chat = 4; // bool 是否启用私聊
+  bool enable_group_chat = 5; // bool 是否启用群聊
+  bool enable_at_mention = 6; // bool 是否启用 @ 提及
+}
+
+// 向应用已注册的 Webhook 推送开放平台事件
+message DispatchPlatformEventReq {
+  string app_id = 1; // string 应用 ID
+  string event_type = 2; // string 事件类型，如 im.message.receive
+  string event_json = 3; // string 事件内容 JSON 字符串
+}
+
+message DispatchPlatformEventRes {
+  bool dispatched = 1; // bool 是否至少推送成功一次
+}
+
 service open {
   rpc ExchangeToken(ExchangeTokenReq) returns (ExchangeTokenRes); // 用授权码换取 Token
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
@@ -127,6 +154,8 @@ service open {
   rpc ResetBotSecret(ResetBotSecretReq) returns (ResetBotSecretRes); // 重置签名密钥
   rpc GetBotInfo(GetBotInfoReq) returns (GetBotInfoRes); // 获取推送机器人信息
   rpc SaveWebhookLog(SaveWebhookLogReq) returns (SaveWebhookLogRes); // 记录 Webhook 回调日志
+  rpc GetRobotByUserID(GetRobotByUserIDReq) returns (GetRobotByUserIDRes); // 根据 IM 用户 ID 反查 Robot
+  rpc DispatchPlatformEvent(DispatchPlatformEventReq) returns (DispatchPlatformEventRes); // 推送开放平台事件
 }
 
 // goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

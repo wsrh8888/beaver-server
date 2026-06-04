@@ -286,7 +286,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	conversationType, userIds := conversation.ParseConversationWithType(in.ConversationId)
 
 	if conversationType == 1 {
-		// 私聊需要验证好友关系
+		// 私聊需要验证好友关系（与 Robot 对话时跳过）
 		if !strings.Contains(in.ConversationId, in.UserId) {
 			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserId, in.ConversationId)
 			return nil, errors.New("异常操作")
@@ -297,21 +297,33 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			return nil, errors.New("无效的私聊会话ID")
 		}
 
-		friendRes, err := l.svcCtx.FriendRpc.IsFriend(l.ctx, &friend_rpc.IsFriendReq{
-			UserA: userIds[0],
-			UserB: userIds[1],
-		})
-		if err != nil || !friendRes.IsFriend {
-			logx.Errorf("不是好友关系，用户IDs: %v", userIds)
-			return nil, errors.New("不是好友关系")
+		skipFriendCheck := isOpenRobotSender(in.DeviceId)
+		if !skipFriendCheck {
+			for _, uid := range userIds {
+				if uid != in.UserId && isRobotPeer(l.ctx, l.svcCtx.OpenRpc, uid) {
+					skipFriendCheck = true
+					break
+				}
+			}
 		}
 
-		blockRes, err := l.svcCtx.FriendRpc.IsBlocked(l.ctx, &friend_rpc.IsBlockedReq{
-			UserA: userIds[0],
-			UserB: userIds[1],
-		})
-		if err == nil && blockRes.IsBlocked {
-			return nil, errors.New("无法发送消息")
+		if !skipFriendCheck {
+			friendRes, err := l.svcCtx.FriendRpc.IsFriend(l.ctx, &friend_rpc.IsFriendReq{
+				UserA: userIds[0],
+				UserB: userIds[1],
+			})
+			if err != nil || !friendRes.IsFriend {
+				logx.Errorf("不是好友关系，用户IDs: %v", userIds)
+				return nil, errors.New("不是好友关系")
+			}
+
+			blockRes, err := l.svcCtx.FriendRpc.IsBlocked(l.ctx, &friend_rpc.IsBlockedReq{
+				UserA: userIds[0],
+				UserB: userIds[1],
+			})
+			if err == nil && blockRes.IsBlocked {
+				return nil, errors.New("无法发送消息")
+			}
 		}
 	} else if conversationType == 2 {
 		groupID := conversation.GetTargetIDByConversation(in.ConversationId, in.UserId)
@@ -422,6 +434,9 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		l.notifyMessageUpdateGrouped(in.ConversationId, in.UserId, conversationType, messagesUpdate, conversationsUpdate, allUserConversationUpdates)
 		l.sendOfflinePushIfNeeded(in.ConversationId, in.UserId, chatModel, recipientIdsFromUpdates(allUserConversationUpdates, in.ConversationId))
 	}()
+
+	// 6. 异步推送 Robot Webhook 事件
+	go newRobotWebhookPusher(context.Background(), l.svcCtx).tryPush(in, msg)
 
 	return &chat_rpc.SendMsgRes{
 		Id:               uint32(chatModel.Id),

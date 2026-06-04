@@ -1,69 +1,68 @@
 syntax = "v1"
 
-// ==================== 开发者管理 ====================
+// ==================== 开发者管理（开发者门户）====================
 
 type (
+	// 申请成为开发者
 	ApplyDeveloperReq {
-		RealName    string `json:"realName"`     // 真实姓名
-		CompanyName string `json:"companyName,optional"` // 公司名称
-		Phone       string `json:"phone"`        // 联系电话
-		Email       string `json:"email"`        // 联系邮箱
-		Description string `json:"description"`  // 应用场景描述
+		RealName    string `json:"realName"` // string 真实姓名
+		CompanyName string `json:"companyName,optional"` // string 公司名称，可选
+		Phone       string `json:"phone"` // string 联系电话
+		Email       string `json:"email"` // string 联系邮箱
+		Description string `json:"description"` // string 应用场景描述
 	}
-	
 	ApplyDeveloperRes {
-		Success bool   `json:"success"`
-		Message string `json:"message"` // 提示信息
+		Success bool   `json:"success"` // bool 是否提交成功
+		Message string `json:"message"` // string 提示信息
 	}
 )
 
 type (
+	// 获取开发者列表（管理员）
 	GetDeveloperListReq {
-		Page     int `form:"page,default=1"`
-		PageSize int `form:"pageSize,default=10"`
-		Status   int `form:"status,optional"` // 0待审核 1已通过 2已拒绝
+		Page     int `form:"page,default=1"` // int 页码，从 1 开始
+		PageSize int `form:"pageSize,default=10"` // int 每页条数
+		Status   int `form:"status,optional"` // int 状态筛选：0 待审核 1 已通过 2 已拒绝，可选
 	}
-	
 	DeveloperInfo {
-		ID          uint   `json:"id"`
-		UserID      string `json:"userId"`
-		RealName    string `json:"realName"`
-		CompanyName string `json:"companyName"`
-		Phone       string `json:"phone"`
-		Email       string `json:"email"`
-		Description string `json:"description"`
-		Status      int    `json:"status"`
-		AuditBy     string `json:"auditBy"`
-		AuditTime   int64  `json:"auditTime"`
-		AuditRemark string `json:"auditRemark"`
-		CreatedAt   int64  `json:"createdAt"`
+		ID          uint   `json:"id"` // uint 开发者申请记录 ID
+		UserID      string `json:"userId"` // string 关联的 IM 用户 ID
+		RealName    string `json:"realName"` // string 真实姓名
+		CompanyName string `json:"companyName"` // string 公司名称
+		Phone       string `json:"phone"` // string 联系电话
+		Email       string `json:"email"` // string 联系邮箱
+		Description string `json:"description"` // string 应用场景描述
+		Status      int    `json:"status"` // int 状态：0 待审核 1 已通过 2 已拒绝
+		AuditBy     string `json:"auditBy"` // string 审核人用户 ID
+		AuditTime   int64  `json:"auditTime"` // int64 审核时间 Unix 秒
+		AuditRemark string `json:"auditRemark"` // string 审核备注
+		CreatedAt   int64  `json:"createdAt"` // int64 申请时间 Unix 秒
 	}
-	
 	GetDeveloperListRes {
-		Total int64           `json:"total"`
-		List  []DeveloperInfo `json:"list"`
+		Total int64           `json:"total"` // int64 总条数
+		List  []DeveloperInfo `json:"list"` // array 开发者列表
 	}
 )
 
 type (
+	// 获取开发者详情（管理员）
 	GetDeveloperDetailReq {
-		ID uint `form:"id"`
+		ID uint `form:"id"` // uint 开发者申请记录 ID
 	}
-	
 	GetDeveloperDetailRes {
-		Developer DeveloperInfo `json:"developer"`
+		Developer DeveloperInfo `json:"developer"` // object 开发者详情
 	}
 )
 
 type (
+	// 审核开发者申请（管理员）
 	AuditDeveloperReq {
-		ID          uint   `json:"id"`
-		Status      int    `json:"status"` // 1通过 2拒绝
-		AuditRemark string `json:"auditRemark,optional"`
+		ID          uint   `json:"id"` // uint 开发者申请记录 ID
+		Status      int    `json:"status"` // int 审核结果：1 通过 2 拒绝
+		AuditRemark string `json:"auditRemark,optional"` // string 审核备注，可选
 	}
-	
 	AuditDeveloperRes {
-		Success bool `json:"success"`
+		Success bool `json:"success"` // bool 是否操作成功
 	}
 )
 
@@ -75,15 +74,21 @@ service open {
 	@doc "申请成为开发者"
 	@handler ApplyDeveloper
 	post /api/open_portal/developer/v1/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
-	
+}
+
+@server (
+	group: developer
+	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
+)
+service open {
 	@doc "获取开发者列表"
 	@handler GetDeveloperList
 	get /api/open_portal/developer/v1/list (GetDeveloperListReq) returns (GetDeveloperListRes)
-	
+
 	@doc "获取开发者详情"
 	@handler GetDeveloperDetail
 	get /api/open_portal/developer/v1/detail (GetDeveloperDetailReq) returns (GetDeveloperDetailRes)
-	
+
 	@doc "审核开发者申请"
 	@handler AuditDeveloper
 	post /api/open_portal/developer/v1/audit (AuditDeveloperReq) returns (AuditDeveloperRes)

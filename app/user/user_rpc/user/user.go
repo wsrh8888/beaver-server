@@ -14,18 +14,20 @@ import (
 )
 
 type (
-	SearchUserReq   = user_rpc.SearchUserReq
-	SearchUserRes   = user_rpc.SearchUserRes
-	UserCreateReq   = user_rpc.UserCreateReq
-	UserCreateRes   = user_rpc.UserCreateRes
-	UserInfo        = user_rpc.UserInfo
-	UserInfoReq     = user_rpc.UserInfoReq
-	UserInfoRes     = user_rpc.UserInfoRes
-	UserListInfoReq = user_rpc.UserListInfoReq
-	UserListInfoRes = user_rpc.UserListInfoRes
-	UserVersionInfo = user_rpc.UserVersionInfo
-	UserVersionsReq = user_rpc.UserVersionsReq
-	UserVersionsRes = user_rpc.UserVersionsRes
+	SearchUserReq        = user_rpc.SearchUserReq
+	SearchUserRes        = user_rpc.SearchUserRes
+	UserCreateReq        = user_rpc.UserCreateReq
+	UserCreateRes        = user_rpc.UserCreateRes
+	UserInfo             = user_rpc.UserInfo
+	UserInfoReq          = user_rpc.UserInfoReq
+	UserInfoRes          = user_rpc.UserInfoRes
+	UserListInfoReq      = user_rpc.UserListInfoReq
+	UserListInfoRes      = user_rpc.UserListInfoRes
+	UserUpdateDisplayReq = user_rpc.UserUpdateDisplayReq
+	UserUpdateDisplayRes = user_rpc.UserUpdateDisplayRes
+	UserVersionInfo      = user_rpc.UserVersionInfo
+	UserVersionsReq      = user_rpc.UserVersionsReq
+	UserVersionsRes      = user_rpc.UserVersionsRes
 
 	User interface {
 		UserCreate(ctx context.Context, in *UserCreateReq, opts ...grpc.CallOption) (*UserCreateRes, error)
@@ -33,6 +35,7 @@ type (
 		SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserRes, error)
 		UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
 		UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error)
+		UserUpdateDisplay(ctx context.Context, in *UserUpdateDisplayReq, opts ...grpc.CallOption) (*UserUpdateDisplayRes, error)
 	}
 
 	defaultUser struct {
@@ -69,4 +72,9 @@ func (m *defaultUser) UserListInfo(ctx context.Context, in *UserListInfoReq, opt
 func (m *defaultUser) UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error) {
 	client := user_rpc.NewUserClient(m.cli.Conn())
 	return client.UserVersions(ctx, in, opts...)
+}
+
+func (m *defaultUser) UserUpdateDisplay(ctx context.Context, in *UserUpdateDisplayReq, opts ...grpc.CallOption) (*UserUpdateDisplayRes, error) {
+	client := user_rpc.NewUserClient(m.cli.Conn())
+	return client.UserUpdateDisplay(ctx, in, opts...)
 }

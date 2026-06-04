@@ -29,6 +29,16 @@ AuthRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: authrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: grouprpc.rpc
+OpenRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: openrpc.rpc
 
 # OAuth 授权页面配置
 OAuth:

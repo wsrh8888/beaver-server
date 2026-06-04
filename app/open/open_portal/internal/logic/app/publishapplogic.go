@@ -27,9 +27,6 @@ func NewPublishAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Publis
 }
 
 func (l *PublishAppLogic) PublishApp(req *types.PublishAppReq) (resp *types.PublishAppRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 查询应用
 	var app open_models.OpenApp
@@ -37,11 +34,14 @@ func (l *PublishAppLogic) PublishApp(req *types.PublishAppReq) (resp *types.Publ
 		return nil, errors.New("应用不存在或无权限访问")
 	}
 
-	// 2. TODO: OpenBotModel 已重构为群机器人模型，应用维度的 Bot 配置功能暂时禁用
-	// 原逻辑：检查并创建默认 Bot 配置
-	logx.Infof("应用发布前检查（Bot 配置功能待实现）: app_id=%s", req.AppID)
+	if app.EnableRobot == 1 {
+		if err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
+			logx.Errorf("发布应用时 Robot 未就绪: app_id=%s err=%v", req.AppID, err)
+			return nil, errors.New("发布失败：智能机器人未创建成功，请先开启 robot 能力后重试")
+		}
+	}
 
-	// 3. 更新应用状态为已发布
+	// 更新应用状态为已发布
 	if err := l.svcCtx.DB.Model(&app).Update("status", 1).Error; err != nil {
 		logx.Errorf("发布应用失败: %v", err)
 		return nil, errors.New("发布应用失败")

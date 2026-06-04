@@ -2822,6 +2822,111 @@ func (x *GetUserConversationVersionsRes) GetUserConversationVersions() []*UserCo
 	return nil
 }
 
+// 按会话 + 消息 ID 查询消息（用于回复引用原消息快照）
+type GetChatMessageReq struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	MessageId      string                 `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetChatMessageReq) Reset() {
+	*x = GetChatMessageReq{}
+	mi := &file_chat_rpc_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChatMessageReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChatMessageReq) ProtoMessage() {}
+
+func (x *GetChatMessageReq) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_rpc_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChatMessageReq.ProtoReflect.Descriptor instead.
+func (*GetChatMessageReq) Descriptor() ([]byte, []int) {
+	return file_chat_rpc_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *GetChatMessageReq) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *GetChatMessageReq) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+type GetChatMessageRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Found         bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`
+	Msg           *Msg                   `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChatMessageRes) Reset() {
+	*x = GetChatMessageRes{}
+	mi := &file_chat_rpc_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChatMessageRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChatMessageRes) ProtoMessage() {}
+
+func (x *GetChatMessageRes) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_rpc_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChatMessageRes.ProtoReflect.Descriptor instead.
+func (*GetChatMessageRes) Descriptor() ([]byte, []int) {
+	return file_chat_rpc_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *GetChatMessageRes) GetFound() bool {
+	if x != nil {
+		return x.Found
+	}
+	return false
+}
+
+func (x *GetChatMessageRes) GetMsg() *Msg {
+	if x != nil {
+		return x.Msg
+	}
+	return nil
+}
+
 var File_chat_rpc_proto protoreflect.FileDescriptor
 
 const file_chat_rpc_proto_rawDesc = "" +
@@ -3028,7 +3133,15 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"\x81\x01\n" +
 	"\x1eGetUserConversationVersionsRes\x12_\n" +
-	"\x1auser_conversation_versions\x18\x01 \x03(\v2!.chat_rpc.UserConversationVersionR\x18userConversationVersions2\xc3\t\n" +
+	"\x1auser_conversation_versions\x18\x01 \x03(\v2!.chat_rpc.UserConversationVersionR\x18userConversationVersions\"[\n" +
+	"\x11GetChatMessageReq\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x02 \x01(\tR\tmessageId\"J\n" +
+	"\x11GetChatMessageRes\x12\x14\n" +
+	"\x05found\x18\x01 \x01(\bR\x05found\x12\x1f\n" +
+	"\x03msg\x18\x02 \x01(\v2\r.chat_rpc.MsgR\x03msg2\x8f\n" +
+	"\n" +
 	"\x04Chat\x125\n" +
 	"\aSendMsg\x12\x14.chat_rpc.SendMsgReq\x1a\x14.chat_rpc.SendMsgRes\x12V\n" +
 	"\x12UpdateConversation\x12\x1f.chat_rpc.UpdateConversationReq\x1a\x1f.chat_rpc.UpdateConversationRes\x12e\n" +
@@ -3041,7 +3154,8 @@ const file_chat_rpc_proto_rawDesc = "" +
 	"\x16AddConversationMembers\x12#.chat_rpc.AddConversationMembersReq\x1a#.chat_rpc.AddConversationMembersRes\x12k\n" +
 	"\x19RemoveConversationMembers\x12&.chat_rpc.RemoveConversationMembersReq\x1a&.chat_rpc.RemoveConversationMembersRes\x12\\\n" +
 	"\x14DissolveConversation\x12!.chat_rpc.DissolveConversationReq\x1a!.chat_rpc.DissolveConversationRes\x12e\n" +
-	"\x17SendNotificationMessage\x12$.chat_rpc.SendNotificationMessageReq\x1a$.chat_rpc.SendNotificationMessageResB\fZ\n" +
+	"\x17SendNotificationMessage\x12$.chat_rpc.SendNotificationMessageReq\x1a$.chat_rpc.SendNotificationMessageRes\x12J\n" +
+	"\x0eGetChatMessage\x12\x1b.chat_rpc.GetChatMessageReq\x1a\x1b.chat_rpc.GetChatMessageResB\fZ\n" +
 	"./chat_rpcb\x06proto3"
 
 var (
@@ -3056,7 +3170,7 @@ func file_chat_rpc_proto_rawDescGZIP() []byte {
 	return file_chat_rpc_proto_rawDescData
 }
 
-var file_chat_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 45)
+var file_chat_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 47)
 var file_chat_rpc_proto_goTypes = []any{
 	(*TextMsg)(nil),                                 // 0: chat_rpc.TextMsg
 	(*ImageMsg)(nil),                                // 1: chat_rpc.ImageMsg
@@ -3103,6 +3217,8 @@ var file_chat_rpc_proto_goTypes = []any{
 	(*GetUserConversationVersionsReq)(nil),          // 42: chat_rpc.GetUserConversationVersionsReq
 	(*UserConversationVersion)(nil),                 // 43: chat_rpc.UserConversationVersion
 	(*GetUserConversationVersionsRes)(nil),          // 44: chat_rpc.GetUserConversationVersionsRes
+	(*GetChatMessageReq)(nil),                       // 45: chat_rpc.GetChatMessageReq
+	(*GetChatMessageRes)(nil),                       // 46: chat_rpc.GetChatMessageRes
 }
 var file_chat_rpc_proto_depIdxs = []int32{
 	15, // 0: chat_rpc.WithdrawMsg.origin_msg:type_name -> chat_rpc.Msg
@@ -3130,35 +3246,38 @@ var file_chat_rpc_proto_depIdxs = []int32{
 	27, // 22: chat_rpc.GetConversationsListByIdsRes.conversations:type_name -> chat_rpc.ConversationListById
 	30, // 23: chat_rpc.GetUserConversationSettingsListByIdsRes.user_conversation_settings:type_name -> chat_rpc.UserConversationSettingListById
 	43, // 24: chat_rpc.GetUserConversationVersionsRes.user_conversation_versions:type_name -> chat_rpc.UserConversationVersion
-	16, // 25: chat_rpc.Chat.SendMsg:input_type -> chat_rpc.SendMsgReq
-	19, // 26: chat_rpc.Chat.UpdateConversation:input_type -> chat_rpc.UpdateConversationReq
-	21, // 27: chat_rpc.Chat.BatchUpdateConversation:input_type -> chat_rpc.BatchUpdateConversationReq
-	23, // 28: chat_rpc.Chat.GetUserConversations:input_type -> chat_rpc.GetUserConversationsReq
-	26, // 29: chat_rpc.Chat.GetConversationsListByIds:input_type -> chat_rpc.GetConversationsListByIdsReq
-	29, // 30: chat_rpc.Chat.GetUserConversationSettingsListByIds:input_type -> chat_rpc.GetUserConversationSettingsListByIdsReq
-	42, // 31: chat_rpc.Chat.GetUserConversationVersions:input_type -> chat_rpc.GetUserConversationVersionsReq
-	32, // 32: chat_rpc.Chat.InitializeConversation:input_type -> chat_rpc.InitializeConversationReq
-	36, // 33: chat_rpc.Chat.AddConversationMembers:input_type -> chat_rpc.AddConversationMembersReq
-	38, // 34: chat_rpc.Chat.RemoveConversationMembers:input_type -> chat_rpc.RemoveConversationMembersReq
-	40, // 35: chat_rpc.Chat.DissolveConversation:input_type -> chat_rpc.DissolveConversationReq
-	34, // 36: chat_rpc.Chat.SendNotificationMessage:input_type -> chat_rpc.SendNotificationMessageReq
-	18, // 37: chat_rpc.Chat.SendMsg:output_type -> chat_rpc.SendMsgRes
-	20, // 38: chat_rpc.Chat.UpdateConversation:output_type -> chat_rpc.UpdateConversationRes
-	22, // 39: chat_rpc.Chat.BatchUpdateConversation:output_type -> chat_rpc.BatchUpdateConversationRes
-	25, // 40: chat_rpc.Chat.GetUserConversations:output_type -> chat_rpc.GetUserConversationsRes
-	28, // 41: chat_rpc.Chat.GetConversationsListByIds:output_type -> chat_rpc.GetConversationsListByIdsRes
-	31, // 42: chat_rpc.Chat.GetUserConversationSettingsListByIds:output_type -> chat_rpc.GetUserConversationSettingsListByIdsRes
-	44, // 43: chat_rpc.Chat.GetUserConversationVersions:output_type -> chat_rpc.GetUserConversationVersionsRes
-	33, // 44: chat_rpc.Chat.InitializeConversation:output_type -> chat_rpc.InitializeConversationRes
-	37, // 45: chat_rpc.Chat.AddConversationMembers:output_type -> chat_rpc.AddConversationMembersRes
-	39, // 46: chat_rpc.Chat.RemoveConversationMembers:output_type -> chat_rpc.RemoveConversationMembersRes
-	41, // 47: chat_rpc.Chat.DissolveConversation:output_type -> chat_rpc.DissolveConversationRes
-	35, // 48: chat_rpc.Chat.SendNotificationMessage:output_type -> chat_rpc.SendNotificationMessageRes
-	37, // [37:49] is the sub-list for method output_type
-	25, // [25:37] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	15, // 25: chat_rpc.GetChatMessageRes.msg:type_name -> chat_rpc.Msg
+	16, // 26: chat_rpc.Chat.SendMsg:input_type -> chat_rpc.SendMsgReq
+	19, // 27: chat_rpc.Chat.UpdateConversation:input_type -> chat_rpc.UpdateConversationReq
+	21, // 28: chat_rpc.Chat.BatchUpdateConversation:input_type -> chat_rpc.BatchUpdateConversationReq
+	23, // 29: chat_rpc.Chat.GetUserConversations:input_type -> chat_rpc.GetUserConversationsReq
+	26, // 30: chat_rpc.Chat.GetConversationsListByIds:input_type -> chat_rpc.GetConversationsListByIdsReq
+	29, // 31: chat_rpc.Chat.GetUserConversationSettingsListByIds:input_type -> chat_rpc.GetUserConversationSettingsListByIdsReq
+	42, // 32: chat_rpc.Chat.GetUserConversationVersions:input_type -> chat_rpc.GetUserConversationVersionsReq
+	32, // 33: chat_rpc.Chat.InitializeConversation:input_type -> chat_rpc.InitializeConversationReq
+	36, // 34: chat_rpc.Chat.AddConversationMembers:input_type -> chat_rpc.AddConversationMembersReq
+	38, // 35: chat_rpc.Chat.RemoveConversationMembers:input_type -> chat_rpc.RemoveConversationMembersReq
+	40, // 36: chat_rpc.Chat.DissolveConversation:input_type -> chat_rpc.DissolveConversationReq
+	34, // 37: chat_rpc.Chat.SendNotificationMessage:input_type -> chat_rpc.SendNotificationMessageReq
+	45, // 38: chat_rpc.Chat.GetChatMessage:input_type -> chat_rpc.GetChatMessageReq
+	18, // 39: chat_rpc.Chat.SendMsg:output_type -> chat_rpc.SendMsgRes
+	20, // 40: chat_rpc.Chat.UpdateConversation:output_type -> chat_rpc.UpdateConversationRes
+	22, // 41: chat_rpc.Chat.BatchUpdateConversation:output_type -> chat_rpc.BatchUpdateConversationRes
+	25, // 42: chat_rpc.Chat.GetUserConversations:output_type -> chat_rpc.GetUserConversationsRes
+	28, // 43: chat_rpc.Chat.GetConversationsListByIds:output_type -> chat_rpc.GetConversationsListByIdsRes
+	31, // 44: chat_rpc.Chat.GetUserConversationSettingsListByIds:output_type -> chat_rpc.GetUserConversationSettingsListByIdsRes
+	44, // 45: chat_rpc.Chat.GetUserConversationVersions:output_type -> chat_rpc.GetUserConversationVersionsRes
+	33, // 46: chat_rpc.Chat.InitializeConversation:output_type -> chat_rpc.InitializeConversationRes
+	37, // 47: chat_rpc.Chat.AddConversationMembers:output_type -> chat_rpc.AddConversationMembersRes
+	39, // 48: chat_rpc.Chat.RemoveConversationMembers:output_type -> chat_rpc.RemoveConversationMembersRes
+	41, // 49: chat_rpc.Chat.DissolveConversation:output_type -> chat_rpc.DissolveConversationRes
+	35, // 50: chat_rpc.Chat.SendNotificationMessage:output_type -> chat_rpc.SendNotificationMessageRes
+	46, // 51: chat_rpc.Chat.GetChatMessage:output_type -> chat_rpc.GetChatMessageRes
+	39, // [39:52] is the sub-list for method output_type
+	26, // [26:39] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_chat_rpc_proto_init() }
@@ -3172,7 +3291,7 @@ func file_chat_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_rpc_proto_rawDesc), len(file_chat_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   45,
+			NumMessages:   47,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

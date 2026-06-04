@@ -15,8 +15,10 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int
 	}
-	UserRpc zrpc.RpcClientConf
-	AuthRpc zrpc.RpcClientConf
+	UserRpc  zrpc.RpcClientConf
+	AuthRpc  zrpc.RpcClientConf
+	GroupRpc zrpc.RpcClientConf
+	OpenRpc  zrpc.RpcClientConf
 	OAuth   struct {
 		BaseUrl string // OAuth 服务基础 URL（授权页面地址）
 	}

@@ -26,9 +26,6 @@ func NewPublishVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pu
 }
 
 func (l *PublishVersionLogic) PublishVersion(req *types.PublishVersionReq) (resp *types.PublishVersionRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	return nil, errors.New("功能暂未开放")
 }

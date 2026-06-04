@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_UserCreate_FullMethodName   = "/user_rpc.user/UserCreate"
-	User_UserInfo_FullMethodName     = "/user_rpc.user/UserInfo"
-	User_SearchUser_FullMethodName   = "/user_rpc.user/SearchUser"
-	User_UserListInfo_FullMethodName = "/user_rpc.user/UserListInfo"
-	User_UserVersions_FullMethodName = "/user_rpc.user/UserVersions"
+	User_UserCreate_FullMethodName        = "/user_rpc.user/UserCreate"
+	User_UserInfo_FullMethodName          = "/user_rpc.user/UserInfo"
+	User_SearchUser_FullMethodName        = "/user_rpc.user/SearchUser"
+	User_UserListInfo_FullMethodName      = "/user_rpc.user/UserListInfo"
+	User_UserVersions_FullMethodName      = "/user_rpc.user/UserVersions"
+	User_UserUpdateDisplay_FullMethodName = "/user_rpc.user/UserUpdateDisplay"
 )
 
 // UserClient is the client API for User service.
@@ -35,6 +36,7 @@ type UserClient interface {
 	SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserRes, error)
 	UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
 	UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error)
+	UserUpdateDisplay(ctx context.Context, in *UserUpdateDisplayReq, opts ...grpc.CallOption) (*UserUpdateDisplayRes, error)
 }
 
 type userClient struct {
@@ -95,6 +97,16 @@ func (c *userClient) UserVersions(ctx context.Context, in *UserVersionsReq, opts
 	return out, nil
 }
 
+func (c *userClient) UserUpdateDisplay(ctx context.Context, in *UserUpdateDisplayReq, opts ...grpc.CallOption) (*UserUpdateDisplayRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserUpdateDisplayRes)
+	err := c.cc.Invoke(ctx, User_UserUpdateDisplay_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type UserServer interface {
 	SearchUser(context.Context, *SearchUserReq) (*SearchUserRes, error)
 	UserListInfo(context.Context, *UserListInfoReq) (*UserListInfoRes, error)
 	UserVersions(context.Context, *UserVersionsReq) (*UserVersionsRes, error)
+	UserUpdateDisplay(context.Context, *UserUpdateDisplayReq) (*UserUpdateDisplayRes, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedUserServer) UserListInfo(context.Context, *UserListInfoReq) (
 }
 func (UnimplementedUserServer) UserVersions(context.Context, *UserVersionsReq) (*UserVersionsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserVersions not implemented")
+}
+func (UnimplementedUserServer) UserUpdateDisplay(context.Context, *UserUpdateDisplayReq) (*UserUpdateDisplayRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserUpdateDisplay not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 func (UnimplementedUserServer) testEmbeddedByValue()              {}
@@ -240,6 +256,24 @@ func _User_UserVersions_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_UserUpdateDisplay_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserUpdateDisplayReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UserUpdateDisplay(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_UserUpdateDisplay_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UserUpdateDisplay(ctx, req.(*UserUpdateDisplayReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserVersions",
 			Handler:    _User_UserVersions_Handler,
+		},
+		{
+			MethodName: "UserUpdateDisplay",
+			Handler:    _User_UserUpdateDisplay_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

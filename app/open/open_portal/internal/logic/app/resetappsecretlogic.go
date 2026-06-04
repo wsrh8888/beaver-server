@@ -28,9 +28,6 @@ func NewResetAppSecretLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Re
 }
 
 func (l *ResetAppSecretLogic) ResetAppSecret(req *types.ResetAppSecretReq) (resp *types.ResetAppSecretRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 生成新密钥
 	newSecret := uuid.New().String() + uuid.New().String()

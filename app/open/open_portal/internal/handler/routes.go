@@ -10,6 +10,7 @@ import (
 	developer "beaver/app/open/open_portal/internal/handler/developer"
 	event "beaver/app/open/open_portal/internal/handler/event"
 	oauth "beaver/app/open/open_portal/internal/handler/oauth"
+	robot "beaver/app/open/open_portal/internal/handler/robot"
 	security "beaver/app/open/open_portal/internal/handler/security"
 	version "beaver/app/open/open_portal/internal/handler/version"
 	"beaver/app/open/open_portal/internal/svc"
@@ -20,7 +21,7 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
 					// 启用/禁用应用能力（对标飞书）
@@ -95,7 +96,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: auth_public.LoginHandler(serverCtx),
 			},
 			{
-				// OAuth 授权码登录
+				// OAuth 授权码登录（前端传 code，服务端换 token 并签发 Portal JWT）
 				Method:  http.MethodPost,
 				Path:    "/api/open_portal/auth_public/v1/oauth_login",
 				Handler: auth_public.OAuthLoginHandler(serverCtx),
@@ -105,37 +106,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
-					// 获取 Bot 配置
-					Method:  http.MethodGet,
-					Path:    "/api/open_portal/bot/v1/config",
-					Handler: bot.GetBotConfigHandler(serverCtx),
-				},
-				{
-					// 更新 Bot 配置
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/bot/v1/config_update",
-					Handler: bot.UpdateBotConfigHandler(serverCtx),
-				},
-				{
-					// 创建 Incoming Webhook
+					// 创建推送 Bot Incoming Webhook（按群）
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/bot/v1/incoming_create",
 					Handler: bot.CreateIncomingWebhookHandler(serverCtx),
 				},
 				{
-					// 删除 Incoming Webhook
+					// 删除推送 Bot Incoming Webhook
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/bot/v1/incoming_delete",
 					Handler: bot.DeleteIncomingWebhookHandler(serverCtx),
 				},
 				{
-					// 获取 Incoming Webhook 列表
+					// 获取推送 Bot Incoming Webhook 列表
 					Method:  http.MethodGet,
 					Path:    "/api/open_portal/bot/v1/incoming_list",
 					Handler: bot.ListIncomingWebhooksHandler(serverCtx),
+				},
+				{
+					// 重置推送 Bot 加签密钥
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/bot/v1/incoming_reset_secret",
+					Handler: bot.ResetIncomingWebhookSecretHandler(serverCtx),
 				},
 			}...,
 		),
@@ -151,6 +146,14 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/api/open_portal/developer/v1/apply",
 					Handler: developer.ApplyDeveloperHandler(serverCtx),
 				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
+			[]rest.Route{
 				{
 					// 审核开发者申请
 					Method:  http.MethodPost,
@@ -175,7 +178,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
 					// 创建事件订阅
@@ -196,6 +199,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: event.ListEventSubscriptionsHandler(serverCtx),
 				},
 				{
+					// 获取事件推送日志
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/event/v1/logs",
+					Handler: event.GetEventLogsHandler(serverCtx),
+				},
+				{
 					// 更新事件订阅
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/event/v1/update",
@@ -207,7 +216,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
 					// 获取 OAuth 配置
@@ -227,7 +236,27 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
+			[]rest.Route{
+				{
+					// 获取智能机器人 Robot 配置
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/robot/v1/config",
+					Handler: robot.GetRobotConfigHandler(serverCtx),
+				},
+				{
+					// 更新智能机器人 Robot 配置
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/robot/v1/config_update",
+					Handler: robot.UpdateRobotConfigHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
 					// 获取安全配置
@@ -247,7 +276,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware},
+			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
 					// 创建新版本

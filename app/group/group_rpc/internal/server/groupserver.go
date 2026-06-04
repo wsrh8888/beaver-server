@@ -62,3 +62,13 @@ func (s *GroupServer) CanSendGroupMessage(ctx context.Context, in *group_rpc.Can
 	l := logic.NewCanSendGroupMessageLogic(ctx, s.svcCtx)
 	return l.CanSendGroupMessage(in)
 }
+
+func (s *GroupServer) AddGroupMember(ctx context.Context, in *group_rpc.AddGroupMemberReq) (*group_rpc.AddGroupMemberRes, error) {
+	l := logic.NewAddGroupMemberLogic(ctx, s.svcCtx)
+	return l.AddGroupMember(in)
+}
+
+func (s *GroupServer) RemoveGroupMember(ctx context.Context, in *group_rpc.RemoveGroupMemberReq) (*group_rpc.RemoveGroupMemberRes, error) {
+	l := logic.NewRemoveGroupMemberLogic(ctx, s.svcCtx)
+	return l.RemoveGroupMember(in)
+}

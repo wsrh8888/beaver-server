@@ -67,12 +67,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: event.RegisterWebhookHandler(serverCtx),
 			},
 			{
-				// 触发测试事件推送（调试用，向 Bot 服务器发一条测试事件）
-				Method:  http.MethodPost,
-				Path:    "/api/open/event/v1/test_webhook",
-				Handler: event.TestEventPushHandler(serverCtx),
-			},
-			{
 				// 获取当前应用的 Webhook 订阅列表
 				Method:  http.MethodGet,
 				Path:    "/api/open/event/v1/webhook_list",
@@ -153,13 +147,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 将 Robot 加入群（Robot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Robot 的 Webhook URL）
+				// 将 Robot 加入群
 				Method:  http.MethodPost,
 				Path:    "/api/open/robot/v1/add_to_group",
 				Handler: robot.AddRobotToGroupHandler(serverCtx),
 			},
 			{
-				// 获取 Robot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Robot 身份）
+				// 获取 Robot 自身信息
 				Method:  http.MethodGet,
 				Path:    "/api/open/robot/v1/info",
 				Handler: robot.GetRobotInfoHandler(serverCtx),
@@ -171,16 +165,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: robot.RemoveRobotFromGroupHandler(serverCtx),
 			},
 			{
-				// Robot 发送消息到 IM 会话（私聊或群聊）
+				// Robot 发送消息到 IM 会话
 				Method:  http.MethodPost,
 				Path:    "/api/open/robot/v1/send_message",
 				Handler: robot.RobotSendMessageHandler(serverCtx),
-			},
-			{
-				// Robot 流式发送消息（SSE，适合 AI 流式输出）
-				Method:  http.MethodPost,
-				Path:    "/api/open/robot/v1/stream_message",
-				Handler: robot.RobotStreamMessageHandler(serverCtx),
 			},
 		},
 	)

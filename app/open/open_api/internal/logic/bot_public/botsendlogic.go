@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"net"
+	"strings"
 	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
@@ -31,7 +33,7 @@ func NewBotSendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BotSendLo
 	}
 }
 
-func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, err error) {
+func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *types.BotSendRes, err error) {
 	// 1. 根据 Token 查询机器人信息
 	var bot open_models.OpenBotModel
 	if err := l.svcCtx.DB.Where("token = ?", req.Token).First(&bot).Error; err != nil {
@@ -96,8 +98,28 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 
 	// 5. 校验 IP 白名单（如果启用了 IP 白名单）
 	if bot.Security.IPWhitelistEnabled && len(bot.Security.IPWhitelist) > 0 {
-		// TODO: 获取请求 IP 并校验是否在白名单中
-		// 这里需要通过 context 或 middleware 传递请求 IP
+		if clientIP == "" {
+			return nil, fmt.Errorf("client ip required")
+		}
+		host := strings.TrimSpace(clientIP)
+		if h, _, splitErr := net.SplitHostPort(host); splitErr == nil {
+			host = h
+		}
+		allowed := false
+		for _, item := range bot.Security.IPWhitelist {
+			item = strings.TrimSpace(item)
+			if item == "" {
+				continue
+			}
+			if item == host || item == clientIP {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			l.Errorf("BotSend: ip not in whitelist, client=%s botID=%s", host, bot.BotID)
+			return nil, fmt.Errorf("ip not in whitelist")
+		}
 	}
 
 	// 6. 构建 chat_rpc 的消息对象
@@ -234,8 +256,38 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 		if req.Reply == nil {
 			return nil, fmt.Errorf("reply content is required")
 		}
-		msg.Type = 11 // 回复消息
-		// TODO: 需要查询原消息内容来构建 ReplyMsg
+		if req.Reply.OriginMsgID == "" {
+			return nil, fmt.Errorf("reply originMsgId is required")
+		}
+		replyBody := &chat_rpc.Msg{}
+		switch req.Reply.MsgType {
+		case "text", "":
+			replyBody.Type = 1
+			replyBody.TextMsg = &chat_rpc.TextMsg{Content: req.Reply.Content}
+		case "markdown":
+			replyBody.Type = 13
+			replyBody.MarkdownMsg = &chat_rpc.MarkdownMsg{Content: req.Reply.Content}
+		default:
+			return nil, fmt.Errorf("unsupported reply msgType: %s", req.Reply.MsgType)
+		}
+		originSnap := &chat_rpc.Msg{
+			Type:    1,
+			TextMsg: &chat_rpc.TextMsg{Content: "[消息]"},
+		}
+		convID := "group_" + bot.GroupID
+		getRes, getErr := l.svcCtx.ChatRpc.GetChatMessage(l.ctx, &chat_rpc.GetChatMessageReq{
+			ConversationId: convID,
+			MessageId:      req.Reply.OriginMsgID,
+		})
+		if getErr == nil && getRes != nil && getRes.Found && getRes.Msg != nil {
+			originSnap = getRes.Msg
+		}
+		msg.Type = 11
+		msg.ReplyMsg = &chat_rpc.ReplyMsg{
+			OriginMsgId: req.Reply.OriginMsgID,
+			OriginMsg:   originSnap,
+			ReplyMsg:    replyBody,
+		}
 
 	case "forward":
 		if req.Forward == nil {
@@ -259,13 +311,6 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq) (resp *types.BotSendRes, e
 			Desc:     req.Link.Desc,
 			ImageUrl: req.Link.ImageURL,
 		}
-
-	case "card":
-		if req.Card == nil {
-			return nil, fmt.Errorf("card content is required")
-		}
-		// TODO: 交互式卡片消息需要特殊处理
-		return nil, fmt.Errorf("card message type not fully supported yet")
 
 	default:
 		return nil, fmt.Errorf("unsupported message type: %s", req.MsgType)

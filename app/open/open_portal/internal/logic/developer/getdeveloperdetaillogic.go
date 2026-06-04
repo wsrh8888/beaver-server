@@ -3,11 +3,14 @@ package developer
 import (
 	"context"
 	"errors"
+	"time"
 
+	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 type GetDeveloperDetailLogic struct {
@@ -29,10 +32,32 @@ func (l *GetDeveloperDetailLogic) GetDeveloperDetail(req *types.GetDeveloperDeta
 	if !ok || userID == "" {
 		return nil, errors.New("未登录")
 	}
-	if _, err := l.svcCtx.RequireDeveloper(userID); err != nil {
+	if req.ID == 0 {
+		return nil, errors.New("id 不能为空")
+	}
+
+	var dev open_models.OpenDeveloper
+	if err := l.svcCtx.DB.Where("id = ?", req.ID).First(&dev).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("开发者记录不存在")
+		}
 		return nil, err
 	}
 
-	// TODO: 实现开发者详情查询逻辑
-	return nil, nil
+	return &types.GetDeveloperDetailRes{
+		Developer: types.DeveloperInfo{
+			ID:          dev.Id,
+			UserID:      dev.UserID,
+			RealName:    dev.RealName,
+			CompanyName: dev.CompanyName,
+			Phone:       dev.Phone,
+			Email:       dev.Email,
+			Description: dev.Description,
+			Status:      dev.Status,
+			AuditBy:     dev.AuditBy,
+			AuditTime:   dev.AuditTime,
+			AuditRemark: dev.AuditRemark,
+			CreatedAt:   time.Time(dev.CreatedAt).Unix(),
+		},
+	}, nil
 }

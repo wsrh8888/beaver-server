@@ -28,9 +28,6 @@ func NewGetSecurityConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetSecurityConfigLogic) GetSecurityConfig(req *types.GetSecurityConfigReq) (resp *types.GetSecurityConfigRes, err error) {
-	if _, err := l.svcCtx.RequireDeveloper(req.UserID); err != nil {
-		return nil, err
-	}
 
 	// 查询应用信息
 	var app open_models.OpenApp

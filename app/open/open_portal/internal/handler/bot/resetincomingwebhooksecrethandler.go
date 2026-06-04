@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func UpdateBotConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func ResetIncomingWebhookSecretHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateBotConfigReq
+		var req types.ResetIncomingWebhookSecretReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewUpdateBotConfigLogic(r.Context(), svcCtx)
-		resp, err := l.UpdateBotConfig(&req)
+		l := logic.NewResetIncomingWebhookSecretLogic(r.Context(), svcCtx)
+		resp, err := l.ResetIncomingWebhookSecret(&req)
 		response.Response(r, w, resp, err)
 	}
 }

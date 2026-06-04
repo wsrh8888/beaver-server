@@ -31,6 +31,7 @@ const (
 	Chat_RemoveConversationMembers_FullMethodName            = "/chat_rpc.Chat/RemoveConversationMembers"
 	Chat_DissolveConversation_FullMethodName                 = "/chat_rpc.Chat/DissolveConversation"
 	Chat_SendNotificationMessage_FullMethodName              = "/chat_rpc.Chat/SendNotificationMessage"
+	Chat_GetChatMessage_FullMethodName                       = "/chat_rpc.Chat/GetChatMessage"
 )
 
 // ChatClient is the client API for Chat service.
@@ -51,6 +52,7 @@ type ChatClient interface {
 	RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error)
 	DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
 	SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
+	GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error)
 }
 
 type chatClient struct {
@@ -181,6 +183,16 @@ func (c *chatClient) SendNotificationMessage(ctx context.Context, in *SendNotifi
 	return out, nil
 }
 
+func (c *chatClient) GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetChatMessageRes)
+	err := c.cc.Invoke(ctx, Chat_GetChatMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility.
@@ -199,6 +211,7 @@ type ChatServer interface {
 	RemoveConversationMembers(context.Context, *RemoveConversationMembersReq) (*RemoveConversationMembersRes, error)
 	DissolveConversation(context.Context, *DissolveConversationReq) (*DissolveConversationRes, error)
 	SendNotificationMessage(context.Context, *SendNotificationMessageReq) (*SendNotificationMessageRes, error)
+	GetChatMessage(context.Context, *GetChatMessageReq) (*GetChatMessageRes, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -244,6 +257,9 @@ func (UnimplementedChatServer) DissolveConversation(context.Context, *DissolveCo
 }
 func (UnimplementedChatServer) SendNotificationMessage(context.Context, *SendNotificationMessageReq) (*SendNotificationMessageRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendNotificationMessage not implemented")
+}
+func (UnimplementedChatServer) GetChatMessage(context.Context, *GetChatMessageReq) (*GetChatMessageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatMessage not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 func (UnimplementedChatServer) testEmbeddedByValue()              {}
@@ -482,6 +498,24 @@ func _Chat_SendNotificationMessage_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chat_GetChatMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatMessageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetChatMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_GetChatMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetChatMessage(ctx, req.(*GetChatMessageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -536,6 +570,10 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendNotificationMessage",
 			Handler:    _Chat_SendNotificationMessage_Handler,
+		},
+		{
+			MethodName: "GetChatMessage",
+			Handler:    _Chat_GetChatMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
