@@ -11,22 +11,26 @@ type (
 		IsDeleted      bool   `form:"isDeleted,optional"`      // 按删除状态筛选
 		StartTime      string `form:"startTime,optional"`
 		EndTime        string `form:"endTime,optional"`
+		Order          int    `form:"order,optional"`          // 1正序时间线 2倒序
+		WithContent    bool   `form:"withContent,optional"`    // 是否返回完整内容
 	}
 	GetChatMessageListRes {
 		List  []GetChatMessageListItem `json:"list"`
 		Total int64                    `json:"total"`
 	}
 	GetChatMessageListItem {
-		Id             string `json:"id"`
-		MessageID      string `json:"messageId"`
-		ConversationID string `json:"conversationId"`
-		SendUserID     string `json:"sendUserId"`
-		SendUserName   string `json:"sendUserName"`
-		MsgType        int    `json:"msgType"`
-		MsgPreview     string `json:"msgPreview"`
-		IsDeleted      bool   `json:"isDeleted"`
-		CreateTime     string `json:"createTime"`
-		UpdateTime     string `json:"updateTime"`
+		Id               string `json:"id"`
+		MessageID        string `json:"messageId"`
+		ConversationID   string `json:"conversationId"`
+		ConversationType int    `json:"conversationType"`
+		SendUserID       string `json:"sendUserId"`
+		SendUserName     string `json:"sendUserName"`
+		MsgType          int    `json:"msgType"`
+		MsgPreview       string `json:"msgPreview"`
+		MsgContent       string `json:"msgContent,optional"`
+		IsDeleted        bool   `json:"isDeleted"`
+		CreateTime       string `json:"createTime"`
+		UpdateTime       string `json:"updateTime"`
 	}
 )
 
@@ -104,10 +108,40 @@ type (
 	}
 )
 
+// 获取用户会话列表（运营审计：先选人再看会话）
+type (
+	GetChatSessionListReq {
+		UserID           string `form:"userId"`
+		ConversationType int    `form:"conversationType,optional"`
+		Page             int    `form:"page,default=1"`
+		PageSize         int    `form:"pageSize,default=20"`
+	}
+	GetChatSessionListRes {
+		List  []GetChatSessionListItem `json:"list"`
+		Total int64                    `json:"total"`
+	}
+	GetChatSessionListItem {
+		ConversationID   string   `json:"conversationId"`
+		ConversationType int      `json:"conversationType"`
+		Title            string   `json:"title"`
+		PeerUserID       string   `json:"peerUserId"`
+		PeerUserName     string   `json:"peerUserName"`
+		ParticipantIDs   []string `json:"participantIds"`
+		ParticipantNames []string `json:"participantNames"`
+		LastMessage      string   `json:"lastMessage"`
+		LastMessageTime  string   `json:"lastMessageTime"`
+		MessageCount     int64    `json:"messageCount"`
+	}
+)
+
 @server (
 	group: chat
 )
 service backend {
+	@doc "获取用户会话列表"
+	@handler getChatSessionList
+	get /admin/chat/sessions (GetChatSessionListReq) returns (GetChatSessionListRes)
+
 	@doc "获取聊天消息列表"
 	@handler getChatMessageList
 	get /admin/chat/list (GetChatMessageListReq) returns (GetChatMessageListRes)

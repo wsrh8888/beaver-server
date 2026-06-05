@@ -2,12 +2,12 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/group/group_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -18,78 +18,63 @@ type GetGroupMemberListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取群成员列表
 func NewGetGroupMemberListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupMemberListLogic {
-	return &GetGroupMemberListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetGroupMemberListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetGroupMemberListLogic) GetGroupMemberList(req *types.GetGroupMemberListReq) (resp *types.GetGroupMemberListRes, err error) {
-	// 分页参数校验
-	page := req.Page
-	limit := req.Limit
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 20
-	}
-	if limit > 100 {
-		limit = 100
+	if req.GroupId == "" {
+		return nil, errors.New("群组ID不能为空")
 	}
 
-	// 构建查询条件
-	whereClause := l.svcCtx.DB.Where("group_id = ?", req.GroupId)
-
-	// 角色筛选
-	if req.Role != 0 {
-		whereClause = whereClause.Where("role = ?", req.Role)
-	}
-
-	// 状态筛选
-	if req.Status != 0 {
-		whereClause = whereClause.Where("status = ?", req.Status)
-	}
-
-	// 分页查询
-	members, count, err := list_query.ListQuery(l.svcCtx.DB, group_models.GroupMemberModel{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  page,
-			Limit: limit,
-			Sort:  "created_at desc",
-		},
-		Where: whereClause,
+	rpcRes, err := l.svcCtx.GroupRpc.ListGroupMembers(l.ctx, &group_rpc.ListGroupMembersReq{
+		GroupId:  req.GroupId,
+		Page:     int32(req.Page),
+		PageSize: int32(req.Limit),
+		Role:     int32(req.Role),
+		Status:   int32(req.Status),
 	})
-
 	if err != nil {
-		logx.Errorf("查询群组成员列表失败: %v", err)
+		l.Errorf("获取群成员列表失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式（已精简模型字段，以下为兼容管理端返回结构的占位）
-	var list []types.GetGroupMemberListItem
-	for _, member := range members {
-		list = append(list, types.GetGroupMemberListItem{
-			Id:              member.Id,
-			GroupId:         member.GroupID,
-			UserId:          member.UserID,
-			MemberNickname:  "",
-			Role:            int(member.Role),
-			ProhibitionTime: 0,
-			InviterId:       "",
-			Status:          int(member.Status),
-			NotifyLevel:     0,
-			DisplayName:     "",
-			CreatedAt:       member.CreatedAt.String(),
-			UpdatedAt:       member.UpdatedAt.String(),
-		})
+	users := map[string]*user_rpc.UserInfo{}
+	seen := map[string]struct{}{}
+	userIDs := make([]string, 0, len(rpcRes.List))
+	for _, m := range rpcRes.List {
+		if m.UserId == "" {
+			continue
+		}
+		if _, ok := seen[m.UserId]; ok {
+			continue
+		}
+		seen[m.UserId] = struct{}{}
+		userIDs = append(userIDs, m.UserId)
+	}
+	if len(userIDs) > 0 {
+		if res, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: userIDs}); err == nil && res != nil {
+			users = res.UserInfo
+		}
 	}
 
-	return &types.GetGroupMemberListRes{
-		List:  list,
-		Total: count,
-	}, nil
+	list := make([]types.GetGroupMemberListItem, 0, len(rpcRes.List))
+	for _, m := range rpcRes.List {
+		nick := ""
+		if u, ok := users[m.UserId]; ok && u != nil {
+			nick = u.NickName
+		}
+		list = append(list, types.GetGroupMemberListItem{
+			Id:              uint(m.Id),
+			GroupId:         m.GroupId,
+			UserId:          m.UserId,
+			MemberNickname:  nick,
+			Role:            int(m.Role),
+			ProhibitionTime: int(m.ProhibitionMinutes),
+			Status:          int(m.Status),
+			CreatedAt:       m.CreatedAt,
+			UpdatedAt:       m.UpdatedAt,
+		})
+	}
+	return &types.GetGroupMemberListRes{List: list, Total: rpcRes.Total}, nil
 }

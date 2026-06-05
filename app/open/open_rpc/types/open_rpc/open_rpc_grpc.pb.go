@@ -30,6 +30,14 @@ const (
 	Open_SaveWebhookLog_FullMethodName        = "/open_rpc.open/SaveWebhookLog"
 	Open_GetRobotByUserID_FullMethodName      = "/open_rpc.open/GetRobotByUserID"
 	Open_DispatchPlatformEvent_FullMethodName = "/open_rpc.open/DispatchPlatformEvent"
+	Open_ApplyDeveloper_FullMethodName        = "/open_rpc.open/ApplyDeveloper"
+	Open_GetDeveloperByUserID_FullMethodName  = "/open_rpc.open/GetDeveloperByUserID"
+	Open_GetDeveloper_FullMethodName          = "/open_rpc.open/GetDeveloper"
+	Open_ListDevelopers_FullMethodName        = "/open_rpc.open/ListDevelopers"
+	Open_AuditDeveloper_FullMethodName        = "/open_rpc.open/AuditDeveloper"
+	Open_ListOpenApps_FullMethodName          = "/open_rpc.open/ListOpenApps"
+	Open_UpdateOpenApps_FullMethodName        = "/open_rpc.open/UpdateOpenApps"
+	Open_ListWebhookLogs_FullMethodName       = "/open_rpc.open/ListWebhookLogs"
 )
 
 // OpenClient is the client API for Open service.
@@ -47,6 +55,14 @@ type OpenClient interface {
 	SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
 	GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
 	DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
+	ApplyDeveloper(ctx context.Context, in *ApplyDeveloperReq, opts ...grpc.CallOption) (*ApplyDeveloperRes, error)
+	GetDeveloperByUserID(ctx context.Context, in *GetDeveloperByUserIDReq, opts ...grpc.CallOption) (*GetDeveloperByUserIDRes, error)
+	GetDeveloper(ctx context.Context, in *GetDeveloperReq, opts ...grpc.CallOption) (*GetDeveloperRes, error)
+	ListDevelopers(ctx context.Context, in *ListDevelopersReq, opts ...grpc.CallOption) (*ListDevelopersRes, error)
+	AuditDeveloper(ctx context.Context, in *AuditDeveloperReq, opts ...grpc.CallOption) (*AuditDeveloperRes, error)
+	ListOpenApps(ctx context.Context, in *ListOpenAppsReq, opts ...grpc.CallOption) (*ListOpenAppsRes, error)
+	UpdateOpenApps(ctx context.Context, in *UpdateOpenAppsReq, opts ...grpc.CallOption) (*UpdateOpenAppsRes, error)
+	ListWebhookLogs(ctx context.Context, in *ListWebhookLogsReq, opts ...grpc.CallOption) (*ListWebhookLogsRes, error)
 }
 
 type openClient struct {
@@ -167,6 +183,86 @@ func (c *openClient) DispatchPlatformEvent(ctx context.Context, in *DispatchPlat
 	return out, nil
 }
 
+func (c *openClient) ApplyDeveloper(ctx context.Context, in *ApplyDeveloperReq, opts ...grpc.CallOption) (*ApplyDeveloperRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApplyDeveloperRes)
+	err := c.cc.Invoke(ctx, Open_ApplyDeveloper_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) GetDeveloperByUserID(ctx context.Context, in *GetDeveloperByUserIDReq, opts ...grpc.CallOption) (*GetDeveloperByUserIDRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDeveloperByUserIDRes)
+	err := c.cc.Invoke(ctx, Open_GetDeveloperByUserID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) GetDeveloper(ctx context.Context, in *GetDeveloperReq, opts ...grpc.CallOption) (*GetDeveloperRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDeveloperRes)
+	err := c.cc.Invoke(ctx, Open_GetDeveloper_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) ListDevelopers(ctx context.Context, in *ListDevelopersReq, opts ...grpc.CallOption) (*ListDevelopersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDevelopersRes)
+	err := c.cc.Invoke(ctx, Open_ListDevelopers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) AuditDeveloper(ctx context.Context, in *AuditDeveloperReq, opts ...grpc.CallOption) (*AuditDeveloperRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuditDeveloperRes)
+	err := c.cc.Invoke(ctx, Open_AuditDeveloper_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) ListOpenApps(ctx context.Context, in *ListOpenAppsReq, opts ...grpc.CallOption) (*ListOpenAppsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListOpenAppsRes)
+	err := c.cc.Invoke(ctx, Open_ListOpenApps_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) UpdateOpenApps(ctx context.Context, in *UpdateOpenAppsReq, opts ...grpc.CallOption) (*UpdateOpenAppsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateOpenAppsRes)
+	err := c.cc.Invoke(ctx, Open_UpdateOpenApps_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) ListWebhookLogs(ctx context.Context, in *ListWebhookLogsReq, opts ...grpc.CallOption) (*ListWebhookLogsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListWebhookLogsRes)
+	err := c.cc.Invoke(ctx, Open_ListWebhookLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OpenServer is the server API for Open service.
 // All implementations must embed UnimplementedOpenServer
 // for forward compatibility.
@@ -182,6 +278,14 @@ type OpenServer interface {
 	SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error)
 	GetRobotByUserID(context.Context, *GetRobotByUserIDReq) (*GetRobotByUserIDRes, error)
 	DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error)
+	ApplyDeveloper(context.Context, *ApplyDeveloperReq) (*ApplyDeveloperRes, error)
+	GetDeveloperByUserID(context.Context, *GetDeveloperByUserIDReq) (*GetDeveloperByUserIDRes, error)
+	GetDeveloper(context.Context, *GetDeveloperReq) (*GetDeveloperRes, error)
+	ListDevelopers(context.Context, *ListDevelopersReq) (*ListDevelopersRes, error)
+	AuditDeveloper(context.Context, *AuditDeveloperReq) (*AuditDeveloperRes, error)
+	ListOpenApps(context.Context, *ListOpenAppsReq) (*ListOpenAppsRes, error)
+	UpdateOpenApps(context.Context, *UpdateOpenAppsReq) (*UpdateOpenAppsRes, error)
+	ListWebhookLogs(context.Context, *ListWebhookLogsReq) (*ListWebhookLogsRes, error)
 	mustEmbedUnimplementedOpenServer()
 }
 
@@ -224,6 +328,30 @@ func (UnimplementedOpenServer) GetRobotByUserID(context.Context, *GetRobotByUser
 }
 func (UnimplementedOpenServer) DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DispatchPlatformEvent not implemented")
+}
+func (UnimplementedOpenServer) ApplyDeveloper(context.Context, *ApplyDeveloperReq) (*ApplyDeveloperRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApplyDeveloper not implemented")
+}
+func (UnimplementedOpenServer) GetDeveloperByUserID(context.Context, *GetDeveloperByUserIDReq) (*GetDeveloperByUserIDRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDeveloperByUserID not implemented")
+}
+func (UnimplementedOpenServer) GetDeveloper(context.Context, *GetDeveloperReq) (*GetDeveloperRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDeveloper not implemented")
+}
+func (UnimplementedOpenServer) ListDevelopers(context.Context, *ListDevelopersReq) (*ListDevelopersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDevelopers not implemented")
+}
+func (UnimplementedOpenServer) AuditDeveloper(context.Context, *AuditDeveloperReq) (*AuditDeveloperRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AuditDeveloper not implemented")
+}
+func (UnimplementedOpenServer) ListOpenApps(context.Context, *ListOpenAppsReq) (*ListOpenAppsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOpenApps not implemented")
+}
+func (UnimplementedOpenServer) UpdateOpenApps(context.Context, *UpdateOpenAppsReq) (*UpdateOpenAppsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOpenApps not implemented")
+}
+func (UnimplementedOpenServer) ListWebhookLogs(context.Context, *ListWebhookLogsReq) (*ListWebhookLogsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWebhookLogs not implemented")
 }
 func (UnimplementedOpenServer) mustEmbedUnimplementedOpenServer() {}
 func (UnimplementedOpenServer) testEmbeddedByValue()              {}
@@ -444,6 +572,150 @@ func _Open_DispatchPlatformEvent_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_ApplyDeveloper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyDeveloperReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ApplyDeveloper(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ApplyDeveloper_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ApplyDeveloper(ctx, req.(*ApplyDeveloperReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_GetDeveloperByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDeveloperByUserIDReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).GetDeveloperByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_GetDeveloperByUserID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).GetDeveloperByUserID(ctx, req.(*GetDeveloperByUserIDReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_GetDeveloper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDeveloperReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).GetDeveloper(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_GetDeveloper_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).GetDeveloper(ctx, req.(*GetDeveloperReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_ListDevelopers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDevelopersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ListDevelopers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ListDevelopers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ListDevelopers(ctx, req.(*ListDevelopersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_AuditDeveloper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuditDeveloperReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).AuditDeveloper(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_AuditDeveloper_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).AuditDeveloper(ctx, req.(*AuditDeveloperReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_ListOpenApps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOpenAppsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ListOpenApps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ListOpenApps_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ListOpenApps(ctx, req.(*ListOpenAppsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_UpdateOpenApps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOpenAppsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).UpdateOpenApps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_UpdateOpenApps_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).UpdateOpenApps(ctx, req.(*UpdateOpenAppsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_ListWebhookLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWebhookLogsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ListWebhookLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ListWebhookLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ListWebhookLogs(ctx, req.(*ListWebhookLogsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Open_ServiceDesc is the grpc.ServiceDesc for Open service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -494,6 +766,38 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DispatchPlatformEvent",
 			Handler:    _Open_DispatchPlatformEvent_Handler,
+		},
+		{
+			MethodName: "ApplyDeveloper",
+			Handler:    _Open_ApplyDeveloper_Handler,
+		},
+		{
+			MethodName: "GetDeveloperByUserID",
+			Handler:    _Open_GetDeveloperByUserID_Handler,
+		},
+		{
+			MethodName: "GetDeveloper",
+			Handler:    _Open_GetDeveloper_Handler,
+		},
+		{
+			MethodName: "ListDevelopers",
+			Handler:    _Open_ListDevelopers_Handler,
+		},
+		{
+			MethodName: "AuditDeveloper",
+			Handler:    _Open_AuditDeveloper_Handler,
+		},
+		{
+			MethodName: "ListOpenApps",
+			Handler:    _Open_ListOpenApps_Handler,
+		},
+		{
+			MethodName: "UpdateOpenApps",
+			Handler:    _Open_UpdateOpenApps_Handler,
+		},
+		{
+			MethodName: "ListWebhookLogs",
+			Handler:    _Open_ListWebhookLogs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

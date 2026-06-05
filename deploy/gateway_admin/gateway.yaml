@@ -10,8 +10,8 @@ Redis:
   Password: '123456'
   Db: 0
 WhiteList:
-  - /admin/auth/login
-  - /admin/auth/authentication
+  - /admin/auth_public/v1/login
+  - /admin/auth_public/v1/authentication
 
 RateLimit:
   Enabled: false  # 是否启用限流

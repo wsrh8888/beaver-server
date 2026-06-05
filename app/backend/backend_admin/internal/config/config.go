@@ -24,6 +24,7 @@ type Config struct {
 		MaxSize   map[string]float64 // 文件大小限制
 	}
 	UserRpc zrpc.RpcClientConf
+	AuthRpc zrpc.RpcClientConf
 	Auth    struct {
 		AccessSecret string
 		AccessExpire int
@@ -40,5 +41,12 @@ type Config struct {
 		Domain      string
 		ExpireTime  int64 // 签名URL有效期, 单位：秒
 	}
-	FileRpc zrpc.RpcClientConf
+	FileRpc      zrpc.RpcClientConf
+	PlatformRpc  zrpc.RpcClientConf
+	OpenRpc      zrpc.RpcClientConf
+	FriendRpc    zrpc.RpcClientConf
+	GroupRpc     zrpc.RpcClientConf
+	ChatRpc      zrpc.RpcClientConf
+	MomentRpc    zrpc.RpcClientConf
+	EmojiRpc     zrpc.RpcClientConf
 }

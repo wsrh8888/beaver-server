@@ -77,3 +77,43 @@ func (s *OpenServer) DispatchPlatformEvent(ctx context.Context, in *open_rpc.Dis
 	l := logic.NewDispatchPlatformEventLogic(ctx, s.svcCtx)
 	return l.DispatchPlatformEvent(in)
 }
+
+func (s *OpenServer) ApplyDeveloper(ctx context.Context, in *open_rpc.ApplyDeveloperReq) (*open_rpc.ApplyDeveloperRes, error) {
+	l := logic.NewApplyDeveloperLogic(ctx, s.svcCtx)
+	return l.ApplyDeveloper(in)
+}
+
+func (s *OpenServer) GetDeveloperByUserID(ctx context.Context, in *open_rpc.GetDeveloperByUserIDReq) (*open_rpc.GetDeveloperByUserIDRes, error) {
+	l := logic.NewGetDeveloperByUserIDLogic(ctx, s.svcCtx)
+	return l.GetDeveloperByUserID(in)
+}
+
+func (s *OpenServer) GetDeveloper(ctx context.Context, in *open_rpc.GetDeveloperReq) (*open_rpc.GetDeveloperRes, error) {
+	l := logic.NewGetDeveloperLogic(ctx, s.svcCtx)
+	return l.GetDeveloper(in)
+}
+
+func (s *OpenServer) ListDevelopers(ctx context.Context, in *open_rpc.ListDevelopersReq) (*open_rpc.ListDevelopersRes, error) {
+	l := logic.NewListDevelopersLogic(ctx, s.svcCtx)
+	return l.ListDevelopers(in)
+}
+
+func (s *OpenServer) AuditDeveloper(ctx context.Context, in *open_rpc.AuditDeveloperReq) (*open_rpc.AuditDeveloperRes, error) {
+	l := logic.NewAuditDeveloperLogic(ctx, s.svcCtx)
+	return l.AuditDeveloper(in)
+}
+
+func (s *OpenServer) ListOpenApps(ctx context.Context, in *open_rpc.ListOpenAppsReq) (*open_rpc.ListOpenAppsRes, error) {
+	l := logic.NewListOpenAppsLogic(ctx, s.svcCtx)
+	return l.ListOpenApps(in)
+}
+
+func (s *OpenServer) UpdateOpenApps(ctx context.Context, in *open_rpc.UpdateOpenAppsReq) (*open_rpc.UpdateOpenAppsRes, error) {
+	l := logic.NewUpdateOpenAppsLogic(ctx, s.svcCtx)
+	return l.UpdateOpenApps(in)
+}
+
+func (s *OpenServer) ListWebhookLogs(ctx context.Context, in *open_rpc.ListWebhookLogsReq) (*open_rpc.ListWebhookLogsRes, error) {
+	l := logic.NewListWebhookLogsLogic(ctx, s.svcCtx)
+	return l.ListWebhookLogs(in)
+}

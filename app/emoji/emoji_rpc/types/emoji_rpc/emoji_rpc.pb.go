@@ -807,6 +807,1243 @@ func (x *EmojiPackageCollectVersionItem) GetVersion() int64 {
 	return 0
 }
 
+type EmojiInfoMsg struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Width         int32                  `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`   // int32 表情图片宽度
+	Height        int32                  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"` // int32 表情图片高度
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmojiInfoMsg) Reset() {
+	*x = EmojiInfoMsg{}
+	mi := &file_emoji_rpc_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmojiInfoMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmojiInfoMsg) ProtoMessage() {}
+
+func (x *EmojiInfoMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmojiInfoMsg.ProtoReflect.Descriptor instead.
+func (*EmojiInfoMsg) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *EmojiInfoMsg) GetWidth() int32 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *EmojiInfoMsg) GetHeight() int32 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+type EmojiItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EmojiId       string                 `protobuf:"bytes,1,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`       // string 表情 ID
+	FileKey       string                 `protobuf:"bytes,2,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`       // string 文件 Key
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                          // string 表情名称
+	EmojiInfo     *EmojiInfoMsg          `protobuf:"bytes,4,opt,name=emoji_info,json=emojiInfo,proto3" json:"emoji_info,omitempty"` // object 尺寸信息
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                       // int32 状态：1=正常 2=审核中 3=违规禁用
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // string 创建时间 RFC3339
+	UpdatedAt     string                 `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // string 更新时间 RFC3339
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmojiItem) Reset() {
+	*x = EmojiItem{}
+	mi := &file_emoji_rpc_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmojiItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmojiItem) ProtoMessage() {}
+
+func (x *EmojiItem) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmojiItem.ProtoReflect.Descriptor instead.
+func (*EmojiItem) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *EmojiItem) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *EmojiItem) GetFileKey() string {
+	if x != nil {
+		return x.FileKey
+	}
+	return ""
+}
+
+func (x *EmojiItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *EmojiItem) GetEmojiInfo() *EmojiInfoMsg {
+	if x != nil {
+		return x.EmojiInfo
+	}
+	return nil
+}
+
+func (x *EmojiItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *EmojiItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *EmojiItem) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+// ListEmojis：表情列表/详情/包内表情查询（package_id 非空时按包内 sort_order 排序）
+type ListEmojisReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                           // int32 页码
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // int32 每页条数
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                          // string 名称模糊搜索，可选
+	StartTime     string                 `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"` // string 创建时间起，可选
+	EndTime       string                 `protobuf:"bytes,5,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`       // string 创建时间止，可选
+	EmojiId       string                 `protobuf:"bytes,6,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`       // string 表情 ID 精确查，可选
+	PackageId     string                 `protobuf:"bytes,7,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"` // string 表情包 ID，非空时查包内表情，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmojisReq) Reset() {
+	*x = ListEmojisReq{}
+	mi := &file_emoji_rpc_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmojisReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmojisReq) ProtoMessage() {}
+
+func (x *ListEmojisReq) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmojisReq.ProtoReflect.Descriptor instead.
+func (*ListEmojisReq) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListEmojisReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListEmojisReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListEmojisReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ListEmojisReq) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *ListEmojisReq) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+func (x *ListEmojisReq) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *ListEmojisReq) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+type ListEmojisRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
+	List          []*EmojiItem           `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 表情列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmojisRes) Reset() {
+	*x = ListEmojisRes{}
+	mi := &file_emoji_rpc_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmojisRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmojisRes) ProtoMessage() {}
+
+func (x *ListEmojisRes) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmojisRes.ProtoReflect.Descriptor instead.
+func (*ListEmojisRes) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListEmojisRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListEmojisRes) GetList() []*EmojiItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// SaveEmoji：创建/更新/删除单条表情（emoji_id 空=创建，delete=true=删除，否则按传入字段更新）
+type SaveEmojiReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EmojiId       string                 `protobuf:"bytes,1,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`                        // string 表情 ID，创建时留空
+	FileKey       string                 `protobuf:"bytes,2,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`                        // string 文件 Key，创建必填
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                                           // string 表情名称，创建必填
+	EmojiInfo     *EmojiInfoMsg          `protobuf:"bytes,4,opt,name=emoji_info,json=emojiInfo,proto3" json:"emoji_info,omitempty"`                  // object 尺寸信息，创建时可选
+	PatchFileKey  *string                `protobuf:"bytes,5,opt,name=patch_file_key,json=patchFileKey,proto3,oneof" json:"patch_file_key,omitempty"` // string 更新文件 Key，可选
+	PatchTitle    *string                `protobuf:"bytes,6,opt,name=patch_title,json=patchTitle,proto3,oneof" json:"patch_title,omitempty"`         // string 更新名称，可选
+	Delete        *bool                  `protobuf:"varint,7,opt,name=delete,proto3,oneof" json:"delete,omitempty"`                                  // bool true=删除该表情
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveEmojiReq) Reset() {
+	*x = SaveEmojiReq{}
+	mi := &file_emoji_rpc_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveEmojiReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveEmojiReq) ProtoMessage() {}
+
+func (x *SaveEmojiReq) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveEmojiReq.ProtoReflect.Descriptor instead.
+func (*SaveEmojiReq) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *SaveEmojiReq) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *SaveEmojiReq) GetFileKey() string {
+	if x != nil {
+		return x.FileKey
+	}
+	return ""
+}
+
+func (x *SaveEmojiReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *SaveEmojiReq) GetEmojiInfo() *EmojiInfoMsg {
+	if x != nil {
+		return x.EmojiInfo
+	}
+	return nil
+}
+
+func (x *SaveEmojiReq) GetPatchFileKey() string {
+	if x != nil && x.PatchFileKey != nil {
+		return *x.PatchFileKey
+	}
+	return ""
+}
+
+func (x *SaveEmojiReq) GetPatchTitle() string {
+	if x != nil && x.PatchTitle != nil {
+		return *x.PatchTitle
+	}
+	return ""
+}
+
+func (x *SaveEmojiReq) GetDelete() bool {
+	if x != nil && x.Delete != nil {
+		return *x.Delete
+	}
+	return false
+}
+
+type SaveEmojiRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EmojiId       string                 `protobuf:"bytes,1,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"` // string 表情 ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveEmojiRes) Reset() {
+	*x = SaveEmojiRes{}
+	mi := &file_emoji_rpc_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveEmojiRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveEmojiRes) ProtoMessage() {}
+
+func (x *SaveEmojiRes) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveEmojiRes.ProtoReflect.Descriptor instead.
+func (*SaveEmojiRes) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *SaveEmojiRes) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+type EmojiPackageItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PackageId     string                 `protobuf:"bytes,1,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"` // string 表情包 ID
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                          // string 名称
+	CoverFile     string                 `protobuf:"bytes,3,opt,name=cover_file,json=coverFile,proto3" json:"cover_file,omitempty"` // string 封面文件 Key
+	UserId        string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`          // string 所属用户 ID
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`              // string 描述
+	Type          string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`                            // string 类型：official / user
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                       // int32 状态
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // string 创建时间 RFC3339
+	UpdatedAt     string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // string 更新时间 RFC3339
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmojiPackageItem) Reset() {
+	*x = EmojiPackageItem{}
+	mi := &file_emoji_rpc_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmojiPackageItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmojiPackageItem) ProtoMessage() {}
+
+func (x *EmojiPackageItem) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmojiPackageItem.ProtoReflect.Descriptor instead.
+func (*EmojiPackageItem) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *EmojiPackageItem) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetCoverFile() string {
+	if x != nil {
+		return x.CoverFile
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *EmojiPackageItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *EmojiPackageItem) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+// ListEmojiPackages：表情包列表/详情（package_id 精确查单条）
+type ListEmojiPackagesReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                           // int32 页码
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // int32 每页条数
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`          // string 所属用户 ID 筛选，可选
+	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`                            // string 类型筛选，可选
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                       // int32 状态筛选，0 表示全部
+	Title         string                 `protobuf:"bytes,6,opt,name=title,proto3" json:"title,omitempty"`                          // string 名称/描述模糊搜索，可选
+	StartTime     string                 `protobuf:"bytes,7,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"` // string 创建时间起，可选
+	EndTime       string                 `protobuf:"bytes,8,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`       // string 创建时间止，可选
+	PackageId     string                 `protobuf:"bytes,9,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"` // string 表情包 ID 精确查，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmojiPackagesReq) Reset() {
+	*x = ListEmojiPackagesReq{}
+	mi := &file_emoji_rpc_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmojiPackagesReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmojiPackagesReq) ProtoMessage() {}
+
+func (x *ListEmojiPackagesReq) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmojiPackagesReq.ProtoReflect.Descriptor instead.
+func (*ListEmojiPackagesReq) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ListEmojiPackagesReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListEmojiPackagesReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListEmojiPackagesReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListEmojiPackagesReq) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *ListEmojiPackagesReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListEmojiPackagesReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ListEmojiPackagesReq) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *ListEmojiPackagesReq) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+func (x *ListEmojiPackagesReq) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+type ListEmojiPackagesRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
+	List          []*EmojiPackageItem    `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 表情包列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmojiPackagesRes) Reset() {
+	*x = ListEmojiPackagesRes{}
+	mi := &file_emoji_rpc_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmojiPackagesRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmojiPackagesRes) ProtoMessage() {}
+
+func (x *ListEmojiPackagesRes) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmojiPackagesRes.ProtoReflect.Descriptor instead.
+func (*ListEmojiPackagesRes) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ListEmojiPackagesRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListEmojiPackagesRes) GetList() []*EmojiPackageItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// SaveEmojiPackage：创建/更新/删除表情包（package_id 空=创建，delete=true=删除）
+type SaveEmojiPackageReq struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	PackageId        string                 `protobuf:"bytes,1,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"`                            // string 表情包 ID，创建时留空
+	Title            string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                                                     // string 名称，创建必填
+	CoverFile        string                 `protobuf:"bytes,3,opt,name=cover_file,json=coverFile,proto3" json:"cover_file,omitempty"`                            // string 封面文件 Key
+	UserId           string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                                     // string 所属用户 ID，创建必填
+	Description      string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`                                         // string 描述
+	Type             string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`                                                       // string 类型
+	PatchTitle       *string                `protobuf:"bytes,7,opt,name=patch_title,json=patchTitle,proto3,oneof" json:"patch_title,omitempty"`                   // string 更新名称，可选
+	PatchCoverFile   *string                `protobuf:"bytes,8,opt,name=patch_cover_file,json=patchCoverFile,proto3,oneof" json:"patch_cover_file,omitempty"`     // string 更新封面，可选
+	PatchDescription *string                `protobuf:"bytes,9,opt,name=patch_description,json=patchDescription,proto3,oneof" json:"patch_description,omitempty"` // string 更新描述，可选
+	PatchType        *string                `protobuf:"bytes,10,opt,name=patch_type,json=patchType,proto3,oneof" json:"patch_type,omitempty"`                     // string 更新类型，可选
+	PatchStatus      *int32                 `protobuf:"varint,11,opt,name=patch_status,json=patchStatus,proto3,oneof" json:"patch_status,omitempty"`              // int32 更新状态，可选
+	Delete           *bool                  `protobuf:"varint,12,opt,name=delete,proto3,oneof" json:"delete,omitempty"`                                           // bool true=删除该表情包
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *SaveEmojiPackageReq) Reset() {
+	*x = SaveEmojiPackageReq{}
+	mi := &file_emoji_rpc_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveEmojiPackageReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveEmojiPackageReq) ProtoMessage() {}
+
+func (x *SaveEmojiPackageReq) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveEmojiPackageReq.ProtoReflect.Descriptor instead.
+func (*SaveEmojiPackageReq) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *SaveEmojiPackageReq) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetCoverFile() string {
+	if x != nil {
+		return x.CoverFile
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetPatchTitle() string {
+	if x != nil && x.PatchTitle != nil {
+		return *x.PatchTitle
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetPatchCoverFile() string {
+	if x != nil && x.PatchCoverFile != nil {
+		return *x.PatchCoverFile
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetPatchDescription() string {
+	if x != nil && x.PatchDescription != nil {
+		return *x.PatchDescription
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetPatchType() string {
+	if x != nil && x.PatchType != nil {
+		return *x.PatchType
+	}
+	return ""
+}
+
+func (x *SaveEmojiPackageReq) GetPatchStatus() int32 {
+	if x != nil && x.PatchStatus != nil {
+		return *x.PatchStatus
+	}
+	return 0
+}
+
+func (x *SaveEmojiPackageReq) GetDelete() bool {
+	if x != nil && x.Delete != nil {
+		return *x.Delete
+	}
+	return false
+}
+
+type SaveEmojiPackageRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PackageId     string                 `protobuf:"bytes,1,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"` // string 表情包 ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveEmojiPackageRes) Reset() {
+	*x = SaveEmojiPackageRes{}
+	mi := &file_emoji_rpc_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveEmojiPackageRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveEmojiPackageRes) ProtoMessage() {}
+
+func (x *SaveEmojiPackageRes) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveEmojiPackageRes.ProtoReflect.Descriptor instead.
+func (*SaveEmojiPackageRes) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *SaveEmojiPackageRes) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+// UpdateEmojiPackageContent：维护表情包与表情的关联（action：1=添加并创建表情，2=移除）
+type UpdateEmojiPackageContentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PackageId     string                 `protobuf:"bytes,1,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"` // string 表情包 ID
+	Action        int32                  `protobuf:"varint,2,opt,name=action,proto3" json:"action,omitempty"`                       // int32 操作：1=添加 2=移除
+	EmojiId       string                 `protobuf:"bytes,3,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`       // string 表情 ID，action=2 时必填
+	FileKey       string                 `protobuf:"bytes,4,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`       // string 文件 Key，action=1 时必填
+	Title         string                 `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`                          // string 表情名称，action=1 时必填
+	EmojiInfo     *EmojiInfoMsg          `protobuf:"bytes,6,opt,name=emoji_info,json=emojiInfo,proto3" json:"emoji_info,omitempty"` // object 尺寸信息，action=1 时可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEmojiPackageContentReq) Reset() {
+	*x = UpdateEmojiPackageContentReq{}
+	mi := &file_emoji_rpc_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEmojiPackageContentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEmojiPackageContentReq) ProtoMessage() {}
+
+func (x *UpdateEmojiPackageContentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEmojiPackageContentReq.ProtoReflect.Descriptor instead.
+func (*UpdateEmojiPackageContentReq) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *UpdateEmojiPackageContentReq) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+func (x *UpdateEmojiPackageContentReq) GetAction() int32 {
+	if x != nil {
+		return x.Action
+	}
+	return 0
+}
+
+func (x *UpdateEmojiPackageContentReq) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *UpdateEmojiPackageContentReq) GetFileKey() string {
+	if x != nil {
+		return x.FileKey
+	}
+	return ""
+}
+
+func (x *UpdateEmojiPackageContentReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *UpdateEmojiPackageContentReq) GetEmojiInfo() *EmojiInfoMsg {
+	if x != nil {
+		return x.EmojiInfo
+	}
+	return nil
+}
+
+type UpdateEmojiPackageContentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RelationId    string                 `protobuf:"bytes,1,opt,name=relation_id,json=relationId,proto3" json:"relation_id,omitempty"` // string 关联记录 ID，添加时返回
+	EmojiId       string                 `protobuf:"bytes,2,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`          // string 表情 ID，添加时返回
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEmojiPackageContentRes) Reset() {
+	*x = UpdateEmojiPackageContentRes{}
+	mi := &file_emoji_rpc_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEmojiPackageContentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEmojiPackageContentRes) ProtoMessage() {}
+
+func (x *UpdateEmojiPackageContentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEmojiPackageContentRes.ProtoReflect.Descriptor instead.
+func (*UpdateEmojiPackageContentRes) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *UpdateEmojiPackageContentRes) GetRelationId() string {
+	if x != nil {
+		return x.RelationId
+	}
+	return ""
+}
+
+func (x *UpdateEmojiPackageContentRes) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+type EmojiCollectItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectId     string                 `protobuf:"bytes,1,opt,name=collect_id,json=collectId,proto3" json:"collect_id,omitempty"`            // string 收藏记录 ID
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                     // string 用户 ID
+	EmojiId       string                 `protobuf:"bytes,3,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`                  // string 表情 ID
+	EmojiTitle    string                 `protobuf:"bytes,4,opt,name=emoji_title,json=emojiTitle,proto3" json:"emoji_title,omitempty"`         // string 表情名称（join 查询）
+	EmojiFileKey  string                 `protobuf:"bytes,5,opt,name=emoji_file_key,json=emojiFileKey,proto3" json:"emoji_file_key,omitempty"` // string 表情文件 Key（join 查询）
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`            // string 创建时间 RFC3339
+	UpdatedAt     string                 `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`            // string 更新时间 RFC3339
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmojiCollectItem) Reset() {
+	*x = EmojiCollectItem{}
+	mi := &file_emoji_rpc_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmojiCollectItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmojiCollectItem) ProtoMessage() {}
+
+func (x *EmojiCollectItem) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmojiCollectItem.ProtoReflect.Descriptor instead.
+func (*EmojiCollectItem) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *EmojiCollectItem) GetCollectId() string {
+	if x != nil {
+		return x.CollectId
+	}
+	return ""
+}
+
+func (x *EmojiCollectItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *EmojiCollectItem) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *EmojiCollectItem) GetEmojiTitle() string {
+	if x != nil {
+		return x.EmojiTitle
+	}
+	return ""
+}
+
+func (x *EmojiCollectItem) GetEmojiFileKey() string {
+	if x != nil {
+		return x.EmojiFileKey
+	}
+	return ""
+}
+
+func (x *EmojiCollectItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *EmojiCollectItem) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListEmojiCollectsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                           // int32 页码
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // int32 每页条数
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`          // string 用户 ID 筛选，可选
+	EmojiId       string                 `protobuf:"bytes,4,opt,name=emoji_id,json=emojiId,proto3" json:"emoji_id,omitempty"`       // string 表情 ID 筛选，可选
+	StartTime     string                 `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"` // string 收藏时间起，可选
+	EndTime       string                 `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`       // string 收藏时间止，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmojiCollectsReq) Reset() {
+	*x = ListEmojiCollectsReq{}
+	mi := &file_emoji_rpc_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmojiCollectsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmojiCollectsReq) ProtoMessage() {}
+
+func (x *ListEmojiCollectsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmojiCollectsReq.ProtoReflect.Descriptor instead.
+func (*ListEmojiCollectsReq) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ListEmojiCollectsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListEmojiCollectsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListEmojiCollectsReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListEmojiCollectsReq) GetEmojiId() string {
+	if x != nil {
+		return x.EmojiId
+	}
+	return ""
+}
+
+func (x *ListEmojiCollectsReq) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *ListEmojiCollectsReq) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+type ListEmojiCollectsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
+	List          []*EmojiCollectItem    `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 收藏列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmojiCollectsRes) Reset() {
+	*x = ListEmojiCollectsRes{}
+	mi := &file_emoji_rpc_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmojiCollectsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmojiCollectsRes) ProtoMessage() {}
+
+func (x *ListEmojiCollectsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_emoji_rpc_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmojiCollectsRes.ProtoReflect.Descriptor instead.
+func (*ListEmojiCollectsRes) Descriptor() ([]byte, []int) {
+	return file_emoji_rpc_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ListEmojiCollectsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListEmojiCollectsRes) GetList() []*EmojiCollectItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
 var File_emoji_rpc_proto protoreflect.FileDescriptor
 
 const file_emoji_rpc_proto_rawDesc = "" +
@@ -856,13 +2093,154 @@ const file_emoji_rpc_proto_rawDesc = "" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\"f\n" +
 	"\x1eEmojiPackageCollectVersionItem\x12*\n" +
 	"\x10packageCollectId\x18\x01 \x01(\tR\x10packageCollectId\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x03R\aversion2\xd8\x03\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"<\n" +
+	"\fEmojiInfoMsg\x12\x14\n" +
+	"\x05width\x18\x01 \x01(\x05R\x05width\x12\x16\n" +
+	"\x06height\x18\x02 \x01(\x05R\x06height\"\xe5\x01\n" +
+	"\tEmojiItem\x12\x19\n" +
+	"\bemoji_id\x18\x01 \x01(\tR\aemojiId\x12\x19\n" +
+	"\bfile_key\x18\x02 \x01(\tR\afileKey\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x126\n" +
+	"\n" +
+	"emoji_info\x18\x04 \x01(\v2\x17.emoji_rpc.EmojiInfoMsgR\temojiInfo\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\tR\tupdatedAt\"\xca\x01\n" +
+	"\rListEmojisReq\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\x04 \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\x05 \x01(\tR\aendTime\x12\x19\n" +
+	"\bemoji_id\x18\x06 \x01(\tR\aemojiId\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\a \x01(\tR\tpackageId\"O\n" +
+	"\rListEmojisRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12(\n" +
+	"\x04list\x18\x02 \x03(\v2\x14.emoji_rpc.EmojiItemR\x04list\"\xae\x02\n" +
+	"\fSaveEmojiReq\x12\x19\n" +
+	"\bemoji_id\x18\x01 \x01(\tR\aemojiId\x12\x19\n" +
+	"\bfile_key\x18\x02 \x01(\tR\afileKey\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x126\n" +
+	"\n" +
+	"emoji_info\x18\x04 \x01(\v2\x17.emoji_rpc.EmojiInfoMsgR\temojiInfo\x12)\n" +
+	"\x0epatch_file_key\x18\x05 \x01(\tH\x00R\fpatchFileKey\x88\x01\x01\x12$\n" +
+	"\vpatch_title\x18\x06 \x01(\tH\x01R\n" +
+	"patchTitle\x88\x01\x01\x12\x1b\n" +
+	"\x06delete\x18\a \x01(\bH\x02R\x06delete\x88\x01\x01B\x11\n" +
+	"\x0f_patch_file_keyB\x0e\n" +
+	"\f_patch_titleB\t\n" +
+	"\a_delete\")\n" +
+	"\fSaveEmojiRes\x12\x19\n" +
+	"\bemoji_id\x18\x01 \x01(\tR\aemojiId\"\x8b\x02\n" +
+	"\x10EmojiPackageItem\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\x01 \x01(\tR\tpackageId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1d\n" +
+	"\n" +
+	"cover_file\x18\x03 \x01(\tR\tcoverFile\x12\x17\n" +
+	"\auser_id\x18\x04 \x01(\tR\x06userId\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04type\x18\x06 \x01(\tR\x04type\x12\x16\n" +
+	"\x06status\x18\a \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt\"\xfb\x01\n" +
+	"\x14ListEmojiPackagesReq\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x14\n" +
+	"\x05title\x18\x06 \x01(\tR\x05title\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\a \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\b \x01(\tR\aendTime\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\t \x01(\tR\tpackageId\"]\n" +
+	"\x14ListEmojiPackagesRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12/\n" +
+	"\x04list\x18\x02 \x03(\v2\x1b.emoji_rpc.EmojiPackageItemR\x04list\"\x8e\x04\n" +
+	"\x13SaveEmojiPackageReq\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\x01 \x01(\tR\tpackageId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1d\n" +
+	"\n" +
+	"cover_file\x18\x03 \x01(\tR\tcoverFile\x12\x17\n" +
+	"\auser_id\x18\x04 \x01(\tR\x06userId\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04type\x18\x06 \x01(\tR\x04type\x12$\n" +
+	"\vpatch_title\x18\a \x01(\tH\x00R\n" +
+	"patchTitle\x88\x01\x01\x12-\n" +
+	"\x10patch_cover_file\x18\b \x01(\tH\x01R\x0epatchCoverFile\x88\x01\x01\x120\n" +
+	"\x11patch_description\x18\t \x01(\tH\x02R\x10patchDescription\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"patch_type\x18\n" +
+	" \x01(\tH\x03R\tpatchType\x88\x01\x01\x12&\n" +
+	"\fpatch_status\x18\v \x01(\x05H\x04R\vpatchStatus\x88\x01\x01\x12\x1b\n" +
+	"\x06delete\x18\f \x01(\bH\x05R\x06delete\x88\x01\x01B\x0e\n" +
+	"\f_patch_titleB\x13\n" +
+	"\x11_patch_cover_fileB\x14\n" +
+	"\x12_patch_descriptionB\r\n" +
+	"\v_patch_typeB\x0f\n" +
+	"\r_patch_statusB\t\n" +
+	"\a_delete\"4\n" +
+	"\x13SaveEmojiPackageRes\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\x01 \x01(\tR\tpackageId\"\xd9\x01\n" +
+	"\x1cUpdateEmojiPackageContentReq\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\x01 \x01(\tR\tpackageId\x12\x16\n" +
+	"\x06action\x18\x02 \x01(\x05R\x06action\x12\x19\n" +
+	"\bemoji_id\x18\x03 \x01(\tR\aemojiId\x12\x19\n" +
+	"\bfile_key\x18\x04 \x01(\tR\afileKey\x12\x14\n" +
+	"\x05title\x18\x05 \x01(\tR\x05title\x126\n" +
+	"\n" +
+	"emoji_info\x18\x06 \x01(\v2\x17.emoji_rpc.EmojiInfoMsgR\temojiInfo\"Z\n" +
+	"\x1cUpdateEmojiPackageContentRes\x12\x1f\n" +
+	"\vrelation_id\x18\x01 \x01(\tR\n" +
+	"relationId\x12\x19\n" +
+	"\bemoji_id\x18\x02 \x01(\tR\aemojiId\"\xea\x01\n" +
+	"\x10EmojiCollectItem\x12\x1d\n" +
+	"\n" +
+	"collect_id\x18\x01 \x01(\tR\tcollectId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x19\n" +
+	"\bemoji_id\x18\x03 \x01(\tR\aemojiId\x12\x1f\n" +
+	"\vemoji_title\x18\x04 \x01(\tR\n" +
+	"emojiTitle\x12$\n" +
+	"\x0eemoji_file_key\x18\x05 \x01(\tR\femojiFileKey\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\tR\tupdatedAt\"\xb5\x01\n" +
+	"\x14ListEmojiCollectsReq\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x19\n" +
+	"\bemoji_id\x18\x04 \x01(\tR\aemojiId\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\x05 \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\x06 \x01(\tR\aendTime\"]\n" +
+	"\x14ListEmojiCollectsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12/\n" +
+	"\x04list\x18\x02 \x03(\v2\x1b.emoji_rpc.EmojiCollectItemR\x04list2\xca\a\n" +
 	"\x05emoji\x12^\n" +
 	"\x14GetUserEmojiCollects\x12\".emoji_rpc.GetUserEmojiCollectsReq\x1a\".emoji_rpc.GetUserEmojiCollectsRes\x12s\n" +
 	"\x1bGetUserEmojiPackageCollects\x12).emoji_rpc.GetUserEmojiPackageCollectsReq\x1a).emoji_rpc.GetUserEmojiPackageCollectsRes\x12R\n" +
 	"\x10GetEmojiPackages\x12\x1e.emoji_rpc.GetEmojiPackagesReq\x1a\x1e.emoji_rpc.GetEmojiPackagesRes\x12g\n" +
 	"\x17GetEmojiPackageContents\x12%.emoji_rpc.GetEmojiPackageContentsReq\x1a%.emoji_rpc.GetEmojiPackageContentsRes\x12=\n" +
-	"\tGetEmojis\x12\x17.emoji_rpc.GetEmojisReq\x1a\x17.emoji_rpc.GetEmojisResB\rZ\v./emoji_rpcb\x06proto3"
+	"\tGetEmojis\x12\x17.emoji_rpc.GetEmojisReq\x1a\x17.emoji_rpc.GetEmojisRes\x12@\n" +
+	"\n" +
+	"ListEmojis\x12\x18.emoji_rpc.ListEmojisReq\x1a\x18.emoji_rpc.ListEmojisRes\x12=\n" +
+	"\tSaveEmoji\x12\x17.emoji_rpc.SaveEmojiReq\x1a\x17.emoji_rpc.SaveEmojiRes\x12U\n" +
+	"\x11ListEmojiPackages\x12\x1f.emoji_rpc.ListEmojiPackagesReq\x1a\x1f.emoji_rpc.ListEmojiPackagesRes\x12R\n" +
+	"\x10SaveEmojiPackage\x12\x1e.emoji_rpc.SaveEmojiPackageReq\x1a\x1e.emoji_rpc.SaveEmojiPackageRes\x12m\n" +
+	"\x19UpdateEmojiPackageContent\x12'.emoji_rpc.UpdateEmojiPackageContentReq\x1a'.emoji_rpc.UpdateEmojiPackageContentRes\x12U\n" +
+	"\x11ListEmojiCollects\x12\x1f.emoji_rpc.ListEmojiCollectsReq\x1a\x1f.emoji_rpc.ListEmojiCollectsResB\rZ\v./emoji_rpcb\x06proto3"
 
 var (
 	file_emoji_rpc_proto_rawDescOnce sync.Once
@@ -876,7 +2254,7 @@ func file_emoji_rpc_proto_rawDescGZIP() []byte {
 	return file_emoji_rpc_proto_rawDescData
 }
 
-var file_emoji_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_emoji_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_emoji_rpc_proto_goTypes = []any{
 	(*GetUserEmojiCollectsReq)(nil),        // 0: emoji_rpc.GetUserEmojiCollectsReq
 	(*GetUserEmojiCollectsRes)(nil),        // 1: emoji_rpc.GetUserEmojiCollectsRes
@@ -893,6 +2271,22 @@ var file_emoji_rpc_proto_goTypes = []any{
 	(*EmojiPackageContentVersionItem)(nil), // 12: emoji_rpc.EmojiPackageContentVersionItem
 	(*EmojiCollectVersionItem)(nil),        // 13: emoji_rpc.EmojiCollectVersionItem
 	(*EmojiPackageCollectVersionItem)(nil), // 14: emoji_rpc.EmojiPackageCollectVersionItem
+	(*EmojiInfoMsg)(nil),                   // 15: emoji_rpc.EmojiInfoMsg
+	(*EmojiItem)(nil),                      // 16: emoji_rpc.EmojiItem
+	(*ListEmojisReq)(nil),                  // 17: emoji_rpc.ListEmojisReq
+	(*ListEmojisRes)(nil),                  // 18: emoji_rpc.ListEmojisRes
+	(*SaveEmojiReq)(nil),                   // 19: emoji_rpc.SaveEmojiReq
+	(*SaveEmojiRes)(nil),                   // 20: emoji_rpc.SaveEmojiRes
+	(*EmojiPackageItem)(nil),               // 21: emoji_rpc.EmojiPackageItem
+	(*ListEmojiPackagesReq)(nil),           // 22: emoji_rpc.ListEmojiPackagesReq
+	(*ListEmojiPackagesRes)(nil),           // 23: emoji_rpc.ListEmojiPackagesRes
+	(*SaveEmojiPackageReq)(nil),            // 24: emoji_rpc.SaveEmojiPackageReq
+	(*SaveEmojiPackageRes)(nil),            // 25: emoji_rpc.SaveEmojiPackageRes
+	(*UpdateEmojiPackageContentReq)(nil),   // 26: emoji_rpc.UpdateEmojiPackageContentReq
+	(*UpdateEmojiPackageContentRes)(nil),   // 27: emoji_rpc.UpdateEmojiPackageContentRes
+	(*EmojiCollectItem)(nil),               // 28: emoji_rpc.EmojiCollectItem
+	(*ListEmojiCollectsReq)(nil),           // 29: emoji_rpc.ListEmojiCollectsReq
+	(*ListEmojiCollectsRes)(nil),           // 30: emoji_rpc.ListEmojiCollectsRes
 }
 var file_emoji_rpc_proto_depIdxs = []int32{
 	13, // 0: emoji_rpc.GetUserEmojiCollectsRes.emojiCollectVersions:type_name -> emoji_rpc.EmojiCollectVersionItem
@@ -900,21 +2294,39 @@ var file_emoji_rpc_proto_depIdxs = []int32{
 	11, // 2: emoji_rpc.GetEmojiPackagesRes.emojiPackageVersions:type_name -> emoji_rpc.EmojiPackageVersionItem
 	12, // 3: emoji_rpc.GetEmojiPackageContentsRes.emojiPackageContentVersions:type_name -> emoji_rpc.EmojiPackageContentVersionItem
 	10, // 4: emoji_rpc.GetEmojisRes.emojiVersions:type_name -> emoji_rpc.EmojiVersionItem
-	0,  // 5: emoji_rpc.emoji.GetUserEmojiCollects:input_type -> emoji_rpc.GetUserEmojiCollectsReq
-	2,  // 6: emoji_rpc.emoji.GetUserEmojiPackageCollects:input_type -> emoji_rpc.GetUserEmojiPackageCollectsReq
-	4,  // 7: emoji_rpc.emoji.GetEmojiPackages:input_type -> emoji_rpc.GetEmojiPackagesReq
-	6,  // 8: emoji_rpc.emoji.GetEmojiPackageContents:input_type -> emoji_rpc.GetEmojiPackageContentsReq
-	8,  // 9: emoji_rpc.emoji.GetEmojis:input_type -> emoji_rpc.GetEmojisReq
-	1,  // 10: emoji_rpc.emoji.GetUserEmojiCollects:output_type -> emoji_rpc.GetUserEmojiCollectsRes
-	3,  // 11: emoji_rpc.emoji.GetUserEmojiPackageCollects:output_type -> emoji_rpc.GetUserEmojiPackageCollectsRes
-	5,  // 12: emoji_rpc.emoji.GetEmojiPackages:output_type -> emoji_rpc.GetEmojiPackagesRes
-	7,  // 13: emoji_rpc.emoji.GetEmojiPackageContents:output_type -> emoji_rpc.GetEmojiPackageContentsRes
-	9,  // 14: emoji_rpc.emoji.GetEmojis:output_type -> emoji_rpc.GetEmojisRes
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	15, // 5: emoji_rpc.EmojiItem.emoji_info:type_name -> emoji_rpc.EmojiInfoMsg
+	16, // 6: emoji_rpc.ListEmojisRes.list:type_name -> emoji_rpc.EmojiItem
+	15, // 7: emoji_rpc.SaveEmojiReq.emoji_info:type_name -> emoji_rpc.EmojiInfoMsg
+	21, // 8: emoji_rpc.ListEmojiPackagesRes.list:type_name -> emoji_rpc.EmojiPackageItem
+	15, // 9: emoji_rpc.UpdateEmojiPackageContentReq.emoji_info:type_name -> emoji_rpc.EmojiInfoMsg
+	28, // 10: emoji_rpc.ListEmojiCollectsRes.list:type_name -> emoji_rpc.EmojiCollectItem
+	0,  // 11: emoji_rpc.emoji.GetUserEmojiCollects:input_type -> emoji_rpc.GetUserEmojiCollectsReq
+	2,  // 12: emoji_rpc.emoji.GetUserEmojiPackageCollects:input_type -> emoji_rpc.GetUserEmojiPackageCollectsReq
+	4,  // 13: emoji_rpc.emoji.GetEmojiPackages:input_type -> emoji_rpc.GetEmojiPackagesReq
+	6,  // 14: emoji_rpc.emoji.GetEmojiPackageContents:input_type -> emoji_rpc.GetEmojiPackageContentsReq
+	8,  // 15: emoji_rpc.emoji.GetEmojis:input_type -> emoji_rpc.GetEmojisReq
+	17, // 16: emoji_rpc.emoji.ListEmojis:input_type -> emoji_rpc.ListEmojisReq
+	19, // 17: emoji_rpc.emoji.SaveEmoji:input_type -> emoji_rpc.SaveEmojiReq
+	22, // 18: emoji_rpc.emoji.ListEmojiPackages:input_type -> emoji_rpc.ListEmojiPackagesReq
+	24, // 19: emoji_rpc.emoji.SaveEmojiPackage:input_type -> emoji_rpc.SaveEmojiPackageReq
+	26, // 20: emoji_rpc.emoji.UpdateEmojiPackageContent:input_type -> emoji_rpc.UpdateEmojiPackageContentReq
+	29, // 21: emoji_rpc.emoji.ListEmojiCollects:input_type -> emoji_rpc.ListEmojiCollectsReq
+	1,  // 22: emoji_rpc.emoji.GetUserEmojiCollects:output_type -> emoji_rpc.GetUserEmojiCollectsRes
+	3,  // 23: emoji_rpc.emoji.GetUserEmojiPackageCollects:output_type -> emoji_rpc.GetUserEmojiPackageCollectsRes
+	5,  // 24: emoji_rpc.emoji.GetEmojiPackages:output_type -> emoji_rpc.GetEmojiPackagesRes
+	7,  // 25: emoji_rpc.emoji.GetEmojiPackageContents:output_type -> emoji_rpc.GetEmojiPackageContentsRes
+	9,  // 26: emoji_rpc.emoji.GetEmojis:output_type -> emoji_rpc.GetEmojisRes
+	18, // 27: emoji_rpc.emoji.ListEmojis:output_type -> emoji_rpc.ListEmojisRes
+	20, // 28: emoji_rpc.emoji.SaveEmoji:output_type -> emoji_rpc.SaveEmojiRes
+	23, // 29: emoji_rpc.emoji.ListEmojiPackages:output_type -> emoji_rpc.ListEmojiPackagesRes
+	25, // 30: emoji_rpc.emoji.SaveEmojiPackage:output_type -> emoji_rpc.SaveEmojiPackageRes
+	27, // 31: emoji_rpc.emoji.UpdateEmojiPackageContent:output_type -> emoji_rpc.UpdateEmojiPackageContentRes
+	30, // 32: emoji_rpc.emoji.ListEmojiCollects:output_type -> emoji_rpc.ListEmojiCollectsRes
+	22, // [22:33] is the sub-list for method output_type
+	11, // [11:22] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_emoji_rpc_proto_init() }
@@ -922,13 +2334,15 @@ func file_emoji_rpc_proto_init() {
 	if File_emoji_rpc_proto != nil {
 		return
 	}
+	file_emoji_rpc_proto_msgTypes[19].OneofWrappers = []any{}
+	file_emoji_rpc_proto_msgTypes[24].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_emoji_rpc_proto_rawDesc), len(file_emoji_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

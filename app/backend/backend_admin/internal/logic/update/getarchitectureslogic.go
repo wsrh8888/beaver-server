@@ -1,13 +1,11 @@
 package logic
 
 import (
-	"beaver/app/platform/platform_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
 	"context"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -18,59 +16,41 @@ type GetArchitecturesLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取架构列表
 func NewGetArchitecturesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetArchitecturesLogic {
-	return &GetArchitecturesLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetArchitecturesLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetArchitecturesLogic) GetArchitectures(req *types.GetArchitecturesReq) (resp *types.GetArchitecturesRes, err error) {
-	// 构建查询条件
-	query := l.svcCtx.DB.Preload("App") // 预加载 App 信息
-
-	// 添加查询条件
-	if req.AppID != "" {
-		query = query.Where("app_id = ?", req.AppID)
+	rpcReq := &platform_rpc.ListArchitecturesReq{
+		AppId:    req.AppID,
+		Page:     int32(req.Page),
+		PageSize: int32(req.PageSize),
 	}
 	if req.IsActive {
-		query = query.Where("is_active = ?", true)
+		active := true
+		rpcReq.IsActive = &active
 	}
 
-	// 使用 list_query 进行查询
-	list, total, err := list_query.ListQuery(l.svcCtx.DB.Preload("App"), platform_models.UpdateArchitecture{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
-		},
-		Where: query,
-	})
-
+	rpcRes, err := l.svcCtx.PlatformRpc.ListArchitectures(l.ctx, rpcReq)
 	if err != nil {
-		logx.Errorf("Failed to get architectures: %v", err)
+		l.Errorf("获取架构列表失败: %v", err)
 		return nil, err
 	}
 
-	// 构建响应
-	architectureList := make([]types.GetArchitecturesItem, 0, len(list))
-	for _, arch := range list {
-		architectureList = append(architectureList, types.GetArchitecturesItem{
+	list := make([]types.GetArchitecturesItem, 0, len(rpcRes.Architectures))
+	for _, arch := range rpcRes.Architectures {
+		list = append(list, types.GetArchitecturesItem{
 			Id:          uint(arch.Id),
-			AppID:       arch.AppID,
-			AppName:     arch.App.Name, // 添加应用名称
-			PlatformID:  arch.PlatformID,
-			ArchID:      arch.ArchID,
+			AppID:       arch.AppId,
+			AppName:     arch.AppName,
+			PlatformID:  uint(arch.PlatformId),
+			ArchID:      uint(arch.ArchId),
 			Description: arch.Description,
 			IsActive:    arch.IsActive,
-			CreatedAt:   arch.CreatedAt.String(),
-			UpdatedAt:   arch.UpdatedAt.String(),
+			CreatedAt:   arch.CreatedAt,
+			UpdatedAt:   arch.UpdatedAt,
 		})
 	}
 
-	return &types.GetArchitecturesRes{
-		Total:         total,
-		Architectures: architectureList,
-	}, nil
+	return &types.GetArchitecturesRes{Total: rpcRes.Total, Architectures: list}, nil
 }

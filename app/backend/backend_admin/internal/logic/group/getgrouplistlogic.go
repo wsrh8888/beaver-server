@@ -5,9 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/group/group_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
+	"beaver/app/group/group_rpc/types/group_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -18,7 +16,6 @@ type GetGroupListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取群组列表
 func NewGetGroupListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupListLogic {
 	return &GetGroupListLogic{
 		Logger: logx.WithContext(ctx),
@@ -28,68 +25,32 @@ func NewGetGroupListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetG
 }
 
 func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *types.GetGroupListRes, err error) {
-	// 分页参数校验
-	page := req.Page
-	limit := req.Limit
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
-
-	// 构建查询条件
-	whereClause := l.svcCtx.DB.Where("1 = 1")
-
-	// 状态筛选
-	if req.Status != 0 {
-		whereClause = whereClause.Where("status = ?", req.Status)
-	}
-
-	// 类型筛选
-	if req.Type != 0 {
-		whereClause = whereClause.Where("type = ?", req.Type)
-	}
-
-	// 分页查询
-	groups, count, err := list_query.ListQuery(l.svcCtx.DB, group_models.GroupModel{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  page,
-			Limit: limit,
-			Key:   req.Keywords,
-			Sort:  "created_at desc",
-		},
-		Where: whereClause,
-		Likes: []string{"title"},
+	rpcRes, err := l.svcCtx.GroupRpc.ListGroups(l.ctx, &group_rpc.ListGroupsReq{
+		Page:     int32(req.Page),
+		PageSize: int32(req.Limit),
+		Status:   int32(req.Status),
+		Type:     int32(req.Type),
+		Keywords: req.Keywords,
 	})
-
 	if err != nil {
-		logx.Errorf("查询群组列表失败: %v", err)
+		l.Errorf("获取群组列表失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var list []types.GetGroupListItem
-	for _, group := range groups {
+	list := make([]types.GetGroupListItem, 0, len(rpcRes.List))
+	for _, g := range rpcRes.List {
 		list = append(list, types.GetGroupListItem{
-			Id:        group.Id,
-			GroupId:   group.GroupID,
-			Type:      int(group.Type),
-			Title:     group.Title,
-			FileName:  group.Avatar,
-			CreatorId: group.CreatorID,
-			Notice:    group.Notice,
-			Status:    int(group.Status),
-			CreatedAt: group.CreatedAt.String(),
-			UpdatedAt: group.UpdatedAt.String(),
+			Id:        uint(g.Id),
+			GroupId:   g.GroupId,
+			Type:      int(g.Type),
+			Title:     g.Title,
+			FileName:  g.Avatar,
+			CreatorId: g.CreatorId,
+			Notice:    g.Notice,
+			Status:    int(g.Status),
+			CreatedAt: g.CreatedAt,
+			UpdatedAt: g.UpdatedAt,
 		})
 	}
-
-	return &types.GetGroupListRes{
-		List:  list,
-		Total: count,
-	}, nil
+	return &types.GetGroupListRes{List: list, Total: rpcRes.Total}, nil
 }

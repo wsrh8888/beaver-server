@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/moment/moment_models"
+	"beaver/app/moment/moment_rpc/types/moment_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type GetMomentDetailLogic struct {
@@ -18,45 +17,40 @@ type GetMomentDetailLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取动态详情
 func NewGetMomentDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentDetailLogic {
-	return &GetMomentDetailLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetMomentDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (resp *types.GetMomentDetailRes, err error) {
-	var moment moment_models.MomentModel
+	if req.MomentId == "" {
+		return nil, errors.New("动态ID不能为空")
+	}
 
-	err = l.svcCtx.DB.Where("moment_id = ?", req.MomentId).First(&moment).Error
+	rpcRes, err := l.svcCtx.MomentRpc.ListMoments(l.ctx, &moment_rpc.ListMomentsReq{
+		MomentId: req.MomentId,
+		Page:     1,
+		PageSize: 1,
+	})
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("动态不存在: %s", req.MomentId)
-			return nil, errors.New("动态不存在")
-		}
-		logx.Errorf("查询动态详情失败: %v", err)
-		return nil, errors.New("查询动态详情失败")
+		l.Errorf("获取动态详情失败: %v", err)
+		return nil, err
+	}
+	if len(rpcRes.List) == 0 {
+		return nil, errors.New("动态不存在")
 	}
 
-	// 转换文件信息
-	var files []types.GetMomentDetailFileInfo
-	if moment.Files != nil {
-		for _, file := range *moment.Files {
-			files = append(files, types.GetMomentDetailFileInfo{
-				FileName: file.FileKey,
-			})
-		}
+	m := rpcRes.List[0]
+	files := make([]types.GetMomentDetailFileInfo, 0, len(m.Files))
+	for _, f := range m.Files {
+		files = append(files, types.GetMomentDetailFileInfo{FileName: f.FileKey})
 	}
-
 	return &types.GetMomentDetailRes{
-		MomentId:  moment.MomentID,
-		UserId:    moment.UserID,
-		Content:   moment.Content,
+		MomentId:  m.MomentId,
+		UserId:    m.UserId,
+		Content:   m.Content,
 		Files:     files,
-		IsDeleted: moment.IsDeleted,
-		CreatedAt: moment.CreatedAt.String(),
-		UpdatedAt: moment.UpdatedAt.String(),
+		IsDeleted: m.IsDeleted,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
 	}, nil
 }

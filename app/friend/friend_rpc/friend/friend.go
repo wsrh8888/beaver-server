@@ -14,8 +14,11 @@ import (
 )
 
 type (
+	FriendBlockItem                                = friend_rpc.FriendBlockItem
 	FriendDetailItem                               = friend_rpc.FriendDetailItem
+	FriendItem                                     = friend_rpc.FriendItem
 	FriendListById                                 = friend_rpc.FriendListById
+	FriendVerifyItem                               = friend_rpc.FriendVerifyItem
 	FriendVerifyListById                           = friend_rpc.FriendVerifyListById
 	GetFriendDetailReq                             = friend_rpc.GetFriendDetailReq
 	GetFriendDetailRes                             = friend_rpc.GetFriendDetailRes
@@ -35,6 +38,18 @@ type (
 	IsBlockedRes                                   = friend_rpc.IsBlockedRes
 	IsFriendReq                                    = friend_rpc.IsFriendReq
 	IsFriendRes                                    = friend_rpc.IsFriendRes
+	ListFriendBlocksReq                            = friend_rpc.ListFriendBlocksReq
+	ListFriendBlocksRes                            = friend_rpc.ListFriendBlocksRes
+	ListFriendVerifiesReq                          = friend_rpc.ListFriendVerifiesReq
+	ListFriendVerifiesRes                          = friend_rpc.ListFriendVerifiesRes
+	ListFriendsReq                                 = friend_rpc.ListFriendsReq
+	ListFriendsRes                                 = friend_rpc.ListFriendsRes
+	UpdateFriendBlocksReq                          = friend_rpc.UpdateFriendBlocksReq
+	UpdateFriendBlocksRes                          = friend_rpc.UpdateFriendBlocksRes
+	UpdateFriendVerifiesReq                        = friend_rpc.UpdateFriendVerifiesReq
+	UpdateFriendVerifiesRes                        = friend_rpc.UpdateFriendVerifiesRes
+	UpdateFriendsReq                               = friend_rpc.UpdateFriendsReq
+	UpdateFriendsRes                               = friend_rpc.UpdateFriendsRes
 
 	Friend interface {
 		GetFriendIds(ctx context.Context, in *GetFriendIdsRequest, opts ...grpc.CallOption) (*GetFriendIdsResponse, error)
@@ -45,6 +60,13 @@ type (
 		GetFriendDetail(ctx context.Context, in *GetFriendDetailReq, opts ...grpc.CallOption) (*GetFriendDetailRes, error)
 		IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendRes, error)
 		IsBlocked(ctx context.Context, in *IsBlockedReq, opts ...grpc.CallOption) (*IsBlockedRes, error)
+		// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+		ListFriends(ctx context.Context, in *ListFriendsReq, opts ...grpc.CallOption) (*ListFriendsRes, error)
+		UpdateFriends(ctx context.Context, in *UpdateFriendsReq, opts ...grpc.CallOption) (*UpdateFriendsRes, error)
+		ListFriendVerifies(ctx context.Context, in *ListFriendVerifiesReq, opts ...grpc.CallOption) (*ListFriendVerifiesRes, error)
+		UpdateFriendVerifies(ctx context.Context, in *UpdateFriendVerifiesReq, opts ...grpc.CallOption) (*UpdateFriendVerifiesRes, error)
+		ListFriendBlocks(ctx context.Context, in *ListFriendBlocksReq, opts ...grpc.CallOption) (*ListFriendBlocksRes, error)
+		UpdateFriendBlocks(ctx context.Context, in *UpdateFriendBlocksReq, opts ...grpc.CallOption) (*UpdateFriendBlocksRes, error)
 	}
 
 	defaultFriend struct {
@@ -96,4 +118,35 @@ func (m *defaultFriend) IsFriend(ctx context.Context, in *IsFriendReq, opts ...g
 func (m *defaultFriend) IsBlocked(ctx context.Context, in *IsBlockedReq, opts ...grpc.CallOption) (*IsBlockedRes, error) {
 	client := friend_rpc.NewFriendClient(m.cli.Conn())
 	return client.IsBlocked(ctx, in, opts...)
+}
+
+// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+func (m *defaultFriend) ListFriends(ctx context.Context, in *ListFriendsReq, opts ...grpc.CallOption) (*ListFriendsRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.ListFriends(ctx, in, opts...)
+}
+
+func (m *defaultFriend) UpdateFriends(ctx context.Context, in *UpdateFriendsReq, opts ...grpc.CallOption) (*UpdateFriendsRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.UpdateFriends(ctx, in, opts...)
+}
+
+func (m *defaultFriend) ListFriendVerifies(ctx context.Context, in *ListFriendVerifiesReq, opts ...grpc.CallOption) (*ListFriendVerifiesRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.ListFriendVerifies(ctx, in, opts...)
+}
+
+func (m *defaultFriend) UpdateFriendVerifies(ctx context.Context, in *UpdateFriendVerifiesReq, opts ...grpc.CallOption) (*UpdateFriendVerifiesRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.UpdateFriendVerifies(ctx, in, opts...)
+}
+
+func (m *defaultFriend) ListFriendBlocks(ctx context.Context, in *ListFriendBlocksReq, opts ...grpc.CallOption) (*ListFriendBlocksRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.ListFriendBlocks(ctx, in, opts...)
+}
+
+func (m *defaultFriend) UpdateFriendBlocks(ctx context.Context, in *UpdateFriendBlocksReq, opts ...grpc.CallOption) (*UpdateFriendBlocksRes, error) {
+	client := friend_rpc.NewFriendClient(m.cli.Conn())
+	return client.UpdateFriendBlocks(ctx, in, opts...)
 }

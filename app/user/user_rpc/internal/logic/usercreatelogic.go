@@ -157,13 +157,16 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	// 创建用户基础信息（不包含密码）
 	user = user_models.UserModel{
 		UserID:   userID,
-		Email:    in.Email, // 机器人可为空
-		Phone:    in.Phone, // 机器人可为空
+		Email:    in.Email,
+		Phone:    in.Phone,
 		Source:   in.Source,
 		NickName: nickName,
-		Abstract: "",
-		UserType: int8(in.UserType), // 用户类型（1-普通用户，2-推送机器人，3-智能机器人）
+		Abstract: in.Abstract,
+		UserType: int8(in.UserType),
 		Version:  version,
+	}
+	if user.UserType == 0 {
+		user.UserType = user_models.UserTypeNormal
 	}
 
 	err = l.svcCtx.DB.Create(&user).Error

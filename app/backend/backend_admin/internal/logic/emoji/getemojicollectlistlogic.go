@@ -2,13 +2,10 @@ package logic
 
 import (
 	"context"
-	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -19,95 +16,38 @@ type GetEmojiCollectListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取用户收藏的表情图片列表
 func NewGetEmojiCollectListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiCollectListLogic {
-	return &GetEmojiCollectListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetEmojiCollectListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// GetEmojiCollectList 管理后台：用户收藏表情列表。
+// admin 职责：运营筛选条件映射、响应适配；如需展示收藏者昵称，在此通过 UserRpc.UserListInfo 跨域组装。
+// RPC 职责：ListEmojiCollects 查询并 join 表情 title/file_key。
 func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollectListReq) (resp *types.GetEmojiCollectListRes, err error) {
-	// 构建查询条件
-	whereClause := l.svcCtx.DB.Where("1 = 1")
-
-	// 按用户ID筛选
-	if req.UserID != "" {
-		whereClause = whereClause.Where("user_id = ?", req.UserID)
-	}
-
-	// 按表情ID筛选
-	if req.EmojiID != "" {
-		whereClause = whereClause.Where("emoji_id = ?", req.EmojiID)
-	}
-
-	// 时间范围筛选
-	if req.StartTime != "" {
-		if startTime, err := time.Parse("2006-01-02 15:04:05", req.StartTime); err == nil {
-			whereClause = whereClause.Where("created_at >= ?", startTime)
-		}
-	}
-
-	if req.EndTime != "" {
-		if endTime, err := time.Parse("2006-01-02 15:04:05", req.EndTime); err == nil {
-			whereClause = whereClause.Where("created_at <= ?", endTime)
-		}
-	}
-
-	// 分页参数校验
-	page := req.Page
-	pageSize := req.PageSize
-	if page <= 0 {
-		page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if pageSize > 100 {
-		pageSize = 100
-	}
-
-	// 分页查询
-	collects, count, err := list_query.ListQuery(l.svcCtx.DB, emoji_models.EmojiCollectEmoji{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  page,
-			Limit: pageSize,
-			Sort:  "created_at desc",
-		},
-		Where: whereClause,
+	rpcRes, err := l.svcCtx.EmojiRpc.ListEmojiCollects(l.ctx, &emoji_rpc.ListEmojiCollectsReq{
+		Page:      int32(req.Page),
+		PageSize:  int32(req.PageSize),
+		UserId:    req.UserID,
+		EmojiId:   req.EmojiID,
+		StartTime: req.StartTime,
+		EndTime:   req.EndTime,
 	})
-
 	if err != nil {
-		logx.Errorf("查询表情收藏列表失败: %v", err)
+		l.Errorf("获取表情收藏列表失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var list []types.GetEmojiCollectListItem
-	for _, collect := range collects {
-		emojiTitle := ""
-		emojiFileName := ""
-		// 通过 EmojiID 查询 Emoji 信息
-		var emoji emoji_models.Emoji
-		if err := l.svcCtx.DB.Where("emoji_id = ?", collect.EmojiID).First(&emoji).Error; err == nil {
-			emojiTitle = emoji.Title
-			emojiFileName = emoji.FileKey
-		}
-
+	list := make([]types.GetEmojiCollectListItem, 0, len(rpcRes.List))
+	for _, c := range rpcRes.List {
 		list = append(list, types.GetEmojiCollectListItem{
-			CollectId:    collect.EmojiCollectID,
-			UserID:       collect.UserID,
-			EmojiId:      collect.EmojiID,
-			EmojiTitle:   emojiTitle,
-			EmojiFileKey: emojiFileName,
-			CreateTime:   collect.CreatedAt.String(),
-			UpdateTime:   collect.UpdatedAt.String(),
+			CollectId:    c.CollectId,
+			UserID:       c.UserId,
+			EmojiId:      c.EmojiId,
+			EmojiTitle:   c.EmojiTitle,
+			EmojiFileKey: c.EmojiFileKey,
+			CreateTime:   c.CreatedAt,
+			UpdateTime:   c.UpdatedAt,
 		})
 	}
-
-	return &types.GetEmojiCollectListRes{
-		List:  list,
-		Total: count,
-	}, nil
+	return &types.GetEmojiCollectListRes{List: list, Total: rpcRes.Total}, nil
 }

@@ -52,3 +52,14 @@ func (s *UserServer) UserUpdateDisplay(ctx context.Context, in *user_rpc.UserUpd
 	l := logic.NewUserUpdateDisplayLogic(ctx, s.svcCtx)
 	return l.UserUpdateDisplay(in)
 }
+
+// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+func (s *UserServer) ListUsers(ctx context.Context, in *user_rpc.ListUsersReq) (*user_rpc.ListUsersRes, error) {
+	l := logic.NewListUsersLogic(ctx, s.svcCtx)
+	return l.ListUsers(in)
+}
+
+func (s *UserServer) UpdateUsers(ctx context.Context, in *user_rpc.UpdateUsersReq) (*user_rpc.UpdateUsersRes, error) {
+	l := logic.NewUpdateUsersLogic(ctx, s.svcCtx)
+	return l.UpdateUsers(in)
+}

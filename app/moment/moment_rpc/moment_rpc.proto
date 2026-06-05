@@ -1,0 +1,73 @@
+syntax = "proto3";
+package moment_rpc;
+
+option go_package = "./moment_rpc";
+
+message MomentFileItem {
+  string file_key = 1;
+}
+
+message MomentItem {
+  string moment_id = 1;
+  string user_id = 2;
+  string content = 3;
+  repeated MomentFileItem files = 4;
+  bool is_deleted = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message ListMomentsReq {
+  int32 page = 1;
+  int32 page_size = 2;
+  string user_id = 3;
+  string keywords = 4;
+  string moment_id = 5;
+}
+
+message ListMomentsRes {
+  int64 total = 1;
+  repeated MomentItem list = 2;
+}
+
+message UpdateMomentReq {
+  string moment_id = 1;
+  optional bool is_deleted = 2;
+}
+
+message UpdateMomentRes {}
+
+message MomentCommentItem {
+  string comment_id = 1;
+  string moment_id = 2;
+  string user_id = 3;
+  string content = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message ListMomentCommentsReq {
+  int32 page = 1;
+  int32 page_size = 2;
+  string moment_id = 3;
+}
+
+message ListMomentCommentsRes {
+  int64 total = 1;
+  repeated MomentCommentItem list = 2;
+}
+
+message DeleteMomentCommentsReq {
+  repeated string comment_ids = 1;
+}
+
+message DeleteMomentCommentsRes {}
+
+service moment {
+  rpc ListMoments(ListMomentsReq) returns (ListMomentsRes);
+  rpc UpdateMoment(UpdateMomentReq) returns (UpdateMomentRes);
+  rpc ListMomentComments(ListMomentCommentsReq) returns (ListMomentCommentsRes);
+  rpc DeleteMomentComments(DeleteMomentCommentsReq) returns (DeleteMomentCommentsRes);
+}
+
+// goctl rpc protoc moment_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

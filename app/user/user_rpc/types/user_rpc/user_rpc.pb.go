@@ -27,7 +27,8 @@ type UserCreateReq struct {
 	Source        int32                  `protobuf:"varint,2,opt,name=source,proto3" json:"source,omitempty"`                     // 注册来源：1-手机号注册，2-邮箱注册
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`                        // 邮箱（与phone二选一）
 	NickName      string                 `protobuf:"bytes,4,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`  // 昵称（可选）
-	UserType      int32                  `protobuf:"varint,5,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // 用户类型：0-普通用户，1-机器人（可选，默认0）
+	UserType      int32                  `protobuf:"varint,5,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // 用户类型：1-普通用户，2-bot，3-robot（可选，默认1）
+	Abstract      string                 `protobuf:"bytes,6,opt,name=abstract,proto3" json:"abstract,omitempty"`                  // 个性签名（可选）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -95,6 +96,13 @@ func (x *UserCreateReq) GetUserType() int32 {
 		return x.UserType
 	}
 	return 0
+}
+
+func (x *UserCreateReq) GetAbstract() string {
+	if x != nil {
+		return x.Abstract
+	}
+	return ""
 }
 
 type UserCreateRes struct {
@@ -238,6 +246,11 @@ type UserInfo struct {
 	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
 	Abstract      string                 `protobuf:"bytes,6,opt,name=abstract,proto3" json:"abstract,omitempty"`
 	Phone         string                 `protobuf:"bytes,7,opt,name=phone,proto3" json:"phone,omitempty"`
+	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`                        // 状态 1正常 2禁用 3删除
+	Source        int32                  `protobuf:"varint,9,opt,name=source,proto3" json:"source,omitempty"`                        // 注册来源
+	UserType      int32                  `protobuf:"varint,10,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"`   // 用户类型
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 创建时间
+	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // 更新时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -321,6 +334,323 @@ func (x *UserInfo) GetPhone() string {
 	return ""
 }
 
+func (x *UserInfo) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UserInfo) GetSource() int32 {
+	if x != nil {
+		return x.Source
+	}
+	return 0
+}
+
+func (x *UserInfo) GetUserType() int32 {
+	if x != nil {
+		return x.UserType
+	}
+	return 0
+}
+
+func (x *UserInfo) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *UserInfo) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+// ListUsers：用户查询（列表 + user_id 精确查详情）
+type ListUsersReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                         // int32 页码
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // int32 每页条数
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`                        // string 邮箱模糊筛选，可选
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`                     // int32 状态筛选，0 表示全部
+	Source        int32                  `protobuf:"varint,5,opt,name=source,proto3" json:"source,omitempty"`                     // int32 来源筛选，0 表示全部
+	UserId        string                 `protobuf:"bytes,6,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`        // string 用户 ID 精确查，可选
+	Keyword       string                 `protobuf:"bytes,7,opt,name=keyword,proto3" json:"keyword,omitempty"`                    // string 昵称/邮箱/手机号模糊搜索，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersReq) Reset() {
+	*x = ListUsersReq{}
+	mi := &file_user_rpc_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersReq) ProtoMessage() {}
+
+func (x *ListUsersReq) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersReq.ProtoReflect.Descriptor instead.
+func (*ListUsersReq) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ListUsersReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListUsersReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListUsersReq) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *ListUsersReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListUsersReq) GetSource() int32 {
+	if x != nil {
+		return x.Source
+	}
+	return 0
+}
+
+func (x *ListUsersReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListUsersReq) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+type ListUsersRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
+	List          []*UserInfo            `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 用户列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersRes) Reset() {
+	*x = ListUsersRes{}
+	mi := &file_user_rpc_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersRes) ProtoMessage() {}
+
+func (x *ListUsersRes) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersRes.ProtoReflect.Descriptor instead.
+func (*ListUsersRes) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListUsersRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListUsersRes) GetList() []*UserInfo {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// UpdateUsers：用户状态变更（更新字段 / 软删除 / 批量改状态，支持批量）
+type UpdateUsersReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserIds       []string               `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"`                           // array 用户 ID
+	Action        int32                  `protobuf:"varint,2,opt,name=action,proto3" json:"action,omitempty"`                                           // int32 操作：1=更新字段 2=软删除 3=批量改状态
+	PatchNickName *string                `protobuf:"bytes,3,opt,name=patch_nick_name,json=patchNickName,proto3,oneof" json:"patch_nick_name,omitempty"` // string 更新昵称，可选
+	PatchEmail    *string                `protobuf:"bytes,4,opt,name=patch_email,json=patchEmail,proto3,oneof" json:"patch_email,omitempty"`            // string 更新邮箱，可选
+	PatchAvatar   *string                `protobuf:"bytes,5,opt,name=patch_avatar,json=patchAvatar,proto3,oneof" json:"patch_avatar,omitempty"`         // string 更新头像，可选
+	PatchAbstract *string                `protobuf:"bytes,6,opt,name=patch_abstract,json=patchAbstract,proto3,oneof" json:"patch_abstract,omitempty"`   // string 更新个性签名，可选
+	PatchStatus   *int32                 `protobuf:"varint,7,opt,name=patch_status,json=patchStatus,proto3,oneof" json:"patch_status,omitempty"`        // int32 更新状态，action=1 或 action=3 时使用
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateUsersReq) Reset() {
+	*x = UpdateUsersReq{}
+	mi := &file_user_rpc_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateUsersReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUsersReq) ProtoMessage() {}
+
+func (x *UpdateUsersReq) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUsersReq.ProtoReflect.Descriptor instead.
+func (*UpdateUsersReq) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *UpdateUsersReq) GetUserIds() []string {
+	if x != nil {
+		return x.UserIds
+	}
+	return nil
+}
+
+func (x *UpdateUsersReq) GetAction() int32 {
+	if x != nil {
+		return x.Action
+	}
+	return 0
+}
+
+func (x *UpdateUsersReq) GetPatchNickName() string {
+	if x != nil && x.PatchNickName != nil {
+		return *x.PatchNickName
+	}
+	return ""
+}
+
+func (x *UpdateUsersReq) GetPatchEmail() string {
+	if x != nil && x.PatchEmail != nil {
+		return *x.PatchEmail
+	}
+	return ""
+}
+
+func (x *UpdateUsersReq) GetPatchAvatar() string {
+	if x != nil && x.PatchAvatar != nil {
+		return *x.PatchAvatar
+	}
+	return ""
+}
+
+func (x *UpdateUsersReq) GetPatchAbstract() string {
+	if x != nil && x.PatchAbstract != nil {
+		return *x.PatchAbstract
+	}
+	return ""
+}
+
+func (x *UpdateUsersReq) GetPatchStatus() int32 {
+	if x != nil && x.PatchStatus != nil {
+		return *x.PatchStatus
+	}
+	return 0
+}
+
+type UpdateUsersRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AffectedCount int64                  `protobuf:"varint,1,opt,name=affected_count,json=affectedCount,proto3" json:"affected_count,omitempty"` // int64 影响条数
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateUsersRes) Reset() {
+	*x = UpdateUsersRes{}
+	mi := &file_user_rpc_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateUsersRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUsersRes) ProtoMessage() {}
+
+func (x *UpdateUsersRes) ProtoReflect() protoreflect.Message {
+	mi := &file_user_rpc_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUsersRes.ProtoReflect.Descriptor instead.
+func (*UpdateUsersRes) Descriptor() ([]byte, []int) {
+	return file_user_rpc_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateUsersRes) GetAffectedCount() int64 {
+	if x != nil {
+		return x.AffectedCount
+	}
+	return 0
+}
+
 type UserVersionInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -331,7 +661,7 @@ type UserVersionInfo struct {
 
 func (x *UserVersionInfo) Reset() {
 	*x = UserVersionInfo{}
-	mi := &file_user_rpc_proto_msgTypes[5]
+	mi := &file_user_rpc_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -343,7 +673,7 @@ func (x *UserVersionInfo) String() string {
 func (*UserVersionInfo) ProtoMessage() {}
 
 func (x *UserVersionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[5]
+	mi := &file_user_rpc_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -356,7 +686,7 @@ func (x *UserVersionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserVersionInfo.ProtoReflect.Descriptor instead.
 func (*UserVersionInfo) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{5}
+	return file_user_rpc_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UserVersionInfo) GetUserId() string {
@@ -382,7 +712,7 @@ type UserVersionsReq struct {
 
 func (x *UserVersionsReq) Reset() {
 	*x = UserVersionsReq{}
-	mi := &file_user_rpc_proto_msgTypes[6]
+	mi := &file_user_rpc_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -394,7 +724,7 @@ func (x *UserVersionsReq) String() string {
 func (*UserVersionsReq) ProtoMessage() {}
 
 func (x *UserVersionsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[6]
+	mi := &file_user_rpc_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -407,7 +737,7 @@ func (x *UserVersionsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserVersionsReq.ProtoReflect.Descriptor instead.
 func (*UserVersionsReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{6}
+	return file_user_rpc_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UserVersionsReq) GetUserIds() []string {
@@ -426,7 +756,7 @@ type UserVersionsRes struct {
 
 func (x *UserVersionsRes) Reset() {
 	*x = UserVersionsRes{}
-	mi := &file_user_rpc_proto_msgTypes[7]
+	mi := &file_user_rpc_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -438,7 +768,7 @@ func (x *UserVersionsRes) String() string {
 func (*UserVersionsRes) ProtoMessage() {}
 
 func (x *UserVersionsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[7]
+	mi := &file_user_rpc_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +781,7 @@ func (x *UserVersionsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserVersionsRes.ProtoReflect.Descriptor instead.
 func (*UserVersionsRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{7}
+	return file_user_rpc_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UserVersionsRes) GetUserVersions() map[string]int64 {
@@ -471,7 +801,7 @@ type UserListInfoReq struct {
 
 func (x *UserListInfoReq) Reset() {
 	*x = UserListInfoReq{}
-	mi := &file_user_rpc_proto_msgTypes[8]
+	mi := &file_user_rpc_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -483,7 +813,7 @@ func (x *UserListInfoReq) String() string {
 func (*UserListInfoReq) ProtoMessage() {}
 
 func (x *UserListInfoReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[8]
+	mi := &file_user_rpc_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -496,7 +826,7 @@ func (x *UserListInfoReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserListInfoReq.ProtoReflect.Descriptor instead.
 func (*UserListInfoReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{8}
+	return file_user_rpc_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UserListInfoReq) GetUserIdList() []string {
@@ -522,7 +852,7 @@ type UserListInfoRes struct {
 
 func (x *UserListInfoRes) Reset() {
 	*x = UserListInfoRes{}
-	mi := &file_user_rpc_proto_msgTypes[9]
+	mi := &file_user_rpc_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -534,7 +864,7 @@ func (x *UserListInfoRes) String() string {
 func (*UserListInfoRes) ProtoMessage() {}
 
 func (x *UserListInfoRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[9]
+	mi := &file_user_rpc_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -547,7 +877,7 @@ func (x *UserListInfoRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserListInfoRes.ProtoReflect.Descriptor instead.
 func (*UserListInfoRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{9}
+	return file_user_rpc_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UserListInfoRes) GetUserInfo() map[string]*UserInfo {
@@ -567,7 +897,7 @@ type SearchUserReq struct {
 
 func (x *SearchUserReq) Reset() {
 	*x = SearchUserReq{}
-	mi := &file_user_rpc_proto_msgTypes[10]
+	mi := &file_user_rpc_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -579,7 +909,7 @@ func (x *SearchUserReq) String() string {
 func (*SearchUserReq) ProtoMessage() {}
 
 func (x *SearchUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[10]
+	mi := &file_user_rpc_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -592,7 +922,7 @@ func (x *SearchUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchUserReq.ProtoReflect.Descriptor instead.
 func (*SearchUserReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{10}
+	return file_user_rpc_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *SearchUserReq) GetKeyword() string {
@@ -618,7 +948,7 @@ type SearchUserRes struct {
 
 func (x *SearchUserRes) Reset() {
 	*x = SearchUserRes{}
-	mi := &file_user_rpc_proto_msgTypes[11]
+	mi := &file_user_rpc_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -630,7 +960,7 @@ func (x *SearchUserRes) String() string {
 func (*SearchUserRes) ProtoMessage() {}
 
 func (x *SearchUserRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[11]
+	mi := &file_user_rpc_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -643,7 +973,7 @@ func (x *SearchUserRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchUserRes.ProtoReflect.Descriptor instead.
 func (*SearchUserRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{11}
+	return file_user_rpc_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SearchUserRes) GetUserInfo() *UserInfo {
@@ -656,16 +986,16 @@ func (x *SearchUserRes) GetUserInfo() *UserInfo {
 // 更新用户展示信息（昵称/头像，供开放平台 Robot/Bot 等内部服务调用）
 type UserUpdateDisplayReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	NickName      string                 `protobuf:"bytes,2,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`
-	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`       // string IM 用户 ID
+	NickName      string                 `protobuf:"bytes,2,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"` // string 新昵称，空表示不修改
+	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`                     // string 新头像 URL，空表示不修改
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UserUpdateDisplayReq) Reset() {
 	*x = UserUpdateDisplayReq{}
-	mi := &file_user_rpc_proto_msgTypes[12]
+	mi := &file_user_rpc_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -677,7 +1007,7 @@ func (x *UserUpdateDisplayReq) String() string {
 func (*UserUpdateDisplayReq) ProtoMessage() {}
 
 func (x *UserUpdateDisplayReq) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[12]
+	mi := &file_user_rpc_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -690,7 +1020,7 @@ func (x *UserUpdateDisplayReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserUpdateDisplayReq.ProtoReflect.Descriptor instead.
 func (*UserUpdateDisplayReq) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{12}
+	return file_user_rpc_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *UserUpdateDisplayReq) GetUserId() string {
@@ -716,14 +1046,14 @@ func (x *UserUpdateDisplayReq) GetAvatar() string {
 
 type UserUpdateDisplayRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Version       int64                  `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	Version       int64                  `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"` // int64 更新后的用户资料版本号
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UserUpdateDisplayRes) Reset() {
 	*x = UserUpdateDisplayRes{}
-	mi := &file_user_rpc_proto_msgTypes[13]
+	mi := &file_user_rpc_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -735,7 +1065,7 @@ func (x *UserUpdateDisplayRes) String() string {
 func (*UserUpdateDisplayRes) ProtoMessage() {}
 
 func (x *UserUpdateDisplayRes) ProtoReflect() protoreflect.Message {
-	mi := &file_user_rpc_proto_msgTypes[13]
+	mi := &file_user_rpc_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -748,7 +1078,7 @@ func (x *UserUpdateDisplayRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserUpdateDisplayRes.ProtoReflect.Descriptor instead.
 func (*UserUpdateDisplayRes) Descriptor() ([]byte, []int) {
-	return file_user_rpc_proto_rawDescGZIP(), []int{13}
+	return file_user_rpc_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *UserUpdateDisplayRes) GetVersion() int64 {
@@ -762,19 +1092,20 @@ var File_user_rpc_proto protoreflect.FileDescriptor
 
 const file_user_rpc_proto_rawDesc = "" +
 	"\n" +
-	"\x0euser_rpc.proto\x12\buser_rpc\"\x8d\x01\n" +
+	"\x0euser_rpc.proto\x12\buser_rpc\"\xa9\x01\n" +
 	"\rUserCreateReq\x12\x14\n" +
 	"\x05phone\x18\x01 \x01(\tR\x05phone\x12\x16\n" +
 	"\x06source\x18\x02 \x01(\x05R\x06source\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1b\n" +
 	"\tnick_name\x18\x04 \x01(\tR\bnickName\x12\x1b\n" +
-	"\tuser_type\x18\x05 \x01(\x05R\buserType\"'\n" +
+	"\tuser_type\x18\x05 \x01(\x05R\buserType\x12\x1a\n" +
+	"\babstract\x18\x06 \x01(\tR\babstract\"'\n" +
 	"\rUserCreateRes\x12\x16\n" +
 	"\x06userID\x18\x01 \x01(\tR\x06userID\"%\n" +
 	"\vUserInfoReq\x12\x16\n" +
 	"\x06userID\x18\x01 \x01(\tR\x06userID\">\n" +
 	"\vUserInfoRes\x12/\n" +
-	"\tuser_info\x18\x01 \x01(\v2\x12.user_rpc.UserInfoR\buserInfo\"\xba\x01\n" +
+	"\tuser_info\x18\x01 \x01(\v2\x12.user_rpc.UserInfoR\buserInfo\"\xc5\x02\n" +
 	"\bUserInfo\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tnick_name\x18\x02 \x01(\tR\bnickName\x12\x16\n" +
@@ -782,7 +1113,42 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\aversion\x18\x04 \x01(\x03R\aversion\x12\x14\n" +
 	"\x05email\x18\x05 \x01(\tR\x05email\x12\x1a\n" +
 	"\babstract\x18\x06 \x01(\tR\babstract\x12\x14\n" +
-	"\x05phone\x18\a \x01(\tR\x05phone\"D\n" +
+	"\x05phone\x18\a \x01(\tR\x05phone\x12\x16\n" +
+	"\x06status\x18\b \x01(\x05R\x06status\x12\x16\n" +
+	"\x06source\x18\t \x01(\x05R\x06source\x12\x1b\n" +
+	"\tuser_type\x18\n" +
+	" \x01(\x05R\buserType\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\f \x01(\tR\tupdatedAt\"\xb8\x01\n" +
+	"\fListUsersReq\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\x12\x16\n" +
+	"\x06source\x18\x05 \x01(\x05R\x06source\x12\x17\n" +
+	"\auser_id\x18\x06 \x01(\tR\x06userId\x12\x18\n" +
+	"\akeyword\x18\a \x01(\tR\akeyword\"L\n" +
+	"\fListUsersRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12&\n" +
+	"\x04list\x18\x02 \x03(\v2\x12.user_rpc.UserInfoR\x04list\"\xeb\x02\n" +
+	"\x0eUpdateUsersReq\x12\x19\n" +
+	"\buser_ids\x18\x01 \x03(\tR\auserIds\x12\x16\n" +
+	"\x06action\x18\x02 \x01(\x05R\x06action\x12+\n" +
+	"\x0fpatch_nick_name\x18\x03 \x01(\tH\x00R\rpatchNickName\x88\x01\x01\x12$\n" +
+	"\vpatch_email\x18\x04 \x01(\tH\x01R\n" +
+	"patchEmail\x88\x01\x01\x12&\n" +
+	"\fpatch_avatar\x18\x05 \x01(\tH\x02R\vpatchAvatar\x88\x01\x01\x12*\n" +
+	"\x0epatch_abstract\x18\x06 \x01(\tH\x03R\rpatchAbstract\x88\x01\x01\x12&\n" +
+	"\fpatch_status\x18\a \x01(\x05H\x04R\vpatchStatus\x88\x01\x01B\x12\n" +
+	"\x10_patch_nick_nameB\x0e\n" +
+	"\f_patch_emailB\x0f\n" +
+	"\r_patch_avatarB\x11\n" +
+	"\x0f_patch_abstractB\x0f\n" +
+	"\r_patch_status\"7\n" +
+	"\x0eUpdateUsersRes\x12%\n" +
+	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount\"D\n" +
 	"\x0fUserVersionInfo\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\",\n" +
@@ -812,7 +1178,7 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\tnick_name\x18\x02 \x01(\tR\bnickName\x12\x16\n" +
 	"\x06avatar\x18\x03 \x01(\tR\x06avatar\"0\n" +
 	"\x14UserUpdateDisplayRes\x12\x18\n" +
-	"\aversion\x18\x01 \x01(\x03R\aversion2\xa1\x03\n" +
+	"\aversion\x18\x01 \x01(\x03R\aversion2\xa1\x04\n" +
 	"\x04user\x12>\n" +
 	"\n" +
 	"UserCreate\x12\x17.user_rpc.UserCreateReq\x1a\x17.user_rpc.UserCreateRes\x128\n" +
@@ -821,7 +1187,9 @@ const file_user_rpc_proto_rawDesc = "" +
 	"SearchUser\x12\x17.user_rpc.SearchUserReq\x1a\x17.user_rpc.SearchUserRes\x12D\n" +
 	"\fUserListInfo\x12\x19.user_rpc.UserListInfoReq\x1a\x19.user_rpc.UserListInfoRes\x12D\n" +
 	"\fUserVersions\x12\x19.user_rpc.UserVersionsReq\x1a\x19.user_rpc.UserVersionsRes\x12S\n" +
-	"\x11UserUpdateDisplay\x12\x1e.user_rpc.UserUpdateDisplayReq\x1a\x1e.user_rpc.UserUpdateDisplayResB\fZ\n" +
+	"\x11UserUpdateDisplay\x12\x1e.user_rpc.UserUpdateDisplayReq\x1a\x1e.user_rpc.UserUpdateDisplayRes\x12;\n" +
+	"\tListUsers\x12\x16.user_rpc.ListUsersReq\x1a\x16.user_rpc.ListUsersRes\x12A\n" +
+	"\vUpdateUsers\x12\x18.user_rpc.UpdateUsersReq\x1a\x18.user_rpc.UpdateUsersResB\fZ\n" +
 	"./user_rpcb\x06proto3"
 
 var (
@@ -836,48 +1204,57 @@ func file_user_rpc_proto_rawDescGZIP() []byte {
 	return file_user_rpc_proto_rawDescData
 }
 
-var file_user_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_user_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_user_rpc_proto_goTypes = []any{
 	(*UserCreateReq)(nil),        // 0: user_rpc.UserCreateReq
 	(*UserCreateRes)(nil),        // 1: user_rpc.UserCreateRes
 	(*UserInfoReq)(nil),          // 2: user_rpc.UserInfoReq
 	(*UserInfoRes)(nil),          // 3: user_rpc.UserInfoRes
 	(*UserInfo)(nil),             // 4: user_rpc.UserInfo
-	(*UserVersionInfo)(nil),      // 5: user_rpc.UserVersionInfo
-	(*UserVersionsReq)(nil),      // 6: user_rpc.UserVersionsReq
-	(*UserVersionsRes)(nil),      // 7: user_rpc.UserVersionsRes
-	(*UserListInfoReq)(nil),      // 8: user_rpc.UserListInfoReq
-	(*UserListInfoRes)(nil),      // 9: user_rpc.UserListInfoRes
-	(*SearchUserReq)(nil),        // 10: user_rpc.SearchUserReq
-	(*SearchUserRes)(nil),        // 11: user_rpc.SearchUserRes
-	(*UserUpdateDisplayReq)(nil), // 12: user_rpc.UserUpdateDisplayReq
-	(*UserUpdateDisplayRes)(nil), // 13: user_rpc.UserUpdateDisplayRes
-	nil,                          // 14: user_rpc.UserVersionsRes.UserVersionsEntry
-	nil,                          // 15: user_rpc.UserListInfoRes.UserInfoEntry
+	(*ListUsersReq)(nil),         // 5: user_rpc.ListUsersReq
+	(*ListUsersRes)(nil),         // 6: user_rpc.ListUsersRes
+	(*UpdateUsersReq)(nil),       // 7: user_rpc.UpdateUsersReq
+	(*UpdateUsersRes)(nil),       // 8: user_rpc.UpdateUsersRes
+	(*UserVersionInfo)(nil),      // 9: user_rpc.UserVersionInfo
+	(*UserVersionsReq)(nil),      // 10: user_rpc.UserVersionsReq
+	(*UserVersionsRes)(nil),      // 11: user_rpc.UserVersionsRes
+	(*UserListInfoReq)(nil),      // 12: user_rpc.UserListInfoReq
+	(*UserListInfoRes)(nil),      // 13: user_rpc.UserListInfoRes
+	(*SearchUserReq)(nil),        // 14: user_rpc.SearchUserReq
+	(*SearchUserRes)(nil),        // 15: user_rpc.SearchUserRes
+	(*UserUpdateDisplayReq)(nil), // 16: user_rpc.UserUpdateDisplayReq
+	(*UserUpdateDisplayRes)(nil), // 17: user_rpc.UserUpdateDisplayRes
+	nil,                          // 18: user_rpc.UserVersionsRes.UserVersionsEntry
+	nil,                          // 19: user_rpc.UserListInfoRes.UserInfoEntry
 }
 var file_user_rpc_proto_depIdxs = []int32{
 	4,  // 0: user_rpc.UserInfoRes.user_info:type_name -> user_rpc.UserInfo
-	14, // 1: user_rpc.UserVersionsRes.user_versions:type_name -> user_rpc.UserVersionsRes.UserVersionsEntry
-	15, // 2: user_rpc.UserListInfoRes.user_info:type_name -> user_rpc.UserListInfoRes.UserInfoEntry
-	4,  // 3: user_rpc.SearchUserRes.user_info:type_name -> user_rpc.UserInfo
-	4,  // 4: user_rpc.UserListInfoRes.UserInfoEntry.value:type_name -> user_rpc.UserInfo
-	0,  // 5: user_rpc.user.UserCreate:input_type -> user_rpc.UserCreateReq
-	2,  // 6: user_rpc.user.UserInfo:input_type -> user_rpc.UserInfoReq
-	10, // 7: user_rpc.user.SearchUser:input_type -> user_rpc.SearchUserReq
-	8,  // 8: user_rpc.user.UserListInfo:input_type -> user_rpc.UserListInfoReq
-	6,  // 9: user_rpc.user.UserVersions:input_type -> user_rpc.UserVersionsReq
-	12, // 10: user_rpc.user.UserUpdateDisplay:input_type -> user_rpc.UserUpdateDisplayReq
-	1,  // 11: user_rpc.user.UserCreate:output_type -> user_rpc.UserCreateRes
-	3,  // 12: user_rpc.user.UserInfo:output_type -> user_rpc.UserInfoRes
-	11, // 13: user_rpc.user.SearchUser:output_type -> user_rpc.SearchUserRes
-	9,  // 14: user_rpc.user.UserListInfo:output_type -> user_rpc.UserListInfoRes
-	7,  // 15: user_rpc.user.UserVersions:output_type -> user_rpc.UserVersionsRes
-	13, // 16: user_rpc.user.UserUpdateDisplay:output_type -> user_rpc.UserUpdateDisplayRes
-	11, // [11:17] is the sub-list for method output_type
-	5,  // [5:11] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	4,  // 1: user_rpc.ListUsersRes.list:type_name -> user_rpc.UserInfo
+	18, // 2: user_rpc.UserVersionsRes.user_versions:type_name -> user_rpc.UserVersionsRes.UserVersionsEntry
+	19, // 3: user_rpc.UserListInfoRes.user_info:type_name -> user_rpc.UserListInfoRes.UserInfoEntry
+	4,  // 4: user_rpc.SearchUserRes.user_info:type_name -> user_rpc.UserInfo
+	4,  // 5: user_rpc.UserListInfoRes.UserInfoEntry.value:type_name -> user_rpc.UserInfo
+	0,  // 6: user_rpc.user.UserCreate:input_type -> user_rpc.UserCreateReq
+	2,  // 7: user_rpc.user.UserInfo:input_type -> user_rpc.UserInfoReq
+	14, // 8: user_rpc.user.SearchUser:input_type -> user_rpc.SearchUserReq
+	12, // 9: user_rpc.user.UserListInfo:input_type -> user_rpc.UserListInfoReq
+	10, // 10: user_rpc.user.UserVersions:input_type -> user_rpc.UserVersionsReq
+	16, // 11: user_rpc.user.UserUpdateDisplay:input_type -> user_rpc.UserUpdateDisplayReq
+	5,  // 12: user_rpc.user.ListUsers:input_type -> user_rpc.ListUsersReq
+	7,  // 13: user_rpc.user.UpdateUsers:input_type -> user_rpc.UpdateUsersReq
+	1,  // 14: user_rpc.user.UserCreate:output_type -> user_rpc.UserCreateRes
+	3,  // 15: user_rpc.user.UserInfo:output_type -> user_rpc.UserInfoRes
+	15, // 16: user_rpc.user.SearchUser:output_type -> user_rpc.SearchUserRes
+	13, // 17: user_rpc.user.UserListInfo:output_type -> user_rpc.UserListInfoRes
+	11, // 18: user_rpc.user.UserVersions:output_type -> user_rpc.UserVersionsRes
+	17, // 19: user_rpc.user.UserUpdateDisplay:output_type -> user_rpc.UserUpdateDisplayRes
+	6,  // 20: user_rpc.user.ListUsers:output_type -> user_rpc.ListUsersRes
+	8,  // 21: user_rpc.user.UpdateUsers:output_type -> user_rpc.UpdateUsersRes
+	14, // [14:22] is the sub-list for method output_type
+	6,  // [6:14] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_user_rpc_proto_init() }
@@ -885,13 +1262,14 @@ func file_user_rpc_proto_init() {
 	if File_user_rpc_proto != nil {
 		return
 	}
+	file_user_rpc_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_rpc_proto_rawDesc), len(file_user_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

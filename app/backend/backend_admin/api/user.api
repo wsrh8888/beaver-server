@@ -5,7 +5,8 @@ type (
 	GetUserListReq {
 		Page     int    `form:"page,default=1"`
 		PageSize int    `form:"pageSize,default=10"`
-		Email    string `form:"email, optional"`
+		Email    string `form:"email,optional"`
+		Keyword  string `form:"keyword,optional"` // 昵称/邮箱/手机号模糊搜索
 		Status   int    `form:"status,optional"`
 		Source   int    `form:"source,optional"`
 	}

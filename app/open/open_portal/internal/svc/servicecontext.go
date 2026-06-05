@@ -29,14 +29,15 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	db := coregorm.InitGorm(c.Mysql.DataSource)
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
+	openRpc := open.NewOpen(zrpc.MustNewClient(c.OpenRpc, rpcOpt))
 	return &ServiceContext{
 		Config:                     c,
 		DB:                         db,
 		UserRpc:                    user.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
 		AuthRpc:                    auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, rpcOpt)),
 		GroupRpc:                   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, rpcOpt)),
-		OpenRpc:                    open.NewOpen(zrpc.MustNewClient(c.OpenRpc, rpcOpt)),
+		OpenRpc:                    openRpc,
 		DeveloperAuthMiddleware:    middleware.NewDeveloperAuthMiddleware(c.Auth.AccessSecret).Handle,
-		RequireDeveloperMiddleware: middleware.NewRequireDeveloperMiddleware(db).Handle,
+		RequireDeveloperMiddleware: middleware.NewRequireDeveloperMiddleware(openRpc).Handle,
 	}
 }

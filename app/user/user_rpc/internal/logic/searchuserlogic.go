@@ -45,14 +45,5 @@ func (l *SearchUserLogic) SearchUser(in *user_rpc.SearchUserReq) (*user_rpc.Sear
 		return nil, errors.New("用户不存在")
 	}
 
-	return &user_rpc.SearchUserRes{
-		UserInfo: &user_rpc.UserInfo{
-			UserId:   user.UserID,
-			NickName: user.NickName,
-			Avatar:   user.Avatar,
-			Version:  user.Version,
-			Email:    user.Email,
-			Phone:    user.Phone,
-		},
-	}, nil
+	return &user_rpc.SearchUserRes{UserInfo: toUserInfo(user)}, nil
 }

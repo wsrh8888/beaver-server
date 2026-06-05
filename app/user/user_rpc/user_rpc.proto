@@ -9,7 +9,8 @@ message UserCreateReq {
   int32 source = 2; // 注册来源：1-手机号注册，2-邮箱注册
   string email = 3; // 邮箱（与phone二选一）
   string nick_name = 4; // 昵称（可选）
-  int32 user_type = 5; // 用户类型：0-普通用户，1-机器人（可选，默认0）
+  int32 user_type = 5; // 用户类型：1-普通用户，2-bot，3-robot（可选，默认1）
+  string abstract = 6; // 个性签名（可选）
 }
 
 message UserCreateRes {
@@ -33,6 +34,42 @@ message UserInfo {
   string email = 5;
   string abstract = 6;
   string phone = 7;
+  int32 status = 8; // 状态 1正常 2禁用 3删除
+  int32 source = 9; // 注册来源
+  int32 user_type = 10; // 用户类型
+  string created_at = 11; // 创建时间
+  string updated_at = 12; // 更新时间
+}
+
+// ListUsers：用户查询（列表 + user_id 精确查详情）
+message ListUsersReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string email = 3; // string 邮箱模糊筛选，可选
+  int32 status = 4; // int32 状态筛选，0 表示全部
+  int32 source = 5; // int32 来源筛选，0 表示全部
+  string user_id = 6; // string 用户 ID 精确查，可选
+  string keyword = 7; // string 昵称/邮箱/手机号模糊搜索，可选
+}
+
+message ListUsersRes {
+  int64 total = 1; // int64 总数
+  repeated UserInfo list = 2; // array 用户列表
+}
+
+// UpdateUsers：用户状态变更（更新字段 / 软删除 / 批量改状态，支持批量）
+message UpdateUsersReq {
+  repeated string user_ids = 1; // array 用户 ID
+  int32 action = 2; // int32 操作：1=更新字段 2=软删除 3=批量改状态
+  optional string patch_nick_name = 3; // string 更新昵称，可选
+  optional string patch_email = 4; // string 更新邮箱，可选
+  optional string patch_avatar = 5; // string 更新头像，可选
+  optional string patch_abstract = 6; // string 更新个性签名，可选
+  optional int32 patch_status = 7; // int32 更新状态，action=1 或 action=3 时使用
+}
+
+message UpdateUsersRes {
+  int64 affected_count = 1; // int64 影响条数
 }
 
 message UserVersionInfo {
@@ -84,6 +121,9 @@ service user {
   rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes);
   rpc UserVersions(UserVersionsReq) returns(UserVersionsRes);
   rpc UserUpdateDisplay(UserUpdateDisplayReq) returns(UserUpdateDisplayRes);
+  // 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+  rpc ListUsers(ListUsersReq) returns(ListUsersRes); // 用户查询：列表、详情
+  rpc UpdateUsers(UpdateUsersReq) returns(UpdateUsersRes); // 用户变更：更新、软删、批量改状态
 }
 
 // goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

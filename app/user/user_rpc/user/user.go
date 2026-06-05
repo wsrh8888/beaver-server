@@ -14,8 +14,12 @@ import (
 )
 
 type (
+	ListUsersReq         = user_rpc.ListUsersReq
+	ListUsersRes         = user_rpc.ListUsersRes
 	SearchUserReq        = user_rpc.SearchUserReq
 	SearchUserRes        = user_rpc.SearchUserRes
+	UpdateUsersReq       = user_rpc.UpdateUsersReq
+	UpdateUsersRes       = user_rpc.UpdateUsersRes
 	UserCreateReq        = user_rpc.UserCreateReq
 	UserCreateRes        = user_rpc.UserCreateRes
 	UserInfo             = user_rpc.UserInfo
@@ -36,6 +40,9 @@ type (
 		UserListInfo(ctx context.Context, in *UserListInfoReq, opts ...grpc.CallOption) (*UserListInfoRes, error)
 		UserVersions(ctx context.Context, in *UserVersionsReq, opts ...grpc.CallOption) (*UserVersionsRes, error)
 		UserUpdateDisplay(ctx context.Context, in *UserUpdateDisplayReq, opts ...grpc.CallOption) (*UserUpdateDisplayRes, error)
+		// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+		ListUsers(ctx context.Context, in *ListUsersReq, opts ...grpc.CallOption) (*ListUsersRes, error)
+		UpdateUsers(ctx context.Context, in *UpdateUsersReq, opts ...grpc.CallOption) (*UpdateUsersRes, error)
 	}
 
 	defaultUser struct {
@@ -77,4 +84,15 @@ func (m *defaultUser) UserVersions(ctx context.Context, in *UserVersionsReq, opt
 func (m *defaultUser) UserUpdateDisplay(ctx context.Context, in *UserUpdateDisplayReq, opts ...grpc.CallOption) (*UserUpdateDisplayRes, error) {
 	client := user_rpc.NewUserClient(m.cli.Conn())
 	return client.UserUpdateDisplay(ctx, in, opts...)
+}
+
+// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+func (m *defaultUser) ListUsers(ctx context.Context, in *ListUsersReq, opts ...grpc.CallOption) (*ListUsersRes, error) {
+	client := user_rpc.NewUserClient(m.cli.Conn())
+	return client.ListUsers(ctx, in, opts...)
+}
+
+func (m *defaultUser) UpdateUsers(ctx context.Context, in *UpdateUsersReq, opts ...grpc.CallOption) (*UpdateUsersRes, error) {
+	client := user_rpc.NewUserClient(m.cli.Conn())
+	return client.UpdateUsers(ctx, in, opts...)
 }

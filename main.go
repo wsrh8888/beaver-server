@@ -187,6 +187,7 @@ func main() {
 					&platform_models.TrackEvent{},
 					&platform_models.TrackLogger{},
 					&platform_models.FeedbackModel{},
+					&platform_models.ContentReportModel{},
 					&platform_models.UpdateApp{},
 					&platform_models.UpdateArchitecture{},
 					&platform_models.UpdateVersion{},
@@ -205,6 +206,9 @@ func main() {
 					&backend_models.AdminSystemAuthorityMenu{},
 					&backend_models.AdminSystemAuthorityUser{},
 					&backend_models.AdminSystemMenu{},
+					&backend_models.AdminModerationCase{},
+					&backend_models.AdminOperationLog{},
+					&backend_models.AdminSensitiveWord{},
 				)
 			},
 		},

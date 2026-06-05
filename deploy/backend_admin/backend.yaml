@@ -14,8 +14,8 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /admin/auth/login
-  - /admin/auth/authentication
+  - /admin/auth_public/v1/login
+  - /admin/auth_public/v1/authentication
 BlackList: []
 File:
   WhiteList:
@@ -57,9 +57,49 @@ UserRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+AuthRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: authrpc.rpc
 FileRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: filerpc.rpc
+PlatformRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: platformrpc.rpc
+OpenRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: openrpc.rpc
+FriendRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: friendrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: grouprpc.rpc
+ChatRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: chatrpc.rpc
+MomentRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: momentrpc.rpc
+EmojiRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: emojirpc.rpc
 

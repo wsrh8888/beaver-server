@@ -5,9 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/user/user_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -18,77 +16,34 @@ type GetUserListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取用户列表
 func NewGetUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserListLogic {
-	return &GetUserListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetUserListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// GetUserList 管理后台：用户列表查询。
+// admin 职责：运营筛选条件映射、响应字段适配前端协议。
+// RPC 职责：ListUsers 领域查询，不与本 HTTP 接口 1:1。
 func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.GetUserListRes, err error) {
-	// 设置默认分页参数
-	if req.Page <= 0 {
-		req.Page = 1
-	}
-	if req.PageSize <= 0 {
-		req.PageSize = 10
-	}
-
-	// 构建查询条件
-	whereClause := l.svcCtx.DB.Where("1 = 1")
-
-	// 状态筛选
-	if req.Status != 0 {
-		whereClause = whereClause.Where("status = ?", req.Status)
-	}
-
-	// 来源筛选
-	if req.Source != 0 {
-		whereClause = whereClause.Where("source = ?", req.Source)
-	}
-
-	// 邮箱筛选
-	if req.Email != "" {
-		whereClause = whereClause.Where("email LIKE ?", "%"+req.Email+"%")
-	}
-
-	// 分页查询
-	users, count, err := list_query.ListQuery(l.svcCtx.DB, user_models.UserModel{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
-			Sort:  "created_at desc",
-		},
-		Where: whereClause,
+	rpcRes, err := l.svcCtx.UserRpc.ListUsers(l.ctx, &user_rpc.ListUsersReq{
+		Page:     int32(req.Page),
+		PageSize: int32(req.PageSize),
+		Email:    req.Email,
+		Keyword:  req.Keyword,
+		Status:   int32(req.Status),
+		Source:   int32(req.Source),
 	})
-
 	if err != nil {
-		l.Logger.Errorf("查询用户列表失败: %v", err)
+		l.Errorf("获取用户列表失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var list []types.UserInfo
-	for _, user := range users {
+	list := make([]types.UserInfo, 0, len(rpcRes.List))
+	for _, u := range rpcRes.List {
 		list = append(list, types.UserInfo{
-			Id:          user.UserID,
-			NickName:    user.NickName,
-			Email:       user.Email,
-			Abstract:    user.Abstract,
-			FileName:    user.Avatar,
-			Status:      int(user.Status),
-			Source:      int(user.Source),
-			LastLoginIP: "", // UserModel 没有 LastLoginIP 字段
-			CreateTime:  user.CreatedAt.String(),
-			UpdateTime:  user.UpdatedAt.String(),
+			Id: u.UserId, NickName: u.NickName, Email: u.Email, Abstract: u.Abstract,
+			FileName: u.Avatar, Status: int(u.Status), Source: int(u.Source),
+			CreateTime: u.CreatedAt, UpdateTime: u.UpdatedAt,
 		})
 	}
-
-	l.Logger.Infof("获取用户列表成功: page=%d, pageSize=%d, total=%d", req.Page, req.PageSize, count)
-	return &types.GetUserListRes{
-		List:  list,
-		Total: count,
-	}, nil
+	return &types.GetUserListRes{List: list, Total: rpcRes.Total}, nil
 }

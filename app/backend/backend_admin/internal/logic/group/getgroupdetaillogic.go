@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type GetGroupDetailLogic struct {
@@ -18,38 +17,38 @@ type GetGroupDetailLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取群组详情
 func NewGetGroupDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupDetailLogic {
-	return &GetGroupDetailLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetGroupDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetGroupDetailLogic) GetGroupDetail(req *types.GetGroupDetailReq) (resp *types.GetGroupDetailRes, err error) {
-	var group group_models.GroupModel
-
-	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&group).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("群组不存在: %d", req.Id)
-			return nil, errors.New("群组不存在")
-		}
-		logx.Errorf("查询群组详情失败: %v", err)
-		return nil, errors.New("查询群组详情失败")
+	if req.Id == 0 {
+		return nil, errors.New("群组ID不能为空")
 	}
 
+	rpcRes, err := l.svcCtx.GroupRpc.ListGroups(l.ctx, &group_rpc.ListGroupsReq{
+		Id:       uint64(req.Id),
+		Page:     1,
+		PageSize: 1,
+	})
+	if err != nil {
+		l.Errorf("获取群组详情失败: %v", err)
+		return nil, err
+	}
+	if len(rpcRes.List) == 0 {
+		return nil, errors.New("群组不存在")
+	}
+	g := rpcRes.List[0]
 	return &types.GetGroupDetailRes{
-		Id:        group.Id,
-		GroupId:   group.GroupID,
-		Type:      int(group.Type),
-		Title:     group.Title,
-		FileName:  group.Avatar,
-		CreatorId: group.CreatorID,
-		Notice:    group.Notice,
-		Status:    int(group.Status),
-		CreatedAt: group.CreatedAt.String(),
-		UpdatedAt: group.UpdatedAt.String(),
+		Id:        uint(g.Id),
+		GroupId:   g.GroupId,
+		Type:      int(g.Type),
+		Title:     g.Title,
+		FileName:  g.Avatar,
+		CreatorId: g.CreatorId,
+		Notice:    g.Notice,
+		Status:    int(g.Status),
+		CreatedAt: g.CreatedAt,
+		UpdatedAt: g.UpdatedAt,
 	}, nil
 }

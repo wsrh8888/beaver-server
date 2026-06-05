@@ -341,6 +341,76 @@ message GetChatMessageRes {
   Msg msg = 2; // object 消息内容（ctype 转 Msg），未找到时为空
 }
 
+// ==================== 消息管理（通用）====================
+
+message ChatMessageItem {
+  string message_id = 1; // string 消息 ID
+  string conversation_id = 2; // string 会话 ID
+  int32 conversation_type = 3; // int32 会话类型
+  string send_user_id = 4; // string 发送者 ID
+  int32 msg_type = 5; // int32 消息类型
+  string msg_preview = 6; // string 消息预览
+  string msg_content = 7; // string 消息 JSON 内容，列表可为空
+  int32 status = 8; // int32 消息状态
+  string created_at = 9; // string 创建时间 RFC3339
+  string updated_at = 10; // string 更新时间 RFC3339
+}
+
+message ListChatMessagesReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string conversation_id = 3; // string 会话 ID 筛选
+  string send_user_id = 4; // string 发送者 ID 筛选
+  int32 msg_type = 5; // int32 消息类型筛选，0 表示全部
+  string start_time = 6; // string 开始时间
+  string end_time = 7; // string 结束时间
+  string message_id = 8; // string 消息 ID，可选
+  bool with_content = 9; // bool 是否返回 msg_content
+  int32 status = 10; // int32 状态筛选，0 表示全部
+  int32 order = 11; // int32 排序：1=时间正序（时间线） 2=时间倒序（默认）
+}
+
+// ==================== 会话查询（通用，admin 编排）====================
+
+message ConversationDetailItem {
+  string conversation_id = 1; // string 会话 ID
+  int32 type = 2; // int32 会话类型 1私聊 2群聊
+  string last_message = 3; // string 最后一条消息预览
+  string last_message_time = 4; // string 最后消息时间 RFC3339
+  int64 message_count = 5; // int64 消息总数
+  repeated string participant_ids = 6; // array 参与用户 ID
+}
+
+message ListConversationsReq {
+  string user_id = 1; // string 参与用户 ID
+  int32 conversation_type = 2; // int32 类型筛选，0 全部 1 私聊 2 群聊
+  int32 page = 3; // int32 页码
+  int32 page_size = 4; // int32 每页条数
+}
+
+message ListConversationsRes {
+  int64 total = 1; // int64 总数
+  repeated ConversationDetailItem list = 2; // array 会话列表
+}
+
+message ListChatMessagesRes {
+  int64 total = 1; // int64 总数
+  repeated ChatMessageItem list = 2; // array 消息列表
+}
+
+message UpdateChatMessagesReq {
+  repeated string message_ids = 1; // array 消息 ID，可选
+  string conversation_id = 2; // string 会话 ID，可选
+  int32 msg_type = 3; // int32 消息类型，0 表示不限
+  string start_time = 4; // string 开始时间，可选
+  string end_time = 5; // string 结束时间，可选
+  int32 status = 6; // int32 目标状态
+}
+
+message UpdateChatMessagesRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
@@ -356,6 +426,10 @@ service Chat {
     rpc DissolveConversation(DissolveConversationReq) returns (DissolveConversationRes); //解散会话
     rpc SendNotificationMessage(SendNotificationMessageReq) returns (SendNotificationMessageRes); //发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
     rpc GetChatMessage(GetChatMessageReq) returns (GetChatMessageRes); //按消息ID查询消息内容
+
+    rpc ListChatMessages(ListChatMessagesReq) returns (ListChatMessagesRes);
+    rpc UpdateChatMessages(UpdateChatMessagesReq) returns (UpdateChatMessagesRes);
+    rpc ListConversations(ListConversationsReq) returns (ListConversationsRes); // 会话查询：按用户列出会话及摘要
 }
 
 // goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

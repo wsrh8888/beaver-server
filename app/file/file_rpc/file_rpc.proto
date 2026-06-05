@@ -32,13 +32,84 @@ message GetQiniuUploadTokenRes {
   int64 expiresIn = 2;       // token过期时间 (秒)
 }
 
+// ==================== 文件管理（通用）====================
+
+message FileItem {
+  uint64 id = 1; // uint64 记录 ID
+  string file_key = 2; // string 文件 Key
+  string original_name = 3; // string 原始文件名
+  int64 size = 4; // int64 文件大小
+  string path = 5; // string 存储路径
+  string md5 = 6; // string MD5
+  string type = 7; // string 文件类型
+  string source = 8; // string 来源 qiniu/local
+  string created_at = 9; // string 创建时间
+  string updated_at = 10; // string 更新时间
+}
+
+message ListFilesReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string type = 3; // string 类型筛选，可选
+  string keywords = 4; // string 关键词，可选
+}
+
+message ListFilesRes {
+  int64 total = 1; // int64 总数
+  repeated FileItem list = 2; // array 文件列表
+}
+
+message GetFileByIdReq {
+  uint64 id = 1; // uint64 记录 ID
+}
+
+message GetFileByIdRes {
+  FileItem file = 1; // object 文件详情
+}
+
+message DeleteFileReq {
+  uint64 id = 1; // uint64 记录 ID
+}
+
+message DeleteFileRes {
+  string path = 1; // string 物理路径，供调用方清理本地文件
+}
+
+message BatchDeleteFilesReq {
+  repeated uint64 ids = 1; // array 记录 ID 列表
+}
+
+message BatchDeleteFilesRes {
+  repeated string paths = 1; // array 物理路径列表
+}
+
+message SaveFileReq {
+  string original_name = 1; // string 原始文件名
+  int64 size = 2; // int64 文件大小
+  string path = 3; // string 存储路径
+  string md5 = 4; // string MD5
+  string type = 5; // string 文件类型
+  string source = 6; // string 来源 qiniu/local
+  string file_info_json = 7; // string FileInfo JSON
+}
+
+message SaveFileRes {
+  string file_key = 1; // string 文件 Key
+}
+
 // 文件服务
 service file {
   // 通过fileName查询文件详情
   rpc GetFileDetail(GetFileDetailReq) returns (GetFileDetailRes);
-  
+
   // 获取七牛云上传token
   rpc GetQiniuUploadToken(GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes);
-} 
+
+  rpc ListFiles(ListFilesReq) returns (ListFilesRes);
+  rpc GetFileById(GetFileByIdReq) returns (GetFileByIdRes);
+  rpc DeleteFile(DeleteFileReq) returns (DeleteFileRes);
+  rpc BatchDeleteFiles(BatchDeleteFilesReq) returns (BatchDeleteFilesRes);
+  rpc SaveFile(SaveFileReq) returns (SaveFileRes);
+}
 
 // goctl rpc protoc file_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

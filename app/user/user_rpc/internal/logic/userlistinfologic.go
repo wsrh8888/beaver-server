@@ -53,14 +53,7 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 	}
 
 	for _, user := range userList {
-		resp.UserInfo[user.UserID] = &user_rpc.UserInfo{
-			UserId:   user.UserID, // 保持向后兼容
-			NickName: user.NickName,
-			Avatar:   user.Avatar,
-			Version:  user.Version,
-			Email:    user.Email,
-			Abstract: user.Abstract,
-		}
+		resp.UserInfo[user.UserID] = toUserInfo(user)
 	}
 
 	if in.SinceTimestamp > 0 {

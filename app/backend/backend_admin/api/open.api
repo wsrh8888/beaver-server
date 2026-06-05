@@ -2,12 +2,13 @@ type (
 	// ==================== 开发者管理 ====================
 	// 开发者申请
 	ApplyDeveloperReq {
-		RealName    string `json:"realName"`
-		CompanyName string `json:"companyName,optional"`
-		Phone       string `json:"phone"`
-		Email       string `json:"email"`
-		Description string `json:"description,optional"`
-		UserID      string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
+		ApplicantUserID string `json:"applicantUserId,optional"` // 代申请目标用户ID，空则取当前登录用户
+		RealName        string `json:"realName"`
+		CompanyName     string `json:"companyName,optional"`
+		Phone           string `json:"phone"`
+		Email           string `json:"email"`
+		Description     string `json:"description,optional"`
+		UserID          string `header:"Beaver-User-Id"` // 操作人ID（由网关注入）
 	}
 	ApplyDeveloperRes {
 		ID string `json:"id"`
@@ -44,6 +45,80 @@ type (
 		UserID      string `header:"Beaver-User-Id"` // 审核人ID（由网关注入）
 	}
 	AuditDeveloperRes  {}
+
+	// ==================== 应用管理 ====================
+	GetOpenAppListReq {
+		Page            int    `form:"page,default=1"`
+		PageSize        int    `form:"pageSize,default=10"`
+		Keyword         string `form:"keyword,optional"`
+		OwnerUserID     string `form:"ownerUserId,optional"`
+		AppID           string `form:"appId,optional"`
+		Status          int    `form:"status,optional"`          // 0全部 1草稿 2已发布 3禁用
+		AuditStatus     int    `form:"auditStatus,optional"`     // 0全部 1待审核 2已通过 3已拒绝
+		CapabilityType  int    `form:"capabilityType,optional"`  // 0全部 1Robot 2Webhook 3Robot或Webhook
+	}
+	GetOpenAppListRes {
+		Total int64         `json:"total"`
+		List  []OpenAppInfo `json:"list"`
+	}
+	OpenAppInfo {
+		AppID         string `json:"appId"`
+		Name          string `json:"name"`
+		Description   string `json:"description"`
+		Icon          string `json:"icon"`
+		OwnerUserID   string `json:"ownerUserId"`
+		OwnerUserName string `json:"ownerUserName"`
+		AppType       int    `json:"appType"`
+		Category      string `json:"category"`
+		Status        int    `json:"status"`
+		AuditStatus   int    `json:"auditStatus"`
+		AuditedBy     string `json:"auditedBy"`
+		AuditedAt     int64  `json:"auditedAt"`
+		EnableRobot   int    `json:"enableRobot"`
+		EnableOAuth   int    `json:"enableOAuth"`
+		EnableWebhook int    `json:"enableWebhook"`
+		CreatedAt     int64  `json:"createdAt"`
+	}
+	AuditOpenAppReq {
+		AppID       string `json:"appId"`
+		Status      int    `json:"status"` // 1通过 2拒绝
+		AuditRemark string `json:"auditRemark,optional"`
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	AuditOpenAppRes {}
+	UpdateOpenAppStatusReq {
+		AppIDs []string `json:"appIds"`
+		Action int      `json:"action"` // 3禁用 4启用
+		UserID string   `header:"Beaver-User-Id"`
+	}
+	UpdateOpenAppStatusRes {}
+)
+
+type (
+	GetOpenWebhookLogListReq {
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=20"`
+		AppID     string `form:"appId,optional"`
+		EventType string `form:"eventType,optional"`
+		Status    int    `form:"status,optional"` // 0全部 1成功 2失败
+	}
+	GetOpenWebhookLogListRes {
+		Total int64              `json:"total"`
+		List  []OpenWebhookLogInfo `json:"list"`
+	}
+	OpenWebhookLogInfo {
+		ID           uint64 `json:"id"`
+		AppID        string `json:"appId"`
+		EventID      string `json:"eventId"`
+		EventType    string `json:"eventType"`
+		TargetURL    string `json:"targetUrl"`
+		HTTPStatus   int    `json:"httpStatus"`
+		LatencyMs    int64  `json:"latencyMs"`
+		RetryCount   int    `json:"retryCount"`
+		Status       int    `json:"status"`
+		ErrorMessage string `json:"errorMessage"`
+		CreatedAt    int64  `json:"createdAt"`
+	}
 )
 
 @server (
@@ -59,5 +134,17 @@ service backend {
 
 	@handler AuditDeveloper
 	post /admin/open/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
+
+	@handler GetOpenAppList
+	get /admin/open/app/list (GetOpenAppListReq) returns (GetOpenAppListRes)
+
+	@handler AuditOpenApp
+	post /admin/open/app/audit (AuditOpenAppReq) returns (AuditOpenAppRes)
+
+	@handler UpdateOpenAppStatus
+	put /admin/open/app/status (UpdateOpenAppStatusReq) returns (UpdateOpenAppStatusRes)
+
+	@handler GetOpenWebhookLogList
+	get /admin/open/webhook/logs (GetOpenWebhookLogListReq) returns (GetOpenWebhookLogListRes)
 }
 

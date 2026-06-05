@@ -1,0 +1,71 @@
+syntax = "v1"
+
+// 运营工作台概览
+type (
+	GetDashboardOverviewReq {}
+	GetDashboardOverviewRes {
+		UserTotal             int64 `json:"userTotal"`
+		GroupTotal            int64 `json:"groupTotal"`
+		FriendTotal           int64 `json:"friendTotal"`
+		MessageTotal          int64 `json:"messageTotal"`
+		MomentTotal           int64 `json:"momentTotal"`
+		BlockTotal            int64 `json:"blockTotal"`
+		PendingDeveloperCount int64 `json:"pendingDeveloperCount"`
+		PendingAppCount       int64 `json:"pendingAppCount"`
+		PendingFeedbackCount  int64 `json:"pendingFeedbackCount"`
+		PendingReportCount    int64 `json:"pendingReportCount"`
+		PendingCaseCount      int64 `json:"pendingCaseCount"`
+	}
+)
+
+// 运营工作台待办收件箱
+type (
+	GetDashboardInboxReq {
+		Limit int `form:"limit,default=20"`
+	}
+	GetDashboardInboxRes {
+		List  []DashboardInboxItem `json:"list"`
+		Total int64                `json:"total"`
+	}
+	DashboardInboxItem {
+		Category  string `json:"category"`
+		Title     string `json:"title"`
+		Summary   string `json:"summary"`
+		EntityID  string `json:"entityId"`
+		CreatedAt string `json:"createdAt"`
+		Action    string `json:"action"`
+	}
+)
+
+// 运营数据趋势（近 N 日）
+type (
+	GetDashboardTrendsReq {
+		Days int `form:"days,default=7"`
+	}
+	GetDashboardTrendsRes {
+		Days   []string                 `json:"days"`
+		Series []DashboardTrendSeries   `json:"series"`
+	}
+	DashboardTrendSeries {
+		Key    string  `json:"key"`
+		Label  string  `json:"label"`
+		Values []int64 `json:"values"`
+	}
+)
+
+@server (
+	group: overview
+)
+service backend {
+	@doc "运营工作台概览"
+	@handler getDashboardOverview
+	get /admin/overview/dashboard (GetDashboardOverviewReq) returns (GetDashboardOverviewRes)
+
+	@doc "运营工作台待办收件箱"
+	@handler getDashboardInbox
+	get /admin/overview/inbox (GetDashboardInboxReq) returns (GetDashboardInboxRes)
+
+	@doc "运营数据趋势"
+	@handler getDashboardTrends
+	get /admin/overview/trends (GetDashboardTrendsReq) returns (GetDashboardTrendsRes)
+}

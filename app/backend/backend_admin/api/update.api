@@ -144,6 +144,13 @@ type (
 	}
 )
 
+type (
+	DeleteVersionReq {
+		VersionID uint `path:"id"`
+	}
+	DeleteVersionRes {}
+)
+
 // 更新城市策略
 type (
 	UpdateCityStrategyReq {
@@ -229,6 +236,10 @@ service backend {
 	@doc "获取应用下所有版本"
 	@handler GetAppVersions
 	get /admin/update/versions (GetAppVersionsReq) returns (GetAppVersionsRes)
+
+	@doc "删除版本"
+	@handler DeleteVersion
+	delete /admin/update/version/:id (DeleteVersionReq) returns (DeleteVersionRes)
 
 	// 城市策略管理API
 	@doc "更新城市策略"

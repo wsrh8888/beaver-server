@@ -3,15 +3,15 @@ package logic
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/friend/friend_models"
+	"beaver/app/friend/friend_rpc/types/friend_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
+
+const friendActionHardDelete int32 = 1
 
 type DeleteFriendLogic struct {
 	logx.Logger
@@ -19,43 +19,25 @@ type DeleteFriendLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 强制删除好友关系
 func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFriendLogic {
-	return &DeleteFriendLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &DeleteFriendLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// DeleteFriend 管理后台：强制删除单条好友关系。
+// admin 职责：校验 relationId，映射为 UpdateFriends 物理删除 action。
+// RPC 职责：UpdateFriends 统一处理删除/恢复，不与 HTTP 路由 1:1。
 func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *types.DeleteFriendRes, err error) {
-	// 转换ID
-	friendID, err := strconv.ParseUint(req.FriendID, 10, 32)
-	if err != nil {
-		logx.Errorf("无效的好友关系ID: %s", req.FriendID)
-		return nil, errors.New("无效的好友关系ID")
+	if req.FriendID == "" {
+		return nil, errors.New("好友关系ID不能为空")
 	}
 
-	// 先查询好友关系是否存在
-	var friend friend_models.FriendModel
-	err = l.svcCtx.DB.Where("id = ?", uint(friendID)).First(&friend).Error
+	_, err = l.svcCtx.FriendRpc.UpdateFriends(l.ctx, &friend_rpc.UpdateFriendsReq{
+		RelationIds: []string{req.FriendID},
+		Action:      friendActionHardDelete,
+	})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logx.Errorf("好友关系不存在, Id: %s", req.FriendID)
-			return nil, errors.New("好友关系不存在")
-		}
-		logx.Errorf("查询好友关系失败: %v", err)
+		l.Errorf("删除好友失败: %v", err)
 		return nil, err
 	}
-
-	// 强制删除好友关系（物理删除）
-	err = l.svcCtx.DB.Unscoped().Delete(&friend).Error
-	if err != nil {
-		logx.Errorf("删除好友关系失败: %v", err)
-		return nil, err
-	}
-
-	logx.Infof("好友关系删除成功, Id: %s, SendUserID: %s, RevUserID: %s",
-		req.FriendID, friend.SendUserID, friend.RevUserID)
 	return &types.DeleteFriendRes{}, nil
 }

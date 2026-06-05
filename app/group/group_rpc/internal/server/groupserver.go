@@ -72,3 +72,23 @@ func (s *GroupServer) RemoveGroupMember(ctx context.Context, in *group_rpc.Remov
 	l := logic.NewRemoveGroupMemberLogic(ctx, s.svcCtx)
 	return l.RemoveGroupMember(in)
 }
+
+func (s *GroupServer) ListGroups(ctx context.Context, in *group_rpc.ListGroupsReq) (*group_rpc.ListGroupsRes, error) {
+	l := logic.NewListGroupsLogic(ctx, s.svcCtx)
+	return l.ListGroups(in)
+}
+
+func (s *GroupServer) UpdateGroup(ctx context.Context, in *group_rpc.UpdateGroupReq) (*group_rpc.UpdateGroupRes, error) {
+	l := logic.NewUpdateGroupLogic(ctx, s.svcCtx)
+	return l.UpdateGroup(in)
+}
+
+func (s *GroupServer) ListGroupMembers(ctx context.Context, in *group_rpc.ListGroupMembersReq) (*group_rpc.ListGroupMembersRes, error) {
+	l := logic.NewListGroupMembersLogic(ctx, s.svcCtx)
+	return l.ListGroupMembers(in)
+}
+
+func (s *GroupServer) UpdateGroupMember(ctx context.Context, in *group_rpc.UpdateGroupMemberReq) (*group_rpc.UpdateGroupMemberRes, error) {
+	l := logic.NewUpdateGroupMemberLogic(ctx, s.svcCtx)
+	return l.UpdateGroupMember(in)
+}

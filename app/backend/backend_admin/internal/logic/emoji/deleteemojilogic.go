@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type DeleteEmojiLogic struct {
@@ -18,34 +17,26 @@ type DeleteEmojiLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 删除表情图片
 func NewDeleteEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteEmojiLogic {
-	return &DeleteEmojiLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &DeleteEmojiLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// DeleteEmoji 管理后台：删除表情。
+// admin 职责：校验路径参数，将「删除」接口语义映射为 SaveEmoji.delete=true。
+// RPC 职责：执行领域删除与版本同步，不与 HTTP 路由 1:1 命名。
 func (l *DeleteEmojiLogic) DeleteEmoji(req *types.DeleteEmojiReq) (resp *types.DeleteEmojiRes, err error) {
-	// 检查表情是否存在
-	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("emoji_id = ?", req.EmojiId).First(&emoji).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.EmojiId)
-			return nil, errors.New("表情不存在")
-		}
-		logx.Errorf("查询表情失败: %v", err)
-		return nil, errors.New("查询表情失败")
+	if req.EmojiId == "" {
+		return nil, errors.New("表情ID不能为空")
 	}
 
-	// 使用逻辑删除
-	err = l.svcCtx.DB.Delete(&emoji).Error
+	del := true
+	_, err = l.svcCtx.EmojiRpc.SaveEmoji(l.ctx, &emoji_rpc.SaveEmojiReq{
+		EmojiId: req.EmojiId,
+		Delete:  &del,
+	})
 	if err != nil {
-		logx.Errorf("删除表情失败: %v", err)
-		return nil, errors.New("删除表情失败")
+		l.Errorf("删除表情失败: %v", err)
+		return nil, err
 	}
-
 	return &types.DeleteEmojiRes{}, nil
 }

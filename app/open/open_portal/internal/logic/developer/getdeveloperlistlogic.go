@@ -3,11 +3,10 @@ package developer
 import (
 	"context"
 	"errors"
-	"time"
 
-	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	"beaver/app/open/open_rpc/types/open_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -19,11 +18,7 @@ type GetDeveloperListLogic struct {
 }
 
 func NewGetDeveloperListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDeveloperListLogic {
-	return &GetDeveloperListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetDeveloperListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq) (resp *types.GetDeveloperListRes, err error) {
@@ -31,49 +26,34 @@ func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq)
 	if !ok || userID == "" {
 		return nil, errors.New("未登录")
 	}
+	_ = userID
 
-	// 构建查询
-	query := l.svcCtx.DB.Model(&open_models.OpenDeveloper{})
-
-	// 状态筛选
-	if req.Status != 0 {
-		query = query.Where("status = ?", req.Status)
-	}
-
-	// 获取总数
-	var total int64
-	query.Count(&total)
-
-	// 分页查询
-	var developers []open_models.OpenDeveloper
-	offset := (req.Page - 1) * req.PageSize
-	err = query.Order("created_at DESC").Offset(offset).Limit(req.PageSize).Find(&developers).Error
-
+	rpcRes, err := l.svcCtx.OpenRpc.ListDevelopers(l.ctx, &open_rpc.ListDevelopersReq{
+		Page:     int32(req.Page),
+		PageSize: int32(req.PageSize),
+		Status:   int32(req.Status),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// 转换为响应格式
-	list := make([]types.DeveloperInfo, 0, len(developers))
-	for _, dev := range developers {
+	list := make([]types.DeveloperInfo, 0, len(rpcRes.List))
+	for _, dev := range rpcRes.List {
 		list = append(list, types.DeveloperInfo{
-			ID:          dev.Id,
-			UserID:      dev.UserID,
+			ID:          uint(dev.Id),
+			UserID:      dev.UserId,
 			RealName:    dev.RealName,
 			CompanyName: dev.CompanyName,
 			Phone:       dev.Phone,
 			Email:       dev.Email,
 			Description: dev.Description,
-			Status:      dev.Status,
+			Status:      int(dev.Status),
 			AuditBy:     dev.AuditBy,
 			AuditTime:   dev.AuditTime,
 			AuditRemark: dev.AuditRemark,
-			CreatedAt:   time.Time(dev.CreatedAt).Unix(),
+			CreatedAt:   dev.CreatedAt / 1000,
 		})
 	}
 
-	return &types.GetDeveloperListRes{
-		Total: total,
-		List:  list,
-	}, nil
+	return &types.GetDeveloperListRes{Total: rpcRes.Total, List: list}, nil
 }

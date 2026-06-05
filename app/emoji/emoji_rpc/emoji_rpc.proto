@@ -84,6 +84,143 @@ message EmojiPackageCollectVersionItem {
   int64 version = 2; // 版本号
 }
 
+// ==================== 表情领域管理（通用，非 admin 1:1）====================
+
+message EmojiInfoMsg {
+  int32 width = 1; // int32 表情图片宽度
+  int32 height = 2; // int32 表情图片高度
+}
+
+message EmojiItem {
+  string emoji_id = 1; // string 表情 ID
+  string file_key = 2; // string 文件 Key
+  string title = 3; // string 表情名称
+  EmojiInfoMsg emoji_info = 4; // object 尺寸信息
+  int32 status = 5; // int32 状态：1=正常 2=审核中 3=违规禁用
+  string created_at = 6; // string 创建时间 RFC3339
+  string updated_at = 7; // string 更新时间 RFC3339
+}
+
+// ListEmojis：表情列表/详情/包内表情查询（package_id 非空时按包内 sort_order 排序）
+message ListEmojisReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string title = 3; // string 名称模糊搜索，可选
+  string start_time = 4; // string 创建时间起，可选
+  string end_time = 5; // string 创建时间止，可选
+  string emoji_id = 6; // string 表情 ID 精确查，可选
+  string package_id = 7; // string 表情包 ID，非空时查包内表情，可选
+}
+
+message ListEmojisRes {
+  int64 total = 1; // int64 总数
+  repeated EmojiItem list = 2; // array 表情列表
+}
+
+// SaveEmoji：创建/更新/删除单条表情（emoji_id 空=创建，delete=true=删除，否则按传入字段更新）
+message SaveEmojiReq {
+  string emoji_id = 1; // string 表情 ID，创建时留空
+  string file_key = 2; // string 文件 Key，创建必填
+  string title = 3; // string 表情名称，创建必填
+  EmojiInfoMsg emoji_info = 4; // object 尺寸信息，创建时可选
+  optional string patch_file_key = 5; // string 更新文件 Key，可选
+  optional string patch_title = 6; // string 更新名称，可选
+  optional bool delete = 7; // bool true=删除该表情
+}
+
+message SaveEmojiRes {
+  string emoji_id = 1; // string 表情 ID
+}
+
+message EmojiPackageItem {
+  string package_id = 1; // string 表情包 ID
+  string title = 2; // string 名称
+  string cover_file = 3; // string 封面文件 Key
+  string user_id = 4; // string 所属用户 ID
+  string description = 5; // string 描述
+  string type = 6; // string 类型：official / user
+  int32 status = 7; // int32 状态
+  string created_at = 8; // string 创建时间 RFC3339
+  string updated_at = 9; // string 更新时间 RFC3339
+}
+
+// ListEmojiPackages：表情包列表/详情（package_id 精确查单条）
+message ListEmojiPackagesReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string user_id = 3; // string 所属用户 ID 筛选，可选
+  string type = 4; // string 类型筛选，可选
+  int32 status = 5; // int32 状态筛选，0 表示全部
+  string title = 6; // string 名称/描述模糊搜索，可选
+  string start_time = 7; // string 创建时间起，可选
+  string end_time = 8; // string 创建时间止，可选
+  string package_id = 9; // string 表情包 ID 精确查，可选
+}
+
+message ListEmojiPackagesRes {
+  int64 total = 1; // int64 总数
+  repeated EmojiPackageItem list = 2; // array 表情包列表
+}
+
+// SaveEmojiPackage：创建/更新/删除表情包（package_id 空=创建，delete=true=删除）
+message SaveEmojiPackageReq {
+  string package_id = 1; // string 表情包 ID，创建时留空
+  string title = 2; // string 名称，创建必填
+  string cover_file = 3; // string 封面文件 Key
+  string user_id = 4; // string 所属用户 ID，创建必填
+  string description = 5; // string 描述
+  string type = 6; // string 类型
+  optional string patch_title = 7; // string 更新名称，可选
+  optional string patch_cover_file = 8; // string 更新封面，可选
+  optional string patch_description = 9; // string 更新描述，可选
+  optional string patch_type = 10; // string 更新类型，可选
+  optional int32 patch_status = 11; // int32 更新状态，可选
+  optional bool delete = 12; // bool true=删除该表情包
+}
+
+message SaveEmojiPackageRes {
+  string package_id = 1; // string 表情包 ID
+}
+
+// UpdateEmojiPackageContent：维护表情包与表情的关联（action：1=添加并创建表情，2=移除）
+message UpdateEmojiPackageContentReq {
+  string package_id = 1; // string 表情包 ID
+  int32 action = 2; // int32 操作：1=添加 2=移除
+  string emoji_id = 3; // string 表情 ID，action=2 时必填
+  string file_key = 4; // string 文件 Key，action=1 时必填
+  string title = 5; // string 表情名称，action=1 时必填
+  EmojiInfoMsg emoji_info = 6; // object 尺寸信息，action=1 时可选
+}
+
+message UpdateEmojiPackageContentRes {
+  string relation_id = 1; // string 关联记录 ID，添加时返回
+  string emoji_id = 2; // string 表情 ID，添加时返回
+}
+
+message EmojiCollectItem {
+  string collect_id = 1; // string 收藏记录 ID
+  string user_id = 2; // string 用户 ID
+  string emoji_id = 3; // string 表情 ID
+  string emoji_title = 4; // string 表情名称（join 查询）
+  string emoji_file_key = 5; // string 表情文件 Key（join 查询）
+  string created_at = 6; // string 创建时间 RFC3339
+  string updated_at = 7; // string 更新时间 RFC3339
+}
+
+message ListEmojiCollectsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string user_id = 3; // string 用户 ID 筛选，可选
+  string emoji_id = 4; // string 表情 ID 筛选，可选
+  string start_time = 5; // string 收藏时间起，可选
+  string end_time = 6; // string 收藏时间止，可选
+}
+
+message ListEmojiCollectsRes {
+  int64 total = 1; // int64 总数
+  repeated EmojiCollectItem list = 2; // array 收藏列表
+}
+
 service emoji {
   // ========== 用户收藏表情同步 ==========
   rpc GetUserEmojiCollects(GetUserEmojiCollectsReq) returns (GetUserEmojiCollectsRes);
@@ -99,6 +236,14 @@ service emoji {
 
   // ========== 表情基础数据同步 ==========
   rpc GetEmojis(GetEmojisReq) returns (GetEmojisRes);
+
+  // 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+  rpc ListEmojis(ListEmojisReq) returns (ListEmojisRes); // 表情查询：列表、详情、包内表情
+  rpc SaveEmoji(SaveEmojiReq) returns (SaveEmojiRes); // 表情写入：创建、更新、删除
+  rpc ListEmojiPackages(ListEmojiPackagesReq) returns (ListEmojiPackagesRes); // 表情包查询：列表、详情
+  rpc SaveEmojiPackage(SaveEmojiPackageReq) returns (SaveEmojiPackageRes); // 表情包写入：创建、更新、删除
+  rpc UpdateEmojiPackageContent(UpdateEmojiPackageContentReq) returns (UpdateEmojiPackageContentRes); // 包内表情关联：添加、移除
+  rpc ListEmojiCollects(ListEmojiCollectsReq) returns (ListEmojiCollectsRes); // 用户收藏表情查询
 }
 
 // goctl rpc protoc emoji_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

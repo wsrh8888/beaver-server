@@ -2,16 +2,14 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/chat/chat_models"
-	"beaver/app/user/user_models"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type GetChatMessageDetailLogic struct {
@@ -20,61 +18,51 @@ type GetChatMessageDetailLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取聊天消息详情
 func NewGetChatMessageDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetChatMessageDetailLogic {
-	return &GetChatMessageDetailLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetChatMessageDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetChatMessageDetailLogic) GetChatMessageDetail(req *types.GetChatMessageDetailReq) (resp *types.GetChatMessageDetailRes, err error) {
-	var message chat_models.ChatMessage
+	if req.MessageID == "" {
+		return nil, errors.New("消息ID不能为空")
+	}
 
-	err = l.svcCtx.DB.Where("message_id = ?", req.MessageID).First(&message).Error
+	rpcRes, err := l.svcCtx.ChatRpc.ListChatMessages(l.ctx, &chat_rpc.ListChatMessagesReq{
+		MessageId:   req.MessageID,
+		WithContent: true,
+		Page:        1,
+		PageSize:    1,
+	})
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("聊天消息不存在: %s", req.MessageID)
-			return nil, errors.New("聊天消息不存在")
-		}
-		logx.Errorf("查询聊天消息详情失败: %v", err)
-		return nil, errors.New("查询聊天消息详情失败")
+		l.Errorf("获取聊天消息详情失败: %v", err)
+		return nil, err
+	}
+	if len(rpcRes.List) == 0 {
+		return nil, errors.New("聊天消息不存在")
 	}
 
-	sendUserName := ""
-	sendUserFileName := ""
-	if message.SendUserID != nil && *message.SendUserID != "" {
-		var user user_models.UserModel
-		if err := l.svcCtx.DB.Where("user_id = ?", *message.SendUserID).First(&user).Error; err == nil {
-			sendUserName = user.NickName
-			sendUserFileName = user.Avatar
+	m := rpcRes.List[0]
+	sendName, sendAvatar := "", ""
+	if m.SendUserId != "" {
+		if res, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: []string{m.SendUserId}}); err == nil && res != nil {
+			if u, ok := res.UserInfo[m.SendUserId]; ok && u != nil {
+				sendName, sendAvatar = u.NickName, u.Avatar
+			}
 		}
-	}
-
-	msgContent := ""
-	if message.Msg != nil {
-		if msgBytes, err := json.Marshal(message.Msg); err == nil {
-			msgContent = string(msgBytes)
-		}
-	}
-
-	sendUserID := ""
-	if message.SendUserID != nil {
-		sendUserID = *message.SendUserID
 	}
 
 	return &types.GetChatMessageDetailRes{
-		Id:               message.MessageID,
-		MessageID:        message.MessageID,
-		ConversationID:   message.ConversationID,
-		SendUserID:       sendUserID,
-		SendUserName:     sendUserName,
-		SendUserFileName: sendUserFileName,
-		MsgType:          int(message.MsgType),
-		MsgPreview:       message.MsgPreview,
-		MsgContent:       msgContent,
-		CreateTime:       message.CreatedAt.String(),
-		UpdateTime:       message.UpdatedAt.String(),
+		Id:               m.MessageId,
+		MessageID:        m.MessageId,
+		ConversationID:   m.ConversationId,
+		SendUserID:       m.SendUserId,
+		SendUserName:     sendName,
+		SendUserFileName: sendAvatar,
+		MsgType:          int(m.MsgType),
+		MsgPreview:       m.MsgPreview,
+		MsgContent:       m.MsgContent,
+		IsDeleted:        m.Status == chatMessageStatusDeleted,
+		CreateTime:       m.CreatedAt,
+		UpdateTime:       m.UpdatedAt,
 	}, nil
 }

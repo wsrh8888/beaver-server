@@ -6,9 +6,8 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
-	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -18,51 +17,32 @@ type CreateEmojiLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 创建表情图片
 func NewCreateEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateEmojiLogic {
-	return &CreateEmojiLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &CreateEmojiLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// CreateEmoji 管理后台：创建表情。
+// admin 职责：校验运营录入的必填项（fileKey/title），将 HTTP 结构映射为领域写入请求。
+// RPC 职责：SaveEmoji 创建分支（版本号、落库），可被其他服务复用。
 func (l *CreateEmojiLogic) CreateEmoji(req *types.CreateEmojiReq) (resp *types.CreateEmojiRes, err error) {
-	// 检查表情名称是否已存在
-	var count int64
-	// 检查表情标题是否已存在（暂时不检查作者，允许同名表情）
-	count = 0
-	if err != nil {
-		logx.Errorf("检查表情名称失败: %v", err)
-		return nil, errors.New("检查表情名称失败")
+	if req.FileKey == "" {
+		return nil, errors.New("文件ID不能为空")
 	}
-	if count > 0 {
-		return nil, errors.New("该创建者已存在同名表情")
+	if req.Title == "" {
+		return nil, errors.New("表情名称不能为空")
 	}
 
-	// 生成表情版本号
-	emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
-
-	// 创建表情
-	emoji := emoji_models.Emoji{
-		EmojiID: uuid.New().String(),
+	rpcRes, err := l.svcCtx.EmojiRpc.SaveEmoji(l.ctx, &emoji_rpc.SaveEmojiReq{
 		FileKey: req.FileKey,
 		Title:   req.Title,
-		EmojiInfo: emoji_models.EmojiInfo{
-			Width:  req.EmojiInfo.Width,
-			Height: req.EmojiInfo.Height,
+		EmojiInfo: &emoji_rpc.EmojiInfoMsg{
+			Width:  int32(req.EmojiInfo.Width),
+			Height: int32(req.EmojiInfo.Height),
 		},
-		Status:  1, // 默认状态为正常
-		Version: emojiVersion,
-	}
-
-	err = l.svcCtx.DB.Create(&emoji).Error
+	})
 	if err != nil {
-		logx.Errorf("创建表情失败: %v", err)
-		return nil, errors.New("创建表情失败")
+		l.Errorf("创建表情失败: %v", err)
+		return nil, err
 	}
-
-	return &types.CreateEmojiRes{
-		EmojiId: emoji.EmojiID,
-	}, nil
+	return &types.CreateEmojiRes{EmojiId: rpcRes.EmojiId}, nil
 }

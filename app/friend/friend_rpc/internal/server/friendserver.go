@@ -62,3 +62,34 @@ func (s *FriendServer) IsBlocked(ctx context.Context, in *friend_rpc.IsBlockedRe
 	l := logic.NewIsBlockedLogic(ctx, s.svcCtx)
 	return l.IsBlocked(in)
 }
+
+// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+func (s *FriendServer) ListFriends(ctx context.Context, in *friend_rpc.ListFriendsReq) (*friend_rpc.ListFriendsRes, error) {
+	l := logic.NewListFriendsLogic(ctx, s.svcCtx)
+	return l.ListFriends(in)
+}
+
+func (s *FriendServer) UpdateFriends(ctx context.Context, in *friend_rpc.UpdateFriendsReq) (*friend_rpc.UpdateFriendsRes, error) {
+	l := logic.NewUpdateFriendsLogic(ctx, s.svcCtx)
+	return l.UpdateFriends(in)
+}
+
+func (s *FriendServer) ListFriendVerifies(ctx context.Context, in *friend_rpc.ListFriendVerifiesReq) (*friend_rpc.ListFriendVerifiesRes, error) {
+	l := logic.NewListFriendVerifiesLogic(ctx, s.svcCtx)
+	return l.ListFriendVerifies(in)
+}
+
+func (s *FriendServer) UpdateFriendVerifies(ctx context.Context, in *friend_rpc.UpdateFriendVerifiesReq) (*friend_rpc.UpdateFriendVerifiesRes, error) {
+	l := logic.NewUpdateFriendVerifiesLogic(ctx, s.svcCtx)
+	return l.UpdateFriendVerifies(in)
+}
+
+func (s *FriendServer) ListFriendBlocks(ctx context.Context, in *friend_rpc.ListFriendBlocksReq) (*friend_rpc.ListFriendBlocksRes, error) {
+	l := logic.NewListFriendBlocksLogic(ctx, s.svcCtx)
+	return l.ListFriendBlocks(in)
+}
+
+func (s *FriendServer) UpdateFriendBlocks(ctx context.Context, in *friend_rpc.UpdateFriendBlocksReq) (*friend_rpc.UpdateFriendBlocksRes, error) {
+	l := logic.NewUpdateFriendBlocksLogic(ctx, s.svcCtx)
+	return l.UpdateFriendBlocks(in)
+}

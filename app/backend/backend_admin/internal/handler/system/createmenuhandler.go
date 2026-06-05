@@ -1,7 +1,7 @@
 package handler
 
 import (
-	logic "beaver/app/backend/backend_admin/internal/logic/system"
+	systemLogic "beaver/app/backend/backend_admin/internal/logic/system"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func CreateMenuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewCreateMenuLogic(r.Context(), svcCtx)
+		l := systemLogic.NewCreateMenuLogic(r.Context(), svcCtx)
 		resp, err := l.CreateMenu(&req)
 		response.Response(r, w, resp, err)
 	}

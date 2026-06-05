@@ -16,5 +16,6 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	FileRpc zrpc.RpcClientConf
+	FileRpc     zrpc.RpcClientConf
+	PlatformRpc zrpc.RpcClientConf
 }

@@ -35,15 +35,5 @@ func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRe
 		return nil, errors.New("用户不存在")
 	}
 
-	return &user_rpc.UserInfoRes{
-		UserInfo: &user_rpc.UserInfo{
-			UserId:   user.UserID,
-			NickName: user.NickName,
-			Avatar:   user.Avatar,
-			Version:  user.Version,
-			Email:    user.Email,
-			Abstract: user.Abstract,
-			Phone:    user.Phone,
-		},
-	}, nil
+	return &user_rpc.UserInfoRes{UserInfo: toUserInfo(user)}, nil
 }

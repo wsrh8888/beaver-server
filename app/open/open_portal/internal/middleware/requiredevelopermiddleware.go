@@ -1,19 +1,19 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 
-	models "beaver/app/open/open_models"
-
-	"gorm.io/gorm"
+	"beaver/app/open/open_rpc/open"
+	"beaver/app/open/open_rpc/types/open_rpc"
 )
 
 type RequireDeveloperMiddleware struct {
-	db *gorm.DB
+	openRpc open.Open
 }
 
-func NewRequireDeveloperMiddleware(db *gorm.DB) *RequireDeveloperMiddleware {
-	return &RequireDeveloperMiddleware{db: db}
+func NewRequireDeveloperMiddleware(openRpc open.Open) *RequireDeveloperMiddleware {
+	return &RequireDeveloperMiddleware{openRpc: openRpc}
 }
 
 func (m *RequireDeveloperMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
@@ -24,17 +24,12 @@ func (m *RequireDeveloperMiddleware) Handle(next http.HandlerFunc) http.HandlerF
 			return
 		}
 
-		var developer models.OpenDeveloper
-		err := m.db.Where("user_id = ? AND status = ?", userID, 1).First(&developer).Error
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				http.Error(w, `{"code":403,"msg":"您还不是认证开发者,请先申请开发者资质"}`, http.StatusForbidden)
-				return
-			}
-			http.Error(w, `{"code":500,"msg":"服务内部异常"}`, http.StatusInternalServerError)
+		res, err := m.openRpc.GetDeveloperByUserID(r.Context(), &open_rpc.GetDeveloperByUserIDReq{UserId: userID})
+		if err != nil || !res.Found || res.Developer == nil || res.Developer.Status != 1 {
+			http.Error(w, `{"code":403,"msg":"您还不是认证开发者,请先申请开发者资质"}`, http.StatusForbidden)
 			return
 		}
 
-		next(w, r)
+		next(w, r.WithContext(context.WithValue(r.Context(), "developerId", res.Developer.Id)))
 	}
 }

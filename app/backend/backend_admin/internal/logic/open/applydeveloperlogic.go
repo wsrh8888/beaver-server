@@ -3,12 +3,12 @@ package open
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/open/open_models"
+	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -19,46 +19,30 @@ type ApplyDeveloperLogic struct {
 }
 
 func NewApplyDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ApplyDeveloperLogic {
-	return &ApplyDeveloperLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &ApplyDeveloperLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *ApplyDeveloperLogic) ApplyDeveloper(req *types.ApplyDeveloperReq) (resp *types.ApplyDeveloperRes, err error) {
-	// 1. 获取当前用户 ID（从 request header，由网关注入）
-	if req.UserID == "" {
-		return nil, errors.New("未登录")
+	userID := req.ApplicantUserID
+	if userID == "" {
+		userID = req.UserID
+	}
+	if userID == "" {
+		return nil, errors.New("未指定申请用户")
 	}
 
-	// 2. 检查是否已经申请过
-	var existing open_models.OpenDeveloper
-	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&existing).Error
-	if err == nil {
-		return nil, errors.New("您已经提交过申请，请等待审核")
-	}
-
-	// 3. 创建申请记录
-	id := uuid.New().String()
-	developer := open_models.OpenDeveloper{
-		UserID:      req.UserID,
+	rpcRes, err := l.svcCtx.OpenRpc.ApplyDeveloper(l.ctx, &open_rpc.ApplyDeveloperReq{
+		UserId:      userID,
 		RealName:    req.RealName,
 		CompanyName: req.CompanyName,
 		Phone:       req.Phone,
 		Email:       req.Email,
 		Description: req.Description,
-		Status:      0, // 待审核
-	}
-
-	err = l.svcCtx.DB.Create(&developer).Error
+	})
 	if err != nil {
-		return nil, errors.New("申请失败")
+		l.Errorf("开发者申请失败: %v", err)
+		return nil, err
 	}
 
-	logx.Infof("开发者申请成功: user_id=%s, id=%s", req.UserID, id)
-
-	return &types.ApplyDeveloperRes{
-		ID: id,
-	}, nil
+	return &types.ApplyDeveloperRes{ID: fmt.Sprintf("%d", rpcRes.Id)}, nil
 }

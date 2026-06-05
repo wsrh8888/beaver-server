@@ -6,7 +6,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/chat/chat_models"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -18,11 +18,7 @@ type ClearConversationLogic struct {
 }
 
 func NewClearConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ClearConversationLogic {
-	return &ClearConversationLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &ClearConversationLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *ClearConversationLogic) ClearConversation(req *types.ClearConversationReq) (resp *types.ClearConversationRes, err error) {
@@ -30,14 +26,13 @@ func (l *ClearConversationLogic) ClearConversation(req *types.ClearConversationR
 		return nil, errors.New("会话ID不能为空")
 	}
 
-	// 逻辑删除会话中的所有消息
-	err = l.svcCtx.DB.Model(&chat_models.ChatMessage{}).
-		Where("conversation_id = ?", req.ConversationID).
-		Update("is_deleted", true).Error
+	_, err = l.svcCtx.ChatRpc.UpdateChatMessages(l.ctx, &chat_rpc.UpdateChatMessagesReq{
+		ConversationId: req.ConversationID,
+		Status:         chatMessageStatusDeleted,
+	})
 	if err != nil {
-		logx.Errorf("清空会话消息失败: %v", err)
-		return nil, errors.New("清空会话消息失败")
+		l.Errorf("清空会话消息失败: %v", err)
+		return nil, err
 	}
-
 	return &types.ClearConversationRes{}, nil
 }

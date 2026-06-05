@@ -6,11 +6,12 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
+
+const userActionPatch int32 = 1
 
 type UpdateUserLogic struct {
 	logx.Logger
@@ -18,68 +19,43 @@ type UpdateUserLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 更新用户
 func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateUserLogic {
-	return &UpdateUserLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &UpdateUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// UpdateUser 管理后台：更新用户。
+// admin 职责：校验 userId，将可选字段组装为 patch 语义。
+// RPC 职责：UpdateUsers(action=1) 处理领域更新与邮箱冲突检测。
 func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.UpdateUserRes, err error) {
-	// 检查用户是否存在
-	var user user_models.UserModel
-	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			l.Logger.Errorf("用户不存在: %s", req.UserID)
-			return nil, errors.New("用户不存在")
-		}
-		l.Logger.Errorf("查询用户失败: %v", err)
-		return nil, errors.New("查询用户失败")
+	if req.UserID == "" {
+		return nil, errors.New("用户ID不能为空")
 	}
 
-	// 如果要更新邮箱，检查是否重复
-	if req.Email != nil && *req.Email != user.Email {
-		var existUser user_models.UserModel
-		err = l.svcCtx.DB.Where("email = ? AND user_id != ?", *req.Email, req.UserID).First(&existUser).Error
-		if err == nil {
-			l.Logger.Errorf("邮箱已存在: %s", *req.Email)
-			return nil, errors.New("邮箱已存在")
-		}
+	rpcReq := &user_rpc.UpdateUsersReq{
+		UserIds: []string{req.UserID},
+		Action:  userActionPatch,
 	}
-
-	// 构建更新字段
-	updates := make(map[string]interface{})
-
 	if req.NickName != nil {
-		updates["nick_name"] = *req.NickName
+		rpcReq.PatchNickName = req.NickName
 	}
 	if req.Email != nil {
-		updates["email"] = *req.Email
+		rpcReq.PatchEmail = req.Email
 	}
 	if req.FileName != nil {
-		updates["file_name"] = *req.FileName
+		rpcReq.PatchAvatar = req.FileName
 	}
 	if req.Abstract != nil {
-		updates["abstract"] = *req.Abstract
+		rpcReq.PatchAbstract = req.Abstract
 	}
 	if req.Status != nil {
-		updates["status"] = int8(*req.Status)
+		status := int32(*req.Status)
+		rpcReq.PatchStatus = &status
 	}
 
-	// 执行更新
-	if len(updates) > 0 {
-		err = l.svcCtx.DB.Model(&user).Updates(updates).Error
-		if err != nil {
-			l.Logger.Errorf("更新用户失败: %v", err)
-			return nil, errors.New("更新用户失败")
-		}
-		l.Logger.Infof("更新用户成功: userID=%s, updates=%v", req.UserID, updates)
-	} else {
-		l.Logger.Infof("用户信息无变化: userID=%s", req.UserID)
+	_, err = l.svcCtx.UserRpc.UpdateUsers(l.ctx, rpcReq)
+	if err != nil {
+		l.Errorf("更新用户失败: %v", err)
+		return nil, err
 	}
-
 	return &types.UpdateUserRes{}, nil
 }

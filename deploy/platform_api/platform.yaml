@@ -17,3 +17,8 @@ FileRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: filerpc.rpc
+PlatformRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: platformrpc.rpc

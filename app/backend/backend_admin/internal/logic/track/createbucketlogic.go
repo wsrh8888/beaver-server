@@ -5,8 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/platform/platform_models"
-	uuid_util "beaver/utils/uuid"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -17,7 +16,6 @@ type CreateBucketLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 创建Bucket
 func NewCreateBucketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateBucketLogic {
 	return &CreateBucketLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,27 +25,14 @@ func NewCreateBucketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 }
 
 func (l *CreateBucketLogic) CreateBucket(req *types.CreateBucketReq) (resp *types.CreateBucketRes, err error) {
-	// 生成唯一 Bucket ID
-	bucketID := uuid_util.NewV4().String()
-
-	// 创建 Bucket 记录
-	bucket := &platform_models.TrackBucket{
-		BucketID:    bucketID,
+	rpcRes, err := l.svcCtx.PlatformRpc.AdminCreateBucket(l.ctx, &platform_rpc.AdminCreateBucketReq{
 		Name:        req.Name,
 		Description: req.Description,
 		CreateUser:  req.UserID,
-		IsActive:    true, // 默认激活状态
-	}
-
-	// 插入数据库
-	if err = l.svcCtx.DB.Create(bucket).Error; err != nil {
-		logx.Errorf("创建Bucket失败: %v", err)
+	})
+	if err != nil {
+		l.Errorf("创建 Bucket 失败: %v", err)
 		return nil, err
 	}
-
-	resp = &types.CreateBucketRes{
-		BucketId: bucketID,
-	}
-
-	return
+	return &types.CreateBucketRes{BucketId: rpcRes.BucketId}, nil
 }

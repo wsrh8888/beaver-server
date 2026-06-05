@@ -1,13 +1,11 @@
 package logic
 
 import (
-	"beaver/app/platform/platform_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
 	"context"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -18,55 +16,34 @@ type GetVersionListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取版本列表
 func NewGetVersionListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetVersionListLogic {
-	return &GetVersionListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetVersionListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp *types.GetVersionListRes, err error) {
-	// 构建查询条件
-	query := l.svcCtx.DB
-
-	// 添加查询条件
-	if req.ArchitectureID > 0 {
-		query = query.Where("architecture_id = ?", req.ArchitectureID)
-	}
-
-	// 使用 list_query 进行查询
-	list, total, err := list_query.ListQuery(l.svcCtx.DB.Preload("Architecture"), platform_models.UpdateVersion{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
-		},
-		Where: query,
+	rpcRes, err := l.svcCtx.PlatformRpc.ListVersions(l.ctx, &platform_rpc.ListVersionsReq{
+		ArchitectureId: uint64(req.ArchitectureID),
+		Page:           int32(req.Page),
+		PageSize:       int32(req.PageSize),
 	})
-
 	if err != nil {
-		logx.Errorf("Failed to get versions: %v", err)
+		l.Errorf("获取版本列表失败: %v", err)
 		return nil, err
 	}
 
-	// 构建响应
-	versionList := make([]types.GetVersionListItem, 0, len(list))
-	for _, ver := range list {
-		versionList = append(versionList, types.GetVersionListItem{
-			VersionID:      uint(ver.Id),
-			ArchitectureID: ver.ArchitectureID,
+	list := make([]types.GetVersionListItem, 0, len(rpcRes.Versions))
+	for _, ver := range rpcRes.Versions {
+		list = append(list, types.GetVersionListItem{
+			VersionID:      uint(ver.VersionId),
+			ArchitectureID: uint(ver.ArchitectureId),
 			Version:        ver.Version,
 			FileKey:        ver.FileKey,
 			Description:    ver.Description,
 			ReleaseNotes:   ver.ReleaseNotes,
-			CreatedAt:      ver.CreatedAt.String(),
-			UpdatedAt:      ver.UpdatedAt.String(),
+			CreatedAt:      ver.CreatedAt,
+			UpdatedAt:      ver.UpdatedAt,
 		})
 	}
 
-	return &types.GetVersionListRes{
-		Total:    total,
-		Versions: versionList,
-	}, nil
+	return &types.GetVersionListRes{Total: rpcRes.Total, Versions: list}, nil
 }
