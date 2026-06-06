@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -52,8 +53,9 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			if svcCtx.Config.Domain != "" {
 				resp.FileURL = fmt.Sprintf("%s/api/file/preview/%s", svcCtx.Config.Domain, existingFile.FileKey)
 			} else {
-				// 如果未配置域名，返回相对路径
-				resp.FileURL = fmt.Sprintf("/api/file/preview/%s", existingFile.FileKey)
+				// 异常
+				response.Response(r, w, nil, errors.New("未配置域名"))
+				return
 			}
 
 			// 转换FileInfo为API响应格式

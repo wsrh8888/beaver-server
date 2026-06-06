@@ -102,6 +102,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 					UserID:   userId,
 					NickName: userInfo.NickName,
 					Avatar:   userInfo.Avatar,
+					UserType: int8(userInfo.UserType),
 				}
 			}
 		}

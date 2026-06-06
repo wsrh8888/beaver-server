@@ -49,5 +49,5 @@ func (l *CreateSensitiveWordLogic) CreateSensitiveWord(req *types.CreateSensitiv
 	}
 
 	l.svcCtx.RecordOperation(req.UserID, "create_sensitive_word", "sensitive_word", word, 0, "新增敏感词", "success", "")
-	return &types.CreateSensitiveWordRes{ID: uint64(row.ID)}, nil
+	return &types.CreateSensitiveWordRes{ID: uint64(row.Id)}, nil
 }

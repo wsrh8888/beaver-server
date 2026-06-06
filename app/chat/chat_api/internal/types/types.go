@@ -309,6 +309,7 @@ type Sender struct {
 	UserID   string `json:"userId"`
 	Avatar   string `json:"avatar"`
 	NickName string `json:"nickName"`
+	UserType int8   `json:"userType"`
 }
 
 type TextMsg struct {

@@ -18,7 +18,7 @@ func DeleteSensitiveWordHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewDeleteSensitiveWordLogic(r.Context(), svcCtx)
+		l := moderation.NewDeleteSensitiveWordLogic(r.Context(), svcCtx)
 		resp, err := l.DeleteSensitiveWord(&req)
 		response.Response(r, w, resp, err)
 	}

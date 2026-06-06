@@ -30,7 +30,7 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 		pageSize = 10
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.UpdateArchitecture{}).Preload("App")
+	db := l.svcCtx.DB.Model(&platform_models.UpdateArchitecture{})
 	if in.AppId != "" {
 		db = db.Where("app_id = ?", in.AppId)
 	}
@@ -50,16 +50,14 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 		return nil, err
 	}
 
+	appNameMap := l.loadAppNameMap(list)
+
 	items := make([]*platform_rpc.ArchitectureItem, 0, len(list))
 	for _, arch := range list {
-		appName := ""
-		if arch.App != nil {
-			appName = arch.App.Name
-		}
 		items = append(items, &platform_rpc.ArchitectureItem{
 			Id:          uint64(arch.Id),
 			AppId:       arch.AppID,
-			AppName:     appName,
+			AppName:     appNameMap[arch.AppID],
 			PlatformId:  uint32(arch.PlatformID),
 			ArchId:      uint32(arch.ArchID),
 			Description: arch.Description,
@@ -70,4 +68,37 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 	}
 
 	return &platform_rpc.ListArchitecturesRes{Total: total, Architectures: items}, nil
+}
+
+func (l *ListArchitecturesLogic) loadAppNameMap(list []platform_models.UpdateArchitecture) map[string]string {
+	appNameMap := make(map[string]string)
+	if len(list) == 0 {
+		return appNameMap
+	}
+
+	appIDs := make([]string, 0, len(list))
+	seen := make(map[string]struct{}, len(list))
+	for _, arch := range list {
+		if arch.AppID == "" {
+			continue
+		}
+		if _, ok := seen[arch.AppID]; ok {
+			continue
+		}
+		seen[arch.AppID] = struct{}{}
+		appIDs = append(appIDs, arch.AppID)
+	}
+	if len(appIDs) == 0 {
+		return appNameMap
+	}
+
+	var apps []platform_models.UpdateApp
+	if err := l.svcCtx.DB.Where("app_id IN ?", appIDs).Find(&apps).Error; err != nil {
+		l.Errorf("查询应用名称失败: %v", err)
+		return appNameMap
+	}
+	for _, app := range apps {
+		appNameMap[app.AppID] = app.Name
+	}
+	return appNameMap
 }

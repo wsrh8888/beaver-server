@@ -97,6 +97,7 @@ type (
 		UserID   string `json:"userId"`
 		Avatar   string `json:"avatar"`
 		NickName string `json:"nickName"`
+		UserType int8   `json:"userType"` // 1普通用户 2bot 3robot
 	}
 )
 
@@ -375,75 +376,75 @@ type (
 service chat {
 	@doc "发送消息"
 	@handler SendMsg
-	post /api/chat/sendMsg (SendMsgReq) returns (SendMsgRes)
+	post /api/chat/v1/sendMsg (SendMsgReq) returns (SendMsgRes)
 
 	@doc "获取会话id"
 	@handler ConversationInfo
-	post /api/chat/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes)
+	post /api/chat/v1/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes)
 
 	@doc "获取最近会话列表"
 	@handler recentChatList
-	get /api/chat/getRecentChatList (RecentChatListReq) returns (RecentChatListRes)
+	get /api/chat/v1/getRecentChatList (RecentChatListReq) returns (RecentChatListRes)
 
 	@doc "获取聊天记录"
 	@handler chatHistory
-	post /api/chat/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes)
+	post /api/chat/v1/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes)
 
 	@doc "搜索消息"
 	@handler searchMessages
-	post /api/chat/searchMessages (SearchMessagesReq) returns (SearchMessagesRes)
+	post /api/chat/v1/searchMessages (SearchMessagesReq) returns (SearchMessagesRes)
 
 	@doc "删除某个最近会话"
 	@handler deleteRecent
-	post /api/chat/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes)
+	post /api/chat/v1/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes)
 
 	@doc "置顶某个会话"
 	@handler pinnedChat
-	post /api/chat/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
+	post /api/chat/v1/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
 
 	@doc "设置会话免打扰"
 	@handler muteChat
-	post /api/chat/muteChat (MuteChatReq) returns (MuteChatRes)
+	post /api/chat/v1/muteChat (MuteChatReq) returns (MuteChatRes)
 
 	@doc "隐藏/显示会话"
 	@handler hideChat
-	post /api/chat/hideChat (HideChatReq) returns (HideChatRes)
+	post /api/chat/v1/hideChat (HideChatReq) returns (HideChatRes)
 
 	@doc "编辑消息"
 	@handler editMessage
-	post /api/chat/edit (EditMessageReq) returns (EditMessageRes)
+	post /api/chat/v1/edit (EditMessageReq) returns (EditMessageRes)
 
 	@doc "撤回消息"
 	@handler recallMessage
-	post /api/chat/recall (RecallMessageReq) returns (RecallMessageRes)
+	post /api/chat/v1/recall (RecallMessageReq) returns (RecallMessageRes)
 
 	@doc "批量删除消息(仅自己不可见)"
 	@handler deleteMessages
-	post /api/chat/deleteMessages (DeleteMessagesReq) returns (DeleteMessagesRes)
+	post /api/chat/v1/deleteMessages (DeleteMessagesReq) returns (DeleteMessagesRes)
 
 	@doc "转发消息"
 	@handler forwardMessage
-	post /api/chat/forward (ForwardMessageReq) returns (ForwardMessageRes)
+	post /api/chat/v1/forward (ForwardMessageReq) returns (ForwardMessageRes)
 
 	@doc "聊天数据同步"
 	@handler chatSync
-	post /api/chat/sync (ChatSyncReq) returns (ChatSyncRes)
+	post /api/chat/v1/sync (ChatSyncReq) returns (ChatSyncRes)
 
 	@doc "批量获取会话数据"
 	@handler getConversationsListByIds
-	post /api/chat/getConversationsListByIds (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
+	post /api/chat/v1/getConversationsListByIds (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
 
 	@doc "批量获取用户会话设置数据"
 	@handler getUserConversationSettingsListByIds
-	post /api/chat/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
+	post /api/chat/v1/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
 
 	@doc "更新会话已读序列号"
 	@handler updateReadSeq
-	post /api/chat/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
+	post /api/chat/v1/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
 
 	@doc "获取合并转发详情"
 	@handler getForwardDetails
-	get /api/chat/getForwardDetails (GetForwardDetailsReq) returns (GetForwardDetailsRes)
+	get /api/chat/v1/getForwardDetails (GetForwardDetailsReq) returns (GetForwardDetailsRes)
 }
 
 // goctl api go -api chat_api.api -dir . --home ../../../template

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"beaver/app/backend/backend_admin/internal/logic/open"
+	openLogic "beaver/app/backend/backend_admin/internal/logic/open"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/common/response"
@@ -18,7 +18,7 @@ func GetOpenWebhookLogListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewGetOpenWebhookLogListLogic(r.Context(), svcCtx)
+		l := openLogic.NewGetOpenWebhookLogListLogic(r.Context(), svcCtx)
 		resp, err := l.GetOpenWebhookLogList(&req)
 		response.Response(r, w, resp, err)
 	}

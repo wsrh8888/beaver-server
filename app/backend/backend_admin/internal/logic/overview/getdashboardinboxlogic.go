@@ -54,7 +54,7 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 					Category: "report", Title: "待处理举报",
 					Summary: fmt.Sprintf("%s 举报 %s", r.ReporterUserId, r.TargetId),
 					EntityID: fmt.Sprintf("%d", r.Id), CreatedAt: r.CreatedAt,
-					Action: fmt.Sprintf("/safety/reports?reportId=%d", r.Id),
+					Action: fmt.Sprintf("/safety/cases?tab=reports&reportId=%d", r.Id),
 				},
 			})
 		}
@@ -72,7 +72,7 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 					Category: "case", Title: "待处理工单",
 					Summary: fmt.Sprintf("%s · %s", c.CaseNo, c.Title),
 					EntityID: fmt.Sprintf("%d", c.Id), CreatedAt: c.CreatedAt.String(),
-					Action: fmt.Sprintf("/safety/cases?caseId=%d", c.Id),
+					Action: fmt.Sprintf("/safety/cases?tab=cases&caseId=%d", c.Id),
 				},
 			})
 		}

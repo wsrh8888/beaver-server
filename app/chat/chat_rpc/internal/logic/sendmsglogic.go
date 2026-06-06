@@ -554,6 +554,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		UserId:   sendUserID,
 		NickName: userInfo.NickName,
 		Avatar:   userInfo.Avatar,
+		UserType: userInfo.UserType,
 	}, nil
 }
 

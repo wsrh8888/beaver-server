@@ -18,7 +18,7 @@ func CreateSensitiveWordHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewCreateSensitiveWordLogic(r.Context(), svcCtx)
+		l := moderation.NewCreateSensitiveWordLogic(r.Context(), svcCtx)
 		resp, err := l.CreateSensitiveWord(&req)
 		response.Response(r, w, resp, err)
 	}

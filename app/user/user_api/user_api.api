@@ -61,6 +61,7 @@ type (
 		Email     string `json:"email"` // 邮箱
 		Gender    int8   `json:"gender"` // 性别
 		Status    int8   `json:"status"` // 状态
+		UserType  int8   `json:"userType"` // 1普通用户 2bot 3robot
 		Version   int64  `json:"version"` // 版本号
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
@@ -71,19 +72,19 @@ type (
 service user {
 	@doc "获取用户基础信息"
 	@handler userInfo
-	get /api/user/user_info (UserInfoReq) returns (UserInfoRes)
+	get /api/user/v1/user_info (UserInfoReq) returns (UserInfoRes)
 
 	@doc "更新用户基础信息（昵称、头像、个性签名、性别）"
 	@handler updateInfo
-	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes)
+	post /api/user/v1/update_info (UpdateInfoReq) returns (UpdateInfoRes)
 
 	@doc "修改用户邮箱（需要验证码）"
 	@handler updateEmail
-	post /api/user/update_email (UpdateEmailReq) returns (UpdateEmailRes)
+	post /api/user/v1/update_email (UpdateEmailReq) returns (UpdateEmailRes)
 
 	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
-	post /api/user/sync (UserSyncReq) returns (UserSyncRes)
+	post /api/user/v1/sync (UserSyncReq) returns (UserSyncRes)
 }
 
 // goctl api go -api user_api.api -dir . --home ../../../template

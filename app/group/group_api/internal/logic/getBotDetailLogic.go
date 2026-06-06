@@ -54,7 +54,7 @@ func (l *GetBotDetailLogic) GetBotDetail(req *types.GetBotDetailReq) (resp *type
 	}
 
 	// 4. 拼接完整 Webhook URL
-	fullWebhookURL := fmt.Sprintf("%s/api/webhook/%s?token=%s", l.svcCtx.Config.Domain, botInfoRes.Token, botInfoRes.Token)
+	fullWebhookURL := fmt.Sprintf("%s/api/open/bot_public/v1/send?token=%s", l.svcCtx.Config.Domain, botInfoRes.Token)
 
 	return &types.GetBotDetailRes{
 		BotID:         bot.BotID,

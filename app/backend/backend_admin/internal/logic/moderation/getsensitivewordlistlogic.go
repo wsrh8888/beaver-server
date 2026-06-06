@@ -58,13 +58,13 @@ func (l *GetSensitiveWordListLogic) GetSensitiveWordList(req *types.GetSensitive
 	list := make([]types.SensitiveWordInfo, 0, len(rows))
 	for _, row := range rows {
 		list = append(list, types.SensitiveWordInfo{
-			ID:        uint64(row.ID),
+			ID:        uint64(row.Id),
 			Word:      row.Word,
 			Category:  row.Category,
 			Level:     row.Level,
 			IsActive:  row.IsActive,
 			Remark:    row.Remark,
-			CreatedAt: row.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt: row.CreatedAt.String(),
 		})
 	}
 

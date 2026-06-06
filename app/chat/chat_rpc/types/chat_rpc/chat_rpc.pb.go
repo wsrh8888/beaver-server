@@ -1288,6 +1288,7 @@ type Sender struct {
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Avatar        string                 `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	NickName      string                 `protobuf:"bytes,3,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`
+	UserType      int32                  `protobuf:"varint,4,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1341,6 +1342,13 @@ func (x *Sender) GetNickName() string {
 		return x.NickName
 	}
 	return ""
+}
+
+func (x *Sender) GetUserType() int32 {
+	if x != nil {
+		return x.UserType
+	}
+	return 0
 }
 
 // 定义SendMsgRes消息

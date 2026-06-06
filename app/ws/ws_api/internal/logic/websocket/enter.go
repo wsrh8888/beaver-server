@@ -37,24 +37,52 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		}
 
 		if wsMessage.Command == "" {
+			if logBytes, err := json.Marshal(map[string]interface{}{
+				"userId":  req.UserID,
+				"content": json.RawMessage(p),
+				"source": map[string]string{
+					"platform":   req.Platform,
+					"deviceId":   req.DeviceID,
+					"remoteAddr": client.Conn.RemoteAddr().String(),
+					"userAgent":  r.Header.Get("User-Agent"),
+				},
+			}); err != nil {
+				logx.Errorf("WS 消息日志序列化失败, 用户: %s, 错误: %v", req.UserID, err)
+			} else {
+				logx.Infof("收到 WS 消息: %s", string(logBytes))
+			}
 			continue
 		}
 
 		cmd := wsCommandConst.Command(wsMessage.Command)
+		if logBytes, err := json.Marshal(map[string]interface{}{
+			"userId": req.UserID,
+			"content": map[string]interface{}{
+				"command": wsMessage.Command,
+				"content": wsMessage.Content,
+			},
+			"source": map[string]string{
+				"platform":   req.Platform,
+				"deviceId":   req.DeviceID,
+				"remoteAddr": client.Conn.RemoteAddr().String(),
+				"userAgent":  r.Header.Get("User-Agent"),
+			},
+		}); err != nil {
+			logx.Errorf("WS 消息日志序列化失败, 用户: %s, 错误: %v", req.UserID, err)
+		} else {
+			logx.Infof("收到 WS 消息: %s", string(logBytes))
+		}
 
 		// 控制帧：PING/PONG 直接处理，不发 ACK
 		switch cmd {
 		case wsCommandConst.PING:
-			fmt.Printf("收到 PING: 用户: %s, 原始时间戳: %d\n", req.UserID, wsMessage.Content.Timestamp)
 			heartbeat.HandleClientPing(client, wsMessage.Content.Timestamp)
 			continue
 		case wsCommandConst.PONG:
-			// 收到客户端对服务端 PING 的回复，无需处理
-			fmt.Printf("收到 PONG: 用户: %s, 时间戳: %d\n", req.UserID, wsMessage.Content.Timestamp)
 			continue
 		case wsCommandConst.USER_PROFILE, wsCommandConst.NOTIFICATION, wsCommandConst.EMOJI:
 			// 仅服务端推送，客户端不应发送
-			fmt.Printf("客户端不应发送此命令, 用户: %s, 命令: %s\n", req.UserID, cmd)
+			logx.Infof("客户端不应发送此命令, 用户: %s, 命令: %s", req.UserID, cmd)
 			continue
 		}
 
@@ -70,7 +98,7 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		case wsCommandConst.CHAT_MESSAGE:
 			handlerErr = chat_message.Handle(ctx, svcCtx, req, r, client, wsMessage.Content)
 		default:
-			fmt.Printf("未支持的命令类型, 用户: %s, 命令: %s\n", req.UserID, wsMessage.Command)
+			logx.Infof("未支持的命令类型, 用户: %s, 命令: %s", req.UserID, wsMessage.Command)
 		}
 
 		if handlerErr != nil {

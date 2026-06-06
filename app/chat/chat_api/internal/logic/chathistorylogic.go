@@ -81,6 +81,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 					UserID:   userId,
 					NickName: userInfo.NickName,
 					Avatar:   userInfo.Avatar,
+					UserType: int8(userInfo.UserType),
 				}
 			}
 		}

@@ -11,6 +11,4 @@ type UpdateVersion struct {
 	FileKey        string `json:"fileKey"`
 	Description    string `json:"description"`
 	ReleaseNotes   string `json:"releaseNotes"`
-
-	Architecture *UpdateArchitecture `gorm:"foreignKey:ArchitectureID"`
 }

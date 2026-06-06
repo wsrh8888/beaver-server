@@ -45,6 +45,7 @@ type UserSyncItem struct {
 	Email     string `json:"email"`     // 邮箱
 	Gender    int8   `json:"gender"`    // 性别
 	Status    int8   `json:"status"`    // 状态
+	UserType  int8   `json:"userType"`  // 1普通用户 2bot 3robot
 	Version   int64  `json:"version"`   // 版本号
 	CreatedAt int64  `json:"createdAt"` // 创建时间戳
 	UpdatedAt int64  `json:"updatedAt"` // 更新时间戳

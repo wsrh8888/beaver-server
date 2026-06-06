@@ -138,39 +138,39 @@ type (
 service notification {
 	@doc "按ID拉取通知事件明细（数据库同步）"
 	@handler getEventsByIds
-	post /api/notification/getEventsByIds (getEventsByIdsReq) returns (getEventsByIdsRes)
+	post /api/notification/v1/getEventsByIds (getEventsByIdsReq) returns (getEventsByIdsRes)
 
 	@doc "按ID拉取收件箱明细（数据库同步）"
 	@handler getInboxByIds
-	post /api/notification/getInboxByIds (getInboxByIdsReq) returns (getInboxByIdsRes)
+	post /api/notification/v1/getInboxByIds (getInboxByIdsReq) returns (getInboxByIdsRes)
 
 	@doc "按分类拉取通知已读游标（数据库同步）"
 	@handler getReadCursors
-	post /api/notification/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
+	post /api/notification/v1/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
 
 	@doc "按事件ID标记单个通知已读"
 	@handler markReadByEvent
-	post /api/notification/markReadByEvent (markReadByEventReq) returns (markReadByEventRes)
+	post /api/notification/v1/markReadByEvent (markReadByEventReq) returns (markReadByEventRes)
 
 	@doc "按事件ID删除单个通知"
 	@handler deleteNotification
-	post /api/notification/deleteNotification (deleteNotificationReq) returns (deleteNotificationRes)
+	post /api/notification/v1/deleteNotification (deleteNotificationReq) returns (deleteNotificationRes)
 
 	@doc "按分类标记所有通知为已读"
 	@handler markReadByCategory
-	post /api/notification/markReadByCategory (markReadByCategoryReq) returns (markReadByCategoryRes)
+	post /api/notification/v1/markReadByCategory (markReadByCategoryReq) returns (markReadByCategoryRes)
 
 	@doc "按分类游标标记已读（高效批量，高级用法）"
 	@handler markReadByCursor
-	post /api/notification/markReadByCursor (markReadByCursorReq) returns (markReadByCursorRes)
+	post /api/notification/v1/markReadByCursor (markReadByCursorReq) returns (markReadByCursorRes)
 
 	@doc "获取未读汇总（红点）"
 	@handler getUnreadSummary
-	post /api/notification/getUnreadSummary (getUnreadSummaryReq) returns (getUnreadSummaryRes)
+	post /api/notification/v1/getUnreadSummary (getUnreadSummaryReq) returns (getUnreadSummaryRes)
 
 	@doc "注册或更新离线推送 Token（FCM/APNs）"
 	@handler registerPushToken
-	post /api/notification/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
+	post /api/notification/v1/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template

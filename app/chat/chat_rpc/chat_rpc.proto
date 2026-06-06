@@ -157,6 +157,7 @@ message Sender {
   string user_id = 1;
   string avatar = 2;
   string nick_name = 3;
+  int32 user_type = 4; // 1普通用户 2bot 3robot
 }
 
 // 定义SendMsgRes消息

@@ -1,9 +1,26 @@
 package main
 
 import (
+	"beaver/app/auth/auth_models"
+	"beaver/app/backend/backend_models"
+	"beaver/app/call/call_models"
+	"beaver/app/chat/chat_models"
+	"beaver/app/datasync/datasync_models"
+	"beaver/app/emoji/emoji_models"
+	"beaver/app/file/file_models"
+	"beaver/app/friend/friend_models"
+	"beaver/app/group/group_models"
+	"beaver/app/moment/moment_models"
+	"beaver/app/notification/notification_models"
+	"beaver/app/open/open_models"
+	"beaver/app/platform/platform_models"
+	"beaver/app/user/user_models"
+	"beaver/core/coregorm"
 	"beaver/database"
 	"flag"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 type Options struct {
@@ -20,13 +37,21 @@ func main() {
 		return
 	}
 
-	dbMap, err := database.RunMigrations()
-	if err != nil {
-		fmt.Println(err)
-		return
+	serverDSN := "root:123456@tcp(127.0.0.1:3306)/?charset=utf8mb4&parseTime=True&loc=Local"
+	serverDB := coregorm.InitGorm(serverDSN)
+
+	databases := []string{
+		"beaver_user", "beaver_auth", "beaver_friend", "beaver_group", "beaver_chat",
+		"beaver_moment", "beaver_emoji", "beaver_file", "beaver_notification", "beaver_call",
+		"beaver_open", "beaver_platform", "beaver_backend", "beaver_datasync",
+	}
+	for _, name := range databases {
+		if err := serverDB.Exec("CREATE DATABASE IF NOT EXISTS `" + name + "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci").Error; err != nil {
+			fmt.Printf("创建数据库 %s 失败: %v\n", name, err)
+			return
+		}
 	}
 
-<<<<<<< HEAD
 	migrations := []struct {
 		name string
 		dsn  string
@@ -216,13 +241,6 @@ func main() {
 	_ = database.InitUpdateApp(platformDB)
 	_ = database.InitUpdateStrategy(platformDB)
 	if err := database.InitDefaultUser(userDB, authDB, openDB); err != nil {
-=======
-	if err := database.InitDefaultUser(
-		dbMap["beaver_user"],
-		dbMap["beaver_auth"],
-		dbMap["beaver_open"],
-	); err != nil {
->>>>>>> 5b160f761511999451c7965cce0863719701c988
 		fmt.Printf("默认用户初始化失败: %v\n", err)
 		return
 	}

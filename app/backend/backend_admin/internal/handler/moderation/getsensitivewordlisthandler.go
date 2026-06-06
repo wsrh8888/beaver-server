@@ -18,7 +18,7 @@ func GetSensitiveWordListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewGetSensitiveWordListLogic(r.Context(), svcCtx)
+		l := moderation.NewGetSensitiveWordListLogic(r.Context(), svcCtx)
 		resp, err := l.GetSensitiveWordList(&req)
 		response.Response(r, w, resp, err)
 	}

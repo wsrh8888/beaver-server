@@ -7,13 +7,11 @@ import (
 // UpdateArchitecture 架构信息表
 type UpdateArchitecture struct {
 	models.Model
-	AppID       string          `json:"appId" gorm:"type:varchar(64);index"`
-	App         *UpdateApp      `json:"app" gorm:"foreignKey:AppID;references:AppID"`
-	PlatformID  uint            `json:"platformId"`
-	ArchID      uint            `json:"archId"`
-	Description string          `json:"description"`
-	Versions    []UpdateVersion `gorm:"foreignKey:ArchitectureID"`
-	IsActive    bool            `json:"isActive"`
+	AppID       string `json:"appId" gorm:"type:varchar(64);index"`
+	PlatformID  uint   `json:"platformId"`
+	ArchID      uint   `json:"archId"`
+	Description string `json:"description"`
+	IsActive    bool   `json:"isActive"`
 }
 
 const (

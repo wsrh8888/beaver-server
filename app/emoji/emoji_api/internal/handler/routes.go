@@ -15,85 +15,85 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 添加表情，并且自动收藏
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/add",
+				Path:    "/api/emoji/v1/add",
 				Handler: AddEmojiHandler(serverCtx),
 			},
 			{
 				// 批量获取用户收藏的表情记录详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/collects-by-ids",
+				Path:    "/api/emoji/v1/collects-by-ids",
 				Handler: GetEmojiCollectsByIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取表情详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/emojis-by-ids",
+				Path:    "/api/emoji/v1/emojis-by-ids",
 				Handler: GetEmojisByIdsHandler(serverCtx),
 			},
 			{
 				// 收藏或者取消收藏表情
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/favoriteEmoji",
+				Path:    "/api/emoji/v1/favoriteEmoji",
 				Handler: UpdateFavoriteEmojiHandler(serverCtx),
 			},
 			{
 				// 获取用户收藏的表情列表
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/favoriteList",
+				Path:    "/api/emoji/v1/favoriteList",
 				Handler: GetEmojisListHandler(serverCtx),
 			},
 			{
 				// 获取用户收藏的表情包列表
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/favoritePackageList",
+				Path:    "/api/emoji/v1/favoritePackageList",
 				Handler: GetUserFavoritePackagesHandler(serverCtx),
 			},
 			{
 				// 按ID批量查询表情基础信息（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/getEmojisByUuids",
+				Path:    "/api/emoji/v1/getEmojisByUuids",
 				Handler: GetEmojisByUuidsHandler(serverCtx),
 			},
 			{
 				// 批量获取用户收藏的表情包记录详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/package-collects-by-ids",
+				Path:    "/api/emoji/v1/package-collects-by-ids",
 				Handler: GetEmojiPackageCollectsByIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取表情包内容详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/package-contents-by-package-ids",
+				Path:    "/api/emoji/v1/package-contents-by-package-ids",
 				Handler: GetEmojiPackageContentsByPackageIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取表情包内容详情（通过relationIds，数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/package-contents-by-relation-ids",
+				Path:    "/api/emoji/v1/package-contents-by-relation-ids",
 				Handler: GetEmojiPackageContentsByRelationIdsHandler(serverCtx),
 			},
 			{
 				// 收藏或取消收藏表情包
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageFavorite",
+				Path:    "/api/emoji/v1/packageFavorite",
 				Handler: UpdateFavoriteEmojiPackageHandler(serverCtx),
 			},
 			{
 				// 获取表情包详情
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageInfo",
+				Path:    "/api/emoji/v1/packageInfo",
 				Handler: GetEmojiPackageDetailHandler(serverCtx),
 			},
 			{
 				// 获取表情包列表
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/packageList",
+				Path:    "/api/emoji/v1/packageList",
 				Handler: GetEmojiPackagesHandler(serverCtx),
 			},
 			{
 				// 批量获取表情包详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/packages-by-ids",
+				Path:    "/api/emoji/v1/packages-by-ids",
 				Handler: GetEmojiPackagesByIdsHandler(serverCtx),
 			},
 		},

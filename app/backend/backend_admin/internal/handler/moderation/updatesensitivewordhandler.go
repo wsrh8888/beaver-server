@@ -18,7 +18,7 @@ func UpdateSensitiveWordHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewUpdateSensitiveWordLogic(r.Context(), svcCtx)
+		l := moderation.NewUpdateSensitiveWordLogic(r.Context(), svcCtx)
 		resp, err := l.UpdateSensitiveWord(&req)
 		response.Response(r, w, resp, err)
 	}

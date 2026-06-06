@@ -15,25 +15,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
 				Method:  http.MethodPost,
-				Path:    "/api/user/sync",
+				Path:    "/api/user/v1/sync",
 				Handler: userSyncHandler(serverCtx),
 			},
 			{
 				// 修改用户邮箱（需要验证码）
 				Method:  http.MethodPost,
-				Path:    "/api/user/update_email",
+				Path:    "/api/user/v1/update_email",
 				Handler: updateEmailHandler(serverCtx),
 			},
 			{
 				// 更新用户基础信息（昵称、头像、个性签名、性别）
 				Method:  http.MethodPost,
-				Path:    "/api/user/update_info",
+				Path:    "/api/user/v1/update_info",
 				Handler: updateInfoHandler(serverCtx),
 			},
 			{
 				// 获取用户基础信息
 				Method:  http.MethodGet,
-				Path:    "/api/user/user_info",
+				Path:    "/api/user/v1/user_info",
 				Handler: userInfoHandler(serverCtx),
 			},
 		},

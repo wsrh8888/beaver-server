@@ -9,14 +9,14 @@ import (
 type GroupModel struct {
 	models.Model
 	GroupID   string     `gorm:"size:64;unique;index" json:"groupId"`
-	Type      int8       `gorm:"default:1" json:"type"`                                               // 群类型：1正常群 2讨论组 ...
-	Title     string     `gorm:"size:32;index" json:"title"`                                          // 群名
-	Avatar    string     `gorm:"size:256;default:a8ba5d19ea54a91aec17dec0ad5000e6.png" json:"avatar"` // 群头像文件名
-	CreatorID string     `gorm:"size:64;index" json:"creatorId"`                                      // 创建者ID
-	Notice    string     `gorm:"type:text" json:"notice"`                                             // 当前公告内容
-	JoinType  int8       `gorm:"not null;default:0" json:"joinType"`                                  // 0自由加入 1需审批 2不可加入
-	IsMuteAll bool       `gorm:"not null;default:false" json:"isMuteAll"`                             // 是否全员禁言
-	MuteAllAt *time.Time `json:"muteAllAt"`                                                           // 开启全员禁言的时间
-	Status    int8       `gorm:"default:1" json:"status"`                                             // 群状态：1正常 2冻结 3解散
-	Version   int64      `gorm:"not null;default:0;index" json:"version"`                             // 群组版本号
+	Type      int8       `gorm:"default:1" json:"type"`                                                                                                   // 群类型：1正常群 2讨论组 ...
+	Title     string     `gorm:"size:32;index" json:"title"`                                                                                              // 群名
+	Avatar    string     `gorm:"size:256;default:https://server.wsrh8888.com/beaver/api/file/preview/a8ba5d19ea54a91aec17dec0ad5000e6.png" json:"avatar"` // 群头像文件名
+	CreatorID string     `gorm:"size:64;index" json:"creatorId"`                                                                                          // 创建者ID
+	Notice    string     `gorm:"type:text" json:"notice"`                                                                                                 // 当前公告内容
+	JoinType  int8       `gorm:"not null;default:0" json:"joinType"`                                                                                      // 0自由加入 1需审批 2不可加入
+	IsMuteAll bool       `gorm:"not null;default:false" json:"isMuteAll"`                                                                                 // 是否全员禁言
+	MuteAllAt *time.Time `json:"muteAllAt"`                                                                                                               // 开启全员禁言的时间
+	Status    int8       `gorm:"default:1" json:"status"`                                                                                                 // 群状态：1正常 2冻结 3解散
+	Version   int64      `gorm:"not null;default:0;index" json:"version"`                                                                                 // 群组版本号
 }
