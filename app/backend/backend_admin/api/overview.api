@@ -15,6 +15,7 @@ type (
 		PendingFeedbackCount  int64 `json:"pendingFeedbackCount"`
 		PendingReportCount    int64 `json:"pendingReportCount"`
 		PendingCaseCount      int64 `json:"pendingCaseCount"`
+		OnlineUserCount       int64 `json:"onlineUserCount"`
 	}
 )
 

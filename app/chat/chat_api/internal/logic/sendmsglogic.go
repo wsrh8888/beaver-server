@@ -47,7 +47,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.ImageMsgType:
 		if apiMsg.ImageMsg != nil {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
-				FileKey: apiMsg.ImageMsg.FileKey,
+				FileUrl: apiMsg.ImageMsg.FileUrl,
 				Width:   int32(apiMsg.ImageMsg.Width),
 				Height:  int32(apiMsg.ImageMsg.Height),
 				Size:    apiMsg.ImageMsg.Size,
@@ -56,18 +56,18 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.VideoMsgType:
 		if apiMsg.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileKey:      apiMsg.VideoMsg.FileKey,
+				FileUrl:       apiMsg.VideoMsg.FileUrl,
 				Width:        int32(apiMsg.VideoMsg.Width),
 				Height:       int32(apiMsg.VideoMsg.Height),
 				Duration:     int32(apiMsg.VideoMsg.Duration),
-				ThumbnailKey: apiMsg.VideoMsg.ThumbnailKey,
+				ThumbnailUrl: apiMsg.VideoMsg.ThumbnailUrl,
 				Size:         apiMsg.VideoMsg.Size,
 			}
 		}
 	case ctype.FileMsgType:
 		if apiMsg.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:   apiMsg.FileMsg.FileKey,
+				FileUrl:   apiMsg.FileMsg.FileUrl,
 				FileName:  apiMsg.FileMsg.FileName,
 				Size:      apiMsg.FileMsg.Size,
 				MimeType:  apiMsg.FileMsg.MimeType,
@@ -78,7 +78,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.VoiceMsgType:
 		if apiMsg.VoiceMsg != nil {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
-				FileKey:  apiMsg.VoiceMsg.FileKey,
+				FileUrl:  apiMsg.VoiceMsg.FileUrl,
 				Duration: int32(apiMsg.VoiceMsg.Duration),
 				Size:     apiMsg.VoiceMsg.Size,
 			}
@@ -86,7 +86,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.EmojiMsgType:
 		if apiMsg.EmojiMsg != nil {
 			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
-				FileKey:   apiMsg.EmojiMsg.FileKey,
+				FileUrl:   apiMsg.EmojiMsg.FileUrl,
 				EmojiId:   apiMsg.EmojiMsg.EmojiID,
 				PackageId: apiMsg.EmojiMsg.PackageID,
 			}
@@ -101,7 +101,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.AudioFileMsgType:
 		if apiMsg.AudioFileMsg != nil {
 			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-				FileKey:  apiMsg.AudioFileMsg.FileKey,
+				FileUrl:  apiMsg.AudioFileMsg.FileUrl,
 				FileName: apiMsg.AudioFileMsg.FileName,
 				Duration: int32(apiMsg.AudioFileMsg.Duration),
 				Size:     apiMsg.AudioFileMsg.Size,

@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func UpdateCityStrategyHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func UpsertReleasePolicyHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateCityStrategyReq
+		var req types.UpsertReleasePolicyReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := logic.NewUpdateCityStrategyLogic(r.Context(), svcCtx)
-		resp, err := l.UpdateCityStrategy(&req)
+		l := logic.NewUpsertReleasePolicyLogic(r.Context(), svcCtx)
+		resp, err := l.UpsertReleasePolicy(&req)
 		response.Response(r, w, resp, err)
 	}
 }

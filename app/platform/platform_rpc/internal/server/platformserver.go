@@ -98,14 +98,14 @@ func (s *PlatformServer) ListAppVersions(ctx context.Context, in *platform_rpc.L
 	return l.ListAppVersions(in)
 }
 
-func (s *PlatformServer) UpdateCityStrategy(ctx context.Context, in *platform_rpc.UpdateCityStrategyReq) (*platform_rpc.UpdateCityStrategyRes, error) {
-	l := logic.NewUpdateCityStrategyLogic(ctx, s.svcCtx)
-	return l.UpdateCityStrategy(in)
+func (s *PlatformServer) UpsertReleasePolicy(ctx context.Context, in *platform_rpc.UpsertReleasePolicyReq) (*platform_rpc.UpsertReleasePolicyRes, error) {
+	l := logic.NewUpsertReleasePolicyLogic(ctx, s.svcCtx)
+	return l.UpsertReleasePolicy(in)
 }
 
-func (s *PlatformServer) ListCityStrategies(ctx context.Context, in *platform_rpc.ListCityStrategiesReq) (*platform_rpc.ListCityStrategiesRes, error) {
-	l := logic.NewListCityStrategiesLogic(ctx, s.svcCtx)
-	return l.ListCityStrategies(in)
+func (s *PlatformServer) ListReleasePolicies(ctx context.Context, in *platform_rpc.ListReleasePoliciesReq) (*platform_rpc.ListReleasePoliciesRes, error) {
+	l := logic.NewListReleasePoliciesLogic(ctx, s.svcCtx)
+	return l.ListReleasePolicies(in)
 }
 
 func (s *PlatformServer) SubmitFeedback(ctx context.Context, in *platform_rpc.SubmitFeedbackReq) (*platform_rpc.SubmitFeedbackRes, error) {

@@ -95,7 +95,7 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 	}
 
 	return &types.CreateIncomingWebhookRes{
-		Webhook: toIncomingWebhookInfo(&bot, l.svcCtx.Config.ApiBaseUrl, true),
+		Webhook: toIncomingWebhookInfo(&bot, l.svcCtx.Config.Domain, true),
 	}, nil
 }
 

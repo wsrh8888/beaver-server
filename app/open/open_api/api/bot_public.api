@@ -23,13 +23,13 @@ type (
 	}
 
 	BotImageContent {
-		URL    string `json:"url"` // string 图片文件 URL 或 fileKey
+		URL    string `json:"url"` // string 图片完整 URL
 		Width  int32  `json:"width,optional"` // int32 图片宽度像素，可选
 		Height int32  `json:"height,optional"` // int32 图片高度像素，可选
 	}
 
 	BotVideoContent {
-		URL          string `json:"url"` // string 视频文件 URL 或 fileKey
+		URL          string `json:"url"` // string 视频完整 URL
 		Width        int32  `json:"width,optional"` // int32 视频宽度像素，可选
 		Height       int32  `json:"height,optional"` // int32 视频高度像素，可选
 		Duration     int32  `json:"duration,optional"` // int32 时长秒，可选
@@ -37,27 +37,27 @@ type (
 	}
 
 	BotFileContent {
-		URL      string `json:"url"` // string 文件 URL 或 fileKey
+		URL      string `json:"url"` // string 文件完整 URL
 		FileName string `json:"fileName"` // string 文件名
 		FileSize int64  `json:"fileSize"` // int64 文件大小字节
 		MimeType string `json:"mimeType,optional"` // string MIME 类型，可选
 	}
 
 	BotVoiceContent {
-		URL      string `json:"url"` // string 语音文件 URL 或 fileKey
+		URL      string `json:"url"` // string 语音完整 URL
 		Duration int32  `json:"duration,optional"` // int32 时长秒，可选
 		FileSize int64  `json:"fileSize,optional"` // int64 文件大小字节，可选
 	}
 
 	BotAudioFileContent {
-		URL      string `json:"url"` // string 音频文件 URL 或 fileKey
+		URL      string `json:"url"` // string 音频完整 URL
 		FileName string `json:"fileName"` // string 文件名
 		Duration int32  `json:"duration,optional"` // int32 时长秒，可选
 		FileSize int64  `json:"fileSize,optional"` // int64 文件大小字节，可选
 	}
 
 	BotEmojiContent {
-		URL    string `json:"url"` // string 表情图片 URL 或 fileKey
+		URL    string `json:"url"` // string 表情图片完整 URL
 		Width  int64  `json:"width,optional"` // int64 宽度像素，可选
 		Height int64  `json:"height,optional"` // int64 高度像素，可选
 	}

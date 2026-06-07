@@ -37,18 +37,14 @@ func (l *DeleteVersionLogic) DeleteVersion(in *platform_rpc.DeleteVersionReq) (*
 		return nil, err
 	}
 
-	var strategies []platform_models.UpdateStrategy
-	if err := l.svcCtx.DB.Find(&strategies).Error; err != nil {
+	var policies []platform_models.UpdateReleasePolicy
+	if err := l.svcCtx.DB.Find(&policies).Error; err != nil {
 		return nil, err
 	}
-	for _, s := range strategies {
-		if s.Strategy == nil {
-			continue
-		}
-		for _, item := range *s.Strategy {
-			if item.VersionID == uint(in.VersionId) {
-				return nil, status.Error(codes.FailedPrecondition, "版本已被发布策略引用，请先调整策略")
-			}
+	vid := uint(in.VersionId)
+	for _, p := range policies {
+		if p.StableVersionID == vid || p.GrayVersionID == vid {
+			return nil, status.Error(codes.FailedPrecondition, "版本已被发版策略引用，请先调整策略")
 		}
 	}
 

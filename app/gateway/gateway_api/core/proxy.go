@@ -89,6 +89,9 @@ func (p Proxy) oauthSecretAuth(res http.ResponseWriter, req *http.Request, path 
 
 var openApiJwtRoutes = []string{
 	`/api/open/oauth/v1/h5_authcode`,
+	`/api/open/oauth/v1/qrcode_scan`,
+	`/api/open/oauth/v1/qrcode_confirm`,
+	`/api/open/oauth/v1/qrcode_cancel`,
 }
 
 func isOpenApiPassThrough(path string) bool {

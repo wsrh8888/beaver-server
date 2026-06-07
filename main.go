@@ -191,7 +191,7 @@ func main() {
 					&platform_models.UpdateApp{},
 					&platform_models.UpdateArchitecture{},
 					&platform_models.UpdateVersion{},
-					&platform_models.UpdateStrategy{},
+					&platform_models.UpdateReleasePolicy{},
 					&platform_models.UpdateReport{},
 				)
 			},
@@ -238,8 +238,7 @@ func main() {
 	authDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local")
 	openDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local")
 	_ = database.InitFileData(fileDB)
-	_ = database.InitUpdateApp(platformDB)
-	_ = database.InitUpdateStrategy(platformDB)
+	_ = database.SeedUpdateData(platformDB)
 	if err := database.InitDefaultUser(userDB, authDB, openDB); err != nil {
 		fmt.Printf("默认用户初始化失败: %v\n", err)
 		return

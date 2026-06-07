@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-// AuthDeviceModel 登录设备（auth 库：设备列表、踢下线、多端登录）
+// AuthDeviceModel 登录设备档案（MySQL 持久化：设备列表、踢下线、多端登录）。
+// 与 WS 实时在线态（Redis coreonline）分离：这里是「登记过哪些设备」，不是「此刻是否连着 WS」。
 type AuthDeviceModel struct {
 	models.Model
 	UserID        string    `gorm:"size:64;not null;uniqueIndex:idx_auth_user_device" json:"userId"`

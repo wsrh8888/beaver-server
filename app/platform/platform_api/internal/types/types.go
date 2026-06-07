@@ -3,7 +3,6 @@ package types
 
 type GetLatestVersionReq struct {
 	UserID     string `header:"Beaver-User-Id,optional"`
-	CityName   string `header:"X-City-Name,optional"`
 	DeviceID   string `header:"deviceId"`
 	AppID      string `json:"appId"`
 	PlatformID uint   `json:"platformId"`
@@ -13,9 +12,10 @@ type GetLatestVersionReq struct {
 
 type GetLatestVersionRes struct {
 	HasUpdate      bool   `json:"hasUpdate"`
+	ForceUpdate    bool   `json:"forceUpdate"`
 	ArchitectureID uint   `json:"architectureId,omitempty"`
 	Version        string `json:"version,omitempty"`
-	FileKey        string `json:"fileKey"`
+	FileUrl        string `json:"fileUrl,omitempty"`
 	Size           int64  `json:"size"`
 	MD5            string `json:"md5"`
 	Description    string `json:"description,omitempty"`

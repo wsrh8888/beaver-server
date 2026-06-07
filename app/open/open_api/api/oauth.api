@@ -14,6 +14,39 @@ type (
 	}
 )
 
+type (
+	// 移动端标记已扫码（IM App 已登录用户）
+	ScanQrCodeReq {
+		UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
+		SceneID string `json:"sceneId"` // string 扫码场景 ID
+	}
+	ScanQrCodeRes {
+		Success bool `json:"success"` // bool 是否标记成功
+	}
+)
+
+type (
+	// 移动端确认扫码授权（IM App 已登录用户）
+	ConfirmQrCodeReq {
+		UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
+		SceneID string `json:"sceneId"` // string 扫码场景 ID
+	}
+	ConfirmQrCodeRes {
+		Success bool `json:"success"` // bool 是否确认成功
+	}
+)
+
+type (
+	// 移动端取消扫码授权
+	CancelQrCodeReq {
+		UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
+		SceneID string `json:"sceneId"` // string 扫码场景 ID
+	}
+	CancelQrCodeRes {
+		Success bool `json:"success"` // bool 是否取消成功
+	}
+)
+
 @server (
 	group: oauth
 )
@@ -21,4 +54,16 @@ service open {
 	@doc "PC 客户端生成 authCode（用于快捷登录）"
 	@handler GetH5AuthCode
 	post /api/open/oauth/v1/h5_authcode (GetH5AuthCodeReq) returns (GetH5AuthCodeRes)
+
+	@doc "移动端标记已扫码"
+	@handler ScanQrCode
+	post /api/open/oauth/v1/qrcode_scan (ScanQrCodeReq) returns (ScanQrCodeRes)
+
+	@doc "移动端确认扫码授权"
+	@handler ConfirmQrCode
+	post /api/open/oauth/v1/qrcode_confirm (ConfirmQrCodeReq) returns (ConfirmQrCodeRes)
+
+	@doc "移动端取消扫码授权"
+	@handler CancelQrCode
+	post /api/open/oauth/v1/qrcode_cancel (CancelQrCodeReq) returns (CancelQrCodeRes)
 }

@@ -2,10 +2,11 @@ package oauth_secret
 
 import (
 	"context"
+	"errors"
 
-	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
+	"beaver/app/open/open_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,8 +26,16 @@ func NewRevokeTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Revok
 }
 
 func (l *RevokeTokenLogic) RevokeToken(req *types.RevokeTokenReq) (resp *types.RevokeTokenRes, err error) {
-	if err := oauthutil.RevokeOAuthToken(l.svcCtx.DB, req.Token); err != nil {
-		return nil, err
+	if req.Token == "" {
+		return nil, errors.New("token 不能为空")
+	}
+
+	result := l.svcCtx.DB.Where("token = ? OR refresh_token = ?", req.Token, req.Token).Delete(&open_models.OpenOAuthToken{})
+	if result.Error != nil {
+		return nil, errors.New("撤销令牌失败")
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("令牌不存在")
 	}
 
 	return &types.RevokeTokenRes{Success: true}, nil

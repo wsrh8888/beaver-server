@@ -13,6 +13,7 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/core/coreonline"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -129,6 +130,14 @@ func (l *GetDashboardOverviewLogic) GetDashboardOverview(req *types.GetDashboard
 	} else {
 		resp.PendingCaseCount = pendingCases
 	}
+
+	resp.OnlineUserCount = countRPC(l, "在线用户", func() (int64, error) {
+		online, err := coreonline.List(l.svcCtx.Redis)
+		if err != nil {
+			return 0, err
+		}
+		return int64(len(online)), nil
+	})
 
 	return resp, nil
 }

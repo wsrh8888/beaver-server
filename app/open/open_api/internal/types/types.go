@@ -10,131 +10,140 @@ type AddRobotToGroupRes struct {
 }
 
 type BotAtInfo struct {
-	AtMobiles []string `json:"atMobiles,optional"`
-	AtUserIDs []string `json:"atUserIds,optional"`
-	IsAtAll   bool     `json:"isAtAll,optional"`
+	AtMobiles []string `json:"atMobiles,optional"` // []string 要 @ 的手机号列表，可选
+	AtUserIDs []string `json:"atUserIds,optional"` // []string 要 @ 的 IM 用户 ID 列表，可选
+	IsAtAll   bool     `json:"isAtAll,optional"`   // bool 是否 @ 全体成员，可选
 }
 
 type BotAudioFileContent struct {
-	URL      string `json:"url"`
-	FileName string `json:"fileName"`
-	Duration int32  `json:"duration,optional"`
-	FileSize int64  `json:"fileSize,optional"`
+	URL      string `json:"url"`               // string 音频完整 URL
+	FileName string `json:"fileName"`          // string 文件名
+	Duration int32  `json:"duration,optional"` // int32 时长秒，可选
+	FileSize int64  `json:"fileSize,optional"` // int64 文件大小字节，可选
 }
 
 type BotCallContent struct {
-	RoomID   string `json:"roomId"`
-	CallType int32  `json:"callType"`
-	Status   int32  `json:"status"`
-	Duration int64  `json:"duration"`
+	RoomID   string `json:"roomId"`   // string 通话房间 ID
+	CallType int32  `json:"callType"` // int32 通话类型
+	Status   int32  `json:"status"`   // int32 通话状态
+	Duration int64  `json:"duration"` // int64 通话时长秒
 }
 
 type BotEmojiContent struct {
-	URL    string `json:"url"`
-	Width  int64  `json:"width,optional"`
-	Height int64  `json:"height,optional"`
+	URL    string `json:"url"`             // string 表情图片完整 URL
+	Width  int64  `json:"width,optional"`  // int64 宽度像素，可选
+	Height int64  `json:"height,optional"` // int64 高度像素，可选
 }
 
 type BotFileContent struct {
-	URL      string `json:"url"`
-	FileName string `json:"fileName"`
-	FileSize int64  `json:"fileSize"`
-	MimeType string `json:"mimeType,optional"`
+	URL      string `json:"url"`               // string 文件完整 URL
+	FileName string `json:"fileName"`          // string 文件名
+	FileSize int64  `json:"fileSize"`          // int64 文件大小字节
+	MimeType string `json:"mimeType,optional"` // string MIME 类型，可选
 }
 
 type BotForwardContent struct {
-	Title    string `json:"title"`
-	RecordID string `json:"recordId"`
-	Count    int32  `json:"count"`
+	Title    string `json:"title"`    // string 转发标题
+	RecordID string `json:"recordId"` // string 转发记录 ID
+	Count    int32  `json:"count"`    // int32 转发消息条数
 }
 
 type BotImageContent struct {
-	URL    string `json:"url"`
-	Width  int32  `json:"width,optional"`
-	Height int32  `json:"height,optional"`
+	URL    string `json:"url"`             // string 图片完整 URL
+	Width  int32  `json:"width,optional"`  // int32 图片宽度像素，可选
+	Height int32  `json:"height,optional"` // int32 图片高度像素，可选
 }
 
 type BotLinkContent struct {
-	URL      string `json:"url"`
-	Title    string `json:"title"`
-	Desc     string `json:"desc,optional"`
-	ImageURL string `json:"imageUrl,optional"`
+	URL      string `json:"url"`               // string 链接地址
+	Title    string `json:"title"`             // string 链接标题
+	Desc     string `json:"desc,optional"`     // string 链接描述，可选
+	ImageURL string `json:"imageUrl,optional"` // string 链接配图 URL，可选
 }
 
 type BotMarkdownContent struct {
-	Title   string     `json:"title"`
-	Content string     `json:"text"`
-	Image   string     `json:"image,optional"`
-	At      *BotAtInfo `json:"at,optional"`
+	Title   string     `json:"title"`          // string Markdown 标题
+	Content string     `json:"text"`           // string Markdown 正文
+	Image   string     `json:"image,optional"` // string 配图 URL，可选
+	At      *BotAtInfo `json:"at,optional"`    // object @ 信息，可选
 }
 
 type BotNotificationContent struct {
-	Type   int32    `json:"type"`
-	Actors []string `json:"actors"`
+	Type   int32    `json:"type"`   // int32 通知子类型（会话内系统通知）
+	Actors []string `json:"actors"` // []string 相关用户 ID 列表
 }
 
 type BotReplyContent struct {
-	OriginMsgID string `json:"originMsgId"`
-	MsgType     string `json:"msgType"`
-	Content     string `json:"content"`
+	OriginMsgID string `json:"originMsgId"` // string 被回复的原消息 ID
+	MsgType     string `json:"msgType"`     // string 回复体类型：text / markdown
+	Content     string `json:"content"`     // string 回复正文
 }
 
 type BotSendReq struct {
-	Token        string                  `form:"token"`
-	Timestamp    int64                   `form:"timestamp,optional"`
-	Sign         string                  `form:"sign,optional"`
-	MsgType      string                  `json:"msgtype"`
-	Text         *BotTextContent         `json:"text,optional"`
-	Markdown     *BotMarkdownContent     `json:"markdown,optional"`
-	Image        *BotImageContent        `json:"image,optional"`
-	Video        *BotVideoContent        `json:"video,optional"`
-	File         *BotFileContent         `json:"file,optional"`
-	Voice        *BotVoiceContent        `json:"voice,optional"`
-	AudioFile    *BotAudioFileContent    `json:"audioFile,optional"`
-	Emoji        *BotEmojiContent        `json:"emoji,optional"`
-	Notification *BotNotificationContent `json:"notification,optional"`
-	Call         *BotCallContent         `json:"call,optional"`
-	Withdraw     *BotWithdrawContent     `json:"withdraw,optional"`
-	Reply        *BotReplyContent        `json:"reply,optional"`
-	Forward      *BotForwardContent      `json:"forward,optional"`
-	Link         *BotLinkContent         `json:"link,optional"`
+	Token        string                  `form:"token"`                 // string 推送 Bot Webhook Token（URL 参数）
+	Timestamp    int64                   `form:"timestamp,optional"`    // int64 请求时间戳毫秒（签名校验用），可选
+	Sign         string                  `form:"sign,optional"`         // string HMAC 签名 Base64（签名校验用），可选
+	MsgType      string                  `json:"msgtype"`               // string 消息类型：text/markdown/image/video/file/voice/audioFile/emoji/notification/call/withdraw/reply/forward/link
+	Text         *BotTextContent         `json:"text,optional"`         // object 文本消息体，msgtype=text 时必填
+	Markdown     *BotMarkdownContent     `json:"markdown,optional"`     // object Markdown 消息体，msgtype=markdown 时必填
+	Image        *BotImageContent        `json:"image,optional"`        // object 图片消息体，msgtype=image 时必填
+	Video        *BotVideoContent        `json:"video,optional"`        // object 视频消息体，msgtype=video 时必填
+	File         *BotFileContent         `json:"file,optional"`         // object 文件消息体，msgtype=file 时必填
+	Voice        *BotVoiceContent        `json:"voice,optional"`        // object 语音消息体，msgtype=voice 时必填
+	AudioFile    *BotAudioFileContent    `json:"audioFile,optional"`    // object 音频文件消息体，msgtype=audioFile 时必填
+	Emoji        *BotEmojiContent        `json:"emoji,optional"`        // object 表情消息体，msgtype=emoji 时必填
+	Notification *BotNotificationContent `json:"notification,optional"` // object 通知消息体，msgtype=notification 时必填
+	Call         *BotCallContent         `json:"call,optional"`         // object 通话消息体，msgtype=call 时必填
+	Withdraw     *BotWithdrawContent     `json:"withdraw,optional"`     // object 撤回消息体，msgtype=withdraw 时必填
+	Reply        *BotReplyContent        `json:"reply,optional"`        // object 回复消息体，msgtype=reply 时必填
+	Forward      *BotForwardContent      `json:"forward,optional"`      // object 转发消息体，msgtype=forward 时必填
+	Link         *BotLinkContent         `json:"link,optional"`         // object 链接卡片消息体，msgtype=link 时必填
 }
 
 type BotSendRes struct {
-	MessageID string `json:"messageId"`
-	SendTime  int64  `json:"sendTime"`
+	MessageID string `json:"messageId"` // string 发送成功后的 IM 消息 ID
+	SendTime  int64  `json:"sendTime"`  // int64 发送时间 Unix 毫秒
 }
 
 type BotTextContent struct {
-	Content string     `json:"content"`
-	At      *BotAtInfo `json:"at,optional"`
+	Content string     `json:"content"`     // string 文本内容
+	At      *BotAtInfo `json:"at,optional"` // object @ 信息，可选
 }
 
 type BotVideoContent struct {
-	URL          string `json:"url"`
-	Width        int32  `json:"width,optional"`
-	Height       int32  `json:"height,optional"`
-	Duration     int32  `json:"duration,optional"`
-	ThumbnailURL string `json:"thumbnailUrl,optional"`
+	URL          string `json:"url"`                   // string 视频完整 URL
+	Width        int32  `json:"width,optional"`        // int32 视频宽度像素，可选
+	Height       int32  `json:"height,optional"`       // int32 视频高度像素，可选
+	Duration     int32  `json:"duration,optional"`     // int32 时长秒，可选
+	ThumbnailURL string `json:"thumbnailUrl,optional"` // string 封面图 URL，可选
 }
 
 type BotVoiceContent struct {
-	URL      string `json:"url"`
-	Duration int32  `json:"duration,optional"`
-	FileSize int64  `json:"fileSize,optional"`
+	URL      string `json:"url"`               // string 语音完整 URL
+	Duration int32  `json:"duration,optional"` // int32 时长秒，可选
+	FileSize int64  `json:"fileSize,optional"` // int64 文件大小字节，可选
 }
 
 type BotWithdrawContent struct {
-	OriginMsgID string `json:"originMsgId"`
+	OriginMsgID string `json:"originMsgId"` // string 要撤回的原消息 ID
+}
+
+type CancelQrCodeReq struct {
+	UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
+	SceneID string `json:"sceneId"`          // string 扫码场景 ID
+}
+
+type CancelQrCodeRes struct {
+	Success bool `json:"success"` // bool 是否取消成功
 }
 
 type CheckQrCodeStatusReq struct {
-	SceneID string `form:"sceneId"`
+	SceneID string `form:"sceneId"` // string 扫码场景 ID
 }
 
 type CheckQrCodeStatusRes struct {
-	Status string `json:"status"` // waiting / scanned / confirmed / cancelled / expired
-	Code   string `json:"code,optional"`
+	Status string `json:"status"`        // string 状态：waiting / scanned / confirmed / cancelled / expired
+	Code   string `json:"code,optional"` // string 授权码，confirmed 时返回
 }
 
 type ConfirmQrCodeLoginReq struct {
@@ -146,55 +155,77 @@ type ConfirmQrCodeLoginRes struct {
 	Success bool `json:"success"`
 }
 
+type ConfirmQrCodeReq struct {
+	UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
+	SceneID string `json:"sceneId"`          // string 扫码场景 ID
+}
+
+type ConfirmQrCodeRes struct {
+	Success bool `json:"success"` // bool 是否确认成功
+}
+
 type DeleteWebhookReq struct {
-	SubscriptionID uint64 `json:"subscriptionId"`
+	SubscriptionID uint64 `json:"subscriptionId"` // uint64 订阅 ID
 }
 
 type DeleteWebhookRes struct {
-	Success bool `json:"success"`
+	Success bool `json:"success"` // bool 是否删除成功
 }
 
 type EventLogInfo struct {
-	ID           uint64 `json:"id"`
-	EventID      string `json:"eventId"`
-	EventType    string `json:"eventType"`
-	ResponseCode int    `json:"responseCode"`
-	CostMs       int64  `json:"costMs"`
-	RetryCount   int    `json:"retryCount"`
-	Status       int    `json:"status"` // 0 推送中 1 成功 2 失败
-	ErrorMsg     string `json:"errorMsg,optional"`
-	CreatedAt    int64  `json:"createdAt"`
+	ID           uint64 `json:"id"`                // uint64 日志 ID
+	EventID      string `json:"eventId"`           // string 平台事件 ID
+	EventType    string `json:"eventType"`         // string 事件类型
+	ResponseCode int    `json:"responseCode"`      // int 开发者服务器 HTTP 状态码
+	CostMs       int64  `json:"costMs"`            // int64 推送耗时毫秒
+	RetryCount   int    `json:"retryCount"`        // int 重试次数
+	Status       int    `json:"status"`            // int 0 失败 1 成功
+	ErrorMsg     string `json:"errorMsg,optional"` // string 错误信息，可选
+	CreatedAt    int64  `json:"createdAt"`         // int64 创建时间 Unix 秒
 }
 
 type GenerateQrCodeReq struct {
-	AppID string `json:"appId"`
+	AppID string `json:"appId"` // string 第三方应用 ID
 }
 
 type GenerateQrCodeRes struct {
-	QrCodeURL string `json:"qrCodeUrl"`
-	SceneID   string `json:"sceneId"`
-	ExpireIn  int64  `json:"expireIn"`
+	SceneID  string `json:"sceneId"`  // string 扫码场景 ID，用于轮询状态与拼接 QR
+	ExpireIn int64  `json:"expireIn"` // int64 二维码有效期秒
 }
 
 type GetEventLogsReq struct {
-	SubscriptionID uint64 `form:"subscriptionId,optional"`
-	Page           int    `form:"page,default=1"`
-	PageSize       int    `form:"pageSize,default=20"`
+	SubscriptionID uint64 `form:"subscriptionId,optional"` // uint64 订阅 ID 筛选，可选
+	Page           int    `form:"page,default=1"`          // int 页码，从 1 开始
+	PageSize       int    `form:"pageSize,default=20"`     // int 每页条数
 }
 
 type GetEventLogsRes struct {
-	Total int64          `json:"total"`
-	List  []EventLogInfo `json:"list"`
+	Total int64          `json:"total"` // int64 总条数
+	List  []EventLogInfo `json:"list"`  // array 日志列表
 }
 
 type GetH5AuthCodeReq struct {
-	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由 Gateway 注入）
-	AppID  string `json:"appId"`
+	UserID string `header:"Beaver-User-Id"` // string 当前登录用户 ID（Gateway 注入）
+	AppID  string `json:"appId"`            // string 第三方应用 ID
 }
 
 type GetH5AuthCodeRes struct {
-	AuthCode string `json:"authCode"`
-	ExpireIn int64  `json:"expireIn"`
+	AuthCode string `json:"authCode"` // string 一次性授权码
+	ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
+}
+
+type GetQrCodeSceneReq struct {
+	SceneID string `form:"sceneId"` // string 扫码场景 ID
+}
+
+type GetQrCodeSceneRes struct {
+	SceneID  string   `json:"sceneId"`  // string 扫码场景 ID
+	AppID    string   `json:"appId"`    // string 第三方应用 ID
+	AppName  string   `json:"appName"`  // string 应用名称
+	AppIcon  string   `json:"appIcon"`  // string 应用图标 URL
+	Status   string   `json:"status"`   // string waiting/scanned/confirmed/cancelled/expired
+	ExpireIn int64    `json:"expireIn"` // int64 剩余有效秒数
+	Scopes   []string `json:"scopes"`   // []string 请求的权限范围
 }
 
 type GetRobotInfoReq struct {
@@ -208,138 +239,138 @@ type GetRobotInfoRes struct {
 }
 
 type GetTokenByCodeReq struct {
-	AppID        string `json:"appId"`
-	AppSecret    string `json:"appSecret,optional"`
-	Code         string `json:"code"`
-	RedirectURI  string `json:"redirectUri,optional"`
-	CodeVerifier string `json:"codeVerifier,optional"`
+	AppID        string `json:"appId"`                 // string 应用 ID
+	AppSecret    string `json:"appSecret,optional"`    // string 应用密钥，PKCE 流程可省略
+	Code         string `json:"code"`                  // string OAuth 授权码
+	RedirectURI  string `json:"redirectUri,optional"`  // string 回调地址，需与授权时一致，可选
+	CodeVerifier string `json:"codeVerifier,optional"` // string PKCE code_verifier，可选
 }
 
 type GetTokenByCodeRes struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken,optional"`
-	ExpiresIn    int64  `json:"expiresIn"`
-	TokenType    string `json:"tokenType"`
-	Scope        string `json:"scope,optional"`
+	AccessToken  string `json:"accessToken"`           // string 访问令牌
+	RefreshToken string `json:"refreshToken,optional"` // string 刷新令牌，可选
+	ExpiresIn    int64  `json:"expiresIn"`             // int64 访问令牌有效期秒
+	TokenType    string `json:"tokenType"`             // string 令牌类型，一般为 Bearer
+	Scope        string `json:"scope,optional"`        // string 授权范围，可选
 }
 
 type GetTokenReq struct {
-	AppID     string `json:"appId"`
-	AppSecret string `json:"appSecret"`
+	AppID     string `json:"appId"`     // string 应用 ID
+	AppSecret string `json:"appSecret"` // string 应用密钥
 }
 
 type GetTokenRes struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken,optional"`
-	ExpiresIn    int64  `json:"expiresIn"`
-	TokenType    string `json:"tokenType"`
+	AccessToken  string `json:"accessToken"`           // string 访问令牌
+	RefreshToken string `json:"refreshToken,optional"` // string 刷新令牌，可选
+	ExpiresIn    int64  `json:"expiresIn"`             // int64 访问令牌有效期秒
+	TokenType    string `json:"tokenType"`             // string 令牌类型，一般为 Bearer
 }
 
 type GetUserInfoByH5CodeReq struct {
-	AppID     string `json:"appId"`
-	AppSecret string `json:"appSecret"`
-	AuthCode  string `json:"authCode"`
+	AppID     string `json:"appId"`     // string 应用 ID
+	AppSecret string `json:"appSecret"` // string 应用密钥
+	AuthCode  string `json:"authCode"`  // string H5 一次性 authCode
 }
 
 type GetUserInfoByH5CodeRes struct {
-	UserID   string `json:"userId"`
-	NickName string `json:"nickName"`
-	Avatar   string `json:"avatar,optional"`
-	Phone    string `json:"phone,optional"`
-	Email    string `json:"email,optional"`
+	UserID   string `json:"userId"`          // string IM 用户 ID
+	NickName string `json:"nickName"`        // string 用户昵称
+	Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
+	Phone    string `json:"phone,optional"`  // string 手机号，可选
+	Email    string `json:"email,optional"`  // string 邮箱，可选
 }
 
 type GetUserInfoByQuickLoginReq struct {
-	AppID     string `json:"appId"`
-	AppSecret string `json:"appSecret"`
-	AuthCode  string `json:"authCode"`
+	AppID     string `json:"appId"`     // string 应用 ID
+	AppSecret string `json:"appSecret"` // string 应用密钥
+	AuthCode  string `json:"authCode"`  // string PC 端生成的 authCode
 }
 
 type GetUserInfoByQuickLoginRes struct {
-	UserID   string `json:"userId"`
-	NickName string `json:"nickName"`
-	Avatar   string `json:"avatar,optional"`
-	Phone    string `json:"phone,optional"`
-	Email    string `json:"email,optional"`
+	UserID   string `json:"userId"`          // string IM 用户 ID
+	NickName string `json:"nickName"`        // string 用户昵称
+	Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
+	Phone    string `json:"phone,optional"`  // string 手机号，可选
+	Email    string `json:"email,optional"`  // string 邮箱，可选
 }
 
 type GetUserInfoReq struct {
-	UserID        string `form:"userId"`          // 要查询的用户ID
-	Authorization string `header:"Authorization"` // Bearer {access_token}
+	UserID        string `form:"userId"`          // string 要查询的 IM 用户 ID
+	Authorization string `header:"Authorization"` // string Bearer {access_token}
 }
 
 type GetUserInfoRes struct {
-	User GetUserInfoUserItem `json:"user"` // 用户信息
+	User GetUserInfoUserItem `json:"user"` // object 用户信息
 }
 
 type GetUserInfoUserItem struct {
-	UserID   string `json:"userId"`          // 用户ID
-	Nickname string `json:"nickname"`        // 用户昵称
-	Avatar   string `json:"avatar,optional"` // 头像URL
-	Phone    string `json:"phone,optional"`  // 手机号
-	Email    string `json:"email,optional"`  // 邮箱
+	UserID   string `json:"userId"`          // string IM 用户 ID
+	Nickname string `json:"nickname"`        // string 用户昵称
+	Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
+	Phone    string `json:"phone,optional"`  // string 手机号，可选
+	Email    string `json:"email,optional"`  // string 邮箱，可选
 }
 
 type GetUserListReq struct {
-	UserIDs       []string `json:"userIds"`         // 用户ID列表（批量查询）
-	Authorization string   `header:"Authorization"` // Bearer {access_token}
+	UserIDs       []string `json:"userIds"`         // []string IM 用户 ID 列表
+	Authorization string   `header:"Authorization"` // string Bearer {access_token}
 }
 
 type GetUserListRes struct {
-	Users []GetUserListUserItem `json:"users"` // 用户列表
+	Users []GetUserListUserItem `json:"users"` // array 用户列表
 }
 
 type GetUserListUserItem struct {
-	UserID   string `json:"userId"`          // 用户ID
-	Nickname string `json:"nickname"`        // 用户昵称
-	Avatar   string `json:"avatar,optional"` // 头像URL
-	Phone    string `json:"phone,optional"`  // 手机号
-	Email    string `json:"email,optional"`  // 邮箱
+	UserID   string `json:"userId"`          // string IM 用户 ID
+	Nickname string `json:"nickname"`        // string 用户昵称
+	Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
+	Phone    string `json:"phone,optional"`  // string 手机号，可选
+	Email    string `json:"email,optional"`  // string 邮箱，可选
 }
 
 type GetWebhookListReq struct {
-	Page      int    `form:"page,default=1"`
-	PageSize  int    `form:"pageSize,default=20"`
-	EventType string `form:"eventType,optional"`
+	Page      int    `form:"page,default=1"`      // int 页码，从 1 开始
+	PageSize  int    `form:"pageSize,default=20"` // int 每页条数
+	EventType string `form:"eventType,optional"`  // string 事件类型筛选，可选
 }
 
 type GetWebhookListRes struct {
-	Total int64                     `json:"total"`
-	List  []WebhookSubscriptionInfo `json:"list"`
+	Total int64                     `json:"total"` // int64 总条数
+	List  []WebhookSubscriptionInfo `json:"list"`  // array 订阅列表
 }
 
 type PasswordLoginReq struct {
-	AppID    string `json:"appId"`
-	Account  string `json:"account"`
-	Password string `json:"password"`
+	AppID    string `json:"appId"`    // string 第三方应用 ID
+	Account  string `json:"account"`  // string 手机号或邮箱
+	Password string `json:"password"` // string 登录密码
 }
 
 type PasswordLoginRes struct {
-	Code     string `json:"code"`
-	ExpireIn int64  `json:"expireIn"`
+	Code     string `json:"code"`     // string OAuth 授权码
+	ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
 }
 
 type RefreshTokenReq struct {
-	RefreshToken string `json:"refreshToken"`
+	RefreshToken string `json:"refreshToken"` // string 刷新令牌
 }
 
 type RefreshTokenRes struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken,optional"`
-	ExpiresIn    int64  `json:"expiresIn"`
+	AccessToken  string `json:"accessToken"`           // string 新的访问令牌
+	RefreshToken string `json:"refreshToken,optional"` // string 新的刷新令牌，可选
+	ExpiresIn    int64  `json:"expiresIn"`             // int64 访问令牌有效期秒
 }
 
 type RegisterWebhookReq struct {
-	EventType  string `json:"eventType"`           // 订阅的事件类型，见上方说明
-	TargetURL  string `json:"targetUrl"`           // Webhook URL（Bot 本机可通过内网穿透暴露）
-	Secret     string `json:"secret,optional"`     // HMAC 签名密钥，用于验证推送来源
-	RetryCount int    `json:"retryCount,optional"` // 推送失败重试次数，默认 3
-	Timeout    int    `json:"timeout,optional"`    // 推送超时（秒），默认 5
+	EventType  string `json:"eventType"`           // string 订阅的事件类型，如 im.message.receive
+	TargetURL  string `json:"targetUrl"`           // string Webhook 推送目标 URL
+	Secret     string `json:"secret,optional"`     // string HMAC 签名密钥，可选
+	RetryCount int    `json:"retryCount,optional"` // int 推送失败重试次数，默认 3
+	Timeout    int    `json:"timeout,optional"`    // int 推送超时秒数，默认 5
 }
 
 type RegisterWebhookRes struct {
-	SubscriptionID uint64 `json:"subscriptionId"`
-	Status         string `json:"status"` // active（验证通过）/ pending（验证中）
+	SubscriptionID uint64 `json:"subscriptionId"` // uint64 订阅 ID
+	Status         string `json:"status"`         // string 状态：active 验证通过 / pending 待验证
 }
 
 type RemoveRobotFromGroupReq struct {
@@ -351,12 +382,12 @@ type RemoveRobotFromGroupRes struct {
 }
 
 type RevokeTokenReq struct {
-	Token         string `json:"token"`
-	TokenTypeHint string `json:"tokenTypeHint,optional"`
+	Token         string `json:"token"`                  // string 要撤销的 token
+	TokenTypeHint string `json:"tokenTypeHint,optional"` // string 提示类型：access_token / refresh_token，可选
 }
 
 type RevokeTokenRes struct {
-	Success bool `json:"success"`
+	Success bool `json:"success"` // bool 是否撤销成功
 }
 
 type RobotSendMessageReq struct {
@@ -372,15 +403,24 @@ type RobotSendMessageRes struct {
 	SendTime  int64  `json:"sendTime"`  // int64 发送时间 Unix 秒
 }
 
+type ScanQrCodeReq struct {
+	UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
+	SceneID string `json:"sceneId"`          // string 扫码场景 ID
+}
+
+type ScanQrCodeRes struct {
+	Success bool `json:"success"` // bool 是否标记成功
+}
+
 type WebhookSubscriptionInfo struct {
-	ID             uint64 `json:"id"`
-	EventType      string `json:"eventType"`
-	TargetURL      string `json:"targetUrl"`
-	Status         int    `json:"status"` // 0 禁用 1 启用
-	VerifyStatus   int    `json:"verifyStatus"`
-	LastError      string `json:"lastError,optional"`
-	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"`
-	RetryCount     int    `json:"retryCount"`
-	Timeout        int    `json:"timeout"`
-	CreatedAt      int64  `json:"createdAt"`
+	ID             uint64 `json:"id"`                      // uint64 订阅 ID
+	EventType      string `json:"eventType"`               // string 事件类型
+	TargetURL      string `json:"targetUrl"`               // string Webhook 推送目标 URL
+	Status         int    `json:"status"`                  // int 0 禁用 1 启用（且 URL 验证通过才可推送）
+	VerifyStatus   int    `json:"verifyStatus"`            // int 0 待验证 1 已通过 2 失败
+	LastError      string `json:"lastError,optional"`      // string 上次验证或推送失败原因，可选
+	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间 Unix 秒，可选
+	RetryCount     int    `json:"retryCount"`              // int 推送失败重试次数
+	Timeout        int    `json:"timeout"`                 // int 推送超时秒数
+	CreatedAt      int64  `json:"createdAt"`               // int64 创建时间 Unix 秒
 }

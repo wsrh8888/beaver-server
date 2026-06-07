@@ -2,8 +2,8 @@ package oauth_secret
 
 import (
 	"context"
+	"errors"
 
-	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
@@ -27,8 +27,17 @@ func NewGetTokenByCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetTokenByCodeLogic) GetTokenByCode(req *types.GetTokenByCodeReq) (resp *types.GetTokenByCodeRes, err error) {
-	if _, err := oauthutil.VerifyAppForCodeExchange(l.svcCtx.DB, req.AppID, req.AppSecret); err != nil {
-		return nil, err
+	if req.AppID == "" {
+		return nil, errors.New("appId 不能为空")
+	}
+
+	var app open_models.OpenApp
+	query := l.svcCtx.DB.Where("app_id = ? AND status = ?", req.AppID, 1)
+	if req.AppSecret != "" {
+		query = query.Where("app_secret = ?", req.AppSecret)
+	}
+	if err := query.First(&app).Error; err != nil {
+		return nil, errors.New("应用不存在或凭证错误")
 	}
 
 	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{

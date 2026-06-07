@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -61,9 +62,13 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 检查文件是否已经存在于数据库中
 		existingFile, err := checkFileExists(fileReq.FileMd5, svcCtx)
 		if err == nil {
-			// 文件已存在，直接返回
 			resp.FileKey = existingFile.FileKey
 			resp.OriginalName = existingFile.OriginalName
+			if svcCtx.Config.Domain == "" {
+				response.Response(r, w, nil, errors.New("未配置域名"))
+				return
+			}
+			resp.FileURL = filecommon.BuildLocalFileURL(svcCtx.Config.Domain, existingFile.FileKey)
 			response.Response(r, w, resp, nil)
 			return
 		}
@@ -109,8 +114,9 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		resp.FileKey = saveResp.FileKey
 		resp.OriginalName = fileReq.OriginalName
+		resp.FileURL = filecommon.BuildLocalFileURL(svcCtx.Config.Domain, saveResp.FileKey)
 
-		logx.Infof("本地文件上传成功: %s", saveResp.FileKey)
+		logx.Infof("本地文件上传成功: %s, url: %s", saveResp.FileKey, resp.FileURL)
 		response.Response(r, w, resp, nil)
 	}
 }

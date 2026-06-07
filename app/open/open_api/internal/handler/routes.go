@@ -38,7 +38,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 推送机器人发送消息到群（第三方服务如 Jenkins/GitLab 调用此接口）
+				// 推送机器人发送消息到群（第三方服务调用）
 				Method:  http.MethodPost,
 				Path:    "/api/open/bot_public/v1/send",
 				Handler: bot_public.BotSendHandler(serverCtx),
@@ -83,6 +83,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/open/oauth/v1/h5_authcode",
 				Handler: oauth.GetH5AuthCodeHandler(serverCtx),
 			},
+			{
+				// 移动端取消扫码授权
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/qrcode_cancel",
+				Handler: oauth.CancelQrCodeHandler(serverCtx),
+			},
+			{
+				// 移动端确认扫码授权
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/qrcode_confirm",
+				Handler: oauth.ConfirmQrCodeHandler(serverCtx),
+			},
+			{
+				// 移动端标记已扫码
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/qrcode_scan",
+				Handler: oauth.ScanQrCodeHandler(serverCtx),
+			},
 		},
 	)
 
@@ -101,10 +119,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: oauth_public.GenerateQrCodeHandler(serverCtx),
 			},
 			{
-				// 确认扫码登录（移动端调用）
-				Method:  http.MethodPost,
-				Path:    "/api/open/oauth_public/v1/qrcode_confirm",
-				Handler: oauth_public.ConfirmQrCodeLoginHandler(serverCtx),
+				// 查询扫码会话信息
+				Method:  http.MethodGet,
+				Path:    "/api/open/oauth_public/v1/qrcode_scene",
+				Handler: oauth_public.GetQrCodeSceneHandler(serverCtx),
 			},
 			{
 				// 查询扫码状态（轮询）

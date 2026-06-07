@@ -7,6 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// DefaultUpdateAppID 海狸IM 默认升级应用 ID，与各端客户端保持一致
+const DefaultUpdateAppID = "87c9dc499cc34f32896a4537e66cf65e"
+
 // InitUpdateApp 初始化升级应用表数据
 func InitUpdateApp(db *gorm.DB) error {
 	fmt.Println("=== 开始初始化升级应用表 ===")
@@ -15,7 +18,7 @@ func InitUpdateApp(db *gorm.DB) error {
 	defaultApp := platform_models.UpdateApp{
 		Name:        "海狸IM",
 		Description: "海狸IM",
-		AppID:       "87c9dc499cc34f32896a4537e66cf65e",
+		AppID:       DefaultUpdateAppID,
 		Icon:        "",
 		IsActive:    true,
 	}

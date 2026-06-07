@@ -1,11 +1,5 @@
-// Package corepush 提供离线 Push 能力（对标 corewebhook，不是独立微服务）。
-//
-// 调用链：
-//   chat_rpc 发消息 → IsOnline 判断 → SendToUser 推送到系统通知栏
-//   ws_api 连/断 WS  → MarkOnline / MarkOffline 维护 Redis 在线态
-//
-// 配置在 chat_rpc/etc/chatrpc.yaml 的 Push 段，由 svc 映射为 Config 后 NewPushSender。
-// Push.Enabled=false 或未配凭证时，所有方法安全 no-op。
+// Package corepush 提供离线 Push（FCM / APNs）。
+// WS 在线态见 coreonline；设备档案见 auth_models.AuthDeviceModel。
 package corepush
 
 import (
@@ -26,7 +20,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-redis/redis"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -34,9 +27,6 @@ import (
 const (
 	PlatformFCM  = "fcm"  // Android / 使用 Firebase SDK 的 iOS
 	PlatformAPNs = "apns" // iOS 原生 APNs device token
-
-	onlineKeyPrefix = "beaver:user:online:" // Redis SET，成员格式 instanceId:slot(desktop/mobile)
-	onlineTTL       = 90 * time.Second      // 心跳续期，超时视为离线
 )
 
 // ─────────────────────────────────────────────────────────────
@@ -46,7 +36,7 @@ const (
 // Config 推送配置，由 chat_rpc/svc 从 yaml 组装后传入。
 type Config struct {
 	Enabled bool
-	FCM     FCMConfig // Android 必填（iOS 若走 Firebase 也只需开 FCM）
+	FCM     FCMConfig  // Android 必填（iOS 若走 Firebase 也只需开 FCM）
 	APNs    APNsConfig // iOS 原生 token 时开启，与 FCM 可只开其一
 }
 
@@ -143,54 +133,7 @@ func (s *PushSender) sendToToken(ctx context.Context, tok PushToken, msg Message
 }
 
 // ─────────────────────────────────────────────────────────────
-// 二、WS 在线态（Redis）
-// 用途：用户在线时走 WS，不发系统 Push，避免重复打扰。
-// 调用方：ws_api 连/断/心跳；chat_rpc 发 Push 前用 IsOnline 判断。
-// ─────────────────────────────────────────────────────────────
-
-// MarkOnline WS 连接建立时调用；slot 为 desktop/mobile，instanceID 区分多 ws 实例。
-func MarkOnline(rdb *redis.Client, userID, slot, instanceID string) {
-	if rdb == nil || userID == "" || slot == "" || instanceID == "" {
-		return
-	}
-	key := onlineKeyPrefix + userID
-	rdb.SAdd(key, instanceID+":"+slot)
-	rdb.Expire(key, onlineTTL)
-}
-
-// MarkOffline WS 连接断开且该槽位无连接时调用。
-func MarkOffline(rdb *redis.Client, userID, slot, instanceID string) {
-	if rdb == nil || userID == "" || slot == "" || instanceID == "" {
-		return
-	}
-	key := onlineKeyPrefix + userID
-	rdb.SRem(key, instanceID+":"+slot)
-	if rdb.SCard(key).Val() == 0 {
-		rdb.Del(key)
-	}
-}
-
-// RefreshOnline 心跳续期，防止 WS 长连接仍在线却被误判为离线。
-func RefreshOnline(rdb *redis.Client, userID string) {
-	if rdb == nil || userID == "" {
-		return
-	}
-	key := onlineKeyPrefix + userID
-	if rdb.Exists(key).Val() > 0 {
-		rdb.Expire(key, onlineTTL)
-	}
-}
-
-// IsOnline 用户在任意 WS 实例是否在线。
-func IsOnline(rdb *redis.Client, userID string) bool {
-	if rdb == nil || userID == "" {
-		return false
-	}
-	return rdb.SCard(onlineKeyPrefix+userID).Val() > 0
-}
-
-// ─────────────────────────────────────────────────────────────
-// 三、FCM / APNs 协议实现（内部细节，业务层无需调用）
+// FCM / APNs 协议实现（内部细节，业务层无需调用）
 // 行数多是因为 Google/Apple HTTP API 要求 JWT 签名换 token，无法省略。
 // ─────────────────────────────────────────────────────────────
 
@@ -243,10 +186,10 @@ func (c *fcmClient) send(ctx context.Context, deviceToken string, msg Message) e
 	}
 	body, _ := json.Marshal(map[string]interface{}{
 		"message": map[string]interface{}{
-			"token": deviceToken,
+			"token":        deviceToken,
 			"notification": map[string]string{"title": msg.Title, "body": msg.Body},
-			"data":    msg.Data,
-			"android": map[string]string{"priority": "HIGH"},
+			"data":         msg.Data,
+			"android":      map[string]string{"priority": "HIGH"},
 		},
 	})
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPost,

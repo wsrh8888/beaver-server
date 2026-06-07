@@ -194,7 +194,7 @@ message VersionItem {
   uint64 version_id = 1; // uint64 版本 ID
   uint64 architecture_id = 2; // uint64 架构 ID
   string version = 3; // string 版本号
-  string file_key = 4; // string 文件 Key
+  string file_url = 4; // string 安装包完整 URL
   string description = 5; // string 版本描述
   string release_notes = 6; // string 更新日志
   string created_at = 7; // string 创建时间
@@ -204,7 +204,7 @@ message VersionItem {
 message CreateVersionReq {
   uint64 architecture_id = 1; // uint64 架构 ID
   string version = 2; // string 版本号
-  string file_key = 3; // string 文件 Key
+  string file_url = 3; // string 安装包完整 URL
   string description = 4; // string 版本描述
   string release_notes = 5; // string 更新日志
 }
@@ -253,50 +253,43 @@ message ListAppVersionsRes {
   repeated AppVersionsArchItem architectures = 2; // array 按架构分组的版本
 }
 
-message StrategyInput {
-  uint64 architecture_id = 1; // uint64 架构 ID
-  uint64 version_id = 2; // uint64 版本 ID
-  bool force_update = 3; // bool 是否强制更新
-  bool is_active = 4; // bool 是否启用
+message ReleasePolicyItem {
+  uint64 id = 1;
+  string app_id = 2;
+  uint64 architecture_id = 3;
+  uint64 stable_version_id = 4;
+  uint64 gray_version_id = 5;
+  uint32 rollout_percent = 6;
+  string min_version = 7;
+  bool force_update = 8;
+  bool is_active = 9;
+  string stable_version = 10;
+  string gray_version = 11;
+  string created_at = 12;
+  string updated_at = 13;
 }
 
-message StrategyInfoItem {
-  uint64 architecture_id = 1; // uint64 架构 ID
-  uint64 version_id = 2; // uint64 版本 ID
-  string version = 3; // string 版本号（列表时填充）
-  bool force_update = 4; // bool 是否强制更新
-  bool is_active = 5; // bool 是否启用
+message UpsertReleasePolicyReq {
+  string app_id = 1;
+  uint64 architecture_id = 2;
+  uint64 stable_version_id = 3;
+  uint64 gray_version_id = 4;
+  uint32 rollout_percent = 5;
+  string min_version = 6;
+  bool force_update = 7;
+  bool is_active = 8;
 }
 
-message CityStrategyItem {
-  uint64 id = 1; // uint64 策略 ID
-  string app_id = 2; // string 应用 ID
-  string city_id = 3; // string 城市 ID
-  repeated StrategyInfoItem strategy = 4; // array 策略配置
-  bool is_active = 5; // bool 是否启用
-  string created_at = 6; // string 创建时间
-  string updated_at = 7; // string 更新时间
+message UpsertReleasePolicyRes {
+  uint64 id = 1;
 }
 
-message UpdateCityStrategyReq {
-  string app_id = 1; // string 应用 ID
-  repeated string city_ids = 2; // array 城市 ID 列表
-  repeated StrategyInput strategy = 3; // array 策略配置
-  string update_type = 4; // string 更新类型：single | global
+message ListReleasePoliciesReq {
+  string app_id = 1;
 }
 
-message UpdateCityStrategyRes {}
-
-message ListCityStrategiesReq {
-  string app_id = 1; // string 应用 ID 筛选，可选
-  optional bool is_active = 2; // bool 仅活跃，可选
-  int32 page = 3; // int32 页码
-  int32 page_size = 4; // int32 每页条数
-}
-
-message ListCityStrategiesRes {
-  int64 total = 1; // int64 总数
-  repeated CityStrategyItem strategies = 2; // array 策略列表
+message ListReleasePoliciesRes {
+  repeated ReleasePolicyItem policies = 1;
 }
 
 // ==================== 用户反馈（通用）====================
@@ -445,8 +438,8 @@ service platform {
   rpc DeleteVersion(DeleteVersionReq) returns (DeleteVersionRes);
   rpc ListVersions(ListVersionsReq) returns (ListVersionsRes);
   rpc ListAppVersions(ListAppVersionsReq) returns (ListAppVersionsRes);
-  rpc UpdateCityStrategy(UpdateCityStrategyReq) returns (UpdateCityStrategyRes);
-  rpc ListCityStrategies(ListCityStrategiesReq) returns (ListCityStrategiesRes);
+  rpc UpsertReleasePolicy(UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes);
+  rpc ListReleasePolicies(ListReleasePoliciesReq) returns (ListReleasePoliciesRes);
 
   rpc SubmitFeedback(SubmitFeedbackReq) returns (SubmitFeedbackRes);
   rpc ListFeedback(ListFeedbackReq) returns (ListFeedbackRes);

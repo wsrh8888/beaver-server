@@ -2,13 +2,13 @@ package update_public
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 
-	"beaver/app/file/file_rpc/types/file_rpc"
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	"beaver/app/platform/platform_models"
+	"beaver/core/coreupdate"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -30,68 +30,84 @@ func NewGetLatestVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq) (*types.GetLatestVersionRes, error) {
 	if req.ArchID == 0 {
-		logx.Infof("H5获取最新版本: AppID=%s, Version=%s, DeviceID=%s", req.AppID, req.Version, req.DeviceID)
 		return &types.GetLatestVersionRes{HasUpdate: false}, nil
 	}
 
 	var app platform_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND is_active = ?", req.AppID, true).First(&app).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("应用不存在或已停用")
 		}
-		logx.Errorf("查询应用失败: %v", err)
 		return nil, fmt.Errorf("查询应用失败")
 	}
 
 	var architecture platform_models.UpdateArchitecture
 	if err := l.svcCtx.DB.Where("app_id = ? AND platform_id = ? AND arch_id = ? AND is_active = ?",
 		req.AppID, req.PlatformID, req.ArchID, true).First(&architecture).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("不支持的平台或架构")
 		}
-		logx.Errorf("查询架构失败: %v", err)
 		return nil, fmt.Errorf("查询架构失败")
 	}
 
-	var latestVersion platform_models.UpdateVersion
-	if err := l.svcCtx.DB.Where("architecture_id = ?", architecture.Id).
-		Order("created_at DESC").First(&latestVersion).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return &types.GetLatestVersionRes{HasUpdate: false}, nil
-		}
-		logx.Errorf("查询最新版本失败: %v", err)
-		return nil, fmt.Errorf("查询最新版本失败")
+	stableID, grayID, rollout, minVer, forceFlag, active := l.loadPolicy(architecture)
+
+	resolved := coreupdate.Resolve(coreupdate.ResolveInput{
+		AppID:           req.AppID,
+		ArchitectureID:  architecture.Id,
+		DeviceID:        req.DeviceID,
+		UserID:          req.UserID,
+		CurrentVersion:  req.Version,
+		StableVersionID: stableID,
+		GrayVersionID:   grayID,
+		RolloutPercent:  rollout,
+		MinVersion:      minVer,
+		ForceUpdate:     forceFlag,
+		PolicyActive:    active,
+	})
+
+	if resolved.TargetVersionID == 0 {
+		return &types.GetLatestVersionRes{HasUpdate: false}, nil
 	}
 
-	if !l.isNewerVersion(latestVersion.Version, req.Version) {
+	var target platform_models.UpdateVersion
+	if err := l.svcCtx.DB.First(&target, resolved.TargetVersionID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &types.GetLatestVersionRes{HasUpdate: false}, nil
+		}
+		return nil, fmt.Errorf("查询目标版本失败")
+	}
+
+	if !coreupdate.CompareVersion(target.Version, req.Version) {
 		return &types.GetLatestVersionRes{HasUpdate: false}, nil
 	}
 
 	resp := &types.GetLatestVersionRes{
 		HasUpdate:      true,
-		ArchitectureID: uint(architecture.Id),
-		Version:        latestVersion.Version,
-		FileKey:        latestVersion.FileKey,
-		Description:    latestVersion.Description,
-		ReleaseNotes:   latestVersion.ReleaseNotes,
+		ForceUpdate:    resolved.ForceUpdate,
+		ArchitectureID: architecture.Id,
+		Version:        target.Version,
+		FileUrl:        target.FileUrl,
+		Description:    target.Description,
+		ReleaseNotes:   target.ReleaseNotes,
 	}
 
-	fileDetail, err := l.svcCtx.FileRpc.GetFileDetail(l.ctx, &file_rpc.GetFileDetailReq{
-		FileKey: latestVersion.FileKey,
-	})
-	if err != nil {
-		logx.Errorf("获取文件详情失败: %v", err)
-	} else {
-		resp.Size = fileDetail.Size
-		resp.MD5 = fileDetail.Md5
-	}
-
-	logx.Infof("获取最新版本成功: AppID=%s, PlatformID=%d, ArchID=%d, CurrentVersion=%s, LatestVersion=%s",
-		req.AppID, req.PlatformID, req.ArchID, req.Version, latestVersion.Version)
+	logx.Infof("检查更新: app=%s arch=%d current=%s target=%s gray=%v force=%v",
+		req.AppID, architecture.Id, req.Version, target.Version, resolved.InGrayRollout, resolved.ForceUpdate)
 
 	return resp, nil
 }
 
-func (l *GetLatestVersionLogic) isNewerVersion(latestVersion, currentVersion string) bool {
-	return strings.Compare(latestVersion, currentVersion) > 0
+func (l *GetLatestVersionLogic) loadPolicy(arch platform_models.UpdateArchitecture) (stableID, grayID, rollout uint, minVer string, forceFlag, active bool) {
+	var policy platform_models.UpdateReleasePolicy
+	err := l.svcCtx.DB.Where("architecture_id = ? AND is_active = ?", arch.Id, true).First(&policy).Error
+	if err == nil {
+		return policy.StableVersionID, policy.GrayVersionID, policy.RolloutPercent, policy.MinVersion, policy.ForceUpdate, true
+	}
+
+	var latest platform_models.UpdateVersion
+	if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").First(&latest).Error; err == nil {
+		return latest.Id, 0, 0, "", false, true
+	}
+	return 0, 0, 0, "", false, false
 }

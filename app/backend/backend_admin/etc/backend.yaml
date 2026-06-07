@@ -28,6 +28,7 @@ File:
     - mp3
     - pdf
     - exe
+    - apk
   BlackList:
     - sh
     - bat
@@ -39,7 +40,9 @@ File:
     document: 2
     unknown: 10
     exe: 1024
+    apk: 512
 MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
+Domain: "http://192.168.3.4:20800" # 对外访问域名，用于生成本地文件完整 URL（与 file_api 网关一致）
 # 本地存储配置
 Local:
   UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)

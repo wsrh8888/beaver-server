@@ -8,9 +8,8 @@ type (
 		AppID string `json:"appId"` // string 第三方应用 ID
 	}
 	GenerateQrCodeRes {
-		QrCodeURL string `json:"qrCodeUrl"` // string 二维码图片或跳转 URL
-		SceneID   string `json:"sceneId"` // string 扫码场景 ID，用于轮询状态
-		ExpireIn  int64  `json:"expireIn"` // int64 二维码有效期秒
+		SceneID  string `json:"sceneId"` // string 扫码场景 ID，用于轮询状态与拼接 QR
+		ExpireIn int64  `json:"expireIn"` // int64 二维码有效期秒
 	}
 )
 
@@ -26,13 +25,18 @@ type (
 )
 
 type (
-	// 确认扫码登录（已登录移动端调用）
-	ConfirmQrCodeLoginReq {
-		SceneID string `json:"sceneId"` // string 扫码场景 ID
-		UserID  string `json:"userId"` // string 确认登录的 IM 用户 ID
+	// 查询扫码会话信息（公开，供 H5 与 App 展示应用信息）
+	GetQrCodeSceneReq {
+		SceneID string `form:"sceneId"` // string 扫码场景 ID
 	}
-	ConfirmQrCodeLoginRes {
-		Success bool `json:"success"` // bool 是否确认成功
+	GetQrCodeSceneRes {
+		SceneID   string   `json:"sceneId"` // string 扫码场景 ID
+		AppID     string   `json:"appId"` // string 第三方应用 ID
+		AppName   string   `json:"appName"` // string 应用名称
+		AppIcon   string   `json:"appIcon"` // string 应用图标 URL
+		Status    string   `json:"status"` // string waiting/scanned/confirmed/cancelled/expired
+		ExpireIn  int64    `json:"expireIn"` // int64 剩余有效秒数
+		Scopes    []string `json:"scopes"` // []string 请求的权限范围
 	}
 )
 
@@ -61,11 +65,22 @@ service open {
 	@handler CheckQrCodeStatus
 	get /api/open/oauth_public/v1/qrcode_status (CheckQrCodeStatusReq) returns (CheckQrCodeStatusRes)
 
-	@doc "确认扫码登录（移动端调用）"
-	@handler ConfirmQrCodeLogin
-	post /api/open/oauth_public/v1/qrcode_confirm (ConfirmQrCodeLoginReq) returns (ConfirmQrCodeLoginRes)
+	@doc "查询扫码会话信息"
+	@handler GetQrCodeScene
+	get /api/open/oauth_public/v1/qrcode_scene (GetQrCodeSceneReq) returns (GetQrCodeSceneRes)
 
 	@doc "账号密码登录"
 	@handler PasswordLogin
 	post /api/open/oauth_public/v1/password_login (PasswordLoginReq) returns (PasswordLoginRes)
 }
+
+// 以下类型仅保留给历史 handler 编译，不再注册路由
+type (
+	ConfirmQrCodeLoginReq {
+		SceneID string `json:"sceneId"`
+		UserID  string `json:"userId"`
+	}
+	ConfirmQrCodeLoginRes {
+		Success bool `json:"success"`
+	}
+)

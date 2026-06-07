@@ -9,14 +9,16 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
-	"beaver/core/corepush"
+	"beaver/core/coreonline"
 
+	"github.com/go-redis/redis"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// HandleClientPing 收到客户端 PING，立即回复 PONG（无状态，echo timestamp）
-func HandleClientPing(client *ws_conn.Client, timestamp int64) {
+// HandleClientPing 收到客户端 PING，续期在线态并回复 PONG。
+func HandleClientPing(rdb *redis.Client, userID, slot, instanceID string, client *ws_conn.Client, timestamp int64) {
+	coreonline.MarkOnline(rdb, userID, slot, instanceID)
 	err := client.SafeSendControl(type_struct.WsControlFrame{
 		Command:   wsCommandConst.PONG,
 		Timestamp: timestamp,
@@ -52,11 +54,8 @@ func NewManager(client *ws_conn.Client, userID, deviceGroup string, svcCtx *svc.
 }
 
 func (m *Manager) Start() {
-	// 仅保留底层协议级 ping
 	go m.startProtocolPing()
-	
-	// 注意：此处不再启动 startApplicationPing，因为移动端(Flutter)已实现主动心跳。
-	// 减少心跳噪声，降低 Socket 并发冲突风险。
+	coreonline.MarkOnline(m.svcCtx.Redis, m.userID, m.deviceGroup, m.svcCtx.InstanceID)
 }
 
 func (m *Manager) Stop() {
@@ -77,7 +76,7 @@ func (m *Manager) startProtocolPing() {
 		case <-m.ctx.Done():
 			return
 		case <-ticker.C:
-			corepush.RefreshOnline(m.svcCtx.Redis, m.userID)
+			coreonline.MarkOnline(m.svcCtx.Redis, m.userID, m.deviceGroup, m.svcCtx.InstanceID)
 			if err := m.sendProtocolPing(); err != nil {
 				logx.Errorf("协议级 ping 失败, 用户: %s, 错误: %v", m.userID, err)
 				return

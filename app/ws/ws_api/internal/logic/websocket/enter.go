@@ -18,7 +18,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r *http.Request, client *ws_conn.Client) {
+func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, deviceGroup string, r *http.Request, client *ws_conn.Client) {
 	for {
 		_, p, err := client.Conn.ReadMessage()
 		if err != nil {
@@ -76,7 +76,7 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		// 控制帧：PING/PONG 直接处理，不发 ACK
 		switch cmd {
 		case wsCommandConst.PING:
-			heartbeat.HandleClientPing(client, wsMessage.Content.Timestamp)
+			heartbeat.HandleClientPing(svcCtx.Redis, req.UserID, deviceGroup, svcCtx.InstanceID, client, wsMessage.Content.Timestamp)
 			continue
 		case wsCommandConst.PONG:
 			continue

@@ -159,7 +159,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 2 // 图片消息
 		msg.ImageMsg = &chat_rpc.ImageMsg{
-			FileKey: req.Image.URL,
+			FileUrl: req.Image.URL,
 			Width:   int32(req.Image.Width),
 			Height:  int32(req.Image.Height),
 		}
@@ -170,11 +170,11 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 3 // 视频消息
 		msg.VideoMsg = &chat_rpc.VideoMsg{
-			FileKey:      req.Video.URL,
+			FileUrl:       req.Video.URL,
 			Width:        int32(req.Video.Width),
 			Height:       int32(req.Video.Height),
 			Duration:     int32(req.Video.Duration),
-			ThumbnailKey: req.Video.ThumbnailURL,
+			ThumbnailUrl: req.Video.ThumbnailURL,
 		}
 
 	case "file":
@@ -183,7 +183,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 4 // 文件消息
 		msg.FileMsg = &chat_rpc.FileMsg{
-			FileKey:  req.File.URL,
+			FileUrl:  req.File.URL,
 			FileName: req.File.FileName,
 			Size:     req.File.FileSize,
 			MimeType: req.File.MimeType,
@@ -195,7 +195,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 5 // 语音消息
 		msg.VoiceMsg = &chat_rpc.VoiceMsg{
-			FileKey:  req.Voice.URL,
+			FileUrl:  req.Voice.URL,
 			Duration: int32(req.Voice.Duration),
 			Size:     req.Voice.FileSize,
 		}
@@ -206,7 +206,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 8 // 音频文件消息
 		msg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-			FileKey:  req.AudioFile.URL,
+			FileUrl:  req.AudioFile.URL,
 			FileName: req.AudioFile.FileName,
 			Duration: int32(req.AudioFile.Duration),
 			Size:     req.AudioFile.FileSize,
@@ -218,7 +218,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 6 // 表情消息
 		msg.EmojiMsg = &chat_rpc.EmojiMsg{
-			FileKey: req.Emoji.URL,
+			FileUrl: req.Emoji.URL,
 			Width:   req.Emoji.Width,
 			Height:  req.Emoji.Height,
 		}

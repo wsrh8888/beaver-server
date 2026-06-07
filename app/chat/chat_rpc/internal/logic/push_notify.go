@@ -6,6 +6,7 @@ import (
 
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/chat/chat_models"
+	"beaver/core/coreonline"
 	"beaver/core/corepush"
 )
 
@@ -45,7 +46,7 @@ func (l *SendMsgLogic) sendOfflinePushIfNeeded(
 		if recipientID == senderID {
 			continue
 		}
-		if corepush.IsOnline(l.svcCtx.Redis, recipientID) {
+		if coreonline.IsOnline(l.svcCtx.Redis, recipientID) {
 			continue
 		}
 

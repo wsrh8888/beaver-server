@@ -152,7 +152,7 @@ func AllMigrations() []Migration {
 				&platform_models.UpdateApp{},
 				&platform_models.UpdateArchitecture{},
 				&platform_models.UpdateVersion{},
-				&platform_models.UpdateStrategy{},
+				&platform_models.UpdateReleasePolicy{},
 				&platform_models.UpdateReport{},
 			},
 			Seed: seedPlatform,
@@ -175,10 +175,7 @@ func AllMigrations() []Migration {
 }
 
 func seedPlatform(db *gorm.DB) error {
-	if err := InitUpdateApp(db); err != nil {
-		return err
-	}
-	return InitUpdateStrategy(db)
+	return SeedUpdateData(db)
 }
 
 // RunMigrations 建库、迁表、单库种子数据，返回各库连接供跨库初始化使用

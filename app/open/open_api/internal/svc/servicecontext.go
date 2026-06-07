@@ -7,6 +7,7 @@ import (
 	"beaver/app/group/group_rpc/group"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/open/open_api/internal/config"
+	oauthmiddle "beaver/app/open/open_api/internal/middle/oauth"
 	"beaver/app/open/open_rpc/open"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
@@ -24,6 +25,7 @@ type ServiceContext struct {
 	Config   config.Config
 	DB       *gorm.DB
 	Redis    *redis.Client
+	OAuth    *oauthmiddle.Qrcode
 	UserRpc  user_rpc.UserClient
 	AuthRpc  auth.Auth
 	ChatRpc  chat_rpc.ChatClient
@@ -39,6 +41,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:   c,
 		DB:       mysqlDb,
 		Redis:    client,
+		OAuth:    oauthmiddle.NewQrcode(mysqlDb),
 		UserRpc:  user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		AuthRpc:  auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		ChatRpc:  chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),

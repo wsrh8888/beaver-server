@@ -11,7 +11,7 @@ import (
 	"beaver/app/ws/ws_api/internal/logic/websocket/heartbeat"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
-	"beaver/core/corepush"
+	"beaver/core/coreonline"
 	"beaver/utils/device"
 
 	"github.com/gorilla/websocket"
@@ -70,7 +70,7 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 
 	logx.Infof("用户上线: %s, 槽位: %s (%s), 地址: %s", req.UserID, deviceGroup, preciseType, conn.RemoteAddr().String())
 	manageUserConnection(userKey, client, req.UserID, deviceGroup)
-	corepush.MarkOnline(l.svcCtx.Redis, req.UserID, deviceGroup, l.svcCtx.InstanceID)
+	coreonline.MarkOnline(l.svcCtx.Redis, req.UserID, deviceGroup, l.svcCtx.InstanceID)
 	connAddr := conn.RemoteAddr().String()
 	defer func() {
 		conn.Close()
@@ -83,7 +83,7 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	heartbeatManager.Start()
 
 	// 7. 消息循环
-	ws.HandleWebSocketMessages(l.ctx, l.svcCtx, req, r, client)
+	ws.HandleWebSocketMessages(l.ctx, l.svcCtx, req, deviceGroup, r, client)
 
 	return nil, nil
 }
@@ -138,14 +138,14 @@ func cleanupConnection(userID, deviceGroup, addr string, svcCtx *svc.ServiceCont
 	userKey := ws_conn.GetUserKey(userID, deviceGroup)
 	userWsInfo, ok := ws_conn.UserOnlineWsMap[userKey]
 	if !ok {
-		corepush.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
+		coreonline.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
 		return
 	}
 
 	delete(userWsInfo.WsClientMap, addr)
 	if len(userWsInfo.WsClientMap) == 0 {
 		delete(ws_conn.UserOnlineWsMap, userKey)
-		corepush.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
+		coreonline.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
 		logx.Infof("用户下线, 用户: %s, 槽位: %s", userID, deviceGroup)
 	}
 }

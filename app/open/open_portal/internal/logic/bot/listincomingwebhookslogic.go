@@ -60,7 +60,7 @@ func (l *ListIncomingWebhooksLogic) ListIncomingWebhooks(req *types.ListIncoming
 
 	list := make([]types.IncomingWebhookInfo, 0, len(bots))
 	for i := range bots {
-		list = append(list, toIncomingWebhookInfo(&bots[i], l.svcCtx.Config.ApiBaseUrl, false))
+		list = append(list, toIncomingWebhookInfo(&bots[i], l.svcCtx.Config.Domain, false))
 	}
 
 	return &types.ListIncomingWebhooksRes{

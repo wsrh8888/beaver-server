@@ -7,7 +7,8 @@ import (
 
 type Config struct {
 	rest.RestConf
-	Etcd  string
+	Domain string // 对外访问域名（用于生成本地文件完整 URL）
+	Etcd   string
 	Mysql struct {
 		DataSource string
 	}

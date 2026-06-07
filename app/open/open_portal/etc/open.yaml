@@ -40,14 +40,11 @@ OpenRpc:
       - 127.0.0.1:2379
     Key: openrpc.rpc
 
-# OAuth 授权页面配置
+# OAuth 授权页（beaver-oauth H5，用于生成扫码 URL）
 OAuth:
-  BaseUrl: http://127.0.0.1:5173
+  BaseUrl: http://192.168.3.4:5173
+Domain: "http://192.168.3.4:20800"
 
 # 门户自身 OAuth 客户端（code 换 token 在服务端完成，appSecret 不下发前端）
 PortalOAuth:
   AppId: app_2db39e38
-  GatewayUrl: http://127.0.0.1:20800
-
-# open_api 对外地址（Incoming Webhook 推送入口）
-ApiBaseUrl: http://127.0.0.1:21900

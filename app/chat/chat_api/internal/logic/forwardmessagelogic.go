@@ -122,7 +122,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.ImageMsgType:
 		if m.ImageMsg != nil {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
-				FileKey: m.ImageMsg.FileKey,
+				FileUrl: m.ImageMsg.FileUrl,
 				Width:   int32(m.ImageMsg.Width),
 				Height:  int32(m.ImageMsg.Height),
 				Size:    m.ImageMsg.Size,
@@ -131,18 +131,18 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.VideoMsgType:
 		if m.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileKey:      m.VideoMsg.FileKey,
+				FileUrl:       m.VideoMsg.FileUrl,
 				Width:        int32(m.VideoMsg.Width),
 				Height:       int32(m.VideoMsg.Height),
 				Duration:     int32(m.VideoMsg.Duration),
-				ThumbnailKey: m.VideoMsg.ThumbnailKey,
+				ThumbnailUrl: m.VideoMsg.ThumbnailUrl,
 				Size:         m.VideoMsg.Size,
 			}
 		}
 	case ctype.FileMsgType:
 		if m.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:   m.FileMsg.FileKey,
+				FileUrl:   m.FileMsg.FileUrl,
 				FileName:  m.FileMsg.FileName,
 				Size:      m.FileMsg.Size,
 				MimeType:  m.FileMsg.MimeType,
@@ -153,7 +153,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.VoiceMsgType:
 		if m.VoiceMsg != nil {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
-				FileKey:  m.VoiceMsg.FileKey,
+				FileUrl:  m.VoiceMsg.FileUrl,
 				Duration: int32(m.VoiceMsg.Duration),
 				Size:     m.VoiceMsg.Size,
 			}
@@ -161,7 +161,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.EmojiMsgType:
 		if m.EmojiMsg != nil {
 			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
-				FileKey:   m.EmojiMsg.FileKey,
+				FileUrl:   m.EmojiMsg.FileUrl,
 				EmojiId:   m.EmojiMsg.EmojiID,
 				PackageId: m.EmojiMsg.PackageID,
 				Width:     m.EmojiMsg.Width,
@@ -178,7 +178,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.AudioFileMsgType:
 		if m.AudioFileMsg != nil {
 			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-				FileKey:  m.AudioFileMsg.FileKey,
+				FileUrl:  m.AudioFileMsg.FileUrl,
 				FileName: m.AudioFileMsg.FileName,
 				Duration: int32(m.AudioFileMsg.Duration),
 				Size:     m.AudioFileMsg.Size,

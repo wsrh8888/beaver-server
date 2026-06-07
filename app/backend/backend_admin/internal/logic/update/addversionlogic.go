@@ -24,7 +24,7 @@ func (l *AddVersionLogic) AddVersion(req *types.AddVersionReq) (resp *types.AddV
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateVersion(l.ctx, &platform_rpc.CreateVersionReq{
 		ArchitectureId: uint64(req.ArchitectureID),
 		Version:        req.Version,
-		FileKey:        req.FileKey,
+		FileUrl:        req.FileUrl,
 		Description:    req.Description,
 		ReleaseNotes:   req.ReleaseNotes,
 	})

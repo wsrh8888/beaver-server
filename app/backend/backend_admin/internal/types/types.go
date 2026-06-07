@@ -42,7 +42,7 @@ type AddEmojiToPackageRes struct {
 type AddVersionReq struct {
 	ArchitectureID uint   `json:"architectureId"`        // 架构ID
 	Version        string `json:"version"`               // 版本号
-	FileKey        string `json:"fileKey"`               // 文件ID
+	FileUrl        string `json:"fileUrl"`               // 安装包完整 URL
 	Description    string `json:"description,optional"`  // 版本描述
 	ReleaseNotes   string `json:"releaseNotes,optional"` // 更新日志
 }
@@ -521,6 +521,7 @@ type FileUploadLocalReq struct {
 
 type FileUploadLocalRes struct {
 	FileKey      string `json:"fileKey"`
+	FileURL      string `json:"fileUrl,optional"`
 	OriginalName string `json:"originalName"`
 }
 
@@ -531,6 +532,7 @@ type FileUploadQiniuReq struct {
 
 type FileUploadQiniuRes struct {
 	FileKey      string `json:"fileKey"`
+	FileURL      string `json:"fileUrl,optional"`
 	OriginalName string `json:"originalName"`
 }
 
@@ -729,36 +731,6 @@ type GetChatSessionListRes struct {
 	Total int64                    `json:"total"`
 }
 
-type GetCityStrategiesItem struct {
-	Id        uint                            `json:"id"`        // 策略ID
-	AppID     string                          `json:"appId"`     // 应用ID
-	CityID    string                          `json:"cityId"`    // 城市代码
-	Strategy  []GetCityStrategiesStrategyItem `json:"strategy"`  // 城市策略配置
-	IsActive  bool                            `json:"isActive"`  // 是否启用
-	CreatedAt string                          `json:"createdAt"` // 创建时间
-	UpdatedAt string                          `json:"updatedAt"` // 更新时间
-}
-
-type GetCityStrategiesReq struct {
-	AppID    string `form:"appId,optional"`    // 应用ID
-	IsActive bool   `form:"isActive,optional"` // 是否仅查询活跃策略
-	Page     int    `form:"page,optional"`     // 页码
-	PageSize int    `form:"pageSize,optional"` // 每页数量
-}
-
-type GetCityStrategiesRes struct {
-	Total      int64                   `json:"total"`      // 总数
-	Strategies []GetCityStrategiesItem `json:"strategies"` // 策略列表
-}
-
-type GetCityStrategiesStrategyItem struct {
-	ArchitectureID uint   `json:"architectureId"` // 架构ID
-	VersionID      uint   `json:"versionId"`      // 版本ID
-	Version        string `json:"version"`        // 版本号
-	ForceUpdate    bool   `json:"forceUpdate"`    // 是否强制更新
-	IsActive       bool   `json:"isActive"`       // 是否启用
-}
-
 type GetContentReportListReq struct {
 	Page       int    `form:"page,default=1"`
 	PageSize   int    `form:"pageSize,default=10"`
@@ -796,6 +768,7 @@ type GetDashboardOverviewRes struct {
 	PendingFeedbackCount  int64 `json:"pendingFeedbackCount"`
 	PendingReportCount    int64 `json:"pendingReportCount"`
 	PendingCaseCount      int64 `json:"pendingCaseCount"`
+	OnlineUserCount       int64 `json:"onlineUserCount"`
 }
 
 type GetDashboardTrendsReq struct {
@@ -1350,6 +1323,26 @@ type GetMomentListRes struct {
 	Total int64               `json:"total"`
 }
 
+type GetOnlineStatsReq struct {
+}
+
+type GetOnlineStatsRes struct {
+	UserCount    int64 `json:"userCount"`    // int64 当前在线用户数
+	DesktopCount int64 `json:"desktopCount"` // int64 PC 端在线用户数
+	MobileCount  int64 `json:"mobileCount"`  // int64 移动端在线用户数
+}
+
+type GetOnlineUserListReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	Keyword  string `form:"keyword,optional"` // string 昵称/邮箱/用户ID 模糊筛选
+}
+
+type GetOnlineUserListRes struct {
+	List  []OnlineUserItem `json:"list"`
+	Total int64            `json:"total"`
+}
+
 type GetOpenAppListReq struct {
 	Page           int    `form:"page,default=1"`
 	PageSize       int    `form:"pageSize,default=10"`
@@ -1401,6 +1394,14 @@ type GetQiniuUploadTokenReq struct {
 type GetQiniuUploadTokenRes struct {
 	UploadToken string `json:"uploadToken"` // 上传token
 	ExpiresIn   int64  `json:"expiresIn"`   // token过期时间 (秒)
+}
+
+type GetReleasePoliciesReq struct {
+	AppID string `form:"appId"`
+}
+
+type GetReleasePoliciesRes struct {
+	Policies []ReleasePolicyItem `json:"policies"`
 }
 
 type GetSensitiveWordListReq struct {
@@ -1470,7 +1471,7 @@ type GetVersionListItem struct {
 	VersionID      uint   `json:"versionId"`      // 版本ID
 	ArchitectureID uint   `json:"architectureId"` // 架构ID
 	Version        string `json:"version"`        // 版本号
-	FileKey        string `json:"fileKey"`        // 文件ID
+	FileUrl        string `json:"fileUrl"`        // 安装包完整 URL
 	Description    string `json:"description"`    // 版本描述
 	ReleaseNotes   string `json:"releaseNotes"`   // 更新日志
 	ReleaseDate    string `json:"releaseDate"`    // 发布时间
@@ -1590,6 +1591,19 @@ type MuteGroupMemberReq struct {
 type MuteGroupMemberRes struct {
 }
 
+type OnlineUserItem struct {
+	UserID   string               `json:"userId"`   // string 用户 ID
+	NickName string               `json:"nickName"` // string 昵称
+	Email    string               `json:"email"`    // string 邮箱
+	Avatar   string               `json:"avatar"`   // string 头像 fileKey
+	Slots    []OnlineUserSlotItem `json:"slots"`    // array 在线槽位
+}
+
+type OnlineUserSlotItem struct {
+	InstanceID string `json:"instanceId"` // string WS 实例 ID
+	Slot       string `json:"slot"`       // string desktop | mobile
+}
+
 type OpenAppInfo struct {
 	AppID         string `json:"appId"`
 	Name          string `json:"name"`
@@ -1678,6 +1692,22 @@ type RejectContentReportReq struct {
 }
 
 type RejectContentReportRes struct {
+}
+
+type ReleasePolicyItem struct {
+	ID              uint   `json:"id"`
+	AppID           string `json:"appId"`
+	ArchitectureID  uint   `json:"architectureId"`
+	StableVersionID uint   `json:"stableVersionId"`
+	GrayVersionID   uint   `json:"grayVersionId"`
+	RolloutPercent  uint   `json:"rolloutPercent"`
+	MinVersion      string `json:"minVersion"`
+	ForceUpdate     bool   `json:"forceUpdate"`
+	IsActive        bool   `json:"isActive"`
+	StableVersion   string `json:"stableVersion"`
+	GrayVersion     string `json:"grayVersion"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
 }
 
 type RemoveEmojiFromPackageReq struct {
@@ -1832,23 +1862,6 @@ type UpdateBucketReq struct {
 type UpdateBucketRes struct {
 }
 
-type UpdateCityStrategyItem struct {
-	ArchitectureID uint `json:"architectureId"` // 架构ID
-	VersionID      uint `json:"versionId"`      // 版本ID
-	ForceUpdate    bool `json:"forceUpdate"`    // 是否强制更新
-	IsActive       bool `json:"isActive"`       // 是否启用
-}
-
-type UpdateCityStrategyReq struct {
-	AppID      string                   `json:"appId"`               // 应用ID
-	CityIDs    []string                 `json:"cityIds"`             // 城市ID数组
-	Strategy   []UpdateCityStrategyItem `json:"strategy"`            // 城市策略配置
-	UpdateType string                   `json:"updateType,optional"` // 更新类型：single(单个架构) | global(全局架构)
-}
-
-type UpdateCityStrategyRes struct {
-}
-
 type UpdateEmojiPackageReq struct {
 	PackageId   string  `json:"packageId"`
 	Title       *string `json:"title,optional"`
@@ -1938,6 +1951,21 @@ type UpdateUserReq struct {
 }
 
 type UpdateUserRes struct {
+}
+
+type UpsertReleasePolicyReq struct {
+	AppID           string `json:"appId"`
+	ArchitectureID  uint   `json:"architectureId"`
+	StableVersionID uint   `json:"stableVersionId"`
+	GrayVersionID   uint   `json:"grayVersionId,optional"`
+	RolloutPercent  uint   `json:"rolloutPercent"`
+	MinVersion      string `json:"minVersion,optional"`
+	ForceUpdate     bool   `json:"forceUpdate,optional"`
+	IsActive        bool   `json:"isActive,optional"`
+}
+
+type UpsertReleasePolicyRes struct {
+	ID uint `json:"id"`
 }
 
 type UserInfo struct {

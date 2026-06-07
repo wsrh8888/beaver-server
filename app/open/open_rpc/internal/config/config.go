@@ -12,6 +12,5 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	ApiBaseUrl string // Webhook URL 基址，如 https://api.example.com
 	UserRpc    zrpc.RpcClientConf
 }

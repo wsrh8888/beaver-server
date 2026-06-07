@@ -11,7 +11,7 @@ message TextMsg {
 
 // 定义ImageMsg消息
 message ImageMsg {
-  string file_key = 1; // 图片文件ID
+  string file_url = 1; // 图片完整 URL
   int32 width = 2;    // 图片宽度（可选）
   int32 height = 3;   // 图片高度（可选）
   int64 size = 4;     // 文件大小（字节，可选）
@@ -19,17 +19,17 @@ message ImageMsg {
 
 // 定义VideoMsg消息
 message VideoMsg {
-  string file_key = 1;      // 视频文件ID
+  string file_url = 1;         // 视频完整 URL
   int32 width = 2;         // 视频宽度（可选）
   int32 height = 3;        // 视频高度（可选）
   int32 duration = 4;      // 视频时长（秒，可选）
-  string thumbnail_key = 5; // 视频封面图文件ID（可选）
+  string thumbnail_url = 5; // 视频封面完整 URL（可选）
   int64 size = 6;          // 文件大小（字节，可选）
 }
 
 // 定义FileMsg消息（对标飞书 msg_type=file，聊天内 Office/PDF 等附件）
 message FileMsg {
-  string file_key = 1;   // 文件ID（file_key / file_token）
+  string file_url = 1;   // 文件完整 URL
   string file_name = 2;  // 原始文件名
   int64 size = 3;        // 文件大小（字节）
   string mime_type = 4;  // MIME 类型
@@ -50,14 +50,14 @@ message CloudDocMsg {
 
 // 定义VoiceMsg消息
 message VoiceMsg {
-  string file_key = 1;   // 语音文件ID
+  string file_url = 1;   // 语音完整 URL
   int32 duration = 2;   // 语音时长（秒，可选）
   int64 size = 3;       // 文件大小（字节，可选）
 }
 
 // 定义AudioFileMsg消息 - 音频文件消息
 message AudioFileMsg {
-  string file_key = 1;  // 音频文件ID
+  string file_url = 1;  // 音频文件完整 URL
   string file_name = 2; // 原始文件名（可选，用于显示）
   int32 duration = 3;  // 音频时长（秒，可选）
   int64 size = 4;      // 文件大小（字节，可选）
@@ -65,7 +65,7 @@ message AudioFileMsg {
 
 // 定义EmojiMsg消息 - 表情相关消息
 message EmojiMsg {
-  string file_key = 1; // 表情图片文件ID（Emoji.FileName）
+  string file_url = 1; // 表情图片完整 URL
   string emoji_id = 2; // 表情ID（Emoji.ID，单个表情时使用）
   string package_id = 3; // 表情包ID（EmojiPackage.ID，表情包分享时使用）
   int64 width = 4; // 表情图片宽度（可选，用于保持比例显示）

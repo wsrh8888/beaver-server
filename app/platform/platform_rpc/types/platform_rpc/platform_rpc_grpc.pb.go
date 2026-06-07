@@ -34,8 +34,8 @@ const (
 	Platform_DeleteVersion_FullMethodName        = "/platform_rpc.platform/DeleteVersion"
 	Platform_ListVersions_FullMethodName         = "/platform_rpc.platform/ListVersions"
 	Platform_ListAppVersions_FullMethodName      = "/platform_rpc.platform/ListAppVersions"
-	Platform_UpdateCityStrategy_FullMethodName   = "/platform_rpc.platform/UpdateCityStrategy"
-	Platform_ListCityStrategies_FullMethodName   = "/platform_rpc.platform/ListCityStrategies"
+	Platform_UpsertReleasePolicy_FullMethodName  = "/platform_rpc.platform/UpsertReleasePolicy"
+	Platform_ListReleasePolicies_FullMethodName  = "/platform_rpc.platform/ListReleasePolicies"
 	Platform_SubmitFeedback_FullMethodName       = "/platform_rpc.platform/SubmitFeedback"
 	Platform_ListFeedback_FullMethodName         = "/platform_rpc.platform/ListFeedback"
 	Platform_GetFeedback_FullMethodName          = "/platform_rpc.platform/GetFeedback"
@@ -66,8 +66,8 @@ type PlatformClient interface {
 	DeleteVersion(ctx context.Context, in *DeleteVersionReq, opts ...grpc.CallOption) (*DeleteVersionRes, error)
 	ListVersions(ctx context.Context, in *ListVersionsReq, opts ...grpc.CallOption) (*ListVersionsRes, error)
 	ListAppVersions(ctx context.Context, in *ListAppVersionsReq, opts ...grpc.CallOption) (*ListAppVersionsRes, error)
-	UpdateCityStrategy(ctx context.Context, in *UpdateCityStrategyReq, opts ...grpc.CallOption) (*UpdateCityStrategyRes, error)
-	ListCityStrategies(ctx context.Context, in *ListCityStrategiesReq, opts ...grpc.CallOption) (*ListCityStrategiesRes, error)
+	UpsertReleasePolicy(ctx context.Context, in *UpsertReleasePolicyReq, opts ...grpc.CallOption) (*UpsertReleasePolicyRes, error)
+	ListReleasePolicies(ctx context.Context, in *ListReleasePoliciesReq, opts ...grpc.CallOption) (*ListReleasePoliciesRes, error)
 	SubmitFeedback(ctx context.Context, in *SubmitFeedbackReq, opts ...grpc.CallOption) (*SubmitFeedbackRes, error)
 	ListFeedback(ctx context.Context, in *ListFeedbackReq, opts ...grpc.CallOption) (*ListFeedbackRes, error)
 	GetFeedback(ctx context.Context, in *GetFeedbackReq, opts ...grpc.CallOption) (*GetFeedbackRes, error)
@@ -237,20 +237,20 @@ func (c *platformClient) ListAppVersions(ctx context.Context, in *ListAppVersion
 	return out, nil
 }
 
-func (c *platformClient) UpdateCityStrategy(ctx context.Context, in *UpdateCityStrategyReq, opts ...grpc.CallOption) (*UpdateCityStrategyRes, error) {
+func (c *platformClient) UpsertReleasePolicy(ctx context.Context, in *UpsertReleasePolicyReq, opts ...grpc.CallOption) (*UpsertReleasePolicyRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateCityStrategyRes)
-	err := c.cc.Invoke(ctx, Platform_UpdateCityStrategy_FullMethodName, in, out, cOpts...)
+	out := new(UpsertReleasePolicyRes)
+	err := c.cc.Invoke(ctx, Platform_UpsertReleasePolicy_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *platformClient) ListCityStrategies(ctx context.Context, in *ListCityStrategiesReq, opts ...grpc.CallOption) (*ListCityStrategiesRes, error) {
+func (c *platformClient) ListReleasePolicies(ctx context.Context, in *ListReleasePoliciesReq, opts ...grpc.CallOption) (*ListReleasePoliciesRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListCityStrategiesRes)
-	err := c.cc.Invoke(ctx, Platform_ListCityStrategies_FullMethodName, in, out, cOpts...)
+	out := new(ListReleasePoliciesRes)
+	err := c.cc.Invoke(ctx, Platform_ListReleasePolicies_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -366,8 +366,8 @@ type PlatformServer interface {
 	DeleteVersion(context.Context, *DeleteVersionReq) (*DeleteVersionRes, error)
 	ListVersions(context.Context, *ListVersionsReq) (*ListVersionsRes, error)
 	ListAppVersions(context.Context, *ListAppVersionsReq) (*ListAppVersionsRes, error)
-	UpdateCityStrategy(context.Context, *UpdateCityStrategyReq) (*UpdateCityStrategyRes, error)
-	ListCityStrategies(context.Context, *ListCityStrategiesReq) (*ListCityStrategiesRes, error)
+	UpsertReleasePolicy(context.Context, *UpsertReleasePolicyReq) (*UpsertReleasePolicyRes, error)
+	ListReleasePolicies(context.Context, *ListReleasePoliciesReq) (*ListReleasePoliciesRes, error)
 	SubmitFeedback(context.Context, *SubmitFeedbackReq) (*SubmitFeedbackRes, error)
 	ListFeedback(context.Context, *ListFeedbackReq) (*ListFeedbackRes, error)
 	GetFeedback(context.Context, *GetFeedbackReq) (*GetFeedbackRes, error)
@@ -432,11 +432,11 @@ func (UnimplementedPlatformServer) ListVersions(context.Context, *ListVersionsRe
 func (UnimplementedPlatformServer) ListAppVersions(context.Context, *ListAppVersionsReq) (*ListAppVersionsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAppVersions not implemented")
 }
-func (UnimplementedPlatformServer) UpdateCityStrategy(context.Context, *UpdateCityStrategyReq) (*UpdateCityStrategyRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateCityStrategy not implemented")
+func (UnimplementedPlatformServer) UpsertReleasePolicy(context.Context, *UpsertReleasePolicyReq) (*UpsertReleasePolicyRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertReleasePolicy not implemented")
 }
-func (UnimplementedPlatformServer) ListCityStrategies(context.Context, *ListCityStrategiesReq) (*ListCityStrategiesRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListCityStrategies not implemented")
+func (UnimplementedPlatformServer) ListReleasePolicies(context.Context, *ListReleasePoliciesReq) (*ListReleasePoliciesRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListReleasePolicies not implemented")
 }
 func (UnimplementedPlatformServer) SubmitFeedback(context.Context, *SubmitFeedbackReq) (*SubmitFeedbackRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitFeedback not implemented")
@@ -756,38 +756,38 @@ func _Platform_ListAppVersions_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Platform_UpdateCityStrategy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateCityStrategyReq)
+func _Platform_UpsertReleasePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertReleasePolicyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlatformServer).UpdateCityStrategy(ctx, in)
+		return srv.(PlatformServer).UpsertReleasePolicy(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Platform_UpdateCityStrategy_FullMethodName,
+		FullMethod: Platform_UpsertReleasePolicy_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).UpdateCityStrategy(ctx, req.(*UpdateCityStrategyReq))
+		return srv.(PlatformServer).UpsertReleasePolicy(ctx, req.(*UpsertReleasePolicyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Platform_ListCityStrategies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListCityStrategiesReq)
+func _Platform_ListReleasePolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListReleasePoliciesReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlatformServer).ListCityStrategies(ctx, in)
+		return srv.(PlatformServer).ListReleasePolicies(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Platform_ListCityStrategies_FullMethodName,
+		FullMethod: Platform_ListReleasePolicies_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).ListCityStrategies(ctx, req.(*ListCityStrategiesReq))
+		return srv.(PlatformServer).ListReleasePolicies(ctx, req.(*ListReleasePoliciesReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1022,12 +1022,12 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Platform_ListAppVersions_Handler,
 		},
 		{
-			MethodName: "UpdateCityStrategy",
-			Handler:    _Platform_UpdateCityStrategy_Handler,
+			MethodName: "UpsertReleasePolicy",
+			Handler:    _Platform_UpsertReleasePolicy_Handler,
 		},
 		{
-			MethodName: "ListCityStrategies",
-			Handler:    _Platform_ListCityStrategies_Handler,
+			MethodName: "ListReleasePolicies",
+			Handler:    _Platform_ListReleasePolicies_Handler,
 		},
 		{
 			MethodName: "SubmitFeedback",

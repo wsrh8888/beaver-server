@@ -34,6 +34,8 @@ var FileTypeMapper = map[string]string{
 	"mkv":  "video",
 	"mov":  "video",
 	"mp3":  "audio",
+	"m4a":  "audio",
+	"aac":  "audio",
 	"wav":  "audio",
 	"ogg":  "audio",
 	"zip":  "archive",

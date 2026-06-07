@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"beaver/app/open/constants"
-	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
@@ -28,15 +27,8 @@ func NewGetUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 }
 
 func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.GetUserListRes, err error) {
-	tokenRecord, err := oauthutil.ValidateAccessTokenWithScopes(
-		l.svcCtx.DB,
-		req.Authorization,
-		constants.ScopeUserProfileRead,
-	)
+	tokenRecord, err := loadUserAccessToken(l.svcCtx.DB, req.Authorization, constants.ScopeUserProfileRead)
 	if err != nil {
-		return nil, err
-	}
-	if err := oauthutil.RequireUserToken(tokenRecord); err != nil {
 		return nil, err
 	}
 	if len(req.UserIDs) == 0 {
@@ -55,7 +47,7 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 		return nil, err
 	}
 
-	scopes := oauthutil.ParseScopes(tokenRecord.Scope)
+	scopes := parseScopeList(tokenRecord.Scope)
 	userList := make([]types.GetUserListUserItem, 0, len(req.UserIDs))
 	for _, uid := range req.UserIDs {
 		info, ok := listRes.UserInfo[uid]
@@ -66,10 +58,10 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 			UserID:   info.UserId,
 			Nickname: info.NickName,
 		}
-		if oauthutil.HasScope(scopes, constants.ScopeUserAvatarRead) {
+		if hasScope(scopes, constants.ScopeUserAvatarRead) {
 			item.Avatar = info.Avatar
 		}
-		if oauthutil.HasScope(scopes, constants.ScopeUserEmailRead) {
+		if hasScope(scopes, constants.ScopeUserEmailRead) {
 			item.Email = info.Email
 		}
 		userList = append(userList, item)

@@ -13,6 +13,7 @@ import (
 	group "beaver/app/backend/backend_admin/internal/handler/group"
 	moderation "beaver/app/backend/backend_admin/internal/handler/moderation"
 	moment "beaver/app/backend/backend_admin/internal/handler/moment"
+	monitor "beaver/app/backend/backend_admin/internal/handler/monitor"
 	open "beaver/app/backend/backend_admin/internal/handler/open"
 	operations "beaver/app/backend/backend_admin/internal/handler/operations"
 	overview "beaver/app/backend/backend_admin/internal/handler/overview"
@@ -518,6 +519,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 在线用户列表
+				Method:  http.MethodGet,
+				Path:    "/admin/monitor/online/list",
+				Handler: monitor.GetOnlineUserListHandler(serverCtx),
+			},
+			{
+				// 在线用户统计
+				Method:  http.MethodGet,
+				Path:    "/admin/monitor/online/stats",
+				Handler: monitor.GetOnlineStatsHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
 				Method:  http.MethodPost,
 				Path:    "/admin/open/app/audit",
 				Handler: open.AuditOpenAppHandler(serverCtx),
@@ -758,16 +776,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: update.GetArchitecturesHandler(serverCtx),
 			},
 			{
-				// 获取城市策略列表
+				// 获取发版策略
 				Method:  http.MethodGet,
-				Path:    "/admin/update/cityStrategies",
-				Handler: update.GetCityStrategiesHandler(serverCtx),
+				Path:    "/admin/update/releasePolicies",
+				Handler: update.GetReleasePoliciesHandler(serverCtx),
 			},
 			{
-				// 更新城市策略
+				// 保存发版策略
 				Method:  http.MethodPost,
-				Path:    "/admin/update/cityStrategyUpdate",
-				Handler: update.UpdateCityStrategyHandler(serverCtx),
+				Path:    "/admin/update/releasePolicy",
+				Handler: update.UpsertReleasePolicyHandler(serverCtx),
 			},
 			{
 				// 删除版本

@@ -39,7 +39,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 	}
 
 	appID := l.svcCtx.Config.PortalOAuth.AppId
-	gatewayURL := l.svcCtx.Config.PortalOAuth.GatewayUrl
+	gatewayURL := l.svcCtx.Config.Domain
 	if appID == "" || gatewayURL == "" {
 		return nil, errors.New("门户 OAuth 未配置")
 	}

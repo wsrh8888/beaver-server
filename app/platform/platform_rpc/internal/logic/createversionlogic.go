@@ -25,6 +25,9 @@ func NewCreateVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 }
 
 func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*platform_rpc.CreateVersionRes, error) {
+	if in.FileUrl == "" {
+		return nil, status.Error(codes.InvalidArgument, "fileUrl不能为空")
+	}
 	var arch platform_models.UpdateArchitecture
 	if err := l.svcCtx.DB.First(&arch, in.ArchitectureId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,7 +39,7 @@ func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*
 	version := platform_models.UpdateVersion{
 		ArchitectureID: uint(in.ArchitectureId),
 		Version:        in.Version,
-		FileKey:        in.FileKey,
+		FileUrl:        in.FileUrl,
 		Description:    in.Description,
 		ReleaseNotes:   in.ReleaseNotes,
 	}

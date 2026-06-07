@@ -57,7 +57,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.ImageMsgType:
 		if protoMsg.ImageMsg != nil {
 			imageMsg := &ctype.ImageMsg{
-				FileKey: protoMsg.ImageMsg.FileKey,
+				FileUrl: protoMsg.ImageMsg.FileUrl,
 			}
 			if protoMsg.ImageMsg.Width > 0 {
 				imageMsg.Width = int(protoMsg.ImageMsg.Width)
@@ -76,7 +76,8 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.VideoMsgType:
 		if protoMsg.VideoMsg != nil {
 			videoMsg := &ctype.VideoMsg{
-				FileKey: protoMsg.VideoMsg.FileKey,
+				FileUrl:      protoMsg.VideoMsg.FileUrl,
+				ThumbnailUrl: protoMsg.VideoMsg.ThumbnailUrl,
 			}
 			if protoMsg.VideoMsg.Width > 0 {
 				videoMsg.Width = int(protoMsg.VideoMsg.Width)
@@ -86,9 +87,6 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			}
 			if protoMsg.VideoMsg.Duration > 0 {
 				videoMsg.Duration = int(protoMsg.VideoMsg.Duration)
-			}
-			if protoMsg.VideoMsg.ThumbnailKey != "" {
-				videoMsg.ThumbnailKey = protoMsg.VideoMsg.ThumbnailKey
 			}
 			if protoMsg.VideoMsg.Size > 0 {
 				videoMsg.Size = protoMsg.VideoMsg.Size
@@ -101,7 +99,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.FileMsgType:
 		if protoMsg.FileMsg != nil {
 			fileMsg := &ctype.FileMsg{
-				FileKey: protoMsg.FileMsg.FileKey,
+				FileUrl: protoMsg.FileMsg.FileUrl,
 			}
 			if protoMsg.FileMsg.FileName != "" {
 				fileMsg.FileName = protoMsg.FileMsg.FileName
@@ -126,7 +124,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.VoiceMsgType:
 		if protoMsg.VoiceMsg != nil {
 			voiceMsg := &ctype.VoiceMsg{
-				FileKey: protoMsg.VoiceMsg.FileKey,
+				FileUrl: protoMsg.VoiceMsg.FileUrl,
 			}
 			if protoMsg.VoiceMsg.Duration > 0 {
 				voiceMsg.Duration = int(protoMsg.VoiceMsg.Duration)
@@ -144,7 +142,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			msg = ctype.Msg{
 				Type: ctype.EmojiMsgType,
 				EmojiMsg: &ctype.EmojiMsg{
-					FileKey:   protoMsg.EmojiMsg.FileKey,
+					FileUrl:   protoMsg.EmojiMsg.FileUrl,
 					EmojiID:   protoMsg.EmojiMsg.EmojiId,
 					PackageID: protoMsg.EmojiMsg.PackageId,
 					Width:     protoMsg.EmojiMsg.Width,
@@ -166,7 +164,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.AudioFileMsgType:
 		if protoMsg.AudioFileMsg != nil {
 			audioFileMsg := &ctype.AudioFileMsg{
-				FileKey: protoMsg.AudioFileMsg.FileKey,
+				FileUrl: protoMsg.AudioFileMsg.FileUrl,
 			}
 			if protoMsg.AudioFileMsg.FileName != "" {
 				audioFileMsg.FileName = protoMsg.AudioFileMsg.FileName
@@ -571,7 +569,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.ImageMsgType:
 		if m.ImageMsg != nil {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
-				FileKey: m.ImageMsg.FileKey,
+				FileUrl: m.ImageMsg.FileUrl,
 				Width:   int32(m.ImageMsg.Width),
 				Height:  int32(m.ImageMsg.Height),
 				Size:    m.ImageMsg.Size,
@@ -580,18 +578,18 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.VideoMsgType:
 		if m.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileKey:      m.VideoMsg.FileKey,
+				FileUrl:       m.VideoMsg.FileUrl,
 				Width:        int32(m.VideoMsg.Width),
 				Height:       int32(m.VideoMsg.Height),
 				Duration:     int32(m.VideoMsg.Duration),
-				ThumbnailKey: m.VideoMsg.ThumbnailKey,
+				ThumbnailUrl: m.VideoMsg.ThumbnailUrl,
 				Size:         m.VideoMsg.Size,
 			}
 		}
 	case ctype.FileMsgType:
 		if m.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:   m.FileMsg.FileKey,
+				FileUrl:   m.FileMsg.FileUrl,
 				FileName:  m.FileMsg.FileName,
 				Size:      m.FileMsg.Size,
 				MimeType:  m.FileMsg.MimeType,
@@ -602,7 +600,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.VoiceMsgType:
 		if m.VoiceMsg != nil {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
-				FileKey:  m.VoiceMsg.FileKey,
+				FileUrl:  m.VoiceMsg.FileUrl,
 				Duration: int32(m.VoiceMsg.Duration),
 				Size:     m.VoiceMsg.Size,
 			}
@@ -610,7 +608,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.EmojiMsgType:
 		if m.EmojiMsg != nil {
 			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
-				FileKey:   m.EmojiMsg.FileKey,
+				FileUrl:   m.EmojiMsg.FileUrl,
 				EmojiId:   m.EmojiMsg.EmojiID,
 				PackageId: m.EmojiMsg.PackageID,
 				Width:     m.EmojiMsg.Width,
@@ -627,7 +625,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.AudioFileMsgType:
 		if m.AudioFileMsg != nil {
 			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-				FileKey:  m.AudioFileMsg.FileKey,
+				FileUrl:  m.AudioFileMsg.FileUrl,
 				FileName: m.AudioFileMsg.FileName,
 				Duration: int32(m.AudioFileMsg.Duration),
 				Size:     m.AudioFileMsg.Size,

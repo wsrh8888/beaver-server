@@ -108,6 +108,22 @@ func GetFileType(suffix string) string {
 	return "unknown"
 }
 
+// BuildLocalFileURL 生成本地文件的完整访问 URL（与 file_api 保持一致）
+func BuildLocalFileURL(domain, fileKey string) string {
+	if domain == "" {
+		return fmt.Sprintf("/api/file/preview/%s", fileKey)
+	}
+	return fmt.Sprintf("%s/api/file/preview/%s", strings.TrimRight(domain, "/"), fileKey)
+}
+
+// BuildQiniuFileURL 生成七牛云文件的完整访问 URL
+func BuildQiniuFileURL(domain, path string) string {
+	if domain == "" || domain == "your_qiniu_domain" || path == "" {
+		return ""
+	}
+	return fmt.Sprintf("https://%s/%s", strings.TrimRight(domain, "/"), strings.TrimLeft(path, "/"))
+}
+
 // inList 检查元素是否在列表中
 func inList(list []string, item string) bool {
 	for _, v := range list {

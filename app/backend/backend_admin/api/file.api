@@ -75,6 +75,7 @@ type (
 	}
 	FileUploadLocalRes {
 		FileKey      string `json:"fileKey"`
+		FileURL      string `json:"fileUrl,optional"`
 		OriginalName string `json:"originalName"`
 	}
 )
@@ -87,6 +88,7 @@ type (
 	}
 	FileUploadQiniuRes {
 		FileKey      string `json:"fileKey"`
+		FileURL      string `json:"fileUrl,optional"`
 		OriginalName string `json:"originalName"`
 	}
 )

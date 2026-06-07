@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/open/open_api/internal/logic/oauthutil"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
@@ -27,35 +26,32 @@ func NewGetUserInfoByH5CodeLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *GetUserInfoByH5CodeLogic) GetUserInfoByH5Code(req *types.GetUserInfoByH5CodeReq) (resp *types.GetUserInfoByH5CodeRes, err error) {
-	if _, err := oauthutil.VerifyApp(l.svcCtx.DB, req.AppID, req.AppSecret); err != nil {
+	if _, err := verifyApp(l.svcCtx.DB, req.AppID, req.AppSecret); err != nil {
 		return nil, err
 	}
 
-	oauthCode, err := oauthutil.FindOAuthCode(l.svcCtx.DB, req.AppID, req.AuthCode)
+	oauthCode, err := findOAuthCode(l.svcCtx.DB, req.AppID, req.AuthCode)
 	if err != nil {
 		return nil, err
 	}
-	if err := oauthutil.ValidateOAuthCode(oauthCode); err != nil {
-		return nil, err
-	}
 	if oauthCode.Scene != "h5_sso" {
-		return nil, errors.New("????????")
+		return nil, errors.New("授权码场景无效")
 	}
 
-	if err := oauthutil.MarkOAuthCodeUsed(l.svcCtx.DB, oauthCode); err != nil {
-		logx.Errorf("?? authCode ?????: %v", err)
-		return nil, errors.New("???????")
+	if err := l.svcCtx.DB.Model(oauthCode).Update("used", true).Error; err != nil {
+		logx.Errorf("标记 authCode 已使用失败: %v", err)
+		return nil, errors.New("服务内部异常")
 	}
 
 	userInfoRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
 		UserID: oauthCode.UserID,
 	})
 	if err != nil {
-		logx.Errorf("????????: %v", err)
-		return nil, errors.New("????????")
+		logx.Errorf("查询用户信息失败: %v", err)
+		return nil, errors.New("获取用户信息失败")
 	}
 	if userInfoRes.UserInfo == nil {
-		return nil, errors.New("?????")
+		return nil, errors.New("用户不存在")
 	}
 
 	return &types.GetUserInfoByH5CodeRes{

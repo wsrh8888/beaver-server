@@ -53,7 +53,7 @@ func (l *ListVersionsLogic) ListVersions(in *platform_rpc.ListVersionsReq) (*pla
 			VersionId:      uint64(ver.Id),
 			ArchitectureId: uint64(ver.ArchitectureID),
 			Version:        ver.Version,
-			FileKey:        ver.FileKey,
+			FileUrl:        ver.FileUrl,
 			Description:    ver.Description,
 			ReleaseNotes:   ver.ReleaseNotes,
 			CreatedAt:      ver.CreatedAt.String(),

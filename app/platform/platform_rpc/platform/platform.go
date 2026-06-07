@@ -33,7 +33,6 @@ type (
 	AppVersionBrief         = platform_rpc.AppVersionBrief
 	AppVersionsArchItem     = platform_rpc.AppVersionsArchItem
 	ArchitectureItem        = platform_rpc.ArchitectureItem
-	CityStrategyItem        = platform_rpc.CityStrategyItem
 	ContentReportItem       = platform_rpc.ContentReportItem
 	CreateAppReq            = platform_rpc.CreateAppReq
 	CreateAppRes            = platform_rpc.CreateAppRes
@@ -58,26 +57,25 @@ type (
 	ListAppsRes             = platform_rpc.ListAppsRes
 	ListArchitecturesReq    = platform_rpc.ListArchitecturesReq
 	ListArchitecturesRes    = platform_rpc.ListArchitecturesRes
-	ListCityStrategiesReq   = platform_rpc.ListCityStrategiesReq
-	ListCityStrategiesRes   = platform_rpc.ListCityStrategiesRes
 	ListContentReportsReq   = platform_rpc.ListContentReportsReq
 	ListContentReportsRes   = platform_rpc.ListContentReportsRes
 	ListFeedbackReq         = platform_rpc.ListFeedbackReq
 	ListFeedbackRes         = platform_rpc.ListFeedbackRes
+	ListReleasePoliciesReq  = platform_rpc.ListReleasePoliciesReq
+	ListReleasePoliciesRes  = platform_rpc.ListReleasePoliciesRes
 	ListVersionsReq         = platform_rpc.ListVersionsReq
 	ListVersionsRes         = platform_rpc.ListVersionsRes
-	StrategyInfoItem        = platform_rpc.StrategyInfoItem
-	StrategyInput           = platform_rpc.StrategyInput
+	ReleasePolicyItem       = platform_rpc.ReleasePolicyItem
 	SubmitContentReportReq  = platform_rpc.SubmitContentReportReq
 	SubmitContentReportRes  = platform_rpc.SubmitContentReportRes
 	SubmitFeedbackReq       = platform_rpc.SubmitFeedbackReq
 	SubmitFeedbackRes       = platform_rpc.SubmitFeedbackRes
 	UpdateArchitectureReq   = platform_rpc.UpdateArchitectureReq
 	UpdateArchitectureRes   = platform_rpc.UpdateArchitectureRes
-	UpdateCityStrategyReq   = platform_rpc.UpdateCityStrategyReq
-	UpdateCityStrategyRes   = platform_rpc.UpdateCityStrategyRes
 	UpdateContentReportsReq = platform_rpc.UpdateContentReportsReq
 	UpdateContentReportsRes = platform_rpc.UpdateContentReportsRes
+	UpsertReleasePolicyReq  = platform_rpc.UpsertReleasePolicyReq
+	UpsertReleasePolicyRes  = platform_rpc.UpsertReleasePolicyRes
 	VersionItem             = platform_rpc.VersionItem
 
 	Platform interface {
@@ -96,8 +94,8 @@ type (
 		DeleteVersion(ctx context.Context, in *DeleteVersionReq, opts ...grpc.CallOption) (*DeleteVersionRes, error)
 		ListVersions(ctx context.Context, in *ListVersionsReq, opts ...grpc.CallOption) (*ListVersionsRes, error)
 		ListAppVersions(ctx context.Context, in *ListAppVersionsReq, opts ...grpc.CallOption) (*ListAppVersionsRes, error)
-		UpdateCityStrategy(ctx context.Context, in *UpdateCityStrategyReq, opts ...grpc.CallOption) (*UpdateCityStrategyRes, error)
-		ListCityStrategies(ctx context.Context, in *ListCityStrategiesReq, opts ...grpc.CallOption) (*ListCityStrategiesRes, error)
+		UpsertReleasePolicy(ctx context.Context, in *UpsertReleasePolicyReq, opts ...grpc.CallOption) (*UpsertReleasePolicyRes, error)
+		ListReleasePolicies(ctx context.Context, in *ListReleasePoliciesReq, opts ...grpc.CallOption) (*ListReleasePoliciesRes, error)
 		SubmitFeedback(ctx context.Context, in *SubmitFeedbackReq, opts ...grpc.CallOption) (*SubmitFeedbackRes, error)
 		ListFeedback(ctx context.Context, in *ListFeedbackReq, opts ...grpc.CallOption) (*ListFeedbackRes, error)
 		GetFeedback(ctx context.Context, in *GetFeedbackReq, opts ...grpc.CallOption) (*GetFeedbackRes, error)
@@ -195,14 +193,14 @@ func (m *defaultPlatform) ListAppVersions(ctx context.Context, in *ListAppVersio
 	return client.ListAppVersions(ctx, in, opts...)
 }
 
-func (m *defaultPlatform) UpdateCityStrategy(ctx context.Context, in *UpdateCityStrategyReq, opts ...grpc.CallOption) (*UpdateCityStrategyRes, error) {
+func (m *defaultPlatform) UpsertReleasePolicy(ctx context.Context, in *UpsertReleasePolicyReq, opts ...grpc.CallOption) (*UpsertReleasePolicyRes, error) {
 	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateCityStrategy(ctx, in, opts...)
+	return client.UpsertReleasePolicy(ctx, in, opts...)
 }
 
-func (m *defaultPlatform) ListCityStrategies(ctx context.Context, in *ListCityStrategiesReq, opts ...grpc.CallOption) (*ListCityStrategiesRes, error) {
+func (m *defaultPlatform) ListReleasePolicies(ctx context.Context, in *ListReleasePoliciesReq, opts ...grpc.CallOption) (*ListReleasePoliciesRes, error) {
 	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListCityStrategies(ctx, in, opts...)
+	return client.ListReleasePolicies(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) SubmitFeedback(ctx context.Context, in *SubmitFeedbackReq, opts ...grpc.CallOption) (*SubmitFeedbackRes, error) {

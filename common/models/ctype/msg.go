@@ -183,23 +183,23 @@ type NotificationMsg struct {
 }
 
 type ImageMsg struct {
-	FileKey string `json:"fileKey"`          //图片文件ID
+	FileUrl string `json:"fileUrl"`           // 图片完整 URL
 	Width   int    `json:"width,omitempty"`  //图片宽度（可选）
 	Height  int    `json:"height,omitempty"` //图片高度（可选）
 	Size    int64  `json:"size,omitempty"`   //文件大小（字节，可选）
 }
 
 type VideoMsg struct {
-	FileKey      string `json:"fileKey"`                //视频文件ID
+	FileUrl      string `json:"fileUrl"`                // 视频完整 URL
 	Width        int    `json:"width,omitempty"`        //视频宽度（可选）
 	Height       int    `json:"height,omitempty"`       //视频高度（可选）
 	Duration     int    `json:"duration,omitempty"`     //视频时长（秒，可选）
-	ThumbnailKey string `json:"thumbnailKey,omitempty"` //视频封面图文件ID（可选）
+	ThumbnailUrl string `json:"thumbnailUrl,omitempty"` // 视频封面完整 URL
 	Size         int64  `json:"size,omitempty"`         //文件大小（字节，可选）
 }
 
 type FileMsg struct {
-	FileKey   string `json:"fileKey"`             // 文件ID（对标飞书 file_key / file_token）
+	FileUrl   string `json:"fileUrl"`             // 文件完整 URL
 	FileName  string `json:"fileName,omitempty"`  // 原始文件名
 	Size      int64  `json:"size,omitempty"`      // 文件大小（字节）
 	MimeType  string `json:"mimeType,omitempty"`  // MIME 类型
@@ -220,14 +220,14 @@ type CloudDocMsg struct {
 }
 
 type VoiceMsg struct {
-	FileKey  string `json:"fileKey"`            //语音文件ID
+	FileUrl  string `json:"fileUrl"`            // 语音文件完整 URL
 	Duration int    `json:"duration,omitempty"` //语音时长（秒，可选）
 	Size     int64  `json:"size,omitempty"`     //文件大小（字节，可选）
 }
 
 // AudioFileMsg 音频文件消息结构
 type AudioFileMsg struct {
-	FileKey  string `json:"fileKey"`            //音频文件ID
+	FileUrl  string `json:"fileUrl"`            // 音频文件完整 URL
 	FileName string `json:"fileName,omitempty"` //原始文件名（可选，用于显示）
 	Duration int    `json:"duration,omitempty"` //音频时长（秒，可选）
 	Size     int64  `json:"size,omitempty"`     //文件大小（字节，可选）
@@ -235,7 +235,7 @@ type AudioFileMsg struct {
 
 // 表情消息结构
 type EmojiMsg struct {
-	FileKey   string `json:"fileKey"`          // 表情图片文件ID（Emoji.FileName）
+	FileUrl   string `json:"fileUrl"`          // 表情图片完整 URL
 	EmojiID   string `json:"emojiId"`          // 表情ID（Emoji.ID，单个表情时使用）
 	PackageID string `json:"packageId"`        // 表情包ID（EmojiPackage.ID，表情包分享时使用）
 	Width     int64  `json:"width,omitempty"`  // 表情图片宽度（可选）
