@@ -64,10 +64,12 @@ func (l *MqConsumerLogic) StartConsumer() error {
 			logx.Errorf("MQ 消息格式错误: %v", err)
 			return nil
 		}
-		conversationID, err := payloadString(msg.Payload, "conversationId")
-		if err != nil {
-			logx.Errorf("MQ 消息格式错误: %v", err)
-			return nil
+		// 通知/好友/群等非聊天类推送允许 conversationId 为空
+		conversationID := ""
+		if v, ok := msg.Payload["conversationId"]; ok && v != nil {
+			if s, ok := v.(string); ok {
+				conversationID = s
+			}
 		}
 
 		body, ok := msg.Payload["body"]
