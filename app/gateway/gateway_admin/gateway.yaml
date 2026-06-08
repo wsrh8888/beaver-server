@@ -20,6 +20,6 @@ RateLimit:
 Timeout:
   Backend: 30 # 后端请求超时
 Log:
-  Encoding: plain
+  Encoding: json
   TimeFormat: 2006-01-02T15:04:05
   Stat: false

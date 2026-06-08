@@ -1,6 +1,11 @@
 Name: open_portal
 Host: 0.0.0.0
 Port: 22000
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
 Etcd: 127.0.0.1:2379
 
 # CORS 配置

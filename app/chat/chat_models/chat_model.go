@@ -3,8 +3,11 @@ package chat_models
 import (
 	"beaver/common/models"
 	"beaver/common/models/ctype"
+	"errors"
 	"unicode/utf8"
 )
+
+const MaxTextMessageRunes = 5000
 
 type ChatMessage struct {
 	models.Model
@@ -107,4 +110,29 @@ func truncatePreview(s string, maxRunes int) string {
 	}
 	runes := []rune(s)
 	return string(runes[:maxRunes]) + "…"
+}
+
+func ValidateMsgLength(msg *ctype.Msg) error {
+	if msg == nil {
+		return nil
+	}
+
+	switch msg.Type {
+	case ctype.TextMsgType:
+		if msg.TextMsg != nil && utf8.RuneCountInString(msg.TextMsg.Content) > MaxTextMessageRunes {
+			return errors.New("消息内容过长")
+		}
+	case ctype.MarkdownMsgType:
+		if msg.MarkdownMsg != nil && utf8.RuneCountInString(msg.MarkdownMsg.Content) > MaxTextMessageRunes {
+			return errors.New("消息内容过长")
+		}
+	case ctype.ReplyMsgType:
+		if msg.ReplyMsg != nil {
+			if err := ValidateMsgLength(msg.ReplyMsg.ReplyMsg); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

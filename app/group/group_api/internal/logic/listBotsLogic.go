@@ -67,7 +67,7 @@ func (l *ListBotsLogic) ListBots(req *types.ListBotsReq) (resp *types.ListBotsRe
 		items = append(items, types.ListBotsItem{
 			BotID:       b.BotID,
 			Name:        userInfo.NickName,
-			Description: "", // TODO: 从 open_rpc 获取
+			Description: userInfo.Abstract,
 			Avatar:      userInfo.Avatar,
 			Type:        b.Type,
 			Status:      b.Status,

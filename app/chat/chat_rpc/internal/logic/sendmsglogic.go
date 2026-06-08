@@ -17,20 +17,23 @@ import (
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type SendMsgLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
 	return &SendMsgLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("send_msg"),
 		svcCtx: svcCtx,
 	}
 }
@@ -343,6 +346,9 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 
 	// 调用抽离好的递归转换函数
 	msg := l.BuildMsgFromProto(in.Msg)
+	if err := chat_models.ValidateMsgLength(msg); err != nil {
+		return nil, err
+	}
 	msgType := msg.Type
 
 	// 获取下一个消息序列号（消息表内部序列号）
@@ -352,7 +358,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Select("COALESCE(MAX(seq), 0)").
 		Scan(&maxSeq).Error
 	if err != nil {
-		l.Logger.Errorf("获取消息序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
+		logx.WithContext(l.ctx).Errorf("获取消息序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
 	}
 
@@ -372,7 +378,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
 	err = l.svcCtx.DB.Create(&chatModel).Error
 	if err != nil {
-		l.Logger.Errorf("创建消息记录失败: conversationId=%s, userId=%s, error=%v", in.ConversationId, in.UserId, err)
+		logx.WithContext(l.ctx).Errorf("创建消息记录失败: conversationId=%s, userId=%s, error=%v", in.ConversationId, in.UserId, err)
 		return nil, err
 	}
 
@@ -390,7 +396,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	// 2. 更新会话级别的信息
 	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
 	if err != nil {
-		l.Logger.Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
+		logx.WithContext(l.ctx).Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
 	}
 
@@ -408,7 +414,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	// 3. 批量更新该会话所有用户的会话关系（包括发送者：恢复隐藏状态，更新版本号，更新已读序列号）
 	allUserConversationUpdates, err := chatrpcutils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
 	if err != nil {
-		l.Logger.Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
+		logx.WithContext(l.ctx).Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
 		// 不影响消息发送成功，只记录错误
 		allUserConversationUpdates = []chatrpcutils.UserConversationUpdate{}
 	}
@@ -416,14 +422,14 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	// 转换消息格式
 	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(*msg)
 	if err != nil {
-		l.Logger.Errorf("转换消息格式失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("转换消息格式失败: %v", err)
 		return nil, err
 	}
 
 	// 获取发送者信息
 	sender, err := l.getSenderInfo(chatModel)
 	if err != nil {
-		l.Logger.Errorf("获取发送者信息失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("获取发送者信息失败: %v", err)
 		return nil, err
 	}
 
@@ -435,6 +441,18 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 
 	// 6. 异步推送 Robot Webhook 事件
 	go newRobotWebhookPusher(context.Background(), l.svcCtx).tryPush(in, msg)
+
+	l.logger.Info(model.LogMsg{
+		Text: "消息发送成功",
+		Data: map[string]interface{}{
+			"conversationId":   in.ConversationId,
+			"messageId":        chatModel.MessageID,
+			"userId":           in.UserId,
+			"conversationType": conversationType,
+			"msgType":          int(msgType),
+			"seq":              chatModel.Seq,
+		},
+	})
 
 	return &chat_rpc.SendMsgRes{
 		Id:               uint32(chatModel.Id),
@@ -454,7 +472,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chatrpcutils.UserConversationUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
-			l.Logger.Errorf("推送消息更新时发生panic: %v", r)
+			logx.WithContext(l.ctx).Errorf("推送消息更新时发生panic: %v", r)
 		}
 	}()
 
@@ -503,7 +521,7 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 			"conversationId": conversationId,
 		}
 		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
-			l.Logger.Errorf("MQ 推送失败: recipient=%s, conversation=%s, error=%v", recipientId, conversationId, err)
+			logx.WithContext(l.ctx).Errorf("MQ 推送失败: recipient=%s, conversation=%s, error=%v", recipientId, conversationId, err)
 		}
 	}
 }
@@ -539,7 +557,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		UserID: sendUserID,
 	})
 	if err != nil {
-		l.Logger.Errorf("获取用户信息失败: userId=%s, error=%v", sendUserID, err)
+		logx.WithContext(l.ctx).Errorf("获取用户信息失败: userId=%s, error=%v", sendUserID, err)
 		return &chat_rpc.Sender{
 			UserId:   sendUserID,
 			NickName: "未知用户",

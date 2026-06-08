@@ -7,22 +7,25 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/auth/auth_rpc/internal/svc"
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type UpdatePasswordLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *logger.Logger
 }
 
 func NewUpdatePasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdatePasswordLogic {
 	return &UpdatePasswordLogic{
 		ctx:    ctx,
+		logger: logger.New("update_password"),
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
 	}
 }
 
@@ -60,6 +63,12 @@ func (l *UpdatePasswordLogic) UpdatePassword(in *auth_rpc.UpdatePasswordReq) (*a
 	}
 
 	logx.Infof("密码更新成功: userID=%s", in.UserId)
+	l.logger.Info(model.LogMsg{
+		Text: "密码修改成功",
+		Data: map[string]interface{}{
+			"userId": in.UserId,
+		},
+	})
 
 	return &auth_rpc.UpdatePasswordRes{
 		Success: true,

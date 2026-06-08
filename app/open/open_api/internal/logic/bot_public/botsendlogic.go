@@ -14,21 +14,24 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type BotSendLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 推送机器人发送消息到群（第三方服务如 Jenkins/GitLab 调用此接口）
 func NewBotSendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BotSendLogic {
 	return &BotSendLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("bot_send"),
 		svcCtx: svcCtx,
 	}
 }
@@ -37,11 +40,9 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 	// 1. 根据 Token 查询机器人信息
 	var bot open_models.OpenBotModel
 	if err := l.svcCtx.DB.Where("token = ?", req.Token).First(&bot).Error; err != nil {
-		l.Errorf("BotSend: query bot failed, token=%s, error=%v", req.Token, err)
+		logx.WithContext(l.ctx).Errorf("BotSend: query bot failed, token=%s, error=%v", req.Token, err)
 		return nil, fmt.Errorf("invalid token")
 	}
-
-	l.Infof("BotSend: found bot, botID=%s, groupID=%s, status=%d", bot.BotID, bot.GroupID, bot.Status)
 
 	// 2. 校验机器人状态
 	if bot.Status != 1 {
@@ -63,7 +64,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		// 验证签名：HMAC-SHA256 + Base64
 		expectedSign := generateSignature(req.Timestamp, bot.Security.SignatureSecret)
 		if req.Sign != expectedSign {
-			l.Errorf("BotSend: signature mismatch, received=%s, expected=%s", req.Sign, expectedSign)
+			logx.WithContext(l.ctx).Errorf("BotSend: signature mismatch, received=%s, expected=%s", req.Sign, expectedSign)
 			return nil, fmt.Errorf("invalid signature")
 		}
 	}
@@ -117,7 +118,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 			}
 		}
 		if !allowed {
-			l.Errorf("BotSend: ip not in whitelist, client=%s botID=%s", host, bot.BotID)
+			logx.WithContext(l.ctx).Errorf("BotSend: ip not in whitelist, client=%s botID=%s", host, bot.BotID)
 			return nil, fmt.Errorf("ip not in whitelist")
 		}
 	}
@@ -125,6 +126,15 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 	// 6. 构建 chat_rpc 的消息对象
 	msg := &chat_rpc.Msg{}
 	atUserIds := []string{}
+
+	allowedBotMsgTypes := map[string]bool{
+		"text":     true,
+		"markdown": true,
+		"link":     true,
+	}
+	if !allowedBotMsgTypes[req.MsgType] {
+		return nil, fmt.Errorf("unsupported msgType: %s", req.MsgType)
+	}
 
 	// 根据消息类型构建不同的消息内容
 	switch req.MsgType {
@@ -200,7 +210,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 			Size:     req.Voice.FileSize,
 		}
 
-	case "audio_file":
+	case "audioFile", "audio_file":
 		if req.AudioFile == nil {
 			return nil, fmt.Errorf("audio file content is required")
 		}
@@ -304,7 +314,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		if req.Link == nil {
 			return nil, fmt.Errorf("link content is required")
 		}
-		msg.Type = 16 // 链接卡片消息
+		msg.Type = 14 // 链接卡片消息
 		msg.LinkMsg = &chat_rpc.LinkMsg{
 			Url:      req.Link.URL,
 			Title:    req.Link.Title,
@@ -334,9 +344,19 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 
 	chatRes, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, chatReq)
 	if err != nil {
-		l.Errorf("failed to send message via chat_rpc: %v", err)
+		logx.WithContext(l.ctx).Errorf("failed to send message via chat_rpc: %v", err)
 		return nil, fmt.Errorf("failed to send message")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "Bot推送成功",
+		Data: map[string]interface{}{
+			"botId":     bot.BotID,
+			"groupId":   bot.GroupID,
+			"messageId": chatRes.MessageId,
+			"msgType":   req.MsgType,
+		},
+	})
 
 	// 9. 返回响应
 	return &types.BotSendRes{

@@ -9,19 +9,22 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type CreateAdminUserLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewCreateAdminUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateAdminUserLogic {
-	return &CreateAdminUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &CreateAdminUserLogic{logger: logger.New("create_admin_user"), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserReq) (resp *types.CreateAdminUserRes, err error) {
@@ -46,7 +49,7 @@ func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserReq) (r
 		CreatedBy: req.OperatorID,
 	}
 	if err = l.svcCtx.DB.Create(&adminUser).Error; err != nil {
-		l.Errorf("创建管理员失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("创建管理员失败: %v", err)
 		return nil, err
 	}
 
@@ -59,9 +62,16 @@ func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserReq) (r
 			})
 		}
 		if err = l.svcCtx.DB.Create(&rows).Error; err != nil {
-			l.Errorf("绑定管理员角色失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("绑定管理员角色失败: %v", err)
 			return nil, err
 		}
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "管理员账号创建成功",
+		Data: map[string]interface{}{
+			"userId":     userID,
+			"operatorId": req.OperatorID,
+		},
+	})
 	return &types.CreateAdminUserRes{UserID: userID}, nil
 }

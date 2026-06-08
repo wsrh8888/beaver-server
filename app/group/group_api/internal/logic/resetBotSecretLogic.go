@@ -8,21 +8,22 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 )
 
+
 type ResetBotSecretLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 重置机器人的签名密钥（旧 Secret 立即失效）
 func NewResetBotSecretLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetBotSecretLogic {
 	return &ResetBotSecretLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("reset_bot_secret"),
 		svcCtx: svcCtx,
 	}
 }
@@ -57,6 +58,15 @@ func (l *ResetBotSecretLogic) ResetBotSecret(req *types.ResetBotSecretReq) (resp
 	if err != nil {
 		return nil, errors.New("重置密钥失败")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "群机器人密钥重置成功",
+		Data: map[string]interface{}{
+			"groupId": ref.GroupID,
+			"userId":  req.UserID,
+			"botId":   req.BotID,
+		},
+	})
 
 	return &types.ResetBotSecretRes{
 		Secret: secretRes.SignatureSecret,

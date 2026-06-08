@@ -7,9 +7,9 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
+	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_models"
 	"beaver/app/open/openevent"
-	"beaver/app/open/open_api/internal/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"

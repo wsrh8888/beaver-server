@@ -7,8 +7,8 @@ import (
 
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	"beaver/app/open/openevent"
 	"beaver/app/open/open_rpc/types/open_rpc"
+	"beaver/app/open/openevent"
 	"beaver/common/models/ctype"
 	"beaver/utils/conversation"
 

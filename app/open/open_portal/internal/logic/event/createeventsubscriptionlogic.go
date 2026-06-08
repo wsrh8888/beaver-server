@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"beaver/app/open/open_models"
-	"beaver/app/open/openevent"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	"beaver/app/open/openevent"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"

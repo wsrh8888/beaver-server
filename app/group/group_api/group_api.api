@@ -193,6 +193,7 @@ type (
 		CreatorID string `json:"creatorId"` // 创建者ID
 		JoinType  int8   `json:"joinType"` // 加入方式
 		Status    int8   `json:"status"` // 群状态：1正常 2冻结 3解散
+		Notice    string `json:"notice"` // 群公告
 		Version   int64  `json:"version"` // 版本号
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳

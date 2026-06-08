@@ -7,23 +7,26 @@ import (
 	"fmt"
 	"time"
 
-	"beaver/app/backend/backend_models"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/backend/backend_models"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
+
 type HandleModerationCaseLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewHandleModerationCaseLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HandleModerationCaseLogic {
-	return &HandleModerationCaseLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &HandleModerationCaseLogic{logger: logger.New("handle_moderation_case"), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModerationCaseReq) (resp *types.HandleModerationCaseRes, err error) {
@@ -39,13 +42,13 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("工单不存在")
 		}
-		l.Errorf("查询工单失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("查询工单失败: %v", err)
 		return nil, err
 	}
 
 	for _, act := range req.Actions {
 		if actErr := executeControlAction(l.ctx, l.svcCtx, req.UserID, uint64(c.Id), act); actErr != nil {
-			l.Errorf("执行管控动作失败 action=%s: %v", act.Action, actErr)
+			logx.WithContext(l.ctx).Errorf("执行管控动作失败 action=%s: %v", act.Action, actErr)
 			return nil, actErr
 		}
 	}
@@ -66,7 +69,7 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 		"actions_taken": actionsJSON,
 	}
 	if err = l.svcCtx.DB.Model(&c).Updates(updates).Error; err != nil {
-		l.Errorf("更新工单失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("更新工单失败: %v", err)
 		return nil, err
 	}
 
@@ -101,6 +104,15 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 
 	l.svcCtx.RecordOperation(req.UserID, "handle_case", "case", fmt.Sprintf("%d", c.Id), uint64(c.Id),
 		fmt.Sprintf("处置工单 status=%d remark=%s", req.Status, req.HandleRemark), "success", "")
+
+	l.logger.Info(model.LogMsg{
+		Text: "审核工单处置成功",
+		Data: map[string]interface{}{
+			"caseId":     req.CaseID,
+			"operatorId": req.UserID,
+			"status":     req.Status,
+		},
+	})
 
 	return &types.HandleModerationCaseRes{}, nil
 }

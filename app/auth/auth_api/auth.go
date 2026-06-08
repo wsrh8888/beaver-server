@@ -9,6 +9,7 @@ import (
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/common/etcd"
 	uaMiddleware "beaver/common/middleware/ua"
+	"beaver/utils/logger"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -21,6 +22,8 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+
+	logger.Init("auth_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

@@ -12,21 +12,24 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GroupInviteLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 邀请用户加入群组
 func NewGroupInviteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupInviteLogic {
 	return &GroupInviteLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("group_invite"),
 		svcCtx: svcCtx,
 	}
 }
@@ -36,7 +39,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 	var group group_models.GroupModel
 	err = l.svcCtx.DB.Where("group_id = ? AND status = ?", req.GroupID, 1).First(&group).Error
 	if err != nil {
-		l.Errorf("群组不存在或已解散，群组ID: %s", req.GroupID)
+		logx.WithContext(l.ctx).Errorf("群组不存在或已解散，群组ID: %s", req.GroupID)
 		return nil, err
 	}
 
@@ -45,13 +48,13 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 	err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = ?",
 		req.GroupID, req.UserID, 1).First(&inviterMember).Error
 	if err != nil {
-		l.Errorf("邀请者不是群成员，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
+		logx.WithContext(l.ctx).Errorf("邀请者不是群成员，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 		return nil, err
 	}
 
 	// 检查邀请者角色（群主或管理员）
 	if inviterMember.Role != 1 && inviterMember.Role != 2 {
-		l.Errorf("邀请者权限不足，群组ID: %s, 用户ID: %s, 角色: %d", req.GroupID, req.UserID, inviterMember.Role)
+		logx.WithContext(l.ctx).Errorf("邀请者权限不足，群组ID: %s, 用户ID: %s, 角色: %d", req.GroupID, req.UserID, inviterMember.Role)
 		return nil, err
 	}
 
@@ -76,7 +79,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 				err = tx.Model(&existingMember).Update("status", 1).Error
 				if err != nil {
 					tx.Rollback()
-					l.Errorf("更新群成员状态失败: %v", err)
+					logx.WithContext(l.ctx).Errorf("更新群成员状态失败: %v", err)
 					return nil, err
 				}
 			}
@@ -93,7 +96,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 			err = tx.Create(&member).Error
 			if err != nil {
 				tx.Rollback()
-				l.Errorf("添加群成员失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("添加群成员失败: %v", err)
 				return nil, err
 			}
 		}
@@ -110,7 +113,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 		err = tx.Create(&changeLog).Error
 		if err != nil {
 			tx.Rollback()
-			l.Errorf("记录群成员变更日志失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("记录群成员变更日志失败: %v", err)
 			return nil, err
 		}
 	}
@@ -118,14 +121,14 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 	// 提交事务
 	err = tx.Commit().Error
 	if err != nil {
-		l.Errorf("提交事务失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("提交事务失败: %v", err)
 		return nil, err
 	}
 
 	// 获取该群成员的版本号（按群独立递增）
 	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 	if memberVersion == -1 {
-		l.Errorf("获取群成员版本号失败")
+		logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -143,7 +146,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			l.Errorf("获取群成员列表失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
 			return
 		}
 
@@ -192,6 +195,14 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 		}
 	}()
 
-	l.Infof("群组邀请完成，群组ID: %s, 邀请者: %s, 被邀请用户数: %d", req.GroupID, req.UserID, len(req.UserIds))
+	logx.WithContext(l.ctx).Infof("群组邀请完成，群组ID: %s, 邀请者: %s, 被邀请用户数: %d", req.GroupID, req.UserID, len(req.UserIds))
+	l.logger.Info(model.LogMsg{
+		Text: "群邀请成功",
+		Data: map[string]interface{}{
+			"groupId": req.GroupID,
+			"userId":  req.UserID,
+			"count":   len(req.UserIds),
+		},
+	})
 	return resp, nil
 }

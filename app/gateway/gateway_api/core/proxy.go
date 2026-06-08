@@ -5,6 +5,8 @@ import (
 	"beaver/common/etcd"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,6 +18,8 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+var gatewayLog = logger.New("proxy")
 
 type BaseResponse struct {
 	Code int    `json:"code"`
@@ -73,16 +77,9 @@ func (p Proxy) oauthSecretAuth(res http.ResponseWriter, req *http.Request, path 
 	}
 
 	appSecret := req.Header.Get("App-Secret")
-	switch {
-	case strings.HasSuffix(path, "/revoke"):
-		return true
-	case strings.HasSuffix(path, "/token"):
-		return true
-	default:
-		if appSecret == "" {
-			writeErrorResponse(res, "缺少 App-Secret 请求头", http.StatusUnauthorized, uuid)
-			return false
-		}
+	if appSecret == "" {
+		writeErrorResponse(res, "缺少 App-Secret 请求头", http.StatusUnauthorized, uuid)
+		return false
 	}
 	return true
 }
@@ -145,6 +142,14 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if p.Config.Limit.Enable {
 		clientIP := getClientIP(req)
 		if !p.rateLimitCheck(clientIP) {
+			gatewayLog.Warn(model.LogMsg{
+				Text: "请求频率过高",
+				Data: map[string]interface{}{
+					"clientIp": clientIP,
+					"path":     req.URL.Path,
+					"uuid":     uuid,
+				},
+			})
 			writeErrorResponse(res, "请求频率过高", http.StatusTooManyRequests, uuid)
 			return
 		}
@@ -153,6 +158,13 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	token := getToken(req)
 	req.Header.Set("Token", token)
 	if !p.auth(res, req) {
+		gatewayLog.Warn(model.LogMsg{
+			Text: "网关鉴权失败",
+			Data: map[string]interface{}{
+				"path": req.URL.Path,
+				"uuid": uuid,
+			},
+		})
 		writeErrorResponse(res, "网关鉴权失败", http.StatusServiceUnavailable, uuid)
 		return
 	}
@@ -180,6 +192,14 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if addr == "" {
+		gatewayLog.Error(model.LogMsg{
+			Text: "服务不可用",
+			Data: map[string]interface{}{
+				"service": service + "_api",
+				"path":    req.URL.Path,
+				"uuid":    uuid,
+			},
+		})
 		logx.Errorf("未匹配到服务: %s_api", service)
 		writeErrorResponse(res, "服务暂时不可用", http.StatusServiceUnavailable, uuid)
 		return

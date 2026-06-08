@@ -8,21 +8,25 @@ import (
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/authlock"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type ResetPasswordLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewResetPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetPasswordLogic {
 	return &ResetPasswordLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("reset_password"),
 		svcCtx: svcCtx,
 	}
 }
@@ -50,18 +54,16 @@ func (l *ResetPasswordLogic) ResetPassword(req *types.ResetPasswordReq) (*types.
 	}
 
 	logx.Infof("用户 %s 密码重置成功", req.Email)
+	l.logger.Info(model.LogMsg{
+		Text: "密码重置成功",
+		Data: map[string]interface{}{
+			"userId": searchRes.UserInfo.UserId,
+		},
+	})
 	return &types.ResetPasswordRes{}, nil
 }
 
 func (l *ResetPasswordLogic) verifyEmailCode(email, code, codeType string) error {
 	codeKey := fmt.Sprintf("email_code_%s_%s", email, codeType)
-	storedCode, err := l.svcCtx.Redis.Get(codeKey).Result()
-	if err != nil {
-		return fmt.Errorf("验证码已过期或不存在")
-	}
-	if storedCode != code {
-		return fmt.Errorf("验证码错误")
-	}
-	l.svcCtx.Redis.Del(codeKey)
-	return nil
+	return authlock.VerifyStoredCode(l.ctx, l.svcCtx.Redis, codeKey, codeType, email, code)
 }

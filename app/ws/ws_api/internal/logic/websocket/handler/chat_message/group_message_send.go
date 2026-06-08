@@ -11,7 +11,11 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 )
+
+var groupMsgLog = logger.New("group_msg_send")
 
 func HandleGroupMessageSend(
 	ctx context.Context,
@@ -24,13 +28,19 @@ func HandleGroupMessageSend(
 ) error {
 	var body type_struct.BodySendMsg
 	if err := json.Unmarshal(bodyRaw, &body); err != nil {
-		fmt.Println("群聊消息解析错误", err.Error())
+		groupMsgLog.Error(model.LogMsg{
+			Text: "群聊消息解析失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return fmt.Errorf("消息格式错误: %w", err)
 	}
 
 	rpcMsg, err := convertToRpcMsg(body.Msg)
 	if err != nil {
-		fmt.Println("消息格式转换错误", err.Error())
+		groupMsgLog.Error(model.LogMsg{
+			Text: "群聊消息格式转换失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return fmt.Errorf("消息内容错误: %w", err)
 	}
 
@@ -41,21 +51,16 @@ func HandleGroupMessageSend(
 		Msg:            rpcMsg,
 	})
 	if err != nil {
-		fmt.Println("群聊消息发送失败", err)
+		groupMsgLog.Error(model.LogMsg{
+			Text: "群聊消息发送失败",
+			Data: map[string]interface{}{
+				"userId":         req.UserID,
+				"conversationId": body.ConversationID,
+				"err":            err.Error(),
+			},
+		})
 		return err
 	}
-
-	// Bot 流式 Webhook（bot_streaming.go）暂禁用
-	// go func() {
-	// 	var msgContent string
-	// 	var msgMap map[string]interface{}
-	// 	if err := json.Unmarshal(body.Msg, &msgMap); err == nil {
-	// 		if content, ok := msgMap["content"].(string); ok {
-	// 			msgContent = content
-	// 		}
-	// 	}
-	// 	handleBotStreaming(ctx, svcCtx.DB, client, body.ConversationID, msgContent, req.UserID)
-	// }()
 
 	return nil
 }

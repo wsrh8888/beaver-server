@@ -10,21 +10,24 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	util "beaver/utils/uuid"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GetH5AuthCodeLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewGetH5AuthCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetH5AuthCodeLogic {
 	return &GetH5AuthCodeLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("get_h5_auth_code"),
 		svcCtx: svcCtx,
 	}
 }
@@ -71,6 +74,13 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 	}
 
 	logx.Infof("生成 H5 authCode 成功: appId=%s, userId=%s", req.AppID, req.UserID)
+	l.logger.Info(model.LogMsg{
+		Text: "H5授权码生成成功",
+		Data: map[string]interface{}{
+			"appId":  req.AppID,
+			"userId": req.UserID,
+		},
+	})
 
 	return &types.GetH5AuthCodeRes{
 		AuthCode: authCode,

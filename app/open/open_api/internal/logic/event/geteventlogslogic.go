@@ -6,8 +6,8 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	"beaver/app/open/open_models"
 	"beaver/app/open/open_api/internal/utils"
+	"beaver/app/open/open_models"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

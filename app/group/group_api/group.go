@@ -8,6 +8,7 @@ import (
 	"beaver/app/group/group_api/internal/handler"
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/common/etcd"
+	"beaver/utils/logger"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -20,6 +21,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logger.Init("group_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

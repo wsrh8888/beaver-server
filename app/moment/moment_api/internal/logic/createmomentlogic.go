@@ -10,21 +10,23 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/models/ctype"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type CreateMomentLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewCreateMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateMomentLogic {
 	return &CreateMomentLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("create_moment"),
 		svcCtx: svcCtx,
 	}
 }
@@ -75,6 +77,14 @@ func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *type
 		IsLiked:      false,           // 创建时为false
 		CreatedAt:    moment.CreatedAt.String(),
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "朋友圈发布成功",
+		Data: map[string]interface{}{
+			"momentId": momentID,
+			"userId":   req.UserID,
+		},
+	})
 
 	return resp, nil
 }

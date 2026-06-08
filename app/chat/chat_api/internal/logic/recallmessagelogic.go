@@ -10,21 +10,24 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type RecallMessageLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewRecallMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RecallMessageLogic {
 	return &RecallMessageLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("recall_msg"),
 		svcCtx: svcCtx,
 	}
 }
@@ -73,9 +76,18 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 		},
 	})
 	if err != nil {
-		l.Logger.Errorf("发送撤回指令失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("发送撤回指令失败: %v", err)
 		return nil, errors.New("撤回失败")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "消息撤回成功",
+		Data: map[string]interface{}{
+			"messageId":      req.MessageID,
+			"userId":         req.UserID,
+			"conversationId": msg.ConversationID,
+		},
+	})
 
 	return &types.RecallMessageRes{
 		MessageID:  req.MessageID,

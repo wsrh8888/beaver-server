@@ -10,21 +10,25 @@ import (
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/authlock"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type EmailRegisterLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewEmailRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EmailRegisterLogic {
 	return &EmailRegisterLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("email_register"),
 		svcCtx: svcCtx,
 	}
 }
@@ -58,18 +62,14 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (*types.
 	}
 
 	logx.Infof("用户注册成功: userID=%s, email=%s", createRes.UserID, req.Email)
+	l.logger.Info(model.LogMsg{
+		Text: "邮箱注册成功",
+		Data: map[string]interface{}{"userId": createRes.UserID},
+	})
 	return &types.EmailRegisterRes{}, nil
 }
 
 func (l *EmailRegisterLogic) verifyEmailCode(email, code, codeType string) error {
 	codeKey := fmt.Sprintf("email_code_%s_%s", email, codeType)
-	storedCode, err := l.svcCtx.Redis.Get(codeKey).Result()
-	if err != nil {
-		return fmt.Errorf("验证码已过期或不存在")
-	}
-	if storedCode != code {
-		return fmt.Errorf("验证码错误")
-	}
-	l.svcCtx.Redis.Del(codeKey)
-	return nil
+	return authlock.VerifyStoredCode(l.ctx, l.svcCtx.Redis, codeKey, codeType, email, code)
 }

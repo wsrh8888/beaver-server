@@ -9,25 +9,28 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
 type UpdateFavoriteEmojiPackageLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewUpdateFavoriteEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateFavoriteEmojiPackageLogic {
 	return &UpdateFavoriteEmojiPackageLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: logger.New("update_favorite_emoji_package"),
 	}
 }
 
@@ -178,6 +181,14 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectVersion, req.PackageID, emojiPackage.Version)
+
+		l.logger.Info(model.LogMsg{
+			Text: "收藏表情包成功",
+			Data: map[string]interface{}{
+				"userId":    req.UserID,
+				"packageId": req.PackageID,
+			},
+		})
 	} else if req.Type == "unfavorite" {
 		// 取消收藏
 		if err != nil {
@@ -267,6 +278,14 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectRecord.Version, req.PackageID, emojiPackage.Version)
+
+		l.logger.Info(model.LogMsg{
+			Text: "取消收藏表情包成功",
+			Data: map[string]interface{}{
+				"userId":    req.UserID,
+				"packageId": req.PackageID,
+			},
+		})
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")
 	}

@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"beaver/app/open/constants"
 	oauthmiddle "beaver/app/open/open_api/internal/middle/oauth"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	"beaver/app/open/constants"
 	"beaver/app/open/open_models"
 
 	"github.com/zeromicro/go-zero/core/logx"

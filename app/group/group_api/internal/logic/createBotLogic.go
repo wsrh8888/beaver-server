@@ -12,22 +12,24 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
+
 type CreateBotLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）
 func NewCreateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateBotLogic {
 	return &CreateBotLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("create_bot"),
 		svcCtx: svcCtx,
 	}
 }
@@ -109,6 +111,15 @@ func (l *CreateBotLogic) CreateBot(req *types.CreateBotReq) (resp *types.CreateB
 
 	// 6. 拼接完整 Webhook URL（从配置获取基础 URL）
 	fullWebhookURL := fmt.Sprintf("%s%s?token=%s", l.svcCtx.Config.Domain, rpcRes.WebhookUrl, rpcRes.Token)
+
+	l.logger.Info(model.LogMsg{
+		Text: "群机器人创建成功",
+		Data: map[string]interface{}{
+			"groupId": req.GroupID,
+			"userId":  req.UserID,
+			"botId":   userRes.UserID,
+		},
+	})
 
 	return &types.CreateBotRes{
 		BotID:      userRes.UserID, // 机器人用户 ID

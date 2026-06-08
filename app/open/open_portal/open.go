@@ -5,6 +5,7 @@ import (
 	"beaver/app/open/open_portal/internal/handler"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/common/etcd"
+	"beaver/utils/logger"
 	"flag"
 	"fmt"
 
@@ -19,6 +20,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logger.Init("open_portal")
 
 	// 配置 CORS - 允许所有来源和头部
 	server := rest.MustNewServer(c.RestConf,

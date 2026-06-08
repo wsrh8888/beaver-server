@@ -7,21 +7,23 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
+
 type UpdateEmailLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewUpdateEmailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateEmailLogic {
 	return &UpdateEmailLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("update_email"),
 		svcCtx: svcCtx,
 	}
 }
@@ -35,8 +37,6 @@ func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.U
 		}
 		return nil, err
 	}
-	fmt.Println("当前邮箱:", user.Email)
-	fmt.Println("修改的邮箱", req.Email)
 	// 检查新邮箱是否与当前邮箱相同
 	if user.Email == req.Email {
 		return nil, fmt.Errorf("新邮箱不能与当前邮箱相同")
@@ -62,6 +62,10 @@ func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.U
 		return nil, err
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "用户修改邮箱成功",
+		Data: map[string]interface{}{"userId": req.UserID},
+	})
 	return &types.UpdateEmailRes{}, nil
 }
 

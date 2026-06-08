@@ -7,18 +7,21 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type AuditOpenAppLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewAuditOpenAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuditOpenAppLogic {
-	return &AuditOpenAppLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AuditOpenAppLogic{logger: logger.New("audit_open_app"), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *AuditOpenAppLogic) AuditOpenApp(req *types.AuditOpenAppReq) (resp *types.AuditOpenAppRes, err error) {
@@ -39,9 +42,18 @@ func (l *AuditOpenAppLogic) AuditOpenApp(req *types.AuditOpenAppReq) (resp *type
 		AuditRemark: req.AuditRemark,
 	})
 	if err != nil {
-		l.Errorf("审核应用失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("审核应用失败: %v", err)
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "开放应用审核成功",
+		Data: map[string]interface{}{
+			"appId":      req.AppID,
+			"operatorId": req.UserID,
+			"status":     req.Status,
+		},
+	})
 
 	return &types.AuditOpenAppRes{}, nil
 }

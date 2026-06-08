@@ -9,21 +9,25 @@ import (
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/authlock"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type PhoneRegisterLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewPhoneRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PhoneRegisterLogic {
 	return &PhoneRegisterLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("phone_register"),
 		svcCtx: svcCtx,
 	}
 }
@@ -56,18 +60,14 @@ func (l *PhoneRegisterLogic) PhoneRegister(req *types.PhoneRegisterReq) (*types.
 	}
 
 	logx.Infof("用户注册成功: userID=%s, phone=%s", createRes.UserID, req.Phone)
+	l.logger.Info(model.LogMsg{
+		Text: "手机注册成功",
+		Data: map[string]interface{}{"userId": createRes.UserID},
+	})
 	return &types.PhoneRegisterRes{}, nil
 }
 
 func (l *PhoneRegisterLogic) verifyPhoneCode(phone, code, codeType string) error {
 	codeKey := fmt.Sprintf("phone_code_%s_%s", phone, codeType)
-	storedCode, err := l.svcCtx.Redis.Get(codeKey).Result()
-	if err != nil {
-		return fmt.Errorf("验证码已过期或不存在")
-	}
-	if storedCode != code {
-		return fmt.Errorf("验证码错误")
-	}
-	l.svcCtx.Redis.Del(codeKey)
-	return nil
+	return authlock.VerifyStoredCode(l.ctx, l.svcCtx.Redis, codeKey, codeType, phone, code)
 }

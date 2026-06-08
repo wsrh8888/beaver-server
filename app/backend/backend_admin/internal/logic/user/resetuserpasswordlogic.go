@@ -7,18 +7,21 @@ import (
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type ResetUserPasswordLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewResetUserPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetUserPasswordLogic {
-	return &ResetUserPasswordLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &ResetUserPasswordLogic{logger: logger.New("reset_user_password"), ctx: ctx, svcCtx: svcCtx}
 }
 
 // ResetUserPassword 管理后台：重置用户密码。
@@ -37,8 +40,14 @@ func (l *ResetUserPasswordLogic) ResetUserPassword(req *types.ResetUserPasswordR
 		NewPassword: req.NewPassword,
 	})
 	if err != nil {
-		l.Errorf("重置用户密码失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("重置用户密码失败: %v", err)
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "管理员重置用户密码成功",
+		Data: map[string]interface{}{
+			"userId": req.UserID,
+		},
+	})
 	return &types.ResetUserPasswordRes{}, nil
 }

@@ -13,20 +13,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GroupMemberAddLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewGroupMemberAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupMemberAddLogic {
 	return &GroupMemberAddLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("group_member_add"),
 		svcCtx: svcCtx,
 	}
 }
@@ -66,7 +69,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		// 获取该群成员的版本号（按群独立递增）
 		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 		if memberVersion == -1 {
-			l.Logger.Errorf("获取群成员版本号失败")
+			logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
 			return nil, errors.New("获取版本号失败")
 		}
 		lastVersion = memberVersion // 记录最后一个版本号
@@ -99,7 +102,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	if len(newMembers) > 0 {
 		err = l.svcCtx.DB.Create(&newMembers).Error
 		if err != nil {
-			l.Logger.Errorf("添加群成员失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("添加群成员失败: %v", err)
 			return nil, errors.New("添加失败")
 		}
 	}
@@ -115,7 +118,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 					"version":   updateMember.Version, // 更新版本号
 				}).Error
 			if err != nil {
-				l.Logger.Errorf("更新群成员状态失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("更新群成员状态失败: %v", err)
 				return nil, errors.New("更新成员状态失败")
 			}
 		}
@@ -143,7 +146,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			l.Logger.Errorf("获取群成员列表失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
 			return
 		}
 
@@ -156,7 +159,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		// 获取群组版本号（用于通知群组信息变化）
 		groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 		if groupVersion == -1 {
-			l.Logger.Errorf("获取群组版本号失败")
+			logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
 			// 这里不影响主要功能，只是日志记录失败
 		}
 
@@ -238,7 +241,15 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		Version: lastVersion,
 	}
 
-	l.Logger.Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)
+	logx.WithContext(l.ctx).Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)
+	l.logger.Info(model.LogMsg{
+		Text: "添加群成员成功",
+		Data: map[string]interface{}{
+			"groupId": req.GroupID,
+			"userId":  req.UserID,
+			"count":   len(req.UserIds),
+		},
+	})
 	return resp, nil
 }
 
@@ -246,12 +257,12 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 func (l *GroupMemberAddLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {
 	defer func() {
 		if r := recover(); r != nil {
-			l.Logger.Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
+			logx.WithContext(l.ctx).Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
 		}
 	}()
 
 	// 查询该群关联的应用(如果有的话)
 	// TODO: 这里需要根据实际业务逻辑确定如何关联群和应用
 	// 暂时先不实现,等待后续需求明确
-	l.Logger.Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
+	logx.WithContext(l.ctx).Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
 }

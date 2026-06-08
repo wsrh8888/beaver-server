@@ -3,6 +3,7 @@ package main
 import (
 	"beaver/app/gateway/gateway_api/core"
 	"beaver/app/gateway/gateway_api/types"
+	"beaver/utils/logger"
 	"flag"
 	"fmt"
 	"net/http"
@@ -23,6 +24,7 @@ func main() {
 
 	conf.MustLoad(*configFile, &config)
 	logx.SetUp(config.Log)
+	logger.Init("gateway_api")
 	proxy := core.Proxy{
 		Config: config,
 	}

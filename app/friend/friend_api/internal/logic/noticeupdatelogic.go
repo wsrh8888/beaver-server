@@ -10,20 +10,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type NoticeUpdateLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewNoticeUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *NoticeUpdateLogic {
 	return &NoticeUpdateLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("notice_update"),
 		svcCtx: svcCtx,
 	}
 }
@@ -43,7 +46,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 
 	// 检查是否为好友关系
 	if !friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
-		l.Logger.Errorf("尝试修改非好友备注: userID=%s, friendID=%s", req.UserID, req.FriendID)
+		logx.WithContext(l.ctx).Errorf("尝试修改非好友备注: userID=%s, friendID=%s", req.UserID, req.FriendID)
 		return nil, errors.New("不是好友关系")
 	}
 
@@ -52,14 +55,14 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		"((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0",
 		req.UserID, req.FriendID, req.FriendID, req.UserID).Error
 	if err != nil {
-		l.Logger.Errorf("查询好友关系失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("查询好友关系失败: %v", err)
 		return nil, errors.New("查询好友关系失败")
 	}
 
 	// 获取下一个版本号
 	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
 	if nextVersion == -1 {
-		l.Logger.Errorf("获取版本号失败")
+		logx.WithContext(l.ctx).Errorf("获取版本号失败")
 		return nil, errors.New("系统错误")
 	}
 
@@ -86,12 +89,12 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		}).Error
 	} else {
 		// 这种情况理论上不应该发生
-		l.Logger.Errorf("用户角色异常: userID=%s, friendID=%s", req.UserID, req.FriendID)
+		logx.WithContext(l.ctx).Errorf("用户角色异常: userID=%s, friendID=%s", req.UserID, req.FriendID)
 		return nil, errors.New("用户角色异常")
 	}
 
 	if err != nil {
-		l.Logger.Errorf("更新好友备注失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("更新好友备注失败: %v", err)
 		return nil, errors.New("更新好友备注失败")
 	}
 
@@ -99,7 +102,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+				logx.WithContext(l.ctx).Errorf("异步发送WebSocket消息时发生panic: %v", r)
 			}
 		}()
 
@@ -126,10 +129,17 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		}
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 
-		l.Logger.Infof("异步发送好友备注更新通知完成: userId=%s, friendId=%s, version=%d", req.UserID, friend.FriendID, nextVersion)
+		logx.WithContext(l.ctx).Infof("异步发送好友备注更新通知完成: userId=%s, friendId=%s, version=%d", req.UserID, friend.FriendID, nextVersion)
 	}()
 
-	l.Logger.Infof("更新好友备注成功: userID=%s, friendID=%s, notice=%s", req.UserID, req.FriendID, req.Notice)
+	logx.WithContext(l.ctx).Infof("更新好友备注成功: userID=%s, friendID=%s, notice=%s", req.UserID, req.FriendID, req.Notice)
+	l.logger.Info(model.LogMsg{
+		Text: "好友备注更新成功",
+		Data: map[string]interface{}{
+			"userId":   req.UserID,
+			"friendId": req.FriendID,
+		},
+	})
 	return &types.NoticeUpdateRes{
 		Version: nextVersion,
 	}, nil

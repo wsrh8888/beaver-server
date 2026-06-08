@@ -8,21 +8,22 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 )
 
+
 type DeleteBotLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 删除机器人
 func NewDeleteBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteBotLogic {
 	return &DeleteBotLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("delete_bot"),
 		svcCtx: svcCtx,
 	}
 }
@@ -64,6 +65,15 @@ func (l *DeleteBotLogic) DeleteBot(req *types.DeleteBotReq) (resp *types.DeleteB
 	l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
 		Where("group_id = ? AND user_id = ?", ref.GroupID, ref.BotID).
 		Update("status", 0)
+
+	l.logger.Info(model.LogMsg{
+		Text: "群机器人删除成功",
+		Data: map[string]interface{}{
+			"groupId": ref.GroupID,
+			"userId":  req.UserID,
+			"botId":   req.BotID,
+		},
+	})
 
 	return &types.DeleteBotRes{}, nil
 }

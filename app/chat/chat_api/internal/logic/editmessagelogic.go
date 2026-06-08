@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"unicode/utf8"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -12,20 +13,23 @@ import (
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type EditMessageLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewEditMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EditMessageLogic {
 	return &EditMessageLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("edit_msg"),
 		svcCtx: svcCtx,
 	}
 }
@@ -33,6 +37,9 @@ func NewEditMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EditM
 func (l *EditMessageLogic) EditMessage(req *types.EditMessageReq) (resp *types.EditMessageRes, err error) {
 	if req.Content == "" {
 		return nil, errors.New("消息内容不能为空")
+	}
+	if utf8.RuneCountInString(req.Content) > chat_models.MaxTextMessageRunes {
+		return nil, errors.New("消息内容过长")
 	}
 
 	var msg chat_models.ChatMessage
@@ -78,7 +85,7 @@ func (l *EditMessageLogic) EditMessage(req *types.EditMessageReq) (resp *types.E
 		"status":      3,
 		"updated_at":  editTime,
 	}).Error; err != nil {
-		l.Errorf("更新消息失败: messageId=%s, error=%v", req.MessageID, err)
+		logx.WithContext(l.ctx).Errorf("更新消息失败: messageId=%s, error=%v", req.MessageID, err)
 		return nil, errors.New("编辑失败")
 	}
 
@@ -91,11 +98,20 @@ func (l *EditMessageLogic) EditMessage(req *types.EditMessageReq) (resp *types.E
 			"version":      conversationVersion,
 			"updated_at":   editTime,
 		}).Error; err != nil {
-			l.Errorf("更新会话预览失败: conversationId=%s, error=%v", msg.ConversationID, err)
+			logx.WithContext(l.ctx).Errorf("更新会话预览失败: conversationId=%s, error=%v", msg.ConversationID, err)
 		}
 	}
 
 	go l.notifyMessageEdited(req.UserID, msg.ConversationID, msg.Seq, conversationVersion)
+
+	l.logger.Info(model.LogMsg{
+		Text: "消息编辑成功",
+		Data: map[string]interface{}{
+			"messageId":      req.MessageID,
+			"userId":         req.UserID,
+			"conversationId": msg.ConversationID,
+		},
+	})
 
 	return &types.EditMessageRes{
 		Id:        msg.Id,
@@ -108,13 +124,13 @@ func (l *EditMessageLogic) EditMessage(req *types.EditMessageReq) (resp *types.E
 func (l *EditMessageLogic) notifyMessageEdited(senderID, conversationID string, seq, conversationVersion int64) {
 	defer func() {
 		if r := recover(); r != nil {
-			l.Errorf("推送消息编辑通知时发生panic: %v", r)
+			logx.WithContext(l.ctx).Errorf("推送消息编辑通知时发生panic: %v", r)
 		}
 	}()
 
 	var userConversations []chat_models.ChatUserConversation
 	if err := l.svcCtx.DB.Where("conversation_id = ?", conversationID).Find(&userConversations).Error; err != nil {
-		l.Errorf("查询会话成员失败: conversationId=%s, error=%v", conversationID, err)
+		logx.WithContext(l.ctx).Errorf("查询会话成员失败: conversationId=%s, error=%v", conversationID, err)
 		return
 	}
 
@@ -149,7 +165,7 @@ func (l *EditMessageLogic) notifyMessageEdited(senderID, conversationID string, 
 			"conversationId": conversationID,
 		}
 		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
-			l.Errorf("推送消息编辑通知失败: target=%s, error=%v", uc.UserID, err)
+			logx.WithContext(l.ctx).Errorf("推送消息编辑通知失败: target=%s, error=%v", uc.UserID, err)
 		}
 	}
 }

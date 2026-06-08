@@ -12,29 +12,38 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
+	"beaver/utils/authlock"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
+
 type PhoneLoginLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewPhoneLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PhoneLoginLogic {
 	return &PhoneLoginLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("phone_login"),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (*types.PhoneLoginRes, error) {
+	failKey := authlock.LoginFailKey(req.Phone)
+	lockKey := authlock.LoginLockKey(req.Phone)
+	if err := authlock.CheckLocked(l.ctx, l.svcCtx.Redis, lockKey); err != nil {
+		return nil, err
+	}
+
 	searchRes, err := l.svcCtx.UserRpc.SearchUser(l.ctx, &user_rpc.SearchUserReq{
 		Keyword: req.Phone,
 		Type:    "phone",
@@ -49,8 +58,12 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (*types.PhoneLogi
 		return nil, errors.New("用户凭证不存在")
 	}
 	if !pwd.CheckPad(credential.Password, req.Password) {
+		if lockErr := authlock.RecordFailure(l.ctx, l.svcCtx.Redis, failKey, lockKey, "login", "phone"); lockErr != nil {
+			return nil, lockErr
+		}
 		return nil, errors.New("密码错误")
 	}
+	authlock.ClearFailures(l.svcCtx.Redis, failKey, lockKey)
 
 	preciseType, _ := l.ctx.Value(ua.KeyDeviceType).(string)
 	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
@@ -96,6 +109,14 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (*types.PhoneLogi
 			"last_login_time": now, "is_active": true, "updated_at": now,
 		}).Error
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "手机密码登录成功",
+		Data: map[string]interface{}{
+			"userId":      userInfo.UserId,
+			"deviceGroup": deviceGroup,
+		},
+	})
 
 	return &types.PhoneLoginRes{Token: token, UserID: userInfo.UserId}, nil
 }

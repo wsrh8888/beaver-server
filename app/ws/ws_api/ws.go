@@ -10,6 +10,7 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/common/etcd"
 	"beaver/common/middleware"
+	"beaver/utils/logger"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -22,6 +23,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logger.Init("ws_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

@@ -5,6 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/core/coreonline"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +26,26 @@ func NewGetOnlineStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetOnlineStatsLogic) GetOnlineStats(req *types.GetOnlineStatsReq) (resp *types.GetOnlineStatsRes, err error) {
-	// todo: add your logic here and delete this line
+	online, err := coreonline.List(l.svcCtx.Redis)
+	if err != nil {
+		l.Errorf("获取在线用户统计失败: %v", err)
+		return nil, err
+	}
 
-	return
+	resp = &types.GetOnlineStatsRes{
+		UserCount: int64(len(online)),
+	}
+
+	for _, user := range online {
+		for _, slot := range user.Slots {
+			switch slot.Slot {
+			case "desktop":
+				resp.DesktopCount++
+			case "mobile":
+				resp.MobileCount++
+			}
+		}
+	}
+
+	return resp, nil
 }

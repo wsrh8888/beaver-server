@@ -18,6 +18,13 @@ func GetTokenByCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		if req.AppSecret == "" {
+			req.AppSecret = r.Header.Get("App-Secret")
+		}
+		if req.AppID == "" {
+			req.AppID = r.Header.Get("App-Id")
+		}
+
 		l := logic.NewGetTokenByCodeLogic(r.Context(), svcCtx)
 		resp, err := l.GetTokenByCode(&req)
 		response.Response(r, w, resp, err)

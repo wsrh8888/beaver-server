@@ -6,6 +6,7 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/common/etcd"
 	commonMiddleware "beaver/common/middleware/http"
+	"beaver/utils/logger"
 	"flag"
 	"fmt"
 
@@ -20,6 +21,8 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+
+	logger.Init("open_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

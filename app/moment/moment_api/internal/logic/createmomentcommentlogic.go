@@ -12,22 +12,26 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
+
 	"gorm.io/gorm"
 )
 
+
 type CreateMomentCommentLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewCreateMomentCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateMomentCommentLogic {
 	return &CreateMomentCommentLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("create_moment_comment"),
 		svcCtx: svcCtx,
 	}
 }
@@ -163,7 +167,7 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 				DedupHash:   comment.CommentID,
 			})
 			if err != nil {
-				l.Logger.Errorf("推送评论通知失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("推送评论通知失败: %v", err)
 			}
 		}
 
@@ -180,10 +184,19 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 				DedupHash:   comment.CommentID + "_reply",
 			})
 			if err != nil {
-				l.Logger.Errorf("推送回复通知失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("推送回复通知失败: %v", err)
 			}
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "朋友圈评论成功",
+		Data: map[string]interface{}{
+			"momentId":  req.MomentID,
+			"commentId": comment.CommentID,
+			"userId":    req.UserID,
+		},
+	})
 
 	return resp, nil
 }

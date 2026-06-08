@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -31,9 +30,6 @@ func NewChatHistoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatH
 }
 
 func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.ChatHistoryRes, err error) {
-
-	fmt.Println("当前的会话Id是:", req.ConversationID)
-
 	// 过滤掉当前用户主动删除的消息
 	subQuery := l.svcCtx.DB.Model(&chat_models.ChatUserDelete{}).
 		Select("message_id").

@@ -11,25 +11,38 @@ import (
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/utils/email"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GetEmailCodeLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewGetEmailCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmailCodeLogic {
 	return &GetEmailCodeLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("get_email_code"),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *types.GetEmailCodeRes, err error) {
+	rateLimitKey := fmt.Sprintf("email_rate_limit_%s", req.Email)
+	exists, err := l.svcCtx.Redis.Exists(rateLimitKey).Result()
+	if err != nil {
+		logx.Errorf("检查邮件发送频率限制失败: %v", err)
+		return nil, errors.New("服务内部异常")
+	}
+	if exists > 0 {
+		return nil, errors.New("发送过于频繁，请60秒后再试")
+	}
+
 	// 生成6位数字验证码
 	code := email.GenerateCode()
 
@@ -49,11 +62,15 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 	}
 
 	// 设置发送频率限制（60秒）
-	rateLimitKey := fmt.Sprintf("email_rate_limit_%s", req.Email)
 	err = l.svcCtx.Redis.Set(rateLimitKey, "1", 60*time.Second).Err()
 	if err != nil {
 		logx.Errorf("设置发送频率限制失败: %v", err)
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "邮件验证码已发送",
+		Data: map[string]interface{}{"codeType": req.Type},
+	})
 
 	return &types.GetEmailCodeRes{}, nil
 }

@@ -11,20 +11,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type UpdateGroupInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateGroupInfoLogic {
 	return &UpdateGroupInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("update_group_info"),
 		svcCtx: svcCtx,
 	}
 }
@@ -59,7 +62,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		// 获取该群的新版本号（独立递增）
 		newVersion = l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 		if newVersion == -1 {
-			l.Logger.Errorf("获取群组版本号失败")
+			logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
 			return nil, errors.New("获取版本号失败")
 		}
 
@@ -70,7 +73,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 			Where("group_id = ?", req.GroupID).
 			Updates(updateFields).Error
 		if err != nil {
-			l.Logger.Errorf("更新群组信息失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("更新群组信息失败: %v", err)
 			return nil, errors.New("更新群组信息失败")
 		}
 	}
@@ -86,7 +89,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 				GroupID: req.GroupID,
 			})
 			if err != nil {
-				l.Logger.Errorf("获取群成员列表失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
 				return
 			}
 
@@ -112,6 +115,16 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}()
+	}
+
+	if newVersion > 0 {
+		l.logger.Info(model.LogMsg{
+			Text: "群信息更新成功",
+			Data: map[string]interface{}{
+				"groupId": req.GroupID,
+				"userId":  req.UserID,
+			},
+		})
 	}
 
 	return &types.UpdateGroupInfoRes{

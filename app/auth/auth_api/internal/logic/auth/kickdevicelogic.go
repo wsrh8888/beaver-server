@@ -12,20 +12,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type KickDeviceLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewKickDeviceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *KickDeviceLogic {
 	return &KickDeviceLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("kick_device"),
 		svcCtx: svcCtx,
 	}
 }
@@ -46,7 +49,7 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDevic
 		UserId:   req.UserID,
 		DeviceId: req.DeviceID,
 	}); err != nil {
-		l.Errorf("禁用 Push Token 失败: userId=%s, deviceId=%s, err=%v", req.UserID, req.DeviceID, err)
+		logx.WithContext(l.ctx).Errorf("禁用 Push Token 失败: userId=%s, deviceId=%s, err=%v", req.UserID, req.DeviceID, err)
 	}
 
 	go func() {
@@ -64,5 +67,12 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDevic
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 	}()
 
+	l.logger.Info(model.LogMsg{
+		Text: "用户踢出设备成功",
+		Data: map[string]interface{}{
+			"userId":   req.UserID,
+			"deviceId": req.DeviceID,
+		},
+	})
 	return &types.KickDeviceRes{}, nil
 }

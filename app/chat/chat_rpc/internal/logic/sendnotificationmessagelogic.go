@@ -6,8 +6,8 @@ import (
 
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	chatrpcutils "beaver/app/chat/chat_rpc/internal/utils"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"

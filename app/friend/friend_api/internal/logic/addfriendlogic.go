@@ -14,21 +14,24 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type AddFriendLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFriendLogic {
 	return &AddFriendLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("add_friend"),
 		svcCtx: svcCtx,
 	}
 }
@@ -69,7 +72,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		UserID: req.FriendID,
 	})
 	if err != nil {
-		l.Logger.Errorf("目标用户不存在: friendID=%s, error=%v", req.FriendID, err)
+		logx.WithContext(l.ctx).Errorf("目标用户不存在: friendID=%s, error=%v", req.FriendID, err)
 		return nil, errors.New("用户不存在")
 	}
 
@@ -80,14 +83,14 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		req.UserID, req.FriendID, req.FriendID, req.UserID).Error
 
 	if err == nil {
-		l.Logger.Infof("已存在待处理的好友请求: userID=%s, friendID=%s", req.UserID, req.FriendID)
+		logx.WithContext(l.ctx).Infof("已存在待处理的好友请求: userID=%s, friendID=%s", req.UserID, req.FriendID)
 		return &types.AddFriendRes{}, nil
 	}
 
 	// 获取下一个版本号
 	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "")
 	if nextVersion == -1 {
-		l.Logger.Errorf("获取版本号失败")
+		logx.WithContext(l.ctx).Errorf("获取版本号失败")
 		return nil, errors.New("系统错误")
 	}
 
@@ -103,7 +106,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error
 	if err != nil {
-		l.Logger.Errorf("创建好友验证请求失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("创建好友验证请求失败: %v", err)
 		return nil, errors.New("添加好友请求失败")
 	}
 
@@ -111,7 +114,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				l.Logger.Errorf("异步发送WebSocket消息时发生panic: %v", r)
+				logx.WithContext(l.ctx).Errorf("异步发送WebSocket消息时发生panic: %v", r)
 			}
 		}()
 
@@ -131,7 +134,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			DedupHash:   verifyModel.VerifyID,
 		})
 		if err != nil {
-			l.Logger.Errorf("投递好友申请通知失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("投递好友申请通知失败: %v", err)
 		}
 
 		// 获取发送者和接收者的用户信息
@@ -139,14 +142,14 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			UserID: req.UserID,
 		})
 		if senderErr != nil {
-			l.Logger.Errorf("获取发送者用户信息失败: %v", senderErr)
+			logx.WithContext(l.ctx).Errorf("获取发送者用户信息失败: %v", senderErr)
 		}
 
 		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(context.Background(), &user_rpc.UserInfoReq{
 			UserID: req.FriendID,
 		})
 		if receiverErr != nil {
-			l.Logger.Errorf("获取接收者用户信息失败: %v", receiverErr)
+			logx.WithContext(l.ctx).Errorf("获取接收者用户信息失败: %v", receiverErr)
 		}
 
 		// 构建好友验证表更新数据
@@ -215,10 +218,19 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		}
 		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload2)
 
-		l.Logger.Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, verifyId=%s", req.UserID, req.FriendID, nextVersion, verifyModel.VerifyID)
+		logx.WithContext(l.ctx).Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, verifyId=%s", req.UserID, req.FriendID, nextVersion, verifyModel.VerifyID)
 	}()
 
-	l.Logger.Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
+	logx.WithContext(l.ctx).Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
+	l.logger.Info(model.LogMsg{
+		Text: "好友请求发送成功",
+		Data: map[string]interface{}{
+			"userId":   req.UserID,
+			"friendId": req.FriendID,
+			"source":   req.Source,
+			"verifyId": verifyModel.VerifyID,
+		},
+	})
 	resp = &types.AddFriendRes{
 		Version: nextVersion,
 	}

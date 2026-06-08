@@ -10,20 +10,23 @@ import (
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type SendMsgLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
 	return &SendMsgLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("send_msg"),
 		svcCtx: svcCtx,
 	}
 }
@@ -169,13 +172,18 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		Msg:            rpcMsg,
 	}
 
-	// 记录请求（仅调试用）
-	l.Logger.Infof("Sending message via RPC: userId=%s, conversationId=%s, type=%d", req.UserID, req.ConversationID, req.Msg.Type)
-
 	// 调用 RPC 服务
 	rpcResp, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, rpcReq)
 	if err != nil {
-		l.Logger.Errorf("failed to send message via RPC: %v", err)
+		logx.WithContext(l.ctx).Errorf("failed to send message via RPC: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "发送消息失败",
+			Data: map[string]interface{}{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"messageType":    req.Msg.Type,
+			},
+		})
 		return nil, errors.New("failed to send message")
 	}
 
@@ -196,5 +204,14 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		Seq:        rpcResp.Seq,
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "发送消息成功",
+		Data: map[string]interface{}{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"messageId":      rpcResp.MessageId,
+			"messageType":    req.Msg.Type,
+		},
+	})
 	return resp, nil
 }

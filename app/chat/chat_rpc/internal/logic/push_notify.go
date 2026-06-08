@@ -4,10 +4,12 @@ import (
 	"context"
 	"strconv"
 
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/chat/chat_models"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/core/coreonline"
 	"beaver/core/corepush"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 func (l *SendMsgLogic) sendOfflinePushIfNeeded(
@@ -21,7 +23,7 @@ func (l *SendMsgLogic) sendOfflinePushIfNeeded(
 
 	sender, err := l.getSenderInfo(chatModel)
 	if err != nil {
-		l.Logger.Errorf("离线推送获取发送者失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("离线推送获取发送者失败: %v", err)
 		return
 	}
 

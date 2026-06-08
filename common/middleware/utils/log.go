@@ -3,19 +3,38 @@ package utils
 import (
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 )
 
-// LogRequest 记录请求日志
+var accessLog = logger.New("http")
+
+// LogRequest 记录 HTTP/gRPC 请求日志
 func LogRequest(method, path string, req, resp interface{}, err error, startTime time.Time) {
 	duration := time.Since(startTime)
+	data := map[string]interface{}{
+		"method":   method,
+		"path":     path,
+		"duration": duration.String(),
+	}
+	if req != nil {
+		data["req"] = req
+	}
+	if resp != nil {
+		data["resp"] = resp
+	}
 
 	if err != nil {
-		logx.Errorf("请求失败: %s %s, 耗时: %v, 请求: %v, 错误: %v",
-			method, path, duration, req, err)
+		data["err"] = err.Error()
+		accessLog.Error(model.LogMsg{
+			Text: "请求失败",
+			Data: data,
+		})
 		return
 	}
 
-	logx.Infof("请求成功: %s %s, 耗时: %v, 请求: %v, 响应: %v",
-		method, path, duration, req, resp)
+	accessLog.Info(model.LogMsg{
+		Text: "请求成功",
+		Data: data,
+	})
 }

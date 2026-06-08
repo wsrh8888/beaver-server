@@ -10,21 +10,24 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type ForwardMessageLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewForwardMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ForwardMessageLogic {
 	return &ForwardMessageLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("forward_message"),
 		svcCtx: svcCtx,
 	}
 }
@@ -34,7 +37,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 	var originMessages []chat_models.ChatMessage
 	err = l.svcCtx.DB.Where("message_id IN ?", req.MessageIDs).Order("created_at asc").Find(&originMessages).Error
 	if err != nil {
-		l.Logger.Errorf("获取待转发消息失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("获取待转发消息失败: %v", err)
 		return nil, err
 	}
 
@@ -56,7 +59,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 				Msg:            l.convertModelToProtoMsg(m.Msg),
 			})
 			if err != nil {
-				l.Logger.Errorf("逐条转发失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("逐条转发失败: %v", err)
 				// 商业化项目通常会继续处理下一条，或者返回部分成功的提示
 			}
 		}
@@ -70,7 +73,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			Content:  originMessages, // 直接赋值，由 ForwardContent.Value 接口处理序列化
 		}).Error
 		if err != nil {
-			l.Logger.Errorf("创建转发详情失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("创建转发详情失败: %v", err)
 			return nil, err
 		}
 
@@ -94,11 +97,20 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			},
 		})
 		if err != nil {
-			l.Logger.Errorf("发送合并转发卡片失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("发送合并转发卡片失败: %v", err)
 			return nil, err
 		}
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "消息转发成功",
+		Data: map[string]interface{}{
+			"userId":      req.UserID,
+			"targetId":    req.TargetID,
+			"forwardMode": req.ForwardMode,
+			"messageCount": len(originMessages),
+		},
+	})
 	return &types.ForwardMessageRes{
 		ForwardTime: time.Now().Format("2006-01-02 15:04:05"),
 	}, nil

@@ -12,22 +12,24 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/livekit/protocol/auth"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type AddMemberLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 群聊中途加入通话
 func NewAddMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddMemberLogic {
 	return &AddMemberLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("add_member"),
 		svcCtx: svcCtx,
 	}
 }
@@ -66,6 +68,13 @@ func (l *AddMemberLogic) AddMember(req *types.AddCallMemberReq) (resp *types.Add
 		return nil, err
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "加入通话成功",
+		Data: map[string]interface{}{
+			"userId": req.UserID,
+			"roomId": req.RoomID,
+		},
+	})
 	return &types.AddCallMemberRes{
 		RoomToken:  token,
 		LiveKitUrl: l.svcCtx.Config.LiveKit.Host,

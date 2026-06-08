@@ -9,8 +9,8 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
-	"beaver/app/open/openevent"
 	"beaver/app/open/open_rpc/types/open_rpc"
+	"beaver/app/open/openevent"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

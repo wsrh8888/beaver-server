@@ -6,20 +6,23 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type ScanQrCodeLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewScanQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ScanQrCodeLogic {
 	return &ScanQrCodeLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("scan_qrcode"),
 		svcCtx: svcCtx,
 	}
 }
@@ -37,6 +40,13 @@ func (l *ScanQrCodeLogic) ScanQrCode(req *types.ScanQrCodeReq) (resp *types.Scan
 	}
 
 	logx.Infof("扫码会话已标记 scanned: sceneId=%s, userId=%s", req.SceneID, req.UserID)
+	l.logger.Info(model.LogMsg{
+		Text: "OAuth扫码成功",
+		Data: map[string]interface{}{
+			"sceneId": req.SceneID,
+			"userId":  req.UserID,
+		},
+	})
 
 	return &types.ScanQrCodeRes{Success: true}, nil
 }
