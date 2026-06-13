@@ -42,6 +42,15 @@ type (
 	KickDeviceRes  {}
 )
 
+type (
+	UpdatePasswordReq {
+		UserID      string `header:"Beaver-User-Id"`
+		OldPassword string `json:"oldPassword"`
+		NewPassword string `json:"newPassword"`
+	}
+	UpdatePasswordRes  {}
+)
+
 @server (
 	group: auth
 )
@@ -61,6 +70,10 @@ service auth {
 	@doc "强制下线指定设备"
 	@handler kickDevice
 	post /api/auth/auth/v1/kick_device (KickDeviceReq) returns (KickDeviceRes)
+
+	@doc "修改密码（需验证旧密码）"
+	@handler updatePassword
+	post /api/auth/auth/v1/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
 }
 
 // goctl api go -api auth_api.api -dir . --home ../../../template

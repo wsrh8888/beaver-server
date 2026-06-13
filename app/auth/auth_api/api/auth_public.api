@@ -27,6 +27,18 @@ type (
 )
 
 type (
+	OAuthCodeLoginReq {
+		AppID    string `json:"appId"`
+		Code     string `json:"code"`
+		DeviceID string `header:"deviceId"`
+	}
+	OAuthCodeLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
+
+type (
 	AuthenticationReq {
 		Token     string `header:"Token,optional"`
 		ValidPath string `header:"ValidPath,optional"`
@@ -126,6 +138,10 @@ service auth {
 	@doc "邮箱密码登录"
 	@handler emailPasswordLogin
 	post /api/auth/auth_public/v1/email_password_login (EmailPasswordLoginReq) returns (EmailPasswordLoginRes)
+
+	@doc "OAuth 授权码登录（PC 客户端 SDK）"
+	@handler oauthCodeLogin
+	post /api/auth/auth_public/v1/oauth_code_login (OAuthCodeLoginReq) returns (OAuthCodeLoginRes)
 
 	@doc "用户认证（Gateway 内部校验 Token）"
 	@handler authentication

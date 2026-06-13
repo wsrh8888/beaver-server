@@ -19,6 +19,7 @@ type Config struct {
 	WhiteList []string
 	UserRpc         zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf
+	OpenRpc         zrpc.RpcClientConf
 	RocketMQ        struct {
 		Addr string
 	}

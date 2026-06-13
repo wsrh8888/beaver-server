@@ -25,12 +25,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: deleteRecentHandler(serverCtx),
 			},
 			{
-				// 编辑消息
-				Method:  http.MethodPost,
-				Path:    "/api/chat/v1/edit",
-				Handler: editMessageHandler(serverCtx),
-			},
-			{
 				// 转发消息
 				Method:  http.MethodPost,
 				Path:    "/api/chat/v1/forward",
@@ -77,6 +71,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/chat/v1/hideChat",
 				Handler: hideChatHandler(serverCtx),
+			},
+			{
+				// 标记消息媒体状态（语音已听等）
+				Method:  http.MethodPost,
+				Path:    "/api/chat/v1/markMessageMedia",
+				Handler: markMessageMediaHandler(serverCtx),
 			},
 			{
 				// 设置会话免打扰

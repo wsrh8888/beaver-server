@@ -51,6 +51,8 @@ type (
 	ResetBotSecretRes        = open_rpc.ResetBotSecretRes
 	SaveWebhookLogReq        = open_rpc.SaveWebhookLogReq
 	SaveWebhookLogRes        = open_rpc.SaveWebhookLogRes
+	UpdateBotReq             = open_rpc.UpdateBotReq
+	UpdateBotRes             = open_rpc.UpdateBotRes
 	UpdateOpenAppsReq        = open_rpc.UpdateOpenAppsReq
 	UpdateOpenAppsRes        = open_rpc.UpdateOpenAppsRes
 	ValidateTokenReq         = open_rpc.ValidateTokenReq
@@ -66,6 +68,7 @@ type (
 		DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
 		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
+		UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
 		SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
 		GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
 		DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
@@ -128,6 +131,11 @@ func (m *defaultOpen) ResetBotSecret(ctx context.Context, in *ResetBotSecretReq,
 func (m *defaultOpen) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
 	return client.GetBotInfo(ctx, in, opts...)
+}
+
+func (m *defaultOpen) UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.UpdateBot(ctx, in, opts...)
 }
 
 func (m *defaultOpen) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error) {

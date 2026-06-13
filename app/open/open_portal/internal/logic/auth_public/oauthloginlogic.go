@@ -1,18 +1,14 @@
 package auth_public
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
-	"net/http"
 	"time"
 
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/jwts"
 
@@ -39,8 +35,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 	}
 
 	appID := l.svcCtx.Config.PortalOAuth.AppId
-	gatewayURL := l.svcCtx.Config.Domain
-	if appID == "" || gatewayURL == "" {
+	if appID == "" {
 		return nil, errors.New("门户 OAuth 未配置")
 	}
 
@@ -50,13 +45,20 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 		return nil, errors.New("门户 OAuth 应用不存在")
 	}
 
-	accessToken, err := l.exchangeCodeForToken(gatewayURL, appID, app.AppSecret, req.Code)
+	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
+		AppId: appID,
+		Code:  req.Code,
+	})
 	if err != nil {
-		return nil, err
+		logx.Errorf("code 换 token 失败: appId=%s, err=%v", appID, err)
+		return nil, errors.New("授权码换取令牌失败")
+	}
+	if rpcResp.AccessToken == "" {
+		return nil, errors.New("授权码换取令牌失败")
 	}
 
 	var tokenRecord open_models.OpenOAuthToken
-	if err := l.svcCtx.DB.Where("token = ?", accessToken).First(&tokenRecord).Error; err != nil {
+	if err := l.svcCtx.DB.Where("token = ?", rpcResp.AccessToken).First(&tokenRecord).Error; err != nil {
 		logx.Errorf("查询 OAuth token 失败: err=%v", err)
 		return nil, errors.New("获取用户信息失败")
 	}
@@ -93,53 +95,4 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 		NickName: userRes.UserInfo.NickName,
 		ExpireAt: expireAt,
 	}, nil
-}
-
-func (l *OAuthLoginLogic) exchangeCodeForToken(gatewayURL, appID, appSecret, code string) (string, error) {
-	payload, _ := json.Marshal(map[string]string{
-		"appId":     appID,
-		"appSecret": appSecret,
-		"code":      code,
-	})
-
-	req, err := http.NewRequest(
-		http.MethodPost,
-		fmt.Sprintf("%s/api/open/oauth_secret/v1/token", gatewayURL),
-		bytes.NewReader(payload),
-	)
-	if err != nil {
-		return "", errors.New("授权码换取令牌失败")
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("App-Id", appID)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		logx.Errorf("code 换 token 请求失败: %v", err)
-		return "", errors.New("授权码换取令牌失败")
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", errors.New("授权码换取令牌失败")
-	}
-
-	var apiResp struct {
-		Code   int    `json:"code"`
-		Msg    string `json:"msg"`
-		Result struct {
-			AccessToken string `json:"accessToken"`
-		} `json:"result"`
-	}
-	if err := json.Unmarshal(body, &apiResp); err != nil {
-		logx.Errorf("解析 token 响应失败: %v, body=%s", err, string(body))
-		return "", errors.New("授权码换取令牌失败")
-	}
-	if apiResp.Code != 0 || apiResp.Result.AccessToken == "" {
-		logx.Errorf("code 换 token 失败: code=%d, msg=%s", apiResp.Code, apiResp.Msg)
-		return "", errors.New(apiResp.Msg)
-	}
-
-	return apiResp.Result.AccessToken, nil
 }

@@ -94,6 +94,18 @@ type (
 	}
 )
 
+// 同步消息媒体状态（语音已听等）
+type (
+	GetSyncMessageMediasReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步
+	}
+	GetSyncMessageMediasRes {
+		MessageIDs      []string `json:"messageIds"` // 已标记媒体状态的消息ID列表
+		ServerTimestamp int64    `json:"serverTimestamp"` // 服务端同步时间戳
+	}
+)
+
 // 同步会话元信息
 type (
 	GetSyncChatConversationsReq {
@@ -282,6 +294,10 @@ service datasync {
 	@doc "获取所有需要更新的已删除消息ID列表"
 	@handler getSyncDeletedMessages
 	post /api/datasync/v1/getSyncDeletedMessages (GetSyncDeletedMessagesReq) returns (GetSyncDeletedMessagesRes)
+
+	@doc "获取所有需要同步的消息媒体状态"
+	@handler getSyncMessageMedias
+	post /api/datasync/v1/getSyncMessageMedias (GetSyncMessageMediasReq) returns (GetSyncMessageMediasRes)
 
 	@doc "获取所有需要更新的会话元信息版本"
 	@handler getSyncChatConversations

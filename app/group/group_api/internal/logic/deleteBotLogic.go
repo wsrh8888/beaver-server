@@ -3,13 +3,21 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/open/open_rpc/types/open_rpc"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/logger"
 	"beaver/utils/logger/model"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 
@@ -62,9 +70,13 @@ func (l *DeleteBotLogic) DeleteBot(req *types.DeleteBotReq) (resp *types.DeleteB
 	l.svcCtx.DB.Delete(&ref)
 
 	// 5. 将机器人移出群（软删除）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", ref.GroupID)
 	l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
 		Where("group_id = ? AND user_id = ?", ref.GroupID, ref.BotID).
-		Update("status", 0)
+		Updates(map[string]interface{}{
+			"status":  0,
+			"version": memberVersion,
+		})
 
 	l.logger.Info(model.LogMsg{
 		Text: "群机器人删除成功",
@@ -75,5 +87,62 @@ func (l *DeleteBotLogic) DeleteBot(req *types.DeleteBotReq) (resp *types.DeleteB
 		},
 	})
 
+	go l.notifyBotRemoved(ref.GroupID, req.UserID, memberVersion)
+
 	return &types.DeleteBotRes{}, nil
+}
+
+func (l *DeleteBotLogic) notifyBotRemoved(groupID, operatorID string, memberVersion int64) {
+	defer func() {
+		if r := recover(); r != nil {
+			logx.Errorf("异步通知群机器人删除时发生panic: %v", r)
+		}
+	}()
+
+	ctx := context.Background()
+	conversationID := "group_" + groupID
+
+	_, err := l.svcCtx.ChatRpc.SendNotificationMessage(ctx, &chat_rpc.SendNotificationMessageReq{
+		ConversationId: conversationID,
+		MessageType:    8,
+		Content:        fmt.Sprintf("%s 移除了群机器人", operatorID),
+		RelatedUserId:  operatorID,
+	})
+	if err != nil {
+		logx.Errorf("发送群机器人删除通知失败: groupId=%s, error=%v", groupID, err)
+	}
+
+	if memberVersion <= 0 {
+		return
+	}
+
+	response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+		GroupID: groupID,
+	})
+	if err != nil {
+		logx.Errorf("获取群成员列表失败: groupId=%s, error=%v", groupID, err)
+		return
+	}
+
+	for _, member := range response.Members {
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.GROUP_OPERATION,
+			"type":     wsTypeConst.GroupMemberReceive,
+			"senderId": operatorID,
+			"targetId": member.UserID,
+			"body": map[string]interface{}{
+				"table": "group_members",
+				"data": []map[string]interface{}{
+					{
+						"version": memberVersion,
+						"groupId": groupID,
+					},
+				},
+			},
+			"conversationId": "",
+		}
+		if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
+			logx.Errorf("推送群成员更新失败: groupId=%s, targetId=%s, error=%v", groupID, member.UserID, err)
+		}
+	}
 }

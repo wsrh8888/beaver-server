@@ -61,7 +61,7 @@ func main() {
 			name: "beaver_user",
 			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_user?charset=utf8mb4&parseTime=True&loc=Local",
 			run: func(db *gorm.DB) error {
-				return db.AutoMigrate(&user_models.UserModel{}, &user_models.UserChangeLogModel{})
+				return db.AutoMigrate(&user_models.UserModel{}, &user_models.UserChangeLogModel{}, &user_models.UserSettingModel{})
 			},
 		},
 		{
@@ -104,6 +104,7 @@ func main() {
 					&chat_models.ChatConversationMeta{},
 					&chat_models.ChatUserConversation{},
 					&chat_models.ChatUserDelete{},
+					&chat_models.ChatMessageMedia{},
 					&chat_models.ChatForward{},
 				)
 			},

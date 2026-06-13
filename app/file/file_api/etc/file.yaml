@@ -49,6 +49,8 @@ WhiteList:
   - aac
   - pdf
   - exe
+  - wav
+
 BlackList:
   - sh
   - bat

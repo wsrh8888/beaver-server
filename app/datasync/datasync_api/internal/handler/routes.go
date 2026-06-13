@@ -85,6 +85,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncGroupRequestsHandler(serverCtx),
 			},
 			{
+				// 获取所有需要同步的消息媒体状态
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/v1/getSyncMessageMedias",
+				Handler: getSyncMessageMediasHandler(serverCtx),
+			},
+			{
 				// 获取通知事件版本摘要
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/v1/getSyncNotificationEvents",

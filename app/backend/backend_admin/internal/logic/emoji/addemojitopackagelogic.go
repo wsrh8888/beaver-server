@@ -30,8 +30,8 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 	if req.PackageId == "" {
 		return nil, errors.New("表情包ID不能为空")
 	}
-	if req.FileKey == "" {
-		return nil, errors.New("文件ID不能为空")
+	if req.FileUrl == "" {
+		return nil, errors.New("文件地址不能为空")
 	}
 	if req.Title == "" {
 		return nil, errors.New("表情名称不能为空")
@@ -40,7 +40,7 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 	rpcRes, err := l.svcCtx.EmojiRpc.UpdateEmojiPackageContent(l.ctx, &emoji_rpc.UpdateEmojiPackageContentReq{
 		PackageId: req.PackageId,
 		Action:    emojiPackageContentActionAdd,
-		FileKey:   req.FileKey,
+		FileKey:   req.FileUrl,
 		Title:     req.Title,
 		EmojiInfo: &emoji_rpc.EmojiInfoMsg{
 			Width:  int32(req.EmojiInfo.Width),

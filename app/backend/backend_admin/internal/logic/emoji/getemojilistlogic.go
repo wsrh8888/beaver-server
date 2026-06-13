@@ -40,7 +40,7 @@ func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *type
 	for _, e := range rpcRes.List {
 		list = append(list, types.GetEmojiListItem{
 			EmojiId:    e.EmojiId,
-			FileKey:    e.FileKey,
+			FileUrl:    e.FileKey,
 			Title:      e.Title,
 			AuthorID:   req.AuthorID, // 领域表无 author 字段，仅回显筛选条件
 			CreateTime: e.CreatedAt,

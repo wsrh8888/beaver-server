@@ -29,7 +29,7 @@ type AddEmojiInfo struct {
 
 type AddEmojiToPackageReq struct {
 	PackageId string       `json:"packageId"`
-	FileKey   string       `json:"fileKey"`
+	FileUrl   string       `json:"fileUrl"`
 	Title     string       `json:"title"`
 	EmojiInfo AddEmojiInfo `json:"emojiInfo"`
 	AuthorID  string       `header:"Beaver-User-Id"`
@@ -269,7 +269,7 @@ type CreateEmojiPackageRes struct {
 }
 
 type CreateEmojiReq struct {
-	FileKey   string    `json:"fileKey"`
+	FileUrl   string    `json:"fileUrl"`
 	Title     string    `json:"title"`
 	EmojiInfo EmojiInfo `json:"emojiInfo"`
 	AuthorID  string    `header:"Beaver-User-Id"`
@@ -520,8 +520,7 @@ type FileUploadLocalReq struct {
 }
 
 type FileUploadLocalRes struct {
-	FileKey      string `json:"fileKey"`
-	FileURL      string `json:"fileUrl,optional"`
+	FileURL      string `json:"fileUrl"`
 	OriginalName string `json:"originalName"`
 }
 
@@ -531,8 +530,7 @@ type FileUploadQiniuReq struct {
 }
 
 type FileUploadQiniuRes struct {
-	FileKey      string `json:"fileKey"`
-	FileURL      string `json:"fileUrl,optional"`
+	FileURL      string `json:"fileUrl"`
 	OriginalName string `json:"originalName"`
 }
 
@@ -796,7 +794,7 @@ type GetEmojiCollectListItem struct {
 	UserID       string `json:"userId"`
 	EmojiId      string `json:"emojiId"`
 	EmojiTitle   string `json:"emojiTitle"`
-	EmojiFileKey string `json:"emojiFileKey"`
+	EmojiFileUrl string `json:"emojiFileUrl"`
 	CreateTime   string `json:"createTime"`
 	UpdateTime   string `json:"updateTime"`
 }
@@ -817,7 +815,7 @@ type GetEmojiCollectListRes struct {
 
 type GetEmojiListItem struct {
 	EmojiId    string `json:"emojiId"`
-	FileKey    string `json:"fileKey"`
+	FileUrl    string `json:"fileUrl"`
 	Title      string `json:"title"`
 	AuthorID   string `json:"authorId"`
 	CreateTime string `json:"createTime"`
@@ -840,7 +838,7 @@ type GetEmojiListRes struct {
 
 type GetEmojiPackageEmojisItem struct {
 	EmojiId    string `json:"emojiId"`
-	FileKey    string `json:"fileKey"`
+	FileUrl    string `json:"fileUrl"`
 	Title      string `json:"title"`
 	AuthorID   string `json:"authorId"`
 	CreateTime string `json:"createTime"`
@@ -1876,7 +1874,7 @@ type UpdateEmojiPackageRes struct {
 
 type UpdateEmojiReq struct {
 	EmojiId string  `path:"emojiId"`
-	FileKey *string `json:"fileKey,optional"`
+	FileUrl *string `json:"fileUrl,optional"`
 	Title   *string `json:"title,optional"`
 }
 

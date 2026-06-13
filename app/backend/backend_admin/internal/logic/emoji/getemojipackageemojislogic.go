@@ -43,7 +43,7 @@ func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPa
 	for _, e := range rpcRes.List {
 		list = append(list, types.GetEmojiPackageEmojisItem{
 			EmojiId:    e.EmojiId,
-			FileKey:    e.FileKey,
+			FileUrl:    e.FileKey,
 			Title:      e.Title,
 			CreateTime: e.CreatedAt,
 			UpdateTime: e.UpdatedAt,

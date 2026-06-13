@@ -127,9 +127,9 @@ const (
 const (
 	CloudDocTypeFolder = 0 // 文件夹
 	CloudDocTypeDoc    = 1 // 文档
-	CloudDocTypeSheet = 2 // 表格
-	CloudDocTypeSlide = 3 // 幻灯片
-	CloudDocTypeMind  = 4 // 思维笔记
+	CloudDocTypeSheet  = 2 // 表格
+	CloudDocTypeSlide  = 3 // 幻灯片
+	CloudDocTypeMind   = 4 // 思维笔记
 )
 
 type Msg struct {
@@ -178,12 +178,12 @@ type TextMsg struct {
 
 // NotificationMsg 通知消息结构（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
 type NotificationMsg struct {
-	Type   int      `json:"type"`   // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+	Type   int      `json:"type"`   // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
 	Actors []string `json:"actors"` // 相关用户ID列表
 }
 
 type ImageMsg struct {
-	FileUrl string `json:"fileUrl"`           // 图片完整 URL
+	FileUrl string `json:"fileUrl"`          // 图片完整 URL
 	Width   int    `json:"width,omitempty"`  //图片宽度（可选）
 	Height  int    `json:"height,omitempty"` //图片高度（可选）
 	Size    int64  `json:"size,omitempty"`   //文件大小（字节，可选）
@@ -253,7 +253,7 @@ type CallMsg struct {
 // WithdrawMsg 撤回消息结构 (Type: 10)
 type WithdrawMsg struct {
 	OriginMsgID string `json:"originMsgId"`         // 被撤回的消息ID
-	OriginMsg   *Msg   `json:"originMsg,omitempty"` // 被撤回的消息内容快照（用于重新编辑或审计）
+	OriginMsg   *Msg   `json:"originMsg,omitempty"` // 被撤回的消息内容快照
 }
 
 // ReplyMsg 回复消息结构 (Type: 11)
@@ -272,14 +272,14 @@ type ForwardMsg struct {
 
 // MarkdownMsg Markdown 富文本消息结构（Type: 13）
 type MarkdownMsg struct {
-	Content string `json:"content"`          // Markdown 正文
-	Title   string `json:"title,omitempty"`  // 会话列表预览标题（可选，为空时取 Content 前50字）
+	Content string `json:"content"`         // Markdown 正文
+	Title   string `json:"title,omitempty"` // 会话列表预览标题（可选，为空时取 Content 前50字）
 }
 
 // LinkMsg 链接卡片消息结构（Type: 14）
 type LinkMsg struct {
-	URL      string `json:"url"`               // 跳转链接
-	Title    string `json:"title"`             // 标题
-	Desc     string `json:"desc,omitempty"`    // 摘要描述
+	URL      string `json:"url"`                // 跳转链接
+	Title    string `json:"title"`              // 标题
+	Desc     string `json:"desc,omitempty"`     // 摘要描述
 	ImageURL string `json:"imageUrl,omitempty"` // 封面图 URL（可选）
 }

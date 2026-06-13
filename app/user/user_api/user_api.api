@@ -68,6 +68,49 @@ type (
 	}
 )
 
+// 获取用户设置
+type (
+	GetUserSettingsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	}
+	GetUserSettingsPrivacyItem {
+		AllowFriendRequest bool `json:"allowFriendRequest"` // 是否允许添加好友
+		ShowOnlineStatus   bool `json:"showOnlineStatus"` // 是否展示在线状态
+		AllowSearchByPhone bool `json:"allowSearchByPhone"` // 是否允许通过手机号搜索
+		AllowSearchByEmail bool `json:"allowSearchByEmail"` // 是否允许通过邮箱搜索
+	}
+	GetUserSettingsNotificationItem {
+		NotifyFriendRequest bool `json:"notifyFriendRequest"` // 是否接收好友申请通知
+		NotifyGroupMessage  bool `json:"notifyGroupMessage"` // 是否接收群消息通知
+		NotifyMoment        bool `json:"notifyMoment"` // 是否接收朋友圈通知
+	}
+	GetUserSettingsRes {
+		Privacy      GetUserSettingsPrivacyItem      `json:"privacy"` // 隐私设置
+		Notification GetUserSettingsNotificationItem `json:"notification"` // 通知策略
+	}
+)
+
+// 更新用户设置
+type (
+	UpdateUserSettingsPrivacyItem {
+		AllowFriendRequest *bool `json:"allowFriendRequest,optional"` // 是否允许添加好友
+		ShowOnlineStatus   *bool `json:"showOnlineStatus,optional"` // 是否展示在线状态
+		AllowSearchByPhone *bool `json:"allowSearchByPhone,optional"` // 是否允许通过手机号搜索
+		AllowSearchByEmail *bool `json:"allowSearchByEmail,optional"` // 是否允许通过邮箱搜索
+	}
+	UpdateUserSettingsNotificationItem {
+		NotifyFriendRequest *bool `json:"notifyFriendRequest,optional"` // 是否接收好友申请通知
+		NotifyGroupMessage  *bool `json:"notifyGroupMessage,optional"` // 是否接收群消息通知
+		NotifyMoment        *bool `json:"notifyMoment,optional"` // 是否接收朋友圈通知
+	}
+	UpdateUserSettingsReq {
+		UserID       string                              `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Privacy      *UpdateUserSettingsPrivacyItem      `json:"privacy,optional"` // 隐私设置（可选，局部更新）
+		Notification *UpdateUserSettingsNotificationItem `json:"notification,optional"` // 通知策略（可选，局部更新）
+	}
+	UpdateUserSettingsRes  {}
+)
+
 // 用户服务
 service user {
 	@doc "获取用户基础信息"
@@ -85,6 +128,14 @@ service user {
 	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
 	post /api/user/v1/sync (UserSyncReq) returns (UserSyncRes)
+
+	@doc "获取用户设置（隐私与通知策略）"
+	@handler getUserSettings
+	get /api/user/v1/settings (GetUserSettingsReq) returns (GetUserSettingsRes)
+
+	@doc "更新用户设置（隐私与通知策略，支持局部更新）"
+	@handler updateUserSettings
+	post /api/user/v1/update_settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes)
 }
 
 // goctl api go -api user_api.api -dir . --home ../../../template

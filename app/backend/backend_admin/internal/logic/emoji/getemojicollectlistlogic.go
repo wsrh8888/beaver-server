@@ -44,7 +44,7 @@ func (l *GetEmojiCollectListLogic) GetEmojiCollectList(req *types.GetEmojiCollec
 			UserID:       c.UserId,
 			EmojiId:      c.EmojiId,
 			EmojiTitle:   c.EmojiTitle,
-			EmojiFileKey: c.EmojiFileKey,
+			EmojiFileUrl: c.EmojiFileKey,
 			CreateTime:   c.CreatedAt,
 			UpdateTime:   c.UpdatedAt,
 		})

@@ -83,6 +83,7 @@ func AllMigrations() []Migration {
 				&chat_models.ChatConversationMeta{},
 				&chat_models.ChatUserConversation{},
 				&chat_models.ChatUserDelete{},
+				&chat_models.ChatMessageMedia{},
 				&chat_models.ChatForward{},
 			},
 		},

@@ -7,6 +7,8 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
+	"beaver/app/open/open_rpc/types/open_rpc"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,7 +29,6 @@ func NewUpdateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateB
 }
 
 func (l *UpdateBotLogic) UpdateBot(req *types.UpdateBotReq) (resp *types.UpdateBotRes, err error) {
-	// 1. 校验权限
 	var ref group_models.GroupBotModel
 	if err = l.svcCtx.DB.Where("bot_id = ?", req.BotID).First(&ref).Error; err != nil {
 		return nil, errors.New("机器人不存在")
@@ -41,7 +42,14 @@ func (l *UpdateBotLogic) UpdateBot(req *types.UpdateBotReq) (resp *types.UpdateB
 		return nil, errors.New("无权限，仅群主或管理员可更新机器人")
 	}
 
-	// 2. 更新群内展示信息
+	if err = l.updateBotUserProfile(req); err != nil {
+		return nil, err
+	}
+
+	if err = l.updateBotSecurity(req); err != nil {
+		return nil, err
+	}
+
 	updates := make(map[string]interface{})
 	if req.Type != "" {
 		updates["type"] = req.Type
@@ -56,4 +64,58 @@ func (l *UpdateBotLogic) UpdateBot(req *types.UpdateBotReq) (resp *types.UpdateB
 	}
 
 	return &types.UpdateBotRes{}, nil
+}
+
+func (l *UpdateBotLogic) updateBotUserProfile(req *types.UpdateBotReq) error {
+	if req.Name == "" && req.Avatar == "" && req.Description == "" {
+		return nil
+	}
+
+	patchReq := &user_rpc.UpdateUsersReq{
+		UserIds: []string{req.BotID},
+		Action:  1,
+	}
+	if req.Name != "" {
+		patchReq.PatchNickName = &req.Name
+	}
+	if req.Avatar != "" {
+		patchReq.PatchAvatar = &req.Avatar
+	}
+	if req.Description != "" {
+		patchReq.PatchAbstract = &req.Description
+	}
+
+	_, err := l.svcCtx.UserRpc.UpdateUsers(l.ctx, patchReq)
+	if err != nil {
+		l.Logger.Errorf("更新机器人用户资料失败: botId=%s, error=%v", req.BotID, err)
+		return errors.New("更新机器人资料失败")
+	}
+	return nil
+}
+
+func (l *UpdateBotLogic) updateBotSecurity(req *types.UpdateBotReq) error {
+	if req.Security == nil {
+		return nil
+	}
+
+	if req.Security.KeywordsEnabled && len(req.Security.Keywords) > 10 {
+		return errors.New("关键词最多10个")
+	}
+
+	_, err := l.svcCtx.OpenRpc.UpdateBot(l.ctx, &open_rpc.UpdateBotReq{
+		BotId: req.BotID,
+		Security: &open_rpc.BotSecurity{
+			KeywordsEnabled:    req.Security.KeywordsEnabled,
+			Keywords:           req.Security.Keywords,
+			IpWhitelistEnabled: req.Security.IPWhitelistEnabled,
+			IpWhitelist:        req.Security.IPWhitelist,
+			SignatureEnabled:   req.Security.SignatureEnabled,
+			SignatureSecret:    req.Security.SignatureSecret,
+		},
+	})
+	if err != nil {
+		l.Logger.Errorf("更新机器人安全设置失败: botId=%s, error=%v", req.BotID, err)
+		return errors.New("更新机器人安全设置失败")
+	}
+	return nil
 }

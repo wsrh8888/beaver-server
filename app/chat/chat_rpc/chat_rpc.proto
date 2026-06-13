@@ -74,7 +74,7 @@ message EmojiMsg {
 
 // 定义NotificationMsg消息 - 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
 message NotificationMsg {
-  int32 type = 1;         // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+  int32 type = 1;         // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
   repeated string actors = 2; // 相关用户ID列表
 }
 
@@ -271,7 +271,7 @@ message InitializeConversationRes {
 // 定义SendNotificationMessageReq消息 - 发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
 message SendNotificationMessageReq {
   string conversation_id = 1;    // 会话ID
-  int32 message_type = 2;        // 通知消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
+  int32 message_type = 2;        // 通知消息类型: 1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
   string content = 3;           // 消息内容
   string related_user_id = 4;     // 相关用户ID（如新加好友的ID）
   repeated string read_user_ids = 5; // 需要标记为已读的用户ID列表（为空表示所有用户都标记为已读）

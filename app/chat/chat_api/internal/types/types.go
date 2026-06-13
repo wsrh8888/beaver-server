@@ -106,19 +106,6 @@ type DeleteRecentReq struct {
 type DeleteRecentRes struct {
 }
 
-type EditMessageReq struct {
-	UserID    string `header:"Beaver-User-Id"`
-	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`   //新的消息内容
-}
-
-type EditMessageRes struct {
-	Id        uint   `json:"id"`        //数据库自增ID
-	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`   //编辑后的内容
-	EditTime  string `json:"editTime"`  //编辑时间
-}
-
 type EmojiMsg struct {
 	FileUrl   string `json:"fileUrl"`   // 表情图片完整 URL
 	EmojiID   string `json:"emojiId"`   // 表情ID（Emoji.Id，单个表情时使用）
@@ -193,6 +180,14 @@ type ImageMsg struct {
 	Width   int    `json:"width,optional"`  //图片宽度（可选）
 	Height  int    `json:"height,optional"` //图片高度（可选）
 	Size    int64  `json:"size,optional"`   //文件大小（字节，可选）
+}
+
+type MarkMessageMediaReq struct {
+	UserID     string   `header:"Beaver-User-Id"` // 用户ID
+	MessageIDs []string `json:"messageIds"`       // 消息ID列表，最多100条
+}
+
+type MarkMessageMediaRes struct {
 }
 
 type Message struct {
@@ -309,7 +304,7 @@ type Sender struct {
 	UserID   string `json:"userId"`
 	Avatar   string `json:"avatar"`
 	NickName string `json:"nickName"`
-	UserType int8   `json:"userType"`
+	UserType int8   `json:"userType"` // 1普通用户 2bot 3robot
 }
 
 type TextMsg struct {
@@ -355,5 +350,5 @@ type VoiceMsg struct {
 
 type WithdrawMsg struct {
 	OriginMsgId string `json:"originMsgId"`        // 被撤回的消息ID
-	OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照，用于重新编辑
+	OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照
 }

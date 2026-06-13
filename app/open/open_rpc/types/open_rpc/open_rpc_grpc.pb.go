@@ -27,6 +27,7 @@ const (
 	Open_DeleteBot_FullMethodName             = "/open_rpc.open/DeleteBot"
 	Open_ResetBotSecret_FullMethodName        = "/open_rpc.open/ResetBotSecret"
 	Open_GetBotInfo_FullMethodName            = "/open_rpc.open/GetBotInfo"
+	Open_UpdateBot_FullMethodName             = "/open_rpc.open/UpdateBot"
 	Open_SaveWebhookLog_FullMethodName        = "/open_rpc.open/SaveWebhookLog"
 	Open_GetRobotByUserID_FullMethodName      = "/open_rpc.open/GetRobotByUserID"
 	Open_DispatchPlatformEvent_FullMethodName = "/open_rpc.open/DispatchPlatformEvent"
@@ -52,6 +53,7 @@ type OpenClient interface {
 	DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
 	ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 	GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
+	UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
 	SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
 	GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
 	DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
@@ -147,6 +149,16 @@ func (c *openClient) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetBotInfoRes)
 	err := c.cc.Invoke(ctx, Open_GetBotInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateBotRes)
+	err := c.cc.Invoke(ctx, Open_UpdateBot_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -275,6 +287,7 @@ type OpenServer interface {
 	DeleteBot(context.Context, *DeleteBotReq) (*DeleteBotRes, error)
 	ResetBotSecret(context.Context, *ResetBotSecretReq) (*ResetBotSecretRes, error)
 	GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error)
+	UpdateBot(context.Context, *UpdateBotReq) (*UpdateBotRes, error)
 	SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error)
 	GetRobotByUserID(context.Context, *GetRobotByUserIDReq) (*GetRobotByUserIDRes, error)
 	DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error)
@@ -319,6 +332,9 @@ func (UnimplementedOpenServer) ResetBotSecret(context.Context, *ResetBotSecretRe
 }
 func (UnimplementedOpenServer) GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBotInfo not implemented")
+}
+func (UnimplementedOpenServer) UpdateBot(context.Context, *UpdateBotReq) (*UpdateBotRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBot not implemented")
 }
 func (UnimplementedOpenServer) SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveWebhookLog not implemented")
@@ -514,6 +530,24 @@ func _Open_GetBotInfo_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OpenServer).GetBotInfo(ctx, req.(*GetBotInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_UpdateBot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateBotReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).UpdateBot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_UpdateBot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).UpdateBot(ctx, req.(*UpdateBotReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -754,6 +788,10 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBotInfo",
 			Handler:    _Open_GetBotInfo_Handler,
+		},
+		{
+			MethodName: "UpdateBot",
+			Handler:    _Open_UpdateBot_Handler,
 		},
 		{
 			MethodName: "SaveWebhookLog",

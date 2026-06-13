@@ -28,8 +28,8 @@ type BaseResponse struct {
 }
 
 func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uuid string) {
-	res.WriteHeader(statusCode)
 	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(statusCode)
 	response := BaseResponse{Code: 1, Msg: msg}
 	byteData, _ := json.Marshal(response)
 	res.Write(byteData)
@@ -41,47 +41,47 @@ type Proxy struct {
 	Config types.Config
 }
 
-func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
+func (p Proxy) auth(req *http.Request) (ok bool, errMsg string) {
 	path := req.URL.Path
 
 	// 1. 公开接口，无需鉴权
 	if utils.InListByRegex(p.Config.PublicList, path) {
-		return true
+		return true, ""
 	}
 
 	// 2. 自定义鉴权，透传到下游服务 middleware 处理
 	if utils.InListByRegex(p.Config.CustomAuthList, path) {
-		return true
+		return true, ""
 	}
 
 	// 3. open oauth_secret：Gateway 校验 App-Id / App-Secret 请求头
 	if strings.HasPrefix(path, "/api/open/oauth_secret/") {
-		return p.oauthSecretAuth(res, req, path)
+		return p.oauthSecretAuth(req)
 	}
 
 	// 4. open_api：Gateway 默认不鉴权，各接口 logic 自行校验；仅 Beaver JWT 路由例外
 	if isOpenApiPassThrough(path) {
-		return true
+		return true, ""
 	}
 
 	// 5. 统一 JWT 鉴权
-	return p.jwtAuth(res, req)
+	if !p.jwtAuth(req) {
+		return false, "网关鉴权失败"
+	}
+	return true, ""
 }
 
-func (p Proxy) oauthSecretAuth(res http.ResponseWriter, req *http.Request, path string) bool {
-	uuid := getUuid(req)
+func (p Proxy) oauthSecretAuth(req *http.Request) (bool, string) {
 	appID := req.Header.Get("App-Id")
 	if appID == "" {
-		writeErrorResponse(res, "缺少 App-Id 请求头", http.StatusUnauthorized, uuid)
-		return false
+		return false, "缺少 App-Id 请求头"
 	}
 
 	appSecret := req.Header.Get("App-Secret")
 	if appSecret == "" {
-		writeErrorResponse(res, "缺少 App-Secret 请求头", http.StatusUnauthorized, uuid)
-		return false
+		return false, "缺少 App-Secret 请求头"
 	}
-	return true
+	return true, ""
 }
 
 var openApiJwtRoutes = []string{
@@ -102,7 +102,7 @@ func isOpenApiPassThrough(path string) bool {
 }
 
 // jwtAuth JWT认证（普通用户）
-func (p Proxy) jwtAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
+func (p Proxy) jwtAuth(req *http.Request) bool {
 	// 获取token
 	token := getToken(req)
 	if token == "" {
@@ -157,15 +157,17 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	token := getToken(req)
 	req.Header.Set("Token", token)
-	if !p.auth(res, req) {
+	ok, authErrMsg := p.auth(req)
+	if !ok {
 		gatewayLog.Warn(model.LogMsg{
 			Text: "网关鉴权失败",
 			Data: map[string]interface{}{
 				"path": req.URL.Path,
 				"uuid": uuid,
+				"msg":  authErrMsg,
 			},
 		})
-		writeErrorResponse(res, "网关鉴权失败", http.StatusServiceUnavailable, uuid)
+		writeErrorResponse(res, authErrMsg, http.StatusUnauthorized, uuid)
 		return
 	}
 

@@ -13,6 +13,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 获取用户设置（隐私与通知策略）
+				Method:  http.MethodGet,
+				Path:    "/api/user/v1/settings",
+				Handler: getUserSettingsHandler(serverCtx),
+			},
+			{
 				// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
 				Method:  http.MethodPost,
 				Path:    "/api/user/v1/sync",
@@ -29,6 +35,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/user/v1/update_info",
 				Handler: updateInfoHandler(serverCtx),
+			},
+			{
+				// 更新用户设置（隐私与通知策略，支持局部更新）
+				Method:  http.MethodPost,
+				Path:    "/api/user/v1/update_settings",
+				Handler: updateUserSettingsHandler(serverCtx),
 			},
 			{
 				// 获取用户基础信息

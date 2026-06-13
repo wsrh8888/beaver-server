@@ -175,6 +175,16 @@ type GetSyncGroupRequestsRes struct {
 	ServerTimestamp int64                      `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
+type GetSyncMessageMediasReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步
+}
+
+type GetSyncMessageMediasRes struct {
+	MessageIDs      []string `json:"messageIds"`      // 已标记媒体状态的消息ID列表
+	ServerTimestamp int64    `json:"serverTimestamp"` // 服务端同步时间戳
+}
+
 type GetSyncNotificationEventsReq struct {
 	SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
 	Limit        int32 `json:"limit,optional"`        // 可选分页大小

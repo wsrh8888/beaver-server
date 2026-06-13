@@ -43,5 +43,10 @@ NotificationRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: notificationrpc.rpc
+OpenRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: openrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876

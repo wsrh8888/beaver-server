@@ -608,7 +608,7 @@ func (x *EmojiMsg) GetHeight() int64 {
 // 定义NotificationMsg消息 - 通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群、添加好友成功等）
 type NotificationMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          int32                  `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`    // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+	Type          int32                  `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`    // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
 	Actors        []string               `protobuf:"bytes,2,rep,name=actors,proto3" json:"actors,omitempty"` // 相关用户ID列表
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2275,7 +2275,7 @@ func (x *InitializeConversationRes) GetConversationId() string {
 type SendNotificationMessageReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"` // 会话ID
-	MessageType    int32                  `protobuf:"varint,2,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`         // 通知消息类型: 1=好友欢迎 2=群欢迎 3=成员加入 4=成员退出
+	MessageType    int32                  `protobuf:"varint,2,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`         // 通知消息类型: 1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
 	Content        string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`                                     // 消息内容
 	RelatedUserId  string                 `protobuf:"bytes,4,opt,name=related_user_id,json=relatedUserId,proto3" json:"related_user_id,omitempty"`  // 相关用户ID（如新加好友的ID）
 	ReadUserIds    []string               `protobuf:"bytes,5,rep,name=read_user_ids,json=readUserIds,proto3" json:"read_user_ids,omitempty"`        // 需要标记为已读的用户ID列表（为空表示所有用户都标记为已读）

@@ -32,7 +32,7 @@ func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileUploadQiniuReq) (r
 	logx.Infof("七牛云文件上传请求，用户ID: %s", req.UserID)
 
 	return &types.FileUploadQiniuRes{
-		FileKey:      "",
+		FileURL:      "",
 		OriginalName: "",
 	}, nil
 }

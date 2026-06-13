@@ -42,7 +42,7 @@ type (
 		Size    int64  `json:"size,optional"` //文件大小（字节，可选）
 	}
 	NotificationMsg {
-		Type   int      `json:"type"` // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+		Type   int      `json:"type"` // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
 		Actors []string `json:"actors"` // 相关用户ID列表
 	}
 	AudioFileMsg {
@@ -63,7 +63,7 @@ type (
 	}
 	WithdrawMsg {
 		OriginMsgId string `json:"originMsgId"` // 被撤回的消息ID
-		OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照，用于重新编辑
+		OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照
 	}
 	CallMsg {
 		RoomId   string `json:"roomId"` // 房间ID
@@ -230,21 +230,6 @@ type (
 	HideChatRes  {}
 )
 
-// 消息编辑
-type (
-	EditMessageReq {
-		UserID    string `header:"Beaver-User-Id"`
-		MessageID string `json:"messageId"` //客户端消息ID
-		Content   string `json:"content"` //新的消息内容
-	}
-	EditMessageRes {
-		Id        uint   `json:"id"` //数据库自增ID
-		MessageID string `json:"messageId"` //客户端消息ID
-		Content   string `json:"content"` //编辑后的内容
-		EditTime  string `json:"editTime"` //编辑时间
-	}
-)
-
 // 消息撤回
 type (
 	RecallMessageReq {
@@ -264,6 +249,15 @@ type (
 		MessageIDs []string `json:"messageIds"` // 支持批量删除，最多100条
 	}
 	DeleteMessagesRes  {}
+)
+
+// 标记消息媒体状态（语音已听等）
+type (
+	MarkMessageMediaReq {
+		UserID     string   `header:"Beaver-User-Id"` // 用户ID
+		MessageIDs []string `json:"messageIds"` // 消息ID列表，最多100条
+	}
+	MarkMessageMediaRes  {}
 )
 
 // 消息转发
@@ -410,10 +404,6 @@ service chat {
 	@handler hideChat
 	post /api/chat/v1/hideChat (HideChatReq) returns (HideChatRes)
 
-	@doc "编辑消息"
-	@handler editMessage
-	post /api/chat/v1/edit (EditMessageReq) returns (EditMessageRes)
-
 	@doc "撤回消息"
 	@handler recallMessage
 	post /api/chat/v1/recall (RecallMessageReq) returns (RecallMessageRes)
@@ -421,6 +411,10 @@ service chat {
 	@doc "批量删除消息(仅自己不可见)"
 	@handler deleteMessages
 	post /api/chat/v1/deleteMessages (DeleteMessagesReq) returns (DeleteMessagesRes)
+
+	@doc "标记消息媒体状态（语音已听等）"
+	@handler markMessageMedia
+	post /api/chat/v1/markMessageMedia (MarkMessageMediaReq) returns (MarkMessageMediaRes)
 
 	@doc "转发消息"
 	@handler forwardMessage

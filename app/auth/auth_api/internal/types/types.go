@@ -42,6 +42,17 @@ type EmailPasswordLoginRes struct {
 	UserID string `json:"userId"`
 }
 
+type OAuthCodeLoginReq struct {
+	AppID    string `json:"appId"`
+	Code     string `json:"code"`
+	DeviceID string `header:"deviceId"`
+}
+
+type OAuthCodeLoginRes struct {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
 type EmailRegisterReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -147,4 +158,13 @@ type ResetPasswordReq struct {
 }
 
 type ResetPasswordRes struct {
+}
+
+type UpdatePasswordReq struct {
+	UserID      string `header:"Beaver-User-Id"`
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type UpdatePasswordRes struct {
 }

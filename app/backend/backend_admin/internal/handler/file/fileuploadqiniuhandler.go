@@ -119,7 +119,6 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		if err == nil {
 			logx.Info("文件已存在，直接返回:", fileModel.FileKey, fileModel.OriginalName)
-			resp.FileKey = fileModel.FileKey
 			resp.OriginalName = fileModel.OriginalName
 			resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, fileModel.Path)
 			response.Response(r, w, resp, nil)
@@ -186,11 +185,10 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		logx.Info("数据库记录创建成功:", newFileModel.FileKey)
 
-		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
 		resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, newFileModel.Path)
 
-		logx.Info("文件上传完成:", resp.FileKey, "url:", resp.FileURL)
+		logx.Info("文件上传完成, url:", resp.FileURL)
 		response.Response(r, w, resp, nil)
 	}
 }

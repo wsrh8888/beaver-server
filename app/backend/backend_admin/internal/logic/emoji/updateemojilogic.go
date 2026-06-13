@@ -30,8 +30,8 @@ func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.U
 	}
 
 	rpcReq := &emoji_rpc.SaveEmojiReq{EmojiId: req.EmojiId}
-	if req.FileKey != nil {
-		rpcReq.PatchFileKey = req.FileKey
+	if req.FileUrl != nil {
+		rpcReq.PatchFileKey = req.FileUrl
 	}
 	if req.Title != nil {
 		rpcReq.PatchTitle = req.Title
