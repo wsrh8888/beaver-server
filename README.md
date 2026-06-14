@@ -1,6 +1,7 @@
 # 🦫 Beaver IM - 企业级即时通讯平台
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](VERSION)
 [![Go](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/)
 [![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.6.0+-green.svg)](https://github.com/zeromicro/go-zero)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
@@ -8,6 +9,8 @@
 [![Stars](https://img.shields.io/badge/stars-50+-yellow.svg)](https://github.com/wsrh8888/beaver-server/stargazers)
 
 > 🚀 **企业级即时通讯平台** - 基于Go-Zero微服务架构构建，支持移动端（Flutter）、桌面端（Electron）和Web端，提供实时通信能力。
+
+**当前版本：[2.0.0](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
 
 [English](README_EN.md) | [中文](README.md)
 

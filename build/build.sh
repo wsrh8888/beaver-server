@@ -2,7 +2,8 @@
 
 # 配置变量
 REGISTRY_URL="wsrh8888"
-VERSION="1.2.0"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 
 # 函数：获取Docker镜像的Id
 get_image_id() {
