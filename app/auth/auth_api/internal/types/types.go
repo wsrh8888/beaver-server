@@ -11,13 +11,15 @@ type AuthenticationRes struct {
 }
 
 type DeviceInfo struct {
-	DeviceID      string `json:"deviceId"`
-	DeviceType    string `json:"deviceType"`
-	DeviceOS      string `json:"deviceOs"`
-	DeviceName    string `json:"deviceName"`
-	LastLoginTime string `json:"lastLoginTime"`
-	IsActive      bool   `json:"isActive"`
-	LastLoginIP   string `json:"lastLoginIp"`
+	DeviceID        string `json:"deviceId"`
+	DeviceType      string `json:"deviceType"`
+	DeviceOS        string `json:"deviceOs"`
+	DeviceModel     string `json:"deviceModel"`
+	DeviceOsVersion string `json:"deviceOsVersion"`
+	DeviceName      string `json:"deviceName"`
+	LastLoginTime   string `json:"lastLoginTime"`
+	IsOnline        bool   `json:"isOnline"`
+	LastLoginIP     string `json:"lastLoginIp"`
 }
 
 type EmailLoginReq struct {
@@ -95,7 +97,8 @@ type KickDeviceRes struct {
 }
 
 type LogoutReq struct {
-	UserID string `header:"Beaver-User-Id"`
+	UserID   string `header:"Beaver-User-Id"`
+	DeviceID string `header:"deviceId"`
 }
 
 type LogoutRes struct {

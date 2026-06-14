@@ -29,9 +29,8 @@ func (l *BatchDeleteUsersLogic) BatchDeleteUsers(req *types.BatchDeleteUsersReq)
 		return nil, errors.New("请选择要删除的用户")
 	}
 
-	_, err = l.svcCtx.UserRpc.UpdateUsers(l.ctx, &user_rpc.UpdateUsersReq{
+	_, err = l.svcCtx.UserRpc.DeleteUsers(l.ctx, &user_rpc.DeleteUsersReq{
 		UserIds: req.Ids,
-		Action:  userActionSoftDelete,
 	})
 	if err != nil {
 		l.Errorf("批量删除用户失败: %v", err)

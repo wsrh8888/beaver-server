@@ -3,7 +3,8 @@ syntax = "v1"
 // ==================== 认证接口（需 Gateway JWT，注入 Beaver-User-Id 或 Header Token）====================
 type (
 	LogoutReq {
-		UserID string `header:"Beaver-User-Id"`
+		UserID   string `header:"Beaver-User-Id"`
+		DeviceID string `header:"deviceId"`
 	}
 	LogoutRes  {}
 )
@@ -24,13 +25,15 @@ type (
 		Devices []DeviceInfo `json:"devices"`
 	}
 	DeviceInfo {
-		DeviceID      string `json:"deviceId"`
-		DeviceType    string `json:"deviceType"`
-		DeviceOS      string `json:"deviceOs"`
-		DeviceName    string `json:"deviceName"`
-		LastLoginTime string `json:"lastLoginTime"`
-		IsActive      bool   `json:"isActive"`
-		LastLoginIP   string `json:"lastLoginIp"`
+		DeviceID        string `json:"deviceId"`
+		DeviceType      string `json:"deviceType"`
+		DeviceOS        string `json:"deviceOs"`
+		DeviceModel     string `json:"deviceModel"`
+		DeviceOsVersion string `json:"deviceOsVersion"`
+		DeviceName      string `json:"deviceName"`
+		LastLoginTime   string `json:"lastLoginTime"`
+		IsOnline        bool   `json:"isOnline"`
+		LastLoginIP     string `json:"lastLoginIp"`
 	}
 )
 

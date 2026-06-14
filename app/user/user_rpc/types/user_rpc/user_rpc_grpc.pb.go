@@ -27,6 +27,8 @@ const (
 	User_UserUpdateDisplay_FullMethodName = "/user_rpc.user/UserUpdateDisplay"
 	User_ListUsers_FullMethodName         = "/user_rpc.user/ListUsers"
 	User_UpdateUsers_FullMethodName       = "/user_rpc.user/UpdateUsers"
+	User_DeleteUsers_FullMethodName       = "/user_rpc.user/DeleteUsers"
+	User_UpdateUsersStatus_FullMethodName = "/user_rpc.user/UpdateUsersStatus"
 )
 
 // UserClient is the client API for User service.
@@ -42,6 +44,8 @@ type UserClient interface {
 	// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
 	ListUsers(ctx context.Context, in *ListUsersReq, opts ...grpc.CallOption) (*ListUsersRes, error)
 	UpdateUsers(ctx context.Context, in *UpdateUsersReq, opts ...grpc.CallOption) (*UpdateUsersRes, error)
+	DeleteUsers(ctx context.Context, in *DeleteUsersReq, opts ...grpc.CallOption) (*DeleteUsersRes, error)
+	UpdateUsersStatus(ctx context.Context, in *UpdateUsersStatusReq, opts ...grpc.CallOption) (*UpdateUsersStatusRes, error)
 }
 
 type userClient struct {
@@ -132,6 +136,26 @@ func (c *userClient) UpdateUsers(ctx context.Context, in *UpdateUsersReq, opts .
 	return out, nil
 }
 
+func (c *userClient) DeleteUsers(ctx context.Context, in *DeleteUsersReq, opts ...grpc.CallOption) (*DeleteUsersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteUsersRes)
+	err := c.cc.Invoke(ctx, User_DeleteUsers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) UpdateUsersStatus(ctx context.Context, in *UpdateUsersStatusReq, opts ...grpc.CallOption) (*UpdateUsersStatusRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUsersStatusRes)
+	err := c.cc.Invoke(ctx, User_UpdateUsersStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility.
@@ -145,6 +169,8 @@ type UserServer interface {
 	// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
 	ListUsers(context.Context, *ListUsersReq) (*ListUsersRes, error)
 	UpdateUsers(context.Context, *UpdateUsersReq) (*UpdateUsersRes, error)
+	DeleteUsers(context.Context, *DeleteUsersReq) (*DeleteUsersRes, error)
+	UpdateUsersStatus(context.Context, *UpdateUsersStatusReq) (*UpdateUsersStatusRes, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -178,6 +204,12 @@ func (UnimplementedUserServer) ListUsers(context.Context, *ListUsersReq) (*ListU
 }
 func (UnimplementedUserServer) UpdateUsers(context.Context, *UpdateUsersReq) (*UpdateUsersRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUsers not implemented")
+}
+func (UnimplementedUserServer) DeleteUsers(context.Context, *DeleteUsersReq) (*DeleteUsersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUsers not implemented")
+}
+func (UnimplementedUserServer) UpdateUsersStatus(context.Context, *UpdateUsersStatusReq) (*UpdateUsersStatusRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUsersStatus not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 func (UnimplementedUserServer) testEmbeddedByValue()              {}
@@ -344,6 +376,42 @@ func _User_UpdateUsers_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_DeleteUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUsersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).DeleteUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_DeleteUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).DeleteUsers(ctx, req.(*DeleteUsersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_UpdateUsersStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUsersStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UpdateUsersStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_UpdateUsersStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UpdateUsersStatus(ctx, req.(*UpdateUsersStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -382,6 +450,14 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUsers",
 			Handler:    _User_UpdateUsers_Handler,
+		},
+		{
+			MethodName: "DeleteUsers",
+			Handler:    _User_DeleteUsers_Handler,
+		},
+		{
+			MethodName: "UpdateUsersStatus",
+			Handler:    _User_UpdateUsersStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

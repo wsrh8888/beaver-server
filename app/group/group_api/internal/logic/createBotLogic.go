@@ -65,7 +65,6 @@ func (l *CreateBotLogic) CreateBot(req *types.CreateBotReq) (resp *types.CreateB
 		avatar := req.Avatar
 		if _, err := l.svcCtx.UserRpc.UpdateUsers(l.ctx, &user_rpc.UpdateUsersReq{
 			UserIds:     []string{userRes.UserID},
-			Action:      1,
 			PatchAvatar: &avatar,
 		}); err != nil {
 			return nil, fmt.Errorf("设置机器人头像失败: %v", err)

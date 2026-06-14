@@ -11,8 +11,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-const userActionBatchStatus int32 = 3
-
 type BatchUpdateUserStatusLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -35,10 +33,9 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 	}
 
 	status := int32(req.Status)
-	_, err = l.svcCtx.UserRpc.UpdateUsers(l.ctx, &user_rpc.UpdateUsersReq{
-		UserIds:     req.Ids,
-		Action:      userActionBatchStatus,
-		PatchStatus: &status,
+	_, err = l.svcCtx.UserRpc.UpdateUsersStatus(l.ctx, &user_rpc.UpdateUsersStatusReq{
+		UserIds: req.Ids,
+		Status:  status,
 	})
 	if err != nil {
 		l.Errorf("批量更新用户状态失败: %v", err)

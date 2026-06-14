@@ -28,15 +28,19 @@ func (l *GetUserSettingsLogic) GetUserSettings(req *types.GetUserSettingsReq) (*
 		return nil, err
 	}
 
+	defaults := user_models.DefaultUserSetting(req.UserID).SettingInfo
 	info := setting.SettingInfo
 	if info == nil {
-		info = user_models.DefaultUserSetting(req.UserID).SettingInfo
+		info = defaults
 	}
 	if info.Privacy == nil {
-		info.Privacy = user_models.DefaultUserSetting(req.UserID).SettingInfo.Privacy
+		info.Privacy = defaults.Privacy
 	}
 	if info.Notification == nil {
-		info.Notification = user_models.DefaultUserSetting(req.UserID).SettingInfo.Notification
+		info.Notification = defaults.Notification
+	}
+	if info.Keyboard == nil {
+		info.Keyboard = defaults.Keyboard
 	}
 
 	return &types.GetUserSettingsRes{
@@ -50,6 +54,11 @@ func (l *GetUserSettingsLogic) GetUserSettings(req *types.GetUserSettingsReq) (*
 			NotifyFriendRequest: info.Notification.NotifyFriendRequest,
 			NotifyGroupMessage:  info.Notification.NotifyGroupMessage,
 			NotifyMoment:        info.Notification.NotifyMoment,
+		},
+		Keyboard: types.GetUserSettingsKeyboardItem{
+			Screenshot:   info.Keyboard.Screenshot,
+			ToggleWindow: info.Keyboard.ToggleWindow,
+			SendMessage:  info.Keyboard.SendMessage,
 		},
 	}, nil
 }

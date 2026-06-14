@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
@@ -33,7 +34,7 @@ func (l *ListUsersLogic) ListUsers(in *user_rpc.ListUsersReq) (*user_rpc.ListUse
 		}
 		return &user_rpc.ListUsersRes{
 			Total: 1,
-			List:  []*user_rpc.UserInfo{toUserInfo(user)},
+			List:  []*user_rpc.UserInfo{userInfoFromModel(user)},
 		}, nil
 	}
 
@@ -78,7 +79,24 @@ func (l *ListUsersLogic) ListUsers(in *user_rpc.ListUsersReq) (*user_rpc.ListUse
 
 	list := make([]*user_rpc.UserInfo, 0, len(users))
 	for _, user := range users {
-		list = append(list, toUserInfo(user))
+		list = append(list, userInfoFromModel(user))
 	}
 	return &user_rpc.ListUsersRes{Total: total, List: list}, nil
+}
+
+func userInfoFromModel(user user_models.UserModel) *user_rpc.UserInfo {
+	return &user_rpc.UserInfo{
+		UserId:    user.UserID,
+		NickName:  user.NickName,
+		Avatar:    user.Avatar,
+		Version:   user.Version,
+		Email:     user.Email,
+		Abstract:  user.Abstract,
+		Phone:     user.Phone,
+		Status:    int32(user.Status),
+		Source:    user.Source,
+		UserType:  int32(user.UserType),
+		CreatedAt: time.Time(user.CreatedAt).Format(time.RFC3339),
+		UpdatedAt: time.Time(user.UpdatedAt).Format(time.RFC3339),
+	}
 }

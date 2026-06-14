@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
@@ -12,12 +14,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
-)
-
-const (
-	userActionPatch       int32 = 1 // 更新用户字段
-	userActionSoftDelete  int32 = 2 // 软删除（status=3）
-	userActionBatchStatus int32 = 3 // 批量修改状态
 )
 
 type UpdateUsersLogic struct {
@@ -31,19 +27,6 @@ func NewUpdateUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 }
 
 func (l *UpdateUsersLogic) UpdateUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.UpdateUsersRes, error) {
-	switch in.Action {
-	case userActionPatch:
-		return l.patchUsers(in)
-	case userActionSoftDelete:
-		return l.softDelete(in.UserIds)
-	case userActionBatchStatus:
-		return l.batchStatus(in.UserIds, in.PatchStatus)
-	default:
-		return nil, errors.New("不支持的操作类型")
-	}
-}
-
-func (l *UpdateUsersLogic) patchUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.UpdateUsersRes, error) {
 	var affected int64
 	for _, uid := range in.UserIds {
 		var user user_models.UserModel
@@ -76,53 +59,56 @@ func (l *UpdateUsersLogic) patchUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.Up
 		if in.PatchAbstract != nil {
 			updates["abstract"] = *in.PatchAbstract
 		}
-		if in.PatchStatus != nil {
-			updates["status"] = int8(*in.PatchStatus)
-		}
 		if len(updates) == 0 {
 			affected++
 			continue
 		}
+
+		version := l.svcCtx.VersionGen.GetNextVersion("users", "user_id", uid)
+		if version == -1 {
+			return nil, errors.New("获取用户版本号失败")
+		}
+		updates["version"] = version
+
 		if err := l.svcCtx.DB.Model(&user).Updates(updates).Error; err != nil {
 			l.Errorf("更新用户失败: %v", err)
 			return nil, err
 		}
+		l.recordUserChangeLog(uid, version, updates)
 		affected++
 	}
 	return &user_rpc.UpdateUsersRes{AffectedCount: affected}, nil
 }
 
-func (l *UpdateUsersLogic) softDelete(userIDs []string) (*user_rpc.UpdateUsersRes, error) {
-	if len(userIDs) == 0 {
-		return &user_rpc.UpdateUsersRes{}, nil
-	}
-	result := l.svcCtx.DB.Model(&user_models.UserModel{}).
-		Where("user_id IN ?", userIDs).
-		Update("status", 3)
-	if result.Error != nil {
-		l.Errorf("删除用户失败: %v", result.Error)
-		return nil, result.Error
-	}
-	return &user_rpc.UpdateUsersRes{AffectedCount: result.RowsAffected}, nil
-}
+func (l *UpdateUsersLogic) recordUserChangeLog(userID string, version int64, updateFields map[string]interface{}) {
+	changeLogs := make([]user_models.UserChangeLogModel, 0, len(updateFields))
+	now := time.Now().Unix()
 
-func (l *UpdateUsersLogic) batchStatus(userIDs []string, statusPtr *int32) (*user_rpc.UpdateUsersRes, error) {
-	if statusPtr == nil {
-		return &user_rpc.UpdateUsersRes{}, nil
+	for field, newValue := range updateFields {
+		if field == "version" {
+			continue
+		}
+		changeType := field
+		switch field {
+		case "nick_name":
+			changeType = "nickName"
+		case "avatar":
+			changeType = "avatar"
+		case "abstract":
+			changeType = "abstract"
+		}
+		changeLogs = append(changeLogs, user_models.UserChangeLogModel{
+			UserID:     userID,
+			ChangeType: changeType,
+			NewValue:   fmt.Sprintf("%v", newValue),
+			ChangeTime: now,
+			Version:    version,
+		})
 	}
-	status := *statusPtr
-	if status < 1 || status > 3 {
-		return nil, errors.New("无效的状态值")
+
+	if len(changeLogs) > 0 {
+		if err := l.svcCtx.DB.Create(&changeLogs).Error; err != nil {
+			l.Errorf("记录用户变更日志失败: userId=%s, error=%v", userID, err)
+		}
 	}
-	if len(userIDs) == 0 {
-		return &user_rpc.UpdateUsersRes{}, nil
-	}
-	result := l.svcCtx.DB.Model(&user_models.UserModel{}).
-		Where("user_id IN ?", userIDs).
-		Update("status", int8(status))
-	if result.Error != nil {
-		l.Errorf("批量更新用户状态失败: %v", result.Error)
-		return nil, result.Error
-	}
-	return &user_rpc.UpdateUsersRes{AffectedCount: result.RowsAffected}, nil
 }

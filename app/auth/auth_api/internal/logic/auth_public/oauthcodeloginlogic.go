@@ -9,7 +9,6 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
-	"beaver/app/auth/auth_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
@@ -19,7 +18,6 @@ import (
 	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type OAuthCodeLoginLogic struct {
@@ -91,19 +89,7 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 		return nil, errors.New("服务内部异常")
 	}
 
-	now := time.Now()
-	var dev auth_models.AuthDeviceModel
-	if err := l.svcCtx.DB.Where("user_id = ? AND device_id = ?", userInfo.UserId, req.DeviceID).First(&dev).Error; err == gorm.ErrRecordNotFound {
-		_ = l.svcCtx.DB.Create(&auth_models.AuthDeviceModel{
-			UserID: userInfo.UserId, DeviceID: req.DeviceID, DeviceType: deviceGroup, DeviceOS: preciseType,
-			LastLoginTime: now, IsActive: true,
-		}).Error
-	} else if err == nil {
-		_ = l.svcCtx.DB.Model(&dev).Updates(map[string]interface{}{
-			"device_type": deviceGroup, "device_os": preciseType,
-			"last_login_time": now, "is_active": true, "updated_at": now,
-		}).Error
-	}
+	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, ctxUAProfile(l.ctx), ctxClientIP(l.ctx))
 
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth 授权码登录成功",

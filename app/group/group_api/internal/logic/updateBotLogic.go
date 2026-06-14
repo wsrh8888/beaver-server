@@ -73,7 +73,6 @@ func (l *UpdateBotLogic) updateBotUserProfile(req *types.UpdateBotReq) error {
 
 	patchReq := &user_rpc.UpdateUsersReq{
 		UserIds: []string{req.BotID},
-		Action:  1,
 	}
 	if req.Name != "" {
 		patchReq.PatchNickName = &req.Name

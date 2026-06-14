@@ -18,8 +18,6 @@ import (
 	"beaver/utils/jwts"
 	"beaver/utils/logger"
 	"beaver/utils/logger/model"
-
-	"gorm.io/gorm"
 )
 
 
@@ -91,19 +89,7 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (*types.EmailLogi
 		_ = l.svcCtx.DB.Save(&credential).Error
 	}
 
-	now := time.Now()
-	var dev auth_models.AuthDeviceModel
-	if err := l.svcCtx.DB.Where("user_id = ? AND device_id = ?", userInfo.UserId, req.DeviceID).First(&dev).Error; err == gorm.ErrRecordNotFound {
-		_ = l.svcCtx.DB.Create(&auth_models.AuthDeviceModel{
-			UserID: userInfo.UserId, DeviceID: req.DeviceID, DeviceType: deviceGroup, DeviceOS: preciseType,
-			LastLoginTime: now, IsActive: true,
-		}).Error
-	} else if err == nil {
-		_ = l.svcCtx.DB.Model(&dev).Updates(map[string]interface{}{
-			"device_type": deviceGroup, "device_os": preciseType,
-			"last_login_time": now, "is_active": true, "updated_at": now,
-		}).Error
-	}
+	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, ctxUAProfile(l.ctx), ctxClientIP(l.ctx))
 
 	l.logger.Info(model.LogMsg{
 		Text: "邮箱验证码登录成功",

@@ -32,14 +32,18 @@ func (l *UpdateUserSettingsLogic) UpdateUserSettings(req *types.UpdateUserSettin
 		return nil, err
 	}
 
+	defaults := user_models.DefaultUserSetting(req.UserID).SettingInfo
 	if setting.SettingInfo == nil {
-		setting.SettingInfo = user_models.DefaultUserSetting(req.UserID).SettingInfo
+		setting.SettingInfo = defaults
 	}
 	if setting.SettingInfo.Privacy == nil {
-		setting.SettingInfo.Privacy = user_models.DefaultUserSetting(req.UserID).SettingInfo.Privacy
+		setting.SettingInfo.Privacy = defaults.Privacy
 	}
 	if setting.SettingInfo.Notification == nil {
-		setting.SettingInfo.Notification = user_models.DefaultUserSetting(req.UserID).SettingInfo.Notification
+		setting.SettingInfo.Notification = defaults.Notification
+	}
+	if setting.SettingInfo.Keyboard == nil {
+		setting.SettingInfo.Keyboard = defaults.Keyboard
 	}
 
 	if req.Privacy != nil {
@@ -66,6 +70,18 @@ func (l *UpdateUserSettingsLogic) UpdateUserSettings(req *types.UpdateUserSettin
 		}
 		if req.Notification.NotifyMoment != nil {
 			setting.SettingInfo.Notification.NotifyMoment = *req.Notification.NotifyMoment
+		}
+	}
+
+	if req.Keyboard != nil {
+		if req.Keyboard.Screenshot != nil {
+			setting.SettingInfo.Keyboard.Screenshot = *req.Keyboard.Screenshot
+		}
+		if req.Keyboard.ToggleWindow != nil {
+			setting.SettingInfo.Keyboard.ToggleWindow = *req.Keyboard.ToggleWindow
+		}
+		if req.Keyboard.SendMessage != nil {
+			setting.SettingInfo.Keyboard.SendMessage = *req.Keyboard.SendMessage
 		}
 	}
 

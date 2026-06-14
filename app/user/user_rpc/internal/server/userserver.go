@@ -63,3 +63,13 @@ func (s *UserServer) UpdateUsers(ctx context.Context, in *user_rpc.UpdateUsersRe
 	l := logic.NewUpdateUsersLogic(ctx, s.svcCtx)
 	return l.UpdateUsers(in)
 }
+
+func (s *UserServer) DeleteUsers(ctx context.Context, in *user_rpc.DeleteUsersReq) (*user_rpc.DeleteUsersRes, error) {
+	l := logic.NewDeleteUsersLogic(ctx, s.svcCtx)
+	return l.DeleteUsers(in)
+}
+
+func (s *UserServer) UpdateUsersStatus(ctx context.Context, in *user_rpc.UpdateUsersStatusReq) (*user_rpc.UpdateUsersStatusRes, error) {
+	l := logic.NewUpdateUsersStatusLogic(ctx, s.svcCtx)
+	return l.UpdateUsersStatus(in)
+}

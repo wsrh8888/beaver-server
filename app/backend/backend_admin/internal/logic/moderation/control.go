@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	userActionBatchStatus      int32 = 3
-	chatMessageStatusDeleted   int32 = 4
+	chatMessageStatusDeleted int32 = 4
 )
 
 func executeControlAction(ctx context.Context, svcCtx *svc.ServiceContext, operatorID string, caseID uint64, act types.ModerationControlAction) error {
@@ -32,21 +31,17 @@ func executeControlAction(ctx context.Context, svcCtx *svc.ServiceContext, opera
 		if target == "" {
 			return errors.New("封禁用户需要指定 userId")
 		}
-		status := int32(2)
-		_, err = svcCtx.UserRpc.UpdateUsers(ctx, &user_rpc.UpdateUsersReq{
-			UserIds:     []string{target},
-			Action:      userActionBatchStatus,
-			PatchStatus: &status,
+		_, err = svcCtx.UserRpc.UpdateUsersStatus(ctx, &user_rpc.UpdateUsersStatusReq{
+			UserIds: []string{target},
+			Status:  2,
 		})
 	case "unban_user":
 		if target == "" {
 			return errors.New("解封用户需要指定 userId")
 		}
-		status := int32(1)
-		_, err = svcCtx.UserRpc.UpdateUsers(ctx, &user_rpc.UpdateUsersReq{
-			UserIds:     []string{target},
-			Action:      userActionBatchStatus,
-			PatchStatus: &status,
+		_, err = svcCtx.UserRpc.UpdateUsersStatus(ctx, &user_rpc.UpdateUsersStatusReq{
+			UserIds: []string{target},
+			Status:  1,
 		})
 	case "delete_message":
 		if target == "" {

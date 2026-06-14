@@ -50,12 +50,10 @@ func (l *UpsertDeviceLogic) UpsertDevice(in *auth_rpc.UpsertDeviceReq) (*auth_rp
 		updates := map[string]interface{}{
 			"device_type":     in.DeviceType,
 			"device_os":       in.DeviceOs,
+			"device_name":     in.DeviceName,
 			"last_login_time": now,
 			"is_active":       true,
 			"updated_at":      now,
-		}
-		if in.DeviceName != "" {
-			updates["device_name"] = in.DeviceName
 		}
 		if in.LastLoginIp != "" {
 			updates["last_login_ip"] = in.LastLoginIp

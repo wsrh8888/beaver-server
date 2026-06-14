@@ -57,18 +57,35 @@ message ListUsersRes {
   repeated UserInfo list = 2; // array 用户列表
 }
 
-// UpdateUsers：用户状态变更（更新字段 / 软删除 / 批量改状态，支持批量）
+// UpdateUsers：批量更新用户资料字段
 message UpdateUsersReq {
   repeated string user_ids = 1; // array 用户 ID
-  int32 action = 2; // int32 操作：1=更新字段 2=软删除 3=批量改状态
-  optional string patch_nick_name = 3; // string 更新昵称，可选
-  optional string patch_email = 4; // string 更新邮箱，可选
-  optional string patch_avatar = 5; // string 更新头像，可选
-  optional string patch_abstract = 6; // string 更新个性签名，可选
-  optional int32 patch_status = 7; // int32 更新状态，action=1 或 action=3 时使用
+  optional string patch_nick_name = 2; // string 更新昵称，可选
+  optional string patch_email = 3; // string 更新邮箱，可选
+  optional string patch_avatar = 4; // string 更新头像，可选
+  optional string patch_abstract = 5; // string 更新个性签名，可选
 }
 
 message UpdateUsersRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// DeleteUsers：批量软删除用户
+message DeleteUsersReq {
+  repeated string user_ids = 1; // array 用户 ID
+}
+
+message DeleteUsersRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// UpdateUsersStatus：批量更新用户状态
+message UpdateUsersStatusReq {
+  repeated string user_ids = 1; // array 用户 ID
+  int32 status = 2; // int32 状态 1正常 2禁用 3删除
+}
+
+message UpdateUsersStatusRes {
   int64 affected_count = 1; // int64 影响条数
 }
 
@@ -123,7 +140,9 @@ service user {
   rpc UserUpdateDisplay(UserUpdateDisplayReq) returns(UserUpdateDisplayRes);
   // 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
   rpc ListUsers(ListUsersReq) returns(ListUsersRes); // 用户查询：列表、详情
-  rpc UpdateUsers(UpdateUsersReq) returns(UpdateUsersRes); // 用户变更：更新、软删、批量改状态
+  rpc UpdateUsers(UpdateUsersReq) returns(UpdateUsersRes); // 更新用户资料
+  rpc DeleteUsers(DeleteUsersReq) returns(DeleteUsersRes); // 软删除用户
+  rpc UpdateUsersStatus(UpdateUsersStatusReq) returns(UpdateUsersStatusRes); // 批量更新用户状态
 }
 
 // goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

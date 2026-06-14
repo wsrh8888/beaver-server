@@ -7,6 +7,12 @@ type GetUserSettingsNotificationItem struct {
 	NotifyMoment        bool `json:"notifyMoment"`        // 是否接收朋友圈通知
 }
 
+type GetUserSettingsKeyboardItem struct {
+	Screenshot   string `json:"screenshot"`   // 区域截图
+	ToggleWindow string `json:"toggleWindow"` // 显示/隐藏主窗口
+	SendMessage  string `json:"sendMessage"`  // 发送消息
+}
+
 type GetUserSettingsPrivacyItem struct {
 	AllowFriendRequest bool `json:"allowFriendRequest"` // 是否允许添加好友
 	ShowOnlineStatus   bool `json:"showOnlineStatus"`   // 是否展示在线状态
@@ -21,6 +27,7 @@ type GetUserSettingsReq struct {
 type GetUserSettingsRes struct {
 	Privacy      GetUserSettingsPrivacyItem      `json:"privacy"`      // 隐私设置
 	Notification GetUserSettingsNotificationItem `json:"notification"` // 通知策略
+	Keyboard     GetUserSettingsKeyboardItem     `json:"keyboard"`     // 快捷键
 }
 
 type UpdateEmailReq struct {
@@ -49,6 +56,12 @@ type UpdateUserSettingsNotificationItem struct {
 	NotifyMoment        *bool `json:"notifyMoment,optional"`        // 是否接收朋友圈通知
 }
 
+type UpdateUserSettingsKeyboardItem struct {
+	Screenshot   *string `json:"screenshot,optional"`   // 区域截图
+	ToggleWindow *string `json:"toggleWindow,optional"` // 显示/隐藏主窗口
+	SendMessage  *string `json:"sendMessage,optional"`  // 发送消息
+}
+
 type UpdateUserSettingsPrivacyItem struct {
 	AllowFriendRequest *bool `json:"allowFriendRequest,optional"` // 是否允许添加好友
 	ShowOnlineStatus   *bool `json:"showOnlineStatus,optional"`   // 是否展示在线状态
@@ -60,6 +73,7 @@ type UpdateUserSettingsReq struct {
 	UserID       string                              `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
 	Privacy      *UpdateUserSettingsPrivacyItem      `json:"privacy,optional"`      // 隐私设置（可选，局部更新）
 	Notification *UpdateUserSettingsNotificationItem `json:"notification,optional"` // 通知策略（可选，局部更新）
+	Keyboard     *UpdateUserSettingsKeyboardItem     `json:"keyboard,optional"`     // 快捷键（可选，局部更新）
 }
 
 type UpdateUserSettingsRes struct {

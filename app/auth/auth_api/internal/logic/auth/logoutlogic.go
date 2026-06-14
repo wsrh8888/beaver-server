@@ -6,10 +6,10 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	"beaver/utils/device"
 	"beaver/utils/logger"
 	"beaver/utils/logger/model"
 )
-
 
 type LogoutLogic struct {
 	ctx    context.Context
@@ -31,9 +31,13 @@ func (l *LogoutLogic) Logout(req *types.LogoutReq) (*types.LogoutRes, error) {
 		l.svcCtx.Redis.Del(key)
 	}
 
+	if err := device.Deactivate(l.svcCtx.DB, req.UserID, req.DeviceID); err != nil {
+		return nil, err
+	}
+
 	l.logger.Info(model.LogMsg{
 		Text: "用户登出成功",
-		Data: map[string]interface{}{"userId": req.UserID},
+		Data: map[string]interface{}{"userId": req.UserID, "deviceId": req.DeviceID},
 	})
 	return &types.LogoutRes{}, nil
 }

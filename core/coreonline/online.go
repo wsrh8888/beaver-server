@@ -64,6 +64,24 @@ func MarkOffline(rdb *redis.Client, userID, slot, instanceID string) {
 	}
 }
 
+// IsSlotOnline 某槽位（desktop/mobile）是否 WS 在线。
+func IsSlotOnline(rdb *redis.Client, userID, slot string) bool {
+	if rdb == nil || userID == "" || slot == "" {
+		return false
+	}
+	members, err := rdb.SMembers(key(userID)).Result()
+	if err != nil {
+		return false
+	}
+	suffix := ":" + slot
+	for _, m := range members {
+		if strings.HasSuffix(m, suffix) {
+			return true
+		}
+	}
+	return false
+}
+
 // IsOnline 是否在线。
 func IsOnline(rdb *redis.Client, userID string) bool {
 	if rdb == nil || userID == "" {

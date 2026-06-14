@@ -84,9 +84,15 @@ type (
 		NotifyGroupMessage  bool `json:"notifyGroupMessage"` // 是否接收群消息通知
 		NotifyMoment        bool `json:"notifyMoment"` // 是否接收朋友圈通知
 	}
+	GetUserSettingsKeyboardItem {
+		Screenshot   string `json:"screenshot"` // 区域截图
+		ToggleWindow string `json:"toggleWindow"` // 显示/隐藏主窗口
+		SendMessage  string `json:"sendMessage"` // 发送消息
+	}
 	GetUserSettingsRes {
 		Privacy      GetUserSettingsPrivacyItem      `json:"privacy"` // 隐私设置
 		Notification GetUserSettingsNotificationItem `json:"notification"` // 通知策略
+		Keyboard     GetUserSettingsKeyboardItem     `json:"keyboard"` // 快捷键
 	}
 )
 
@@ -103,10 +109,16 @@ type (
 		NotifyGroupMessage  *bool `json:"notifyGroupMessage,optional"` // 是否接收群消息通知
 		NotifyMoment        *bool `json:"notifyMoment,optional"` // 是否接收朋友圈通知
 	}
+	UpdateUserSettingsKeyboardItem {
+		Screenshot   *string `json:"screenshot,optional"` // 区域截图
+		ToggleWindow *string `json:"toggleWindow,optional"` // 显示/隐藏主窗口
+		SendMessage  *string `json:"sendMessage,optional"` // 发送消息
+	}
 	UpdateUserSettingsReq {
 		UserID       string                              `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Privacy      *UpdateUserSettingsPrivacyItem      `json:"privacy,optional"` // 隐私设置（可选，局部更新）
 		Notification *UpdateUserSettingsNotificationItem `json:"notification,optional"` // 通知策略（可选，局部更新）
+		Keyboard     *UpdateUserSettingsKeyboardItem     `json:"keyboard,optional"` // 快捷键（可选，局部更新）
 	}
 	UpdateUserSettingsRes  {}
 )
@@ -129,11 +141,11 @@ service user {
 	@handler userSync
 	post /api/user/v1/sync (UserSyncReq) returns (UserSyncRes)
 
-	@doc "获取用户设置（隐私与通知策略）"
+	@doc "获取用户设置（隐私、通知策略、快捷键）"
 	@handler getUserSettings
 	get /api/user/v1/settings (GetUserSettingsReq) returns (GetUserSettingsRes)
 
-	@doc "更新用户设置（隐私与通知策略，支持局部更新）"
+	@doc "更新用户设置（隐私、通知策略、快捷键，支持局部更新）"
 	@handler updateUserSettings
 	post /api/user/v1/update_settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes)
 }

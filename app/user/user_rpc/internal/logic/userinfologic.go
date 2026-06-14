@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
@@ -35,5 +36,18 @@ func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRe
 		return nil, errors.New("用户不存在")
 	}
 
-	return &user_rpc.UserInfoRes{UserInfo: toUserInfo(user)}, nil
+	return &user_rpc.UserInfoRes{UserInfo: &user_rpc.UserInfo{
+		UserId:    user.UserID,
+		NickName:  user.NickName,
+		Avatar:    user.Avatar,
+		Version:   user.Version,
+		Email:     user.Email,
+		Abstract:  user.Abstract,
+		Phone:     user.Phone,
+		Status:    int32(user.Status),
+		Source:    user.Source,
+		UserType:  int32(user.UserType),
+		CreatedAt: time.Time(user.CreatedAt).Format(time.RFC3339),
+		UpdatedAt: time.Time(user.UpdatedAt).Format(time.RFC3339),
+	}}, nil
 }
