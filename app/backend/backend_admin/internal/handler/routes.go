@@ -519,15 +519,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 用户登录设备详情
+				Method:  http.MethodGet,
+				Path:    "/admin/monitor/v1/devices",
+				Handler: monitor.GetUserOnlineDevicesHandler(serverCtx),
+			},
+			{
 				// 在线用户列表
 				Method:  http.MethodGet,
-				Path:    "/admin/monitor/online/list",
+				Path:    "/admin/monitor/v1/list",
 				Handler: monitor.GetOnlineUserListHandler(serverCtx),
 			},
 			{
 				// 在线用户统计
 				Method:  http.MethodGet,
-				Path:    "/admin/monitor/online/stats",
+				Path:    "/admin/monitor/v1/stats",
 				Handler: monitor.GetOnlineStatsHandler(serverCtx),
 			},
 		},

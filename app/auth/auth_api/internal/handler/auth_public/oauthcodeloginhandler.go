@@ -10,10 +10,14 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func OAuthCodeLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func OauthCodeLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.OAuthCodeLoginReq
 		if err := httpx.Parse(r, &req); err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
+		if err := validateLoginDevice(r, req.DeviceID); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}

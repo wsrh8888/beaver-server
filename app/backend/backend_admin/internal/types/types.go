@@ -1421,11 +1421,12 @@ type GetUserDetailReq struct {
 type GetUserDetailRes struct {
 	Id          string `json:"id"`
 	NickName    string `json:"nickName"`
-	FileName    string `json:"fileName"`
+	Avatar      string `json:"avatar"`
 	Email       string `json:"email"`
 	Abstract    string `json:"abstract"`
 	Status      int    `json:"status"`
 	Source      int    `json:"source"`
+	UserType    int    `json:"userType"`
 	LastLoginIP string `json:"lastLoginIp"`
 	CreateTime  string `json:"createTime"`
 	UpdateTime  string `json:"updateTime"`
@@ -1438,11 +1439,20 @@ type GetUserListReq struct {
 	Keyword  string `form:"keyword,optional"` // 昵称/邮箱/手机号模糊搜索
 	Status   int    `form:"status,optional"`
 	Source   int    `form:"source,optional"`
+	UserType int    `form:"userType,optional"` // 用户类型：1普通 2bot 3robot，0全部
 }
 
 type GetUserListRes struct {
 	List  []UserInfo `json:"list"`
 	Total int64      `json:"total"`
+}
+
+type GetUserOnlineDevicesReq struct {
+	UserID string `form:"userId"` // string 用户 ID
+}
+
+type GetUserOnlineDevicesRes struct {
+	List []UserOnlineDeviceItem `json:"list"`
 }
 
 type GetUserOperationsProfileReq struct {
@@ -1943,7 +1953,7 @@ type UpdateUserReq struct {
 	UserID   string  `path:"id"`
 	NickName *string `json:"nickName,optional"`
 	Email    *string `json:"email,optional"`
-	FileName *string `json:"fileName,optional"`
+	Avatar   *string `json:"avatar,optional"`
 	Abstract *string `json:"abstract,optional"`
 	Status   *int    `json:"status,optional"`
 }
@@ -1971,12 +1981,25 @@ type UserInfo struct {
 	NickName    string `json:"nickName"`
 	Email       string `json:"email"`
 	Abstract    string `json:"abstract"`
-	FileName    string `json:"fileName"`
+	Avatar      string `json:"avatar"`
 	Status      int    `json:"status"`
 	Source      int    `json:"source"`
+	UserType    int    `json:"userType"`
 	LastLoginIP string `json:"lastLoginIp"`
 	CreateTime  string `json:"createTime"`
 	UpdateTime  string `json:"updateTime"`
+}
+
+type UserOnlineDeviceItem struct {
+	DeviceID        string `json:"deviceId"`        // string 设备 ID
+	DeviceType      string `json:"deviceType"`      // string desktop | mobile
+	DeviceName      string `json:"deviceName"`      // string 设备名称
+	DeviceOs        string `json:"deviceOs"`        // string 系统
+	DeviceModel     string `json:"deviceModel"`     // string 设备型号
+	DeviceOsVersion string `json:"deviceOsVersion"` // string 系统版本
+	LastLoginTime   string `json:"lastLoginTime"`   // string 最近登录时间
+	LastLoginIp     string `json:"lastLoginIp"`     // string 最近登录 IP
+	IsOnline        bool   `json:"isOnline"`        // bool 当前是否在线
 }
 
 type UserOpsBlockItem struct {

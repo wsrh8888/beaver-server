@@ -1,7 +1,7 @@
 # 🦫 Beaver IM - Enterprise-Grade Instant Messaging Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](VERSION)
 [![Go](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/)
 [![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.6.0+-green.svg)](https://github.com/zeromicro/go-zero)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
@@ -10,7 +10,7 @@
 
 > 🚀 **Enterprise-Grade Instant Messaging Platform** - Built with Go-Zero microservices, supporting mobile (Flutter), desktop (Electron), and web clients with real-time communication capabilities.
 
-**Current Version: [2.0.0](VERSION)** (see [`VERSION`](VERSION) at repository root)
+**Current Version: [2.0.1](VERSION)** (see [`VERSION`](VERSION) at repository root)
 
 [English](README_EN.md) | [中文](README.md)
 

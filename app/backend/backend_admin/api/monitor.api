@@ -33,15 +33,39 @@ type (
 	}
 )
 
+type (
+	GetUserOnlineDevicesReq {
+		UserID string `form:"userId"` // string 用户 ID
+	}
+	UserOnlineDeviceItem {
+		DeviceID        string `json:"deviceId"` // string 设备 ID
+		DeviceType      string `json:"deviceType"` // string desktop | mobile
+		DeviceName      string `json:"deviceName"` // string 设备名称
+		DeviceOs        string `json:"deviceOs"` // string 系统
+		DeviceModel     string `json:"deviceModel"` // string 设备型号
+		DeviceOsVersion string `json:"deviceOsVersion"` // string 系统版本
+		LastLoginTime   string `json:"lastLoginTime"` // string 最近登录时间
+		LastLoginIp     string `json:"lastLoginIp"` // string 最近登录 IP
+		IsOnline        bool   `json:"isOnline"` // bool 当前是否在线
+	}
+	GetUserOnlineDevicesRes {
+		List []UserOnlineDeviceItem `json:"list"`
+	}
+)
+
 @server (
 	group: monitor
 )
 service backend {
 	@doc "在线用户统计"
 	@handler getOnlineStats
-	get /admin/monitor/online/stats (GetOnlineStatsReq) returns (GetOnlineStatsRes)
+	get /admin/monitor/v1/stats (GetOnlineStatsReq) returns (GetOnlineStatsRes)
 
 	@doc "在线用户列表"
 	@handler getOnlineUserList
-	get /admin/monitor/online/list (GetOnlineUserListReq) returns (GetOnlineUserListRes)
+	get /admin/monitor/v1/list (GetOnlineUserListReq) returns (GetOnlineUserListRes)
+
+	@doc "用户登录设备详情"
+	@handler getUserOnlineDevices
+	get /admin/monitor/v1/devices (GetUserOnlineDevicesReq) returns (GetUserOnlineDevicesRes)
 }

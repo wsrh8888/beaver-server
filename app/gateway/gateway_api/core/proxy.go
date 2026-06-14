@@ -214,9 +214,11 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	originalDirector := reverseProxy.Director
 	reverseProxy.Director = func(req *http.Request) {
 		originalDirector(req)
-		// 确保 User-Agent 被保留
 		if userAgent := req.Header.Get("User-Agent"); userAgent != "" {
 			req.Header.Set("User-Agent", userAgent)
+		}
+		if clientIP := getClientIP(req); clientIP != "" {
+			req.Header.Set("ClientIp", clientIP)
 		}
 	}
 

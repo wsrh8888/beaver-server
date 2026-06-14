@@ -17,6 +17,10 @@ func EmailLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, err)
 			return
 		}
+		if err := validateLoginDevice(r, req.DeviceID); err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
 
 		l := logic.NewEmailLoginLogic(r.Context(), svcCtx)
 		resp, err := l.EmailLogin(&req)

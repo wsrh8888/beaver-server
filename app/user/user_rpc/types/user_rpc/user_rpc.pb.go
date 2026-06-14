@@ -379,6 +379,7 @@ type ListUsersReq struct {
 	Source        int32                  `protobuf:"varint,5,opt,name=source,proto3" json:"source,omitempty"`                     // int32 来源筛选，0 表示全部
 	UserId        string                 `protobuf:"bytes,6,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`        // string 用户 ID 精确查，可选
 	Keyword       string                 `protobuf:"bytes,7,opt,name=keyword,proto3" json:"keyword,omitempty"`                    // string 昵称/邮箱/手机号模糊搜索，可选
+	UserType      int32                  `protobuf:"varint,8,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // int32 用户类型筛选，0 表示全部
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -460,6 +461,13 @@ func (x *ListUsersReq) GetKeyword() string {
 		return x.Keyword
 	}
 	return ""
+}
+
+func (x *ListUsersReq) GetUserType() int32 {
+	if x != nil {
+		return x.UserType
+	}
+	return 0
 }
 
 type ListUsersRes struct {
@@ -1291,7 +1299,7 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"\xb8\x01\n" +
+	"updated_at\x18\f \x01(\tR\tupdatedAt\"\xd5\x01\n" +
 	"\fListUsersReq\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x14\n" +
@@ -1299,7 +1307,8 @@ const file_user_rpc_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\x12\x16\n" +
 	"\x06source\x18\x05 \x01(\x05R\x06source\x12\x17\n" +
 	"\auser_id\x18\x06 \x01(\tR\x06userId\x12\x18\n" +
-	"\akeyword\x18\a \x01(\tR\akeyword\"L\n" +
+	"\akeyword\x18\a \x01(\tR\akeyword\x12\x1b\n" +
+	"\tuser_type\x18\b \x01(\x05R\buserType\"L\n" +
 	"\fListUsersRes\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x03R\x05total\x12&\n" +
 	"\x04list\x18\x02 \x03(\v2\x12.user_rpc.UserInfoR\x04list\"\x9a\x02\n" +

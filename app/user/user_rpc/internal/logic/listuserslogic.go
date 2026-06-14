@@ -57,6 +57,9 @@ func (l *ListUsersLogic) ListUsers(in *user_rpc.ListUsersReq) (*user_rpc.ListUse
 	if in.Source > 0 {
 		db = db.Where("source = ?", in.Source)
 	}
+	if in.UserType > 0 {
+		db = db.Where("user_type = ?", in.UserType)
+	}
 	if in.Email != "" {
 		db = db.Where("email LIKE ?", "%"+in.Email+"%")
 	}

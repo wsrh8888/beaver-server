@@ -59,17 +59,9 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 	}
 	user := infoRes.UserInfo
 
-	preciseType, _ := l.ctx.Value(ua.KeyDeviceType).(string)
-	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
-	if preciseType == "" {
-		preciseType = "desktop"
-		if uaStr := l.ctx.Value("user-agent"); uaStr != nil {
-			preciseType = device.GetDeviceType(uaStr.(string))
-		}
-	}
-	if deviceGroup == "" {
-		deviceGroup = device.GetDeviceGroup(preciseType)
-	}
+	profile := ua.Profile(l.ctx)
+	preciseType := ua.DeviceType(l.ctx)
+	deviceGroup := ua.DeviceGroup(l.ctx)
 
 	jwtExpireHours := QrcodeTokenExpireHours
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
@@ -99,7 +91,7 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 		_ = l.svcCtx.DB.Save(&credential).Error
 	}
 
-	_ = device.UpsertOnLogin(l.svcCtx.DB, user.UserId, req.DeviceID, ctxUAProfile(l.ctx), ctxClientIP(l.ctx))
+	_ = device.UpsertOnLogin(l.svcCtx.DB, user.UserId, req.DeviceID, profile, req.ClientIP)
 
 	l.svcCtx.Redis.Del(key)
 	return &types.QrcodeStatusRes{

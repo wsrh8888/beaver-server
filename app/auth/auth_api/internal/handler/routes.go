@@ -27,12 +27,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: auth.KickDeviceHandler(serverCtx),
 			},
 			{
-				// 修改密码（需验证旧密码）
-				Method:  http.MethodPost,
-				Path:    "/api/auth/auth/v1/update_password",
-				Handler: auth.UpdatePasswordHandler(serverCtx),
-			},
-			{
 				// 用户登出
 				Method:  http.MethodPost,
 				Path:    "/api/auth/auth/v1/logout",
@@ -43,6 +37,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/auth/auth/v1/qrcode/scan",
 				Handler: auth.QrcodeScanHandler(serverCtx),
+			},
+			{
+				// 修改密码（需验证旧密码）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth/v1/update_password",
+				Handler: auth.UpdatePasswordHandler(serverCtx),
 			},
 		},
 	)
@@ -68,12 +68,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: auth_public.EmailPasswordLoginHandler(serverCtx),
 			},
 			{
-				// OAuth 授权码登录（PC 客户端 SDK）
-				Method:  http.MethodPost,
-				Path:    "/api/auth/auth_public/v1/oauth_code_login",
-				Handler: auth_public.OAuthCodeLoginHandler(serverCtx),
-			},
-			{
 				// 邮箱注册
 				Method:  http.MethodPost,
 				Path:    "/api/auth/auth_public/v1/email_register",
@@ -84,6 +78,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/auth/auth_public/v1/emailcode",
 				Handler: auth_public.GetEmailCodeHandler(serverCtx),
+			},
+			{
+				// OAuth 授权码登录（PC 客户端 SDK）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/oauth_code_login",
+				Handler: auth_public.OauthCodeLoginHandler(serverCtx),
 			},
 			{
 				// 手机号登录
