@@ -62,14 +62,9 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	}
 	authlock.ClearFailures(l.svcCtx.Redis, failKey, lockKey)
 
-	preciseType, _ := l.ctx.Value(ua.KeyDeviceType).(string)
-	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
-	if preciseType == "" || preciseType == device.DeviceUnknown {
-		return nil, errors.New("不支持的设备类型")
-	}
-	if req.DeviceID == "" {
-		return nil, errors.New("无法识别的物理设备，请联系管理员")
-	}
+	profile := ua.Profile(l.ctx)
+	preciseType := ua.DeviceType(l.ctx)
+	deviceGroup := ua.DeviceGroup(l.ctx)
 
 	key := fmt.Sprintf("user_authentication_session:%s:%s", userInfo.UserId, deviceGroup)
 	token, err := jwts.GenToken(jwts.JwtPayLoad{
@@ -94,7 +89,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 	credential.LoginCount++
 	_ = l.svcCtx.DB.Save(&credential).Error
 
-	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, ctxUAProfile(l.ctx), ctxClientIP(l.ctx))
+	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, profile, req.ClientIP)
 
 	l.logger.Info(model.LogMsg{
 		Text: "邮箱密码登录成功",

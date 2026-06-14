@@ -31,6 +31,7 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 		Keyword:  req.Keyword,
 		Status:   int32(req.Status),
 		Source:   int32(req.Source),
+		UserType: int32(req.UserType),
 	})
 	if err != nil {
 		l.Errorf("获取用户列表失败: %v", err)
@@ -41,7 +42,7 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 	for _, u := range rpcRes.List {
 		list = append(list, types.UserInfo{
 			Id: u.UserId, NickName: u.NickName, Email: u.Email, Abstract: u.Abstract,
-			FileName: u.Avatar, Status: int(u.Status), Source: int(u.Source),
+			Avatar: u.Avatar, Status: int(u.Status), Source: int(u.Source), UserType: int(u.UserType),
 			CreateTime: u.CreatedAt, UpdateTime: u.UpdatedAt,
 		})
 	}

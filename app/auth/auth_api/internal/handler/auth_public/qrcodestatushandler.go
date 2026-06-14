@@ -17,6 +17,10 @@ func QrcodeStatusHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, err)
 			return
 		}
+		if err := validateLoginDevice(r, req.DeviceID); err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
 
 		l := logic.NewQrcodeStatusLogic(r.Context(), svcCtx)
 		resp, err := l.QrcodeStatus(&req)

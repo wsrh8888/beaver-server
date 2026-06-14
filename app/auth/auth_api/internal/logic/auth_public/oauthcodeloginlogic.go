@@ -42,14 +42,9 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 		return nil, errors.New("授权码不能为空")
 	}
 
-	preciseType, _ := l.ctx.Value(ua.KeyDeviceType).(string)
-	deviceGroup, _ := l.ctx.Value(ua.KeyDeviceGroup).(string)
-	if preciseType == "" || preciseType == device.DeviceUnknown {
-		return nil, errors.New("不支持的设备类型")
-	}
-	if req.DeviceID == "" {
-		return nil, errors.New("无法识别的物理设备，请联系管理员")
-	}
+	profile := ua.Profile(l.ctx)
+	preciseType := ua.DeviceType(l.ctx)
+	deviceGroup := ua.DeviceGroup(l.ctx)
 
 	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
 		AppId: req.AppID,
@@ -89,7 +84,7 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 		return nil, errors.New("服务内部异常")
 	}
 
-	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, ctxUAProfile(l.ctx), ctxClientIP(l.ctx))
+	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, profile, req.ClientIP)
 
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth 授权码登录成功",

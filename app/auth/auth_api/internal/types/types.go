@@ -26,6 +26,7 @@ type EmailLoginReq struct {
 	Email    string `json:"email"`
 	Code     string `json:"code"`
 	DeviceID string `header:"deviceId"`
+	ClientIP string `header:"clientIp,optional"`
 }
 
 type EmailLoginRes struct {
@@ -37,20 +38,10 @@ type EmailPasswordLoginReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	DeviceID string `header:"deviceId"`
+	ClientIP string `header:"clientIp,optional"`
 }
 
 type EmailPasswordLoginRes struct {
-	Token  string `json:"token"`
-	UserID string `json:"userId"`
-}
-
-type OAuthCodeLoginReq struct {
-	AppID    string `json:"appId"`
-	Code     string `json:"code"`
-	DeviceID string `header:"deviceId"`
-}
-
-type OAuthCodeLoginRes struct {
 	Token  string `json:"token"`
 	UserID string `json:"userId"`
 }
@@ -104,10 +95,23 @@ type LogoutReq struct {
 type LogoutRes struct {
 }
 
+type OAuthCodeLoginReq struct {
+	AppID    string `json:"appId"`
+	Code     string `json:"code"`
+	DeviceID string `header:"deviceId"`
+	ClientIP string `header:"clientIp,optional"`
+}
+
+type OAuthCodeLoginRes struct {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
 type PhoneLoginReq struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 	DeviceID string `header:"deviceId"`
+	ClientIP string `header:"clientIp,optional"`
 }
 
 type PhoneLoginRes struct {
@@ -126,6 +130,7 @@ type PhoneRegisterRes struct {
 
 type QrcodeGenerateReq struct {
 	DeviceID string `header:"deviceId"`
+	ClientIP string `header:"clientIp,optional"`
 	Source   string `json:"source,optional"`
 }
 
@@ -145,6 +150,7 @@ type QrcodeScanRes struct {
 type QrcodeStatusReq struct {
 	Token    string `form:"token"`
 	DeviceID string `header:"deviceId"`
+	ClientIP string `header:"clientIp,optional"`
 }
 
 type QrcodeStatusRes struct {

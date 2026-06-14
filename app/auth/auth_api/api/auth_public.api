@@ -7,6 +7,7 @@ type (
 		Phone    string `json:"phone"`
 		Password string `json:"password"`
 		DeviceID string `header:"deviceId"`
+		ClientIP string `header:"clientIp,optional"`
 	}
 	PhoneLoginRes {
 		Token  string `json:"token"`
@@ -19,6 +20,7 @@ type (
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		DeviceID string `header:"deviceId"`
+		ClientIP string `header:"clientIp,optional"`
 	}
 	EmailPasswordLoginRes {
 		Token  string `json:"token"`
@@ -31,6 +33,7 @@ type (
 		AppID    string `json:"appId"`
 		Code     string `json:"code"`
 		DeviceID string `header:"deviceId"`
+		ClientIP string `header:"clientIp,optional"`
 	}
 	OAuthCodeLoginRes {
 		Token  string `json:"token"`
@@ -87,6 +90,7 @@ type (
 		Email    string `json:"email"`
 		Code     string `json:"code"`
 		DeviceID string `header:"deviceId"`
+		ClientIP string `header:"clientIp,optional"`
 	}
 	EmailLoginRes {
 		Token  string `json:"token"`
@@ -106,6 +110,7 @@ type (
 type (
 	QrcodeGenerateReq {
 		DeviceID string `header:"deviceId"`
+		ClientIP string `header:"clientIp,optional"`
 		Source   string `json:"source,optional"`
 	}
 	QrcodeGenerateRes {
@@ -118,6 +123,7 @@ type (
 	QrcodeStatusReq {
 		Token    string `form:"token"`
 		DeviceID string `header:"deviceId"`
+		ClientIP string `header:"clientIp,optional"`
 	}
 	QrcodeStatusRes {
 		Status string `json:"status"`

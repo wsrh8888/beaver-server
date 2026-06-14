@@ -38,14 +38,14 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.Upda
 	if req.Email != nil {
 		rpcReq.PatchEmail = req.Email
 	}
-	if req.FileName != nil {
-		rpcReq.PatchAvatar = req.FileName
+	if req.Avatar != nil {
+		rpcReq.PatchAvatar = req.Avatar
 	}
 	if req.Abstract != nil {
 		rpcReq.PatchAbstract = req.Abstract
 	}
 
-	hasPatch := req.NickName != nil || req.Email != nil || req.FileName != nil || req.Abstract != nil
+	hasPatch := req.NickName != nil || req.Email != nil || req.Avatar != nil || req.Abstract != nil
 	if hasPatch {
 		_, err = l.svcCtx.UserRpc.UpdateUsers(l.ctx, rpcReq)
 		if err != nil {

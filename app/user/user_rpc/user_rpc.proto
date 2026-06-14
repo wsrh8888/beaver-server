@@ -50,6 +50,7 @@ message ListUsersReq {
   int32 source = 5; // int32 来源筛选，0 表示全部
   string user_id = 6; // string 用户 ID 精确查，可选
   string keyword = 7; // string 昵称/邮箱/手机号模糊搜索，可选
+  int32 user_type = 8; // int32 用户类型筛选，0 表示全部
 }
 
 message ListUsersRes {

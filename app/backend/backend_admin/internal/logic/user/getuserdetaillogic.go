@@ -40,8 +40,8 @@ func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *t
 
 	u := rpcRes.List[0]
 	return &types.GetUserDetailRes{
-		Id: u.UserId, NickName: u.NickName, FileName: u.Avatar, Email: u.Email,
-		Abstract: u.Abstract, Status: int(u.Status), Source: int(u.Source),
+		Id: u.UserId, NickName: u.NickName, Avatar: u.Avatar, Email: u.Email,
+		Abstract: u.Abstract, Status: int(u.Status), Source: int(u.Source), UserType: int(u.UserType),
 		CreateTime: u.CreatedAt, UpdateTime: u.UpdatedAt,
 	}, nil
 }

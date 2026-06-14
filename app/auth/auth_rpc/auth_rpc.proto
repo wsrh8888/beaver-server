@@ -85,6 +85,27 @@ message CheckDeviceActiveRes {
   bool active = 1;
 }
 
+// 查询用户登录设备列表（auth 库）
+message ListUserDevicesReq {
+  string user_id = 1; // 用户ID
+}
+
+message UserDeviceItem {
+  string device_id = 1; // 设备ID
+  string device_type = 2; // 槽位 desktop / mobile
+  string device_os = 3; // 系统
+  string device_model = 4; // 设备型号
+  string device_os_version = 5; // 系统版本
+  string device_name = 6; // 设备名称
+  string last_login_time = 7; // 最近登录时间
+  string last_login_ip = 8; // 最近登录 IP
+  bool is_online = 9; // 当前是否在线
+}
+
+message ListUserDevicesRes {
+  repeated UserDeviceItem list = 1; // 设备列表
+}
+
 service auth {
   rpc CreateCredential(CreateCredentialReq) returns(CreateCredentialRes);
   rpc VerifyPassword(VerifyPasswordReq) returns(VerifyPasswordRes);
@@ -94,6 +115,7 @@ service auth {
   rpc ResetPassword(ResetPasswordReq) returns(ResetPasswordRes);
   rpc UpsertDevice(UpsertDeviceReq) returns(UpsertDeviceRes);
   rpc CheckDeviceActive(CheckDeviceActiveReq) returns(CheckDeviceActiveRes);
+  rpc ListUserDevices(ListUserDevicesReq) returns(ListUserDevicesRes);
 }
 
 // goctl rpc protoc auth_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template
