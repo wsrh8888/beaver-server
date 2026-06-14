@@ -141,6 +141,36 @@ type (
 	BatchDeleteFriendVerifyRes {}
 )
 
+// 获取好友黑名单列表
+type (
+	GetFriendBlockListReq {
+		Page          int    `form:"page,default=1"`
+		PageSize      int    `form:"pageSize,default=10"`
+		UserID        string `form:"userId,optional"`
+		BlockedUserID string `form:"blockedUserId,optional"`
+	}
+	GetFriendBlockListRes {
+		List  []GetFriendBlockListItem `json:"list"`
+		Total int64                    `json:"total"`
+	}
+	GetFriendBlockListItem {
+		Id              string `json:"id"`
+		UserID          string `json:"userId"`
+		UserName        string `json:"userName"`
+		BlockedUserID   string `json:"blockedUserId"`
+		BlockedUserName string `json:"blockedUserName"`
+		CreateTime      string `json:"createTime"`
+	}
+)
+
+// 解除黑名单（批量）
+type (
+	UnblockFriendUsersReq {
+		Ids []string `json:"ids"`
+	}
+	UnblockFriendUsersRes {}
+)
+
 @server (
 	group: friend
 )
@@ -180,4 +210,12 @@ service backend {
 	@doc "批量删除好友验证记录"
 	@handler batchDeleteFriendVerify
 	delete /admin/friend/verifybatch (BatchDeleteFriendVerifyReq) returns (BatchDeleteFriendVerifyRes)
+
+	@doc "获取好友黑名单列表"
+	@handler getFriendBlockList
+	get /admin/friend/blocklist (GetFriendBlockListReq) returns (GetFriendBlockListRes)
+
+	@doc "解除黑名单"
+	@handler unblockFriendUsers
+	delete /admin/friend/blockbatch (UnblockFriendUsersReq) returns (UnblockFriendUsersRes)
 }

@@ -30,7 +30,7 @@ func NewRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Refr
 
 func (l *RefreshTokenLogic) RefreshToken(in *open_rpc.RefreshTokenReq) (*open_rpc.RefreshTokenRes, error) {
 	// 1. 查询 Refresh Token
-	var token open_models.OpenAccessToken
+	var token open_models.OpenOAuthToken
 	if err := l.svcCtx.DB.Where("refresh_token = ? AND app_id = ?", in.RefreshToken, in.AppId).First(&token).Error; err != nil {
 		return nil, errors.New("无效的刷新令牌")
 	}

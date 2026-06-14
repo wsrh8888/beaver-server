@@ -1,21 +1,26 @@
 Name: backend
 Host: 0.0.0.0
 Port: 40000
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
 Timeout: 600000 # 10分钟超时，单位毫秒，文件上传需要更长的处理时间
 Auth:
   AccessSecret: robert
   AccessExpire: 3600
 Etcd: 127.0.0.1:2379
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_backend?charset=utf8mb4&parseTime=True&loc=Local
 Etcd: 127.0.0.1:2379
 Redis:
   Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
 WhiteList:
-  - /admin/auth/login
-  - /admin/auth/authentication
+  - /admin/auth_public/v1/login
+  - /admin/auth_public/v1/authentication
 BlackList: []
 File:
   WhiteList:
@@ -28,6 +33,7 @@ File:
     - mp3
     - pdf
     - exe
+    - apk
   BlackList:
     - sh
     - bat
@@ -39,7 +45,9 @@ File:
     document: 2
     unknown: 10
     exe: 1024
+    apk: 512
 MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
+Domain: "http://192.168.3.4:20800" # 对外访问域名，用于生成本地文件完整 URL（与 file_api 网关一致）
 # 本地存储配置
 Local:
   UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
@@ -57,13 +65,48 @@ UserRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+AuthRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: authrpc.rpc
 FileRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: filerpc.rpc
-DictionaryRpc:
+PlatformRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: dictionaryrpc.rpc
+    Key: platformrpc.rpc
+OpenRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: openrpc.rpc
+FriendRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: friendrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: grouprpc.rpc
+ChatRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: chatrpc.rpc
+MomentRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: momentrpc.rpc
+EmojiRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: emojirpc.rpc

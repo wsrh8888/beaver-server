@@ -6,7 +6,7 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -47,30 +47,24 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 		userIDs = append(userIDs, member.UserID)
 	}
 
-	// 3. 批量查询用户信息
-	var users []user_models.UserModel
-	err = l.svcCtx.DB.Where("user_id IN (?)", userIDs).Find(&users).Error
+	// 3. 通过 UserRpc 批量查询用户信息
+	userResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+		UserIdList: userIDs,
+	})
 	if err != nil {
 		logx.Error("查询用户信息失败:", err)
 		return nil, err
 	}
 
-	// 4. 构建用户信息映射
-	userMap := make(map[string]user_models.UserModel)
-	for _, user := range users {
-		userMap[user.UserID] = user
-	}
-
-	// 5. 构建返回结果
+	// 4. 构建返回结果
 	var members []*group_rpc.GroupMemberInfo
 	for _, member := range groupMembers {
-		if user, ok := userMap[member.UserID]; ok {
-			memberInfo := &group_rpc.GroupMemberInfo{
-				UserID:   user.UserID,
+		if user, ok := userResp.UserInfo[member.UserID]; ok && user != nil {
+			members = append(members, &group_rpc.GroupMemberInfo{
+				UserID:   user.UserId,
 				Username: user.NickName,
 				Avatar:   user.Avatar,
-			}
-			members = append(members, memberInfo)
+			})
 		}
 	}
 

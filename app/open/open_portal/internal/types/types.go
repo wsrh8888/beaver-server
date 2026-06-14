@@ -8,19 +8,11 @@ type AppInfo struct {
 	Icon          string `json:"icon,optional"` // 应用图标 URL
 	AppSecret     string `json:"appSecret"`     // 应用密钥（掩码形式）
 	Status        int    `json:"status"`        // 0=草稿，1=已发布，2=禁用
-	EnableBot     int    `json:"enableBot"`     // 是否启用机器人能力
+	EnableRobot   int    `json:"enableRobot"`   // 是否启用智能机器人能力
 	EnableOAuth   int    `json:"enableOAuth"`   // 是否启用OAuth能力
 	EnableWebhook int    `json:"enableWebhook"` // 是否启用Webhook能力
 	WebhookURL    string `json:"webhookUrl"`
 	CreatedAt     int64  `json:"createdAt"`
-}
-
-type AppPermissionInfo struct {
-	ID        uint   `json:"id"`
-	Scope     string `json:"scope"`
-	GrantedAt int64  `json:"grantedAt"`
-	GrantedBy string `json:"grantedBy"`
-	ExpiresAt int64  `json:"expiresAt"`
 }
 
 type ApplyDeveloperReq struct {
@@ -46,32 +38,6 @@ type AuditDeveloperRes struct {
 	Success bool `json:"success"`
 }
 
-type BotConfigInfo struct {
-	AppID            string   `json:"appId"`
-	BotName          string   `json:"botName"`
-	BotAvatar        string   `json:"botAvatar"`
-	BotDescription   string   `json:"botDescription"`
-	UsageGuide       string   `json:"usageGuide"` // 使用说明
-	EnableSingleChat bool     `json:"enableSingleChat"`
-	EnableGroupChat  bool     `json:"enableGroupChat"`
-	EnableAtMention  bool     `json:"enableAtMention"`
-	EnableMenu       bool     `json:"enableMenu"` // 是否启用自定义菜单
-	MenuItems        string   `json:"menuItems"`  // JSON 字符串，菜单项配置
-	AutoReplyRules   []string `json:"autoReplyRules"`
-	Commands         []string `json:"commands"`
-	Status           int      `json:"status"`
-}
-
-type ConfigAppPermissionReq struct {
-	AppID     string   `json:"appId"`
-	Scopes    []string `json:"scopes"`             // 权限范围列表
-	ExpiresAt int64    `json:"expiresAt,optional"` // 过期时间
-}
-
-type ConfigAppPermissionRes struct {
-	Success bool `json:"success"`
-}
-
 type CreateAppReq struct {
 	Name        string `json:"name" validate:"required,min=2,max=50"`
 	Description string `json:"description,optional" validate:"max=200"`
@@ -85,28 +51,44 @@ type CreateAppRes struct {
 }
 
 type CreateEventSubscriptionReq struct {
-	AppID      string `json:"appId"`
-	EventType  string `json:"eventType"`           // 事件类型
-	TargetURL  string `json:"targetUrl"`           // 推送目标URL
-	Secret     string `json:"secret,optional"`     // 签名密钥
-	RetryCount int    `json:"retryCount,optional"` // 重试次数
-	Timeout    int    `json:"timeout,optional"`    // 超时时间(秒)
-	UserID     string `header:"Beaver-User-Id"`
+	AppID      string `json:"appId"`               // string 应用 ID
+	EventType  string `json:"eventType"`           // string 事件类型，如 im.message.receive
+	TargetURL  string `json:"targetUrl"`           // string Webhook 推送目标 URL
+	Secret     string `json:"secret,optional"`     // string HMAC 签名密钥，可选
+	RetryCount int    `json:"retryCount,optional"` // int 推送失败重试次数，默认 3
+	Timeout    int    `json:"timeout,optional"`    // int 推送超时秒数，默认 5
+	UserID     string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
 }
 
 type CreateEventSubscriptionRes struct {
-	Subscription EventSubscriptionInfo `json:"subscription"`
+	Subscription CreateEventSubscriptionResSubscription `json:"subscription"` // 创建的订阅信息
+}
+
+type CreateEventSubscriptionResSubscription struct {
+	ID             string `json:"id"`                      // string 订阅 ID
+	AppID          string `json:"appId"`                   // string 应用 ID
+	EventType      string `json:"eventType"`               // string 事件类型
+	TargetURL      string `json:"targetUrl"`               // string Webhook 推送目标 URL
+	Secret         string `json:"secret"`                  // string 签名密钥
+	Status         int    `json:"status"`                  // int 0 未就绪/禁用 1 启用
+	VerifyStatus   int    `json:"verifyStatus"`            // int 0 待验证 1 已通过 2 失败
+	LastError      string `json:"lastError,optional"`      // string 失败原因
+	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间
+	RetryCount     int    `json:"retryCount"`              // int 重试次数
+	Timeout        int    `json:"timeout"`                 // int 超时秒数
+	CreatedAt      int64  `json:"createdAt"`               // int64 创建时间 Unix 秒
+	UpdatedAt      int64  `json:"updatedAt"`               // int64 更新时间 Unix 秒
 }
 
 type CreateIncomingWebhookReq struct {
-	AppID   string `json:"appId"`
-	GroupID string `json:"groupId"`
-	Name    string `json:"name,optional"`
-	UserID  string `header:"Beaver-User-Id"`
+	AppID   string `json:"appId"`            // string 应用 ID
+	GroupID string `json:"groupId"`          // string 目标群组 ID
+	Name    string `json:"name,optional"`    // string 机器人名称，可选
+	UserID  string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 }
 
 type CreateIncomingWebhookRes struct {
-	Webhook IncomingWebhookInfo `json:"webhook"`
+	Webhook IncomingWebhookInfo `json:"webhook"` // 创建的 Webhook
 }
 
 type CreateVersionReq struct {
@@ -130,16 +112,16 @@ type DeleteAppRes struct {
 }
 
 type DeleteEventSubscriptionReq struct {
-	ID     string `json:"id"`
-	UserID string `header:"Beaver-User-Id"`
+	ID     string `json:"id"`               // string 订阅 ID
+	UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 }
 
 type DeleteEventSubscriptionRes struct {
 }
 
 type DeleteIncomingWebhookReq struct {
-	ID     string `json:"id"`
-	UserID string `header:"Beaver-User-Id"`
+	ID     string `json:"id"`               // string 记录 ID
+	UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 }
 
 type DeleteIncomingWebhookRes struct {
@@ -166,19 +148,6 @@ type DeveloperInfo struct {
 	CreatedAt   int64  `json:"createdAt"`
 }
 
-type EventSubscriptionInfo struct {
-	ID         string `json:"id"`
-	AppID      string `json:"appId"`
-	EventType  string `json:"eventType"`
-	TargetURL  string `json:"targetUrl"`
-	Secret     string `json:"secret"`
-	Status     int    `json:"status"` // 0禁用 1启用
-	RetryCount int    `json:"retryCount"`
-	Timeout    int    `json:"timeout"`
-	CreatedAt  int64  `json:"createdAt"`
-	UpdatedAt  int64  `json:"updatedAt"`
-}
-
 type GetAppDetailReq struct {
 	AppID  string `form:"appId"`            // 应用ID
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
@@ -200,14 +169,6 @@ type GetAppListRes struct {
 	List  []AppInfo `json:"list"`
 }
 
-type GetAppPermissionsReq struct {
-	AppID string `form:"appId"`
-}
-
-type GetAppPermissionsRes struct {
-	Permissions []AppPermissionInfo `json:"permissions"`
-}
-
 type GetAppScopesReq struct {
 	AppID  string `form:"appId"`
 	UserID string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
@@ -215,15 +176,6 @@ type GetAppScopesReq struct {
 
 type GetAppScopesRes struct {
 	Scopes []ScopeInfo `json:"scopes"`
-}
-
-type GetBotConfigReq struct {
-	AppID  string `form:"appId"`
-	UserID string `header:"Beaver-User-Id"`
-}
-
-type GetBotConfigRes struct {
-	Config BotConfigInfo `json:"config"`
 }
 
 type GetDeveloperDetailReq struct {
@@ -245,17 +197,50 @@ type GetDeveloperListRes struct {
 	List  []DeveloperInfo `json:"list"`
 }
 
+type GetEventLogsReq struct {
+	AppID          string `form:"appId"`                   // string 应用 ID
+	SubscriptionID uint64 `form:"subscriptionId,optional"` // uint64 订阅 ID 筛选，可选
+	Page           int    `form:"page,default=1"`          // int 页码，从 1 开始
+	PageSize       int    `form:"pageSize,default=20"`     // int 每页条数
+	UserID         string `header:"Beaver-User-Id"`        // string 当前开发者用户 ID
+}
+
+type GetEventLogsRes struct {
+	Total int64                 `json:"total"` // int64 总条数
+	List  []GetEventLogsResItem `json:"list"`  // 日志列表
+}
+
+type GetEventLogsResItem struct {
+	ID           uint64 `json:"id"`                // uint64 日志 ID
+	EventID      string `json:"eventId"`           // string 事件 ID
+	EventType    string `json:"eventType"`         // string 事件类型
+	TargetURL    string `json:"targetUrl"`         // string 推送目标 URL
+	ResponseCode int    `json:"responseCode"`      // int HTTP 响应状态码
+	CostMs       int64  `json:"costMs"`            // int64 推送耗时毫秒
+	RetryCount   int    `json:"retryCount"`        // int 重试次数
+	Status       int    `json:"status"`            // int 状态：0 失败 1 成功
+	ErrorMsg     string `json:"errorMsg,optional"` // string 错误信息，可选
+	CreatedAt    int64  `json:"createdAt"`         // int64 创建时间 Unix 秒
+}
+
 type GetOAuthConfigReq struct {
-	AppID     string `form:"appId"`
-	OAuthType string `form:"oauthType"` // h5 | desktop | mobile
-	UserID    string `header:"Beaver-User-Id"`
+	AppID  string `form:"appId"`
+	UserID string `header:"Beaver-User-Id"`
 }
 
 type GetOAuthConfigRes struct {
-	OAuthType     string                  `json:"oauthType"`
 	H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"`
 	DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"`
 	MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`
+}
+
+type GetRobotConfigReq struct {
+	AppID  string `form:"appId"`            // string 应用 ID
+	UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+}
+
+type GetRobotConfigRes struct {
+	Config RobotConfigInfo `json:"config"` // Robot 配置
 }
 
 type GetSecurityConfigReq struct {
@@ -287,40 +272,58 @@ type H5OAuthConfigInfo struct {
 }
 
 type IncomingWebhookInfo struct {
-	ID         string `json:"id"`
-	Token      string `json:"token"`
-	AppID      string `json:"appId"`
-	GroupID    string `json:"groupId"`
-	BotUserID  string `json:"botUserId"`
-	Name       string `json:"name"`
-	WebhookURL string `json:"webhookUrl"` // 完整的 Webhook URL
-	Status     int    `json:"status"`
-	CreatedAt  int64  `json:"createdAt"`
+	ID         string `json:"id"`              // string 记录 ID
+	Token      string `json:"token"`           // string Webhook access_token
+	Secret     string `json:"secret,optional"` // string 加签密钥，仅创建时返回
+	AppID      string `json:"appId"`           // string 应用 ID
+	GroupID    string `json:"groupId"`         // string 群组 ID
+	BotID      string `json:"botId"`           // string 推送 Bot 的 IM 用户 ID（user_type=2）
+	Name       string `json:"name"`            // string 名称
+	WebhookURL string `json:"webhookUrl"`      // string Webhook 调用地址
+	Status     int    `json:"status"`          // int 状态：0 禁用 1 启用
+	CreatedAt  int64  `json:"createdAt"`       // int64 创建时间 Unix 秒
 }
 
 type ListEventSubscriptionsReq struct {
-	AppID     string `form:"appId"`
-	EventType string `form:"eventType,optional"`
-	Page      int    `form:"page,default=1"`
-	PageSize  int    `form:"pageSize,default=20"`
-	UserID    string `header:"Beaver-User-Id"`
+	AppID     string `form:"appId"`               // string 应用 ID
+	EventType string `form:"eventType,optional"`  // string 事件类型筛选，可选
+	Page      int    `form:"page,default=1"`      // int 页码，从 1 开始
+	PageSize  int    `form:"pageSize,default=20"` // int 每页条数
+	UserID    string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
 }
 
 type ListEventSubscriptionsRes struct {
-	Total int64                   `json:"total"`
-	List  []EventSubscriptionInfo `json:"list"`
+	Total int64                           `json:"total"` // int64 总条数
+	List  []ListEventSubscriptionsResItem `json:"list"`  // 订阅列表
+}
+
+type ListEventSubscriptionsResItem struct {
+	ID             string `json:"id"`                      // string 订阅 ID
+	AppID          string `json:"appId"`                   // string 应用 ID
+	EventType      string `json:"eventType"`               // string 事件类型
+	TargetURL      string `json:"targetUrl"`               // string Webhook 推送目标 URL
+	Secret         string `json:"secret"`                  // string 签名密钥
+	Status         int    `json:"status"`                  // int 0 未就绪/禁用 1 启用
+	VerifyStatus   int    `json:"verifyStatus"`            // int 0 待验证 1 已通过 2 失败
+	LastError      string `json:"lastError,optional"`      // string 失败原因
+	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间
+	RetryCount     int    `json:"retryCount"`              // int 重试次数
+	Timeout        int    `json:"timeout"`                 // int 超时秒数
+	CreatedAt      int64  `json:"createdAt"`               // int64 创建时间 Unix 秒
+	UpdatedAt      int64  `json:"updatedAt"`               // int64 更新时间 Unix 秒
 }
 
 type ListIncomingWebhooksReq struct {
-	AppID    string `form:"appId"`
-	Page     int    `form:"page,default=1"`
-	PageSize int    `form:"pageSize,default=20"`
-	UserID   string `header:"Beaver-User-Id"`
+	AppID    string `form:"appId"`               // string 应用 ID
+	GroupID  string `form:"groupId,optional"`    // string 按群筛选，可选
+	Page     int    `form:"page,default=1"`      // int 页码
+	PageSize int    `form:"pageSize,default=20"` // int 每页条数
+	UserID   string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
 }
 
 type ListIncomingWebhooksRes struct {
-	Total int64                 `json:"total"`
-	List  []IncomingWebhookInfo `json:"list"`
+	Total int64                 `json:"total"` // int64 总条数
+	List  []IncomingWebhookInfo `json:"list"`  // Webhook 列表
 }
 
 type LoginReq struct {
@@ -331,7 +334,7 @@ type LoginReq struct {
 type LoginRes struct {
 	Token    string `json:"token"`
 	UserID   string `json:"userId"`
-	NickName string `json:"nickName"` // 用户昵称
+	NickName string `json:"nickName"`
 	ExpireAt int64  `json:"expireAt"`
 }
 
@@ -342,6 +345,17 @@ type MobileOAuthConfigInfo struct {
 	UniversalLink      string `json:"universalLink"`
 	CustomScheme       string `json:"customScheme"`
 	EnablePKCE         bool   `json:"enablePKCE"`
+}
+
+type OAuthLoginReq struct {
+	Code string `json:"code"`
+}
+
+type OAuthLoginRes struct {
+	Token    string `json:"token"`
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	ExpireAt int64  `json:"expireAt"`
 }
 
 type PublishAppReq struct {
@@ -372,6 +386,28 @@ type ResetAppSecretRes struct {
 	AppSecret string `json:"appSecret"`
 }
 
+type ResetIncomingWebhookSecretReq struct {
+	ID     string `json:"id"`               // string open_bots 记录 ID
+	UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+}
+
+type ResetIncomingWebhookSecretRes struct {
+	Secret string `json:"secret"` // string 新的加签密钥
+}
+
+type RobotConfigInfo struct {
+	AppID            string `json:"appId"`                   // string 应用 ID
+	RobotID          string `json:"robotId"`                 // string Robot 在 IM 中的用户 ID
+	RobotName        string `json:"robotName"`               // string Robot 昵称
+	Avatar           string `json:"avatar,optional"`         // string 头像 URL，可选
+	WelcomeMessage   string `json:"welcomeMessage,optional"` // string 欢迎语，可选
+	CommandPrefix    string `json:"commandPrefix,optional"`  // string 命令前缀，可选
+	EnableSingleChat bool   `json:"enableSingleChat"`        // bool 是否启用单聊
+	EnableGroupChat  bool   `json:"enableGroupChat"`         // bool 是否启用群聊
+	EnableAtMention  bool   `json:"enableAtMention"`         // bool 是否允许 @ 提及
+	Status           int    `json:"status"`                  // int 状态：0 禁用 1 启用
+}
+
 type ScopeInfo struct {
 	Scope       string `json:"scope"`       // 权限标识
 	Name        string `json:"name"`        // 权限名称
@@ -396,9 +432,9 @@ type SubmitVersionReviewRes struct {
 
 type ToggleAppCapabilityReq struct {
 	AppID      string `json:"appId"`
-	Capability string `json:"capability" validate:"required,oneof=bot oauth webhook"` // 能力类型：bot/oauth/webhook
-	Enable     bool   `json:"enable"`                                                 // true=启用，false=禁用
-	UserID     string `header:"Beaver-User-Id"`                                       // 当前用户ID（由网关注入）
+	Capability string `json:"capability" validate:"required,oneof=robot oauth webhook"` // 能力类型：robot/oauth/webhook
+	Enable     bool   `json:"enable"`                                                   // true=启用，false=禁用
+	UserID     string `header:"Beaver-User-Id"`                                         // 当前用户ID（由网关注入）
 }
 
 type ToggleAppCapabilityRes struct {
@@ -426,34 +462,14 @@ type UpdateAppScopesReq struct {
 type UpdateAppScopesRes struct {
 }
 
-type UpdateBotConfigReq struct {
-	AppID            string   `json:"appId"`
-	BotName          string   `json:"botName,optional"`
-	BotAvatar        string   `json:"botAvatar,optional"`
-	BotDescription   string   `json:"botDescription,optional"`
-	UsageGuide       string   `json:"usageGuide,optional"` // 使用说明
-	EnableSingleChat *bool    `json:"enableSingleChat,optional"`
-	EnableGroupChat  *bool    `json:"enableGroupChat,optional"`
-	EnableAtMention  *bool    `json:"enableAtMention,optional"`
-	EnableMenu       *bool    `json:"enableMenu,optional"` // 是否启用自定义菜单
-	MenuItems        string   `json:"menuItems,optional"`  // JSON 字符串，菜单项配置
-	AutoReplyRules   []string `json:"autoReplyRules,optional"`
-	Commands         []string `json:"commands,optional"`
-	Status           *int     `json:"status,optional"`
-	UserID           string   `header:"Beaver-User-Id"`
-}
-
-type UpdateBotConfigRes struct {
-}
-
 type UpdateEventSubscriptionReq struct {
-	ID         string `json:"id"`
-	TargetURL  string `json:"targetUrl,optional"`
-	Secret     string `json:"secret,optional"`
-	Status     *int   `json:"status,optional"` // 0禁用 1启用
-	RetryCount *int   `json:"retryCount,optional"`
-	Timeout    *int   `json:"timeout,optional"`
-	UserID     string `header:"Beaver-User-Id"`
+	ID         string `json:"id"`                  // string 订阅 ID
+	TargetURL  string `json:"targetUrl,optional"`  // string 新的 Webhook URL，可选
+	Secret     string `json:"secret,optional"`     // string 新的签名密钥，可选
+	Status     *int   `json:"status,optional"`     // int 状态：0 禁用 1 启用，可选
+	RetryCount *int   `json:"retryCount,optional"` // int 重试次数，可选
+	Timeout    *int   `json:"timeout,optional"`    // int 超时秒数，可选
+	UserID     string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
 }
 
 type UpdateEventSubscriptionRes struct {
@@ -467,6 +483,22 @@ type UpdateOAuthConfigReq struct {
 }
 
 type UpdateOAuthConfigRes struct {
+}
+
+type UpdateRobotConfigReq struct {
+	AppID            string `json:"appId"`                     // string 应用 ID
+	RobotName        string `json:"robotName,optional"`        // string Robot 昵称，可选
+	Avatar           string `json:"avatar,optional"`           // string 头像 URL，可选
+	WelcomeMessage   string `json:"welcomeMessage,optional"`   // string 欢迎语，可选
+	CommandPrefix    string `json:"commandPrefix,optional"`    // string 命令前缀，可选
+	EnableSingleChat *bool  `json:"enableSingleChat,optional"` // bool 是否启用单聊，可选
+	EnableGroupChat  *bool  `json:"enableGroupChat,optional"`  // bool 是否启用群聊，可选
+	EnableAtMention  *bool  `json:"enableAtMention,optional"`  // bool 是否允许 @ 提及，可选
+	Status           *int   `json:"status,optional"`           // int 状态，可选
+	UserID           string `header:"Beaver-User-Id"`          // string 当前开发者用户 ID
+}
+
+type UpdateRobotConfigRes struct {
 }
 
 type UpdateSecurityConfigReq struct {

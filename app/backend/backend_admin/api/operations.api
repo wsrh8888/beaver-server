@@ -1,0 +1,175 @@
+syntax = "v1"
+
+// 用户运营 360（跨域编排）
+type (
+	GetUserOperationsProfileReq {
+		UserID string `path:"userId"`
+	}
+	GetUserOperationsProfileRes {
+		Profile        UserOpsProfileInfo     `json:"profile"`
+		FriendTotal    int64                  `json:"friendTotal"`
+		GroupTotal     int64                  `json:"groupTotal"`
+		SessionTotal   int64                  `json:"sessionTotal"`
+		MomentTotal    int64                  `json:"momentTotal"`
+		ReportTotal    int64                  `json:"reportTotal"`
+		BlockTotal     int64                  `json:"blockTotal"`
+		Friends        []UserOpsFriendItem    `json:"friends"`
+		Groups         []UserOpsGroupItem     `json:"groups"`
+		Sessions       []UserOpsSessionItem   `json:"sessions"`
+		Moments        []UserOpsMomentItem    `json:"moments"`
+		Reports        []UserOpsReportItem    `json:"reports"`
+		Blocks         []UserOpsBlockItem     `json:"blocks"`
+	}
+	UserOpsProfileInfo {
+		UserID     string `json:"userId"`
+		NickName   string `json:"nickName"`
+		Email      string `json:"email"`
+		Avatar     string `json:"avatar"`
+		Abstract   string `json:"abstract"`
+		Status     int    `json:"status"`
+		Source     int    `json:"source"`
+		CreateTime string `json:"createTime"`
+	}
+	UserOpsFriendItem {
+		PeerUserID   string `json:"peerUserId"`
+		PeerUserName string `json:"peerUserName"`
+		CreateTime   string `json:"createTime"`
+	}
+	UserOpsGroupItem {
+		GroupID string `json:"groupId"`
+		Title   string `json:"title"`
+		Role    int    `json:"role"`
+		Status  int    `json:"status"`
+	}
+	UserOpsSessionItem {
+		ConversationID   string `json:"conversationId"`
+		ConversationType int    `json:"conversationType"`
+		Title            string `json:"title"`
+		LastMessage      string `json:"lastMessage"`
+		LastMessageTime  string `json:"lastMessageTime"`
+		MessageCount     int64  `json:"messageCount"`
+	}
+	UserOpsMomentItem {
+		MomentID  string `json:"momentId"`
+		Content   string `json:"content"`
+		IsDeleted bool   `json:"isDeleted"`
+		CreatedAt string `json:"createdAt"`
+	}
+	UserOpsReportItem {
+		ID         uint64 `json:"id"`
+		TargetType int    `json:"targetType"`
+		TargetID   string `json:"targetId"`
+		ReasonType int    `json:"reasonType"`
+		Status     int    `json:"status"`
+		CreatedAt  string `json:"createdAt"`
+	}
+	UserOpsBlockItem {
+		ID              string `json:"id"`
+		BlockedUserID   string `json:"blockedUserId"`
+		BlockedUserName string `json:"blockedUserName"`
+		CreateTime      string `json:"createTime"`
+	}
+)
+
+// 运营统一检索
+type (
+	AdminUnifiedSearchReq {
+		Keyword string `form:"keyword"`
+		Limit   int    `form:"limit,default=10"`
+	}
+	AdminUnifiedSearchRes {
+		Users         []SearchUserHit         `json:"users"`
+		Groups        []SearchGroupHit        `json:"groups"`
+		Messages      []SearchMessageHit      `json:"messages"`
+		Conversations []SearchConversationHit `json:"conversations"`
+	}
+	SearchUserHit {
+		UserID   string `json:"userId"`
+		NickName string `json:"nickName"`
+		Email    string `json:"email"`
+		Status   int    `json:"status"`
+	}
+	SearchGroupHit {
+		GroupID string `json:"groupId"`
+		Title   string `json:"title"`
+		Status  int    `json:"status"`
+	}
+	SearchMessageHit {
+		MessageID      string `json:"messageId"`
+		ConversationID string `json:"conversationId"`
+		SendUserID     string `json:"sendUserId"`
+		MsgPreview     string `json:"msgPreview"`
+		CreateTime     string `json:"createTime"`
+	}
+	SearchConversationHit {
+		ConversationID string `json:"conversationId"`
+		Title          string `json:"title"`
+		LastMessage    string `json:"lastMessage"`
+	}
+)
+
+// 群组运营 360（跨域编排）
+type (
+	GetGroupOperationsProfileReq {
+		GroupID string `path:"groupId"`
+	}
+	GetGroupOperationsProfileRes {
+		Profile       GroupOpsProfileInfo    `json:"profile"`
+		MemberTotal   int64                  `json:"memberTotal"`
+		MessageTotal  int64                  `json:"messageTotal"`
+		ReportTotal   int64                  `json:"reportTotal"`
+		Members       []GroupOpsMemberItem   `json:"members"`
+		Messages      []GroupOpsMessageItem  `json:"messages"`
+		Reports       []GroupOpsReportItem   `json:"reports"`
+	}
+	GroupOpsProfileInfo {
+		GroupID   string `json:"groupId"`
+		Title     string `json:"title"`
+		Avatar    string `json:"avatar"`
+		CreatorID string `json:"creatorId"`
+		Notice    string `json:"notice"`
+		Status    int    `json:"status"`
+		MuteAll   bool   `json:"muteAll"`
+		CreatedAt string `json:"createdAt"`
+	}
+	GroupOpsMemberItem {
+		UserID   string `json:"userId"`
+		NickName string `json:"nickName"`
+		Role     int    `json:"role"`
+		Status   int    `json:"status"`
+		JoinTime string `json:"joinTime"`
+	}
+	GroupOpsMessageItem {
+		MessageID  string `json:"messageId"`
+		SendUserID string `json:"sendUserId"`
+		SendName   string `json:"sendName"`
+		MsgPreview string `json:"msgPreview"`
+		IsDeleted  bool   `json:"isDeleted"`
+		CreateTime string `json:"createTime"`
+	}
+	GroupOpsReportItem {
+		ID             uint64 `json:"id"`
+		ReporterUserID string `json:"reporterUserId"`
+		ReporterName   string `json:"reporterName"`
+		ReasonType     int    `json:"reasonType"`
+		Status         int    `json:"status"`
+		CreatedAt      string `json:"createdAt"`
+	}
+)
+
+@server (
+	group: operations
+)
+service backend {
+	@doc "用户运营360"
+	@handler getUserOperationsProfile
+	get /admin/operations/user/:userId/profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
+
+	@doc "运营统一检索"
+	@handler adminUnifiedSearch
+	get /admin/operations/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
+
+	@doc "群组运营360"
+	@handler getGroupOperationsProfile
+	get /admin/operations/group/:groupId/profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
+}

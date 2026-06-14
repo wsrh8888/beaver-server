@@ -10,21 +10,24 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type ForwardMessageLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewForwardMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ForwardMessageLogic {
 	return &ForwardMessageLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("forward_message"),
 		svcCtx: svcCtx,
 	}
 }
@@ -34,7 +37,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 	var originMessages []chat_models.ChatMessage
 	err = l.svcCtx.DB.Where("message_id IN ?", req.MessageIDs).Order("created_at asc").Find(&originMessages).Error
 	if err != nil {
-		l.Logger.Errorf("获取待转发消息失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("获取待转发消息失败: %v", err)
 		return nil, err
 	}
 
@@ -56,7 +59,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 				Msg:            l.convertModelToProtoMsg(m.Msg),
 			})
 			if err != nil {
-				l.Logger.Errorf("逐条转发失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("逐条转发失败: %v", err)
 				// 商业化项目通常会继续处理下一条，或者返回部分成功的提示
 			}
 		}
@@ -70,7 +73,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			Content:  originMessages, // 直接赋值，由 ForwardContent.Value 接口处理序列化
 		}).Error
 		if err != nil {
-			l.Logger.Errorf("创建转发详情失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("创建转发详情失败: %v", err)
 			return nil, err
 		}
 
@@ -94,11 +97,20 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			},
 		})
 		if err != nil {
-			l.Logger.Errorf("发送合并转发卡片失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("发送合并转发卡片失败: %v", err)
 			return nil, err
 		}
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "消息转发成功",
+		Data: map[string]interface{}{
+			"userId":      req.UserID,
+			"targetId":    req.TargetID,
+			"forwardMode": req.ForwardMode,
+			"messageCount": len(originMessages),
+		},
+	})
 	return &types.ForwardMessageRes{
 		ForwardTime: time.Now().Format("2006-01-02 15:04:05"),
 	}, nil
@@ -122,7 +134,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.ImageMsgType:
 		if m.ImageMsg != nil {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
-				FileKey: m.ImageMsg.FileKey,
+				FileUrl: m.ImageMsg.FileUrl,
 				Width:   int32(m.ImageMsg.Width),
 				Height:  int32(m.ImageMsg.Height),
 				Size:    m.ImageMsg.Size,
@@ -131,27 +143,29 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.VideoMsgType:
 		if m.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileKey:      m.VideoMsg.FileKey,
+				FileUrl:       m.VideoMsg.FileUrl,
 				Width:        int32(m.VideoMsg.Width),
 				Height:       int32(m.VideoMsg.Height),
 				Duration:     int32(m.VideoMsg.Duration),
-				ThumbnailKey: m.VideoMsg.ThumbnailKey,
+				ThumbnailUrl: m.VideoMsg.ThumbnailUrl,
 				Size:         m.VideoMsg.Size,
 			}
 		}
 	case ctype.FileMsgType:
 		if m.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:  m.FileMsg.FileKey,
-				FileName: m.FileMsg.FileName,
-				Size:     m.FileMsg.Size,
-				MimeType: m.FileMsg.MimeType,
+				FileUrl:   m.FileMsg.FileUrl,
+				FileName:  m.FileMsg.FileName,
+				Size:      m.FileMsg.Size,
+				MimeType:  m.FileMsg.MimeType,
+				Extension: m.FileMsg.Extension,
+				OpenMode:  int32(m.FileMsg.OpenMode),
 			}
 		}
 	case ctype.VoiceMsgType:
 		if m.VoiceMsg != nil {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
-				FileKey:  m.VoiceMsg.FileKey,
+				FileUrl:  m.VoiceMsg.FileUrl,
 				Duration: int32(m.VoiceMsg.Duration),
 				Size:     m.VoiceMsg.Size,
 			}
@@ -159,7 +173,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.EmojiMsgType:
 		if m.EmojiMsg != nil {
 			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
-				FileKey:   m.EmojiMsg.FileKey,
+				FileUrl:   m.EmojiMsg.FileUrl,
 				EmojiId:   m.EmojiMsg.EmojiID,
 				PackageId: m.EmojiMsg.PackageID,
 				Width:     m.EmojiMsg.Width,
@@ -176,7 +190,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.AudioFileMsgType:
 		if m.AudioFileMsg != nil {
 			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-				FileKey:  m.AudioFileMsg.FileKey,
+				FileUrl:  m.AudioFileMsg.FileUrl,
 				FileName: m.AudioFileMsg.FileName,
 				Duration: int32(m.AudioFileMsg.Duration),
 				Size:     m.AudioFileMsg.Size,
@@ -212,6 +226,34 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 				Title:    m.ForwardMsg.Title,
 				RecordId: m.ForwardMsg.RecordID,
 				Count:    int32(m.ForwardMsg.Count),
+			}
+		}
+	case ctype.MarkdownMsgType:
+		if m.MarkdownMsg != nil {
+			rpcMsg.MarkdownMsg = &chat_rpc.MarkdownMsg{
+				Content: m.MarkdownMsg.Content,
+				Title:   m.MarkdownMsg.Title,
+			}
+		}
+	case ctype.LinkMsgType:
+		if m.LinkMsg != nil {
+			rpcMsg.LinkMsg = &chat_rpc.LinkMsg{
+				Url:      m.LinkMsg.URL,
+				Title:    m.LinkMsg.Title,
+				Desc:     m.LinkMsg.Desc,
+				ImageUrl: m.LinkMsg.ImageURL,
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if m.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId: m.CloudDocMsg.DocID,
+				DocType:  int32(m.CloudDocMsg.DocType),
+				Title:    m.CloudDocMsg.Title,
+				OwnerId:  m.CloudDocMsg.OwnerID,
+				Perm:     int32(m.CloudDocMsg.Perm),
+				CoverUrl: m.CloudDocMsg.CoverURL,
+				Revision: m.CloudDocMsg.Revision,
 			}
 		}
 	}

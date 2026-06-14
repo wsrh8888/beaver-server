@@ -1,0 +1,47 @@
+syntax = "v1"
+
+// WS 在线用户监控（Redis 全局在线态，对标大厂 IM 后台「在线用户 / 连接监控」）
+type (
+	GetOnlineStatsReq {}
+	GetOnlineStatsRes {
+		UserCount    int64 `json:"userCount"` // int64 当前在线用户数
+		DesktopCount int64 `json:"desktopCount"` // int64 PC 端在线用户数
+		MobileCount  int64 `json:"mobileCount"` // int64 移动端在线用户数
+	}
+)
+
+type (
+	GetOnlineUserListReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=20"`
+		Keyword  string `form:"keyword,optional"` // string 昵称/邮箱/用户ID 模糊筛选
+	}
+	OnlineUserSlotItem {
+		InstanceID string `json:"instanceId"` // string WS 实例 ID
+		Slot       string `json:"slot"` // string desktop | mobile
+	}
+	OnlineUserItem {
+		UserID   string               `json:"userId"` // string 用户 ID
+		NickName string               `json:"nickName"` // string 昵称
+		Email    string               `json:"email"` // string 邮箱
+		Avatar   string               `json:"avatar"` // string 头像 fileKey
+		Slots    []OnlineUserSlotItem `json:"slots"` // array 在线槽位
+	}
+	GetOnlineUserListRes {
+		List  []OnlineUserItem `json:"list"`
+		Total int64            `json:"total"`
+	}
+)
+
+@server (
+	group: monitor
+)
+service backend {
+	@doc "在线用户统计"
+	@handler getOnlineStats
+	get /admin/monitor/online/stats (GetOnlineStatsReq) returns (GetOnlineStatsRes)
+
+	@doc "在线用户列表"
+	@handler getOnlineUserList
+	get /admin/monitor/online/list (GetOnlineUserListReq) returns (GetOnlineUserListRes)
+}

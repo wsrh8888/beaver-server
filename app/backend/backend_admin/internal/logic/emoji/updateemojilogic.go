@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type UpdateEmojiLogic struct {
@@ -18,63 +17,30 @@ type UpdateEmojiLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 更新表情图片
 func NewUpdateEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateEmojiLogic {
-	return &UpdateEmojiLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &UpdateEmojiLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// UpdateEmoji 管理后台：更新表情。
+// admin 职责：校验路径参数 emojiId，将可选更新字段组装为 patch 语义（只传有值的字段）。
+// RPC 职责：SaveEmoji 更新分支，处理版本递增与同名冲突等领域规则。
 func (l *UpdateEmojiLogic) UpdateEmoji(req *types.UpdateEmojiReq) (resp *types.UpdateEmojiRes, err error) {
-	// 检查表情是否存在
-	var emoji emoji_models.Emoji
-	err = l.svcCtx.DB.Where("emoji_id = ?", req.EmojiId).First(&emoji).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情不存在: %s", req.EmojiId)
-			return nil, errors.New("表情不存在")
-		}
-		logx.Errorf("查询表情失败: %v", err)
-		return nil, errors.New("查询表情失败")
+	if req.EmojiId == "" {
+		return nil, errors.New("表情ID不能为空")
 	}
 
-	// 构建更新数据
-	updateData := make(map[string]interface{})
-	if req.FileKey != nil {
-		updateData["file_name"] = *req.FileKey
+	rpcReq := &emoji_rpc.SaveEmojiReq{EmojiId: req.EmojiId}
+	if req.FileUrl != nil {
+		rpcReq.PatchFileKey = req.FileUrl
 	}
 	if req.Title != nil {
-		// 检查同创建者下的表情名称是否重复
-		if *req.Title != emoji.Title {
-			var count int64
-			err = l.svcCtx.DB.Model(&emoji_models.Emoji{}).
-				Where("title = ? AND emoji_id != ?", *req.Title, req.EmojiId).
-				Count(&count).Error
-			if err != nil {
-				logx.Errorf("检查表情名称失败: %v", err)
-				return nil, errors.New("检查表情名称失败")
-			}
-			if count > 0 {
-				return nil, errors.New("该创建者已存在同名表情")
-			}
-		}
-		updateData["title"] = *req.Title
+		rpcReq.PatchTitle = req.Title
 	}
 
-	// 更新表情信息
-	if len(updateData) > 0 {
-		// 生成新的版本号
-		newVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
-		updateData["version"] = newVersion
-
-		err = l.svcCtx.DB.Model(&emoji).Updates(updateData).Error
-		if err != nil {
-			logx.Errorf("更新表情信息失败: %v", err)
-			return nil, errors.New("更新表情信息失败")
-		}
+	_, err = l.svcCtx.EmojiRpc.SaveEmoji(l.ctx, rpcReq)
+	if err != nil {
+		l.Errorf("更新表情失败: %v", err)
+		return nil, err
 	}
-
 	return &types.UpdateEmojiRes{}, nil
 }

@@ -24,6 +24,12 @@ const (
 	Emoji_GetEmojiPackages_FullMethodName            = "/emoji_rpc.emoji/GetEmojiPackages"
 	Emoji_GetEmojiPackageContents_FullMethodName     = "/emoji_rpc.emoji/GetEmojiPackageContents"
 	Emoji_GetEmojis_FullMethodName                   = "/emoji_rpc.emoji/GetEmojis"
+	Emoji_ListEmojis_FullMethodName                  = "/emoji_rpc.emoji/ListEmojis"
+	Emoji_SaveEmoji_FullMethodName                   = "/emoji_rpc.emoji/SaveEmoji"
+	Emoji_ListEmojiPackages_FullMethodName           = "/emoji_rpc.emoji/ListEmojiPackages"
+	Emoji_SaveEmojiPackage_FullMethodName            = "/emoji_rpc.emoji/SaveEmojiPackage"
+	Emoji_UpdateEmojiPackageContent_FullMethodName   = "/emoji_rpc.emoji/UpdateEmojiPackageContent"
+	Emoji_ListEmojiCollects_FullMethodName           = "/emoji_rpc.emoji/ListEmojiCollects"
 )
 
 // EmojiClient is the client API for Emoji service.
@@ -40,6 +46,13 @@ type EmojiClient interface {
 	GetEmojiPackageContents(ctx context.Context, in *GetEmojiPackageContentsReq, opts ...grpc.CallOption) (*GetEmojiPackageContentsRes, error)
 	// ========== 表情基础数据同步 ==========
 	GetEmojis(ctx context.Context, in *GetEmojisReq, opts ...grpc.CallOption) (*GetEmojisRes, error)
+	// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+	ListEmojis(ctx context.Context, in *ListEmojisReq, opts ...grpc.CallOption) (*ListEmojisRes, error)
+	SaveEmoji(ctx context.Context, in *SaveEmojiReq, opts ...grpc.CallOption) (*SaveEmojiRes, error)
+	ListEmojiPackages(ctx context.Context, in *ListEmojiPackagesReq, opts ...grpc.CallOption) (*ListEmojiPackagesRes, error)
+	SaveEmojiPackage(ctx context.Context, in *SaveEmojiPackageReq, opts ...grpc.CallOption) (*SaveEmojiPackageRes, error)
+	UpdateEmojiPackageContent(ctx context.Context, in *UpdateEmojiPackageContentReq, opts ...grpc.CallOption) (*UpdateEmojiPackageContentRes, error)
+	ListEmojiCollects(ctx context.Context, in *ListEmojiCollectsReq, opts ...grpc.CallOption) (*ListEmojiCollectsRes, error)
 }
 
 type emojiClient struct {
@@ -100,6 +113,66 @@ func (c *emojiClient) GetEmojis(ctx context.Context, in *GetEmojisReq, opts ...g
 	return out, nil
 }
 
+func (c *emojiClient) ListEmojis(ctx context.Context, in *ListEmojisReq, opts ...grpc.CallOption) (*ListEmojisRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEmojisRes)
+	err := c.cc.Invoke(ctx, Emoji_ListEmojis_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *emojiClient) SaveEmoji(ctx context.Context, in *SaveEmojiReq, opts ...grpc.CallOption) (*SaveEmojiRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveEmojiRes)
+	err := c.cc.Invoke(ctx, Emoji_SaveEmoji_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *emojiClient) ListEmojiPackages(ctx context.Context, in *ListEmojiPackagesReq, opts ...grpc.CallOption) (*ListEmojiPackagesRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEmojiPackagesRes)
+	err := c.cc.Invoke(ctx, Emoji_ListEmojiPackages_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *emojiClient) SaveEmojiPackage(ctx context.Context, in *SaveEmojiPackageReq, opts ...grpc.CallOption) (*SaveEmojiPackageRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveEmojiPackageRes)
+	err := c.cc.Invoke(ctx, Emoji_SaveEmojiPackage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *emojiClient) UpdateEmojiPackageContent(ctx context.Context, in *UpdateEmojiPackageContentReq, opts ...grpc.CallOption) (*UpdateEmojiPackageContentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateEmojiPackageContentRes)
+	err := c.cc.Invoke(ctx, Emoji_UpdateEmojiPackageContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *emojiClient) ListEmojiCollects(ctx context.Context, in *ListEmojiCollectsReq, opts ...grpc.CallOption) (*ListEmojiCollectsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEmojiCollectsRes)
+	err := c.cc.Invoke(ctx, Emoji_ListEmojiCollects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EmojiServer is the server API for Emoji service.
 // All implementations must embed UnimplementedEmojiServer
 // for forward compatibility.
@@ -114,6 +187,13 @@ type EmojiServer interface {
 	GetEmojiPackageContents(context.Context, *GetEmojiPackageContentsReq) (*GetEmojiPackageContentsRes, error)
 	// ========== 表情基础数据同步 ==========
 	GetEmojis(context.Context, *GetEmojisReq) (*GetEmojisRes, error)
+	// 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+	ListEmojis(context.Context, *ListEmojisReq) (*ListEmojisRes, error)
+	SaveEmoji(context.Context, *SaveEmojiReq) (*SaveEmojiRes, error)
+	ListEmojiPackages(context.Context, *ListEmojiPackagesReq) (*ListEmojiPackagesRes, error)
+	SaveEmojiPackage(context.Context, *SaveEmojiPackageReq) (*SaveEmojiPackageRes, error)
+	UpdateEmojiPackageContent(context.Context, *UpdateEmojiPackageContentReq) (*UpdateEmojiPackageContentRes, error)
+	ListEmojiCollects(context.Context, *ListEmojiCollectsReq) (*ListEmojiCollectsRes, error)
 	mustEmbedUnimplementedEmojiServer()
 }
 
@@ -138,6 +218,24 @@ func (UnimplementedEmojiServer) GetEmojiPackageContents(context.Context, *GetEmo
 }
 func (UnimplementedEmojiServer) GetEmojis(context.Context, *GetEmojisReq) (*GetEmojisRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEmojis not implemented")
+}
+func (UnimplementedEmojiServer) ListEmojis(context.Context, *ListEmojisReq) (*ListEmojisRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEmojis not implemented")
+}
+func (UnimplementedEmojiServer) SaveEmoji(context.Context, *SaveEmojiReq) (*SaveEmojiRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveEmoji not implemented")
+}
+func (UnimplementedEmojiServer) ListEmojiPackages(context.Context, *ListEmojiPackagesReq) (*ListEmojiPackagesRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEmojiPackages not implemented")
+}
+func (UnimplementedEmojiServer) SaveEmojiPackage(context.Context, *SaveEmojiPackageReq) (*SaveEmojiPackageRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveEmojiPackage not implemented")
+}
+func (UnimplementedEmojiServer) UpdateEmojiPackageContent(context.Context, *UpdateEmojiPackageContentReq) (*UpdateEmojiPackageContentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateEmojiPackageContent not implemented")
+}
+func (UnimplementedEmojiServer) ListEmojiCollects(context.Context, *ListEmojiCollectsReq) (*ListEmojiCollectsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEmojiCollects not implemented")
 }
 func (UnimplementedEmojiServer) mustEmbedUnimplementedEmojiServer() {}
 func (UnimplementedEmojiServer) testEmbeddedByValue()               {}
@@ -250,6 +348,114 @@ func _Emoji_GetEmojis_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Emoji_ListEmojis_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEmojisReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmojiServer).ListEmojis(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Emoji_ListEmojis_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmojiServer).ListEmojis(ctx, req.(*ListEmojisReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Emoji_SaveEmoji_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveEmojiReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmojiServer).SaveEmoji(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Emoji_SaveEmoji_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmojiServer).SaveEmoji(ctx, req.(*SaveEmojiReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Emoji_ListEmojiPackages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEmojiPackagesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmojiServer).ListEmojiPackages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Emoji_ListEmojiPackages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmojiServer).ListEmojiPackages(ctx, req.(*ListEmojiPackagesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Emoji_SaveEmojiPackage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveEmojiPackageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmojiServer).SaveEmojiPackage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Emoji_SaveEmojiPackage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmojiServer).SaveEmojiPackage(ctx, req.(*SaveEmojiPackageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Emoji_UpdateEmojiPackageContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateEmojiPackageContentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmojiServer).UpdateEmojiPackageContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Emoji_UpdateEmojiPackageContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmojiServer).UpdateEmojiPackageContent(ctx, req.(*UpdateEmojiPackageContentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Emoji_ListEmojiCollects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEmojiCollectsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmojiServer).ListEmojiCollects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Emoji_ListEmojiCollects_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmojiServer).ListEmojiCollects(ctx, req.(*ListEmojiCollectsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Emoji_ServiceDesc is the grpc.ServiceDesc for Emoji service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +482,30 @@ var Emoji_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetEmojis",
 			Handler:    _Emoji_GetEmojis_Handler,
+		},
+		{
+			MethodName: "ListEmojis",
+			Handler:    _Emoji_ListEmojis_Handler,
+		},
+		{
+			MethodName: "SaveEmoji",
+			Handler:    _Emoji_SaveEmoji_Handler,
+		},
+		{
+			MethodName: "ListEmojiPackages",
+			Handler:    _Emoji_ListEmojiPackages_Handler,
+		},
+		{
+			MethodName: "SaveEmojiPackage",
+			Handler:    _Emoji_SaveEmojiPackage_Handler,
+		},
+		{
+			MethodName: "UpdateEmojiPackageContent",
+			Handler:    _Emoji_UpdateEmojiPackageContent_Handler,
+		},
+		{
+			MethodName: "ListEmojiCollects",
+			Handler:    _Emoji_ListEmojiCollects_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

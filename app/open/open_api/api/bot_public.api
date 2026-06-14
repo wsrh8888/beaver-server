@@ -1,0 +1,134 @@
+syntax = "v1"
+
+// ==================== 推送机器人公开接口（Gateway bot_public 放行，logic 校验 Token + 签名）====================
+// 第三方（Jenkins/GitLab 等）通过 Webhook URL 携带 token 调用，向群内发送消息。
+
+type (
+	BotAtInfo {
+		AtMobiles []string `json:"atMobiles,optional"` // []string 要 @ 的手机号列表，可选
+		AtUserIDs []string `json:"atUserIds,optional"` // []string 要 @ 的 IM 用户 ID 列表，可选
+		IsAtAll   bool     `json:"isAtAll,optional"` // bool 是否 @ 全体成员，可选
+	}
+
+	BotTextContent {
+		Content string     `json:"content"` // string 文本内容
+		At      *BotAtInfo `json:"at,optional"` // object @ 信息，可选
+	}
+
+	BotMarkdownContent {
+		Title   string     `json:"title"` // string Markdown 标题
+		Content string     `json:"text"` // string Markdown 正文
+		Image   string     `json:"image,optional"` // string 配图 URL，可选
+		At      *BotAtInfo `json:"at,optional"` // object @ 信息，可选
+	}
+
+	BotImageContent {
+		URL    string `json:"url"` // string 图片完整 URL
+		Width  int32  `json:"width,optional"` // int32 图片宽度像素，可选
+		Height int32  `json:"height,optional"` // int32 图片高度像素，可选
+	}
+
+	BotVideoContent {
+		URL          string `json:"url"` // string 视频完整 URL
+		Width        int32  `json:"width,optional"` // int32 视频宽度像素，可选
+		Height       int32  `json:"height,optional"` // int32 视频高度像素，可选
+		Duration     int32  `json:"duration,optional"` // int32 时长秒，可选
+		ThumbnailURL string `json:"thumbnailUrl,optional"` // string 封面图 URL，可选
+	}
+
+	BotFileContent {
+		URL      string `json:"url"` // string 文件完整 URL
+		FileName string `json:"fileName"` // string 文件名
+		FileSize int64  `json:"fileSize"` // int64 文件大小字节
+		MimeType string `json:"mimeType,optional"` // string MIME 类型，可选
+	}
+
+	BotVoiceContent {
+		URL      string `json:"url"` // string 语音完整 URL
+		Duration int32  `json:"duration,optional"` // int32 时长秒，可选
+		FileSize int64  `json:"fileSize,optional"` // int64 文件大小字节，可选
+	}
+
+	BotAudioFileContent {
+		URL      string `json:"url"` // string 音频完整 URL
+		FileName string `json:"fileName"` // string 文件名
+		Duration int32  `json:"duration,optional"` // int32 时长秒，可选
+		FileSize int64  `json:"fileSize,optional"` // int64 文件大小字节，可选
+	}
+
+	BotEmojiContent {
+		URL    string `json:"url"` // string 表情图片完整 URL
+		Width  int64  `json:"width,optional"` // int64 宽度像素，可选
+		Height int64  `json:"height,optional"` // int64 高度像素，可选
+	}
+
+	BotNotificationContent {
+		Type   int32    `json:"type"` // int32 通知子类型（会话内系统通知）
+		Actors []string `json:"actors"` // []string 相关用户 ID 列表
+	}
+
+	BotCallContent {
+		RoomID   string `json:"roomId"` // string 通话房间 ID
+		CallType int32  `json:"callType"` // int32 通话类型
+		Status   int32  `json:"status"` // int32 通话状态
+		Duration int64  `json:"duration"` // int64 通话时长秒
+	}
+
+	BotWithdrawContent {
+		OriginMsgID string `json:"originMsgId"` // string 要撤回的原消息 ID
+	}
+
+	BotReplyContent {
+		OriginMsgID string `json:"originMsgId"` // string 被回复的原消息 ID
+		MsgType     string `json:"msgType"` // string 回复体类型：text / markdown
+		Content     string `json:"content"` // string 回复正文
+	}
+
+	BotForwardContent {
+		Title    string `json:"title"` // string 转发标题
+		RecordID string `json:"recordId"` // string 转发记录 ID
+		Count    int32  `json:"count"` // int32 转发消息条数
+	}
+
+	BotLinkContent {
+		URL      string `json:"url"` // string 链接地址
+		Title    string `json:"title"` // string 链接标题
+		Desc     string `json:"desc,optional"` // string 链接描述，可选
+		ImageURL string `json:"imageUrl,optional"` // string 链接配图 URL，可选
+	}
+
+	BotSendReq {
+		Token        string                  `form:"token"` // string 推送 Bot Webhook Token（URL 参数）
+		Timestamp    int64                   `form:"timestamp,optional"` // int64 请求时间戳毫秒（签名校验用），可选
+		Sign         string                  `form:"sign,optional"` // string HMAC 签名 Base64（签名校验用），可选
+		MsgType      string                  `json:"msgtype"` // string 消息类型：text/markdown/image/video/file/voice/audioFile/emoji/notification/call/withdraw/reply/forward/link
+		Text         *BotTextContent         `json:"text,optional"` // object 文本消息体，msgtype=text 时必填
+		Markdown     *BotMarkdownContent     `json:"markdown,optional"` // object Markdown 消息体，msgtype=markdown 时必填
+		Image        *BotImageContent        `json:"image,optional"` // object 图片消息体，msgtype=image 时必填
+		Video        *BotVideoContent        `json:"video,optional"` // object 视频消息体，msgtype=video 时必填
+		File         *BotFileContent         `json:"file,optional"` // object 文件消息体，msgtype=file 时必填
+		Voice        *BotVoiceContent        `json:"voice,optional"` // object 语音消息体，msgtype=voice 时必填
+		AudioFile    *BotAudioFileContent    `json:"audioFile,optional"` // object 音频文件消息体，msgtype=audioFile 时必填
+		Emoji        *BotEmojiContent        `json:"emoji,optional"` // object 表情消息体，msgtype=emoji 时必填
+		Notification *BotNotificationContent `json:"notification,optional"` // object 通知消息体，msgtype=notification 时必填
+		Call         *BotCallContent         `json:"call,optional"` // object 通话消息体，msgtype=call 时必填
+		Withdraw     *BotWithdrawContent     `json:"withdraw,optional"` // object 撤回消息体，msgtype=withdraw 时必填
+		Reply        *BotReplyContent        `json:"reply,optional"` // object 回复消息体，msgtype=reply 时必填
+		Forward      *BotForwardContent      `json:"forward,optional"` // object 转发消息体，msgtype=forward 时必填
+		Link         *BotLinkContent         `json:"link,optional"` // object 链接卡片消息体，msgtype=link 时必填
+	}
+
+	BotSendRes {
+		MessageID string `json:"messageId"` // string 发送成功后的 IM 消息 ID
+		SendTime  int64  `json:"sendTime"` // int64 发送时间 Unix 毫秒
+	}
+)
+
+@server (
+	group: bot_public
+)
+service open {
+	@doc "推送机器人发送消息到群（第三方服务调用）"
+	@handler BotSend
+	post /api/open/bot_public/v1/send (BotSendReq) returns (BotSendRes)
+}

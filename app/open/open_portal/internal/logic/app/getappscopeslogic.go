@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"beaver/app/open/constants"
@@ -29,29 +28,11 @@ func NewGetAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetA
 }
 
 func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *types.GetAppScopesRes, err error) {
-	// 1. 从 header 获取当前用户 ID
-	userID := l.ctx.Value("userId")
-	if userID == nil {
-		return nil, errors.New("未登录")
-	}
 
-	// 2. 查询应用
+	// 查询应用
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, userID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限")
-	}
-
-	// 3. 解析已授权的权限列表
-	var enabledScopes []string
-	if app.Scopes != "" {
-		json.Unmarshal([]byte(app.Scopes), &enabledScopes)
-	}
-
-	// 4. 构建所有权限列表（标记是否已启用）
-	// 创建 enabledScopes map 提高查找效率
-	enabledMap := make(map[string]bool)
-	for _, s := range enabledScopes {
-		enabledMap[s] = true
 	}
 
 	// 创建 defaultScopes map 提高查找效率
@@ -67,7 +48,6 @@ func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *type
 			Scope:       scopeStr,
 			Name:        scopeStr,
 			Description: constants.ScopeDescription[scope],
-			Enabled:     enabledMap[scopeStr],
 			Required:    defaultMap[scopeStr],
 		})
 	}

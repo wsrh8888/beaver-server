@@ -10,6 +10,7 @@ import (
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	"github.com/qiniu/go-sdk/v7/storagev2/http_client"
 	"github.com/qiniu/go-sdk/v7/storagev2/uploader"
+
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
@@ -51,6 +52,12 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err == nil {
 			resp.FileKey = existingFile.FileKey
 			resp.OriginalName = existingFile.OriginalName
+
+			// 生成完整URL
+			domain := svcCtx.Config.Qiniu.Domain
+			if domain != "" && domain != "your_qiniu_domain" {
+				resp.FileURL = fmt.Sprintf("https://%s/%s", domain, existingFile.Path)
+			}
 
 			// 如果文件已存在但FileInfo为空，可以设置默认值
 			if existingFile.FileInfo == nil {
@@ -115,6 +122,12 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		resp.FileKey = newFileModel.FileKey
 		resp.OriginalName = newFileModel.OriginalName
+
+		// 生成完整URL
+		domain := svcCtx.Config.Qiniu.Domain
+		if domain != "" && domain != "your_qiniu_domain" {
+			resp.FileURL = fmt.Sprintf("https://%s/%s", domain, newFileModel.Path)
+		}
 
 		// 转换FileInfo为API响应格式
 		if fileInfo != nil {

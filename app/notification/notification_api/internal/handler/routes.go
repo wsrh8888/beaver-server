@@ -15,50 +15,56 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 按事件ID删除单个通知
 				Method:  http.MethodPost,
-				Path:    "/api/notification/deleteNotification",
+				Path:    "/api/notification/v1/deleteNotification",
 				Handler: deleteNotificationHandler(serverCtx),
 			},
 			{
-				// 按ID拉取通知事件明细
+				// 按ID拉取通知事件明细（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/notification/getEventsByIds",
+				Path:    "/api/notification/v1/getEventsByIds",
 				Handler: getEventsByIdsHandler(serverCtx),
 			},
 			{
-				// 按ID拉取收件箱明细
+				// 按ID拉取收件箱明细（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/notification/getInboxByIds",
+				Path:    "/api/notification/v1/getInboxByIds",
 				Handler: getInboxByIdsHandler(serverCtx),
 			},
 			{
-				// 按分类拉取通知已读游标
+				// 按分类拉取通知已读游标（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/notification/getReadCursors",
+				Path:    "/api/notification/v1/getReadCursors",
 				Handler: getReadCursorsHandler(serverCtx),
 			},
 			{
 				// 获取未读汇总（红点）
 				Method:  http.MethodPost,
-				Path:    "/api/notification/getUnreadSummary",
+				Path:    "/api/notification/v1/getUnreadSummary",
 				Handler: getUnreadSummaryHandler(serverCtx),
 			},
 			{
 				// 按分类标记所有通知为已读
 				Method:  http.MethodPost,
-				Path:    "/api/notification/markReadByCategory",
+				Path:    "/api/notification/v1/markReadByCategory",
 				Handler: markReadByCategoryHandler(serverCtx),
 			},
 			{
 				// 按分类游标标记已读（高效批量，高级用法）
 				Method:  http.MethodPost,
-				Path:    "/api/notification/markReadByCursor",
+				Path:    "/api/notification/v1/markReadByCursor",
 				Handler: markReadByCursorHandler(serverCtx),
 			},
 			{
 				// 按事件ID标记单个通知已读
 				Method:  http.MethodPost,
-				Path:    "/api/notification/markReadByEvent",
+				Path:    "/api/notification/v1/markReadByEvent",
 				Handler: markReadByEventHandler(serverCtx),
+			},
+			{
+				// 注册或更新离线推送 Token（FCM/APNs）
+				Method:  http.MethodPost,
+				Path:    "/api/notification/v1/register_push_token",
+				Handler: registerPushTokenHandler(serverCtx),
 			},
 		},
 	)

@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
@@ -11,29 +10,31 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
+
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
+
 type PushEventLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *logger.Logger
 }
 
 func NewPushEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PushEventLogic {
 	return &PushEventLogic{
 		ctx:    ctx,
+		logger: logger.New("push_event"),
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
 	}
 }
 
 func (l *PushEventLogic) PushEvent(in *notification_rpc.PushEventReq) (*notification_rpc.PushEventRes, error) {
-	fmt.Println("1111111111111111111111111111")
 	if len(in.ToUserIds) == 0 {
 		return nil, errors.New("to_user_ids 不能为空")
 	}
@@ -154,6 +155,16 @@ func (l *PushEventLogic) PushEvent(in *notification_rpc.PushEventReq) (*notifica
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}
 	}(l.svcCtx.Config.Etcd.Hosts[0], in.ToUserIds, eventID, eventVersion)
+
+	l.logger.Info(model.LogMsg{
+		Text: "通知事件推送成功",
+		Data: map[string]interface{}{
+			"eventId":   eventID,
+			"eventType": in.EventType,
+			"category":  in.Category,
+			"count":     len(in.ToUserIds),
+		},
+	})
 
 	return &notification_rpc.PushEventRes{
 		EventId: eventID,

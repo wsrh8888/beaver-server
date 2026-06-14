@@ -5,11 +5,12 @@ option go_package = "./user_rpc";
 
 
 message UserCreateReq {
-  string phone = 1;    // 手机号（与email二选一）
-  string password = 2; // 密码
-  int32 source = 3;    // 注册来源：1-手机号注册，2-邮箱注册
-  string email = 4;    // 邮箱（与phone二选一）
-  string nick_name = 5; // 昵称（可选）
+  string phone = 1; // 手机号（与email二选一）
+  int32 source = 2; // 注册来源：1-手机号注册，2-邮箱注册
+  string email = 3; // 邮箱（与phone二选一）
+  string nick_name = 4; // 昵称（可选）
+  int32 user_type = 5; // 用户类型：1-普通用户，2-bot，3-robot（可选，默认1）
+  string abstract = 6; // 个性签名（可选）
 }
 
 message UserCreateRes {
@@ -21,26 +22,71 @@ message UserInfoReq {
 }
 
 message UserInfoRes {
-  UserInfo user_info = 1;  // 用户信息
+  UserInfo user_info = 1; // 用户信息
 }
  
 
- message IsFriendReq {
-  string user1 = 1;
-  string user2 = 2;
-}
-
-message IsFriendRes {
-  bool is_friend = 1;
-}
-
 message UserInfo {
-  string user_id = 1;   // 用户ID
+  string user_id = 1; // 用户ID
   string nick_name = 2;
   string avatar = 3;
-  int64 version = 4;    // 用户版本号，用于同步
+  int64 version = 4; // 用户版本号，用于同步
   string email = 5;
   string abstract = 6;
+  string phone = 7;
+  int32 status = 8; // 状态 1正常 2禁用 3删除
+  int32 source = 9; // 注册来源
+  int32 user_type = 10; // 用户类型
+  string created_at = 11; // 创建时间
+  string updated_at = 12; // 更新时间
+}
+
+// ListUsers：用户查询（列表 + user_id 精确查详情）
+message ListUsersReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string email = 3; // string 邮箱模糊筛选，可选
+  int32 status = 4; // int32 状态筛选，0 表示全部
+  int32 source = 5; // int32 来源筛选，0 表示全部
+  string user_id = 6; // string 用户 ID 精确查，可选
+  string keyword = 7; // string 昵称/邮箱/手机号模糊搜索，可选
+}
+
+message ListUsersRes {
+  int64 total = 1; // int64 总数
+  repeated UserInfo list = 2; // array 用户列表
+}
+
+// UpdateUsers：批量更新用户资料字段
+message UpdateUsersReq {
+  repeated string user_ids = 1; // array 用户 ID
+  optional string patch_nick_name = 2; // string 更新昵称，可选
+  optional string patch_email = 3; // string 更新邮箱，可选
+  optional string patch_avatar = 4; // string 更新头像，可选
+  optional string patch_abstract = 5; // string 更新个性签名，可选
+}
+
+message UpdateUsersRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// DeleteUsers：批量软删除用户
+message DeleteUsersReq {
+  repeated string user_ids = 1; // array 用户 ID
+}
+
+message DeleteUsersRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// UpdateUsersStatus：批量更新用户状态
+message UpdateUsersStatusReq {
+  repeated string user_ids = 1; // array 用户 ID
+  int32 status = 2; // int32 状态 1正常 2禁用 3删除
+}
+
+message UpdateUsersStatusRes {
+  int64 affected_count = 1; // int64 影响条数
 }
 
 message UserVersionInfo {
@@ -67,21 +113,36 @@ message UserListInfoRes {
 
 message SearchUserReq {
   string keyword = 1; // 搜索关键词（邮箱或用户ID）
-  string type = 2;    // 搜索类型：email 或 userId
+  string type = 2; // 搜索类型：email 或 userId
 }
 
 message SearchUserRes {
   UserInfo user_info = 1; // 用户信息
 }
 
-service user {
-  rpc UserCreate(UserCreateReq) returns(UserCreateRes); //创建用户
-  rpc UserInfo(UserInfoReq) returns(UserInfoRes); // 用户信息
-  rpc IsFriend(IsFriendReq) returns(IsFriendRes); //是否是好友
-  rpc SearchUser(SearchUserReq) returns(SearchUserRes); // 根据邮箱或用户ID搜索用户
-  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes); // 批量获取用户信息
-  rpc UserVersions(UserVersionsReq) returns(UserVersionsRes); // 批量获取用户版本信息
-
+// 更新用户展示信息（昵称/头像，供开放平台 Robot/Bot 等内部服务调用）
+message UserUpdateDisplayReq {
+  string user_id = 1; // string IM 用户 ID
+  string nick_name = 2; // string 新昵称，空表示不修改
+  string avatar = 3; // string 新头像 URL，空表示不修改
 }
 
-// goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+message UserUpdateDisplayRes {
+  int64 version = 1; // int64 更新后的用户资料版本号
+}
+
+service user {
+  rpc UserCreate(UserCreateReq) returns(UserCreateRes);
+  rpc UserInfo(UserInfoReq) returns(UserInfoRes);
+  rpc SearchUser(SearchUserReq) returns(SearchUserRes);
+  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes);
+  rpc UserVersions(UserVersionsReq) returns(UserVersionsRes);
+  rpc UserUpdateDisplay(UserUpdateDisplayReq) returns(UserUpdateDisplayRes);
+  // 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+  rpc ListUsers(ListUsersReq) returns(ListUsersRes); // 用户查询：列表、详情
+  rpc UpdateUsers(UpdateUsersReq) returns(UpdateUsersRes); // 更新用户资料
+  rpc DeleteUsers(DeleteUsersReq) returns(DeleteUsersRes); // 软删除用户
+  rpc UpdateUsersStatus(UpdateUsersStatusReq) returns(UpdateUsersStatusRes); // 批量更新用户状态
+}
+
+// goctl rpc protoc user_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

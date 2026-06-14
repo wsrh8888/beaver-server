@@ -15,103 +15,109 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 批量删除消息(仅自己不可见)
 				Method:  http.MethodPost,
-				Path:    "/api/chat/deleteMessages",
+				Path:    "/api/chat/v1/deleteMessages",
 				Handler: deleteMessagesHandler(serverCtx),
 			},
 			{
 				// 删除某个最近会话
 				Method:  http.MethodPost,
-				Path:    "/api/chat/deleteRecentChat",
+				Path:    "/api/chat/v1/deleteRecentChat",
 				Handler: deleteRecentHandler(serverCtx),
-			},
-			{
-				// 编辑消息
-				Method:  http.MethodPost,
-				Path:    "/api/chat/edit",
-				Handler: editMessageHandler(serverCtx),
 			},
 			{
 				// 转发消息
 				Method:  http.MethodPost,
-				Path:    "/api/chat/forward",
+				Path:    "/api/chat/v1/forward",
 				Handler: forwardMessageHandler(serverCtx),
 			},
 			{
 				// 获取聊天记录
 				Method:  http.MethodPost,
-				Path:    "/api/chat/getChatHistory",
+				Path:    "/api/chat/v1/getChatHistory",
 				Handler: chatHistoryHandler(serverCtx),
 			},
 			{
 				// 获取会话id
 				Method:  http.MethodPost,
-				Path:    "/api/chat/getConversationInfo",
+				Path:    "/api/chat/v1/getConversationInfo",
 				Handler: ConversationInfoHandler(serverCtx),
 			},
 			{
 				// 批量获取会话数据
 				Method:  http.MethodPost,
-				Path:    "/api/chat/getConversationsListByIds",
+				Path:    "/api/chat/v1/getConversationsListByIds",
 				Handler: getConversationsListByIdsHandler(serverCtx),
 			},
 			{
 				// 获取合并转发详情
 				Method:  http.MethodGet,
-				Path:    "/api/chat/getForwardDetails",
+				Path:    "/api/chat/v1/getForwardDetails",
 				Handler: getForwardDetailsHandler(serverCtx),
 			},
 			{
 				// 获取最近会话列表
 				Method:  http.MethodGet,
-				Path:    "/api/chat/getRecentChatList",
+				Path:    "/api/chat/v1/getRecentChatList",
 				Handler: recentChatListHandler(serverCtx),
 			},
 			{
 				// 批量获取用户会话设置数据
 				Method:  http.MethodPost,
-				Path:    "/api/chat/getUserConversationSettingsListByIds",
+				Path:    "/api/chat/v1/getUserConversationSettingsListByIds",
 				Handler: getUserConversationSettingsListByIdsHandler(serverCtx),
 			},
 			{
 				// 隐藏/显示会话
 				Method:  http.MethodPost,
-				Path:    "/api/chat/hideChat",
+				Path:    "/api/chat/v1/hideChat",
 				Handler: hideChatHandler(serverCtx),
+			},
+			{
+				// 标记消息媒体状态（语音已听等）
+				Method:  http.MethodPost,
+				Path:    "/api/chat/v1/markMessageMedia",
+				Handler: markMessageMediaHandler(serverCtx),
 			},
 			{
 				// 设置会话免打扰
 				Method:  http.MethodPost,
-				Path:    "/api/chat/muteChat",
+				Path:    "/api/chat/v1/muteChat",
 				Handler: muteChatHandler(serverCtx),
 			},
 			{
 				// 置顶某个会话
 				Method:  http.MethodPost,
-				Path:    "/api/chat/pinnedChat",
+				Path:    "/api/chat/v1/pinnedChat",
 				Handler: pinnedChatHandler(serverCtx),
 			},
 			{
 				// 撤回消息
 				Method:  http.MethodPost,
-				Path:    "/api/chat/recall",
+				Path:    "/api/chat/v1/recall",
 				Handler: recallMessageHandler(serverCtx),
+			},
+			{
+				// 搜索消息
+				Method:  http.MethodPost,
+				Path:    "/api/chat/v1/searchMessages",
+				Handler: searchMessagesHandler(serverCtx),
 			},
 			{
 				// 发送消息
 				Method:  http.MethodPost,
-				Path:    "/api/chat/sendMsg",
+				Path:    "/api/chat/v1/sendMsg",
 				Handler: SendMsgHandler(serverCtx),
 			},
 			{
 				// 聊天数据同步
 				Method:  http.MethodPost,
-				Path:    "/api/chat/sync",
+				Path:    "/api/chat/v1/sync",
 				Handler: chatSyncHandler(serverCtx),
 			},
 			{
 				// 更新会话已读序列号
 				Method:  http.MethodPost,
-				Path:    "/api/chat/updateReadSeq",
+				Path:    "/api/chat/v1/updateReadSeq",
 				Handler: updateReadSeqHandler(serverCtx),
 			},
 		},

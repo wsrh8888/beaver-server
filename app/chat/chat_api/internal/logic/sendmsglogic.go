@@ -10,20 +10,23 @@ import (
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type SendMsgLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
 	return &SendMsgLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("send_msg"),
 		svcCtx: svcCtx,
 	}
 }
@@ -47,7 +50,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.ImageMsgType:
 		if apiMsg.ImageMsg != nil {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
-				FileKey: apiMsg.ImageMsg.FileKey,
+				FileUrl: apiMsg.ImageMsg.FileUrl,
 				Width:   int32(apiMsg.ImageMsg.Width),
 				Height:  int32(apiMsg.ImageMsg.Height),
 				Size:    apiMsg.ImageMsg.Size,
@@ -56,27 +59,29 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.VideoMsgType:
 		if apiMsg.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileKey:      apiMsg.VideoMsg.FileKey,
+				FileUrl:       apiMsg.VideoMsg.FileUrl,
 				Width:        int32(apiMsg.VideoMsg.Width),
 				Height:       int32(apiMsg.VideoMsg.Height),
 				Duration:     int32(apiMsg.VideoMsg.Duration),
-				ThumbnailKey: apiMsg.VideoMsg.ThumbnailKey,
+				ThumbnailUrl: apiMsg.VideoMsg.ThumbnailUrl,
 				Size:         apiMsg.VideoMsg.Size,
 			}
 		}
 	case ctype.FileMsgType:
 		if apiMsg.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:  apiMsg.FileMsg.FileKey,
-				FileName: apiMsg.FileMsg.FileName,
-				Size:     apiMsg.FileMsg.Size,
-				MimeType: apiMsg.FileMsg.MimeType,
+				FileUrl:   apiMsg.FileMsg.FileUrl,
+				FileName:  apiMsg.FileMsg.FileName,
+				Size:      apiMsg.FileMsg.Size,
+				MimeType:  apiMsg.FileMsg.MimeType,
+				Extension: apiMsg.FileMsg.Extension,
+				OpenMode:  int32(apiMsg.FileMsg.OpenMode),
 			}
 		}
 	case ctype.VoiceMsgType:
 		if apiMsg.VoiceMsg != nil {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
-				FileKey:  apiMsg.VoiceMsg.FileKey,
+				FileUrl:  apiMsg.VoiceMsg.FileUrl,
 				Duration: int32(apiMsg.VoiceMsg.Duration),
 				Size:     apiMsg.VoiceMsg.Size,
 			}
@@ -84,7 +89,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.EmojiMsgType:
 		if apiMsg.EmojiMsg != nil {
 			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
-				FileKey:   apiMsg.EmojiMsg.FileKey,
+				FileUrl:   apiMsg.EmojiMsg.FileUrl,
 				EmojiId:   apiMsg.EmojiMsg.EmojiID,
 				PackageId: apiMsg.EmojiMsg.PackageID,
 			}
@@ -99,7 +104,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.AudioFileMsgType:
 		if apiMsg.AudioFileMsg != nil {
 			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-				FileKey:  apiMsg.AudioFileMsg.FileKey,
+				FileUrl:  apiMsg.AudioFileMsg.FileUrl,
 				FileName: apiMsg.AudioFileMsg.FileName,
 				Duration: int32(apiMsg.AudioFileMsg.Duration),
 				Size:     apiMsg.AudioFileMsg.Size,
@@ -140,6 +145,18 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 				Count:    int32(apiMsg.ForwardMsg.Count),
 			}
 		}
+	case ctype.CloudDocMsgType:
+		if apiMsg.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId: apiMsg.CloudDocMsg.DocID,
+				DocType:  int32(apiMsg.CloudDocMsg.DocType),
+				Title:    apiMsg.CloudDocMsg.Title,
+				OwnerId:  apiMsg.CloudDocMsg.OwnerID,
+				Perm:     int32(apiMsg.CloudDocMsg.Perm),
+				CoverUrl: apiMsg.CloudDocMsg.CoverURL,
+				Revision: apiMsg.CloudDocMsg.Revision,
+			}
+		}
 	}
 	return rpcMsg
 }
@@ -155,13 +172,18 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		Msg:            rpcMsg,
 	}
 
-	// 记录请求（仅调试用）
-	l.Logger.Infof("Sending message via RPC: userId=%s, conversationId=%s, type=%d", req.UserID, req.ConversationID, req.Msg.Type)
-
 	// 调用 RPC 服务
 	rpcResp, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, rpcReq)
 	if err != nil {
-		l.Logger.Errorf("failed to send message via RPC: %v", err)
+		logx.WithContext(l.ctx).Errorf("failed to send message via RPC: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "发送消息失败",
+			Data: map[string]interface{}{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"messageType":    req.Msg.Type,
+			},
+		})
 		return nil, errors.New("failed to send message")
 	}
 
@@ -175,11 +197,21 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 			UserID:   rpcResp.Sender.UserId,
 			Avatar:   rpcResp.Sender.Avatar,
 			NickName: rpcResp.Sender.NickName,
+			UserType: int8(rpcResp.Sender.UserType),
 		},
 		CreatedAt:  rpcResp.CreatedAt,
 		MsgPreview: rpcResp.MsgPreview,
 		Seq:        rpcResp.Seq,
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "发送消息成功",
+		Data: map[string]interface{}{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"messageId":      rpcResp.MessageId,
+			"messageType":    req.Msg.Type,
+		},
+	})
 	return resp, nil
 }

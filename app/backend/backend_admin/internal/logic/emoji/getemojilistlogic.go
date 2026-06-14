@@ -2,13 +2,10 @@ package logic
 
 import (
 	"context"
-	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -19,80 +16,36 @@ type GetEmojiListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取表情图片列表
 func NewGetEmojiListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiListLogic {
-	return &GetEmojiListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetEmojiListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// GetEmojiList 管理后台：表情列表查询。
+// admin 职责：HTTP 入参校验与映射、运营筛选条件组装、响应字段适配前端协议。
+// RPC 职责：表情领域数据查询（ListEmojis），不与本接口 1:1。
 func (l *GetEmojiListLogic) GetEmojiList(req *types.GetEmojiListReq) (resp *types.GetEmojiListRes, err error) {
-	// 分页参数校验
-	page := req.Page
-	pageSize := req.PageSize
-	if page <= 0 {
-		page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if pageSize > 100 {
-		pageSize = 100
-	}
-
-	// 构建查询条件
-	whereClause := l.svcCtx.DB.Where("1 = 1")
-
-	// 按创建者ID筛选
-	// 作者ID筛选暂时移除
-
-	// 时间范围筛选
-	if req.StartTime != "" {
-		if startTime, err := time.Parse("2006-01-02 15:04:05", req.StartTime); err == nil {
-			whereClause = whereClause.Where("created_at >= ?", startTime)
-		}
-	}
-
-	if req.EndTime != "" {
-		if endTime, err := time.Parse("2006-01-02 15:04:05", req.EndTime); err == nil {
-			whereClause = whereClause.Where("created_at <= ?", endTime)
-		}
-	}
-
-	// 分页查询
-	emojis, count, err := list_query.ListQuery(l.svcCtx.DB, emoji_models.Emoji{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  page,
-			Limit: pageSize,
-			Key:   req.Title,
-			Sort:  "created_at desc",
-		},
-		Where: whereClause,
-		Likes: []string{"title"},
+	rpcRes, err := l.svcCtx.EmojiRpc.ListEmojis(l.ctx, &emoji_rpc.ListEmojisReq{
+		Page:      int32(req.Page),
+		PageSize:  int32(req.PageSize),
+		Title:     req.Title,
+		StartTime: req.StartTime,
+		EndTime:   req.EndTime,
 	})
-
 	if err != nil {
-		logx.Errorf("查询表情列表失败: %v", err)
+		l.Errorf("获取表情列表失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var list []types.GetEmojiListItem
-	for _, emoji := range emojis {
+	list := make([]types.GetEmojiListItem, 0, len(rpcRes.List))
+	for _, e := range rpcRes.List {
 		list = append(list, types.GetEmojiListItem{
-			EmojiId:    emoji.EmojiID,
-			FileKey:    emoji.FileKey,
-			Title:      emoji.Title,
-			AuthorID:   "", // 暂时为空，后续可从其他途径获取
-			CreateTime: emoji.CreatedAt.String(),
-			UpdateTime: emoji.UpdatedAt.String(),
+			EmojiId:    e.EmojiId,
+			FileUrl:    e.FileKey,
+			Title:      e.Title,
+			AuthorID:   req.AuthorID, // 领域表无 author 字段，仅回显筛选条件
+			CreateTime: e.CreatedAt,
+			UpdateTime: e.UpdatedAt,
 		})
 	}
-
-	return &types.GetEmojiListRes{
-		List:  list,
-		Total: count,
-	}, nil
+	return &types.GetEmojiListRes{List: list, Total: rpcRes.Total}, nil
 }

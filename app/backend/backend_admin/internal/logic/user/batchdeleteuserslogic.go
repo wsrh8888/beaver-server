@@ -6,7 +6,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -17,32 +17,24 @@ type BatchDeleteUsersLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 批量删除用户
 func NewBatchDeleteUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteUsersLogic {
-	return &BatchDeleteUsersLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &BatchDeleteUsersLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// BatchDeleteUsers 管理后台：批量软删除用户。
+// admin 职责：校验 ids 非空，映射为 UpdateUsers 批量软删除。
+// RPC 职责：UpdateUsers 可复用的批量运维能力。
 func (l *BatchDeleteUsersLogic) BatchDeleteUsers(req *types.BatchDeleteUsersReq) (resp *types.BatchDeleteUsersRes, err error) {
-	// 批量逻辑删除用户（设置状态为删除状态）
-	err = l.svcCtx.DB.Model(&user_models.UserModel{}).
-		Where("user_id IN ?", req.Ids).
-		Update("status", 3).Error
-
-	if err != nil {
-		logx.Errorf("批量删除用户失败: %v", err)
-		return nil, errors.New("批量删除用户失败")
+	if len(req.Ids) == 0 {
+		return nil, errors.New("请选择要删除的用户")
 	}
 
-	// 或者使用物理删除（根据业务需求选择）
-	// err = l.svcCtx.DB.Where("user_id IN ?", req.Ids).Delete(&user_models.UserModel{}).Error
-	// if err != nil {
-	//     logx.Errorf("批量删除用户失败: %v", err)
-	//     return nil, errors.New("批量删除用户失败")
-	// }
-
+	_, err = l.svcCtx.UserRpc.DeleteUsers(l.ctx, &user_rpc.DeleteUsersReq{
+		UserIds: req.Ids,
+	})
+	if err != nil {
+		l.Errorf("批量删除用户失败: %v", err)
+		return nil, err
+	}
 	return &types.BatchDeleteUsersRes{}, nil
 }

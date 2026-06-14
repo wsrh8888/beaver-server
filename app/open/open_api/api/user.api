@@ -1,53 +1,52 @@
 syntax = "v1"
 
-// ==================== 用户接口 ====================
+// ==================== 用户开放接口（logic 校验 access_token + scope）====================
 
 type (
+	// 获取单个用户信息
 	GetUserInfoReq {
-		UserID string `form:"userId"` // 要查询的用户ID
+		UserID        string `form:"userId"` // string 要查询的 IM 用户 ID
+		Authorization string `header:"Authorization"` // string Bearer {access_token}
 	}
-
 	GetUserInfoUserItem {
-		UserID   string `json:"userId"`           // 用户ID
-		Nickname string `json:"nickname"`         // 用户昵称
-		Avatar   string `json:"avatar,optional"`  // 头像URL
-		Phone    string `json:"phone,optional"`   // 手机号
-		Email    string `json:"email,optional"`   // 邮箱
+		UserID   string `json:"userId"` // string IM 用户 ID
+		Nickname string `json:"nickname"` // string 用户昵称
+		Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
+		Phone    string `json:"phone,optional"` // string 手机号，可选
+		Email    string `json:"email,optional"` // string 邮箱，可选
 	}
-
 	GetUserInfoRes {
-		User GetUserInfoUserItem `json:"user"` // 用户信息
+		User GetUserInfoUserItem `json:"user"` // object 用户信息
 	}
 )
 
 type (
+	// 批量获取用户信息
 	GetUserListReq {
-		UserIDs []string `json:"userIds"` // 用户ID列表（批量查询）
+		UserIDs       []string `json:"userIds"` // []string IM 用户 ID 列表
+		Authorization string   `header:"Authorization"` // string Bearer {access_token}
 	}
-
 	GetUserListUserItem {
-		UserID   string `json:"userId"`          // 用户ID
-		Nickname string `json:"nickname"`        // 用户昵称
-		Avatar   string `json:"avatar,optional"` // 头像URL
-		Phone    string `json:"phone,optional"`  // 手机号
-		Email    string `json:"email,optional"`  // 邮箱
+		UserID   string `json:"userId"` // string IM 用户 ID
+		Nickname string `json:"nickname"` // string 用户昵称
+		Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
+		Phone    string `json:"phone,optional"` // string 手机号，可选
+		Email    string `json:"email,optional"` // string 邮箱，可选
 	}
-
 	GetUserListRes {
-		Users []GetUserListUserItem `json:"users"` // 用户列表
+		Users []GetUserListUserItem `json:"users"` // array 用户列表
 	}
 )
 
 @server (
-	group:      user
-	middleware: AuthMiddleware
+	group: user
 )
 service open {
 	@doc "获取单个用户信息"
 	@handler GetUserInfo
-	get /api/open/v1/user/get_info (GetUserInfoReq) returns (GetUserInfoRes)
+	get /api/open/user/v1/get_info (GetUserInfoReq) returns (GetUserInfoRes)
 
 	@doc "批量获取用户信息"
 	@handler GetUserList
-	post /api/open/v1/user/list (GetUserListReq) returns (GetUserListRes)
+	post /api/open/user/v1/list (GetUserListReq) returns (GetUserListRes)
 }

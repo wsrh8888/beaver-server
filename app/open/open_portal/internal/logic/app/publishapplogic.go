@@ -27,35 +27,21 @@ func NewPublishAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Publis
 }
 
 func (l *PublishAppLogic) PublishApp(req *types.PublishAppReq) (resp *types.PublishAppRes, err error) {
-	// 1. 查询应用
+
+	// 查询应用
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限访问")
 	}
 
-	// 2. 检查是否已配置 Bot（如果启用了 Bot 能力）
-	var botConfig open_models.OpenBotConfig
-	err = l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&botConfig).Error
-	if err != nil {
-		// 如果没有 Bot 配置，创建默认配置
-		botConfig = open_models.OpenBotConfig{
-			AppID:            req.AppID,
-			BotName:          app.Name,
-			BotAvatar:        app.Icon,
-			BotDescription:   app.Description,
-			EnableSingleChat: 1, // int 类型：1是 0否
-			EnableGroupChat:  1,
-			EnableAtMention:  1,
-			Status:           1,
+	if app.EnableRobot == 1 {
+		if err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
+			logx.Errorf("发布应用时 Robot 未就绪: app_id=%s err=%v", req.AppID, err)
+			return nil, errors.New("发布失败：智能机器人未创建成功，请先开启 robot 能力后重试")
 		}
-		if err := l.svcCtx.DB.Create(&botConfig).Error; err != nil {
-			logx.Errorf("创建默认 Bot 配置失败: %v", err)
-			return nil, errors.New("创建 Bot 配置失败")
-		}
-		logx.Infof("为应用 %s 创建默认 Bot 配置", req.AppID)
 	}
 
-	// 3. 更新应用状态为已发布
+	// 更新应用状态为已发布
 	if err := l.svcCtx.DB.Model(&app).Update("status", 1).Error; err != nil {
 		logx.Errorf("发布应用失败: %v", err)
 		return nil, errors.New("发布应用失败")

@@ -7,6 +7,8 @@ import (
 	"beaver/app/friend/friend_rpc/friend"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/notification/notification_rpc/notification"
+	"beaver/app/open/open_rpc/open"
+	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -28,6 +30,7 @@ type ServiceContext struct {
 	ChatRpc    chat_rpc.ChatClient
 	FriendRpc  friend_rpc.FriendClient
 	NotifyRpc  notification.Notification
+	OpenRpc    open_rpc.OpenClient
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client
 }
@@ -49,6 +52,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		FriendRpc:  friend.NewFriend(zrpc.MustNewClient(c.FriendRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		NotifyRpc:  notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		OpenRpc:    open.NewOpen(zrpc.MustNewClient(c.OpenRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
 	}

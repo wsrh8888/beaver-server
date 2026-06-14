@@ -4,6 +4,8 @@ package handler
 import (
 	"net/http"
 
+	auth "beaver/app/auth/auth_api/internal/handler/auth"
+	auth_public "beaver/app/auth/auth_api/internal/handler/auth_public"
 	"beaver/app/auth/auth_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -13,82 +15,111 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 用户认证
+				// 获取登录设备列表
 				Method:  http.MethodGet,
-				Path:    "/api/auth/authentication",
-				Handler: authenticationHandler(serverCtx),
+				Path:    "/api/auth/auth/v1/devices",
+				Handler: auth.GetDevicesHandler(serverCtx),
 			},
 			{
-				// 邮箱登录
+				// 强制下线指定设备
 				Method:  http.MethodPost,
-				Path:    "/api/auth/email_login",
-				Handler: emailLoginHandler(serverCtx),
+				Path:    "/api/auth/auth/v1/kick_device",
+				Handler: auth.KickDeviceHandler(serverCtx),
 			},
 			{
-				// 邮箱密码登录
+				// 修改密码（需验证旧密码）
 				Method:  http.MethodPost,
-				Path:    "/api/auth/email_password_login",
-				Handler: emailPasswordLoginHandler(serverCtx),
-			},
-			{
-				// 邮箱注册
-				Method:  http.MethodPost,
-				Path:    "/api/auth/email_register",
-				Handler: emailRegisterHandler(serverCtx),
-			},
-			{
-				// 获取邮箱验证码
-				Method:  http.MethodPost,
-				Path:    "/api/auth/emailcode",
-				Handler: getEmailCodeHandler(serverCtx),
+				Path:    "/api/auth/auth/v1/update_password",
+				Handler: auth.UpdatePasswordHandler(serverCtx),
 			},
 			{
 				// 用户登出
 				Method:  http.MethodPost,
-				Path:    "/api/auth/logout",
-				Handler: logoutHandler(serverCtx),
+				Path:    "/api/auth/auth/v1/logout",
+				Handler: auth.LogoutHandler(serverCtx),
+			},
+			{
+				// 扫码登录-确认扫码（移动端，Header Token）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth/v1/qrcode/scan",
+				Handler: auth.QrcodeScanHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 用户认证（Gateway 内部校验 Token）
+				Method:  http.MethodGet,
+				Path:    "/api/auth/auth_public/v1/authentication",
+				Handler: auth_public.AuthenticationHandler(serverCtx),
+			},
+			{
+				// 邮箱验证码登录
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/email_login",
+				Handler: auth_public.EmailLoginHandler(serverCtx),
+			},
+			{
+				// 邮箱密码登录
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/email_password_login",
+				Handler: auth_public.EmailPasswordLoginHandler(serverCtx),
+			},
+			{
+				// OAuth 授权码登录（PC 客户端 SDK）
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/oauth_code_login",
+				Handler: auth_public.OAuthCodeLoginHandler(serverCtx),
+			},
+			{
+				// 邮箱注册
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/email_register",
+				Handler: auth_public.EmailRegisterHandler(serverCtx),
+			},
+			{
+				// 获取邮箱验证码
+				Method:  http.MethodPost,
+				Path:    "/api/auth/auth_public/v1/emailcode",
+				Handler: auth_public.GetEmailCodeHandler(serverCtx),
 			},
 			{
 				// 手机号登录
 				Method:  http.MethodPost,
-				Path:    "/api/auth/phone_login",
-				Handler: phoneLoginHandler(serverCtx),
+				Path:    "/api/auth/auth_public/v1/phone_login",
+				Handler: auth_public.PhoneLoginHandler(serverCtx),
 			},
 			{
 				// 手机号注册
 				Method:  http.MethodPost,
-				Path:    "/api/auth/phone_register",
-				Handler: phoneRegisterHandler(serverCtx),
+				Path:    "/api/auth/auth_public/v1/phone_register",
+				Handler: auth_public.PhoneRegisterHandler(serverCtx),
 			},
 			{
 				// 获取手机验证码
 				Method:  http.MethodPost,
-				Path:    "/api/auth/phonecode",
-				Handler: getPhoneCodeHandler(serverCtx),
+				Path:    "/api/auth/auth_public/v1/phonecode",
+				Handler: auth_public.GetPhoneCodeHandler(serverCtx),
 			},
 			{
-				// 扫码登录-生成二维码（PC 端调用）
+				// 扫码登录-生成二维码（PC）
 				Method:  http.MethodPost,
-				Path:    "/api/auth/qrcode/generate",
-				Handler: qrcodeGenerateHandler(serverCtx),
+				Path:    "/api/auth/auth_public/v1/qrcode/generate",
+				Handler: auth_public.QrcodeGenerateHandler(serverCtx),
 			},
 			{
-				// 扫码登录-确认扫码（移动端调用，需登录）
-				Method:  http.MethodPost,
-				Path:    "/api/auth/qrcode/scan",
-				Handler: qrcodeScanHandler(serverCtx),
-			},
-			{
-				// 扫码登录-轮询状态（PC 端调用）
+				// 扫码登录-轮询状态（PC）
 				Method:  http.MethodGet,
-				Path:    "/api/auth/qrcode/status",
-				Handler: qrcodeStatusHandler(serverCtx),
+				Path:    "/api/auth/auth_public/v1/qrcode/status",
+				Handler: auth_public.QrcodeStatusHandler(serverCtx),
 			},
 			{
-				// 找回密码（通过邮箱验证码重置密码）
+				// 找回密码
 				Method:  http.MethodPost,
-				Path:    "/api/auth/reset_password",
-				Handler: resetPasswordHandler(serverCtx),
+				Path:    "/api/auth/auth_public/v1/reset_password",
+				Handler: auth_public.ResetPasswordHandler(serverCtx),
 			},
 		},
 	)

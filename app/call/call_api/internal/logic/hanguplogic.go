@@ -11,21 +11,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 )
 
+
 type HangupLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 主动挂断或拒绝通话
 func NewHangupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HangupLogic {
 	return &HangupLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("hangup_call"),
 		svcCtx: svcCtx,
 	}
 }
@@ -66,6 +67,15 @@ func (l *HangupLogic) Hangup(req *types.HangupCallReq) (resp *types.HangupCallRe
 	for _, pid := range session.ParticipantIds {
 		go l.sendSignal(req.UserID, pid, req.RoomID, session.ConversationId, signalType)
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "通话挂断成功",
+		Data: map[string]interface{}{
+			"roomId": req.RoomID,
+			"userId": req.UserID,
+			"status": status,
+		},
+	})
 
 	return &types.HangupCallRes{}, nil
 }

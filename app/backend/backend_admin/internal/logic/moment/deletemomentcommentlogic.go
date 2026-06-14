@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/moment/moment_models"
+	"beaver/app/moment/moment_rpc/types/moment_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type DeleteMomentCommentLogic struct {
@@ -18,34 +17,21 @@ type DeleteMomentCommentLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 删除动态评论
 func NewDeleteMomentCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMomentCommentLogic {
-	return &DeleteMomentCommentLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &DeleteMomentCommentLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *DeleteMomentCommentLogic) DeleteMomentComment(req *types.DeleteMomentCommentReq) (resp *types.DeleteMomentCommentRes, err error) {
-	// 检查评论是否存在
-	var comment moment_models.MomentCommentModel
-	err = l.svcCtx.DB.Where("comment_id = ?", req.CommentId).First(&comment).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("评论不存在: %s", req.CommentId)
-			return nil, errors.New("评论不存在")
-		}
-		logx.Errorf("查询评论失败: %v", err)
-		return nil, errors.New("查询评论失败")
+	if req.CommentId == "" {
+		return nil, errors.New("评论ID不能为空")
 	}
 
-	// 删除评论
-	err = l.svcCtx.DB.Delete(&comment).Error
+	_, err = l.svcCtx.MomentRpc.DeleteMomentComments(l.ctx, &moment_rpc.DeleteMomentCommentsReq{
+		CommentIds: []string{req.CommentId},
+	})
 	if err != nil {
-		logx.Errorf("删除评论失败: %v", err)
-		return nil, errors.New("删除评论失败")
+		l.Errorf("删除评论失败: %v", err)
+		return nil, err
 	}
-
 	return &types.DeleteMomentCommentRes{}, nil
 }

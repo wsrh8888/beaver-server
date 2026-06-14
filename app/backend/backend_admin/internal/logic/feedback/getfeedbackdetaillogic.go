@@ -2,15 +2,12 @@ package logic
 
 import (
 	"context"
-	"errors"
-	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/feedback/feedback_models"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type GetFeedbackDetailLogic struct {
@@ -19,44 +16,29 @@ type GetFeedbackDetailLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取反馈详情
 func NewGetFeedbackDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFeedbackDetailLogic {
-	return &GetFeedbackDetailLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetFeedbackDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetFeedbackDetailLogic) GetFeedbackDetail(req *types.GetFeedbackDetailReq) (resp *types.GetFeedbackDetailRes, err error) {
-	var feedback feedback_models.FeedbackModel
-	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&feedback).Error
+	rpcRes, err := l.svcCtx.PlatformRpc.GetFeedback(l.ctx, &platform_rpc.GetFeedbackReq{Id: uint64(req.Id)})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logx.Errorf("反馈记录不存在: %d", req.Id)
-			return nil, errors.New("反馈记录不存在")
-		}
-		logx.Errorf("查询反馈详情失败: %v", err)
+		l.Errorf("获取反馈详情失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var handleTime string
-	if feedback.HandleTime != nil {
-		handleTime = feedback.HandleTime.Format(time.RFC3339)
-	}
-
+	f := rpcRes.Feedback
 	return &types.GetFeedbackDetailRes{
-		Id:           feedback.Id,
-		UserId:       feedback.UserID,
-		Content:      feedback.Content,
-		Type:         int(feedback.Type),
-		Status:       int(feedback.Status),
-		FileNames:    []string(feedback.FileNames),
-		HandlerId:    feedback.HandlerID,
-		HandleTime:   handleTime,
-		HandleResult: feedback.HandleResult,
-		CreatedAt:    time.Time(feedback.CreatedAt).Format(time.RFC3339),
-		UpdatedAt:    time.Time(feedback.UpdatedAt).Format(time.RFC3339),
+		Id:           uint(f.Id),
+		UserId:       f.UserId,
+		Content:      f.Content,
+		Type:         int(f.Type),
+		Status:       int(f.Status),
+		FileNames:    f.FileNames,
+		HandlerId:    f.HandlerId,
+		HandleTime:   f.HandleTime,
+		HandleResult: f.HandleResult,
+		CreatedAt:    f.CreatedAt,
+		UpdatedAt:    f.UpdatedAt,
 	}, nil
 }

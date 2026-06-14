@@ -15,49 +15,49 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 发表评论的接口
 				Method:  http.MethodPost,
-				Path:    "/api/moment/comment/create",
+				Path:    "/api/moment/v1/comment/create",
 				Handler: CreateMomentCommentHandler(serverCtx),
 			},
 			{
 				// 获取动态评论列表的接口（分页）
 				Method:  http.MethodPost,
-				Path:    "/api/moment/comments",
+				Path:    "/api/moment/v1/comments",
 				Handler: GetMomentCommentsHandler(serverCtx),
 			},
 			{
 				// 创建动态的接口
 				Method:  http.MethodPost,
-				Path:    "/api/moment/create",
+				Path:    "/api/moment/v1/create",
 				Handler: CreateMomentHandler(serverCtx),
 			},
 			{
 				// 删除动态的接口
 				Method:  http.MethodGet,
-				Path:    "/api/moment/delete",
+				Path:    "/api/moment/v1/delete",
 				Handler: DeleteMomentHandler(serverCtx),
 			},
 			{
 				// 获取动态详情的接口（包含更多评论和点赞）
 				Method:  http.MethodPost,
-				Path:    "/api/moment/detail",
+				Path:    "/api/moment/v1/detail",
 				Handler: GetMomentDetailHandler(serverCtx),
 			},
 			{
 				// 点赞/取消点赞的接口
 				Method:  http.MethodPost,
-				Path:    "/api/moment/like",
+				Path:    "/api/moment/v1/like",
 				Handler: LikeMomentHandler(serverCtx),
 			},
 			{
 				// 获取动态点赞列表的接口（分页）
 				Method:  http.MethodPost,
-				Path:    "/api/moment/likes",
+				Path:    "/api/moment/v1/likes",
 				Handler: GetMomentLikesHandler(serverCtx),
 			},
 			{
 				// 获取自己和好友的动态列表的接口（只返回部分评论和点赞）
 				Method:  http.MethodPost,
-				Path:    "/api/moment/list",
+				Path:    "/api/moment/v1/list",
 				Handler: GetMomentsListHandler(serverCtx),
 			},
 		},

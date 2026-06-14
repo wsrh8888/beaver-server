@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"time"
 
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
@@ -54,12 +55,18 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 
 	for _, user := range userList {
 		resp.UserInfo[user.UserID] = &user_rpc.UserInfo{
-			UserId:   user.UserID, // 保持向后兼容
-			NickName: user.NickName,
-			Avatar:   user.Avatar,
-			Version:  user.Version,
-			Email:    user.Email,
-			Abstract: user.Abstract,
+			UserId:    user.UserID,
+			NickName:  user.NickName,
+			Avatar:    user.Avatar,
+			Version:   user.Version,
+			Email:     user.Email,
+			Abstract:  user.Abstract,
+			Phone:     user.Phone,
+			Status:    int32(user.Status),
+			Source:    user.Source,
+			UserType:  int32(user.UserType),
+			CreatedAt: time.Time(user.CreatedAt).Format(time.RFC3339),
+			UpdatedAt: time.Time(user.UpdatedAt).Format(time.RFC3339),
 		}
 	}
 

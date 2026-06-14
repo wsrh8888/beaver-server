@@ -19,7 +19,7 @@ func RegisterWebhookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewRegisterWebhookLogic(r.Context(), svcCtx)
-		resp, err := l.RegisterWebhook(&req)
+		resp, err := l.RegisterWebhook(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

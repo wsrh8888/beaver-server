@@ -14,23 +14,25 @@ import (
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/utils/conversation"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/livekit/protocol/auth"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type StartCallLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 发起音视频通话
 func NewStartCallLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StartCallLogic {
 	return &StartCallLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("start_call"),
 		svcCtx: svcCtx,
 	}
 }
@@ -71,6 +73,16 @@ func (l *StartCallLogic) StartCall(req *types.StartCallReq) (resp *types.StartCa
 		// 开启超时处理定时器
 		l.startTimeoutTimer(roomID, targetID)
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "发起通话成功",
+		Data: map[string]interface{}{
+			"roomId":         roomID,
+			"userId":         req.UserID,
+			"conversationId": convID,
+			"callType":       req.CallType,
+		},
+	})
 
 	return &types.StartCallRes{
 		RoomID:     roomID,

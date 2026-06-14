@@ -8,21 +8,24 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type MuteGroupMemberLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 禁言/解禁群成员
 func NewMuteGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteGroupMemberLogic {
 	return &MuteGroupMemberLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("mute_group_member"),
 		svcCtx: svcCtx,
 	}
 }
@@ -70,9 +73,19 @@ func (l *MuteGroupMemberLogic) MuteGroupMember(req *types.MuteGroupMemberReq) (r
 		"muted_until": mutedUntil,
 		"version":     nextVersion,
 	}).Error; err != nil {
-		l.Errorf("更新禁言状态失败: groupID=%s memberID=%s err=%v", req.GroupID, req.MemberID, err)
+		logx.WithContext(l.ctx).Errorf("更新禁言状态失败: groupID=%s memberID=%s err=%v", req.GroupID, req.MemberID, err)
 		return nil, errors.New("操作失败")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "群成员禁言状态更新成功",
+		Data: map[string]interface{}{
+			"groupId":  req.GroupID,
+			"userId":   req.UserID,
+			"memberId": req.MemberID,
+			"duration": req.Duration,
+		},
+	})
 
 	return &types.MuteGroupMemberRes{}, nil
 }

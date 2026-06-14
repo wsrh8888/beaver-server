@@ -2,7 +2,7 @@ Name: gateway
 Addr: 0.0.0.0:20800
 etcd: 127.0.0.1:2379
 Log:
-  Encoding: plain
+  Encoding: json
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
 Auth:
@@ -12,32 +12,15 @@ Limit:
   Enable: true
   Rate: 100    # 每秒请求数
   Burst: 200   # 峰值容忍
-WhiteList:
-  - /api/auth/phone_register
-  - /api/auth/email_register
-  - /api/auth/phonecode
-  - /api/auth/emailcode
-  - /api/auth/phone_login
-  - /api/auth/reset_password
-  - /api/auth/email_login
-  - /api/auth/open_login
-  - /api/auth/authentication
-  - /api/settings/open_login_info
-  - /api/auth/email_password_login
+# 无需 Gateway 鉴权（公开接口）
+PublicList:
+  - /api/auth/auth_public/.*
+  - /api/platform/track_public/.*
+  - /api/platform/update_public/.*
+  - /api/open/.*_public/.*
   - /api/file/preview/.*
-  - /api/dictionary/cities
-  - /api/track/events
-  - /api/track/logs
-  - /api/update/report
   - /api/call/v1/webhook
-  # 开放平台认证接口（无需token）
-  - /api/open/v1/auth/token
-  - /api/open/v1/auth/refresh
-  # 开放平台扫码登录接口（无需token）
-  - /api/open/v1/oauth/qrcode
-  - /api/open/v1/oauth/qrcode_status
-  - /api/open/v1/oauth/qrcode_confirm
-  # 开放平台账号密码登录接口（无需token）
-  - /api/open/v1/oauth/password_login
-  # 开放平台 H5 免登接口（无需token）
-  - /api/open/v1/oauth/h5_authcode
+# 下游服务自带鉴权中间件（如 open_portal DeveloperAuthMiddleware）
+CustomAuthList:
+  - /api/open_portal/.*
+# /api/open/oauth_secret/* Gateway 校验 App-Id/App-Secret 请求头；其余 /api/open/* 默认放行（logic 校验）

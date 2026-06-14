@@ -20,8 +20,8 @@ func CreateEmojiHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 参数校验
-		if req.FileKey == "" {
-			response.Response(r, w, nil, errors.New("文件ID不能为空"))
+		if req.FileUrl == "" {
+			response.Response(r, w, nil, errors.New("文件地址不能为空"))
 			return
 		}
 		if req.Title == "" {

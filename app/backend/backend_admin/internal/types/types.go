@@ -29,7 +29,7 @@ type AddEmojiInfo struct {
 
 type AddEmojiToPackageReq struct {
 	PackageId string       `json:"packageId"`
-	FileKey   string       `json:"fileKey"`
+	FileUrl   string       `json:"fileUrl"`
 	Title     string       `json:"title"`
 	EmojiInfo AddEmojiInfo `json:"emojiInfo"`
 	AuthorID  string       `header:"Beaver-User-Id"`
@@ -42,7 +42,7 @@ type AddEmojiToPackageRes struct {
 type AddVersionReq struct {
 	ArchitectureID uint   `json:"architectureId"`        // 架构ID
 	Version        string `json:"version"`               // 版本号
-	FileKey        string `json:"fileKey"`               // 文件ID
+	FileUrl        string `json:"fileUrl"`               // 安装包完整 URL
 	Description    string `json:"description,optional"`  // 版本描述
 	ReleaseNotes   string `json:"releaseNotes,optional"` // 更新日志
 }
@@ -51,13 +51,38 @@ type AddVersionRes struct {
 	VersionID uint `json:"versionId"` // 创建的版本ID
 }
 
+type AdminUnifiedSearchReq struct {
+	Keyword string `form:"keyword"`
+	Limit   int    `form:"limit,default=10"`
+}
+
+type AdminUnifiedSearchRes struct {
+	Users         []SearchUserHit         `json:"users"`
+	Groups        []SearchGroupHit        `json:"groups"`
+	Messages      []SearchMessageHit      `json:"messages"`
+	Conversations []SearchConversationHit `json:"conversations"`
+}
+
+type AdminUserInfo struct {
+	Id             uint     `json:"id"`
+	UserID         string   `json:"userId"`
+	NickName       string   `json:"nickName"`
+	Phone          string   `json:"phone"`
+	Status         int8     `json:"status"`
+	LastLoginAt    int64    `json:"lastLoginAt"`
+	CreatedAt      string   `json:"createdAt"`
+	AuthorityIds   []uint   `json:"authorityIds"`
+	AuthorityNames []string `json:"authorityNames"`
+}
+
 type ApplyDeveloperReq struct {
-	RealName    string `json:"realName"`
-	CompanyName string `json:"companyName,optional"`
-	Phone       string `json:"phone"`
-	Email       string `json:"email"`
-	Description string `json:"description,optional"`
-	UserID      string `header:"Beaver-User-Id"` // 当前用户ID（由网关注入）
+	ApplicantUserID string `json:"applicantUserId,optional"` // 代申请目标用户ID，空则取当前登录用户
+	RealName        string `json:"realName"`
+	CompanyName     string `json:"companyName,optional"`
+	Phone           string `json:"phone"`
+	Email           string `json:"email"`
+	Description     string `json:"description,optional"`
+	UserID          string `header:"Beaver-User-Id"` // 操作人ID（由网关注入）
 }
 
 type ApplyDeveloperRes struct {
@@ -74,13 +99,32 @@ type AuditDeveloperReq struct {
 type AuditDeveloperRes struct {
 }
 
+type AuditOpenAppReq struct {
+	AppID       string `json:"appId"`
+	Status      int    `json:"status"` // 1通过 2拒绝
+	AuditRemark string `json:"auditRemark,optional"`
+	UserID      string `header:"Beaver-User-Id"`
+}
+
+type AuditOpenAppRes struct {
+}
+
 type AuthenticationReq struct {
-	Token     string `header:"Token,optional"`
-	ValidPath string `header:"ValidPath,optional"`
+	Token     string `header:"Token,optional"`     // string JWT，可选
+	ValidPath string `header:"ValidPath,optional"` // string 当前请求路径，用于白名单判断
 }
 
 type AuthenticationRes struct {
-	UserID string `json:"userId"`
+	UserID string `json:"userId"` // string 管理员用户 ID
+}
+
+type AuthorityInfo struct {
+	Id          uint   `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      int8   `json:"status"`
+	Sort        int    `json:"sort"`
+	MenuCount   int64  `json:"menuCount"`
 }
 
 type BatchDeleteChatMessagesReq struct {
@@ -133,11 +177,65 @@ type BatchUpdateUserStatusReq struct {
 type BatchUpdateUserStatusRes struct {
 }
 
+type CaseContextGroup struct {
+	GroupID string `json:"groupId"`
+	Title   string `json:"title"`
+	Status  int    `json:"status"`
+}
+
+type CaseContextMessage struct {
+	MessageID      string `json:"messageId"`
+	ConversationID string `json:"conversationId"`
+	SendUserID     string `json:"sendUserId"`
+	SendUserName   string `json:"sendUserName"`
+	MsgPreview     string `json:"msgPreview"`
+	IsDeleted      bool   `json:"isDeleted"`
+	CreateTime     string `json:"createTime"`
+}
+
+type CaseContextMoment struct {
+	MomentID string `json:"momentId"`
+	UserID   string `json:"userId"`
+	Content  string `json:"content"`
+}
+
+type CaseContextUser struct {
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Email    string `json:"email"`
+	Status   int    `json:"status"`
+}
+
 type ClearConversationReq struct {
 	ConversationID string `json:"conversationId"`
 }
 
 type ClearConversationRes struct {
+}
+
+type ContentReportInfo struct {
+	ID             uint64 `json:"id"`
+	ReporterUserID string `json:"reporterUserId"`
+	ReporterName   string `json:"reporterName"`
+	TargetType     int    `json:"targetType"`
+	TargetID       string `json:"targetId"`
+	ReasonType     int    `json:"reasonType"`
+	Content        string `json:"content"`
+	Status         int    `json:"status"`
+	CaseID         uint64 `json:"caseId"`
+	CreatedAt      string `json:"createdAt"`
+}
+
+type CreateAdminUserReq struct {
+	NickName     string `json:"nickName"`
+	Phone        string `json:"phone"`
+	Password     string `json:"password"`
+	AuthorityIds []uint `json:"authorityIds"`
+	OperatorID   string `header:"Beaver-User-Id"`
+}
+
+type CreateAdminUserRes struct {
+	UserID string `json:"userId"`
 }
 
 type CreateAuthorityReq struct {
@@ -171,7 +269,7 @@ type CreateEmojiPackageRes struct {
 }
 
 type CreateEmojiReq struct {
-	FileKey   string    `json:"fileKey"`
+	FileUrl   string    `json:"fileUrl"`
 	Title     string    `json:"title"`
 	EmojiInfo EmojiInfo `json:"emojiInfo"`
 	AuthorID  string    `header:"Beaver-User-Id"`
@@ -195,6 +293,32 @@ type CreateMenuReq struct {
 type CreateMenuRes struct {
 }
 
+type CreateModerationCaseReq struct {
+	TargetType  int    `json:"targetType"`
+	TargetID    string `json:"targetId"`
+	Title       string `json:"title"`
+	Description string `json:"description,optional"`
+	Priority    int    `json:"priority,optional"`
+	UserID      string `header:"Beaver-User-Id"`
+}
+
+type CreateModerationCaseRes struct {
+	CaseID uint64 `json:"caseId"`
+	CaseNo string `json:"caseNo"`
+}
+
+type CreateSensitiveWordReq struct {
+	Word     string `json:"word"`
+	Category string `json:"category,optional"`
+	Level    int    `json:"level,optional"`
+	Remark   string `json:"remark,optional"`
+	UserID   string `header:"Beaver-User-Id"`
+}
+
+type CreateSensitiveWordRes struct {
+	ID uint64 `json:"id"`
+}
+
 type CreateUserReq struct {
 	NickName string `json:"nickName"`
 	Password string `json:"password"`
@@ -205,6 +329,28 @@ type CreateUserReq struct {
 
 type CreateUserRes struct {
 	Id string `json:"id"`
+}
+
+type DashboardInboxItem struct {
+	Category  string `json:"category"`
+	Title     string `json:"title"`
+	Summary   string `json:"summary"`
+	EntityID  string `json:"entityId"`
+	CreatedAt string `json:"createdAt"`
+	Action    string `json:"action"`
+}
+
+type DashboardTrendSeries struct {
+	Key    string  `json:"key"`
+	Label  string  `json:"label"`
+	Values []int64 `json:"values"`
+}
+
+type DeleteAuthorityReq struct {
+	Id uint `json:"id"`
+}
+
+type DeleteAuthorityRes struct {
 }
 
 type DeleteBucketReq struct {
@@ -304,11 +450,26 @@ type DeleteMomentReq struct {
 type DeleteMomentRes struct {
 }
 
+type DeleteSensitiveWordReq struct {
+	ID     uint64 `path:"id"`
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type DeleteSensitiveWordRes struct {
+}
+
 type DeleteUserReq struct {
 	UserID string `path:"id"`
 }
 
 type DeleteUserRes struct {
+}
+
+type DeleteVersionReq struct {
+	VersionID uint `path:"id"`
+}
+
+type DeleteVersionRes struct {
 }
 
 type DeveloperInfo struct {
@@ -331,13 +492,35 @@ type EmojiInfo struct {
 	Height int `json:"height"`
 }
 
+type EscalateContentReportReq struct {
+	ReportID uint64 `json:"reportId"`
+	Priority int    `json:"priority,optional"`
+	UserID   string `header:"Beaver-User-Id"`
+}
+
+type EscalateContentReportRes struct {
+	CaseID uint64 `json:"caseId"`
+	CaseNo string `json:"caseNo"`
+}
+
+type ExecuteUserControlReq struct {
+	UserID     string `json:"userId"`
+	Action     string `json:"action"`
+	Reason     string `json:"reason,optional"`
+	CaseID     uint64 `json:"caseId,optional"`
+	OperatorID string `header:"Beaver-User-Id"`
+}
+
+type ExecuteUserControlRes struct {
+}
+
 type FileUploadLocalReq struct {
 	UserID string `header:"Beaver-User-Id"`
 	Source string `form:"source"` // 文件来源：qiniu 或 local
 }
 
 type FileUploadLocalRes struct {
-	FileKey      string `json:"fileKey"`
+	FileURL      string `json:"fileUrl"`
 	OriginalName string `json:"originalName"`
 }
 
@@ -347,8 +530,20 @@ type FileUploadQiniuReq struct {
 }
 
 type FileUploadQiniuRes struct {
-	FileKey      string `json:"fileKey"`
+	FileURL      string `json:"fileUrl"`
 	OriginalName string `json:"originalName"`
+}
+
+type GetAdminUserListReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	Keyword  string `form:"keyword,optional"`
+	Status   int8   `form:"status,optional"`
+}
+
+type GetAdminUserListRes struct {
+	List  []AdminUserInfo `json:"list"`
+	Total int64           `json:"total"`
 }
 
 type GetAppVersionsItem struct {
@@ -419,6 +614,21 @@ type GetArchitecturesRes struct {
 	Architectures []GetArchitecturesItem `json:"architectures"` // 架构列表
 }
 
+type GetAuthorityListReq struct {
+}
+
+type GetAuthorityListRes struct {
+	List []AuthorityInfo `json:"list"`
+}
+
+type GetAuthorityMenusReq struct {
+	Id uint `path:"id"`
+}
+
+type GetAuthorityMenusRes struct {
+	MenuIds []uint `json:"menuIds"`
+}
+
 type GetBucketListItem struct {
 	BucketId    string `json:"bucketId"`    // Bucket ID
 	Name        string `json:"name"`        // Bucket名称
@@ -462,16 +672,18 @@ type GetChatMessageDetailRes struct {
 }
 
 type GetChatMessageListItem struct {
-	Id             string `json:"id"`
-	MessageID      string `json:"messageId"`
-	ConversationID string `json:"conversationId"`
-	SendUserID     string `json:"sendUserId"`
-	SendUserName   string `json:"sendUserName"`
-	MsgType        int    `json:"msgType"`
-	MsgPreview     string `json:"msgPreview"`
-	IsDeleted      bool   `json:"isDeleted"`
-	CreateTime     string `json:"createTime"`
-	UpdateTime     string `json:"updateTime"`
+	Id               string `json:"id"`
+	MessageID        string `json:"messageId"`
+	ConversationID   string `json:"conversationId"`
+	ConversationType int    `json:"conversationType"`
+	SendUserID       string `json:"sendUserId"`
+	SendUserName     string `json:"sendUserName"`
+	MsgType          int    `json:"msgType"`
+	MsgPreview       string `json:"msgPreview"`
+	MsgContent       string `json:"msgContent,optional"`
+	IsDeleted        bool   `json:"isDeleted"`
+	CreateTime       string `json:"createTime"`
+	UpdateTime       string `json:"updateTime"`
 }
 
 type GetChatMessageListReq struct {
@@ -483,6 +695,8 @@ type GetChatMessageListReq struct {
 	IsDeleted      bool   `form:"isDeleted,optional"`      // 按删除状态筛选
 	StartTime      string `form:"startTime,optional"`
 	EndTime        string `form:"endTime,optional"`
+	Order          int    `form:"order,optional"`       // 1正序时间线 2倒序
+	WithContent    bool   `form:"withContent,optional"` // 是否返回完整内容
 }
 
 type GetChatMessageListRes struct {
@@ -490,34 +704,78 @@ type GetChatMessageListRes struct {
 	Total int64                    `json:"total"`
 }
 
-type GetCityStrategiesItem struct {
-	Id        uint                            `json:"id"`        // 策略ID
-	AppID     string                          `json:"appId"`     // 应用ID
-	CityID    string                          `json:"cityId"`    // 城市代码
-	Strategy  []GetCityStrategiesStrategyItem `json:"strategy"`  // 城市策略配置
-	IsActive  bool                            `json:"isActive"`  // 是否启用
-	CreatedAt string                          `json:"createdAt"` // 创建时间
-	UpdatedAt string                          `json:"updatedAt"` // 更新时间
+type GetChatSessionListItem struct {
+	ConversationID   string   `json:"conversationId"`
+	ConversationType int      `json:"conversationType"`
+	Title            string   `json:"title"`
+	PeerUserID       string   `json:"peerUserId"`
+	PeerUserName     string   `json:"peerUserName"`
+	ParticipantIDs   []string `json:"participantIds"`
+	ParticipantNames []string `json:"participantNames"`
+	LastMessage      string   `json:"lastMessage"`
+	LastMessageTime  string   `json:"lastMessageTime"`
+	MessageCount     int64    `json:"messageCount"`
 }
 
-type GetCityStrategiesReq struct {
-	AppID    string `form:"appId,optional"`    // 应用ID
-	IsActive bool   `form:"isActive,optional"` // 是否仅查询活跃策略
-	Page     int    `form:"page,optional"`     // 页码
-	PageSize int    `form:"pageSize,optional"` // 每页数量
+type GetChatSessionListReq struct {
+	UserID           string `form:"userId"`
+	ConversationType int    `form:"conversationType,optional"`
+	Page             int    `form:"page,default=1"`
+	PageSize         int    `form:"pageSize,default=20"`
 }
 
-type GetCityStrategiesRes struct {
-	Total      int64                   `json:"total"`      // 总数
-	Strategies []GetCityStrategiesItem `json:"strategies"` // 策略列表
+type GetChatSessionListRes struct {
+	List  []GetChatSessionListItem `json:"list"`
+	Total int64                    `json:"total"`
 }
 
-type GetCityStrategiesStrategyItem struct {
-	ArchitectureID uint   `json:"architectureId"` // 架构ID
-	VersionID      uint   `json:"versionId"`      // 版本ID
-	Version        string `json:"version"`        // 版本号
-	ForceUpdate    bool   `json:"forceUpdate"`    // 是否强制更新
-	IsActive       bool   `json:"isActive"`       // 是否启用
+type GetContentReportListReq struct {
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"pageSize,default=10"`
+	Status     int    `form:"status,optional"`
+	TargetType int    `form:"targetType,optional"`
+	TargetID   string `form:"targetId,optional"`
+}
+
+type GetContentReportListRes struct {
+	List  []ContentReportInfo `json:"list"`
+	Total int64               `json:"total"`
+}
+
+type GetDashboardInboxReq struct {
+	Limit int `form:"limit,default=20"`
+}
+
+type GetDashboardInboxRes struct {
+	List  []DashboardInboxItem `json:"list"`
+	Total int64                `json:"total"`
+}
+
+type GetDashboardOverviewReq struct {
+}
+
+type GetDashboardOverviewRes struct {
+	UserTotal             int64 `json:"userTotal"`
+	GroupTotal            int64 `json:"groupTotal"`
+	FriendTotal           int64 `json:"friendTotal"`
+	MessageTotal          int64 `json:"messageTotal"`
+	MomentTotal           int64 `json:"momentTotal"`
+	BlockTotal            int64 `json:"blockTotal"`
+	PendingDeveloperCount int64 `json:"pendingDeveloperCount"`
+	PendingAppCount       int64 `json:"pendingAppCount"`
+	PendingFeedbackCount  int64 `json:"pendingFeedbackCount"`
+	PendingReportCount    int64 `json:"pendingReportCount"`
+	PendingCaseCount      int64 `json:"pendingCaseCount"`
+	OnlineUserCount       int64 `json:"onlineUserCount"`
+}
+
+type GetDashboardTrendsReq struct {
+	Days int `form:"days,default=7"`
+}
+
+type GetDashboardTrendsRes struct {
+	Days   []string               `json:"days"`
+	Series []DashboardTrendSeries `json:"series"`
 }
 
 type GetDeveloperListReq struct {
@@ -536,7 +794,7 @@ type GetEmojiCollectListItem struct {
 	UserID       string `json:"userId"`
 	EmojiId      string `json:"emojiId"`
 	EmojiTitle   string `json:"emojiTitle"`
-	EmojiFileKey string `json:"emojiFileKey"`
+	EmojiFileUrl string `json:"emojiFileUrl"`
 	CreateTime   string `json:"createTime"`
 	UpdateTime   string `json:"updateTime"`
 }
@@ -557,7 +815,7 @@ type GetEmojiCollectListRes struct {
 
 type GetEmojiListItem struct {
 	EmojiId    string `json:"emojiId"`
-	FileKey    string `json:"fileKey"`
+	FileUrl    string `json:"fileUrl"`
 	Title      string `json:"title"`
 	AuthorID   string `json:"authorId"`
 	CreateTime string `json:"createTime"`
@@ -580,7 +838,7 @@ type GetEmojiListRes struct {
 
 type GetEmojiPackageEmojisItem struct {
 	EmojiId    string `json:"emojiId"`
-	FileKey    string `json:"fileKey"`
+	FileUrl    string `json:"fileUrl"`
 	Title      string `json:"title"`
 	AuthorID   string `json:"authorId"`
 	CreateTime string `json:"createTime"`
@@ -742,6 +1000,27 @@ type GetFileListReq struct {
 type GetFileListRes struct {
 	List  []GetFileListItem `json:"list"`
 	Total int64             `json:"total"`
+}
+
+type GetFriendBlockListItem struct {
+	Id              string `json:"id"`
+	UserID          string `json:"userId"`
+	UserName        string `json:"userName"`
+	BlockedUserID   string `json:"blockedUserId"`
+	BlockedUserName string `json:"blockedUserName"`
+	CreateTime      string `json:"createTime"`
+}
+
+type GetFriendBlockListReq struct {
+	Page          int    `form:"page,default=1"`
+	PageSize      int    `form:"pageSize,default=10"`
+	UserID        string `form:"userId,optional"`
+	BlockedUserID string `form:"blockedUserId,optional"`
+}
+
+type GetFriendBlockListRes struct {
+	List  []GetFriendBlockListItem `json:"list"`
+	Total int64                    `json:"total"`
 }
 
 type GetFriendDetailReq struct {
@@ -910,6 +1189,20 @@ type GetGroupMemberListRes struct {
 	Total int64                    `json:"total"`
 }
 
+type GetGroupOperationsProfileReq struct {
+	GroupID string `path:"groupId"`
+}
+
+type GetGroupOperationsProfileRes struct {
+	Profile      GroupOpsProfileInfo   `json:"profile"`
+	MemberTotal  int64                 `json:"memberTotal"`
+	MessageTotal int64                 `json:"messageTotal"`
+	ReportTotal  int64                 `json:"reportTotal"`
+	Members      []GroupOpsMemberItem  `json:"members"`
+	Messages     []GroupOpsMessageItem `json:"messages"`
+	Reports      []GroupOpsReportItem  `json:"reports"`
+}
+
 type GetMenuListItem struct {
 	Id       uint   `json:"id"`
 	ParentId uint   `json:"parentId"`
@@ -927,6 +1220,41 @@ type GetMenuListReq struct {
 
 type GetMenuListRes struct {
 	List []GetMenuListItem `json:"list"`
+}
+
+type GetModerationCaseContextReq struct {
+	CaseID uint64 `path:"id"`
+}
+
+type GetModerationCaseContextRes struct {
+	Case           ModerationCaseInfo   `json:"case"`
+	TargetUser     *CaseContextUser     `json:"targetUser,optional"`
+	TargetMessage  *CaseContextMessage  `json:"targetMessage,optional"`
+	TargetMoment   *CaseContextMoment   `json:"targetMoment,optional"`
+	TargetGroup    *CaseContextGroup    `json:"targetGroup,optional"`
+	RelatedReports []ContentReportInfo  `json:"relatedReports"`
+	RecentMessages []CaseContextMessage `json:"recentMessages"`
+}
+
+type GetModerationCaseDetailReq struct {
+	CaseID uint64 `path:"id"`
+}
+
+type GetModerationCaseDetailRes struct {
+	Case ModerationCaseInfo `json:"case"`
+}
+
+type GetModerationCaseListReq struct {
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"pageSize,default=10"`
+	Status     int    `form:"status,optional"`
+	TargetType int    `form:"targetType,optional"`
+	Keyword    string `form:"keyword,optional"`
+}
+
+type GetModerationCaseListRes struct {
+	List  []ModerationCaseInfo `json:"list"`
+	Total int64                `json:"total"`
 }
 
 type GetMomentCommentListItem struct {
@@ -993,12 +1321,97 @@ type GetMomentListRes struct {
 	Total int64               `json:"total"`
 }
 
+type GetOnlineStatsReq struct {
+}
+
+type GetOnlineStatsRes struct {
+	UserCount    int64 `json:"userCount"`    // int64 当前在线用户数
+	DesktopCount int64 `json:"desktopCount"` // int64 PC 端在线用户数
+	MobileCount  int64 `json:"mobileCount"`  // int64 移动端在线用户数
+}
+
+type GetOnlineUserListReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	Keyword  string `form:"keyword,optional"` // string 昵称/邮箱/用户ID 模糊筛选
+}
+
+type GetOnlineUserListRes struct {
+	List  []OnlineUserItem `json:"list"`
+	Total int64            `json:"total"`
+}
+
+type GetOpenAppListReq struct {
+	Page           int    `form:"page,default=1"`
+	PageSize       int    `form:"pageSize,default=10"`
+	Keyword        string `form:"keyword,optional"`
+	OwnerUserID    string `form:"ownerUserId,optional"`
+	AppID          string `form:"appId,optional"`
+	Status         int    `form:"status,optional"`         // 0全部 1草稿 2已发布 3禁用
+	AuditStatus    int    `form:"auditStatus,optional"`    // 0全部 1待审核 2已通过 3已拒绝
+	CapabilityType int    `form:"capabilityType,optional"` // 0全部 1Robot 2Webhook 3Robot或Webhook
+}
+
+type GetOpenAppListRes struct {
+	Total int64         `json:"total"`
+	List  []OpenAppInfo `json:"list"`
+}
+
+type GetOpenWebhookLogListReq struct {
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"pageSize,default=20"`
+	AppID     string `form:"appId,optional"`
+	EventType string `form:"eventType,optional"`
+	Status    int    `form:"status,optional"` // 0全部 1成功 2失败
+}
+
+type GetOpenWebhookLogListRes struct {
+	Total int64                `json:"total"`
+	List  []OpenWebhookLogInfo `json:"list"`
+}
+
+type GetOperationLogListReq struct {
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"pageSize,default=20"`
+	OperatorID string `form:"operatorId,optional"`
+	Action     string `form:"action,optional"`
+	Actions    string `form:"actions,optional"`
+	TargetType string `form:"targetType,optional"`
+	TargetID   string `form:"targetId,optional"`
+	CaseID     uint64 `form:"caseId,optional"`
+}
+
+type GetOperationLogListRes struct {
+	List  []OperationLogInfo `json:"list"`
+	Total int64              `json:"total"`
+}
+
 type GetQiniuUploadTokenReq struct {
 }
 
 type GetQiniuUploadTokenRes struct {
 	UploadToken string `json:"uploadToken"` // 上传token
 	ExpiresIn   int64  `json:"expiresIn"`   // token过期时间 (秒)
+}
+
+type GetReleasePoliciesReq struct {
+	AppID string `form:"appId"`
+}
+
+type GetReleasePoliciesRes struct {
+	Policies []ReleasePolicyItem `json:"policies"`
+}
+
+type GetSensitiveWordListReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=20"`
+	Keyword  string `form:"keyword,optional"`
+	IsActive bool   `form:"isActive,optional"`
+}
+
+type GetSensitiveWordListRes struct {
+	List  []SensitiveWordInfo `json:"list"`
+	Total int64               `json:"total"`
 }
 
 type GetUserDetailReq struct {
@@ -1021,7 +1434,8 @@ type GetUserDetailRes struct {
 type GetUserListReq struct {
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"pageSize,default=10"`
-	Email    string `form:"email, optional"`
+	Email    string `form:"email,optional"`
+	Keyword  string `form:"keyword,optional"` // 昵称/邮箱/手机号模糊搜索
 	Status   int    `form:"status,optional"`
 	Source   int    `form:"source,optional"`
 }
@@ -1031,11 +1445,31 @@ type GetUserListRes struct {
 	Total int64      `json:"total"`
 }
 
+type GetUserOperationsProfileReq struct {
+	UserID string `path:"userId"`
+}
+
+type GetUserOperationsProfileRes struct {
+	Profile      UserOpsProfileInfo   `json:"profile"`
+	FriendTotal  int64                `json:"friendTotal"`
+	GroupTotal   int64                `json:"groupTotal"`
+	SessionTotal int64                `json:"sessionTotal"`
+	MomentTotal  int64                `json:"momentTotal"`
+	ReportTotal  int64                `json:"reportTotal"`
+	BlockTotal   int64                `json:"blockTotal"`
+	Friends      []UserOpsFriendItem  `json:"friends"`
+	Groups       []UserOpsGroupItem   `json:"groups"`
+	Sessions     []UserOpsSessionItem `json:"sessions"`
+	Moments      []UserOpsMomentItem  `json:"moments"`
+	Reports      []UserOpsReportItem  `json:"reports"`
+	Blocks       []UserOpsBlockItem   `json:"blocks"`
+}
+
 type GetVersionListItem struct {
 	VersionID      uint   `json:"versionId"`      // 版本ID
 	ArchitectureID uint   `json:"architectureId"` // 架构ID
 	Version        string `json:"version"`        // 版本号
-	FileKey        string `json:"fileKey"`        // 文件ID
+	FileUrl        string `json:"fileUrl"`        // 安装包完整 URL
 	Description    string `json:"description"`    // 版本描述
 	ReleaseNotes   string `json:"releaseNotes"`   // 更新日志
 	ReleaseDate    string `json:"releaseDate"`    // 发布时间
@@ -1055,6 +1489,43 @@ type GetVersionListRes struct {
 	Versions []GetVersionListItem `json:"versions"` // 版本列表
 }
 
+type GroupOpsMemberItem struct {
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Role     int    `json:"role"`
+	Status   int    `json:"status"`
+	JoinTime string `json:"joinTime"`
+}
+
+type GroupOpsMessageItem struct {
+	MessageID  string `json:"messageId"`
+	SendUserID string `json:"sendUserId"`
+	SendName   string `json:"sendName"`
+	MsgPreview string `json:"msgPreview"`
+	IsDeleted  bool   `json:"isDeleted"`
+	CreateTime string `json:"createTime"`
+}
+
+type GroupOpsProfileInfo struct {
+	GroupID   string `json:"groupId"`
+	Title     string `json:"title"`
+	Avatar    string `json:"avatar"`
+	CreatorID string `json:"creatorId"`
+	Notice    string `json:"notice"`
+	Status    int    `json:"status"`
+	MuteAll   bool   `json:"muteAll"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type GroupOpsReportItem struct {
+	ID             uint64 `json:"id"`
+	ReporterUserID string `json:"reporterUserId"`
+	ReporterName   string `json:"reporterName"`
+	ReasonType     int    `json:"reasonType"`
+	Status         int    `json:"status"`
+	CreatedAt      string `json:"createdAt"`
+}
+
 type HandleFeedbackReq struct {
 	Id           uint   `path:"id"`
 	Status       int    `json:"status"`       // 处理状态
@@ -1065,14 +1536,49 @@ type HandleFeedbackReq struct {
 type HandleFeedbackRes struct {
 }
 
+type HandleModerationCaseReq struct {
+	CaseID       uint64                    `path:"id"`
+	Status       int                       `json:"status"`
+	HandleRemark string                    `json:"handleRemark,optional"`
+	Actions      []ModerationControlAction `json:"actions,optional"`
+	UserID       string                    `header:"Beaver-User-Id"`
+}
+
+type HandleModerationCaseRes struct {
+}
+
 type LoginReq struct {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
+	Phone    string `json:"phone"`    // string 管理员手机号
+	Password string `json:"password"` // string 登录密码
 }
 
 type LoginRes struct {
-	Token  string `json:"token"`
-	UserID string `json:"userId"`
+	Token  string `json:"token"`  // string 访问 JWT
+	UserID string `json:"userId"` // string 管理员用户 ID
+}
+
+type ModerationCaseInfo struct {
+	ID           uint64 `json:"id"`
+	CaseNo       string `json:"caseNo"`
+	Source       int    `json:"source"`
+	SourceID     uint64 `json:"sourceId"`
+	TargetType   int    `json:"targetType"`
+	TargetID     string `json:"targetId"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	Priority     int    `json:"priority"`
+	Status       int    `json:"status"`
+	HandlerID    string `json:"handlerId"`
+	HandleRemark string `json:"handleRemark"`
+	HandleTime   string `json:"handleTime"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type ModerationControlAction struct {
+	Action string `json:"action"`
+	Target string `json:"target,optional"`
+	Reason string `json:"reason,optional"`
+	Extra  string `json:"extra,optional"`
 }
 
 type MuteGroupMemberReq struct {
@@ -1081,6 +1587,65 @@ type MuteGroupMemberReq struct {
 }
 
 type MuteGroupMemberRes struct {
+}
+
+type OnlineUserItem struct {
+	UserID   string               `json:"userId"`   // string 用户 ID
+	NickName string               `json:"nickName"` // string 昵称
+	Email    string               `json:"email"`    // string 邮箱
+	Avatar   string               `json:"avatar"`   // string 头像 fileKey
+	Slots    []OnlineUserSlotItem `json:"slots"`    // array 在线槽位
+}
+
+type OnlineUserSlotItem struct {
+	InstanceID string `json:"instanceId"` // string WS 实例 ID
+	Slot       string `json:"slot"`       // string desktop | mobile
+}
+
+type OpenAppInfo struct {
+	AppID         string `json:"appId"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Icon          string `json:"icon"`
+	OwnerUserID   string `json:"ownerUserId"`
+	OwnerUserName string `json:"ownerUserName"`
+	AppType       int    `json:"appType"`
+	Category      string `json:"category"`
+	Status        int    `json:"status"`
+	AuditStatus   int    `json:"auditStatus"`
+	AuditedBy     string `json:"auditedBy"`
+	AuditedAt     int64  `json:"auditedAt"`
+	EnableRobot   int    `json:"enableRobot"`
+	EnableOAuth   int    `json:"enableOAuth"`
+	EnableWebhook int    `json:"enableWebhook"`
+	CreatedAt     int64  `json:"createdAt"`
+}
+
+type OpenWebhookLogInfo struct {
+	ID           uint64 `json:"id"`
+	AppID        string `json:"appId"`
+	EventID      string `json:"eventId"`
+	EventType    string `json:"eventType"`
+	TargetURL    string `json:"targetUrl"`
+	HTTPStatus   int    `json:"httpStatus"`
+	LatencyMs    int64  `json:"latencyMs"`
+	RetryCount   int    `json:"retryCount"`
+	Status       int    `json:"status"`
+	ErrorMessage string `json:"errorMessage"`
+	CreatedAt    int64  `json:"createdAt"`
+}
+
+type OperationLogInfo struct {
+	ID           uint64 `json:"id"`
+	OperatorID   string `json:"operatorId"`
+	Action       string `json:"action"`
+	TargetType   string `json:"targetType"`
+	TargetID     string `json:"targetId"`
+	CaseID       uint64 `json:"caseId"`
+	Detail       string `json:"detail"`
+	Result       string `json:"result"`
+	ErrorMessage string `json:"errorMessage"`
+	CreatedAt    string `json:"createdAt"`
 }
 
 type PreviewReq struct {
@@ -1116,6 +1681,31 @@ type QueryLogsReq struct {
 type QueryLogsRes struct {
 	Total int64           `json:"total"` // 总数
 	Logs  []QueryLogsItem `json:"logs"`  // 日志条目
+}
+
+type RejectContentReportReq struct {
+	ReportID     uint64 `json:"reportId"`
+	HandleRemark string `json:"handleRemark,optional"`
+	UserID       string `header:"Beaver-User-Id"`
+}
+
+type RejectContentReportRes struct {
+}
+
+type ReleasePolicyItem struct {
+	ID              uint   `json:"id"`
+	AppID           string `json:"appId"`
+	ArchitectureID  uint   `json:"architectureId"`
+	StableVersionID uint   `json:"stableVersionId"`
+	GrayVersionID   uint   `json:"grayVersionId"`
+	RolloutPercent  uint   `json:"rolloutPercent"`
+	MinVersion      string `json:"minVersion"`
+	ForceUpdate     bool   `json:"forceUpdate"`
+	IsActive        bool   `json:"isActive"`
+	StableVersion   string `json:"stableVersion"`
+	GrayVersion     string `json:"grayVersion"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
 }
 
 type RemoveEmojiFromPackageReq struct {
@@ -1170,6 +1760,62 @@ type SaveFileRes struct {
 	FileKey string `json:"fileKey"`
 }
 
+type SearchConversationHit struct {
+	ConversationID string `json:"conversationId"`
+	Title          string `json:"title"`
+	LastMessage    string `json:"lastMessage"`
+}
+
+type SearchGroupHit struct {
+	GroupID string `json:"groupId"`
+	Title   string `json:"title"`
+	Status  int    `json:"status"`
+}
+
+type SearchMessageHit struct {
+	MessageID      string `json:"messageId"`
+	ConversationID string `json:"conversationId"`
+	SendUserID     string `json:"sendUserId"`
+	MsgPreview     string `json:"msgPreview"`
+	CreateTime     string `json:"createTime"`
+}
+
+type SearchUserHit struct {
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Email    string `json:"email"`
+	Status   int    `json:"status"`
+}
+
+type SensitiveWordInfo struct {
+	ID        uint64 `json:"id"`
+	Word      string `json:"word"`
+	Category  string `json:"category"`
+	Level     int    `json:"level"`
+	IsActive  bool   `json:"isActive"`
+	Remark    string `json:"remark"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type UnblockFriendUsersReq struct {
+	Ids []string `json:"ids"`
+}
+
+type UnblockFriendUsersRes struct {
+}
+
+type UpdateAdminUserReq struct {
+	UserID       string `path:"userId"`
+	NickName     string `json:"nickName,optional"`
+	Status       int8   `json:"status,optional"`
+	Password     string `json:"password,optional"`
+	AuthorityIds []uint `json:"authorityIds,optional"`
+	OperatorID   string `header:"Beaver-User-Id"`
+}
+
+type UpdateAdminUserRes struct {
+}
+
 type UpdateArchitectureReq struct {
 	Id          uint   `json:"id"`                   // 记录ID
 	Description string `json:"description,optional"` // 描述
@@ -1192,6 +1838,17 @@ type UpdateAuthorityMenuReq struct {
 type UpdateAuthorityMenuRes struct {
 }
 
+type UpdateAuthorityReq struct {
+	Id          uint   `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      int8   `json:"status"`
+	Sort        int    `json:"sort"`
+}
+
+type UpdateAuthorityRes struct {
+}
+
 type UpdateBucketReq struct {
 	UserID      string `header:"Beaver-User-Id"`     // 用户ID
 	BucketId    string `json:"bucketId"`             // Bucket ID
@@ -1201,23 +1858,6 @@ type UpdateBucketReq struct {
 }
 
 type UpdateBucketRes struct {
-}
-
-type UpdateCityStrategyItem struct {
-	ArchitectureID uint `json:"architectureId"` // 架构ID
-	VersionID      uint `json:"versionId"`      // 版本ID
-	ForceUpdate    bool `json:"forceUpdate"`    // 是否强制更新
-	IsActive       bool `json:"isActive"`       // 是否启用
-}
-
-type UpdateCityStrategyReq struct {
-	AppID      string                   `json:"appId"`               // 应用ID
-	CityIDs    []string                 `json:"cityIds"`             // 城市ID数组
-	Strategy   []UpdateCityStrategyItem `json:"strategy"`            // 城市策略配置
-	UpdateType string                   `json:"updateType,optional"` // 更新类型：single(单个架构) | global(全局架构)
-}
-
-type UpdateCityStrategyRes struct {
 }
 
 type UpdateEmojiPackageReq struct {
@@ -1234,7 +1874,7 @@ type UpdateEmojiPackageRes struct {
 
 type UpdateEmojiReq struct {
 	EmojiId string  `path:"emojiId"`
-	FileKey *string `json:"fileKey,optional"`
+	FileUrl *string `json:"fileUrl,optional"`
 	Title   *string `json:"title,optional"`
 }
 
@@ -1277,6 +1917,28 @@ type UpdateMenuReq struct {
 type UpdateMenuRes struct {
 }
 
+type UpdateOpenAppStatusReq struct {
+	AppIDs []string `json:"appIds"`
+	Action int      `json:"action"` // 3禁用 4启用
+	UserID string   `header:"Beaver-User-Id"`
+}
+
+type UpdateOpenAppStatusRes struct {
+}
+
+type UpdateSensitiveWordReq struct {
+	ID       uint64 `path:"id"`
+	Word     string `json:"word,optional"`
+	Category string `json:"category,optional"`
+	Level    int    `json:"level,optional"`
+	IsActive bool   `json:"isActive,optional"`
+	Remark   string `json:"remark,optional"`
+	UserID   string `header:"Beaver-User-Id"`
+}
+
+type UpdateSensitiveWordRes struct {
+}
+
 type UpdateUserReq struct {
 	UserID   string  `path:"id"`
 	NickName *string `json:"nickName,optional"`
@@ -1287,6 +1949,21 @@ type UpdateUserReq struct {
 }
 
 type UpdateUserRes struct {
+}
+
+type UpsertReleasePolicyReq struct {
+	AppID           string `json:"appId"`
+	ArchitectureID  uint   `json:"architectureId"`
+	StableVersionID uint   `json:"stableVersionId"`
+	GrayVersionID   uint   `json:"grayVersionId,optional"`
+	RolloutPercent  uint   `json:"rolloutPercent"`
+	MinVersion      string `json:"minVersion,optional"`
+	ForceUpdate     bool   `json:"forceUpdate,optional"`
+	IsActive        bool   `json:"isActive,optional"`
+}
+
+type UpsertReleasePolicyRes struct {
+	ID uint `json:"id"`
 }
 
 type UserInfo struct {
@@ -1300,4 +1977,60 @@ type UserInfo struct {
 	LastLoginIP string `json:"lastLoginIp"`
 	CreateTime  string `json:"createTime"`
 	UpdateTime  string `json:"updateTime"`
+}
+
+type UserOpsBlockItem struct {
+	ID              string `json:"id"`
+	BlockedUserID   string `json:"blockedUserId"`
+	BlockedUserName string `json:"blockedUserName"`
+	CreateTime      string `json:"createTime"`
+}
+
+type UserOpsFriendItem struct {
+	PeerUserID   string `json:"peerUserId"`
+	PeerUserName string `json:"peerUserName"`
+	CreateTime   string `json:"createTime"`
+}
+
+type UserOpsGroupItem struct {
+	GroupID string `json:"groupId"`
+	Title   string `json:"title"`
+	Role    int    `json:"role"`
+	Status  int    `json:"status"`
+}
+
+type UserOpsMomentItem struct {
+	MomentID  string `json:"momentId"`
+	Content   string `json:"content"`
+	IsDeleted bool   `json:"isDeleted"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type UserOpsProfileInfo struct {
+	UserID     string `json:"userId"`
+	NickName   string `json:"nickName"`
+	Email      string `json:"email"`
+	Avatar     string `json:"avatar"`
+	Abstract   string `json:"abstract"`
+	Status     int    `json:"status"`
+	Source     int    `json:"source"`
+	CreateTime string `json:"createTime"`
+}
+
+type UserOpsReportItem struct {
+	ID         uint64 `json:"id"`
+	TargetType int    `json:"targetType"`
+	TargetID   string `json:"targetId"`
+	ReasonType int    `json:"reasonType"`
+	Status     int    `json:"status"`
+	CreatedAt  string `json:"createdAt"`
+}
+
+type UserOpsSessionItem struct {
+	ConversationID   string `json:"conversationId"`
+	ConversationType int    `json:"conversationType"`
+	Title            string `json:"title"`
+	LastMessage      string `json:"lastMessage"`
+	LastMessageTime  string `json:"lastMessageTime"`
+	MessageCount     int64  `json:"messageCount"`
 }

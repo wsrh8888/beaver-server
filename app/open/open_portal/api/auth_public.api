@@ -1,0 +1,43 @@
+syntax = "v1"
+
+// ==================== 开发者 Portal 公开接口（无需登录）====================
+
+type (
+	// 开发者账号密码登录
+	LoginReq {
+		Username string `json:"username"` // string 手机号或邮箱
+		Password string `json:"password"` // string 登录密码
+	}
+	LoginRes {
+		Token    string `json:"token"` // string Portal 访问 JWT
+		UserID   string `json:"userId"` // string 开发者用户 ID
+		NickName string `json:"nickName"` // string 开发者昵称
+		ExpireAt int64  `json:"expireAt"` // int64 Token 过期时间 Unix 秒
+	}
+)
+
+type (
+	// OAuth 授权码登录
+	OAuthLoginReq {
+		Code string `json:"code"` // string OAuth 授权码
+	}
+	OAuthLoginRes {
+		Token    string `json:"token"` // string Portal 访问 JWT
+		UserID   string `json:"userId"` // string 开发者用户 ID
+		NickName string `json:"nickName"` // string 开发者昵称
+		ExpireAt int64  `json:"expireAt"` // int64 Token 过期时间 Unix 秒
+	}
+)
+
+@server (
+	group: auth_public
+)
+service open {
+	@doc "开发者 Portal 登录"
+	@handler Login
+	post /api/open_portal/auth_public/v1/login (LoginReq) returns (LoginRes)
+
+	@doc "OAuth 授权码登录"
+	@handler OAuthLogin
+	post /api/open_portal/auth_public/v1/oauth_login (OAuthLoginReq) returns (OAuthLoginRes)
+}

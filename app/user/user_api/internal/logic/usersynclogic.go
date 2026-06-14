@@ -62,6 +62,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 			Email:     user.Email,
 			Gender:    user.Gender,
 			Status:    user.Status,
+			UserType:  user.UserType,
 			Version:   user.Version,
 			CreatedAt: time.Time(user.CreatedAt).Unix(),
 			UpdatedAt: time.Time(user.UpdatedAt).Unix(),

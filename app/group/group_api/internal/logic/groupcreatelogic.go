@@ -14,21 +14,24 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	utils "beaver/utils/rand"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GroupCreateLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewGroupCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupCreateLogic {
 	return &GroupCreateLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("group_create"),
 		svcCtx: svcCtx,
 	}
 }
@@ -125,20 +128,19 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			GroupID: groupModel.GroupID,
 		})
 		if err != nil {
-			l.Logger.Errorf("获取群成员列表失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
 			return
 		}
 
 		// 初始化群聊会话（创建chat_conversation_meta和chat_user_conversations）
 		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
-		fmt.Println("初始化群聊会话")
 		_, err = l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
 			ConversationId: "group_" + groupModel.GroupID,
 			Type:           2, // 群聊类型
 			UserIds:        allUserIDs,
 		})
 		if err != nil {
-			l.Logger.Errorf("初始化群聊会话失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("初始化群聊会话失败: %v", err)
 			return
 		}
 
@@ -146,7 +148,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					l.Logger.Errorf("异步发送群创建消息时发生panic: %v", r)
+					logx.WithContext(l.ctx).Errorf("异步发送群创建消息时发生panic: %v", r)
 				}
 			}()
 
@@ -158,9 +160,9 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 				RelatedUserId:  req.UserID,                          // 创建者ID
 			})
 			if err != nil {
-				l.Logger.Errorf("异步发送群创建消息失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("异步发送群创建消息失败: %v", err)
 			} else {
-				l.Logger.Infof("异步发送群创建消息成功: groupID=%s", groupModel.GroupID)
+				logx.WithContext(l.ctx).Infof("异步发送群创建消息成功: groupID=%s", groupModel.GroupID)
 			}
 		}()
 
@@ -213,6 +215,15 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "群创建成功",
+		Data: map[string]interface{}{
+			"groupId": groupModel.GroupID,
+			"userId":  req.UserID,
+			"count":   len(groupUserList),
+		},
+	})
 
 	return &types.GroupCreateRes{
 		GroupID: groupModel.GroupID,

@@ -5,16 +5,21 @@ import (
 	"beaver/common/etcd"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+var gatewayLog = logger.New("proxy")
 
 type BaseResponse struct {
 	Code int    `json:"code"`
@@ -23,8 +28,8 @@ type BaseResponse struct {
 }
 
 func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uuid string) {
-	res.WriteHeader(statusCode)
 	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(statusCode)
 	response := BaseResponse{Code: 1, Msg: msg}
 	byteData, _ := json.Marshal(response)
 	res.Write(byteData)
@@ -36,46 +41,68 @@ type Proxy struct {
 	Config types.Config
 }
 
-func (p Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
-	// 1. 检查白名单
-	if utils.InListByRegex(p.Config.WhiteList, req.URL.Path) {
-		logx.Infof("白名单请求：%s", req.URL.Path)
-		return true
+func (p Proxy) auth(req *http.Request) (ok bool, errMsg string) {
+	path := req.URL.Path
+
+	// 1. 公开接口，无需鉴权
+	if utils.InListByRegex(p.Config.PublicList, path) {
+		return true, ""
 	}
 
-	// 2. 判断是否是开放平台请求
-	if isOAuthRequest(req.URL.Path) {
-		return p.oauthAuth(res, req)
+	// 2. 自定义鉴权，透传到下游服务 middleware 处理
+	if utils.InListByRegex(p.Config.CustomAuthList, path) {
+		return true, ""
 	}
 
-	// 3. 普通用户请求，使用JWT验证
-	return p.jwtAuth(res, req)
+	// 3. open oauth_secret：Gateway 校验 App-Id / App-Secret 请求头
+	if strings.HasPrefix(path, "/api/open/oauth_secret/") {
+		return p.oauthSecretAuth(req)
+	}
+
+	// 4. open_api：Gateway 默认不鉴权，各接口 logic 自行校验；仅 Beaver JWT 路由例外
+	if isOpenApiPassThrough(path) {
+		return true, ""
+	}
+
+	// 5. 统一 JWT 鉴权
+	if !p.jwtAuth(req) {
+		return false, "网关鉴权失败"
+	}
+	return true, ""
 }
 
-// isOAuthRequest 判断是否是开放平台OAuth请求
-func isOAuthRequest(path string) bool {
-	return len(path) >= 9 && path[:9] == "/api/open"
+func (p Proxy) oauthSecretAuth(req *http.Request) (bool, string) {
+	appID := req.Header.Get("App-Id")
+	if appID == "" {
+		return false, "缺少 App-Id 请求头"
+	}
+
+	appSecret := req.Header.Get("App-Secret")
+	if appSecret == "" {
+		return false, "缺少 App-Secret 请求头"
+	}
+	return true, ""
 }
 
-// oauthAuth OAuth认证（开放平台）
-func (p Proxy) oauthAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
-	// 获取 Access Token
-	token := getToken(req)
-	if token == "" {
-		logx.Error("OAuth token为空")
+var openApiJwtRoutes = []string{
+	`/api/open/oauth/v1/h5_authcode`,
+	`/api/open/oauth/v1/qrcode_scan`,
+	`/api/open/oauth/v1/qrcode_confirm`,
+	`/api/open/oauth/v1/qrcode_cancel`,
+}
+
+func isOpenApiPassThrough(path string) bool {
+	if !strings.HasPrefix(path, "/api/open/") {
 		return false
 	}
-
-	// TODO: 这里应该调用 open_api 验证 token 的有效性
-	// 目前先透传 token，由 open_api 自己验证
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	logx.Info("OAuth请求，透传token到open_api")
+	if utils.InListByRegex(openApiJwtRoutes, path) {
+		return false
+	}
 	return true
 }
 
 // jwtAuth JWT认证（普通用户）
-func (p Proxy) jwtAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
+func (p Proxy) jwtAuth(req *http.Request) bool {
 	// 获取token
 	token := getToken(req)
 	if token == "" {
@@ -110,12 +137,19 @@ func (p Proxy) jwtAuth(res http.ResponseWriter, req *http.Request) (ok bool) {
 
 func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	uuid := getUuid(req)
-	logx.Info("request: ", "唯一标识: ", uuid, req.URL.Path)
 
 	// 限流检查
 	if p.Config.Limit.Enable {
 		clientIP := getClientIP(req)
 		if !p.rateLimitCheck(clientIP) {
+			gatewayLog.Warn(model.LogMsg{
+				Text: "请求频率过高",
+				Data: map[string]interface{}{
+					"clientIp": clientIP,
+					"path":     req.URL.Path,
+					"uuid":     uuid,
+				},
+			})
 			writeErrorResponse(res, "请求频率过高", http.StatusTooManyRequests, uuid)
 			return
 		}
@@ -123,8 +157,17 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	token := getToken(req)
 	req.Header.Set("Token", token)
-	if !p.auth(res, req) {
-		writeErrorResponse(res, "网关鉴权失败", http.StatusServiceUnavailable, uuid)
+	ok, authErrMsg := p.auth(req)
+	if !ok {
+		gatewayLog.Warn(model.LogMsg{
+			Text: "网关鉴权失败",
+			Data: map[string]interface{}{
+				"path": req.URL.Path,
+				"uuid": uuid,
+				"msg":  authErrMsg,
+			},
+		})
+		writeErrorResponse(res, authErrMsg, http.StatusUnauthorized, uuid)
 		return
 	}
 
@@ -151,12 +194,18 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if addr == "" {
+		gatewayLog.Error(model.LogMsg{
+			Text: "服务不可用",
+			Data: map[string]interface{}{
+				"service": service + "_api",
+				"path":    req.URL.Path,
+				"uuid":    uuid,
+			},
+		})
 		logx.Errorf("未匹配到服务: %s_api", service)
 		writeErrorResponse(res, "服务暂时不可用", http.StatusServiceUnavailable, uuid)
 		return
 	}
-
-	logx.Infof("路由到服务: %s -> %s", service, addr)
 
 	remote, _ := url.Parse(fmt.Sprintf("http://%s", addr))
 	reverseProxy := httputil.NewSingleHostReverseProxy(remote)

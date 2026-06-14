@@ -1,0 +1,305 @@
+syntax = "v1"
+
+// ==================== 内容举报 ====================
+type (
+	GetContentReportListReq {
+		Page       int    `form:"page,default=1"`
+		PageSize   int    `form:"pageSize,default=10"`
+		Status     int    `form:"status,optional"`
+		TargetType int    `form:"targetType,optional"`
+		TargetID   string `form:"targetId,optional"`
+	}
+	GetContentReportListRes {
+		List  []ContentReportInfo `json:"list"`
+		Total int64               `json:"total"`
+	}
+	ContentReportInfo {
+		ID             uint64 `json:"id"`
+		ReporterUserID string `json:"reporterUserId"`
+		ReporterName   string `json:"reporterName"`
+		TargetType     int    `json:"targetType"`
+		TargetID       string `json:"targetId"`
+		ReasonType     int    `json:"reasonType"`
+		Content        string `json:"content"`
+		Status         int    `json:"status"`
+		CaseID         uint64 `json:"caseId"`
+		CreatedAt      string `json:"createdAt"`
+	}
+	EscalateContentReportReq {
+		ReportID uint64 `json:"reportId"`
+		Priority int    `json:"priority,optional"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	EscalateContentReportRes {
+		CaseID uint64 `json:"caseId"`
+		CaseNo string `json:"caseNo"`
+	}
+)
+
+type (
+	RejectContentReportReq {
+		ReportID     uint64 `json:"reportId"`
+		HandleRemark string `json:"handleRemark,optional"`
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	RejectContentReportRes {}
+)
+
+// ==================== 处置工单 ====================
+type (
+	GetModerationCaseListReq {
+		Page       int    `form:"page,default=1"`
+		PageSize   int    `form:"pageSize,default=10"`
+		Status     int    `form:"status,optional"`
+		TargetType int    `form:"targetType,optional"`
+		Keyword    string `form:"keyword,optional"`
+	}
+	GetModerationCaseListRes {
+		List  []ModerationCaseInfo `json:"list"`
+		Total int64                `json:"total"`
+	}
+	ModerationCaseInfo {
+		ID           uint64 `json:"id"`
+		CaseNo       string `json:"caseNo"`
+		Source       int    `json:"source"`
+		SourceID     uint64 `json:"sourceId"`
+		TargetType   int    `json:"targetType"`
+		TargetID     string `json:"targetId"`
+		Title        string `json:"title"`
+		Description  string `json:"description"`
+		Priority     int    `json:"priority"`
+		Status       int    `json:"status"`
+		HandlerID    string `json:"handlerId"`
+		HandleRemark string `json:"handleRemark"`
+		HandleTime   string `json:"handleTime"`
+		CreatedAt    string `json:"createdAt"`
+	}
+	GetModerationCaseDetailReq {
+		CaseID uint64 `path:"id"`
+	}
+	GetModerationCaseDetailRes {
+		Case ModerationCaseInfo `json:"case"`
+	}
+	GetModerationCaseContextReq {
+		CaseID uint64 `path:"id"`
+	}
+	GetModerationCaseContextRes {
+		Case           ModerationCaseInfo       `json:"case"`
+		TargetUser     *CaseContextUser         `json:"targetUser,optional"`
+		TargetMessage  *CaseContextMessage      `json:"targetMessage,optional"`
+		TargetMoment   *CaseContextMoment       `json:"targetMoment,optional"`
+		TargetGroup    *CaseContextGroup        `json:"targetGroup,optional"`
+		RelatedReports []ContentReportInfo      `json:"relatedReports"`
+		RecentMessages []CaseContextMessage     `json:"recentMessages"`
+	}
+	CaseContextUser {
+		UserID   string `json:"userId"`
+		NickName string `json:"nickName"`
+		Email    string `json:"email"`
+		Status   int    `json:"status"`
+	}
+	CaseContextMessage {
+		MessageID      string `json:"messageId"`
+		ConversationID string `json:"conversationId"`
+		SendUserID     string `json:"sendUserId"`
+		SendUserName   string `json:"sendUserName"`
+		MsgPreview     string `json:"msgPreview"`
+		IsDeleted      bool   `json:"isDeleted"`
+		CreateTime     string `json:"createTime"`
+	}
+	CaseContextMoment {
+		MomentID string `json:"momentId"`
+		UserID   string `json:"userId"`
+		Content  string `json:"content"`
+	}
+	CaseContextGroup {
+		GroupID string `json:"groupId"`
+		Title   string `json:"title"`
+		Status  int    `json:"status"`
+	}
+	CreateModerationCaseReq {
+		TargetType  int    `json:"targetType"`
+		TargetID    string `json:"targetId"`
+		Title       string `json:"title"`
+		Description string `json:"description,optional"`
+		Priority    int    `json:"priority,optional"`
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	CreateModerationCaseRes {
+		CaseID uint64 `json:"caseId"`
+		CaseNo string `json:"caseNo"`
+	}
+	HandleModerationCaseReq {
+		CaseID       uint64                    `path:"id"`
+		Status       int                       `json:"status"`
+		HandleRemark string                    `json:"handleRemark,optional"`
+		Actions      []ModerationControlAction `json:"actions,optional"`
+		UserID       string                    `header:"Beaver-User-Id"`
+	}
+	ModerationControlAction {
+		Action string `json:"action"`
+		Target string `json:"target,optional"`
+		Reason string `json:"reason,optional"`
+		Extra  string `json:"extra,optional"`
+	}
+	HandleModerationCaseRes {}
+)
+
+// ==================== 快捷管控 ====================
+type (
+	ExecuteUserControlReq {
+		UserID       string `json:"userId"`
+		Action       string `json:"action"`
+		Reason       string `json:"reason,optional"`
+		CaseID       uint64 `json:"caseId,optional"`
+		OperatorID   string `header:"Beaver-User-Id"`
+	}
+	ExecuteUserControlRes {}
+)
+
+// ==================== 操作审计 ====================
+type (
+	GetOperationLogListReq {
+		Page       int    `form:"page,default=1"`
+		PageSize   int    `form:"pageSize,default=20"`
+		OperatorID string `form:"operatorId,optional"`
+		Action     string `form:"action,optional"`
+		Actions    string `form:"actions,optional"`
+		TargetType string `form:"targetType,optional"`
+		TargetID   string `form:"targetId,optional"`
+		CaseID     uint64 `form:"caseId,optional"`
+	}
+	GetOperationLogListRes {
+		List  []OperationLogInfo `json:"list"`
+		Total int64              `json:"total"`
+	}
+	OperationLogInfo {
+		ID           uint64 `json:"id"`
+		OperatorID   string `json:"operatorId"`
+		Action       string `json:"action"`
+		TargetType   string `json:"targetType"`
+		TargetID     string `json:"targetId"`
+		CaseID       uint64 `json:"caseId"`
+		Detail       string `json:"detail"`
+		Result       string `json:"result"`
+		ErrorMessage string `json:"errorMessage"`
+		CreatedAt    string `json:"createdAt"`
+	}
+)
+
+type (
+	GetSensitiveWordListReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=20"`
+		Keyword  string `form:"keyword,optional"`
+		IsActive bool   `form:"isActive,optional"`
+	}
+	GetSensitiveWordListRes {
+		List  []SensitiveWordInfo `json:"list"`
+		Total int64               `json:"total"`
+	}
+	SensitiveWordInfo {
+		ID       uint64 `json:"id"`
+		Word     string `json:"word"`
+		Category string `json:"category"`
+		Level    int    `json:"level"`
+		IsActive bool   `json:"isActive"`
+		Remark   string `json:"remark"`
+		CreatedAt string `json:"createdAt"`
+	}
+)
+
+type (
+	CreateSensitiveWordReq {
+		Word     string `json:"word"`
+		Category string `json:"category,optional"`
+		Level    int    `json:"level,optional"`
+		Remark   string `json:"remark,optional"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	CreateSensitiveWordRes {
+		ID uint64 `json:"id"`
+	}
+)
+
+type (
+	UpdateSensitiveWordReq {
+		ID       uint64 `path:"id"`
+		Word     string `json:"word,optional"`
+		Category string `json:"category,optional"`
+		Level    int    `json:"level,optional"`
+		IsActive bool   `json:"isActive,optional"`
+		Remark   string `json:"remark,optional"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	UpdateSensitiveWordRes {}
+)
+
+type (
+	DeleteSensitiveWordReq {
+		ID     uint64 `path:"id"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DeleteSensitiveWordRes {}
+)
+
+@server (
+	group: moderation
+)
+service backend {
+	@doc "内容举报列表"
+	@handler getContentReportList
+	get /admin/moderation/reports (GetContentReportListReq) returns (GetContentReportListRes)
+
+	@doc "举报立案（创建工单）"
+	@handler escalateContentReport
+	post /admin/moderation/reports/escalate (EscalateContentReportReq) returns (EscalateContentReportRes)
+
+	@doc "驳回举报"
+	@handler rejectContentReport
+	post /admin/moderation/reports/reject (RejectContentReportReq) returns (RejectContentReportRes)
+
+	@doc "工单列表"
+	@handler getModerationCaseList
+	get /admin/moderation/cases (GetModerationCaseListReq) returns (GetModerationCaseListRes)
+
+	@doc "工单详情"
+	@handler getModerationCaseDetail
+	get /admin/moderation/cases/:id (GetModerationCaseDetailReq) returns (GetModerationCaseDetailRes)
+
+	@doc "工单处置上下文（跨域编排）"
+	@handler getModerationCaseContext
+	get /admin/moderation/cases/:id/context (GetModerationCaseContextReq) returns (GetModerationCaseContextRes)
+
+	@doc "创建工单"
+	@handler createModerationCase
+	post /admin/moderation/cases (CreateModerationCaseReq) returns (CreateModerationCaseRes)
+
+	@doc "处置工单（含联动管控）"
+	@handler handleModerationCase
+	put /admin/moderation/cases/:id/handle (HandleModerationCaseReq) returns (HandleModerationCaseRes)
+
+	@doc "用户快捷管控"
+	@handler executeUserControl
+	post /admin/moderation/control/user (ExecuteUserControlReq) returns (ExecuteUserControlRes)
+
+	@doc "操作审计日志"
+	@handler getOperationLogList
+	get /admin/moderation/logs (GetOperationLogListReq) returns (GetOperationLogListRes)
+
+	@doc "敏感词列表"
+	@handler getSensitiveWordList
+	get /admin/moderation/sensitive-words (GetSensitiveWordListReq) returns (GetSensitiveWordListRes)
+
+	@doc "新增敏感词"
+	@handler createSensitiveWord
+	post /admin/moderation/sensitive-words (CreateSensitiveWordReq) returns (CreateSensitiveWordRes)
+
+	@doc "更新敏感词"
+	@handler updateSensitiveWord
+	put /admin/moderation/sensitive-words/:id (UpdateSensitiveWordReq) returns (UpdateSensitiveWordRes)
+
+	@doc "删除敏感词"
+	@handler deleteSensitiveWord
+	delete /admin/moderation/sensitive-words/:id (DeleteSensitiveWordReq) returns (DeleteSensitiveWordRes)
+}

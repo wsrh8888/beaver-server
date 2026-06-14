@@ -2,17 +2,16 @@ package logic
 
 import (
 	"context"
-	"time"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/chat/chat_models"
-	"beaver/app/user/user_models"
-	"beaver/common/list_query"
-	"beaver/common/models"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+const chatMessageStatusDeleted int32 = 4
 
 type GetChatMessageListLogic struct {
 	logx.Logger
@@ -20,95 +19,75 @@ type GetChatMessageListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取聊天消息列表
 func NewGetChatMessageListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetChatMessageListLogic {
-	return &GetChatMessageListLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetChatMessageListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageListReq) (resp *types.GetChatMessageListRes, err error) {
-	// 构建查询条件
-	whereClause := l.svcCtx.DB.Where("1 = 1")
-
-	// 会话ID筛选
-	if req.ConversationID != "" {
-		whereClause = whereClause.Where("conversation_id = ?", req.ConversationID)
+	rpcReq := &chat_rpc.ListChatMessagesReq{
+		Page:           int32(req.Page),
+		PageSize:       int32(req.PageSize),
+		ConversationId: req.ConversationID,
+		SendUserId:     req.SendUserID,
+		MsgType:        int32(req.MsgType),
+		StartTime:      req.StartTime,
+		EndTime:        req.EndTime,
+		WithContent:    req.WithContent,
 	}
-
-	// 发送者ID筛选
-	if req.SendUserID != "" {
-		whereClause = whereClause.Where("send_user_id = ?", req.SendUserID)
+	if req.Order == 1 {
+		rpcReq.Order = 1
+	} else if req.Order == 2 {
+		rpcReq.Order = 2
 	}
-
-	// 消息类型筛选
-	if req.MsgType != 0 {
-		whereClause = whereClause.Where("msg_type = ?", req.MsgType)
-	}
-
-	// 删除状态筛选 - GetChatMessageListReq 没有 Status 字段，使用 IsDeleted
 	if req.IsDeleted {
-		whereClause = whereClause.Where("status = ?", 4) // 4=已删除
+		rpcReq.Status = chatMessageStatusDeleted
 	}
 
-	// 时间范围筛选
-	if req.StartTime != "" {
-		if startTime, err := time.Parse("2006-01-02 15:04:05", req.StartTime); err == nil {
-			whereClause = whereClause.Where("created_at >= ?", startTime)
-		}
-	}
-
-	if req.EndTime != "" {
-		if endTime, err := time.Parse("2006-01-02 15:04:05", req.EndTime); err == nil {
-			whereClause = whereClause.Where("created_at <= ?", endTime)
-		}
-	}
-
-	// 分页查询
-	messages, count, err := list_query.ListQuery(l.svcCtx.DB, chat_models.ChatMessage{}, list_query.Option{
-		PageInfo: models.PageInfo{
-			Page:  req.Page,
-			Limit: req.PageSize,
-			Sort:  "created_at desc",
-		},
-		Where: whereClause,
-	})
-
+	rpcRes, err := l.svcCtx.ChatRpc.ListChatMessages(l.ctx, rpcReq)
 	if err != nil {
-		logx.Errorf("查询聊天消息列表失败: %v", err)
+		l.Errorf("获取聊天消息列表失败: %v", err)
 		return nil, err
 	}
 
-	// 转换为响应格式
-	var list []types.GetChatMessageListItem
-	for _, message := range messages {
-		sendUserName := ""
-		sendUserID := ""
-		if message.SendUserID != nil && *message.SendUserID != "" {
-			sendUserID = *message.SendUserID
-			var user user_models.UserModel
-			if err := l.svcCtx.DB.Where("user_id = ?", *message.SendUserID).First(&user).Error; err == nil {
-				sendUserName = user.NickName
-			}
+	users := map[string]*user_rpc.UserInfo{}
+	seen := map[string]struct{}{}
+	userIDs := make([]string, 0, len(rpcRes.List))
+	for _, m := range rpcRes.List {
+		if m.SendUserId == "" {
+			continue
 		}
-
-		list = append(list, types.GetChatMessageListItem{
-			Id:             message.MessageID,
-			MessageID:      message.MessageID,
-			ConversationID: message.ConversationID,
-			SendUserID:     sendUserID,
-			SendUserName:   sendUserName,
-			MsgType:        int(message.MsgType),
-			MsgPreview:     message.MsgPreview,
-			CreateTime:     message.CreatedAt.String(),
-			UpdateTime:     message.UpdatedAt.String(),
-		})
+		if _, ok := seen[m.SendUserId]; ok {
+			continue
+		}
+		seen[m.SendUserId] = struct{}{}
+		userIDs = append(userIDs, m.SendUserId)
+	}
+	if len(userIDs) > 0 {
+		if res, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: userIDs}); err == nil && res != nil {
+			users = res.UserInfo
+		}
 	}
 
-	return &types.GetChatMessageListRes{
-		List:  list,
-		Total: count,
-	}, nil
+	list := make([]types.GetChatMessageListItem, 0, len(rpcRes.List))
+	for _, m := range rpcRes.List {
+		sendName := ""
+		if u, ok := users[m.SendUserId]; ok && u != nil {
+			sendName = u.NickName
+		}
+		list = append(list, types.GetChatMessageListItem{
+			Id:               m.MessageId,
+			MessageID:        m.MessageId,
+			ConversationID:   m.ConversationId,
+			ConversationType: int(m.ConversationType),
+			SendUserID:       m.SendUserId,
+			SendUserName:     sendName,
+			MsgType:          int(m.MsgType),
+			MsgPreview:       m.MsgPreview,
+			MsgContent:       m.MsgContent,
+			IsDeleted:        m.Status == chatMessageStatusDeleted,
+			CreateTime:       m.CreatedAt,
+			UpdateTime:     m.UpdatedAt,
+		})
+	}
+	return &types.GetChatMessageListRes{List: list, Total: rpcRes.Total}, nil
 }

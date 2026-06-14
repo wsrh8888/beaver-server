@@ -16,6 +16,10 @@ const (
 	ChatConversationMetaReceive    Type = "chat_conversation_meta_receive"    //  服务端->客户端 会话信息同步
 	ChatUserConversationReceive    Type = "chat_user_conversation_receive"    //  服务端->客户端 用户会话信息同步
 	ChatConversationMessageReceive Type = "chat_conversation_message_receive" //  服务端->客户端 会话消息同步
+	ChatPeerReadReceive            Type = "chat_peer_read_receive"            //  服务端->客户端 对端已读序列号同步
+	ChatMessageMediaReceive        Type = "chat_message_media_receive"        //  服务端->客户端 消息媒体状态同步（语音已听等）
+	TypingSend                     Type = "typing_send"                       //  客户端->服务端 正在输入
+	TypingReceive                  Type = "typing_receive"                      //  服务端->客户端 对端正在输入
 )
 const (
 	// -------------------------------------------------------------------------------------

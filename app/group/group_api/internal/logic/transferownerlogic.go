@@ -11,20 +11,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type TransferOwnerLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewTransferOwnerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TransferOwnerLogic {
 	return &TransferOwnerLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("transfer_owner"),
 		svcCtx: svcCtx,
 	}
 }
@@ -50,7 +53,7 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 	// 开始事务
 	tx := l.svcCtx.DB.Begin()
 	if tx.Error != nil {
-		l.Logger.Errorf("开启事务失败: %v", tx.Error)
+		logx.WithContext(l.ctx).Errorf("开启事务失败: %v", tx.Error)
 		return nil, errors.New("转让群组失败")
 	}
 
@@ -60,7 +63,7 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 		Update("role", 3).Error
 	if err != nil {
 		tx.Rollback()
-		l.Logger.Errorf("更新原群主角色失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("更新原群主角色失败: %v", err)
 		return nil, errors.New("转让群组失败")
 	}
 
@@ -70,20 +73,20 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 		Update("role", 1).Error
 	if err != nil {
 		tx.Rollback()
-		l.Logger.Errorf("更新新群主角色失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("更新新群主角色失败: %v", err)
 		return nil, errors.New("转让群组失败")
 	}
 
 	// 获取该群成员的版本号（按群独立递增）
 	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 	if memberVersion == -1 {
-		l.Logger.Errorf("获取群成员版本号失败")
+		logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
 		return nil, errors.New("获取版本号失败")
 	}
 
 	// 提交事务
 	if err = tx.Commit().Error; err != nil {
-		l.Logger.Errorf("提交事务失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("提交事务失败: %v", err)
 		return nil, errors.New("转让群组失败")
 	}
 
@@ -97,7 +100,7 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			l.Logger.Errorf("获取群成员列表失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
 			return
 		}
 
@@ -122,6 +125,15 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "转让群主成功",
+		Data: map[string]interface{}{
+			"groupId":    req.GroupID,
+			"userId":     req.UserID,
+			"newOwnerId": req.NewOwnerID,
+		},
+	})
 
 	return &types.TransferOwnerRes{
 		Version: memberVersion,

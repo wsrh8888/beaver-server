@@ -1,0 +1,57 @@
+syntax = "v1"
+
+// ==================== 智能机器人 Robot（应用维度，user_type=3，Webhook 收事件 + Robot API 回消息）====================
+
+type (
+	// 获取智能机器人 Robot 配置
+	GetRobotConfigReq {
+		AppID  string `form:"appId"` // string 应用 ID
+		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	}
+	RobotConfigInfo {
+		AppID            string `json:"appId"` // string 应用 ID
+		RobotID          string `json:"robotId"` // string Robot 在 IM 中的用户 ID
+		RobotName        string `json:"robotName"` // string Robot 昵称
+		Avatar           string `json:"avatar,optional"` // string 头像 URL，可选
+		WelcomeMessage   string `json:"welcomeMessage,optional"` // string 欢迎语，可选
+		CommandPrefix    string `json:"commandPrefix,optional"` // string 命令前缀，可选
+		EnableSingleChat bool   `json:"enableSingleChat"` // bool 是否启用单聊
+		EnableGroupChat  bool   `json:"enableGroupChat"` // bool 是否启用群聊
+		EnableAtMention  bool   `json:"enableAtMention"` // bool 是否允许 @ 提及
+		Status           int    `json:"status"` // int 状态：0 禁用 1 启用
+	}
+	GetRobotConfigRes {
+		Config RobotConfigInfo `json:"config"` // Robot 配置
+	}
+)
+
+type (
+	// 更新智能机器人 Robot 配置
+	UpdateRobotConfigReq {
+		AppID            string `json:"appId"` // string 应用 ID
+		RobotName        string `json:"robotName,optional"` // string Robot 昵称，可选
+		Avatar           string `json:"avatar,optional"` // string 头像 URL，可选
+		WelcomeMessage   string `json:"welcomeMessage,optional"` // string 欢迎语，可选
+		CommandPrefix    string `json:"commandPrefix,optional"` // string 命令前缀，可选
+		EnableSingleChat *bool  `json:"enableSingleChat,optional"` // bool 是否启用单聊，可选
+		EnableGroupChat  *bool  `json:"enableGroupChat,optional"` // bool 是否启用群聊，可选
+		EnableAtMention  *bool  `json:"enableAtMention,optional"` // bool 是否允许 @ 提及，可选
+		Status           *int   `json:"status,optional"` // int 状态，可选
+		UserID           string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	}
+	UpdateRobotConfigRes {}
+)
+
+@server (
+	group: robot
+	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
+)
+service open {
+	@doc "获取智能机器人 Robot 配置"
+	@handler GetRobotConfig
+	get /api/open_portal/robot/v1/config (GetRobotConfigReq) returns (GetRobotConfigRes)
+
+	@doc "更新智能机器人 Robot 配置"
+	@handler UpdateRobotConfig
+	post /api/open_portal/robot/v1/config_update (UpdateRobotConfigReq) returns (UpdateRobotConfigRes)
+}

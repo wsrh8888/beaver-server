@@ -15,85 +15,85 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 发送好友验证请求
 				Method:  http.MethodPost,
-				Path:    "/api/friend/add_friend",
+				Path:    "/api/friend/v1/add_friend",
 				Handler: addFriendHandler(serverCtx),
 			},
 			{
 				// 拉黑用户
 				Method:  http.MethodPost,
-				Path:    "/api/friend/block",
+				Path:    "/api/friend/v1/block",
 				Handler: blockUserHandler(serverCtx),
 			},
 			{
 				// 取消拉黑
 				Method:  http.MethodDelete,
-				Path:    "/api/friend/block",
+				Path:    "/api/friend/v1/block",
 				Handler: unblockUserHandler(serverCtx),
 			},
 			{
 				// 获取黑名单列表
 				Method:  http.MethodGet,
-				Path:    "/api/friend/block_list",
+				Path:    "/api/friend/v1/block_list",
 				Handler: blockListHandler(serverCtx),
 			},
 			{
 				// 删除好友
 				Method:  http.MethodDelete,
-				Path:    "/api/friend/friend",
+				Path:    "/api/friend/v1/friend",
 				Handler: deleteFriendHandler(serverCtx),
 			},
 			{
 				// 获取好友详细信息
 				Method:  http.MethodGet,
-				Path:    "/api/friend/friend_info",
+				Path:    "/api/friend/v1/friend_info",
 				Handler: friendInfoHandler(serverCtx),
 			},
 			{
 				// 获取好友列表
 				Method:  http.MethodGet,
-				Path:    "/api/friend/friend_list",
+				Path:    "/api/friend/v1/friend_list",
 				Handler: friendListHandler(serverCtx),
 			},
 			{
 				// 批量获取好友验证数据（通过ID）
 				Method:  http.MethodPost,
-				Path:    "/api/friend/getFriendVerifiesListByIds",
+				Path:    "/api/friend/v1/getFriendVerifiesListByIds",
 				Handler: getFriendVerifiesListByIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取好友数据（通过ID）
 				Method:  http.MethodPost,
-				Path:    "/api/friend/getFriendsListByIds",
+				Path:    "/api/friend/v1/getFriendsListByIds",
 				Handler: getFriendsListByUuidsHandler(serverCtx),
 			},
 			{
 				// 通过用户ID或邮箱搜索用户
 				Method:  http.MethodGet,
-				Path:    "/api/friend/search",
+				Path:    "/api/friend/v1/search",
 				Handler: searchHandler(serverCtx),
 			},
 			{
 				// 查询好友验证记录
 				Method:  http.MethodPost,
-				Path:    "/api/friend/searchValidInfo",
+				Path:    "/api/friend/v1/searchValidInfo",
 				Handler: searchValidInfoHandler(serverCtx),
 			},
 			{
 				// 修改好友备注
 				Method:  http.MethodPost,
-				Path:    "/api/friend/update_notice",
+				Path:    "/api/friend/v1/update_notice",
 				Handler: noticeUpdateHandler(serverCtx),
 			},
 			{
 				// 处理好友验证请求(同意/拒绝)
 				Method:  http.MethodPost,
-				Path:    "/api/friend/valid",
+				Path:    "/api/friend/v1/valid",
 				Handler: userValidStatusHandler(serverCtx),
 			},
 			{
 				// 获取好友验证请求列表
 				Method:  http.MethodPost,
-				Path:    "/api/friend/valid_list",
+				Path:    "/api/friend/v1/valid_list",
 				Handler: validListHandler(serverCtx),
 			},
 		},

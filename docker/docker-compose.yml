@@ -81,9 +81,18 @@ services:
     volumes:
       - ./rocketmq/broker/logs:/home/rocketmq/logs
       - ./rocketmq/broker/store:/home/rocketmq/store
-      - ./rocketmq/broker/conf/broker.conf:/home/rocketmq/conf/broker.conf
+      - ./rocketmq/broker/conf/broker-cluster.conf:/home/rocketmq/conf/broker.conf
     depends_on:
       - rocketmq-namesrv
+
+  rocketmq-init:
+    image: apache/rocketmq:5.3.1
+    container_name: rocketmq-init
+    depends_on:
+      - rocketmq-broker
+    restart: on-failure
+    entrypoint: >
+      sh -c "sleep 10 && mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t ws_push_topic"
 
   rocketmq-console:
     image: apacherocketmq/rocketmq-dashboard:latest

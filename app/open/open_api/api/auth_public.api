@@ -1,0 +1,42 @@
+syntax = "v1"
+
+// ==================== Open API 客户端凭证（Gateway auth_public 放行）====================
+
+type (
+	// 获取访问令牌（client_credentials）
+	GetTokenReq {
+		AppID     string `json:"appId"` // string 应用 ID
+		AppSecret string `json:"appSecret"` // string 应用密钥
+	}
+	GetTokenRes {
+		AccessToken  string `json:"accessToken"` // string 访问令牌
+		RefreshToken string `json:"refreshToken,optional"` // string 刷新令牌，可选
+		ExpiresIn    int64  `json:"expiresIn"` // int64 访问令牌有效期秒
+		TokenType    string `json:"tokenType"` // string 令牌类型，一般为 Bearer
+	}
+)
+
+type (
+	// 刷新访问令牌
+	RefreshTokenReq {
+		RefreshToken string `json:"refreshToken"` // string 刷新令牌
+	}
+	RefreshTokenRes {
+		AccessToken  string `json:"accessToken"` // string 新的访问令牌
+		RefreshToken string `json:"refreshToken,optional"` // string 新的刷新令牌，可选
+		ExpiresIn    int64  `json:"expiresIn"` // int64 访问令牌有效期秒
+	}
+)
+
+@server (
+	group: auth_public
+)
+service open {
+	@doc "获取访问令牌（客户端凭证模式）"
+	@handler GetToken
+	post /api/open/auth_public/v1/token (GetTokenReq) returns (GetTokenRes)
+
+	@doc "刷新访问令牌"
+	@handler RefreshToken
+	post /api/open/auth_public/v1/refresh (RefreshTokenReq) returns (RefreshTokenRes)
+}

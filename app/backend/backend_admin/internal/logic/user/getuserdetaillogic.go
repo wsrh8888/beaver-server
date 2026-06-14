@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type GetUserDetailLogic struct {
@@ -18,39 +17,31 @@ type GetUserDetailLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取用户详情
 func NewGetUserDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserDetailLogic {
-	return &GetUserDetailLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetUserDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// GetUserDetail 管理后台：用户详情。
+// admin 职责：校验 userId，复用 ListUsers 查单条并映射响应。
+// RPC 职责：ListUsers(user_id) 精确查询，admin 不单独依赖 UserInfo RPC。
 func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserDetailReq) (resp *types.GetUserDetailRes, err error) {
-	var user user_models.UserModel
-
-	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			l.Logger.Errorf("用户不存在: %s", req.UserID)
-			return nil, errors.New("用户不存在")
-		}
-		l.Logger.Errorf("查询用户详情失败: %v", err)
-		return nil, errors.New("查询用户详情失败")
+	if req.UserID == "" {
+		return nil, errors.New("用户ID不能为空")
 	}
 
-	l.Logger.Infof("获取用户详情成功: userID=%s", req.UserID)
+	rpcRes, err := l.svcCtx.UserRpc.ListUsers(l.ctx, &user_rpc.ListUsersReq{UserId: req.UserID})
+	if err != nil {
+		l.Errorf("获取用户详情失败: %v", err)
+		return nil, err
+	}
+	if len(rpcRes.List) == 0 {
+		return nil, errors.New("用户不存在")
+	}
+
+	u := rpcRes.List[0]
 	return &types.GetUserDetailRes{
-		Id:          user.UserID,
-		NickName:    user.NickName,
-		FileName:    user.Avatar,
-		Email:       user.Email,
-		Abstract:    user.Abstract,
-		Status:      int(user.Status),
-		Source:      int(user.Source),
-		LastLoginIP: "", // UserModel 没有 LastLoginIP 字段
-		CreateTime:  user.CreatedAt.String(),
-		UpdateTime:  user.UpdatedAt.String(),
+		Id: u.UserId, NickName: u.NickName, FileName: u.Avatar, Email: u.Email,
+		Abstract: u.Abstract, Status: int(u.Status), Source: int(u.Source),
+		CreateTime: u.CreatedAt, UpdateTime: u.UpdatedAt,
 	}, nil
 }

@@ -7,7 +7,23 @@
       "WebFetch(domain:open.dingtalk.com)",
       "WebFetch(domain:developers.dingtalk.com)",
       "WebFetch(domain:open.larksuite.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git config *)",
+      "Bash(git filter-repo *)",
+      "Bash(git filter-branch -f --env-filter ' *)",
+      "Bash(git stash *)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --env-filter ' *)",
+      "Bash(xargs -I{} git update-ref -d {})",
+      "Bash(git checkout *)",
+      "Bash(git push *)",
+      "Bash(xargs grep -l \"webhook\\\\|Webhook\")",
+      "Bash(goctl rpc *)",
+      "Bash(goctl --version)",
+      "Bash(xargs grep -l \"NotificationBot\")",
+      "Bash(xargs sed -i 's/OpenGroupBot/OpenGroupBotModel/g')",
+      "Bash(grep -r \"OpenGroupBot[^M]\" --include=\"*.go\" .)",
+      "Bash(grep -r \"webhook\\\\.Name\" --include=\"*.go\" .)",
+      "Bash(awk -F: '{print $1}')"
     ]
   }
 }

@@ -29,12 +29,8 @@ func NewCreateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateA
 }
 
 func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateAppRes, err error) {
-	// 1. 验证用户ID（由网关注入到 header）
-	if req.UserID == "" {
-		return nil, errors.New("未登录")
-	}
 
-	// 2. 生成 AppID 和 AppSecret
+	// 生成 AppID 和 AppSecret
 	appID := fmt.Sprintf("app_%s", uuid.New().String()[:8])
 	appSecret := uuid.New().String() + uuid.New().String()
 
@@ -46,7 +42,7 @@ func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateA
 		Description: req.Description,
 		OwnerUserID: req.UserID,
 		Status:      0, // 0=草稿，1=已发布，2=禁用
-		// Icon:        req.Icon, // TODO: 数据库添加 icon 字段后启用
+		Icon:        req.Icon,
 	}
 
 	if err := l.svcCtx.DB.Create(&app).Error; err != nil {

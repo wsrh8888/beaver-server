@@ -9,6 +9,7 @@ import (
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	grpcMiddleware "beaver/common/middleware/grpc"
+	"beaver/utils/logger"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -25,6 +26,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logger.Init("chat_rpc")
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

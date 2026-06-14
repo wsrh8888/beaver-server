@@ -2,9 +2,9 @@ syntax = "v1"
 
 type wsReq {
 	UserID   string `form:"userId"` // 用户ID
-	Token    string `form:"token"` // 用户token
-	Platform string `form:"platform"` // 平台类型
-	DeviceID string `form:"deviceId"` // 设备唯一标识 (GUID)
+	Token    string `form:"token"` // 用户token（JWT）
+	Platform string `form:"platform"` // 平台类型：windows/macos/linux/ios/android（后端通过 User-Agent 二次校验）
+	DeviceID string `form:"deviceId"` // 设备唯一标识 (GUID)，用于设备指纹校验
 }
 
 type IBodySendMsg {
@@ -60,11 +60,11 @@ type SystemNotification {
 service ws {
 	@doc "WebSocket连接入口"
 	@handler chatWebsocket
-	get /api/ws/ws (wsReq) returns (wsRes)
+	get /api/ws/v1/ws (wsReq) returns (wsRes)
 
 	@doc "HTTP API发送消息"
 	@handler proxySendMsgHandler
-	post /api/ws/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes)
+	post /api/ws/v1/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes)
 }
 
 // goctl api go -api ws_api.api -dir . --home ../../template

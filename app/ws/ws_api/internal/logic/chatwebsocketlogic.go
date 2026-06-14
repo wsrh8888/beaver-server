@@ -11,6 +11,7 @@ import (
 	"beaver/app/ws/ws_api/internal/logic/websocket/heartbeat"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
+	"beaver/core/coreonline"
 	"beaver/utils/device"
 
 	"github.com/gorilla/websocket"
@@ -69,15 +70,20 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 
 	logx.Infof("用户上线: %s, 槽位: %s (%s), 地址: %s", req.UserID, deviceGroup, preciseType, conn.RemoteAddr().String())
 	manageUserConnection(userKey, client, req.UserID, deviceGroup)
-	defer cleanupConnection(req.UserID, conn)
+	coreonline.MarkOnline(l.svcCtx.Redis, req.UserID, deviceGroup, l.svcCtx.InstanceID)
+	connAddr := conn.RemoteAddr().String()
+	defer func() {
+		conn.Close()
+		cleanupConnection(req.UserID, deviceGroup, connAddr, l.svcCtx)
+	}()
 
 	// 6. 启动心跳
-	heartbeatManager := heartbeat.NewManager(client, req.UserID, l.svcCtx)
+	heartbeatManager := heartbeat.NewManager(client, req.UserID, deviceGroup, l.svcCtx)
 	defer heartbeatManager.Stop()
 	heartbeatManager.Start()
 
 	// 7. 消息循环
-	ws.HandleWebSocketMessages(l.ctx, l.svcCtx, req, r, client)
+	ws.HandleWebSocketMessages(l.ctx, l.svcCtx, req, deviceGroup, r, client)
 
 	return nil, nil
 }
@@ -125,26 +131,21 @@ func upgradeToWebSocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn
 	return upGrader.Upgrade(w, r, nil)
 }
 
-func cleanupConnection(userID string, conn *websocket.Conn) {
-	conn.Close()
-	addr := conn.RemoteAddr().String()
-
-	logx.Infof("清理连接, 用户: %s, 地址: %s", userID, addr)
-
+func cleanupConnection(userID, deviceGroup, addr string, svcCtx *svc.ServiceContext) {
 	ws_conn.WsMapMutex.Lock()
 	defer ws_conn.WsMapMutex.Unlock()
 
-	// 清理所有潜在槽位
-	for _, dt := range []string{"desktop", "mobile", "web", "unknown"} {
-		userKey := ws_conn.GetUserKey(userID, dt)
-		userWsInfo, ok := ws_conn.UserOnlineWsMap[userKey]
-		if !ok {
-			continue
-		}
-		delete(userWsInfo.WsClientMap, addr)
-		if len(userWsInfo.WsClientMap) == 0 {
-			delete(ws_conn.UserOnlineWsMap, userKey)
-			logx.Infof("用户下线, 用户: %s, 槽位: %s", userID, dt)
-		}
+	userKey := ws_conn.GetUserKey(userID, deviceGroup)
+	userWsInfo, ok := ws_conn.UserOnlineWsMap[userKey]
+	if !ok {
+		coreonline.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
+		return
+	}
+
+	delete(userWsInfo.WsClientMap, addr)
+	if len(userWsInfo.WsClientMap) == 0 {
+		delete(ws_conn.UserOnlineWsMap, userKey)
+		coreonline.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
+		logx.Infof("用户下线, 用户: %s, 槽位: %s", userID, deviceGroup)
 	}
 }

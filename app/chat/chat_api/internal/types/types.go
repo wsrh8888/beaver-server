@@ -2,7 +2,7 @@
 package types
 
 type AudioFileMsg struct {
-	FileKey  string `json:"fileKey"`           //音频文件ID
+	FileUrl  string `json:"fileUrl"`           // 音频文件完整 URL
 	FileName string `json:"fileName,optional"` //原始文件名（可选，用于显示）
 	Duration int    `json:"duration,optional"` //音频时长（秒，可选）
 	Size     int64  `json:"size,optional"`     //文件大小（字节，可选）
@@ -54,6 +54,16 @@ type ChatSyncRes struct {
 	NextSeq  int64             `json:"nextSeq"`  // 下次同步的起始序列号
 }
 
+type CloudDocMsg struct {
+	DocID    string `json:"docId"`             // 文档唯一标识
+	DocType  int    `json:"docType"`           // 1=文档 2=表格 3=幻灯片 4=思维笔记
+	Title    string `json:"title"`             // 标题
+	OwnerID  string `json:"ownerId,optional"`  // 所有者用户ID
+	Perm     int    `json:"perm,optional"`     // 1=只读 2=可评论 3=可编辑
+	CoverURL string `json:"coverUrl,optional"` // 封面图
+	Revision int64  `json:"revision,optional"` // 版本号
+}
+
 type ConversationById struct {
 	ConversationID string `json:"conversationId"` // 会话ID
 	Type           int    `json:"type"`           // 会话类型 1=私聊 2=群聊 3=系统会话
@@ -96,30 +106,19 @@ type DeleteRecentReq struct {
 type DeleteRecentRes struct {
 }
 
-type EditMessageReq struct {
-	UserID    string `header:"Beaver-User-Id"`
-	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`   //新的消息内容
-}
-
-type EditMessageRes struct {
-	Id        uint   `json:"id"`        //数据库自增ID
-	MessageID string `json:"messageId"` //客户端消息ID
-	Content   string `json:"content"`   //编辑后的内容
-	EditTime  string `json:"editTime"`  //编辑时间
-}
-
 type EmojiMsg struct {
-	FileKey   string `json:"fileKey"`   // 表情图片文件ID（Emoji.FileName）
+	FileUrl   string `json:"fileUrl"`   // 表情图片完整 URL
 	EmojiID   string `json:"emojiId"`   // 表情ID（Emoji.Id，单个表情时使用）
 	PackageID string `json:"packageId"` // 表情包ID（EmojiPackage.Id，表情包分享时使用）
 }
 
 type FileMsg struct {
-	FileKey  string `json:"fileKey"`           //文件ID
-	FileName string `json:"fileName,optional"` //原始文件名（可选，用于显示）
-	Size     int64  `json:"size,optional"`     //文件大小（字节，可选）
-	MimeType string `json:"mimeType,optional"` //MIME类型（可选，如 application/pdf）
+	FileUrl   string `json:"fileUrl"`            // 文件完整 URL
+	FileName  string `json:"fileName,optional"`  // 原始文件名
+	Size      int64  `json:"size,optional"`      // 文件大小（字节）
+	MimeType  string `json:"mimeType,optional"`  // MIME 类型
+	Extension string `json:"extension,optional"` // 扩展名：docx、pptx、xlsx、pdf
+	OpenMode  int    `json:"openMode,optional"`  // 1=下载 2=预览 3=在线编辑
 }
 
 type ForwardMessageReq struct {
@@ -177,10 +176,18 @@ type HideChatRes struct {
 }
 
 type ImageMsg struct {
-	FileKey string `json:"fileKey"`         //图片文件ID
+	FileUrl string `json:"fileUrl"`         // 图片完整 URL
 	Width   int    `json:"width,optional"`  //图片宽度（可选）
 	Height  int    `json:"height,optional"` //图片高度（可选）
 	Size    int64  `json:"size,optional"`   //文件大小（字节，可选）
+}
+
+type MarkMessageMediaReq struct {
+	UserID     string   `header:"Beaver-User-Id"` // 用户ID
+	MessageIDs []string `json:"messageIds"`       // 消息ID列表，最多100条
+}
+
+type MarkMessageMediaRes struct {
 }
 
 type Message struct {
@@ -195,12 +202,12 @@ type Message struct {
 }
 
 type Msg struct {
-	Type            uint32           `json:"type"`                     // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
-	AtUserIds       []string         `json:"atUserIds,optional"`       // @的用户ID列表，服务端据此触发定向推送（与消息类型无关）
+	Type            uint32           `json:"type"`                     // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接 15:云文档
+	AtUserIds       []string         `json:"atUserIds,optional"`       // @的用户ID列表
 	TextMsg         *TextMsg         `json:"textMsg,optional"`         // 文本消息
 	ImageMsg        *ImageMsg        `json:"imageMsg,optional"`        // 图片
 	VideoMsg        *VideoMsg        `json:"videoMsg,optional"`        // 视频
-	FileMsg         *FileMsg         `json:"fileMsg,optional"`         // 文件
+	FileMsg         *FileMsg         `json:"fileMsg,optional"`         // 文件附件（Office/PDF 等）
 	VoiceMsg        *VoiceMsg        `json:"voiceMsg,optional"`        // 语音
 	EmojiMsg        *EmojiMsg        `json:"emojiMsg,optional"`        // 表情
 	NotificationMsg *NotificationMsg `json:"notificationMsg,optional"` // 通知消息
@@ -209,6 +216,7 @@ type Msg struct {
 	WithdrawMsg     *WithdrawMsg     `json:"withdrawMsg,optional"`     // 撤回消息
 	ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"`        // 回复消息
 	ForwardMsg      *ForwardMsg      `json:"forwardMsg,optional"`      // 转发消息（集合）
+	CloudDocMsg     *CloudDocMsg     `json:"cloudDocMsg,optional"`     // 云文档分享卡片
 }
 
 type MuteChatReq struct {
@@ -261,6 +269,19 @@ type ReplyMsg struct {
 	ReplyMsg    *Msg   `json:"replyMsg"`           // 回复的消息主体 (可以是文本、图片等)
 }
 
+type SearchMessagesReq struct {
+	UserID         string `header:"Beaver-User-Id"`
+	Keyword        string `json:"keyword"`                 // 搜索关键词
+	ConversationID string `json:"conversationId,optional"` // 可选，限定在某个会话内搜索
+	Page           int    `json:"page,optional"`
+	Limit          int    `json:"limit,optional"`
+}
+
+type SearchMessagesRes struct {
+	Count int64     `json:"count"`
+	List  []Message `json:"list"`
+}
+
 type SendMsgReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` //会话id
@@ -283,6 +304,7 @@ type Sender struct {
 	UserID   string `json:"userId"`
 	Avatar   string `json:"avatar"`
 	NickName string `json:"nickName"`
+	UserType int8   `json:"userType"` // 1普通用户 2bot 3robot
 }
 
 type TextMsg struct {
@@ -312,21 +334,21 @@ type UserConversationSettingById struct {
 }
 
 type VideoMsg struct {
-	FileKey      string `json:"fileKey"`               //视频文件ID
+	FileUrl      string `json:"fileUrl"`               // 视频完整 URL
 	Width        int    `json:"width,optional"`        //视频宽度（可选）
 	Height       int    `json:"height,optional"`       //视频高度（可选）
 	Duration     int    `json:"duration,optional"`     //视频时长（秒，可选）
-	ThumbnailKey string `json:"thumbnailKey,optional"` //视频封面图文件ID（可选）
+	ThumbnailUrl string `json:"thumbnailUrl,optional"` // 视频封面完整 URL
 	Size         int64  `json:"size,optional"`         //文件大小（字节，可选）
 }
 
 type VoiceMsg struct {
-	FileKey  string `json:"fileKey"`           //语音文件ID
+	FileUrl  string `json:"fileUrl"`           // 语音文件完整 URL
 	Duration int    `json:"duration,optional"` //语音时长（秒，可选）
 	Size     int64  `json:"size,optional"`     //文件大小（字节，可选）
 }
 
 type WithdrawMsg struct {
 	OriginMsgId string `json:"originMsgId"`        // 被撤回的消息ID
-	OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照，用于重新编辑
+	OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照
 }

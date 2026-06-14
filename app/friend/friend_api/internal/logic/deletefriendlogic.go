@@ -2,29 +2,35 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	"beaver/app/open/open_rpc/types/open_rpc"
+	"beaver/app/open/openevent"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type DeleteFriendLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 删除好友
 func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFriendLogic {
 	return &DeleteFriendLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("delete_friend"),
 		svcCtx: svcCtx,
 	}
 }
@@ -82,6 +88,47 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 		}
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload2)
 	}()
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logx.WithContext(l.ctx).Errorf("Robot 好友事件推送 panic: %v", r)
+			}
+		}()
+		ctx := context.Background()
+		res, err := l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.FriendID})
+		if err == nil && res != nil && res.Found {
+			body, _ := json.Marshal(map[string]interface{}{
+				"robot_id": req.FriendID,
+				"user_id":  req.UserID,
+			})
+			_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
+				AppId:     res.AppId,
+				EventType: openevent.EventIMBotUnfollowed,
+				EventJson: string(body),
+			})
+		}
+		res, err = l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.UserID})
+		if err == nil && res != nil && res.Found {
+			body, _ := json.Marshal(map[string]interface{}{
+				"robot_id": req.UserID,
+				"user_id":  req.FriendID,
+			})
+			_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
+				AppId:     res.AppId,
+				EventType: openevent.EventIMBotUnfollowed,
+				EventJson: string(body),
+			})
+		}
+	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "删除好友成功",
+		Data: map[string]interface{}{
+			"userId":   req.UserID,
+			"friendId": req.FriendID,
+		},
+	})
 
 	return &types.DeleteFriendRes{}, nil
 }

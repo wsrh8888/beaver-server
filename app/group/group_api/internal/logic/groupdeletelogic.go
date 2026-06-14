@@ -4,32 +4,35 @@ import (
 	"context"
 	"errors"
 
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GroupDeleteLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewGroupDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupDeleteLogic {
 	return &GroupDeleteLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("group_delete"),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.GroupDeleteRes, err error) {
-	// todo: add your logic here and delete this line
 	var groupMember group_models.GroupMemberModel
 	err = l.svcCtx.DB.Take(&groupMember, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
 	if err != nil {
@@ -42,7 +45,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 	// 获取该群的版本号（独立递增）
 	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 	if groupVersion == -1 {
-		l.Logger.Errorf("获取群组版本号失败")
+		logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -62,6 +65,13 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		}).Error
 	if err != nil {
 		return nil, errors.New("解散群组失败")
+	}
+
+	conversationId := "group_" + req.GroupID
+	if _, dissolveErr := l.svcCtx.ChatRpc.DissolveConversation(l.ctx, &chat_rpc.DissolveConversationReq{
+		ConversationId: conversationId,
+	}); dissolveErr != nil {
+		logx.WithContext(l.ctx).Errorf("解散群会话失败: groupId=%s, err=%v", req.GroupID, dissolveErr)
 	}
 
 	// 异步通知所有成员群组已被解散
@@ -91,6 +101,14 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "群解散成功",
+		Data: map[string]interface{}{
+			"groupId": req.GroupID,
+			"userId":  req.UserID,
+		},
+	})
 
 	return &types.GroupDeleteRes{
 		Version: groupVersion,

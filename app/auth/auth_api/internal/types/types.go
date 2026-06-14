@@ -10,10 +10,22 @@ type AuthenticationRes struct {
 	UserID string `json:"userId"`
 }
 
+type DeviceInfo struct {
+	DeviceID        string `json:"deviceId"`
+	DeviceType      string `json:"deviceType"`
+	DeviceOS        string `json:"deviceOs"`
+	DeviceModel     string `json:"deviceModel"`
+	DeviceOsVersion string `json:"deviceOsVersion"`
+	DeviceName      string `json:"deviceName"`
+	LastLoginTime   string `json:"lastLoginTime"`
+	IsOnline        bool   `json:"isOnline"`
+	LastLoginIP     string `json:"lastLoginIp"`
+}
+
 type EmailLoginReq struct {
 	Email    string `json:"email"`
-	Code     string `json:"code"`       // 验证码
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	Code     string `json:"code"`
+	DeviceID string `header:"deviceId"`
 }
 
 type EmailLoginRes struct {
@@ -24,7 +36,7 @@ type EmailLoginRes struct {
 type EmailPasswordLoginReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	DeviceID string `header:"deviceId"`
 }
 
 type EmailPasswordLoginRes struct {
@@ -32,36 +44,61 @@ type EmailPasswordLoginRes struct {
 	UserID string `json:"userId"`
 }
 
+type OAuthCodeLoginReq struct {
+	AppID    string `json:"appId"`
+	Code     string `json:"code"`
+	DeviceID string `header:"deviceId"`
+}
+
+type OAuthCodeLoginRes struct {
+	Token  string `json:"token"`
+	UserID string `json:"userId"`
+}
+
 type EmailRegisterReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Code     string `json:"code"` // 邮箱验证码
+	Code     string `json:"code"`
 }
 
 type EmailRegisterRes struct {
-	Message string `json:"message"`
+}
+
+type GetDevicesReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type GetDevicesRes struct {
+	Devices []DeviceInfo `json:"devices"`
 }
 
 type GetEmailCodeReq struct {
 	Email string `json:"email"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
+	Type  string `json:"type"`
 }
 
 type GetEmailCodeRes struct {
-	Message string `json:"message"`
 }
 
 type GetPhoneCodeReq struct {
 	Phone string `json:"phone"`
-	Type  string `json:"type"` // 验证码类型：register(注册)、reset_password(重置密码)、login(登录)
+	Type  string `json:"type"`
 }
 
 type GetPhoneCodeRes struct {
-	Message string `json:"message"`
+}
+
+type KickDeviceReq struct {
+	UserID   string `header:"Beaver-User-Id"`
+	DeviceID string `json:"deviceId"`
+}
+
+type KickDeviceRes struct {
 }
 
 type LogoutReq struct {
-	UserID string `header:"Beaver-User-Id"`
+	UserID   string `header:"Beaver-User-Id"`
+	DeviceID string `header:"deviceId"`
 }
 
 type LogoutRes struct {
@@ -70,7 +107,7 @@ type LogoutRes struct {
 type PhoneLoginReq struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
-	DeviceID string `header:"deviceId"` // 客户端生成的设备唯一标识符
+	DeviceID string `header:"deviceId"`
 }
 
 type PhoneLoginRes struct {
@@ -81,49 +118,56 @@ type PhoneLoginRes struct {
 type PhoneRegisterReq struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
-	Code     string `json:"code"` // 手机验证码
+	Code     string `json:"code"`
 }
 
 type PhoneRegisterRes struct {
-	Message string `json:"message"`
 }
 
 type QrcodeGenerateReq struct {
-	DeviceID string `header:"deviceId"`      // PC 端设备唯一标识，客户端本地生成
-	Source   string `json:"source,optional"` // 来源标识，服务端据此决定 JWT 有效期。枚举：login（默认，完整登录 48h）、web（网页端 24h）、temp（临时授权 12h）、其他自定义（12h）
+	DeviceID string `header:"deviceId"`
+	Source   string `json:"source,optional"`
 }
 
 type QrcodeGenerateRes struct {
-	Token    string `json:"token"`    // 二维码唯一 token（UUID），前端将此值渲染成二维码图片供移动端扫描
-	ExpireAt int64  `json:"expireAt"` // 二维码过期时间戳（Unix 秒），前端用于展示倒计时
+	Token    string `json:"token"`
+	ExpireAt int64  `json:"expireAt"`
 }
 
 type QrcodeScanReq struct {
-	Token     string `json:"token"`   // 扫描二维码后解析出的 token，即 generate 接口返回的 token
-	AuthToken string `header:"Token"` // 移动端当前登录用户的 JWT，服务端用于识别扫码人身份
+	Token     string `json:"token"`
+	AuthToken string `header:"Token"`
 }
 
 type QrcodeScanRes struct {
 }
 
 type QrcodeStatusReq struct {
-	Token    string `form:"token"`      // 生成二维码时获得的 token，作为查询 key
-	DeviceID string `header:"deviceId"` // PC 端设备唯一标识，登录成功后写入 Redis 登录态使用
+	Token    string `form:"token"`
+	DeviceID string `header:"deviceId"`
 }
 
 type QrcodeStatusRes struct {
-	Status    string `json:"status"`              // 当前状态：pending（待扫码）| confirmed（扫码已确认）| expired（已过期或已使用）
-	Token     string `json:"token,omitempty"`     // 仅 status=confirmed 时返回，PC 端后续请求携带的 JWT
-	UserID    string `json:"userId,omitempty"`    // 仅 status=confirmed 时返回，扫码用户的 ID
-	ExpiresIn int64  `json:"expiresIn,omitempty"` // 仅 status=confirmed 时返回，token 有效期（秒）
-	Source    string `json:"source,omitempty"`    // 仅 status=confirmed 时返回，透传 generate 时的来源标识
+	Status string `json:"status"`
+	Token  string `json:"token,omitempty"`
+	UserID string `json:"userId,omitempty"`
+	Source string `json:"source,omitempty"`
 }
 
 type ResetPasswordReq struct {
-	Email    string `json:"email"`    // 用户邮箱地址
-	Code     string `json:"code"`     // 邮箱验证码
-	Password string `json:"password"` // 新密码
+	Email    string `json:"email"`
+	Code     string `json:"code"`
+	Password string `json:"password"`
 }
 
 type ResetPasswordRes struct {
+}
+
+type UpdatePasswordReq struct {
+	UserID      string `header:"Beaver-User-Id"`
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type UpdatePasswordRes struct {
 }

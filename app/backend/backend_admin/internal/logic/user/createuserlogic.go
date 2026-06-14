@@ -3,13 +3,11 @@ package logic
 import (
 	"context"
 	"errors"
-	"strings"
 
+	"beaver/app/auth/auth_rpc/types/auth_rpc"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/user/user_models"
-	"beaver/utils/pwd"
-	utils "beaver/utils/rand"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -20,46 +18,40 @@ type CreateUserLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 创建用户
 func NewCreateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateUserLogic {
-	return &CreateUserLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &CreateUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// CreateUser 管理后台：创建用户。
+// admin 职责：校验运营录入项，编排 UserRpc 创建用户 + AuthRpc 创建凭证。
+// RPC 职责：UserCreate 落库用户资料，AuthRpc 管理密码凭证。
 func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.CreateUserRes, err error) {
-	// 检查邮箱是否已存在
-	var existUser user_models.UserModel
-	err = l.svcCtx.DB.Where("email = ?", req.Email).First(&existUser).Error
-	if err == nil {
-		l.Logger.Errorf("邮箱已存在: %s", req.Email)
-		return nil, errors.New("邮箱已存在")
+	if req.Email == "" {
+		return nil, errors.New("邮箱不能为空")
+	}
+	if req.Password == "" {
+		return nil, errors.New("密码不能为空")
 	}
 
-	// 生成用户ID
-	userID := strings.Replace(utils.GenerateUUId(), "-", "", -1)
-
-	// 创建用户，设置默认值
-	user := user_models.UserModel{
-		UserID:   userID,
-		NickName: req.NickName,
-		Password: pwd.HahPwd(req.Password),
+	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &user_rpc.UserCreateReq{
 		Email:    req.Email,
+		NickName: req.NickName,
 		Abstract: req.Abstract,
-		Status:   int8(1),  // 默认状态：正常
-		Source:   int32(1), // 默认来源：后台创建
-	}
-
-	err = l.svcCtx.DB.Create(&user).Error
+		Source:   2,
+	})
 	if err != nil {
-		l.Logger.Errorf("创建用户失败: %v", err)
-		return nil, errors.New("创建用户失败")
+		l.Errorf("创建用户失败: %v", err)
+		return nil, err
 	}
 
-	l.Logger.Infof("创建用户成功: userID=%s, email=%s", user.UserID, req.Email)
-	return &types.CreateUserRes{
-		Id: user.UserID,
-	}, nil
+	credRes, err := l.svcCtx.AuthRpc.CreateCredential(l.ctx, &auth_rpc.CreateCredentialReq{
+		UserId:   createRes.UserID,
+		Password: req.Password,
+	})
+	if err != nil || !credRes.Success {
+		l.Errorf("创建用户凭证失败: %v", err)
+		return nil, errors.New("创建用户凭证失败")
+	}
+
+	return &types.CreateUserRes{Id: createRes.UserID}, nil
 }

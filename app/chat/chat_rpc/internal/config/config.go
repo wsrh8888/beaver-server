@@ -1,6 +1,8 @@
 package config
 
-import "github.com/zeromicro/go-zero/zrpc"
+import (
+	"github.com/zeromicro/go-zero/zrpc"
+)
 
 type Config struct {
 	zrpc.RpcServerConf
@@ -15,6 +17,26 @@ type Config struct {
 	RocketMQ struct {
 		Addr string
 	}
-	DatasyncRpc zrpc.RpcClientConf
-	UserRpc     zrpc.RpcClientConf
+	DatasyncRpc     zrpc.RpcClientConf
+	UserRpc         zrpc.RpcClientConf
+	FriendRpc       zrpc.RpcClientConf
+	GroupRpc        zrpc.RpcClientConf
+	OpenRpc         zrpc.RpcClientConf
+	NotificationRpc zrpc.RpcClientConf
+	Push        struct {
+		Enabled bool
+		FCM     struct {
+			Enabled         bool
+			ProjectID       string
+			CredentialsFile string
+		}
+		APNs struct {
+			Enabled    bool
+			KeyFile    string
+			KeyID      string
+			TeamID     string
+			BundleID   string
+			Production bool
+		}
+	}
 }

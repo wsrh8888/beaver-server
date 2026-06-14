@@ -6,26 +6,15 @@ Auth:
   AccessSecret: your_jwt_secret_here
   AccessExpire: 3600
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
   Addr: 127.0.0.1:6379
   Password: '123456'
   DB: 0
 WhiteList:
-  - /api/auth/phone_register
-  - /api/auth/email_register
-  - /api/auth/phonecode
-  - /api/auth/emailcode
-  - /api/auth/phone_login
-  - /api/auth/email_login
-  - /api/auth/open_login
-  - /api/auth/authentication
+  - /api/auth/auth_public/.*
   - /api/settings/open_login_info
   - /api/file/preview
-  - /api/dictionary/cities
-  - /api/auth/email_password_login
-  - /api/track/events
-  - /api/track/logs
   - /api/update/report
 Email:
   QQ:
@@ -44,3 +33,15 @@ UserRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+NotificationRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: notificationrpc.rpc
+OpenRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: openrpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

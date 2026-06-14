@@ -193,6 +193,7 @@ type (
 		CreatorID string `json:"creatorId"` // 创建者ID
 		JoinType  int8   `json:"joinType"` // 加入方式
 		Status    int8   `json:"status"` // 群状态：1正常 2冻结 3解散
+		Notice    string `json:"notice"` // 群公告
 		Version   int64  `json:"version"` // 版本号
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
@@ -348,60 +349,111 @@ type (
 	}
 )
 
-// ==================== 群通知机器人（Incoming Webhook）====================
-// 群管理员在群设置里创建，外部系统（Jenkins/GitHub/Grafana）用来向群推消息。
-// 机器人只推不收，完全单向。每个群可创建多个通知机器人。
+// ==================== 群自定义机器人 Webhook ====================
+// 群管理员在群设置里创建；外部系统用 access_token + 加签 POST 推送，仅支持 text/markdown/image。
 type (
-	// 创建通知机器人
-	CreateNotificationBotReq {
-		UserID  string `header:"Beaver-User-Id"` // 操作者（需是群主或管理员）
-		GroupID string `json:"groupId"` // 目标群 ID
-		Name    string `json:"name"` // 机器人名称，如 "Jenkins Bot"
-	}
-	CreateNotificationBotRes {
-		ID         int64  `json:"id"`
-		WebhookURL string `json:"webhookUrl"` // 完整 Webhook URL，直接配到 Jenkins
-		Secret     string `json:"secret"` // HMAC 密钥，只在创建时返回一次，请立即保存
+	// 机器人安全设置
+	BotSecurity {
+		KeywordsEnabled    bool     `json:"keywordsEnabled"` // 是否启用关键词校验
+		Keywords           []string `json:"keywords"` // 关键词列表（最多10个）
+		IPWhitelistEnabled bool     `json:"ipWhitelistEnabled"` // 是否启用IP白名单
+		IPWhitelist        []string `json:"ipWhitelist"` // IP地址列表
+		SignatureEnabled   bool     `json:"signatureEnabled"` // 是否启用签名校验
+		SignatureSecret    string   `json:"signatureSecret"` // 签名密钥
+		SignatureUpdated   int64    `json:"signatureUpdated"` // 密钥最后更新时间戳
 	}
 )
 
 type (
-	// 列出群内通知机器人
-	ListNotificationBotsReq {
+	// 创建机器人
+	CreateBotReq {
+		UserID      string `header:"Beaver-User-Id"` // 操作者（需是群主或管理员）
+		GroupID     string `json:"groupId"` // 目标群 ID
+		Name        string `json:"name"` // 机器人名称
+		Description string `json:"description,optional"` // 简介
+		Avatar      string `json:"avatar,optional"` // 头像文件 ID
+		Type        string `json:"type"` // 集成类型：custom(默认)/github/gitlab/jenkins/grafana/prometheus
+	}
+	CreateBotRes {
+		BotID      string `json:"botId"` // 机器人用户 ID
+		WebhookURL string `json:"webhookUrl"` // Webhook URL
+		Secret     string `json:"secret"` // 签名密钥，仅创建时返回一次
+	}
+)
+
+type (
+	// 列出群内机器人
+	ListBotsReq {
 		UserID  string `header:"Beaver-User-Id"`
 		GroupID string `json:"groupId"`
 	}
-	ListNotificationBotsItem {
-		ID         int64  `json:"id"` // 机器人ID
-		Name       string `json:"name"` // 机器人名称
-		WebhookURL string `json:"webhookUrl"` // Webhook 推送 URL
-		CreatedAt  int64  `json:"createdAt"` // 创建时间戳
+	ListBotsItem {
+		BotID       string `json:"botId"` // 机器人用户 ID
+		Name        string `json:"name"` // 机器人名称
+		Description string `json:"description"` // 简介
+		Avatar      string `json:"avatar"` // 头像文件 ID
+		Type        string `json:"botType"` // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
+		Status      int    `json:"status"` // 1 启用 0 禁用
+		CreatedAt   int64  `json:"createdAt"` // 创建时间戳
 	}
-	ListNotificationBotsRes {
-		List []ListNotificationBotsItem `json:"list"` // 机器人列表
+	ListBotsRes {
+		List []ListBotsItem `json:"list"` // 机器人列表
 	}
 )
 
 type (
-	// 删除通知机器人
-	DeleteNotificationBotReq {
+	// 获取机器人详情
+	GetBotDetailReq {
 		UserID string `header:"Beaver-User-Id"`
-		ID     int64  `json:"id"`
+		BotID  string `json:"botId"` // 机器人用户 ID
 	}
-	DeleteNotificationBotRes {
-		Success bool `json:"success"`
+	GetBotDetailRes {
+		BotID         string      `json:"botId"` // 机器人用户 ID
+		Name          string      `json:"name"` // 机器人名称
+		Description   string      `json:"description"` // 简介
+		Avatar        string      `json:"avatar"` // 头像文件 ID
+		WebhookURL    string      `json:"webhookUrl"` // Webhook 推送 URL
+		Type          string      `json:"botType"` // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
+		Status        int         `json:"status"` // 1 启用 0 禁用
+		CreatorUserID string      `json:"creatorUserId"` // 创建者
+		CreatedAt     int64       `json:"createdAt"` // 创建时间戳
+		Security      BotSecurity `json:"security"` // 安全设置
 	}
+)
+
+type (
+	// 删除机器人
+	DeleteBotReq {
+		UserID string `header:"Beaver-User-Id"`
+		BotID  string `json:"botId"` // 机器人用户 ID
+	}
+	DeleteBotRes  {}
 )
 
 type (
 	// 重置签名密钥
-	ResetNotificationBotSecretReq {
+	ResetBotSecretReq {
 		UserID string `header:"Beaver-User-Id"`
-		ID     int64  `json:"id"`
+		BotID  string `json:"botId"` // 机器人用户 ID
 	}
-	ResetNotificationBotSecretRes {
+	ResetBotSecretRes {
 		Secret string `json:"secret"` // 新密钥，只返回一次
 	}
+)
+
+type (
+	// 更新机器人
+	UpdateBotReq {
+		UserID      string       `header:"Beaver-User-Id"`
+		BotID       string       `json:"botId"` // 机器人用户 ID
+		Name        string       `json:"name,optional"`
+		Description string       `json:"description,optional"`
+		Avatar      string       `json:"avatar,optional"`
+		Type        string       `json:"type,optional"` // 集成类型：custom/github/gitlab/jenkins/grafana/prometheus
+		Status      *int         `json:"status,optional"` // 1 启用 0 禁用
+		Security    *BotSecurity `json:"security,optional"` // 安全设置
+	}
+	UpdateBotRes  {}
 )
 
 service group {
@@ -489,21 +541,29 @@ service group {
 	@handler muteAllGroup
 	post /api/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
 
-	@doc "在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）"
-	@handler createNotificationBot
-	post /api/group/v1/notification_bot/create (CreateNotificationBotReq) returns (CreateNotificationBotRes)
+	@doc "在群里创建机器人（群管理员操作，返回 Webhook URL + Secret）"
+	@handler createBot
+	post /api/group/v1/create_bot (CreateBotReq) returns (CreateBotRes)
 
-	@doc "获取群内所有通知机器人列表"
-	@handler listNotificationBots
-	post /api/group/v1/notification_bot/list (ListNotificationBotsReq) returns (ListNotificationBotsRes)
+	@doc "获取群内所有机器人列表"
+	@handler listBots
+	post /api/group/v1/list_bots (ListBotsReq) returns (ListBotsRes)
 
-	@doc "删除通知机器人"
-	@handler deleteNotificationBot
-	post /api/group/v1/notification_bot/delete (DeleteNotificationBotReq) returns (DeleteNotificationBotRes)
+	@doc "获取机器人详情"
+	@handler getBotDetail
+	post /api/group/v1/bot_detail (GetBotDetailReq) returns (GetBotDetailRes)
 
-	@doc "重置通知机器人的签名密钥（旧 Secret 立即失效）"
-	@handler resetNotificationBotSecret
-	post /api/group/v1/notification_bot/reset_secret (ResetNotificationBotSecretReq) returns (ResetNotificationBotSecretRes)
+	@doc "删除机器人"
+	@handler deleteBot
+	post /api/group/v1/delete_bot (DeleteBotReq) returns (DeleteBotRes)
+
+	@doc "重置机器人的签名密钥（旧 Secret 立即失效）"
+	@handler resetBotSecret
+	post /api/group/v1/reset_bot_secret (ResetBotSecretReq) returns (ResetBotSecretRes)
+
+	@doc "更新机器人（名称/简介/头像/启用状态）"
+	@handler updateBot
+	post /api/group/v1/update_bot (UpdateBotReq) returns (UpdateBotRes)
 }
 
 // goctl api go -api group_api.api -dir . --home ../../../template

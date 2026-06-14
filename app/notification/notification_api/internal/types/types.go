@@ -42,6 +42,16 @@ type ReadCursorItem struct {
 	LastReadAt int64  `json:"lastReadAt"` // ms，最后查看该分类的时间
 }
 
+type RegisterPushTokenReq struct {
+	UserID       string `header:"Beaver-User-Id"`
+	DeviceID     string `header:"deviceId"`
+	PushToken    string `json:"pushToken"`
+	PushPlatform string `json:"pushPlatform"`
+}
+
+type RegisterPushTokenRes struct {
+}
+
 type DeleteNotificationReq struct {
 	UserID  string `header:"Beaver-User-Id"` // 当前用户ID
 	EventID string `json:"eventId"`          // 通知事件ID

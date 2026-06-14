@@ -1,0 +1,39 @@
+syntax = "v1"
+
+// ==================== 管理后台公开接口（Gateway 白名单放行，无需登录）====================
+
+type (
+	// 管理员登录
+	LoginReq {
+		Phone    string `json:"phone"` // string 管理员手机号
+		Password string `json:"password"` // string 登录密码
+	}
+	LoginRes {
+		Token  string `json:"token"` // string 访问 JWT
+		UserID string `json:"userId"` // string 管理员用户 ID
+	}
+)
+
+type (
+	// 网关 Token 校验
+	AuthenticationReq {
+		Token     string `header:"Token,optional"` // string JWT，可选
+		ValidPath string `header:"ValidPath,optional"` // string 当前请求路径，用于白名单判断
+	}
+	AuthenticationRes {
+		UserID string `json:"userId"` // string 管理员用户 ID
+	}
+)
+
+@server (
+	group: auth_public
+)
+service backend {
+	@doc "管理员登录"
+	@handler Login
+	post /admin/auth_public/v1/login (LoginReq) returns (LoginRes)
+
+	@doc "管理员 Token 认证"
+	@handler Authentication
+	get /admin/auth_public/v1/authentication (AuthenticationReq) returns (AuthenticationRes)
+}

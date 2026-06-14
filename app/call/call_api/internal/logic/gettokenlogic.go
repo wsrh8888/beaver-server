@@ -12,22 +12,24 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/livekit/protocol/auth"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type GetTokenLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 接听通话并获取令牌
 func NewGetTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetTokenLogic {
 	return &GetTokenLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("get_token"),
 		svcCtx: svcCtx,
 	}
 }
@@ -92,6 +94,13 @@ func (l *GetTokenLogic) GetToken(req *types.GetCallTokenReq) (resp *types.GetCal
 		}
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "接听通话成功",
+		Data: map[string]interface{}{
+			"userId": req.UserID,
+			"roomId": req.RoomID,
+		},
+	})
 	return &types.GetCallTokenRes{
 		RoomToken:    token,
 		LiveKitUrl:   l.svcCtx.Config.LiveKit.Host,

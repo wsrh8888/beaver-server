@@ -42,3 +42,83 @@ func (s *OpenServer) RefreshToken(ctx context.Context, in *open_rpc.RefreshToken
 	l := logic.NewRefreshTokenLogic(ctx, s.svcCtx)
 	return l.RefreshToken(in)
 }
+
+func (s *OpenServer) CreateBot(ctx context.Context, in *open_rpc.CreateBotReq) (*open_rpc.CreateBotRes, error) {
+	l := logic.NewCreateBotLogic(ctx, s.svcCtx)
+	return l.CreateBot(in)
+}
+
+func (s *OpenServer) DeleteBot(ctx context.Context, in *open_rpc.DeleteBotReq) (*open_rpc.DeleteBotRes, error) {
+	l := logic.NewDeleteBotLogic(ctx, s.svcCtx)
+	return l.DeleteBot(in)
+}
+
+func (s *OpenServer) ResetBotSecret(ctx context.Context, in *open_rpc.ResetBotSecretReq) (*open_rpc.ResetBotSecretRes, error) {
+	l := logic.NewResetBotSecretLogic(ctx, s.svcCtx)
+	return l.ResetBotSecret(in)
+}
+
+func (s *OpenServer) GetBotInfo(ctx context.Context, in *open_rpc.GetBotInfoReq) (*open_rpc.GetBotInfoRes, error) {
+	l := logic.NewGetBotInfoLogic(ctx, s.svcCtx)
+	return l.GetBotInfo(in)
+}
+
+func (s *OpenServer) UpdateBot(ctx context.Context, in *open_rpc.UpdateBotReq) (*open_rpc.UpdateBotRes, error) {
+	l := logic.NewUpdateBotLogic(ctx, s.svcCtx)
+	return l.UpdateBot(in)
+}
+
+func (s *OpenServer) SaveWebhookLog(ctx context.Context, in *open_rpc.SaveWebhookLogReq) (*open_rpc.SaveWebhookLogRes, error) {
+	l := logic.NewSaveWebhookLogLogic(ctx, s.svcCtx)
+	return l.SaveWebhookLog(in)
+}
+
+func (s *OpenServer) GetRobotByUserID(ctx context.Context, in *open_rpc.GetRobotByUserIDReq) (*open_rpc.GetRobotByUserIDRes, error) {
+	l := logic.NewGetRobotByUserIDLogic(ctx, s.svcCtx)
+	return l.GetRobotByUserID(in)
+}
+
+func (s *OpenServer) DispatchPlatformEvent(ctx context.Context, in *open_rpc.DispatchPlatformEventReq) (*open_rpc.DispatchPlatformEventRes, error) {
+	l := logic.NewDispatchPlatformEventLogic(ctx, s.svcCtx)
+	return l.DispatchPlatformEvent(in)
+}
+
+func (s *OpenServer) ApplyDeveloper(ctx context.Context, in *open_rpc.ApplyDeveloperReq) (*open_rpc.ApplyDeveloperRes, error) {
+	l := logic.NewApplyDeveloperLogic(ctx, s.svcCtx)
+	return l.ApplyDeveloper(in)
+}
+
+func (s *OpenServer) GetDeveloperByUserID(ctx context.Context, in *open_rpc.GetDeveloperByUserIDReq) (*open_rpc.GetDeveloperByUserIDRes, error) {
+	l := logic.NewGetDeveloperByUserIDLogic(ctx, s.svcCtx)
+	return l.GetDeveloperByUserID(in)
+}
+
+func (s *OpenServer) GetDeveloper(ctx context.Context, in *open_rpc.GetDeveloperReq) (*open_rpc.GetDeveloperRes, error) {
+	l := logic.NewGetDeveloperLogic(ctx, s.svcCtx)
+	return l.GetDeveloper(in)
+}
+
+func (s *OpenServer) ListDevelopers(ctx context.Context, in *open_rpc.ListDevelopersReq) (*open_rpc.ListDevelopersRes, error) {
+	l := logic.NewListDevelopersLogic(ctx, s.svcCtx)
+	return l.ListDevelopers(in)
+}
+
+func (s *OpenServer) AuditDeveloper(ctx context.Context, in *open_rpc.AuditDeveloperReq) (*open_rpc.AuditDeveloperRes, error) {
+	l := logic.NewAuditDeveloperLogic(ctx, s.svcCtx)
+	return l.AuditDeveloper(in)
+}
+
+func (s *OpenServer) ListOpenApps(ctx context.Context, in *open_rpc.ListOpenAppsReq) (*open_rpc.ListOpenAppsRes, error) {
+	l := logic.NewListOpenAppsLogic(ctx, s.svcCtx)
+	return l.ListOpenApps(in)
+}
+
+func (s *OpenServer) UpdateOpenApps(ctx context.Context, in *open_rpc.UpdateOpenAppsReq) (*open_rpc.UpdateOpenAppsRes, error) {
+	l := logic.NewUpdateOpenAppsLogic(ctx, s.svcCtx)
+	return l.UpdateOpenApps(in)
+}
+
+func (s *OpenServer) ListWebhookLogs(ctx context.Context, in *open_rpc.ListWebhookLogsReq) (*open_rpc.ListWebhookLogsRes, error) {
+	l := logic.NewListWebhookLogsLogic(ctx, s.svcCtx)
+	return l.ListWebhookLogs(in)
+}

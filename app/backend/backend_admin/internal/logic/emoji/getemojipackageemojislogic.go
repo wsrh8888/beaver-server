@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type GetEmojiPackageEmojisLogic struct {
@@ -18,115 +17,37 @@ type GetEmojiPackageEmojisLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取表情包内的表情图片列表
 func NewGetEmojiPackageEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackageEmojisLogic {
-	return &GetEmojiPackageEmojisLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &GetEmojiPackageEmojisLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// GetEmojiPackageEmojis 管理后台：查询包内表情列表。
+// admin 职责：校验 packageId，复用 ListEmojis 的 package_id 筛选（不与 RPC 新增 1:1 方法）。
+// RPC 职责：按包内 sort_order 返回表情数据。
 func (l *GetEmojiPackageEmojisLogic) GetEmojiPackageEmojis(req *types.GetEmojiPackageEmojisReq) (resp *types.GetEmojiPackageEmojisRes, err error) {
-	// 检查表情包是否存在
-	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.PackageId)
-			return nil, errors.New("表情包不存在")
-		}
-		logx.Errorf("查询表情包失败: %v", err)
-		return nil, errors.New("查询表情包失败")
+	if req.PackageId == "" {
+		return nil, errors.New("表情包ID不能为空")
 	}
 
-	// 先查询关联关系
-	var emojiPackageEmojis []emoji_models.EmojiPackageEmoji
-	err = l.svcCtx.DB.Where("package_id = ?", pkg.PackageID).
-		Order("sort_order asc").
-		Find(&emojiPackageEmojis).Error
+	rpcRes, err := l.svcCtx.EmojiRpc.ListEmojis(l.ctx, &emoji_rpc.ListEmojisReq{
+		PackageId: req.PackageId,
+		Page:      int32(req.Page),
+		PageSize:  int32(req.PageSize),
+	})
 	if err != nil {
-		logx.Errorf("查询表情包关联失败: %v", err)
+		l.Errorf("获取表情包表情列表失败: %v", err)
 		return nil, err
 	}
 
-	// 如果没有表情，返回空列表
-	if len(emojiPackageEmojis) == 0 {
-		return &types.GetEmojiPackageEmojisRes{
-			List:  []types.GetEmojiPackageEmojisItem{},
-			Total: 0,
-		}, nil
-	}
-
-	// 获取所有表情ID
-	emojiIDs := make([]string, len(emojiPackageEmojis))
-	for i, emojiPackageEmoji := range emojiPackageEmojis {
-		emojiIDs[i] = emojiPackageEmoji.EmojiID
-	}
-
-	// 查询表情详情
-	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&emojis).Error
-	if err != nil {
-		logx.Errorf("查询表情详情失败: %v", err)
-		return nil, err
-	}
-
-	// 创建表情ID到表情的映射
-	emojiMap := make(map[string]emoji_models.Emoji)
-	for _, emoji := range emojis {
-		emojiMap[emoji.EmojiID] = emoji
-	}
-
-	// 按照关联表中的顺序构建结果
-	var orderedEmojis []emoji_models.Emoji
-	for _, emojiPackageEmoji := range emojiPackageEmojis {
-		if emoji, exists := emojiMap[emojiPackageEmoji.EmojiID]; exists {
-			orderedEmojis = append(orderedEmojis, emoji)
-		}
-	}
-
-	// 分页参数校验
-	page := req.Page
-	pageSize := req.PageSize
-	if page <= 0 {
-		page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if pageSize > 100 {
-		pageSize = 100
-	}
-
-	// 手动分页
-	total := int64(len(orderedEmojis))
-	start := (page - 1) * pageSize
-	end := start + pageSize
-	if start >= len(orderedEmojis) {
-		start = len(orderedEmojis)
-	}
-	if end > len(orderedEmojis) {
-		end = len(orderedEmojis)
-	}
-
-	pagedEmojis := orderedEmojis[start:end]
-
-	// 转换为响应格式
-	var list []types.GetEmojiPackageEmojisItem
-	for _, emoji := range pagedEmojis {
+	list := make([]types.GetEmojiPackageEmojisItem, 0, len(rpcRes.List))
+	for _, e := range rpcRes.List {
 		list = append(list, types.GetEmojiPackageEmojisItem{
-			EmojiId:    emoji.EmojiID,
-			FileKey:    emoji.FileKey,
-			Title:      emoji.Title,
-			AuthorID:   "", // 暂时为空，后续可从其他途径获取
-			CreateTime: emoji.CreatedAt.String(),
-			UpdateTime: emoji.UpdatedAt.String(),
+			EmojiId:    e.EmojiId,
+			FileUrl:    e.FileKey,
+			Title:      e.Title,
+			CreateTime: e.CreatedAt,
+			UpdateTime: e.UpdatedAt,
 		})
 	}
-
-	return &types.GetEmojiPackageEmojisRes{
-		List:  list,
-		Total: total,
-	}, nil
+	return &types.GetEmojiPackageEmojisRes{List: list, Total: rpcRes.Total}, nil
 }

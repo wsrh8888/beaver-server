@@ -82,6 +82,96 @@ type (
 	UpdateAuthorityMenuRes {}
 )
 
+// 角色列表
+type (
+	GetAuthorityListReq {}
+	GetAuthorityListRes {
+		List []AuthorityInfo `json:"list"`
+	}
+	AuthorityInfo {
+		Id          uint   `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Status      int8   `json:"status"`
+		Sort        int    `json:"sort"`
+		MenuCount   int64  `json:"menuCount"`
+	}
+)
+
+// 更新角色
+type (
+	UpdateAuthorityReq {
+		Id          uint   `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Status      int8   `json:"status"`
+		Sort        int    `json:"sort"`
+	}
+	UpdateAuthorityRes {}
+)
+
+// 删除角色
+type (
+	DeleteAuthorityReq {
+		Id uint `json:"id"`
+	}
+	DeleteAuthorityRes {}
+)
+
+// 角色已授权菜单
+type (
+	GetAuthorityMenusReq {
+		Id uint `path:"id"`
+	}
+	GetAuthorityMenusRes {
+		MenuIds []uint `json:"menuIds"`
+	}
+)
+
+// 管理员账号
+type (
+	GetAdminUserListReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=20"`
+		Keyword  string `form:"keyword,optional"`
+		Status   int8   `form:"status,optional"`
+	}
+	GetAdminUserListRes {
+		List  []AdminUserInfo `json:"list"`
+		Total int64           `json:"total"`
+	}
+	AdminUserInfo {
+		Id             uint     `json:"id"`
+		UserID         string   `json:"userId"`
+		NickName       string   `json:"nickName"`
+		Phone          string   `json:"phone"`
+		Status         int8     `json:"status"`
+		LastLoginAt    int64    `json:"lastLoginAt"`
+		CreatedAt      string   `json:"createdAt"`
+		AuthorityIds   []uint   `json:"authorityIds"`
+		AuthorityNames []string `json:"authorityNames"`
+	}
+	CreateAdminUserReq {
+		NickName     string `json:"nickName"`
+		Phone        string `json:"phone"`
+		Password     string `json:"password"`
+		AuthorityIds []uint `json:"authorityIds"`
+		OperatorID   string `header:"Beaver-User-Id"`
+	}
+	CreateAdminUserRes {
+		UserID string `json:"userId"`
+	}
+	UpdateAdminUserReq {
+		UserID       string `path:"userId"`
+		NickName     string `json:"nickName,optional"`
+		Status       int8   `json:"status,optional"`
+		Password     string `json:"password,optional"`
+		AuthorityIds []uint `json:"authorityIds,optional"`
+		OperatorID   string `header:"Beaver-User-Id"`
+	}
+	UpdateAdminUserRes {}
+)
+
 @server (
 	group: system
 )
@@ -109,4 +199,32 @@ service backend {
 	@doc "更新权限菜单"
 	@handler updateAuthorityMenu
 	put /admin/system/updateAuthorityMenu (UpdateAuthorityMenuReq) returns (UpdateAuthorityMenuRes)
+
+	@doc "角色列表"
+	@handler getAuthorityList
+	get /admin/system/authorities (GetAuthorityListReq) returns (GetAuthorityListRes)
+
+	@doc "更新角色"
+	@handler updateAuthority
+	put /admin/system/authority (UpdateAuthorityReq) returns (UpdateAuthorityRes)
+
+	@doc "删除角色"
+	@handler deleteAuthority
+	delete /admin/system/authority (DeleteAuthorityReq) returns (DeleteAuthorityRes)
+
+	@doc "角色已授权菜单"
+	@handler getAuthorityMenus
+	get /admin/system/authority/:id/menus (GetAuthorityMenusReq) returns (GetAuthorityMenusRes)
+
+	@doc "管理员列表"
+	@handler getAdminUserList
+	get /admin/system/admins (GetAdminUserListReq) returns (GetAdminUserListRes)
+
+	@doc "创建管理员"
+	@handler createAdminUser
+	post /admin/system/admins (CreateAdminUserReq) returns (CreateAdminUserRes)
+
+	@doc "更新管理员"
+	@handler updateAdminUser
+	put /admin/system/admins/:userId (UpdateAdminUserReq) returns (UpdateAdminUserRes)
 }

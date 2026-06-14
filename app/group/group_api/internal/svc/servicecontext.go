@@ -7,6 +7,7 @@ import (
 	"beaver/app/group/group_rpc/group"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/notification/notification_rpc/notification"
+	openClient "beaver/app/open/open_rpc/open"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -27,6 +28,7 @@ type ServiceContext struct {
 	GroupRpc   group_rpc.GroupClient
 	ChatRpc    chat_rpc.ChatClient
 	NotifyRpc  notification.Notification
+	OpenRpc    openClient.Open
 	DB         *gorm.DB
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client
@@ -49,6 +51,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		GroupRpc:   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		ChatRpc:    chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		NotifyRpc:  notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		OpenRpc:    openClient.NewOpen(zrpc.MustNewClient(c.OpenRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
 	}

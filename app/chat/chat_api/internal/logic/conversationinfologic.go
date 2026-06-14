@@ -8,8 +8,8 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-	"beaver/app/group/group_models"
-	"beaver/app/user/user_models"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -67,26 +67,34 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			opponentID = ids[1]
 		}
 
-		// 查询对方用户信息
-		var user user_models.UserModel
-		err = l.svcCtx.DB.Where("user_id = ?", opponentID).First(&user).Error
+		userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+			UserID: opponentID,
+		})
 		if err != nil {
 			return nil, err
 		}
+		if userRes.UserInfo == nil {
+			return nil, errors.New("user not found")
+		}
 
-		resp.Avatar = user.Avatar
-		resp.NickName = user.NickName
+		resp.Avatar = userRes.UserInfo.Avatar
+		resp.NickName = userRes.UserInfo.NickName
 		resp.ChatType = 1 // 私聊类型
 	} else {
 		// 群聊会话
-		var group group_models.GroupModel
-		err = l.svcCtx.DB.Where("group_id = ?", req.ConversationID).First(&group).Error
+		groupRes, err := l.svcCtx.GroupRpc.GetGroupsListByIds(l.ctx, &group_rpc.GetGroupsListByIdsReq{
+			GroupIDs: []string{req.ConversationID},
+		})
 		if err != nil {
 			return nil, err
 		}
+		if len(groupRes.Groups) == 0 {
+			return nil, errors.New("group not found")
+		}
 
+		group := groupRes.Groups[0]
 		resp.Avatar = group.Avatar
-		resp.NickName = group.Title
+		resp.NickName = group.Name
 		resp.ChatType = 2 // 群聊类型
 	}
 

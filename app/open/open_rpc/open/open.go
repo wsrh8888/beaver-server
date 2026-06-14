@@ -14,20 +14,72 @@ import (
 )
 
 type (
-	ExchangeTokenReq = open_rpc.ExchangeTokenReq
-	ExchangeTokenRes = open_rpc.ExchangeTokenRes
-	GetUserInfoReq   = open_rpc.GetUserInfoReq
-	GetUserInfoRes   = open_rpc.GetUserInfoRes
-	RefreshTokenReq  = open_rpc.RefreshTokenReq
-	RefreshTokenRes  = open_rpc.RefreshTokenRes
-	ValidateTokenReq = open_rpc.ValidateTokenReq
-	ValidateTokenRes = open_rpc.ValidateTokenRes
+	ApplyDeveloperReq        = open_rpc.ApplyDeveloperReq
+	ApplyDeveloperRes        = open_rpc.ApplyDeveloperRes
+	AuditDeveloperReq        = open_rpc.AuditDeveloperReq
+	AuditDeveloperRes        = open_rpc.AuditDeveloperRes
+	BotSecurity              = open_rpc.BotSecurity
+	CreateBotReq             = open_rpc.CreateBotReq
+	CreateBotRes             = open_rpc.CreateBotRes
+	DeleteBotReq             = open_rpc.DeleteBotReq
+	DeleteBotRes             = open_rpc.DeleteBotRes
+	DeveloperItem            = open_rpc.DeveloperItem
+	DispatchPlatformEventReq = open_rpc.DispatchPlatformEventReq
+	DispatchPlatformEventRes = open_rpc.DispatchPlatformEventRes
+	ExchangeTokenReq         = open_rpc.ExchangeTokenReq
+	ExchangeTokenRes         = open_rpc.ExchangeTokenRes
+	GetBotInfoReq            = open_rpc.GetBotInfoReq
+	GetBotInfoRes            = open_rpc.GetBotInfoRes
+	GetDeveloperByUserIDReq  = open_rpc.GetDeveloperByUserIDReq
+	GetDeveloperByUserIDRes  = open_rpc.GetDeveloperByUserIDRes
+	GetDeveloperReq          = open_rpc.GetDeveloperReq
+	GetDeveloperRes          = open_rpc.GetDeveloperRes
+	GetRobotByUserIDReq      = open_rpc.GetRobotByUserIDReq
+	GetRobotByUserIDRes      = open_rpc.GetRobotByUserIDRes
+	GetUserInfoReq           = open_rpc.GetUserInfoReq
+	GetUserInfoRes           = open_rpc.GetUserInfoRes
+	ListDevelopersReq        = open_rpc.ListDevelopersReq
+	ListDevelopersRes        = open_rpc.ListDevelopersRes
+	ListOpenAppsReq          = open_rpc.ListOpenAppsReq
+	ListOpenAppsRes          = open_rpc.ListOpenAppsRes
+	ListWebhookLogsReq       = open_rpc.ListWebhookLogsReq
+	ListWebhookLogsRes       = open_rpc.ListWebhookLogsRes
+	OpenAppItem              = open_rpc.OpenAppItem
+	RefreshTokenReq          = open_rpc.RefreshTokenReq
+	RefreshTokenRes          = open_rpc.RefreshTokenRes
+	ResetBotSecretReq        = open_rpc.ResetBotSecretReq
+	ResetBotSecretRes        = open_rpc.ResetBotSecretRes
+	SaveWebhookLogReq        = open_rpc.SaveWebhookLogReq
+	SaveWebhookLogRes        = open_rpc.SaveWebhookLogRes
+	UpdateBotReq             = open_rpc.UpdateBotReq
+	UpdateBotRes             = open_rpc.UpdateBotRes
+	UpdateOpenAppsReq        = open_rpc.UpdateOpenAppsReq
+	UpdateOpenAppsRes        = open_rpc.UpdateOpenAppsRes
+	ValidateTokenReq         = open_rpc.ValidateTokenReq
+	ValidateTokenRes         = open_rpc.ValidateTokenRes
+	WebhookLogItem           = open_rpc.WebhookLogItem
 
 	Open interface {
 		ExchangeToken(ctx context.Context, in *ExchangeTokenReq, opts ...grpc.CallOption) (*ExchangeTokenRes, error)
 		GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoRes, error)
 		ValidateToken(ctx context.Context, in *ValidateTokenReq, opts ...grpc.CallOption) (*ValidateTokenRes, error)
 		RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error)
+		CreateBot(ctx context.Context, in *CreateBotReq, opts ...grpc.CallOption) (*CreateBotRes, error)
+		DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error)
+		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
+		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
+		UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
+		SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
+		GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
+		DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
+		ApplyDeveloper(ctx context.Context, in *ApplyDeveloperReq, opts ...grpc.CallOption) (*ApplyDeveloperRes, error)
+		GetDeveloperByUserID(ctx context.Context, in *GetDeveloperByUserIDReq, opts ...grpc.CallOption) (*GetDeveloperByUserIDRes, error)
+		GetDeveloper(ctx context.Context, in *GetDeveloperReq, opts ...grpc.CallOption) (*GetDeveloperRes, error)
+		ListDevelopers(ctx context.Context, in *ListDevelopersReq, opts ...grpc.CallOption) (*ListDevelopersRes, error)
+		AuditDeveloper(ctx context.Context, in *AuditDeveloperReq, opts ...grpc.CallOption) (*AuditDeveloperRes, error)
+		ListOpenApps(ctx context.Context, in *ListOpenAppsReq, opts ...grpc.CallOption) (*ListOpenAppsRes, error)
+		UpdateOpenApps(ctx context.Context, in *UpdateOpenAppsReq, opts ...grpc.CallOption) (*UpdateOpenAppsRes, error)
+		ListWebhookLogs(ctx context.Context, in *ListWebhookLogsReq, opts ...grpc.CallOption) (*ListWebhookLogsRes, error)
 	}
 
 	defaultOpen struct {
@@ -59,4 +111,84 @@ func (m *defaultOpen) ValidateToken(ctx context.Context, in *ValidateTokenReq, o
 func (m *defaultOpen) RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
 	return client.RefreshToken(ctx, in, opts...)
+}
+
+func (m *defaultOpen) CreateBot(ctx context.Context, in *CreateBotReq, opts ...grpc.CallOption) (*CreateBotRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.CreateBot(ctx, in, opts...)
+}
+
+func (m *defaultOpen) DeleteBot(ctx context.Context, in *DeleteBotReq, opts ...grpc.CallOption) (*DeleteBotRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.DeleteBot(ctx, in, opts...)
+}
+
+func (m *defaultOpen) ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.ResetBotSecret(ctx, in, opts...)
+}
+
+func (m *defaultOpen) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.GetBotInfo(ctx, in, opts...)
+}
+
+func (m *defaultOpen) UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.UpdateBot(ctx, in, opts...)
+}
+
+func (m *defaultOpen) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.SaveWebhookLog(ctx, in, opts...)
+}
+
+func (m *defaultOpen) GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.GetRobotByUserID(ctx, in, opts...)
+}
+
+func (m *defaultOpen) DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.DispatchPlatformEvent(ctx, in, opts...)
+}
+
+func (m *defaultOpen) ApplyDeveloper(ctx context.Context, in *ApplyDeveloperReq, opts ...grpc.CallOption) (*ApplyDeveloperRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.ApplyDeveloper(ctx, in, opts...)
+}
+
+func (m *defaultOpen) GetDeveloperByUserID(ctx context.Context, in *GetDeveloperByUserIDReq, opts ...grpc.CallOption) (*GetDeveloperByUserIDRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.GetDeveloperByUserID(ctx, in, opts...)
+}
+
+func (m *defaultOpen) GetDeveloper(ctx context.Context, in *GetDeveloperReq, opts ...grpc.CallOption) (*GetDeveloperRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.GetDeveloper(ctx, in, opts...)
+}
+
+func (m *defaultOpen) ListDevelopers(ctx context.Context, in *ListDevelopersReq, opts ...grpc.CallOption) (*ListDevelopersRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.ListDevelopers(ctx, in, opts...)
+}
+
+func (m *defaultOpen) AuditDeveloper(ctx context.Context, in *AuditDeveloperReq, opts ...grpc.CallOption) (*AuditDeveloperRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.AuditDeveloper(ctx, in, opts...)
+}
+
+func (m *defaultOpen) ListOpenApps(ctx context.Context, in *ListOpenAppsReq, opts ...grpc.CallOption) (*ListOpenAppsRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.ListOpenApps(ctx, in, opts...)
+}
+
+func (m *defaultOpen) UpdateOpenApps(ctx context.Context, in *UpdateOpenAppsReq, opts ...grpc.CallOption) (*UpdateOpenAppsRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.UpdateOpenApps(ctx, in, opts...)
+}
+
+func (m *defaultOpen) ListWebhookLogs(ctx context.Context, in *ListWebhookLogsReq, opts ...grpc.CallOption) (*ListWebhookLogsRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.ListWebhookLogs(ctx, in, opts...)
 }

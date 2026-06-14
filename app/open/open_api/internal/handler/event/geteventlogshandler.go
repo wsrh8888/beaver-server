@@ -19,7 +19,7 @@ func GetEventLogsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewGetEventLogsLogic(r.Context(), svcCtx)
-		resp, err := l.GetEventLogs(&req)
+		resp, err := l.GetEventLogs(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

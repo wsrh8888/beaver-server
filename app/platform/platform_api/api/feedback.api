@@ -1,0 +1,22 @@
+syntax = "v1"
+
+// ==================== 用户反馈（需登录，由 Gateway 鉴权并注入 Beaver-User-Id）====================
+
+type (
+	SubmitFeedbackReq {
+		UserID    string   `header:"Beaver-User-Id"`
+		Content   string   `json:"content"`
+		Type      int      `json:"type"`
+		FileNames []string `json:"fileNames,optional"`
+	}
+	SubmitFeedbackRes {}
+)
+
+@server (
+	group: feedback
+)
+service platform {
+	@doc "提交用户反馈"
+	@handler SubmitFeedback
+	post /api/platform/feedback/v1/submit_feedback (SubmitFeedbackReq) returns (SubmitFeedbackRes)
+}

@@ -4,15 +4,19 @@ package handler
 import (
 	"net/http"
 
-	auth "beaver/app/backend/backend_admin/internal/handler/auth"
+	auth_public "beaver/app/backend/backend_admin/internal/handler/auth_public"
 	chat "beaver/app/backend/backend_admin/internal/handler/chat"
 	emoji "beaver/app/backend/backend_admin/internal/handler/emoji"
 	feedback "beaver/app/backend/backend_admin/internal/handler/feedback"
 	file "beaver/app/backend/backend_admin/internal/handler/file"
 	friend "beaver/app/backend/backend_admin/internal/handler/friend"
 	group "beaver/app/backend/backend_admin/internal/handler/group"
+	moderation "beaver/app/backend/backend_admin/internal/handler/moderation"
 	moment "beaver/app/backend/backend_admin/internal/handler/moment"
+	monitor "beaver/app/backend/backend_admin/internal/handler/monitor"
 	open "beaver/app/backend/backend_admin/internal/handler/open"
+	operations "beaver/app/backend/backend_admin/internal/handler/operations"
+	overview "beaver/app/backend/backend_admin/internal/handler/overview"
 	system "beaver/app/backend/backend_admin/internal/handler/system"
 	track "beaver/app/backend/backend_admin/internal/handler/track"
 	update "beaver/app/backend/backend_admin/internal/handler/update"
@@ -26,16 +30,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 用户认证
+				// 管理员 Token 认证
 				Method:  http.MethodGet,
-				Path:    "/admin/auth/authentication",
-				Handler: auth.AuthenticationHandler(serverCtx),
+				Path:    "/admin/auth_public/v1/authentication",
+				Handler: auth_public.AuthenticationHandler(serverCtx),
 			},
 			{
-				// 用户登录
+				// 管理员登录
 				Method:  http.MethodPost,
-				Path:    "/admin/auth/login",
-				Handler: auth.LoginHandler(serverCtx),
+				Path:    "/admin/auth_public/v1/login",
+				Handler: auth_public.LoginHandler(serverCtx),
 			},
 		},
 	)
@@ -89,6 +93,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPut,
 				Path:    "/admin/chat/restorebatch",
 				Handler: chat.BatchRestoreChatMessagesHandler(serverCtx),
+			},
+			{
+				// 获取用户会话列表
+				Method:  http.MethodGet,
+				Path:    "/admin/chat/sessions",
+				Handler: chat.GetChatSessionListHandler(serverCtx),
 			},
 		},
 	)
@@ -279,6 +289,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: friend.BatchDeleteFriendsHandler(serverCtx),
 			},
 			{
+				// 解除黑名单
+				Method:  http.MethodDelete,
+				Path:    "/admin/friend/blockbatch",
+				Handler: friend.UnblockFriendUsersHandler(serverCtx),
+			},
+			{
+				// 获取好友黑名单列表
+				Method:  http.MethodGet,
+				Path:    "/admin/friend/blocklist",
+				Handler: friend.GetFriendBlockListHandler(serverCtx),
+			},
+			{
 				// 获取好友关系列表
 				Method:  http.MethodGet,
 				Path:    "/admin/friend/list",
@@ -373,6 +395,95 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 工单列表
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/cases",
+				Handler: moderation.GetModerationCaseListHandler(serverCtx),
+			},
+			{
+				// 创建工单
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/cases",
+				Handler: moderation.CreateModerationCaseHandler(serverCtx),
+			},
+			{
+				// 工单详情
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/cases/:id",
+				Handler: moderation.GetModerationCaseDetailHandler(serverCtx),
+			},
+			{
+				// 工单处置上下文（跨域编排）
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/cases/:id/context",
+				Handler: moderation.GetModerationCaseContextHandler(serverCtx),
+			},
+			{
+				// 处置工单（含联动管控）
+				Method:  http.MethodPut,
+				Path:    "/admin/moderation/cases/:id/handle",
+				Handler: moderation.HandleModerationCaseHandler(serverCtx),
+			},
+			{
+				// 用户快捷管控
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/control/user",
+				Handler: moderation.ExecuteUserControlHandler(serverCtx),
+			},
+			{
+				// 操作审计日志
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/logs",
+				Handler: moderation.GetOperationLogListHandler(serverCtx),
+			},
+			{
+				// 内容举报列表
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/reports",
+				Handler: moderation.GetContentReportListHandler(serverCtx),
+			},
+			{
+				// 举报立案（创建工单）
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/reports/escalate",
+				Handler: moderation.EscalateContentReportHandler(serverCtx),
+			},
+			{
+				// 驳回举报
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/reports/reject",
+				Handler: moderation.RejectContentReportHandler(serverCtx),
+			},
+			{
+				// 敏感词列表
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/sensitive-words",
+				Handler: moderation.GetSensitiveWordListHandler(serverCtx),
+			},
+			{
+				// 新增敏感词
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/sensitive-words",
+				Handler: moderation.CreateSensitiveWordHandler(serverCtx),
+			},
+			{
+				// 更新敏感词
+				Method:  http.MethodPut,
+				Path:    "/admin/moderation/sensitive-words/:id",
+				Handler: moderation.UpdateSensitiveWordHandler(serverCtx),
+			},
+			{
+				// 删除敏感词
+				Method:  http.MethodDelete,
+				Path:    "/admin/moderation/sensitive-words/:id",
+				Handler: moderation.DeleteSensitiveWordHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
 				// 获取动态详情
 				Method:  http.MethodGet,
 				Path:    "/admin/moment/:momentId",
@@ -408,6 +519,38 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 在线用户列表
+				Method:  http.MethodGet,
+				Path:    "/admin/monitor/online/list",
+				Handler: monitor.GetOnlineUserListHandler(serverCtx),
+			},
+			{
+				// 在线用户统计
+				Method:  http.MethodGet,
+				Path:    "/admin/monitor/online/stats",
+				Handler: monitor.GetOnlineStatsHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/open/app/audit",
+				Handler: open.AuditOpenAppHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/open/app/list",
+				Handler: open.GetOpenAppListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/admin/open/app/status",
+				Handler: open.UpdateOpenAppStatusHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/admin/open/developer/apply",
 				Handler: open.ApplyDeveloperHandler(serverCtx),
@@ -422,11 +565,104 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/admin/open/developer/list",
 				Handler: open.GetDeveloperListHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/open/webhook/logs",
+				Handler: open.GetOpenWebhookLogListHandler(serverCtx),
+			},
 		},
 	)
 
 	server.AddRoutes(
 		[]rest.Route{
+			{
+				// 群组运营360
+				Method:  http.MethodGet,
+				Path:    "/admin/operations/group/:groupId/profile",
+				Handler: operations.GetGroupOperationsProfileHandler(serverCtx),
+			},
+			{
+				// 运营统一检索
+				Method:  http.MethodGet,
+				Path:    "/admin/operations/search",
+				Handler: operations.AdminUnifiedSearchHandler(serverCtx),
+			},
+			{
+				// 用户运营360
+				Method:  http.MethodGet,
+				Path:    "/admin/operations/user/:userId/profile",
+				Handler: operations.GetUserOperationsProfileHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 运营工作台概览
+				Method:  http.MethodGet,
+				Path:    "/admin/overview/dashboard",
+				Handler: overview.GetDashboardOverviewHandler(serverCtx),
+			},
+			{
+				// 运营工作台待办收件箱
+				Method:  http.MethodGet,
+				Path:    "/admin/overview/inbox",
+				Handler: overview.GetDashboardInboxHandler(serverCtx),
+			},
+			{
+				// 运营数据趋势
+				Method:  http.MethodGet,
+				Path:    "/admin/overview/trends",
+				Handler: overview.GetDashboardTrendsHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 管理员列表
+				Method:  http.MethodGet,
+				Path:    "/admin/system/admins",
+				Handler: system.GetAdminUserListHandler(serverCtx),
+			},
+			{
+				// 创建管理员
+				Method:  http.MethodPost,
+				Path:    "/admin/system/admins",
+				Handler: system.CreateAdminUserHandler(serverCtx),
+			},
+			{
+				// 更新管理员
+				Method:  http.MethodPut,
+				Path:    "/admin/system/admins/:userId",
+				Handler: system.UpdateAdminUserHandler(serverCtx),
+			},
+			{
+				// 角色列表
+				Method:  http.MethodGet,
+				Path:    "/admin/system/authorities",
+				Handler: system.GetAuthorityListHandler(serverCtx),
+			},
+			{
+				// 更新角色
+				Method:  http.MethodPut,
+				Path:    "/admin/system/authority",
+				Handler: system.UpdateAuthorityHandler(serverCtx),
+			},
+			{
+				// 删除角色
+				Method:  http.MethodDelete,
+				Path:    "/admin/system/authority",
+				Handler: system.DeleteAuthorityHandler(serverCtx),
+			},
+			{
+				// 角色已授权菜单
+				Method:  http.MethodGet,
+				Path:    "/admin/system/authority/:id/menus",
+				Handler: system.GetAuthorityMenusHandler(serverCtx),
+			},
 			{
 				// 创建权限
 				Method:  http.MethodPost,
@@ -540,16 +776,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: update.GetArchitecturesHandler(serverCtx),
 			},
 			{
-				// 获取城市策略列表
+				// 获取发版策略
 				Method:  http.MethodGet,
-				Path:    "/admin/update/cityStrategies",
-				Handler: update.GetCityStrategiesHandler(serverCtx),
+				Path:    "/admin/update/releasePolicies",
+				Handler: update.GetReleasePoliciesHandler(serverCtx),
 			},
 			{
-				// 更新城市策略
+				// 保存发版策略
 				Method:  http.MethodPost,
-				Path:    "/admin/update/cityStrategyUpdate",
-				Handler: update.UpdateCityStrategyHandler(serverCtx),
+				Path:    "/admin/update/releasePolicy",
+				Handler: update.UpsertReleasePolicyHandler(serverCtx),
+			},
+			{
+				// 删除版本
+				Method:  http.MethodDelete,
+				Path:    "/admin/update/version/:id",
+				Handler: update.DeleteVersionHandler(serverCtx),
 			},
 			{
 				// 添加新版本

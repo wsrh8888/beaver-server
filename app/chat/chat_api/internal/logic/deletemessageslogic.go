@@ -6,21 +6,24 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type DeleteMessagesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 批量删除消息(仅自己不可见)
 func NewDeleteMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMessagesLogic {
 	return &DeleteMessagesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("delete_messages"),
 		svcCtx: svcCtx,
 	}
 }
@@ -42,9 +45,17 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 	// 3. 执行入库 (使用 Create 批量插入)
 	err = l.svcCtx.DB.Create(&deleteRecords).Error
 	if err != nil {
-		l.Logger.Errorf("用户 %s 批量删除消息失败: %v", req.UserID, err)
+		logx.WithContext(l.ctx).Errorf("用户 %s 批量删除消息失败: %v", req.UserID, err)
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "批量删除消息成功",
+		Data: map[string]interface{}{
+			"userId": req.UserID,
+			"count":  len(req.MessageIDs),
+		},
+	})
 
 	return &types.DeleteMessagesRes{}, nil
 }

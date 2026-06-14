@@ -6,6 +6,7 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/common/etcd"
 	commonMiddleware "beaver/common/middleware/http"
+	"beaver/utils/logger"
 	"flag"
 	"fmt"
 
@@ -21,6 +22,8 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
+	logger.Init("open_api")
+
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
@@ -29,9 +32,6 @@ func main() {
 
 	// 注册全局中间件（日志）
 	server.Use(commonMiddleware.RequestLogMiddleware)
-
-	// 使用 ServiceContext 中的 AuthMiddleware
-	server.Use(ctx.AuthMiddleware)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

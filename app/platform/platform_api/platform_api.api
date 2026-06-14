@@ -1,0 +1,5 @@
+import "api/track_public.api"
+import "api/update_public.api"
+import "api/feedback.api"
+
+// goctl api go -api platform_api.api -dir . --home ../../../template

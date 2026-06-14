@@ -28,6 +28,7 @@ func NewUpdateSecurityConfigLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *UpdateSecurityConfigLogic) UpdateSecurityConfig(req *types.UpdateSecurityConfigReq) (resp *types.UpdateSecurityConfigRes, err error) {
+
 	// 验证应用是否存在
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {

@@ -1,0 +1,86 @@
+syntax = "v1"
+
+// ==================== OAuth 公开接口（无需认证）====================
+
+type (
+	// 生成扫码登录二维码
+	GenerateQrCodeReq {
+		AppID string `json:"appId"` // string 第三方应用 ID
+	}
+	GenerateQrCodeRes {
+		SceneID  string `json:"sceneId"` // string 扫码场景 ID，用于轮询状态与拼接 QR
+		ExpireIn int64  `json:"expireIn"` // int64 二维码有效期秒
+	}
+)
+
+type (
+	// 查询扫码登录状态
+	CheckQrCodeStatusReq {
+		SceneID string `form:"sceneId"` // string 扫码场景 ID
+	}
+	CheckQrCodeStatusRes {
+		Status string `json:"status"` // string 状态：waiting / scanned / confirmed / cancelled / expired
+		Code   string `json:"code,optional"` // string 授权码，confirmed 时返回
+	}
+)
+
+type (
+	// 查询扫码会话信息（公开，供 H5 与 App 展示应用信息）
+	GetQrCodeSceneReq {
+		SceneID string `form:"sceneId"` // string 扫码场景 ID
+	}
+	GetQrCodeSceneRes {
+		SceneID   string   `json:"sceneId"` // string 扫码场景 ID
+		AppID     string   `json:"appId"` // string 第三方应用 ID
+		AppName   string   `json:"appName"` // string 应用名称
+		AppIcon   string   `json:"appIcon"` // string 应用图标 URL
+		Status    string   `json:"status"` // string waiting/scanned/confirmed/cancelled/expired
+		ExpireIn  int64    `json:"expireIn"` // int64 剩余有效秒数
+		Scopes    []string `json:"scopes"` // []string 请求的权限范围
+	}
+)
+
+type (
+	// 账号密码登录获取授权码
+	PasswordLoginReq {
+		AppID    string `json:"appId"` // string 第三方应用 ID
+		Account  string `json:"account"` // string 手机号或邮箱
+		Password string `json:"password"` // string 登录密码
+	}
+	PasswordLoginRes {
+		Code     string `json:"code"` // string OAuth 授权码
+		ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
+	}
+)
+
+@server (
+	group: oauth_public
+)
+service open {
+	@doc "生成扫码登录二维码"
+	@handler GenerateQrCode
+	post /api/open/oauth_public/v1/qrcode (GenerateQrCodeReq) returns (GenerateQrCodeRes)
+
+	@doc "查询扫码状态（轮询）"
+	@handler CheckQrCodeStatus
+	get /api/open/oauth_public/v1/qrcode_status (CheckQrCodeStatusReq) returns (CheckQrCodeStatusRes)
+
+	@doc "查询扫码会话信息"
+	@handler GetQrCodeScene
+	get /api/open/oauth_public/v1/qrcode_scene (GetQrCodeSceneReq) returns (GetQrCodeSceneRes)
+
+	@doc "账号密码登录"
+	@handler PasswordLogin
+	post /api/open/oauth_public/v1/password_login (PasswordLoginReq) returns (PasswordLoginRes)
+}
+
+// 以下类型仅保留给历史 handler 编译，不再注册路由
+type (
+	ConfirmQrCodeLoginReq {
+		SceneID string `json:"sceneId"`
+		UserID  string `json:"userId"`
+	}
+	ConfirmQrCodeLoginRes {
+		Success bool `json:"success"`
+	}
+)

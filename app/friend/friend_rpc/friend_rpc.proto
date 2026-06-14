@@ -104,6 +104,138 @@ message GetFriendDetailRes {
   repeated FriendDetailItem friends = 1; // 好友详细信息列表
 }
 
+message IsFriendReq {
+  string user_a = 1;
+  string user_b = 2;
+}
+
+message IsFriendRes {
+  bool is_friend = 1;
+}
+
+message IsBlockedReq {
+  string user_a = 1;
+  string user_b = 2;
+}
+
+message IsBlockedRes {
+  bool is_blocked = 1; // 任一方拉黑对方
+}
+
+// ==================== 好友关系管理（通用）====================
+
+message FriendItem {
+  string friend_id = 1; // string 好友关系 ID
+  string send_user_id = 2; // string 发起方用户 ID
+  string rev_user_id = 3; // string 接收方用户 ID
+  string send_user_notice = 4; // string 发起方备注
+  string rev_user_notice = 5; // string 接收方备注
+  string source = 6; // string 来源
+  bool is_deleted = 7; // bool 是否已删除
+  string created_at = 8; // string 创建时间 RFC3339
+  string updated_at = 9; // string 更新时间 RFC3339
+}
+
+// ListFriends：好友关系查询（列表 + relation_id 精确查详情）
+message ListFriendsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string user_id = 3; // string 参与方用户 ID 筛选，可选
+  string peer_user_id = 4; // string 对方用户 ID 筛选，可选
+  optional bool is_deleted = 5; // bool 删除状态筛选，可选
+  string start_time = 6; // string 开始时间，可选
+  string end_time = 7; // string 结束时间，可选
+  string relation_id = 8; // string 好友关系记录 ID 精确查，可选
+}
+
+message ListFriendsRes {
+  int64 total = 1; // int64 总数
+  repeated FriendItem list = 2; // array 好友列表
+}
+
+// UpdateFriends：好友关系状态变更（物理删除 / 恢复软删，支持批量）
+message UpdateFriendsReq {
+  repeated string relation_ids = 1; // array 好友关系记录 ID
+  int32 action = 2; // int32 操作：1=物理删除 2=恢复软删
+}
+
+message UpdateFriendsRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+message FriendVerifyItem {
+  string verify_id = 1; // string 验证记录 ID
+  string send_user_id = 2; // string 发起方用户 ID
+  string rev_user_id = 3; // string 接收方用户 ID
+  int32 send_status = 4; // int32 发起方状态
+  int32 rev_status = 5; // int32 接收方状态
+  string message = 6; // string 附加消息
+  string source = 7; // string 来源
+  string created_at = 8; // string 创建时间 RFC3339
+  string updated_at = 9; // string 更新时间 RFC3339
+}
+
+// ListFriendVerifies：好友验证查询（列表 + verify_id 精确查详情）
+message ListFriendVerifiesReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string send_user_id = 3; // string 发起方筛选，可选
+  string rev_user_id = 4; // string 接收方筛选，可选
+  int32 send_status = 5; // int32 发起方状态，0 表示全部
+  int32 rev_status = 6; // int32 接收方状态，0 表示全部
+  string start_time = 7; // string 开始时间，可选
+  string end_time = 8; // string 结束时间，可选
+  string verify_id = 9; // string 验证记录 ID 精确查，可选
+}
+
+message ListFriendVerifiesRes {
+  int64 total = 1; // int64 总数
+  repeated FriendVerifyItem list = 2; // array 验证列表
+}
+
+// UpdateFriendVerifies：好友验证记录删除（支持批量）
+message UpdateFriendVerifiesReq {
+  repeated string verify_ids = 1; // array 验证记录 ID
+  int32 action = 2; // int32 操作：1=删除
+}
+
+message UpdateFriendVerifiesRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// ==================== 好友黑名单（通用）====================
+
+message FriendBlockItem {
+  string block_id = 1; // string 黑名单记录 ID
+  string user_id = 2; // string 执行拉黑的用户 ID
+  string blocked_user_id = 3; // string 被拉黑的用户 ID
+  string created_at = 4; // string 创建时间 RFC3339
+}
+
+// ListFriendBlocks：黑名单查询（列表 + block_id 精确查详情）
+message ListFriendBlocksReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string user_id = 3; // string 拉黑方用户 ID 筛选，可选
+  string blocked_user_id = 4; // string 被拉黑用户 ID 筛选，可选
+  string block_id = 5; // string 记录 ID 精确查，可选
+}
+
+message ListFriendBlocksRes {
+  int64 total = 1; // int64 总数
+  repeated FriendBlockItem list = 2; // array 黑名单列表
+}
+
+// UpdateFriendBlocks：黑名单变更（解除拉黑 / 删除记录，支持批量）
+message UpdateFriendBlocksReq {
+  repeated string block_ids = 1; // array 黑名单记录 ID
+  int32 action = 2; // int32 操作：1=解除拉黑（删除记录）
+}
+
+message UpdateFriendBlocksRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
 service friend {
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
   rpc GetFriendVersions(GetFriendVersionsReq) returns (GetFriendVersionsRes); //获取用户好友版本信息
@@ -111,6 +243,16 @@ service friend {
   rpc GetFriendsListByIds(GetFriendsListByIdsReq) returns (GetFriendsListByIdsRes); //通过ID获取好友列表
   rpc GetFriendVerifiesListByIds(GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes); //通过ID获取好友验证列表
   rpc GetFriendDetail(GetFriendDetailReq) returns (GetFriendDetailRes); //获取好友详细信息
+  rpc IsFriend(IsFriendReq) returns (IsFriendRes);
+  rpc IsBlocked(IsBlockedReq) returns (IsBlockedRes);
+
+  // 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+  rpc ListFriends(ListFriendsReq) returns (ListFriendsRes); // 好友关系查询：列表、详情
+  rpc UpdateFriends(UpdateFriendsReq) returns (UpdateFriendsRes); // 好友关系变更：物理删除、恢复
+  rpc ListFriendVerifies(ListFriendVerifiesReq) returns (ListFriendVerifiesRes); // 好友验证查询：列表、详情
+  rpc UpdateFriendVerifies(UpdateFriendVerifiesReq) returns (UpdateFriendVerifiesRes); // 好友验证删除
+  rpc ListFriendBlocks(ListFriendBlocksReq) returns (ListFriendBlocksRes); // 黑名单查询：列表、详情
+  rpc UpdateFriendBlocks(UpdateFriendBlocksReq) returns (UpdateFriendBlocksRes); // 黑名单变更：解除拉黑
 }
 
 // goctl rpc protoc friend_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

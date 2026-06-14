@@ -1,0 +1,46 @@
+syntax = "v1"
+
+// ==================== 埋点公开接口（无需认证，Gateway 白名单）====================
+
+type (
+	ReportEventsReq {
+		UserID string            `json:"userId,optional"`
+		Events []ReportEventItem `json:"events,optional"`
+	}
+	ReportEventItem {
+		EventName string `json:"eventName"`
+		Action    string `json:"action"`
+		BucketID  string `json:"bucketId"`
+		Platform  string `json:"platform,optional"`
+		Timestamp int64  `json:"timestamp"`
+		DeviceID  string `json:"deviceID,optional"`
+		Data      string `json:"data,optional"`
+	}
+	ReportEventsRes {}
+)
+
+type (
+	LogEventsReq {
+		Logs []LogEventItem `json:"logs"`
+	}
+	LogEventItem {
+		Level     string `json:"level"`
+		BucketID  string `json:"bucketId"`
+		Data      string `json:"data"`
+		Timestamp int64  `json:"timestamp,optional"`
+	}
+	LogEventsRes {}
+)
+
+@server (
+	group: track_public
+)
+service platform {
+	@doc "上报统计埋点事件"
+	@handler ReportEvents
+	post /api/platform/track_public/v1/report_events (ReportEventsReq) returns (ReportEventsRes)
+
+	@doc "记录客户端日志"
+	@handler LogEvents
+	post /api/platform/track_public/v1/log_events (LogEventsReq) returns (LogEventsRes)
+}

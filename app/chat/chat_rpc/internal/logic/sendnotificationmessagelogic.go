@@ -3,12 +3,11 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
+	chatrpcutils "beaver/app/chat/chat_rpc/internal/utils"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	"beaver/app/chat/chat_utils"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
@@ -98,7 +97,7 @@ func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.Send
 	}
 
 	// 更新会话级别的信息，获取会话版本号
-	conversationVersion, err := chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.Type, nextSeq, in.Content)
+	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.Type, nextSeq, in.Content)
 	if err != nil {
 		l.Logger.Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
 		// 这里不返回错误，因为消息已经创建成功
@@ -118,11 +117,11 @@ func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.Send
 
 	// 批量更新该会话所有用户的会话关系（恢复隐藏状态，更新版本号）
 	// 如果指定了readUserIds，只更新这些用户的已读状态；否则所有用户都标记为已读
-	allUserConversationUpdates, err := chat_utils.UpdateUserConversationsReadSeq(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.ReadUserIds, nextSeq)
+	allUserConversationUpdates, err := chatrpcutils.UpdateUserConversationsReadSeq(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.ReadUserIds, nextSeq)
 	if err != nil {
 		l.Logger.Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
 		// 不影响消息发送成功，只记录错误
-		allUserConversationUpdates = []chat_utils.UserConversationUpdate{}
+		allUserConversationUpdates = []chatrpcutils.UserConversationUpdate{}
 	}
 
 	// 如果有发送者（RelatedUserId），则推送通知消息给所有相关用户
@@ -152,14 +151,13 @@ func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.Send
 }
 
 // notifyNotificationUpdateGrouped 按会话分组推送通知更新（给该会话的所有用户推送）
-func (l *SendNotificationMessageLogic) notifyNotificationUpdateGrouped(conversationId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chat_utils.UserConversationUpdate) {
+func (l *SendNotificationMessageLogic) notifyNotificationUpdateGrouped(conversationId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chatrpcutils.UserConversationUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
 			l.Logger.Errorf("推送通知更新时发生panic: %v", r)
 		}
 	}()
 
-	// 获取该会话的所有用户ID
 	var recipientIds []string
 	for _, update := range allUserConversationUpdates {
 		if update.ConversationID == conversationId {
@@ -191,13 +189,6 @@ func (l *SendNotificationMessageLogic) notifyNotificationUpdateGrouped(conversat
 	// 为每个接收者推送批量更新
 	messageType := wsTypeConst.ChatConversationMessageReceive
 
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println(("111111111111111111111"))
-	fmt.Println("推送通知更新给会话成员: ", recipientIds)
-
 	for _, recipientId := range recipientIds {
 		// 一次性推送所有表的更新信息
 		payload := map[string]interface{}{
@@ -210,7 +201,10 @@ func (l *SendNotificationMessageLogic) notifyNotificationUpdateGrouped(conversat
 			},
 			"conversationId": conversationId,
 		}
-		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
+		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+			l.Logger.Errorf("MQ 推送失败: recipient=%s, conversation=%s, error=%v", recipientId, conversationId, err)
+			continue
+		}
 
 		l.Logger.Infof("分组推送通知相关更新: recipient=%s, conversation=%s, tableUpdateCount=%d",
 			recipientId, conversationId, len(tableUpdates))

@@ -32,49 +32,34 @@ func NewGenerateQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp *types.GenerateQrCodeRes, err error) {
-	// 1. 验证 appId 是否存在
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
 		logx.Errorf("应用不存在: appId=%s, err=%v", req.AppID, err)
 		return nil, fmt.Errorf("应用不存在")
 	}
-
-	// 2. 检查应用状态
 	if app.Status != 1 {
 		return nil, fmt.Errorf("应用未启用")
 	}
 
-	// 3. 生成 SceneID
+	const expireIn int64 = 300
 	sceneID := util.NewV4().String()
+	expiresAt := time.Now().Add(time.Duration(expireIn) * time.Second)
 
-	// 4. 设置过期时间（5分钟）
-	now := time.Now()
-	expiresAt := now.Add(5 * time.Minute)
-
-	// 5. 创建扫码记录
-	qrCode := open_models.OpenQrCode{
+	qrCode := open_models.OpenOAuthQrCode{
 		SceneID:   sceneID,
 		AppID:     req.AppID,
-		Status:    0, // 0-等待扫码
+		Status:    0,
 		ExpiresAt: expiresAt,
 	}
-
 	if err := l.svcCtx.DB.Create(&qrCode).Error; err != nil {
 		logx.Errorf("创建扫码记录失败: err=%v", err)
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
-	// 6. 生成短链接（TODO: 实现短链接服务）
-	// 暂时使用完整 URL
-	oauthBaseUrl := l.svcCtx.Config.OAuth.BaseUrl
-	qrCodeURL := fmt.Sprintf("%s/scan?sceneId=%s", oauthBaseUrl, sceneID)
-
-	// 7. 返回结果
-	logx.Infof("生成扫码二维码成功: sceneId=%s, appId=%s, qrCodeUrl=%s", sceneID, req.AppID, qrCodeURL)
+	logx.Infof("生成扫码会话成功: sceneId=%s, appId=%s", sceneID, req.AppID)
 
 	return &types.GenerateQrCodeRes{
-		QrCodeURL: qrCodeURL, // 二维码 URL（短链接或完整 URL）
-		SceneID:   sceneID,
-		ExpireIn:  300, // 5分钟 = 300秒
+		SceneID:  sceneID,
+		ExpireIn: expireIn,
 	}, nil
 }

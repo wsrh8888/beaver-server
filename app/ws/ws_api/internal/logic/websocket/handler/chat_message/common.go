@@ -5,6 +5,20 @@ import (
 	"encoding/json"
 )
 
+func fileUrlFromMap(m map[string]interface{}) string {
+	if fileUrl, ok := m["fileUrl"].(string); ok {
+		return fileUrl
+	}
+	return ""
+}
+
+func thumbnailUrlFromMap(m map[string]interface{}) string {
+	if thumbnailUrl, ok := m["thumbnailUrl"].(string); ok {
+		return thumbnailUrl
+	}
+	return ""
+}
+
 // convertToRpcMsg 将原始消息转换为RPC消息格式
 func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 	var msgData map[string]interface{}
@@ -15,24 +29,21 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 
 	rpcMsg := &chat_rpc.Msg{}
 
-	// 获取消息类型
 	if msgType, ok := msgData["type"].(float64); ok {
 		rpcMsg.Type = uint32(msgType)
 	}
 
-	// 根据消息类型设置对应的消息内容
 	switch rpcMsg.Type {
-	case 1: // 文本消息
+	case 1:
 		if textMsg, ok := msgData["textMsg"].(map[string]interface{}); ok {
 			if content, ok := textMsg["content"].(string); ok {
 				rpcMsg.TextMsg = &chat_rpc.TextMsg{Content: content}
 			}
 		}
-	case 2: // 图片消息
+	case 2:
 		if imageMsg, ok := msgData["imageMsg"].(map[string]interface{}); ok {
-			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{}
-			if fileKey, ok := imageMsg["fileKey"].(string); ok {
-				rpcMsg.ImageMsg.FileKey = fileKey
+			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
+				FileUrl: fileUrlFromMap(imageMsg),
 			}
 			if width, ok := imageMsg["width"].(float64); ok {
 				rpcMsg.ImageMsg.Width = int32(width)
@@ -44,11 +55,11 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.ImageMsg.Size = int64(size)
 			}
 		}
-	case 3: // 视频消息
+	case 3:
 		if videoMsg, ok := msgData["videoMsg"].(map[string]interface{}); ok {
-			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{}
-			if fileKey, ok := videoMsg["fileKey"].(string); ok {
-				rpcMsg.VideoMsg.FileKey = fileKey
+			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
+				FileUrl:       fileUrlFromMap(videoMsg),
+				ThumbnailUrl: thumbnailUrlFromMap(videoMsg),
 			}
 			if width, ok := videoMsg["width"].(float64); ok {
 				rpcMsg.VideoMsg.Width = int32(width)
@@ -59,18 +70,17 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			if duration, ok := videoMsg["duration"].(float64); ok {
 				rpcMsg.VideoMsg.Duration = int32(duration)
 			}
-			if thumbnailKey, ok := videoMsg["thumbnailKey"].(string); ok {
-				rpcMsg.VideoMsg.ThumbnailKey = thumbnailKey
-			}
 			if size, ok := videoMsg["size"].(float64); ok {
 				rpcMsg.VideoMsg.Size = int64(size)
 			}
 		}
-	case 4: // 文件消息
+	case 4:
 		if fileMsg, ok := msgData["fileMsg"].(map[string]interface{}); ok {
-			file := &chat_rpc.FileMsg{}
-			if fileKey, ok := fileMsg["fileKey"].(string); ok {
-				file.FileKey = fileKey
+			file := &chat_rpc.FileMsg{
+				FileUrl: fileUrlFromMap(fileMsg),
+			}
+			if fileName, ok := fileMsg["fileName"].(string); ok {
+				file.FileName = fileName
 			}
 			if size, ok := fileMsg["size"].(float64); ok {
 				file.Size = int64(size)
@@ -80,11 +90,10 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			}
 			rpcMsg.FileMsg = file
 		}
-	case 5: // 语音消息
+	case 5:
 		if voiceMsg, ok := msgData["voiceMsg"].(map[string]interface{}); ok {
-			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{}
-			if fileKey, ok := voiceMsg["fileKey"].(string); ok {
-				rpcMsg.VoiceMsg.FileKey = fileKey
+			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
+				FileUrl: fileUrlFromMap(voiceMsg),
 			}
 			if duration, ok := voiceMsg["duration"].(float64); ok {
 				rpcMsg.VoiceMsg.Duration = int32(duration)
@@ -93,11 +102,10 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.VoiceMsg.Size = int64(size)
 			}
 		}
-	case 6: // 表情消息
+	case 6:
 		if emojiMsg, ok := msgData["emojiMsg"].(map[string]interface{}); ok {
-			emoji := &chat_rpc.EmojiMsg{}
-			if fileKey, ok := emojiMsg["fileKey"].(string); ok {
-				emoji.FileKey = fileKey
+			emoji := &chat_rpc.EmojiMsg{
+				FileUrl: fileUrlFromMap(emojiMsg),
 			}
 			if emojiId, ok := emojiMsg["emojiId"].(string); ok {
 				emoji.EmojiId = emojiId
@@ -111,10 +119,9 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			if height, ok := emojiMsg["height"].(float64); ok {
 				emoji.Height = int64(height)
 			}
-
 			rpcMsg.EmojiMsg = emoji
 		}
-	case 7: // 通知消息
+	case 7:
 		if notificationMsg, ok := msgData["notificationMsg"].(map[string]interface{}); ok {
 			rpcMsg.NotificationMsg = &chat_rpc.NotificationMsg{}
 			if msgType, ok := notificationMsg["type"].(float64); ok {
@@ -128,11 +135,13 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				}
 			}
 		}
-	case 8: // 音频文件消息
+	case 8:
 		if audioFileMsg, ok := msgData["audioFileMsg"].(map[string]interface{}); ok {
-			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{}
-			if fileKey, ok := audioFileMsg["fileKey"].(string); ok {
-				rpcMsg.AudioFileMsg.FileKey = fileKey
+			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
+				FileUrl: fileUrlFromMap(audioFileMsg),
+			}
+			if fileName, ok := audioFileMsg["fileName"].(string); ok {
+				rpcMsg.AudioFileMsg.FileName = fileName
 			}
 			if duration, ok := audioFileMsg["duration"].(float64); ok {
 				rpcMsg.AudioFileMsg.Duration = int32(duration)
@@ -141,7 +150,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.AudioFileMsg.Size = int64(size)
 			}
 		}
-	case 9: // 音视频通话
+	case 9:
 		if callMsg, ok := msgData["callMsg"].(map[string]interface{}); ok {
 			rpcMsg.CallMsg = &chat_rpc.CallMsg{}
 			if roomId, ok := callMsg["roomId"].(string); ok {
@@ -157,7 +166,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.CallMsg.Duration = int64(duration)
 			}
 		}
-	case 10: // 撤回消息
+	case 10:
 		if withdrawMsg, ok := msgData["withdrawMsg"].(map[string]interface{}); ok {
 			rpcMsg.WithdrawMsg = &chat_rpc.WithdrawMsg{}
 			if originMsgId, ok := withdrawMsg["originMsgId"].(string); ok {
@@ -169,7 +178,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.WithdrawMsg.OriginMsg = originMsg
 			}
 		}
-	case 11: // 回复消息
+	case 11:
 		if replyMsg, ok := msgData["replyMsg"].(map[string]interface{}); ok {
 			rpcMsg.ReplyMsg = &chat_rpc.ReplyMsg{}
 			if originMsgId, ok := replyMsg["originMsgId"].(string); ok {
@@ -186,7 +195,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.ReplyMsg.ReplyMsg = replyInnerMsg
 			}
 		}
-	case 12: // 转发消息
+	case 12:
 		if forwardMsg, ok := msgData["forwardMsg"].(map[string]interface{}); ok {
 			rpcMsg.ForwardMsg = &chat_rpc.ForwardMsg{}
 			if title, ok := forwardMsg["title"].(string); ok {

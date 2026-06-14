@@ -4,36 +4,36 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"time"
 
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
+	chatrpcutils "beaver/app/chat/chat_rpc/internal/utils"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	"beaver/app/chat/chat_utils"
-	"beaver/app/friend/friend_models"
-	"beaver/app/group/group_models"
-	open_models "beaver/app/open/open_models"
+	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/core/corewebhook"
 	"beaver/utils/conversation"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type SendMsgLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
 	return &SendMsgLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("send_msg"),
 		svcCtx: svcCtx,
 	}
 }
@@ -60,7 +60,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.ImageMsgType:
 		if protoMsg.ImageMsg != nil {
 			imageMsg := &ctype.ImageMsg{
-				FileKey: protoMsg.ImageMsg.FileKey,
+				FileUrl: protoMsg.ImageMsg.FileUrl,
 			}
 			if protoMsg.ImageMsg.Width > 0 {
 				imageMsg.Width = int(protoMsg.ImageMsg.Width)
@@ -79,7 +79,8 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.VideoMsgType:
 		if protoMsg.VideoMsg != nil {
 			videoMsg := &ctype.VideoMsg{
-				FileKey: protoMsg.VideoMsg.FileKey,
+				FileUrl:      protoMsg.VideoMsg.FileUrl,
+				ThumbnailUrl: protoMsg.VideoMsg.ThumbnailUrl,
 			}
 			if protoMsg.VideoMsg.Width > 0 {
 				videoMsg.Width = int(protoMsg.VideoMsg.Width)
@@ -89,9 +90,6 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			}
 			if protoMsg.VideoMsg.Duration > 0 {
 				videoMsg.Duration = int(protoMsg.VideoMsg.Duration)
-			}
-			if protoMsg.VideoMsg.ThumbnailKey != "" {
-				videoMsg.ThumbnailKey = protoMsg.VideoMsg.ThumbnailKey
 			}
 			if protoMsg.VideoMsg.Size > 0 {
 				videoMsg.Size = protoMsg.VideoMsg.Size
@@ -104,7 +102,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.FileMsgType:
 		if protoMsg.FileMsg != nil {
 			fileMsg := &ctype.FileMsg{
-				FileKey: protoMsg.FileMsg.FileKey,
+				FileUrl: protoMsg.FileMsg.FileUrl,
 			}
 			if protoMsg.FileMsg.FileName != "" {
 				fileMsg.FileName = protoMsg.FileMsg.FileName
@@ -115,6 +113,12 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			if protoMsg.FileMsg.MimeType != "" {
 				fileMsg.MimeType = protoMsg.FileMsg.MimeType
 			}
+			if protoMsg.FileMsg.Extension != "" {
+				fileMsg.Extension = protoMsg.FileMsg.Extension
+			}
+			if protoMsg.FileMsg.OpenMode > 0 {
+				fileMsg.OpenMode = int(protoMsg.FileMsg.OpenMode)
+			}
 			msg = ctype.Msg{
 				Type:    ctype.FileMsgType,
 				FileMsg: fileMsg,
@@ -123,7 +127,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.VoiceMsgType:
 		if protoMsg.VoiceMsg != nil {
 			voiceMsg := &ctype.VoiceMsg{
-				FileKey: protoMsg.VoiceMsg.FileKey,
+				FileUrl: protoMsg.VoiceMsg.FileUrl,
 			}
 			if protoMsg.VoiceMsg.Duration > 0 {
 				voiceMsg.Duration = int(protoMsg.VoiceMsg.Duration)
@@ -141,7 +145,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			msg = ctype.Msg{
 				Type: ctype.EmojiMsgType,
 				EmojiMsg: &ctype.EmojiMsg{
-					FileKey:   protoMsg.EmojiMsg.FileKey,
+					FileUrl:   protoMsg.EmojiMsg.FileUrl,
 					EmojiID:   protoMsg.EmojiMsg.EmojiId,
 					PackageID: protoMsg.EmojiMsg.PackageId,
 					Width:     protoMsg.EmojiMsg.Width,
@@ -163,7 +167,7 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 	case ctype.AudioFileMsgType:
 		if protoMsg.AudioFileMsg != nil {
 			audioFileMsg := &ctype.AudioFileMsg{
-				FileKey: protoMsg.AudioFileMsg.FileKey,
+				FileUrl: protoMsg.AudioFileMsg.FileUrl,
 			}
 			if protoMsg.AudioFileMsg.FileName != "" {
 				audioFileMsg.FileName = protoMsg.AudioFileMsg.FileName
@@ -235,6 +239,46 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 				},
 			}
 		}
+	case ctype.MarkdownMsgType:
+		if protoMsg.MarkdownMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.MarkdownMsgType,
+				MarkdownMsg: &ctype.MarkdownMsg{
+					Content: protoMsg.MarkdownMsg.Content,
+					Title:   protoMsg.MarkdownMsg.Title,
+				},
+			}
+		}
+	case ctype.LinkMsgType:
+		if protoMsg.LinkMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.LinkMsgType,
+				LinkMsg: &ctype.LinkMsg{
+					URL:      protoMsg.LinkMsg.Url,
+					Title:    protoMsg.LinkMsg.Title,
+					Desc:     protoMsg.LinkMsg.Desc,
+					ImageURL: protoMsg.LinkMsg.ImageUrl,
+				},
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if protoMsg.CloudDocMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.CloudDocMsgType,
+				CloudDocMsg: &ctype.CloudDocMsg{
+					DocID:    protoMsg.CloudDocMsg.DocId,
+					DocType:  int(protoMsg.CloudDocMsg.DocType),
+					Title:    protoMsg.CloudDocMsg.Title,
+					OwnerID:  protoMsg.CloudDocMsg.OwnerId,
+					Perm:     int(protoMsg.CloudDocMsg.Perm),
+					CoverURL: protoMsg.CloudDocMsg.CoverUrl,
+					Revision: protoMsg.CloudDocMsg.Revision,
+				},
+			}
+		}
+	}
+	if len(protoMsg.AtUserIds) > 0 {
+		msg.AtUserIDs = protoMsg.AtUserIds
 	}
 	return &msg
 }
@@ -243,7 +287,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	conversationType, userIds := conversation.ParseConversationWithType(in.ConversationId)
 
 	if conversationType == 1 {
-		// 私聊需要验证好友关系
+		// 私聊需要验证好友关系（与 Robot 对话时跳过）
 		if !strings.Contains(in.ConversationId, in.UserId) {
 			logx.Errorf("用户id不匹配，用户id：%s，会话id：%s", in.UserId, in.ConversationId)
 			return nil, errors.New("异常操作")
@@ -254,49 +298,57 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			return nil, errors.New("无效的私聊会话ID")
 		}
 
-		var friendModel friend_models.FriendModel
-		if !friendModel.IsFriend(l.svcCtx.DB, userIds[0], userIds[1]) {
-			logx.Errorf("不是好友关系，用户IDs: %v", userIds)
-			return nil, errors.New("不是好友关系")
-		}
-
-		// 黑名单检查（双向）：任一方拉黑对方均无法发消息
-		var blockCount int64
-		l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).
-			Where("(user_id = ? AND blocked_user_id = ?) OR (user_id = ? AND blocked_user_id = ?)",
-				userIds[0], userIds[1], userIds[1], userIds[0]).
-			Count(&blockCount)
-		if blockCount > 0 {
-			return nil, errors.New("无法发送消息")
-		}
-	} else if conversationType == 2 {
-		// 群聊：禁言检查
-		groupID := conversation.GetTargetIDByConversation(in.ConversationId, in.UserId)
-
-		var member group_models.GroupMemberModel
-		if err := l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", groupID, in.UserId).
-			First(&member).Error; err != nil {
-			return nil, errors.New("你不是该群成员")
-		}
-
-		// 群主(1)和管理员(2)不受禁言限制
-		if member.Role != 1 && member.Role != 2 {
-			// 全员禁言检查
-			var group group_models.GroupModel
-			if err := l.svcCtx.DB.Where("group_id = ?", groupID).First(&group).Error; err == nil {
-				if group.IsMuteAll {
-					return nil, errors.New("当前群已开启全员禁言")
+		skipFriendCheck := isOpenRobotSender(in.DeviceId)
+		if !skipFriendCheck {
+			for _, uid := range userIds {
+				if uid != in.UserId && isRobotPeer(l.ctx, l.svcCtx.OpenRpc, uid) {
+					skipFriendCheck = true
+					break
 				}
 			}
-			// 个人禁言检查
-			if member.MutedUntil != nil && member.MutedUntil.After(time.Now()) {
-				return nil, errors.New("你已被禁言")
+		}
+
+		if !skipFriendCheck {
+			friendRes, err := l.svcCtx.FriendRpc.IsFriend(l.ctx, &friend_rpc.IsFriendReq{
+				UserA: userIds[0],
+				UserB: userIds[1],
+			})
+			if err != nil || !friendRes.IsFriend {
+				logx.Errorf("不是好友关系，用户IDs: %v", userIds)
+				return nil, errors.New("不是好友关系")
 			}
+
+			blockRes, err := l.svcCtx.FriendRpc.IsBlocked(l.ctx, &friend_rpc.IsBlockedReq{
+				UserA: userIds[0],
+				UserB: userIds[1],
+			})
+			if err == nil && blockRes.IsBlocked {
+				return nil, errors.New("无法发送消息")
+			}
+		}
+	} else if conversationType == 2 {
+		groupID := conversation.GetTargetIDByConversation(in.ConversationId, in.UserId)
+		canSend, err := l.svcCtx.GroupRpc.CanSendGroupMessage(l.ctx, &group_rpc.CanSendGroupMessageReq{
+			GroupId: groupID,
+			UserId:  in.UserId,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if !canSend.Allowed {
+			reason := canSend.Reason
+			if reason == "" {
+				reason = "无法发送消息"
+			}
+			return nil, errors.New(reason)
 		}
 	}
 
 	// 调用抽离好的递归转换函数
 	msg := l.BuildMsgFromProto(in.Msg)
+	if err := chat_models.ValidateMsgLength(msg); err != nil {
+		return nil, err
+	}
 	msgType := msg.Type
 
 	// 获取下一个消息序列号（消息表内部序列号）
@@ -306,7 +358,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Select("COALESCE(MAX(seq), 0)").
 		Scan(&maxSeq).Error
 	if err != nil {
-		l.Logger.Errorf("获取消息序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
+		logx.WithContext(l.ctx).Errorf("获取消息序列号失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
 	}
 
@@ -326,12 +378,9 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
 	err = l.svcCtx.DB.Create(&chatModel).Error
 	if err != nil {
-		l.Logger.Errorf("创建消息记录失败: conversationId=%s, userId=%s, error=%v", in.ConversationId, in.UserId, err)
+		logx.WithContext(l.ctx).Errorf("创建消息记录失败: conversationId=%s, userId=%s, error=%v", in.ConversationId, in.UserId, err)
 		return nil, err
 	}
-
-	// 1.5 检查接收者是否是 Bot，触发 Webhook 回调
-	l.triggerBotWebhookIfNeeded(chatModel, userIds)
 
 	// 1.1 构建 Messages 表更新数据
 	messagesUpdate := map[string]interface{}{
@@ -345,9 +394,9 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	// 2. 更新会话级别的信息
-	conversationVersion, err := chat_utils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
+	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
 	if err != nil {
-		l.Logger.Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
+		logx.WithContext(l.ctx).Errorf("更新会话信息失败: conversationId=%s, error=%v", in.ConversationId, err)
 		return nil, err
 	}
 
@@ -363,31 +412,47 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}
 
 	// 3. 批量更新该会话所有用户的会话关系（包括发送者：恢复隐藏状态，更新版本号，更新已读序列号）
-	allUserConversationUpdates, err := chat_utils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
+	allUserConversationUpdates, err := chatrpcutils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
 	if err != nil {
-		l.Logger.Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
+		logx.WithContext(l.ctx).Errorf("批量更新用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
 		// 不影响消息发送成功，只记录错误
-		allUserConversationUpdates = []chat_utils.UserConversationUpdate{}
+		allUserConversationUpdates = []chatrpcutils.UserConversationUpdate{}
 	}
 
 	// 转换消息格式
 	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(*msg)
 	if err != nil {
-		l.Logger.Errorf("转换消息格式失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("转换消息格式失败: %v", err)
 		return nil, err
 	}
 
 	// 获取发送者信息
 	sender, err := l.getSenderInfo(chatModel)
 	if err != nil {
-		l.Logger.Errorf("获取发送者信息失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("获取发送者信息失败: %v", err)
 		return nil, err
 	}
 
 	// 5. 异步推送消息更新给会话成员（按表分组，一次推送包含所有相关更新）
 	go func() {
 		l.notifyMessageUpdateGrouped(in.ConversationId, in.UserId, conversationType, messagesUpdate, conversationsUpdate, allUserConversationUpdates)
+		l.sendOfflinePushIfNeeded(in.ConversationId, in.UserId, chatModel, recipientIdsFromUpdates(allUserConversationUpdates, in.ConversationId))
 	}()
+
+	// 6. 异步推送 Robot Webhook 事件
+	go newRobotWebhookPusher(context.Background(), l.svcCtx).tryPush(in, msg)
+
+	l.logger.Info(model.LogMsg{
+		Text: "消息发送成功",
+		Data: map[string]interface{}{
+			"conversationId":   in.ConversationId,
+			"messageId":        chatModel.MessageID,
+			"userId":           in.UserId,
+			"conversationType": conversationType,
+			"msgType":          int(msgType),
+			"seq":              chatModel.Seq,
+		},
+	})
 
 	return &chat_rpc.SendMsgRes{
 		Id:               uint32(chatModel.Id),
@@ -404,14 +469,13 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 }
 
 // notifyMessageUpdateGrouped 按会话分组推送消息更新（给该会话的所有用户推送）
-func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chat_utils.UserConversationUpdate) {
+func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chatrpcutils.UserConversationUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
-			l.Logger.Errorf("推送消息更新时发生panic: %v", r)
+			logx.WithContext(l.ctx).Errorf("推送消息更新时发生panic: %v", r)
 		}
 	}()
 
-	// 获取该会话的所有用户ID
 	var recipientIds []string
 	for _, update := range allUserConversationUpdates {
 		if update.ConversationID == conversationId {
@@ -456,8 +520,20 @@ func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId strin
 			},
 			"conversationId": conversationId,
 		}
-		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload)
+		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+			logx.WithContext(l.ctx).Errorf("MQ 推送失败: recipient=%s, conversation=%s, error=%v", recipientId, conversationId, err)
+		}
 	}
+}
+
+func recipientIdsFromUpdates(updates []chatrpcutils.UserConversationUpdate, conversationID string) []string {
+	var ids []string
+	for _, update := range updates {
+		if update.ConversationID == conversationID {
+			ids = append(ids, update.UserID)
+		}
+	}
+	return ids
 }
 
 // getSenderInfo 获取发送者信息
@@ -481,7 +557,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		UserID: sendUserID,
 	})
 	if err != nil {
-		l.Logger.Errorf("获取用户信息失败: userId=%s, error=%v", sendUserID, err)
+		logx.WithContext(l.ctx).Errorf("获取用户信息失败: userId=%s, error=%v", sendUserID, err)
 		return &chat_rpc.Sender{
 			UserId:   sendUserID,
 			NickName: "未知用户",
@@ -494,6 +570,7 @@ func (l *SendMsgLogic) getSenderInfo(chatModel chat_models.ChatMessage) (*chat_r
 		UserId:   sendUserID,
 		NickName: userInfo.NickName,
 		Avatar:   userInfo.Avatar,
+		UserType: userInfo.UserType,
 	}, nil
 }
 
@@ -510,7 +587,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.ImageMsgType:
 		if m.ImageMsg != nil {
 			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
-				FileKey: m.ImageMsg.FileKey,
+				FileUrl: m.ImageMsg.FileUrl,
 				Width:   int32(m.ImageMsg.Width),
 				Height:  int32(m.ImageMsg.Height),
 				Size:    m.ImageMsg.Size,
@@ -519,27 +596,29 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.VideoMsgType:
 		if m.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileKey:      m.VideoMsg.FileKey,
+				FileUrl:       m.VideoMsg.FileUrl,
 				Width:        int32(m.VideoMsg.Width),
 				Height:       int32(m.VideoMsg.Height),
 				Duration:     int32(m.VideoMsg.Duration),
-				ThumbnailKey: m.VideoMsg.ThumbnailKey,
+				ThumbnailUrl: m.VideoMsg.ThumbnailUrl,
 				Size:         m.VideoMsg.Size,
 			}
 		}
 	case ctype.FileMsgType:
 		if m.FileMsg != nil {
 			rpcMsg.FileMsg = &chat_rpc.FileMsg{
-				FileKey:  m.FileMsg.FileKey,
-				FileName: m.FileMsg.FileName,
-				Size:     m.FileMsg.Size,
-				MimeType: m.FileMsg.MimeType,
+				FileUrl:   m.FileMsg.FileUrl,
+				FileName:  m.FileMsg.FileName,
+				Size:      m.FileMsg.Size,
+				MimeType:  m.FileMsg.MimeType,
+				Extension: m.FileMsg.Extension,
+				OpenMode:  int32(m.FileMsg.OpenMode),
 			}
 		}
 	case ctype.VoiceMsgType:
 		if m.VoiceMsg != nil {
 			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
-				FileKey:  m.VoiceMsg.FileKey,
+				FileUrl:  m.VoiceMsg.FileUrl,
 				Duration: int32(m.VoiceMsg.Duration),
 				Size:     m.VoiceMsg.Size,
 			}
@@ -547,7 +626,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.EmojiMsgType:
 		if m.EmojiMsg != nil {
 			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
-				FileKey:   m.EmojiMsg.FileKey,
+				FileUrl:   m.EmojiMsg.FileUrl,
 				EmojiId:   m.EmojiMsg.EmojiID,
 				PackageId: m.EmojiMsg.PackageID,
 				Width:     m.EmojiMsg.Width,
@@ -564,7 +643,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.AudioFileMsgType:
 		if m.AudioFileMsg != nil {
 			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
-				FileKey:  m.AudioFileMsg.FileKey,
+				FileUrl:  m.AudioFileMsg.FileUrl,
 				FileName: m.AudioFileMsg.FileName,
 				Duration: int32(m.AudioFileMsg.Duration),
 				Size:     m.AudioFileMsg.Size,
@@ -611,88 +690,34 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 				Count:    int32(m.ForwardMsg.Count),
 			}
 		}
-	}
-	return rpcMsg, nil
-}
-
-// triggerBotWebhookIfNeeded 检查接收者是否是 Bot，如果是则触发 Webhook 回调
-func (l *SendMsgLogic) triggerBotWebhookIfNeeded(chatModel chat_models.ChatMessage, userIds []string) {
-	defer func() {
-		if r := recover(); r != nil {
-			l.Logger.Errorf("触发 Bot Webhook 时发生 panic: %v", r)
-		}
-	}()
-
-	// 1. 确定接收者 ID
-	var receiverID string
-	if chatModel.ConversationType == 1 && len(userIds) == 2 {
-		// 私聊：找到不是发送者的那个用户
-		for _, uid := range userIds {
-			if uid != *chatModel.SendUserID {
-				receiverID = uid
-				break
+	case ctype.MarkdownMsgType:
+		if m.MarkdownMsg != nil {
+			rpcMsg.MarkdownMsg = &chat_rpc.MarkdownMsg{
+				Content: m.MarkdownMsg.Content,
+				Title:   m.MarkdownMsg.Title,
 			}
 		}
-	} else if chatModel.ConversationType == 2 {
-		// 群聊：暂不处理（群 Bot 需要更复杂的逻辑）
-		return
+	case ctype.LinkMsgType:
+		if m.LinkMsg != nil {
+			rpcMsg.LinkMsg = &chat_rpc.LinkMsg{
+				Url:      m.LinkMsg.URL,
+				Title:    m.LinkMsg.Title,
+				Desc:     m.LinkMsg.Desc,
+				ImageUrl: m.LinkMsg.ImageURL,
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if m.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId:    m.CloudDocMsg.DocID,
+				DocType:  int32(m.CloudDocMsg.DocType),
+				Title:    m.CloudDocMsg.Title,
+				OwnerId:  m.CloudDocMsg.OwnerID,
+				Perm:     int32(m.CloudDocMsg.Perm),
+				CoverUrl: m.CloudDocMsg.CoverURL,
+				Revision: m.CloudDocMsg.Revision,
+			}
+		}
 	}
-
-	if receiverID == "" {
-		return
-	}
-
-	// 2. 检查接收者是否是 Bot（查数据库）
-	var userInfo struct {
-		IsBot int `gorm:"column:is_bot"`
-	}
-	err := l.svcCtx.DB.Table("users").Where("user_id = ?", receiverID).First(&userInfo).Error
-	if err != nil || userInfo.IsBot != 1 {
-		return // 不是 Bot 或查询失败
-	}
-
-	// 3. 查询 Bot 关联的应用
-	var app open_models.OpenApp
-	err = l.svcCtx.DB.Where("bot_user_id = ? AND status = ?", receiverID, 1).First(&app).Error
-	if err != nil {
-		l.Logger.Errorf("Bot 未关联应用或应用已禁用: botUserId=%s, error=%v", receiverID, err)
-		return
-	}
-
-	// 4. 查询 Webhook 配置
-	var webhookConfig open_models.OpenWebhookConfig
-	err = l.svcCtx.DB.Where("app_id = ? AND event_type = ? AND status = ?", app.AppID, "message.receive", 1).First(&webhookConfig).Error
-	if err != nil {
-		l.Logger.Infof("Bot 未配置 Webhook: appId=%s", app.AppID)
-		return
-	}
-
-	// 5. 构建 Webhook 载荷
-	payload := map[string]interface{}{
-		"eventType": "message.receive",
-		"timestamp": time.Now().UnixMilli(),
-		"data": map[string]interface{}{
-			"messageId":      chatModel.MessageID,
-			"conversationId": chatModel.ConversationID,
-			"senderId":       *chatModel.SendUserID,
-			"receiverId":     receiverID,
-			"msgType":        chatModel.MsgType,
-			"msg":            chatModel.Msg,
-			"createdAt":      chatModel.CreatedAt,
-		},
-	}
-
-	// 6. 发送 Webhook
-	l.svcCtx.WebhookSender.Send("message.receive", payload, []corewebhook.WebhookTargetConfig{
-		{
-			ID:         webhookConfig.ID,
-			AppID:      webhookConfig.AppID,
-			TargetURL:  webhookConfig.TargetURL,
-			Secret:     webhookConfig.Secret,
-			RetryCount: webhookConfig.RetryCount,
-			Timeout:    webhookConfig.Timeout,
-		},
-	})
-
-	l.Logger.Infof("触发 Bot Webhook: appId=%s, messageId=%s", app.AppID, chatModel.MessageID)
+	return rpcMsg, nil
 }

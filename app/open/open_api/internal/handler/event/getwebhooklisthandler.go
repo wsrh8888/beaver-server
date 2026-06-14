@@ -19,7 +19,7 @@ func GetWebhookListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewGetWebhookListLogic(r.Context(), svcCtx)
-		resp, err := l.GetWebhookList(&req)
+		resp, err := l.GetWebhookList(&req, r.Header.Get("Authorization"))
 		response.Response(r, w, resp, err)
 	}
 }

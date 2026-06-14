@@ -74,7 +74,7 @@ type (
 		Source string `form:"source"` // 文件来源：qiniu 或 local
 	}
 	FileUploadLocalRes {
-		FileKey      string `json:"fileKey"`
+		FileURL      string `json:"fileUrl"`
 		OriginalName string `json:"originalName"`
 	}
 )
@@ -86,7 +86,7 @@ type (
 		Source string `form:"source,optional"` // 文件来源：qiniu 或 local
 	}
 	FileUploadQiniuRes {
-		FileKey      string `json:"fileKey"`
+		FileURL      string `json:"fileUrl"`
 		OriginalName string `json:"originalName"`
 	}
 )

@@ -15,20 +15,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type QuitGroupLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewQuitGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QuitGroupLogic {
 	return &QuitGroupLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("quit_group"),
 		svcCtx: svcCtx,
 	}
 }
@@ -50,7 +53,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 	// 获取该群成员的版本号（按群独立递增）
 	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 	if memberVersion == -1 {
-		l.Logger.Errorf("获取群成员版本号失败")
+		logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -61,7 +64,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 			"version": memberVersion,
 		}).Error
 	if err != nil {
-		l.Logger.Errorf("退出群组失败: %v", err)
+		logx.WithContext(l.ctx).Errorf("退出群组失败: %v", err)
 		return nil, errors.New("退出群组失败")
 	}
 
@@ -75,7 +78,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			l.Logger.Errorf("获取群成员列表失败: %v", err)
+			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
 			return
 		}
 
@@ -108,7 +111,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		if err := l.svcCtx.DB.WithContext(ctx).
 			Where("group_id = ? AND status = 1 AND role IN (?)", req.GroupID, []int{1, 2}).
 			Find(&admins).Error; err != nil {
-			l.Logger.Errorf("获取群管理员/群主失败(用于退出通知): %v", err)
+			logx.WithContext(l.ctx).Errorf("获取群管理员/群主失败(用于退出通知): %v", err)
 		} else {
 			for _, m := range admins {
 				toUsers = append(toUsers, m.UserID)
@@ -130,10 +133,18 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 				DedupHash:   fmt.Sprintf("%s_left_%s", req.GroupID, req.UserID),
 			})
 			if err != nil {
-				l.Logger.Errorf("投递退出群通知失败: %v", err)
+				logx.WithContext(l.ctx).Errorf("投递退出群通知失败: %v", err)
 			}
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "退群成功",
+		Data: map[string]interface{}{
+			"groupId": req.GroupID,
+			"userId":  req.UserID,
+		},
+	})
 
 	return &types.GroupQuitRes{
 		Version: memberVersion,

@@ -5,6 +5,7 @@ import (
 	"beaver/app/moment/moment_api/internal/handler"
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/common/etcd"
+	"beaver/utils/logger"
 	"flag"
 	"fmt"
 
@@ -19,6 +20,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logger.Init("moment_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

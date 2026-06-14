@@ -6,21 +6,24 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+
 type DeleteNotificationLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 // 按事件ID删除单个通知
 func NewDeleteNotificationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteNotificationLogic {
 	return &DeleteNotificationLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("delete_notification"),
 		svcCtx: svcCtx,
 	}
 }
@@ -35,12 +38,22 @@ func (l *DeleteNotificationLogic) DeleteNotification(req *types.DeleteNotificati
 		Update("is_deleted", true)
 
 	if result.Error != nil {
-		l.Logger.Errorf("删除通知失败: %v", result.Error)
+		logx.WithContext(l.ctx).Errorf("删除通知失败: %v", result.Error)
 		return nil, result.Error
 	}
 
 	resp = &types.DeleteNotificationRes{
 		Success: result.RowsAffected > 0,
+	}
+
+	if result.RowsAffected > 0 {
+		l.logger.Info(model.LogMsg{
+			Text: "通知删除成功",
+			Data: map[string]interface{}{
+				"userId":  userId,
+				"eventId": eventId,
+			},
+		})
 	}
 
 	return resp, nil

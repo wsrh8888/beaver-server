@@ -4,15 +4,14 @@ package handler
 import (
 	"net/http"
 
-	auth "beaver/app/open/open_api/internal/handler/auth"
-	bot "beaver/app/open/open_api/internal/handler/bot"
+	auth_public "beaver/app/open/open_api/internal/handler/auth_public"
+	bot_public "beaver/app/open/open_api/internal/handler/bot_public"
 	event "beaver/app/open/open_api/internal/handler/event"
-	group "beaver/app/open/open_api/internal/handler/group"
-	message "beaver/app/open/open_api/internal/handler/message"
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
 	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
+	oauth_secret "beaver/app/open/open_api/internal/handler/oauth_secret"
+	robot "beaver/app/open/open_api/internal/handler/robot"
 	user "beaver/app/open/open_api/internal/handler/user"
-	webhook "beaver/app/open/open_api/internal/handler/webhook"
 	"beaver/app/open/open_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -24,258 +23,187 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 刷新访问令牌
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/auth/refresh",
-				Handler: auth.RefreshTokenHandler(serverCtx),
+				Path:    "/api/open/auth_public/v1/refresh",
+				Handler: auth_public.RefreshTokenHandler(serverCtx),
 			},
 			{
-				// 获取访问令牌
+				// 获取访问令牌（客户端凭证模式）
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/auth/token",
-				Handler: auth.GetTokenHandler(serverCtx),
+				Path:    "/api/open/auth_public/v1/token",
+				Handler: auth_public.GetTokenHandler(serverCtx),
 			},
 		},
 	)
 
 	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 获取 Bot 自身信息（AppID+AppSecret 换到 token 后调此接口确认 Bot 身份）
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/bot/info",
-					Handler: bot.GetBotInfoHandler(serverCtx),
-				},
-				{
-					// Bot 发送消息到 IM 会话（私聊或群聊）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/bot/send_message",
-					Handler: bot.BotSendMessageHandler(serverCtx),
-				},
-				{
-					// Bot 流式发送消息（SSE，适合 AI 流式输出）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/bot/stream_message",
-					Handler: bot.BotStreamMessageHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 删除 Webhook 订阅
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/event/delete_webhook",
-					Handler: event.DeleteWebhookHandler(serverCtx),
-				},
-				{
-					// 获取事件推送日志
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/event/logs",
-					Handler: event.GetEventLogsHandler(serverCtx),
-				},
-				{
-					// 注册 Bot Webhook URL（注册后 Beaver 立即向该 URL 发送 Challenge 验证请求）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/event/register_webhook",
-					Handler: event.RegisterWebhookHandler(serverCtx),
-				},
-				{
-					// 触发测试事件推送（调试用，向 Bot 服务器发一条测试事件）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/event/test_webhook",
-					Handler: event.TestEventPushHandler(serverCtx),
-				},
-				{
-					// 获取当前应用的 Webhook 订阅列表
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/event/webhook_list",
-					Handler: event.GetWebhookListHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 将 Bot 加入群（Bot 进群后可接收消息和 @ 提及，Beaver 会推送事件到 Bot 的 Webhook URL）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/group/add_bot",
-					Handler: group.AddBotToGroupHandler(serverCtx),
-				},
-				{
-					// 将 Bot 从群移除
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/group/remove_bot",
-					Handler: group.RemoveBotFromGroupHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 撤回消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/recall",
-					Handler: message.RecallMessageHandler(serverCtx),
-				},
-				{
-					// 发送交互式卡片消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_card",
-					Handler: message.SendCardMessageHandler(serverCtx),
-				},
-				{
-					// 发送文件消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_file",
-					Handler: message.SendFileMessageHandler(serverCtx),
-				},
-				{
-					// 发送图片消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_image",
-					Handler: message.SendImageMessageHandler(serverCtx),
-				},
-				{
-					// 发送富文本消息（Markdown）
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_richtext",
-					Handler: message.SendRichTextMessageHandler(serverCtx),
-				},
-				{
-					// 发送文本消息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/send_text",
-					Handler: message.SendTextMessageHandler(serverCtx),
-				},
-				{
-					// 更新卡片消息内容
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/message/update_card",
-					Handler: message.UpdateCardMessageHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 获取授权码（引导用户授权，支持 PKCE 的 code_challenge）
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/oauth/authorize",
-					Handler: oauth.GetAuthorizeCodeHandler(serverCtx),
-				},
-				{
-					// 获取 PC 端快捷登录签名
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/desktop_quick_login",
-					Handler: oauth.GetDesktopQuickLoginSignHandler(serverCtx),
-				},
-				{
-					// 用 H5 authCode 换取用户信息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/oauth/h5_userinfo",
-					Handler: oauth.GetUserInfoByH5CodeHandler(serverCtx),
-				},
-				{
-					// 获取当前用户信息（OIDC 标准 userinfo 端点）
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/oauth/userinfo",
-					Handler: oauth.GetOIDCUserInfoHandler(serverCtx),
-				},
-			}...,
-		),
+		[]rest.Route{
+			{
+				// 推送机器人发送消息到群（第三方服务调用）
+				Method:  http.MethodPost,
+				Path:    "/api/open/bot_public/v1/send",
+				Handler: bot_public.BotSendHandler(serverCtx),
+			},
+		},
 	)
 
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// H5 免登获取 authCode
+				// 删除 Webhook 订阅
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/h5_authcode",
-				Handler: oauth_public.GetH5AuthCodeHandler(serverCtx),
+				Path:    "/api/open/event/v1/delete_webhook",
+				Handler: event.DeleteWebhookHandler(serverCtx),
 			},
+			{
+				// 获取事件推送日志
+				Method:  http.MethodGet,
+				Path:    "/api/open/event/v1/logs",
+				Handler: event.GetEventLogsHandler(serverCtx),
+			},
+			{
+				// 注册 Bot Webhook URL（注册后 Beaver 立即向该 URL 发送 Challenge 验证请求）
+				Method:  http.MethodPost,
+				Path:    "/api/open/event/v1/register_webhook",
+				Handler: event.RegisterWebhookHandler(serverCtx),
+			},
+			{
+				// 获取当前应用的 Webhook 订阅列表
+				Method:  http.MethodGet,
+				Path:    "/api/open/event/v1/webhook_list",
+				Handler: event.GetWebhookListHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// PC 客户端生成 authCode（用于快捷登录）
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/h5_authcode",
+				Handler: oauth.GetH5AuthCodeHandler(serverCtx),
+			},
+			{
+				// 移动端取消扫码授权
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/qrcode_cancel",
+				Handler: oauth.CancelQrCodeHandler(serverCtx),
+			},
+			{
+				// 移动端确认扫码授权
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/qrcode_confirm",
+				Handler: oauth.ConfirmQrCodeHandler(serverCtx),
+			},
+			{
+				// 移动端标记已扫码
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth/v1/qrcode_scan",
+				Handler: oauth.ScanQrCodeHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
 			{
 				// 账号密码登录
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/password_login",
+				Path:    "/api/open/oauth_public/v1/password_login",
 				Handler: oauth_public.PasswordLoginHandler(serverCtx),
 			},
 			{
 				// 生成扫码登录二维码
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/qrcode",
+				Path:    "/api/open/oauth_public/v1/qrcode",
 				Handler: oauth_public.GenerateQrCodeHandler(serverCtx),
 			},
 			{
-				// 确认扫码登录（移动端调用）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/qrcode_confirm",
-				Handler: oauth_public.ConfirmQrCodeLoginHandler(serverCtx),
+				// 查询扫码会话信息
+				Method:  http.MethodGet,
+				Path:    "/api/open/oauth_public/v1/qrcode_scene",
+				Handler: oauth_public.GetQrCodeSceneHandler(serverCtx),
 			},
 			{
 				// 查询扫码状态（轮询）
 				Method:  http.MethodGet,
-				Path:    "/api/open/v1/oauth/qrcode_status",
+				Path:    "/api/open/oauth_public/v1/qrcode_status",
 				Handler: oauth_public.CheckQrCodeStatusHandler(serverCtx),
-			},
-			{
-				// 撤销 Token（登出 / 解除授权）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/revoke",
-				Handler: oauth_public.RevokeTokenHandler(serverCtx),
-			},
-			{
-				// 用授权码换取 Token（支持 PKCE）
-				Method:  http.MethodPost,
-				Path:    "/api/open/v1/oauth/token",
-				Handler: oauth_public.GetTokenByCodeHandler(serverCtx),
 			},
 		},
 	)
 
 	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
-			[]rest.Route{
-				{
-					// 获取单个用户信息
-					Method:  http.MethodGet,
-					Path:    "/api/open/v1/user/get_info",
-					Handler: user.GetUserInfoHandler(serverCtx),
-				},
-				{
-					// 批量获取用户信息
-					Method:  http.MethodPost,
-					Path:    "/api/open/v1/user/list",
-					Handler: user.GetUserListHandler(serverCtx),
-				},
-			}...,
-		),
+		[]rest.Route{
+			{
+				// 用 H5 authCode 换取用户信息
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth_secret/v1/h5_userinfo",
+				Handler: oauth_secret.GetUserInfoByH5CodeHandler(serverCtx),
+			},
+			{
+				// PC 端快捷登录（用 authCode 换取用户信息）
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth_secret/v1/quick_login",
+				Handler: oauth_secret.GetUserInfoByQuickLoginHandler(serverCtx),
+			},
+			{
+				// 撤销 Token（登出 / 解除授权）
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth_secret/v1/revoke",
+				Handler: oauth_secret.RevokeTokenHandler(serverCtx),
+			},
+			{
+				// 用授权码换取 Token（支持 PKCE）
+				Method:  http.MethodPost,
+				Path:    "/api/open/oauth_secret/v1/token",
+				Handler: oauth_secret.GetTokenByCodeHandler(serverCtx),
+			},
+		},
 	)
 
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 接收外部系统消息推送（Jenkins/GitHub/Grafana 等）
+				// 将 Robot 加入群
 				Method:  http.MethodPost,
-				Path:    "/api/open/v1/webhook/incoming",
-				Handler: webhook.IncomingWebhookHandler(serverCtx),
+				Path:    "/api/open/robot/v1/add_to_group",
+				Handler: robot.AddRobotToGroupHandler(serverCtx),
+			},
+			{
+				// 获取 Robot 自身信息
+				Method:  http.MethodGet,
+				Path:    "/api/open/robot/v1/info",
+				Handler: robot.GetRobotInfoHandler(serverCtx),
+			},
+			{
+				// 将 Robot 从群移除
+				Method:  http.MethodPost,
+				Path:    "/api/open/robot/v1/remove_from_group",
+				Handler: robot.RemoveRobotFromGroupHandler(serverCtx),
+			},
+			{
+				// Robot 发送消息到 IM 会话
+				Method:  http.MethodPost,
+				Path:    "/api/open/robot/v1/send_message",
+				Handler: robot.RobotSendMessageHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 获取单个用户信息
+				Method:  http.MethodGet,
+				Path:    "/api/open/user/v1/get_info",
+				Handler: user.GetUserInfoHandler(serverCtx),
+			},
+			{
+				// 批量获取用户信息
+				Method:  http.MethodPost,
+				Path:    "/api/open/user/v1/list",
+				Handler: user.GetUserListHandler(serverCtx),
 			},
 		},
 	)

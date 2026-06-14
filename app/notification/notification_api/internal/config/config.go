@@ -20,4 +20,5 @@ type Config struct {
 		Addr string
 	}
 	UserRpc zrpc.RpcClientConf
+	AuthRpc zrpc.RpcClientConf
 }

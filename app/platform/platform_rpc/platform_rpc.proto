@@ -1,0 +1,456 @@
+syntax = "proto3";
+
+package platform_rpc;
+
+option go_package = "./platform_rpc";
+
+// ==================== 管理后台：埋点 Bucket ====================
+
+message AdminGetBucketListReq {
+  int32 page = 1; // int32 页码，从 1 开始
+  int32 page_size = 2; // int32 每页条数
+  string keyword = 3; // string 关键词（名称或描述），可选
+  optional bool is_active = 4; // bool 是否激活筛选，可选
+}
+
+message AdminBucketItem {
+  string bucket_id = 1; // string Bucket ID
+  string name = 2; // string Bucket 名称
+  string description = 3; // string Bucket 描述
+  string create_user = 4; // string 创建者用户 ID
+  bool is_active = 5; // bool 是否激活
+  string created_at = 6; // string 创建时间 RFC3339
+  string updated_at = 7; // string 更新时间 RFC3339
+}
+
+message AdminGetBucketListRes {
+  repeated AdminBucketItem list = 1; // array Bucket 列表
+  int64 total = 2; // int64 总条数
+}
+
+message AdminCreateBucketReq {
+  string name = 1; // string Bucket 名称
+  string description = 2; // string Bucket 描述
+  string create_user = 3; // string 创建者用户 ID
+}
+
+message AdminCreateBucketRes {
+  string bucket_id = 1; // string 新创建的 Bucket ID
+}
+
+message AdminUpdateBucketReq {
+  string bucket_id = 1; // string Bucket ID
+  string name = 2; // string Bucket 名称，空表示不修改
+  string description = 3; // string Bucket 描述，空表示不修改
+  optional bool is_active = 4; // bool 是否激活，可选
+}
+
+message AdminUpdateBucketRes {}
+
+message AdminDeleteBucketReq {
+  string bucket_id = 1; // string Bucket ID
+}
+
+message AdminDeleteBucketRes {}
+
+// ==================== 管理后台：埋点事件 ====================
+
+message AdminGetEventListReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string bucket_id = 3; // string Bucket ID 筛选，可选
+  string event_name = 4; // string 事件名称筛选，可选
+  string action = 5; // string 操作筛选，可选
+  string user_filter = 6; // string 用户 ID 筛选，可选
+  int64 start_time = 7; // int64 开始时间戳毫秒，可选
+  int64 end_time = 8; // int64 结束时间戳毫秒，可选
+  string platform = 9; // string 平台筛选，可选
+}
+
+message AdminEventItem {
+  uint64 id = 1; // uint64 事件记录 ID
+  string event_name = 2; // string 事件名称
+  string action = 3; // string 操作
+  string user_id = 4; // string 用户 ID
+  string bucket_id = 5; // string Bucket ID
+  string bucket_name = 6; // string Bucket 名称
+  string platform = 7; // string 平台
+  string device_id = 8; // string 设备 ID
+  string data = 9; // string 事件数据 JSON
+  int64 timestamp = 10; // int64 事件时间戳毫秒
+  string created_at = 11; // string 创建时间 RFC3339
+}
+
+message AdminGetEventListRes {
+  repeated AdminEventItem list = 1; // array 事件列表
+  int64 total = 2; // int64 总条数
+}
+
+// ==================== 管理后台：埋点日志 ====================
+
+message AdminQueryLogsReq {
+  string bucket_id = 1; // string Bucket ID
+  string level = 2; // string 日志级别，可选
+  int64 start_time = 3; // int64 开始时间戳毫秒
+  int64 end_time = 4; // int64 结束时间戳毫秒
+  string keyword = 5; // string 关键词，可选
+  string user_filter = 6; // string 用户 ID 筛选，可选
+  int32 page = 7; // int32 页码
+  int32 page_size = 8; // int32 每页条数
+}
+
+message AdminLogItem {
+  uint64 id = 1; // uint64 日志记录 ID
+  string level = 2; // string 日志级别
+  string data = 3; // string 日志数据 JSON
+  string bucket_id = 4; // string Bucket ID
+  string bucket_name = 5; // string Bucket 名称
+  int64 timestamp = 6; // int64 时间戳毫秒
+  string created_at = 7; // string 创建时间 RFC3339
+}
+
+message AdminQueryLogsRes {
+  int64 total = 1; // int64 总条数
+  repeated AdminLogItem logs = 2; // array 日志列表
+}
+
+// ==================== 应用更新（通用，platform_api / backend_admin 共用）====================
+
+message AppItem {
+  uint64 id = 1; // uint64 记录 ID
+  string app_id = 2; // string 应用唯一标识
+  string name = 3; // string 应用名称
+  string description = 4; // string 应用描述
+  bool is_active = 5; // bool 是否活跃
+  string created_at = 6; // string 创建时间
+  string updated_at = 7; // string 更新时间
+}
+
+message CreateAppReq {
+  string name = 1; // string 应用名称
+  string description = 2; // string 应用描述
+}
+
+message CreateAppRes {
+  uint64 id = 1; // uint64 记录 ID
+  string app_id = 2; // string 应用唯一标识
+}
+
+message ListAppsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  optional bool is_active = 3; // bool 仅活跃，可选
+}
+
+message ListAppsRes {
+  int64 total = 1; // int64 总数
+  repeated AppItem apps = 2; // array 应用列表
+}
+
+message ArchitectureItem {
+  uint64 id = 1; // uint64 记录 ID
+  string app_id = 2; // string 应用 ID
+  string app_name = 3; // string 应用名称
+  uint32 platform_id = 4; // uint32 平台 ID
+  uint32 arch_id = 5; // uint32 架构 ID
+  string description = 6; // string 描述
+  bool is_active = 7; // bool 是否启用
+  string created_at = 8; // string 创建时间
+  string updated_at = 9; // string 更新时间
+}
+
+message CreateArchitectureReq {
+  string app_id = 1; // string 应用 ID
+  uint32 platform_id = 2; // uint32 平台 ID
+  uint32 arch_id = 3; // uint32 架构 ID
+  string description = 4; // string 描述
+}
+
+message CreateArchitectureRes {
+  uint64 id = 1; // uint64 记录 ID
+}
+
+message UpdateArchitectureReq {
+  uint64 id = 1; // uint64 记录 ID
+  string description = 2; // string 描述，空表示不修改
+  bool is_active = 3; // bool 是否启用
+}
+
+message UpdateArchitectureRes {}
+
+message ListArchitecturesReq {
+  string app_id = 1; // string 应用 ID 筛选，可选
+  int32 page = 2; // int32 页码
+  int32 page_size = 3; // int32 每页条数
+  optional bool is_active = 4; // bool 仅活跃，可选
+}
+
+message ListArchitecturesRes {
+  int64 total = 1; // int64 总数
+  repeated ArchitectureItem architectures = 2; // array 架构列表
+}
+
+message VersionItem {
+  uint64 version_id = 1; // uint64 版本 ID
+  uint64 architecture_id = 2; // uint64 架构 ID
+  string version = 3; // string 版本号
+  string file_url = 4; // string 安装包完整 URL
+  string description = 5; // string 版本描述
+  string release_notes = 6; // string 更新日志
+  string created_at = 7; // string 创建时间
+  string updated_at = 8; // string 更新时间
+}
+
+message CreateVersionReq {
+  uint64 architecture_id = 1; // uint64 架构 ID
+  string version = 2; // string 版本号
+  string file_url = 3; // string 安装包完整 URL
+  string description = 4; // string 版本描述
+  string release_notes = 5; // string 更新日志
+}
+
+message CreateVersionRes {
+  uint64 version_id = 1; // uint64 版本 ID
+}
+
+message DeleteVersionReq {
+  uint64 version_id = 1; // uint64 版本 ID
+}
+
+message DeleteVersionRes {}
+
+message ListVersionsReq {
+  uint64 architecture_id = 1; // uint64 架构 ID
+  int32 page = 2; // int32 页码
+  int32 page_size = 3; // int32 每页条数
+}
+
+message ListVersionsRes {
+  int64 total = 1; // int64 总数
+  repeated VersionItem versions = 2; // array 版本列表
+}
+
+message AppVersionBrief {
+  uint64 version_id = 1; // uint64 版本 ID
+  string version = 2; // string 版本号
+}
+
+message AppVersionsArchItem {
+  uint64 architecture_id = 1; // uint64 架构 ID
+  uint32 arch_id = 2; // uint32 架构类型
+  string description = 3; // string 架构描述
+  repeated AppVersionBrief versions = 4; // array 版本列表
+}
+
+message ListAppVersionsReq {
+  string app_id = 1; // string 应用 ID
+  int32 page = 2; // int32 页码
+  int32 page_size = 3; // int32 每页条数
+}
+
+message ListAppVersionsRes {
+  int64 total = 1; // int64 架构总数
+  repeated AppVersionsArchItem architectures = 2; // array 按架构分组的版本
+}
+
+message ReleasePolicyItem {
+  uint64 id = 1;
+  string app_id = 2;
+  uint64 architecture_id = 3;
+  uint64 stable_version_id = 4;
+  uint64 gray_version_id = 5;
+  uint32 rollout_percent = 6;
+  string min_version = 7;
+  bool force_update = 8;
+  bool is_active = 9;
+  string stable_version = 10;
+  string gray_version = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+message UpsertReleasePolicyReq {
+  string app_id = 1;
+  uint64 architecture_id = 2;
+  uint64 stable_version_id = 3;
+  uint64 gray_version_id = 4;
+  uint32 rollout_percent = 5;
+  string min_version = 6;
+  bool force_update = 7;
+  bool is_active = 8;
+}
+
+message UpsertReleasePolicyRes {
+  uint64 id = 1;
+}
+
+message ListReleasePoliciesReq {
+  string app_id = 1;
+}
+
+message ListReleasePoliciesRes {
+  repeated ReleasePolicyItem policies = 1;
+}
+
+// ==================== 用户反馈（通用）====================
+
+message FeedbackItem {
+  uint64 id = 1; // uint64 反馈 ID
+  string user_id = 2; // string 提交用户 ID
+  string content = 3; // string 反馈内容
+  int32 type = 4; // int32 反馈类型
+  int32 status = 5; // int32 反馈状态
+  repeated string file_names = 6; // array 附件文件名
+  int64 handler_id = 7; // int64 处理人 ID
+  string handle_time = 8; // string 处理时间 RFC3339
+  string handle_result = 9; // string 处理结果
+  string created_at = 10; // string 创建时间 RFC3339
+  string updated_at = 11; // string 更新时间 RFC3339
+}
+
+message SubmitFeedbackReq {
+  string user_id = 1; // string 提交用户 ID
+  string content = 2; // string 反馈内容
+  int32 type = 3; // int32 反馈类型
+  repeated string file_names = 4; // array 附件文件名
+}
+
+message SubmitFeedbackRes {
+  uint64 id = 1; // uint64 反馈 ID
+}
+
+message ListFeedbackReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  int32 status = 3; // int32 状态筛选，0 表示全部
+  int32 type = 4; // int32 类型筛选，0 表示全部
+  string user_id = 5; // string 用户 ID 筛选，可选
+  string keywords = 6; // string 关键词，可选
+}
+
+message ListFeedbackRes {
+  int64 total = 1; // int64 总数
+  repeated FeedbackItem list = 2; // array 反馈列表
+}
+
+message GetFeedbackReq {
+  uint64 id = 1; // uint64 反馈 ID
+}
+
+message GetFeedbackRes {
+  FeedbackItem feedback = 1; // object 反馈详情
+}
+
+message HandleFeedbackReq {
+  uint64 id = 1; // uint64 反馈 ID
+  int32 status = 2; // int32 处理状态
+  string handle_result = 3; // string 处理结果
+  string handler_id = 4; // string 处理人 ID
+}
+
+message HandleFeedbackRes {}
+
+message DeleteFeedbackReq {
+  uint64 id = 1; // uint64 反馈 ID
+}
+
+message DeleteFeedbackRes {}
+
+// ==================== 内容举报（通用）====================
+
+message ContentReportItem {
+  uint64 id = 1; // uint64 举报 ID
+  string reporter_user_id = 2; // string 举报人 ID
+  int32 target_type = 3; // int32 对象类型 1用户 2消息 3动态 4群组
+  string target_id = 4; // string 对象 ID
+  int32 reason_type = 5; // int32 原因类型
+  string content = 6; // string 补充说明
+  repeated string file_names = 7; // array 证据附件
+  int32 status = 8; // int32 状态
+  uint64 case_id = 9; // uint64 关联工单 ID
+  string handler_id = 10; // string 处理人 ID
+  string handle_remark = 11; // string 处理备注
+  string created_at = 12; // string 创建时间 RFC3339
+}
+
+message SubmitContentReportReq {
+  string reporter_user_id = 1; // string 举报人 ID
+  int32 target_type = 2; // int32 对象类型
+  string target_id = 3; // string 对象 ID
+  int32 reason_type = 4; // int32 原因类型
+  string content = 5; // string 补充说明
+  repeated string file_names = 6; // array 证据附件
+}
+
+message SubmitContentReportRes {
+  uint64 id = 1; // uint64 举报 ID
+}
+
+message ListContentReportsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  int32 status = 3; // int32 状态筛选，0 全部
+  int32 target_type = 4; // int32 对象类型，0 全部
+  string target_id = 5; // string 对象 ID，可选
+  string reporter_user_id = 6; // string 举报人，可选
+}
+
+message ListContentReportsRes {
+  int64 total = 1; // int64 总数
+  repeated ContentReportItem list = 2; // array 列表
+}
+
+message GetContentReportReq {
+  uint64 id = 1; // uint64 举报 ID
+}
+
+message GetContentReportRes {
+  ContentReportItem report = 1; // object 举报详情
+}
+
+// UpdateContentReports：举报状态变更（立案/驳回/结案，支持批量）
+message UpdateContentReportsReq {
+  repeated uint64 ids = 1; // array 举报 ID
+  int32 action = 2; // int32 1立案 2驳回 3结案
+  string handler_id = 3; // string 处理人 ID
+  string handle_remark = 4; // string 备注
+  uint64 case_id = 5; // uint64 关联工单 ID（action=1 时）
+}
+
+message UpdateContentReportsRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+service platform {
+  rpc AdminGetBucketList(AdminGetBucketListReq) returns (AdminGetBucketListRes);
+  rpc AdminCreateBucket(AdminCreateBucketReq) returns (AdminCreateBucketRes);
+  rpc AdminUpdateBucket(AdminUpdateBucketReq) returns (AdminUpdateBucketRes);
+  rpc AdminDeleteBucket(AdminDeleteBucketReq) returns (AdminDeleteBucketRes);
+  rpc AdminGetEventList(AdminGetEventListReq) returns (AdminGetEventListRes);
+  rpc AdminQueryLogs(AdminQueryLogsReq) returns (AdminQueryLogsRes);
+
+  rpc CreateApp(CreateAppReq) returns (CreateAppRes);
+  rpc ListApps(ListAppsReq) returns (ListAppsRes);
+  rpc CreateArchitecture(CreateArchitectureReq) returns (CreateArchitectureRes);
+  rpc UpdateArchitecture(UpdateArchitectureReq) returns (UpdateArchitectureRes);
+  rpc ListArchitectures(ListArchitecturesReq) returns (ListArchitecturesRes);
+  rpc CreateVersion(CreateVersionReq) returns (CreateVersionRes);
+  rpc DeleteVersion(DeleteVersionReq) returns (DeleteVersionRes);
+  rpc ListVersions(ListVersionsReq) returns (ListVersionsRes);
+  rpc ListAppVersions(ListAppVersionsReq) returns (ListAppVersionsRes);
+  rpc UpsertReleasePolicy(UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes);
+  rpc ListReleasePolicies(ListReleasePoliciesReq) returns (ListReleasePoliciesRes);
+
+  rpc SubmitFeedback(SubmitFeedbackReq) returns (SubmitFeedbackRes);
+  rpc ListFeedback(ListFeedbackReq) returns (ListFeedbackRes);
+  rpc GetFeedback(GetFeedbackReq) returns (GetFeedbackRes);
+  rpc HandleFeedback(HandleFeedbackReq) returns (HandleFeedbackRes);
+  rpc DeleteFeedback(DeleteFeedbackReq) returns (DeleteFeedbackRes);
+
+  rpc SubmitContentReport(SubmitContentReportReq) returns (SubmitContentReportRes);
+  rpc ListContentReports(ListContentReportsReq) returns (ListContentReportsRes);
+  rpc GetContentReport(GetContentReportReq) returns (GetContentReportRes);
+  rpc UpdateContentReports(UpdateContentReportsReq) returns (UpdateContentReportsRes);
+}
+
+// goctl rpc protoc platform_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

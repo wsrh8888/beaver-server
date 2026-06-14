@@ -1,0 +1,57 @@
+package auth_public
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"beaver/app/backend/backend_admin/internal/svc"
+	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/backend/backend_models"
+	"beaver/utils/jwts"
+	utils "beaver/utils/list"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type AuthenticationLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+// 管理员 Token 认证
+func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuthenticationLogic {
+	return &AuthenticationLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp *types.AuthenticationRes, err error) {
+	if utils.InListByRegex(l.svcCtx.Config.WhiteList, req.ValidPath) {
+		return &types.AuthenticationRes{}, nil
+	}
+
+	claims, err := jwts.ParseToken(req.Token, l.svcCtx.Config.Auth.AccessSecret)
+	if err != nil {
+		return nil, errors.New("认证失败")
+	}
+
+	var adminUser backend_models.AdminUser
+	err = l.svcCtx.DB.Take(&adminUser, "user_id = ? AND status = ?", claims.UserID, 1).Error
+	if err != nil {
+		return nil, errors.New("管理员用户不存在或已被禁用")
+	}
+
+	key := fmt.Sprintf("admin_login_%s", claims.UserID)
+	token, _ := l.svcCtx.Redis.Get(key).Result()
+	if token != req.Token {
+		return nil, errors.New("token已失效")
+	}
+
+	return &types.AuthenticationRes{
+		UserID: claims.UserID,
+	}, nil
+}

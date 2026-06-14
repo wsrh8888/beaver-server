@@ -215,59 +215,59 @@ type (
 service friend {
 	@doc "发送好友验证请求"
 	@handler addFriend
-	post /api/friend/add_friend (AddFriendReq) returns (AddFriendRes)
+	post /api/friend/v1/add_friend (AddFriendReq) returns (AddFriendRes)
 
 	@doc "处理好友验证请求(同意/拒绝)"
 	@handler userValidStatus
-	post /api/friend/valid (FriendValidStatusReq) returns (FriendValidStatusRes)
+	post /api/friend/v1/valid (FriendValidStatusReq) returns (FriendValidStatusRes)
 
 	@doc "获取好友列表"
 	@handler friendList
-	get /api/friend/friend_list (FriendListReq) returns (FriendListRes)
+	get /api/friend/v1/friend_list (FriendListReq) returns (FriendListRes)
 
 	@doc "获取好友验证请求列表"
 	@handler validList
-	post /api/friend/valid_list (ValidListReq) returns (ValidListRes)
+	post /api/friend/v1/valid_list (ValidListReq) returns (ValidListRes)
 
 	@doc "获取好友详细信息"
 	@handler friendInfo
-	get /api/friend/friend_info (FriendInfoReq) returns (FriendInfoRes)
+	get /api/friend/v1/friend_info (FriendInfoReq) returns (FriendInfoRes)
 
 	@doc "修改好友备注"
 	@handler noticeUpdate
-	post /api/friend/update_notice (NoticeUpdateReq) returns (NoticeUpdateRes)
+	post /api/friend/v1/update_notice (NoticeUpdateReq) returns (NoticeUpdateRes)
 
 	@doc "通过用户ID或邮箱搜索用户"
 	@handler search
-	get /api/friend/search (SearchReq) returns (SearchRes)
+	get /api/friend/v1/search (SearchReq) returns (SearchRes)
 
 	@doc "查询好友验证记录"
 	@handler searchValidInfo
-	post /api/friend/searchValidInfo (SearchValidInfoReq) returns (SearchValidInfoRes)
+	post /api/friend/v1/searchValidInfo (SearchValidInfoReq) returns (SearchValidInfoRes)
 
 	@doc "批量获取好友数据（通过ID）"
 	@handler getFriendsListByUuids
-	post /api/friend/getFriendsListByIds (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
+	post /api/friend/v1/getFriendsListByIds (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
 
 	@doc "批量获取好友验证数据（通过ID）"
 	@handler getFriendVerifiesListByIds
-	post /api/friend/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
+	post /api/friend/v1/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
 
 	@doc "删除好友"
 	@handler deleteFriend
-	delete /api/friend/friend (DeleteFriendReq) returns (DeleteFriendRes)
+	delete /api/friend/v1/friend (DeleteFriendReq) returns (DeleteFriendRes)
 
 	@doc "拉黑用户"
 	@handler blockUser
-	post /api/friend/block (BlockUserReq) returns (BlockUserRes)
+	post /api/friend/v1/block (BlockUserReq) returns (BlockUserRes)
 
 	@doc "取消拉黑"
 	@handler unblockUser
-	delete /api/friend/block (UnblockUserReq) returns (UnblockUserRes)
+	delete /api/friend/v1/block (UnblockUserReq) returns (UnblockUserRes)
 
 	@doc "获取黑名单列表"
 	@handler blockList
-	get /api/friend/block_list (BlockListReq) returns (BlockListRes)
+	get /api/friend/v1/block_list (BlockListReq) returns (BlockListRes)
 }
 
 // goctl api go -api friend_api.api -dir . --home ../../../template

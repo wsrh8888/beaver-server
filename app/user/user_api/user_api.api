@@ -29,16 +29,6 @@ type (
 	UpdateInfoRes  {}
 )
 
-// 修改密码
-type (
-	UpdatePasswordReq {
-		UserID      string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-		OldPassword string `json:"oldPassword"` // 旧密码
-		NewPassword string `json:"newPassword"` // 新密码
-	}
-	UpdatePasswordRes  {}
-)
-
 // 修改邮箱
 type (
 	UpdateEmailReq {
@@ -47,25 +37,6 @@ type (
 		Code   string `json:"code"` // 验证码
 	}
 	UpdateEmailRes  {}
-)
-
-// 获取设备列表
-type (
-	GetDevicesReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID
-	}
-	GetDevicesRes {
-		Devices []DeviceInfo `json:"devices"` // 设备列表
-	}
-	DeviceInfo {
-		DeviceID      string `json:"deviceId"` // 设备ID
-		DeviceType    string `json:"deviceType"` // 设备类型：desktop/mobile/web
-		DeviceOS      string `json:"deviceOs"` // 操作系统：windows/macos/linux/android/ios/harmonyos
-		DeviceName    string `json:"deviceName"` // 设备名称
-		LastLoginTime string `json:"lastLoginTime"` // 最后登录时间
-		IsActive      bool   `json:"isActive"` // 是否活跃
-		LastLoginIP   string `json:"lastLoginIp"` // 最后登录IP
-	}
 )
 
 // 用户数据同步（大厂用户独立版本号方式）
@@ -90,64 +61,93 @@ type (
 		Email     string `json:"email"` // 邮箱
 		Gender    int8   `json:"gender"` // 性别
 		Status    int8   `json:"status"` // 状态
+		UserType  int8   `json:"userType"` // 1普通用户 2bot 3robot
 		Version   int64  `json:"version"` // 版本号
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
 )
 
-// 强制下线指定设备
+// 获取用户设置
 type (
-	KickDeviceReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-		DeviceID string `json:"deviceId"` // 要踢下线的设备ID
+	GetUserSettingsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 	}
-	KickDeviceRes  {}
+	GetUserSettingsPrivacyItem {
+		AllowFriendRequest bool `json:"allowFriendRequest"` // 是否允许添加好友
+		ShowOnlineStatus   bool `json:"showOnlineStatus"` // 是否展示在线状态
+		AllowSearchByPhone bool `json:"allowSearchByPhone"` // 是否允许通过手机号搜索
+		AllowSearchByEmail bool `json:"allowSearchByEmail"` // 是否允许通过邮箱搜索
+	}
+	GetUserSettingsNotificationItem {
+		NotifyFriendRequest bool `json:"notifyFriendRequest"` // 是否接收好友申请通知
+		NotifyGroupMessage  bool `json:"notifyGroupMessage"` // 是否接收群消息通知
+		NotifyMoment        bool `json:"notifyMoment"` // 是否接收朋友圈通知
+	}
+	GetUserSettingsKeyboardItem {
+		Screenshot   string `json:"screenshot"` // 区域截图
+		ToggleWindow string `json:"toggleWindow"` // 显示/隐藏主窗口
+		SendMessage  string `json:"sendMessage"` // 发送消息
+	}
+	GetUserSettingsRes {
+		Privacy      GetUserSettingsPrivacyItem      `json:"privacy"` // 隐私设置
+		Notification GetUserSettingsNotificationItem `json:"notification"` // 通知策略
+		Keyboard     GetUserSettingsKeyboardItem     `json:"keyboard"` // 快捷键
+	}
 )
 
-// 注销账号
+// 更新用户设置
 type (
-	DeactivateAccountReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
-		Password string `json:"password"` // 确认密码，防止误操作
+	UpdateUserSettingsPrivacyItem {
+		AllowFriendRequest *bool `json:"allowFriendRequest,optional"` // 是否允许添加好友
+		ShowOnlineStatus   *bool `json:"showOnlineStatus,optional"` // 是否展示在线状态
+		AllowSearchByPhone *bool `json:"allowSearchByPhone,optional"` // 是否允许通过手机号搜索
+		AllowSearchByEmail *bool `json:"allowSearchByEmail,optional"` // 是否允许通过邮箱搜索
 	}
-	DeactivateAccountRes  {}
+	UpdateUserSettingsNotificationItem {
+		NotifyFriendRequest *bool `json:"notifyFriendRequest,optional"` // 是否接收好友申请通知
+		NotifyGroupMessage  *bool `json:"notifyGroupMessage,optional"` // 是否接收群消息通知
+		NotifyMoment        *bool `json:"notifyMoment,optional"` // 是否接收朋友圈通知
+	}
+	UpdateUserSettingsKeyboardItem {
+		Screenshot   *string `json:"screenshot,optional"` // 区域截图
+		ToggleWindow *string `json:"toggleWindow,optional"` // 显示/隐藏主窗口
+		SendMessage  *string `json:"sendMessage,optional"` // 发送消息
+	}
+	UpdateUserSettingsReq {
+		UserID       string                              `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Privacy      *UpdateUserSettingsPrivacyItem      `json:"privacy,optional"` // 隐私设置（可选，局部更新）
+		Notification *UpdateUserSettingsNotificationItem `json:"notification,optional"` // 通知策略（可选，局部更新）
+		Keyboard     *UpdateUserSettingsKeyboardItem     `json:"keyboard,optional"` // 快捷键（可选，局部更新）
+	}
+	UpdateUserSettingsRes  {}
 )
 
 // 用户服务
 service user {
 	@doc "获取用户基础信息"
 	@handler userInfo
-	get /api/user/user_info (UserInfoReq) returns (UserInfoRes)
+	get /api/user/v1/user_info (UserInfoReq) returns (UserInfoRes)
 
 	@doc "更新用户基础信息（昵称、头像、个性签名、性别）"
 	@handler updateInfo
-	post /api/user/update_info (UpdateInfoReq) returns (UpdateInfoRes)
-
-	@doc "修改用户密码"
-	@handler updatePassword
-	post /api/user/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
+	post /api/user/v1/update_info (UpdateInfoReq) returns (UpdateInfoRes)
 
 	@doc "修改用户邮箱（需要验证码）"
 	@handler updateEmail
-	post /api/user/update_email (UpdateEmailReq) returns (UpdateEmailRes)
-
-	@doc "获取用户设备列表"
-	@handler getDevices
-	get /api/user/devices (GetDevicesReq) returns (GetDevicesRes)
+	post /api/user/v1/update_email (UpdateEmailReq) returns (UpdateEmailRes)
 
 	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
-	post /api/user/sync (UserSyncReq) returns (UserSyncRes)
+	post /api/user/v1/sync (UserSyncReq) returns (UserSyncRes)
 
-	@doc "强制下线指定设备"
-	@handler kickDevice
-	post /api/user/kick_device (KickDeviceReq) returns (KickDeviceRes)
+	@doc "获取用户设置（隐私、通知策略、快捷键）"
+	@handler getUserSettings
+	get /api/user/v1/settings (GetUserSettingsReq) returns (GetUserSettingsRes)
 
-	@doc "注销账号"
-	@handler deactivateAccount
-	post /api/user/deactivate (DeactivateAccountReq) returns (DeactivateAccountRes)
+	@doc "更新用户设置（隐私、通知策略、快捷键，支持局部更新）"
+	@handler updateUserSettings
+	post /api/user/v1/update_settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes)
 }
 
-// 生成代码命令
 // goctl api go -api user_api.api -dir . --home ../../../template

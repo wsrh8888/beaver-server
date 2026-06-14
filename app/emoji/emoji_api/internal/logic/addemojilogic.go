@@ -8,22 +8,26 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
+
 	"gorm.io/gorm"
 )
 
+
 type AddEmojiLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewAddEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddEmojiLogic {
 	return &AddEmojiLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("add_emoji"),
 		svcCtx: svcCtx,
 	}
 }
@@ -132,6 +136,14 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 		}(l.svcCtx.Config.Etcd, req.UserID, favoriteEmoji.EmojiCollectID, collectVersion, emoji.Version)
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "表情收藏成功",
+		Data: map[string]interface{}{
+			"userId":  req.UserID,
+			"emojiId": emoji.EmojiID,
+		},
+	})
 
 	return &types.AddEmojiRes{}, nil
 }

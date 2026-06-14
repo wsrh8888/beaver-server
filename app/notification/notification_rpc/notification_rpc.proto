@@ -71,12 +71,38 @@ message GetReadCursorVersionsRes {
   int64 max_version = 2;
 }
 
-service notification {
-  rpc PushEvent(PushEventReq) returns (PushEventRes);                                   // 业务推事件
-  rpc GetEventVersions(GetEventVersionsReq) returns (GetEventVersionsRes);               // 表1：事件版本
-  rpc GetInboxVersions(GetInboxVersionsReq) returns (GetInboxVersionsRes);               // 表2：收件箱版本
-  rpc GetReadCursorVersions(GetReadCursorVersionsReq) returns (GetReadCursorVersionsRes); // 表3：游标版本
+// 离线 Push Token（FCM/APNs）
+message PushTokenInfo {
+  string device_id = 1;
+  string push_token = 2;
+  string push_platform = 3;
 }
 
-// goctl rpc protoc notification_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+message ListPushTokensReq {
+  string user_id = 1;
+}
+
+message ListPushTokensRes {
+  repeated PushTokenInfo tokens = 1;
+}
+
+message DisablePushTokenReq {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+message DisablePushTokenRes {
+  bool success = 1;
+}
+
+service notification {
+  rpc PushEvent(PushEventReq) returns (PushEventRes);
+  rpc GetEventVersions(GetEventVersionsReq) returns (GetEventVersionsRes);
+  rpc GetInboxVersions(GetInboxVersionsReq) returns (GetInboxVersionsRes);
+  rpc GetReadCursorVersions(GetReadCursorVersionsReq) returns (GetReadCursorVersionsRes);
+  rpc ListPushTokens(ListPushTokensReq) returns (ListPushTokensRes);
+  rpc DisablePushToken(DisablePushTokenReq) returns (DisablePushTokenRes);
+}
+
+// goctl rpc protoc notification_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template
 

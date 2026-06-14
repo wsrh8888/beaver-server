@@ -58,6 +58,7 @@ func (l *GetForwardDetailsLogic) GetForwardDetails(req *types.GetForwardDetailsR
 					UserID:   userId,
 					NickName: userInfo.NickName,
 					Avatar:   userInfo.Avatar,
+					UserType: int8(userInfo.UserType),
 				}
 			}
 		}

@@ -7,20 +7,21 @@ import (
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/logger"
+	"beaver/utils/logger/model"
 )
 
+
 type DeleteMomentLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *logger.Logger
 }
 
 func NewDeleteMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMomentLogic {
 	return &DeleteMomentLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: logger.New("delete_moment"),
 		svcCtx: svcCtx,
 	}
 }
@@ -38,5 +39,12 @@ func (l *DeleteMomentLogic) DeleteMoment(req *types.DeleteMomentReq) (resp *type
 	}
 
 	resp = &types.DeleteMomentRes{}
+	l.logger.Info(model.LogMsg{
+		Text: "朋友圈删除成功",
+		Data: map[string]interface{}{
+			"momentId": req.MomentID,
+			"userId":   req.UserID,
+		},
+	})
 	return resp, nil
 }

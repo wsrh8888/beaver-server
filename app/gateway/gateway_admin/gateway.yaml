@@ -10,8 +10,8 @@ Redis:
   Password: '123456'
   Db: 0
 WhiteList:
-  - /admin/auth/login
-  - /admin/auth/authentication
+  - /admin/auth_public/v1/login
+  - /admin/auth_public/v1/authentication
 
 RateLimit:
   Enabled: false  # 是否启用限流
@@ -20,6 +20,6 @@ RateLimit:
 Timeout:
   Backend: 30 # 后端请求超时
 Log:
-  Encoding: plain
+  Encoding: json
   TimeFormat: 2006-01-02T15:04:05
   Stat: false

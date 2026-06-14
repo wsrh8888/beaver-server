@@ -82,3 +82,23 @@ func (s *ChatServer) SendNotificationMessage(ctx context.Context, in *chat_rpc.S
 	l := logic.NewSendNotificationMessageLogic(ctx, s.svcCtx)
 	return l.SendNotificationMessage(in)
 }
+
+func (s *ChatServer) GetChatMessage(ctx context.Context, in *chat_rpc.GetChatMessageReq) (*chat_rpc.GetChatMessageRes, error) {
+	l := logic.NewGetChatMessageLogic(ctx, s.svcCtx)
+	return l.GetChatMessage(in)
+}
+
+func (s *ChatServer) ListChatMessages(ctx context.Context, in *chat_rpc.ListChatMessagesReq) (*chat_rpc.ListChatMessagesRes, error) {
+	l := logic.NewListChatMessagesLogic(ctx, s.svcCtx)
+	return l.ListChatMessages(in)
+}
+
+func (s *ChatServer) UpdateChatMessages(ctx context.Context, in *chat_rpc.UpdateChatMessagesReq) (*chat_rpc.UpdateChatMessagesRes, error) {
+	l := logic.NewUpdateChatMessagesLogic(ctx, s.svcCtx)
+	return l.UpdateChatMessages(in)
+}
+
+func (s *ChatServer) ListConversations(ctx context.Context, in *chat_rpc.ListConversationsReq) (*chat_rpc.ListConversationsRes, error) {
+	l := logic.NewListConversationsLogic(ctx, s.svcCtx)
+	return l.ListConversations(in)
+}

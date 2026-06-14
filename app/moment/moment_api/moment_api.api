@@ -224,35 +224,35 @@ type (
 service moment {
 	@doc "创建动态的接口"
 	@handler CreateMoment
-	post /api/moment/create (CreateMomentReq) returns (CreateMomentRes)
+	post /api/moment/v1/create (CreateMomentReq) returns (CreateMomentRes)
 
 	@doc "获取自己和好友的动态列表的接口（只返回部分评论和点赞）"
 	@handler GetMomentsList
-	post /api/moment/list (GetMomentsReq) returns (GetMomentsRes)
+	post /api/moment/v1/list (GetMomentsReq) returns (GetMomentsRes)
 
 	@doc "获取动态详情的接口（包含更多评论和点赞）"
 	@handler GetMomentDetail
-	post /api/moment/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
+	post /api/moment/v1/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
 
 	@doc "发表评论的接口"
 	@handler CreateMomentComment
-	post /api/moment/comment/create (CreateMomentCommentReq) returns (CreateMomentCommentRes)
+	post /api/moment/v1/comment/create (CreateMomentCommentReq) returns (CreateMomentCommentRes)
 
 	@doc "获取动态评论列表的接口（分页）"
 	@handler GetMomentComments
-	post /api/moment/comments (GetMomentCommentsReq) returns (GetMomentCommentsRes)
+	post /api/moment/v1/comments (GetMomentCommentsReq) returns (GetMomentCommentsRes)
 
 	@doc "获取动态点赞列表的接口（分页）"
 	@handler GetMomentLikes
-	post /api/moment/likes (GetMomentLikesReq) returns (GetMomentLikesRes)
+	post /api/moment/v1/likes (GetMomentLikesReq) returns (GetMomentLikesRes)
 
 	@doc "点赞/取消点赞的接口"
 	@handler LikeMoment
-	post /api/moment/like (LikeMomentReq) returns (LikeMomentRes)
+	post /api/moment/v1/like (LikeMomentReq) returns (LikeMomentRes)
 
 	@doc "删除动态的接口"
 	@handler DeleteMoment
-	get /api/moment/delete (DeleteMomentReq) returns (DeleteMomentRes)
+	get /api/moment/v1/delete (DeleteMomentReq) returns (DeleteMomentRes)
 }
 
 // goctl api go -api moment_api.api -dir . --home ../../../template

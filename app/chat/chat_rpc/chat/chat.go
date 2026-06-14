@@ -20,6 +20,9 @@ type (
 	BatchUpdateConversationReq              = chat_rpc.BatchUpdateConversationReq
 	BatchUpdateConversationRes              = chat_rpc.BatchUpdateConversationRes
 	CallMsg                                 = chat_rpc.CallMsg
+	ChatMessageItem                         = chat_rpc.ChatMessageItem
+	CloudDocMsg                             = chat_rpc.CloudDocMsg
+	ConversationDetailItem                  = chat_rpc.ConversationDetailItem
 	ConversationItem                        = chat_rpc.ConversationItem
 	ConversationListById                    = chat_rpc.ConversationListById
 	DissolveConversationReq                 = chat_rpc.DissolveConversationReq
@@ -27,6 +30,8 @@ type (
 	EmojiMsg                                = chat_rpc.EmojiMsg
 	FileMsg                                 = chat_rpc.FileMsg
 	ForwardMsg                              = chat_rpc.ForwardMsg
+	GetChatMessageReq                       = chat_rpc.GetChatMessageReq
+	GetChatMessageRes                       = chat_rpc.GetChatMessageRes
 	GetConversationsListByIdsReq            = chat_rpc.GetConversationsListByIdsReq
 	GetConversationsListByIdsRes            = chat_rpc.GetConversationsListByIdsRes
 	GetUserConversationSettingsListByIdsReq = chat_rpc.GetUserConversationSettingsListByIdsReq
@@ -38,6 +43,12 @@ type (
 	ImageMsg                                = chat_rpc.ImageMsg
 	InitializeConversationReq               = chat_rpc.InitializeConversationReq
 	InitializeConversationRes               = chat_rpc.InitializeConversationRes
+	LinkMsg                                 = chat_rpc.LinkMsg
+	ListChatMessagesReq                     = chat_rpc.ListChatMessagesReq
+	ListChatMessagesRes                     = chat_rpc.ListChatMessagesRes
+	ListConversationsReq                    = chat_rpc.ListConversationsReq
+	ListConversationsRes                    = chat_rpc.ListConversationsRes
+	MarkdownMsg                             = chat_rpc.MarkdownMsg
 	Msg                                     = chat_rpc.Msg
 	NotificationMsg                         = chat_rpc.NotificationMsg
 	RemoveConversationMembersReq            = chat_rpc.RemoveConversationMembersReq
@@ -49,6 +60,8 @@ type (
 	SendNotificationMessageRes              = chat_rpc.SendNotificationMessageRes
 	Sender                                  = chat_rpc.Sender
 	TextMsg                                 = chat_rpc.TextMsg
+	UpdateChatMessagesReq                   = chat_rpc.UpdateChatMessagesReq
+	UpdateChatMessagesRes                   = chat_rpc.UpdateChatMessagesRes
 	UpdateConversationReq                   = chat_rpc.UpdateConversationReq
 	UpdateConversationRes                   = chat_rpc.UpdateConversationRes
 	UserConversationSettingListById         = chat_rpc.UserConversationSettingListById
@@ -70,6 +83,10 @@ type (
 		RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error)
 		DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
 		SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
+		GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error)
+		ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error)
+		UpdateChatMessages(ctx context.Context, in *UpdateChatMessagesReq, opts ...grpc.CallOption) (*UpdateChatMessagesRes, error)
+		ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error)
 	}
 
 	defaultChat struct {
@@ -141,4 +158,24 @@ func (m *defaultChat) DissolveConversation(ctx context.Context, in *DissolveConv
 func (m *defaultChat) SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
 	return client.SendNotificationMessage(ctx, in, opts...)
+}
+
+func (m *defaultChat) GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.GetChatMessage(ctx, in, opts...)
+}
+
+func (m *defaultChat) ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.ListChatMessages(ctx, in, opts...)
+}
+
+func (m *defaultChat) UpdateChatMessages(ctx context.Context, in *UpdateChatMessagesReq, opts ...grpc.CallOption) (*UpdateChatMessagesRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.UpdateChatMessages(ctx, in, opts...)
+}
+
+func (m *defaultChat) ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.ListConversations(ctx, in, opts...)
 }

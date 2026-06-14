@@ -1,0 +1,82 @@
+syntax = "v1"
+
+// ==================== 认证接口（需 Gateway JWT，注入 Beaver-User-Id 或 Header Token）====================
+type (
+	LogoutReq {
+		UserID   string `header:"Beaver-User-Id"`
+		DeviceID string `header:"deviceId"`
+	}
+	LogoutRes  {}
+)
+
+type (
+	QrcodeScanReq {
+		Token     string `json:"token"`
+		AuthToken string `header:"Token"`
+	}
+	QrcodeScanRes  {}
+)
+
+type (
+	GetDevicesReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	GetDevicesRes {
+		Devices []DeviceInfo `json:"devices"`
+	}
+	DeviceInfo {
+		DeviceID        string `json:"deviceId"`
+		DeviceType      string `json:"deviceType"`
+		DeviceOS        string `json:"deviceOs"`
+		DeviceModel     string `json:"deviceModel"`
+		DeviceOsVersion string `json:"deviceOsVersion"`
+		DeviceName      string `json:"deviceName"`
+		LastLoginTime   string `json:"lastLoginTime"`
+		IsOnline        bool   `json:"isOnline"`
+		LastLoginIP     string `json:"lastLoginIp"`
+	}
+)
+
+type (
+	KickDeviceReq {
+		UserID   string `header:"Beaver-User-Id"`
+		DeviceID string `json:"deviceId"`
+	}
+	KickDeviceRes  {}
+)
+
+type (
+	UpdatePasswordReq {
+		UserID      string `header:"Beaver-User-Id"`
+		OldPassword string `json:"oldPassword"`
+		NewPassword string `json:"newPassword"`
+	}
+	UpdatePasswordRes  {}
+)
+
+@server (
+	group: auth
+)
+service auth {
+	@doc "用户登出"
+	@handler logout
+	post /api/auth/auth/v1/logout (LogoutReq) returns (LogoutRes)
+
+	@doc "扫码登录-确认扫码（移动端，Header Token）"
+	@handler qrcodeScan
+	post /api/auth/auth/v1/qrcode/scan (QrcodeScanReq) returns (QrcodeScanRes)
+
+	@doc "获取登录设备列表"
+	@handler getDevices
+	get /api/auth/auth/v1/devices (GetDevicesReq) returns (GetDevicesRes)
+
+	@doc "强制下线指定设备"
+	@handler kickDevice
+	post /api/auth/auth/v1/kick_device (KickDeviceReq) returns (KickDeviceRes)
+
+	@doc "修改密码（需验证旧密码）"
+	@handler updatePassword
+	post /api/auth/auth/v1/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
+}
+
+// goctl api go -api auth_api.api -dir . --home ../../../template

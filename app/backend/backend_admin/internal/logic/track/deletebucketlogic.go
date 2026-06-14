@@ -5,7 +5,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/track/track_models"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -16,7 +16,6 @@ type DeleteBucketLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 删除Bucket
 func NewDeleteBucketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteBucketLogic {
 	return &DeleteBucketLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,21 +25,12 @@ func NewDeleteBucketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 }
 
 func (l *DeleteBucketLogic) DeleteBucket(req *types.DeleteBucketReq) (resp *types.DeleteBucketRes, err error) {
-	// 执行软删除
-	result := l.svcCtx.DB.Where("bucket_id = ?", req.BucketId).Delete(&track_models.TrackBucket{})
-
-	if result.Error != nil {
-		logx.Errorf("删除Bucket失败: %v", result.Error)
-		return nil, result.Error
+	_, err = l.svcCtx.PlatformRpc.AdminDeleteBucket(l.ctx, &platform_rpc.AdminDeleteBucketReq{
+		BucketId: req.BucketId,
+	})
+	if err != nil {
+		l.Errorf("删除 Bucket 失败: %v", err)
+		return nil, err
 	}
-
-	// 检查是否删除了记录
-	if result.RowsAffected == 0 {
-		logx.Errorf("未找到要删除的Bucket: %s", req.BucketId)
-		return nil, result.Error
-	}
-
-	resp = &types.DeleteBucketRes{}
-
-	return
+	return &types.DeleteBucketRes{}, nil
 }

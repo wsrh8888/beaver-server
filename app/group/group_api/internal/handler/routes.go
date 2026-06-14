@@ -13,16 +13,34 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 获取机器人详情
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/bot_detail",
+				Handler: getBotDetailHandler(serverCtx),
+			},
+			{
 				// 创建群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/create",
 				Handler: groupCreateHandler(serverCtx),
 			},
 			{
+				// 在群里创建机器人（群管理员操作，返回 Webhook URL + Secret）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/create_bot",
+				Handler: createBotHandler(serverCtx),
+			},
+			{
 				// 解散群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/delete",
 				Handler: groupDeleteHandler(serverCtx),
+			},
+			{
+				// 删除机器人
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/delete_bot",
+				Handler: deleteBotHandler(serverCtx),
 			},
 			{
 				// 获取群信息
@@ -59,6 +77,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/join_request_sync",
 				Handler: groupJoinRequestSyncHandler(serverCtx),
+			},
+			{
+				// 获取群内所有机器人列表
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/list_bots",
+				Handler: listBotsHandler(serverCtx),
 			},
 			{
 				// 添加群成员
@@ -109,34 +133,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: muteAllGroupHandler(serverCtx),
 			},
 			{
-				// 在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）
-				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/create",
-				Handler: createNotificationBotHandler(serverCtx),
-			},
-			{
-				// 删除通知机器人
-				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/delete",
-				Handler: deleteNotificationBotHandler(serverCtx),
-			},
-			{
-				// 获取群内所有通知机器人列表
-				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/list",
-				Handler: listNotificationBotsHandler(serverCtx),
-			},
-			{
-				// 重置通知机器人的签名密钥（旧 Secret 立即失效）
-				Method:  http.MethodPost,
-				Path:    "/api/group/v1/notification_bot/reset_secret",
-				Handler: resetNotificationBotSecretHandler(serverCtx),
-			},
-			{
 				// 退出群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/quit",
 				Handler: quitGroupHandler(serverCtx),
+			},
+			{
+				// 重置机器人的签名密钥（旧 Secret 立即失效）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/reset_bot_secret",
+				Handler: resetBotSecretHandler(serverCtx),
 			},
 			{
 				// 搜索群组
@@ -161,6 +167,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/update",
 				Handler: updateGroupInfoHandler(serverCtx),
+			},
+			{
+				// 更新机器人（名称/简介/头像/启用状态）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/update_bot",
+				Handler: updateBotHandler(serverCtx),
 			},
 		},
 	)

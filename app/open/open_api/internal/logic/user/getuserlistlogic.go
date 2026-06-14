@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
+	"errors"
 
+	"beaver/app/open/constants"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	user_models "beaver/app/user/user_models"
+	"beaver/app/user/user_rpc/types/user_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -16,7 +18,6 @@ type GetUserListLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 批量获取用户信息
 func NewGetUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserListLogic {
 	return &GetUserListLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,25 +27,45 @@ func NewGetUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 }
 
 func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.GetUserListRes, err error) {
-	// 1. 查询用户列表
-	var users []user_models.UserModel
-	if err := l.svcCtx.DB.Where("user_id IN ?", req.UserIDs).Find(&users).Error; err != nil {
+	tokenRecord, err := loadUserAccessToken(l.svcCtx.DB, req.Authorization, constants.ScopeUserProfileRead)
+	if err != nil {
+		return nil, err
+	}
+	if len(req.UserIDs) == 0 {
+		return nil, errors.New("userIds 不能为空")
+	}
+	for _, uid := range req.UserIDs {
+		if uid != tokenRecord.UserID {
+			return nil, errors.New("无权查询该用户信息")
+		}
+	}
+
+	listRes, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+		UserIdList: req.UserIDs,
+	})
+	if err != nil {
 		return nil, err
 	}
 
-	// 2. 转换为响应格式
-	var userList []types.GetUserListUserItem
-	for _, user := range users {
-		userList = append(userList, types.GetUserListUserItem{
-			UserID:   user.UserID,
-			Nickname: user.NickName,
-			Avatar:   user.Avatar,
-			Phone:    user.Phone,
-			Email:    user.Email,
-		})
+	scopes := parseScopeList(tokenRecord.Scope)
+	userList := make([]types.GetUserListUserItem, 0, len(req.UserIDs))
+	for _, uid := range req.UserIDs {
+		info, ok := listRes.UserInfo[uid]
+		if !ok {
+			continue
+		}
+		item := types.GetUserListUserItem{
+			UserID:   info.UserId,
+			Nickname: info.NickName,
+		}
+		if hasScope(scopes, constants.ScopeUserAvatarRead) {
+			item.Avatar = info.Avatar
+		}
+		if hasScope(scopes, constants.ScopeUserEmailRead) {
+			item.Email = info.Email
+		}
+		userList = append(userList, item)
 	}
 
-	return &types.GetUserListRes{
-		Users: userList,
-	}, nil
+	return &types.GetUserListRes{Users: userList}, nil
 }

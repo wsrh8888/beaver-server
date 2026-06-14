@@ -1,0 +1,181 @@
+syntax = "v1"
+
+// ==================== 认证公开接口（无需 Gateway JWT，见 gateway WhiteList）====================
+
+type (
+	PhoneLoginReq {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+		DeviceID string `header:"deviceId"`
+	}
+	PhoneLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
+
+type (
+	EmailPasswordLoginReq {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		DeviceID string `header:"deviceId"`
+	}
+	EmailPasswordLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
+
+type (
+	OAuthCodeLoginReq {
+		AppID    string `json:"appId"`
+		Code     string `json:"code"`
+		DeviceID string `header:"deviceId"`
+	}
+	OAuthCodeLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
+
+type (
+	AuthenticationReq {
+		Token     string `header:"Token,optional"`
+		ValidPath string `header:"ValidPath,optional"`
+	}
+	AuthenticationRes {
+		UserID string `json:"userId"`
+	}
+)
+
+type (
+	PhoneRegisterReq {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+		Code     string `json:"code"`
+	}
+	PhoneRegisterRes {}
+)
+
+type (
+	EmailRegisterReq {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Code     string `json:"code"`
+	}
+	EmailRegisterRes {}
+)
+
+type (
+	GetPhoneCodeReq {
+		Phone string `json:"phone"`
+		Type  string `json:"type"`
+	}
+	GetPhoneCodeRes {}
+)
+
+type (
+	GetEmailCodeReq {
+		Email string `json:"email"`
+		Type  string `json:"type"`
+	}
+	GetEmailCodeRes {}
+)
+
+type (
+	EmailLoginReq {
+		Email    string `json:"email"`
+		Code     string `json:"code"`
+		DeviceID string `header:"deviceId"`
+	}
+	EmailLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
+
+type (
+	ResetPasswordReq {
+		Email    string `json:"email"`
+		Code     string `json:"code"`
+		Password string `json:"password"`
+	}
+	ResetPasswordRes {}
+)
+
+type (
+	QrcodeGenerateReq {
+		DeviceID string `header:"deviceId"`
+		Source   string `json:"source,optional"`
+	}
+	QrcodeGenerateRes {
+		Token    string `json:"token"`
+		ExpireAt int64  `json:"expireAt"`
+	}
+)
+
+type (
+	QrcodeStatusReq {
+		Token    string `form:"token"`
+		DeviceID string `header:"deviceId"`
+	}
+	QrcodeStatusRes {
+		Status string `json:"status"`
+		Token  string `json:"token,omitempty"`
+		UserID string `json:"userId,omitempty"`
+		Source string `json:"source,omitempty"`
+	}
+)
+
+@server (
+	group: auth_public
+)
+service auth {
+	@doc "手机号登录"
+	@handler phoneLogin
+	post /api/auth/auth_public/v1/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
+
+	@doc "邮箱密码登录"
+	@handler emailPasswordLogin
+	post /api/auth/auth_public/v1/email_password_login (EmailPasswordLoginReq) returns (EmailPasswordLoginRes)
+
+	@doc "OAuth 授权码登录（PC 客户端 SDK）"
+	@handler oauthCodeLogin
+	post /api/auth/auth_public/v1/oauth_code_login (OAuthCodeLoginReq) returns (OAuthCodeLoginRes)
+
+	@doc "用户认证（Gateway 内部校验 Token）"
+	@handler authentication
+	get /api/auth/auth_public/v1/authentication (AuthenticationReq) returns (AuthenticationRes)
+
+	@doc "手机号注册"
+	@handler phoneRegister
+	post /api/auth/auth_public/v1/phone_register (PhoneRegisterReq) returns (PhoneRegisterRes)
+
+	@doc "邮箱注册"
+	@handler emailRegister
+	post /api/auth/auth_public/v1/email_register (EmailRegisterReq) returns (EmailRegisterRes)
+
+	@doc "获取手机验证码"
+	@handler getPhoneCode
+	post /api/auth/auth_public/v1/phonecode (GetPhoneCodeReq) returns (GetPhoneCodeRes)
+
+	@doc "获取邮箱验证码"
+	@handler getEmailCode
+	post /api/auth/auth_public/v1/emailcode (GetEmailCodeReq) returns (GetEmailCodeRes)
+
+	@doc "邮箱验证码登录"
+	@handler emailLogin
+	post /api/auth/auth_public/v1/email_login (EmailLoginReq) returns (EmailLoginRes)
+
+	@doc "找回密码"
+	@handler resetPassword
+	post /api/auth/auth_public/v1/reset_password (ResetPasswordReq) returns (ResetPasswordRes)
+
+	@doc "扫码登录-生成二维码（PC）"
+	@handler qrcodeGenerate
+	post /api/auth/auth_public/v1/qrcode/generate (QrcodeGenerateReq) returns (QrcodeGenerateRes)
+
+	@doc "扫码登录-轮询状态（PC）"
+	@handler qrcodeStatus
+	get /api/auth/auth_public/v1/qrcode/status (QrcodeStatusReq) returns (QrcodeStatusRes)
+}

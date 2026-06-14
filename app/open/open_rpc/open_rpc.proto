@@ -55,11 +55,269 @@ message RefreshTokenRes {
   int64 expires_in = 3; // 过期时间（秒）
 }
 
+// ==================== 推送机器人（Bot）管理 ====================
+
+// 创建推送机器人
+message CreateBotReq {
+  string group_id = 1; // 目标群组 ID
+  string bot_id = 2; // 机器人用户 ID（由 user_rpc 生成）
+}
+
+message CreateBotRes {
+  uint32 id = 1; // 机器人 ID（open_bots.id）
+  string bot_id = 2; // 机器人用户 ID
+  string token = 3; // Webhook Token
+  string webhook_url = 4; // Webhook 基础 URL（不含 token）
+}
+
+// 删除推送机器人（软删除，设置 status=0）
+message DeleteBotReq {
+  uint32 id = 1; // open_bots.id
+}
+
+message DeleteBotRes {}
+
+// 重置签名密钥
+message ResetBotSecretReq {
+  uint32 id = 1;
+}
+
+message ResetBotSecretRes {
+  string signature_secret = 1; // 新密钥
+}
+
+// 获取推送机器人信息
+message GetBotInfoReq {
+  string bot_id = 1; // 机器人用户ID
+}
+
+message BotSecurity {
+  bool keywords_enabled = 1;
+  repeated string keywords = 2;
+  bool ip_whitelist_enabled = 3;
+  repeated string ip_whitelist = 4;
+  bool signature_enabled = 5;
+  string signature_secret = 6;
+}
+
+message GetBotInfoRes {
+  uint32 id = 1; // open_bots.id
+  string bot_id = 2; // 机器人用户ID
+  string token = 3; // Webhook Token
+  BotSecurity security = 4; // 安全设置
+}
+
+// 更新推送机器人（安全设置等）
+message UpdateBotReq {
+  string bot_id = 1; // 机器人用户 ID
+  BotSecurity security = 2; // 安全设置
+}
+
+message UpdateBotRes {}
+
+// 记录 Webhook 回调日志（供 chat 等域通过 RPC 写入，不直连 beaver_open）
+message SaveWebhookLogReq {
+  string config_id = 1; // 配置 ID
+  string app_id = 2; // 应用 ID
+  string event_type = 3; // 事件类型
+  int32 status = 4; // 0 失败 1 成功
+}
+
+message SaveWebhookLogRes {}
+
+// ==================== 智能机器人 Webhook ====================
+
+// 根据 IM 用户 ID 反查智能机器人
+message GetRobotByUserIDReq {
+  string robot_user_id = 1; // string Robot 的 IM 用户 ID
+}
+
+message GetRobotByUserIDRes {
+  bool found = 1; // bool 是否找到对应 Robot
+  string app_id = 2; // string 所属应用 ID
+  string robot_user_id = 3; // string Robot 的 IM 用户 ID
+  bool enable_single_chat = 4; // bool 是否启用私聊
+  bool enable_group_chat = 5; // bool 是否启用群聊
+  bool enable_at_mention = 6; // bool 是否启用 @ 提及
+}
+
+// 向应用已注册的 Webhook 推送开放平台事件
+message DispatchPlatformEventReq {
+  string app_id = 1; // string 应用 ID
+  string event_type = 2; // string 事件类型，如 im.message.receive
+  string event_json = 3; // string 事件内容 JSON 字符串
+}
+
+message DispatchPlatformEventRes {
+  bool dispatched = 1; // bool 是否至少推送成功一次
+}
+
+// ==================== 开发者资质（通用，portal / backend_admin 共用）====================
+
+message DeveloperItem {
+  uint64 id = 1; // uint64 记录 ID
+  string user_id = 2; // string 用户 ID
+  string real_name = 3; // string 真实姓名
+  string company_name = 4; // string 公司名称
+  string phone = 5; // string 联系电话
+  string email = 6; // string 邮箱
+  string description = 7; // string 申请说明
+  int32 status = 8; // int32 状态 0待审核 1已通过 2已拒绝
+  string audit_by = 9; // string 审核人 ID
+  int64 audit_time = 10; // int64 审核时间戳毫秒
+  string audit_remark = 11; // string 审核备注
+  int64 created_at = 12; // int64 创建时间戳毫秒
+}
+
+message ApplyDeveloperReq {
+  string user_id = 1; // string 用户 ID
+  string real_name = 2; // string 真实姓名
+  string company_name = 3; // string 公司名称
+  string phone = 4; // string 联系电话
+  string email = 5; // string 邮箱
+  string description = 6; // string 申请说明
+}
+
+message ApplyDeveloperRes {
+  uint64 id = 1; // uint64 记录 ID
+}
+
+message GetDeveloperByUserIDReq {
+  string user_id = 1; // string 用户 ID
+}
+
+message GetDeveloperByUserIDRes {
+  bool found = 1; // bool 是否存在记录
+  DeveloperItem developer = 2; // object 开发者信息
+}
+
+message GetDeveloperReq {
+  uint64 id = 1; // uint64 记录 ID
+}
+
+message GetDeveloperRes {
+  DeveloperItem developer = 1; // object 开发者信息
+}
+
+message ListDevelopersReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  int32 status = 3; // int32 状态筛选，0 表示全部
+}
+
+message ListDevelopersRes {
+  int64 total = 1; // int64 总数
+  repeated DeveloperItem list = 2; // array 开发者列表
+}
+
+message AuditDeveloperReq {
+  uint64 id = 1; // uint64 记录 ID
+  int32 status = 2; // int32 审核结果 1通过 2拒绝
+  string audit_by = 3; // string 审核人 ID
+  string audit_remark = 4; // string 审核备注
+}
+
+message AuditDeveloperRes {}
+
+// ==================== 开放平台应用（通用）====================
+
+message OpenAppItem {
+  string app_id = 1; // string 应用 ID
+  string name = 2; // string 应用名称
+  string description = 3; // string 应用描述
+  string icon = 4; // string 图标 URL
+  string owner_user_id = 5; // string 所属用户 ID
+  int32 app_type = 6; // int32 应用类型 1自建 2第三方
+  string category = 7; // string 分类
+  int32 status = 8; // int32 状态 0草稿 1已发布 2禁用
+  int32 audit_status = 9; // int32 审核状态 0待审核 1已通过 2已拒绝
+  string audited_by = 10; // string 审核人 ID
+  int64 audited_at = 11; // int64 审核时间戳毫秒
+  int32 enable_robot = 12; // int32 是否启用 Robot
+  int32 enable_oauth = 13; // int32 是否启用 OAuth
+  int32 enable_webhook = 14; // int32 是否启用 Webhook
+  int64 created_at = 15; // int64 创建时间戳毫秒
+}
+
+// ListOpenApps：应用查询（列表 + app_id 精确查详情）
+message ListOpenAppsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string keyword = 3; // string 名称/描述模糊搜索，可选
+  string owner_user_id = 4; // string 所属用户 ID，可选
+  int32 status = 5; // int32 状态筛选，0 表示全部
+  int32 audit_status = 6; // int32 审核状态筛选，0 表示全部
+  string app_id = 7; // string 应用 ID 精确查，可选
+  int32 capability_type = 8; // int32 能力筛选：0全部 1Robot 2Webhook 3Robot或Webhook
+}
+
+message ListOpenAppsRes {
+  int64 total = 1; // int64 总数
+  repeated OpenAppItem list = 2; // array 应用列表
+}
+
+// ListWebhookLogs：Webhook 投递日志（运营后台）
+message ListWebhookLogsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string app_id = 3; // string 应用 ID，可选
+  string event_type = 4; // string 事件类型，可选
+  int32 status = 5; // int32 投递结果：0全部 1成功 2失败
+}
+
+message WebhookLogItem {
+  uint64 id = 1; // uint64 日志 ID
+  string app_id = 2; // string 应用 ID
+  string event_id = 3; // string 事件 ID
+  string event_type = 4; // string 事件类型
+  string target_url = 5; // string 目标 URL
+  int32 http_status = 6; // int32 HTTP 状态码
+  int64 latency_ms = 7; // int64 耗时毫秒
+  int32 retry_count = 8; // int32 重试次数
+  int32 status = 9; // int32 1成功 0失败
+  string error_message = 10; // string 错误信息
+  int64 created_at = 11; // int64 创建时间戳秒
+}
+
+message ListWebhookLogsRes {
+  int64 total = 1; // int64 总数
+  repeated WebhookLogItem list = 2; // array 日志列表
+}
+
+// UpdateOpenApps：应用状态变更（审核 / 启用禁用，支持批量）
+message UpdateOpenAppsReq {
+  repeated string app_ids = 1; // array 应用 ID
+  int32 action = 2; // int32 操作：1审核通过 2审核拒绝 3禁用 4启用
+  string operator_id = 3; // string 操作人 ID
+  string audit_remark = 4; // string 审核备注，可选
+}
+
+message UpdateOpenAppsRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
 service open {
   rpc ExchangeToken(ExchangeTokenReq) returns (ExchangeTokenRes); // 用授权码换取 Token
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes); // 获取用户信息
   rpc ValidateToken(ValidateTokenReq) returns (ValidateTokenRes); // 验证 Token
   rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenRes); // 刷新 Token
+  rpc CreateBot(CreateBotReq) returns (CreateBotRes); // 创建推送机器人
+  rpc DeleteBot(DeleteBotReq) returns (DeleteBotRes); // 删除推送机器人（软删除）
+  rpc ResetBotSecret(ResetBotSecretReq) returns (ResetBotSecretRes); // 重置签名密钥
+  rpc GetBotInfo(GetBotInfoReq) returns (GetBotInfoRes); // 获取推送机器人信息
+  rpc UpdateBot(UpdateBotReq) returns (UpdateBotRes); // 更新推送机器人
+  rpc SaveWebhookLog(SaveWebhookLogReq) returns (SaveWebhookLogRes); // 记录 Webhook 回调日志
+  rpc GetRobotByUserID(GetRobotByUserIDReq) returns (GetRobotByUserIDRes); // 根据 IM 用户 ID 反查 Robot
+  rpc DispatchPlatformEvent(DispatchPlatformEventReq) returns (DispatchPlatformEventRes); // 推送开放平台事件
+
+  rpc ApplyDeveloper(ApplyDeveloperReq) returns (ApplyDeveloperRes); // 提交开发者申请
+  rpc GetDeveloperByUserID(GetDeveloperByUserIDReq) returns (GetDeveloperByUserIDRes); // 按用户 ID 查询
+  rpc GetDeveloper(GetDeveloperReq) returns (GetDeveloperRes); // 按记录 ID 查询
+  rpc ListDevelopers(ListDevelopersReq) returns (ListDevelopersRes); // 分页列表
+  rpc AuditDeveloper(AuditDeveloperReq) returns (AuditDeveloperRes); // 审核申请
+  rpc ListOpenApps(ListOpenAppsReq) returns (ListOpenAppsRes); // 应用查询：列表、详情
+  rpc UpdateOpenApps(UpdateOpenAppsReq) returns (UpdateOpenAppsRes); // 应用变更：审核、启用禁用
+  rpc ListWebhookLogs(ListWebhookLogsReq) returns (ListWebhookLogsRes); // Webhook 投递日志
 }
 
-// goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --style=goZero
+// goctl rpc protoc open_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

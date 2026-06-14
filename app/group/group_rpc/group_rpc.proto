@@ -108,6 +108,113 @@ message GroupRequestVersionItem {
   int64 version = 2; // 最新版本号
 }
 
+message CanSendGroupMessageReq {
+  string group_id = 1;
+  string user_id = 2;
+}
+
+message CanSendGroupMessageRes {
+  bool allowed = 1;
+  string reason = 2;
+}
+
+// 添加群成员（供开放平台 Robot 入群等内部调用）
+message AddGroupMemberReq {
+  string group_id = 1; // string 群组 ID
+  string user_id = 2; // string 要加入的用户 ID
+  string operated_by = 3; // string 操作者 ID（如 app_id），可为空
+}
+
+message AddGroupMemberRes {
+  bool added = 1; // bool 是否新加入（已在群内则为 false）
+  int64 member_version = 2; // int64 群成员列表版本号
+}
+
+// 移除群成员
+message RemoveGroupMemberReq {
+  string group_id = 1; // string 群组 ID
+  string user_id = 2; // string 要移除的用户 ID
+  string operated_by = 3; // string 操作者 ID（如 app_id），可为空
+  bool kick = 4; // bool true=被踢(status=3)，false=退出(status=2)
+}
+
+message RemoveGroupMemberRes {
+  int64 member_version = 1; // int64 群成员列表版本号
+}
+
+// ==================== 群组管理（通用）====================
+
+message GroupItem {
+  uint64 id = 1; // uint64 记录 ID
+  string group_id = 2; // string 群组 ID
+  int32 type = 3; // int32 群类型
+  string title = 4; // string 群名称
+  string avatar = 5; // string 群头像
+  string creator_id = 6; // string 创建者 ID
+  string notice = 7; // string 群公告
+  int32 status = 8; // int32 群状态
+  bool mute_all = 9; // bool 是否全员禁言
+  string created_at = 10; // string 创建时间 RFC3339
+  string updated_at = 11; // string 更新时间 RFC3339
+}
+
+message ListGroupsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  int32 status = 3; // int32 状态筛选，0 表示全部
+  int32 type = 4; // int32 类型筛选，0 表示全部
+  string keywords = 5; // string 群名关键词，可选
+  uint64 id = 6; // uint64 记录 ID，可选
+  string group_id = 7; // string 业务群组 ID，可选
+}
+
+message ListGroupsRes {
+  int64 total = 1; // int64 总数
+  repeated GroupItem list = 2; // array 群组列表
+}
+
+message UpdateGroupReq {
+  uint64 id = 1; // uint64 记录 ID
+  string title = 2; // string 群名称，空表示不修改
+  string avatar = 3; // string 群头像，空表示不修改
+  string notice = 4; // string 群公告，空表示不修改
+  int32 status = 5; // int32 群状态，0 表示不修改
+  optional bool mute_all = 6; // bool 全员禁言，可选
+}
+
+message UpdateGroupRes {}
+
+message GroupMemberItem {
+  uint64 id = 1; // uint64 记录 ID
+  string group_id = 2; // string 群组 ID
+  string user_id = 3; // string 用户 ID
+  int32 role = 4; // int32 成员角色
+  int32 status = 5; // int32 成员状态
+  int32 prohibition_minutes = 6; // int32 禁言剩余分钟，0 表示未禁言
+  string created_at = 7; // string 创建时间 RFC3339
+  string updated_at = 8; // string 更新时间 RFC3339
+}
+
+message ListGroupMembersReq {
+  string group_id = 1; // string 群组 ID
+  int32 page = 2; // int32 页码
+  int32 page_size = 3; // int32 每页条数
+  int32 role = 4; // int32 角色筛选，0 表示全部
+  int32 status = 5; // int32 状态筛选，0 表示全部
+}
+
+message ListGroupMembersRes {
+  int64 total = 1; // int64 总数
+  repeated GroupMemberItem list = 2; // array 成员列表
+}
+
+message UpdateGroupMemberReq {
+  uint64 id = 1; // uint64 成员记录 ID
+  optional int32 role = 2; // int32 角色，可选
+  optional int32 mute_minutes = 3; // int32 禁言分钟，0 解除，可选
+}
+
+message UpdateGroupMemberRes {}
 
 service group {
   rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersRes); // 获取群成员列表
@@ -117,6 +224,14 @@ service group {
   rpc GetGroupMembersListByIds(GetGroupMembersListByIdsReq) returns (GetGroupMembersListByIdsRes); // 通过ID获取群成员列表
   rpc GetGroupJoinRequestsListByIds(GetGroupJoinRequestsListByIdsReq) returns (GetGroupJoinRequestsListByIdsRes); // 通过ID获取入群申请列表
   rpc GetUserGroupRequestVersions(GetUserGroupRequestVersionsReq) returns (GetUserGroupRequestVersionsRes); // 获取用户群组申请版本信息
+  rpc CanSendGroupMessage(CanSendGroupMessageReq) returns (CanSendGroupMessageRes); // 校验用户是否可在群内发消息
+  rpc AddGroupMember(AddGroupMemberReq) returns (AddGroupMemberRes); // 添加群成员
+  rpc RemoveGroupMember(RemoveGroupMemberReq) returns (RemoveGroupMemberRes); // 移除群成员
+
+  rpc ListGroups(ListGroupsReq) returns (ListGroupsRes);
+  rpc UpdateGroup(UpdateGroupReq) returns (UpdateGroupRes);
+  rpc ListGroupMembers(ListGroupMembersReq) returns (ListGroupMembersRes);
+  rpc UpdateGroupMember(UpdateGroupMemberReq) returns (UpdateGroupMemberRes);
 }
 
 // goctl rpc protoc group_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

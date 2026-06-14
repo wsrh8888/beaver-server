@@ -10,8 +10,8 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/utils/pwd"
 	utils "beaver/utils/rand"
+	uuidUtil "beaver/utils/uuid"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -90,15 +90,20 @@ func (l *UserCreateLogic) initializeRedisCounter() error {
 }
 
 func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.UserCreateRes, error) {
-	// 验证必填字段
-	if in.Password == "" {
-		return nil, errors.New("密码不能为空")
-	}
-	if in.Phone == "" && in.Email == "" {
-		return nil, errors.New("手机号或邮箱至少需要提供一个")
+	// 验证必填字段（机器人/Robot 用户不需要联系方式）
+	isSystemUser := in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeRobot)
+	if !isSystemUser {
+		if in.Phone == "" && in.Email == "" {
+			return nil, errors.New("手机号或邮箱至少需要提供一个")
+		}
+	} else {
+		// 机器人用户：昵称必填
+		if in.NickName == "" {
+			return nil, errors.New("机器人用户必须提供昵称")
+		}
 	}
 
-	// 检查用户是否已存在
+	// 检查用户是否已存在（通过 phone/email 查询）
 	var user user_models.UserModel
 	var err error
 
@@ -108,17 +113,17 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	} else if in.Phone != "" {
 		// 只提供手机号
 		err = l.svcCtx.DB.Take(&user, "phone = ?", in.Phone).Error
-	} else {
+	} else if in.Email != "" {
 		// 只提供邮箱
 		err = l.svcCtx.DB.Take(&user, "email = ?", in.Email).Error
+	} else {
+		// 机器人用户：没有联系方式，跳过重复检查
+		err = errors.New("record not found")
 	}
 
 	if err == nil {
 		return nil, errors.New("用户已存在")
 	}
-
-	// 加密密码
-	hashedPassword := pwd.HahPwd(in.Password)
 
 	// 生成随机昵称
 	nickName := utils.GenerateRandomString(8)
@@ -126,11 +131,19 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		nickName = in.NickName
 	}
 
-	// 生成6位数字递增用户ID
-	userID, err := l.generateUserID()
-	if err != nil {
-		logx.Errorf("生成用户ID失败: %v", err)
-		return nil, errors.New("生成用户ID失败")
+	// 生成用户ID（普通用户用递增数字，机器人/Robot 用 UUID）
+	var userID string
+	if in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeRobot) {
+		// 机器人用户：生成 UUID 格式的 ID
+		userID = uuidUtil.NewV4().String()
+	} else {
+		// 普通用户：生成6位数字递增用户ID
+		var genErr error
+		userID, genErr = l.generateUserID()
+		if genErr != nil {
+			logx.Errorf("生成用户ID失败: %v", genErr)
+			return nil, errors.New("生成用户ID失败")
+		}
 	}
 
 	// 获取新版本号（用户独立递增，从1开始）
@@ -141,15 +154,19 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	}
 	logx.Infof("获取用户版本号: userID=%s, version=%d", userID, version)
 
+	// 创建用户基础信息（不包含密码）
 	user = user_models.UserModel{
 		UserID:   userID,
-		Password: hashedPassword,
 		Email:    in.Email,
 		Phone:    in.Phone,
 		Source:   in.Source,
 		NickName: nickName,
-		Abstract: "",
+		Abstract: in.Abstract,
+		UserType: int8(in.UserType),
 		Version:  version,
+	}
+	if user.UserType == 0 {
+		user.UserType = user_models.UserTypeNormal
 	}
 
 	err = l.svcCtx.DB.Create(&user).Error
@@ -157,6 +174,10 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		logx.Errorf("创建用户失败: %v", err)
 		return nil, errors.New("创建用户失败")
 	}
+
+	// TODO: 调用 auth 服务创建用户凭证（密码）
+	// 这里需要通过 RPC 调用 auth 服务的 CreateCredential 接口
+	// 暂时留空，等待 auth 服务实现后补充
 
 	// 记录用户创建的变更日志
 	l.recordUserCreateLog(user.UserID, version)

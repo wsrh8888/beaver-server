@@ -2,6 +2,7 @@ package corewebhook
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 // CallbackPayload Webhook 回调载荷
@@ -30,20 +30,25 @@ type Config struct {
 	RetryCount int
 }
 
-// WebhookSender Webhook 发送器
-type WebhookSender struct {
-	db     *gorm.DB
-	config Config
+// LogWriter 跨域写 Webhook 日志（由 open_rpc 等实现）
+type LogWriter interface {
+	SaveWebhookLog(ctx context.Context, configID, appID, eventType string, success bool)
 }
 
-// NewWebhookSender 创建发送器
-func NewWebhookSender(db *gorm.DB, conf Config) *WebhookSender {
+// WebhookSender Webhook 发送器
+type WebhookSender struct {
+	logWriter LogWriter
+	config    Config
+}
+
+// NewWebhookSender 创建发送器，logWriter 可为 nil（不记日志）
+func NewWebhookSender(conf Config, logWriter LogWriter) *WebhookSender {
 	if conf.Timeout == 0 {
 		conf.Timeout = 10
 	}
 	return &WebhookSender{
-		db:     db,
-		config: conf,
+		logWriter: logWriter,
+		config:    conf,
 	}
 }
 
@@ -85,12 +90,12 @@ func (s *WebhookSender) sendAsync(config WebhookTargetConfig, data CallbackPaylo
 	}
 
 	signature := s.generateSignature(body, config.Secret)
-	
+
 	retryCount := config.RetryCount
 	if retryCount == 0 {
 		retryCount = s.config.RetryCount
 	}
-	
+
 	timeout := config.Timeout
 	if timeout == 0 {
 		timeout = s.config.Timeout
@@ -111,7 +116,6 @@ func (s *WebhookSender) sendAsync(config WebhookTargetConfig, data CallbackPaylo
 		logx.Errorf("Webhook 回调失败 (重试 %d/%d): EventID=%s", retry+1, retryCount, data.EventID)
 	}
 
-	// 记录日志 (这里回调业务层的日志记录逻辑)
 	s.saveLog(config, data, success)
 }
 
@@ -151,20 +155,9 @@ func (s *WebhookSender) generateSignature(body []byte, secret string) string {
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
-// saveLog 保存日志 (建议根据业务需求在 core 或业务层实现)
 func (s *WebhookSender) saveLog(config WebhookTargetConfig, data CallbackPayload, success bool) {
-	status := 0
-	if success {
-		status = 1
+	if s.logWriter == nil {
+		return
 	}
-
-	// 这种业务强相关的模型操作，通常建议通过 Hook 或者接口回调回业务层
-	// 这里先简单用 SQL 写入，保持兼容性
-	s.db.Table("open_webhook_logs").Create(map[string]interface{}{
-		"config_id":  fmt.Sprintf("%d", config.ID),
-		"app_id":     config.AppID,
-		"event_type": data.EventType,
-		"status":     status,
-		"created_at": time.Now(),
-	})
+	s.logWriter.SaveWebhookLog(context.Background(), fmt.Sprintf("%d", config.ID), config.AppID, data.EventType, success)
 }

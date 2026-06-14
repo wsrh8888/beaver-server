@@ -7,12 +7,11 @@
 package group_rpc
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -1048,6 +1047,1048 @@ func (x *GroupRequestVersionItem) GetVersion() int64 {
 	return 0
 }
 
+type CanSendGroupMessageReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CanSendGroupMessageReq) Reset() {
+	*x = CanSendGroupMessageReq{}
+	mi := &file_group_rpc_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CanSendGroupMessageReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CanSendGroupMessageReq) ProtoMessage() {}
+
+func (x *CanSendGroupMessageReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CanSendGroupMessageReq.ProtoReflect.Descriptor instead.
+func (*CanSendGroupMessageReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *CanSendGroupMessageReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *CanSendGroupMessageReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type CanSendGroupMessageRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Allowed       bool                   `protobuf:"varint,1,opt,name=allowed,proto3" json:"allowed,omitempty"`
+	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CanSendGroupMessageRes) Reset() {
+	*x = CanSendGroupMessageRes{}
+	mi := &file_group_rpc_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CanSendGroupMessageRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CanSendGroupMessageRes) ProtoMessage() {}
+
+func (x *CanSendGroupMessageRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CanSendGroupMessageRes.ProtoReflect.Descriptor instead.
+func (*CanSendGroupMessageRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *CanSendGroupMessageRes) GetAllowed() bool {
+	if x != nil {
+		return x.Allowed
+	}
+	return false
+}
+
+func (x *CanSendGroupMessageRes) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+// 添加群成员（供开放平台 Robot 入群等内部调用）
+type AddGroupMemberReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`          // string 群组 ID
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`             // string 要加入的用户 ID
+	OperatedBy    string                 `protobuf:"bytes,3,opt,name=operated_by,json=operatedBy,proto3" json:"operated_by,omitempty"` // string 操作者 ID（如 app_id），可为空
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddGroupMemberReq) Reset() {
+	*x = AddGroupMemberReq{}
+	mi := &file_group_rpc_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddGroupMemberReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddGroupMemberReq) ProtoMessage() {}
+
+func (x *AddGroupMemberReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddGroupMemberReq.ProtoReflect.Descriptor instead.
+func (*AddGroupMemberReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *AddGroupMemberReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *AddGroupMemberReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AddGroupMemberReq) GetOperatedBy() string {
+	if x != nil {
+		return x.OperatedBy
+	}
+	return ""
+}
+
+type AddGroupMemberRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Added         bool                   `protobuf:"varint,1,opt,name=added,proto3" json:"added,omitempty"`                                      // bool 是否新加入（已在群内则为 false）
+	MemberVersion int64                  `protobuf:"varint,2,opt,name=member_version,json=memberVersion,proto3" json:"member_version,omitempty"` // int64 群成员列表版本号
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddGroupMemberRes) Reset() {
+	*x = AddGroupMemberRes{}
+	mi := &file_group_rpc_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddGroupMemberRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddGroupMemberRes) ProtoMessage() {}
+
+func (x *AddGroupMemberRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddGroupMemberRes.ProtoReflect.Descriptor instead.
+func (*AddGroupMemberRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *AddGroupMemberRes) GetAdded() bool {
+	if x != nil {
+		return x.Added
+	}
+	return false
+}
+
+func (x *AddGroupMemberRes) GetMemberVersion() int64 {
+	if x != nil {
+		return x.MemberVersion
+	}
+	return 0
+}
+
+// 移除群成员
+type RemoveGroupMemberReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`          // string 群组 ID
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`             // string 要移除的用户 ID
+	OperatedBy    string                 `protobuf:"bytes,3,opt,name=operated_by,json=operatedBy,proto3" json:"operated_by,omitempty"` // string 操作者 ID（如 app_id），可为空
+	Kick          bool                   `protobuf:"varint,4,opt,name=kick,proto3" json:"kick,omitempty"`                              // bool true=被踢(status=3)，false=退出(status=2)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveGroupMemberReq) Reset() {
+	*x = RemoveGroupMemberReq{}
+	mi := &file_group_rpc_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveGroupMemberReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveGroupMemberReq) ProtoMessage() {}
+
+func (x *RemoveGroupMemberReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveGroupMemberReq.ProtoReflect.Descriptor instead.
+func (*RemoveGroupMemberReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *RemoveGroupMemberReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *RemoveGroupMemberReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RemoveGroupMemberReq) GetOperatedBy() string {
+	if x != nil {
+		return x.OperatedBy
+	}
+	return ""
+}
+
+func (x *RemoveGroupMemberReq) GetKick() bool {
+	if x != nil {
+		return x.Kick
+	}
+	return false
+}
+
+type RemoveGroupMemberRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MemberVersion int64                  `protobuf:"varint,1,opt,name=member_version,json=memberVersion,proto3" json:"member_version,omitempty"` // int64 群成员列表版本号
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveGroupMemberRes) Reset() {
+	*x = RemoveGroupMemberRes{}
+	mi := &file_group_rpc_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveGroupMemberRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveGroupMemberRes) ProtoMessage() {}
+
+func (x *RemoveGroupMemberRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveGroupMemberRes.ProtoReflect.Descriptor instead.
+func (*RemoveGroupMemberRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *RemoveGroupMemberRes) GetMemberVersion() int64 {
+	if x != nil {
+		return x.MemberVersion
+	}
+	return 0
+}
+
+type GroupItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                // uint64 记录 ID
+	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`        // string 群组 ID
+	Type          int32                  `protobuf:"varint,3,opt,name=type,proto3" json:"type,omitempty"`                            // int32 群类型
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`                           // string 群名称
+	Avatar        string                 `protobuf:"bytes,5,opt,name=avatar,proto3" json:"avatar,omitempty"`                         // string 群头像
+	CreatorId     string                 `protobuf:"bytes,6,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`  // string 创建者 ID
+	Notice        string                 `protobuf:"bytes,7,opt,name=notice,proto3" json:"notice,omitempty"`                         // string 群公告
+	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`                        // int32 群状态
+	MuteAll       bool                   `protobuf:"varint,9,opt,name=mute_all,json=muteAll,proto3" json:"mute_all,omitempty"`       // bool 是否全员禁言
+	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // string 创建时间 RFC3339
+	UpdatedAt     string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // string 更新时间 RFC3339
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GroupItem) Reset() {
+	*x = GroupItem{}
+	mi := &file_group_rpc_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GroupItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupItem) ProtoMessage() {}
+
+func (x *GroupItem) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupItem.ProtoReflect.Descriptor instead.
+func (*GroupItem) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GroupItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GroupItem) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupItem) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *GroupItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *GroupItem) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *GroupItem) GetCreatorId() string {
+	if x != nil {
+		return x.CreatorId
+	}
+	return ""
+}
+
+func (x *GroupItem) GetNotice() string {
+	if x != nil {
+		return x.Notice
+	}
+	return ""
+}
+
+func (x *GroupItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *GroupItem) GetMuteAll() bool {
+	if x != nil {
+		return x.MuteAll
+	}
+	return false
+}
+
+func (x *GroupItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *GroupItem) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListGroupsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                         // int32 页码
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // int32 每页条数
+	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`                     // int32 状态筛选，0 表示全部
+	Type          int32                  `protobuf:"varint,4,opt,name=type,proto3" json:"type,omitempty"`                         // int32 类型筛选，0 表示全部
+	Keywords      string                 `protobuf:"bytes,5,opt,name=keywords,proto3" json:"keywords,omitempty"`                  // string 群名关键词，可选
+	Id            uint64                 `protobuf:"varint,6,opt,name=id,proto3" json:"id,omitempty"`                             // uint64 记录 ID，可选
+	GroupId       string                 `protobuf:"bytes,7,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`     // string 业务群组 ID，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupsReq) Reset() {
+	*x = ListGroupsReq{}
+	mi := &file_group_rpc_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupsReq) ProtoMessage() {}
+
+func (x *ListGroupsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupsReq.ProtoReflect.Descriptor instead.
+func (*ListGroupsReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ListGroupsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListGroupsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListGroupsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListGroupsReq) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *ListGroupsReq) GetKeywords() string {
+	if x != nil {
+		return x.Keywords
+	}
+	return ""
+}
+
+func (x *ListGroupsReq) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ListGroupsReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+type ListGroupsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
+	List          []*GroupItem           `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 群组列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupsRes) Reset() {
+	*x = ListGroupsRes{}
+	mi := &file_group_rpc_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupsRes) ProtoMessage() {}
+
+func (x *ListGroupsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupsRes.ProtoReflect.Descriptor instead.
+func (*ListGroupsRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListGroupsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListGroupsRes) GetList() []*GroupItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+type UpdateGroupReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                // uint64 记录 ID
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                           // string 群名称，空表示不修改
+	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`                         // string 群头像，空表示不修改
+	Notice        string                 `protobuf:"bytes,4,opt,name=notice,proto3" json:"notice,omitempty"`                         // string 群公告，空表示不修改
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                        // int32 群状态，0 表示不修改
+	MuteAll       *bool                  `protobuf:"varint,6,opt,name=mute_all,json=muteAll,proto3,oneof" json:"mute_all,omitempty"` // bool 全员禁言，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateGroupReq) Reset() {
+	*x = UpdateGroupReq{}
+	mi := &file_group_rpc_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateGroupReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateGroupReq) ProtoMessage() {}
+
+func (x *UpdateGroupReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateGroupReq.ProtoReflect.Descriptor instead.
+func (*UpdateGroupReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *UpdateGroupReq) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateGroupReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *UpdateGroupReq) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *UpdateGroupReq) GetNotice() string {
+	if x != nil {
+		return x.Notice
+	}
+	return ""
+}
+
+func (x *UpdateGroupReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UpdateGroupReq) GetMuteAll() bool {
+	if x != nil && x.MuteAll != nil {
+		return *x.MuteAll
+	}
+	return false
+}
+
+type UpdateGroupRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateGroupRes) Reset() {
+	*x = UpdateGroupRes{}
+	mi := &file_group_rpc_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateGroupRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateGroupRes) ProtoMessage() {}
+
+func (x *UpdateGroupRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateGroupRes.ProtoReflect.Descriptor instead.
+func (*UpdateGroupRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{29}
+}
+
+type GroupMemberItem struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                                           // uint64 记录 ID
+	GroupId            string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`                                   // string 群组 ID
+	UserId             string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                                      // string 用户 ID
+	Role               int32                  `protobuf:"varint,4,opt,name=role,proto3" json:"role,omitempty"`                                                       // int32 成员角色
+	Status             int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                                                   // int32 成员状态
+	ProhibitionMinutes int32                  `protobuf:"varint,6,opt,name=prohibition_minutes,json=prohibitionMinutes,proto3" json:"prohibition_minutes,omitempty"` // int32 禁言剩余分钟，0 表示未禁言
+	CreatedAt          string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`                             // string 创建时间 RFC3339
+	UpdatedAt          string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`                             // string 更新时间 RFC3339
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GroupMemberItem) Reset() {
+	*x = GroupMemberItem{}
+	mi := &file_group_rpc_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GroupMemberItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupMemberItem) ProtoMessage() {}
+
+func (x *GroupMemberItem) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupMemberItem.ProtoReflect.Descriptor instead.
+func (*GroupMemberItem) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GroupMemberItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GroupMemberItem) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupMemberItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GroupMemberItem) GetRole() int32 {
+	if x != nil {
+		return x.Role
+	}
+	return 0
+}
+
+func (x *GroupMemberItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *GroupMemberItem) GetProhibitionMinutes() int32 {
+	if x != nil {
+		return x.ProhibitionMinutes
+	}
+	return 0
+}
+
+func (x *GroupMemberItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *GroupMemberItem) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListGroupMembersReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`     // string 群组 ID
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // int32 页码
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // int32 每页条数
+	Role          int32                  `protobuf:"varint,4,opt,name=role,proto3" json:"role,omitempty"`                         // int32 角色筛选，0 表示全部
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                     // int32 状态筛选，0 表示全部
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupMembersReq) Reset() {
+	*x = ListGroupMembersReq{}
+	mi := &file_group_rpc_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupMembersReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupMembersReq) ProtoMessage() {}
+
+func (x *ListGroupMembersReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupMembersReq.ProtoReflect.Descriptor instead.
+func (*ListGroupMembersReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ListGroupMembersReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *ListGroupMembersReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListGroupMembersReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListGroupMembersReq) GetRole() int32 {
+	if x != nil {
+		return x.Role
+	}
+	return 0
+}
+
+func (x *ListGroupMembersReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type ListGroupMembersRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
+	List          []*GroupMemberItem     `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 成员列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupMembersRes) Reset() {
+	*x = ListGroupMembersRes{}
+	mi := &file_group_rpc_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupMembersRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupMembersRes) ProtoMessage() {}
+
+func (x *ListGroupMembersRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupMembersRes.ProtoReflect.Descriptor instead.
+func (*ListGroupMembersRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ListGroupMembersRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListGroupMembersRes) GetList() []*GroupMemberItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+type UpdateGroupMemberReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                            // uint64 成员记录 ID
+	Role          *int32                 `protobuf:"varint,2,opt,name=role,proto3,oneof" json:"role,omitempty"`                                  // int32 角色，可选
+	MuteMinutes   *int32                 `protobuf:"varint,3,opt,name=mute_minutes,json=muteMinutes,proto3,oneof" json:"mute_minutes,omitempty"` // int32 禁言分钟，0 解除，可选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateGroupMemberReq) Reset() {
+	*x = UpdateGroupMemberReq{}
+	mi := &file_group_rpc_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateGroupMemberReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateGroupMemberReq) ProtoMessage() {}
+
+func (x *UpdateGroupMemberReq) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateGroupMemberReq.ProtoReflect.Descriptor instead.
+func (*UpdateGroupMemberReq) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *UpdateGroupMemberReq) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateGroupMemberReq) GetRole() int32 {
+	if x != nil && x.Role != nil {
+		return *x.Role
+	}
+	return 0
+}
+
+func (x *UpdateGroupMemberReq) GetMuteMinutes() int32 {
+	if x != nil && x.MuteMinutes != nil {
+		return *x.MuteMinutes
+	}
+	return 0
+}
+
+type UpdateGroupMemberRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateGroupMemberRes) Reset() {
+	*x = UpdateGroupMemberRes{}
+	mi := &file_group_rpc_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateGroupMemberRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateGroupMemberRes) ProtoMessage() {}
+
+func (x *UpdateGroupMemberRes) ProtoReflect() protoreflect.Message {
+	mi := &file_group_rpc_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateGroupMemberRes.ProtoReflect.Descriptor instead.
+func (*UpdateGroupMemberRes) Descriptor() ([]byte, []int) {
+	return file_group_rpc_proto_rawDescGZIP(), []int{34}
+}
+
 var File_group_rpc_proto protoreflect.FileDescriptor
 
 const file_group_rpc_proto_rawDesc = "" +
@@ -1113,7 +2154,92 @@ const file_group_rpc_proto_rawDesc = "" +
 	"\bversions\x18\x01 \x03(\v2\".group_rpc.GroupRequestVersionItemR\bversions\"M\n" +
 	"\x17GroupRequestVersionItem\x12\x18\n" +
 	"\agroupID\x18\x01 \x01(\tR\agroupID\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x03R\aversion2\xbc\x05\n" +
+	"\aversion\x18\x02 \x01(\x03R\aversion\"L\n" +
+	"\x16CanSendGroupMessageReq\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"J\n" +
+	"\x16CanSendGroupMessageRes\x12\x18\n" +
+	"\aallowed\x18\x01 \x01(\bR\aallowed\x12\x16\n" +
+	"\x06reason\x18\x02 \x01(\tR\x06reason\"h\n" +
+	"\x11AddGroupMemberReq\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
+	"\voperated_by\x18\x03 \x01(\tR\n" +
+	"operatedBy\"P\n" +
+	"\x11AddGroupMemberRes\x12\x14\n" +
+	"\x05added\x18\x01 \x01(\bR\x05added\x12%\n" +
+	"\x0emember_version\x18\x02 \x01(\x03R\rmemberVersion\"\x7f\n" +
+	"\x14RemoveGroupMemberReq\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
+	"\voperated_by\x18\x03 \x01(\tR\n" +
+	"operatedBy\x12\x12\n" +
+	"\x04kick\x18\x04 \x01(\bR\x04kick\"=\n" +
+	"\x14RemoveGroupMemberRes\x12%\n" +
+	"\x0emember_version\x18\x01 \x01(\x03R\rmemberVersion\"\xa0\x02\n" +
+	"\tGroupItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x19\n" +
+	"\bgroup_id\x18\x02 \x01(\tR\agroupId\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\x05R\x04type\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12\x16\n" +
+	"\x06avatar\x18\x05 \x01(\tR\x06avatar\x12\x1d\n" +
+	"\n" +
+	"creator_id\x18\x06 \x01(\tR\tcreatorId\x12\x16\n" +
+	"\x06notice\x18\a \x01(\tR\x06notice\x12\x16\n" +
+	"\x06status\x18\b \x01(\x05R\x06status\x12\x19\n" +
+	"\bmute_all\x18\t \x01(\bR\amuteAll\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\n" +
+	" \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"\xb3\x01\n" +
+	"\rListGroupsReq\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\x05R\x04type\x12\x1a\n" +
+	"\bkeywords\x18\x05 \x01(\tR\bkeywords\x12\x0e\n" +
+	"\x02id\x18\x06 \x01(\x04R\x02id\x12\x19\n" +
+	"\bgroup_id\x18\a \x01(\tR\agroupId\"O\n" +
+	"\rListGroupsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12(\n" +
+	"\x04list\x18\x02 \x03(\v2\x14.group_rpc.GroupItemR\x04list\"\xab\x01\n" +
+	"\x0eUpdateGroupReq\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
+	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x12\x16\n" +
+	"\x06notice\x18\x04 \x01(\tR\x06notice\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x1e\n" +
+	"\bmute_all\x18\x06 \x01(\bH\x00R\amuteAll\x88\x01\x01B\v\n" +
+	"\t_mute_all\"\x10\n" +
+	"\x0eUpdateGroupRes\"\xf0\x01\n" +
+	"\x0fGroupMemberItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x19\n" +
+	"\bgroup_id\x18\x02 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\x05R\x04role\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12/\n" +
+	"\x13prohibition_minutes\x18\x06 \x01(\x05R\x12prohibitionMinutes\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x8d\x01\n" +
+	"\x13ListGroupMembersReq\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\x05R\x04role\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\"[\n" +
+	"\x13ListGroupMembersRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12.\n" +
+	"\x04list\x18\x02 \x03(\v2\x1a.group_rpc.GroupMemberItemR\x04list\"\x81\x01\n" +
+	"\x14UpdateGroupMemberReq\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x17\n" +
+	"\x04role\x18\x02 \x01(\x05H\x00R\x04role\x88\x01\x01\x12&\n" +
+	"\fmute_minutes\x18\x03 \x01(\x05H\x01R\vmuteMinutes\x88\x01\x01B\a\n" +
+	"\x05_roleB\x0f\n" +
+	"\r_mute_minutes\"\x16\n" +
+	"\x14UpdateGroupMemberRes2\xf0\t\n" +
 	"\x05group\x12O\n" +
 	"\x0fGetGroupMembers\x12\x1d.group_rpc.GetGroupMembersReq\x1a\x1d.group_rpc.GetGroupMembersRes\x12[\n" +
 	"\x13GetUserGroupMembers\x12!.group_rpc.GetUserGroupMembersReq\x1a!.group_rpc.GetUserGroupMembersRes\x12O\n" +
@@ -1121,7 +2247,15 @@ const file_group_rpc_proto_rawDesc = "" +
 	"\x12GetGroupsListByIds\x12 .group_rpc.GetGroupsListByIdsReq\x1a .group_rpc.GetGroupsListByIdsRes\x12j\n" +
 	"\x18GetGroupMembersListByIds\x12&.group_rpc.GetGroupMembersListByIdsReq\x1a&.group_rpc.GetGroupMembersListByIdsRes\x12y\n" +
 	"\x1dGetGroupJoinRequestsListByIds\x12+.group_rpc.GetGroupJoinRequestsListByIdsReq\x1a+.group_rpc.GetGroupJoinRequestsListByIdsRes\x12s\n" +
-	"\x1bGetUserGroupRequestVersions\x12).group_rpc.GetUserGroupRequestVersionsReq\x1a).group_rpc.GetUserGroupRequestVersionsResB\rZ\v./group_rpcb\x06proto3"
+	"\x1bGetUserGroupRequestVersions\x12).group_rpc.GetUserGroupRequestVersionsReq\x1a).group_rpc.GetUserGroupRequestVersionsRes\x12[\n" +
+	"\x13CanSendGroupMessage\x12!.group_rpc.CanSendGroupMessageReq\x1a!.group_rpc.CanSendGroupMessageRes\x12L\n" +
+	"\x0eAddGroupMember\x12\x1c.group_rpc.AddGroupMemberReq\x1a\x1c.group_rpc.AddGroupMemberRes\x12U\n" +
+	"\x11RemoveGroupMember\x12\x1f.group_rpc.RemoveGroupMemberReq\x1a\x1f.group_rpc.RemoveGroupMemberRes\x12@\n" +
+	"\n" +
+	"ListGroups\x12\x18.group_rpc.ListGroupsReq\x1a\x18.group_rpc.ListGroupsRes\x12C\n" +
+	"\vUpdateGroup\x12\x19.group_rpc.UpdateGroupReq\x1a\x19.group_rpc.UpdateGroupRes\x12R\n" +
+	"\x10ListGroupMembers\x12\x1e.group_rpc.ListGroupMembersReq\x1a\x1e.group_rpc.ListGroupMembersRes\x12U\n" +
+	"\x11UpdateGroupMember\x12\x1f.group_rpc.UpdateGroupMemberReq\x1a\x1f.group_rpc.UpdateGroupMemberResB\rZ\v./group_rpcb\x06proto3"
 
 var (
 	file_group_rpc_proto_rawDescOnce sync.Once
@@ -1135,7 +2269,7 @@ func file_group_rpc_proto_rawDescGZIP() []byte {
 	return file_group_rpc_proto_rawDescData
 }
 
-var file_group_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_group_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_group_rpc_proto_goTypes = []any{
 	(*GetGroupMembersReq)(nil),               // 0: group_rpc.GetGroupMembersReq
 	(*GroupMemberInfo)(nil),                  // 1: group_rpc.GroupMemberInfo
@@ -1156,6 +2290,22 @@ var file_group_rpc_proto_goTypes = []any{
 	(*GetUserGroupRequestVersionsReq)(nil),   // 16: group_rpc.GetUserGroupRequestVersionsReq
 	(*GetUserGroupRequestVersionsRes)(nil),   // 17: group_rpc.GetUserGroupRequestVersionsRes
 	(*GroupRequestVersionItem)(nil),          // 18: group_rpc.GroupRequestVersionItem
+	(*CanSendGroupMessageReq)(nil),           // 19: group_rpc.CanSendGroupMessageReq
+	(*CanSendGroupMessageRes)(nil),           // 20: group_rpc.CanSendGroupMessageRes
+	(*AddGroupMemberReq)(nil),                // 21: group_rpc.AddGroupMemberReq
+	(*AddGroupMemberRes)(nil),                // 22: group_rpc.AddGroupMemberRes
+	(*RemoveGroupMemberReq)(nil),             // 23: group_rpc.RemoveGroupMemberReq
+	(*RemoveGroupMemberRes)(nil),             // 24: group_rpc.RemoveGroupMemberRes
+	(*GroupItem)(nil),                        // 25: group_rpc.GroupItem
+	(*ListGroupsReq)(nil),                    // 26: group_rpc.ListGroupsReq
+	(*ListGroupsRes)(nil),                    // 27: group_rpc.ListGroupsRes
+	(*UpdateGroupReq)(nil),                   // 28: group_rpc.UpdateGroupReq
+	(*UpdateGroupRes)(nil),                   // 29: group_rpc.UpdateGroupRes
+	(*GroupMemberItem)(nil),                  // 30: group_rpc.GroupMemberItem
+	(*ListGroupMembersReq)(nil),              // 31: group_rpc.ListGroupMembersReq
+	(*ListGroupMembersRes)(nil),              // 32: group_rpc.ListGroupMembersRes
+	(*UpdateGroupMemberReq)(nil),             // 33: group_rpc.UpdateGroupMemberReq
+	(*UpdateGroupMemberRes)(nil),             // 34: group_rpc.UpdateGroupMemberRes
 }
 var file_group_rpc_proto_depIdxs = []int32{
 	1,  // 0: group_rpc.GetGroupMembersRes.members:type_name -> group_rpc.GroupMemberInfo
@@ -1163,25 +2313,41 @@ var file_group_rpc_proto_depIdxs = []int32{
 	11, // 2: group_rpc.GetGroupMembersListByIdsRes.members:type_name -> group_rpc.GroupMemberListById
 	14, // 3: group_rpc.GetGroupJoinRequestsListByIdsRes.requests:type_name -> group_rpc.GroupJoinRequestListById
 	18, // 4: group_rpc.GetUserGroupRequestVersionsRes.versions:type_name -> group_rpc.GroupRequestVersionItem
-	0,  // 5: group_rpc.group.GetGroupMembers:input_type -> group_rpc.GetGroupMembersReq
-	3,  // 6: group_rpc.group.GetUserGroupMembers:input_type -> group_rpc.GetUserGroupMembersReq
-	5,  // 7: group_rpc.group.GetUserGroupIDs:input_type -> group_rpc.GetUserGroupIDsReq
-	7,  // 8: group_rpc.group.GetGroupsListByIds:input_type -> group_rpc.GetGroupsListByIdsReq
-	10, // 9: group_rpc.group.GetGroupMembersListByIds:input_type -> group_rpc.GetGroupMembersListByIdsReq
-	13, // 10: group_rpc.group.GetGroupJoinRequestsListByIds:input_type -> group_rpc.GetGroupJoinRequestsListByIdsReq
-	16, // 11: group_rpc.group.GetUserGroupRequestVersions:input_type -> group_rpc.GetUserGroupRequestVersionsReq
-	2,  // 12: group_rpc.group.GetGroupMembers:output_type -> group_rpc.GetGroupMembersRes
-	4,  // 13: group_rpc.group.GetUserGroupMembers:output_type -> group_rpc.GetUserGroupMembersRes
-	6,  // 14: group_rpc.group.GetUserGroupIDs:output_type -> group_rpc.GetUserGroupIDsRes
-	9,  // 15: group_rpc.group.GetGroupsListByIds:output_type -> group_rpc.GetGroupsListByIdsRes
-	12, // 16: group_rpc.group.GetGroupMembersListByIds:output_type -> group_rpc.GetGroupMembersListByIdsRes
-	15, // 17: group_rpc.group.GetGroupJoinRequestsListByIds:output_type -> group_rpc.GetGroupJoinRequestsListByIdsRes
-	17, // 18: group_rpc.group.GetUserGroupRequestVersions:output_type -> group_rpc.GetUserGroupRequestVersionsRes
-	12, // [12:19] is the sub-list for method output_type
-	5,  // [5:12] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	25, // 5: group_rpc.ListGroupsRes.list:type_name -> group_rpc.GroupItem
+	30, // 6: group_rpc.ListGroupMembersRes.list:type_name -> group_rpc.GroupMemberItem
+	0,  // 7: group_rpc.group.GetGroupMembers:input_type -> group_rpc.GetGroupMembersReq
+	3,  // 8: group_rpc.group.GetUserGroupMembers:input_type -> group_rpc.GetUserGroupMembersReq
+	5,  // 9: group_rpc.group.GetUserGroupIDs:input_type -> group_rpc.GetUserGroupIDsReq
+	7,  // 10: group_rpc.group.GetGroupsListByIds:input_type -> group_rpc.GetGroupsListByIdsReq
+	10, // 11: group_rpc.group.GetGroupMembersListByIds:input_type -> group_rpc.GetGroupMembersListByIdsReq
+	13, // 12: group_rpc.group.GetGroupJoinRequestsListByIds:input_type -> group_rpc.GetGroupJoinRequestsListByIdsReq
+	16, // 13: group_rpc.group.GetUserGroupRequestVersions:input_type -> group_rpc.GetUserGroupRequestVersionsReq
+	19, // 14: group_rpc.group.CanSendGroupMessage:input_type -> group_rpc.CanSendGroupMessageReq
+	21, // 15: group_rpc.group.AddGroupMember:input_type -> group_rpc.AddGroupMemberReq
+	23, // 16: group_rpc.group.RemoveGroupMember:input_type -> group_rpc.RemoveGroupMemberReq
+	26, // 17: group_rpc.group.ListGroups:input_type -> group_rpc.ListGroupsReq
+	28, // 18: group_rpc.group.UpdateGroup:input_type -> group_rpc.UpdateGroupReq
+	31, // 19: group_rpc.group.ListGroupMembers:input_type -> group_rpc.ListGroupMembersReq
+	33, // 20: group_rpc.group.UpdateGroupMember:input_type -> group_rpc.UpdateGroupMemberReq
+	2,  // 21: group_rpc.group.GetGroupMembers:output_type -> group_rpc.GetGroupMembersRes
+	4,  // 22: group_rpc.group.GetUserGroupMembers:output_type -> group_rpc.GetUserGroupMembersRes
+	6,  // 23: group_rpc.group.GetUserGroupIDs:output_type -> group_rpc.GetUserGroupIDsRes
+	9,  // 24: group_rpc.group.GetGroupsListByIds:output_type -> group_rpc.GetGroupsListByIdsRes
+	12, // 25: group_rpc.group.GetGroupMembersListByIds:output_type -> group_rpc.GetGroupMembersListByIdsRes
+	15, // 26: group_rpc.group.GetGroupJoinRequestsListByIds:output_type -> group_rpc.GetGroupJoinRequestsListByIdsRes
+	17, // 27: group_rpc.group.GetUserGroupRequestVersions:output_type -> group_rpc.GetUserGroupRequestVersionsRes
+	20, // 28: group_rpc.group.CanSendGroupMessage:output_type -> group_rpc.CanSendGroupMessageRes
+	22, // 29: group_rpc.group.AddGroupMember:output_type -> group_rpc.AddGroupMemberRes
+	24, // 30: group_rpc.group.RemoveGroupMember:output_type -> group_rpc.RemoveGroupMemberRes
+	27, // 31: group_rpc.group.ListGroups:output_type -> group_rpc.ListGroupsRes
+	29, // 32: group_rpc.group.UpdateGroup:output_type -> group_rpc.UpdateGroupRes
+	32, // 33: group_rpc.group.ListGroupMembers:output_type -> group_rpc.ListGroupMembersRes
+	34, // 34: group_rpc.group.UpdateGroupMember:output_type -> group_rpc.UpdateGroupMemberRes
+	21, // [21:35] is the sub-list for method output_type
+	7,  // [7:21] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_group_rpc_proto_init() }
@@ -1189,13 +2355,15 @@ func file_group_rpc_proto_init() {
 	if File_group_rpc_proto != nil {
 		return
 	}
+	file_group_rpc_proto_msgTypes[28].OneofWrappers = []any{}
+	file_group_rpc_proto_msgTypes[33].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_group_rpc_proto_rawDesc), len(file_group_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

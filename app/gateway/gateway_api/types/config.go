@@ -8,9 +8,10 @@ type Config struct {
 	Etcd       string
 	Log        logx.LogConf
 	Prometheus PrometheusConfig
-	Limit      LimitConfig
-	Auth       AuthConfig
-	WhiteList  []string
+	Limit          LimitConfig
+	Auth           AuthConfig
+	PublicList     []string `json:",optional"` // Gateway 不鉴权（含 *_public）
+	CustomAuthList []string `json:",optional"` // 透传，由下游服务 middleware 鉴权
 }
 
 type AuthConfig struct {

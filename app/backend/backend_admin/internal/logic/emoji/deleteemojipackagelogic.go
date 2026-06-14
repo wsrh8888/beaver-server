@@ -6,10 +6,9 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/emoji/emoji_models"
+	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"gorm.io/gorm"
 )
 
 type DeleteEmojiPackageLogic struct {
@@ -18,34 +17,26 @@ type DeleteEmojiPackageLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 删除表情包集合
 func NewDeleteEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteEmojiPackageLogic {
-	return &DeleteEmojiPackageLogic{
-		Logger: logx.WithContext(ctx),
-		ctx:    ctx,
-		svcCtx: svcCtx,
-	}
+	return &DeleteEmojiPackageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
+// DeleteEmojiPackage 管理后台：删除表情包。
+// admin 职责：校验 packageId，映射为 SaveEmojiPackage.delete=true。
+// RPC 职责：领域删除，不与 HTTP 路由 1:1。
 func (l *DeleteEmojiPackageLogic) DeleteEmojiPackage(req *types.DeleteEmojiPackageReq) (resp *types.DeleteEmojiPackageRes, err error) {
-	// 检查表情包是否存在
-	var pkg emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("package_id = ?", req.PackageId).First(&pkg).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("表情包不存在: %s", req.PackageId)
-			return nil, errors.New("表情包不存在")
-		}
-		logx.Errorf("查询表情包失败: %v", err)
-		return nil, errors.New("查询表情包失败")
+	if req.PackageId == "" {
+		return nil, errors.New("表情包ID不能为空")
 	}
 
-	// 使用逻辑删除
-	err = l.svcCtx.DB.Delete(&pkg).Error
+	del := true
+	_, err = l.svcCtx.EmojiRpc.SaveEmojiPackage(l.ctx, &emoji_rpc.SaveEmojiPackageReq{
+		PackageId: req.PackageId,
+		Delete:    &del,
+	})
 	if err != nil {
-		logx.Errorf("删除表情包失败: %v", err)
-		return nil, errors.New("删除表情包失败")
+		l.Errorf("删除表情包失败: %v", err)
+		return nil, err
 	}
-
 	return &types.DeleteEmojiPackageRes{}, nil
 }
