@@ -34,6 +34,8 @@ type (
 	GetChatMessageRes                       = chat_rpc.GetChatMessageRes
 	GetConversationsListByIdsReq            = chat_rpc.GetConversationsListByIdsReq
 	GetConversationsListByIdsRes            = chat_rpc.GetConversationsListByIdsRes
+	GetSyncMessageMediasReq                 = chat_rpc.GetSyncMessageMediasReq
+	GetSyncMessageMediasRes                 = chat_rpc.GetSyncMessageMediasRes
 	GetUserConversationSettingsListByIdsReq = chat_rpc.GetUserConversationSettingsListByIdsReq
 	GetUserConversationSettingsListByIdsRes = chat_rpc.GetUserConversationSettingsListByIdsRes
 	GetUserConversationVersionsReq          = chat_rpc.GetUserConversationVersionsReq
@@ -84,6 +86,7 @@ type (
 		DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
 		SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
 		GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error)
+		GetSyncMessageMedias(ctx context.Context, in *GetSyncMessageMediasReq, opts ...grpc.CallOption) (*GetSyncMessageMediasRes, error)
 		ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error)
 		UpdateChatMessages(ctx context.Context, in *UpdateChatMessagesReq, opts ...grpc.CallOption) (*UpdateChatMessagesRes, error)
 		ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error)
@@ -163,6 +166,11 @@ func (m *defaultChat) SendNotificationMessage(ctx context.Context, in *SendNotif
 func (m *defaultChat) GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error) {
 	client := chat_rpc.NewChatClient(m.cli.Conn())
 	return client.GetChatMessage(ctx, in, opts...)
+}
+
+func (m *defaultChat) GetSyncMessageMedias(ctx context.Context, in *GetSyncMessageMediasReq, opts ...grpc.CallOption) (*GetSyncMessageMediasRes, error) {
+	client := chat_rpc.NewChatClient(m.cli.Conn())
+	return client.GetSyncMessageMedias(ctx, in, opts...)
 }
 
 func (m *defaultChat) ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error) {

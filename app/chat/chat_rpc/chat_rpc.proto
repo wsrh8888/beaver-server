@@ -412,6 +412,16 @@ message UpdateChatMessagesRes {
   int64 affected_count = 1; // int64 影响条数
 }
 
+message GetSyncMessageMediasReq {
+  string user_id = 1; // string 用户ID
+  int64 since = 2; // int64 从这个时间戳之后开始同步（秒）
+}
+
+message GetSyncMessageMediasRes {
+  repeated string message_ids = 1; // array 已标记媒体状态的消息ID列表
+  int64 server_timestamp = 2; // int64 服务端同步时间戳（秒）
+}
+
 // 定义chat_rpc服务
 service Chat {
     rpc SendMsg(SendMsgReq) returns (SendMsgRes); //发送消息
@@ -427,6 +437,7 @@ service Chat {
     rpc DissolveConversation(DissolveConversationReq) returns (DissolveConversationRes); //解散会话
     rpc SendNotificationMessage(SendNotificationMessageReq) returns (SendNotificationMessageRes); //发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
     rpc GetChatMessage(GetChatMessageReq) returns (GetChatMessageRes); //按消息ID查询消息内容
+    rpc GetSyncMessageMedias(GetSyncMessageMediasReq) returns (GetSyncMessageMediasRes); //同步消息媒体状态（语音已听等）
 
     rpc ListChatMessages(ListChatMessagesReq) returns (ListChatMessagesRes);
     rpc UpdateChatMessages(UpdateChatMessagesReq) returns (UpdateChatMessagesRes);

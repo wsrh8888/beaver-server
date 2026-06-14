@@ -32,6 +32,7 @@ const (
 	Chat_DissolveConversation_FullMethodName                 = "/chat_rpc.Chat/DissolveConversation"
 	Chat_SendNotificationMessage_FullMethodName              = "/chat_rpc.Chat/SendNotificationMessage"
 	Chat_GetChatMessage_FullMethodName                       = "/chat_rpc.Chat/GetChatMessage"
+	Chat_GetSyncMessageMedias_FullMethodName                 = "/chat_rpc.Chat/GetSyncMessageMedias"
 	Chat_ListChatMessages_FullMethodName                     = "/chat_rpc.Chat/ListChatMessages"
 	Chat_UpdateChatMessages_FullMethodName                   = "/chat_rpc.Chat/UpdateChatMessages"
 	Chat_ListConversations_FullMethodName                    = "/chat_rpc.Chat/ListConversations"
@@ -56,6 +57,7 @@ type ChatClient interface {
 	DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error)
 	SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error)
 	GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error)
+	GetSyncMessageMedias(ctx context.Context, in *GetSyncMessageMediasReq, opts ...grpc.CallOption) (*GetSyncMessageMediasRes, error)
 	ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error)
 	UpdateChatMessages(ctx context.Context, in *UpdateChatMessagesReq, opts ...grpc.CallOption) (*UpdateChatMessagesRes, error)
 	ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error)
@@ -199,6 +201,16 @@ func (c *chatClient) GetChatMessage(ctx context.Context, in *GetChatMessageReq, 
 	return out, nil
 }
 
+func (c *chatClient) GetSyncMessageMedias(ctx context.Context, in *GetSyncMessageMediasReq, opts ...grpc.CallOption) (*GetSyncMessageMediasRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSyncMessageMediasRes)
+	err := c.cc.Invoke(ctx, Chat_GetSyncMessageMedias_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *chatClient) ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListChatMessagesRes)
@@ -248,6 +260,7 @@ type ChatServer interface {
 	DissolveConversation(context.Context, *DissolveConversationReq) (*DissolveConversationRes, error)
 	SendNotificationMessage(context.Context, *SendNotificationMessageReq) (*SendNotificationMessageRes, error)
 	GetChatMessage(context.Context, *GetChatMessageReq) (*GetChatMessageRes, error)
+	GetSyncMessageMedias(context.Context, *GetSyncMessageMediasReq) (*GetSyncMessageMediasRes, error)
 	ListChatMessages(context.Context, *ListChatMessagesReq) (*ListChatMessagesRes, error)
 	UpdateChatMessages(context.Context, *UpdateChatMessagesReq) (*UpdateChatMessagesRes, error)
 	ListConversations(context.Context, *ListConversationsReq) (*ListConversationsRes, error)
@@ -299,6 +312,9 @@ func (UnimplementedChatServer) SendNotificationMessage(context.Context, *SendNot
 }
 func (UnimplementedChatServer) GetChatMessage(context.Context, *GetChatMessageReq) (*GetChatMessageRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChatMessage not implemented")
+}
+func (UnimplementedChatServer) GetSyncMessageMedias(context.Context, *GetSyncMessageMediasReq) (*GetSyncMessageMediasRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSyncMessageMedias not implemented")
 }
 func (UnimplementedChatServer) ListChatMessages(context.Context, *ListChatMessagesReq) (*ListChatMessagesRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListChatMessages not implemented")
@@ -564,6 +580,24 @@ func _Chat_GetChatMessage_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chat_GetSyncMessageMedias_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSyncMessageMediasReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetSyncMessageMedias(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_GetSyncMessageMedias_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetSyncMessageMedias(ctx, req.(*GetSyncMessageMediasReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Chat_ListChatMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListChatMessagesReq)
 	if err := dec(in); err != nil {
@@ -676,6 +710,10 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChatMessage",
 			Handler:    _Chat_GetChatMessage_Handler,
+		},
+		{
+			MethodName: "GetSyncMessageMedias",
+			Handler:    _Chat_GetSyncMessageMedias_Handler,
 		},
 		{
 			MethodName: "ListChatMessages",
