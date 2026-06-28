@@ -14,21 +14,9 @@ import (
 )
 
 type (
-	AdminBucketItem         = platform_rpc.AdminBucketItem
-	AdminCreateBucketReq    = platform_rpc.AdminCreateBucketReq
-	AdminCreateBucketRes    = platform_rpc.AdminCreateBucketRes
-	AdminDeleteBucketReq    = platform_rpc.AdminDeleteBucketReq
-	AdminDeleteBucketRes    = platform_rpc.AdminDeleteBucketRes
-	AdminEventItem          = platform_rpc.AdminEventItem
-	AdminGetBucketListReq   = platform_rpc.AdminGetBucketListReq
-	AdminGetBucketListRes   = platform_rpc.AdminGetBucketListRes
-	AdminGetEventListReq    = platform_rpc.AdminGetEventListReq
-	AdminGetEventListRes    = platform_rpc.AdminGetEventListRes
 	AdminLogItem            = platform_rpc.AdminLogItem
 	AdminQueryLogsReq       = platform_rpc.AdminQueryLogsReq
 	AdminQueryLogsRes       = platform_rpc.AdminQueryLogsRes
-	AdminUpdateBucketReq    = platform_rpc.AdminUpdateBucketReq
-	AdminUpdateBucketRes    = platform_rpc.AdminUpdateBucketRes
 	AppItem                 = platform_rpc.AppItem
 	AppVersionBrief         = platform_rpc.AppVersionBrief
 	AppVersionsArchItem     = platform_rpc.AppVersionsArchItem
@@ -79,11 +67,6 @@ type (
 	VersionItem             = platform_rpc.VersionItem
 
 	Platform interface {
-		AdminGetBucketList(ctx context.Context, in *AdminGetBucketListReq, opts ...grpc.CallOption) (*AdminGetBucketListRes, error)
-		AdminCreateBucket(ctx context.Context, in *AdminCreateBucketReq, opts ...grpc.CallOption) (*AdminCreateBucketRes, error)
-		AdminUpdateBucket(ctx context.Context, in *AdminUpdateBucketReq, opts ...grpc.CallOption) (*AdminUpdateBucketRes, error)
-		AdminDeleteBucket(ctx context.Context, in *AdminDeleteBucketReq, opts ...grpc.CallOption) (*AdminDeleteBucketRes, error)
-		AdminGetEventList(ctx context.Context, in *AdminGetEventListReq, opts ...grpc.CallOption) (*AdminGetEventListRes, error)
 		AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error)
 		CreateApp(ctx context.Context, in *CreateAppReq, opts ...grpc.CallOption) (*CreateAppRes, error)
 		ListApps(ctx context.Context, in *ListAppsReq, opts ...grpc.CallOption) (*ListAppsRes, error)
@@ -116,31 +99,6 @@ func NewPlatform(cli zrpc.Client) Platform {
 	return &defaultPlatform{
 		cli: cli,
 	}
-}
-
-func (m *defaultPlatform) AdminGetBucketList(ctx context.Context, in *AdminGetBucketListReq, opts ...grpc.CallOption) (*AdminGetBucketListRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.AdminGetBucketList(ctx, in, opts...)
-}
-
-func (m *defaultPlatform) AdminCreateBucket(ctx context.Context, in *AdminCreateBucketReq, opts ...grpc.CallOption) (*AdminCreateBucketRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.AdminCreateBucket(ctx, in, opts...)
-}
-
-func (m *defaultPlatform) AdminUpdateBucket(ctx context.Context, in *AdminUpdateBucketReq, opts ...grpc.CallOption) (*AdminUpdateBucketRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.AdminUpdateBucket(ctx, in, opts...)
-}
-
-func (m *defaultPlatform) AdminDeleteBucket(ctx context.Context, in *AdminDeleteBucketReq, opts ...grpc.CallOption) (*AdminDeleteBucketRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.AdminDeleteBucket(ctx, in, opts...)
-}
-
-func (m *defaultPlatform) AdminGetEventList(ctx context.Context, in *AdminGetEventListReq, opts ...grpc.CallOption) (*AdminGetEventListRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.AdminGetEventList(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error) {

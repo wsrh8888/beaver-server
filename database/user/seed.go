@@ -1,4 +1,4 @@
-package database
+package userseed
 
 import (
 	"beaver/app/auth/auth_models"

@@ -36,24 +36,6 @@ type LogEventsReq struct {
 type LogEventsRes struct {
 }
 
-type ReportEventItem struct {
-	EventName string `json:"eventName"`
-	Action    string `json:"action"`
-	BucketID  string `json:"bucketId"`
-	Platform  string `json:"platform,optional"`
-	Timestamp int64  `json:"timestamp"`
-	DeviceID  string `json:"deviceID,optional"`
-	Data      string `json:"data,optional"`
-}
-
-type ReportEventsReq struct {
-	UserID string            `json:"userId,optional"`
-	Events []ReportEventItem `json:"events,optional"`
-}
-
-type ReportEventsRes struct {
-}
-
 type ReportVersionReq struct {
 	UserID     string `header:"Beaver-User-Id,optional"`
 	DeviceID   string `header:"deviceId"`

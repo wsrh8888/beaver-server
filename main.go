@@ -16,7 +16,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
-	"beaver/database"
+	"beaver/database/file"
+	"beaver/database/platform"
+	"beaver/database/user"
 	"flag"
 	"fmt"
 
@@ -185,7 +187,12 @@ func main() {
 			run: func(db *gorm.DB) error {
 				return db.AutoMigrate(
 					&platform_models.TrackBucket{},
-					&platform_models.TrackEvent{},
+					&platform_models.TrackEventDef{},
+					&platform_models.TrackEventCommonParam{},
+					&platform_models.TrackEventAttr{},
+					&platform_models.TrackEventReport{},
+					&platform_models.TrackEventCommonValue{},
+					&platform_models.TrackEventAttrValue{},
 					&platform_models.TrackLogger{},
 					&platform_models.FeedbackModel{},
 					&platform_models.ContentReportModel{},
@@ -238,9 +245,9 @@ func main() {
 	userDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_user?charset=utf8mb4&parseTime=True&loc=Local")
 	authDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local")
 	openDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local")
-	_ = database.InitFileData(fileDB)
-	_ = database.SeedUpdateData(platformDB)
-	if err := database.InitDefaultUser(userDB, authDB, openDB); err != nil {
+	_ = fileseed.InitDefaultFiles(fileDB)
+	_ = platform.InitPlatform(platformDB)
+	if err := userseed.InitDefaultUser(userDB, authDB, openDB); err != nil {
 		fmt.Printf("默认用户初始化失败: %v\n", err)
 		return
 	}

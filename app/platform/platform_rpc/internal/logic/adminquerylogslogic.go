@@ -35,7 +35,7 @@ func (l *AdminQueryLogsLogic) AdminQueryLogs(in *platform_rpc.AdminQueryLogsReq)
 		pageSize = 20
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.TrackLogger{}).Preload("BucketModel")
+	db := l.svcCtx.DB.Model(&platform_models.TrackLogger{})
 	db = db.Where("bucket_id = ?", in.BucketId)
 	if in.Level != "" {
 		db = db.Where("level = ?", in.Level)
@@ -63,12 +63,10 @@ func (l *AdminQueryLogsLogic) AdminQueryLogs(in *platform_rpc.AdminQueryLogsReq)
 		return nil, err
 	}
 
+	bucketName := bucketNameByID(l.svcCtx.DB, in.BucketId)
+
 	items := make([]*platform_rpc.AdminLogItem, 0, len(logs))
 	for _, logItem := range logs {
-		bucketName := ""
-		if logItem.BucketModel != nil {
-			bucketName = logItem.BucketModel.Name
-		}
 		dataStr := ""
 		if logItem.Data != nil {
 			dataBytes, _ := logItem.Data.MarshalJSON()

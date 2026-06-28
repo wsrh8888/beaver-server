@@ -1,14 +1,14 @@
-package database
+package fileseed
 
 import (
 	"beaver/app/file/file_models"
-	"log"
+	"fmt"
 
 	"gorm.io/gorm"
 )
 
-func InitFileData(db *gorm.DB) error {
-	// 初始化默认文件数据
+// InitDefaultFiles 初始化默认文件数据
+func InitDefaultFiles(db *gorm.DB) error {
 	defaultFiles := []file_models.FileModel{
 		{
 			OriginalName: "defaultUserFileName",
@@ -37,11 +37,9 @@ func InitFileData(db *gorm.DB) error {
 		}
 		if count == 0 {
 			if err := db.Create(&file).Error; err != nil {
-				log.Printf("创建默认文件失败: %v", err)
-				return err
-			} else {
-				log.Printf("创建默认文件成功: %s", file.FileKey)
+				return fmt.Errorf("创建默认文件失败: %w", err)
 			}
+			fmt.Printf("创建默认文件成功: %s\n", file.FileKey)
 		}
 	}
 

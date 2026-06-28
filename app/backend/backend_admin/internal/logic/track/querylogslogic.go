@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
@@ -42,14 +43,16 @@ func (l *QueryLogsLogic) QueryLogs(req *types.QueryLogsReq) (resp *types.QueryLo
 
 	logs := make([]types.QueryLogsItem, 0, len(rpcRes.Logs))
 	for _, item := range rpcRes.Logs {
+		var data interface{}
+		if item.Data != "" {
+			if err := json.Unmarshal([]byte(item.Data), &data); err != nil {
+				data = item.Data
+			}
+		}
 		logs = append(logs, types.QueryLogsItem{
-			Id:         uint(item.Id),
-			Level:      item.Level,
-			Data:       item.Data,
-			BucketID:   item.BucketId,
-			BucketName: item.BucketName,
-			Timestamp:  item.Timestamp,
-			CreatedAt:  item.CreatedAt,
+			Id:        uint(item.Id),
+			Timestamp: item.Timestamp,
+			Data:      data,
 		})
 	}
 
