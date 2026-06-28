@@ -304,9 +304,8 @@ This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LI
 
 #### 📄 **General Requirements**
 - **LICENSE file**: Retain the original project MIT license information
-- **Commercial Use**: Company or enterprise-level commercial applications require explicit authorization
 
-> 💡 **Friendly Note**: This project supports both personal learning and personal commercial use. For company or enterprise-level commercial applications, **explicit authorization from us is required** before any commercial use.
+> 💡 **Friendly Note**: Personal and commercial use are permitted. When developing or publishing based on this project, you **must retain project attribution** as described above.
 
 > 📖 **Detailed Legal Terms**: Please refer to [LEGAL.md](LEGAL.md) for complete legal disclaimers and usage requirements.
 

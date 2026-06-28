@@ -8,7 +8,7 @@
 
 ### 📋 重要法律声明
 
-**Beaver IM** 是一个开源的即时通讯平台，主要用于**技术学习和交流**，支持个人学习和个人商业使用。
+**Beaver IM** 是一个开源的即时通讯平台，主要用于**技术学习和交流**，支持个人及商业使用；基于本项目二次开发或发布时，须保留项目来源标注。
 
 ### 🚫 禁止用途
 
@@ -35,21 +35,21 @@
    - 使用者应获得相关方的明确授权
 
 3. **合规要求**
-   - **公司或企业级商业应用必须事先获得明确授权**
-   - 个人学习和个人商业使用无需授权
+   - 基于本项目二次开发或发布时，**必须保留项目来源标注**（见「项目来源标注要求」）
    - 必须遵守数据保护法规（如GDPR、个人信息保护法等）
    - 确保用户隐私和数据安全
 
 ### 🛡️ 合规建议
 
 #### 企业使用
-- 📋 **必须事先获得明确授权**
+- 📋 **保留项目来源标注**
 - 🔒 实施数据保护措施
 - 📞 建立合规的客服体系
 - 📊 定期进行安全审计
 
 #### 个人使用
-- ✅ 个人学习和个人商业使用无需授权
+- ✅ 个人学习、个人商业及企业商业使用均可
+- 📋 **二次开发或发布须保留项目来源标注**
 - 🔐 保护个人隐私
 - 📱 遵守平台使用条款
 - ⚠️ 发现违法行为及时举报
@@ -87,7 +87,7 @@
 
 ### 📋 Important Legal Notice
 
-**Beaver IM** is an open-source instant messaging platform primarily designed for **technical learning and communication**, supporting both personal learning and personal commercial use.
+**Beaver IM** is an open-source instant messaging platform primarily designed for **technical learning and communication**, supporting personal and commercial use; project attribution must be retained when developing or publishing derivative works.
 
 ### 🚫 Prohibited Uses
 
@@ -114,21 +114,21 @@ The following uses are strictly prohibited:
    - Users must obtain explicit authorization from relevant parties
 
 3. **Compliance Requirements**
-   - **Company or enterprise-level commercial applications require explicit authorization**
-   - Personal learning and personal commercial use require no authorization
+   - **Project attribution must be retained** when developing or publishing based on this project (see "Project Attribution Requirements")
    - Must comply with data protection regulations (GDPR, CCPA, etc.)
    - Ensure user privacy and data security
 
 ### 🛡️ Compliance Recommendations
 
 #### Enterprise Use
-- 📋 **Explicit authorization required**
+- 📋 **Retain project attribution**
 - 🔒 Implement data protection measures
 - 📞 Establish compliant customer service systems
 - 📊 Conduct regular security audits
 
 #### Personal Use
-- ✅ Personal learning and personal commercial use require no authorization
+- ✅ Personal learning, personal commercial, and enterprise commercial use are permitted
+- 📋 **Project attribution required for derivative development or publication**
 - 🔐 Protect personal privacy
 - 📱 Comply with platform terms of service
 - ⚠️ Report illegal activities promptly
