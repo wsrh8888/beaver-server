@@ -16,6 +16,8 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
+	fileseed "beaver/database/file"
+	platformseed "beaver/database/platform"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -26,11 +28,11 @@ const (
 	mysqlAddr = "127.0.0.1:3306"
 )
 
-// Migration 单库迁移配置：库名 + 表模型 + 可选种子数据
+// Migration 单库迁移配置：库名 + 表模型 + 可选默认数据初始化
 type Migration struct {
 	Name   string
 	Models []any
-	Seed   func(*gorm.DB) error
+	Init   func(*gorm.DB) error
 }
 
 // DSN 根据库名生成连接串，dbName 为空时连接实例（用于 CREATE DATABASE）
@@ -108,7 +110,7 @@ func AllMigrations() []Migration {
 		{
 			Name:   "beaver_file",
 			Models: []any{&file_models.FileModel{}},
-			Seed:   InitFileData,
+			Init:   fileseed.InitDefaultFiles,
 		},
 		{
 			Name: "beaver_notification",
@@ -147,7 +149,6 @@ func AllMigrations() []Migration {
 			Name: "beaver_platform",
 			Models: []any{
 				&platform_models.TrackBucket{},
-				&platform_models.TrackEvent{},
 				&platform_models.TrackLogger{},
 				&platform_models.FeedbackModel{},
 				&platform_models.UpdateApp{},
@@ -156,7 +157,7 @@ func AllMigrations() []Migration {
 				&platform_models.UpdateReleasePolicy{},
 				&platform_models.UpdateReport{},
 			},
-			Seed: seedPlatform,
+			Init: platformseed.InitPlatform,
 		},
 		{
 			Name: "beaver_backend",
@@ -175,11 +176,7 @@ func AllMigrations() []Migration {
 	}
 }
 
-func seedPlatform(db *gorm.DB) error {
-	return SeedUpdateData(db)
-}
-
-// RunMigrations 建库、迁表、单库种子数据，返回各库连接供跨库初始化使用
+// RunMigrations 建库、迁表、单库默认数据初始化，返回各库连接供跨库初始化使用
 func RunMigrations() (map[string]*gorm.DB, error) {
 	migrations := AllMigrations()
 	serverDB := coregorm.InitGorm(DSN(""))
@@ -206,9 +203,9 @@ func RunMigrations() (map[string]*gorm.DB, error) {
 		db.Exec("SET FOREIGN_KEY_CHECKS = 1")
 		fmt.Printf("%s 表结构生成成功\n", m.Name)
 
-		if m.Seed != nil {
-			if err := m.Seed(db); err != nil {
-				return nil, fmt.Errorf("%s 种子数据初始化失败: %w", m.Name, err)
+		if m.Init != nil {
+			if err := m.Init(db); err != nil {
+				return nil, fmt.Errorf("%s 默认数据初始化失败: %w", m.Name, err)
 			}
 		}
 	}

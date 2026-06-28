@@ -19,11 +19,6 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Platform_AdminGetBucketList_FullMethodName   = "/platform_rpc.platform/AdminGetBucketList"
-	Platform_AdminCreateBucket_FullMethodName    = "/platform_rpc.platform/AdminCreateBucket"
-	Platform_AdminUpdateBucket_FullMethodName    = "/platform_rpc.platform/AdminUpdateBucket"
-	Platform_AdminDeleteBucket_FullMethodName    = "/platform_rpc.platform/AdminDeleteBucket"
-	Platform_AdminGetEventList_FullMethodName    = "/platform_rpc.platform/AdminGetEventList"
 	Platform_AdminQueryLogs_FullMethodName       = "/platform_rpc.platform/AdminQueryLogs"
 	Platform_CreateApp_FullMethodName            = "/platform_rpc.platform/CreateApp"
 	Platform_ListApps_FullMethodName             = "/platform_rpc.platform/ListApps"
@@ -51,11 +46,6 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlatformClient interface {
-	AdminGetBucketList(ctx context.Context, in *AdminGetBucketListReq, opts ...grpc.CallOption) (*AdminGetBucketListRes, error)
-	AdminCreateBucket(ctx context.Context, in *AdminCreateBucketReq, opts ...grpc.CallOption) (*AdminCreateBucketRes, error)
-	AdminUpdateBucket(ctx context.Context, in *AdminUpdateBucketReq, opts ...grpc.CallOption) (*AdminUpdateBucketRes, error)
-	AdminDeleteBucket(ctx context.Context, in *AdminDeleteBucketReq, opts ...grpc.CallOption) (*AdminDeleteBucketRes, error)
-	AdminGetEventList(ctx context.Context, in *AdminGetEventListReq, opts ...grpc.CallOption) (*AdminGetEventListRes, error)
 	AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error)
 	CreateApp(ctx context.Context, in *CreateAppReq, opts ...grpc.CallOption) (*CreateAppRes, error)
 	ListApps(ctx context.Context, in *ListAppsReq, opts ...grpc.CallOption) (*ListAppsRes, error)
@@ -85,56 +75,6 @@ type platformClient struct {
 
 func NewPlatformClient(cc grpc.ClientConnInterface) PlatformClient {
 	return &platformClient{cc}
-}
-
-func (c *platformClient) AdminGetBucketList(ctx context.Context, in *AdminGetBucketListReq, opts ...grpc.CallOption) (*AdminGetBucketListRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AdminGetBucketListRes)
-	err := c.cc.Invoke(ctx, Platform_AdminGetBucketList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *platformClient) AdminCreateBucket(ctx context.Context, in *AdminCreateBucketReq, opts ...grpc.CallOption) (*AdminCreateBucketRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AdminCreateBucketRes)
-	err := c.cc.Invoke(ctx, Platform_AdminCreateBucket_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *platformClient) AdminUpdateBucket(ctx context.Context, in *AdminUpdateBucketReq, opts ...grpc.CallOption) (*AdminUpdateBucketRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AdminUpdateBucketRes)
-	err := c.cc.Invoke(ctx, Platform_AdminUpdateBucket_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *platformClient) AdminDeleteBucket(ctx context.Context, in *AdminDeleteBucketReq, opts ...grpc.CallOption) (*AdminDeleteBucketRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AdminDeleteBucketRes)
-	err := c.cc.Invoke(ctx, Platform_AdminDeleteBucket_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *platformClient) AdminGetEventList(ctx context.Context, in *AdminGetEventListReq, opts ...grpc.CallOption) (*AdminGetEventListRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AdminGetEventListRes)
-	err := c.cc.Invoke(ctx, Platform_AdminGetEventList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *platformClient) AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error) {
@@ -351,11 +291,6 @@ func (c *platformClient) UpdateContentReports(ctx context.Context, in *UpdateCon
 // All implementations must embed UnimplementedPlatformServer
 // for forward compatibility.
 type PlatformServer interface {
-	AdminGetBucketList(context.Context, *AdminGetBucketListReq) (*AdminGetBucketListRes, error)
-	AdminCreateBucket(context.Context, *AdminCreateBucketReq) (*AdminCreateBucketRes, error)
-	AdminUpdateBucket(context.Context, *AdminUpdateBucketReq) (*AdminUpdateBucketRes, error)
-	AdminDeleteBucket(context.Context, *AdminDeleteBucketReq) (*AdminDeleteBucketRes, error)
-	AdminGetEventList(context.Context, *AdminGetEventListReq) (*AdminGetEventListRes, error)
 	AdminQueryLogs(context.Context, *AdminQueryLogsReq) (*AdminQueryLogsRes, error)
 	CreateApp(context.Context, *CreateAppReq) (*CreateAppRes, error)
 	ListApps(context.Context, *ListAppsReq) (*ListAppsRes, error)
@@ -387,21 +322,6 @@ type PlatformServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPlatformServer struct{}
 
-func (UnimplementedPlatformServer) AdminGetBucketList(context.Context, *AdminGetBucketListReq) (*AdminGetBucketListRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AdminGetBucketList not implemented")
-}
-func (UnimplementedPlatformServer) AdminCreateBucket(context.Context, *AdminCreateBucketReq) (*AdminCreateBucketRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AdminCreateBucket not implemented")
-}
-func (UnimplementedPlatformServer) AdminUpdateBucket(context.Context, *AdminUpdateBucketReq) (*AdminUpdateBucketRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AdminUpdateBucket not implemented")
-}
-func (UnimplementedPlatformServer) AdminDeleteBucket(context.Context, *AdminDeleteBucketReq) (*AdminDeleteBucketRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AdminDeleteBucket not implemented")
-}
-func (UnimplementedPlatformServer) AdminGetEventList(context.Context, *AdminGetEventListReq) (*AdminGetEventListRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AdminGetEventList not implemented")
-}
 func (UnimplementedPlatformServer) AdminQueryLogs(context.Context, *AdminQueryLogsReq) (*AdminQueryLogsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminQueryLogs not implemented")
 }
@@ -484,96 +404,6 @@ func RegisterPlatformServer(s grpc.ServiceRegistrar, srv PlatformServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Platform_ServiceDesc, srv)
-}
-
-func _Platform_AdminGetBucketList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdminGetBucketListReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlatformServer).AdminGetBucketList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Platform_AdminGetBucketList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).AdminGetBucketList(ctx, req.(*AdminGetBucketListReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Platform_AdminCreateBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdminCreateBucketReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlatformServer).AdminCreateBucket(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Platform_AdminCreateBucket_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).AdminCreateBucket(ctx, req.(*AdminCreateBucketReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Platform_AdminUpdateBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdminUpdateBucketReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlatformServer).AdminUpdateBucket(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Platform_AdminUpdateBucket_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).AdminUpdateBucket(ctx, req.(*AdminUpdateBucketReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Platform_AdminDeleteBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdminDeleteBucketReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlatformServer).AdminDeleteBucket(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Platform_AdminDeleteBucket_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).AdminDeleteBucket(ctx, req.(*AdminDeleteBucketReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Platform_AdminGetEventList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdminGetEventListReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlatformServer).AdminGetEventList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Platform_AdminGetEventList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformServer).AdminGetEventList(ctx, req.(*AdminGetEventListReq))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Platform_AdminQueryLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -961,26 +791,6 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "platform_rpc.platform",
 	HandlerType: (*PlatformServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AdminGetBucketList",
-			Handler:    _Platform_AdminGetBucketList_Handler,
-		},
-		{
-			MethodName: "AdminCreateBucket",
-			Handler:    _Platform_AdminCreateBucket_Handler,
-		},
-		{
-			MethodName: "AdminUpdateBucket",
-			Handler:    _Platform_AdminUpdateBucket_Handler,
-		},
-		{
-			MethodName: "AdminDeleteBucket",
-			Handler:    _Platform_AdminDeleteBucket_Handler,
-		},
-		{
-			MethodName: "AdminGetEventList",
-			Handler:    _Platform_AdminGetEventList_Handler,
-		},
 		{
 			MethodName: "AdminQueryLogs",
 			Handler:    _Platform_AdminQueryLogs_Handler,

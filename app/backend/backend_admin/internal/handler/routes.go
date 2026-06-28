@@ -711,36 +711,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 创建Bucket
-				Method:  http.MethodPost,
-				Path:    "/admin/track/bucket",
-				Handler: track.CreateBucketHandler(serverCtx),
-			},
-			{
-				// 更新Bucket
-				Method:  http.MethodPut,
-				Path:    "/admin/track/bucket",
-				Handler: track.UpdateBucketHandler(serverCtx),
-			},
-			{
-				// 删除Bucket
-				Method:  http.MethodDelete,
-				Path:    "/admin/track/bucket",
-				Handler: track.DeleteBucketHandler(serverCtx),
-			},
-			{
-				// 获取Bucket列表
-				Method:  http.MethodGet,
-				Path:    "/admin/track/buckets",
-				Handler: track.GetBucketListHandler(serverCtx),
-			},
-			{
-				// 获取事件列表
-				Method:  http.MethodGet,
-				Path:    "/admin/track/events",
-				Handler: track.GetEventListHandler(serverCtx),
-			},
-			{
 				// 查询日志
 				Method:  http.MethodGet,
 				Path:    "/admin/track/logs",

@@ -4,89 +4,7 @@ package platform_rpc;
 
 option go_package = "./platform_rpc";
 
-// ==================== 管理后台：埋点 Bucket ====================
-
-message AdminGetBucketListReq {
-  int32 page = 1; // int32 页码，从 1 开始
-  int32 page_size = 2; // int32 每页条数
-  string keyword = 3; // string 关键词（名称或描述），可选
-  optional bool is_active = 4; // bool 是否激活筛选，可选
-}
-
-message AdminBucketItem {
-  string bucket_id = 1; // string Bucket ID
-  string name = 2; // string Bucket 名称
-  string description = 3; // string Bucket 描述
-  string create_user = 4; // string 创建者用户 ID
-  bool is_active = 5; // bool 是否激活
-  string created_at = 6; // string 创建时间 RFC3339
-  string updated_at = 7; // string 更新时间 RFC3339
-}
-
-message AdminGetBucketListRes {
-  repeated AdminBucketItem list = 1; // array Bucket 列表
-  int64 total = 2; // int64 总条数
-}
-
-message AdminCreateBucketReq {
-  string name = 1; // string Bucket 名称
-  string description = 2; // string Bucket 描述
-  string create_user = 3; // string 创建者用户 ID
-}
-
-message AdminCreateBucketRes {
-  string bucket_id = 1; // string 新创建的 Bucket ID
-}
-
-message AdminUpdateBucketReq {
-  string bucket_id = 1; // string Bucket ID
-  string name = 2; // string Bucket 名称，空表示不修改
-  string description = 3; // string Bucket 描述，空表示不修改
-  optional bool is_active = 4; // bool 是否激活，可选
-}
-
-message AdminUpdateBucketRes {}
-
-message AdminDeleteBucketReq {
-  string bucket_id = 1; // string Bucket ID
-}
-
-message AdminDeleteBucketRes {}
-
-// ==================== 管理后台：埋点事件 ====================
-
-message AdminGetEventListReq {
-  int32 page = 1; // int32 页码
-  int32 page_size = 2; // int32 每页条数
-  string bucket_id = 3; // string Bucket ID 筛选，可选
-  string event_name = 4; // string 事件名称筛选，可选
-  string action = 5; // string 操作筛选，可选
-  string user_filter = 6; // string 用户 ID 筛选，可选
-  int64 start_time = 7; // int64 开始时间戳毫秒，可选
-  int64 end_time = 8; // int64 结束时间戳毫秒，可选
-  string platform = 9; // string 平台筛选，可选
-}
-
-message AdminEventItem {
-  uint64 id = 1; // uint64 事件记录 ID
-  string event_name = 2; // string 事件名称
-  string action = 3; // string 操作
-  string user_id = 4; // string 用户 ID
-  string bucket_id = 5; // string Bucket ID
-  string bucket_name = 6; // string Bucket 名称
-  string platform = 7; // string 平台
-  string device_id = 8; // string 设备 ID
-  string data = 9; // string 事件数据 JSON
-  int64 timestamp = 10; // int64 事件时间戳毫秒
-  string created_at = 11; // string 创建时间 RFC3339
-}
-
-message AdminGetEventListRes {
-  repeated AdminEventItem list = 1; // array 事件列表
-  int64 total = 2; // int64 总条数
-}
-
-// ==================== 管理后台：埋点日志 ====================
+// ==================== 管理后台：客户端日志 ====================
 
 message AdminQueryLogsReq {
   string bucket_id = 1; // string Bucket ID
@@ -422,11 +340,6 @@ message UpdateContentReportsRes {
 }
 
 service platform {
-  rpc AdminGetBucketList(AdminGetBucketListReq) returns (AdminGetBucketListRes);
-  rpc AdminCreateBucket(AdminCreateBucketReq) returns (AdminCreateBucketRes);
-  rpc AdminUpdateBucket(AdminUpdateBucketReq) returns (AdminUpdateBucketRes);
-  rpc AdminDeleteBucket(AdminDeleteBucketReq) returns (AdminDeleteBucketRes);
-  rpc AdminGetEventList(AdminGetEventListReq) returns (AdminGetEventListRes);
   rpc AdminQueryLogs(AdminQueryLogsReq) returns (AdminQueryLogsRes);
 
   rpc CreateApp(CreateAppReq) returns (CreateAppRes);

@@ -51,9 +51,16 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 
 	// 获取群成员列表，用于推送通知
 	var memberList []group_models.GroupMemberModel
-	err = l.svcCtx.DB.Find(&memberList, "group_id = ?", req.GroupID).Error
+	err = l.svcCtx.DB.Find(&memberList, "group_id = ? AND status = ?", req.GroupID, 1).Error
 	if err != nil {
 		return nil, errors.New("获取群成员失败")
+	}
+
+	// 获取群成员版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+		return nil, errors.New("获取版本号失败")
 	}
 
 	// 将群组状态改为解散（逻辑删除），并更新版本号
@@ -67,6 +74,18 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		return nil, errors.New("解散群组失败")
 	}
 
+	// 全员成员关系失效（与退群一致：status=2 退出）
+	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("group_id = ? AND status = ?", req.GroupID, 1).
+		Updates(map[string]interface{}{
+			"status":  2, // 2=退出
+			"version": memberVersion,
+		}).Error
+	if err != nil {
+		logx.WithContext(l.ctx).Errorf("更新群成员状态失败: groupId=%s, err=%v", req.GroupID, err)
+		return nil, errors.New("解散群组失败")
+	}
+
 	conversationId := "group_" + req.GroupID
 	if _, dissolveErr := l.svcCtx.ChatRpc.DissolveConversation(l.ctx, &chat_rpc.DissolveConversationReq{
 		ConversationId: conversationId,
@@ -74,9 +93,17 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		logx.WithContext(l.ctx).Errorf("解散群会话失败: groupId=%s, err=%v", req.GroupID, dissolveErr)
 	}
 
-	// 异步通知所有成员群组已被解散
+	// 异步通知所有成员：群资料解散 + 成员关系失效
 	go func() {
-		// 推送给所有成员 - 群组信息同步（标记为删除状态）
+		memberData := make([]map[string]interface{}, 0, len(memberList))
+		for _, member := range memberList {
+			memberData = append(memberData, map[string]interface{}{
+				"version": memberVersion,
+				"groupId": req.GroupID,
+				"userId":  member.UserID,
+			})
+		}
+
 		for _, member := range memberList {
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
@@ -93,6 +120,10 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 									"groupId": req.GroupID,
 								},
 							},
+						},
+						{
+							"table": "group_members",
+							"data": memberData,
 						},
 					},
 				},

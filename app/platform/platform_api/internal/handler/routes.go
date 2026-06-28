@@ -29,14 +29,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 记录客户端日志
 				Method:  http.MethodPost,
-				Path:    "/api/platform/track_public/v1/log_events",
+				Path:    "/api/platform/track_public/v1/log",
 				Handler: track_public.LogEventsHandler(serverCtx),
-			},
-			{
-				// 上报统计埋点事件
-				Method:  http.MethodPost,
-				Path:    "/api/platform/track_public/v1/report_events",
-				Handler: track_public.ReportEventsHandler(serverCtx),
 			},
 		},
 	)

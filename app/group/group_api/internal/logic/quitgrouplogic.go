@@ -91,11 +91,16 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 					"senderId": req.GroupID,
 					"targetId": member.UserID,
 					"body": map[string]interface{}{
-						"table": "group_members",
-						"data": []map[string]interface{}{
+						"tables": []map[string]interface{}{
 							{
-								"version": memberVersion,
-								"groupId": req.GroupID,
+								"table": "group_members",
+								"data": []map[string]interface{}{
+									{
+										"version": memberVersion,
+										"groupId": req.GroupID,
+										"userId":  req.UserID,
+									},
+								},
 							},
 						},
 					},

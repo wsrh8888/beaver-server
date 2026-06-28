@@ -23,31 +23,6 @@ func NewPlatformServer(svcCtx *svc.ServiceContext) *PlatformServer {
 	}
 }
 
-func (s *PlatformServer) AdminGetBucketList(ctx context.Context, in *platform_rpc.AdminGetBucketListReq) (*platform_rpc.AdminGetBucketListRes, error) {
-	l := logic.NewAdminGetBucketListLogic(ctx, s.svcCtx)
-	return l.AdminGetBucketList(in)
-}
-
-func (s *PlatformServer) AdminCreateBucket(ctx context.Context, in *platform_rpc.AdminCreateBucketReq) (*platform_rpc.AdminCreateBucketRes, error) {
-	l := logic.NewAdminCreateBucketLogic(ctx, s.svcCtx)
-	return l.AdminCreateBucket(in)
-}
-
-func (s *PlatformServer) AdminUpdateBucket(ctx context.Context, in *platform_rpc.AdminUpdateBucketReq) (*platform_rpc.AdminUpdateBucketRes, error) {
-	l := logic.NewAdminUpdateBucketLogic(ctx, s.svcCtx)
-	return l.AdminUpdateBucket(in)
-}
-
-func (s *PlatformServer) AdminDeleteBucket(ctx context.Context, in *platform_rpc.AdminDeleteBucketReq) (*platform_rpc.AdminDeleteBucketRes, error) {
-	l := logic.NewAdminDeleteBucketLogic(ctx, s.svcCtx)
-	return l.AdminDeleteBucket(in)
-}
-
-func (s *PlatformServer) AdminGetEventList(ctx context.Context, in *platform_rpc.AdminGetEventListReq) (*platform_rpc.AdminGetEventListRes, error) {
-	l := logic.NewAdminGetEventListLogic(ctx, s.svcCtx)
-	return l.AdminGetEventList(in)
-}
-
 func (s *PlatformServer) AdminQueryLogs(ctx context.Context, in *platform_rpc.AdminQueryLogsReq) (*platform_rpc.AdminQueryLogsRes, error) {
 	l := logic.NewAdminQueryLogsLogic(ctx, s.svcCtx)
 	return l.AdminQueryLogs(in)

@@ -250,6 +250,7 @@ type CreateBucketReq struct {
 	UserID      string `header:"Beaver-User-Id"` // 用户ID
 	Name        string `json:"name"`             // Bucket名称
 	Description string `json:"description"`      // Bucket描述
+	Kind        string `json:"kind"`             // 类型：log / track
 }
 
 type CreateBucketRes struct {
@@ -633,6 +634,7 @@ type GetBucketListItem struct {
 	BucketId    string `json:"bucketId"`    // Bucket ID
 	Name        string `json:"name"`        // Bucket名称
 	Description string `json:"description"` // Bucket描述
+	Kind        string `json:"kind"`        // 类型：log / track
 	CreateUser  string `json:"createUser"`  // 创建者
 	IsActive    bool   `json:"isActive"`    // 是否激活
 	CreatedAt   string `json:"createdAt"`   // 创建时间
@@ -645,6 +647,7 @@ type GetBucketListReq struct {
 	PageSize int    `form:"pageSize,default=10"` // 每页大小
 	Keyword  string `form:"keyword,optional"`    // 关键词搜索(名称或描述)
 	IsActive *bool  `form:"isActive,optional"`   // 是否激活
+	Kind     string `form:"kind,optional"`       // 类型：log / track
 }
 
 type GetBucketListRes struct {
@@ -1666,14 +1669,9 @@ type PreviewRes struct {
 }
 
 type QueryLogsItem struct {
-	Id         uint   `json:"id"`         // 日志ID
-	Level      string `json:"level"`      // 日志级别
-	Data       string `json:"data"`       // 日志数据
-	UserID     string `json:"userId"`     // 用户ID
-	BucketID   string `json:"bucketId"`   // Bucket Id
-	BucketName string `json:"bucketName"` // Bucket名称
-	Timestamp  int64  `json:"timestamp"`  // 时间戳(毫秒)
-	CreatedAt  string `json:"createdAt"`  // 创建时间
+	Id        uint        `json:"id"`        // 日志ID
+	Timestamp int64       `json:"timestamp"` // 时间戳(毫秒)
+	Data      interface{} `json:"data"`      // 业务日志 JSON 对象
 }
 
 type QueryLogsReq struct {

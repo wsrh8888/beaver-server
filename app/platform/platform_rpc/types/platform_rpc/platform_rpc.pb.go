@@ -21,790 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type AdminGetBucketListReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                               // int32 页码，从 1 开始
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`       // int32 每页条数
-	Keyword       string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"`                          // string 关键词（名称或描述），可选
-	IsActive      *bool                  `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"` // bool 是否激活筛选，可选
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminGetBucketListReq) Reset() {
-	*x = AdminGetBucketListReq{}
-	mi := &file_platform_rpc_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminGetBucketListReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminGetBucketListReq) ProtoMessage() {}
-
-func (x *AdminGetBucketListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminGetBucketListReq.ProtoReflect.Descriptor instead.
-func (*AdminGetBucketListReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *AdminGetBucketListReq) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *AdminGetBucketListReq) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (x *AdminGetBucketListReq) GetKeyword() string {
-	if x != nil {
-		return x.Keyword
-	}
-	return ""
-}
-
-func (x *AdminGetBucketListReq) GetIsActive() bool {
-	if x != nil && x.IsActive != nil {
-		return *x.IsActive
-	}
-	return false
-}
-
-type AdminBucketItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	BucketId      string                 `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`       // string Bucket ID
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                               // string Bucket 名称
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                 // string Bucket 描述
-	CreateUser    string                 `protobuf:"bytes,4,opt,name=create_user,json=createUser,proto3" json:"create_user,omitempty"` // string 创建者用户 ID
-	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`      // bool 是否激活
-	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`    // string 创建时间 RFC3339
-	UpdatedAt     string                 `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`    // string 更新时间 RFC3339
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminBucketItem) Reset() {
-	*x = AdminBucketItem{}
-	mi := &file_platform_rpc_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminBucketItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminBucketItem) ProtoMessage() {}
-
-func (x *AdminBucketItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminBucketItem.ProtoReflect.Descriptor instead.
-func (*AdminBucketItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *AdminBucketItem) GetBucketId() string {
-	if x != nil {
-		return x.BucketId
-	}
-	return ""
-}
-
-func (x *AdminBucketItem) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *AdminBucketItem) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *AdminBucketItem) GetCreateUser() string {
-	if x != nil {
-		return x.CreateUser
-	}
-	return ""
-}
-
-func (x *AdminBucketItem) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *AdminBucketItem) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *AdminBucketItem) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
-type AdminGetBucketListRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	List          []*AdminBucketItem     `protobuf:"bytes,1,rep,name=list,proto3" json:"list,omitempty"`    // array Bucket 列表
-	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"` // int64 总条数
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminGetBucketListRes) Reset() {
-	*x = AdminGetBucketListRes{}
-	mi := &file_platform_rpc_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminGetBucketListRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminGetBucketListRes) ProtoMessage() {}
-
-func (x *AdminGetBucketListRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminGetBucketListRes.ProtoReflect.Descriptor instead.
-func (*AdminGetBucketListRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *AdminGetBucketListRes) GetList() []*AdminBucketItem {
-	if x != nil {
-		return x.List
-	}
-	return nil
-}
-
-func (x *AdminGetBucketListRes) GetTotal() int64 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-type AdminCreateBucketReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`                               // string Bucket 名称
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`                 // string Bucket 描述
-	CreateUser    string                 `protobuf:"bytes,3,opt,name=create_user,json=createUser,proto3" json:"create_user,omitempty"` // string 创建者用户 ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminCreateBucketReq) Reset() {
-	*x = AdminCreateBucketReq{}
-	mi := &file_platform_rpc_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminCreateBucketReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminCreateBucketReq) ProtoMessage() {}
-
-func (x *AdminCreateBucketReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminCreateBucketReq.ProtoReflect.Descriptor instead.
-func (*AdminCreateBucketReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *AdminCreateBucketReq) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *AdminCreateBucketReq) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *AdminCreateBucketReq) GetCreateUser() string {
-	if x != nil {
-		return x.CreateUser
-	}
-	return ""
-}
-
-type AdminCreateBucketRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	BucketId      string                 `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"` // string 新创建的 Bucket ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminCreateBucketRes) Reset() {
-	*x = AdminCreateBucketRes{}
-	mi := &file_platform_rpc_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminCreateBucketRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminCreateBucketRes) ProtoMessage() {}
-
-func (x *AdminCreateBucketRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminCreateBucketRes.ProtoReflect.Descriptor instead.
-func (*AdminCreateBucketRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *AdminCreateBucketRes) GetBucketId() string {
-	if x != nil {
-		return x.BucketId
-	}
-	return ""
-}
-
-type AdminUpdateBucketReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	BucketId      string                 `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`        // string Bucket ID
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                // string Bucket 名称，空表示不修改
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                  // string Bucket 描述，空表示不修改
-	IsActive      *bool                  `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"` // bool 是否激活，可选
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminUpdateBucketReq) Reset() {
-	*x = AdminUpdateBucketReq{}
-	mi := &file_platform_rpc_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminUpdateBucketReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminUpdateBucketReq) ProtoMessage() {}
-
-func (x *AdminUpdateBucketReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminUpdateBucketReq.ProtoReflect.Descriptor instead.
-func (*AdminUpdateBucketReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *AdminUpdateBucketReq) GetBucketId() string {
-	if x != nil {
-		return x.BucketId
-	}
-	return ""
-}
-
-func (x *AdminUpdateBucketReq) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *AdminUpdateBucketReq) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *AdminUpdateBucketReq) GetIsActive() bool {
-	if x != nil && x.IsActive != nil {
-		return *x.IsActive
-	}
-	return false
-}
-
-type AdminUpdateBucketRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminUpdateBucketRes) Reset() {
-	*x = AdminUpdateBucketRes{}
-	mi := &file_platform_rpc_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminUpdateBucketRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminUpdateBucketRes) ProtoMessage() {}
-
-func (x *AdminUpdateBucketRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminUpdateBucketRes.ProtoReflect.Descriptor instead.
-func (*AdminUpdateBucketRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{6}
-}
-
-type AdminDeleteBucketReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	BucketId      string                 `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"` // string Bucket ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminDeleteBucketReq) Reset() {
-	*x = AdminDeleteBucketReq{}
-	mi := &file_platform_rpc_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminDeleteBucketReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminDeleteBucketReq) ProtoMessage() {}
-
-func (x *AdminDeleteBucketReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminDeleteBucketReq.ProtoReflect.Descriptor instead.
-func (*AdminDeleteBucketReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *AdminDeleteBucketReq) GetBucketId() string {
-	if x != nil {
-		return x.BucketId
-	}
-	return ""
-}
-
-type AdminDeleteBucketRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminDeleteBucketRes) Reset() {
-	*x = AdminDeleteBucketRes{}
-	mi := &file_platform_rpc_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminDeleteBucketRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminDeleteBucketRes) ProtoMessage() {}
-
-func (x *AdminDeleteBucketRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminDeleteBucketRes.ProtoReflect.Descriptor instead.
-func (*AdminDeleteBucketRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{8}
-}
-
-type AdminGetEventListReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                              // int32 页码
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`      // int32 每页条数
-	BucketId      string                 `protobuf:"bytes,3,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`       // string Bucket ID 筛选，可选
-	EventName     string                 `protobuf:"bytes,4,opt,name=event_name,json=eventName,proto3" json:"event_name,omitempty"`    // string 事件名称筛选，可选
-	Action        string                 `protobuf:"bytes,5,opt,name=action,proto3" json:"action,omitempty"`                           // string 操作筛选，可选
-	UserFilter    string                 `protobuf:"bytes,6,opt,name=user_filter,json=userFilter,proto3" json:"user_filter,omitempty"` // string 用户 ID 筛选，可选
-	StartTime     int64                  `protobuf:"varint,7,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`   // int64 开始时间戳毫秒，可选
-	EndTime       int64                  `protobuf:"varint,8,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`         // int64 结束时间戳毫秒，可选
-	Platform      string                 `protobuf:"bytes,9,opt,name=platform,proto3" json:"platform,omitempty"`                       // string 平台筛选，可选
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminGetEventListReq) Reset() {
-	*x = AdminGetEventListReq{}
-	mi := &file_platform_rpc_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminGetEventListReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminGetEventListReq) ProtoMessage() {}
-
-func (x *AdminGetEventListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminGetEventListReq.ProtoReflect.Descriptor instead.
-func (*AdminGetEventListReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *AdminGetEventListReq) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *AdminGetEventListReq) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (x *AdminGetEventListReq) GetBucketId() string {
-	if x != nil {
-		return x.BucketId
-	}
-	return ""
-}
-
-func (x *AdminGetEventListReq) GetEventName() string {
-	if x != nil {
-		return x.EventName
-	}
-	return ""
-}
-
-func (x *AdminGetEventListReq) GetAction() string {
-	if x != nil {
-		return x.Action
-	}
-	return ""
-}
-
-func (x *AdminGetEventListReq) GetUserFilter() string {
-	if x != nil {
-		return x.UserFilter
-	}
-	return ""
-}
-
-func (x *AdminGetEventListReq) GetStartTime() int64 {
-	if x != nil {
-		return x.StartTime
-	}
-	return 0
-}
-
-func (x *AdminGetEventListReq) GetEndTime() int64 {
-	if x != nil {
-		return x.EndTime
-	}
-	return 0
-}
-
-func (x *AdminGetEventListReq) GetPlatform() string {
-	if x != nil {
-		return x.Platform
-	}
-	return ""
-}
-
-type AdminEventItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                  // uint64 事件记录 ID
-	EventName     string                 `protobuf:"bytes,2,opt,name=event_name,json=eventName,proto3" json:"event_name,omitempty"`    // string 事件名称
-	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`                           // string 操作
-	UserId        string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`             // string 用户 ID
-	BucketId      string                 `protobuf:"bytes,5,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`       // string Bucket ID
-	BucketName    string                 `protobuf:"bytes,6,opt,name=bucket_name,json=bucketName,proto3" json:"bucket_name,omitempty"` // string Bucket 名称
-	Platform      string                 `protobuf:"bytes,7,opt,name=platform,proto3" json:"platform,omitempty"`                       // string 平台
-	DeviceId      string                 `protobuf:"bytes,8,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`       // string 设备 ID
-	Data          string                 `protobuf:"bytes,9,opt,name=data,proto3" json:"data,omitempty"`                               // string 事件数据 JSON
-	Timestamp     int64                  `protobuf:"varint,10,opt,name=timestamp,proto3" json:"timestamp,omitempty"`                   // int64 事件时间戳毫秒
-	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`   // string 创建时间 RFC3339
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminEventItem) Reset() {
-	*x = AdminEventItem{}
-	mi := &file_platform_rpc_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminEventItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminEventItem) ProtoMessage() {}
-
-func (x *AdminEventItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminEventItem.ProtoReflect.Descriptor instead.
-func (*AdminEventItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *AdminEventItem) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *AdminEventItem) GetEventName() string {
-	if x != nil {
-		return x.EventName
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetAction() string {
-	if x != nil {
-		return x.Action
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetBucketId() string {
-	if x != nil {
-		return x.BucketId
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetBucketName() string {
-	if x != nil {
-		return x.BucketName
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetPlatform() string {
-	if x != nil {
-		return x.Platform
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetDeviceId() string {
-	if x != nil {
-		return x.DeviceId
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetData() string {
-	if x != nil {
-		return x.Data
-	}
-	return ""
-}
-
-func (x *AdminEventItem) GetTimestamp() int64 {
-	if x != nil {
-		return x.Timestamp
-	}
-	return 0
-}
-
-func (x *AdminEventItem) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-type AdminGetEventListRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	List          []*AdminEventItem      `protobuf:"bytes,1,rep,name=list,proto3" json:"list,omitempty"`    // array 事件列表
-	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"` // int64 总条数
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdminGetEventListRes) Reset() {
-	*x = AdminGetEventListRes{}
-	mi := &file_platform_rpc_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdminGetEventListRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdminGetEventListRes) ProtoMessage() {}
-
-func (x *AdminGetEventListRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdminGetEventListRes.ProtoReflect.Descriptor instead.
-func (*AdminGetEventListRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *AdminGetEventListRes) GetList() []*AdminEventItem {
-	if x != nil {
-		return x.List
-	}
-	return nil
-}
-
-func (x *AdminGetEventListRes) GetTotal() int64 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
 type AdminQueryLogsReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	BucketId      string                 `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`       // string Bucket ID
@@ -821,7 +37,7 @@ type AdminQueryLogsReq struct {
 
 func (x *AdminQueryLogsReq) Reset() {
 	*x = AdminQueryLogsReq{}
-	mi := &file_platform_rpc_proto_msgTypes[12]
+	mi := &file_platform_rpc_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -833,7 +49,7 @@ func (x *AdminQueryLogsReq) String() string {
 func (*AdminQueryLogsReq) ProtoMessage() {}
 
 func (x *AdminQueryLogsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[12]
+	mi := &file_platform_rpc_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -846,7 +62,7 @@ func (x *AdminQueryLogsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminQueryLogsReq.ProtoReflect.Descriptor instead.
 func (*AdminQueryLogsReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{12}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *AdminQueryLogsReq) GetBucketId() string {
@@ -920,7 +136,7 @@ type AdminLogItem struct {
 
 func (x *AdminLogItem) Reset() {
 	*x = AdminLogItem{}
-	mi := &file_platform_rpc_proto_msgTypes[13]
+	mi := &file_platform_rpc_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -932,7 +148,7 @@ func (x *AdminLogItem) String() string {
 func (*AdminLogItem) ProtoMessage() {}
 
 func (x *AdminLogItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[13]
+	mi := &file_platform_rpc_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -945,7 +161,7 @@ func (x *AdminLogItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminLogItem.ProtoReflect.Descriptor instead.
 func (*AdminLogItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{13}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *AdminLogItem) GetId() uint64 {
@@ -1007,7 +223,7 @@ type AdminQueryLogsRes struct {
 
 func (x *AdminQueryLogsRes) Reset() {
 	*x = AdminQueryLogsRes{}
-	mi := &file_platform_rpc_proto_msgTypes[14]
+	mi := &file_platform_rpc_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1019,7 +235,7 @@ func (x *AdminQueryLogsRes) String() string {
 func (*AdminQueryLogsRes) ProtoMessage() {}
 
 func (x *AdminQueryLogsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[14]
+	mi := &file_platform_rpc_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1032,7 +248,7 @@ func (x *AdminQueryLogsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminQueryLogsRes.ProtoReflect.Descriptor instead.
 func (*AdminQueryLogsRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{14}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *AdminQueryLogsRes) GetTotal() int64 {
@@ -1064,7 +280,7 @@ type AppItem struct {
 
 func (x *AppItem) Reset() {
 	*x = AppItem{}
-	mi := &file_platform_rpc_proto_msgTypes[15]
+	mi := &file_platform_rpc_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1076,7 +292,7 @@ func (x *AppItem) String() string {
 func (*AppItem) ProtoMessage() {}
 
 func (x *AppItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[15]
+	mi := &file_platform_rpc_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1089,7 +305,7 @@ func (x *AppItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AppItem.ProtoReflect.Descriptor instead.
 func (*AppItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{15}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *AppItem) GetId() uint64 {
@@ -1151,7 +367,7 @@ type CreateAppReq struct {
 
 func (x *CreateAppReq) Reset() {
 	*x = CreateAppReq{}
-	mi := &file_platform_rpc_proto_msgTypes[16]
+	mi := &file_platform_rpc_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1163,7 +379,7 @@ func (x *CreateAppReq) String() string {
 func (*CreateAppReq) ProtoMessage() {}
 
 func (x *CreateAppReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[16]
+	mi := &file_platform_rpc_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1176,7 +392,7 @@ func (x *CreateAppReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAppReq.ProtoReflect.Descriptor instead.
 func (*CreateAppReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{16}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateAppReq) GetName() string {
@@ -1203,7 +419,7 @@ type CreateAppRes struct {
 
 func (x *CreateAppRes) Reset() {
 	*x = CreateAppRes{}
-	mi := &file_platform_rpc_proto_msgTypes[17]
+	mi := &file_platform_rpc_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1215,7 +431,7 @@ func (x *CreateAppRes) String() string {
 func (*CreateAppRes) ProtoMessage() {}
 
 func (x *CreateAppRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[17]
+	mi := &file_platform_rpc_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1228,7 +444,7 @@ func (x *CreateAppRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAppRes.ProtoReflect.Descriptor instead.
 func (*CreateAppRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{17}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CreateAppRes) GetId() uint64 {
@@ -1256,7 +472,7 @@ type ListAppsReq struct {
 
 func (x *ListAppsReq) Reset() {
 	*x = ListAppsReq{}
-	mi := &file_platform_rpc_proto_msgTypes[18]
+	mi := &file_platform_rpc_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1268,7 +484,7 @@ func (x *ListAppsReq) String() string {
 func (*ListAppsReq) ProtoMessage() {}
 
 func (x *ListAppsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[18]
+	mi := &file_platform_rpc_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1281,7 +497,7 @@ func (x *ListAppsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAppsReq.ProtoReflect.Descriptor instead.
 func (*ListAppsReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{18}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListAppsReq) GetPage() int32 {
@@ -1315,7 +531,7 @@ type ListAppsRes struct {
 
 func (x *ListAppsRes) Reset() {
 	*x = ListAppsRes{}
-	mi := &file_platform_rpc_proto_msgTypes[19]
+	mi := &file_platform_rpc_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1327,7 +543,7 @@ func (x *ListAppsRes) String() string {
 func (*ListAppsRes) ProtoMessage() {}
 
 func (x *ListAppsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[19]
+	mi := &file_platform_rpc_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1340,7 +556,7 @@ func (x *ListAppsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAppsRes.ProtoReflect.Descriptor instead.
 func (*ListAppsRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{19}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListAppsRes) GetTotal() int64 {
@@ -1374,7 +590,7 @@ type ArchitectureItem struct {
 
 func (x *ArchitectureItem) Reset() {
 	*x = ArchitectureItem{}
-	mi := &file_platform_rpc_proto_msgTypes[20]
+	mi := &file_platform_rpc_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1386,7 +602,7 @@ func (x *ArchitectureItem) String() string {
 func (*ArchitectureItem) ProtoMessage() {}
 
 func (x *ArchitectureItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[20]
+	mi := &file_platform_rpc_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1399,7 +615,7 @@ func (x *ArchitectureItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ArchitectureItem.ProtoReflect.Descriptor instead.
 func (*ArchitectureItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{20}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ArchitectureItem) GetId() uint64 {
@@ -1477,7 +693,7 @@ type CreateArchitectureReq struct {
 
 func (x *CreateArchitectureReq) Reset() {
 	*x = CreateArchitectureReq{}
-	mi := &file_platform_rpc_proto_msgTypes[21]
+	mi := &file_platform_rpc_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1489,7 +705,7 @@ func (x *CreateArchitectureReq) String() string {
 func (*CreateArchitectureReq) ProtoMessage() {}
 
 func (x *CreateArchitectureReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[21]
+	mi := &file_platform_rpc_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1502,7 +718,7 @@ func (x *CreateArchitectureReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateArchitectureReq.ProtoReflect.Descriptor instead.
 func (*CreateArchitectureReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{21}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CreateArchitectureReq) GetAppId() string {
@@ -1542,7 +758,7 @@ type CreateArchitectureRes struct {
 
 func (x *CreateArchitectureRes) Reset() {
 	*x = CreateArchitectureRes{}
-	mi := &file_platform_rpc_proto_msgTypes[22]
+	mi := &file_platform_rpc_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1554,7 +770,7 @@ func (x *CreateArchitectureRes) String() string {
 func (*CreateArchitectureRes) ProtoMessage() {}
 
 func (x *CreateArchitectureRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[22]
+	mi := &file_platform_rpc_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1567,7 +783,7 @@ func (x *CreateArchitectureRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateArchitectureRes.ProtoReflect.Descriptor instead.
 func (*CreateArchitectureRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{22}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CreateArchitectureRes) GetId() uint64 {
@@ -1588,7 +804,7 @@ type UpdateArchitectureReq struct {
 
 func (x *UpdateArchitectureReq) Reset() {
 	*x = UpdateArchitectureReq{}
-	mi := &file_platform_rpc_proto_msgTypes[23]
+	mi := &file_platform_rpc_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1600,7 +816,7 @@ func (x *UpdateArchitectureReq) String() string {
 func (*UpdateArchitectureReq) ProtoMessage() {}
 
 func (x *UpdateArchitectureReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[23]
+	mi := &file_platform_rpc_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1613,7 +829,7 @@ func (x *UpdateArchitectureReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateArchitectureReq.ProtoReflect.Descriptor instead.
 func (*UpdateArchitectureReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{23}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateArchitectureReq) GetId() uint64 {
@@ -1645,7 +861,7 @@ type UpdateArchitectureRes struct {
 
 func (x *UpdateArchitectureRes) Reset() {
 	*x = UpdateArchitectureRes{}
-	mi := &file_platform_rpc_proto_msgTypes[24]
+	mi := &file_platform_rpc_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1657,7 +873,7 @@ func (x *UpdateArchitectureRes) String() string {
 func (*UpdateArchitectureRes) ProtoMessage() {}
 
 func (x *UpdateArchitectureRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[24]
+	mi := &file_platform_rpc_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1670,7 +886,7 @@ func (x *UpdateArchitectureRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateArchitectureRes.ProtoReflect.Descriptor instead.
 func (*UpdateArchitectureRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{24}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{12}
 }
 
 type ListArchitecturesReq struct {
@@ -1685,7 +901,7 @@ type ListArchitecturesReq struct {
 
 func (x *ListArchitecturesReq) Reset() {
 	*x = ListArchitecturesReq{}
-	mi := &file_platform_rpc_proto_msgTypes[25]
+	mi := &file_platform_rpc_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1697,7 +913,7 @@ func (x *ListArchitecturesReq) String() string {
 func (*ListArchitecturesReq) ProtoMessage() {}
 
 func (x *ListArchitecturesReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[25]
+	mi := &file_platform_rpc_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1710,7 +926,7 @@ func (x *ListArchitecturesReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListArchitecturesReq.ProtoReflect.Descriptor instead.
 func (*ListArchitecturesReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{25}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListArchitecturesReq) GetAppId() string {
@@ -1751,7 +967,7 @@ type ListArchitecturesRes struct {
 
 func (x *ListArchitecturesRes) Reset() {
 	*x = ListArchitecturesRes{}
-	mi := &file_platform_rpc_proto_msgTypes[26]
+	mi := &file_platform_rpc_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1763,7 +979,7 @@ func (x *ListArchitecturesRes) String() string {
 func (*ListArchitecturesRes) ProtoMessage() {}
 
 func (x *ListArchitecturesRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[26]
+	mi := &file_platform_rpc_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1776,7 +992,7 @@ func (x *ListArchitecturesRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListArchitecturesRes.ProtoReflect.Descriptor instead.
 func (*ListArchitecturesRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{26}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListArchitecturesRes) GetTotal() int64 {
@@ -1809,7 +1025,7 @@ type VersionItem struct {
 
 func (x *VersionItem) Reset() {
 	*x = VersionItem{}
-	mi := &file_platform_rpc_proto_msgTypes[27]
+	mi := &file_platform_rpc_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1821,7 +1037,7 @@ func (x *VersionItem) String() string {
 func (*VersionItem) ProtoMessage() {}
 
 func (x *VersionItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[27]
+	mi := &file_platform_rpc_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1834,7 +1050,7 @@ func (x *VersionItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VersionItem.ProtoReflect.Descriptor instead.
 func (*VersionItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{27}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *VersionItem) GetVersionId() uint64 {
@@ -1906,7 +1122,7 @@ type CreateVersionReq struct {
 
 func (x *CreateVersionReq) Reset() {
 	*x = CreateVersionReq{}
-	mi := &file_platform_rpc_proto_msgTypes[28]
+	mi := &file_platform_rpc_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1918,7 +1134,7 @@ func (x *CreateVersionReq) String() string {
 func (*CreateVersionReq) ProtoMessage() {}
 
 func (x *CreateVersionReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[28]
+	mi := &file_platform_rpc_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1931,7 +1147,7 @@ func (x *CreateVersionReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateVersionReq.ProtoReflect.Descriptor instead.
 func (*CreateVersionReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{28}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CreateVersionReq) GetArchitectureId() uint64 {
@@ -1978,7 +1194,7 @@ type CreateVersionRes struct {
 
 func (x *CreateVersionRes) Reset() {
 	*x = CreateVersionRes{}
-	mi := &file_platform_rpc_proto_msgTypes[29]
+	mi := &file_platform_rpc_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1990,7 +1206,7 @@ func (x *CreateVersionRes) String() string {
 func (*CreateVersionRes) ProtoMessage() {}
 
 func (x *CreateVersionRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[29]
+	mi := &file_platform_rpc_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2003,7 +1219,7 @@ func (x *CreateVersionRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateVersionRes.ProtoReflect.Descriptor instead.
 func (*CreateVersionRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{29}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *CreateVersionRes) GetVersionId() uint64 {
@@ -2022,7 +1238,7 @@ type DeleteVersionReq struct {
 
 func (x *DeleteVersionReq) Reset() {
 	*x = DeleteVersionReq{}
-	mi := &file_platform_rpc_proto_msgTypes[30]
+	mi := &file_platform_rpc_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2034,7 +1250,7 @@ func (x *DeleteVersionReq) String() string {
 func (*DeleteVersionReq) ProtoMessage() {}
 
 func (x *DeleteVersionReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[30]
+	mi := &file_platform_rpc_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2047,7 +1263,7 @@ func (x *DeleteVersionReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteVersionReq.ProtoReflect.Descriptor instead.
 func (*DeleteVersionReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{30}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *DeleteVersionReq) GetVersionId() uint64 {
@@ -2065,7 +1281,7 @@ type DeleteVersionRes struct {
 
 func (x *DeleteVersionRes) Reset() {
 	*x = DeleteVersionRes{}
-	mi := &file_platform_rpc_proto_msgTypes[31]
+	mi := &file_platform_rpc_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2077,7 +1293,7 @@ func (x *DeleteVersionRes) String() string {
 func (*DeleteVersionRes) ProtoMessage() {}
 
 func (x *DeleteVersionRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[31]
+	mi := &file_platform_rpc_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2090,7 +1306,7 @@ func (x *DeleteVersionRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteVersionRes.ProtoReflect.Descriptor instead.
 func (*DeleteVersionRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{31}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{19}
 }
 
 type ListVersionsReq struct {
@@ -2104,7 +1320,7 @@ type ListVersionsReq struct {
 
 func (x *ListVersionsReq) Reset() {
 	*x = ListVersionsReq{}
-	mi := &file_platform_rpc_proto_msgTypes[32]
+	mi := &file_platform_rpc_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2116,7 +1332,7 @@ func (x *ListVersionsReq) String() string {
 func (*ListVersionsReq) ProtoMessage() {}
 
 func (x *ListVersionsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[32]
+	mi := &file_platform_rpc_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2129,7 +1345,7 @@ func (x *ListVersionsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListVersionsReq.ProtoReflect.Descriptor instead.
 func (*ListVersionsReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{32}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListVersionsReq) GetArchitectureId() uint64 {
@@ -2163,7 +1379,7 @@ type ListVersionsRes struct {
 
 func (x *ListVersionsRes) Reset() {
 	*x = ListVersionsRes{}
-	mi := &file_platform_rpc_proto_msgTypes[33]
+	mi := &file_platform_rpc_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2175,7 +1391,7 @@ func (x *ListVersionsRes) String() string {
 func (*ListVersionsRes) ProtoMessage() {}
 
 func (x *ListVersionsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[33]
+	mi := &file_platform_rpc_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2188,7 +1404,7 @@ func (x *ListVersionsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListVersionsRes.ProtoReflect.Descriptor instead.
 func (*ListVersionsRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{33}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListVersionsRes) GetTotal() int64 {
@@ -2215,7 +1431,7 @@ type AppVersionBrief struct {
 
 func (x *AppVersionBrief) Reset() {
 	*x = AppVersionBrief{}
-	mi := &file_platform_rpc_proto_msgTypes[34]
+	mi := &file_platform_rpc_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2227,7 +1443,7 @@ func (x *AppVersionBrief) String() string {
 func (*AppVersionBrief) ProtoMessage() {}
 
 func (x *AppVersionBrief) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[34]
+	mi := &file_platform_rpc_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2240,7 +1456,7 @@ func (x *AppVersionBrief) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AppVersionBrief.ProtoReflect.Descriptor instead.
 func (*AppVersionBrief) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{34}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AppVersionBrief) GetVersionId() uint64 {
@@ -2269,7 +1485,7 @@ type AppVersionsArchItem struct {
 
 func (x *AppVersionsArchItem) Reset() {
 	*x = AppVersionsArchItem{}
-	mi := &file_platform_rpc_proto_msgTypes[35]
+	mi := &file_platform_rpc_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2281,7 +1497,7 @@ func (x *AppVersionsArchItem) String() string {
 func (*AppVersionsArchItem) ProtoMessage() {}
 
 func (x *AppVersionsArchItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[35]
+	mi := &file_platform_rpc_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2294,7 +1510,7 @@ func (x *AppVersionsArchItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AppVersionsArchItem.ProtoReflect.Descriptor instead.
 func (*AppVersionsArchItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{35}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *AppVersionsArchItem) GetArchitectureId() uint64 {
@@ -2336,7 +1552,7 @@ type ListAppVersionsReq struct {
 
 func (x *ListAppVersionsReq) Reset() {
 	*x = ListAppVersionsReq{}
-	mi := &file_platform_rpc_proto_msgTypes[36]
+	mi := &file_platform_rpc_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2348,7 +1564,7 @@ func (x *ListAppVersionsReq) String() string {
 func (*ListAppVersionsReq) ProtoMessage() {}
 
 func (x *ListAppVersionsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[36]
+	mi := &file_platform_rpc_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2361,7 +1577,7 @@ func (x *ListAppVersionsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAppVersionsReq.ProtoReflect.Descriptor instead.
 func (*ListAppVersionsReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{36}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListAppVersionsReq) GetAppId() string {
@@ -2395,7 +1611,7 @@ type ListAppVersionsRes struct {
 
 func (x *ListAppVersionsRes) Reset() {
 	*x = ListAppVersionsRes{}
-	mi := &file_platform_rpc_proto_msgTypes[37]
+	mi := &file_platform_rpc_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2407,7 +1623,7 @@ func (x *ListAppVersionsRes) String() string {
 func (*ListAppVersionsRes) ProtoMessage() {}
 
 func (x *ListAppVersionsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[37]
+	mi := &file_platform_rpc_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2420,7 +1636,7 @@ func (x *ListAppVersionsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAppVersionsRes.ProtoReflect.Descriptor instead.
 func (*ListAppVersionsRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{37}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListAppVersionsRes) GetTotal() int64 {
@@ -2458,7 +1674,7 @@ type ReleasePolicyItem struct {
 
 func (x *ReleasePolicyItem) Reset() {
 	*x = ReleasePolicyItem{}
-	mi := &file_platform_rpc_proto_msgTypes[38]
+	mi := &file_platform_rpc_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2470,7 +1686,7 @@ func (x *ReleasePolicyItem) String() string {
 func (*ReleasePolicyItem) ProtoMessage() {}
 
 func (x *ReleasePolicyItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[38]
+	mi := &file_platform_rpc_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2483,7 +1699,7 @@ func (x *ReleasePolicyItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReleasePolicyItem.ProtoReflect.Descriptor instead.
 func (*ReleasePolicyItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{38}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ReleasePolicyItem) GetId() uint64 {
@@ -2593,7 +1809,7 @@ type UpsertReleasePolicyReq struct {
 
 func (x *UpsertReleasePolicyReq) Reset() {
 	*x = UpsertReleasePolicyReq{}
-	mi := &file_platform_rpc_proto_msgTypes[39]
+	mi := &file_platform_rpc_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2605,7 +1821,7 @@ func (x *UpsertReleasePolicyReq) String() string {
 func (*UpsertReleasePolicyReq) ProtoMessage() {}
 
 func (x *UpsertReleasePolicyReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[39]
+	mi := &file_platform_rpc_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2618,7 +1834,7 @@ func (x *UpsertReleasePolicyReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpsertReleasePolicyReq.ProtoReflect.Descriptor instead.
 func (*UpsertReleasePolicyReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{39}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *UpsertReleasePolicyReq) GetAppId() string {
@@ -2686,7 +1902,7 @@ type UpsertReleasePolicyRes struct {
 
 func (x *UpsertReleasePolicyRes) Reset() {
 	*x = UpsertReleasePolicyRes{}
-	mi := &file_platform_rpc_proto_msgTypes[40]
+	mi := &file_platform_rpc_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2698,7 +1914,7 @@ func (x *UpsertReleasePolicyRes) String() string {
 func (*UpsertReleasePolicyRes) ProtoMessage() {}
 
 func (x *UpsertReleasePolicyRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[40]
+	mi := &file_platform_rpc_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2711,7 +1927,7 @@ func (x *UpsertReleasePolicyRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpsertReleasePolicyRes.ProtoReflect.Descriptor instead.
 func (*UpsertReleasePolicyRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{40}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *UpsertReleasePolicyRes) GetId() uint64 {
@@ -2730,7 +1946,7 @@ type ListReleasePoliciesReq struct {
 
 func (x *ListReleasePoliciesReq) Reset() {
 	*x = ListReleasePoliciesReq{}
-	mi := &file_platform_rpc_proto_msgTypes[41]
+	mi := &file_platform_rpc_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2742,7 +1958,7 @@ func (x *ListReleasePoliciesReq) String() string {
 func (*ListReleasePoliciesReq) ProtoMessage() {}
 
 func (x *ListReleasePoliciesReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[41]
+	mi := &file_platform_rpc_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2755,7 +1971,7 @@ func (x *ListReleasePoliciesReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListReleasePoliciesReq.ProtoReflect.Descriptor instead.
 func (*ListReleasePoliciesReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{41}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ListReleasePoliciesReq) GetAppId() string {
@@ -2774,7 +1990,7 @@ type ListReleasePoliciesRes struct {
 
 func (x *ListReleasePoliciesRes) Reset() {
 	*x = ListReleasePoliciesRes{}
-	mi := &file_platform_rpc_proto_msgTypes[42]
+	mi := &file_platform_rpc_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2786,7 +2002,7 @@ func (x *ListReleasePoliciesRes) String() string {
 func (*ListReleasePoliciesRes) ProtoMessage() {}
 
 func (x *ListReleasePoliciesRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[42]
+	mi := &file_platform_rpc_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2799,7 +2015,7 @@ func (x *ListReleasePoliciesRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListReleasePoliciesRes.ProtoReflect.Descriptor instead.
 func (*ListReleasePoliciesRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{42}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListReleasePoliciesRes) GetPolicies() []*ReleasePolicyItem {
@@ -2828,7 +2044,7 @@ type FeedbackItem struct {
 
 func (x *FeedbackItem) Reset() {
 	*x = FeedbackItem{}
-	mi := &file_platform_rpc_proto_msgTypes[43]
+	mi := &file_platform_rpc_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2840,7 +2056,7 @@ func (x *FeedbackItem) String() string {
 func (*FeedbackItem) ProtoMessage() {}
 
 func (x *FeedbackItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[43]
+	mi := &file_platform_rpc_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2853,7 +2069,7 @@ func (x *FeedbackItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedbackItem.ProtoReflect.Descriptor instead.
 func (*FeedbackItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{43}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *FeedbackItem) GetId() uint64 {
@@ -2945,7 +2161,7 @@ type SubmitFeedbackReq struct {
 
 func (x *SubmitFeedbackReq) Reset() {
 	*x = SubmitFeedbackReq{}
-	mi := &file_platform_rpc_proto_msgTypes[44]
+	mi := &file_platform_rpc_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2957,7 +2173,7 @@ func (x *SubmitFeedbackReq) String() string {
 func (*SubmitFeedbackReq) ProtoMessage() {}
 
 func (x *SubmitFeedbackReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[44]
+	mi := &file_platform_rpc_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2970,7 +2186,7 @@ func (x *SubmitFeedbackReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitFeedbackReq.ProtoReflect.Descriptor instead.
 func (*SubmitFeedbackReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{44}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *SubmitFeedbackReq) GetUserId() string {
@@ -3010,7 +2226,7 @@ type SubmitFeedbackRes struct {
 
 func (x *SubmitFeedbackRes) Reset() {
 	*x = SubmitFeedbackRes{}
-	mi := &file_platform_rpc_proto_msgTypes[45]
+	mi := &file_platform_rpc_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3022,7 +2238,7 @@ func (x *SubmitFeedbackRes) String() string {
 func (*SubmitFeedbackRes) ProtoMessage() {}
 
 func (x *SubmitFeedbackRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[45]
+	mi := &file_platform_rpc_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3035,7 +2251,7 @@ func (x *SubmitFeedbackRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitFeedbackRes.ProtoReflect.Descriptor instead.
 func (*SubmitFeedbackRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{45}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *SubmitFeedbackRes) GetId() uint64 {
@@ -3059,7 +2275,7 @@ type ListFeedbackReq struct {
 
 func (x *ListFeedbackReq) Reset() {
 	*x = ListFeedbackReq{}
-	mi := &file_platform_rpc_proto_msgTypes[46]
+	mi := &file_platform_rpc_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3071,7 +2287,7 @@ func (x *ListFeedbackReq) String() string {
 func (*ListFeedbackReq) ProtoMessage() {}
 
 func (x *ListFeedbackReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[46]
+	mi := &file_platform_rpc_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3084,7 +2300,7 @@ func (x *ListFeedbackReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFeedbackReq.ProtoReflect.Descriptor instead.
 func (*ListFeedbackReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{46}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListFeedbackReq) GetPage() int32 {
@@ -3139,7 +2355,7 @@ type ListFeedbackRes struct {
 
 func (x *ListFeedbackRes) Reset() {
 	*x = ListFeedbackRes{}
-	mi := &file_platform_rpc_proto_msgTypes[47]
+	mi := &file_platform_rpc_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3151,7 +2367,7 @@ func (x *ListFeedbackRes) String() string {
 func (*ListFeedbackRes) ProtoMessage() {}
 
 func (x *ListFeedbackRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[47]
+	mi := &file_platform_rpc_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3164,7 +2380,7 @@ func (x *ListFeedbackRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFeedbackRes.ProtoReflect.Descriptor instead.
 func (*ListFeedbackRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{47}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ListFeedbackRes) GetTotal() int64 {
@@ -3190,7 +2406,7 @@ type GetFeedbackReq struct {
 
 func (x *GetFeedbackReq) Reset() {
 	*x = GetFeedbackReq{}
-	mi := &file_platform_rpc_proto_msgTypes[48]
+	mi := &file_platform_rpc_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3202,7 +2418,7 @@ func (x *GetFeedbackReq) String() string {
 func (*GetFeedbackReq) ProtoMessage() {}
 
 func (x *GetFeedbackReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[48]
+	mi := &file_platform_rpc_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3215,7 +2431,7 @@ func (x *GetFeedbackReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedbackReq.ProtoReflect.Descriptor instead.
 func (*GetFeedbackReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{48}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *GetFeedbackReq) GetId() uint64 {
@@ -3234,7 +2450,7 @@ type GetFeedbackRes struct {
 
 func (x *GetFeedbackRes) Reset() {
 	*x = GetFeedbackRes{}
-	mi := &file_platform_rpc_proto_msgTypes[49]
+	mi := &file_platform_rpc_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3246,7 +2462,7 @@ func (x *GetFeedbackRes) String() string {
 func (*GetFeedbackRes) ProtoMessage() {}
 
 func (x *GetFeedbackRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[49]
+	mi := &file_platform_rpc_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3259,7 +2475,7 @@ func (x *GetFeedbackRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedbackRes.ProtoReflect.Descriptor instead.
 func (*GetFeedbackRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{49}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetFeedbackRes) GetFeedback() *FeedbackItem {
@@ -3281,7 +2497,7 @@ type HandleFeedbackReq struct {
 
 func (x *HandleFeedbackReq) Reset() {
 	*x = HandleFeedbackReq{}
-	mi := &file_platform_rpc_proto_msgTypes[50]
+	mi := &file_platform_rpc_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3293,7 +2509,7 @@ func (x *HandleFeedbackReq) String() string {
 func (*HandleFeedbackReq) ProtoMessage() {}
 
 func (x *HandleFeedbackReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[50]
+	mi := &file_platform_rpc_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3306,7 +2522,7 @@ func (x *HandleFeedbackReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandleFeedbackReq.ProtoReflect.Descriptor instead.
 func (*HandleFeedbackReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{50}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *HandleFeedbackReq) GetId() uint64 {
@@ -3345,7 +2561,7 @@ type HandleFeedbackRes struct {
 
 func (x *HandleFeedbackRes) Reset() {
 	*x = HandleFeedbackRes{}
-	mi := &file_platform_rpc_proto_msgTypes[51]
+	mi := &file_platform_rpc_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3357,7 +2573,7 @@ func (x *HandleFeedbackRes) String() string {
 func (*HandleFeedbackRes) ProtoMessage() {}
 
 func (x *HandleFeedbackRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[51]
+	mi := &file_platform_rpc_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3370,7 +2586,7 @@ func (x *HandleFeedbackRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandleFeedbackRes.ProtoReflect.Descriptor instead.
 func (*HandleFeedbackRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{51}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{39}
 }
 
 type DeleteFeedbackReq struct {
@@ -3382,7 +2598,7 @@ type DeleteFeedbackReq struct {
 
 func (x *DeleteFeedbackReq) Reset() {
 	*x = DeleteFeedbackReq{}
-	mi := &file_platform_rpc_proto_msgTypes[52]
+	mi := &file_platform_rpc_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3394,7 +2610,7 @@ func (x *DeleteFeedbackReq) String() string {
 func (*DeleteFeedbackReq) ProtoMessage() {}
 
 func (x *DeleteFeedbackReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[52]
+	mi := &file_platform_rpc_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3407,7 +2623,7 @@ func (x *DeleteFeedbackReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFeedbackReq.ProtoReflect.Descriptor instead.
 func (*DeleteFeedbackReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{52}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *DeleteFeedbackReq) GetId() uint64 {
@@ -3425,7 +2641,7 @@ type DeleteFeedbackRes struct {
 
 func (x *DeleteFeedbackRes) Reset() {
 	*x = DeleteFeedbackRes{}
-	mi := &file_platform_rpc_proto_msgTypes[53]
+	mi := &file_platform_rpc_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3437,7 +2653,7 @@ func (x *DeleteFeedbackRes) String() string {
 func (*DeleteFeedbackRes) ProtoMessage() {}
 
 func (x *DeleteFeedbackRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[53]
+	mi := &file_platform_rpc_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3450,7 +2666,7 @@ func (x *DeleteFeedbackRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFeedbackRes.ProtoReflect.Descriptor instead.
 func (*DeleteFeedbackRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{53}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{41}
 }
 
 type ContentReportItem struct {
@@ -3473,7 +2689,7 @@ type ContentReportItem struct {
 
 func (x *ContentReportItem) Reset() {
 	*x = ContentReportItem{}
-	mi := &file_platform_rpc_proto_msgTypes[54]
+	mi := &file_platform_rpc_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3485,7 +2701,7 @@ func (x *ContentReportItem) String() string {
 func (*ContentReportItem) ProtoMessage() {}
 
 func (x *ContentReportItem) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[54]
+	mi := &file_platform_rpc_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3498,7 +2714,7 @@ func (x *ContentReportItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContentReportItem.ProtoReflect.Descriptor instead.
 func (*ContentReportItem) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{54}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ContentReportItem) GetId() uint64 {
@@ -3599,7 +2815,7 @@ type SubmitContentReportReq struct {
 
 func (x *SubmitContentReportReq) Reset() {
 	*x = SubmitContentReportReq{}
-	mi := &file_platform_rpc_proto_msgTypes[55]
+	mi := &file_platform_rpc_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3611,7 +2827,7 @@ func (x *SubmitContentReportReq) String() string {
 func (*SubmitContentReportReq) ProtoMessage() {}
 
 func (x *SubmitContentReportReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[55]
+	mi := &file_platform_rpc_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3624,7 +2840,7 @@ func (x *SubmitContentReportReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitContentReportReq.ProtoReflect.Descriptor instead.
 func (*SubmitContentReportReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{55}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *SubmitContentReportReq) GetReporterUserId() string {
@@ -3678,7 +2894,7 @@ type SubmitContentReportRes struct {
 
 func (x *SubmitContentReportRes) Reset() {
 	*x = SubmitContentReportRes{}
-	mi := &file_platform_rpc_proto_msgTypes[56]
+	mi := &file_platform_rpc_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3690,7 +2906,7 @@ func (x *SubmitContentReportRes) String() string {
 func (*SubmitContentReportRes) ProtoMessage() {}
 
 func (x *SubmitContentReportRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[56]
+	mi := &file_platform_rpc_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3703,7 +2919,7 @@ func (x *SubmitContentReportRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitContentReportRes.ProtoReflect.Descriptor instead.
 func (*SubmitContentReportRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{56}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *SubmitContentReportRes) GetId() uint64 {
@@ -3727,7 +2943,7 @@ type ListContentReportsReq struct {
 
 func (x *ListContentReportsReq) Reset() {
 	*x = ListContentReportsReq{}
-	mi := &file_platform_rpc_proto_msgTypes[57]
+	mi := &file_platform_rpc_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3739,7 +2955,7 @@ func (x *ListContentReportsReq) String() string {
 func (*ListContentReportsReq) ProtoMessage() {}
 
 func (x *ListContentReportsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[57]
+	mi := &file_platform_rpc_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3752,7 +2968,7 @@ func (x *ListContentReportsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListContentReportsReq.ProtoReflect.Descriptor instead.
 func (*ListContentReportsReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{57}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ListContentReportsReq) GetPage() int32 {
@@ -3807,7 +3023,7 @@ type ListContentReportsRes struct {
 
 func (x *ListContentReportsRes) Reset() {
 	*x = ListContentReportsRes{}
-	mi := &file_platform_rpc_proto_msgTypes[58]
+	mi := &file_platform_rpc_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3819,7 +3035,7 @@ func (x *ListContentReportsRes) String() string {
 func (*ListContentReportsRes) ProtoMessage() {}
 
 func (x *ListContentReportsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[58]
+	mi := &file_platform_rpc_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3832,7 +3048,7 @@ func (x *ListContentReportsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListContentReportsRes.ProtoReflect.Descriptor instead.
 func (*ListContentReportsRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{58}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *ListContentReportsRes) GetTotal() int64 {
@@ -3858,7 +3074,7 @@ type GetContentReportReq struct {
 
 func (x *GetContentReportReq) Reset() {
 	*x = GetContentReportReq{}
-	mi := &file_platform_rpc_proto_msgTypes[59]
+	mi := &file_platform_rpc_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3870,7 +3086,7 @@ func (x *GetContentReportReq) String() string {
 func (*GetContentReportReq) ProtoMessage() {}
 
 func (x *GetContentReportReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[59]
+	mi := &file_platform_rpc_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3883,7 +3099,7 @@ func (x *GetContentReportReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetContentReportReq.ProtoReflect.Descriptor instead.
 func (*GetContentReportReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{59}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *GetContentReportReq) GetId() uint64 {
@@ -3902,7 +3118,7 @@ type GetContentReportRes struct {
 
 func (x *GetContentReportRes) Reset() {
 	*x = GetContentReportRes{}
-	mi := &file_platform_rpc_proto_msgTypes[60]
+	mi := &file_platform_rpc_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3914,7 +3130,7 @@ func (x *GetContentReportRes) String() string {
 func (*GetContentReportRes) ProtoMessage() {}
 
 func (x *GetContentReportRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[60]
+	mi := &file_platform_rpc_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3927,7 +3143,7 @@ func (x *GetContentReportRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetContentReportRes.ProtoReflect.Descriptor instead.
 func (*GetContentReportRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{60}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *GetContentReportRes) GetReport() *ContentReportItem {
@@ -3951,7 +3167,7 @@ type UpdateContentReportsReq struct {
 
 func (x *UpdateContentReportsReq) Reset() {
 	*x = UpdateContentReportsReq{}
-	mi := &file_platform_rpc_proto_msgTypes[61]
+	mi := &file_platform_rpc_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3963,7 +3179,7 @@ func (x *UpdateContentReportsReq) String() string {
 func (*UpdateContentReportsReq) ProtoMessage() {}
 
 func (x *UpdateContentReportsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[61]
+	mi := &file_platform_rpc_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3976,7 +3192,7 @@ func (x *UpdateContentReportsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateContentReportsReq.ProtoReflect.Descriptor instead.
 func (*UpdateContentReportsReq) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{61}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *UpdateContentReportsReq) GetIds() []uint64 {
@@ -4023,7 +3239,7 @@ type UpdateContentReportsRes struct {
 
 func (x *UpdateContentReportsRes) Reset() {
 	*x = UpdateContentReportsRes{}
-	mi := &file_platform_rpc_proto_msgTypes[62]
+	mi := &file_platform_rpc_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4035,7 +3251,7 @@ func (x *UpdateContentReportsRes) String() string {
 func (*UpdateContentReportsRes) ProtoMessage() {}
 
 func (x *UpdateContentReportsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_platform_rpc_proto_msgTypes[62]
+	mi := &file_platform_rpc_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4048,7 +3264,7 @@ func (x *UpdateContentReportsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateContentReportsRes.ProtoReflect.Descriptor instead.
 func (*UpdateContentReportsRes) Descriptor() ([]byte, []int) {
-	return file_platform_rpc_proto_rawDescGZIP(), []int{62}
+	return file_platform_rpc_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *UpdateContentReportsRes) GetAffectedCount() int64 {
@@ -4062,78 +3278,7 @@ var File_platform_rpc_proto protoreflect.FileDescriptor
 
 const file_platform_rpc_proto_rawDesc = "" +
 	"\n" +
-	"\x12platform_rpc.proto\x12\fplatform_rpc\"\x92\x01\n" +
-	"\x15AdminGetBucketListReq\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x18\n" +
-	"\akeyword\x18\x03 \x01(\tR\akeyword\x12 \n" +
-	"\tis_active\x18\x04 \x01(\bH\x00R\bisActive\x88\x01\x01B\f\n" +
-	"\n" +
-	"_is_active\"\xe0\x01\n" +
-	"\x0fAdminBucketItem\x12\x1b\n" +
-	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1f\n" +
-	"\vcreate_user\x18\x04 \x01(\tR\n" +
-	"createUser\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\a \x01(\tR\tupdatedAt\"`\n" +
-	"\x15AdminGetBucketListRes\x121\n" +
-	"\x04list\x18\x01 \x03(\v2\x1d.platform_rpc.AdminBucketItemR\x04list\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\"m\n" +
-	"\x14AdminCreateBucketReq\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1f\n" +
-	"\vcreate_user\x18\x03 \x01(\tR\n" +
-	"createUser\"3\n" +
-	"\x14AdminCreateBucketRes\x12\x1b\n" +
-	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\"\x99\x01\n" +
-	"\x14AdminUpdateBucketReq\x12\x1b\n" +
-	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12 \n" +
-	"\tis_active\x18\x04 \x01(\bH\x00R\bisActive\x88\x01\x01B\f\n" +
-	"\n" +
-	"_is_active\"\x16\n" +
-	"\x14AdminUpdateBucketRes\"3\n" +
-	"\x14AdminDeleteBucketReq\x12\x1b\n" +
-	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\"\x16\n" +
-	"\x14AdminDeleteBucketRes\"\x92\x02\n" +
-	"\x14AdminGetEventListReq\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1b\n" +
-	"\tbucket_id\x18\x03 \x01(\tR\bbucketId\x12\x1d\n" +
-	"\n" +
-	"event_name\x18\x04 \x01(\tR\teventName\x12\x16\n" +
-	"\x06action\x18\x05 \x01(\tR\x06action\x12\x1f\n" +
-	"\vuser_filter\x18\x06 \x01(\tR\n" +
-	"userFilter\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\a \x01(\x03R\tstartTime\x12\x19\n" +
-	"\bend_time\x18\b \x01(\x03R\aendTime\x12\x1a\n" +
-	"\bplatform\x18\t \x01(\tR\bplatform\"\xb8\x02\n" +
-	"\x0eAdminEventItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x1d\n" +
-	"\n" +
-	"event_name\x18\x02 \x01(\tR\teventName\x12\x16\n" +
-	"\x06action\x18\x03 \x01(\tR\x06action\x12\x17\n" +
-	"\auser_id\x18\x04 \x01(\tR\x06userId\x12\x1b\n" +
-	"\tbucket_id\x18\x05 \x01(\tR\bbucketId\x12\x1f\n" +
-	"\vbucket_name\x18\x06 \x01(\tR\n" +
-	"bucketName\x12\x1a\n" +
-	"\bplatform\x18\a \x01(\tR\bplatform\x12\x1b\n" +
-	"\tdevice_id\x18\b \x01(\tR\bdeviceId\x12\x12\n" +
-	"\x04data\x18\t \x01(\tR\x04data\x12\x1c\n" +
-	"\ttimestamp\x18\n" +
-	" \x01(\x03R\ttimestamp\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"^\n" +
-	"\x14AdminGetEventListRes\x120\n" +
-	"\x04list\x18\x01 \x03(\v2\x1c.platform_rpc.AdminEventItemR\x04list\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\"\xec\x01\n" +
+	"\x12platform_rpc.proto\x12\fplatform_rpc\"\xec\x01\n" +
 	"\x11AdminQueryLogsReq\x12\x1b\n" +
 	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12\x14\n" +
 	"\x05level\x18\x02 \x01(\tR\x05level\x12\x1d\n" +
@@ -4405,13 +3550,8 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\rhandle_remark\x18\x04 \x01(\tR\fhandleRemark\x12\x17\n" +
 	"\acase_id\x18\x05 \x01(\x04R\x06caseId\"@\n" +
 	"\x17UpdateContentReportsRes\x12%\n" +
-	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount2\xfb\x11\n" +
-	"\bplatform\x12^\n" +
-	"\x12AdminGetBucketList\x12#.platform_rpc.AdminGetBucketListReq\x1a#.platform_rpc.AdminGetBucketListRes\x12[\n" +
-	"\x11AdminCreateBucket\x12\".platform_rpc.AdminCreateBucketReq\x1a\".platform_rpc.AdminCreateBucketRes\x12[\n" +
-	"\x11AdminUpdateBucket\x12\".platform_rpc.AdminUpdateBucketReq\x1a\".platform_rpc.AdminUpdateBucketRes\x12[\n" +
-	"\x11AdminDeleteBucket\x12\".platform_rpc.AdminDeleteBucketReq\x1a\".platform_rpc.AdminDeleteBucketRes\x12[\n" +
-	"\x11AdminGetEventList\x12\".platform_rpc.AdminGetEventListReq\x1a\".platform_rpc.AdminGetEventListRes\x12R\n" +
+	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount2\xa7\x0e\n" +
+	"\bplatform\x12R\n" +
 	"\x0eAdminQueryLogs\x12\x1f.platform_rpc.AdminQueryLogsReq\x1a\x1f.platform_rpc.AdminQueryLogsRes\x12C\n" +
 	"\tCreateApp\x12\x1a.platform_rpc.CreateAppReq\x1a\x1a.platform_rpc.CreateAppRes\x12@\n" +
 	"\bListApps\x12\x19.platform_rpc.ListAppsReq\x1a\x19.platform_rpc.ListAppsRes\x12^\n" +
@@ -4446,143 +3586,119 @@ func file_platform_rpc_proto_rawDescGZIP() []byte {
 	return file_platform_rpc_proto_rawDescData
 }
 
-var file_platform_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 63)
+var file_platform_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
 var file_platform_rpc_proto_goTypes = []any{
-	(*AdminGetBucketListReq)(nil),   // 0: platform_rpc.AdminGetBucketListReq
-	(*AdminBucketItem)(nil),         // 1: platform_rpc.AdminBucketItem
-	(*AdminGetBucketListRes)(nil),   // 2: platform_rpc.AdminGetBucketListRes
-	(*AdminCreateBucketReq)(nil),    // 3: platform_rpc.AdminCreateBucketReq
-	(*AdminCreateBucketRes)(nil),    // 4: platform_rpc.AdminCreateBucketRes
-	(*AdminUpdateBucketReq)(nil),    // 5: platform_rpc.AdminUpdateBucketReq
-	(*AdminUpdateBucketRes)(nil),    // 6: platform_rpc.AdminUpdateBucketRes
-	(*AdminDeleteBucketReq)(nil),    // 7: platform_rpc.AdminDeleteBucketReq
-	(*AdminDeleteBucketRes)(nil),    // 8: platform_rpc.AdminDeleteBucketRes
-	(*AdminGetEventListReq)(nil),    // 9: platform_rpc.AdminGetEventListReq
-	(*AdminEventItem)(nil),          // 10: platform_rpc.AdminEventItem
-	(*AdminGetEventListRes)(nil),    // 11: platform_rpc.AdminGetEventListRes
-	(*AdminQueryLogsReq)(nil),       // 12: platform_rpc.AdminQueryLogsReq
-	(*AdminLogItem)(nil),            // 13: platform_rpc.AdminLogItem
-	(*AdminQueryLogsRes)(nil),       // 14: platform_rpc.AdminQueryLogsRes
-	(*AppItem)(nil),                 // 15: platform_rpc.AppItem
-	(*CreateAppReq)(nil),            // 16: platform_rpc.CreateAppReq
-	(*CreateAppRes)(nil),            // 17: platform_rpc.CreateAppRes
-	(*ListAppsReq)(nil),             // 18: platform_rpc.ListAppsReq
-	(*ListAppsRes)(nil),             // 19: platform_rpc.ListAppsRes
-	(*ArchitectureItem)(nil),        // 20: platform_rpc.ArchitectureItem
-	(*CreateArchitectureReq)(nil),   // 21: platform_rpc.CreateArchitectureReq
-	(*CreateArchitectureRes)(nil),   // 22: platform_rpc.CreateArchitectureRes
-	(*UpdateArchitectureReq)(nil),   // 23: platform_rpc.UpdateArchitectureReq
-	(*UpdateArchitectureRes)(nil),   // 24: platform_rpc.UpdateArchitectureRes
-	(*ListArchitecturesReq)(nil),    // 25: platform_rpc.ListArchitecturesReq
-	(*ListArchitecturesRes)(nil),    // 26: platform_rpc.ListArchitecturesRes
-	(*VersionItem)(nil),             // 27: platform_rpc.VersionItem
-	(*CreateVersionReq)(nil),        // 28: platform_rpc.CreateVersionReq
-	(*CreateVersionRes)(nil),        // 29: platform_rpc.CreateVersionRes
-	(*DeleteVersionReq)(nil),        // 30: platform_rpc.DeleteVersionReq
-	(*DeleteVersionRes)(nil),        // 31: platform_rpc.DeleteVersionRes
-	(*ListVersionsReq)(nil),         // 32: platform_rpc.ListVersionsReq
-	(*ListVersionsRes)(nil),         // 33: platform_rpc.ListVersionsRes
-	(*AppVersionBrief)(nil),         // 34: platform_rpc.AppVersionBrief
-	(*AppVersionsArchItem)(nil),     // 35: platform_rpc.AppVersionsArchItem
-	(*ListAppVersionsReq)(nil),      // 36: platform_rpc.ListAppVersionsReq
-	(*ListAppVersionsRes)(nil),      // 37: platform_rpc.ListAppVersionsRes
-	(*ReleasePolicyItem)(nil),       // 38: platform_rpc.ReleasePolicyItem
-	(*UpsertReleasePolicyReq)(nil),  // 39: platform_rpc.UpsertReleasePolicyReq
-	(*UpsertReleasePolicyRes)(nil),  // 40: platform_rpc.UpsertReleasePolicyRes
-	(*ListReleasePoliciesReq)(nil),  // 41: platform_rpc.ListReleasePoliciesReq
-	(*ListReleasePoliciesRes)(nil),  // 42: platform_rpc.ListReleasePoliciesRes
-	(*FeedbackItem)(nil),            // 43: platform_rpc.FeedbackItem
-	(*SubmitFeedbackReq)(nil),       // 44: platform_rpc.SubmitFeedbackReq
-	(*SubmitFeedbackRes)(nil),       // 45: platform_rpc.SubmitFeedbackRes
-	(*ListFeedbackReq)(nil),         // 46: platform_rpc.ListFeedbackReq
-	(*ListFeedbackRes)(nil),         // 47: platform_rpc.ListFeedbackRes
-	(*GetFeedbackReq)(nil),          // 48: platform_rpc.GetFeedbackReq
-	(*GetFeedbackRes)(nil),          // 49: platform_rpc.GetFeedbackRes
-	(*HandleFeedbackReq)(nil),       // 50: platform_rpc.HandleFeedbackReq
-	(*HandleFeedbackRes)(nil),       // 51: platform_rpc.HandleFeedbackRes
-	(*DeleteFeedbackReq)(nil),       // 52: platform_rpc.DeleteFeedbackReq
-	(*DeleteFeedbackRes)(nil),       // 53: platform_rpc.DeleteFeedbackRes
-	(*ContentReportItem)(nil),       // 54: platform_rpc.ContentReportItem
-	(*SubmitContentReportReq)(nil),  // 55: platform_rpc.SubmitContentReportReq
-	(*SubmitContentReportRes)(nil),  // 56: platform_rpc.SubmitContentReportRes
-	(*ListContentReportsReq)(nil),   // 57: platform_rpc.ListContentReportsReq
-	(*ListContentReportsRes)(nil),   // 58: platform_rpc.ListContentReportsRes
-	(*GetContentReportReq)(nil),     // 59: platform_rpc.GetContentReportReq
-	(*GetContentReportRes)(nil),     // 60: platform_rpc.GetContentReportRes
-	(*UpdateContentReportsReq)(nil), // 61: platform_rpc.UpdateContentReportsReq
-	(*UpdateContentReportsRes)(nil), // 62: platform_rpc.UpdateContentReportsRes
+	(*AdminQueryLogsReq)(nil),       // 0: platform_rpc.AdminQueryLogsReq
+	(*AdminLogItem)(nil),            // 1: platform_rpc.AdminLogItem
+	(*AdminQueryLogsRes)(nil),       // 2: platform_rpc.AdminQueryLogsRes
+	(*AppItem)(nil),                 // 3: platform_rpc.AppItem
+	(*CreateAppReq)(nil),            // 4: platform_rpc.CreateAppReq
+	(*CreateAppRes)(nil),            // 5: platform_rpc.CreateAppRes
+	(*ListAppsReq)(nil),             // 6: platform_rpc.ListAppsReq
+	(*ListAppsRes)(nil),             // 7: platform_rpc.ListAppsRes
+	(*ArchitectureItem)(nil),        // 8: platform_rpc.ArchitectureItem
+	(*CreateArchitectureReq)(nil),   // 9: platform_rpc.CreateArchitectureReq
+	(*CreateArchitectureRes)(nil),   // 10: platform_rpc.CreateArchitectureRes
+	(*UpdateArchitectureReq)(nil),   // 11: platform_rpc.UpdateArchitectureReq
+	(*UpdateArchitectureRes)(nil),   // 12: platform_rpc.UpdateArchitectureRes
+	(*ListArchitecturesReq)(nil),    // 13: platform_rpc.ListArchitecturesReq
+	(*ListArchitecturesRes)(nil),    // 14: platform_rpc.ListArchitecturesRes
+	(*VersionItem)(nil),             // 15: platform_rpc.VersionItem
+	(*CreateVersionReq)(nil),        // 16: platform_rpc.CreateVersionReq
+	(*CreateVersionRes)(nil),        // 17: platform_rpc.CreateVersionRes
+	(*DeleteVersionReq)(nil),        // 18: platform_rpc.DeleteVersionReq
+	(*DeleteVersionRes)(nil),        // 19: platform_rpc.DeleteVersionRes
+	(*ListVersionsReq)(nil),         // 20: platform_rpc.ListVersionsReq
+	(*ListVersionsRes)(nil),         // 21: platform_rpc.ListVersionsRes
+	(*AppVersionBrief)(nil),         // 22: platform_rpc.AppVersionBrief
+	(*AppVersionsArchItem)(nil),     // 23: platform_rpc.AppVersionsArchItem
+	(*ListAppVersionsReq)(nil),      // 24: platform_rpc.ListAppVersionsReq
+	(*ListAppVersionsRes)(nil),      // 25: platform_rpc.ListAppVersionsRes
+	(*ReleasePolicyItem)(nil),       // 26: platform_rpc.ReleasePolicyItem
+	(*UpsertReleasePolicyReq)(nil),  // 27: platform_rpc.UpsertReleasePolicyReq
+	(*UpsertReleasePolicyRes)(nil),  // 28: platform_rpc.UpsertReleasePolicyRes
+	(*ListReleasePoliciesReq)(nil),  // 29: platform_rpc.ListReleasePoliciesReq
+	(*ListReleasePoliciesRes)(nil),  // 30: platform_rpc.ListReleasePoliciesRes
+	(*FeedbackItem)(nil),            // 31: platform_rpc.FeedbackItem
+	(*SubmitFeedbackReq)(nil),       // 32: platform_rpc.SubmitFeedbackReq
+	(*SubmitFeedbackRes)(nil),       // 33: platform_rpc.SubmitFeedbackRes
+	(*ListFeedbackReq)(nil),         // 34: platform_rpc.ListFeedbackReq
+	(*ListFeedbackRes)(nil),         // 35: platform_rpc.ListFeedbackRes
+	(*GetFeedbackReq)(nil),          // 36: platform_rpc.GetFeedbackReq
+	(*GetFeedbackRes)(nil),          // 37: platform_rpc.GetFeedbackRes
+	(*HandleFeedbackReq)(nil),       // 38: platform_rpc.HandleFeedbackReq
+	(*HandleFeedbackRes)(nil),       // 39: platform_rpc.HandleFeedbackRes
+	(*DeleteFeedbackReq)(nil),       // 40: platform_rpc.DeleteFeedbackReq
+	(*DeleteFeedbackRes)(nil),       // 41: platform_rpc.DeleteFeedbackRes
+	(*ContentReportItem)(nil),       // 42: platform_rpc.ContentReportItem
+	(*SubmitContentReportReq)(nil),  // 43: platform_rpc.SubmitContentReportReq
+	(*SubmitContentReportRes)(nil),  // 44: platform_rpc.SubmitContentReportRes
+	(*ListContentReportsReq)(nil),   // 45: platform_rpc.ListContentReportsReq
+	(*ListContentReportsRes)(nil),   // 46: platform_rpc.ListContentReportsRes
+	(*GetContentReportReq)(nil),     // 47: platform_rpc.GetContentReportReq
+	(*GetContentReportRes)(nil),     // 48: platform_rpc.GetContentReportRes
+	(*UpdateContentReportsReq)(nil), // 49: platform_rpc.UpdateContentReportsReq
+	(*UpdateContentReportsRes)(nil), // 50: platform_rpc.UpdateContentReportsRes
 }
 var file_platform_rpc_proto_depIdxs = []int32{
-	1,  // 0: platform_rpc.AdminGetBucketListRes.list:type_name -> platform_rpc.AdminBucketItem
-	10, // 1: platform_rpc.AdminGetEventListRes.list:type_name -> platform_rpc.AdminEventItem
-	13, // 2: platform_rpc.AdminQueryLogsRes.logs:type_name -> platform_rpc.AdminLogItem
-	15, // 3: platform_rpc.ListAppsRes.apps:type_name -> platform_rpc.AppItem
-	20, // 4: platform_rpc.ListArchitecturesRes.architectures:type_name -> platform_rpc.ArchitectureItem
-	27, // 5: platform_rpc.ListVersionsRes.versions:type_name -> platform_rpc.VersionItem
-	34, // 6: platform_rpc.AppVersionsArchItem.versions:type_name -> platform_rpc.AppVersionBrief
-	35, // 7: platform_rpc.ListAppVersionsRes.architectures:type_name -> platform_rpc.AppVersionsArchItem
-	38, // 8: platform_rpc.ListReleasePoliciesRes.policies:type_name -> platform_rpc.ReleasePolicyItem
-	43, // 9: platform_rpc.ListFeedbackRes.list:type_name -> platform_rpc.FeedbackItem
-	43, // 10: platform_rpc.GetFeedbackRes.feedback:type_name -> platform_rpc.FeedbackItem
-	54, // 11: platform_rpc.ListContentReportsRes.list:type_name -> platform_rpc.ContentReportItem
-	54, // 12: platform_rpc.GetContentReportRes.report:type_name -> platform_rpc.ContentReportItem
-	0,  // 13: platform_rpc.platform.AdminGetBucketList:input_type -> platform_rpc.AdminGetBucketListReq
-	3,  // 14: platform_rpc.platform.AdminCreateBucket:input_type -> platform_rpc.AdminCreateBucketReq
-	5,  // 15: platform_rpc.platform.AdminUpdateBucket:input_type -> platform_rpc.AdminUpdateBucketReq
-	7,  // 16: platform_rpc.platform.AdminDeleteBucket:input_type -> platform_rpc.AdminDeleteBucketReq
-	9,  // 17: platform_rpc.platform.AdminGetEventList:input_type -> platform_rpc.AdminGetEventListReq
-	12, // 18: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
-	16, // 19: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
-	18, // 20: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
-	21, // 21: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
-	23, // 22: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
-	25, // 23: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
-	28, // 24: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
-	30, // 25: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
-	32, // 26: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
-	36, // 27: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
-	39, // 28: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
-	41, // 29: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
-	44, // 30: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
-	46, // 31: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
-	48, // 32: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
-	50, // 33: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
-	52, // 34: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
-	55, // 35: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
-	57, // 36: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
-	59, // 37: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
-	61, // 38: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
-	2,  // 39: platform_rpc.platform.AdminGetBucketList:output_type -> platform_rpc.AdminGetBucketListRes
-	4,  // 40: platform_rpc.platform.AdminCreateBucket:output_type -> platform_rpc.AdminCreateBucketRes
-	6,  // 41: platform_rpc.platform.AdminUpdateBucket:output_type -> platform_rpc.AdminUpdateBucketRes
-	8,  // 42: platform_rpc.platform.AdminDeleteBucket:output_type -> platform_rpc.AdminDeleteBucketRes
-	11, // 43: platform_rpc.platform.AdminGetEventList:output_type -> platform_rpc.AdminGetEventListRes
-	14, // 44: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
-	17, // 45: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
-	19, // 46: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
-	22, // 47: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
-	24, // 48: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
-	26, // 49: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
-	29, // 50: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
-	31, // 51: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
-	33, // 52: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
-	37, // 53: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
-	40, // 54: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
-	42, // 55: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
-	45, // 56: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
-	47, // 57: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
-	49, // 58: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
-	51, // 59: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
-	53, // 60: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
-	56, // 61: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
-	58, // 62: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
-	60, // 63: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
-	62, // 64: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
-	39, // [39:65] is the sub-list for method output_type
-	13, // [13:39] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	1,  // 0: platform_rpc.AdminQueryLogsRes.logs:type_name -> platform_rpc.AdminLogItem
+	3,  // 1: platform_rpc.ListAppsRes.apps:type_name -> platform_rpc.AppItem
+	8,  // 2: platform_rpc.ListArchitecturesRes.architectures:type_name -> platform_rpc.ArchitectureItem
+	15, // 3: platform_rpc.ListVersionsRes.versions:type_name -> platform_rpc.VersionItem
+	22, // 4: platform_rpc.AppVersionsArchItem.versions:type_name -> platform_rpc.AppVersionBrief
+	23, // 5: platform_rpc.ListAppVersionsRes.architectures:type_name -> platform_rpc.AppVersionsArchItem
+	26, // 6: platform_rpc.ListReleasePoliciesRes.policies:type_name -> platform_rpc.ReleasePolicyItem
+	31, // 7: platform_rpc.ListFeedbackRes.list:type_name -> platform_rpc.FeedbackItem
+	31, // 8: platform_rpc.GetFeedbackRes.feedback:type_name -> platform_rpc.FeedbackItem
+	42, // 9: platform_rpc.ListContentReportsRes.list:type_name -> platform_rpc.ContentReportItem
+	42, // 10: platform_rpc.GetContentReportRes.report:type_name -> platform_rpc.ContentReportItem
+	0,  // 11: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
+	4,  // 12: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
+	6,  // 13: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
+	9,  // 14: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
+	11, // 15: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
+	13, // 16: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
+	16, // 17: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
+	18, // 18: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
+	20, // 19: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
+	24, // 20: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
+	27, // 21: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
+	29, // 22: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
+	32, // 23: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
+	34, // 24: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
+	36, // 25: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
+	38, // 26: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
+	40, // 27: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
+	43, // 28: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
+	45, // 29: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
+	47, // 30: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
+	49, // 31: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
+	2,  // 32: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
+	5,  // 33: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
+	7,  // 34: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
+	10, // 35: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
+	12, // 36: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
+	14, // 37: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
+	17, // 38: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
+	19, // 39: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
+	21, // 40: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
+	25, // 41: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
+	28, // 42: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
+	30, // 43: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
+	33, // 44: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
+	35, // 45: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
+	37, // 46: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
+	39, // 47: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
+	41, // 48: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
+	44, // 49: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
+	46, // 50: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
+	48, // 51: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
+	50, // 52: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
+	32, // [32:53] is the sub-list for method output_type
+	11, // [11:32] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_platform_rpc_proto_init() }
@@ -4590,17 +3706,15 @@ func file_platform_rpc_proto_init() {
 	if File_platform_rpc_proto != nil {
 		return
 	}
-	file_platform_rpc_proto_msgTypes[0].OneofWrappers = []any{}
-	file_platform_rpc_proto_msgTypes[5].OneofWrappers = []any{}
-	file_platform_rpc_proto_msgTypes[18].OneofWrappers = []any{}
-	file_platform_rpc_proto_msgTypes[25].OneofWrappers = []any{}
+	file_platform_rpc_proto_msgTypes[6].OneofWrappers = []any{}
+	file_platform_rpc_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_platform_rpc_proto_rawDesc), len(file_platform_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   63,
+			NumMessages:   51,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
