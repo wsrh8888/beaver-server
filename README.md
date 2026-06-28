@@ -1,273 +1,158 @@
 # 🦫 Beaver IM - 企业级即时通讯平台
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](VERSION)
-[![Go](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/)
-[![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.6.0+-green.svg)](https://github.com/zeromicro/go-zero)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)]()
-[![Stars](https://img.shields.io/badge/stars-50+-yellow.svg)](https://github.com/wsrh8888/beaver-server/stargazers)
+[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](VERSION)
+[![Go](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/)
+[![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.7.4-green.svg)](https://github.com/zeromicro/go-zero)
+[![QQ群](https://img.shields.io/badge/QQ群-1013328597%2B-blue.svg)](https://qm.qq.com/q/82rbf7QBzO)
 
-> 🚀 **企业级即时通讯平台** - 基于Go-Zero微服务架构构建，支持移动端（Flutter）、桌面端（Electron）和Web端，提供实时通信能力。
+> **海狸 IM 后端服务** - 基于 Go-Zero 微服务架构构建，为移动端（Flutter）、桌面端（Electron）与后台管理系统提供 REST / WebSocket / gRPC 能力。
 
-**当前版本：[2.0.1](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
+**当前版本：[2.0.2](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
 
 [English](README_EN.md) | [中文](README.md)
 
 ---
 
-## 🌟 核心特性
+## ✨ 核心能力
 
-### 🔐 **企业级安全**
-- **多因子认证** - 邮箱验证、短信验证码、生物识别支持
-- **端到端加密** - 消息传输和存储加密
-- **基于角色的访问控制** - 细粒度权限管理和管理员控制
-- **审计日志** - 全面的安全事件追踪
-
-### 💬 **高级消息功能**
-- **实时通信** - 基于WebSocket的即时消息
-- **多格式支持** - 文本、图片、文件、语音消息、表情
-- **消息状态** - 已读回执、正在输入提示、送达确认
-- **消息搜索** - 全文本对话搜索
-- **消息撤回** - 限时消息删除
-
-### 👥 **社交功能**
-- **联系人管理** - 二维码扫描、联系人导入导出
-- **群组管理** - 创建、管理和审核群聊
-- **好友请求** - 带自定义消息的审批流程
-- **用户资料** - 丰富的个人资料信息和头像
-
-### 🏗️ **微服务架构**
-- **15+微服务** - 可扩展、可维护的服务分解
-- **高可用性** - 多实例部署支持
-- **服务发现** - 基于ETCD的服务注册
-- **负载均衡** - 智能请求分发
-- **熔断器** - 故障容忍和弹性
-
-### 📱 **跨平台支持**
-- **移动应用** - 通过Flutter框架支持iOS/Android (推荐)
-- **桌面应用** - 通过Electron支持Windows/macOS/Linux
-- **API网关** - 第三方集成的RESTful API
+- 🔐 **认证授权** - 手机号 / 邮箱 / 扫码 / OAuth 登录，JWT 鉴权，登录设备管理
+- 💬 **即时通讯** - 私聊与群聊，消息存储与检索，已读回执，WebSocket 实时推送
+- 👥 **社交关系** - 好友申请与资料、群组创建与管理、朋友圈
+- 📁 **文件与表情** - 文件上传下载、表情包与收藏
+- 📞 **音视频通话** - 基于 LiveKit 的通话信令与房间管理
+- 🔔 **消息通知** - 系统通知与互动提醒
+- 🔄 **跨端同步** - 数据同步服务，支持多端消息与媒体状态一致
+- 🧩 **开放平台** - 开放 API 与开发者门户，支持机器人 / Webhook 集成
+- 📦 **平台服务** - 字典、意见反馈、版本更新、客户端日志查询等公共能力
+- 🛠️ **后台管理** - 用户管理、消息审计、连接监控、版本发布等管理端接口
 
 ## 🛠️ 技术栈
 
-### 后端服务
-| 技术 | 版本 | 用途 |
+| 类别 | 技术 | 说明 |
 |------|------|------|
-| **Go-Zero** | v1.6.0+ | 微服务框架 |
-| **gRPC** | v1.58+ | 服务间通信 |
-| **WebSocket** | - | 实时消息 |
-| **MySQL** | 8.0+ | 主数据存储 |
-| **Redis** | 6.0+ | 缓存和会话管理 |
-| **ETCD** | 3.5+ | 服务发现和配置 |
-| **Docker** | 20.0+ | 容器化 |
-
-### 前端技术
-| 平台 | 框架 | 特性 |
-|------|------|------|
-| **移动端** | Flutter 3.x | 跨平台移动应用 (推荐) |
-| **桌面端** | Electron + Vue 3 | 原生桌面体验 |
-
-## 📊 性能指标
-
-- **消息延迟**: 平均 < 100ms
-- **并发用户**: 支持 10,000+
-- **消息吞吐量**: 100,000+ 消息/秒
-- **可用性**: 99.9% 正常运行时间
-- **响应时间**: API响应 < 200ms
+| 语言 / 框架 | Go 1.24 + Go-Zero 1.7 | 微服务 API / RPC |
+| 通信 | gRPC、WebSocket、RocketMQ | 服务间调用与实时消息 |
+| 存储 | MySQL 8.0、Redis 6.0 | 多库拆分 + 缓存 |
+| 基础设施 | ETCD 3.5、Docker | 服务发现与部署 |
+| 其他 | JWT、LiveKit、七牛云 | 鉴权、通话、对象存储 |
 
 ## 🏗️ 架构概览
 
+客户端（Flutter / Electron / 管理端）统一经 API 网关访问各业务服务；服务间通过 gRPC 协作，WebSocket 负责长连接推送。
+
 ```
-┌─────────────────┐    ┌─────────────────┐
-│   移动端应用     │    │   桌面端应用     │
-│   (Flutter)     │    │   (Electron)    │
-└─────────┬───────┘    └─────────┬───────┘
-          │                      │
-          └──────────────────────┘
-                    │
-                    ┌─────────────┴─────────────┐
-                    │      API网关              │
-                    │      (端口: 20800)        │
-                    └─────────────┬─────────────┘
-                                  │
-        ┌─────────────────────────┼─────────────────────────┐
-        │                         │                         │
-┌───────▼────────┐    ┌───────────▼──────────┐    ┌────────▼────────┐
-│   认证服务      │    │    用户服务           │    │   好友服务      │
-│   API:20100    │    │   API:20000          │    │  API:20200      │
-│   RPC:30100    │    │   RPC:30000          │    │  RPC:30200      │
-└────────────────┘    └──────────────────────┘    └─────────────────┘
-        │                         │                         │
-┌───────▼────────┐    ┌───────────▼──────────┐    ┌────────▼────────┐
-│   聊天服务      │    │    群组服务          │    │   文件服务      │
-│   API:20300    │    │   API:20500          │    │  API:20600      │
-│   RPC:30300    │    │   RPC:30500          │    │  RPC:30600      │
-└────────────────┘    └──────────────────────┘    └─────────────────┘
-        │                         │                         │
-┌───────▼────────┐    ┌───────────▼──────────┐    ┌────────▼────────┐
-│   WS服务       │    │   表情服务           │    │ 反馈服务        │
-│   API:20400    │    │   API:20700          │    │  API:21400      │
-│   -            │    │   -                  │    │  -              │
-└────────────────┘    └──────────────────────┘    └─────────────────┘
-        │
-        └─────────────────────────────────────────────────────────────┐
-                                                                      │
-                    ┌─────────────────────────────────────────────────┴─┐
-                    │              数据层                               │
-                    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-                    │  │    MySQL    │  │    Redis    │  │    ETCD     │ │
-                    │  │   (8.0+)    │  │   (6.0+)    │  │   (3.5+)    │ │
-                    │  └─────────────┘  └─────────────┘  └─────────────┘ │
-                    └───────────────────────────────────────────────────┘
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ Flutter 移动端 │  │ Electron 桌面端│  │  后台管理 Web │
+└──────┬───────┘  └──────┬───────┘  └──────┬───────┘
+       │                 │                 │
+       └─────────────────┼─────────────────┘
+                         │
+              ┌──────────▼──────────┐
+              │  gateway_api :20800  │
+              │  gateway_admin :40800│
+              └──────────┬──────────┘
+                         │
+    ┌────────────────────┼────────────────────┐
+    │                    │                    │
+ user/auth/friend   chat/ws/group/file    platform/open/call
+ moment/emoji/...   notification/datasync   backend :40000
+    │                    │                    │
+    └────────────────────┼────────────────────┘
+                         │
+              ┌──────────▼──────────┐
+              │ MySQL · Redis · ETCD │
+              └─────────────────────┘
 ```
 
+### 服务端口
 
+| 服务 | API 端口 | RPC 端口 | 说明 |
+|------|---------:|---------:|------|
+| user | 20000 | 30000 | 用户 |
+| auth | 20100 | 30100 | 认证 |
+| friend | 20200 | 30200 | 好友 |
+| chat | 20300 | 30300 | 聊天 |
+| ws | 20400 | - | WebSocket |
+| group | 20500 | 30500 | 群组 |
+| file | 20600 | 30600 | 文件 |
+| emoji | 20700 | 30700 | 表情 |
+| gateway_api | 20800 | - | 客户端 API 网关 |
+| moment | 20900 | 30800 | 朋友圈 |
+| notification | 21000 | 31000 | 通知 |
+| platform | 21600 | 31100 | 平台（字典 / 反馈 / 更新 / 日志等） |
+| datasync | 21700 | - | 数据同步 |
+| call | 21800 | 31800 | 通话 |
+| open_api | 21900 | 30900 | 开放平台 API |
+| open_portal | 22000 | - | 开放平台门户 |
+| backend | 40000 | - | 后台管理 |
+| gateway_admin | 40800 | - | 管理端网关 |
 
-## 📚 文档与资源
-
-- 📖 **详细文档**: [https://wsrh8888.github.io/beaver-docs/](https://wsrh8888.github.io/beaver-docs/)
-- 🎥 **视频教程**: [B站频道](https://space.bilibili.com/269553626/lists)
-- 📱 **体验包下载**: [海狸IM Android体验包](https://github.com/wsrh8888/beaver-docs/releases/download/lastest/latest.apk)
-- 💬 **QQ群**: [1013328597](https://qm.qq.com/q/82rbf7QBzO)
-
-## 🔗 相关项目
-
-| 项目 | 仓库地址 | 说明 |
-|------|----------|------|
-| **beaver-server** | [GitHub](https://github.com/wsrh8888/beaver-server) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-server) | 后端微服务 |
-| **beaver-flutter** | [GitHub](https://github.com/wsrh8888/beaver-flutter) | 移动端应用 (Flutter - 推荐) |
-| **beaver-desktop** | [GitHub](https://github.com/wsrh8888/beaver-desktop) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-desktop) | 桌面端应用 |
-| **beaver-uniapp** | [GitHub](https://github.com/wsrh8888/beaver-uniapp) | 移动端应用 (Uniapp - 已废弃) |
-
-
-
-## 📱 功能展示
-
-### 🔐 用户认证
-<div align="center">
-  <img src="./static/mobile/login.jpg" width="200" alt="登录界面"/>
-  <img src="./static/mobile/register.jpg" width="200" alt="注册界面"/>
-  <img src="./static/mobile/find-password.jpg" width="200" alt="找回密码"/>
-</div>
-
-### 💬 聊天功能
-<div align="center">
-  <img src="./static/mobile/message.jpg" width="200" alt="消息主界面"/>
-  <img src="./static/mobile/private-chat.jpg" width="200" alt="私聊聊天"/>
-  <img src="./static/mobile/group-chat.jpg" width="200" alt="群聊聊天"/>
-  <img src="./static/mobile/send-text.jpg" width="200" alt="发送文字"/>
-  <img src="./static/mobile/send-emoji.jpg" width="200" alt="发送表情"/>
-  <img src="./static/mobile/chat-details.jpg" width="200" alt="聊天详情"/>
-</div>
-
-### 👥 社交功能
-<div align="center">
-  <img src="./static/mobile/friend.jpg" width="200" alt="好友列表"/>
-  <img src="./static/mobile/new-friends.jpg" width="200" alt="新的朋友"/>
-  <img src="./static/mobile/friend-info.jpg" width="200" alt="好友资料"/>
-  <img src="./static/mobile/edit-remark.jpg" width="200" alt="编辑备注"/>
-</div>
-
-### 🏠 朋友圈与群组
-<div align="center">
-  <img src="./static/mobile/moments.jpg" width="200" alt="朋友圈"/>
-  <img src="./static/mobile/send-moments.jpg" width="200" alt="发布朋友圈"/>
-  <img src="./static/mobile/group-list.jpg" width="200" alt="群聊列表"/>
-  <img src="./static/mobile/create-group.jpg" width="200" alt="创建群聊"/>
-  <img src="./static/mobile/group-details.jpg" width="200" alt="群聊详情"/>
-  <img src="./static/mobile/add-members.jpg" width="200" alt="添加成员"/>
-</div>
-
-### 👤 个人中心
-<div align="center">
-  <img src="./static/mobile/mine.jpg" width="200" alt="我的主界面"/>
-  <img src="./static/mobile/profile-edit.jpg" width="200" alt="编辑个人资料"/>
-  <img src="./static/mobile/qcode.jpg" width="200" alt="二维码功能"/>
-</div>
-
-### ⚙️ 系统功能
-<div align="center">
-  <img src="./static/mobile/settings.jpg" width="200" alt="设置"/>
-  <img src="./static/mobile/update.jpg" width="200" alt="更新"/>
-  <img src="./static/mobile/feedback.jpg" width="200" alt="反馈"/>
-  <img src="./static/mobile/about.jpg" width="200" alt="关于"/>
-  <img src="./static/mobile/statement.jpg" width="200" alt="声明"/>
-</div>
+> 完整端口表见 [`server.md`](server.md)；实际部署以各服务 `etc/*.yaml` 为准。
 
 ## 📁 项目结构
 
 ```
 beaver-server/
-├── app/                          # 微服务应用
-│   ├── auth/                     # 认证服务
-│   │   ├── auth_api/            # HTTP API层
-│   │   └── auth_rpc/            # gRPC服务层
-│   ├── chat/                     # 聊天服务
-│   │   ├── chat_api/            # HTTP API层
-│   │   ├── chat_rpc/            # gRPC服务层
-│   │   └── chat_models/         # 数据模型
-│   ├── dictionary/               # 字典服务
-│   │   ├── dictionary_api/      # HTTP API层
-│   │   └── dictionary_rpc/      # gRPC服务层
-│   ├── feedback/                 # 反馈服务
-│   │   ├── feedback_api/        # HTTP API层
-│   │   └── feedback_models/     # 数据模型
-│   ├── file/                     # 文件管理服务
-│   │   ├── file_api/            # HTTP API层
-│   │   ├── file_rpc/            # gRPC服务层
-│   │   └── file_models/         # 数据模型
-│   ├── friend/                   # 好友管理服务
-│   │   ├── friend_api/          # HTTP API层
-│   │   ├── friend_rpc/          # gRPC服务层
-│   │   └── friend_models/       # 数据模型
-│   ├── gateway/                  # API网关
-│   ├── group/                    # 群组管理服务
-│   │   ├── group_api/           # HTTP API层
-│   │   ├── group_rpc/           # gRPC服务层
-│   │   └── group_models/        # 数据模型
-│   ├── moment/                   # 朋友圈服务
-│   │   ├── moment_api/          # HTTP API层
-│   │   └── moment_models/       # 数据模型
-│   ├── user/                     # 用户管理服务
-│   │   ├── user_api/            # HTTP API层
-│   │   ├── user_rpc/            # gRPC服务层
-│   │   └── user_models/         # 数据模型
-│   └── ws/                       # WebSocket服务
-│       └── ws_api/              # HTTP API层
-├── common/                       # 共享组件
-│   ├── middleware/              # HTTP/gRPC中间件
-│   ├── models/                  # 共享数据模型
-│   ├── response/                # 响应工具
-│   └── validator/               # 请求验证
-├── core/                        # 核心配置
-│   ├── etcd.go                 # ETCD客户端
-│   ├── gorm.go                 # 数据库连接
-│   └── redis.go                # Redis客户端
-├── static/                      # 静态资源
-├── template/                    # 代码生成模板
-└── utils/                       # 工具函数
+├── app/                    # 微服务
+│   ├── auth/               # 认证
+│   ├── user/               # 用户
+│   ├── friend/             # 好友
+│   ├── chat/               # 聊天
+│   ├── ws/                 # WebSocket
+│   ├── group/              # 群组
+│   ├── file/               # 文件
+│   ├── emoji/              # 表情
+│   ├── moment/             # 朋友圈
+│   ├── notification/       # 通知
+│   ├── platform/           # 平台公共能力
+│   ├── datasync/           # 跨端同步
+│   ├── call/               # 音视频通话
+│   ├── open/               # 开放平台
+│   ├── backend/            # 后台管理
+│   └── gateway/            # API 网关
+├── common/                 # 中间件、响应、校验等公共组件
+├── core/                   # 数据库 / Redis / ETCD 等核心配置
+├── database/               # 初始化数据与迁移脚本
+├── deploy/                 # 部署配置
+├── main.go                 # 数据库创建与 AutoMigrate 入口
+└── server.md               # 服务端口说明
 ```
+
+## 🚀 快速开始
+
+详细的环境准备、配置说明与部署步骤见文档站：
+
+- 📖 [后端开发文档](https://wsrh8888.github.io/beaver-docs/backend/)
+- 📖 [部署说明](https://wsrh8888.github.io/beaver-docs/backend/deploy/build-scripts.html)
+
+本地初始化数据库（需先配置 MySQL 连接）：
+
+```bash
+go run main.go -db
+```
+
+## 📚 文档与资源
+
+- 📖 **详细文档**: [https://wsrh8888.github.io/beaver-docs/](https://wsrh8888.github.io/beaver-docs/)
+- 🎥 **视频教程**: [B站频道](https://space.bilibili.com/269553626/lists)
+- 📱 **体验包下载**: [海狸 IM Android 体验包](https://github.com/wsrh8888/beaver-docs/releases/download/lastest/latest.apk)
+- 💬 **QQ 群**: [1013328597](https://qm.qq.com/q/82rbf7QBzO)
+
+## 🔗 相关项目
+
+| 项目 | 仓库地址 | 说明 |
+|------|----------|------|
+| **beaver-server** | [GitHub](https://github.com/wsrh8888/beaver-server) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-server) | 后端微服务（本仓库） |
+| **beaver-flutter** | [GitHub](https://github.com/wsrh8888/beaver-flutter) | 移动端（Flutter，推荐） |
+| **beaver-desktop** | [GitHub](https://github.com/wsrh8888/beaver-desktop) \| [Gitee](https://gitee.com/dawwdadfrf/beaver-desktop) | 桌面端（Electron） |
+| **beaver-manager** | [GitHub](https://github.com/wsrh8888/beaver-manager) | 后台管理系统 |
+| **beaver-docs** | [GitHub](https://github.com/wsrh8888/beaver-docs) | 项目文档站 |
+| **beaver-uniapp** | [GitHub](https://github.com/wsrh8888/beaver-uniapp) | 移动端（UniApp，已废弃） |
 
 ## 🤝 贡献指南
 
-我们欢迎社区贡献！详情请参阅[贡献指南](CONTRIBUTING.md)。
-
-### 如何贡献
-
-1. **Fork** 本仓库
-2. **创建** 特性分支 (`git checkout -b feature/AmazingFeature`)
-3. **提交** 更改 (`git commit -m 'Add some AmazingFeature'`)
-4. **推送** 到分支 (`git push origin feature/AmazingFeature`)
-5. **开启** Pull Request
-
-### 贡献领域
-
-- 🐛 **Bug报告** - 帮助我们识别和修复问题
-- 💡 **功能建议** - 建议新功能和改进
-- 📝 **文档** - 改进文档和示例
-- 🔧 **代码贡献** - 提交代码改进和新功能
-- 🧪 **测试** - 帮助测试和质量保证
+欢迎通过 Issue / Pull Request 参与贡献，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 📄 开源协议与免责声明
 
@@ -310,7 +195,7 @@ beaver-server/
 
 > 📖 **详细法律条款**：请参阅 [LEGAL.md](LEGAL.md) 文件了解完整的法律免责声明和使用要求。
 
-## ⭐ Star历史
+## ⭐ Star 历史
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wsrh8888/beaver-server&type=Date)](https://star-history.com/#wsrh8888/beaver-server&Date)
 
@@ -323,13 +208,9 @@ beaver-server/
   <img src="./static/sponsor/zhifubao.jpg" width="200" alt="支付宝赞助码"/>
 </div>
 
-## ⭐ 支持项目
-
-如果这个项目对你有帮助，请在GitHub上给我们一个 ⭐ Star！
-
 ---
 
 <div align="center">
   <strong>Made with ❤️ by Beaver IM Team</strong><br>
   <em>企业级即时通讯平台</em>
-</div> 
+</div>
