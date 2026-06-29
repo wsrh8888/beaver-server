@@ -127,3 +127,33 @@ func (s *PlatformServer) UpdateContentReports(ctx context.Context, in *platform_
 	l := logic.NewUpdateContentReportsLogic(ctx, s.svcCtx)
 	return l.UpdateContentReports(in)
 }
+
+func (s *PlatformServer) CreateWorkbenchApp(ctx context.Context, in *platform_rpc.CreateWorkbenchAppReq) (*platform_rpc.CreateWorkbenchAppRes, error) {
+	l := logic.NewCreateWorkbenchAppLogic(ctx, s.svcCtx)
+	return l.CreateWorkbenchApp(in)
+}
+
+func (s *PlatformServer) UpdateWorkbenchApp(ctx context.Context, in *platform_rpc.UpdateWorkbenchAppReq) (*platform_rpc.UpdateWorkbenchAppRes, error) {
+	l := logic.NewUpdateWorkbenchAppLogic(ctx, s.svcCtx)
+	return l.UpdateWorkbenchApp(in)
+}
+
+func (s *PlatformServer) DeleteWorkbenchApp(ctx context.Context, in *platform_rpc.DeleteWorkbenchAppReq) (*platform_rpc.DeleteWorkbenchAppRes, error) {
+	l := logic.NewDeleteWorkbenchAppLogic(ctx, s.svcCtx)
+	return l.DeleteWorkbenchApp(in)
+}
+
+func (s *PlatformServer) GetWorkbenchApp(ctx context.Context, in *platform_rpc.GetWorkbenchAppReq) (*platform_rpc.GetWorkbenchAppRes, error) {
+	l := logic.NewGetWorkbenchAppLogic(ctx, s.svcCtx)
+	return l.GetWorkbenchApp(in)
+}
+
+func (s *PlatformServer) ListWorkbenchApps(ctx context.Context, in *platform_rpc.ListWorkbenchAppsReq) (*platform_rpc.ListWorkbenchAppsRes, error) {
+	l := logic.NewListWorkbenchAppsLogic(ctx, s.svcCtx)
+	return l.ListWorkbenchApps(in)
+}
+
+func (s *PlatformServer) ListEnabledWorkbenchApps(ctx context.Context, in *platform_rpc.ListEnabledWorkbenchAppsReq) (*platform_rpc.ListEnabledWorkbenchAppsRes, error) {
+	l := logic.NewListEnabledWorkbenchAppsLogic(ctx, s.svcCtx)
+	return l.ListEnabledWorkbenchApps(in)
+}

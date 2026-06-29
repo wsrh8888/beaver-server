@@ -3,7 +3,7 @@ syntax = "v1"
 // 用户运营 360（跨域编排）
 type (
 	GetUserOperationsProfileReq {
-		UserID string `path:"userId"`
+		UserID string `form:"userId"`
 	}
 	GetUserOperationsProfileRes {
 		Profile        UserOpsProfileInfo     `json:"profile"`
@@ -111,7 +111,7 @@ type (
 // 群组运营 360（跨域编排）
 type (
 	GetGroupOperationsProfileReq {
-		GroupID string `path:"groupId"`
+		GroupID string `form:"groupId"`
 	}
 	GetGroupOperationsProfileRes {
 		Profile       GroupOpsProfileInfo    `json:"profile"`
@@ -163,13 +163,13 @@ type (
 service backend {
 	@doc "用户运营360"
 	@handler getUserOperationsProfile
-	get /admin/operations/user/:userId/profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
+	get /admin/operations/v1/user_profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
 
 	@doc "运营统一检索"
 	@handler adminUnifiedSearch
-	get /admin/operations/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
+	get /admin/operations/v1/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
 
 	@doc "群组运营360"
 	@handler getGroupOperationsProfile
-	get /admin/operations/group/:groupId/profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
+	get /admin/operations/v1/group_profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
 }

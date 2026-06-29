@@ -1,0 +1,116 @@
+syntax = "proto3";
+package circle_rpc;
+
+option go_package = "./circle_rpc";
+
+// 圈子基础信息
+message CircleItem {
+  string circle_id = 1;    // 圈子ID
+  string name = 2;         // 圈子名称
+  string description = 3;  // 圈子简介
+  string avatar = 4;       // 圈子头像
+  string creator_id = 5;   // 创建者用户ID
+  int32  join_type = 6;    // 加入方式：0=自由加入 1=审批加入
+  int64  member_count = 7; // 成员数量
+  int64  post_count = 8;   // 帖子数量
+  bool   is_deleted = 9;   // 是否已解散
+  string created_at = 10;  // 创建时间
+  string updated_at = 11;  // 更新时间
+}
+
+// 获取圈子列表
+message GetCircleListReq {
+  int32  page = 1;       // 页码
+  int32  page_size = 2;  // 每页数量
+  string user_id = 3;    // 按用户ID过滤（查询某用户加入的圈子）
+  string keywords = 4;   // 关键词搜索
+  string circle_id = 5;  // 按圈子ID精确查询
+}
+
+message GetCircleListRes {
+  int64              total = 1; // 总数
+  repeated CircleItem list = 2; // 圈子列表
+}
+
+// 更新圈子
+message UpdateCircleReq {
+  string circle_id   = 1; // 圈子ID
+  optional bool is_deleted = 2; // 是否解散
+  optional int64 member_count = 3; // 成员数量（增量，正数加负数减）
+  optional int64 post_count   = 4; // 帖子数量（增量，正数加负数减）
+}
+
+message UpdateCircleRes {}
+
+// 获取成员列表
+message GetCircleMembersReq {
+  string circle_id = 1;  // 圈子ID
+  int32  page = 2;       // 页码
+  int32  page_size = 3;  // 每页数量
+}
+
+message CircleMemberItem {
+  string circle_id = 1; // 圈子ID
+  string user_id = 2;   // 用户ID
+  int32  role = 3;      // 角色：1=圈主 2=管理员 3=普通成员
+}
+
+message GetCircleMembersRes {
+  int64                    total = 1; // 总数
+  repeated CircleMemberItem list = 2; // 成员列表
+}
+
+// 获取用户在圈子中的角色
+message GetUserCircleRoleReq {
+  string circle_id = 1; // 圈子ID
+  string user_id = 2;   // 用户ID
+}
+
+message GetUserCircleRoleRes {
+  int32 role = 1; // 用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
+}
+
+// 获取用户加入的圈子ID列表
+message GetUserCircleIDsReq {
+  string user_id = 1; // 用户ID
+}
+
+message GetUserCircleIDsRes {
+  repeated string circle_ids = 1; // 圈子ID列表
+}
+
+// 获取圈子版本变更列表（数据同步用）
+message GetCircleVersionsReq {
+  string user_id = 1;   // 用户ID
+  int64  version = 2;   // 本地版本号
+}
+
+message CircleVersionItem {
+  string circle_id    = 1; // 圈子ID
+  string name         = 2; // 圈子名称
+  string avatar       = 3; // 圈子头像
+  int64  member_count = 4; // 成员数量
+  int32  role         = 5; // 用户角色：0=已退出 1=圈主 2=管理员 3=普通成员
+  int64  version      = 6; // 数据版本号
+}
+
+message GetCircleVersionsRes {
+  repeated CircleVersionItem list = 1; // 变更列表
+}
+
+service circle {
+  // 获取圈子列表（支持按用户、关键词、ID过滤）
+  rpc GetCircleList(GetCircleListReq) returns (GetCircleListRes);
+  // 更新圈子状态（解散、成员数/帖子数变更）
+  rpc UpdateCircle(UpdateCircleReq) returns (UpdateCircleRes);
+  // 获取圈子成员列表
+  rpc GetCircleMembers(GetCircleMembersReq) returns (GetCircleMembersRes);
+  // 获取用户在圈子中的角色
+  rpc GetUserCircleRole(GetUserCircleRoleReq) returns (GetUserCircleRoleRes);
+  // 获取用户加入的所有圈子ID
+  rpc GetUserCircleIDs(GetUserCircleIDsReq) returns (GetUserCircleIDsRes);
+  // 获取圈子版本变更（数据同步）
+  rpc GetCircleVersions(GetCircleVersionsReq) returns (GetCircleVersionsRes);
+}
+
+// goctl rpc protoc circle_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

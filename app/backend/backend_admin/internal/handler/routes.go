@@ -21,6 +21,7 @@ import (
 	track "beaver/app/backend/backend_admin/internal/handler/track"
 	update "beaver/app/backend/backend_admin/internal/handler/update"
 	user "beaver/app/backend/backend_admin/internal/handler/user"
+	workbench "beaver/app/backend/backend_admin/internal/handler/workbench"
 	"beaver/app/backend/backend_admin/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -47,57 +48,57 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取聊天消息详情
-				Method:  http.MethodGet,
-				Path:    "/admin/chat/:id",
-				Handler: chat.GetChatMessageDetailHandler(serverCtx),
-			},
-			{
-				// 删除聊天消息
-				Method:  http.MethodDelete,
-				Path:    "/admin/chat/:id",
-				Handler: chat.DeleteChatMessageHandler(serverCtx),
-			},
-			{
 				// 批量删除聊天消息
-				Method:  http.MethodDelete,
-				Path:    "/admin/chat/batch",
+				Method:  http.MethodPost,
+				Path:    "/admin/chat/v1/batch_delete",
 				Handler: chat.BatchDeleteChatMessagesHandler(serverCtx),
 			},
 			{
-				// 按消息类型删除
-				Method:  http.MethodDelete,
-				Path:    "/admin/chat/bytype",
-				Handler: chat.DeleteMessagesByTypeHandler(serverCtx),
+				// 批量恢复消息
+				Method:  http.MethodPost,
+				Path:    "/admin/chat/v1/batch_restore",
+				Handler: chat.BatchRestoreChatMessagesHandler(serverCtx),
 			},
 			{
 				// 清空会话消息
-				Method:  http.MethodDelete,
-				Path:    "/admin/chat/clearconv",
+				Method:  http.MethodPost,
+				Path:    "/admin/chat/v1/clear_conversation",
 				Handler: chat.ClearConversationHandler(serverCtx),
+			},
+			{
+				// 删除聊天消息
+				Method:  http.MethodPost,
+				Path:    "/admin/chat/v1/delete",
+				Handler: chat.DeleteChatMessageHandler(serverCtx),
+			},
+			{
+				// 按消息类型删除
+				Method:  http.MethodPost,
+				Path:    "/admin/chat/v1/delete_by_type",
+				Handler: chat.DeleteMessagesByTypeHandler(serverCtx),
+			},
+			{
+				// 获取聊天消息详情
+				Method:  http.MethodGet,
+				Path:    "/admin/chat/v1/detail",
+				Handler: chat.GetChatMessageDetailHandler(serverCtx),
 			},
 			{
 				// 获取聊天消息列表
 				Method:  http.MethodGet,
-				Path:    "/admin/chat/list",
+				Path:    "/admin/chat/v1/list",
 				Handler: chat.GetChatMessageListHandler(serverCtx),
 			},
 			{
 				// 恢复已删除的消息
-				Method:  http.MethodPut,
-				Path:    "/admin/chat/restore",
+				Method:  http.MethodPost,
+				Path:    "/admin/chat/v1/restore",
 				Handler: chat.RestoreChatMessageHandler(serverCtx),
-			},
-			{
-				// 批量恢复消息
-				Method:  http.MethodPut,
-				Path:    "/admin/chat/restorebatch",
-				Handler: chat.BatchRestoreChatMessagesHandler(serverCtx),
 			},
 			{
 				// 获取用户会话列表
 				Method:  http.MethodGet,
-				Path:    "/admin/chat/sessions",
+				Path:    "/admin/chat/v1/sessions",
 				Handler: chat.GetChatSessionListHandler(serverCtx),
 			},
 		},
@@ -106,76 +107,76 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 更新表情图片
-				Method:  http.MethodPut,
-				Path:    "/admin/emoji/:emojiId",
-				Handler: emoji.UpdateEmojiHandler(serverCtx),
-			},
-			{
-				// 删除表情图片
-				Method:  http.MethodDelete,
-				Path:    "/admin/emoji/:emojiId",
-				Handler: emoji.DeleteEmojiHandler(serverCtx),
-			},
-			{
 				// 获取用户收藏的表情图片列表
 				Method:  http.MethodGet,
-				Path:    "/admin/emoji/collects",
+				Path:    "/admin/emoji/v1/collect_list",
 				Handler: emoji.GetEmojiCollectListHandler(serverCtx),
 			},
 			{
 				// 创建表情图片
 				Method:  http.MethodPost,
-				Path:    "/admin/emoji/create",
+				Path:    "/admin/emoji/v1/create",
 				Handler: emoji.CreateEmojiHandler(serverCtx),
+			},
+			{
+				// 删除表情图片
+				Method:  http.MethodPost,
+				Path:    "/admin/emoji/v1/delete",
+				Handler: emoji.DeleteEmojiHandler(serverCtx),
 			},
 			{
 				// 获取表情图片列表
 				Method:  http.MethodGet,
-				Path:    "/admin/emoji/list",
+				Path:    "/admin/emoji/v1/list",
 				Handler: emoji.GetEmojiListHandler(serverCtx),
 			},
 			{
 				// 向表情包集合中添加表情图片
 				Method:  http.MethodPost,
-				Path:    "/admin/emoji/packageaddemoji",
+				Path:    "/admin/emoji/v1/package_add_emoji",
 				Handler: emoji.AddEmojiToPackageHandler(serverCtx),
 			},
 			{
 				// 创建表情包集合
 				Method:  http.MethodPost,
-				Path:    "/admin/emoji/packagecreate",
+				Path:    "/admin/emoji/v1/package_create",
 				Handler: emoji.CreateEmojiPackageHandler(serverCtx),
 			},
 			{
 				// 删除表情包集合
-				Method:  http.MethodDelete,
-				Path:    "/admin/emoji/packagedelete",
+				Method:  http.MethodPost,
+				Path:    "/admin/emoji/v1/package_delete",
 				Handler: emoji.DeleteEmojiPackageHandler(serverCtx),
 			},
 			{
 				// 获取表情包内的表情图片列表
 				Method:  http.MethodGet,
-				Path:    "/admin/emoji/packageemojis",
+				Path:    "/admin/emoji/v1/package_emojis",
 				Handler: emoji.GetEmojiPackageEmojisHandler(serverCtx),
-			},
-			{
-				// 从表情包集合中移除表情图片
-				Method:  http.MethodDelete,
-				Path:    "/admin/emoji/packageremoveemoji",
-				Handler: emoji.RemoveEmojiFromPackageHandler(serverCtx),
 			},
 			{
 				// 获取表情包集合列表
 				Method:  http.MethodGet,
-				Path:    "/admin/emoji/packages",
+				Path:    "/admin/emoji/v1/package_list",
 				Handler: emoji.GetEmojiPackageListHandler(serverCtx),
 			},
 			{
+				// 从表情包集合中移除表情图片
+				Method:  http.MethodPost,
+				Path:    "/admin/emoji/v1/package_remove_emoji",
+				Handler: emoji.RemoveEmojiFromPackageHandler(serverCtx),
+			},
+			{
 				// 更新表情包集合
-				Method:  http.MethodPut,
-				Path:    "/admin/emoji/packageupdate",
+				Method:  http.MethodPost,
+				Path:    "/admin/emoji/v1/package_update",
 				Handler: emoji.UpdateEmojiPackageHandler(serverCtx),
+			},
+			{
+				// 更新表情图片
+				Method:  http.MethodPost,
+				Path:    "/admin/emoji/v1/update",
+				Handler: emoji.UpdateEmojiHandler(serverCtx),
 			},
 		},
 	)
@@ -183,27 +184,27 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 删除反馈
+				Method:  http.MethodPost,
+				Path:    "/admin/feedback/v1/delete",
+				Handler: feedback.DeleteFeedbackHandler(serverCtx),
+			},
+			{
 				// 获取反馈详情
 				Method:  http.MethodGet,
-				Path:    "/admin/feedback/:id",
+				Path:    "/admin/feedback/v1/detail",
 				Handler: feedback.GetFeedbackDetailHandler(serverCtx),
 			},
 			{
 				// 处理反馈
-				Method:  http.MethodPut,
-				Path:    "/admin/feedback/:id",
+				Method:  http.MethodPost,
+				Path:    "/admin/feedback/v1/handle",
 				Handler: feedback.HandleFeedbackHandler(serverCtx),
-			},
-			{
-				// 删除反馈
-				Method:  http.MethodDelete,
-				Path:    "/admin/feedback/:id",
-				Handler: feedback.DeleteFeedbackHandler(serverCtx),
 			},
 			{
 				// 获取反馈列表
 				Method:  http.MethodGet,
-				Path:    "/admin/feedback/list",
+				Path:    "/admin/feedback/v1/list",
 				Handler: feedback.GetFeedbackListHandler(serverCtx),
 			},
 		},
@@ -212,57 +213,57 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取文件详情
-				Method:  http.MethodGet,
-				Path:    "/admin/file/:id",
-				Handler: file.GetFileDetailHandler(serverCtx),
+				// 批量删除文件
+				Method:  http.MethodPost,
+				Path:    "/admin/file/v1/batch_delete",
+				Handler: file.BatchDeleteFileHandler(serverCtx),
 			},
 			{
 				// 删除文件
-				Method:  http.MethodDelete,
-				Path:    "/admin/file/:id",
+				Method:  http.MethodPost,
+				Path:    "/admin/file/v1/delete",
 				Handler: file.DeleteFileHandler(serverCtx),
 			},
 			{
-				// 批量删除文件
-				Method:  http.MethodPost,
-				Path:    "/admin/file/batch-delete",
-				Handler: file.BatchDeleteFileHandler(serverCtx),
+				// 获取文件详情
+				Method:  http.MethodGet,
+				Path:    "/admin/file/v1/detail",
+				Handler: file.GetFileDetailHandler(serverCtx),
 			},
 			{
 				// 获取文件列表
 				Method:  http.MethodGet,
-				Path:    "/admin/file/list",
+				Path:    "/admin/file/v1/list",
 				Handler: file.GetFileListHandler(serverCtx),
 			},
 			{
 				// 文件预览
 				Method:  http.MethodGet,
-				Path:    "/admin/file/preview/:fileName",
+				Path:    "/admin/file/v1/preview",
 				Handler: file.PreviewHandler(serverCtx),
 			},
 			{
 				// 获取七牛云上传token
 				Method:  http.MethodPost,
-				Path:    "/admin/file/qiniuToken",
+				Path:    "/admin/file/v1/qiniu_token",
 				Handler: file.GetQiniuUploadTokenHandler(serverCtx),
 			},
 			{
 				// 保存文件信息到数据库
 				Method:  http.MethodPost,
-				Path:    "/admin/file/save",
+				Path:    "/admin/file/v1/save",
 				Handler: file.SaveFileHandler(serverCtx),
 			},
 			{
 				// 文件上传本地
 				Method:  http.MethodPost,
-				Path:    "/admin/file/uploadLocal",
+				Path:    "/admin/file/v1/upload_local",
 				Handler: file.FileUploadLocalHandler(serverCtx),
 			},
 			{
 				// 文件上传七牛云
 				Method:  http.MethodPost,
-				Path:    "/admin/file/uploadQiniu",
+				Path:    "/admin/file/v1/upload_qiniu",
 				Handler: file.FileUploadQiniuHandler(serverCtx),
 			},
 		},
@@ -271,69 +272,69 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取好友关系详情
-				Method:  http.MethodGet,
-				Path:    "/admin/friend/:id",
-				Handler: friend.GetFriendDetailHandler(serverCtx),
-			},
-			{
-				// 强制删除好友关系
-				Method:  http.MethodDelete,
-				Path:    "/admin/friend/:id",
-				Handler: friend.DeleteFriendHandler(serverCtx),
-			},
-			{
 				// 批量删除好友关系
-				Method:  http.MethodDelete,
-				Path:    "/admin/friend/batch",
+				Method:  http.MethodPost,
+				Path:    "/admin/friend/v1/batch_delete",
 				Handler: friend.BatchDeleteFriendsHandler(serverCtx),
 			},
 			{
-				// 解除黑名单
-				Method:  http.MethodDelete,
-				Path:    "/admin/friend/blockbatch",
-				Handler: friend.UnblockFriendUsersHandler(serverCtx),
+				// 批量删除好友验证记录
+				Method:  http.MethodPost,
+				Path:    "/admin/friend/v1/batch_delete_verify",
+				Handler: friend.BatchDeleteFriendVerifyHandler(serverCtx),
 			},
 			{
 				// 获取好友黑名单列表
 				Method:  http.MethodGet,
-				Path:    "/admin/friend/blocklist",
+				Path:    "/admin/friend/v1/block_list",
 				Handler: friend.GetFriendBlockListHandler(serverCtx),
+			},
+			{
+				// 强制删除好友关系
+				Method:  http.MethodPost,
+				Path:    "/admin/friend/v1/delete",
+				Handler: friend.DeleteFriendHandler(serverCtx),
+			},
+			{
+				// 删除好友验证记录
+				Method:  http.MethodPost,
+				Path:    "/admin/friend/v1/delete_verify",
+				Handler: friend.DeleteFriendVerifyHandler(serverCtx),
+			},
+			{
+				// 获取好友关系详情
+				Method:  http.MethodGet,
+				Path:    "/admin/friend/v1/detail",
+				Handler: friend.GetFriendDetailHandler(serverCtx),
 			},
 			{
 				// 获取好友关系列表
 				Method:  http.MethodGet,
-				Path:    "/admin/friend/list",
+				Path:    "/admin/friend/v1/list",
 				Handler: friend.GetFriendListHandler(serverCtx),
 			},
 			{
 				// 恢复好友关系
-				Method:  http.MethodPut,
-				Path:    "/admin/friend/restore",
+				Method:  http.MethodPost,
+				Path:    "/admin/friend/v1/restore",
 				Handler: friend.RestoreFriendHandler(serverCtx),
+			},
+			{
+				// 解除黑名单
+				Method:  http.MethodPost,
+				Path:    "/admin/friend/v1/unblock_batch",
+				Handler: friend.UnblockFriendUsersHandler(serverCtx),
 			},
 			{
 				// 获取好友验证详情
 				Method:  http.MethodGet,
-				Path:    "/admin/friend/verify",
+				Path:    "/admin/friend/v1/verify_detail",
 				Handler: friend.GetFriendVerifyDetailHandler(serverCtx),
-			},
-			{
-				// 删除好友验证记录
-				Method:  http.MethodDelete,
-				Path:    "/admin/friend/verify",
-				Handler: friend.DeleteFriendVerifyHandler(serverCtx),
-			},
-			{
-				// 批量删除好友验证记录
-				Method:  http.MethodDelete,
-				Path:    "/admin/friend/verifybatch",
-				Handler: friend.BatchDeleteFriendVerifyHandler(serverCtx),
 			},
 			{
 				// 获取好友验证列表
 				Method:  http.MethodGet,
-				Path:    "/admin/friend/verifylist",
+				Path:    "/admin/friend/v1/verify_list",
 				Handler: friend.GetFriendVerifyListHandler(serverCtx),
 			},
 		},
@@ -342,52 +343,52 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 删除群组
+				Method:  http.MethodPost,
+				Path:    "/admin/group/v1/delete",
+				Handler: group.DeleteGroupHandler(serverCtx),
+			},
+			{
 				// 获取群组详情
 				Method:  http.MethodGet,
-				Path:    "/admin/group/:id",
+				Path:    "/admin/group/v1/detail",
 				Handler: group.GetGroupDetailHandler(serverCtx),
-			},
-			{
-				// 更新群组信息
-				Method:  http.MethodPut,
-				Path:    "/admin/group/:id",
-				Handler: group.UpdateGroupHandler(serverCtx),
-			},
-			{
-				// 删除群组
-				Method:  http.MethodDelete,
-				Path:    "/admin/group/:id",
-				Handler: group.DeleteGroupHandler(serverCtx),
 			},
 			{
 				// 获取群组列表
 				Method:  http.MethodGet,
-				Path:    "/admin/group/list",
+				Path:    "/admin/group/v1/list",
 				Handler: group.GetGroupListHandler(serverCtx),
-			},
-			{
-				// 更新群成员角色
-				Method:  http.MethodPut,
-				Path:    "/admin/group/member/:id",
-				Handler: group.UpdateMemberRoleHandler(serverCtx),
 			},
 			{
 				// 获取群成员列表
 				Method:  http.MethodGet,
-				Path:    "/admin/group/members",
+				Path:    "/admin/group/v1/members",
 				Handler: group.GetGroupMemberListHandler(serverCtx),
 			},
 			{
 				// 禁言群成员
-				Method:  http.MethodPut,
-				Path:    "/admin/group/mute/:id",
+				Method:  http.MethodPost,
+				Path:    "/admin/group/v1/mute_member",
 				Handler: group.MuteGroupMemberHandler(serverCtx),
 			},
 			{
 				// 移除群成员
 				Method:  http.MethodPost,
-				Path:    "/admin/group/remove-member",
+				Path:    "/admin/group/v1/remove_member",
 				Handler: group.RemoveGroupMemberHandler(serverCtx),
+			},
+			{
+				// 更新群组信息
+				Method:  http.MethodPost,
+				Path:    "/admin/group/v1/update",
+				Handler: group.UpdateGroupHandler(serverCtx),
+			},
+			{
+				// 更新群成员角色
+				Method:  http.MethodPost,
+				Path:    "/admin/group/v1/update_member_role",
+				Handler: group.UpdateMemberRoleHandler(serverCtx),
 			},
 		},
 	)
@@ -395,88 +396,88 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 工单列表
+				// 工单处置上下文（跨域编排）
 				Method:  http.MethodGet,
-				Path:    "/admin/moderation/cases",
-				Handler: moderation.GetModerationCaseListHandler(serverCtx),
-			},
-			{
-				// 创建工单
-				Method:  http.MethodPost,
-				Path:    "/admin/moderation/cases",
-				Handler: moderation.CreateModerationCaseHandler(serverCtx),
+				Path:    "/admin/moderation/v1/case_context",
+				Handler: moderation.GetModerationCaseContextHandler(serverCtx),
 			},
 			{
 				// 工单详情
 				Method:  http.MethodGet,
-				Path:    "/admin/moderation/cases/:id",
+				Path:    "/admin/moderation/v1/case_detail",
 				Handler: moderation.GetModerationCaseDetailHandler(serverCtx),
 			},
 			{
-				// 工单处置上下文（跨域编排）
-				Method:  http.MethodGet,
-				Path:    "/admin/moderation/cases/:id/context",
-				Handler: moderation.GetModerationCaseContextHandler(serverCtx),
+				// 创建工单
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/v1/create_case",
+				Handler: moderation.CreateModerationCaseHandler(serverCtx),
 			},
 			{
-				// 处置工单（含联动管控）
-				Method:  http.MethodPut,
-				Path:    "/admin/moderation/cases/:id/handle",
-				Handler: moderation.HandleModerationCaseHandler(serverCtx),
+				// 新增敏感词
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/v1/create_sensitive_word",
+				Handler: moderation.CreateSensitiveWordHandler(serverCtx),
+			},
+			{
+				// 删除敏感词
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/v1/delete_sensitive_word",
+				Handler: moderation.DeleteSensitiveWordHandler(serverCtx),
+			},
+			{
+				// 举报立案（创建工单）
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/v1/escalate_report",
+				Handler: moderation.EscalateContentReportHandler(serverCtx),
 			},
 			{
 				// 用户快捷管控
 				Method:  http.MethodPost,
-				Path:    "/admin/moderation/control/user",
+				Path:    "/admin/moderation/v1/execute_user_control",
 				Handler: moderation.ExecuteUserControlHandler(serverCtx),
+			},
+			{
+				// 处置工单（含联动管控）
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/v1/handle_case",
+				Handler: moderation.HandleModerationCaseHandler(serverCtx),
+			},
+			{
+				// 工单列表
+				Method:  http.MethodGet,
+				Path:    "/admin/moderation/v1/list_cases",
+				Handler: moderation.GetModerationCaseListHandler(serverCtx),
 			},
 			{
 				// 操作审计日志
 				Method:  http.MethodGet,
-				Path:    "/admin/moderation/logs",
+				Path:    "/admin/moderation/v1/list_logs",
 				Handler: moderation.GetOperationLogListHandler(serverCtx),
 			},
 			{
 				// 内容举报列表
 				Method:  http.MethodGet,
-				Path:    "/admin/moderation/reports",
+				Path:    "/admin/moderation/v1/list_reports",
 				Handler: moderation.GetContentReportListHandler(serverCtx),
-			},
-			{
-				// 举报立案（创建工单）
-				Method:  http.MethodPost,
-				Path:    "/admin/moderation/reports/escalate",
-				Handler: moderation.EscalateContentReportHandler(serverCtx),
-			},
-			{
-				// 驳回举报
-				Method:  http.MethodPost,
-				Path:    "/admin/moderation/reports/reject",
-				Handler: moderation.RejectContentReportHandler(serverCtx),
 			},
 			{
 				// 敏感词列表
 				Method:  http.MethodGet,
-				Path:    "/admin/moderation/sensitive-words",
+				Path:    "/admin/moderation/v1/list_sensitive_words",
 				Handler: moderation.GetSensitiveWordListHandler(serverCtx),
 			},
 			{
-				// 新增敏感词
+				// 驳回举报
 				Method:  http.MethodPost,
-				Path:    "/admin/moderation/sensitive-words",
-				Handler: moderation.CreateSensitiveWordHandler(serverCtx),
+				Path:    "/admin/moderation/v1/reject_report",
+				Handler: moderation.RejectContentReportHandler(serverCtx),
 			},
 			{
 				// 更新敏感词
-				Method:  http.MethodPut,
-				Path:    "/admin/moderation/sensitive-words/:id",
+				Method:  http.MethodPost,
+				Path:    "/admin/moderation/v1/update_sensitive_word",
 				Handler: moderation.UpdateSensitiveWordHandler(serverCtx),
-			},
-			{
-				// 删除敏感词
-				Method:  http.MethodDelete,
-				Path:    "/admin/moderation/sensitive-words/:id",
-				Handler: moderation.DeleteSensitiveWordHandler(serverCtx),
 			},
 		},
 	)
@@ -484,33 +485,33 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取动态详情
+				// 获取动态评论列表
 				Method:  http.MethodGet,
-				Path:    "/admin/moment/:momentId",
-				Handler: moment.GetMomentDetailHandler(serverCtx),
+				Path:    "/admin/moment/v1/comments",
+				Handler: moment.GetMomentCommentListHandler(serverCtx),
 			},
 			{
 				// 删除动态
-				Method:  http.MethodDelete,
-				Path:    "/admin/moment/:momentId",
+				Method:  http.MethodPost,
+				Path:    "/admin/moment/v1/delete",
 				Handler: moment.DeleteMomentHandler(serverCtx),
 			},
 			{
 				// 删除动态评论
-				Method:  http.MethodDelete,
-				Path:    "/admin/moment/comment/:commentId",
+				Method:  http.MethodPost,
+				Path:    "/admin/moment/v1/delete_comment",
 				Handler: moment.DeleteMomentCommentHandler(serverCtx),
 			},
 			{
-				// 获取动态评论列表
+				// 获取动态详情
 				Method:  http.MethodGet,
-				Path:    "/admin/moment/comments",
-				Handler: moment.GetMomentCommentListHandler(serverCtx),
+				Path:    "/admin/moment/v1/detail",
+				Handler: moment.GetMomentDetailHandler(serverCtx),
 			},
 			{
 				// 获取动态列表
 				Method:  http.MethodGet,
-				Path:    "/admin/moment/list",
+				Path:    "/admin/moment/v1/list",
 				Handler: moment.GetMomentListHandler(serverCtx),
 			},
 		},
@@ -543,37 +544,37 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
-				Path:    "/admin/open/app/audit",
+				Path:    "/admin/open/v1/app/audit",
 				Handler: open.AuditOpenAppHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/admin/open/app/list",
+				Path:    "/admin/open/v1/app/list",
 				Handler: open.GetOpenAppListHandler(serverCtx),
 			},
 			{
-				Method:  http.MethodPut,
-				Path:    "/admin/open/app/status",
+				Method:  http.MethodPost,
+				Path:    "/admin/open/v1/app/update_status",
 				Handler: open.UpdateOpenAppStatusHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/admin/open/developer/apply",
+				Path:    "/admin/open/v1/developer/apply",
 				Handler: open.ApplyDeveloperHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/admin/open/developer/audit",
+				Path:    "/admin/open/v1/developer/audit",
 				Handler: open.AuditDeveloperHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/admin/open/developer/list",
+				Path:    "/admin/open/v1/developer/list",
 				Handler: open.GetDeveloperListHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/admin/open/webhook/logs",
+				Path:    "/admin/open/v1/webhook/list_logs",
 				Handler: open.GetOpenWebhookLogListHandler(serverCtx),
 			},
 		},
@@ -584,19 +585,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 群组运营360
 				Method:  http.MethodGet,
-				Path:    "/admin/operations/group/:groupId/profile",
+				Path:    "/admin/operations/v1/group_profile",
 				Handler: operations.GetGroupOperationsProfileHandler(serverCtx),
 			},
 			{
 				// 运营统一检索
 				Method:  http.MethodGet,
-				Path:    "/admin/operations/search",
+				Path:    "/admin/operations/v1/search",
 				Handler: operations.AdminUnifiedSearchHandler(serverCtx),
 			},
 			{
 				// 用户运营360
 				Method:  http.MethodGet,
-				Path:    "/admin/operations/user/:userId/profile",
+				Path:    "/admin/operations/v1/user_profile",
 				Handler: operations.GetUserOperationsProfileHandler(serverCtx),
 			},
 		},
@@ -607,19 +608,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 运营工作台概览
 				Method:  http.MethodGet,
-				Path:    "/admin/overview/dashboard",
+				Path:    "/admin/overview/v1/dashboard",
 				Handler: overview.GetDashboardOverviewHandler(serverCtx),
 			},
 			{
 				// 运营工作台待办收件箱
 				Method:  http.MethodGet,
-				Path:    "/admin/overview/inbox",
+				Path:    "/admin/overview/v1/inbox",
 				Handler: overview.GetDashboardInboxHandler(serverCtx),
 			},
 			{
 				// 运营数据趋势
 				Method:  http.MethodGet,
-				Path:    "/admin/overview/trends",
+				Path:    "/admin/overview/v1/trends",
 				Handler: overview.GetDashboardTrendsHandler(serverCtx),
 			},
 		},
@@ -628,81 +629,81 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 管理员列表
+				// 角色已授权菜单
 				Method:  http.MethodGet,
-				Path:    "/admin/system/admins",
-				Handler: system.GetAdminUserListHandler(serverCtx),
+				Path:    "/admin/system/v1/authority_menus",
+				Handler: system.GetAuthorityMenusHandler(serverCtx),
 			},
 			{
 				// 创建管理员
 				Method:  http.MethodPost,
-				Path:    "/admin/system/admins",
+				Path:    "/admin/system/v1/create_admin",
 				Handler: system.CreateAdminUserHandler(serverCtx),
-			},
-			{
-				// 更新管理员
-				Method:  http.MethodPut,
-				Path:    "/admin/system/admins/:userId",
-				Handler: system.UpdateAdminUserHandler(serverCtx),
-			},
-			{
-				// 角色列表
-				Method:  http.MethodGet,
-				Path:    "/admin/system/authorities",
-				Handler: system.GetAuthorityListHandler(serverCtx),
-			},
-			{
-				// 更新角色
-				Method:  http.MethodPut,
-				Path:    "/admin/system/authority",
-				Handler: system.UpdateAuthorityHandler(serverCtx),
-			},
-			{
-				// 删除角色
-				Method:  http.MethodDelete,
-				Path:    "/admin/system/authority",
-				Handler: system.DeleteAuthorityHandler(serverCtx),
-			},
-			{
-				// 角色已授权菜单
-				Method:  http.MethodGet,
-				Path:    "/admin/system/authority/:id/menus",
-				Handler: system.GetAuthorityMenusHandler(serverCtx),
 			},
 			{
 				// 创建权限
 				Method:  http.MethodPost,
-				Path:    "/admin/system/createAuthority",
+				Path:    "/admin/system/v1/create_authority",
 				Handler: system.CreateAuthorityHandler(serverCtx),
 			},
 			{
 				// 创建菜单
 				Method:  http.MethodPost,
-				Path:    "/admin/system/createMenu",
+				Path:    "/admin/system/v1/create_menu",
 				Handler: system.CreateMenuHandler(serverCtx),
 			},
 			{
+				// 删除角色
+				Method:  http.MethodPost,
+				Path:    "/admin/system/v1/delete_authority",
+				Handler: system.DeleteAuthorityHandler(serverCtx),
+			},
+			{
 				// 删除菜单
-				Method:  http.MethodDelete,
-				Path:    "/admin/system/delete",
+				Method:  http.MethodPost,
+				Path:    "/admin/system/v1/delete_menu",
 				Handler: system.DeleteMenuHandler(serverCtx),
+			},
+			{
+				// 管理员列表
+				Method:  http.MethodGet,
+				Path:    "/admin/system/v1/list_admins",
+				Handler: system.GetAdminUserListHandler(serverCtx),
+			},
+			{
+				// 角色列表
+				Method:  http.MethodGet,
+				Path:    "/admin/system/v1/list_authorities",
+				Handler: system.GetAuthorityListHandler(serverCtx),
 			},
 			{
 				// 获取菜单列表
 				Method:  http.MethodGet,
-				Path:    "/admin/system/getMenuList",
+				Path:    "/admin/system/v1/list_menus",
 				Handler: system.GetMenusHandler(serverCtx),
 			},
 			{
+				// 更新管理员
+				Method:  http.MethodPost,
+				Path:    "/admin/system/v1/update_admin",
+				Handler: system.UpdateAdminUserHandler(serverCtx),
+			},
+			{
+				// 更新角色
+				Method:  http.MethodPost,
+				Path:    "/admin/system/v1/update_authority",
+				Handler: system.UpdateAuthorityHandler(serverCtx),
+			},
+			{
 				// 更新权限菜单
-				Method:  http.MethodPut,
-				Path:    "/admin/system/updateAuthorityMenu",
+				Method:  http.MethodPost,
+				Path:    "/admin/system/v1/update_authority_menu",
 				Handler: system.UpdateAuthorityMenuHandler(serverCtx),
 			},
 			{
 				// 更新菜单
-				Method:  http.MethodPut,
-				Path:    "/admin/system/updateMenu",
+				Method:  http.MethodPost,
+				Path:    "/admin/system/v1/update_menu",
 				Handler: system.UpdateMenuHandler(serverCtx),
 			},
 		},
@@ -713,7 +714,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 查询日志
 				Method:  http.MethodGet,
-				Path:    "/admin/track/logs",
+				Path:    "/admin/track/v1/query_logs",
 				Handler: track.QueryLogsHandler(serverCtx),
 			},
 		},
@@ -724,68 +725,68 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 添加新应用
 				Method:  http.MethodPost,
-				Path:    "/admin/update/appAdd",
+				Path:    "/admin/update/v1/add_app",
 				Handler: update.AddAppHandler(serverCtx),
-			},
-			{
-				// 获取应用列表
-				Method:  http.MethodGet,
-				Path:    "/admin/update/appsUpdate",
-				Handler: update.GetAppsHandler(serverCtx),
 			},
 			{
 				// 添加新架构
 				Method:  http.MethodPost,
-				Path:    "/admin/update/architectureAdd",
+				Path:    "/admin/update/v1/add_architecture",
 				Handler: update.AddArchitectureHandler(serverCtx),
 			},
 			{
-				// 更新架构信息
+				// 添加新版本
 				Method:  http.MethodPost,
-				Path:    "/admin/update/architectureUpdate",
-				Handler: update.UpdateArchitectureHandler(serverCtx),
+				Path:    "/admin/update/v1/add_version",
+				Handler: update.AddVersionHandler(serverCtx),
+			},
+			{
+				// 删除版本
+				Method:  http.MethodPost,
+				Path:    "/admin/update/v1/delete_version",
+				Handler: update.DeleteVersionHandler(serverCtx),
+			},
+			{
+				// 获取应用下所有版本
+				Method:  http.MethodGet,
+				Path:    "/admin/update/v1/list_app_versions",
+				Handler: update.GetAppVersionsHandler(serverCtx),
+			},
+			{
+				// 获取应用列表
+				Method:  http.MethodGet,
+				Path:    "/admin/update/v1/list_apps",
+				Handler: update.GetAppsHandler(serverCtx),
 			},
 			{
 				// 获取架构列表
 				Method:  http.MethodGet,
-				Path:    "/admin/update/architectures",
+				Path:    "/admin/update/v1/list_architectures",
 				Handler: update.GetArchitecturesHandler(serverCtx),
 			},
 			{
 				// 获取发版策略
 				Method:  http.MethodGet,
-				Path:    "/admin/update/releasePolicies",
+				Path:    "/admin/update/v1/list_release_policies",
 				Handler: update.GetReleasePoliciesHandler(serverCtx),
-			},
-			{
-				// 保存发版策略
-				Method:  http.MethodPost,
-				Path:    "/admin/update/releasePolicy",
-				Handler: update.UpsertReleasePolicyHandler(serverCtx),
-			},
-			{
-				// 删除版本
-				Method:  http.MethodDelete,
-				Path:    "/admin/update/version/:id",
-				Handler: update.DeleteVersionHandler(serverCtx),
-			},
-			{
-				// 添加新版本
-				Method:  http.MethodPost,
-				Path:    "/admin/update/versionAdd",
-				Handler: update.AddVersionHandler(serverCtx),
 			},
 			{
 				// 获取版本列表
 				Method:  http.MethodGet,
-				Path:    "/admin/update/versionList",
+				Path:    "/admin/update/v1/list_versions",
 				Handler: update.GetVersionListHandler(serverCtx),
 			},
 			{
-				// 获取应用下所有版本
-				Method:  http.MethodGet,
-				Path:    "/admin/update/versions",
-				Handler: update.GetAppVersionsHandler(serverCtx),
+				// 更新架构信息
+				Method:  http.MethodPost,
+				Path:    "/admin/update/v1/update_architecture",
+				Handler: update.UpdateArchitectureHandler(serverCtx),
+			},
+			{
+				// 保存发版策略
+				Method:  http.MethodPost,
+				Path:    "/admin/update/v1/upsert_release_policy",
+				Handler: update.UpsertReleasePolicyHandler(serverCtx),
 			},
 		},
 	)
@@ -793,52 +794,87 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取用户详情
-				Method:  http.MethodGet,
-				Path:    "/admin/user/:id",
-				Handler: user.GetUserDetailHandler(serverCtx),
-			},
-			{
-				// 更新用户
-				Method:  http.MethodPut,
-				Path:    "/admin/user/:id",
-				Handler: user.UpdateUserHandler(serverCtx),
-			},
-			{
-				// 删除用户
-				Method:  http.MethodDelete,
-				Path:    "/admin/user/:id",
-				Handler: user.DeleteUserHandler(serverCtx),
-			},
-			{
 				// 批量删除用户
-				Method:  http.MethodDelete,
-				Path:    "/admin/user/batch",
+				Method:  http.MethodPost,
+				Path:    "/admin/user/v1/batch_delete",
 				Handler: user.BatchDeleteUsersHandler(serverCtx),
+			},
+			{
+				// 批量更新用户状态
+				Method:  http.MethodPost,
+				Path:    "/admin/user/v1/batch_update_status",
+				Handler: user.BatchUpdateUserStatusHandler(serverCtx),
 			},
 			{
 				// 创建用户
 				Method:  http.MethodPost,
-				Path:    "/admin/user/create",
+				Path:    "/admin/user/v1/create",
 				Handler: user.CreateUserHandler(serverCtx),
+			},
+			{
+				// 删除用户
+				Method:  http.MethodPost,
+				Path:    "/admin/user/v1/delete",
+				Handler: user.DeleteUserHandler(serverCtx),
+			},
+			{
+				// 获取用户详情
+				Method:  http.MethodGet,
+				Path:    "/admin/user/v1/detail",
+				Handler: user.GetUserDetailHandler(serverCtx),
 			},
 			{
 				// 获取用户列表
 				Method:  http.MethodGet,
-				Path:    "/admin/user/list",
+				Path:    "/admin/user/v1/list",
 				Handler: user.GetUserListHandler(serverCtx),
 			},
 			{
 				// 重置用户密码
-				Method:  http.MethodPut,
-				Path:    "/admin/user/password",
+				Method:  http.MethodPost,
+				Path:    "/admin/user/v1/reset_password",
 				Handler: user.ResetUserPasswordHandler(serverCtx),
 			},
 			{
-				// 批量更新用户状态
-				Method:  http.MethodPut,
-				Path:    "/admin/user/status",
-				Handler: user.BatchUpdateUserStatusHandler(serverCtx),
+				// 更新用户
+				Method:  http.MethodPost,
+				Path:    "/admin/user/v1/update",
+				Handler: user.UpdateUserHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 创建工作台应用
+				Method:  http.MethodPost,
+				Path:    "/admin/workbench/v1/create",
+				Handler: workbench.CreateWorkbenchAppHandler(serverCtx),
+			},
+			{
+				// 删除工作台应用
+				Method:  http.MethodPost,
+				Path:    "/admin/workbench/v1/delete",
+				Handler: workbench.DeleteWorkbenchAppHandler(serverCtx),
+			},
+			{
+				// 获取工作台应用详情
+				Method:  http.MethodGet,
+				Path:    "/admin/workbench/v1/detail",
+				Handler: workbench.GetWorkbenchAppHandler(serverCtx),
+			},
+			{
+				// 获取工作台应用列表
+				Method:  http.MethodGet,
+				Path:    "/admin/workbench/v1/list",
+				Handler: workbench.GetWorkbenchAppListHandler(serverCtx),
+			},
+			{
+				// 更新工作台应用
+				Method:  http.MethodPost,
+				Path:    "/admin/workbench/v1/update",
+				Handler: workbench.UpdateWorkbenchAppHandler(serverCtx),
 			},
 		},
 	)

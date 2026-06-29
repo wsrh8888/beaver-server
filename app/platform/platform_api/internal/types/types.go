@@ -22,6 +22,25 @@ type GetLatestVersionRes struct {
 	ReleaseNotes   string `json:"releaseNotes,omitempty"`
 }
 
+type ListWorkbenchAppsItem struct {
+	WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+	Name           string `json:"name"`           // string 应用名称
+	Description    string `json:"description"`    // string 应用描述
+	Icon           string `json:"icon"`           // string 图标 URL
+	EntryURL       string `json:"entryUrl"`       // string 入口 URL
+	Category       string `json:"category"`       // string 分类
+	Sort           int    `json:"sort"`           // int 排序
+}
+
+type ListWorkbenchAppsReq struct {
+	UserID   string `header:"Beaver-User-Id"`  // string 当前用户 ID
+	Category string `form:"category,optional"` // string 分类筛选，可选
+}
+
+type ListWorkbenchAppsRes struct {
+	List []ListWorkbenchAppsItem `json:"list"` // array 上架应用列表
+}
+
 type LogEventItem struct {
 	Level     string `json:"level"`
 	BucketID  string `json:"bucketId"`

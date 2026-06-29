@@ -14,57 +14,71 @@ import (
 )
 
 type (
-	AdminLogItem            = platform_rpc.AdminLogItem
-	AdminQueryLogsReq       = platform_rpc.AdminQueryLogsReq
-	AdminQueryLogsRes       = platform_rpc.AdminQueryLogsRes
-	AppItem                 = platform_rpc.AppItem
-	AppVersionBrief         = platform_rpc.AppVersionBrief
-	AppVersionsArchItem     = platform_rpc.AppVersionsArchItem
-	ArchitectureItem        = platform_rpc.ArchitectureItem
-	ContentReportItem       = platform_rpc.ContentReportItem
-	CreateAppReq            = platform_rpc.CreateAppReq
-	CreateAppRes            = platform_rpc.CreateAppRes
-	CreateArchitectureReq   = platform_rpc.CreateArchitectureReq
-	CreateArchitectureRes   = platform_rpc.CreateArchitectureRes
-	CreateVersionReq        = platform_rpc.CreateVersionReq
-	CreateVersionRes        = platform_rpc.CreateVersionRes
-	DeleteFeedbackReq       = platform_rpc.DeleteFeedbackReq
-	DeleteFeedbackRes       = platform_rpc.DeleteFeedbackRes
-	DeleteVersionReq        = platform_rpc.DeleteVersionReq
-	DeleteVersionRes        = platform_rpc.DeleteVersionRes
-	FeedbackItem            = platform_rpc.FeedbackItem
-	GetContentReportReq     = platform_rpc.GetContentReportReq
-	GetContentReportRes     = platform_rpc.GetContentReportRes
-	GetFeedbackReq          = platform_rpc.GetFeedbackReq
-	GetFeedbackRes          = platform_rpc.GetFeedbackRes
-	HandleFeedbackReq       = platform_rpc.HandleFeedbackReq
-	HandleFeedbackRes       = platform_rpc.HandleFeedbackRes
-	ListAppVersionsReq      = platform_rpc.ListAppVersionsReq
-	ListAppVersionsRes      = platform_rpc.ListAppVersionsRes
-	ListAppsReq             = platform_rpc.ListAppsReq
-	ListAppsRes             = platform_rpc.ListAppsRes
-	ListArchitecturesReq    = platform_rpc.ListArchitecturesReq
-	ListArchitecturesRes    = platform_rpc.ListArchitecturesRes
-	ListContentReportsReq   = platform_rpc.ListContentReportsReq
-	ListContentReportsRes   = platform_rpc.ListContentReportsRes
-	ListFeedbackReq         = platform_rpc.ListFeedbackReq
-	ListFeedbackRes         = platform_rpc.ListFeedbackRes
-	ListReleasePoliciesReq  = platform_rpc.ListReleasePoliciesReq
-	ListReleasePoliciesRes  = platform_rpc.ListReleasePoliciesRes
-	ListVersionsReq         = platform_rpc.ListVersionsReq
-	ListVersionsRes         = platform_rpc.ListVersionsRes
-	ReleasePolicyItem       = platform_rpc.ReleasePolicyItem
-	SubmitContentReportReq  = platform_rpc.SubmitContentReportReq
-	SubmitContentReportRes  = platform_rpc.SubmitContentReportRes
-	SubmitFeedbackReq       = platform_rpc.SubmitFeedbackReq
-	SubmitFeedbackRes       = platform_rpc.SubmitFeedbackRes
-	UpdateArchitectureReq   = platform_rpc.UpdateArchitectureReq
-	UpdateArchitectureRes   = platform_rpc.UpdateArchitectureRes
-	UpdateContentReportsReq = platform_rpc.UpdateContentReportsReq
-	UpdateContentReportsRes = platform_rpc.UpdateContentReportsRes
-	UpsertReleasePolicyReq  = platform_rpc.UpsertReleasePolicyReq
-	UpsertReleasePolicyRes  = platform_rpc.UpsertReleasePolicyRes
-	VersionItem             = platform_rpc.VersionItem
+	AdminLogItem                = platform_rpc.AdminLogItem
+	AdminQueryLogsReq           = platform_rpc.AdminQueryLogsReq
+	AdminQueryLogsRes           = platform_rpc.AdminQueryLogsRes
+	AppItem                     = platform_rpc.AppItem
+	AppVersionBrief             = platform_rpc.AppVersionBrief
+	AppVersionsArchItem         = platform_rpc.AppVersionsArchItem
+	ArchitectureItem            = platform_rpc.ArchitectureItem
+	ContentReportItem           = platform_rpc.ContentReportItem
+	CreateAppReq                = platform_rpc.CreateAppReq
+	CreateAppRes                = platform_rpc.CreateAppRes
+	CreateArchitectureReq       = platform_rpc.CreateArchitectureReq
+	CreateArchitectureRes       = platform_rpc.CreateArchitectureRes
+	CreateVersionReq            = platform_rpc.CreateVersionReq
+	CreateVersionRes            = platform_rpc.CreateVersionRes
+	CreateWorkbenchAppReq       = platform_rpc.CreateWorkbenchAppReq
+	CreateWorkbenchAppRes       = platform_rpc.CreateWorkbenchAppRes
+	DeleteFeedbackReq           = platform_rpc.DeleteFeedbackReq
+	DeleteFeedbackRes           = platform_rpc.DeleteFeedbackRes
+	DeleteVersionReq            = platform_rpc.DeleteVersionReq
+	DeleteVersionRes            = platform_rpc.DeleteVersionRes
+	DeleteWorkbenchAppReq       = platform_rpc.DeleteWorkbenchAppReq
+	DeleteWorkbenchAppRes       = platform_rpc.DeleteWorkbenchAppRes
+	FeedbackItem                = platform_rpc.FeedbackItem
+	GetContentReportReq         = platform_rpc.GetContentReportReq
+	GetContentReportRes         = platform_rpc.GetContentReportRes
+	GetFeedbackReq              = platform_rpc.GetFeedbackReq
+	GetFeedbackRes              = platform_rpc.GetFeedbackRes
+	GetWorkbenchAppReq          = platform_rpc.GetWorkbenchAppReq
+	GetWorkbenchAppRes          = platform_rpc.GetWorkbenchAppRes
+	HandleFeedbackReq           = platform_rpc.HandleFeedbackReq
+	HandleFeedbackRes           = platform_rpc.HandleFeedbackRes
+	ListAppVersionsReq          = platform_rpc.ListAppVersionsReq
+	ListAppVersionsRes          = platform_rpc.ListAppVersionsRes
+	ListAppsReq                 = platform_rpc.ListAppsReq
+	ListAppsRes                 = platform_rpc.ListAppsRes
+	ListArchitecturesReq        = platform_rpc.ListArchitecturesReq
+	ListArchitecturesRes        = platform_rpc.ListArchitecturesRes
+	ListContentReportsReq       = platform_rpc.ListContentReportsReq
+	ListContentReportsRes       = platform_rpc.ListContentReportsRes
+	ListEnabledWorkbenchAppsReq = platform_rpc.ListEnabledWorkbenchAppsReq
+	ListEnabledWorkbenchAppsRes = platform_rpc.ListEnabledWorkbenchAppsRes
+	ListFeedbackReq             = platform_rpc.ListFeedbackReq
+	ListFeedbackRes             = platform_rpc.ListFeedbackRes
+	ListReleasePoliciesReq      = platform_rpc.ListReleasePoliciesReq
+	ListReleasePoliciesRes      = platform_rpc.ListReleasePoliciesRes
+	ListVersionsReq             = platform_rpc.ListVersionsReq
+	ListVersionsRes             = platform_rpc.ListVersionsRes
+	ListWorkbenchAppsReq        = platform_rpc.ListWorkbenchAppsReq
+	ListWorkbenchAppsRes        = platform_rpc.ListWorkbenchAppsRes
+	ReleasePolicyItem           = platform_rpc.ReleasePolicyItem
+	SubmitContentReportReq      = platform_rpc.SubmitContentReportReq
+	SubmitContentReportRes      = platform_rpc.SubmitContentReportRes
+	SubmitFeedbackReq           = platform_rpc.SubmitFeedbackReq
+	SubmitFeedbackRes           = platform_rpc.SubmitFeedbackRes
+	UpdateArchitectureReq       = platform_rpc.UpdateArchitectureReq
+	UpdateArchitectureRes       = platform_rpc.UpdateArchitectureRes
+	UpdateContentReportsReq     = platform_rpc.UpdateContentReportsReq
+	UpdateContentReportsRes     = platform_rpc.UpdateContentReportsRes
+	UpdateWorkbenchAppReq       = platform_rpc.UpdateWorkbenchAppReq
+	UpdateWorkbenchAppRes       = platform_rpc.UpdateWorkbenchAppRes
+	UpsertReleasePolicyReq      = platform_rpc.UpsertReleasePolicyReq
+	UpsertReleasePolicyRes      = platform_rpc.UpsertReleasePolicyRes
+	VersionItem                 = platform_rpc.VersionItem
+	WorkbenchAppItem            = platform_rpc.WorkbenchAppItem
+	WorkbenchAppPublicItem      = platform_rpc.WorkbenchAppPublicItem
 
 	Platform interface {
 		AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error)
@@ -88,6 +102,12 @@ type (
 		ListContentReports(ctx context.Context, in *ListContentReportsReq, opts ...grpc.CallOption) (*ListContentReportsRes, error)
 		GetContentReport(ctx context.Context, in *GetContentReportReq, opts ...grpc.CallOption) (*GetContentReportRes, error)
 		UpdateContentReports(ctx context.Context, in *UpdateContentReportsReq, opts ...grpc.CallOption) (*UpdateContentReportsRes, error)
+		CreateWorkbenchApp(ctx context.Context, in *CreateWorkbenchAppReq, opts ...grpc.CallOption) (*CreateWorkbenchAppRes, error)
+		UpdateWorkbenchApp(ctx context.Context, in *UpdateWorkbenchAppReq, opts ...grpc.CallOption) (*UpdateWorkbenchAppRes, error)
+		DeleteWorkbenchApp(ctx context.Context, in *DeleteWorkbenchAppReq, opts ...grpc.CallOption) (*DeleteWorkbenchAppRes, error)
+		GetWorkbenchApp(ctx context.Context, in *GetWorkbenchAppReq, opts ...grpc.CallOption) (*GetWorkbenchAppRes, error)
+		ListWorkbenchApps(ctx context.Context, in *ListWorkbenchAppsReq, opts ...grpc.CallOption) (*ListWorkbenchAppsRes, error)
+		ListEnabledWorkbenchApps(ctx context.Context, in *ListEnabledWorkbenchAppsReq, opts ...grpc.CallOption) (*ListEnabledWorkbenchAppsRes, error)
 	}
 
 	defaultPlatform struct {
@@ -204,4 +224,34 @@ func (m *defaultPlatform) GetContentReport(ctx context.Context, in *GetContentRe
 func (m *defaultPlatform) UpdateContentReports(ctx context.Context, in *UpdateContentReportsReq, opts ...grpc.CallOption) (*UpdateContentReportsRes, error) {
 	client := platform_rpc.NewPlatformClient(m.cli.Conn())
 	return client.UpdateContentReports(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) CreateWorkbenchApp(ctx context.Context, in *CreateWorkbenchAppReq, opts ...grpc.CallOption) (*CreateWorkbenchAppRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.CreateWorkbenchApp(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) UpdateWorkbenchApp(ctx context.Context, in *UpdateWorkbenchAppReq, opts ...grpc.CallOption) (*UpdateWorkbenchAppRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.UpdateWorkbenchApp(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) DeleteWorkbenchApp(ctx context.Context, in *DeleteWorkbenchAppReq, opts ...grpc.CallOption) (*DeleteWorkbenchAppRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.DeleteWorkbenchApp(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) GetWorkbenchApp(ctx context.Context, in *GetWorkbenchAppReq, opts ...grpc.CallOption) (*GetWorkbenchAppRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.GetWorkbenchApp(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) ListWorkbenchApps(ctx context.Context, in *ListWorkbenchAppsReq, opts ...grpc.CallOption) (*ListWorkbenchAppsRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.ListWorkbenchApps(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) ListEnabledWorkbenchApps(ctx context.Context, in *ListEnabledWorkbenchAppsReq, opts ...grpc.CallOption) (*ListEnabledWorkbenchAppsRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.ListEnabledWorkbenchApps(ctx, in, opts...)
 }

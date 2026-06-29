@@ -1,0 +1,31 @@
+syntax = "v1"
+
+// ==================== 工作台（客户端，需登录）====================
+
+type (
+	ListWorkbenchAppsReq {
+		UserID   string `header:"Beaver-User-Id"` // string 当前用户 ID
+		Category string `form:"category,optional"` // string 分类筛选，可选
+	}
+	ListWorkbenchAppsRes {
+		List []ListWorkbenchAppsItem `json:"list"` // array 上架应用列表
+	}
+	ListWorkbenchAppsItem {
+		WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+		Name           string `json:"name"` // string 应用名称
+		Description    string `json:"description"` // string 应用描述
+		Icon           string `json:"icon"` // string 图标 URL
+		EntryURL       string `json:"entryUrl"` // string 入口 URL
+		Category       string `json:"category"` // string 分类
+		Sort           int    `json:"sort"` // int 排序
+	}
+)
+
+@server (
+	group: workbench
+)
+service platform {
+	@doc "获取工作台应用列表（仅上架）"
+	@handler ListWorkbenchApps
+	get /api/platform/v1/list_workbench (ListWorkbenchAppsReq) returns (ListWorkbenchAppsRes)
+}

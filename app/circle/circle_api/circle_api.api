@@ -1,0 +1,5 @@
+import "api/circle.api"
+import "api/post.api"
+import "api/comment.api"
+
+// goctl api go -api circle_api.api -dir . --home ../../../template

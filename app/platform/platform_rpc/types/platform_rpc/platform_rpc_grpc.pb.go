@@ -19,27 +19,33 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Platform_AdminQueryLogs_FullMethodName       = "/platform_rpc.platform/AdminQueryLogs"
-	Platform_CreateApp_FullMethodName            = "/platform_rpc.platform/CreateApp"
-	Platform_ListApps_FullMethodName             = "/platform_rpc.platform/ListApps"
-	Platform_CreateArchitecture_FullMethodName   = "/platform_rpc.platform/CreateArchitecture"
-	Platform_UpdateArchitecture_FullMethodName   = "/platform_rpc.platform/UpdateArchitecture"
-	Platform_ListArchitectures_FullMethodName    = "/platform_rpc.platform/ListArchitectures"
-	Platform_CreateVersion_FullMethodName        = "/platform_rpc.platform/CreateVersion"
-	Platform_DeleteVersion_FullMethodName        = "/platform_rpc.platform/DeleteVersion"
-	Platform_ListVersions_FullMethodName         = "/platform_rpc.platform/ListVersions"
-	Platform_ListAppVersions_FullMethodName      = "/platform_rpc.platform/ListAppVersions"
-	Platform_UpsertReleasePolicy_FullMethodName  = "/platform_rpc.platform/UpsertReleasePolicy"
-	Platform_ListReleasePolicies_FullMethodName  = "/platform_rpc.platform/ListReleasePolicies"
-	Platform_SubmitFeedback_FullMethodName       = "/platform_rpc.platform/SubmitFeedback"
-	Platform_ListFeedback_FullMethodName         = "/platform_rpc.platform/ListFeedback"
-	Platform_GetFeedback_FullMethodName          = "/platform_rpc.platform/GetFeedback"
-	Platform_HandleFeedback_FullMethodName       = "/platform_rpc.platform/HandleFeedback"
-	Platform_DeleteFeedback_FullMethodName       = "/platform_rpc.platform/DeleteFeedback"
-	Platform_SubmitContentReport_FullMethodName  = "/platform_rpc.platform/SubmitContentReport"
-	Platform_ListContentReports_FullMethodName   = "/platform_rpc.platform/ListContentReports"
-	Platform_GetContentReport_FullMethodName     = "/platform_rpc.platform/GetContentReport"
-	Platform_UpdateContentReports_FullMethodName = "/platform_rpc.platform/UpdateContentReports"
+	Platform_AdminQueryLogs_FullMethodName           = "/platform_rpc.platform/AdminQueryLogs"
+	Platform_CreateApp_FullMethodName                = "/platform_rpc.platform/CreateApp"
+	Platform_ListApps_FullMethodName                 = "/platform_rpc.platform/ListApps"
+	Platform_CreateArchitecture_FullMethodName       = "/platform_rpc.platform/CreateArchitecture"
+	Platform_UpdateArchitecture_FullMethodName       = "/platform_rpc.platform/UpdateArchitecture"
+	Platform_ListArchitectures_FullMethodName        = "/platform_rpc.platform/ListArchitectures"
+	Platform_CreateVersion_FullMethodName            = "/platform_rpc.platform/CreateVersion"
+	Platform_DeleteVersion_FullMethodName            = "/platform_rpc.platform/DeleteVersion"
+	Platform_ListVersions_FullMethodName             = "/platform_rpc.platform/ListVersions"
+	Platform_ListAppVersions_FullMethodName          = "/platform_rpc.platform/ListAppVersions"
+	Platform_UpsertReleasePolicy_FullMethodName      = "/platform_rpc.platform/UpsertReleasePolicy"
+	Platform_ListReleasePolicies_FullMethodName      = "/platform_rpc.platform/ListReleasePolicies"
+	Platform_SubmitFeedback_FullMethodName           = "/platform_rpc.platform/SubmitFeedback"
+	Platform_ListFeedback_FullMethodName             = "/platform_rpc.platform/ListFeedback"
+	Platform_GetFeedback_FullMethodName              = "/platform_rpc.platform/GetFeedback"
+	Platform_HandleFeedback_FullMethodName           = "/platform_rpc.platform/HandleFeedback"
+	Platform_DeleteFeedback_FullMethodName           = "/platform_rpc.platform/DeleteFeedback"
+	Platform_SubmitContentReport_FullMethodName      = "/platform_rpc.platform/SubmitContentReport"
+	Platform_ListContentReports_FullMethodName       = "/platform_rpc.platform/ListContentReports"
+	Platform_GetContentReport_FullMethodName         = "/platform_rpc.platform/GetContentReport"
+	Platform_UpdateContentReports_FullMethodName     = "/platform_rpc.platform/UpdateContentReports"
+	Platform_CreateWorkbenchApp_FullMethodName       = "/platform_rpc.platform/CreateWorkbenchApp"
+	Platform_UpdateWorkbenchApp_FullMethodName       = "/platform_rpc.platform/UpdateWorkbenchApp"
+	Platform_DeleteWorkbenchApp_FullMethodName       = "/platform_rpc.platform/DeleteWorkbenchApp"
+	Platform_GetWorkbenchApp_FullMethodName          = "/platform_rpc.platform/GetWorkbenchApp"
+	Platform_ListWorkbenchApps_FullMethodName        = "/platform_rpc.platform/ListWorkbenchApps"
+	Platform_ListEnabledWorkbenchApps_FullMethodName = "/platform_rpc.platform/ListEnabledWorkbenchApps"
 )
 
 // PlatformClient is the client API for Platform service.
@@ -67,6 +73,12 @@ type PlatformClient interface {
 	ListContentReports(ctx context.Context, in *ListContentReportsReq, opts ...grpc.CallOption) (*ListContentReportsRes, error)
 	GetContentReport(ctx context.Context, in *GetContentReportReq, opts ...grpc.CallOption) (*GetContentReportRes, error)
 	UpdateContentReports(ctx context.Context, in *UpdateContentReportsReq, opts ...grpc.CallOption) (*UpdateContentReportsRes, error)
+	CreateWorkbenchApp(ctx context.Context, in *CreateWorkbenchAppReq, opts ...grpc.CallOption) (*CreateWorkbenchAppRes, error)
+	UpdateWorkbenchApp(ctx context.Context, in *UpdateWorkbenchAppReq, opts ...grpc.CallOption) (*UpdateWorkbenchAppRes, error)
+	DeleteWorkbenchApp(ctx context.Context, in *DeleteWorkbenchAppReq, opts ...grpc.CallOption) (*DeleteWorkbenchAppRes, error)
+	GetWorkbenchApp(ctx context.Context, in *GetWorkbenchAppReq, opts ...grpc.CallOption) (*GetWorkbenchAppRes, error)
+	ListWorkbenchApps(ctx context.Context, in *ListWorkbenchAppsReq, opts ...grpc.CallOption) (*ListWorkbenchAppsRes, error)
+	ListEnabledWorkbenchApps(ctx context.Context, in *ListEnabledWorkbenchAppsReq, opts ...grpc.CallOption) (*ListEnabledWorkbenchAppsRes, error)
 }
 
 type platformClient struct {
@@ -287,6 +299,66 @@ func (c *platformClient) UpdateContentReports(ctx context.Context, in *UpdateCon
 	return out, nil
 }
 
+func (c *platformClient) CreateWorkbenchApp(ctx context.Context, in *CreateWorkbenchAppReq, opts ...grpc.CallOption) (*CreateWorkbenchAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateWorkbenchAppRes)
+	err := c.cc.Invoke(ctx, Platform_CreateWorkbenchApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateWorkbenchApp(ctx context.Context, in *UpdateWorkbenchAppReq, opts ...grpc.CallOption) (*UpdateWorkbenchAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateWorkbenchAppRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateWorkbenchApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteWorkbenchApp(ctx context.Context, in *DeleteWorkbenchAppReq, opts ...grpc.CallOption) (*DeleteWorkbenchAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteWorkbenchAppRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteWorkbenchApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetWorkbenchApp(ctx context.Context, in *GetWorkbenchAppReq, opts ...grpc.CallOption) (*GetWorkbenchAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWorkbenchAppRes)
+	err := c.cc.Invoke(ctx, Platform_GetWorkbenchApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListWorkbenchApps(ctx context.Context, in *ListWorkbenchAppsReq, opts ...grpc.CallOption) (*ListWorkbenchAppsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListWorkbenchAppsRes)
+	err := c.cc.Invoke(ctx, Platform_ListWorkbenchApps_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListEnabledWorkbenchApps(ctx context.Context, in *ListEnabledWorkbenchAppsReq, opts ...grpc.CallOption) (*ListEnabledWorkbenchAppsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEnabledWorkbenchAppsRes)
+	err := c.cc.Invoke(ctx, Platform_ListEnabledWorkbenchApps_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServer is the server API for Platform service.
 // All implementations must embed UnimplementedPlatformServer
 // for forward compatibility.
@@ -312,6 +384,12 @@ type PlatformServer interface {
 	ListContentReports(context.Context, *ListContentReportsReq) (*ListContentReportsRes, error)
 	GetContentReport(context.Context, *GetContentReportReq) (*GetContentReportRes, error)
 	UpdateContentReports(context.Context, *UpdateContentReportsReq) (*UpdateContentReportsRes, error)
+	CreateWorkbenchApp(context.Context, *CreateWorkbenchAppReq) (*CreateWorkbenchAppRes, error)
+	UpdateWorkbenchApp(context.Context, *UpdateWorkbenchAppReq) (*UpdateWorkbenchAppRes, error)
+	DeleteWorkbenchApp(context.Context, *DeleteWorkbenchAppReq) (*DeleteWorkbenchAppRes, error)
+	GetWorkbenchApp(context.Context, *GetWorkbenchAppReq) (*GetWorkbenchAppRes, error)
+	ListWorkbenchApps(context.Context, *ListWorkbenchAppsReq) (*ListWorkbenchAppsRes, error)
+	ListEnabledWorkbenchApps(context.Context, *ListEnabledWorkbenchAppsReq) (*ListEnabledWorkbenchAppsRes, error)
 	mustEmbedUnimplementedPlatformServer()
 }
 
@@ -384,6 +462,24 @@ func (UnimplementedPlatformServer) GetContentReport(context.Context, *GetContent
 }
 func (UnimplementedPlatformServer) UpdateContentReports(context.Context, *UpdateContentReportsReq) (*UpdateContentReportsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateContentReports not implemented")
+}
+func (UnimplementedPlatformServer) CreateWorkbenchApp(context.Context, *CreateWorkbenchAppReq) (*CreateWorkbenchAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWorkbenchApp not implemented")
+}
+func (UnimplementedPlatformServer) UpdateWorkbenchApp(context.Context, *UpdateWorkbenchAppReq) (*UpdateWorkbenchAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkbenchApp not implemented")
+}
+func (UnimplementedPlatformServer) DeleteWorkbenchApp(context.Context, *DeleteWorkbenchAppReq) (*DeleteWorkbenchAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteWorkbenchApp not implemented")
+}
+func (UnimplementedPlatformServer) GetWorkbenchApp(context.Context, *GetWorkbenchAppReq) (*GetWorkbenchAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorkbenchApp not implemented")
+}
+func (UnimplementedPlatformServer) ListWorkbenchApps(context.Context, *ListWorkbenchAppsReq) (*ListWorkbenchAppsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWorkbenchApps not implemented")
+}
+func (UnimplementedPlatformServer) ListEnabledWorkbenchApps(context.Context, *ListEnabledWorkbenchAppsReq) (*ListEnabledWorkbenchAppsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEnabledWorkbenchApps not implemented")
 }
 func (UnimplementedPlatformServer) mustEmbedUnimplementedPlatformServer() {}
 func (UnimplementedPlatformServer) testEmbeddedByValue()                  {}
@@ -784,6 +880,114 @@ func _Platform_UpdateContentReports_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Platform_CreateWorkbenchApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateWorkbenchAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateWorkbenchApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateWorkbenchApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateWorkbenchApp(ctx, req.(*CreateWorkbenchAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateWorkbenchApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorkbenchAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateWorkbenchApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateWorkbenchApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateWorkbenchApp(ctx, req.(*UpdateWorkbenchAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteWorkbenchApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteWorkbenchAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteWorkbenchApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteWorkbenchApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteWorkbenchApp(ctx, req.(*DeleteWorkbenchAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetWorkbenchApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorkbenchAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetWorkbenchApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetWorkbenchApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetWorkbenchApp(ctx, req.(*GetWorkbenchAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListWorkbenchApps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWorkbenchAppsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListWorkbenchApps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListWorkbenchApps_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListWorkbenchApps(ctx, req.(*ListWorkbenchAppsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListEnabledWorkbenchApps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEnabledWorkbenchAppsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListEnabledWorkbenchApps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListEnabledWorkbenchApps_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListEnabledWorkbenchApps(ctx, req.(*ListEnabledWorkbenchAppsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Platform_ServiceDesc is the grpc.ServiceDesc for Platform service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -874,6 +1078,30 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateContentReports",
 			Handler:    _Platform_UpdateContentReports_Handler,
+		},
+		{
+			MethodName: "CreateWorkbenchApp",
+			Handler:    _Platform_CreateWorkbenchApp_Handler,
+		},
+		{
+			MethodName: "UpdateWorkbenchApp",
+			Handler:    _Platform_UpdateWorkbenchApp_Handler,
+		},
+		{
+			MethodName: "DeleteWorkbenchApp",
+			Handler:    _Platform_DeleteWorkbenchApp_Handler,
+		},
+		{
+			MethodName: "GetWorkbenchApp",
+			Handler:    _Platform_GetWorkbenchApp_Handler,
+		},
+		{
+			MethodName: "ListWorkbenchApps",
+			Handler:    _Platform_ListWorkbenchApps_Handler,
+		},
+		{
+			MethodName: "ListEnabledWorkbenchApps",
+			Handler:    _Platform_ListEnabledWorkbenchApps_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

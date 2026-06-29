@@ -1,0 +1,228 @@
+syntax = "v1"
+
+// 创建圈子接口类型
+type (
+	CreateCircleReq {
+		UserID      string `header:"Beaver-User-Id"` // 用户ID
+		Name        string `json:"name"` // 圈子名称
+		Description string `json:"description,optional"` // 圈子简介
+		Avatar      string `json:"avatar,optional"` // 圈子头像
+		JoinType    int8   `json:"joinType,optional"` // 加入方式：0=自由加入（默认） 1=审批加入
+	}
+	CreateCircleRes {
+		CircleID    string `json:"circleId"` // 圈子ID
+		Name        string `json:"name"` // 圈子名称
+		Description string `json:"description"` // 圈子简介
+		Avatar      string `json:"avatar"` // 圈子头像
+		JoinType    int8   `json:"joinType"` // 加入方式：0=自由加入 1=审批加入
+		CreatorID   string `json:"creatorId"` // 创建者用户ID
+		CreatedAt   string `json:"createdAt"` // 创建时间
+	}
+)
+
+// 获取圈子详情接口类型
+type (
+	GetCircleDetailReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		CircleID string `form:"circleId"` // 圈子ID
+	}
+	GetCircleDetailRes {
+		CircleID    string `json:"circleId"` // 圈子ID
+		Name        string `json:"name"` // 圈子名称
+		Description string `json:"description"` // 圈子简介
+		Avatar      string `json:"avatar"` // 圈子头像
+		JoinType    int8   `json:"joinType"` // 加入方式：0=自由加入 1=审批加入
+		CreatorID   string `json:"creatorId"` // 创建者用户ID
+		MemberCount int64  `json:"memberCount"` // 成员数量
+		PostCount   int64  `json:"postCount"` // 帖子数量
+		Role        int8   `json:"role"` // 当前用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
+		CreatedAt   string `json:"createdAt"` // 创建时间
+	}
+)
+
+// 更新圈子信息接口类型
+type (
+	UpdateCircleReq {
+		UserID      string `header:"Beaver-User-Id"` // 用户ID
+		CircleID    string `json:"circleId"` // 圈子ID
+		Name        string `json:"name,optional"` // 圈子名称
+		Description string `json:"description,optional"` // 圈子简介
+		Avatar      string `json:"avatar,optional"` // 圈子头像
+		JoinType    int8   `json:"joinType,optional"` // 加入方式：0=自由加入 1=审批加入
+	}
+	UpdateCircleRes {}
+)
+
+// 解散圈子接口类型
+type (
+	DeleteCircleReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		CircleID string `form:"circleId"` // 圈子ID
+	}
+	DeleteCircleRes {}
+)
+
+// 加入圈子接口类型
+type (
+	JoinCircleReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		CircleID string `json:"circleId"` // 圈子ID
+		Reason   string `json:"reason,optional"` // 申请理由（审批加入时填写）
+	}
+	JoinCircleRes {
+		Status int8 `json:"status"` // 加入结果：1=已加入 0=申请待审批
+	}
+)
+
+// 退出圈子接口类型
+type (
+	QuitCircleReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		CircleID string `json:"circleId"` // 圈子ID
+	}
+	QuitCircleRes {}
+)
+
+// 处理加圈申请接口类型
+type (
+	HandleJoinRequestReq {
+		UserID    string `header:"Beaver-User-Id"` // 用户ID（需为圈主或管理员）
+		RequestID string `json:"requestId"` // 申请记录ID
+		Status    int8   `json:"status"` // 处理结果：1=通过 2=拒绝
+	}
+	HandleJoinRequestRes {}
+)
+
+// 获取加圈申请列表接口类型
+type (
+	GetJoinRequestListReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID（需为圈主或管理员）
+		CircleID string `form:"circleId"` // 圈子ID
+		Page     int    `form:"page"` // 页码
+		Limit    int    `form:"limit"` // 每页数量
+	}
+	GetJoinRequestListItem {
+		RequestID string `json:"requestId"` // 申请记录ID
+		UserID    string `json:"userId"` // 申请用户ID
+		UserName  string `json:"userName"` // 申请用户昵称
+		Avatar    string `json:"avatar"` // 申请用户头像
+		Reason    string `json:"reason"` // 申请理由
+		CreatedAt string `json:"createdAt"` // 申请时间
+	}
+	GetJoinRequestListRes {
+		Count int64                    `json:"count"` // 总数
+		List  []GetJoinRequestListItem `json:"list"` // 申请列表
+	}
+)
+
+// 获取我加入的圈子列表接口类型
+type (
+	GetMyCircleListReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID
+		Page   int    `form:"page"` // 页码
+		Limit  int    `form:"limit"` // 每页数量
+	}
+	MyCircleListItem {
+		CircleID    string `json:"circleId"` // 圈子ID
+		Name        string `json:"name"` // 圈子名称
+		Avatar      string `json:"avatar"` // 圈子头像
+		MemberCount int64  `json:"memberCount"` // 成员数量
+		PostCount   int64  `json:"postCount"` // 帖子数量
+		Role        int8   `json:"role"` // 当前用户角色：1=圈主 2=管理员 3=普通成员
+	}
+	GetMyCircleListRes {
+		Count int64              `json:"count"` // 总数
+		List  []MyCircleListItem `json:"list"` // 圈子列表
+	}
+)
+
+// 搜索圈子接口类型
+type (
+	SearchCircleReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		Keywords string `form:"keywords"` // 搜索关键词
+		Page     int    `form:"page"` // 页码
+		Limit    int    `form:"limit"` // 每页数量
+	}
+	SearchCircleItem {
+		CircleID    string `json:"circleId"` // 圈子ID
+		Name        string `json:"name"` // 圈子名称
+		Description string `json:"description"` // 圈子简介
+		Avatar      string `json:"avatar"` // 圈子头像
+		MemberCount int64  `json:"memberCount"` // 成员数量
+		JoinType    int8   `json:"joinType"` // 加入方式：0=自由加入 1=审批加入
+		Role        int8   `json:"role"` // 当前用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
+	}
+	SearchCircleRes {
+		Count int64              `json:"count"` // 总数
+		List  []SearchCircleItem `json:"list"` // 圈子列表
+	}
+)
+
+// 圈子同步接口类型
+type (
+	CircleSyncReq {
+		UserID  string `header:"Beaver-User-Id"` // 用户ID
+		Version int64  `json:"version"` // 本地版本号，服务端返回大于此版本的变更
+	}
+	CircleSyncItem {
+		CircleID    string `json:"circleId"` // 圈子ID
+		Name        string `json:"name"` // 圈子名称
+		Avatar      string `json:"avatar"` // 圈子头像
+		MemberCount int64  `json:"memberCount"` // 成员数量
+		Role        int8   `json:"role"` // 当前用户角色：0=已退出 1=圈主 2=管理员 3=普通成员
+		Version     int64  `json:"version"` // 数据版本号
+	}
+	CircleSyncRes {
+		List []CircleSyncItem `json:"list"` // 变更的圈子列表
+	}
+)
+
+@server (
+	group: circle
+)
+service circle {
+	@doc "创建圈子"
+	@handler CreateCircle
+	post /api/circle/v1/circle/create (CreateCircleReq) returns (CreateCircleRes)
+
+	@doc "获取圈子详情"
+	@handler GetCircleDetail
+	get /api/circle/v1/circle/detail (GetCircleDetailReq) returns (GetCircleDetailRes)
+
+	@doc "更新圈子信息（圈主/管理员）"
+	@handler UpdateCircle
+	post /api/circle/v1/circle/update (UpdateCircleReq) returns (UpdateCircleRes)
+
+	@doc "解散圈子（圈主）"
+	@handler DeleteCircle
+	get /api/circle/v1/circle/delete (DeleteCircleReq) returns (DeleteCircleRes)
+
+	@doc "加入圈子"
+	@handler JoinCircle
+	post /api/circle/v1/circle/join (JoinCircleReq) returns (JoinCircleRes)
+
+	@doc "退出圈子"
+	@handler QuitCircle
+	post /api/circle/v1/circle/quit (QuitCircleReq) returns (QuitCircleRes)
+
+	@doc "处理加圈申请（圈主/管理员）"
+	@handler HandleJoinRequest
+	post /api/circle/v1/circle/join_request_handle (HandleJoinRequestReq) returns (HandleJoinRequestRes)
+
+	@doc "获取加圈申请列表（圈主/管理员）"
+	@handler GetJoinRequestList
+	get /api/circle/v1/circle/join_request_list (GetJoinRequestListReq) returns (GetJoinRequestListRes)
+
+	@doc "获取我加入的圈子列表"
+	@handler GetMyCircleList
+	get /api/circle/v1/circle/mine (GetMyCircleListReq) returns (GetMyCircleListRes)
+
+	@doc "搜索圈子"
+	@handler SearchCircle
+	get /api/circle/v1/circle/search (SearchCircleReq) returns (SearchCircleRes)
+
+	@doc "圈子数据同步"
+	@handler CircleSync
+	post /api/circle/v1/circle/sync (CircleSyncReq) returns (CircleSyncRes)
+}

@@ -127,24 +127,24 @@ type (
 service backend {
 	// 开发者管理
 	@handler ApplyDeveloper
-	post /admin/open/developer/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
+	post /admin/open/v1/developer/apply (ApplyDeveloperReq) returns (ApplyDeveloperRes)
 
 	@handler GetDeveloperList
-	get /admin/open/developer/list (GetDeveloperListReq) returns (GetDeveloperListRes)
+	get /admin/open/v1/developer/list (GetDeveloperListReq) returns (GetDeveloperListRes)
 
 	@handler AuditDeveloper
-	post /admin/open/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
+	post /admin/open/v1/developer/audit (AuditDeveloperReq) returns (AuditDeveloperRes)
 
 	@handler GetOpenAppList
-	get /admin/open/app/list (GetOpenAppListReq) returns (GetOpenAppListRes)
+	get /admin/open/v1/app/list (GetOpenAppListReq) returns (GetOpenAppListRes)
 
 	@handler AuditOpenApp
-	post /admin/open/app/audit (AuditOpenAppReq) returns (AuditOpenAppRes)
+	post /admin/open/v1/app/audit (AuditOpenAppReq) returns (AuditOpenAppRes)
 
 	@handler UpdateOpenAppStatus
-	put /admin/open/app/status (UpdateOpenAppStatusReq) returns (UpdateOpenAppStatusRes)
+	post /admin/open/v1/app/update_status (UpdateOpenAppStatusReq) returns (UpdateOpenAppStatusRes)
 
 	@handler GetOpenWebhookLogList
-	get /admin/open/webhook/logs (GetOpenWebhookLogListReq) returns (GetOpenWebhookLogListRes)
+	get /admin/open/v1/webhook/list_logs (GetOpenWebhookLogListReq) returns (GetOpenWebhookLogListRes)
 }
 

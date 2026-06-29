@@ -33,7 +33,7 @@ type (
 // 获取用户详情
 type (
 	GetUserDetailReq {
-		UserID string `path:"id"`
+		UserID string `form:"id"`
 	}
 	GetUserDetailRes {
 		Id          string `json:"id"`
@@ -67,7 +67,7 @@ type (
 // 更新用户
 type (
 	UpdateUserReq {
-		UserID   string  `path:"id"`
+		UserID   string  `json:"id"`
 		NickName *string `json:"nickName,optional"`
 		Email    *string `json:"email,optional"`
 		Avatar   *string `json:"avatar,optional"`
@@ -80,7 +80,7 @@ type (
 // 删除用户
 type (
 	DeleteUserReq {
-		UserID string `path:"id"`
+		UserID string `json:"id"`
 	}
 	DeleteUserRes  {}
 )
@@ -117,33 +117,33 @@ type (
 service backend {
 	@doc "获取用户列表"
 	@handler getUserList
-	get /admin/user/list (GetUserListReq) returns (GetUserListRes)
+	get /admin/user/v1/list (GetUserListReq) returns (GetUserListRes)
 
 	@doc "获取用户详情"
 	@handler getUserDetail
-	get /admin/user/:id (GetUserDetailReq) returns (GetUserDetailRes)
+	get /admin/user/v1/detail (GetUserDetailReq) returns (GetUserDetailRes)
 
 	@doc "创建用户"
 	@handler createUser
-	post /admin/user/create (CreateUserReq) returns (CreateUserRes)
+	post /admin/user/v1/create (CreateUserReq) returns (CreateUserRes)
 
 	@doc "更新用户"
 	@handler updateUser
-	put /admin/user/:id (UpdateUserReq) returns (UpdateUserRes)
+	post /admin/user/v1/update (UpdateUserReq) returns (UpdateUserRes)
 
 	@doc "删除用户"
 	@handler deleteUser
-	delete /admin/user/:id (DeleteUserReq) returns (DeleteUserRes)
+	post /admin/user/v1/delete (DeleteUserReq) returns (DeleteUserRes)
 
 	@doc "批量删除用户"
 	@handler batchDeleteUsers
-	delete /admin/user/batch (BatchDeleteUsersReq) returns (BatchDeleteUsersRes)
+	post /admin/user/v1/batch_delete (BatchDeleteUsersReq) returns (BatchDeleteUsersRes)
 
 	@doc "重置用户密码"
 	@handler resetUserPassword
-	put /admin/user/password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
+	post /admin/user/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
 
 	@doc "批量更新用户状态"
 	@handler batchUpdateUserStatus
-	put /admin/user/status (BatchUpdateUserStatusReq) returns (BatchUpdateUserStatusRes)
+	post /admin/user/v1/batch_update_status (BatchUpdateUserStatusReq) returns (BatchUpdateUserStatusRes)
 }

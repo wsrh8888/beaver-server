@@ -75,13 +75,13 @@ type (
 		CreatedAt    string `json:"createdAt"`
 	}
 	GetModerationCaseDetailReq {
-		CaseID uint64 `path:"id"`
+		CaseID uint64 `form:"id"`
 	}
 	GetModerationCaseDetailRes {
 		Case ModerationCaseInfo `json:"case"`
 	}
 	GetModerationCaseContextReq {
-		CaseID uint64 `path:"id"`
+		CaseID uint64 `form:"id"`
 	}
 	GetModerationCaseContextRes {
 		Case           ModerationCaseInfo       `json:"case"`
@@ -130,7 +130,7 @@ type (
 		CaseNo string `json:"caseNo"`
 	}
 	HandleModerationCaseReq {
-		CaseID       uint64                    `path:"id"`
+		CaseID       uint64                    `json:"id"`
 		Status       int                       `json:"status"`
 		HandleRemark string                    `json:"handleRemark,optional"`
 		Actions      []ModerationControlAction `json:"actions,optional"`
@@ -224,7 +224,7 @@ type (
 
 type (
 	UpdateSensitiveWordReq {
-		ID       uint64 `path:"id"`
+		ID       uint64 `json:"id"`
 		Word     string `json:"word,optional"`
 		Category string `json:"category,optional"`
 		Level    int    `json:"level,optional"`
@@ -237,7 +237,7 @@ type (
 
 type (
 	DeleteSensitiveWordReq {
-		ID     uint64 `path:"id"`
+		ID     uint64 `json:"id"`
 		UserID string `header:"Beaver-User-Id"`
 	}
 	DeleteSensitiveWordRes {}
@@ -249,57 +249,57 @@ type (
 service backend {
 	@doc "内容举报列表"
 	@handler getContentReportList
-	get /admin/moderation/reports (GetContentReportListReq) returns (GetContentReportListRes)
+	get /admin/moderation/v1/list_reports (GetContentReportListReq) returns (GetContentReportListRes)
 
 	@doc "举报立案（创建工单）"
 	@handler escalateContentReport
-	post /admin/moderation/reports/escalate (EscalateContentReportReq) returns (EscalateContentReportRes)
+	post /admin/moderation/v1/escalate_report (EscalateContentReportReq) returns (EscalateContentReportRes)
 
 	@doc "驳回举报"
 	@handler rejectContentReport
-	post /admin/moderation/reports/reject (RejectContentReportReq) returns (RejectContentReportRes)
+	post /admin/moderation/v1/reject_report (RejectContentReportReq) returns (RejectContentReportRes)
 
 	@doc "工单列表"
 	@handler getModerationCaseList
-	get /admin/moderation/cases (GetModerationCaseListReq) returns (GetModerationCaseListRes)
+	get /admin/moderation/v1/list_cases (GetModerationCaseListReq) returns (GetModerationCaseListRes)
 
 	@doc "工单详情"
 	@handler getModerationCaseDetail
-	get /admin/moderation/cases/:id (GetModerationCaseDetailReq) returns (GetModerationCaseDetailRes)
+	get /admin/moderation/v1/case_detail (GetModerationCaseDetailReq) returns (GetModerationCaseDetailRes)
 
 	@doc "工单处置上下文（跨域编排）"
 	@handler getModerationCaseContext
-	get /admin/moderation/cases/:id/context (GetModerationCaseContextReq) returns (GetModerationCaseContextRes)
+	get /admin/moderation/v1/case_context (GetModerationCaseContextReq) returns (GetModerationCaseContextRes)
 
 	@doc "创建工单"
 	@handler createModerationCase
-	post /admin/moderation/cases (CreateModerationCaseReq) returns (CreateModerationCaseRes)
+	post /admin/moderation/v1/create_case (CreateModerationCaseReq) returns (CreateModerationCaseRes)
 
 	@doc "处置工单（含联动管控）"
 	@handler handleModerationCase
-	put /admin/moderation/cases/:id/handle (HandleModerationCaseReq) returns (HandleModerationCaseRes)
+	post /admin/moderation/v1/handle_case (HandleModerationCaseReq) returns (HandleModerationCaseRes)
 
 	@doc "用户快捷管控"
 	@handler executeUserControl
-	post /admin/moderation/control/user (ExecuteUserControlReq) returns (ExecuteUserControlRes)
+	post /admin/moderation/v1/execute_user_control (ExecuteUserControlReq) returns (ExecuteUserControlRes)
 
 	@doc "操作审计日志"
 	@handler getOperationLogList
-	get /admin/moderation/logs (GetOperationLogListReq) returns (GetOperationLogListRes)
+	get /admin/moderation/v1/list_logs (GetOperationLogListReq) returns (GetOperationLogListRes)
 
 	@doc "敏感词列表"
 	@handler getSensitiveWordList
-	get /admin/moderation/sensitive-words (GetSensitiveWordListReq) returns (GetSensitiveWordListRes)
+	get /admin/moderation/v1/list_sensitive_words (GetSensitiveWordListReq) returns (GetSensitiveWordListRes)
 
 	@doc "新增敏感词"
 	@handler createSensitiveWord
-	post /admin/moderation/sensitive-words (CreateSensitiveWordReq) returns (CreateSensitiveWordRes)
+	post /admin/moderation/v1/create_sensitive_word (CreateSensitiveWordReq) returns (CreateSensitiveWordRes)
 
 	@doc "更新敏感词"
 	@handler updateSensitiveWord
-	put /admin/moderation/sensitive-words/:id (UpdateSensitiveWordReq) returns (UpdateSensitiveWordRes)
+	post /admin/moderation/v1/update_sensitive_word (UpdateSensitiveWordReq) returns (UpdateSensitiveWordRes)
 
 	@doc "删除敏感词"
 	@handler deleteSensitiveWord
-	delete /admin/moderation/sensitive-words/:id (DeleteSensitiveWordReq) returns (DeleteSensitiveWordRes)
+	post /admin/moderation/v1/delete_sensitive_word (DeleteSensitiveWordReq) returns (DeleteSensitiveWordRes)
 }

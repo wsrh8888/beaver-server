@@ -156,6 +156,7 @@ func AllMigrations() []Migration {
 				&platform_models.UpdateVersion{},
 				&platform_models.UpdateReleasePolicy{},
 				&platform_models.UpdateReport{},
+				&platform_models.WorkbenchApp{},
 			},
 			Init: platformseed.InitPlatform,
 		},

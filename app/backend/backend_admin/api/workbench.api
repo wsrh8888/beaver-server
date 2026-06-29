@@ -1,0 +1,118 @@
+syntax = "v1"
+
+// ==================== 工作台应用管理（IM 运营配置）====================
+
+type (
+	CreateWorkbenchAppReq {
+		Name        string `json:"name"` // string 应用名称
+		Description string `json:"description,optional"` // string 应用描述，可选
+		Icon        string `json:"icon,optional"` // string 图标 URL，可选
+		EntryURL    string `json:"entryUrl"` // string 入口 URL
+		Category    string `json:"category,optional"` // string 分类，可选
+		Sort        int    `json:"sort,optional"` // int 排序，可选
+		Status      int    `json:"status,optional"` // int 状态 0下架 1上架，可选
+		Remark      string `json:"remark,optional"` // string 运营备注，可选
+		UserID      string `header:"Beaver-User-Id"` // string 操作管理员 ID
+	}
+	CreateWorkbenchAppRes {
+		WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+	}
+)
+
+type (
+	UpdateWorkbenchAppReq {
+		WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+		Name           string `json:"name,optional"` // string 应用名称，可选
+		Description    string `json:"description,optional"` // string 应用描述，可选
+		Icon           string `json:"icon,optional"` // string 图标 URL，可选
+		EntryURL       string `json:"entryUrl,optional"` // string 入口 URL，可选
+		Category       string `json:"category,optional"` // string 分类，可选
+		Sort           *int   `json:"sort,optional"` // int 排序，可选
+		Status         *int   `json:"status,optional"` // int 状态，可选
+		Remark         string `json:"remark,optional"` // string 运营备注，可选
+		UserID         string `header:"Beaver-User-Id"` // string 操作管理员 ID
+	}
+	UpdateWorkbenchAppRes {}
+)
+
+type (
+	DeleteWorkbenchAppReq {
+		WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+	}
+	DeleteWorkbenchAppRes {}
+)
+
+type (
+	GetWorkbenchAppReq {
+		WorkbenchAppID string `form:"workbenchAppId"` // string 应用业务 ID
+	}
+	GetWorkbenchAppRes {
+		WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+		Name           string `json:"name"` // string 应用名称
+		Description    string `json:"description"` // string 应用描述
+		Icon           string `json:"icon"` // string 图标 URL
+		EntryURL       string `json:"entryUrl"` // string 入口 URL
+		Category       string `json:"category"` // string 分类
+		Sort           int    `json:"sort"` // int 排序
+		Status         int    `json:"status"` // int 状态
+		Remark         string `json:"remark"` // string 运营备注
+		CreatedBy      string `json:"createdBy"` // string 创建人
+		LastModifiedBy string `json:"lastModifiedBy"` // string 最后修改人
+		CreatedAt      string `json:"createdAt"` // string 创建时间
+		UpdatedAt      string `json:"updatedAt"` // string 更新时间
+	}
+)
+
+type (
+	GetWorkbenchAppListReq {
+		Page     int    `form:"page,optional"` // int 页码，可选
+		PageSize int    `form:"pageSize,optional"` // int 每页条数，可选
+		Status   int    `form:"status,optional"` // int 状态筛选，可选
+		Category string `form:"category,optional"` // string 分类筛选，可选
+		Keywords string `form:"keywords,optional"` // string 关键词，可选
+	}
+	GetWorkbenchAppListRes {
+		Total int64                     `json:"total"` // int64 总数
+		List  []GetWorkbenchAppListItem `json:"list"` // array 列表
+	}
+	GetWorkbenchAppListItem {
+		WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+		Name           string `json:"name"` // string 应用名称
+		Description    string `json:"description"` // string 应用描述
+		Icon           string `json:"icon"` // string 图标 URL
+		EntryURL       string `json:"entryUrl"` // string 入口 URL
+		Category       string `json:"category"` // string 分类
+		Sort           int    `json:"sort"` // int 排序
+		Status         int    `json:"status"` // int 状态
+		Remark         string `json:"remark"` // string 运营备注
+		CreatedBy      string `json:"createdBy"` // string 创建人
+		LastModifiedBy string `json:"lastModifiedBy"` // string 最后修改人
+		CreatedAt      string `json:"createdAt"` // string 创建时间
+		UpdatedAt      string `json:"updatedAt"` // string 更新时间
+	}
+)
+
+@server (
+	group: workbench
+)
+service backend {
+	@doc "获取工作台应用列表"
+	@handler GetWorkbenchAppList
+	get /admin/workbench/v1/list (GetWorkbenchAppListReq) returns (GetWorkbenchAppListRes)
+
+	@doc "创建工作台应用"
+	@handler CreateWorkbenchApp
+	post /admin/workbench/v1/create (CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes)
+
+	@doc "获取工作台应用详情"
+	@handler GetWorkbenchApp
+	get /admin/workbench/v1/detail (GetWorkbenchAppReq) returns (GetWorkbenchAppRes)
+
+	@doc "更新工作台应用"
+	@handler UpdateWorkbenchApp
+	post /admin/workbench/v1/update (UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes)
+
+	@doc "删除工作台应用"
+	@handler DeleteWorkbenchApp
+	post /admin/workbench/v1/delete (DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes)
+}

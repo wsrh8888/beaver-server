@@ -10,6 +10,7 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
+	"beaver/app/circle/circle_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
@@ -44,7 +45,7 @@ func main() {
 
 	databases := []string{
 		"beaver_user", "beaver_auth", "beaver_friend", "beaver_group", "beaver_chat",
-		"beaver_moment", "beaver_emoji", "beaver_file", "beaver_notification", "beaver_call",
+		"beaver_circle", "beaver_moment", "beaver_emoji", "beaver_file", "beaver_notification", "beaver_call",
 		"beaver_open", "beaver_platform", "beaver_backend", "beaver_datasync",
 	}
 	for _, name := range databases {
@@ -108,6 +109,20 @@ func main() {
 					&chat_models.ChatUserDelete{},
 					&chat_models.ChatMessageMedia{},
 					&chat_models.ChatForward{},
+				)
+			},
+		},
+		{
+			name: "beaver_circle",
+			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_circle?charset=utf8mb4&parseTime=True&loc=Local",
+			run: func(db *gorm.DB) error {
+				return db.AutoMigrate(
+					&circle_models.CircleModel{},
+					&circle_models.CircleMemberModel{},
+					&circle_models.CircleJoinRequestModel{},
+					&circle_models.CirclePostModel{},
+					&circle_models.CircleCommentModel{},
+					&circle_models.CircleLikeModel{},
 				)
 			},
 		},
@@ -201,6 +216,7 @@ func main() {
 					&platform_models.UpdateVersion{},
 					&platform_models.UpdateReleasePolicy{},
 					&platform_models.UpdateReport{},
+					&platform_models.WorkbenchApp{},
 				)
 			},
 		},

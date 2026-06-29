@@ -259,7 +259,7 @@ message GetUserConversationSettingsListByIdsRes {
 // 定义InitializeConversationReq消息 - 通用会话初始化
 message InitializeConversationReq {
   string conversation_id = 1;    // 会话ID（调用方生成）
-  int32 type = 2;               // 会话类型: 1=私聊 2=群聊 3=AI会话 4=客服会话
+  int32 type = 2;               // 会话类型: 1=私聊 2=群聊 3=圈子
   repeated string user_ids = 3;  // 参与用户ID列表
 }
 

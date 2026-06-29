@@ -44,7 +44,7 @@ type (
 // 更新表情图片
 type (
 	UpdateEmojiReq {
-		EmojiId string  `path:"emojiId"`
+		EmojiId string  `json:"emojiId"`
 		FileUrl *string `json:"fileUrl,optional"`
 		Title   *string `json:"title,optional"`
 	}
@@ -54,7 +54,7 @@ type (
 // 删除表情图片
 type (
 	DeleteEmojiReq {
-		EmojiId string `path:"emojiId"`
+		EmojiId string `json:"emojiId"`
 	}
 	DeleteEmojiRes  {}
 )
@@ -202,50 +202,50 @@ type (
 service backend {
 	@doc "获取表情图片列表"
 	@handler getEmojiList
-	get /admin/emoji/list (GetEmojiListReq) returns (GetEmojiListRes)
+	get /admin/emoji/v1/list (GetEmojiListReq) returns (GetEmojiListRes)
 
 	@doc "创建表情图片"
 	@handler createEmoji
-	post /admin/emoji/create (CreateEmojiReq) returns (CreateEmojiRes)
+	post /admin/emoji/v1/create (CreateEmojiReq) returns (CreateEmojiRes)
 
 	@doc "更新表情图片"
 	@handler updateEmoji
-	put /admin/emoji/:emojiId (UpdateEmojiReq) returns (UpdateEmojiRes)
+	post /admin/emoji/v1/update (UpdateEmojiReq) returns (UpdateEmojiRes)
 
 	@doc "删除表情图片"
 	@handler deleteEmoji
-	delete /admin/emoji/:emojiId (DeleteEmojiReq) returns (DeleteEmojiRes)
+	post /admin/emoji/v1/delete (DeleteEmojiReq) returns (DeleteEmojiRes)
 
 	@doc "获取表情包集合列表"
 	@handler getEmojiPackageList
-	get /admin/emoji/packages (GetEmojiPackageListReq) returns (GetEmojiPackageListRes)
+	get /admin/emoji/v1/package_list (GetEmojiPackageListReq) returns (GetEmojiPackageListRes)
 
 	@doc "创建表情包集合"
 	@handler createEmojiPackage
-	post /admin/emoji/packagecreate (CreateEmojiPackageReq) returns (CreateEmojiPackageRes)
+	post /admin/emoji/v1/package_create (CreateEmojiPackageReq) returns (CreateEmojiPackageRes)
 
 	@doc "更新表情包集合"
 	@handler updateEmojiPackage
-	put /admin/emoji/packageupdate (UpdateEmojiPackageReq) returns (UpdateEmojiPackageRes)
+	post /admin/emoji/v1/package_update (UpdateEmojiPackageReq) returns (UpdateEmojiPackageRes)
 
 	@doc "删除表情包集合"
 	@handler deleteEmojiPackage
-	delete /admin/emoji/packagedelete (DeleteEmojiPackageReq) returns (DeleteEmojiPackageRes)
+	post /admin/emoji/v1/package_delete (DeleteEmojiPackageReq) returns (DeleteEmojiPackageRes)
 
 	@doc "获取表情包内的表情图片列表"
 	@handler getEmojiPackageEmojis
-	get /admin/emoji/packageemojis (GetEmojiPackageEmojisReq) returns (GetEmojiPackageEmojisRes)
+	get /admin/emoji/v1/package_emojis (GetEmojiPackageEmojisReq) returns (GetEmojiPackageEmojisRes)
 
 	@doc "向表情包集合中添加表情图片"
 	@handler addEmojiToPackage
-	post /admin/emoji/packageaddemoji (AddEmojiToPackageReq) returns (AddEmojiToPackageRes)
+	post /admin/emoji/v1/package_add_emoji (AddEmojiToPackageReq) returns (AddEmojiToPackageRes)
 
 	@doc "从表情包集合中移除表情图片"
 	@handler removeEmojiFromPackage
-	delete /admin/emoji/packageremoveemoji (RemoveEmojiFromPackageReq) returns (RemoveEmojiFromPackageRes)
+	post /admin/emoji/v1/package_remove_emoji (RemoveEmojiFromPackageReq) returns (RemoveEmojiFromPackageRes)
 
 	@doc "获取用户收藏的表情图片列表"
 	@handler getEmojiCollectList
-	get /admin/emoji/collects (GetEmojiCollectListReq) returns (GetEmojiCollectListRes)
+	get /admin/emoji/v1/collect_list (GetEmojiCollectListReq) returns (GetEmojiCollectListRes)
 }
 

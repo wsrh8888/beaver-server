@@ -1,0 +1,12 @@
+Name: circlerpc.rpc
+ListenOn: 0.0.0.0:31000
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: circlerpc.rpc
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_circle?charset=utf8mb4&parseTime=True&loc=Local
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  Db: 0

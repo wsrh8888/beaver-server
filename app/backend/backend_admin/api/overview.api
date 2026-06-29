@@ -60,13 +60,13 @@ type (
 service backend {
 	@doc "运营工作台概览"
 	@handler getDashboardOverview
-	get /admin/overview/dashboard (GetDashboardOverviewReq) returns (GetDashboardOverviewRes)
+	get /admin/overview/v1/dashboard (GetDashboardOverviewReq) returns (GetDashboardOverviewRes)
 
 	@doc "运营工作台待办收件箱"
 	@handler getDashboardInbox
-	get /admin/overview/inbox (GetDashboardInboxReq) returns (GetDashboardInboxRes)
+	get /admin/overview/v1/inbox (GetDashboardInboxReq) returns (GetDashboardInboxRes)
 
 	@doc "运营数据趋势"
 	@handler getDashboardTrends
-	get /admin/overview/trends (GetDashboardTrendsReq) returns (GetDashboardTrendsRes)
+	get /admin/overview/v1/trends (GetDashboardTrendsReq) returns (GetDashboardTrendsRes)
 }

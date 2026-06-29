@@ -13,7 +13,7 @@ type ChatMessage struct {
 	models.Model
 	MessageID        string        `gorm:"size:64;uniqueIndex" json:"messageId"`      // 唯一消息ID（客户端生成+服务端确认）
 	ConversationID   string        `gorm:"size:128;index" json:"conversationId"`      // 所属会话ID
-	ConversationType int           `gorm:"not null" json:"conversationType"`          // 会话类型（1=私聊 2=群聊）
+	ConversationType int           `gorm:"not null" json:"conversationType"`          // 会话类型（1=私聊 2=群聊 3=圈子）
 	Seq              int64         `gorm:"not null;default:0;index" json:"seq"`       // 消息在会话内的序列号（基于ConversationID递增，从1开始）
 	SendUserID       *string       `gorm:"size:64;index" json:"sendUserId,omitempty"` // 发送者用户ID（通知消息可为null）
 	MsgType          ctype.MsgType `gorm:"not null" json:"msgType"`                   // 消息类型

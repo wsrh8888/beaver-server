@@ -7,6 +7,7 @@ import (
 	feedback "beaver/app/platform/platform_api/internal/handler/feedback"
 	track_public "beaver/app/platform/platform_api/internal/handler/track_public"
 	update_public "beaver/app/platform/platform_api/internal/handler/update_public"
+	workbench "beaver/app/platform/platform_api/internal/handler/workbench"
 	"beaver/app/platform/platform_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -48,6 +49,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/platform/update_public/v1/report",
 				Handler: update_public.ReportVersionHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 获取工作台应用列表（仅上架）
+				Method:  http.MethodGet,
+				Path:    "/api/platform/v1/list_workbench",
+				Handler: workbench.ListWorkbenchAppsHandler(serverCtx),
 			},
 		},
 	)
