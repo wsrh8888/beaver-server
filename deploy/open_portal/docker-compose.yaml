@@ -1,0 +1,13 @@
+
+services:
+  open_portal:
+    image: wsrh8888/open_portal:1.0.0
+    container_name: open_portal
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./open.yaml:/etc/open.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

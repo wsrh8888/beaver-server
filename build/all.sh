@@ -4,13 +4,17 @@
 modules=(
     # ==================== RPC 服务 ====================
     "user_rpc"
+    "auth_rpc"
     "group_rpc"
     "friend_rpc"
     "chat_rpc"
     "file_rpc"
     "emoji_rpc"
+    "moment_rpc"
     "notification_rpc"
+    "platform_rpc"
     "call_rpc"
+    "open_rpc"
     
     # ==================== API 服务 ====================
     "auth_api"
@@ -21,13 +25,14 @@ modules=(
     "friend_api"
     "group_api"
     "moment_api"
-    "document_api"
     "notification_api"
     "platform_api"
     "user_api"
     "ws_api"
     "gateway_api"
     "call_api"
+    "open_api"
+    "open_portal"
     
     # ==================== ADMIN 服务 ====================
     "backend_admin"

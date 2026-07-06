@@ -20,6 +20,8 @@ RUN go mod tidy
 # ==================== AUTH 相关服务 ====================
 # auth_api
 RUN go build -ldflags="-s -w" -o auth_api/auth app/auth/auth_api/auth.go
+# auth_rpc
+RUN go build -ldflags="-s -w" -o auth_rpc/authrpc app/auth/auth_rpc/authrpc.go
 
 # ==================== BACKEND 相关服务 ====================
 # backend_admin
@@ -38,6 +40,8 @@ RUN go build -ldflags="-s -w" -o datasync_api/datasync app/datasync/datasync_api
 # ==================== PLATFORM 相关服务 ====================
 # platform_api
 RUN go build -ldflags="-s -w" -o platform_api/platform app/platform/platform_api/platform.go
+# platform_rpc
+RUN go build -ldflags="-s -w" -o platform_rpc/platformrpc app/platform/platform_rpc/platformrpc.go
 
 # ==================== EMOJI 相关服务 ====================
 # emoji_api
@@ -72,10 +76,8 @@ RUN go build -ldflags="-s -w" -o group_rpc/grouprpc app/group/group_rpc/grouprpc
 # ==================== MOMENT 相关服务 ====================
 # moment_api
 RUN go build -ldflags="-s -w" -o moment_api/moment app/moment/moment_api/moment.go
-
-# ==================== DOCUMENT 相关服务 ====================
-# document_api
-RUN go build -ldflags="-s -w" -o document_api/document app/document/document_api/document.go
+# moment_rpc
+RUN go build -ldflags="-s -w" -o moment_rpc/momentrpc app/moment/moment_rpc/momentrpc.go
 
 # ==================== NOTIFICATION 相关服务 ====================
 # notification_api
@@ -101,4 +103,12 @@ RUN go build -ldflags="-s -w" -o call_rpc/callrpc app/call/call_rpc/callrpc.go
 # ==================== WS 相关服务 ====================
 # ws_api
 RUN go build -ldflags="-s -w" -o ws_api/ws app/ws/ws_api/ws.go
+
+# ==================== OPEN 相关服务 ====================
+# open_api
+RUN go build -ldflags="-s -w" -o open_api/open app/open/open_api/open.go
+# open_portal
+RUN go build -ldflags="-s -w" -o open_portal/open app/open/open_portal/open.go
+# open_rpc
+RUN go build -ldflags="-s -w" -o open_rpc/openrpc app/open/open_rpc/openRpc.go
 

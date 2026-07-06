@@ -1,0 +1,55 @@
+Name: open_portal
+Host: 0.0.0.0
+Port: 22000
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
+Etcd: 127.0.0.1:2379
+
+# CORS 配置
+CORS:
+  AllowOrigin: '*'
+  AllowMethods: 'GET,POST,PUT,DELETE,OPTIONS'
+  AllowHeaders: 'Content-Type,Token,deviceId,Authorization'
+  ExposeHeaders: 'Content-Length,Access-Control-Allow-Origin,Access-Control-Allow-Headers,Access-Control-Allow-Methods'
+  MaxAge: 86400
+  AllowCredentials: true
+
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=true&loc=Local
+
+Auth:
+  AccessSecret: robert
+  AccessExpire: 43200
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: userrpc.rpc
+AuthRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: authrpc.rpc
+GroupRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: grouprpc.rpc
+OpenRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: openrpc.rpc
+
+# OAuth 授权页（beaver-oauth H5，用于生成扫码 URL）
+OAuth:
+  BaseUrl: http://192.168.3.4:5173
+Domain: "http://192.168.3.4:20800"
+
+# 门户自身 OAuth 客户端（code 换 token 在服务端完成，appSecret 不下发前端）
+PortalOAuth:
+  AppId: app_2db39e38
