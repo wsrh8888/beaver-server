@@ -16,9 +16,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
-	"beaver/database/file"
+	fileseed "beaver/database/file"
 	"beaver/database/platform"
-	"beaver/database/user"
+	userseed "beaver/database/user"
 	"flag"
 	"fmt"
 
@@ -187,12 +187,6 @@ func main() {
 			run: func(db *gorm.DB) error {
 				return db.AutoMigrate(
 					&platform_models.TrackBucket{},
-					&platform_models.TrackEventDef{},
-					&platform_models.TrackEventCommonParam{},
-					&platform_models.TrackEventAttr{},
-					&platform_models.TrackEventReport{},
-					&platform_models.TrackEventCommonValue{},
-					&platform_models.TrackEventAttrValue{},
 					&platform_models.TrackLogger{},
 					&platform_models.FeedbackModel{},
 					&platform_models.ContentReportModel{},

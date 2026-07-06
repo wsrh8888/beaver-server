@@ -1,0 +1,13 @@
+
+services:
+  platform_rpc:
+    image: wsrh8888/platform_rpc:1.0.0
+    container_name: platform_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./platformrpc.yaml:/etc/platformrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

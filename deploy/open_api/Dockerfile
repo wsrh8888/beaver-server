@@ -6,6 +6,6 @@ RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
-COPY --from=builder /build/document_api/document .
+COPY --from=builder /build/open_api/open .
 
-CMD ["./document", "-f", "/etc/document.yaml"]
+CMD ["./open", "-f", "/etc/open.yaml"]

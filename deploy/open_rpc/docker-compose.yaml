@@ -1,0 +1,13 @@
+
+services:
+  open_rpc:
+    image: wsrh8888/open_rpc:1.0.0
+    container_name: open_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./openrpc.yaml:/etc/openrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

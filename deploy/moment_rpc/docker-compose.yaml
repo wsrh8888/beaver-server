@@ -1,0 +1,13 @@
+
+services:
+  moment_rpc:
+    image: wsrh8888/moment_rpc:1.0.0
+    container_name: moment_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./momentrpc.yaml:/etc/momentrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always
