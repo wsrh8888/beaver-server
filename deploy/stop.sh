@@ -30,16 +30,19 @@ stop_services() {
     done
 }
 
-# 按顺序停止服务：Admin -> API -> RPC
-echo "Stopping services in order: Admin -> API -> RPC"
+# 按顺序停止服务：Portal -> Admin -> API -> RPC
+echo "Stopping services in order: Portal -> Admin -> API -> RPC"
 
-# 1. 停止 Admin 服务
+# 1. 停止 Portal 服务
+stop_services "Portal" "_portal"
+
+# 2. 停止 Admin 服务
 stop_services "Admin" "_admin"
 
-# 2. 停止 API 服务
+# 3. 停止 API 服务
 stop_services "API" "_api"
 
-# 3. 停止 RPC 服务
+# 4. 停止 RPC 服务
 stop_services "RPC" "_rpc"
 
 # 清理容器和网络

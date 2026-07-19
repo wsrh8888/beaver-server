@@ -1,6 +1,12 @@
 Name: file
 Host: 0.0.0.0
 Port: 20600
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
+Domain: "http://192.168.3.4:20800"
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_file?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
@@ -8,11 +14,7 @@ Redis:
   Password: '123456'
   DB: 0
 Etcd: 127.0.0.1:2379
-Log:
-  Encoding: json
-  TimeFormat: 2006-01-02T15:04:05
-  Stat: false
-Timeout: 60000
+
 FileMaxSize:
   image: 2    
   video: 10   
@@ -20,20 +22,21 @@ FileMaxSize:
   archive: 2  
   document: 2 
   unknown: 10
-FileSize: 5 # MB
-MaxBytes: 5368709120 # 5GB
-UploadDir: uploads
+MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
+
+# 本地存储配置
+Local:
+  UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
+  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+  
+# 七牛云配置
 Qiniu: 
   ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
   AK: your_qiniu_access_key
   SK: your_qiniu_secret_key
   Bucket: your_qiniu_bucket_name
-  Domain: 'your_qiniu_domain'
+  Domain: "your_qiniu_domain" # 七牛云文件访问域名（必填，用于拼接完整URL）
   ExpireTime: 3600 # 签名URL有效期, 单位：秒
-# 本地存储配置
-Local:
-  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
-  UploadDir: /mnt/static # 本地文件上传目录(相对路径，相对于程序运行目录)
 WhiteList:
   - png
   - jpg
@@ -44,8 +47,11 @@ WhiteList:
   - mp3
   - m4a
   - aac
-BlackList:
+  - pdf
   - exe
+  - wav
+
+BlackList:
   - sh
   - bat
 UserRpc:
