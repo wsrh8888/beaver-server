@@ -25,5 +25,7 @@ FriendRpc:
 GroupRpc:
   Etcd:
     Hosts:
-    - 10.0.24.6:2379
+    - 127.0.0.1:2379
     Key: grouprpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

@@ -17,6 +17,7 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
 	fileseed "beaver/database/file"
+	openseed "beaver/database/open"
 	"beaver/database/platform"
 	userseed "beaver/database/user"
 	"flag"
@@ -243,6 +244,10 @@ func main() {
 	_ = platform.InitPlatform(platformDB)
 	if err := userseed.InitDefaultUser(userDB, authDB, openDB); err != nil {
 		fmt.Printf("默认用户初始化失败: %v\n", err)
+		return
+	}
+	if err := openseed.InitQuickLoginApp(openDB); err != nil {
+		fmt.Printf("默认开放应用初始化失败: %v\n", err)
 		return
 	}
 

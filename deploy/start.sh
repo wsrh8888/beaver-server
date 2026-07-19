@@ -46,8 +46,8 @@ start_services() {
     done
 }
 
-# 按顺序启动服务：RPC -> API -> Admin
-echo "Starting services in order: RPC -> API -> Admin"
+# 按顺序启动服务：RPC -> API -> Admin -> Portal
+echo "Starting services in order: RPC -> API -> Admin -> Portal"
 
 # 1. 启动 RPC 服务
 start_services "RPC" "_rpc"
@@ -57,6 +57,9 @@ start_services "API" "_api"
 
 # 3. 启动 Admin 服务
 start_services "Admin" "_admin"
+
+# 4. 启动 Portal 服务
+start_services "Portal" "_portal"
 
 # 清理未被使用的镜像
 echo "Pruning unused Docker images"

@@ -1,6 +1,11 @@
 Name: backend
 Host: 0.0.0.0
 Port: 40000
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
 Timeout: 600000 # 10分钟超时，单位毫秒，文件上传需要更长的处理时间
 Auth:
   AccessSecret: robert
@@ -42,14 +47,14 @@ File:
     exe: 1024
     apk: 512
 MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
-Domain: "http://192.168.3.4:20800" # 对外访问域名，用于生成本地文件完整 URL
+Domain: "http://192.168.3.4:20800" # 对外访问域名，用于生成本地文件完整 URL（与 file_api 网关一致）
 # 本地存储配置
 Local:
-  UploadDir: /mnt/static # 本地文件上传目录(相对路径，相对于程序运行目录)
-  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+  UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
+  ProjectName: beaver # 项目名称，用于文件路径前缀
 # 七牛云配置
 Qiniu:
-  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+  ProjectName: beaver # 项目名称，用于文件路径前缀
   AK: your_qiniu_access_key
   SK: your_qiniu_secret_key
   Bucket: your_qiniu_bucket_name
@@ -105,4 +110,3 @@ EmojiRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: emojirpc.rpc
-

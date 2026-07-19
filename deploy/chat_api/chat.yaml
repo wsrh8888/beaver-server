@@ -10,7 +10,7 @@ Redis:
 Log:
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05
-  Stat: false
+  Level: info
 Etcd: 127.0.0.1:2379
 UserRpc:
   Etcd:
@@ -32,3 +32,5 @@ GroupRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876
