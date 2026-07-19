@@ -91,10 +91,12 @@ func InitQuickLoginApp(db *gorm.DB) error {
 		RedirectURIs: []string{
 			"http://localhost:4012/",
 			"http://127.0.0.1:4012/",
+			"https://fe.wsrh8888.com/open/",
 		},
 		JsSdkDomains: []string{
 			"http://localhost:4012",
 			"http://127.0.0.1:4012",
+			"https://fe.wsrh8888.com",
 		},
 	}
 
