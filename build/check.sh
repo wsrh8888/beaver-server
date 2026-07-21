@@ -14,22 +14,17 @@ echo "=================================="
 echo -e "${YELLOW}📁 扫描 /app 目录下的服务（数据源头）...${NC}"
 app_services=()
 
-# 遍历app目录下的所有子目录
+# 遍历 app 目录下的所有子目录
 for dir in app/*/; do
     if [ -d "$dir" ]; then
-        # 获取目录名（去掉app/前缀和末尾的/）
-        service_name=$(basename "$dir")
-        
-        # 检查该目录下是否有api、admin、rpc子目录
-        if [ -d "${dir}${service_name}_api" ]; then
-            app_services+=("${service_name}_api")
-        fi
-        if [ -d "${dir}${service_name}_admin" ]; then
-            app_services+=("${service_name}_admin")
-        fi
-        if [ -d "${dir}${service_name}_rpc" ]; then
-            app_services+=("${service_name}_rpc")
-        fi
+        for subdir in "${dir}"*/; do
+            if [ -d "$subdir" ]; then
+                subname=$(basename "$subdir")
+                if [[ "$subname" =~ _(api|rpc|admin|portal)$ ]]; then
+                    app_services+=("$subname")
+                fi
+            fi
+        done
     fi
 done
 

@@ -17,7 +17,7 @@ func InitDefaultFiles(db *gorm.DB) error {
 			Md5:          "a9de5548bef8c10b92428fff61275c72",
 			Type:         "image",
 			FileKey:      "a9de5548bef8c10b92428fff61275c72.png",
-			Source:       file_models.LocalSource,
+			Source:       file_models.QiniuSource,
 		},
 		{
 			OriginalName: "defaultGroupFileName",
@@ -26,7 +26,7 @@ func InitDefaultFiles(db *gorm.DB) error {
 			Md5:          "a8ba5d19ea54a91aec17dec0ad5000e6.png",
 			Type:         "image",
 			FileKey:      "a8ba5d19ea54a91aec17dec0ad5000e6.png",
-			Source:       file_models.LocalSource,
+			Source:       file_models.QiniuSource,
 		},
 	}
 

@@ -1,0 +1,13 @@
+
+services:
+  auth_rpc:
+    image: wsrh8888/auth_rpc:1.0.0
+    container_name: auth_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./authrpc.yaml:/etc/authrpc.yaml:ro
+    deploy:
+      restart_policy:
+        condition: any
+    pull_policy: always

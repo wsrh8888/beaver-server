@@ -1,9 +1,14 @@
 Name: auth
 Host: 0.0.0.0
 Port: 20100
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
 Etcd: 127.0.0.1:2379
 Auth:
-  AccessSecret: your_jwt_secret_here
+  AccessSecret: robert
   AccessExpire: 3600
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local

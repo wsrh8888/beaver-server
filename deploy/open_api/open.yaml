@@ -1,8 +1,8 @@
-Name: chat
+Name: open
 Host: 0.0.0.0
-Port: 20300
+Port: 21900
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_chat?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
   Addr: 127.0.0.1:6379
   Password: '123456'
@@ -10,27 +10,30 @@ Redis:
 Log:
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05
-  Level: info
+  Stat: false
 Etcd: 127.0.0.1:2379
 UserRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: userrpc.rpc
+AuthRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: authrpc.rpc
 ChatRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: chatrpc.rpc
-FriendRpc:
-  Etcd:
-    Hosts:
-    - 127.0.0.1:2379
-    Key: friendrpc.rpc
 GroupRpc:
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
-RocketMQ:
-  Addr: 127.0.0.1:9876
+OpenRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: openrpc.rpc

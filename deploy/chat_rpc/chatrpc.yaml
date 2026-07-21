@@ -44,6 +44,8 @@ NotificationRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: notificationrpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876
 Push:
   Enabled: false
   FCM:

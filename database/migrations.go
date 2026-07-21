@@ -17,6 +17,7 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
 	fileseed "beaver/database/file"
+	openseed "beaver/database/open"
 	platformseed "beaver/database/platform"
 	"fmt"
 
@@ -144,6 +145,7 @@ func AllMigrations() []Migration {
 				&open_models.OpenWebhookLog{},
 				&open_models.OpenRobotSendLog{},
 			},
+			Init: openseed.InitQuickLoginApp,
 		},
 		{
 			Name: "beaver_platform",

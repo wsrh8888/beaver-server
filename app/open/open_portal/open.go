@@ -22,11 +22,7 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 	logger.Init("open_portal")
 
-	// 配置 CORS - 允许所有来源和头部
-	server := rest.MustNewServer(c.RestConf,
-		rest.WithCors("*"),
-		rest.WithCorsHeaders("*"),
-	)
+	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
