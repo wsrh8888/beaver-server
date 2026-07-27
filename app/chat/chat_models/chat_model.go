@@ -87,8 +87,26 @@ func getPreview(msg *ctype.Msg) string {
 			return prefix + "云文档"
 		}
 		return "[云文档]"
+	case ctype.CardMsgType:
+		if msg.CardMsg != nil {
+			return cardPreviewLabel(msg.CardMsg.CardType)
+		}
+		return "[名片]"
 	}
 	return "[未知消息]"
+}
+
+func cardPreviewLabel(cardType int) string {
+	switch cardType {
+	case ctype.CardTypeUser:
+		return "[个人名片]"
+	case ctype.CardTypeGroup:
+		return "[群名片]"
+	case ctype.CardTypeCircle:
+		return "[圈子名片]"
+	default:
+		return "[名片]"
+	}
 }
 
 func cloudDocPreviewLabel(docType int) string {
