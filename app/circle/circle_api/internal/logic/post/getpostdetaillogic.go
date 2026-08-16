@@ -56,19 +56,54 @@ func (l *GetPostDetailLogic) GetPostDetail(req *types.GetPostDetailReq) (resp *t
 
 	commentItems := buildCommentItems(l.ctx, l.svcCtx, comments, req.PostID)
 
+	var commentCount int64
+	l.svcCtx.DB.Model(&circle_models.CircleCommentModel{}).
+		Where("post_id = ? AND is_deleted = false", req.PostID).
+		Count(&commentCount)
+
+	var likeCount int64
+	l.svcCtx.DB.Model(&circle_models.CircleLikeModel{}).
+		Where("post_id = ?", req.PostID).
+		Count(&likeCount)
+
+	var likes []circle_models.CircleLikeModel
+	l.svcCtx.DB.Where("post_id = ?", req.PostID).Order("created_at DESC").Limit(100).Find(&likes)
+	likeItems := make([]types.GetPostDetailLikeInfo, 0, len(likes))
+	if len(likes) > 0 {
+		likeUserIDs := make([]string, 0, len(likes))
+		for _, item := range likes {
+			likeUserIDs = append(likeUserIDs, item.UserID)
+		}
+		likeUserResp, _ := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: likeUserIDs})
+		for _, item := range likes {
+			likeName, likeAvatar := "", ""
+			if likeUserResp != nil {
+				if info := likeUserResp.UserInfo[item.UserID]; info != nil {
+					likeName = info.NickName
+					likeAvatar = info.Avatar
+				}
+			}
+			likeItems = append(likeItems, types.GetPostDetailLikeInfo{
+				UserID:   item.UserID,
+				UserName: likeName,
+				Avatar:   likeAvatar,
+			})
+		}
+	}
+
 	resp = &types.GetPostDetailRes{
 		PostID:       p.PostID,
 		CircleID:     p.CircleID,
 		UserID:       p.UserID,
 		UserName:     userName,
 		Avatar:       avatar,
-		Title:        p.Title,
 		Content:      p.Content,
-		CommentCount: p.CommentCount,
-		LikeCount:    p.LikeCount,
+		CommentCount: commentCount,
+		LikeCount:    likeCount,
 		IsLiked:      isLiked,
 		IsTop:        p.IsTop,
 		Comments:     commentItems,
+		Likes:        likeItems,
 		CreatedAt:    p.CreatedAt.String(),
 	}
 	if p.Files != nil {
@@ -84,17 +119,16 @@ func buildCommentItems(ctx context.Context, svcCtx *svc.ServiceContext, comments
 		return []types.GetPostDetailCommentInfo{}
 	}
 
-	// 收集所有评论用户ID
-	userIDs := make([]string, 0)
-	commentIDs := make([]string, 0)
+	commentIDs := make([]string, 0, len(comments))
+	userIDSet := make(map[string]struct{})
 	for _, c := range comments {
-		userIDs = append(userIDs, c.UserID)
 		commentIDs = append(commentIDs, c.CommentID)
+		userIDSet[c.UserID] = struct{}{}
+		if c.ReplyToUserID != "" {
+			userIDSet[c.ReplyToUserID] = struct{}{}
+		}
 	}
 
-	userResp, _ := svcCtx.UserRpc.UserListInfo(ctx, &user_rpc.UserListInfoReq{UserIdList: userIDs})
-
-	// 查子评论数
 	type countResult struct {
 		ParentID string
 		Count    int64
@@ -110,8 +144,57 @@ func buildCommentItems(ctx context.Context, svcCtx *svc.ServiceContext, comments
 		childCountMap[cr.ParentID] = cr.Count
 	}
 
+	childMap := make(map[string][]circle_models.CircleCommentModel)
+	var children []circle_models.CircleCommentModel
+	svcCtx.DB.Where("parent_id IN ? AND is_deleted = false", commentIDs).
+		Order("created_at ASC").
+		Find(&children)
+	for _, ch := range children {
+		childMap[ch.ParentID] = append(childMap[ch.ParentID], ch)
+		userIDSet[ch.UserID] = struct{}{}
+		if ch.ReplyToUserID != "" {
+			userIDSet[ch.ReplyToUserID] = struct{}{}
+		}
+	}
+
+	userIDs := make([]string, 0, len(userIDSet))
+	for id := range userIDSet {
+		userIDs = append(userIDs, id)
+	}
+	userResp, _ := svcCtx.UserRpc.UserListInfo(ctx, &user_rpc.UserListInfoReq{UserIdList: userIDs})
+
+	fillUser := func(item *types.GetPostDetailCommentInfo, c circle_models.CircleCommentModel) {
+		if userResp == nil {
+			return
+		}
+		if info := userResp.UserInfo[c.UserID]; info != nil {
+			item.UserName = info.NickName
+			item.Avatar = info.Avatar
+		}
+		if c.ReplyToUserID != "" {
+			if info := userResp.UserInfo[c.ReplyToUserID]; info != nil {
+				item.ReplyToUserName = info.NickName
+			}
+		}
+	}
+
 	items := make([]types.GetPostDetailCommentInfo, 0, len(comments))
 	for _, c := range comments {
+		childItems := make([]types.GetPostDetailCommentInfo, 0, len(childMap[c.CommentID]))
+		for _, ch := range childMap[c.CommentID] {
+			childItem := types.GetPostDetailCommentInfo{
+				CommentID:        ch.CommentID,
+				UserID:           ch.UserID,
+				Content:          ch.Content,
+				ParentID:         ch.ParentID,
+				ReplyToCommentID: ch.ReplyToCommentID,
+				ChildCount:       0,
+				Children:         []types.GetPostDetailCommentInfo{},
+				CreatedAt:        ch.CreatedAt.String(),
+			}
+			fillUser(&childItem, ch)
+			childItems = append(childItems, childItem)
+		}
 		item := types.GetPostDetailCommentInfo{
 			CommentID:        c.CommentID,
 			UserID:           c.UserID,
@@ -119,20 +202,10 @@ func buildCommentItems(ctx context.Context, svcCtx *svc.ServiceContext, comments
 			ParentID:         c.ParentID,
 			ReplyToCommentID: c.ReplyToCommentID,
 			ChildCount:       childCountMap[c.CommentID],
-			Children:         []types.GetPostDetailCommentInfo{},
+			Children:         childItems,
 			CreatedAt:        c.CreatedAt.String(),
 		}
-		if userResp != nil {
-			if info := userResp.UserInfo[c.UserID]; info != nil {
-				item.UserName = info.NickName
-				item.Avatar = info.Avatar
-			}
-			if c.ReplyToUserID != "" {
-				if info := userResp.UserInfo[c.ReplyToUserID]; info != nil {
-					item.ReplyToUserName = info.NickName
-				}
-			}
-		}
+		fillUser(&item, c)
 		items = append(items, item)
 	}
 	return items

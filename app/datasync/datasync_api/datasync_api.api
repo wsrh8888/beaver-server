@@ -34,6 +34,22 @@ type (
 	}
 )
 
+// 同步圈子信息
+type (
+	GetSyncCircleInfoReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
+	}
+	GetSyncCircleInfoRes {
+		CircleVersions  []CircleInfoVersionItem `json:"circleVersions"` // 变更的圈子信息版本摘要
+		ServerTimestamp int64                   `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	CircleInfoVersionItem {
+		CircleID string `json:"circleId"` // 圈子ID
+		Version  int64  `json:"version"` // 圈子资料版本
+	}
+)
+
 // 同步群成员信息
 type (
 	GetSyncGroupMembersReq {
@@ -278,6 +294,10 @@ service datasync {
 	@doc "获取所有需要更新的群组信息版本"
 	@handler getSyncGroupInfo
 	post /api/datasync/v1/getSyncGroupInfo (GetSyncGroupInfoReq) returns (GetSyncGroupInfoRes)
+
+	@doc "获取所有需要更新的圈子信息版本"
+	@handler getSyncCircleInfo
+	post /api/datasync/v1/getSyncCircleInfo (GetSyncCircleInfoReq) returns (GetSyncCircleInfoRes)
 
 	@doc "获取所有需要更新的群成员版本"
 	@handler getSyncGroupMembers

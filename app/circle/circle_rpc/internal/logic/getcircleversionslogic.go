@@ -25,7 +25,6 @@ func NewGetCircleVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetCircleVersionsLogic) GetCircleVersions(in *circle_rpc.GetCircleVersionsReq) (*circle_rpc.GetCircleVersionsRes, error) {
-	// 查用户加入的所有圈子
 	var members []circle_models.CircleMemberModel
 	l.svcCtx.DB.Where("user_id = ?", in.UserId).Find(&members)
 
@@ -40,9 +39,14 @@ func (l *GetCircleVersionsLogic) GetCircleVersions(in *circle_rpc.GetCircleVersi
 		roleMap[m.CircleID] = int32(m.Role)
 	}
 
-	// 用 version 字段做增量比较（Redis 递增生成，严格单调递增）
 	var circles []circle_models.CircleModel
 	l.svcCtx.DB.Where("circle_id IN ? AND version > ?", circleIDs, in.Version).Find(&circles)
+
+	versionIDs := make([]string, 0, len(circles))
+	for _, c := range circles {
+		versionIDs = append(versionIDs, c.CircleID)
+	}
+	memberCountMap := countMembersByCircleIDs(l.svcCtx.DB, versionIDs)
 
 	list := make([]*circle_rpc.CircleVersionItem, 0, len(circles))
 	for _, c := range circles {
@@ -54,7 +58,7 @@ func (l *GetCircleVersionsLogic) GetCircleVersions(in *circle_rpc.GetCircleVersi
 			CircleId:    c.CircleID,
 			Name:        c.Name,
 			Avatar:      c.Avatar,
-			MemberCount: c.MemberCount,
+			MemberCount: memberCountMap[c.CircleID],
 			Role:        role,
 			Version:     c.Version,
 		})

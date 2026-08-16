@@ -30,14 +30,11 @@ func (f *PostFiles) Scan(value interface{}) error {
 // CirclePostModel 圈子帖子表
 type CirclePostModel struct {
 	models.Model
-	PostID       string     `gorm:"column:post_id;size:64;uniqueIndex;not null" json:"postId"`  // 帖子唯一ID
-	CircleID     string     `gorm:"size:64;not null;index" json:"circleId"`                     // 所属圈子ID
-	UserID       string     `gorm:"size:64;not null;index" json:"userId"`                       // 发帖用户ID
-	Title        string     `gorm:"size:128" json:"title"`                                      // 帖子标题（可选）
-	Content      string     `gorm:"type:text;not null" json:"content"`                          // 帖子内容
-	Files        *PostFiles `gorm:"type:longtext" json:"files"`                                 // 附件列表（JSON数组）
-	CommentCount int64      `gorm:"not null;default:0" json:"commentCount"`                     // 评论数（冗余字段）
-	LikeCount    int64      `gorm:"not null;default:0" json:"likeCount"`                        // 点赞数（冗余字段）
-	IsTop        bool       `gorm:"not null;default:false" json:"isTop"`                        // 是否置顶
-	IsDeleted    bool       `gorm:"not null;default:false;index" json:"isDeleted"`              // 软删除标记
+	PostID    string     `gorm:"column:post_id;size:64;uniqueIndex;not null" json:"postId"` // 帖子唯一ID
+	CircleID  string     `gorm:"size:64;not null;index" json:"circleId"`                    // 所属圈子ID
+	UserID    string     `gorm:"size:64;not null;index" json:"userId"`                      // 发帖用户ID
+	Content   string     `gorm:"type:text;not null" json:"content"`                         // 帖子内容
+	Files     *PostFiles `gorm:"type:longtext" json:"files"`                                // 附件列表（JSON数组）
+	IsTop     bool       `gorm:"not null;default:false" json:"isTop"`                       // 是否置顶
+	IsDeleted bool       `gorm:"not null;default:false;index" json:"isDeleted"`             // 软删除标记
 }

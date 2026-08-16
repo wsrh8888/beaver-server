@@ -3,7 +3,9 @@ package post
 import (
 	"context"
 	"fmt"
+	"unicode/utf8"
 
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
@@ -28,7 +30,6 @@ func NewCreatePostLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Create
 }
 
 func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.CreatePostRes, err error) {
-	// 校验是否是圈子成员
 	var member circle_models.CircleMemberModel
 	if err = l.svcCtx.DB.Where("circle_id = ? AND user_id = ?", req.CircleID, req.UserID).First(&member).Error; err != nil {
 		return nil, fmt.Errorf("请先加入圈子再发帖")
@@ -48,7 +49,6 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 		PostID:   postID,
 		CircleID: req.CircleID,
 		UserID:   req.UserID,
-		Title:    req.Title,
 		Content:  req.Content,
 		Files:    files,
 	}
@@ -56,10 +56,30 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 		return nil, fmt.Errorf("发布帖子失败: %v", err)
 	}
 
-	// 更新圈子帖子数
-	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
-		Where("circle_id = ?", req.CircleID).
-		UpdateColumn("post_count", l.svcCtx.DB.Raw("post_count + 1"))
+	// 确保所有成员的圈子会话存在，并把动态顶到会话列表
+	var members []circle_models.CircleMemberModel
+	l.svcCtx.DB.Where("circle_id = ?", req.CircleID).Find(&members)
+	userIDs := make([]string, 0, len(members))
+	for _, m := range members {
+		userIDs = append(userIDs, m.UserID)
+	}
+	conversationID := fmt.Sprintf("circle_%s", req.CircleID)
+	if len(userIDs) > 0 {
+		_, _ = l.svcCtx.ChatRpc.InitializeConversation(l.ctx, &chat_rpc.InitializeConversationReq{
+			ConversationId: conversationID,
+			Type:           3,
+			UserIds:        userIDs,
+		})
+	}
+
+	preview := buildPostPreview(req.Content, len(req.Files) > 0)
+	_, _ = l.svcCtx.ChatRpc.SendNotificationMessage(l.ctx, &chat_rpc.SendNotificationMessageReq{
+		ConversationId: conversationID,
+		MessageType:    1,
+		Content:        preview,
+		RelatedUserId:  req.UserID,
+		ReadUserIds:    []string{req.UserID},
+	})
 
 	userName, avatar := "", ""
 	userResp, _ := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: []string{req.UserID}})
@@ -76,8 +96,41 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 		UserID:    req.UserID,
 		UserName:  userName,
 		Avatar:    avatar,
-		Title:     req.Title,
 		Content:   req.Content,
 		CreatedAt: post.CreatedAt.String(),
 	}, nil
+}
+
+func buildPostPreview(content string, hasFiles bool) string {
+	content = trimPostText(content)
+	if content != "" {
+		if utf8.RuneCountInString(content) > 40 {
+			runes := []rune(content)
+			return string(runes[:40]) + "..."
+		}
+		return content
+	}
+	if hasFiles {
+		return "[图片]"
+	}
+	return "[新动态]"
+}
+
+func trimPostText(s string) string {
+	start, end := 0, len(s)
+	for start < end {
+		r, size := utf8.DecodeRuneInString(s[start:])
+		if r != ' ' && r != '\n' && r != '\t' && r != '\r' {
+			break
+		}
+		start += size
+	}
+	for end > start {
+		r, size := utf8.DecodeLastRuneInString(s[:end])
+		if r != ' ' && r != '\n' && r != '\t' && r != '\r' {
+			break
+		}
+		end -= size
+	}
+	return s[start:end]
 }

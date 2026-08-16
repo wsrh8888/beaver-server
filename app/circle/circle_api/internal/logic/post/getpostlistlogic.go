@@ -42,7 +42,6 @@ func (l *GetPostListLogic) GetPostList(req *types.GetPostListReq) (resp *types.G
 		return &types.GetPostListRes{Count: total, List: []types.PostListItem{}}, nil
 	}
 
-	// 批量拉用户信息
 	userIDs := make([]string, 0, len(posts))
 	postIDs := make([]string, 0, len(posts))
 	for _, p := range posts {
@@ -51,7 +50,6 @@ func (l *GetPostListLogic) GetPostList(req *types.GetPostListReq) (resp *types.G
 	}
 	userResp, _ := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: userIDs})
 
-	// 查当前用户点赞情况
 	var likes []circle_models.CircleLikeModel
 	l.svcCtx.DB.Where("post_id IN ? AND user_id = ?", postIDs, req.UserID).Find(&likes)
 	likedMap := make(map[string]bool)
@@ -59,17 +57,46 @@ func (l *GetPostListLogic) GetPostList(req *types.GetPostListReq) (resp *types.G
 		likedMap[lk.PostID] = true
 	}
 
-	// 每帖取最新3条评论
+	likeCountMap := make(map[string]int64)
+	type likeCountRow struct {
+		PostID string
+		Count  int64
+	}
+	var likeRows []likeCountRow
+	l.svcCtx.DB.Model(&circle_models.CircleLikeModel{}).
+		Select("post_id, count(*) as count").
+		Where("post_id IN ?", postIDs).
+		Group("post_id").
+		Scan(&likeRows)
+	for _, row := range likeRows {
+		likeCountMap[row.PostID] = row.Count
+	}
+
+	commentCountMap := make(map[string]int64)
+	type commentCountRow struct {
+		PostID string
+		Count  int64
+	}
+	var commentRows []commentCountRow
+	l.svcCtx.DB.Model(&circle_models.CircleCommentModel{}).
+		Select("post_id, count(*) as count").
+		Where("post_id IN ? AND is_deleted = false", postIDs).
+		Group("post_id").
+		Scan(&commentRows)
+	for _, row := range commentRows {
+		commentCountMap[row.PostID] = row.Count
+	}
+
 	commentMap := make(map[string][]circle_models.CircleCommentModel)
 	var allComments []circle_models.CircleCommentModel
 	l.svcCtx.DB.Where("post_id IN ? AND parent_id = '' AND is_deleted = false", postIDs).
 		Order("created_at DESC").
 		Find(&allComments)
-	countMap := make(map[string]int)
+	previewCountMap := make(map[string]int)
 	for _, c := range allComments {
-		if countMap[c.PostID] < 3 {
+		if previewCountMap[c.PostID] < 3 {
 			commentMap[c.PostID] = append(commentMap[c.PostID], c)
-			countMap[c.PostID]++
+			previewCountMap[c.PostID]++
 		}
 	}
 
@@ -79,10 +106,9 @@ func (l *GetPostListLogic) GetPostList(req *types.GetPostListReq) (resp *types.G
 			PostID:       p.PostID,
 			CircleID:     p.CircleID,
 			UserID:       p.UserID,
-			Title:        p.Title,
 			Content:      p.Content,
-			CommentCount: p.CommentCount,
-			LikeCount:    p.LikeCount,
+			CommentCount: commentCountMap[p.PostID],
+			LikeCount:    likeCountMap[p.PostID],
 			IsLiked:      likedMap[p.PostID],
 			IsTop:        p.IsTop,
 			CreatedAt:    p.CreatedAt.String(),

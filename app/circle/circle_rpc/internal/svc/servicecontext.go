@@ -19,7 +19,7 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
-	redisClient := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	redisClient := coreredis.InitRedis(c.RedisConf.Addr, c.RedisConf.Password, c.RedisConf.Db)
 	return &ServiceContext{
 		Config:     c,
 		DB:         mysqlDb,

@@ -35,7 +35,6 @@ func (l *LikePostLogic) LikePost(req *types.LikePostReq) (resp *types.LikePostRe
 	exists := l.svcCtx.DB.Where("post_id = ? AND user_id = ?", req.PostID, req.UserID).First(&like).Error == nil
 
 	if req.Status && !exists {
-		// 点赞
 		newLike := circle_models.CircleLikeModel{
 			PostID:   req.PostID,
 			UserID:   req.UserID,
@@ -44,18 +43,9 @@ func (l *LikePostLogic) LikePost(req *types.LikePostReq) (resp *types.LikePostRe
 		if err = l.svcCtx.DB.Create(&newLike).Error; err != nil {
 			return nil, fmt.Errorf("点赞失败: %v", err)
 		}
-		l.svcCtx.DB.Model(&circle_models.CirclePostModel{}).
-			Where("post_id = ?", req.PostID).
-			UpdateColumn("like_count", p.LikeCount+1)
 	} else if !req.Status && exists {
-		// 取消点赞
 		if err = l.svcCtx.DB.Delete(&like).Error; err != nil {
 			return nil, fmt.Errorf("取消点赞失败: %v", err)
-		}
-		if p.LikeCount > 0 {
-			l.svcCtx.DB.Model(&circle_models.CirclePostModel{}).
-				Where("post_id = ?", req.PostID).
-				UpdateColumn("like_count", p.LikeCount-1)
 		}
 	}
 

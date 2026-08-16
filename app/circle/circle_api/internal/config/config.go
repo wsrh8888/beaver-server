@@ -16,6 +16,9 @@ type Config struct {
 		Db       int
 	}
 	Etcd            string
+	RocketMQ        struct {
+		Addr string
+	}
 	UserRpc         zrpc.RpcClientConf
 	ChatRpc         zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf

@@ -37,6 +37,10 @@ const (
 )
 
 const (
+	CircleReceive Type = "circle_receive" // 服务端->客户端 圈子信息同步
+)
+
+const (
 	// --------------------------------------------------------
 	UserReceive     Type = "user_receive"      // 服务端->客户端 用户信息同步
 	UserKickReceive Type = "user_kick_receive" // 服务端->客户端 设备被强制下线（携带deviceId，客户端比对后执行本地登出）

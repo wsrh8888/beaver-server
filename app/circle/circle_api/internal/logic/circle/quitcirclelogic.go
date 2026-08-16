@@ -38,14 +38,11 @@ func (l *QuitCircleLogic) QuitCircle(req *types.QuitCircleReq) (resp *types.Quit
 		return nil, fmt.Errorf("退出圈子失败: %v", err)
 	}
 
-	// 更新圈子版本和成员数
+	// 更新圈子版本
 	circleVersion := l.svcCtx.VersionGen.GetNextVersion("circles", "circle_id", req.CircleID)
 	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
-		Where("circle_id = ? AND member_count > 0", req.CircleID).
-		Updates(map[string]interface{}{
-			"member_count": l.svcCtx.DB.Raw("GREATEST(member_count - 1, 0)"),
-			"version":      circleVersion,
-		})
+		Where("circle_id = ?", req.CircleID).
+		Update("version", circleVersion)
 
 	return &types.QuitCircleRes{}, nil
 }

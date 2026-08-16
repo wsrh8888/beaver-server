@@ -155,6 +155,16 @@ type GetSyncGroupInfoRes struct {
 	ServerTimestamp int64                  `json:"serverTimestamp"` // 服务端处理时间戳
 }
 
+type GetSyncCircleInfoReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+}
+
+type GetSyncCircleInfoRes struct {
+	CircleVersions  []CircleInfoVersionItem `json:"circleVersions"`  // 变更的圈子信息版本摘要
+	ServerTimestamp int64                   `json:"serverTimestamp"` // 服务端处理时间戳
+}
+
 type GetSyncGroupMembersReq struct {
 	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
@@ -222,6 +232,11 @@ type GetSyncNotificationReadCursorsRes struct {
 type GroupInfoVersionItem struct {
 	GroupID string `json:"groupId"` // 群组ID
 	Version int64  `json:"version"` // 群资料版本
+}
+
+type CircleInfoVersionItem struct {
+	CircleID string `json:"circleId"` // 圈子ID
+	Version  int64  `json:"version"`  // 圈子资料版本
 }
 
 type GroupMembersVersionItem struct {

@@ -24,6 +24,12 @@ GroupRpc:
     - 127.0.0.1:2379
     Key: grouprpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
+CircleRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: circlerpc.rpc
+  Timeout: 10000 # 10秒超时，单位毫秒
 UserRpc:
   Etcd:
     Hosts:

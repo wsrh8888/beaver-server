@@ -57,11 +57,6 @@ func (l *CreateCommentLogic) CreateComment(req *types.CreateCommentReq) (resp *t
 		return nil, fmt.Errorf("发布评论失败: %v", err)
 	}
 
-	// 更新帖子评论数
-	l.svcCtx.DB.Model(&circle_models.CirclePostModel{}).
-		Where("post_id = ?", req.PostID).
-		UpdateColumn("comment_count", p.CommentCount+1)
-
 	// 拉用户信息
 	userName, avatar, replyToUserName := "", "", ""
 	queryIDs := []string{req.UserID}

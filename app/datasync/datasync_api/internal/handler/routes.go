@@ -73,6 +73,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: getSyncGroupInfoHandler(serverCtx),
 			},
 			{
+				// 获取所有需要更新的圈子信息版本
+				Method:  http.MethodPost,
+				Path:    "/api/datasync/v1/getSyncCircleInfo",
+				Handler: getSyncCircleInfoHandler(serverCtx),
+			},
+			{
 				// 获取所有需要更新的群成员版本
 				Method:  http.MethodPost,
 				Path:    "/api/datasync/v1/getSyncGroupMembers",

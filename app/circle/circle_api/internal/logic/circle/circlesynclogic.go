@@ -39,9 +39,14 @@ func (l *CircleSyncLogic) CircleSync(req *types.CircleSyncReq) (resp *types.Circ
 		roleMap[m.CircleID] = m.Role
 	}
 
-	// 用 version 字段做增量比较
 	var circles []circle_models.CircleModel
 	l.svcCtx.DB.Where("circle_id IN ? AND version > ?", circleIDs, req.Version).Find(&circles)
+
+	syncIDs := make([]string, 0, len(circles))
+	for _, c := range circles {
+		syncIDs = append(syncIDs, c.CircleID)
+	}
+	memberCountMap := countMembersByCircleIDs(l.svcCtx.DB, syncIDs)
 
 	items := make([]types.CircleSyncItem, 0, len(circles))
 	for _, c := range circles {
@@ -53,7 +58,7 @@ func (l *CircleSyncLogic) CircleSync(req *types.CircleSyncReq) (resp *types.Circ
 			CircleID:    c.CircleID,
 			Name:        c.Name,
 			Avatar:      c.Avatar,
-			MemberCount: c.MemberCount,
+			MemberCount: memberCountMap[c.CircleID],
 			Role:        role,
 			Version:     c.Version,
 		})

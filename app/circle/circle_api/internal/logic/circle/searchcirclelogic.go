@@ -34,7 +34,7 @@ func (l *SearchCircleLogic) SearchCircle(req *types.SearchCircleReq) (resp *type
 			"%"+req.Keywords+"%", "%"+req.Keywords+"%")
 	}
 	query.Count(&total)
-	query.Order("member_count DESC").
+	query.Order("created_at DESC").
 		Offset((req.Page - 1) * req.Limit).
 		Limit(req.Limit).
 		Find(&circles)
@@ -43,7 +43,6 @@ func (l *SearchCircleLogic) SearchCircle(req *types.SearchCircleReq) (resp *type
 		return &types.SearchCircleRes{Count: total, List: []types.SearchCircleItem{}}, nil
 	}
 
-	// 批量查当前用户在这些圈子的角色
 	circleIDs := make([]string, 0, len(circles))
 	for _, c := range circles {
 		circleIDs = append(circleIDs, c.CircleID)
@@ -54,6 +53,7 @@ func (l *SearchCircleLogic) SearchCircle(req *types.SearchCircleReq) (resp *type
 	for _, m := range members {
 		roleMap[m.CircleID] = m.Role
 	}
+	memberCountMap := countMembersByCircleIDs(l.svcCtx.DB, circleIDs)
 
 	items := make([]types.SearchCircleItem, 0, len(circles))
 	for _, c := range circles {
@@ -62,7 +62,7 @@ func (l *SearchCircleLogic) SearchCircle(req *types.SearchCircleReq) (resp *type
 			Name:        c.Name,
 			Description: c.Description,
 			Avatar:      c.Avatar,
-			MemberCount: c.MemberCount,
+			MemberCount: memberCountMap[c.CircleID],
 			JoinType:    c.JoinType,
 			Role:        roleMap[c.CircleID],
 		})

@@ -1,6 +1,6 @@
 Name: circle
 Host: 0.0.0.0
-Port: 21000
+Port: 22100
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_circle?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
@@ -27,3 +27,5 @@ NotificationRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: notificationrpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

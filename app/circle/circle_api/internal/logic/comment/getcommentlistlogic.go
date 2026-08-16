@@ -46,45 +46,66 @@ func (l *GetCommentListLogic) GetCommentList(req *types.GetCommentListReq) (resp
 		return &types.GetCommentListRes{Count: total, List: []types.GetCommentListItem{}}, nil
 	}
 
-	// 批量拉用户信息
-	userIDs := make([]string, 0, len(comments))
 	commentIDs := make([]string, 0, len(comments))
+	userIDSet := make(map[string]struct{})
 	for _, c := range comments {
-		userIDs = append(userIDs, c.UserID)
-		if c.ReplyToUserID != "" {
-			userIDs = append(userIDs, c.ReplyToUserID)
-		}
 		commentIDs = append(commentIDs, c.CommentID)
+		userIDSet[c.UserID] = struct{}{}
+		if c.ReplyToUserID != "" {
+			userIDSet[c.ReplyToUserID] = struct{}{}
+		}
+	}
+
+	childCountMap := make(map[string]int64)
+	childMap := make(map[string][]circle_models.CircleCommentModel)
+	// 仅顶层评论需要附带 children；按 parentId 拉子评论时不再嵌套
+	if req.ParentID == "" {
+		type countResult struct {
+			ParentID string
+			Count    int64
+		}
+		var counts []countResult
+		l.svcCtx.DB.Model(&circle_models.CircleCommentModel{}).
+			Select("parent_id, count(*) as count").
+			Where("parent_id IN ? AND is_deleted = false", commentIDs).
+			Group("parent_id").
+			Scan(&counts)
+		for _, cr := range counts {
+			childCountMap[cr.ParentID] = cr.Count
+		}
+
+		var children []circle_models.CircleCommentModel
+		l.svcCtx.DB.Where("parent_id IN ? AND is_deleted = false", commentIDs).
+			Order("created_at ASC").
+			Find(&children)
+		for _, ch := range children {
+			childMap[ch.ParentID] = append(childMap[ch.ParentID], ch)
+			userIDSet[ch.UserID] = struct{}{}
+			if ch.ReplyToUserID != "" {
+				userIDSet[ch.ReplyToUserID] = struct{}{}
+			}
+		}
+	}
+
+	userIDs := make([]string, 0, len(userIDSet))
+	for id := range userIDSet {
+		userIDs = append(userIDs, id)
 	}
 	userResp, _ := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{UserIdList: userIDs})
 
-	// 查子评论数
-	type countResult struct {
-		ParentID string
-		Count    int64
-	}
-	var counts []countResult
-	l.svcCtx.DB.Model(&circle_models.CircleCommentModel{}).
-		Select("parent_id, count(*) as count").
-		Where("parent_id IN ? AND is_deleted = false", commentIDs).
-		Group("parent_id").
-		Scan(&counts)
-	childCountMap := make(map[string]int64)
-	for _, cr := range counts {
-		childCountMap[cr.ParentID] = cr.Count
-	}
-
-	items := make([]types.GetCommentListItem, 0, len(comments))
-	for _, c := range comments {
+	buildItem := func(c circle_models.CircleCommentModel, childCount int64, children []types.GetCommentListItem) types.GetCommentListItem {
 		item := types.GetCommentListItem{
 			CommentID:        c.CommentID,
 			UserID:           c.UserID,
 			Content:          c.Content,
 			ParentID:         c.ParentID,
 			ReplyToCommentID: c.ReplyToCommentID,
-			ChildCount:       childCountMap[c.CommentID],
-			Children:         []types.GetCommentListItem{},
+			ChildCount:       childCount,
+			Children:         children,
 			CreatedAt:        c.CreatedAt.String(),
+		}
+		if children == nil {
+			item.Children = []types.GetCommentListItem{}
 		}
 		if userResp != nil {
 			if info := userResp.UserInfo[c.UserID]; info != nil {
@@ -97,7 +118,16 @@ func (l *GetCommentListLogic) GetCommentList(req *types.GetCommentListReq) (resp
 				}
 			}
 		}
-		items = append(items, item)
+		return item
+	}
+
+	items := make([]types.GetCommentListItem, 0, len(comments))
+	for _, c := range comments {
+		childItems := make([]types.GetCommentListItem, 0, len(childMap[c.CommentID]))
+		for _, ch := range childMap[c.CommentID] {
+			childItems = append(childItems, buildItem(ch, 0, []types.GetCommentListItem{}))
+		}
+		items = append(items, buildItem(c, childCountMap[c.CommentID], childItems))
 	}
 
 	return &types.GetCommentListRes{Count: total, List: items}, nil

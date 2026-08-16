@@ -36,8 +36,6 @@ message GetCircleListRes {
 message UpdateCircleReq {
   string circle_id   = 1; // 圈子ID
   optional bool is_deleted = 2; // 是否解散
-  optional int64 member_count = 3; // 成员数量（增量，正数加负数减）
-  optional int64 post_count   = 4; // 帖子数量（增量，正数加负数减）
 }
 
 message UpdateCircleRes {}
@@ -101,7 +99,7 @@ message GetCircleVersionsRes {
 service circle {
   // 获取圈子列表（支持按用户、关键词、ID过滤）
   rpc GetCircleList(GetCircleListReq) returns (GetCircleListRes);
-  // 更新圈子状态（解散、成员数/帖子数变更）
+  // 更新圈子状态（解散等）
   rpc UpdateCircle(UpdateCircleReq) returns (UpdateCircleRes);
   // 获取圈子成员列表
   rpc GetCircleMembers(GetCircleMembersReq) returns (GetCircleMembersRes);

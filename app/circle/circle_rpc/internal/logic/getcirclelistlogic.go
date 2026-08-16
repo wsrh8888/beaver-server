@@ -31,7 +31,6 @@ func (l *GetCircleListLogic) GetCircleList(in *circle_rpc.GetCircleListReq) (*ci
 		query = query.Where("circle_id = ?", in.CircleId)
 	}
 	if in.UserId != "" {
-		// 查询用户加入的圈子ID
 		var memberCircleIDs []string
 		l.svcCtx.DB.Model(&circle_models.CircleMemberModel{}).
 			Where("user_id = ?", in.UserId).
@@ -52,6 +51,13 @@ func (l *GetCircleListLogic) GetCircleList(in *circle_rpc.GetCircleListReq) (*ci
 		Limit(int(in.PageSize)).
 		Find(&circles)
 
+	circleIDs := make([]string, 0, len(circles))
+	for _, c := range circles {
+		circleIDs = append(circleIDs, c.CircleID)
+	}
+	memberCountMap := countMembersByCircleIDs(l.svcCtx.DB, circleIDs)
+	postCountMap := countPostsByCircleIDs(l.svcCtx.DB, circleIDs)
+
 	list := make([]*circle_rpc.CircleItem, 0, len(circles))
 	for _, c := range circles {
 		list = append(list, &circle_rpc.CircleItem{
@@ -61,8 +67,8 @@ func (l *GetCircleListLogic) GetCircleList(in *circle_rpc.GetCircleListReq) (*ci
 			Avatar:      c.Avatar,
 			CreatorId:   c.CreatorID,
 			JoinType:    int32(c.JoinType),
-			MemberCount: c.MemberCount,
-			PostCount:   c.PostCount,
+			MemberCount: memberCountMap[c.CircleID],
+			PostCount:   postCountMap[c.CircleID],
 			IsDeleted:   c.IsDeleted,
 			CreatedAt:   c.CreatedAt.String(),
 			UpdatedAt:   c.UpdatedAt.String(),

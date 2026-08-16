@@ -34,6 +34,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: circle.GetCircleDetailHandler(serverCtx),
 			},
 			{
+				// 获取圈子成员列表
+				Method:  http.MethodGet,
+				Path:    "/api/circle/v1/circle/members",
+				Handler: circle.GetCircleMembersHandler(serverCtx),
+			},
+			{
+				// 邀请成员加入圈子（圈主/管理员）
+				Method:  http.MethodPost,
+				Path:    "/api/circle/v1/circle/invite",
+				Handler: circle.InviteCircleMembersHandler(serverCtx),
+			},
+			{
+				// 移除圈子成员（圈主/管理员）
+				Method:  http.MethodPost,
+				Path:    "/api/circle/v1/circle/member_remove",
+				Handler: circle.RemoveCircleMembersHandler(serverCtx),
+			},
+			{
 				// 加入圈子
 				Method:  http.MethodPost,
 				Path:    "/api/circle/v1/circle/join",
@@ -132,6 +150,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/circle/v1/post/like",
 				Handler: post.LikePostHandler(serverCtx),
+			},
+			{
+				// 获取帖子点赞列表（分页）
+				Method:  http.MethodGet,
+				Path:    "/api/circle/v1/post/likes",
+				Handler: post.GetPostLikesHandler(serverCtx),
 			},
 			{
 				// 获取圈子帖子列表

@@ -8,6 +8,9 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -53,33 +56,55 @@ func (l *JoinCircleLogic) JoinCircle(req *types.JoinCircleReq) (resp *types.Join
 	}
 
 	// 自由加入
-	memberVersion := l.svcCtx.VersionGen.GetNextVersion("circle_members", "circle_id", req.CircleID)
 	member := circle_models.CircleMemberModel{
 		CircleID: req.CircleID,
 		UserID:   req.UserID,
 		Role:     3,
-		Version:  memberVersion,
 	}
 	if err = l.svcCtx.DB.Create(&member).Error; err != nil {
 		return nil, fmt.Errorf("加入圈子失败: %v", err)
 	}
 
-	// 更新圈子版本和成员数
+	// 更新圈子版本
 	circleVersion := l.svcCtx.VersionGen.GetNextVersion("circles", "circle_id", req.CircleID)
 	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
 		Where("circle_id = ?", req.CircleID).
-		Updates(map[string]interface{}{
-			"member_count": circle.MemberCount + 1,
-			"version":      circleVersion,
+		Update("version", circleVersion)
+
+	conversationID := fmt.Sprintf("circle_%s", req.CircleID)
+
+	go func() {
+		ctx := context.Background()
+		l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
+			ConversationId: conversationID,
+			Type:           3,
+			UserIds:        []string{req.UserID},
 		})
 
-	// 初始化该用户的圈子会话
-	conversationID := fmt.Sprintf("circle_%s", req.CircleID)
-	l.svcCtx.ChatRpc.InitializeConversation(l.ctx, &chat_rpc.InitializeConversationReq{
-		ConversationId: conversationID,
-		Type:           3,
-		UserIds:        []string{req.UserID},
-	})
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CIRCLE_OPERATION,
+			"type":     wsTypeConst.CircleReceive,
+			"senderId": req.UserID,
+			"targetId": req.UserID,
+			"body": map[string]interface{}{
+				"tables": []map[string]interface{}{
+					{
+						"table": "circles",
+						"data": []map[string]interface{}{
+							{
+								"version":  circleVersion,
+								"circleId": req.CircleID,
+							},
+						},
+					},
+				},
+			},
+			"conversationId": conversationID,
+		}
+		if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
+			logx.Errorf("推送圈子资料同步失败: circleID=%s, err=%v", req.CircleID, err)
+		}
+	}()
 
 	return &types.JoinCircleRes{Status: 1}, nil
 }

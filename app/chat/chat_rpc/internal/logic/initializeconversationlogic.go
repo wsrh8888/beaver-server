@@ -7,14 +7,23 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 type InitializeConversationLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
+}
+
+type initializedUserConversation struct {
+	UserID  string
+	Version int64
 }
 
 func NewInitializeConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InitializeConversationLogic {
@@ -26,46 +35,63 @@ func NewInitializeConversationLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *InitializeConversationLogic) InitializeConversation(in *chat_rpc.InitializeConversationReq) (*chat_rpc.InitializeConversationRes, error) {
-	// 参数验证
 	if in.ConversationId == "" {
 		return nil, errors.New("会话ID不能为空")
 	}
-
 	if len(in.UserIds) == 0 {
 		return nil, errors.New("用户列表不能为空")
 	}
-
 	if in.Type < 1 || in.Type > 4 {
 		return nil, errors.New("无效的会话类型")
 	}
 
-	// 检查会话是否已存在
+	conversationVersion := int64(1)
 	var existingConversation chat_models.ChatConversationMeta
 	err := l.svcCtx.DB.Where("conversation_id = ?", in.ConversationId).First(&existingConversation).Error
 	if err == nil {
-		// 会话已存在，直接返回
-		l.Logger.Infof("会话已存在: conversationId=%s", in.ConversationId)
-		return &chat_rpc.InitializeConversationRes{
-			ConversationId: in.ConversationId,
-		}, nil
+		conversationVersion = existingConversation.Version
+		if conversationVersion <= 0 {
+			conversationVersion = 1
+		}
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		conversationMeta := chat_models.ChatConversationMeta{
+			ConversationID: in.ConversationId,
+			Type:           int(in.Type),
+			MaxSeq:         0,
+			Version:        1,
+		}
+		if err = l.svcCtx.DB.Create(&conversationMeta).Error; err != nil {
+			l.Logger.Errorf("创建会话元数据失败: conversationId=%s, error=%v", in.ConversationId, err)
+			return nil, errors.New("创建会话元数据失败")
+		}
+	} else {
+		l.Logger.Errorf("查询会话失败: conversationId=%s, error=%v", in.ConversationId, err)
+		return nil, errors.New("查询会话失败")
 	}
 
-	// 创建会话元数据
-	conversationMeta := chat_models.ChatConversationMeta{
-		ConversationID: in.ConversationId,
-		Type:           int(in.Type), // 转换类型
-		MaxSeq:         0,            // 初始消息序列号
-		Version:        1,            // 初始版本
-	}
-	// 注意：GORM会自动处理时间字段，无需手动赋值
+	pushedUsers := make([]initializedUserConversation, 0, len(in.UserIds))
 
-	if err := l.svcCtx.DB.Create(&conversationMeta).Error; err != nil {
-		l.Logger.Errorf("创建会话元数据失败: conversationId=%s, error=%v", in.ConversationId, err)
-		return nil, errors.New("创建会话元数据失败")
-	}
-
-	// 为所有参与用户创建用户会话关系记录
 	for _, userId := range in.UserIds {
+		var existingUC chat_models.ChatUserConversation
+		ucErr := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", in.ConversationId, userId).
+			First(&existingUC).Error
+		if ucErr == nil {
+			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", userId)
+			if err = l.svcCtx.DB.Model(&existingUC).Updates(map[string]interface{}{
+				"is_hidden": false,
+				"version":   version,
+			}).Error; err != nil {
+				l.Logger.Errorf("更新用户会话关系失败: userId=%s, conversationId=%s, error=%v", userId, in.ConversationId, err)
+				return nil, errors.New("更新用户会话关系失败")
+			}
+			pushedUsers = append(pushedUsers, initializedUserConversation{UserID: userId, Version: version})
+			continue
+		}
+		if !errors.Is(ucErr, gorm.ErrRecordNotFound) {
+			l.Logger.Errorf("查询用户会话关系失败: userId=%s, conversationId=%s, error=%v", userId, in.ConversationId, ucErr)
+			return nil, errors.New("查询用户会话关系失败")
+		}
+
 		userConversation := chat_models.ChatUserConversation{
 			UserID:         userId,
 			ConversationID: in.ConversationId,
@@ -74,12 +100,15 @@ func (l *InitializeConversationLogic) InitializeConversation(in *chat_rpc.Initia
 			UserReadSeq:    0,
 			Version:        1,
 		}
-		// 注意：GORM会自动处理时间字段，无需手动赋值
-
-		if err := l.svcCtx.DB.Create(&userConversation).Error; err != nil {
+		if err = l.svcCtx.DB.Create(&userConversation).Error; err != nil {
 			l.Logger.Errorf("创建用户会话关系失败: userId=%s, conversationId=%s, error=%v", userId, in.ConversationId, err)
 			return nil, errors.New("创建用户会话关系失败")
 		}
+		pushedUsers = append(pushedUsers, initializedUserConversation{UserID: userId, Version: 1})
+	}
+
+	if len(pushedUsers) > 0 {
+		go l.notifyConversationInitialized(in.ConversationId, conversationVersion, pushedUsers)
 	}
 
 	l.Logger.Infof("初始化会话成功: conversationId=%s, type=%d, users=%v", in.ConversationId, in.Type, in.UserIds)
@@ -87,4 +116,58 @@ func (l *InitializeConversationLogic) InitializeConversation(in *chat_rpc.Initia
 	return &chat_rpc.InitializeConversationRes{
 		ConversationId: in.ConversationId,
 	}, nil
+}
+
+func (l *InitializeConversationLogic) notifyConversationInitialized(
+	conversationId string,
+	conversationVersion int64,
+	users []initializedUserConversation,
+) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.Logger.Errorf("推送会话初始化更新时发生panic: %v", r)
+		}
+	}()
+
+	conversationsUpdate := map[string]interface{}{
+		"table":          "conversations",
+		"conversationId": conversationId,
+		"data": []map[string]interface{}{
+			{
+				"version": int32(conversationVersion),
+			},
+		},
+	}
+
+	for _, user := range users {
+		tableUpdates := []map[string]interface{}{
+			conversationsUpdate,
+			{
+				"table":          "user_conversations",
+				"userId":         user.UserID,
+				"conversationId": conversationId,
+				"data": []map[string]interface{}{
+					{
+						"version": int32(user.Version),
+					},
+				},
+			},
+		}
+
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CHAT_MESSAGE,
+			"type":     wsTypeConst.ChatConversationMessageReceive,
+			"senderId": "",
+			"targetId": user.UserID,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": conversationId,
+		}
+		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+			l.Logger.Errorf("MQ 推送会话初始化失败: recipient=%s, conversation=%s, error=%v", user.UserID, conversationId, err)
+			continue
+		}
+		l.Logger.Infof("推送会话初始化成功: recipient=%s, conversation=%s", user.UserID, conversationId)
+	}
 }

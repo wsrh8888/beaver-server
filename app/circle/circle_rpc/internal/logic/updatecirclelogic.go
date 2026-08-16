@@ -31,21 +31,6 @@ func (l *UpdateCircleLogic) UpdateCircle(in *circle_rpc.UpdateCircleReq) (*circl
 	if in.IsDeleted != nil {
 		updates["is_deleted"] = in.GetIsDeleted()
 	}
-	if in.MemberCount != nil {
-		// 使用原子增量
-		if in.GetMemberCount() >= 0 {
-			updates["member_count"] = l.svcCtx.DB.Raw("member_count + ?", in.GetMemberCount())
-		} else {
-			updates["member_count"] = l.svcCtx.DB.Raw("GREATEST(member_count + ?, 0)", in.GetMemberCount())
-		}
-	}
-	if in.PostCount != nil {
-		if in.GetPostCount() >= 0 {
-			updates["post_count"] = l.svcCtx.DB.Raw("post_count + ?", in.GetPostCount())
-		} else {
-			updates["post_count"] = l.svcCtx.DB.Raw("GREATEST(post_count + ?, 0)", in.GetPostCount())
-		}
-	}
 
 	if len(updates) == 0 {
 		return &circle_rpc.UpdateCircleRes{}, nil

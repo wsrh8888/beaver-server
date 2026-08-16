@@ -32,10 +32,13 @@ func ParseConversation(conversationID string) []string {
 
 /**
  * @description: 获取会话类型
- * @return: 1: 私聊 2: 群聊
+ * @return: 1: 私聊 2: 群聊 3: 圈子
  */
 func GetConversationType(conversationID string) int {
-	// 优先检查前缀：group_ 表示群聊，private_ 表示私聊
+	// 优先检查前缀：circle_ 圈子，group_ 群聊，private_ 私聊
+	if strings.HasPrefix(conversationID, "circle_") {
+		return 3
+	}
 	if strings.HasPrefix(conversationID, "group_") {
 		return 2
 	}
@@ -43,7 +46,7 @@ func GetConversationType(conversationID string) int {
 		return 1
 	}
 	// 如果没有前缀，则根据是否包含下划线判断
-	// 包含下划线且不是 group_ 或 private_ 前缀的，通常是私聊（userId1_userId2格式）
+	// 包含下划线且不是 circle_ / group_ / private_ 前缀的，通常是私聊（userId1_userId2格式）
 	if strings.Contains(conversationID, "_") {
 		return 1
 	}
@@ -53,7 +56,7 @@ func GetConversationType(conversationID string) int {
 
 /**
  * @description: 解析会话ID并返回类型和用户IDs
- * @return: conversationType (1:私聊 2:群聊), userIds ([]string)
+ * @return: conversationType (1:私聊 2:群聊 3:圈子), userIds ([]string)
  */
 func ParseConversationWithType(conversationID string) (int, []string) {
 	conversationType := GetConversationType(conversationID)
@@ -66,6 +69,11 @@ func ParseConversationWithType(conversationID string) (int, []string) {
 
 	// 对于群聊，如果是带前缀的格式 (group_uuid)，移除前缀
 	if conversationType == 2 && len(userIds) >= 2 && userIds[0] == "group" {
+		userIds = userIds[1:]
+	}
+
+	// 对于圈子，如果是带前缀的格式 (circle_uuid)，移除前缀
+	if conversationType == 3 && len(userIds) >= 2 && userIds[0] == "circle" {
 		userIds = userIds[1:]
 	}
 
@@ -89,6 +97,10 @@ func GetTargetIDByConversation(conversationID string, currentUserID string) stri
 			return ids[0]
 		}
 	} else if convType == 2 { // 群聊
+		if len(ids) > 0 {
+			return ids[0]
+		}
+	} else if convType == 3 { // 圈子
 		if len(ids) > 0 {
 			return ids[0]
 		}

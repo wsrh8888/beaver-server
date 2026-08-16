@@ -66,7 +66,6 @@ type CreatePostFileInfo struct {
 type CreatePostReq struct {
 	UserID   string               `header:"Beaver-User-Id"` // 用户ID
 	CircleID string               `json:"circleId"`         // 圈子ID
-	Title    string               `json:"title,optional"`   // 帖子标题（可选）
 	Content  string               `json:"content"`          // 帖子内容
 	Files    []CreatePostFileInfo `json:"files,optional"`   // 附件列表
 }
@@ -77,7 +76,6 @@ type CreatePostRes struct {
 	UserID    string `json:"userId"`    // 发帖用户ID
 	UserName  string `json:"userName"`  // 发帖用户昵称
 	Avatar    string `json:"avatar"`    // 发帖用户头像
-	Title     string `json:"title"`     // 帖子标题
 	Content   string `json:"content"`   // 帖子内容
 	CreatedAt string `json:"createdAt"` // 发布时间
 }
@@ -122,6 +120,43 @@ type GetCircleDetailRes struct {
 	PostCount   int64  `json:"postCount"`   // 帖子数量
 	Role        int8   `json:"role"`        // 当前用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
 	CreatedAt   string `json:"createdAt"`   // 创建时间
+}
+
+type GetCircleMembersItem struct {
+	UserID   string `json:"userId"`   // 用户ID
+	UserName string `json:"userName"` // 用户昵称
+	Avatar   string `json:"avatar"`   // 用户头像
+	Role     int8   `json:"role"`     // 角色：1=圈主 2=管理员 3=普通成员
+}
+
+type GetCircleMembersReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 用户ID
+	CircleID string `form:"circleId"`         // 圈子ID
+	Page     int    `form:"page"`             // 页码
+	Limit    int    `form:"limit"`            // 每页数量
+}
+
+type GetCircleMembersRes struct {
+	Count int64                  `json:"count"` // 总数
+	List  []GetCircleMembersItem `json:"list"`  // 成员列表
+}
+
+type InviteCircleMembersReq struct {
+	UserID   string   `header:"Beaver-User-Id"` // 用户ID（需为圈主或管理员）
+	CircleID string   `json:"circleId"`         // 圈子ID
+	UserIds  []string `json:"userIds"`          // 被邀请用户ID列表
+}
+
+type InviteCircleMembersRes struct {
+}
+
+type RemoveCircleMembersReq struct {
+	UserID   string   `header:"Beaver-User-Id"` // 用户ID（需为圈主或管理员）
+	CircleID string   `json:"circleId"`         // 圈子ID
+	UserIds  []string `json:"userIds"`          // 被移除用户ID列表
+}
+
+type RemoveCircleMembersRes struct {
 }
 
 type GetCommentListItem struct {
@@ -197,6 +232,31 @@ type GetPostDetailCommentInfo struct {
 	CreatedAt        string                     `json:"createdAt"`        // 评论时间
 }
 
+type GetPostDetailLikeInfo struct {
+	UserID   string `json:"userId"`   // 点赞用户ID
+	UserName string `json:"userName"` // 点赞用户昵称
+	Avatar   string `json:"avatar"`   // 点赞用户头像
+}
+
+type GetPostLikesReq struct {
+	UserID string `header:"Beaver-User-Id"` // 用户ID
+	PostID string `form:"postId"`           // 帖子ID
+	Page   int    `form:"page"`             // 页码
+	Limit  int    `form:"limit"`            // 每页数量
+}
+
+type GetPostLikesInfo struct {
+	UserID    string `json:"userId"`    // 点赞用户ID
+	UserName  string `json:"userName"`  // 点赞用户昵称
+	Avatar    string `json:"avatar"`    // 点赞用户头像
+	CreatedAt string `json:"createdAt"` // 点赞时间
+}
+
+type GetPostLikesRes struct {
+	Count int64              `json:"count"` // 总数
+	List  []GetPostLikesInfo `json:"list"`  // 点赞列表
+}
+
 type GetPostDetailFileInfo struct {
 	FileKey string `json:"fileKey"` // 文件key
 	Type    uint32 `json:"type"`    // 文件类型：2=图片 3=视频 4=文件
@@ -213,7 +273,6 @@ type GetPostDetailRes struct {
 	UserID       string                     `json:"userId"`       // 发帖用户ID
 	UserName     string                     `json:"userName"`     // 发帖用户昵称
 	Avatar       string                     `json:"avatar"`       // 发帖用户头像
-	Title        string                     `json:"title"`        // 帖子标题
 	Content      string                     `json:"content"`      // 帖子内容
 	Files        []GetPostDetailFileInfo    `json:"files"`        // 附件列表
 	CommentCount int64                      `json:"commentCount"` // 评论总数
@@ -221,6 +280,7 @@ type GetPostDetailRes struct {
 	IsLiked      bool                       `json:"isLiked"`      // 当前用户是否已点赞
 	IsTop        bool                       `json:"isTop"`        // 是否置顶
 	Comments     []GetPostDetailCommentInfo `json:"comments"`     // 最新20条评论
+	Likes        []GetPostDetailLikeInfo    `json:"likes"`        // 点赞用户列表
 	CreatedAt    string                     `json:"createdAt"`    // 发布时间
 }
 
@@ -292,7 +352,6 @@ type PostListItem struct {
 	UserID       string                   `json:"userId"`       // 发帖用户ID
 	UserName     string                   `json:"userName"`     // 发帖用户昵称
 	Avatar       string                   `json:"avatar"`       // 发帖用户头像
-	Title        string                   `json:"title"`        // 帖子标题
 	Content      string                   `json:"content"`      // 帖子内容
 	Files        []GetPostListFileInfo    `json:"files"`        // 附件列表
 	CommentCount int64                    `json:"commentCount"` // 评论总数

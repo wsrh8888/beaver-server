@@ -44,8 +44,8 @@ func (l *GetCircleDetailLogic) GetCircleDetail(req *types.GetCircleDetailReq) (r
 		Avatar:      circle.Avatar,
 		JoinType:    circle.JoinType,
 		CreatorID:   circle.CreatorID,
-		MemberCount: circle.MemberCount,
-		PostCount:   circle.PostCount,
+		MemberCount: countMembers(l.svcCtx.DB, req.CircleID),
+		PostCount:   countPosts(l.svcCtx.DB, req.CircleID),
 		Role:        role,
 		CreatedAt:   circle.CreatedAt.String(),
 	}, nil

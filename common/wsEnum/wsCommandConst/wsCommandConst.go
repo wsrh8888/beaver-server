@@ -11,6 +11,8 @@ const (
 	FRIEND_OPERATION Command = "FRIEND_OPERATION"
 	// 群组操作类
 	GROUP_OPERATION Command = "GROUP_OPERATION"
+	// 圈子操作类
+	CIRCLE_OPERATION Command = "CIRCLE_OPERATION"
 	// 用户信息类
 	USER_PROFILE Command = "USER_PROFILE"
 	// 通知中心类

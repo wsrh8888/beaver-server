@@ -46,10 +46,5 @@ func (l *DeleteCommentLogic) DeleteComment(req *types.DeleteCommentReq) (resp *t
 		return nil, fmt.Errorf("删除评论失败: %v", err)
 	}
 
-	// 更新帖子评论数
-	l.svcCtx.DB.Model(&circle_models.CirclePostModel{}).
-		Where("post_id = ? AND comment_count > 0", c.PostID).
-		UpdateColumn("comment_count", l.svcCtx.DB.Raw("comment_count - 1"))
-
 	return &types.DeleteCommentRes{}, nil
 }

@@ -50,14 +50,17 @@ func (l *GetMyCircleListLogic) GetMyCircleList(req *types.GetMyCircleListReq) (r
 	var circles []circle_models.CircleModel
 	l.svcCtx.DB.Where("circle_id IN ? AND is_deleted = false", circleIDs).Find(&circles)
 
+	memberCountMap := countMembersByCircleIDs(l.svcCtx.DB, circleIDs)
+	postCountMap := countPostsByCircleIDs(l.svcCtx.DB, circleIDs)
+
 	items := make([]types.MyCircleListItem, 0, len(circles))
 	for _, c := range circles {
 		items = append(items, types.MyCircleListItem{
 			CircleID:    c.CircleID,
 			Name:        c.Name,
 			Avatar:      c.Avatar,
-			MemberCount: c.MemberCount,
-			PostCount:   c.PostCount,
+			MemberCount: memberCountMap[c.CircleID],
+			PostCount:   postCountMap[c.CircleID],
 			Role:        roleMap[c.CircleID],
 		})
 	}

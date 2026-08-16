@@ -46,10 +46,5 @@ func (l *DeletePostLogic) DeletePost(req *types.DeletePostReq) (resp *types.Dele
 		return nil, fmt.Errorf("删除帖子失败: %v", err)
 	}
 
-	// 更新圈子帖子数
-	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
-		Where("circle_id = ? AND post_count > 0", p.CircleID).
-		UpdateColumn("post_count", l.svcCtx.DB.Raw("post_count - 1"))
-
 	return &types.DeletePostRes{}, nil
 }

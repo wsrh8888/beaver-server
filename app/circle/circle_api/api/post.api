@@ -9,7 +9,6 @@ type (
 	CreatePostReq {
 		UserID   string               `header:"Beaver-User-Id"` // 用户ID
 		CircleID string               `json:"circleId"` // 圈子ID
-		Title    string               `json:"title,optional"` // 帖子标题（可选）
 		Content  string               `json:"content"` // 帖子内容
 		Files    []CreatePostFileInfo `json:"files,optional"` // 附件列表
 	}
@@ -19,7 +18,6 @@ type (
 		UserID    string `json:"userId"` // 发帖用户ID
 		UserName  string `json:"userName"` // 发帖用户昵称
 		Avatar    string `json:"avatar"` // 发帖用户头像
-		Title     string `json:"title"` // 帖子标题
 		Content   string `json:"content"` // 帖子内容
 		CreatedAt string `json:"createdAt"` // 发布时间
 	}
@@ -50,7 +48,6 @@ type (
 		UserID       string                   `json:"userId"` // 发帖用户ID
 		UserName     string                   `json:"userName"` // 发帖用户昵称
 		Avatar       string                   `json:"avatar"` // 发帖用户头像
-		Title        string                   `json:"title"` // 帖子标题
 		Content      string                   `json:"content"` // 帖子内容
 		Files        []GetPostListFileInfo    `json:"files"` // 附件列表
 		CommentCount int64                    `json:"commentCount"` // 评论总数
@@ -89,13 +86,17 @@ type (
 		Children         []GetPostDetailCommentInfo `json:"children"` // 子评论（部分）
 		CreatedAt        string                     `json:"createdAt"` // 评论时间
 	}
+	GetPostDetailLikeInfo {
+		UserID   string `json:"userId"` // 点赞用户ID
+		UserName string `json:"userName"` // 点赞用户昵称
+		Avatar   string `json:"avatar"` // 点赞用户头像
+	}
 	GetPostDetailRes {
 		PostID       string                     `json:"postId"` // 帖子ID
 		CircleID     string                     `json:"circleId"` // 圈子ID
 		UserID       string                     `json:"userId"` // 发帖用户ID
 		UserName     string                     `json:"userName"` // 发帖用户昵称
 		Avatar       string                     `json:"avatar"` // 发帖用户头像
-		Title        string                     `json:"title"` // 帖子标题
 		Content      string                     `json:"content"` // 帖子内容
 		Files        []GetPostDetailFileInfo    `json:"files"` // 附件列表
 		CommentCount int64                      `json:"commentCount"` // 评论总数
@@ -103,6 +104,7 @@ type (
 		IsLiked      bool                       `json:"isLiked"` // 当前用户是否已点赞
 		IsTop        bool                       `json:"isTop"` // 是否置顶
 		Comments     []GetPostDetailCommentInfo `json:"comments"` // 最新20条评论
+		Likes        []GetPostDetailLikeInfo    `json:"likes"` // 点赞用户列表
 		CreatedAt    string                     `json:"createdAt"` // 发布时间
 	}
 )
@@ -124,6 +126,26 @@ type (
 		Status bool   `json:"status"` // 点赞状态：true=点赞 false=取消点赞
 	}
 	LikePostRes {}
+)
+
+// 获取帖子点赞列表接口类型
+type (
+	GetPostLikesReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID
+		PostID string `form:"postId"` // 帖子ID
+		Page   int    `form:"page"` // 页码
+		Limit  int    `form:"limit"` // 每页数量
+	}
+	GetPostLikesInfo {
+		UserID    string `json:"userId"` // 点赞用户ID
+		UserName  string `json:"userName"` // 点赞用户昵称
+		Avatar    string `json:"avatar"` // 点赞用户头像
+		CreatedAt string `json:"createdAt"` // 点赞时间
+	}
+	GetPostLikesRes {
+		Count int64              `json:"count"` // 总数
+		List  []GetPostLikesInfo `json:"list"` // 点赞列表
+	}
 )
 
 @server (
@@ -149,4 +171,8 @@ service circle {
 	@doc "点赞/取消点赞帖子"
 	@handler LikePost
 	post /api/circle/v1/post/like (LikePostReq) returns (LikePostRes)
+
+	@doc "获取帖子点赞列表（分页）"
+	@handler GetPostLikes
+	get /api/circle/v1/post/likes (GetPostLikesReq) returns (GetPostLikesRes)
 }

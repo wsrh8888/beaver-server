@@ -178,6 +178,46 @@ type (
 	}
 )
 
+// 获取圈子成员列表接口类型
+type (
+	GetCircleMembersReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		CircleID string `form:"circleId"` // 圈子ID
+		Page     int    `form:"page"` // 页码
+		Limit    int    `form:"limit"` // 每页数量
+	}
+	GetCircleMembersItem {
+		UserID   string `json:"userId"` // 用户ID
+		UserName string `json:"userName"` // 用户昵称
+		Avatar   string `json:"avatar"` // 用户头像
+		Role     int8   `json:"role"` // 角色：1=圈主 2=管理员 3=普通成员
+	}
+	GetCircleMembersRes {
+		Count int64                  `json:"count"` // 总数
+		List  []GetCircleMembersItem `json:"list"` // 成员列表
+	}
+)
+
+// 邀请成员加入圈子接口类型
+type (
+	InviteCircleMembersReq {
+		UserID   string   `header:"Beaver-User-Id"` // 用户ID（需为圈主或管理员）
+		CircleID string   `json:"circleId"` // 圈子ID
+		UserIds  []string `json:"userIds"` // 被邀请用户ID列表
+	}
+	InviteCircleMembersRes {}
+)
+
+// 移除圈子成员接口类型
+type (
+	RemoveCircleMembersReq {
+		UserID   string   `header:"Beaver-User-Id"` // 用户ID（需为圈主或管理员）
+		CircleID string   `json:"circleId"` // 圈子ID
+		UserIds  []string `json:"userIds"` // 被移除用户ID列表
+	}
+	RemoveCircleMembersRes {}
+)
+
 @server (
 	group: circle
 )
@@ -225,4 +265,16 @@ service circle {
 	@doc "圈子数据同步"
 	@handler CircleSync
 	post /api/circle/v1/circle/sync (CircleSyncReq) returns (CircleSyncRes)
+
+	@doc "获取圈子成员列表"
+	@handler GetCircleMembers
+	get /api/circle/v1/circle/members (GetCircleMembersReq) returns (GetCircleMembersRes)
+
+	@doc "邀请成员加入圈子（圈主/管理员）"
+	@handler InviteCircleMembers
+	post /api/circle/v1/circle/invite (InviteCircleMembersReq) returns (InviteCircleMembersRes)
+
+	@doc "移除圈子成员（圈主/管理员）"
+	@handler RemoveCircleMembers
+	post /api/circle/v1/circle/member_remove (RemoveCircleMembersReq) returns (RemoveCircleMembersRes)
 }
