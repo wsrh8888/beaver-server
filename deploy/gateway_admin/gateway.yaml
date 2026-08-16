@@ -3,7 +3,7 @@ Addr: 0.0.0.0:40800
 Etcd: 127.0.0.1:2379
 # JWT 认证配置（网关直接解析 JWT，避免调用后端认证接口，提升性能）
 Auth:
-  AccessSecret: robert  # 必须与 backend_admin 的 AccessSecret 一致
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620  # 必须与 backend_admin 的 AccessSecret 一致
   AccessExpire: 3600    # token 过期时间（秒），可选
 Redis:
   Addr: 127.0.0.1:6379

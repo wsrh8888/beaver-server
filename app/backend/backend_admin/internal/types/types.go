@@ -322,15 +322,18 @@ type CreateUserRes struct {
 }
 
 type CreateWorkbenchAppReq struct {
-	Name        string `json:"name"`                 // string 应用名称
-	Description string `json:"description,optional"` // string 应用描述，可选
-	Icon        string `json:"icon,optional"`        // string 图标 URL，可选
-	EntryURL    string `json:"entryUrl"`             // string 入口 URL
-	Category    string `json:"category,optional"`    // string 分类，可选
-	Sort        int    `json:"sort,optional"`        // int 排序，可选
-	Status      int    `json:"status,optional"`      // int 状态 0下架 1上架，可选
-	Remark      string `json:"remark,optional"`      // string 运营备注，可选
-	UserID      string `header:"Beaver-User-Id"`     // string 操作管理员 ID
+	Name        string               `json:"name"`                 // string 应用名称
+	Description string               `json:"description,optional"` // string 应用描述，可选
+	Icon        string               `json:"icon,optional"`        // string 图标 URL，可选
+	AppType     int                  `json:"appType,optional"`     // int 类型 0内部 1第三方H5，可选默认1
+	ClientScope int                  `json:"clientScope,optional"` // int 可见端 0全部 1仅PC 2仅移动，可选
+	EntryConfig WorkbenchEntryConfig `json:"entryConfig"`          // object 入口配置
+	OpenMode    int                  `json:"openMode,optional"`    // int 打开方式 0内嵌 1系统浏览器，可选
+	Category    int                  `json:"category,optional"`    // int 分类，可选
+	Sort        int                  `json:"sort,optional"`        // int 排序，可选
+	Status      int                  `json:"status,optional"`      // int 状态 0下架 1上架，可选
+	Remark      string               `json:"remark,optional"`      // string 运营备注，可选
+	UserID      string               `header:"Beaver-User-Id"`     // string 操作管理员 ID
 }
 
 type CreateWorkbenchAppRes struct {
@@ -1450,26 +1453,29 @@ type GetVersionListRes struct {
 }
 
 type GetWorkbenchAppListItem struct {
-	WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
-	Name           string `json:"name"`           // string 应用名称
-	Description    string `json:"description"`    // string 应用描述
-	Icon           string `json:"icon"`           // string 图标 URL
-	EntryURL       string `json:"entryUrl"`       // string 入口 URL
-	Category       string `json:"category"`       // string 分类
-	Sort           int    `json:"sort"`           // int 排序
-	Status         int    `json:"status"`         // int 状态
-	Remark         string `json:"remark"`         // string 运营备注
-	CreatedBy      string `json:"createdBy"`      // string 创建人
-	LastModifiedBy string `json:"lastModifiedBy"` // string 最后修改人
-	CreatedAt      string `json:"createdAt"`      // string 创建时间
-	UpdatedAt      string `json:"updatedAt"`      // string 更新时间
+	WorkbenchAppID string               `json:"workbenchAppId"` // string 应用业务 ID
+	Name           string               `json:"name"`           // string 应用名称
+	Description    string               `json:"description"`    // string 应用描述
+	Icon           string               `json:"icon"`           // string 图标 URL
+	AppType        int                  `json:"appType"`        // int 类型
+	ClientScope    int                  `json:"clientScope"`    // int 可见端
+	EntryConfig    WorkbenchEntryConfig `json:"entryConfig"`    // object 入口配置
+	OpenMode       int                  `json:"openMode"`       // int 打开方式
+	Category       int                  `json:"category"`       // int 分类
+	Sort           int                  `json:"sort"`           // int 排序
+	Status         int                  `json:"status"`         // int 状态
+	Remark         string               `json:"remark"`         // string 运营备注
+	CreatedBy      string               `json:"createdBy"`      // string 创建人
+	LastModifiedBy string               `json:"lastModifiedBy"` // string 最后修改人
+	CreatedAt      string               `json:"createdAt"`      // string 创建时间
+	UpdatedAt      string               `json:"updatedAt"`      // string 更新时间
 }
 
 type GetWorkbenchAppListReq struct {
 	Page     int    `form:"page,optional"`     // int 页码，可选
 	PageSize int    `form:"pageSize,optional"` // int 每页条数，可选
 	Status   int    `form:"status,optional"`   // int 状态筛选，可选
-	Category string `form:"category,optional"` // string 分类筛选，可选
+	Category *int   `form:"category,optional"` // int 分类筛选，可选（不传不过滤）
 	Keywords string `form:"keywords,optional"` // string 关键词，可选
 }
 
@@ -1483,19 +1489,22 @@ type GetWorkbenchAppReq struct {
 }
 
 type GetWorkbenchAppRes struct {
-	WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
-	Name           string `json:"name"`           // string 应用名称
-	Description    string `json:"description"`    // string 应用描述
-	Icon           string `json:"icon"`           // string 图标 URL
-	EntryURL       string `json:"entryUrl"`       // string 入口 URL
-	Category       string `json:"category"`       // string 分类
-	Sort           int    `json:"sort"`           // int 排序
-	Status         int    `json:"status"`         // int 状态
-	Remark         string `json:"remark"`         // string 运营备注
-	CreatedBy      string `json:"createdBy"`      // string 创建人
-	LastModifiedBy string `json:"lastModifiedBy"` // string 最后修改人
-	CreatedAt      string `json:"createdAt"`      // string 创建时间
-	UpdatedAt      string `json:"updatedAt"`      // string 更新时间
+	WorkbenchAppID string               `json:"workbenchAppId"` // string 应用业务 ID
+	Name           string               `json:"name"`           // string 应用名称
+	Description    string               `json:"description"`    // string 应用描述
+	Icon           string               `json:"icon"`           // string 图标 URL
+	AppType        int                  `json:"appType"`        // int 类型 0内部 1第三方H5
+	ClientScope    int                  `json:"clientScope"`    // int 可见端
+	EntryConfig    WorkbenchEntryConfig `json:"entryConfig"`    // object 入口配置
+	OpenMode       int                  `json:"openMode"`       // int 打开方式
+	Category       int                  `json:"category"`       // int 分类
+	Sort           int                  `json:"sort"`           // int 排序
+	Status         int                  `json:"status"`         // int 状态
+	Remark         string               `json:"remark"`         // string 运营备注
+	CreatedBy      string               `json:"createdBy"`      // string 创建人
+	LastModifiedBy string               `json:"lastModifiedBy"` // string 最后修改人
+	CreatedAt      string               `json:"createdAt"`      // string 创建时间
+	UpdatedAt      string               `json:"updatedAt"`      // string 更新时间
 }
 
 type GroupOpsMemberItem struct {
@@ -1667,7 +1676,7 @@ type PreviewRes struct {
 type QueryLogsItem struct {
 	Id        uint   `json:"id"`        // 日志ID
 	Timestamp int64  `json:"timestamp"` // 时间戳(毫秒)
-	Data      interface{} `json:"data"`      // 业务日志 JSON 对象（API 层由 RPC data 字符串解析）
+	Data      string `json:"data"`      // 业务日志 JSON 对象（API 层由 RPC data 字符串解析）
 }
 
 type QueryLogsReq struct {
@@ -1945,16 +1954,19 @@ type UpdateUserRes struct {
 }
 
 type UpdateWorkbenchAppReq struct {
-	WorkbenchAppID string `json:"workbenchAppId"`       // string 应用业务 ID
-	Name           string `json:"name,optional"`        // string 应用名称，可选
-	Description    string `json:"description,optional"` // string 应用描述，可选
-	Icon           string `json:"icon,optional"`        // string 图标 URL，可选
-	EntryURL       string `json:"entryUrl,optional"`    // string 入口 URL，可选
-	Category       string `json:"category,optional"`    // string 分类，可选
-	Sort           *int   `json:"sort,optional"`        // int 排序，可选
-	Status         *int   `json:"status,optional"`      // int 状态，可选
-	Remark         string `json:"remark,optional"`      // string 运营备注，可选
-	UserID         string `header:"Beaver-User-Id"`     // string 操作管理员 ID
+	WorkbenchAppID string                `json:"workbenchAppId"`       // string 应用业务 ID
+	Name           string                `json:"name,optional"`        // string 应用名称，可选
+	Description    string                `json:"description,optional"` // string 应用描述，可选
+	Icon           string                `json:"icon,optional"`        // string 图标 URL，可选
+	AppType        *int                  `json:"appType,optional"`     // int 类型，可选
+	ClientScope    *int                  `json:"clientScope,optional"` // int 可见端，可选
+	EntryConfig    *WorkbenchEntryConfig `json:"entryConfig,optional"` // object 入口配置，可选
+	OpenMode       *int                  `json:"openMode,optional"`    // int 打开方式，可选
+	Category       *int                  `json:"category,optional"`    // int 分类，可选
+	Sort           *int                  `json:"sort,optional"`        // int 排序，可选
+	Status         *int                  `json:"status,optional"`      // int 状态，可选
+	Remark         string                `json:"remark,optional"`      // string 运营备注，可选
+	UserID         string                `header:"Beaver-User-Id"`     // string 操作管理员 ID
 }
 
 type UpdateWorkbenchAppRes struct {
@@ -2055,4 +2067,10 @@ type UserOpsSessionItem struct {
 	LastMessage      string `json:"lastMessage"`
 	LastMessageTime  string `json:"lastMessageTime"`
 	MessageCount     int64  `json:"messageCount"`
+}
+
+type WorkbenchEntryConfig struct {
+	Type   int    `json:"type"`            // int 入口类型 0路由key 1H5地址
+	PC     string `json:"pc,optional"`     // string PC 入口，可选
+	Mobile string `json:"mobile,optional"` // string 移动端入口，可选
 }

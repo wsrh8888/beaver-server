@@ -26,17 +26,31 @@ func NewCreateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(in *platform_rpc.CreateWorkbenchAppReq) (*platform_rpc.CreateWorkbenchAppRes, error) {
 	name := strings.TrimSpace(in.Name)
-	entryURL := strings.TrimSpace(in.EntryUrl)
 	if name == "" {
 		return nil, status.Error(codes.InvalidArgument, "应用名称不能为空")
 	}
-	if entryURL == "" {
-		return nil, status.Error(codes.InvalidArgument, "入口 URL 不能为空")
+
+	appType := int8(in.AppType)
+	if appType != 0 && appType != 1 {
+		appType = 1
+	}
+	clientScope := int8(in.ClientScope)
+	if clientScope != 0 && clientScope != 1 && clientScope != 2 {
+		return nil, status.Error(codes.InvalidArgument, "可见端不合法")
+	}
+
+	entryConfig := fromProtoEntryConfig(in.EntryConfig)
+	if msg := validateEntryConfig(appType, entryConfig); msg != "" {
+		return nil, status.Error(codes.InvalidArgument, msg)
 	}
 
 	statusVal := int8(in.Status)
 	if statusVal != 0 && statusVal != 1 {
 		return nil, status.Error(codes.InvalidArgument, "状态不合法")
+	}
+	openMode := int8(in.OpenMode)
+	if openMode != 0 && openMode != 1 {
+		return nil, status.Error(codes.InvalidArgument, "打开方式不合法")
 	}
 
 	app := platform_models.WorkbenchApp{
@@ -44,8 +58,11 @@ func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(in *platform_rpc.CreateWork
 		Name:           name,
 		Description:    strings.TrimSpace(in.Description),
 		Icon:           strings.TrimSpace(in.Icon),
-		EntryURL:       entryURL,
-		Category:       strings.TrimSpace(in.Category),
+		AppType:        appType,
+		ClientScope:    clientScope,
+		EntryConfig:    entryConfig,
+		OpenMode:       openMode,
+		Category:       int8(in.Category),
 		Sort:           int(in.Sort),
 		Status:         statusVal,
 		Remark:         strings.TrimSpace(in.Remark),

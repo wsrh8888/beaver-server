@@ -22,8 +22,12 @@ func NewListEnabledWorkbenchAppsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 
 func (l *ListEnabledWorkbenchAppsLogic) ListEnabledWorkbenchApps(in *platform_rpc.ListEnabledWorkbenchAppsReq) (*platform_rpc.ListEnabledWorkbenchAppsRes, error) {
 	db := l.svcCtx.DB.Model(&platform_models.WorkbenchApp{}).Where("status = ?", 1)
-	if in.Category != "" {
-		db = db.Where("category = ?", in.Category)
+	if in.Category != nil {
+		db = db.Where("category = ?", *in.Category)
+	}
+	// client_scope: 0=全部端可见；1/2 仅对应端；请求 1/2 时同时返回 0
+	if in.ClientScope == 1 || in.ClientScope == 2 {
+		db = db.Where("client_scope IN ?", []int8{0, int8(in.ClientScope)})
 	}
 
 	var list []platform_models.WorkbenchApp

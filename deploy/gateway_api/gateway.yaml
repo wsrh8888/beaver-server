@@ -6,7 +6,7 @@ Log:
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
 Auth:
-  AccessSecret: robert
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600
 Limit:
   Enable: true

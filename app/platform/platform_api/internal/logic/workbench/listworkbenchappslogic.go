@@ -3,6 +3,7 @@ package workbench
 import (
 	"context"
 	"errors"
+	"sort"
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
@@ -25,31 +26,73 @@ func NewListWorkbenchAppsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
+func workbenchCategoryName(category int) string {
+	switch category {
+	case 1:
+		return "办公"
+	case 2:
+		return "审批"
+	case 3:
+		return "效率"
+	case 4:
+		return "其他"
+	default:
+		return "默认"
+	}
+}
+
 func (l *ListWorkbenchAppsLogic) ListWorkbenchApps(req *types.ListWorkbenchAppsReq) (*types.ListWorkbenchAppsRes, error) {
 	if req.UserID == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
 	rpcRes, err := l.svcCtx.PlatformRpc.ListEnabledWorkbenchApps(l.ctx, &platform_rpc.ListEnabledWorkbenchAppsReq{
-		Category: req.Category,
+		ClientScope: int32(req.ClientScope),
 	})
 	if err != nil {
 		l.Errorf("获取工作台应用列表失败: %v", err)
 		return nil, errors.New("获取工作台应用列表失败")
 	}
 
-	list := make([]types.ListWorkbenchAppsItem, 0, len(rpcRes.List))
+	grouped := make(map[int][]types.ListWorkbenchAppsItem)
 	for _, item := range rpcRes.List {
-		list = append(list, types.ListWorkbenchAppsItem{
+		entry := types.WorkbenchEntryConfig{}
+		if item.EntryConfig != nil {
+			entry = types.WorkbenchEntryConfig{
+				Type:   int(item.EntryConfig.Type),
+				PC:     item.EntryConfig.Pc,
+				Mobile: item.EntryConfig.Mobile,
+			}
+		}
+		category := int(item.Category)
+		grouped[category] = append(grouped[category], types.ListWorkbenchAppsItem{
 			WorkbenchAppID: item.WorkbenchAppId,
 			Name:           item.Name,
 			Description:    item.Description,
 			Icon:           item.Icon,
-			EntryURL:       item.EntryUrl,
-			Category:       item.Category,
+			AppType:        int(item.AppType),
+			ClientScope:    int(item.ClientScope),
+			EntryConfig:    entry,
+			Category:       category,
 			Sort:           int(item.Sort),
+			OpenMode:       int(item.OpenMode),
 		})
 	}
 
-	return &types.ListWorkbenchAppsRes{List: list}, nil
+	categories := make([]int, 0, len(grouped))
+	for category := range grouped {
+		categories = append(categories, category)
+	}
+	sort.Ints(categories)
+
+	groups := make([]types.ListWorkbenchAppsGroup, 0, len(categories))
+	for _, category := range categories {
+		groups = append(groups, types.ListWorkbenchAppsGroup{
+			Category:     category,
+			CategoryName: workbenchCategoryName(category),
+			List:         grouped[category],
+		})
+	}
+
+	return &types.ListWorkbenchAppsRes{Groups: groups}, nil
 }

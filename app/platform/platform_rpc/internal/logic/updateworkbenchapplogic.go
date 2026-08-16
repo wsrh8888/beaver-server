@@ -50,14 +50,35 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(in *platform_rpc.UpdateWork
 	if in.Icon != "" {
 		updates["icon"] = strings.TrimSpace(in.Icon)
 	}
-	if entryURL := strings.TrimSpace(in.EntryUrl); entryURL != "" {
-		updates["entry_url"] = entryURL
-	}
-	if in.Category != "" {
-		updates["category"] = strings.TrimSpace(in.Category)
-	}
 	if in.Remark != "" {
 		updates["remark"] = strings.TrimSpace(in.Remark)
+	}
+
+	nextAppType := app.AppType
+	if in.AppType != nil {
+		appType := int8(*in.AppType)
+		if appType != 0 && appType != 1 {
+			return nil, status.Error(codes.InvalidArgument, "应用类型不合法")
+		}
+		updates["app_type"] = appType
+		nextAppType = appType
+	}
+	if in.ClientScope != nil {
+		clientScope := int8(*in.ClientScope)
+		if clientScope != 0 && clientScope != 1 && clientScope != 2 {
+			return nil, status.Error(codes.InvalidArgument, "可见端不合法")
+		}
+		updates["client_scope"] = clientScope
+	}
+	if in.EntryConfig != nil {
+		entryConfig := fromProtoEntryConfig(in.EntryConfig)
+		if msg := validateEntryConfig(nextAppType, entryConfig); msg != "" {
+			return nil, status.Error(codes.InvalidArgument, msg)
+		}
+		updates["entry_config"] = entryConfig
+	}
+	if in.Category != nil {
+		updates["category"] = int8(*in.Category)
 	}
 	if in.Sort != nil {
 		updates["sort"] = int(*in.Sort)
@@ -68,6 +89,13 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(in *platform_rpc.UpdateWork
 			return nil, status.Error(codes.InvalidArgument, "状态不合法")
 		}
 		updates["status"] = statusVal
+	}
+	if in.OpenMode != nil {
+		openMode := int8(*in.OpenMode)
+		if openMode != 0 && openMode != 1 {
+			return nil, status.Error(codes.InvalidArgument, "打开方式不合法")
+		}
+		updates["open_mode"] = openMode
 	}
 
 	if err := l.svcCtx.DB.Model(&app).Updates(updates).Error; err != nil {

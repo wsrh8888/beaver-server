@@ -79,6 +79,7 @@ type (
 	VersionItem                 = platform_rpc.VersionItem
 	WorkbenchAppItem            = platform_rpc.WorkbenchAppItem
 	WorkbenchAppPublicItem      = platform_rpc.WorkbenchAppPublicItem
+	WorkbenchEntryConfig        = platform_rpc.WorkbenchEntryConfig
 
 	Platform interface {
 		AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error)

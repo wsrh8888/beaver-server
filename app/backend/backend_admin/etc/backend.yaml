@@ -8,7 +8,7 @@ Log:
   Stat: false
 Timeout: 600000 # 10分钟超时，单位毫秒，文件上传需要更长的处理时间
 Auth:
-  AccessSecret: robert
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600
 Etcd: 127.0.0.1:2379
 Mysql:

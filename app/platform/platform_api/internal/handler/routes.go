@@ -56,7 +56,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 获取工作台应用列表（仅上架）
+				// 获取工作台应用列表（仅上架，按分类分组）
 				Method:  http.MethodGet,
 				Path:    "/api/platform/v1/list_workbench",
 				Handler: workbench.ListWorkbenchAppsHandler(serverCtx),

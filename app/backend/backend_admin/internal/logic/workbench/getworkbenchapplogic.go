@@ -29,20 +29,23 @@ func (l *GetWorkbenchAppLogic) GetWorkbenchApp(req *types.GetWorkbenchAppReq) (*
 		return nil, err
 	}
 
-	app := rpcRes.App
+	item := toAdminAppItem(rpcRes.App)
 	return &types.GetWorkbenchAppRes{
-		WorkbenchAppID: app.WorkbenchAppId,
-		Name:           app.Name,
-		Description:    app.Description,
-		Icon:           app.Icon,
-		EntryURL:       app.EntryUrl,
-		Category:       app.Category,
-		Sort:           int(app.Sort),
-		Status:         int(app.Status),
-		Remark:         app.Remark,
-		CreatedBy:      app.CreatedBy,
-		LastModifiedBy: app.LastModifiedBy,
-		CreatedAt:      app.CreatedAt,
-		UpdatedAt:      app.UpdatedAt,
+		WorkbenchAppID: item.WorkbenchAppID,
+		Name:           item.Name,
+		Description:    item.Description,
+		Icon:           item.Icon,
+		AppType:        item.AppType,
+		ClientScope:    item.ClientScope,
+		EntryConfig:    item.EntryConfig,
+		OpenMode:       item.OpenMode,
+		Category:       item.Category,
+		Sort:           item.Sort,
+		Status:         item.Status,
+		Remark:         item.Remark,
+		CreatedBy:      item.CreatedBy,
+		LastModifiedBy: item.LastModifiedBy,
+		CreatedAt:      item.CreatedAt,
+		UpdatedAt:      item.UpdatedAt,
 	}, nil
 }

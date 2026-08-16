@@ -26,10 +26,21 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(req *types.UpdateWorkbenchA
 		Name:           req.Name,
 		Description:    req.Description,
 		Icon:           req.Icon,
-		EntryUrl:       req.EntryURL,
-		Category:       req.Category,
+		EntryConfig:    toProtoEntryConfig(req.EntryConfig),
 		Remark:         req.Remark,
 		OperatorId:     req.UserID,
+	}
+	if req.AppType != nil {
+		v := int32(*req.AppType)
+		in.AppType = &v
+	}
+	if req.ClientScope != nil {
+		v := int32(*req.ClientScope)
+		in.ClientScope = &v
+	}
+	if req.Category != nil {
+		v := int32(*req.Category)
+		in.Category = &v
 	}
 	if req.Sort != nil {
 		sortVal := int32(*req.Sort)
@@ -38,6 +49,10 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(req *types.UpdateWorkbenchA
 	if req.Status != nil {
 		statusVal := int32(*req.Status)
 		in.Status = &statusVal
+	}
+	if req.OpenMode != nil {
+		openMode := int32(*req.OpenMode)
+		in.OpenMode = &openMode
 	}
 
 	_, err := l.svcCtx.PlatformRpc.UpdateWorkbenchApp(l.ctx, in)

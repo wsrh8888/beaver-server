@@ -37,8 +37,8 @@ func (l *ListWorkbenchAppsLogic) ListWorkbenchApps(in *platform_rpc.ListWorkbenc
 	if in.Status > 0 {
 		db = db.Where("status = ?", in.Status)
 	}
-	if in.Category != "" {
-		db = db.Where("category = ?", in.Category)
+	if in.Category != nil {
+		db = db.Where("category = ?", *in.Category)
 	}
 	if in.Keywords != "" {
 		like := "%" + in.Keywords + "%"
