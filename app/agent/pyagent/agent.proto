@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package agent;
+
+option go_package = "beaver/app/agent/pyagent";
+
+// 同步自 beaver-agent/proto/agent.proto
+
+message StreamAgentMessageReq {
+  string user_message_id = 1;
+  string agent_id = 2;
+  string user_id = 3;
+  string content = 4;
+  string trace_id = 5;
+  string device_id = 6;
+}
+
+message StreamAgentMessageEvent {
+  string event = 1;
+  string content = 2;
+  string error_message = 3;
+  string llm_meta_json = 4;
+  string name = 5;
+  string data_json = 6;
+}
+
+service Agent {
+  // 流式跑一轮：边生成边推事件（agent_api SSE 主路径）
+  rpc StreamAgentMessage(StreamAgentMessageReq) returns (stream StreamAgentMessageEvent);
+}
+
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative agent.proto

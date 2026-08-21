@@ -1,0 +1,125 @@
+syntax = "v1"
+
+info (
+	title:   "Beaver IM Agent"
+	desc:    "用户 Agent：创建助手 + 发消息(SSE) + 拉历史"
+	author:  "beaver"
+	version: "v1.0"
+)
+
+// ==================== 公共结构 ====================
+type AgentItem {
+	AgentId     string `json:"agentId"`
+	Name        string `json:"name"`
+	Avatar      string `json:"avatar,optional"`
+	Description string `json:"description,optional"`
+	Status      int32  `json:"status"` // 0停用 1启用
+}
+
+type AgentMessageItem {
+	MessageId   string `json:"messageId"`
+	AgentId     string `json:"agentId"`
+	UserId      string `json:"userId"`
+	Role        string `json:"role"` // user / assistant / system
+	MsgType     uint32 `json:"msgType"`
+	MsgJson     string `json:"msgJson,optional"` // ctype.Msg JSON
+	MsgPreview  string `json:"msgPreview,optional"`
+	Seq         int64  `json:"seq"`
+	LlmMetaJson string `json:"llmMetaJson,optional"`
+	CreatedAt   int64  `json:"createdAt"` // unix ms
+}
+
+// ==================== 创建 / 查询 Agent ====================
+type (
+	CreateAgentReq {
+		UserID      string `header:"Beaver-User-Id"`
+		Name        string `json:"name"`
+		Avatar      string `json:"avatar,optional"`
+		Description string `json:"description,optional"`
+	}
+	CreateAgentRes {
+		Agent AgentItem `json:"agent"`
+	}
+)
+
+type (
+	GetAgentReq {
+		UserID  string `header:"Beaver-User-Id"`
+		AgentId string `json:"agentId"`
+	}
+	GetAgentRes {
+		Agent AgentItem `json:"agent"`
+	}
+)
+
+// ==================== 历史消息 ====================
+type (
+	ListMessagesReq {
+		UserID    string `header:"Beaver-User-Id"`
+		AgentId   string `json:"agentId"`
+		BeforeSeq int64  `json:"beforeSeq,optional"` // 0=从最新往前；传 seq 则取更早
+		Limit     int32  `json:"limit,optional"` // 默认 20，最大 100
+	}
+	ListMessagesRes {
+		List []AgentMessageItem `json:"list"` // seq 升序
+	}
+)
+
+// ==================== 发消息（SSE）====================
+//
+// 约定：
+//   POST /api/agent/v1/sendMessage
+//   Content-Type: application/json
+//   响应 Content-Type: text/event-stream
+//
+//   实现上 handler 直接写 http.ResponseWriter（不走普通 JSON Res）。
+//   下面 SendAgentMessageRes 仅占位，goctl 生成用；真实下行是 SSE 事件。
+//
+// 事件示例：
+//   event: accepted
+//   data: {"userMessageId":"amsg_xxx","seq":1}
+//
+//   event: delta
+//   data: {"content":"你"}
+//
+//   event: lg
+//   data: {"name":"on_tool_start:xxx","dataJson":"{...}"}
+//
+//   event: done
+//   data: {"assistantMessageId":"...","seq":2,"status":"succeeded"}
+//
+//   event: error
+//   data: {"message":"..."}
+//
+type (
+	SendAgentMessageReq {
+		UserID      string `header:"Beaver-User-Id"`
+		DeviceId    string `header:"deviceId,optional"`
+		AgentId     string `json:"agentId"`
+		Content     string `json:"content"`
+		ClientMsgId string `json:"clientMsgId,optional"` // 幂等
+	}
+	// 占位：实际为 SSE 流，不要当普通 JSON 响应用
+	SendAgentMessageRes  {}
+)
+
+// ==================== 路由 ====================
+service agent {
+	@doc "创建 Agent"
+	@handler createAgent
+	post /api/agent/v1/createAgent (CreateAgentReq) returns (CreateAgentRes)
+
+	@doc "获取 Agent 详情"
+	@handler getAgent
+	post /api/agent/v1/getAgent (GetAgentReq) returns (GetAgentRes)
+
+	@doc "拉取与某 Agent 的聊天历史"
+	@handler listMessages
+	post /api/agent/v1/listMessages (ListMessagesReq) returns (ListMessagesRes)
+
+	@doc "向 Agent 发消息（SSE 流式：accepted → delta* → done|error）"
+	@handler sendAgentMessage
+	post /api/agent/v1/sendMessage (SendAgentMessageReq) returns (SendAgentMessageRes)
+}
+
+// goctl api go -api agent_api.api -dir . --home ../../../template

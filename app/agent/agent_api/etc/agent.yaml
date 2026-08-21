@@ -1,0 +1,23 @@
+Name: agent
+Host: 0.0.0.0
+Port: 22200
+Timeout: 0 # SSE 长连接，0=不超时（毫秒）
+MaxBytes: 10485760 # 10MB
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false
+Etcd: 127.0.0.1:2379
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_agent?charset=utf8mb4&parseTime=True&loc=Local
+AgentRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: agentrpc.rpc
+  NonBlock: true
+# 直连 beaver-agent 流式
+BeaverAgent:
+  Endpoints:
+  - 127.0.0.1:50051
+  NonBlock: true

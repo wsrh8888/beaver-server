@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package agent_rpc;
+
+option go_package = "./agent_rpc";
+
+// =============================================================================
+// 对外业务 RPC（门面）：API / 其它 Go 服务只依赖本文件。
+// 发消息 SSE 与消息落库在 agent_api，不在本 proto。
+// =============================================================================
+
+// ---------- Agent ----------
+
+message CreateAgentReq {
+  string user_id = 1;
+  string name = 2;
+  string avatar = 3;
+  string description = 4;
+}
+
+message CreateAgentRes {
+  string agent_id = 1;
+  string name = 2;
+  string avatar = 3;
+  string description = 4;
+}
+
+message GetAgentReq {
+  string user_id = 1;
+  string agent_id = 2;
+}
+
+message GetAgentRes {
+  string agent_id = 1;
+  string name = 2;
+  string avatar = 3;
+  string description = 4;
+  int32 status = 5; // 0停用 1启用
+}
+
+// ---------- Message ----------
+
+message ListMessagesReq {
+  string user_id = 1;
+  string agent_id = 2;
+  int64 before_seq = 3; // 0 表示从最新往前；传 seq 则取更早的
+  int32 limit = 4;      // 默认 20，最大 100
+}
+
+message ListMessagesRes {
+  repeated AgentMessageItem list = 1;
+}
+
+message AgentMessageItem {
+  string message_id = 1;
+  string agent_id = 2;
+  string user_id = 3;
+  string role = 4; // user / assistant / system
+  uint32 msg_type = 5;
+  string msg_json = 6;     // ctype.Msg 的 JSON
+  string msg_preview = 7;
+  int64 seq = 8;
+  string llm_meta_json = 9; // AgentLLMMeta JSON，user 消息可空
+  int64 created_at = 10;    // unix ms
+}
+
+service agent {
+  rpc CreateAgent(CreateAgentReq) returns (CreateAgentRes);
+  rpc GetAgent(GetAgentReq) returns (GetAgentRes);
+  rpc ListMessages(ListMessagesReq) returns (ListMessagesRes);
+}
+
+// goctl rpc protoc agent_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

@@ -1,16 +1,17 @@
 package main
 
 import (
+	"beaver/app/agent/agent_models"
 	"beaver/app/auth/auth_models"
 	"beaver/app/backend/backend_models"
 	"beaver/app/call/call_models"
 	"beaver/app/chat/chat_models"
+	"beaver/app/circle/circle_models"
 	"beaver/app/datasync/datasync_models"
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
-	"beaver/app/circle/circle_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
@@ -47,7 +48,7 @@ func main() {
 	databases := []string{
 		"beaver_user", "beaver_auth", "beaver_friend", "beaver_group", "beaver_chat",
 		"beaver_circle", "beaver_moment", "beaver_emoji", "beaver_file", "beaver_notification", "beaver_call",
-		"beaver_open", "beaver_platform", "beaver_backend", "beaver_datasync",
+		"beaver_open", "beaver_platform", "beaver_backend", "beaver_datasync", "beaver_agent",
 	}
 	for _, name := range databases {
 		if err := serverDB.Exec("CREATE DATABASE IF NOT EXISTS `" + name + "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci").Error; err != nil {
@@ -236,6 +237,13 @@ func main() {
 			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_datasync?charset=utf8mb4&parseTime=True&loc=Local",
 			run: func(db *gorm.DB) error {
 				return db.AutoMigrate(&datasync_models.DatasyncModel{})
+			},
+		},
+		{
+			name: "beaver_agent",
+			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_agent?charset=utf8mb4&parseTime=True&loc=Local",
+			run: func(db *gorm.DB) error {
+				return db.AutoMigrate(&agent_models.Agent{}, &agent_models.AgentMessage{})
 			},
 		},
 	}
