@@ -6,7 +6,5 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./call.yaml:/etc/call.yaml:ro
-    deploy:
-      restart_policy:
-        condition: any
+    restart: "no"
     pull_policy: always

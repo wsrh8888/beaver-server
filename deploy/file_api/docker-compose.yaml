@@ -8,7 +8,5 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./file.yaml:/etc/file.yaml:ro
       - /mnt/static:/mnt/static
-    deploy:
-      restart_policy:
-        condition: any
+    restart: "no"
     pull_policy: always 

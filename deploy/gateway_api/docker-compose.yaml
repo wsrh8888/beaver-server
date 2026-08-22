@@ -9,7 +9,5 @@ services:
       - /etc/localtime:/etc/localtime:ro
       # 挂载外部配置文件
       - ./gateway.yaml:/etc/gateway.yaml:ro
-    deploy:
-      restart_policy:
-        condition: any
+    restart: "no"
     pull_policy: always 

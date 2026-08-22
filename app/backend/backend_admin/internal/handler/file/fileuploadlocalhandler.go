@@ -10,7 +10,6 @@ import (
 	logic "beaver/app/backend/backend_admin/internal/logic/file"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/file/file_models"
 	"beaver/common/response"
 
 	"net/http"
@@ -47,9 +46,9 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 确定文件来源
-		source := file_models.LocalSource
+		source := "local"
 		if req.Source != "" && req.Source == "qiniu" {
-			source = file_models.QiniuSource
+			source = "qiniu"
 		}
 
 		l := logic.NewFileUploadLocalLogic(r.Context(), svcCtx)
@@ -60,8 +59,12 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 检查文件是否已经存在于数据库中
-		existingFile, err := checkFileExists(fileReq.FileMd5, svcCtx)
-		if err == nil {
+		existingFile, found, err := filecommon.FindFileByMd5(r.Context(), fileReq.FileMd5, svcCtx)
+		if err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
+		if found {
 			resp.OriginalName = existingFile.OriginalName
 			if svcCtx.Config.Domain == "" {
 				response.Response(r, w, nil, errors.New("未配置域名"))
@@ -100,7 +103,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Path:         relativePath,
 			Md5:          fileReq.FileMd5,
 			Type:         fileReq.FileType,
-			Source:       string(source),
+			Source:       source,
 			FileInfo:     fileInfoStr,
 		}
 
@@ -117,16 +120,6 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		logx.Infof("本地文件上传成功, url: %s", resp.FileURL)
 		response.Response(r, w, resp, nil)
 	}
-}
-
-// checkFileExists 检查文件是否已存在于数据库中
-func checkFileExists(fileMd5 string, svcCtx *svc.ServiceContext) (*file_models.FileModel, error) {
-	var fileModel file_models.FileModel
-	err := svcCtx.DB.Take(&fileModel, "md5 = ?", fileMd5).Error
-	if err != nil {
-		return nil, err
-	}
-	return &fileModel, nil
 }
 
 // saveFileToLocal 保存文件到本地
