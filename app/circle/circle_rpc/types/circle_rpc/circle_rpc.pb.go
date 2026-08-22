@@ -278,10 +278,8 @@ func (x *GetCircleListRes) GetList() []*CircleItem {
 // 更新圈子
 type UpdateCircleReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CircleId      string                 `protobuf:"bytes,1,opt,name=circle_id,json=circleId,proto3" json:"circle_id,omitempty"`                 // 圈子ID
-	IsDeleted     *bool                  `protobuf:"varint,2,opt,name=is_deleted,json=isDeleted,proto3,oneof" json:"is_deleted,omitempty"`       // 是否解散
-	MemberCount   *int64                 `protobuf:"varint,3,opt,name=member_count,json=memberCount,proto3,oneof" json:"member_count,omitempty"` // 成员数量（增量，正数加负数减）
-	PostCount     *int64                 `protobuf:"varint,4,opt,name=post_count,json=postCount,proto3,oneof" json:"post_count,omitempty"`       // 帖子数量（增量，正数加负数减）
+	CircleId      string                 `protobuf:"bytes,1,opt,name=circle_id,json=circleId,proto3" json:"circle_id,omitempty"`           // 圈子ID
+	IsDeleted     *bool                  `protobuf:"varint,2,opt,name=is_deleted,json=isDeleted,proto3,oneof" json:"is_deleted,omitempty"` // 是否解散
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -328,20 +326,6 @@ func (x *UpdateCircleReq) GetIsDeleted() bool {
 		return *x.IsDeleted
 	}
 	return false
-}
-
-func (x *UpdateCircleReq) GetMemberCount() int64 {
-	if x != nil && x.MemberCount != nil {
-		return *x.MemberCount
-	}
-	return 0
-}
-
-func (x *UpdateCircleReq) GetPostCount() int64 {
-	if x != nil && x.PostCount != nil {
-		return *x.PostCount
-	}
-	return 0
 }
 
 type UpdateCircleRes struct {
@@ -920,6 +904,667 @@ func (x *GetCircleVersionsRes) GetList() []*CircleVersionItem {
 	return nil
 }
 
+// 帖子列表（管理后台）
+type ListPostsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CircleId      string                 `protobuf:"bytes,1,opt,name=circle_id,json=circleId,proto3" json:"circle_id,omitempty"`  // 圈子ID
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // 页码
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // 每页数量
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPostsReq) Reset() {
+	*x = ListPostsReq{}
+	mi := &file_circle_rpc_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPostsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPostsReq) ProtoMessage() {}
+
+func (x *ListPostsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPostsReq.ProtoReflect.Descriptor instead.
+func (*ListPostsReq) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ListPostsReq) GetCircleId() string {
+	if x != nil {
+		return x.CircleId
+	}
+	return ""
+}
+
+func (x *ListPostsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListPostsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type PostItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`                    // 帖子ID
+	CircleId      string                 `protobuf:"bytes,2,opt,name=circle_id,json=circleId,proto3" json:"circle_id,omitempty"`              // 圈子ID
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                    // 发帖用户ID
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`                                // 帖子内容
+	IsDeleted     bool                   `protobuf:"varint,5,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted,omitempty"`          // 是否已删除
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`           // 发布时间
+	CommentCount  int64                  `protobuf:"varint,7,opt,name=comment_count,json=commentCount,proto3" json:"comment_count,omitempty"` // 评论数
+	LikeCount     int64                  `protobuf:"varint,8,opt,name=like_count,json=likeCount,proto3" json:"like_count,omitempty"`          // 点赞数
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PostItem) Reset() {
+	*x = PostItem{}
+	mi := &file_circle_rpc_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PostItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostItem) ProtoMessage() {}
+
+func (x *PostItem) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostItem.ProtoReflect.Descriptor instead.
+func (*PostItem) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *PostItem) GetPostId() string {
+	if x != nil {
+		return x.PostId
+	}
+	return ""
+}
+
+func (x *PostItem) GetCircleId() string {
+	if x != nil {
+		return x.CircleId
+	}
+	return ""
+}
+
+func (x *PostItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *PostItem) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *PostItem) GetIsDeleted() bool {
+	if x != nil {
+		return x.IsDeleted
+	}
+	return false
+}
+
+func (x *PostItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *PostItem) GetCommentCount() int64 {
+	if x != nil {
+		return x.CommentCount
+	}
+	return 0
+}
+
+func (x *PostItem) GetLikeCount() int64 {
+	if x != nil {
+		return x.LikeCount
+	}
+	return 0
+}
+
+type ListPostsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // 总数
+	List          []*PostItem            `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // 帖子列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPostsRes) Reset() {
+	*x = ListPostsRes{}
+	mi := &file_circle_rpc_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPostsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPostsRes) ProtoMessage() {}
+
+func (x *ListPostsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPostsRes.ProtoReflect.Descriptor instead.
+func (*ListPostsRes) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListPostsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListPostsRes) GetList() []*PostItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// 删除帖子
+type DeletePostReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"` // 帖子ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeletePostReq) Reset() {
+	*x = DeletePostReq{}
+	mi := &file_circle_rpc_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeletePostReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeletePostReq) ProtoMessage() {}
+
+func (x *DeletePostReq) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeletePostReq.ProtoReflect.Descriptor instead.
+func (*DeletePostReq) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DeletePostReq) GetPostId() string {
+	if x != nil {
+		return x.PostId
+	}
+	return ""
+}
+
+type DeletePostRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeletePostRes) Reset() {
+	*x = DeletePostRes{}
+	mi := &file_circle_rpc_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeletePostRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeletePostRes) ProtoMessage() {}
+
+func (x *DeletePostRes) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeletePostRes.ProtoReflect.Descriptor instead.
+func (*DeletePostRes) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{19}
+}
+
+// 评论列表
+type ListCommentsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`        // 帖子ID
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // 页码
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // 每页数量
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCommentsReq) Reset() {
+	*x = ListCommentsReq{}
+	mi := &file_circle_rpc_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCommentsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCommentsReq) ProtoMessage() {}
+
+func (x *ListCommentsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCommentsReq.ProtoReflect.Descriptor instead.
+func (*ListCommentsReq) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListCommentsReq) GetPostId() string {
+	if x != nil {
+		return x.PostId
+	}
+	return ""
+}
+
+func (x *ListCommentsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListCommentsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type CommentItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CommentId     string                 `protobuf:"bytes,1,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"`  // 评论ID
+	PostId        string                 `protobuf:"bytes,2,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`           // 帖子ID
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`           // 评论用户ID
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`                       // 评论内容
+	IsDeleted     bool                   `protobuf:"varint,5,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted,omitempty"` // 是否已删除
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`  // 评论时间
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommentItem) Reset() {
+	*x = CommentItem{}
+	mi := &file_circle_rpc_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommentItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommentItem) ProtoMessage() {}
+
+func (x *CommentItem) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommentItem.ProtoReflect.Descriptor instead.
+func (*CommentItem) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *CommentItem) GetCommentId() string {
+	if x != nil {
+		return x.CommentId
+	}
+	return ""
+}
+
+func (x *CommentItem) GetPostId() string {
+	if x != nil {
+		return x.PostId
+	}
+	return ""
+}
+
+func (x *CommentItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CommentItem) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *CommentItem) GetIsDeleted() bool {
+	if x != nil {
+		return x.IsDeleted
+	}
+	return false
+}
+
+func (x *CommentItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListCommentsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // 总数
+	List          []*CommentItem         `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // 评论列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCommentsRes) Reset() {
+	*x = ListCommentsRes{}
+	mi := &file_circle_rpc_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCommentsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCommentsRes) ProtoMessage() {}
+
+func (x *ListCommentsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCommentsRes.ProtoReflect.Descriptor instead.
+func (*ListCommentsRes) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ListCommentsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListCommentsRes) GetList() []*CommentItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// 删除评论
+type DeleteCommentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CommentId     string                 `protobuf:"bytes,1,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"` // 评论ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCommentReq) Reset() {
+	*x = DeleteCommentReq{}
+	mi := &file_circle_rpc_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCommentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCommentReq) ProtoMessage() {}
+
+func (x *DeleteCommentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCommentReq.ProtoReflect.Descriptor instead.
+func (*DeleteCommentReq) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeleteCommentReq) GetCommentId() string {
+	if x != nil {
+		return x.CommentId
+	}
+	return ""
+}
+
+type DeleteCommentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCommentRes) Reset() {
+	*x = DeleteCommentRes{}
+	mi := &file_circle_rpc_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCommentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCommentRes) ProtoMessage() {}
+
+func (x *DeleteCommentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCommentRes.ProtoReflect.Descriptor instead.
+func (*DeleteCommentRes) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{24}
+}
+
+// 移除圈子成员
+type RemoveCircleMembersReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CircleId      string                 `protobuf:"bytes,1,opt,name=circle_id,json=circleId,proto3" json:"circle_id,omitempty"` // 圈子ID
+	UserIds       []string               `protobuf:"bytes,2,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"`    // 成员用户ID列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveCircleMembersReq) Reset() {
+	*x = RemoveCircleMembersReq{}
+	mi := &file_circle_rpc_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveCircleMembersReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveCircleMembersReq) ProtoMessage() {}
+
+func (x *RemoveCircleMembersReq) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveCircleMembersReq.ProtoReflect.Descriptor instead.
+func (*RemoveCircleMembersReq) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *RemoveCircleMembersReq) GetCircleId() string {
+	if x != nil {
+		return x.CircleId
+	}
+	return ""
+}
+
+func (x *RemoveCircleMembersReq) GetUserIds() []string {
+	if x != nil {
+		return x.UserIds
+	}
+	return nil
+}
+
+type RemoveCircleMembersRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveCircleMembersRes) Reset() {
+	*x = RemoveCircleMembersRes{}
+	mi := &file_circle_rpc_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveCircleMembersRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveCircleMembersRes) ProtoMessage() {}
+
+func (x *RemoveCircleMembersRes) ProtoReflect() protoreflect.Message {
+	mi := &file_circle_rpc_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveCircleMembersRes.ProtoReflect.Descriptor instead.
+func (*RemoveCircleMembersRes) Descriptor() ([]byte, []int) {
+	return file_circle_rpc_proto_rawDescGZIP(), []int{26}
+}
+
 var File_circle_rpc_proto protoreflect.FileDescriptor
 
 const file_circle_rpc_proto_rawDesc = "" +
@@ -953,17 +1598,12 @@ const file_circle_rpc_proto_rawDesc = "" +
 	"\tcircle_id\x18\x05 \x01(\tR\bcircleId\"T\n" +
 	"\x10GetCircleListRes\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x03R\x05total\x12*\n" +
-	"\x04list\x18\x02 \x03(\v2\x16.circle_rpc.CircleItemR\x04list\"\xcd\x01\n" +
+	"\x04list\x18\x02 \x03(\v2\x16.circle_rpc.CircleItemR\x04list\"a\n" +
 	"\x0fUpdateCircleReq\x12\x1b\n" +
 	"\tcircle_id\x18\x01 \x01(\tR\bcircleId\x12\"\n" +
 	"\n" +
-	"is_deleted\x18\x02 \x01(\bH\x00R\tisDeleted\x88\x01\x01\x12&\n" +
-	"\fmember_count\x18\x03 \x01(\x03H\x01R\vmemberCount\x88\x01\x01\x12\"\n" +
-	"\n" +
-	"post_count\x18\x04 \x01(\x03H\x02R\tpostCount\x88\x01\x01B\r\n" +
-	"\v_is_deletedB\x0f\n" +
-	"\r_member_countB\r\n" +
-	"\v_post_count\"\x11\n" +
+	"is_deleted\x18\x02 \x01(\bH\x00R\tisDeleted\x88\x01\x01B\r\n" +
+	"\v_is_deleted\"\x11\n" +
 	"\x0fUpdateCircleRes\"c\n" +
 	"\x13GetCircleMembersReq\x12\x1b\n" +
 	"\tcircle_id\x18\x01 \x01(\tR\bcircleId\x12\x12\n" +
@@ -997,14 +1637,67 @@ const file_circle_rpc_proto_rawDesc = "" +
 	"\x04role\x18\x05 \x01(\x05R\x04role\x12\x18\n" +
 	"\aversion\x18\x06 \x01(\x03R\aversion\"I\n" +
 	"\x14GetCircleVersionsRes\x121\n" +
-	"\x04list\x18\x01 \x03(\v2\x1d.circle_rpc.CircleVersionItemR\x04list2\xfd\x03\n" +
+	"\x04list\x18\x01 \x03(\v2\x1d.circle_rpc.CircleVersionItemR\x04list\"\\\n" +
+	"\fListPostsReq\x12\x1b\n" +
+	"\tcircle_id\x18\x01 \x01(\tR\bcircleId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\xf5\x01\n" +
+	"\bPostItem\x12\x17\n" +
+	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x1b\n" +
+	"\tcircle_id\x18\x02 \x01(\tR\bcircleId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x18\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x12\x1d\n" +
+	"\n" +
+	"is_deleted\x18\x05 \x01(\bR\tisDeleted\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12#\n" +
+	"\rcomment_count\x18\a \x01(\x03R\fcommentCount\x12\x1d\n" +
+	"\n" +
+	"like_count\x18\b \x01(\x03R\tlikeCount\"N\n" +
+	"\fListPostsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12(\n" +
+	"\x04list\x18\x02 \x03(\v2\x14.circle_rpc.PostItemR\x04list\"(\n" +
+	"\rDeletePostReq\x12\x17\n" +
+	"\apost_id\x18\x01 \x01(\tR\x06postId\"\x0f\n" +
+	"\rDeletePostRes\"[\n" +
+	"\x0fListCommentsReq\x12\x17\n" +
+	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\xb6\x01\n" +
+	"\vCommentItem\x12\x1d\n" +
+	"\n" +
+	"comment_id\x18\x01 \x01(\tR\tcommentId\x12\x17\n" +
+	"\apost_id\x18\x02 \x01(\tR\x06postId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x18\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x12\x1d\n" +
+	"\n" +
+	"is_deleted\x18\x05 \x01(\bR\tisDeleted\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\"T\n" +
+	"\x0fListCommentsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12+\n" +
+	"\x04list\x18\x02 \x03(\v2\x17.circle_rpc.CommentItemR\x04list\"1\n" +
+	"\x10DeleteCommentReq\x12\x1d\n" +
+	"\n" +
+	"comment_id\x18\x01 \x01(\tR\tcommentId\"\x12\n" +
+	"\x10DeleteCommentRes\"P\n" +
+	"\x16RemoveCircleMembersReq\x12\x1b\n" +
+	"\tcircle_id\x18\x01 \x01(\tR\bcircleId\x12\x19\n" +
+	"\buser_ids\x18\x02 \x03(\tR\auserIds\"\x18\n" +
+	"\x16RemoveCircleMembersRes2\xf8\x06\n" +
 	"\x06circle\x12K\n" +
 	"\rGetCircleList\x12\x1c.circle_rpc.GetCircleListReq\x1a\x1c.circle_rpc.GetCircleListRes\x12H\n" +
 	"\fUpdateCircle\x12\x1b.circle_rpc.UpdateCircleReq\x1a\x1b.circle_rpc.UpdateCircleRes\x12T\n" +
 	"\x10GetCircleMembers\x12\x1f.circle_rpc.GetCircleMembersReq\x1a\x1f.circle_rpc.GetCircleMembersRes\x12W\n" +
 	"\x11GetUserCircleRole\x12 .circle_rpc.GetUserCircleRoleReq\x1a .circle_rpc.GetUserCircleRoleRes\x12T\n" +
 	"\x10GetUserCircleIDs\x12\x1f.circle_rpc.GetUserCircleIDsReq\x1a\x1f.circle_rpc.GetUserCircleIDsRes\x12W\n" +
-	"\x11GetCircleVersions\x12 .circle_rpc.GetCircleVersionsReq\x1a .circle_rpc.GetCircleVersionsResB\x0eZ\f./circle_rpcb\x06proto3"
+	"\x11GetCircleVersions\x12 .circle_rpc.GetCircleVersionsReq\x1a .circle_rpc.GetCircleVersionsRes\x12?\n" +
+	"\tListPosts\x12\x18.circle_rpc.ListPostsReq\x1a\x18.circle_rpc.ListPostsRes\x12B\n" +
+	"\n" +
+	"DeletePost\x12\x19.circle_rpc.DeletePostReq\x1a\x19.circle_rpc.DeletePostRes\x12H\n" +
+	"\fListComments\x12\x1b.circle_rpc.ListCommentsReq\x1a\x1b.circle_rpc.ListCommentsRes\x12K\n" +
+	"\rDeleteComment\x12\x1c.circle_rpc.DeleteCommentReq\x1a\x1c.circle_rpc.DeleteCommentRes\x12]\n" +
+	"\x13RemoveCircleMembers\x12\".circle_rpc.RemoveCircleMembersReq\x1a\".circle_rpc.RemoveCircleMembersResB\x0eZ\f./circle_rpcb\x06proto3"
 
 var (
 	file_circle_rpc_proto_rawDescOnce sync.Once
@@ -1018,45 +1711,69 @@ func file_circle_rpc_proto_rawDescGZIP() []byte {
 	return file_circle_rpc_proto_rawDescData
 }
 
-var file_circle_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_circle_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_circle_rpc_proto_goTypes = []any{
-	(*CircleItem)(nil),           // 0: circle_rpc.CircleItem
-	(*GetCircleListReq)(nil),     // 1: circle_rpc.GetCircleListReq
-	(*GetCircleListRes)(nil),     // 2: circle_rpc.GetCircleListRes
-	(*UpdateCircleReq)(nil),      // 3: circle_rpc.UpdateCircleReq
-	(*UpdateCircleRes)(nil),      // 4: circle_rpc.UpdateCircleRes
-	(*GetCircleMembersReq)(nil),  // 5: circle_rpc.GetCircleMembersReq
-	(*CircleMemberItem)(nil),     // 6: circle_rpc.CircleMemberItem
-	(*GetCircleMembersRes)(nil),  // 7: circle_rpc.GetCircleMembersRes
-	(*GetUserCircleRoleReq)(nil), // 8: circle_rpc.GetUserCircleRoleReq
-	(*GetUserCircleRoleRes)(nil), // 9: circle_rpc.GetUserCircleRoleRes
-	(*GetUserCircleIDsReq)(nil),  // 10: circle_rpc.GetUserCircleIDsReq
-	(*GetUserCircleIDsRes)(nil),  // 11: circle_rpc.GetUserCircleIDsRes
-	(*GetCircleVersionsReq)(nil), // 12: circle_rpc.GetCircleVersionsReq
-	(*CircleVersionItem)(nil),    // 13: circle_rpc.CircleVersionItem
-	(*GetCircleVersionsRes)(nil), // 14: circle_rpc.GetCircleVersionsRes
+	(*CircleItem)(nil),             // 0: circle_rpc.CircleItem
+	(*GetCircleListReq)(nil),       // 1: circle_rpc.GetCircleListReq
+	(*GetCircleListRes)(nil),       // 2: circle_rpc.GetCircleListRes
+	(*UpdateCircleReq)(nil),        // 3: circle_rpc.UpdateCircleReq
+	(*UpdateCircleRes)(nil),        // 4: circle_rpc.UpdateCircleRes
+	(*GetCircleMembersReq)(nil),    // 5: circle_rpc.GetCircleMembersReq
+	(*CircleMemberItem)(nil),       // 6: circle_rpc.CircleMemberItem
+	(*GetCircleMembersRes)(nil),    // 7: circle_rpc.GetCircleMembersRes
+	(*GetUserCircleRoleReq)(nil),   // 8: circle_rpc.GetUserCircleRoleReq
+	(*GetUserCircleRoleRes)(nil),   // 9: circle_rpc.GetUserCircleRoleRes
+	(*GetUserCircleIDsReq)(nil),    // 10: circle_rpc.GetUserCircleIDsReq
+	(*GetUserCircleIDsRes)(nil),    // 11: circle_rpc.GetUserCircleIDsRes
+	(*GetCircleVersionsReq)(nil),   // 12: circle_rpc.GetCircleVersionsReq
+	(*CircleVersionItem)(nil),      // 13: circle_rpc.CircleVersionItem
+	(*GetCircleVersionsRes)(nil),   // 14: circle_rpc.GetCircleVersionsRes
+	(*ListPostsReq)(nil),           // 15: circle_rpc.ListPostsReq
+	(*PostItem)(nil),               // 16: circle_rpc.PostItem
+	(*ListPostsRes)(nil),           // 17: circle_rpc.ListPostsRes
+	(*DeletePostReq)(nil),          // 18: circle_rpc.DeletePostReq
+	(*DeletePostRes)(nil),          // 19: circle_rpc.DeletePostRes
+	(*ListCommentsReq)(nil),        // 20: circle_rpc.ListCommentsReq
+	(*CommentItem)(nil),            // 21: circle_rpc.CommentItem
+	(*ListCommentsRes)(nil),        // 22: circle_rpc.ListCommentsRes
+	(*DeleteCommentReq)(nil),       // 23: circle_rpc.DeleteCommentReq
+	(*DeleteCommentRes)(nil),       // 24: circle_rpc.DeleteCommentRes
+	(*RemoveCircleMembersReq)(nil), // 25: circle_rpc.RemoveCircleMembersReq
+	(*RemoveCircleMembersRes)(nil), // 26: circle_rpc.RemoveCircleMembersRes
 }
 var file_circle_rpc_proto_depIdxs = []int32{
 	0,  // 0: circle_rpc.GetCircleListRes.list:type_name -> circle_rpc.CircleItem
 	6,  // 1: circle_rpc.GetCircleMembersRes.list:type_name -> circle_rpc.CircleMemberItem
 	13, // 2: circle_rpc.GetCircleVersionsRes.list:type_name -> circle_rpc.CircleVersionItem
-	1,  // 3: circle_rpc.circle.GetCircleList:input_type -> circle_rpc.GetCircleListReq
-	3,  // 4: circle_rpc.circle.UpdateCircle:input_type -> circle_rpc.UpdateCircleReq
-	5,  // 5: circle_rpc.circle.GetCircleMembers:input_type -> circle_rpc.GetCircleMembersReq
-	8,  // 6: circle_rpc.circle.GetUserCircleRole:input_type -> circle_rpc.GetUserCircleRoleReq
-	10, // 7: circle_rpc.circle.GetUserCircleIDs:input_type -> circle_rpc.GetUserCircleIDsReq
-	12, // 8: circle_rpc.circle.GetCircleVersions:input_type -> circle_rpc.GetCircleVersionsReq
-	2,  // 9: circle_rpc.circle.GetCircleList:output_type -> circle_rpc.GetCircleListRes
-	4,  // 10: circle_rpc.circle.UpdateCircle:output_type -> circle_rpc.UpdateCircleRes
-	7,  // 11: circle_rpc.circle.GetCircleMembers:output_type -> circle_rpc.GetCircleMembersRes
-	9,  // 12: circle_rpc.circle.GetUserCircleRole:output_type -> circle_rpc.GetUserCircleRoleRes
-	11, // 13: circle_rpc.circle.GetUserCircleIDs:output_type -> circle_rpc.GetUserCircleIDsRes
-	14, // 14: circle_rpc.circle.GetCircleVersions:output_type -> circle_rpc.GetCircleVersionsRes
-	9,  // [9:15] is the sub-list for method output_type
-	3,  // [3:9] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	16, // 3: circle_rpc.ListPostsRes.list:type_name -> circle_rpc.PostItem
+	21, // 4: circle_rpc.ListCommentsRes.list:type_name -> circle_rpc.CommentItem
+	1,  // 5: circle_rpc.circle.GetCircleList:input_type -> circle_rpc.GetCircleListReq
+	3,  // 6: circle_rpc.circle.UpdateCircle:input_type -> circle_rpc.UpdateCircleReq
+	5,  // 7: circle_rpc.circle.GetCircleMembers:input_type -> circle_rpc.GetCircleMembersReq
+	8,  // 8: circle_rpc.circle.GetUserCircleRole:input_type -> circle_rpc.GetUserCircleRoleReq
+	10, // 9: circle_rpc.circle.GetUserCircleIDs:input_type -> circle_rpc.GetUserCircleIDsReq
+	12, // 10: circle_rpc.circle.GetCircleVersions:input_type -> circle_rpc.GetCircleVersionsReq
+	15, // 11: circle_rpc.circle.ListPosts:input_type -> circle_rpc.ListPostsReq
+	18, // 12: circle_rpc.circle.DeletePost:input_type -> circle_rpc.DeletePostReq
+	20, // 13: circle_rpc.circle.ListComments:input_type -> circle_rpc.ListCommentsReq
+	23, // 14: circle_rpc.circle.DeleteComment:input_type -> circle_rpc.DeleteCommentReq
+	25, // 15: circle_rpc.circle.RemoveCircleMembers:input_type -> circle_rpc.RemoveCircleMembersReq
+	2,  // 16: circle_rpc.circle.GetCircleList:output_type -> circle_rpc.GetCircleListRes
+	4,  // 17: circle_rpc.circle.UpdateCircle:output_type -> circle_rpc.UpdateCircleRes
+	7,  // 18: circle_rpc.circle.GetCircleMembers:output_type -> circle_rpc.GetCircleMembersRes
+	9,  // 19: circle_rpc.circle.GetUserCircleRole:output_type -> circle_rpc.GetUserCircleRoleRes
+	11, // 20: circle_rpc.circle.GetUserCircleIDs:output_type -> circle_rpc.GetUserCircleIDsRes
+	14, // 21: circle_rpc.circle.GetCircleVersions:output_type -> circle_rpc.GetCircleVersionsRes
+	17, // 22: circle_rpc.circle.ListPosts:output_type -> circle_rpc.ListPostsRes
+	19, // 23: circle_rpc.circle.DeletePost:output_type -> circle_rpc.DeletePostRes
+	22, // 24: circle_rpc.circle.ListComments:output_type -> circle_rpc.ListCommentsRes
+	24, // 25: circle_rpc.circle.DeleteComment:output_type -> circle_rpc.DeleteCommentRes
+	26, // 26: circle_rpc.circle.RemoveCircleMembers:output_type -> circle_rpc.RemoveCircleMembersRes
+	16, // [16:27] is the sub-list for method output_type
+	5,  // [5:16] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_circle_rpc_proto_init() }
@@ -1071,7 +1788,7 @@ func file_circle_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_circle_rpc_proto_rawDesc), len(file_circle_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -369,6 +369,27 @@ type DeleteChatMessageReq struct {
 type DeleteChatMessageRes struct {
 }
 
+type DeleteCircleCommentReq struct {
+	CommentId string `json:"commentId"`
+}
+
+type DeleteCircleCommentRes struct {
+}
+
+type DeleteCirclePostReq struct {
+	PostId string `json:"postId"`
+}
+
+type DeleteCirclePostRes struct {
+}
+
+type DeleteCircleReq struct {
+	CircleId string `json:"circleId"`
+}
+
+type DeleteCircleRes struct {
+}
+
 type DeleteEmojiPackageReq struct {
 	PackageId string `json:"packageId"`
 }
@@ -712,6 +733,111 @@ type GetChatSessionListReq struct {
 type GetChatSessionListRes struct {
 	List  []GetChatSessionListItem `json:"list"`
 	Total int64                    `json:"total"`
+}
+
+type GetCircleCommentListItem struct {
+	CommentId string `json:"commentId"`
+	PostId    string `json:"postId"`
+	UserId    string `json:"userId"`
+	Content   string `json:"content"`
+	IsDeleted bool   `json:"isDeleted"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type GetCircleCommentListReq struct {
+	Page   int    `form:"page,optional"`
+	Limit  int    `form:"limit,optional"`
+	PostId string `form:"postId"`
+}
+
+type GetCircleCommentListRes struct {
+	List  []GetCircleCommentListItem `json:"list"`
+	Total int64                      `json:"total"`
+}
+
+type GetCircleDetailReq struct {
+	CircleId string `form:"circleId"`
+}
+
+type GetCircleDetailRes struct {
+	CircleId    string `json:"circleId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
+	CreatorId   string `json:"creatorId"`
+	JoinType    int    `json:"joinType"`
+	MemberCount int64  `json:"memberCount"`
+	PostCount   int64  `json:"postCount"`
+	IsDeleted   bool   `json:"isDeleted"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type GetCircleListItem struct {
+	CircleId    string `json:"circleId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
+	CreatorId   string `json:"creatorId"`
+	JoinType    int    `json:"joinType"`
+	MemberCount int64  `json:"memberCount"`
+	PostCount   int64  `json:"postCount"`
+	IsDeleted   bool   `json:"isDeleted"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type GetCircleListReq struct {
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	UserId   string `form:"userId,optional"`   // 用户ID筛选
+	Keywords string `form:"keywords,optional"` // 圈子名关键词搜索
+	CircleId string `form:"circleId,optional"` // 圈子ID精确查询
+}
+
+type GetCircleListRes struct {
+	List  []GetCircleListItem `json:"list"`
+	Total int64               `json:"total"`
+}
+
+type GetCircleMemberListItem struct {
+	CircleId string `json:"circleId"`
+	UserId   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Role     int    `json:"role"`
+}
+
+type GetCircleMemberListReq struct {
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	CircleId string `form:"circleId"`
+}
+
+type GetCircleMemberListRes struct {
+	List  []GetCircleMemberListItem `json:"list"`
+	Total int64                     `json:"total"`
+}
+
+type GetCirclePostListItem struct {
+	PostId       string `json:"postId"`
+	CircleId     string `json:"circleId"`
+	UserId       string `json:"userId"`
+	Content      string `json:"content"`
+	IsDeleted    bool   `json:"isDeleted"`
+	CommentCount int64  `json:"commentCount"`
+	LikeCount    int64  `json:"likeCount"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type GetCirclePostListReq struct {
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	CircleId string `form:"circleId"`
+}
+
+type GetCirclePostListRes struct {
+	List  []GetCirclePostListItem `json:"list"`
+	Total int64                   `json:"total"`
 }
 
 type GetContentReportListReq struct {
@@ -1418,12 +1544,14 @@ type GetUserOperationsProfileRes struct {
 	GroupTotal   int64                `json:"groupTotal"`
 	SessionTotal int64                `json:"sessionTotal"`
 	MomentTotal  int64                `json:"momentTotal"`
+	CircleTotal  int64                `json:"circleTotal"`
 	ReportTotal  int64                `json:"reportTotal"`
 	BlockTotal   int64                `json:"blockTotal"`
 	Friends      []UserOpsFriendItem  `json:"friends"`
 	Groups       []UserOpsGroupItem   `json:"groups"`
 	Sessions     []UserOpsSessionItem `json:"sessions"`
 	Moments      []UserOpsMomentItem  `json:"moments"`
+	Circles      []UserOpsCircleItem  `json:"circles"`
 	Reports      []UserOpsReportItem  `json:"reports"`
 	Blocks       []UserOpsBlockItem   `json:"blocks"`
 }
@@ -1719,6 +1847,14 @@ type ReleasePolicyItem struct {
 	GrayVersion     string `json:"grayVersion"`
 	CreatedAt       string `json:"createdAt"`
 	UpdatedAt       string `json:"updatedAt"`
+}
+
+type RemoveCircleMemberReq struct {
+	CircleId  string   `json:"circleId"`
+	MemberIds []string `json:"memberIds"`
+}
+
+type RemoveCircleMemberRes struct {
 }
 
 type RemoveEmojiFromPackageReq struct {
@@ -2018,6 +2154,15 @@ type UserOpsBlockItem struct {
 	BlockedUserID   string `json:"blockedUserId"`
 	BlockedUserName string `json:"blockedUserName"`
 	CreateTime      string `json:"createTime"`
+}
+
+type UserOpsCircleItem struct {
+	CircleID    string `json:"circleId"`
+	Name        string `json:"name"`
+	Role        int    `json:"role"`
+	MemberCount int64  `json:"memberCount"`
+	PostCount   int64  `json:"postCount"`
+	IsDeleted   bool   `json:"isDeleted"`
 }
 
 type UserOpsFriendItem struct {

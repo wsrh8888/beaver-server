@@ -19,12 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Circle_GetCircleList_FullMethodName     = "/circle_rpc.circle/GetCircleList"
-	Circle_UpdateCircle_FullMethodName      = "/circle_rpc.circle/UpdateCircle"
-	Circle_GetCircleMembers_FullMethodName  = "/circle_rpc.circle/GetCircleMembers"
-	Circle_GetUserCircleRole_FullMethodName = "/circle_rpc.circle/GetUserCircleRole"
-	Circle_GetUserCircleIDs_FullMethodName  = "/circle_rpc.circle/GetUserCircleIDs"
-	Circle_GetCircleVersions_FullMethodName = "/circle_rpc.circle/GetCircleVersions"
+	Circle_GetCircleList_FullMethodName       = "/circle_rpc.circle/GetCircleList"
+	Circle_UpdateCircle_FullMethodName        = "/circle_rpc.circle/UpdateCircle"
+	Circle_GetCircleMembers_FullMethodName    = "/circle_rpc.circle/GetCircleMembers"
+	Circle_GetUserCircleRole_FullMethodName   = "/circle_rpc.circle/GetUserCircleRole"
+	Circle_GetUserCircleIDs_FullMethodName    = "/circle_rpc.circle/GetUserCircleIDs"
+	Circle_GetCircleVersions_FullMethodName   = "/circle_rpc.circle/GetCircleVersions"
+	Circle_ListPosts_FullMethodName           = "/circle_rpc.circle/ListPosts"
+	Circle_DeletePost_FullMethodName          = "/circle_rpc.circle/DeletePost"
+	Circle_ListComments_FullMethodName        = "/circle_rpc.circle/ListComments"
+	Circle_DeleteComment_FullMethodName       = "/circle_rpc.circle/DeleteComment"
+	Circle_RemoveCircleMembers_FullMethodName = "/circle_rpc.circle/RemoveCircleMembers"
 )
 
 // CircleClient is the client API for Circle service.
@@ -33,7 +38,7 @@ const (
 type CircleClient interface {
 	// 获取圈子列表（支持按用户、关键词、ID过滤）
 	GetCircleList(ctx context.Context, in *GetCircleListReq, opts ...grpc.CallOption) (*GetCircleListRes, error)
-	// 更新圈子状态（解散、成员数/帖子数变更）
+	// 更新圈子状态（解散等）
 	UpdateCircle(ctx context.Context, in *UpdateCircleReq, opts ...grpc.CallOption) (*UpdateCircleRes, error)
 	// 获取圈子成员列表
 	GetCircleMembers(ctx context.Context, in *GetCircleMembersReq, opts ...grpc.CallOption) (*GetCircleMembersRes, error)
@@ -43,6 +48,16 @@ type CircleClient interface {
 	GetUserCircleIDs(ctx context.Context, in *GetUserCircleIDsReq, opts ...grpc.CallOption) (*GetUserCircleIDsRes, error)
 	// 获取圈子版本变更（数据同步）
 	GetCircleVersions(ctx context.Context, in *GetCircleVersionsReq, opts ...grpc.CallOption) (*GetCircleVersionsRes, error)
+	// 获取圈子帖子列表（管理后台）
+	ListPosts(ctx context.Context, in *ListPostsReq, opts ...grpc.CallOption) (*ListPostsRes, error)
+	// 删除帖子（管理后台）
+	DeletePost(ctx context.Context, in *DeletePostReq, opts ...grpc.CallOption) (*DeletePostRes, error)
+	// 获取帖子评论列表（管理后台）
+	ListComments(ctx context.Context, in *ListCommentsReq, opts ...grpc.CallOption) (*ListCommentsRes, error)
+	// 删除评论（管理后台）
+	DeleteComment(ctx context.Context, in *DeleteCommentReq, opts ...grpc.CallOption) (*DeleteCommentRes, error)
+	// 移除圈子成员（管理后台）
+	RemoveCircleMembers(ctx context.Context, in *RemoveCircleMembersReq, opts ...grpc.CallOption) (*RemoveCircleMembersRes, error)
 }
 
 type circleClient struct {
@@ -113,13 +128,63 @@ func (c *circleClient) GetCircleVersions(ctx context.Context, in *GetCircleVersi
 	return out, nil
 }
 
+func (c *circleClient) ListPosts(ctx context.Context, in *ListPostsReq, opts ...grpc.CallOption) (*ListPostsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPostsRes)
+	err := c.cc.Invoke(ctx, Circle_ListPosts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *circleClient) DeletePost(ctx context.Context, in *DeletePostReq, opts ...grpc.CallOption) (*DeletePostRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeletePostRes)
+	err := c.cc.Invoke(ctx, Circle_DeletePost_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *circleClient) ListComments(ctx context.Context, in *ListCommentsReq, opts ...grpc.CallOption) (*ListCommentsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCommentsRes)
+	err := c.cc.Invoke(ctx, Circle_ListComments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *circleClient) DeleteComment(ctx context.Context, in *DeleteCommentReq, opts ...grpc.CallOption) (*DeleteCommentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCommentRes)
+	err := c.cc.Invoke(ctx, Circle_DeleteComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *circleClient) RemoveCircleMembers(ctx context.Context, in *RemoveCircleMembersReq, opts ...grpc.CallOption) (*RemoveCircleMembersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveCircleMembersRes)
+	err := c.cc.Invoke(ctx, Circle_RemoveCircleMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CircleServer is the server API for Circle service.
 // All implementations must embed UnimplementedCircleServer
 // for forward compatibility.
 type CircleServer interface {
 	// 获取圈子列表（支持按用户、关键词、ID过滤）
 	GetCircleList(context.Context, *GetCircleListReq) (*GetCircleListRes, error)
-	// 更新圈子状态（解散、成员数/帖子数变更）
+	// 更新圈子状态（解散等）
 	UpdateCircle(context.Context, *UpdateCircleReq) (*UpdateCircleRes, error)
 	// 获取圈子成员列表
 	GetCircleMembers(context.Context, *GetCircleMembersReq) (*GetCircleMembersRes, error)
@@ -129,6 +194,16 @@ type CircleServer interface {
 	GetUserCircleIDs(context.Context, *GetUserCircleIDsReq) (*GetUserCircleIDsRes, error)
 	// 获取圈子版本变更（数据同步）
 	GetCircleVersions(context.Context, *GetCircleVersionsReq) (*GetCircleVersionsRes, error)
+	// 获取圈子帖子列表（管理后台）
+	ListPosts(context.Context, *ListPostsReq) (*ListPostsRes, error)
+	// 删除帖子（管理后台）
+	DeletePost(context.Context, *DeletePostReq) (*DeletePostRes, error)
+	// 获取帖子评论列表（管理后台）
+	ListComments(context.Context, *ListCommentsReq) (*ListCommentsRes, error)
+	// 删除评论（管理后台）
+	DeleteComment(context.Context, *DeleteCommentReq) (*DeleteCommentRes, error)
+	// 移除圈子成员（管理后台）
+	RemoveCircleMembers(context.Context, *RemoveCircleMembersReq) (*RemoveCircleMembersRes, error)
 	mustEmbedUnimplementedCircleServer()
 }
 
@@ -156,6 +231,21 @@ func (UnimplementedCircleServer) GetUserCircleIDs(context.Context, *GetUserCircl
 }
 func (UnimplementedCircleServer) GetCircleVersions(context.Context, *GetCircleVersionsReq) (*GetCircleVersionsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCircleVersions not implemented")
+}
+func (UnimplementedCircleServer) ListPosts(context.Context, *ListPostsReq) (*ListPostsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPosts not implemented")
+}
+func (UnimplementedCircleServer) DeletePost(context.Context, *DeletePostReq) (*DeletePostRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
+}
+func (UnimplementedCircleServer) ListComments(context.Context, *ListCommentsReq) (*ListCommentsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListComments not implemented")
+}
+func (UnimplementedCircleServer) DeleteComment(context.Context, *DeleteCommentReq) (*DeleteCommentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
+}
+func (UnimplementedCircleServer) RemoveCircleMembers(context.Context, *RemoveCircleMembersReq) (*RemoveCircleMembersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveCircleMembers not implemented")
 }
 func (UnimplementedCircleServer) mustEmbedUnimplementedCircleServer() {}
 func (UnimplementedCircleServer) testEmbeddedByValue()                {}
@@ -286,6 +376,96 @@ func _Circle_GetCircleVersions_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Circle_ListPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPostsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CircleServer).ListPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Circle_ListPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CircleServer).ListPosts(ctx, req.(*ListPostsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Circle_DeletePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePostReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CircleServer).DeletePost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Circle_DeletePost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CircleServer).DeletePost(ctx, req.(*DeletePostReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Circle_ListComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCommentsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CircleServer).ListComments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Circle_ListComments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CircleServer).ListComments(ctx, req.(*ListCommentsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Circle_DeleteComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCommentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CircleServer).DeleteComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Circle_DeleteComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CircleServer).DeleteComment(ctx, req.(*DeleteCommentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Circle_RemoveCircleMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveCircleMembersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CircleServer).RemoveCircleMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Circle_RemoveCircleMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CircleServer).RemoveCircleMembers(ctx, req.(*RemoveCircleMembersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Circle_ServiceDesc is the grpc.ServiceDesc for Circle service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +496,26 @@ var Circle_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCircleVersions",
 			Handler:    _Circle_GetCircleVersions_Handler,
+		},
+		{
+			MethodName: "ListPosts",
+			Handler:    _Circle_ListPosts_Handler,
+		},
+		{
+			MethodName: "DeletePost",
+			Handler:    _Circle_DeletePost_Handler,
+		},
+		{
+			MethodName: "ListComments",
+			Handler:    _Circle_ListComments_Handler,
+		},
+		{
+			MethodName: "DeleteComment",
+			Handler:    _Circle_DeleteComment_Handler,
+		},
+		{
+			MethodName: "RemoveCircleMembers",
+			Handler:    _Circle_RemoveCircleMembers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
