@@ -16,6 +16,7 @@ type Config struct {
 		Db       int
 	}
 	Etcd            string
+	Domain          string // 对外域名，如 http://192.168.3.4:20800
 	RocketMQ        struct {
 		Addr string
 	}

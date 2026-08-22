@@ -3,6 +3,7 @@ package circle
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
@@ -37,7 +38,7 @@ func (l *GetCircleDetailLogic) GetCircleDetail(req *types.GetCircleDetailReq) (r
 		role = member.Role
 	}
 
-	return &types.GetCircleDetailRes{
+	resp = &types.GetCircleDetailRes{
 		CircleID:    circle.CircleID,
 		Name:        circle.Name,
 		Description: circle.Description,
@@ -48,5 +49,15 @@ func (l *GetCircleDetailLogic) GetCircleDetail(req *types.GetCircleDetailReq) (r
 		PostCount:   countPosts(l.svcCtx.DB, req.CircleID),
 		Role:        role,
 		CreatedAt:   circle.CreatedAt.String(),
-	}, nil
+	}
+	if role > 0 {
+		var invite circle_models.CircleInviteModel
+		if e := l.svcCtx.DB.Where("circle_id = ? AND status = 1", circle.CircleID).Order("id asc").First(&invite).Error; e == nil {
+			domain := strings.TrimRight(strings.TrimSpace(l.svcCtx.Config.Domain), "/")
+			if domain != "" && invite.Token != "" {
+				resp.InviteUrl = fmt.Sprintf("%s/api/circle/v1/circle/invite_code?code=%s", domain, invite.Token)
+			}
+		}
+	}
+	return resp, nil
 }

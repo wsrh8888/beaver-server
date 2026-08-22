@@ -16,9 +16,10 @@ type CallMsg struct {
 }
 
 type CardMsg struct {
-	CardType int    `json:"cardType"`          // 1=个人 2=群 3=圈子
-	ID       string `json:"id"`                // 目标实体 ID
-	ExpireAt int64  `json:"expireAt,optional"` // 过期时间戳(秒)，0=不过期
+	CardType    int    `json:"cardType"`            // 1=个人 2=群 3=圈子
+	ID          string `json:"id"`                  // 目标实体 ID
+	ExpireAt    int64  `json:"expireAt,optional"`   // 过期时间戳(秒)，0=不过期
+	InviteToken string `json:"inviteToken,optional"` // 分享邀请凭证（群/圈）
 }
 
 type ChatHistoryReq struct {

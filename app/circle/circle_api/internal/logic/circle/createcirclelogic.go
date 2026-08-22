@@ -14,6 +14,8 @@ import (
 	"beaver/utils/logger"
 	"beaver/utils/logger/model"
 
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -59,6 +61,18 @@ func (l *CreateCircleLogic) CreateCircle(req *types.CreateCircleReq) (resp *type
 	}
 	if err = l.svcCtx.DB.Create(&member).Error; err != nil {
 		return nil, fmt.Errorf("创建圈主成员失败: %v", err)
+	}
+
+	inviteCode := strings.ReplaceAll(uuid.New().String(), "-", "")[:16]
+	if err = l.svcCtx.DB.Create(&circle_models.CircleInviteModel{
+		Token:     inviteCode,
+		CircleID:  circleID,
+		CreatorID: req.UserID,
+		ExpireAt:  0,
+		MaxUses:   0,
+		Status:    1,
+	}).Error; err != nil {
+		return nil, fmt.Errorf("创建圈子邀请失败: %v", err)
 	}
 
 	conversationID := fmt.Sprintf("circle_%s", circleID)

@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"beaver/app/group/group_api/internal/svc"
@@ -27,7 +29,6 @@ func NewGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupIn
 }
 
 func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupInfoRes, err error) {
-	// 查询群组信息
 	var group group_models.GroupModel
 	err = l.svcCtx.DB.Take(&group, "group_id = ?", req.GroupID).Error
 
@@ -36,12 +37,11 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 		return nil, errors.New("群组不存在")
 	}
 
-	// 统计成员数量
 	var memberCount int64
 	_ = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
 		Where("group_id = ?", req.GroupID).Count(&memberCount).Error
 
-	return &types.GroupInfoRes{
+	resp = &types.GroupInfoRes{
 		GroupID:        group.GroupID,
 		Title:          group.Title,
 		Avatar:         group.Avatar,
@@ -54,5 +54,17 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 		CreatedAt:      time.Time(group.CreatedAt).Unix(),
 		UpdatedAt:      time.Time(group.UpdatedAt).Unix(),
 		Version:        group.Version,
-	}, nil
+	}
+
+	var member group_models.GroupMemberModel
+	if l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", req.GroupID, req.UserID).First(&member).Error == nil {
+		var invite group_models.GroupInviteLinkModel
+		if e := l.svcCtx.DB.Where("group_id = ? AND status = 1", group.GroupID).Order("id asc").First(&invite).Error; e == nil {
+			domain := strings.TrimRight(strings.TrimSpace(l.svcCtx.Config.Domain), "/")
+			if domain != "" && invite.Token != "" {
+				resp.InviteUrl = fmt.Sprintf("%s/api/group/v1/invite_code?code=%s", domain, invite.Token)
+			}
+		}
+	}
+	return resp, nil
 }

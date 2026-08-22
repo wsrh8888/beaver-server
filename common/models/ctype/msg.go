@@ -299,9 +299,10 @@ type LinkMsg struct {
 }
 
 // CardMsg 通用名片消息结构（Type: 16）
-// 仅存名片类型与目标 ID，展示/跳转由客户端按 id 拉取或走本地缓存页完成。
+// 存名片类型、目标 ID、可选邀请凭证；展示由客户端拉详情，加入走 invite redeem。
 type CardMsg struct {
-	CardType int    `json:"cardType"`           // 1=个人 2=群 3=圈子
-	ID       string `json:"id"`                 // 目标实体 ID
-	ExpireAt int64  `json:"expireAt,omitempty"` // 过期时间戳(秒)，0=不过期
+	CardType    int    `json:"cardType"`              // 1=个人 2=群 3=圈子
+	ID          string `json:"id"`                    // 目标实体 ID
+	ExpireAt    int64  `json:"expireAt,omitempty"`    // 过期时间戳(秒)，0=不过期
+	InviteToken string `json:"inviteToken,omitempty"` // 分享邀请凭证
 }

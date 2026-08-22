@@ -110,16 +110,17 @@ type GetCircleDetailReq struct {
 }
 
 type GetCircleDetailRes struct {
-	CircleID    string `json:"circleId"`    // 圈子ID
-	Name        string `json:"name"`        // 圈子名称
-	Description string `json:"description"` // 圈子简介
-	Avatar      string `json:"avatar"`      // 圈子头像
-	JoinType    int8   `json:"joinType"`    // 加入方式：0=自由加入 1=审批加入
-	CreatorID   string `json:"creatorId"`   // 创建者用户ID
-	MemberCount int64  `json:"memberCount"` // 成员数量
-	PostCount   int64  `json:"postCount"`   // 帖子数量
-	Role        int8   `json:"role"`        // 当前用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
-	CreatedAt   string `json:"createdAt"`   // 创建时间
+	CircleID    string `json:"circleId"`            // 圈子ID
+	Name        string `json:"name"`                // 圈子名称
+	Description string `json:"description"`         // 圈子简介
+	Avatar      string `json:"avatar"`              // 圈子头像
+	JoinType    int8   `json:"joinType"`            // 加入方式：0=自由加入 1=审批加入
+	CreatorID   string `json:"creatorId"`           // 创建者用户ID
+	MemberCount int64  `json:"memberCount"`         // 成员数量
+	PostCount   int64  `json:"postCount"`           // 帖子数量
+	Role        int8   `json:"role"`                // 当前用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
+	CreatedAt   string `json:"createdAt"`           // 创建时间
+	InviteUrl   string `json:"inviteUrl,optional"`  // 成员可见：稳定邀请链接
 }
 
 type GetCircleMembersItem struct {
@@ -319,13 +320,15 @@ type HandleJoinRequestRes struct {
 }
 
 type JoinCircleReq struct {
-	UserID   string `header:"Beaver-User-Id"` // 用户ID
-	CircleID string `json:"circleId"`         // 圈子ID
-	Reason   string `json:"reason,optional"`  // 申请理由（审批加入时填写）
+	UserID     string `header:"Beaver-User-Id"`     // 用户ID
+	CircleID   string `json:"circleId,optional"`    // 圈子ID（有 inviteCode 时可空）
+	Reason     string `json:"reason,optional"`      // 申请理由（审批加入时填写）
+	InviteCode string `json:"inviteCode,optional"`  // 邀请短码
 }
 
 type JoinCircleRes struct {
-	Status int8 `json:"status"` // 加入结果：1=已加入 0=申请待审批
+	Status   int8   `json:"status"`             // 加入结果：1=已加入 0=申请待审批
+	CircleID string `json:"circleId,optional"`  // 圈子ID
 }
 
 type LikePostReq struct {
@@ -403,3 +406,21 @@ type UpdateCircleReq struct {
 
 type UpdateCircleRes struct {
 }
+
+type ResolveCircleInviteReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户
+	Code   string `form:"code"`             // 邀请短码
+}
+
+type ResolveCircleInviteRes struct {
+	Code          string `json:"code"`          // 邀请短码
+	CircleID      string `json:"circleId"`      // 圈子ID
+	Name          string `json:"name"`          // 圈子名称
+	Avatar        string `json:"avatar"`        // 头像
+	Description   string `json:"description"`   // 简介
+	MemberCount   int64  `json:"memberCount"`   // 成员数
+	JoinType      int8   `json:"joinType"`      // 加入方式
+	Valid         bool   `json:"valid"`         // 是否有效
+	AlreadyJoined bool   `json:"alreadyJoined"` // 是否已加入
+}
+

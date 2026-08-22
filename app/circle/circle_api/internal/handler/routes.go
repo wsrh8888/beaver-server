@@ -58,6 +58,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: circle.JoinCircleHandler(serverCtx),
 			},
 			{
+				// 解析圈子邀请链接
+				Method:  http.MethodGet,
+				Path:    "/api/circle/v1/circle/invite_code",
+				Handler: circle.ResolveCircleInviteHandler(serverCtx),
+			},
+			{
 				// 处理加圈申请（圈主/管理员）
 				Method:  http.MethodPost,
 				Path:    "/api/circle/v1/circle/join_request_handle",

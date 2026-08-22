@@ -271,6 +271,9 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			if expireAt, ok := cardMsg["expireAt"].(float64); ok {
 				rpcMsg.CardMsg.ExpireAt = int64(expireAt)
 			}
+			if inviteToken, ok := cardMsg["inviteToken"].(string); ok {
+				rpcMsg.CardMsg.InviteToken = inviteToken
+			}
 		}
 	}
 

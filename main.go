@@ -96,6 +96,7 @@ func main() {
 					&group_models.GroupJoinRequestModel{},
 					&group_models.GroupMemberChangeLogModel{},
 					&group_models.GroupBotModel{},
+					&group_models.GroupInviteLinkModel{},
 				)
 			},
 		},
@@ -121,6 +122,7 @@ func main() {
 					&circle_models.CircleModel{},
 					&circle_models.CircleMemberModel{},
 					&circle_models.CircleJoinRequestModel{},
+					&circle_models.CircleInviteModel{},
 					&circle_models.CirclePostModel{},
 					&circle_models.CircleCommentModel{},
 					&circle_models.CircleLikeModel{},

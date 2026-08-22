@@ -281,9 +281,10 @@ func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
 			msg = ctype.Msg{
 				Type: ctype.CardMsgType,
 				CardMsg: &ctype.CardMsg{
-					CardType: int(protoMsg.CardMsg.CardType),
-					ID:       protoMsg.CardMsg.Id,
-					ExpireAt: protoMsg.CardMsg.ExpireAt,
+					CardType:    int(protoMsg.CardMsg.CardType),
+					ID:          protoMsg.CardMsg.Id,
+					ExpireAt:    protoMsg.CardMsg.ExpireAt,
+					InviteToken: protoMsg.CardMsg.InviteToken,
 				},
 			}
 		}
@@ -732,9 +733,10 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.CardMsgType:
 		if m.CardMsg != nil {
 			rpcMsg.CardMsg = &chat_rpc.CardMsg{
-				CardType: int32(m.CardMsg.CardType),
-				Id:       m.CardMsg.ID,
-				ExpireAt: m.CardMsg.ExpireAt,
+				CardType:    int32(m.CardMsg.CardType),
+				Id:          m.CardMsg.ID,
+				ExpireAt:    m.CardMsg.ExpireAt,
+				InviteToken: m.CardMsg.InviteToken,
 			}
 		}
 	}
