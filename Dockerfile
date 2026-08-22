@@ -73,6 +73,12 @@ RUN go build -ldflags="-s -w" -o group_api/group app/group/group_api/group.go
 # group_rpc
 RUN go build -ldflags="-s -w" -o group_rpc/grouprpc app/group/group_rpc/grouprpc.go
 
+# ==================== CIRCLE 相关服务 ====================
+# circle_api
+RUN go build -ldflags="-s -w" -o circle_api/circle app/circle/circle_api/circle.go
+# circle_rpc
+RUN go build -ldflags="-s -w" -o circle_rpc/circlerpc app/circle/circle_rpc/circlerpc.go
+
 # ==================== MOMENT 相关服务 ====================
 # moment_api
 RUN go build -ldflags="-s -w" -o moment_api/moment app/moment/moment_api/moment.go

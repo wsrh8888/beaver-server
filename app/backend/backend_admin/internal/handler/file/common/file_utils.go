@@ -1,6 +1,7 @@
 package file
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"beaver/app/backend/backend_admin/internal/svc"
+	"beaver/app/file/file_rpc/types/file_rpc"
 	"beaver/utils/md5"
 )
 
@@ -122,6 +124,18 @@ func BuildQiniuFileURL(domain, path string) string {
 		return ""
 	}
 	return fmt.Sprintf("https://%s/%s", strings.TrimRight(domain, "/"), strings.TrimLeft(path, "/"))
+}
+
+// FindFileByMd5 通过 FileRpc 按 MD5 查询文件；found=false 表示未命中（非错误）
+func FindFileByMd5(ctx context.Context, fileMd5 string, svcCtx *svc.ServiceContext) (*file_rpc.FileItem, bool, error) {
+	res, err := svcCtx.FileRpc.GetFileByMd5(ctx, &file_rpc.GetFileByMd5Req{Md5: fileMd5})
+	if err != nil {
+		return nil, false, err
+	}
+	if res.File == nil {
+		return nil, false, nil
+	}
+	return res.File, true, nil
 }
 
 // inList 检查元素是否在列表中

@@ -3,7 +3,7 @@ package handler
 import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/file/file_models"
+	"beaver/app/file/file_rpc/types/file_rpc"
 	"beaver/common/response"
 	"errors"
 	"fmt"
@@ -13,6 +13,8 @@ import (
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -24,27 +26,23 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// l := logic.NewPreviewLogic(r.Context(), svcCtx)
-		// resp, err := l.Preview(&req)
-		// response.Response(r, w, resp, err)
-
-		var fileModel file_models.FileModel
-		err := svcCtx.DB.Take(&fileModel, "file_name = ?", req.FileName).Error
+		fileDetail, err := svcCtx.FileRpc.GetFileDetail(r.Context(), &file_rpc.GetFileDetailReq{
+			FileKey: req.FileName,
+		})
 		if err != nil {
-			response.Response(r, w, nil, errors.New("图片不存在"))
+			if st, ok := status.FromError(err); ok && st.Code() == codes.NotFound {
+				response.Response(r, w, nil, errors.New("图片不存在"))
+				return
+			}
+			response.Response(r, w, nil, err)
 			return
 		}
 
-		// 构建七牛云文件URL
-		filePath := fileModel.Path
-
-		// 生成带有时效限制的签名URL
 		mac := qbox.NewMac(svcCtx.Config.Qiniu.AK, svcCtx.Config.Qiniu.SK)
 		deadline := time.Now().Add(time.Duration(svcCtx.Config.Qiniu.ExpireTime) * time.Second).Unix()
-		privateAccessURL := storage.MakePrivateURL(mac, svcCtx.Config.Qiniu.Domain, filePath, deadline)
+		privateAccessURL := storage.MakePrivateURL(mac, svcCtx.Config.Qiniu.Domain, fileDetail.Path, deadline)
 
 		fmt.Println("privateAccessURL:", privateAccessURL)
-		// 返回重定向到签名URL
 		http.Redirect(w, r, privateAccessURL, http.StatusFound)
 	}
 }

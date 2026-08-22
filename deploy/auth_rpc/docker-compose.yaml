@@ -7,7 +7,5 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./authrpc.yaml:/etc/authrpc.yaml:ro
-    deploy:
-      restart_policy:
-        condition: any
+    restart: "no"
     pull_policy: always

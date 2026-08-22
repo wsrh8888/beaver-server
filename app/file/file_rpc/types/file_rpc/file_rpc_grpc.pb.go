@@ -23,6 +23,7 @@ const (
 	File_GetQiniuUploadToken_FullMethodName = "/file_rpc.file/GetQiniuUploadToken"
 	File_ListFiles_FullMethodName           = "/file_rpc.file/ListFiles"
 	File_GetFileById_FullMethodName         = "/file_rpc.file/GetFileById"
+	File_GetFileByMd5_FullMethodName        = "/file_rpc.file/GetFileByMd5"
 	File_DeleteFile_FullMethodName          = "/file_rpc.file/DeleteFile"
 	File_BatchDeleteFiles_FullMethodName    = "/file_rpc.file/BatchDeleteFiles"
 	File_SaveFile_FullMethodName            = "/file_rpc.file/SaveFile"
@@ -40,6 +41,7 @@ type FileClient interface {
 	GetQiniuUploadToken(ctx context.Context, in *GetQiniuUploadTokenReq, opts ...grpc.CallOption) (*GetQiniuUploadTokenRes, error)
 	ListFiles(ctx context.Context, in *ListFilesReq, opts ...grpc.CallOption) (*ListFilesRes, error)
 	GetFileById(ctx context.Context, in *GetFileByIdReq, opts ...grpc.CallOption) (*GetFileByIdRes, error)
+	GetFileByMd5(ctx context.Context, in *GetFileByMd5Req, opts ...grpc.CallOption) (*GetFileByMd5Res, error)
 	DeleteFile(ctx context.Context, in *DeleteFileReq, opts ...grpc.CallOption) (*DeleteFileRes, error)
 	BatchDeleteFiles(ctx context.Context, in *BatchDeleteFilesReq, opts ...grpc.CallOption) (*BatchDeleteFilesRes, error)
 	SaveFile(ctx context.Context, in *SaveFileReq, opts ...grpc.CallOption) (*SaveFileRes, error)
@@ -93,6 +95,16 @@ func (c *fileClient) GetFileById(ctx context.Context, in *GetFileByIdReq, opts .
 	return out, nil
 }
 
+func (c *fileClient) GetFileByMd5(ctx context.Context, in *GetFileByMd5Req, opts ...grpc.CallOption) (*GetFileByMd5Res, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFileByMd5Res)
+	err := c.cc.Invoke(ctx, File_GetFileByMd5_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *fileClient) DeleteFile(ctx context.Context, in *DeleteFileReq, opts ...grpc.CallOption) (*DeleteFileRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteFileRes)
@@ -135,6 +147,7 @@ type FileServer interface {
 	GetQiniuUploadToken(context.Context, *GetQiniuUploadTokenReq) (*GetQiniuUploadTokenRes, error)
 	ListFiles(context.Context, *ListFilesReq) (*ListFilesRes, error)
 	GetFileById(context.Context, *GetFileByIdReq) (*GetFileByIdRes, error)
+	GetFileByMd5(context.Context, *GetFileByMd5Req) (*GetFileByMd5Res, error)
 	DeleteFile(context.Context, *DeleteFileReq) (*DeleteFileRes, error)
 	BatchDeleteFiles(context.Context, *BatchDeleteFilesReq) (*BatchDeleteFilesRes, error)
 	SaveFile(context.Context, *SaveFileReq) (*SaveFileRes, error)
@@ -159,6 +172,9 @@ func (UnimplementedFileServer) ListFiles(context.Context, *ListFilesReq) (*ListF
 }
 func (UnimplementedFileServer) GetFileById(context.Context, *GetFileByIdReq) (*GetFileByIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFileById not implemented")
+}
+func (UnimplementedFileServer) GetFileByMd5(context.Context, *GetFileByMd5Req) (*GetFileByMd5Res, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFileByMd5 not implemented")
 }
 func (UnimplementedFileServer) DeleteFile(context.Context, *DeleteFileReq) (*DeleteFileRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
@@ -262,6 +278,24 @@ func _File_GetFileById_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _File_GetFileByMd5_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFileByMd5Req)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServer).GetFileByMd5(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: File_GetFileByMd5_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServer).GetFileByMd5(ctx, req.(*GetFileByMd5Req))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _File_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteFileReq)
 	if err := dec(in); err != nil {
@@ -338,6 +372,10 @@ var File_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFileById",
 			Handler:    _File_GetFileById_Handler,
+		},
+		{
+			MethodName: "GetFileByMd5",
+			Handler:    _File_GetFileByMd5_Handler,
 		},
 		{
 			MethodName: "DeleteFile",

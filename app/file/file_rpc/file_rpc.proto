@@ -67,6 +67,14 @@ message GetFileByIdRes {
   FileItem file = 1; // object 文件详情
 }
 
+message GetFileByMd5Req {
+  string md5 = 1; // string MD5
+}
+
+message GetFileByMd5Res {
+  FileItem file = 1; // object 文件详情
+}
+
 message DeleteFileReq {
   uint64 id = 1; // uint64 记录 ID
 }
@@ -107,6 +115,7 @@ service file {
 
   rpc ListFiles(ListFilesReq) returns (ListFilesRes);
   rpc GetFileById(GetFileByIdReq) returns (GetFileByIdRes);
+  rpc GetFileByMd5(GetFileByMd5Req) returns (GetFileByMd5Res);
   rpc DeleteFile(DeleteFileReq) returns (DeleteFileRes);
   rpc BatchDeleteFiles(BatchDeleteFilesReq) returns (BatchDeleteFilesRes);
   rpc SaveFile(SaveFileReq) returns (SaveFileRes);

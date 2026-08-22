@@ -1,12 +1,11 @@
 
 services:
-  emoji_rpc:
-    image: wsrh8888/emoji_rpc:1.0.0
-    container_name: emoji_rpc
+  circle_api:
+    image: wsrh8888/circle_api:1.0.0
+    container_name: circle_api
     network_mode: "host"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./emojirpc.yaml:/etc/emojirpc.yaml:ro
+      - ./circle.yaml:/etc/circle.yaml:ro
     restart: "no"
     pull_policy: always
-

@@ -5,7 +5,6 @@ import (
 	logic "beaver/app/backend/backend_admin/internal/logic/file"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/file/file_models"
 	"beaver/common/response"
 	utils "beaver/utils/list"
 	"beaver/utils/md5"
@@ -18,7 +17,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	"github.com/qiniu/go-sdk/v7/storagev2/http_client"
 	"github.com/qiniu/go-sdk/v7/storagev2/uploader"
@@ -50,9 +48,9 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		fileInfoStr := r.FormValue("fileInfo")
 
 		// 确定文件来源
-		source := file_models.QiniuSource
+		source := "qiniu"
 		if req.Source != "" && req.Source == "local" {
-			source = file_models.LocalSource
+			source = "local"
 		}
 
 		// 文件后缀白名单
@@ -114,17 +112,31 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		// 检查文件是否已经存在于数据库中
 		logx.Info("检查文件是否已存在")
-		var fileModel file_models.FileModel
-		err = svcCtx.DB.Take(&fileModel, "md5 = ?", fileMd5).Error
-
-		if err == nil {
-			logx.Info("文件已存在，直接返回:", fileModel.FileKey, fileModel.OriginalName)
-			resp.OriginalName = fileModel.OriginalName
-			resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, fileModel.Path)
+		existingFile, found, err := filecommon.FindFileByMd5(r.Context(), fileMd5, svcCtx)
+		if err != nil {
+			logx.Error("查询文件失败:", err)
+			response.Response(r, w, nil, errors.New("查询文件失败"))
+			return
+		}
+		if found {
+			logx.Info("文件已存在，直接返回:", existingFile.FileKey, existingFile.OriginalName)
+			resp.OriginalName = existingFile.OriginalName
+			resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, existingFile.Path)
 			response.Response(r, w, resp, nil)
 			return
 		}
 		logx.Info("文件不存在，继续上传流程")
+
+		if fileInfoStr == "" {
+			logx.Error("fileInfo不能为空")
+			response.Response(r, w, nil, errors.New("fileInfo不能为空"))
+			return
+		}
+		if !json.Valid([]byte(fileInfoStr)) {
+			logx.Error("fileInfo格式不正确")
+			response.Response(r, w, nil, errors.New("fileInfo格式不正确"))
+			return
+		}
 
 		// 根据文件类型创建目录结构，并生成七牛云文件路径
 		// 如果配置了项目名称，则添加项目目录前缀；否则使用根目录
@@ -147,46 +159,26 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		logx.Info("文件成功上传到七牛云")
 
-		// 创建新的文件记录
-		logx.Info("开始创建数据库记录")
-		// 生成带后缀的FileKey
-		fileUUID := uuid.New().String()
-		fileKeyWithSuffix := fileUUID + "." + suffix
-
-		newFileModel := &file_models.FileModel{
+		saveReq := &types.SaveFileReq{
 			OriginalName: strings.TrimSuffix(originalName, "."+suffix),
 			Size:         fileHead.Size,
 			Path:         qiniuURL,
 			Md5:          fileMd5,
-			FileKey:      fileKeyWithSuffix,
 			Type:         fileType,
 			Source:       source,
+			FileInfo:     fileInfoStr,
 		}
-
-		// 解析fileInfo（必传字段）
-		if fileInfoStr == "" {
-			logx.Error("fileInfo不能为空")
-			response.Response(r, w, nil, errors.New("fileInfo不能为空"))
-			return
-		}
-
-		fileInfo := &file_models.FileInfo{}
-		if err := json.Unmarshal([]byte(fileInfoStr), fileInfo); err != nil {
-			logx.Errorf("解析fileInfo失败: %v, 原始数据: %s", err, fileInfoStr)
-			response.Response(r, w, nil, errors.New("fileInfo格式不正确"))
-			return
-		}
-		newFileModel.FileInfo = fileInfo
-		err = svcCtx.DB.Create(newFileModel).Error
+		saveLogic := logic.NewSaveFileLogic(r.Context(), svcCtx)
+		saveResp, err := saveLogic.SaveFile(saveReq)
 		if err != nil {
-			logx.Error("创建数据库记录失败:", err)
+			logx.Error("保存文件信息失败:", err)
 			response.Response(r, w, nil, errors.New("保存文件信息失败"))
 			return
 		}
-		logx.Info("数据库记录创建成功:", newFileModel.FileKey)
+		logx.Info("数据库记录创建成功:", saveResp.FileKey)
 
-		resp.OriginalName = newFileModel.OriginalName
-		resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, newFileModel.Path)
+		resp.OriginalName = saveReq.OriginalName
+		resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, qiniuURL)
 
 		logx.Info("文件上传完成, url:", resp.FileURL)
 		response.Response(r, w, resp, nil)
