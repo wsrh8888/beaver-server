@@ -13,6 +13,7 @@ import (
 	momentcli "beaver/app/moment/moment_rpc/moment"
 	opencli "beaver/app/open/open_rpc/open"
 	platformcli "beaver/app/platform/platform_rpc/platform"
+	circlecli "beaver/app/circle/circle_rpc/circle"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -40,6 +41,7 @@ type ServiceContext struct {
 	ChatRpc     chatcli.Chat
 	MomentRpc   momentcli.Moment
 	EmojiRpc    emojicli.Emoji
+	CircleRpc   circlecli.Circle
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -62,6 +64,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ChatRpc:     chatcli.NewChat(zrpc.MustNewClient(c.ChatRpc, rpcOpt)),
 		MomentRpc:   momentcli.NewMoment(zrpc.MustNewClient(c.MomentRpc, rpcOpt)),
 		EmojiRpc:    emojicli.NewEmoji(zrpc.MustNewClient(c.EmojiRpc, rpcOpt)),
+		CircleRpc:   circlecli.NewCircle(zrpc.MustNewClient(c.CircleRpc, rpcOpt)),
 	}
 }
 

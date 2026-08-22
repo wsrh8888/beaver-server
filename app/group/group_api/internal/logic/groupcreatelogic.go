@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
@@ -20,7 +21,6 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type GroupCreateLogic struct {
 	ctx    context.Context
@@ -86,10 +86,22 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		members = append(members, memberMode)
 	}
 
-	err = l.svcCtx.DB.Create(&members).Error
-	if err != nil {
+	if err = l.svcCtx.DB.Create(&members).Error; err != nil {
 		logx.Errorf("创建群成员失败: %v", err)
 		return nil, errors.New("创建群成员失败")
+	}
+
+	inviteCode := strings.ReplaceAll(utils.GenerateUUId(), "-", "")[:16]
+	if err = l.svcCtx.DB.Create(&group_models.GroupInviteLinkModel{
+		Token:     inviteCode,
+		GroupID:   groupID,
+		CreatorID: req.UserID,
+		ExpireAt:  0,
+		MaxUses:   0,
+		Status:    1,
+	}).Error; err != nil {
+		logx.Errorf("创建群邀请失败: %v", err)
+		return nil, errors.New("创建群邀请失败")
 	}
 
 	// 创建成员变更日志

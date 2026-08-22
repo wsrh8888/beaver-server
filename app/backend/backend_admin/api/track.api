@@ -30,5 +30,5 @@ type (
 service backend {
 	@doc "查询日志"
 	@handler queryLogs
-	get /admin/track/logs (QueryLogsReq) returns (QueryLogsRes)
+	get /admin/track/v1/query_logs (QueryLogsReq) returns (QueryLogsRes)
 }

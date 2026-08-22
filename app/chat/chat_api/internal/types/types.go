@@ -15,6 +15,13 @@ type CallMsg struct {
 	Duration int64  `json:"duration,optional"` // 通话时长(秒)
 }
 
+type CardMsg struct {
+	CardType    int    `json:"cardType"`            // 1=个人 2=群 3=圈子
+	ID          string `json:"id"`                  // 目标实体 ID
+	ExpireAt    int64  `json:"expireAt,optional"`   // 过期时间戳(秒)，0=不过期
+	InviteToken string `json:"inviteToken,optional"` // 分享邀请凭证（群/圈）
+}
+
 type ChatHistoryReq struct {
 	UserID         string `header:"Beaver-User-Id"`
 	ConversationID string `json:"conversationId"` // 会话Id
@@ -202,7 +209,7 @@ type Message struct {
 }
 
 type Msg struct {
-	Type            uint32           `json:"type"`                     // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接 15:云文档
+	Type            uint32           `json:"type"`                     // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接 15:云文档 16:名片
 	AtUserIds       []string         `json:"atUserIds,optional"`       // @的用户ID列表
 	TextMsg         *TextMsg         `json:"textMsg,optional"`         // 文本消息
 	ImageMsg        *ImageMsg        `json:"imageMsg,optional"`        // 图片
@@ -217,6 +224,7 @@ type Msg struct {
 	ReplyMsg        *ReplyMsg        `json:"replyMsg,optional"`        // 回复消息
 	ForwardMsg      *ForwardMsg      `json:"forwardMsg,optional"`      // 转发消息（集合）
 	CloudDocMsg     *CloudDocMsg     `json:"cloudDocMsg,optional"`     // 云文档分享卡片
+	CardMsg         *CardMsg         `json:"cardMsg,optional"`         // 通用名片（个人/群/圈子）
 }
 
 type MuteChatReq struct {
@@ -229,7 +237,7 @@ type MuteChatRes struct {
 }
 
 type NotificationMsg struct {
-	Type   int      `json:"type"`   // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主等
+	Type   int      `json:"type"`   // 通知类型：1=好友欢迎 2=创建群 3=加入群 4=退出群 5=踢出成员 6=转让群主 7=添加群机器人 8=移除群机器人
 	Actors []string `json:"actors"` // 相关用户ID列表
 }
 

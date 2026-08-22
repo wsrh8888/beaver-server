@@ -246,17 +246,6 @@ type CreateAuthorityReq struct {
 type CreateAuthorityRes struct {
 }
 
-type CreateBucketReq struct {
-	UserID      string `header:"Beaver-User-Id"` // 用户ID
-	Name        string `json:"name"`             // Bucket名称
-	Description string `json:"description"`      // Bucket描述
-	Kind        string `json:"kind"`             // 类型：log / track
-}
-
-type CreateBucketRes struct {
-	BucketId string `json:"bucketId"` // 创建的Bucket ID
-}
-
 type CreateEmojiPackageReq struct {
 	Title       string  `json:"title"`
 	CoverFile   *string `json:"coverFile,optional"`
@@ -332,6 +321,25 @@ type CreateUserRes struct {
 	Id string `json:"id"`
 }
 
+type CreateWorkbenchAppReq struct {
+	Name        string               `json:"name"`                 // string 应用名称
+	Description string               `json:"description,optional"` // string 应用描述，可选
+	Icon        string               `json:"icon,optional"`        // string 图标 URL，可选
+	AppType     int                  `json:"appType,optional"`     // int 类型 0内部 1第三方H5，可选默认1
+	ClientScope int                  `json:"clientScope,optional"` // int 可见端 0全部 1仅PC 2仅移动，可选
+	EntryConfig WorkbenchEntryConfig `json:"entryConfig"`          // object 入口配置
+	OpenMode    int                  `json:"openMode,optional"`    // int 打开方式 0内嵌 1系统浏览器，可选
+	Category    int                  `json:"category,optional"`    // int 分类，可选
+	Sort        int                  `json:"sort,optional"`        // int 排序，可选
+	Status      int                  `json:"status,optional"`      // int 状态 0下架 1上架，可选
+	Remark      string               `json:"remark,optional"`      // string 运营备注，可选
+	UserID      string               `header:"Beaver-User-Id"`     // string 操作管理员 ID
+}
+
+type CreateWorkbenchAppRes struct {
+	WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+}
+
 type DashboardInboxItem struct {
 	Category  string `json:"category"`
 	Title     string `json:"title"`
@@ -354,19 +362,32 @@ type DeleteAuthorityReq struct {
 type DeleteAuthorityRes struct {
 }
 
-type DeleteBucketReq struct {
-	UserID   string `header:"Beaver-User-Id"` // 用户ID
-	BucketId string `json:"bucketId"`         // Bucket ID
-}
-
-type DeleteBucketRes struct {
-}
-
 type DeleteChatMessageReq struct {
-	MessageID string `path:"id"`
+	MessageID string `json:"id"`
 }
 
 type DeleteChatMessageRes struct {
+}
+
+type DeleteCircleCommentReq struct {
+	CommentId string `json:"commentId"`
+}
+
+type DeleteCircleCommentRes struct {
+}
+
+type DeleteCirclePostReq struct {
+	PostId string `json:"postId"`
+}
+
+type DeleteCirclePostRes struct {
+}
+
+type DeleteCircleReq struct {
+	CircleId string `json:"circleId"`
+}
+
+type DeleteCircleRes struct {
 }
 
 type DeleteEmojiPackageReq struct {
@@ -377,28 +398,28 @@ type DeleteEmojiPackageRes struct {
 }
 
 type DeleteEmojiReq struct {
-	EmojiId string `path:"emojiId"`
+	EmojiId string `json:"emojiId"`
 }
 
 type DeleteEmojiRes struct {
 }
 
 type DeleteFeedbackReq struct {
-	Id uint `path:"id"`
+	Id uint `json:"id"`
 }
 
 type DeleteFeedbackRes struct {
 }
 
 type DeleteFileReq struct {
-	Id uint `path:"id"`
+	Id uint `json:"id"`
 }
 
 type DeleteFileRes struct {
 }
 
 type DeleteFriendReq struct {
-	FriendID string `path:"id"`
+	FriendID string `json:"id"`
 }
 
 type DeleteFriendRes struct {
@@ -412,7 +433,7 @@ type DeleteFriendVerifyRes struct {
 }
 
 type DeleteGroupReq struct {
-	Id uint `path:"id"`
+	Id uint `json:"id"`
 }
 
 type DeleteGroupRes struct {
@@ -438,21 +459,21 @@ type DeleteMessagesByTypeRes struct {
 }
 
 type DeleteMomentCommentReq struct {
-	CommentId string `path:"commentId"`
+	CommentId string `json:"commentId"`
 }
 
 type DeleteMomentCommentRes struct {
 }
 
 type DeleteMomentReq struct {
-	MomentId string `path:"momentId"`
+	MomentId string `json:"momentId"`
 }
 
 type DeleteMomentRes struct {
 }
 
 type DeleteSensitiveWordReq struct {
-	ID     uint64 `path:"id"`
+	ID     uint64 `json:"id"`
 	UserID string `header:"Beaver-User-Id"`
 }
 
@@ -460,17 +481,24 @@ type DeleteSensitiveWordRes struct {
 }
 
 type DeleteUserReq struct {
-	UserID string `path:"id"`
+	UserID string `json:"id"`
 }
 
 type DeleteUserRes struct {
 }
 
 type DeleteVersionReq struct {
-	VersionID uint `path:"id"`
+	VersionID uint `json:"id"`
 }
 
 type DeleteVersionRes struct {
+}
+
+type DeleteWorkbenchAppReq struct {
+	WorkbenchAppID string `json:"workbenchAppId"` // string 应用业务 ID
+}
+
+type DeleteWorkbenchAppRes struct {
 }
 
 type DeveloperInfo struct {
@@ -623,40 +651,15 @@ type GetAuthorityListRes struct {
 }
 
 type GetAuthorityMenusReq struct {
-	Id uint `path:"id"`
+	Id uint `form:"id"`
 }
 
 type GetAuthorityMenusRes struct {
 	MenuIds []uint `json:"menuIds"`
 }
 
-type GetBucketListItem struct {
-	BucketId    string `json:"bucketId"`    // Bucket ID
-	Name        string `json:"name"`        // Bucket名称
-	Description string `json:"description"` // Bucket描述
-	Kind        string `json:"kind"`        // 类型：log / track
-	CreateUser  string `json:"createUser"`  // 创建者
-	IsActive    bool   `json:"isActive"`    // 是否激活
-	CreatedAt   string `json:"createdAt"`   // 创建时间
-	UpdatedAt   string `json:"updatedAt"`   // 更新时间
-}
-
-type GetBucketListReq struct {
-	UserID   string `header:"Beaver-User-Id"`    // 用户ID
-	Page     int    `form:"page,default=1"`      // 页码
-	PageSize int    `form:"pageSize,default=10"` // 每页大小
-	Keyword  string `form:"keyword,optional"`    // 关键词搜索(名称或描述)
-	IsActive *bool  `form:"isActive,optional"`   // 是否激活
-	Kind     string `form:"kind,optional"`       // 类型：log / track
-}
-
-type GetBucketListRes struct {
-	List  []GetBucketListItem `json:"list"`  // Bucket列表
-	Total int64               `json:"total"` // 总数
-}
-
 type GetChatMessageDetailReq struct {
-	MessageID string `path:"id"`
+	MessageID string `form:"id"`
 }
 
 type GetChatMessageDetailRes struct {
@@ -730,6 +733,111 @@ type GetChatSessionListReq struct {
 type GetChatSessionListRes struct {
 	List  []GetChatSessionListItem `json:"list"`
 	Total int64                    `json:"total"`
+}
+
+type GetCircleCommentListItem struct {
+	CommentId string `json:"commentId"`
+	PostId    string `json:"postId"`
+	UserId    string `json:"userId"`
+	Content   string `json:"content"`
+	IsDeleted bool   `json:"isDeleted"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type GetCircleCommentListReq struct {
+	Page   int    `form:"page,optional"`
+	Limit  int    `form:"limit,optional"`
+	PostId string `form:"postId"`
+}
+
+type GetCircleCommentListRes struct {
+	List  []GetCircleCommentListItem `json:"list"`
+	Total int64                      `json:"total"`
+}
+
+type GetCircleDetailReq struct {
+	CircleId string `form:"circleId"`
+}
+
+type GetCircleDetailRes struct {
+	CircleId    string `json:"circleId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
+	CreatorId   string `json:"creatorId"`
+	JoinType    int    `json:"joinType"`
+	MemberCount int64  `json:"memberCount"`
+	PostCount   int64  `json:"postCount"`
+	IsDeleted   bool   `json:"isDeleted"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type GetCircleListItem struct {
+	CircleId    string `json:"circleId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
+	CreatorId   string `json:"creatorId"`
+	JoinType    int    `json:"joinType"`
+	MemberCount int64  `json:"memberCount"`
+	PostCount   int64  `json:"postCount"`
+	IsDeleted   bool   `json:"isDeleted"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type GetCircleListReq struct {
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	UserId   string `form:"userId,optional"`   // 用户ID筛选
+	Keywords string `form:"keywords,optional"` // 圈子名关键词搜索
+	CircleId string `form:"circleId,optional"` // 圈子ID精确查询
+}
+
+type GetCircleListRes struct {
+	List  []GetCircleListItem `json:"list"`
+	Total int64               `json:"total"`
+}
+
+type GetCircleMemberListItem struct {
+	CircleId string `json:"circleId"`
+	UserId   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Role     int    `json:"role"`
+}
+
+type GetCircleMemberListReq struct {
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	CircleId string `form:"circleId"`
+}
+
+type GetCircleMemberListRes struct {
+	List  []GetCircleMemberListItem `json:"list"`
+	Total int64                     `json:"total"`
+}
+
+type GetCirclePostListItem struct {
+	PostId       string `json:"postId"`
+	CircleId     string `json:"circleId"`
+	UserId       string `json:"userId"`
+	Content      string `json:"content"`
+	IsDeleted    bool   `json:"isDeleted"`
+	CommentCount int64  `json:"commentCount"`
+	LikeCount    int64  `json:"likeCount"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type GetCirclePostListReq struct {
+	Page     int    `form:"page,optional"`
+	Limit    int    `form:"limit,optional"`
+	CircleId string `form:"circleId"`
+}
+
+type GetCirclePostListRes struct {
+	List  []GetCirclePostListItem `json:"list"`
+	Total int64                   `json:"total"`
 }
 
 type GetContentReportListReq struct {
@@ -887,40 +995,8 @@ type GetEmojiPackageListRes struct {
 	Total int64                     `json:"total"`
 }
 
-type GetEventListItem struct {
-	Id         uint   `json:"id"`         // 事件ID
-	EventName  string `json:"eventName"`  // 事件名称
-	Action     string `json:"action"`     // 操作
-	UserID     string `json:"userId"`     // 用户ID
-	BucketID   string `json:"bucketId"`   // Bucket Id
-	BucketName string `json:"bucketName"` // Bucket名称
-	Platform   string `json:"platform"`   // 平台
-	DeviceID   string `json:"deviceId"`   // 设备ID
-	Data       string `json:"data"`       // 事件数据(JSON格式)
-	Timestamp  int64  `json:"timestamp"`  // 事件时间戳(毫秒)
-	CreatedAt  string `json:"createdAt"`  // 创建时间
-}
-
-type GetEventListReq struct {
-	UserID     string `header:"Beaver-User-Id"`    // 用户ID
-	Page       int    `form:"page,default=1"`      // 页码
-	PageSize   int    `form:"pageSize,default=20"` // 每页大小
-	BucketID   string `form:"bucketId,optional"`   // Bucket ID筛选
-	EventName  string `form:"eventName,optional"`  // 事件名称筛选
-	Action     string `form:"action,optional"`     // 操作筛选
-	UserFilter string `form:"userFilter,optional"` // 用户ID筛选
-	StartTime  int64  `form:"startTime,optional"`  // 开始时间戳(毫秒)
-	EndTime    int64  `form:"endTime,optional"`    // 结束时间戳(毫秒)
-	Platform   string `form:"platform,optional"`   // 平台筛选
-}
-
-type GetEventListRes struct {
-	List  []GetEventListItem `json:"list"`  // 事件列表
-	Total int64              `json:"total"` // 总数
-}
-
 type GetFeedbackDetailReq struct {
-	Id uint `path:"id"`
+	Id uint `form:"id"`
 }
 
 type GetFeedbackDetailRes struct {
@@ -966,7 +1042,7 @@ type GetFeedbackListRes struct {
 }
 
 type GetFileDetailReq struct {
-	Id uint `path:"id"`
+	Id uint `form:"id"`
 }
 
 type GetFileDetailRes struct {
@@ -1027,7 +1103,7 @@ type GetFriendBlockListRes struct {
 }
 
 type GetFriendDetailReq struct {
-	FriendID string `path:"id"`
+	FriendID string `form:"id"`
 }
 
 type GetFriendDetailRes struct {
@@ -1122,7 +1198,7 @@ type GetFriendVerifyListRes struct {
 }
 
 type GetGroupDetailReq struct {
-	Id uint `path:"id"`
+	Id uint `form:"id"`
 }
 
 type GetGroupDetailRes struct {
@@ -1193,7 +1269,7 @@ type GetGroupMemberListRes struct {
 }
 
 type GetGroupOperationsProfileReq struct {
-	GroupID string `path:"groupId"`
+	GroupID string `form:"groupId"`
 }
 
 type GetGroupOperationsProfileRes struct {
@@ -1226,7 +1302,7 @@ type GetMenuListRes struct {
 }
 
 type GetModerationCaseContextReq struct {
-	CaseID uint64 `path:"id"`
+	CaseID uint64 `form:"id"`
 }
 
 type GetModerationCaseContextRes struct {
@@ -1240,7 +1316,7 @@ type GetModerationCaseContextRes struct {
 }
 
 type GetModerationCaseDetailReq struct {
-	CaseID uint64 `path:"id"`
+	CaseID uint64 `form:"id"`
 }
 
 type GetModerationCaseDetailRes struct {
@@ -1285,7 +1361,7 @@ type GetMomentDetailFileInfo struct {
 }
 
 type GetMomentDetailReq struct {
-	MomentId string `path:"momentId"`
+	MomentId string `form:"momentId"`
 }
 
 type GetMomentDetailRes struct {
@@ -1418,7 +1494,7 @@ type GetSensitiveWordListRes struct {
 }
 
 type GetUserDetailReq struct {
-	UserID string `path:"id"`
+	UserID string `form:"id"`
 }
 
 type GetUserDetailRes struct {
@@ -1459,7 +1535,7 @@ type GetUserOnlineDevicesRes struct {
 }
 
 type GetUserOperationsProfileReq struct {
-	UserID string `path:"userId"`
+	UserID string `form:"userId"`
 }
 
 type GetUserOperationsProfileRes struct {
@@ -1468,12 +1544,14 @@ type GetUserOperationsProfileRes struct {
 	GroupTotal   int64                `json:"groupTotal"`
 	SessionTotal int64                `json:"sessionTotal"`
 	MomentTotal  int64                `json:"momentTotal"`
+	CircleTotal  int64                `json:"circleTotal"`
 	ReportTotal  int64                `json:"reportTotal"`
 	BlockTotal   int64                `json:"blockTotal"`
 	Friends      []UserOpsFriendItem  `json:"friends"`
 	Groups       []UserOpsGroupItem   `json:"groups"`
 	Sessions     []UserOpsSessionItem `json:"sessions"`
 	Moments      []UserOpsMomentItem  `json:"moments"`
+	Circles      []UserOpsCircleItem  `json:"circles"`
 	Reports      []UserOpsReportItem  `json:"reports"`
 	Blocks       []UserOpsBlockItem   `json:"blocks"`
 }
@@ -1500,6 +1578,61 @@ type GetVersionListReq struct {
 type GetVersionListRes struct {
 	Total    int64                `json:"total"`    // 总数
 	Versions []GetVersionListItem `json:"versions"` // 版本列表
+}
+
+type GetWorkbenchAppListItem struct {
+	WorkbenchAppID string               `json:"workbenchAppId"` // string 应用业务 ID
+	Name           string               `json:"name"`           // string 应用名称
+	Description    string               `json:"description"`    // string 应用描述
+	Icon           string               `json:"icon"`           // string 图标 URL
+	AppType        int                  `json:"appType"`        // int 类型
+	ClientScope    int                  `json:"clientScope"`    // int 可见端
+	EntryConfig    WorkbenchEntryConfig `json:"entryConfig"`    // object 入口配置
+	OpenMode       int                  `json:"openMode"`       // int 打开方式
+	Category       int                  `json:"category"`       // int 分类
+	Sort           int                  `json:"sort"`           // int 排序
+	Status         int                  `json:"status"`         // int 状态
+	Remark         string               `json:"remark"`         // string 运营备注
+	CreatedBy      string               `json:"createdBy"`      // string 创建人
+	LastModifiedBy string               `json:"lastModifiedBy"` // string 最后修改人
+	CreatedAt      string               `json:"createdAt"`      // string 创建时间
+	UpdatedAt      string               `json:"updatedAt"`      // string 更新时间
+}
+
+type GetWorkbenchAppListReq struct {
+	Page     int    `form:"page,optional"`     // int 页码，可选
+	PageSize int    `form:"pageSize,optional"` // int 每页条数，可选
+	Status   int    `form:"status,optional"`   // int 状态筛选，可选
+	Category *int   `form:"category,optional"` // int 分类筛选，可选（不传不过滤）
+	Keywords string `form:"keywords,optional"` // string 关键词，可选
+}
+
+type GetWorkbenchAppListRes struct {
+	Total int64                     `json:"total"` // int64 总数
+	List  []GetWorkbenchAppListItem `json:"list"`  // array 列表
+}
+
+type GetWorkbenchAppReq struct {
+	WorkbenchAppID string `form:"workbenchAppId"` // string 应用业务 ID
+}
+
+type GetWorkbenchAppRes struct {
+	WorkbenchAppID string               `json:"workbenchAppId"` // string 应用业务 ID
+	Name           string               `json:"name"`           // string 应用名称
+	Description    string               `json:"description"`    // string 应用描述
+	Icon           string               `json:"icon"`           // string 图标 URL
+	AppType        int                  `json:"appType"`        // int 类型 0内部 1第三方H5
+	ClientScope    int                  `json:"clientScope"`    // int 可见端
+	EntryConfig    WorkbenchEntryConfig `json:"entryConfig"`    // object 入口配置
+	OpenMode       int                  `json:"openMode"`       // int 打开方式
+	Category       int                  `json:"category"`       // int 分类
+	Sort           int                  `json:"sort"`           // int 排序
+	Status         int                  `json:"status"`         // int 状态
+	Remark         string               `json:"remark"`         // string 运营备注
+	CreatedBy      string               `json:"createdBy"`      // string 创建人
+	LastModifiedBy string               `json:"lastModifiedBy"` // string 最后修改人
+	CreatedAt      string               `json:"createdAt"`      // string 创建时间
+	UpdatedAt      string               `json:"updatedAt"`      // string 更新时间
 }
 
 type GroupOpsMemberItem struct {
@@ -1540,7 +1673,7 @@ type GroupOpsReportItem struct {
 }
 
 type HandleFeedbackReq struct {
-	Id           uint   `path:"id"`
+	Id           uint   `json:"id"`
 	Status       int    `json:"status"`       // 处理状态
 	HandleResult string `json:"handleResult"` // 处理结果
 	UserID       string `header:"Beaver-User-Id"`
@@ -1550,7 +1683,7 @@ type HandleFeedbackRes struct {
 }
 
 type HandleModerationCaseReq struct {
-	CaseID       uint64                    `path:"id"`
+	CaseID       uint64                    `json:"id"`
 	Status       int                       `json:"status"`
 	HandleRemark string                    `json:"handleRemark,optional"`
 	Actions      []ModerationControlAction `json:"actions,optional"`
@@ -1595,7 +1728,7 @@ type ModerationControlAction struct {
 }
 
 type MuteGroupMemberReq struct {
-	Id              uint `path:"id"`
+	Id              uint `json:"id"`
 	ProhibitionTime int  `json:"prohibitionTime"` // 禁言时长(分钟)，0表示解除禁言
 }
 
@@ -1662,16 +1795,16 @@ type OperationLogInfo struct {
 }
 
 type PreviewReq struct {
-	FileName string `path:"fileName"`
+	FileName string `form:"fileName"`
 }
 
 type PreviewRes struct {
 }
 
 type QueryLogsItem struct {
-	Id        uint        `json:"id"`        // 日志ID
-	Timestamp int64       `json:"timestamp"` // 时间戳(毫秒)
-	Data      interface{} `json:"data"`      // 业务日志 JSON 对象
+	Id        uint   `json:"id"`        // 日志ID
+	Timestamp int64  `json:"timestamp"` // 时间戳(毫秒)
+	Data      string `json:"data"`      // 业务日志 JSON 对象（API 层由 RPC data 字符串解析）
 }
 
 type QueryLogsReq struct {
@@ -1714,6 +1847,14 @@ type ReleasePolicyItem struct {
 	GrayVersion     string `json:"grayVersion"`
 	CreatedAt       string `json:"createdAt"`
 	UpdatedAt       string `json:"updatedAt"`
+}
+
+type RemoveCircleMemberReq struct {
+	CircleId  string   `json:"circleId"`
+	MemberIds []string `json:"memberIds"`
+}
+
+type RemoveCircleMemberRes struct {
 }
 
 type RemoveEmojiFromPackageReq struct {
@@ -1813,7 +1954,7 @@ type UnblockFriendUsersRes struct {
 }
 
 type UpdateAdminUserReq struct {
-	UserID       string `path:"userId"`
+	UserID       string `json:"userId"`
 	NickName     string `json:"nickName,optional"`
 	Status       int8   `json:"status,optional"`
 	Password     string `json:"password,optional"`
@@ -1857,17 +1998,6 @@ type UpdateAuthorityReq struct {
 type UpdateAuthorityRes struct {
 }
 
-type UpdateBucketReq struct {
-	UserID      string `header:"Beaver-User-Id"`     // 用户ID
-	BucketId    string `json:"bucketId"`             // Bucket ID
-	Name        string `json:"name,optional"`        // Bucket名称
-	Description string `json:"description,optional"` // Bucket描述
-	IsActive    *bool  `json:"isActive,optional"`    // 是否激活
-}
-
-type UpdateBucketRes struct {
-}
-
 type UpdateEmojiPackageReq struct {
 	PackageId   string  `json:"packageId"`
 	Title       *string `json:"title,optional"`
@@ -1881,7 +2011,7 @@ type UpdateEmojiPackageRes struct {
 }
 
 type UpdateEmojiReq struct {
-	EmojiId string  `path:"emojiId"`
+	EmojiId string  `json:"emojiId"`
 	FileUrl *string `json:"fileUrl,optional"`
 	Title   *string `json:"title,optional"`
 }
@@ -1890,7 +2020,7 @@ type UpdateEmojiRes struct {
 }
 
 type UpdateGroupReq struct {
-	Id       uint   `path:"id"`
+	Id       uint   `json:"id"`
 	Title    string `json:"title,optional"`
 	FileName string `json:"fileName,optional"`
 	Notice   string `json:"notice,optional"`
@@ -1903,7 +2033,7 @@ type UpdateGroupRes struct {
 }
 
 type UpdateMemberRoleReq struct {
-	Id   uint `path:"id"`
+	Id   uint `json:"id"`
 	Role int  `json:"role"`
 }
 
@@ -1935,7 +2065,7 @@ type UpdateOpenAppStatusRes struct {
 }
 
 type UpdateSensitiveWordReq struct {
-	ID       uint64 `path:"id"`
+	ID       uint64 `json:"id"`
 	Word     string `json:"word,optional"`
 	Category string `json:"category,optional"`
 	Level    int    `json:"level,optional"`
@@ -1948,7 +2078,7 @@ type UpdateSensitiveWordRes struct {
 }
 
 type UpdateUserReq struct {
-	UserID   string  `path:"id"`
+	UserID   string  `json:"id"`
 	NickName *string `json:"nickName,optional"`
 	Email    *string `json:"email,optional"`
 	Avatar   *string `json:"avatar,optional"`
@@ -1957,6 +2087,25 @@ type UpdateUserReq struct {
 }
 
 type UpdateUserRes struct {
+}
+
+type UpdateWorkbenchAppReq struct {
+	WorkbenchAppID string                `json:"workbenchAppId"`       // string 应用业务 ID
+	Name           string                `json:"name,optional"`        // string 应用名称，可选
+	Description    string                `json:"description,optional"` // string 应用描述，可选
+	Icon           string                `json:"icon,optional"`        // string 图标 URL，可选
+	AppType        *int                  `json:"appType,optional"`     // int 类型，可选
+	ClientScope    *int                  `json:"clientScope,optional"` // int 可见端，可选
+	EntryConfig    *WorkbenchEntryConfig `json:"entryConfig,optional"` // object 入口配置，可选
+	OpenMode       *int                  `json:"openMode,optional"`    // int 打开方式，可选
+	Category       *int                  `json:"category,optional"`    // int 分类，可选
+	Sort           *int                  `json:"sort,optional"`        // int 排序，可选
+	Status         *int                  `json:"status,optional"`      // int 状态，可选
+	Remark         string                `json:"remark,optional"`      // string 运营备注，可选
+	UserID         string                `header:"Beaver-User-Id"`     // string 操作管理员 ID
+}
+
+type UpdateWorkbenchAppRes struct {
 }
 
 type UpsertReleasePolicyReq struct {
@@ -2007,6 +2156,15 @@ type UserOpsBlockItem struct {
 	CreateTime      string `json:"createTime"`
 }
 
+type UserOpsCircleItem struct {
+	CircleID    string `json:"circleId"`
+	Name        string `json:"name"`
+	Role        int    `json:"role"`
+	MemberCount int64  `json:"memberCount"`
+	PostCount   int64  `json:"postCount"`
+	IsDeleted   bool   `json:"isDeleted"`
+}
+
 type UserOpsFriendItem struct {
 	PeerUserID   string `json:"peerUserId"`
 	PeerUserName string `json:"peerUserName"`
@@ -2054,4 +2212,10 @@ type UserOpsSessionItem struct {
 	LastMessage      string `json:"lastMessage"`
 	LastMessageTime  string `json:"lastMessageTime"`
 	MessageCount     int64  `json:"messageCount"`
+}
+
+type WorkbenchEntryConfig struct {
+	Type   int    `json:"type"`            // int 入口类型 0路由key 1H5地址
+	PC     string `json:"pc,optional"`     // string PC 入口，可选
+	Mobile string `json:"mobile,optional"` // string 移动端入口，可选
 }

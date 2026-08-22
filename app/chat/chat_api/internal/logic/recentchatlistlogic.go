@@ -60,7 +60,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	var privateChatIds []string
 	var groupChatIds []string
 
-	// 获取会话Ids并根据命名规则区分私聊和群聊
+	// 获取会话Ids并根据命名规则区分私聊、群聊、圈子
 	for _, convo := range userConversations {
 		conversationType := conversation.GetConversationType(convo.ConversationID)
 		if conversationType == 1 { // 私聊
@@ -158,7 +158,8 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		chatInfo.IsTop = convo.IsPinned
 		chatInfo.ConversationID = convo.ConversationID
 		chatInfo.UpdatedAt = convo.UpdatedAt.String()
-		if strings.HasPrefix(convo.ConversationID, "private_") { // 私聊
+		convType := conversation.GetConversationType(convo.ConversationID)
+		if convType == 1 { // 私聊
 			ids := strings.Split(convo.ConversationID, "_")
 			// ids格式: ["private", "A", "B"]
 			var opponentID string
@@ -179,6 +180,11 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 				chatInfo.Notice = ""
 			}
 			chatInfo.ChatType = 1
+		} else if convType == 3 { // 圈子（名称/头像由客户端用圈子详情补齐）
+			chatInfo.ChatType = 3
+			chatInfo.NickName = "圈子"
+			chatInfo.Avatar = ""
+			chatInfo.Notice = ""
 		} else { // 群聊
 			group, exists := groupMap[convo.ConversationID]
 			if exists {

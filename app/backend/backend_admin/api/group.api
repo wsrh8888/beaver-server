@@ -30,7 +30,7 @@ type (
 // 获取群组详情
 type (
 	GetGroupDetailReq {
-		Id uint `path:"id"`
+		Id uint `form:"id"`
 	}
 	GetGroupDetailRes {
 		Id        uint   `json:"id"`
@@ -49,7 +49,7 @@ type (
 // 更新群组信息
 type (
 	UpdateGroupReq {
-		Id       uint   `path:"id"`
+		Id       uint   `json:"id"`
 		Title    string `json:"title,optional"`
 		FileName string `json:"fileName,optional"`
 		Notice   string `json:"notice,optional"`
@@ -63,7 +63,7 @@ type (
 // 删除群组
 type (
 	DeleteGroupReq {
-		Id uint `path:"id"`
+		Id uint `json:"id"`
 	}
 	DeleteGroupRes {}
 )
@@ -109,7 +109,7 @@ type (
 // 更新群成员角色
 type (
 	UpdateMemberRoleReq {
-		Id   uint `path:"id"`
+		Id   uint `json:"id"`
 		Role int  `json:"role"`
 	}
 	UpdateMemberRoleRes {}
@@ -118,7 +118,7 @@ type (
 // 禁言群成员
 type (
 	MuteGroupMemberReq {
-		Id              uint `path:"id"`
+		Id              uint `json:"id"`
 		ProhibitionTime int  `json:"prohibitionTime"` // 禁言时长(分钟)，0表示解除禁言
 	}
 	MuteGroupMemberRes {}
@@ -130,33 +130,33 @@ type (
 service backend {
 	@doc "获取群组列表"
 	@handler GetGroupList
-	get /admin/group/list (GetGroupListReq) returns (GetGroupListRes)
+	get /admin/group/v1/list (GetGroupListReq) returns (GetGroupListRes)
 
 	@doc "获取群组详情"
 	@handler GetGroupDetail
-	get /admin/group/:id (GetGroupDetailReq) returns (GetGroupDetailRes)
+	get /admin/group/v1/detail (GetGroupDetailReq) returns (GetGroupDetailRes)
 
 	@doc "更新群组信息"
 	@handler UpdateGroup
-	put /admin/group/:id (UpdateGroupReq) returns (UpdateGroupRes)
+	post /admin/group/v1/update (UpdateGroupReq) returns (UpdateGroupRes)
 
 	@doc "删除群组"
 	@handler DeleteGroup
-	delete /admin/group/:id (DeleteGroupReq) returns (DeleteGroupRes)
+	post /admin/group/v1/delete (DeleteGroupReq) returns (DeleteGroupRes)
 
 	@doc "获取群成员列表"
 	@handler GetGroupMemberList
-	get /admin/group/members (GetGroupMemberListReq) returns (GetGroupMemberListRes)
+	get /admin/group/v1/members (GetGroupMemberListReq) returns (GetGroupMemberListRes)
 
 	@doc "移除群成员"
 	@handler RemoveGroupMember
-	post /admin/group/remove-member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
+	post /admin/group/v1/remove_member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
 
 	@doc "更新群成员角色"
 	@handler UpdateMemberRole
-	put /admin/group/member/:id (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
+	post /admin/group/v1/update_member_role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
 
 	@doc "禁言群成员"
 	@handler MuteGroupMember
-	put /admin/group/mute/:id (MuteGroupMemberReq) returns (MuteGroupMemberRes)
+	post /admin/group/v1/mute_member (MuteGroupMemberReq) returns (MuteGroupMemberRes)
 }

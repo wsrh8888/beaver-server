@@ -2,6 +2,7 @@ package svc
 
 import (
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/circle/circle_rpc/types/circle_rpc"
 	"beaver/app/datasync/datasync_api/internal/config"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
@@ -23,6 +24,7 @@ type ServiceContext struct {
 	Redis           *redis.Client
 	FriendRpc       friend_rpc.FriendClient
 	GroupRpc        group_rpc.GroupClient
+	CircleRpc       circle_rpc.CircleClient
 	UserRpc         user_rpc.UserClient
 	ChatRpc         chat_rpc.ChatClient
 	EmojiRpc        emoji_rpc.EmojiClient
@@ -38,6 +40,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:           client,
 		FriendRpc:       friend_rpc.NewFriendClient(zrpc.MustNewClient(c.FriendRpc, zrpc.WithTimeout(time.Duration(c.FriendRpc.Timeout)*time.Millisecond)).Conn()),
 		GroupRpc:        group_rpc.NewGroupClient(zrpc.MustNewClient(c.GroupRpc, zrpc.WithTimeout(time.Duration(c.GroupRpc.Timeout)*time.Millisecond)).Conn()),
+		CircleRpc:       circle_rpc.NewCircleClient(zrpc.MustNewClient(c.CircleRpc, zrpc.WithTimeout(time.Duration(c.CircleRpc.Timeout)*time.Millisecond)).Conn()),
 		UserRpc:         user_rpc.NewUserClient(zrpc.MustNewClient(c.UserRpc, zrpc.WithTimeout(time.Duration(c.UserRpc.Timeout)*time.Millisecond)).Conn()),
 		ChatRpc:         chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:        emoji_rpc.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),

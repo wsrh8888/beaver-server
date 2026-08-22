@@ -146,7 +146,7 @@ type (
 
 type (
 	DeleteVersionReq {
-		VersionID uint `path:"id"`
+		VersionID uint `json:"id"`
 	}
 	DeleteVersionRes  {}
 )
@@ -196,48 +196,48 @@ service backend {
 	// 应用管理API
 	@doc "添加新应用"
 	@handler AddApp
-	post /admin/update/appAdd (AddAppReq) returns (AddAppRes)
+	post /admin/update/v1/add_app (AddAppReq) returns (AddAppRes)
 
 	@doc "获取应用列表"
 	@handler GetApps
-	get /admin/update/appsUpdate (GetAppsReq) returns (GetAppsRes)
+	get /admin/update/v1/list_apps (GetAppsReq) returns (GetAppsRes)
 
 	// 架构管理API
 	@doc "添加新架构"
 	@handler AddArchitecture
-	post /admin/update/architectureAdd (AddArchitectureReq) returns (AddArchitectureRes)
+	post /admin/update/v1/add_architecture (AddArchitectureReq) returns (AddArchitectureRes)
 
 	@doc "更新架构信息"
 	@handler UpdateArchitecture
-	post /admin/update/architectureUpdate (UpdateArchitectureReq) returns (UpdateArchitectureRes)
+	post /admin/update/v1/update_architecture (UpdateArchitectureReq) returns (UpdateArchitectureRes)
 
 	@doc "获取架构列表"
 	@handler GetArchitectures
-	get /admin/update/architectures (GetArchitecturesReq) returns (GetArchitecturesRes)
+	get /admin/update/v1/list_architectures (GetArchitecturesReq) returns (GetArchitecturesRes)
 
 	// 版本管理API
 	@doc "添加新版本"
 	@handler AddVersion
-	post /admin/update/versionAdd (AddVersionReq) returns (AddVersionRes)
+	post /admin/update/v1/add_version (AddVersionReq) returns (AddVersionRes)
 
 	@doc "获取版本列表"
 	@handler GetVersionList
-	get /admin/update/versionList (GetVersionListReq) returns (GetVersionListRes)
+	get /admin/update/v1/list_versions (GetVersionListReq) returns (GetVersionListRes)
 
 	@doc "获取应用下所有版本"
 	@handler GetAppVersions
-	get /admin/update/versions (GetAppVersionsReq) returns (GetAppVersionsRes)
+	get /admin/update/v1/list_app_versions (GetAppVersionsReq) returns (GetAppVersionsRes)
 
 	@doc "删除版本"
 	@handler DeleteVersion
-	delete /admin/update/version/:id (DeleteVersionReq) returns (DeleteVersionRes)
+	post /admin/update/v1/delete_version (DeleteVersionReq) returns (DeleteVersionRes)
 
 	@doc "保存发版策略"
 	@handler UpsertReleasePolicy
-	post /admin/update/releasePolicy (UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes)
+	post /admin/update/v1/upsert_release_policy (UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes)
 
 	@doc "获取发版策略"
 	@handler GetReleasePolicies
-	get /admin/update/releasePolicies (GetReleasePoliciesReq) returns (GetReleasePoliciesRes)
+	get /admin/update/v1/list_release_policies (GetReleasePoliciesReq) returns (GetReleasePoliciesRes)
 }
 

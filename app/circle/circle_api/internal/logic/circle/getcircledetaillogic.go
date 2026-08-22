@@ -1,0 +1,63 @@
+package circle
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"beaver/app/circle/circle_api/internal/svc"
+	"beaver/app/circle/circle_api/internal/types"
+	"beaver/app/circle/circle_models"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type GetCircleDetailLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+func NewGetCircleDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCircleDetailLogic {
+	return &GetCircleDetailLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *GetCircleDetailLogic) GetCircleDetail(req *types.GetCircleDetailReq) (resp *types.GetCircleDetailRes, err error) {
+	var circle circle_models.CircleModel
+	if err = l.svcCtx.DB.Where("circle_id = ? AND is_deleted = false", req.CircleID).First(&circle).Error; err != nil {
+		return nil, fmt.Errorf("圈子不存在")
+	}
+
+	role := int8(0)
+	var member circle_models.CircleMemberModel
+	if l.svcCtx.DB.Where("circle_id = ? AND user_id = ?", req.CircleID, req.UserID).First(&member).Error == nil {
+		role = member.Role
+	}
+
+	resp = &types.GetCircleDetailRes{
+		CircleID:    circle.CircleID,
+		Name:        circle.Name,
+		Description: circle.Description,
+		Avatar:      circle.Avatar,
+		JoinType:    circle.JoinType,
+		CreatorID:   circle.CreatorID,
+		MemberCount: countMembers(l.svcCtx.DB, req.CircleID),
+		PostCount:   countPosts(l.svcCtx.DB, req.CircleID),
+		Role:        role,
+		CreatedAt:   circle.CreatedAt.String(),
+	}
+	if role > 0 {
+		var invite circle_models.CircleInviteModel
+		if e := l.svcCtx.DB.Where("circle_id = ? AND status = 1", circle.CircleID).Order("id asc").First(&invite).Error; e == nil {
+			domain := strings.TrimRight(strings.TrimSpace(l.svcCtx.Config.Domain), "/")
+			if domain != "" && invite.Token != "" {
+				resp.InviteUrl = fmt.Sprintf("%s/api/circle/v1/circle/invite_code?code=%s", domain, invite.Token)
+			}
+		}
+	}
+	return resp, nil
+}

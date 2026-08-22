@@ -1,0 +1,78 @@
+syntax = "v1"
+
+// 发布评论接口类型
+type (
+	CreateCommentReq {
+		UserID           string `header:"Beaver-User-Id"` // 用户ID
+		PostID           string `json:"postId"` // 帖子ID
+		Content          string `json:"content"` // 评论内容
+		ParentID         string `json:"parentId,optional"` // 父评论ID，空表示一级评论
+		ReplyToCommentID string `json:"replyToCommentId,optional"` // 被回复的评论ID
+	}
+	CreateCommentRes {
+		CommentID        string `json:"commentId"` // 评论ID
+		PostID           string `json:"postId"` // 帖子ID
+		UserID           string `json:"userId"` // 评论用户ID
+		UserName         string `json:"userName"` // 评论用户昵称
+		Avatar           string `json:"avatar"` // 评论用户头像
+		Content          string `json:"content"` // 评论内容
+		ParentID         string `json:"parentId"` // 父评论ID
+		ReplyToCommentID string `json:"replyToCommentId"` // 被回复的评论ID
+		ReplyToUserName  string `json:"replyToUserName"` // 被回复用户昵称
+		CreatedAt        string `json:"createdAt"` // 评论时间
+	}
+)
+
+// 获取帖子评论列表接口类型
+type (
+	GetCommentListReq {
+		UserID   string `header:"Beaver-User-Id"` // 用户ID
+		PostID   string `form:"postId"` // 帖子ID
+		ParentID string `form:"parentId,optional"` // 父评论ID，查询其子回复
+		Page     int    `form:"page"` // 页码
+		Limit    int    `form:"limit"` // 每页数量
+	}
+	GetCommentListItem {
+		CommentID        string               `json:"commentId"` // 评论ID
+		UserID           string               `json:"userId"` // 评论用户ID
+		UserName         string               `json:"userName"` // 评论用户昵称
+		Avatar           string               `json:"avatar"` // 评论用户头像
+		Content          string               `json:"content"` // 评论内容
+		ParentID         string               `json:"parentId"` // 父评论ID
+		ReplyToCommentID string               `json:"replyToCommentId"` // 被回复的评论ID
+		ReplyToUserName  string               `json:"replyToUserName"` // 被回复用户昵称
+		ChildCount       int64                `json:"childCount"` // 子评论总数
+		Children         []GetCommentListItem `json:"children"` // 子评论
+		CreatedAt        string               `json:"createdAt"` // 评论时间
+	}
+	GetCommentListRes {
+		Count int64                `json:"count"` // 总数
+		List  []GetCommentListItem `json:"list"` // 评论列表
+	}
+)
+
+// 删除评论接口类型
+type (
+	DeleteCommentReq {
+		UserID    string `header:"Beaver-User-Id"` // 用户ID
+		CommentID string `form:"commentId"` // 评论ID
+	}
+	DeleteCommentRes {}
+)
+
+@server (
+	group: comment
+)
+service circle {
+	@doc "发布评论"
+	@handler CreateComment
+	post /api/circle/v1/comment/create (CreateCommentReq) returns (CreateCommentRes)
+
+	@doc "获取帖子评论列表"
+	@handler GetCommentList
+	get /api/circle/v1/comment/list (GetCommentListReq) returns (GetCommentListRes)
+
+	@doc "删除评论（评论人或圈主/管理员）"
+	@handler DeleteComment
+	get /api/circle/v1/comment/delete (DeleteCommentReq) returns (DeleteCommentRes)
+}

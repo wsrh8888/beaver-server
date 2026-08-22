@@ -73,22 +73,24 @@ type GroupDeleteRes struct {
 }
 
 type GroupInfoReq struct {
-	GroupID string `json:"groupId"` // 群组ID
+	UserID  string `header:"Beaver-User-Id,optional"` // 当前用户（成员则返回 inviteUrl）
+	GroupID string `json:"groupId"`                   // 群组ID
 }
 
 type GroupInfoRes struct {
-	GroupID        string `json:"groupId"`        // 群组ID
-	Title          string `json:"title"`          // 群组名称
-	Avatar         string `json:"avatar"`         // 群组头像URL
-	MemberCount    int    `json:"memberCount"`    // 成员数量
-	CreatorID      string `json:"creatorId"`      // 创建者ID
-	Notice         string `json:"notice"`         // 群公告
-	JoinType       int8   `json:"joinType"`       // 加入方式
-	Status         int8   `json:"status"`         // 群状态
-	ConversationID string `json:"conversationId"` // 会话ID
-	CreatedAt      int64  `json:"createdAt"`      // 创建时间戳
-	UpdatedAt      int64  `json:"updatedAt"`      // 更新时间戳
-	Version        int64  `json:"version"`        // 数据版本号
+	GroupID        string `json:"groupId"`               // 群组ID
+	Title          string `json:"title"`                 // 群组名称
+	Avatar         string `json:"avatar"`                // 群组头像URL
+	MemberCount    int    `json:"memberCount"`           // 成员数量
+	CreatorID      string `json:"creatorId"`             // 创建者ID
+	Notice         string `json:"notice"`                // 群公告
+	JoinType       int8   `json:"joinType"`              // 加入方式
+	Status         int8   `json:"status"`                // 群状态
+	ConversationID string `json:"conversationId"`        // 会话ID
+	CreatedAt      int64  `json:"createdAt"`             // 创建时间戳
+	UpdatedAt      int64  `json:"updatedAt"`             // 更新时间戳
+	Version        int64  `json:"version"`               // 数据版本号
+	InviteUrl      string `json:"inviteUrl,optional"`    // 成员可见：稳定邀请链接
 }
 
 type GroupInviteReq struct {
@@ -103,9 +105,10 @@ type GroupInviteRes struct {
 }
 
 type GroupJoinReq struct {
-	UserID  string `header:"Beaver-User-Id"` // 申请者用户ID
-	GroupID string `json:"groupId"`          // 目标群组ID
-	Message string `json:"message,optional"` // 申请消息，可选
+	UserID     string `header:"Beaver-User-Id"`    // 申请者用户ID
+	GroupID    string `json:"groupId,optional"`   // 目标群组ID（有 inviteCode 时可空）
+	Message    string `json:"message,optional"`   // 申请消息，可选
+	InviteCode string `json:"inviteCode,optional"` // 邀请短码
 }
 
 type GroupJoinRequestHandleReq struct {
@@ -168,7 +171,9 @@ type GroupJoinRequestSyncVersionItem struct {
 }
 
 type GroupJoinRes struct {
-	Version int64 `json:"version"` // 入群申请版本号
+	Version int64  `json:"version"`            // 入群申请或成员版本号
+	Status  int8   `json:"status"`             // 1=已加入 0=申请待审批
+	GroupID string `json:"groupId,optional"`  // 群组ID
 }
 
 type GroupMemberAddReq struct {
@@ -411,3 +416,21 @@ type UpdateMemberRoleReq struct {
 type UpdateMemberRoleRes struct {
 	Version int64 `json:"version"` // 群成员新版本号
 }
+
+type ResolveGroupInviteReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户
+	Code   string `form:"code"`             // 邀请短码
+}
+
+type ResolveGroupInviteRes struct {
+	Code          string `json:"code"`          // 邀请短码
+	GroupID       string `json:"groupId"`       // 群组ID
+	Title         string `json:"title"`         // 群名称
+	Avatar        string `json:"avatar"`        // 头像
+	Notice        string `json:"notice"`        // 公告
+	MemberCount   int64  `json:"memberCount"`   // 成员数
+	JoinType      int8   `json:"joinType"`      // 加入方式
+	Valid         bool   `json:"valid"`         // 是否有效
+	AlreadyJoined bool   `json:"alreadyJoined"` // 是否已加入
+}
+

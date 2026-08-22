@@ -123,12 +123,15 @@ type (
 // 申请加入群组
 type (
 	GroupJoinReq {
-		UserID  string `header:"Beaver-User-Id"` // 申请者用户ID
-		GroupID string `json:"groupId"` // 目标群组ID
-		Message string `json:"message,optional"` // 申请消息，可选
+		UserID     string `header:"Beaver-User-Id"` // 申请者用户ID
+		GroupID    string `json:"groupId,optional"` // 目标群组ID（有 inviteCode 时可空）
+		Message    string `json:"message,optional"` // 申请消息，可选
+		InviteCode string `json:"inviteCode,optional"` // 邀请短码（从 inviteUrl 解析）
 	}
 	GroupJoinRes {
-		Version int64 `json:"version"` // 入群申请版本号
+		Version int64  `json:"version"` // 入群申请或成员版本号
+		Status  int8   `json:"status"` // 1=已加入 0=申请待审批
+		GroupID string `json:"groupId,optional"` // 群组ID
 	}
 )
 
@@ -158,6 +161,7 @@ type (
 // 群信息
 type (
 	GroupInfoReq {
+		UserID  string `header:"Beaver-User-Id,optional"` // 当前用户（成员则返回 inviteUrl）
 		GroupID string `json:"groupId"` // 群组ID
 	}
 	GroupInfoRes {
@@ -173,6 +177,7 @@ type (
 		CreatedAt      int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt      int64  `json:"updatedAt"` // 更新时间戳
 		Version        int64  `json:"version"` // 数据版本号
+		InviteUrl      string `json:"inviteUrl,optional"` // 成员可见：稳定邀请链接（复制/二维码共用）
 	}
 )
 
@@ -349,6 +354,25 @@ type (
 	}
 )
 
+// 解析群邀请链接
+type (
+	ResolveGroupInviteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户
+		Code   string `form:"code"` // 邀请短码
+	}
+	ResolveGroupInviteRes {
+		Code          string `json:"code"` // 邀请短码
+		GroupID       string `json:"groupId"` // 群组ID
+		Title         string `json:"title"` // 群名称
+		Avatar        string `json:"avatar"` // 头像
+		Notice        string `json:"notice"` // 公告
+		MemberCount   int64  `json:"memberCount"` // 成员数
+		JoinType      int8   `json:"joinType"` // 加入方式
+		Valid         bool   `json:"valid"` // 是否有效
+		AlreadyJoined bool   `json:"alreadyJoined"` // 是否已加入
+	}
+)
+
 // ==================== 群自定义机器人 Webhook ====================
 // 群管理员在群设置里创建；外部系统用 access_token + 加签 POST 推送，仅支持 text/markdown/image。
 type (
@@ -359,7 +383,7 @@ type (
 		IPWhitelistEnabled bool     `json:"ipWhitelistEnabled"` // 是否启用IP白名单
 		IPWhitelist        []string `json:"ipWhitelist"` // IP地址列表
 		SignatureEnabled   bool     `json:"signatureEnabled"` // 是否启用签名校验
-		SignatureSecret    string   `json:"signatureSecret"` // 签名密钥
+		SignatureSecret    string 	`json:"signatureSecret"` // 签名密钥
 		SignatureUpdated   int64    `json:"signatureUpdated"` // 密钥最后更新时间戳
 	}
 )
@@ -516,6 +540,10 @@ service group {
 	@doc "邀请用户加入群组"
 	@handler groupInvite
 	post /api/group/v1/invite (GroupInviteReq) returns (GroupInviteRes)
+
+	@doc "解析群邀请链接"
+	@handler resolveGroupInvite
+	get /api/group/v1/invite_code (ResolveGroupInviteReq) returns (ResolveGroupInviteRes)
 
 	@doc "群资料同步"
 	@handler groupSync

@@ -55,6 +55,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: groupInviteHandler(serverCtx),
 			},
 			{
+				// 解析群邀请链接
+				Method:  http.MethodGet,
+				Path:    "/api/group/v1/invite_code",
+				Handler: resolveGroupInviteHandler(serverCtx),
+			},
+			{
 				// 申请加入群组
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/join",

@@ -32,7 +32,7 @@ type (
 // 获取反馈详情
 type (
 	GetFeedbackDetailReq {
-		Id uint `path:"id"`
+		Id uint `form:"id"`
 	}
 	GetFeedbackDetailRes {
 		Id           uint     `json:"id"`
@@ -52,7 +52,7 @@ type (
 // 处理反馈
 type (
 	HandleFeedbackReq {
-		Id           uint   `path:"id"`
+		Id           uint   `json:"id"`
 		Status       int    `json:"status"`       // 处理状态
 		HandleResult string `json:"handleResult"` // 处理结果
 		UserID       string `header:"Beaver-User-Id"`
@@ -63,7 +63,7 @@ type (
 // 删除反馈
 type (
 	DeleteFeedbackReq {
-		Id uint `path:"id"`
+		Id uint `json:"id"`
 	}
 	DeleteFeedbackRes {}
 )
@@ -74,17 +74,17 @@ type (
 service backend {
 	@doc "获取反馈列表"
 	@handler GetFeedbackList
-	get /admin/feedback/list (GetFeedbackListReq) returns (GetFeedbackListRes)
+	get /admin/feedback/v1/list (GetFeedbackListReq) returns (GetFeedbackListRes)
 
 	@doc "获取反馈详情"
 	@handler GetFeedbackDetail
-	get /admin/feedback/:id (GetFeedbackDetailReq) returns (GetFeedbackDetailRes)
+	get /admin/feedback/v1/detail (GetFeedbackDetailReq) returns (GetFeedbackDetailRes)
 
 	@doc "处理反馈"
 	@handler HandleFeedback
-	put /admin/feedback/:id (HandleFeedbackReq) returns (HandleFeedbackRes)
+	post /admin/feedback/v1/handle (HandleFeedbackReq) returns (HandleFeedbackRes)
 
 	@doc "删除反馈"
 	@handler DeleteFeedback
-	delete /admin/feedback/:id (DeleteFeedbackReq) returns (DeleteFeedbackRes)
+	post /admin/feedback/v1/delete (DeleteFeedbackReq) returns (DeleteFeedbackRes)
 }

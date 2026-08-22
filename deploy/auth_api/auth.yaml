@@ -8,7 +8,7 @@ Log:
   Stat: false
 Etcd: 127.0.0.1:2379
 Auth:
-  AccessSecret: robert
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local

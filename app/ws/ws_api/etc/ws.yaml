@@ -12,8 +12,8 @@ Log:
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
 Auth:
-  AccessSecret: robert
-InternalSecret: "beaver_internal_ws_secret"
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
+InternalSecret: "6d92c761d23cb0e6bf44473052cbc1dcb368f25a25a170544afab0711a53b13474d7912df2da3e9b530336e28f2235be"
 Etcd: 127.0.0.1:2379
 GroupRpc:
   Etcd:

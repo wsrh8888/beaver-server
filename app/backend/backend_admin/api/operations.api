@@ -3,7 +3,7 @@ syntax = "v1"
 // 用户运营 360（跨域编排）
 type (
 	GetUserOperationsProfileReq {
-		UserID string `path:"userId"`
+		UserID string `form:"userId"`
 	}
 	GetUserOperationsProfileRes {
 		Profile        UserOpsProfileInfo     `json:"profile"`
@@ -11,12 +11,14 @@ type (
 		GroupTotal     int64                  `json:"groupTotal"`
 		SessionTotal   int64                  `json:"sessionTotal"`
 		MomentTotal    int64                  `json:"momentTotal"`
+		CircleTotal    int64                  `json:"circleTotal"`
 		ReportTotal    int64                  `json:"reportTotal"`
 		BlockTotal     int64                  `json:"blockTotal"`
 		Friends        []UserOpsFriendItem    `json:"friends"`
 		Groups         []UserOpsGroupItem     `json:"groups"`
 		Sessions       []UserOpsSessionItem   `json:"sessions"`
 		Moments        []UserOpsMomentItem    `json:"moments"`
+		Circles        []UserOpsCircleItem    `json:"circles"`
 		Reports        []UserOpsReportItem    `json:"reports"`
 		Blocks         []UserOpsBlockItem     `json:"blocks"`
 	}
@@ -54,6 +56,14 @@ type (
 		Content   string `json:"content"`
 		IsDeleted bool   `json:"isDeleted"`
 		CreatedAt string `json:"createdAt"`
+	}
+	UserOpsCircleItem {
+		CircleID    string `json:"circleId"`
+		Name        string `json:"name"`
+		Role        int    `json:"role"`
+		MemberCount int64  `json:"memberCount"`
+		PostCount   int64  `json:"postCount"`
+		IsDeleted   bool   `json:"isDeleted"`
 	}
 	UserOpsReportItem {
 		ID         uint64 `json:"id"`
@@ -111,7 +121,7 @@ type (
 // 群组运营 360（跨域编排）
 type (
 	GetGroupOperationsProfileReq {
-		GroupID string `path:"groupId"`
+		GroupID string `form:"groupId"`
 	}
 	GetGroupOperationsProfileRes {
 		Profile       GroupOpsProfileInfo    `json:"profile"`
@@ -163,13 +173,13 @@ type (
 service backend {
 	@doc "用户运营360"
 	@handler getUserOperationsProfile
-	get /admin/operations/user/:userId/profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
+	get /admin/operations/v1/user_profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
 
 	@doc "运营统一检索"
 	@handler adminUnifiedSearch
-	get /admin/operations/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
+	get /admin/operations/v1/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
 
 	@doc "群组运营360"
 	@handler getGroupOperationsProfile
-	get /admin/operations/group/:groupId/profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
+	get /admin/operations/v1/group_profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
 }

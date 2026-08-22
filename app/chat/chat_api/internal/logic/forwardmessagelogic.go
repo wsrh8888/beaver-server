@@ -256,6 +256,15 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 				Revision: m.CloudDocMsg.Revision,
 			}
 		}
+	case ctype.CardMsgType:
+		if m.CardMsg != nil {
+			rpcMsg.CardMsg = &chat_rpc.CardMsg{
+				CardType:    int32(m.CardMsg.CardType),
+				Id:          m.CardMsg.ID,
+				ExpireAt:    m.CardMsg.ExpireAt,
+				InviteToken: m.CardMsg.InviteToken,
+			}
+		}
 	}
 	return rpcMsg
 }

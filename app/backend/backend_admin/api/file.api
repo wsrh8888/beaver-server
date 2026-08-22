@@ -28,7 +28,7 @@ type (
 // 获取文件详情
 type (
 	GetFileDetailReq {
-		Id uint `path:"id"`
+		Id uint `form:"id"`
 	}
 	GetFileDetailRes {
 		Id           uint   `json:"id"`
@@ -46,7 +46,7 @@ type (
 // 删除文件
 type (
 	DeleteFileReq {
-		Id uint `path:"id"`
+		Id uint `json:"id"`
 	}
 	DeleteFileRes {}
 )
@@ -62,7 +62,7 @@ type (
 // 文件预览
 type (
 	PreviewReq {
-		FileName string `path:"fileName"`
+		FileName string `form:"fileName"`
 	}
 	PreviewRes {}
 )
@@ -122,37 +122,37 @@ type (
 service backend {
 	@doc "获取文件列表"
 	@handler GetFileList
-	get /admin/file/list (GetFileListReq) returns (GetFileListRes)
+	get /admin/file/v1/list (GetFileListReq) returns (GetFileListRes)
 
 	@doc "获取文件详情"
 	@handler GetFileDetail
-	get /admin/file/:id (GetFileDetailReq) returns (GetFileDetailRes)
+	get /admin/file/v1/detail (GetFileDetailReq) returns (GetFileDetailRes)
 
 	@doc "删除文件"
 	@handler DeleteFile
-	delete /admin/file/:id (DeleteFileReq) returns (DeleteFileRes)
+	post /admin/file/v1/delete (DeleteFileReq) returns (DeleteFileRes)
 
 	@doc "批量删除文件"
 	@handler BatchDeleteFile
-	post /admin/file/batch-delete (BatchDeleteFileReq) returns (BatchDeleteFileRes)
+	post /admin/file/v1/batch_delete (BatchDeleteFileReq) returns (BatchDeleteFileRes)
 
 	@doc "文件预览"
 	@handler Preview
-	get /admin/file/preview/:fileName (PreviewReq) returns (PreviewRes)
+	get /admin/file/v1/preview (PreviewReq) returns (PreviewRes)
 
 	@doc "文件上传本地"
 	@handler FileUploadLocal
-	post /admin/file/uploadLocal (FileUploadLocalReq) returns (FileUploadLocalRes)
+	post /admin/file/v1/upload_local (FileUploadLocalReq) returns (FileUploadLocalRes)
 
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
-	post /admin/file/uploadQiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
+	post /admin/file/v1/upload_qiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
 
 	@doc "获取七牛云上传token"
 	@handler GetQiniuUploadToken
-	post /admin/file/qiniuToken (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
+	post /admin/file/v1/qiniu_token (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
 
 	@doc "保存文件信息到数据库"
 	@handler SaveFile
-	post /admin/file/save (SaveFileReq) returns (SaveFileRes)
+	post /admin/file/v1/save (SaveFileReq) returns (SaveFileRes)
 }

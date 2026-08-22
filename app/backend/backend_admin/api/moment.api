@@ -29,7 +29,7 @@ type (
 // 获取动态详情
 type (
 	GetMomentDetailReq {
-		MomentId string `path:"momentId"`
+		MomentId string `form:"momentId"`
 	}
 	GetMomentDetailRes {
 		MomentId  string                     `json:"momentId"`
@@ -48,7 +48,7 @@ type (
 // 删除动态
 type (
 	DeleteMomentReq {
-		MomentId string `path:"momentId"`
+		MomentId string `json:"momentId"`
 	}
 	DeleteMomentRes {}
 )
@@ -77,7 +77,7 @@ type (
 // 删除动态评论
 type (
 	DeleteMomentCommentReq {
-		CommentId string `path:"commentId"`
+		CommentId string `json:"commentId"`
 	}
 	DeleteMomentCommentRes {}
 )
@@ -88,21 +88,21 @@ type (
 service backend {
 	@doc "获取动态列表"
 	@handler GetMomentList
-	get /admin/moment/list (GetMomentListReq) returns (GetMomentListRes)
+	get /admin/moment/v1/list (GetMomentListReq) returns (GetMomentListRes)
 
 	@doc "获取动态详情"
 	@handler GetMomentDetail
-	get /admin/moment/:momentId (GetMomentDetailReq) returns (GetMomentDetailRes)
+	get /admin/moment/v1/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
 
 	@doc "删除动态"
 	@handler DeleteMoment
-	delete /admin/moment/:momentId (DeleteMomentReq) returns (DeleteMomentRes)
+	post /admin/moment/v1/delete (DeleteMomentReq) returns (DeleteMomentRes)
 
 	@doc "获取动态评论列表"
 	@handler GetMomentCommentList
-	get /admin/moment/comments (GetMomentCommentListReq) returns (GetMomentCommentListRes)
+	get /admin/moment/v1/comments (GetMomentCommentListReq) returns (GetMomentCommentListRes)
 
 	@doc "删除动态评论"
 	@handler DeleteMomentComment
-	delete /admin/moment/comment/:commentId (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
+	post /admin/moment/v1/delete_comment (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
 }

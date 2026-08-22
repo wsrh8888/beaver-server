@@ -54,6 +54,8 @@ func (m *MsgType) UnmarshalJSON(data []byte) error {
 		*m = LinkMsgType
 	case "15":
 		*m = CloudDocMsgType
+	case "16":
+		*m = CardMsgType
 	default:
 		*m = TextMsgType
 	}
@@ -121,6 +123,10 @@ const (
 	 * @description: 云文档消息类型（会话内分享云文档卡片，对标飞书云文档 document_token）
 	 */
 	CloudDocMsgType
+	/**
+	 * @description: 名片消息类型（个人/群/圈子等通用名片，仅存类型+目标ID）
+	 */
+	CardMsgType
 )
 
 // 云文档类型（对标飞书 folder / docx / sheet / slides 等）
@@ -132,8 +138,15 @@ const (
 	CloudDocTypeMind   = 4 // 思维笔记
 )
 
+// 名片类型（CardMsg.CardType）
+const (
+	CardTypeUser   = 1 // 个人名片
+	CardTypeGroup  = 2 // 群名片
+	CardTypeCircle = 3 // 圈子名片
+)
+
 type Msg struct {
-	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频文件 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接卡片 15:云文档
+	Type            MsgType          `json:"type"`                      // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频文件 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接卡片 15:云文档 16:名片
 	TargetMsgID     string           `json:"targetMsgId,omitempty"`     // 目标消息ID (用于对旧消息的指令：撤回、通话状态变更等)
 	AtUserIDs       []string         `json:"atUserIds,omitempty"`       // @的用户ID列表，服务端据此触发定向推送；文本中用@昵称占位，前端扫描渲染高亮
 	TextMsg         *TextMsg         `json:"textMsg,omitempty"`         // 文本消息
@@ -151,6 +164,7 @@ type Msg struct {
 	MarkdownMsg     *MarkdownMsg     `json:"markdownMsg,omitempty"`     // Markdown 富文本消息
 	LinkMsg         *LinkMsg         `json:"linkMsg,omitempty"`         // 链接卡片消息
 	CloudDocMsg     *CloudDocMsg     `json:"cloudDocMsg,omitempty"`     // 云文档消息（分享卡片，正文在文档服务）
+	CardMsg         *CardMsg         `json:"cardMsg,omitempty"`         // 名片消息（个人/群/圈子等，仅存引用）
 }
 
 /**
@@ -282,4 +296,13 @@ type LinkMsg struct {
 	Title    string `json:"title"`              // 标题
 	Desc     string `json:"desc,omitempty"`     // 摘要描述
 	ImageURL string `json:"imageUrl,omitempty"` // 封面图 URL（可选）
+}
+
+// CardMsg 通用名片消息结构（Type: 16）
+// 存名片类型、目标 ID、可选邀请凭证；展示由客户端拉详情，加入走 invite redeem。
+type CardMsg struct {
+	CardType    int    `json:"cardType"`              // 1=个人 2=群 3=圈子
+	ID          string `json:"id"`                    // 目标实体 ID
+	ExpireAt    int64  `json:"expireAt,omitempty"`    // 过期时间戳(秒)，0=不过期
+	InviteToken string `json:"inviteToken,omitempty"` // 分享邀请凭证
 }

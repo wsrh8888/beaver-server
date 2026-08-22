@@ -20,6 +20,7 @@ type (
 	BatchUpdateConversationReq              = chat_rpc.BatchUpdateConversationReq
 	BatchUpdateConversationRes              = chat_rpc.BatchUpdateConversationRes
 	CallMsg                                 = chat_rpc.CallMsg
+	CardMsg                                 = chat_rpc.CardMsg
 	ChatMessageItem                         = chat_rpc.ChatMessageItem
 	CloudDocMsg                             = chat_rpc.CloudDocMsg
 	ConversationDetailItem                  = chat_rpc.ConversationDetailItem

@@ -32,7 +32,7 @@ type (
 // 获取好友关系详情
 type (
 	GetFriendDetailReq {
-		FriendID string `path:"id"`
+		FriendID string `form:"id"`
 	}
 	GetFriendDetailRes {
 		Id               string `json:"id"`
@@ -53,7 +53,7 @@ type (
 // 强制删除好友关系
 type (
 	DeleteFriendReq {
-		FriendID string `path:"id"`
+		FriendID string `json:"id"`
 	}
 	DeleteFriendRes {}
 )
@@ -177,45 +177,45 @@ type (
 service backend {
 	@doc "获取好友关系列表"
 	@handler getFriendList
-	get /admin/friend/list (GetFriendListReq) returns (GetFriendListRes)
+	get /admin/friend/v1/list (GetFriendListReq) returns (GetFriendListRes)
 
 	@doc "获取好友关系详情"
 	@handler getFriendDetail
-	get /admin/friend/:id (GetFriendDetailReq) returns (GetFriendDetailRes)
+	get /admin/friend/v1/detail (GetFriendDetailReq) returns (GetFriendDetailRes)
 
 	@doc "强制删除好友关系"
 	@handler deleteFriend
-	delete /admin/friend/:id (DeleteFriendReq) returns (DeleteFriendRes)
+	post /admin/friend/v1/delete (DeleteFriendReq) returns (DeleteFriendRes)
 
 	@doc "批量删除好友关系"
 	@handler batchDeleteFriends
-	delete /admin/friend/batch (BatchDeleteFriendsReq) returns (BatchDeleteFriendsRes)
+	post /admin/friend/v1/batch_delete (BatchDeleteFriendsReq) returns (BatchDeleteFriendsRes)
 
 	@doc "恢复好友关系"
 	@handler restoreFriend
-	put /admin/friend/restore (RestoreFriendReq) returns (RestoreFriendRes)
+	post /admin/friend/v1/restore (RestoreFriendReq) returns (RestoreFriendRes)
 
 	@doc "获取好友验证列表"
 	@handler getFriendVerifyList
-	get /admin/friend/verifylist (GetFriendVerifyListReq) returns (GetFriendVerifyListRes)
+	get /admin/friend/v1/verify_list (GetFriendVerifyListReq) returns (GetFriendVerifyListRes)
 
 	@doc "获取好友验证详情"
 	@handler getFriendVerifyDetail
-	get /admin/friend/verify (GetFriendVerifyDetailReq) returns (GetFriendVerifyDetailRes)
+	get /admin/friend/v1/verify_detail (GetFriendVerifyDetailReq) returns (GetFriendVerifyDetailRes)
 
 	@doc "删除好友验证记录"
 	@handler deleteFriendVerify
-	delete /admin/friend/verify (DeleteFriendVerifyReq) returns (DeleteFriendVerifyRes)
+	post /admin/friend/v1/delete_verify (DeleteFriendVerifyReq) returns (DeleteFriendVerifyRes)
 
 	@doc "批量删除好友验证记录"
 	@handler batchDeleteFriendVerify
-	delete /admin/friend/verifybatch (BatchDeleteFriendVerifyReq) returns (BatchDeleteFriendVerifyRes)
+	post /admin/friend/v1/batch_delete_verify (BatchDeleteFriendVerifyReq) returns (BatchDeleteFriendVerifyRes)
 
 	@doc "获取好友黑名单列表"
 	@handler getFriendBlockList
-	get /admin/friend/blocklist (GetFriendBlockListReq) returns (GetFriendBlockListRes)
+	get /admin/friend/v1/block_list (GetFriendBlockListReq) returns (GetFriendBlockListRes)
 
 	@doc "解除黑名单"
 	@handler unblockFriendUsers
-	delete /admin/friend/blockbatch (UnblockFriendUsersReq) returns (UnblockFriendUsersRes)
+	post /admin/friend/v1/unblock_batch (UnblockFriendUsersReq) returns (UnblockFriendUsersRes)
 }

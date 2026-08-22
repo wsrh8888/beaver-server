@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
@@ -18,7 +19,6 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type GroupMemberAddLogic struct {
 	ctx    context.Context
@@ -129,7 +129,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	// 更新新成员的会话记录
 	_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
 		UserIds:        req.UserIds,
-		ConversationId: req.GroupID,
+		ConversationId: "group_" + req.GroupID,
 		LastMessage:    "",
 	})
 	if err != nil {
@@ -140,6 +140,19 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	go func() {
 		// 创建新的context，避免使用请求的context
 		ctx := context.Background()
+		conversationID := "group_" + req.GroupID
+
+		// 群聊内系统通知：每位新成员各一条「xxx 加入了群聊」
+		for _, memberID := range req.UserIds {
+			if _, err := l.svcCtx.ChatRpc.SendNotificationMessage(ctx, &chat_rpc.SendNotificationMessageReq{
+				ConversationId: conversationID,
+				MessageType:    3,
+				Content:        fmt.Sprintf("%s 加入了群聊", memberID),
+				RelatedUserId:  memberID,
+			}); err != nil {
+				logx.WithContext(l.ctx).Errorf("发送入群通知消息失败: memberId=%s, error=%v", memberID, err)
+			}
+		}
 
 		// 获取群成员列表
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{

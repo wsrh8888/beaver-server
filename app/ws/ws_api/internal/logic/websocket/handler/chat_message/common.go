@@ -208,6 +208,73 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 				rpcMsg.ForwardMsg.Count = int32(count)
 			}
 		}
+	case 13:
+		if markdownMsg, ok := msgData["markdownMsg"].(map[string]interface{}); ok {
+			rpcMsg.MarkdownMsg = &chat_rpc.MarkdownMsg{}
+			if content, ok := markdownMsg["content"].(string); ok {
+				rpcMsg.MarkdownMsg.Content = content
+			}
+			if title, ok := markdownMsg["title"].(string); ok {
+				rpcMsg.MarkdownMsg.Title = title
+			}
+		}
+	case 14:
+		if linkMsg, ok := msgData["linkMsg"].(map[string]interface{}); ok {
+			rpcMsg.LinkMsg = &chat_rpc.LinkMsg{}
+			if url, ok := linkMsg["url"].(string); ok {
+				rpcMsg.LinkMsg.Url = url
+			}
+			if title, ok := linkMsg["title"].(string); ok {
+				rpcMsg.LinkMsg.Title = title
+			}
+			if desc, ok := linkMsg["desc"].(string); ok {
+				rpcMsg.LinkMsg.Desc = desc
+			}
+			if imageUrl, ok := linkMsg["imageUrl"].(string); ok {
+				rpcMsg.LinkMsg.ImageUrl = imageUrl
+			}
+		}
+	case 15:
+		if cloudDocMsg, ok := msgData["cloudDocMsg"].(map[string]interface{}); ok {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{}
+			if docId, ok := cloudDocMsg["docId"].(string); ok {
+				rpcMsg.CloudDocMsg.DocId = docId
+			}
+			if docType, ok := cloudDocMsg["docType"].(float64); ok {
+				rpcMsg.CloudDocMsg.DocType = int32(docType)
+			}
+			if title, ok := cloudDocMsg["title"].(string); ok {
+				rpcMsg.CloudDocMsg.Title = title
+			}
+			if ownerId, ok := cloudDocMsg["ownerId"].(string); ok {
+				rpcMsg.CloudDocMsg.OwnerId = ownerId
+			}
+			if perm, ok := cloudDocMsg["perm"].(float64); ok {
+				rpcMsg.CloudDocMsg.Perm = int32(perm)
+			}
+			if coverUrl, ok := cloudDocMsg["coverUrl"].(string); ok {
+				rpcMsg.CloudDocMsg.CoverUrl = coverUrl
+			}
+			if revision, ok := cloudDocMsg["revision"].(float64); ok {
+				rpcMsg.CloudDocMsg.Revision = int64(revision)
+			}
+		}
+	case 16:
+		if cardMsg, ok := msgData["cardMsg"].(map[string]interface{}); ok {
+			rpcMsg.CardMsg = &chat_rpc.CardMsg{}
+			if cardType, ok := cardMsg["cardType"].(float64); ok {
+				rpcMsg.CardMsg.CardType = int32(cardType)
+			}
+			if id, ok := cardMsg["id"].(string); ok {
+				rpcMsg.CardMsg.Id = id
+			}
+			if expireAt, ok := cardMsg["expireAt"].(float64); ok {
+				rpcMsg.CardMsg.ExpireAt = int64(expireAt)
+			}
+			if inviteToken, ok := cardMsg["inviteToken"].(string); ok {
+				rpcMsg.CardMsg.InviteToken = inviteToken
+			}
+		}
 	}
 
 	return rpcMsg, nil

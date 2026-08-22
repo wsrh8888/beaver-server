@@ -121,6 +121,14 @@ message LinkMsg {
   string image_url = 4; // 封面图 URL（可选）
 }
 
+// 定义CardMsg消息 - 通用名片消息（个人/群/圈子等）
+message CardMsg {
+  int32 card_type = 1; // 1=个人 2=群 3=圈子
+  string id = 2;       // 目标实体 ID
+  int64 expire_at = 3; // 过期时间戳(秒)，0=不过期
+  string invite_token = 4; // 分享邀请凭证（群/圈邀请链接 token）
+}
+
 // 定义Msg消息
 message Msg {
   uint32 type = 1; // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知消息 8:音频文件 9:音视频通话 10:撤回 11:回复 12:转发
@@ -141,6 +149,7 @@ message Msg {
   LinkMsg link_msg = 16; // 链接卡片消息
   repeated string at_user_ids = 17; // @提及的用户ID列表（空=不@任何人）
   CloudDocMsg cloud_doc_msg = 18; // 云文档消息（分享卡片）
+  CardMsg card_msg = 19; // 通用名片消息
 }
 
 // 定义SendMsgReq消息
@@ -259,7 +268,7 @@ message GetUserConversationSettingsListByIdsRes {
 // 定义InitializeConversationReq消息 - 通用会话初始化
 message InitializeConversationReq {
   string conversation_id = 1;    // 会话ID（调用方生成）
-  int32 type = 2;               // 会话类型: 1=私聊 2=群聊 3=AI会话 4=客服会话
+  int32 type = 2;               // 会话类型: 1=私聊 2=群聊 3=圈子
   repeated string user_ids = 3;  // 参与用户ID列表
 }
 

@@ -339,6 +339,120 @@ message UpdateContentReportsRes {
   int64 affected_count = 1; // int64 影响条数
 }
 
+// ==================== 工作台应用（IM 运营配置）====================
+
+message WorkbenchEntryConfig {
+  int32 type = 1; // int32 入口类型 0路由key 1H5地址
+  string pc = 2; // string PC 入口
+  string mobile = 3; // string 移动端入口
+}
+
+message WorkbenchAppItem {
+  uint64 id = 1; // uint64 记录 ID
+  string workbench_app_id = 2; // string 应用业务 ID
+  string name = 3; // string 应用名称
+  string description = 4; // string 应用描述
+  string icon = 5; // string 图标 URL
+  int32 app_type = 6; // int32 类型 0内部 1第三方H5
+  int32 client_scope = 7; // int32 可见端 0全部 1仅PC 2仅移动
+  WorkbenchEntryConfig entry_config = 8; // object 入口配置
+  int32 category = 9; // int32 分类
+  int32 sort = 10; // int32 排序
+  int32 status = 11; // int32 状态 0下架 1上架
+  string created_by = 12; // string 创建人
+  string last_modified_by = 13; // string 最后修改人
+  string remark = 14; // string 运营备注
+  string created_at = 15; // string 创建时间
+  string updated_at = 16; // string 更新时间
+  int32 open_mode = 17; // int32 打开方式 0内嵌 1系统浏览器
+}
+
+message WorkbenchAppPublicItem {
+  string workbench_app_id = 1; // string 应用业务 ID
+  string name = 2; // string 应用名称
+  string description = 3; // string 应用描述
+  string icon = 4; // string 图标 URL
+  int32 app_type = 5; // int32 类型 0内部 1第三方H5
+  int32 client_scope = 6; // int32 可见端
+  WorkbenchEntryConfig entry_config = 7; // object 入口配置
+  int32 category = 8; // int32 分类
+  int32 sort = 9; // int32 排序
+  int32 open_mode = 10; // int32 打开方式 0内嵌 1系统浏览器
+}
+
+message CreateWorkbenchAppReq {
+  string name = 1; // string 应用名称
+  string description = 2; // string 应用描述
+  string icon = 3; // string 图标 URL
+  int32 app_type = 4; // int32 类型 0内部 1第三方H5
+  int32 client_scope = 5; // int32 可见端
+  WorkbenchEntryConfig entry_config = 6; // object 入口配置
+  int32 category = 7; // int32 分类
+  int32 sort = 8; // int32 排序
+  int32 status = 9; // int32 状态 0下架 1上架
+  string remark = 10; // string 运营备注
+  string operator_id = 11; // string 操作人(管理员 ID)
+  int32 open_mode = 12; // int32 打开方式 0内嵌 1系统浏览器
+}
+
+message CreateWorkbenchAppRes {
+  string workbench_app_id = 1; // string 应用业务 ID
+}
+
+message UpdateWorkbenchAppReq {
+  string workbench_app_id = 1; // string 应用业务 ID
+  string name = 2; // string 应用名称，空不修改
+  string description = 3; // string 应用描述，空不修改
+  string icon = 4; // string 图标 URL，空不修改
+  optional int32 app_type = 5; // int32 类型，可选
+  optional int32 client_scope = 6; // int32 可见端，可选
+  WorkbenchEntryConfig entry_config = 7; // object 入口配置，nil 不修改
+  optional int32 category = 8; // int32 分类，可选
+  optional int32 sort = 9; // int32 排序，可选
+  optional int32 status = 10; // int32 状态，可选
+  string remark = 11; // string 运营备注，空不修改
+  string operator_id = 12; // string 操作人(管理员 ID)
+  optional int32 open_mode = 13; // int32 打开方式，可选
+}
+
+message UpdateWorkbenchAppRes {}
+
+message DeleteWorkbenchAppReq {
+  string workbench_app_id = 1; // string 应用业务 ID
+}
+
+message DeleteWorkbenchAppRes {}
+
+message GetWorkbenchAppReq {
+  string workbench_app_id = 1; // string 应用业务 ID
+}
+
+message GetWorkbenchAppRes {
+  WorkbenchAppItem app = 1; // object 应用详情
+}
+
+message ListWorkbenchAppsReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  int32 status = 3; // int32 状态筛选，0 不过滤（用 -1？保持兼容：>0 才筛；category 用 optional）
+  optional int32 category = 4; // int32 分类筛选，可选
+  string keywords = 5; // string 关键词，可选
+}
+
+message ListWorkbenchAppsRes {
+  int64 total = 1; // int64 总数
+  repeated WorkbenchAppItem list = 2; // array 列表
+}
+
+message ListEnabledWorkbenchAppsReq {
+  optional int32 category = 1; // int32 分类筛选，可选
+  int32 client_scope = 2; // int32 端筛选 0全部 1PC 2移动
+}
+
+message ListEnabledWorkbenchAppsRes {
+  repeated WorkbenchAppPublicItem list = 1; // array 上架应用列表
+}
+
 service platform {
   rpc AdminQueryLogs(AdminQueryLogsReq) returns (AdminQueryLogsRes);
 
@@ -364,6 +478,13 @@ service platform {
   rpc ListContentReports(ListContentReportsReq) returns (ListContentReportsRes);
   rpc GetContentReport(GetContentReportReq) returns (GetContentReportRes);
   rpc UpdateContentReports(UpdateContentReportsReq) returns (UpdateContentReportsRes);
+
+  rpc CreateWorkbenchApp(CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes);
+  rpc UpdateWorkbenchApp(UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes);
+  rpc DeleteWorkbenchApp(DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes);
+  rpc GetWorkbenchApp(GetWorkbenchAppReq) returns (GetWorkbenchAppRes);
+  rpc ListWorkbenchApps(ListWorkbenchAppsReq) returns (ListWorkbenchAppsRes);
+  rpc ListEnabledWorkbenchApps(ListEnabledWorkbenchAppsReq) returns (ListEnabledWorkbenchAppsRes);
 }
 
 // goctl rpc protoc platform_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template
