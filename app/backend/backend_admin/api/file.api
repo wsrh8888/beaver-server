@@ -17,7 +17,7 @@ type (
 		FileName     string `json:"fileName"`
 		OriginalName string `json:"originalName"`
 		Size         int64  `json:"size"`
-		Path         string `json:"path"`
+		Path         string `json:"path"` // 完整访问 URL（本地 Domain + preview，七牛 Qiniu.Domain）
 		Md5          string `json:"md5"`
 		Type         string `json:"type"`
 		CreatedAt    string `json:"createdAt"`
@@ -35,7 +35,7 @@ type (
 		FileName     string `json:"fileName"`
 		OriginalName string `json:"originalName"`
 		Size         int64  `json:"size"`
-		Path         string `json:"path"`
+		Path         string `json:"path"` // 完整访问 URL（本地 Domain + preview，七牛 Qiniu.Domain）
 		Md5          string `json:"md5"`
 		Type         string `json:"type"`
 		CreatedAt    string `json:"createdAt"`
