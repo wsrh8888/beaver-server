@@ -1,14 +1,14 @@
 # 🦫 Beaver IM - 企业级即时通讯平台
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)](VERSION)
 [![Go](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/)
 [![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.7.4-green.svg)](https://github.com/zeromicro/go-zero)
 [![QQ群](https://img.shields.io/badge/QQ群-1013328597%2B-blue.svg)](https://qm.qq.com/q/82rbf7QBzO)
 
 > **海狸 IM 后端服务** - 基于 Go-Zero 微服务架构构建，为移动端（Flutter）、桌面端（Electron）与后台管理系统提供 REST / WebSocket / gRPC 能力。
 
-**当前版本：[2.1.0](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
+**当前版本：[2.1.1](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
 
 [English](README_EN.md) | [中文](README.md)
 
