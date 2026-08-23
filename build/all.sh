@@ -19,7 +19,8 @@ assert_version_not_published() {
 
 assert_version_not_published
 
-# 定义模块列表modules=(
+# 定义模块列表
+modules=(
     # ==================== RPC 服务 ====================
     "user_rpc"
     "auth_rpc"
