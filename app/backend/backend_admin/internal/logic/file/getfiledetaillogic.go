@@ -33,7 +33,7 @@ func (l *GetFileDetailLogic) GetFileDetail(req *types.GetFileDetailReq) (resp *t
 		FileName:     f.FileKey,
 		OriginalName: f.OriginalName,
 		Size:         f.Size,
-		Path:         f.Path,
+		Path:         buildFileAccessURL(l.svcCtx, f),
 		Md5:          f.Md5,
 		Type:         f.Type,
 		CreatedAt:    f.CreatedAt,
