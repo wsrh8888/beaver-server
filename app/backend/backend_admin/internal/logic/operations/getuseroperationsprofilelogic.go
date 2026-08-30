@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
 package operations
 
 import (
@@ -7,6 +28,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/circle/circle_rpc/types/circle_rpc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
@@ -51,6 +73,7 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 		},
 		Friends:  []types.UserOpsFriendItem{},
 		Groups:   []types.UserOpsGroupItem{},
+		Circles:  []types.UserOpsCircleItem{},
 		Sessions: []types.UserOpsSessionItem{},
 		Moments:  []types.UserOpsMomentItem{},
 		Reports:  []types.UserOpsReportItem{},
@@ -73,6 +96,14 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 	} else if groupIDsRes != nil {
 		resp.GroupTotal = int64(len(groupIDsRes.GroupIDs))
 		resp.Groups = l.mapGroups(groupIDsRes.GroupIDs)
+	}
+
+	circleIDsRes, err := l.svcCtx.CircleRpc.GetUserCircleIDs(l.ctx, &circle_rpc.GetUserCircleIDsReq{UserId: req.UserID})
+	if err != nil {
+		l.Errorf("查询用户圈子ID失败: %v", err)
+	} else if circleIDsRes != nil {
+		resp.CircleTotal = int64(len(circleIDsRes.CircleIds))
+		resp.Circles = l.mapCircles(req.UserID, circleIDsRes.CircleIds)
 	}
 
 	sessionRes, err := l.svcCtx.ChatRpc.ListConversations(l.ctx, &chat_rpc.ListConversationsReq{
@@ -192,6 +223,50 @@ func (l *GetUserOperationsProfileLogic) mapGroups(groupIDs []string) []types.Use
 	for _, g := range gRes.Groups {
 		out = append(out, types.UserOpsGroupItem{
 			GroupID: g.GroupID, Title: g.Name,
+		})
+	}
+	return out
+}
+
+func (l *GetUserOperationsProfileLogic) mapCircles(userID string, circleIDs []string) []types.UserOpsCircleItem {
+	if len(circleIDs) == 0 {
+		return nil
+	}
+	limit := int(opsPreviewLimit)
+	if len(circleIDs) < limit {
+		limit = len(circleIDs)
+	}
+	ids := circleIDs[:limit]
+
+	cRes, err := l.svcCtx.CircleRpc.GetCircleList(l.ctx, &circle_rpc.GetCircleListReq{
+		UserId:   userID,
+		Page:     1,
+		PageSize: int32(limit),
+	})
+	if err != nil || cRes == nil {
+		out := make([]types.UserOpsCircleItem, 0, len(ids))
+		for _, cid := range ids {
+			out = append(out, types.UserOpsCircleItem{CircleID: cid, Name: cid})
+		}
+		return out
+	}
+
+	out := make([]types.UserOpsCircleItem, 0, len(cRes.List))
+	for _, c := range cRes.List {
+		role := 0
+		if roleRes, err := l.svcCtx.CircleRpc.GetUserCircleRole(l.ctx, &circle_rpc.GetUserCircleRoleReq{
+			CircleId: c.CircleId,
+			UserId:   userID,
+		}); err == nil && roleRes != nil {
+			role = int(roleRes.Role)
+		}
+		out = append(out, types.UserOpsCircleItem{
+			CircleID:    c.CircleId,
+			Name:        c.Name,
+			Role:        role,
+			MemberCount: c.MemberCount,
+			PostCount:   c.PostCount,
+			IsDeleted:   c.IsDeleted,
 		})
 	}
 	return out

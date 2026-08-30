@@ -126,6 +126,7 @@ message CardMsg {
   int32 card_type = 1; // 1=个人 2=群 3=圈子
   string id = 2;       // 目标实体 ID
   int64 expire_at = 3; // 过期时间戳(秒)，0=不过期
+  string invite_token = 4; // 分享邀请凭证（群/圈邀请链接 token）
 }
 
 // 定义Msg消息

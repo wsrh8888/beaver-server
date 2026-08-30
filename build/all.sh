@@ -1,11 +1,31 @@
 #!/bin/bash
 
+REGISTRY_URL="wsrh8888"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
+PUBLISH_PROBE_MODULE="gateway_api"
+
+# 检查当前版本是否已发布到镜像仓库
+assert_version_not_published() {
+    local image="$REGISTRY_URL/$PUBLISH_PROBE_MODULE:$VERSION"
+    echo "🔍 检查版本 $VERSION 是否已发布..."
+    if docker manifest inspect "$image" >/dev/null 2>&1; then
+        echo "❌ 版本 $VERSION 已发布（$image 已存在于镜像仓库）"
+        echo "   请先更新 $ROOT_DIR/VERSION 后再执行构建发布"
+        exit 1
+    fi
+    echo "✅ 版本 $VERSION 尚未发布，开始构建"
+}
+
+assert_version_not_published
+
 # 定义模块列表
 modules=(
     # ==================== RPC 服务 ====================
     "user_rpc"
     "auth_rpc"
     "group_rpc"
+    "circle_rpc"
     "friend_rpc"
     "chat_rpc"
     "file_rpc"
@@ -24,6 +44,7 @@ modules=(
     "file_api"
     "friend_api"
     "group_api"
+    "circle_api"
     "moment_api"
     "notification_api"
     "platform_api"

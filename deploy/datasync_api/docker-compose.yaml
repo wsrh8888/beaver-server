@@ -7,8 +7,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./datasync.yaml:/etc/datasync.yaml:ro
-    deploy:
-      restart_policy:
-        condition: any
+    restart: "no"
     pull_policy: always
 

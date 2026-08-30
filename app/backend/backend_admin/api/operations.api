@@ -11,12 +11,14 @@ type (
 		GroupTotal     int64                  `json:"groupTotal"`
 		SessionTotal   int64                  `json:"sessionTotal"`
 		MomentTotal    int64                  `json:"momentTotal"`
+		CircleTotal    int64                  `json:"circleTotal"`
 		ReportTotal    int64                  `json:"reportTotal"`
 		BlockTotal     int64                  `json:"blockTotal"`
 		Friends        []UserOpsFriendItem    `json:"friends"`
 		Groups         []UserOpsGroupItem     `json:"groups"`
 		Sessions       []UserOpsSessionItem   `json:"sessions"`
 		Moments        []UserOpsMomentItem    `json:"moments"`
+		Circles        []UserOpsCircleItem    `json:"circles"`
 		Reports        []UserOpsReportItem    `json:"reports"`
 		Blocks         []UserOpsBlockItem     `json:"blocks"`
 	}
@@ -54,6 +56,14 @@ type (
 		Content   string `json:"content"`
 		IsDeleted bool   `json:"isDeleted"`
 		CreatedAt string `json:"createdAt"`
+	}
+	UserOpsCircleItem {
+		CircleID    string `json:"circleId"`
+		Name        string `json:"name"`
+		Role        int    `json:"role"`
+		MemberCount int64  `json:"memberCount"`
+		PostCount   int64  `json:"postCount"`
+		IsDeleted   bool   `json:"isDeleted"`
 	}
 	UserOpsReportItem {
 		ID         uint64 `json:"id"`

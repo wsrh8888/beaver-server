@@ -1,14 +1,14 @@
 # 🦫 Beaver IM - 企业级即时通讯平台
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)](VERSION)
 [![Go](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/)
 [![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.7.4-green.svg)](https://github.com/zeromicro/go-zero)
 [![QQ群](https://img.shields.io/badge/QQ群-1013328597%2B-blue.svg)](https://qm.qq.com/q/82rbf7QBzO)
 
 > **海狸 IM 后端服务** - 基于 Go-Zero 微服务架构构建，为移动端（Flutter）、桌面端（Electron）与后台管理系统提供 REST / WebSocket / gRPC 能力。
 
-**当前版本：[2.0.2](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
+**当前版本：[2.1.1](VERSION)**（以仓库根目录 [`VERSION`](VERSION) 文件为准）
 
 [English](README_EN.md) | [中文](README.md)
 
@@ -155,43 +155,17 @@ go run main.go -db
 
 ## 📄 开源协议与免责声明
 
-本项目基于 [MIT](LICENSE) 协议开源 - 详情请参阅 [LICENSE](LICENSE) 文件。
+本项目基于 [MIT](LICENSE) 协议开源，详见 [LICENSE](LICENSE)。
 
-### ⚖️ 使用说明
+**使用要点（摘要）：**
 
-**项目定位**：本项目主要用于**技术学习和交流**，希望为开发者提供一个学习和研究的平台。
+- 闭源自用商用、二次开源均可免费，但须保留根目录 `LICENSE`，上线前端须有「关于」署名（基于海狸 IM + 仓库地址）
+- 闭源交付第三方、去掉署名、对外 SaaS 收费等，请采购商业授权（书面合同）
+- 无论是否付费，**不得删除或篡改 `LICENSE`**
 
-**使用建议**：
-- 📚 **学习交流** - 欢迎用于个人学习、技术研究、学术交流
-- 🤝 **开源贡献** - 欢迎提交代码改进、Bug修复、功能建议
-- 🔒 **合规使用** - 请确保使用方式符合当地法律法规
-- 💡 **创新应用** - 鼓励基于本项目进行创新性应用开发
-
-**温馨提示**：
-- 本项目采用 MIT 开源协议，您可以自由使用、修改和分发
-- 建议在使用前仔细阅读相关法律法规，确保合规使用
-- 如有疑问或需要帮助，欢迎通过 QQ 群或 GitHub Issues 交流
-
-### 📋 项目来源标注要求
-
-**重要**：如果您基于本项目进行二次开发或发布，**必须**在项目中保留以下信息：
-
-#### 🖥️ **前端项目（移动端/桌面端/Web应用）**
-- **关于页面**：必须在"关于我们"、"关于应用"或类似页面中包含项目来源标注
-- **必需文本**："基于 [Beaver IM](https://github.com/wsrh8888/beaver-server) 开源IM项目开发"
-- **链接**：必须提供可点击的原始项目链接
-
-#### 🔧 **后端项目（服务器/API服务）**
-- **README.md**：必须在项目介绍或描述中包含来源标注
-- **必需文本**："基于 [Beaver IM](https://github.com/wsrh8888/beaver-server) 开源IM项目开发"
-- **链接**：必须提供可点击的原始项目链接
-
-#### 📄 **通用要求**
-- **LICENSE 文件**：保留原项目 MIT 协议信息
-
-> 💡 **友好提醒**：本项目允许个人及商业使用；基于本项目二次开发或发布时，**必须保留项目来源标注**，详见上方要求。
-
-> 📖 **详细法律条款**：请参阅 [LEGAL.md](LEGAL.md) 文件了解完整的法律免责声明和使用要求。
+完整免责与署名要求：[LEGAL.md](LEGAL.md)  
+商业授权产品线与报价：[版权与商业授权](https://wsrh8888.github.io/beaver-docs/community/license.html)  
+联系：[751135385@qq.com](mailto:751135385@qq.com)
 
 ## ⭐ Star 历史
 

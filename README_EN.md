@@ -1,7 +1,7 @@
 # 🦫 Beaver IM - Enterprise-Grade Instant Messaging Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)](VERSION)
 [![Go](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/)
 [![Go-Zero](https://img.shields.io/badge/Go--Zero-v1.6.0+-green.svg)](https://github.com/zeromicro/go-zero)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
@@ -10,7 +10,7 @@
 
 > 🚀 **Enterprise-Grade Instant Messaging Platform** - Built with Go-Zero microservices, supporting mobile (Flutter), desktop (Electron), and web clients with real-time communication capabilities.
 
-**Current Version: [2.0.1](VERSION)** (see [`VERSION`](VERSION) at repository root)
+**Current Version: [2.1.1](VERSION)** (see [`VERSION`](VERSION) at repository root)
 
 [English](README_EN.md) | [中文](README.md)
 
@@ -272,43 +272,17 @@ We welcome contributions from the community! Please see our [Contributing Guide]
 
 ## 📄 License & Legal Disclaimer
 
-This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE) — see [LICENSE](LICENSE).
 
-### ⚖️ Usage Guidelines
+**Summary:**
 
-**Project Purpose**: This project is primarily designed for **technical learning and communication**, aiming to provide developers with a platform for learning and research.
+- Closed-source self-use and re-open-sourcing derivatives are free if you keep the root `LICENSE` and show About attribution when deployed (Based on Beaver IM + repo link)
+- Closed-source delivery to third parties, removing About, or running a paid IM SaaS requires a commercial license (written contract)
+- **Do not delete or alter `LICENSE`**, whether paid or free
 
-**Usage Recommendations**:
-- 📚 **Learning & Communication** - Welcome for personal learning, technical research, academic exchange
-- 🤝 **Open Source Contributions** - Welcome code improvements, bug fixes, feature suggestions
-- 🔒 **Compliant Usage** - Please ensure usage complies with local laws and regulations
-- 💡 **Innovative Applications** - Encourage innovative application development based on this project
-
-**Friendly Reminders**:
-- This project uses the MIT open source license, allowing you to freely use, modify, and distribute
-- We recommend reading relevant laws and regulations before use to ensure compliance
-- If you have questions or need help, feel free to reach out via QQ Group or GitHub Issues
-
-### 📋 Project Attribution Requirements
-
-**Important**: If you develop or publish based on this project, you **must** retain the following information:
-
-#### 🖥️ **Frontend Projects (Mobile/Desktop/Web Apps)**
-- **About Page**: Must include project source attribution in "About Us", "About App", or similar pages
-- **Required Text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open source IM project"
-- **Link**: Must provide clickable link to the original project
-
-#### 🔧 **Backend Projects (Server/API Services)**
-- **README.md**: Must include attribution in the project introduction or description
-- **Required Text**: "Based on [Beaver IM](https://github.com/wsrh8888/beaver-server) open source IM project"
-- **Link**: Must provide clickable link to the original project
-
-#### 📄 **General Requirements**
-- **LICENSE file**: Retain the original project MIT license information
-
-> 💡 **Friendly Note**: Personal and commercial use are permitted. When developing or publishing based on this project, you **must retain project attribution** as described above.
-
-> 📖 **Detailed Legal Terms**: Please refer to [LEGAL.md](LEGAL.md) for complete legal disclaimers and usage requirements.
+Full disclaimer & attribution: [LEGAL.md](LEGAL.md)  
+Commercial product lines & pricing: [Copyright & Commercial Licensing](https://wsrh8888.github.io/beaver-docs/community/license.html)  
+Contact: [751135385@qq.com](mailto:751135385@qq.com)
 
 ## ⭐ Star History
 

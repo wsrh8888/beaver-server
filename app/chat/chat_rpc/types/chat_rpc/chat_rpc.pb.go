@@ -1027,9 +1027,10 @@ func (x *LinkMsg) GetImageUrl() string {
 // 定义CardMsg消息 - 通用名片消息（个人/群/圈子等）
 type CardMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CardType      int32                  `protobuf:"varint,1,opt,name=card_type,json=cardType,proto3" json:"card_type,omitempty"` // 1=个人 2=群 3=圈子
-	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`                              // 目标实体 ID
-	ExpireAt      int64                  `protobuf:"varint,3,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"` // 过期时间戳(秒)，0=不过期
+	CardType      int32                  `protobuf:"varint,1,opt,name=card_type,json=cardType,proto3" json:"card_type,omitempty"`             // 1=个人 2=群 3=圈子
+	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`                                          // 目标实体 ID
+	ExpireAt      int64                  `protobuf:"varint,3,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`             // 过期时间戳(秒)，0=不过期
+	InviteToken   string                 `protobuf:"bytes,4,opt,name=invite_token,json=inviteToken,proto3" json:"invite_token,omitempty"` // 分享邀请凭证
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1083,6 +1084,13 @@ func (x *CardMsg) GetExpireAt() int64 {
 		return x.ExpireAt
 	}
 	return 0
+}
+
+func (x *CardMsg) GetInviteToken() string {
+	if x != nil {
+		return x.InviteToken
+	}
+	return ""
 }
 
 // 定义Msg消息

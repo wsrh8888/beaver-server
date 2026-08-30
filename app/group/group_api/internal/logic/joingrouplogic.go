@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
 package logic
 
 import (
@@ -7,6 +28,7 @@ import (
 	"fmt"
 	"time"
 
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
@@ -20,8 +42,8 @@ import (
 	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
-
 
 type JoinGroupLogic struct {
 	ctx    context.Context
@@ -39,12 +61,39 @@ func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGro
 
 func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJoinRes, err error) {
 	var memberVersion int64 = 0
+	var invite *group_models.GroupInviteLinkModel
+
+	groupID := req.GroupID
+	if req.InviteCode != "" {
+		var row group_models.GroupInviteLinkModel
+		if e := l.svcCtx.DB.Where("token = ?", req.InviteCode).First(&row).Error; e != nil {
+			return nil, fmt.Errorf("邀请无效")
+		}
+		if row.Status == 2 {
+			return nil, fmt.Errorf("邀请已失效")
+		}
+		if row.Status == 3 || (row.MaxUses > 0 && row.UsedCount >= row.MaxUses) {
+			return nil, fmt.Errorf("邀请已用尽")
+		}
+		if row.ExpireAt > 0 && time.Now().Unix() >= row.ExpireAt {
+			return nil, fmt.Errorf("邀请已过期")
+		}
+		invite = &row
+		if groupID != "" && groupID != invite.GroupID {
+			return nil, fmt.Errorf("邀请与群不匹配")
+		}
+		groupID = invite.GroupID
+		req.GroupID = groupID
+	}
+	if groupID == "" {
+		return nil, fmt.Errorf("群ID不能为空")
+	}
 
 	// 检查群组是否存在
 	var group group_models.GroupModel
-	err = l.svcCtx.DB.Where("group_id = ? AND status = ?", req.GroupID, 1).First(&group).Error
+	err = l.svcCtx.DB.Where("group_id = ? AND status = ?", groupID, 1).First(&group).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("群组不存在或已解散，群组ID: %s", req.GroupID)
+		logx.WithContext(l.ctx).Errorf("群组不存在或已解散，群组ID: %s", groupID)
 		return nil, err
 	}
 
@@ -58,9 +107,15 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			return nil, err
 		} else {
 			// 用户之前被踢出，现在重新加入
+			memberVersion = l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+			if memberVersion == -1 {
+				logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+				return nil, errors.New("获取版本号失败")
+			}
 			err = l.svcCtx.DB.Model(&existingMember).Updates(map[string]interface{}{
 				"status":    1,
 				"join_time": time.Now(),
+				"version":   memberVersion,
 			}).Error
 			if err != nil {
 				logx.WithContext(l.ctx).Errorf("更新群成员状态失败: %v", err)
@@ -95,7 +150,10 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 
 			resp = &types.GroupJoinRes{
 				Version: requestVersion,
+				Status:  0,
+				GroupID: req.GroupID,
 			}
+			l.bumpInviteUse(invite)
 			logx.WithContext(l.ctx).Infof("用户申请加入群组，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 			l.logger.Info(model.LogMsg{
 				Text: "入群申请提交成功",
@@ -195,12 +253,31 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		}
 	}
 
-	// 异步通知群成员新成员加入
-	go func() {
-		// 创建新的context，避免使用请求的context
-		ctx := context.Background()
+	// 更新新成员的会话记录（对标 groupmemberadd）
+	_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
+		UserIds:        []string{req.UserID},
+		ConversationId: "group_" + req.GroupID,
+		LastMessage:    "",
+	})
+	if err != nil {
+		logx.Errorf("Failed to update conversation: %v", err)
+	}
 
-		// 获取群成员列表，用于推送通知
+	// 异步通知群成员
+	go func() {
+		ctx := context.Background()
+		conversationID := "group_" + req.GroupID
+
+		// 群聊内系统通知：xxx 加入了群聊（全员可见）
+		if _, err := l.svcCtx.ChatRpc.SendNotificationMessage(ctx, &chat_rpc.SendNotificationMessageReq{
+			ConversationId: conversationID,
+			MessageType:    3,
+			Content:        fmt.Sprintf("%s 加入了群聊", req.UserID),
+			RelatedUserId:  req.UserID,
+		}); err != nil {
+			logx.WithContext(l.ctx).Errorf("发送入群通知消息失败: %v", err)
+		}
+
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
 			GroupID: req.GroupID,
 		})
@@ -209,20 +286,32 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			return
 		}
 
-		// 推送给所有群成员 - 群成员变动通知
+		groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+		if groupVersion == -1 {
+			logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
+		}
+
+		joinMemberData := []map[string]interface{}{
+			{
+				"version": memberVersion,
+				"groupId": req.GroupID,
+				"userId":  req.UserID,
+			},
+		}
+
+		// 1. 通知已在群的成员：group_members 变化
 		for _, member := range response.Members {
-			if member.UserID != req.UserID { // 不通知操作者自己
+			if member.UserID != req.UserID {
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.GROUP_OPERATION,
 					"type":     wsTypeConst.GroupMemberReceive,
 					"senderId": req.UserID,
 					"targetId": member.UserID,
 					"body": map[string]interface{}{
-						"table": "group_members",
-						"data": []map[string]interface{}{
+						"tables": []map[string]interface{}{
 							{
-								"version": memberVersion,
-								"groupId": req.GroupID,
+								"table": "group_members",
+								"data":  joinMemberData,
 							},
 						},
 					},
@@ -231,11 +320,50 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
 			}
 		}
+
+		// 2. 通知新加入的成员：groups + group_members 变化
+		joinerTables := []map[string]interface{}{
+			{
+				"table": "group_members",
+				"data":  joinMemberData,
+			},
+		}
+		if groupVersion != -1 {
+			joinerTables = append([]map[string]interface{}{
+				{
+					"table": "groups",
+					"data": []map[string]interface{}{
+						{
+							"version": groupVersion,
+							"groupId": req.GroupID,
+						},
+					},
+				},
+			}, joinerTables...)
+		}
+		joinerPayload := map[string]interface{}{
+			"command":  wsCommandConst.GROUP_OPERATION,
+			"type":     wsTypeConst.GroupMemberReceive,
+			"senderId": req.UserID,
+			"targetId": req.UserID,
+			"body": map[string]interface{}{
+				"tables": joinerTables,
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, joinerPayload)
+
+		// 3. 触发开放平台 Webhook 事件(群成员变更)
+		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, []string{req.UserID}, "added")
 	}()
 
 	resp = &types.GroupJoinRes{
 		Version: memberVersion,
+		Status:  1,
+		GroupID: req.GroupID,
 	}
+
+	l.bumpInviteUse(invite)
 
 	logx.WithContext(l.ctx).Infof("用户加入群组成功，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 	l.logger.Info(model.LogMsg{
@@ -246,4 +374,27 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		},
 	})
 	return resp, nil
+}
+
+func (l *JoinGroupLogic) bumpInviteUse(invite *group_models.GroupInviteLinkModel) {
+	if invite == nil {
+		return
+	}
+	updates := map[string]interface{}{
+		"used_count": gorm.Expr("used_count + 1"),
+	}
+	if invite.MaxUses > 0 && invite.UsedCount+1 >= invite.MaxUses {
+		updates["status"] = 3
+	}
+	_ = l.svcCtx.DB.Model(&group_models.GroupInviteLinkModel{}).Where("id = ?", invite.Id).Updates(updates).Error
+}
+
+func (l *JoinGroupLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {
+	defer func() {
+		if r := recover(); r != nil {
+			logx.WithContext(l.ctx).Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
+		}
+	}()
+
+	logx.WithContext(l.ctx).Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
 }

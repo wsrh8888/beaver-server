@@ -1,0 +1,186 @@
+syntax = "v1"
+
+// 获取圈子列表
+type (
+	GetCircleListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		UserId   string `form:"userId,optional"`   // 用户ID筛选
+		Keywords string `form:"keywords,optional"` // 圈子名关键词搜索
+		CircleId string `form:"circleId,optional"` // 圈子ID精确查询
+	}
+	GetCircleListRes {
+		List  []GetCircleListItem `json:"list"`
+		Total int64               `json:"total"`
+	}
+	GetCircleListItem {
+		CircleId    string `json:"circleId"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Avatar      string `json:"avatar"`
+		CreatorId   string `json:"creatorId"`
+		JoinType    int    `json:"joinType"`
+		MemberCount int64  `json:"memberCount"`
+		PostCount   int64  `json:"postCount"`
+		IsDeleted   bool   `json:"isDeleted"`
+		CreatedAt   string `json:"createdAt"`
+		UpdatedAt   string `json:"updatedAt"`
+	}
+)
+
+// 获取圈子详情
+type (
+	GetCircleDetailReq {
+		CircleId string `form:"circleId"`
+	}
+	GetCircleDetailRes {
+		CircleId    string `json:"circleId"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Avatar      string `json:"avatar"`
+		CreatorId   string `json:"creatorId"`
+		JoinType    int    `json:"joinType"`
+		MemberCount int64  `json:"memberCount"`
+		PostCount   int64  `json:"postCount"`
+		IsDeleted   bool   `json:"isDeleted"`
+		CreatedAt   string `json:"createdAt"`
+		UpdatedAt   string `json:"updatedAt"`
+	}
+)
+
+// 解散圈子
+type (
+	DeleteCircleReq {
+		CircleId string `json:"circleId"`
+	}
+	DeleteCircleRes {}
+)
+
+// 获取圈子成员列表
+type (
+	GetCircleMemberListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		CircleId string `form:"circleId"`
+	}
+	GetCircleMemberListRes {
+		List  []GetCircleMemberListItem `json:"list"`
+		Total int64                     `json:"total"`
+	}
+	GetCircleMemberListItem {
+		CircleId string `json:"circleId"`
+		UserId   string `json:"userId"`
+		NickName string `json:"nickName"`
+		Role     int    `json:"role"`
+	}
+)
+
+// 移除圈子成员
+type (
+	RemoveCircleMemberReq {
+		CircleId  string   `json:"circleId"`
+		MemberIds []string `json:"memberIds"`
+	}
+	RemoveCircleMemberRes {}
+)
+
+// 获取圈子帖子列表
+type (
+	GetCirclePostListReq {
+		Page     int    `form:"page,optional"`
+		Limit    int    `form:"limit,optional"`
+		CircleId string `form:"circleId"`
+	}
+	GetCirclePostListRes {
+		List  []GetCirclePostListItem `json:"list"`
+		Total int64                   `json:"total"`
+	}
+	GetCirclePostListItem {
+		PostId       string `json:"postId"`
+		CircleId     string `json:"circleId"`
+		UserId       string `json:"userId"`
+		Content      string `json:"content"`
+		IsDeleted    bool   `json:"isDeleted"`
+		CommentCount int64  `json:"commentCount"`
+		LikeCount    int64  `json:"likeCount"`
+		CreatedAt    string `json:"createdAt"`
+	}
+)
+
+// 删除圈子帖子
+type (
+	DeleteCirclePostReq {
+		PostId string `json:"postId"`
+	}
+	DeleteCirclePostRes {}
+)
+
+// 获取帖子评论列表
+type (
+	GetCircleCommentListReq {
+		Page   int    `form:"page,optional"`
+		Limit  int    `form:"limit,optional"`
+		PostId string `form:"postId"`
+	}
+	GetCircleCommentListRes {
+		List  []GetCircleCommentListItem `json:"list"`
+		Total int64                      `json:"total"`
+	}
+	GetCircleCommentListItem {
+		CommentId string `json:"commentId"`
+		PostId    string `json:"postId"`
+		UserId    string `json:"userId"`
+		Content   string `json:"content"`
+		IsDeleted bool   `json:"isDeleted"`
+		CreatedAt string `json:"createdAt"`
+	}
+)
+
+// 删除帖子评论
+type (
+	DeleteCircleCommentReq {
+		CommentId string `json:"commentId"`
+	}
+	DeleteCircleCommentRes {}
+)
+
+@server (
+	group: circle
+)
+service backend {
+	@doc "获取圈子列表"
+	@handler GetCircleList
+	get /admin/circle/v1/list (GetCircleListReq) returns (GetCircleListRes)
+
+	@doc "获取圈子详情"
+	@handler GetCircleDetail
+	get /admin/circle/v1/detail (GetCircleDetailReq) returns (GetCircleDetailRes)
+
+	@doc "解散圈子"
+	@handler DeleteCircle
+	post /admin/circle/v1/delete (DeleteCircleReq) returns (DeleteCircleRes)
+
+	@doc "获取圈子成员列表"
+	@handler GetCircleMemberList
+	get /admin/circle/v1/members (GetCircleMemberListReq) returns (GetCircleMemberListRes)
+
+	@doc "移除圈子成员"
+	@handler RemoveCircleMember
+	post /admin/circle/v1/remove_member (RemoveCircleMemberReq) returns (RemoveCircleMemberRes)
+
+	@doc "获取圈子帖子列表"
+	@handler GetCirclePostList
+	get /admin/circle/v1/posts (GetCirclePostListReq) returns (GetCirclePostListRes)
+
+	@doc "删除圈子帖子"
+	@handler DeleteCirclePost
+	post /admin/circle/v1/delete_post (DeleteCirclePostReq) returns (DeleteCirclePostRes)
+
+	@doc "获取帖子评论列表"
+	@handler GetCircleCommentList
+	get /admin/circle/v1/comments (GetCircleCommentListReq) returns (GetCircleCommentListRes)
+
+	@doc "删除帖子评论"
+	@handler DeleteCircleComment
+	post /admin/circle/v1/delete_comment (DeleteCircleCommentReq) returns (DeleteCircleCommentRes)
+}

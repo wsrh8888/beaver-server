@@ -1,0 +1,11 @@
+
+services:
+  circle_rpc:
+    image: wsrh8888/circle_rpc:1.0.0
+    container_name: circle_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./circlerpc.yaml:/etc/circlerpc.yaml:ro
+    restart: "no"
+    pull_policy: always

@@ -1,5 +1,6 @@
 import "api/auth_public.api"
 import "api/chat.api"
+import "api/circle.api"
 import "api/emoji.api"
 import "api/feedback.api"
 import "api/file.api"

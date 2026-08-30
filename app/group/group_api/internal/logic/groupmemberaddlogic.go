@@ -1,8 +1,30 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
 package logic
 
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
@@ -18,7 +40,6 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type GroupMemberAddLogic struct {
 	ctx    context.Context
@@ -129,7 +150,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	// 更新新成员的会话记录
 	_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
 		UserIds:        req.UserIds,
-		ConversationId: req.GroupID,
+		ConversationId: "group_" + req.GroupID,
 		LastMessage:    "",
 	})
 	if err != nil {
@@ -140,6 +161,19 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	go func() {
 		// 创建新的context，避免使用请求的context
 		ctx := context.Background()
+		conversationID := "group_" + req.GroupID
+
+		// 群聊内系统通知：每位新成员各一条「xxx 加入了群聊」
+		for _, memberID := range req.UserIds {
+			if _, err := l.svcCtx.ChatRpc.SendNotificationMessage(ctx, &chat_rpc.SendNotificationMessageReq{
+				ConversationId: conversationID,
+				MessageType:    3,
+				Content:        fmt.Sprintf("%s 加入了群聊", memberID),
+				RelatedUserId:  memberID,
+			}); err != nil {
+				logx.WithContext(l.ctx).Errorf("发送入群通知消息失败: memberId=%s, error=%v", memberID, err)
+			}
+		}
 
 		// 获取群成员列表
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{

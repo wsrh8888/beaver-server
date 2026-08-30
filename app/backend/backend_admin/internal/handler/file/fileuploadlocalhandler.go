@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
 package handler
 
 import (
@@ -10,7 +31,6 @@ import (
 	logic "beaver/app/backend/backend_admin/internal/logic/file"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/file/file_models"
 	"beaver/common/response"
 
 	"net/http"
@@ -47,9 +67,9 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 确定文件来源
-		source := file_models.LocalSource
+		source := "local"
 		if req.Source != "" && req.Source == "qiniu" {
-			source = file_models.QiniuSource
+			source = "qiniu"
 		}
 
 		l := logic.NewFileUploadLocalLogic(r.Context(), svcCtx)
@@ -60,8 +80,12 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 检查文件是否已经存在于数据库中
-		existingFile, err := checkFileExists(fileReq.FileMd5, svcCtx)
-		if err == nil {
+		existingFile, found, err := filecommon.FindFileByMd5(r.Context(), fileReq.FileMd5, svcCtx)
+		if err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
+		if found {
 			resp.OriginalName = existingFile.OriginalName
 			if svcCtx.Config.Domain == "" {
 				response.Response(r, w, nil, errors.New("未配置域名"))
@@ -100,7 +124,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Path:         relativePath,
 			Md5:          fileReq.FileMd5,
 			Type:         fileReq.FileType,
-			Source:       string(source),
+			Source:       source,
 			FileInfo:     fileInfoStr,
 		}
 
@@ -117,16 +141,6 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		logx.Infof("本地文件上传成功, url: %s", resp.FileURL)
 		response.Response(r, w, resp, nil)
 	}
-}
-
-// checkFileExists 检查文件是否已存在于数据库中
-func checkFileExists(fileMd5 string, svcCtx *svc.ServiceContext) (*file_models.FileModel, error) {
-	var fileModel file_models.FileModel
-	err := svcCtx.DB.Take(&fileModel, "md5 = ?", fileMd5).Error
-	if err != nil {
-		return nil, err
-	}
-	return &fileModel, nil
 }
 
 // saveFileToLocal 保存文件到本地

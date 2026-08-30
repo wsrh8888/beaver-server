@@ -7,7 +7,5 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./momentrpc.yaml:/etc/momentrpc.yaml:ro
-    deploy:
-      restart_policy:
-        condition: any
+    restart: "no"
     pull_policy: always

@@ -37,6 +37,7 @@ type (
 		PostCount   int64  `json:"postCount"` // 帖子数量
 		Role        int8   `json:"role"` // 当前用户角色：0=未加入 1=圈主 2=管理员 3=普通成员
 		CreatedAt   string `json:"createdAt"` // 创建时间
+		InviteUrl   string `json:"inviteUrl,optional"` // 成员可见：稳定邀请链接（复制/二维码共用）
 	}
 )
 
@@ -65,12 +66,14 @@ type (
 // 加入圈子接口类型
 type (
 	JoinCircleReq {
-		UserID   string `header:"Beaver-User-Id"` // 用户ID
-		CircleID string `json:"circleId"` // 圈子ID
-		Reason   string `json:"reason,optional"` // 申请理由（审批加入时填写）
+		UserID     string `header:"Beaver-User-Id"` // 用户ID
+		CircleID   string `json:"circleId,optional"` // 圈子ID（有 inviteCode 时可空）
+		Reason     string `json:"reason,optional"` // 申请理由（审批加入时填写）
+		InviteCode string `json:"inviteCode,optional"` // 邀请短码（从 inviteUrl 解析）
 	}
 	JoinCircleRes {
-		Status int8 `json:"status"` // 加入结果：1=已加入 0=申请待审批
+		Status   int8   `json:"status"` // 加入结果：1=已加入 0=申请待审批
+		CircleID string `json:"circleId,optional"` // 圈子ID
 	}
 )
 
@@ -218,6 +221,25 @@ type (
 	RemoveCircleMembersRes {}
 )
 
+// 解析圈子邀请链接
+type (
+	ResolveCircleInviteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户
+		Code   string `form:"code"` // 邀请短码
+	}
+	ResolveCircleInviteRes {
+		Code          string `json:"code"` // 邀请短码
+		CircleID      string `json:"circleId"` // 圈子ID
+		Name          string `json:"name"` // 圈子名称
+		Avatar        string `json:"avatar"` // 头像
+		Description   string `json:"description"` // 简介
+		MemberCount   int64  `json:"memberCount"` // 成员数
+		JoinType      int8   `json:"joinType"` // 加入方式
+		Valid         bool   `json:"valid"` // 是否有效
+		AlreadyJoined bool   `json:"alreadyJoined"` // 是否已加入
+	}
+)
+
 @server (
 	group: circle
 )
@@ -241,6 +263,10 @@ service circle {
 	@doc "加入圈子"
 	@handler JoinCircle
 	post /api/circle/v1/circle/join (JoinCircleReq) returns (JoinCircleRes)
+
+	@doc "解析圈子邀请链接"
+	@handler ResolveCircleInvite
+	get /api/circle/v1/circle/invite_code (ResolveCircleInviteReq) returns (ResolveCircleInviteRes)
 
 	@doc "退出圈子"
 	@handler QuitCircle
