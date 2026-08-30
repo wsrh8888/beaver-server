@@ -98,9 +98,131 @@ type (
 		AgentId     string `json:"agentId"`
 		Content     string `json:"content"`
 		ClientMsgId string `json:"clientMsgId,optional"` // 幂等
+		ModelId     string `json:"modelId,optional"` // 官方/自定义业务ID；空则 auto
+		ModelSource string `json:"modelSource,optional"` // official / custom；空则 official
 	}
 	// 占位：实际为 SSE 流，不要当普通 JSON 响应用
 	SendAgentMessageRes  {}
+)
+
+// ==================== 用户自定义模型（挂在 UserID）====================
+//
+// 设计：
+//   - 配置归属当前登录用户，多端同步
+//   - Tier + Capabilities 与官方目录同构（供路由）
+//   - 对应表：agent_user_models（AgentUserModel）
+//
+// AgentModelCapabilities 能力画像（官方 / 自定义共用）
+type AgentModelCapabilities {
+	Vision           bool `json:"vision,optional"` // 多模态视觉
+	Tools            bool `json:"tools,optional"` // 工具调用
+	Reasoning        bool `json:"reasoning,optional"` // 强推理
+	StructuredOutput bool `json:"structuredOutput,optional"` // 结构化输出
+	LongContext      bool `json:"longContext,optional"` // 长上下文
+}
+
+type AgentModelItem {
+	ModelId      string                 `json:"modelId"`
+	Name         string                 `json:"name"` // 模型名称
+	Endpoint     string                 `json:"endpoint"` // 接口地址
+	ApiKeyMasked string                 `json:"apiKeyMasked"` // 列表脱敏展示，如 sk-***xxxx
+	Tier         string                 `json:"tier"` // fast/balanced/strong
+	Capabilities AgentModelCapabilities `json:"capabilities"` // 能力画像
+	Status       int32                  `json:"status"` // 0停用 1启用
+	CreatedAt    int64                  `json:"createdAt"` // unix ms
+}
+
+type (
+	CreateAgentModelReq {
+		UserID       string                 `header:"Beaver-User-Id"`
+		Name         string                 `json:"name"` // 模型名称
+		Endpoint     string                 `json:"endpoint"` // 接口地址
+		ApiKey       string                 `json:"apiKey"` // API Key
+		Tier         string                 `json:"tier,optional"` // 默认 balanced
+		Capabilities AgentModelCapabilities `json:"capabilities,optional"` // 能力画像
+	}
+	CreateAgentModelRes {
+		Model AgentModelItem `json:"model"`
+	}
+)
+
+type (
+	ListAgentModelsReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ListAgentModelsRes {
+		List []AgentModelItem `json:"list"`
+	}
+)
+
+type (
+	UpdateAgentModelReq {
+		UserID       string                 `header:"Beaver-User-Id"`
+		ModelId      string                 `json:"modelId"`
+		Name         string                 `json:"name,optional"`
+		Endpoint     string                 `json:"endpoint,optional"`
+		ApiKey       string                 `json:"apiKey,optional"` // 空则不改密钥
+		Tier         string                 `json:"tier,optional"`
+		Capabilities AgentModelCapabilities `json:"capabilities,optional"`
+		Status       int32                  `json:"status,optional"` // 0停用 1启用
+	}
+	UpdateAgentModelRes {
+		Model AgentModelItem `json:"model"`
+	}
+)
+
+type (
+	DeleteAgentModelReq {
+		UserID  string `header:"Beaver-User-Id"`
+		ModelId string `json:"modelId"`
+	}
+	DeleteAgentModelRes  {}
+)
+
+// ==================== 官方模型（平台提供，只读）====================
+//
+// 设计（对标大厂 model card + workload routing）：
+//   - Capabilities：固有能力画像（vision/tools/reasoning/...）
+//   - Tier：fast/balanced/strong（对标 Luna/Terra/Sol，非价格字段）
+//   - 不存 Advanced：展示标签由 capabilities 派生
+//   - agent_model_roles：任务角色 → 默认官方模型
+//
+type AgentOfficialModelItem {
+	ModelId      string                 `json:"modelId"`
+	Name         string                 `json:"name"` // 展示名称
+	Provider     string                 `json:"provider"` // 供应商标识
+	ModelName    string                 `json:"modelName"` // 实际调用模型名
+	Endpoint     string                 `json:"endpoint"` // 接口地址，空则平台默认
+	Tier         string                 `json:"tier"` // fast/balanced/strong
+	Capabilities AgentModelCapabilities `json:"capabilities"` // 能力画像
+	Sort         int32                  `json:"sort"` // 排序
+	Status       int32                  `json:"status"` // 0下架 1上架
+}
+
+type (
+	ListOfficialModelsReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ListOfficialModelsRes {
+		List []AgentOfficialModelItem `json:"list"`
+	}
+)
+
+// 平台任务角色路由（只读）：什么任务默认用哪个官方模型
+type AgentModelRoleItem {
+	Role            string `json:"role"` // router/chat/tools/vision/reason
+	ModelId         string `json:"modelId"` // 主选官方模型
+	FallbackModelId string `json:"fallbackModelId"` // 降级模型，可空
+	Status          int32  `json:"status"` // 0停用 1启用
+}
+
+type (
+	ListModelRolesReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ListModelRolesRes {
+		List []AgentModelRoleItem `json:"list"`
+	}
 )
 
 // ==================== 路由 ====================
@@ -120,6 +242,30 @@ service agent {
 	@doc "向 Agent 发消息（SSE 流式：accepted → delta* → done|error）"
 	@handler sendAgentMessage
 	post /api/agent/v1/sendMessage (SendAgentMessageReq) returns (SendAgentMessageRes)
+
+	@doc "创建用户自定义模型"
+	@handler createAgentModel
+	post /api/agent/v1/createModel (CreateAgentModelReq) returns (CreateAgentModelRes)
+
+	@doc "列出当前用户的自定义模型"
+	@handler listAgentModels
+	post /api/agent/v1/listModels (ListAgentModelsReq) returns (ListAgentModelsRes)
+
+	@doc "更新用户自定义模型"
+	@handler updateAgentModel
+	post /api/agent/v1/updateModel (UpdateAgentModelReq) returns (UpdateAgentModelRes)
+
+	@doc "删除用户自定义模型"
+	@handler deleteAgentModel
+	post /api/agent/v1/deleteModel (DeleteAgentModelReq) returns (DeleteAgentModelRes)
+
+	@doc "列出平台官方模型（只读，仅上架；含能力画像与档位）"
+	@handler listOfficialModels
+	post /api/agent/v1/listOfficialModels (ListOfficialModelsReq) returns (ListOfficialModelsRes)
+
+	@doc "列出平台任务角色默认模型路由（只读）"
+	@handler listModelRoles
+	post /api/agent/v1/listModelRoles (ListModelRolesReq) returns (ListModelRolesRes)
 }
 
 // goctl api go -api agent_api.api -dir . --home ../../../template

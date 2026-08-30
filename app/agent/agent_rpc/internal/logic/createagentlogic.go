@@ -40,12 +40,11 @@ func (l *CreateAgentLogic) CreateAgent(in *agent_rpc.CreateAgentReq) (*agent_rpc
 	}
 
 	agent := agent_models.Agent{
-		AgentID:     "agent_" + strings.ReplaceAll(uuid.NewString(), "-", ""),
-		UserID:      in.UserId,
-		Name:        name,
-		Avatar:      strings.TrimSpace(in.Avatar),
-		Description: strings.TrimSpace(in.Description),
-		Status:      1,
+		AgentID: "agent_" + strings.ReplaceAll(uuid.NewString(), "-", ""),
+		UserID:  in.UserId,
+		Name:    name,
+		Avatar:  strings.TrimSpace(in.Avatar),
+		Status:  1,
 	}
 	if err := l.svcCtx.DB.WithContext(l.ctx).Create(&agent).Error; err != nil {
 		l.Errorf("CreateAgent insert failed: %v", err)
@@ -53,9 +52,8 @@ func (l *CreateAgentLogic) CreateAgent(in *agent_rpc.CreateAgentReq) (*agent_rpc
 	}
 
 	return &agent_rpc.CreateAgentRes{
-		AgentId:     agent.AgentID,
-		Name:        agent.Name,
-		Avatar:      agent.Avatar,
-		Description: agent.Description,
+		AgentId: agent.AgentID,
+		Name:    agent.Name,
+		Avatar:  agent.Avatar,
 	}, nil
 }

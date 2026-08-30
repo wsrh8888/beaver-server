@@ -62,12 +62,21 @@ func (l *SendAgentMessageLogic) SendAgentMessage(emit sse.Emitter, req *types.Se
 		return
 	}
 
+	modelID, modelJSON, err := l.resolveModelPayload(req)
+	if err != nil {
+		l.Errorf("resolve model failed: %v", err)
+		_ = emit("error", map[string]any{"message": err.Error()})
+		return
+	}
+
 	stream, err := l.svcCtx.BeaverAgent.StreamAgentMessage(l.ctx, &pyagent.StreamAgentMessageReq{
 		UserMessageId: userMessageID,
 		AgentId:       req.AgentId,
 		UserId:        req.UserID,
 		Content:       content,
 		DeviceId:      req.DeviceId,
+		ModelId:       modelID,
+		ModelJson:     modelJSON,
 	})
 	if err != nil {
 		l.Errorf("StreamAgentMessage open failed: %v", err)
@@ -249,6 +258,92 @@ func (l *SendAgentMessageLogic) persistAssistantMessage(userID, agentID, content
 		}).Error
 	})
 	return msgID, seq, err
+}
+
+type agentModelPayload struct {
+	ModelId   string `json:"modelId"`
+	Source    string `json:"source"`
+	ModelName string `json:"modelName,omitempty"`
+	Endpoint  string `json:"endpoint,omitempty"`
+	ApiKey    string `json:"apiKey,omitempty"`
+	Provider  string `json:"provider,omitempty"`
+}
+
+// resolveModelPayload：按 modelSource/modelId 组装传给 beaver-agent 的 model_json。
+// auto / 空：取官方表 sort 最小的上架模型（含 apiKey）；库空则仍下发 auto 由 agent 本地配置兜底。
+// official：查官方表拿 modelName/endpoint/apiKey。
+// custom：查用户表拿 endpoint+apiKey。
+func (l *SendAgentMessageLogic) resolveModelPayload(req *types.SendAgentMessageReq) (string, string, error) {
+	modelID := strings.TrimSpace(req.ModelId)
+	source := strings.TrimSpace(req.ModelSource)
+	if source == "" {
+		source = "official"
+	}
+	if modelID == "" {
+		modelID = agent_models.OfficialModelIDAuto
+	}
+
+	if source == "official" && modelID == agent_models.OfficialModelIDAuto {
+		var row agent_models.AgentOfficialModel
+		err := l.svcCtx.DB.WithContext(l.ctx).
+			Where("status = ?", 1).
+			Order("sort asc, id asc").
+			First(&row).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				b, mErr := json.Marshal(agentModelPayload{ModelId: modelID, Source: "official"})
+				return modelID, string(b), mErr
+			}
+			return "", "", err
+		}
+		b, mErr := json.Marshal(officialPayload(row))
+		return row.ModelID, string(b), mErr
+	}
+
+	if source == "custom" {
+		var row agent_models.AgentUserModel
+		err := l.svcCtx.DB.WithContext(l.ctx).
+			Where("model_id = ? AND user_id = ? AND status = ?", modelID, strings.TrimSpace(req.UserID), 1).
+			First(&row).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return "", "", errors.New("custom model not found")
+			}
+			return "", "", err
+		}
+		b, err := json.Marshal(agentModelPayload{
+			ModelId:   row.ModelID,
+			Source:    "custom",
+			ModelName: row.Name,
+			Endpoint:  row.Endpoint,
+			ApiKey:    row.ApiKey,
+		})
+		return modelID, string(b), err
+	}
+
+	var row agent_models.AgentOfficialModel
+	err := l.svcCtx.DB.WithContext(l.ctx).
+		Where("model_id = ? AND status = ?", modelID, 1).
+		First(&row).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", "", errors.New("official model not found")
+		}
+		return "", "", err
+	}
+	b, err := json.Marshal(officialPayload(row))
+	return modelID, string(b), err
+}
+
+func officialPayload(row agent_models.AgentOfficialModel) agentModelPayload {
+	return agentModelPayload{
+		ModelId:   row.ModelID,
+		Source:    "official",
+		ModelName: row.ModelName,
+		Endpoint:  row.Endpoint,
+		ApiKey:    row.ApiKey,
+		Provider:  row.Provider,
+	}
 }
 
 func validateSendReq(req *types.SendAgentMessageReq) error {

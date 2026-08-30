@@ -22,6 +22,7 @@
 package database
 
 import (
+	"beaver/app/agent/agent_models"
 	"beaver/app/auth/auth_models"
 	"beaver/app/backend/backend_models"
 	"beaver/app/call/call_models"
@@ -37,6 +38,7 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
+	agentseed "beaver/database/agent"
 	fileseed "beaver/database/file"
 	openseed "beaver/database/open"
 	platformseed "beaver/database/platform"
@@ -196,6 +198,17 @@ func AllMigrations() []Migration {
 		{
 			Name:   "beaver_datasync",
 			Models: []any{&datasync_models.DatasyncModel{}},
+		},
+		{
+			Name: "beaver_agent",
+			Models: []any{
+				&agent_models.Agent{},
+				&agent_models.AgentMessage{},
+				&agent_models.AgentUserModel{},
+				&agent_models.AgentOfficialModel{},
+				&agent_models.AgentModelRole{},
+			},
+			Init: agentseed.InitOfficialModels,
 		},
 	}
 }

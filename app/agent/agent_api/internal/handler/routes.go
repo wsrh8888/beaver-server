@@ -19,6 +19,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: createAgentHandler(serverCtx),
 			},
 			{
+				// 创建用户自定义模型
+				Method:  http.MethodPost,
+				Path:    "/api/agent/v1/createModel",
+				Handler: createAgentModelHandler(serverCtx),
+			},
+			{
+				// 删除用户自定义模型
+				Method:  http.MethodPost,
+				Path:    "/api/agent/v1/deleteModel",
+				Handler: deleteAgentModelHandler(serverCtx),
+			},
+			{
 				// 获取 Agent 详情
 				Method:  http.MethodPost,
 				Path:    "/api/agent/v1/getAgent",
@@ -31,10 +43,34 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: listMessagesHandler(serverCtx),
 			},
 			{
+				// 列出平台任务角色默认模型路由（只读）
+				Method:  http.MethodPost,
+				Path:    "/api/agent/v1/listModelRoles",
+				Handler: listModelRolesHandler(serverCtx),
+			},
+			{
+				// 列出当前用户的自定义模型
+				Method:  http.MethodPost,
+				Path:    "/api/agent/v1/listModels",
+				Handler: listAgentModelsHandler(serverCtx),
+			},
+			{
+				// 列出平台官方模型（只读，仅上架；含能力画像与档位）
+				Method:  http.MethodPost,
+				Path:    "/api/agent/v1/listOfficialModels",
+				Handler: listOfficialModelsHandler(serverCtx),
+			},
+			{
 				// 向 Agent 发消息（SSE 流式：accepted → delta* → done|error）
 				Method:  http.MethodPost,
 				Path:    "/api/agent/v1/sendMessage",
 				Handler: sendAgentMessageHandler(serverCtx),
+			},
+			{
+				// 更新用户自定义模型
+				Method:  http.MethodPost,
+				Path:    "/api/agent/v1/updateModel",
+				Handler: updateAgentModelHandler(serverCtx),
 			},
 		},
 	)

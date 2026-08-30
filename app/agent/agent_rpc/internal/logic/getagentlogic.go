@@ -51,10 +51,9 @@ func (l *GetAgentLogic) GetAgent(in *agent_rpc.GetAgentReq) (*agent_rpc.GetAgent
 	}
 
 	return &agent_rpc.GetAgentRes{
-		AgentId:     agent.AgentID,
-		Name:        agent.Name,
-		Avatar:      agent.Avatar,
-		Description: agent.Description,
-		Status:      int32(agent.Status),
+		AgentId: agent.AgentID,
+		Name:    agent.Name,
+		Avatar:  agent.Avatar,
+		Status:  int32(agent.Status),
 	}, nil
 }

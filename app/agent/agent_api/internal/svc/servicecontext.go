@@ -20,9 +20,11 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
+	db := coregorm.InitGorm(c.Mysql.DataSource)
+
 	return &ServiceContext{
 		Config:   c,
-		DB:       coregorm.InitGorm(c.Mysql.DataSource),
+		DB:       db,
 		AgentRpc: agent.NewAgent(zrpc.MustNewClient(c.AgentRpc, rpcOpt)),
 		BeaverAgent: pyagent.NewClient(zrpc.MustNewClient(zrpc.RpcClientConf{
 			Endpoints: c.BeaverAgent.Endpoints,

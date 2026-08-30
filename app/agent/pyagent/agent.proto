@@ -13,6 +13,8 @@ message StreamAgentMessageReq {
   string content = 4;
   string trace_id = 5;
   string device_id = 6;
+  string model_id = 7;   // 业务模型ID；auto 表示由 agent 选模
+  string model_json = 8; // Go 解析后的调用配置 JSON（含 endpoint/apiKey 等）
 }
 
 message StreamAgentMessageEvent {

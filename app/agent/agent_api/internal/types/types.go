@@ -22,6 +22,57 @@ type AgentMessageItem struct {
 	CreatedAt   int64  `json:"createdAt"` // unix ms
 }
 
+type AgentModelCapabilities struct {
+	Vision           bool `json:"vision,optional"`           // 多模态视觉
+	Tools            bool `json:"tools,optional"`            // 工具调用
+	Reasoning        bool `json:"reasoning,optional"`        // 强推理
+	StructuredOutput bool `json:"structuredOutput,optional"` // 结构化输出
+	LongContext      bool `json:"longContext,optional"`      // 长上下文
+}
+
+type AgentModelItem struct {
+	ModelId      string                 `json:"modelId"`
+	Name         string                 `json:"name"`         // 模型名称
+	Endpoint     string                 `json:"endpoint"`     // 接口地址
+	ApiKeyMasked string                 `json:"apiKeyMasked"` // 列表脱敏展示，如 sk-***xxxx
+	Tier         string                 `json:"tier"`         // fast/balanced/strong
+	Capabilities AgentModelCapabilities `json:"capabilities"` // 能力画像
+	Status       int32                  `json:"status"`       // 0停用 1启用
+	CreatedAt    int64                  `json:"createdAt"`    // unix ms
+}
+
+type AgentModelRoleItem struct {
+	Role            string `json:"role"`            // router/chat/tools/vision/reason
+	ModelId         string `json:"modelId"`         // 主选官方模型
+	FallbackModelId string `json:"fallbackModelId"` // 降级模型，可空
+	Status          int32  `json:"status"`          // 0停用 1启用
+}
+
+type AgentOfficialModelItem struct {
+	ModelId      string                 `json:"modelId"`
+	Name         string                 `json:"name"`         // 展示名称
+	Provider     string                 `json:"provider"`     // 供应商标识
+	ModelName    string                 `json:"modelName"`    // 实际调用模型名
+	Endpoint     string                 `json:"endpoint"`     // 接口地址，空则平台默认
+	Tier         string                 `json:"tier"`         // fast/balanced/strong
+	Capabilities AgentModelCapabilities `json:"capabilities"` // 能力画像
+	Sort         int32                  `json:"sort"`         // 排序
+	Status       int32                  `json:"status"`       // 0下架 1上架
+}
+
+type CreateAgentModelReq struct {
+	UserID       string                 `header:"Beaver-User-Id"`
+	Name         string                 `json:"name"`                  // 模型名称
+	Endpoint     string                 `json:"endpoint"`              // 接口地址
+	ApiKey       string                 `json:"apiKey"`                // API Key
+	Tier         string                 `json:"tier,optional"`         // 默认 balanced
+	Capabilities AgentModelCapabilities `json:"capabilities,optional"` // 能力画像
+}
+
+type CreateAgentModelRes struct {
+	Model AgentModelItem `json:"model"`
+}
+
 type CreateAgentReq struct {
 	UserID      string `header:"Beaver-User-Id"`
 	Name        string `json:"name"`
@@ -33,6 +84,14 @@ type CreateAgentRes struct {
 	Agent AgentItem `json:"agent"`
 }
 
+type DeleteAgentModelReq struct {
+	UserID  string `header:"Beaver-User-Id"`
+	ModelId string `json:"modelId"`
+}
+
+type DeleteAgentModelRes struct {
+}
+
 type GetAgentReq struct {
 	UserID  string `header:"Beaver-User-Id"`
 	AgentId string `json:"agentId"`
@@ -40,6 +99,14 @@ type GetAgentReq struct {
 
 type GetAgentRes struct {
 	Agent AgentItem `json:"agent"`
+}
+
+type ListAgentModelsReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type ListAgentModelsRes struct {
+	List []AgentModelItem `json:"list"`
 }
 
 type ListMessagesReq struct {
@@ -53,13 +120,46 @@ type ListMessagesRes struct {
 	List []AgentMessageItem `json:"list"` // seq 升序
 }
 
+type ListModelRolesReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type ListModelRolesRes struct {
+	List []AgentModelRoleItem `json:"list"`
+}
+
+type ListOfficialModelsReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type ListOfficialModelsRes struct {
+	List []AgentOfficialModelItem `json:"list"`
+}
+
 type SendAgentMessageReq struct {
 	UserID      string `header:"Beaver-User-Id"`
 	DeviceId    string `header:"deviceId,optional"`
 	AgentId     string `json:"agentId"`
 	Content     string `json:"content"`
 	ClientMsgId string `json:"clientMsgId,optional"` // 幂等
+	ModelId     string `json:"modelId,optional"`     // 官方/自定义业务ID；空则 auto
+	ModelSource string `json:"modelSource,optional"` // official / custom；空则 official
 }
 
 type SendAgentMessageRes struct {
+}
+
+type UpdateAgentModelReq struct {
+	UserID       string                 `header:"Beaver-User-Id"`
+	ModelId      string                 `json:"modelId"`
+	Name         string                 `json:"name,optional"`
+	Endpoint     string                 `json:"endpoint,optional"`
+	ApiKey       string                 `json:"apiKey,optional"` // 空则不改密钥
+	Tier         string                 `json:"tier,optional"`
+	Capabilities AgentModelCapabilities `json:"capabilities,optional"`
+	Status       int32                  `json:"status,optional"` // 0停用 1启用
+}
+
+type UpdateAgentModelRes struct {
+	Model AgentModelItem `json:"model"`
 }

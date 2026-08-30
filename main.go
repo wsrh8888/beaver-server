@@ -39,6 +39,7 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
+	agentseed "beaver/database/agent"
 	fileseed "beaver/database/file"
 	openseed "beaver/database/open"
 	"beaver/database/platform"
@@ -266,7 +267,13 @@ func main() {
 			name: "beaver_agent",
 			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_agent?charset=utf8mb4&parseTime=True&loc=Local",
 			run: func(db *gorm.DB) error {
-				return db.AutoMigrate(&agent_models.Agent{}, &agent_models.AgentMessage{})
+				return db.AutoMigrate(
+					&agent_models.Agent{},
+					&agent_models.AgentMessage{},
+					&agent_models.AgentUserModel{},
+					&agent_models.AgentOfficialModel{},
+					&agent_models.AgentModelRole{},
+				)
 			},
 		},
 	}
@@ -287,6 +294,7 @@ func main() {
 	userDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_user?charset=utf8mb4&parseTime=True&loc=Local")
 	authDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local")
 	openDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local")
+	agentDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_agent?charset=utf8mb4&parseTime=True&loc=Local")
 	_ = fileseed.InitDefaultFiles(fileDB)
 	_ = platform.InitPlatform(platformDB)
 	if err := userseed.InitDefaultUser(userDB, authDB, openDB); err != nil {
@@ -295,6 +303,10 @@ func main() {
 	}
 	if err := openseed.InitQuickLoginApp(openDB); err != nil {
 		fmt.Printf("默认开放应用初始化失败: %v\n", err)
+		return
+	}
+	if err := agentseed.InitOfficialModels(agentDB); err != nil {
+		fmt.Printf("默认官方模型初始化失败: %v\n", err)
 		return
 	}
 
