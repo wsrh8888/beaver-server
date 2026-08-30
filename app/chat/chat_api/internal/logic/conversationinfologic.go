@@ -32,21 +32,22 @@ import (
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/conversation"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type ConversationInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewConversationInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ConversationInfoLogic {
 	return &ConversationInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("conversation_info", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -64,6 +65,16 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 
 	var conversationMeta chat_models.ChatConversationMeta
 	metaErr := l.svcCtx.DB.Where("conversation_id = ?", req.ConversationID).First(&conversationMeta).Error
+	if metaErr != nil && !errors.Is(metaErr, gorm.ErrRecordNotFound) {
+		l.logger.Error(model.LogMsg{
+			Text: "查询会话元数据失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"err":            metaErr.Error(),
+			},
+		})
+	}
 
 	if err == nil {
 		if metaErr == nil {
@@ -72,6 +83,14 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		resp.UpdatedAt = userConversation.UpdatedAt.String()
 		resp.IsTop = userConversation.IsPinned
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		l.logger.Error(model.LogMsg{
+			Text: "查询会话关系失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"err":            err.Error(),
+			},
+		})
 		return nil, err
 	}
 
@@ -100,10 +119,27 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			UserID: opponentID,
 		})
 		if userErr != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "获取对方用户信息失败",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+					"opponentId":     opponentID,
+					"err":            userErr.Error(),
+				},
+			})
 			return nil, userErr
 		}
 		if userRes.UserInfo == nil {
-			return nil, errors.New("user not found")
+			l.logger.Warn(model.LogMsg{
+				Text: "用户不存在",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+					"opponentId":     opponentID,
+				},
+			})
+			return nil, errors.New("用户不存在")
 		}
 		resp.Avatar = userRes.UserInfo.Avatar
 		resp.NickName = userRes.UserInfo.NickName
@@ -117,10 +153,27 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			GroupIDs: []string{groupID},
 		})
 		if groupErr != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "获取群组信息失败",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+					"groupId":        groupID,
+					"err":            groupErr.Error(),
+				},
+			})
 			return nil, groupErr
 		}
 		if len(groupRes.Groups) == 0 {
-			return nil, errors.New("group not found")
+			l.logger.Warn(model.LogMsg{
+				Text: "群组不存在",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+					"groupId":        groupID,
+				},
+			})
+			return nil, errors.New("群组不存在")
 		}
 		group := groupRes.Groups[0]
 		resp.Avatar = group.Avatar
@@ -128,5 +181,13 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		resp.ChatType = 2
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "查询会话详情成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"chatType":       resp.ChatType,
+		},
+	})
 	return resp, nil
 }

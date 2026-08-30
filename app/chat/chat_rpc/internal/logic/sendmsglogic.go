@@ -37,24 +37,23 @@ import (
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type SendMsgLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
 	return &SendMsgLogic{
 		ctx:    ctx,
-		logger: logger.New("send_msg"),
+		logger: beaverlog.New("send_msg", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -629,7 +628,7 @@ func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, err
 	case ctype.VideoMsgType:
 		if m.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileUrl:       m.VideoMsg.FileUrl,
+				FileUrl:      m.VideoMsg.FileUrl,
 				Width:        int32(m.VideoMsg.Width),
 				Height:       int32(m.VideoMsg.Height),
 				Duration:     int32(m.VideoMsg.Duration),

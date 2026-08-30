@@ -7,9 +7,18 @@ Etcd:
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_user?charset=utf8mb4&parseTime=True&loc=Local
 Log:
+  ServiceName: user_rpc
+  Mode: file
+  Path: logs/user_rpc
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05
+  KeepDays: 7
   Stat: false
+# go-zero 自带：在独立端口暴露 /metrics（ListenOn 30000 + 7000）
+Prometheus:
+  Host: 0.0.0.0
+  Port: 37000
+  Path: /metrics
 RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'

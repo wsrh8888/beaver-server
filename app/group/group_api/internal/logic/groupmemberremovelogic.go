@@ -32,23 +32,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type GroupMemberRemoveLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGroupMemberRemoveLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupMemberRemoveLogic {
 	return &GroupMemberRemoveLogic{
 		ctx:    ctx,
-		logger: logger.New("group_member_remove"),
+		logger: beaverlog.New("group_member_remove", ctx),
 		svcCtx: svcCtx,
 	}
 }

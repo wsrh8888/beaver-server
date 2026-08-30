@@ -23,6 +23,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -30,21 +31,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type HideChatLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 隐藏/显示会话
 func NewHideChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HideChatLogic {
 	return &HideChatLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("hide_chat", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -52,10 +53,8 @@ func NewHideChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HideChat
 func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRes, err error) {
 	resp = &types.HideChatRes{}
 
-	// 获取下一个版本号
 	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
 
-	// 更新会话隐藏状态和版本号
 	err = l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
 		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 		Updates(map[string]interface{}{
@@ -63,11 +62,28 @@ func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRe
 			"version":   version,
 		}).Error
 	if err != nil {
-		l.Logger.Errorf("hide chat update failed: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新隐藏状态失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"isHidden":       req.IsHidden,
+				"err":            err.Error(),
+			},
+		})
 		return nil, err
 	}
 
-	// 发送WS通知给自己（更新本地数据）
+	l.logger.Info(model.LogMsg{
+		Text: "隐藏会话成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"isHidden":       req.IsHidden,
+			"version":        version,
+		},
+	})
+
 	go func() {
 		l.notifyHiddenUpdate(req.ConversationID, req.UserID, version)
 	}()
@@ -75,15 +91,20 @@ func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRe
 	return resp, nil
 }
 
-// 发送隐藏状态更新通知
 func (l *HideChatLogic) notifyHiddenUpdate(conversationId, userId string, version int64) {
 	defer func() {
 		if r := recover(); r != nil {
-			l.Logger.Errorf("发送隐藏通知时发生panic: %v", r)
+			l.logger.Error(model.LogMsg{
+				Text: "推送隐藏通知异常",
+				Data: map[string]any{
+					"userId":         userId,
+					"conversationId": conversationId,
+					"panic":          fmt.Sprint(r),
+				},
+			})
 		}
 	}()
 
-	// 构建用户会话表更新数据
 	userConversationsUpdate := map[string]interface{}{
 		"table":          "user_conversations",
 		"userId":         userId,
@@ -94,12 +115,10 @@ func (l *HideChatLogic) notifyHiddenUpdate(conversationId, userId string, versio
 			},
 		},
 	}
-	// 发送给自己
 	tableUpdates := []map[string]interface{}{userConversationsUpdate}
-	messageType := wsTypeConst.ChatUserConversationReceive
 	payload := map[string]interface{}{
 		"command":  wsCommandConst.CHAT_MESSAGE,
-		"type":     messageType,
+		"type":     wsTypeConst.ChatUserConversationReceive,
 		"senderId": userId,
 		"targetId": userId,
 		"body": map[string]interface{}{
@@ -107,8 +126,24 @@ func (l *HideChatLogic) notifyHiddenUpdate(conversationId, userId string, versio
 		},
 		"conversationId": conversationId,
 	}
-	l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
+	if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "推送隐藏通知失败",
+			Data: map[string]any{
+				"userId":         userId,
+				"conversationId": conversationId,
+				"err":            err.Error(),
+			},
+		})
+		return
+	}
 
-	l.Logger.Infof("发送隐藏状态更新通知: user=%s, conversation=%s, version=%d",
-		userId, conversationId, version)
+	l.logger.Info(model.LogMsg{
+		Text: "推送隐藏状态更新通知",
+		Data: map[string]any{
+			"userId":         userId,
+			"conversationId": conversationId,
+			"version":        version,
+		},
+	})
 }

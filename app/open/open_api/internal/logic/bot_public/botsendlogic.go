@@ -35,24 +35,23 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type BotSendLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 推送机器人发送消息到群（第三方服务如 Jenkins/GitLab 调用此接口）
 func NewBotSendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BotSendLogic {
 	return &BotSendLogic{
 		ctx:    ctx,
-		logger: logger.New("bot_send"),
+		logger: beaverlog.New("bot_send", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -201,7 +200,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 		msg.Type = 3 // 视频消息
 		msg.VideoMsg = &chat_rpc.VideoMsg{
-			FileUrl:       req.Video.URL,
+			FileUrl:      req.Video.URL,
 			Width:        int32(req.Video.Width),
 			Height:       int32(req.Video.Height),
 			Duration:     int32(req.Video.Duration),

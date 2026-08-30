@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024-2026 Beaver IM Team
  * SPDX-License-Identifier: MIT
  * Project: beaver-server
@@ -22,21 +22,23 @@
 package utils
 
 import (
+	"context"
 	"time"
 
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
-var accessLog = logger.New("http")
-
-// LogRequest 记录 HTTP/gRPC 请求日志
-func LogRequest(method, path string, req, resp interface{}, err error, startTime time.Time) {
+// LogRequest 记录 HTTP/gRPC 访问日志。ctx 用于带上 trace。
+func LogRequest(ctx context.Context, method, path string, req, resp interface{}, err error, statusCode int, startTime time.Time) {
 	duration := time.Since(startTime)
 	data := map[string]interface{}{
 		"method":   method,
 		"path":     path,
 		"duration": duration.String(),
+	}
+	if statusCode > 0 {
+		data["status"] = statusCode
 	}
 	if req != nil {
 		data["req"] = req
@@ -45,17 +47,14 @@ func LogRequest(method, path string, req, resp interface{}, err error, startTime
 		data["resp"] = resp
 	}
 
-	if err != nil {
-		data["err"] = err.Error()
-		accessLog.Error(model.LogMsg{
-			Text: "请求失败",
-			Data: data,
-		})
+	lg := beaverlog.New("http", ctx)
+	if err != nil || statusCode >= 400 {
+		if err != nil {
+			data["err"] = err.Error()
+		}
+		lg.Error(model.LogMsg{Text: "请求失败", Data: data})
 		return
 	}
 
-	accessLog.Info(model.LogMsg{
-		Text: "请求成功",
-		Data: data,
-	})
+	lg.Info(model.LogMsg{Text: "请求完成", Data: data})
 }

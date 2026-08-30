@@ -19,38 +19,11 @@
  * beaver-server-header-v1
  */
 
-package main
+package model
 
-import (
-	"beaver/app/call/call_api/internal/config"
-	"beaver/app/call/call_api/internal/handler"
-	"beaver/app/call/call_api/internal/svc"
-	"beaver/common/etcd"
-	"beaver/utils/beaverlog"
-	"flag"
-	"fmt"
-
-	"github.com/zeromicro/go-zero/core/conf"
-	"github.com/zeromicro/go-zero/rest"
-)
-
-var configFile = flag.String("f", "etc/call.yaml", "the config file")
-
-func main() {
-	flag.Parse()
-
-	var c config.Config
-	conf.MustLoad(*configFile, &c)
-	beaverlog.Init("call_api")
-
-	server := rest.MustNewServer(c.RestConf)
-	defer server.Stop()
-
-	ctx := svc.NewServiceContext(c)
-	handler.RegisterHandlers(server, ctx)
-
-	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
-
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
-	server.Start()
+// LogMsg 结构化日志内容。
+// Text 用中文短语，禁止空格；细节放 Data。
+type LogMsg struct {
+	Text string      `json:"text"`
+	Data interface{} `json:"data,omitempty"`
 }

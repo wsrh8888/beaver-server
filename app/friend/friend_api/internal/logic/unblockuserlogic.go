@@ -28,24 +28,23 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type UnblockUserLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 取消拉黑
 func NewUnblockUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UnblockUserLogic {
 	return &UnblockUserLogic{
 		ctx:    ctx,
-		logger: logger.New("unblock_user"),
+		logger: beaverlog.New("unblock_user", ctx),
 		svcCtx: svcCtx,
 	}
 }

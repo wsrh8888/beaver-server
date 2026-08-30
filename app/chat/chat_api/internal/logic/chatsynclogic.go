@@ -29,21 +29,21 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ChatSyncLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 聊天数据同步
 func NewChatSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatSyncLogic {
 	return &ChatSyncLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("chat_sync", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -81,7 +81,16 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 	// 查询数据
 	err = query.Order("seq ASC").Limit(limit + 1).Find(&chats).Error
 	if err != nil {
-		l.Errorf("查询聊天数据失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询聊天同步数据失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"fromSeq":        req.FromSeq,
+				"toSeq":          req.ToSeq,
+				"err":            err.Error(),
+			},
+		})
 		return nil, err
 	}
 
@@ -102,7 +111,14 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 			// 将Msg结构体序列化为JSON字符串
 			msgBytes, err := json.Marshal(chat.Msg)
 			if err != nil {
-				l.Errorf("序列化消息内容失败: %v", err)
+				l.logger.Error(model.LogMsg{
+					Text: "消息内容序列化失败",
+					Data: map[string]any{
+						"userId":    req.UserID,
+						"messageId": chat.MessageID,
+						"err":       err.Error(),
+					},
+				})
 				msgJson = chat.MsgPreview // 出错时使用预览
 			} else {
 				msgJson = string(msgBytes)
@@ -148,6 +164,15 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 		NextSeq:  nextSeq,
 	}
 
-	l.Infof("聊天数据同步完成，用户ID: %s, 返回消息数: %d, 还有更多: %v", req.UserID, len(messages), hasMore)
+	l.logger.Info(model.LogMsg{
+		Text: "聊天同步完成",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"count":          len(messages),
+			"hasMore":        hasMore,
+			"nextSeq":        nextSeq,
+		},
+	})
 	return resp, nil
 }

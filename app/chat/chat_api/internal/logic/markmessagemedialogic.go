@@ -23,6 +23,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -30,23 +31,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type MarkMessageMediaLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewMarkMessageMediaLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkMessageMediaLogic {
 	return &MarkMessageMediaLogic{
 		ctx:    ctx,
-		logger: logger.New("mark_message_media"),
+		logger: beaverlog.New("mark_message_media", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -65,7 +65,14 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 			continue
 		}
 		if err != gorm.ErrRecordNotFound {
-			logx.WithContext(l.ctx).Errorf("查询消息媒体状态失败: userId=%s, messageId=%s, error=%v", req.UserID, messageID, err)
+			l.logger.Error(model.LogMsg{
+				Text: "查询消息媒体状态失败",
+				Data: map[string]any{
+					"userId":    req.UserID,
+					"messageId": messageID,
+					"err":       err.Error(),
+				},
+			})
 			return nil, err
 		}
 
@@ -76,7 +83,14 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 			Version:   version,
 		}
 		if err := l.svcCtx.DB.Create(&record).Error; err != nil {
-			logx.WithContext(l.ctx).Errorf("记录消息媒体状态失败: userId=%s, messageId=%s, error=%v", req.UserID, messageID, err)
+			l.logger.Error(model.LogMsg{
+				Text: "记录消息媒体状态失败",
+				Data: map[string]any{
+					"userId":    req.UserID,
+					"messageId": messageID,
+					"err":       err.Error(),
+				},
+			})
 			return nil, err
 		}
 		newMessageIDs = append(newMessageIDs, messageID)
@@ -88,7 +102,7 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 
 	l.logger.Info(model.LogMsg{
 		Text: "标记消息媒体状态成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"userId": req.UserID,
 			"count":  len(newMessageIDs),
 		},
@@ -100,7 +114,10 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 func (l *MarkMessageMediaLogic) notifyMessageMedia(userID string, messageIDs []string) {
 	defer func() {
 		if r := recover(); r != nil {
-			logx.WithContext(l.ctx).Errorf("推送消息媒体状态失败 panic: %v", r)
+			l.logger.Error(model.LogMsg{
+				Text: "推送消息媒体状态异常",
+				Data: map[string]any{"userId": userID, "panic": fmt.Sprint(r)},
+			})
 		}
 	}()
 
@@ -122,6 +139,9 @@ func (l *MarkMessageMediaLogic) notifyMessageMedia(userID string, messageIDs []s
 		},
 	}
 	if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
-		logx.WithContext(l.ctx).Errorf("推送消息媒体状态失败: userId=%s, error=%v", userID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "推送消息媒体状态失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
 	}
 }

@@ -32,22 +32,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type HangupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 主动挂断或拒绝通话
 func NewHangupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HangupLogic {
 	return &HangupLogic{
 		ctx:    ctx,
-		logger: logger.New("hangup_call"),
+		logger: beaverlog.New("hangup_call", ctx),
 		svcCtx: svcCtx,
 	}
 }

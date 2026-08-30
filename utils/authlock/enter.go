@@ -27,8 +27,8 @@ import (
 	"fmt"
 	"time"
 
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/go-redis/redis"
 )
@@ -42,13 +42,12 @@ const (
 var (
 	ErrTooManyAttempts = errors.New("尝试次数过多，请15分钟后再试")
 	ErrInternal        = errors.New("服务内部异常")
-	log                = logger.New("authlock")
 )
 
 func CheckLocked(ctx context.Context, redisClient *redis.Client, lockKey string) error {
 	exists, err := redisClient.Exists(lockKey).Result()
 	if err != nil {
-		log.Error(model.LogMsg{
+		beaverlog.New("authlock", ctx).Error(model.LogMsg{
 			Text: "检查锁定状态失败",
 			Data: map[string]interface{}{"lockKey": lockKey, "err": err.Error()},
 		})
@@ -63,7 +62,7 @@ func CheckLocked(ctx context.Context, redisClient *redis.Client, lockKey string)
 func RecordFailure(ctx context.Context, redisClient *redis.Client, failKey, lockKey, event, scope string) error {
 	count, err := redisClient.Incr(failKey).Result()
 	if err != nil {
-		log.Error(model.LogMsg{
+		beaverlog.New("authlock", ctx).Error(model.LogMsg{
 			Text: "递增失败计数失败",
 			Data: map[string]interface{}{"failKey": failKey, "err": err.Error()},
 		})
@@ -73,7 +72,7 @@ func RecordFailure(ctx context.Context, redisClient *redis.Client, failKey, lock
 		_ = redisClient.Expire(failKey, failWindow).Err()
 	}
 
-	log.Warn(model.LogMsg{
+	beaverlog.New("authlock", ctx).Warn(model.LogMsg{
 		Text: failureText(event),
 		Data: map[string]interface{}{
 			"scope": scope,
@@ -84,7 +83,7 @@ func RecordFailure(ctx context.Context, redisClient *redis.Client, failKey, lock
 	if count >= maxFailures {
 		_ = redisClient.Set(lockKey, "1", lockDuration).Err()
 		_ = redisClient.Del(failKey).Err()
-		log.Error(model.LogMsg{
+		beaverlog.New("authlock", ctx).Error(model.LogMsg{
 			Text: lockedText(event),
 			Data: map[string]interface{}{
 				"scope": scope,

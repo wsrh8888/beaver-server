@@ -27,23 +27,20 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type CancelQrCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCancelQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CancelQrCodeLogic {
 	return &CancelQrCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("cancel_qrcode"),
+		logger: beaverlog.New("cancel_qrcode", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -57,13 +54,16 @@ func (l *CancelQrCodeLogic) CancelQrCode(req *types.CancelQrCodeReq) (resp *type
 	}
 
 	if err := l.svcCtx.OAuth.Cancel(req.SceneID, req.UserID); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码取消失败",
+			Data: map[string]any{"sceneId": req.SceneID, "userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
-	logx.Infof("扫码授权已取消: sceneId=%s, userId=%s", req.SceneID, req.UserID)
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth扫码取消成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"sceneId": req.SceneID,
 			"userId":  req.UserID,
 		},

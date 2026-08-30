@@ -29,24 +29,23 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type MuteAllGroupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 全员禁言/解禁
 func NewMuteAllGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteAllGroupLogic {
 	return &MuteAllGroupLogic{
 		ctx:    ctx,
-		logger: logger.New("mute_all_group"),
+		logger: beaverlog.New("mute_all_group", ctx),
 		svcCtx: svcCtx,
 	}
 }

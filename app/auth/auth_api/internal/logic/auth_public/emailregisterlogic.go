@@ -32,24 +32,21 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/authlock"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type EmailRegisterLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewEmailRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EmailRegisterLogic {
 	return &EmailRegisterLogic{
 		ctx:    ctx,
-		logger: logger.New("email_register"),
+		logger: beaverlog.New("email_register", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -71,21 +68,26 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (*types.
 		Email: req.Email, NickName: nickName, Source: 2,
 	})
 	if err != nil {
-		logx.Errorf("创建用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户失败",
+			Data: map[string]any{"email": req.Email, "err": err.Error()},
+		})
 		return nil, errors.New("注册失败")
 	}
 
 	if err := l.svcCtx.DB.Create(&auth_models.AuthCredentialModel{
 		UserID: createRes.UserID, Password: pwd.HahPwd(req.Password),
 	}).Error; err != nil {
-		logx.Errorf("创建用户凭证失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户凭证失败",
+			Data: map[string]any{"userId": createRes.UserID, "err": err.Error()},
+		})
 		return nil, errors.New("创建用户凭证失败")
 	}
 
-	logx.Infof("用户注册成功: userID=%s, email=%s", createRes.UserID, req.Email)
 	l.logger.Info(model.LogMsg{
 		Text: "邮箱注册成功",
-		Data: map[string]interface{}{"userId": createRes.UserID},
+		Data: map[string]any{"userId": createRes.UserID},
 	})
 	return &types.EmailRegisterRes{}, nil
 }

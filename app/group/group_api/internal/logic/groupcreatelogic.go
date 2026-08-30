@@ -36,8 +36,8 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	utils "beaver/utils/rand"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -46,13 +46,13 @@ import (
 type GroupCreateLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGroupCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupCreateLogic {
 	return &GroupCreateLogic{
 		ctx:    ctx,
-		logger: logger.New("group_create"),
+		logger: beaverlog.New("group_create", ctx),
 		svcCtx: svcCtx,
 	}
 }

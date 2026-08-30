@@ -29,7 +29,8 @@ import (
 	"beaver/app/auth/auth_rpc/internal/server"
 	"beaver/app/auth/auth_rpc/internal/svc"
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
-	"beaver/utils/logger"
+	grpcMiddleware "beaver/common/middleware/grpc"
+	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -45,7 +46,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("auth_rpc")
+	beaverlog.Init("auth_rpc")
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
@@ -57,6 +58,9 @@ func main() {
 	})
 	defer s.Stop()
 
+	s.AddUnaryInterceptors(grpcMiddleware.TraceServerInterceptor)
+
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
+
 	s.Start()
 }

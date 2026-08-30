@@ -36,23 +36,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type QuitGroupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewQuitGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QuitGroupLogic {
 	return &QuitGroupLogic{
 		ctx:    ctx,
-		logger: logger.New("quit_group"),
+		logger: beaverlog.New("quit_group", ctx),
 		svcCtx: svcCtx,
 	}
 }

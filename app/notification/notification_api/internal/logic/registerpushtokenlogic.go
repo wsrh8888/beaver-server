@@ -31,24 +31,23 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
-
 type RegisterPushTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRegisterPushTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RegisterPushTokenLogic {
 	return &RegisterPushTokenLogic{
 		ctx:    ctx,
-		logger: logger.New("register_push_token"),
+		logger: beaverlog.New("register_push_token", ctx),
 		svcCtx: svcCtx,
 	}
 }

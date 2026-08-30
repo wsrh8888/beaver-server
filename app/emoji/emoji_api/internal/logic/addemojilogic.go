@@ -29,8 +29,8 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -38,17 +38,16 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type AddEmojiLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAddEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddEmojiLogic {
 	return &AddEmojiLogic{
 		ctx:    ctx,
-		logger: logger.New("add_emoji"),
+		logger: beaverlog.New("add_emoji", ctx),
 		svcCtx: svcCtx,
 	}
 }

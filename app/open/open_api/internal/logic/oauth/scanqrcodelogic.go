@@ -27,23 +27,20 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type ScanQrCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewScanQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ScanQrCodeLogic {
 	return &ScanQrCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("scan_qrcode"),
+		logger: beaverlog.New("scan_qrcode", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -57,13 +54,16 @@ func (l *ScanQrCodeLogic) ScanQrCode(req *types.ScanQrCodeReq) (resp *types.Scan
 	}
 
 	if err := l.svcCtx.OAuth.MarkScanned(req.SceneID, req.UserID); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码标记失败",
+			Data: map[string]any{"sceneId": req.SceneID, "userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
-	logx.Infof("扫码会话已标记 scanned: sceneId=%s, userId=%s", req.SceneID, req.UserID)
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth扫码成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"sceneId": req.SceneID,
 			"userId":  req.UserID,
 		},

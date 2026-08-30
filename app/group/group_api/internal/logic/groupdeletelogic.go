@@ -32,23 +32,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type GroupDeleteLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGroupDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupDeleteLogic {
 	return &GroupDeleteLogic{
 		ctx:    ctx,
-		logger: logger.New("group_delete"),
+		logger: beaverlog.New("group_delete", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -144,7 +143,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 						},
 						{
 							"table": "group_members",
-							"data": memberData,
+							"data":  memberData,
 						},
 					},
 				},

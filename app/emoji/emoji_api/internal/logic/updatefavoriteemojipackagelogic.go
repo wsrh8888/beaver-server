@@ -30,8 +30,8 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -44,14 +44,14 @@ import (
 type UpdateFavoriteEmojiPackageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateFavoriteEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateFavoriteEmojiPackageLogic {
 	return &UpdateFavoriteEmojiPackageLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		logger: logger.New("update_favorite_emoji_package"),
+		logger: beaverlog.New("update_favorite_emoji_package", ctx),
 	}
 }
 

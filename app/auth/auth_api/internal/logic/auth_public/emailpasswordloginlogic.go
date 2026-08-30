@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024-2026 Beaver IM Team
  * SPDX-License-Identifier: MIT
  * Project: beaver-server
@@ -34,23 +34,23 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
 	"beaver/utils/authlock"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 )
 
 type EmailPasswordLoginLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewEmailPasswordLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EmailPasswordLoginLogic {
 	return &EmailPasswordLoginLogic{
 		ctx:    ctx,
-		logger: logger.New("email_password_login"),
+		logger: beaverlog.New("email_password_login", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -76,6 +76,10 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 		return nil, errors.New("用户凭证不存在")
 	}
 	if !pwd.CheckPad(credential.Password, req.Password) {
+		l.logger.Warn(model.LogMsg{
+			Text: "邮箱密码错误",
+			Data: map[string]any{"email": req.Email},
+		})
 		if lockErr := authlock.RecordFailure(l.ctx, l.svcCtx.Redis, failKey, lockKey, "login", "email"); lockErr != nil {
 			return nil, lockErr
 		}
@@ -114,7 +118,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 
 	l.logger.Info(model.LogMsg{
 		Text: "邮箱密码登录成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"userId":      userInfo.UserId,
 			"deviceGroup": deviceGroup,
 		},

@@ -28,22 +28,23 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/auth/auth_rpc/internal/svc"
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type CheckDeviceActiveLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCheckDeviceActiveLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CheckDeviceActiveLogic {
 	return &CheckDeviceActiveLogic{
 		ctx:    ctx,
+		logger: beaverlog.New("check_device_active", ctx),
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
 	}
 }
 
@@ -56,12 +57,33 @@ func (l *CheckDeviceActiveLogic) CheckDeviceActive(in *auth_rpc.CheckDeviceActiv
 	err := l.svcCtx.DB.Where("user_id = ? AND device_id = ? AND is_active = ?",
 		in.UserId, in.DeviceId, true).First(&device).Error
 	if err == gorm.ErrRecordNotFound {
+		l.logger.Warn(model.LogMsg{
+			Text: "设备未激活",
+			Data: map[string]any{
+				"userId":   in.UserId,
+				"deviceId": in.DeviceId,
+			},
+		})
 		return &auth_rpc.CheckDeviceActiveRes{Active: false}, nil
 	}
 	if err != nil {
-		l.Errorf("校验设备状态失败: userId=%s, deviceId=%s, err=%v", in.UserId, in.DeviceId, err)
+		l.logger.Error(model.LogMsg{
+			Text: "校验设备状态失败",
+			Data: map[string]any{
+				"userId":   in.UserId,
+				"deviceId": in.DeviceId,
+				"err":      err.Error(),
+			},
+		})
 		return nil, errors.New("校验设备状态失败")
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "设备校验通过",
+		Data: map[string]any{
+			"userId":   in.UserId,
+			"deviceId": in.DeviceId,
+		},
+	})
 	return &auth_rpc.CheckDeviceActiveRes{Active: true}, nil
 }

@@ -34,16 +34,55 @@ import (
 
 const (
 	// 与 beaver-desktop / beaver-open 的 openAppId 保持一致
-	defaultAppID     = "app_2db39e38"
-	defaultAppSecret = "beaver_im_oauth_secret_dev"
-	defaultOwnerUserID = "100000"
-	defaultAppName     = "海狸IM"
-	defaultAppDesc     = "系统初始化默认应用（OAuth 登录）"
+	defaultAppID         = "app_2db39e38"
+	defaultAppSecret     = "beaver_im_oauth_secret_dev"
+	defaultOwnerUserID   = "100000"
+	defaultOwnerEmail    = "751135385@qq.com"
+	defaultOwnerRealName = "默认开发者"
+	defaultAppName       = "海狸IM"
+	defaultAppDesc       = "系统初始化默认应用（OAuth 登录）"
 	defaultDesktopScheme = "beaver://"
 )
 
+// InitDefaultDeveloper 初始化开放平台默认已审核开发者（绑定 userId=100000）
+func InitDefaultDeveloper(db *gorm.DB) error {
+	var developer open_models.OpenDeveloper
+	err := db.Where("user_id = ?", defaultOwnerUserID).First(&developer).Error
+	if err == gorm.ErrRecordNotFound {
+		developer = open_models.OpenDeveloper{
+			UserID:      defaultOwnerUserID,
+			RealName:    defaultOwnerRealName,
+			CompanyName: "Beaver",
+			Email:       defaultOwnerEmail,
+			Description: "系统初始化默认开发者",
+			Status:      1,
+		}
+		if err := db.Create(&developer).Error; err != nil {
+			return fmt.Errorf("创建默认开发者失败: %w", err)
+		}
+		log.Printf("创建默认开发者成功: userId=%s", defaultOwnerUserID)
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("查询默认开发者失败: %w", err)
+	}
+	if developer.Status != 1 {
+		if err := db.Model(&developer).Update("status", 1).Error; err != nil {
+			return fmt.Errorf("更新默认开发者状态失败: %w", err)
+		}
+		log.Printf("默认开发者已审核通过: userId=%s", defaultOwnerUserID)
+		return nil
+	}
+	log.Printf("默认开发者已存在: userId=%s", defaultOwnerUserID)
+	return nil
+}
+
 // InitQuickLoginApp 初始化开放平台默认「海狸IM」应用（启用 Desktop + H5 OAuth，不含机器人等能力）
 func InitQuickLoginApp(db *gorm.DB) error {
+	if err := InitDefaultDeveloper(db); err != nil {
+		return err
+	}
+
 	var app open_models.OpenApp
 	err := db.Where("app_id = ?", defaultAppID).First(&app).Error
 	if err == gorm.ErrRecordNotFound {

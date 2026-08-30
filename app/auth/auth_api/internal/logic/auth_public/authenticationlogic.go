@@ -30,22 +30,22 @@ import (
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/common/middleware/ua"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AuthenticationLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuthenticationLogic {
 	return &AuthenticationLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("authentication", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -60,6 +60,10 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (*typ
 
 	claims, err := jwts.ParseToken(req.Token, l.svcCtx.Config.Auth.AccessSecret)
 	if err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "令牌解析失败",
+			Data: map[string]any{"path": req.ValidPath, "err": err.Error()},
+		})
 		return nil, errors.New("认证失败")
 	}
 
@@ -90,6 +94,10 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (*typ
 		}
 		if claims.DeviceID != "" {
 			if storedDeviceID, ok := info["device_id"].(string); ok && storedDeviceID != claims.DeviceID {
+				l.logger.Warn(model.LogMsg{
+					Text: "设备标识不匹配",
+					Data: map[string]any{"userId": claims.UserID},
+				})
 				return nil, errors.New("设备标识符不匹配")
 			}
 		}
@@ -98,6 +106,10 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (*typ
 		break
 	}
 	if loginInfo == nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "令牌已失效",
+			Data: map[string]any{"userId": claims.UserID, "path": req.ValidPath},
+		})
 		return nil, errors.New("token已失效")
 	}
 

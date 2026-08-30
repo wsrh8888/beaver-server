@@ -35,24 +35,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
-
 type UpdateInfoLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateInfoLogic {
 	return &UpdateInfoLogic{
 		ctx:    ctx,
-		logger: logger.New("update_info"),
+		logger: beaverlog.New("update_info", ctx),
 		svcCtx: svcCtx,
 	}
 }

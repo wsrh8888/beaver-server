@@ -31,24 +31,21 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	util "beaver/utils/uuid"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type GetH5AuthCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetH5AuthCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetH5AuthCodeLogic {
 	return &GetH5AuthCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("get_h5_auth_code"),
+		logger: beaverlog.New("get_h5_auth_code", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -90,14 +87,16 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 		Scene:     "h5_sso",
 	}
 	if err := l.svcCtx.DB.Create(&record).Error; err != nil {
-		logx.Errorf("生成 H5 authCode 失败: appId=%s, userId=%s, err=%v", req.AppID, req.UserID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "生成H5授权码失败",
+			Data: map[string]any{"appId": req.AppID, "userId": req.UserID, "err": err.Error()},
+		})
 		return nil, errors.New("生成授权码失败")
 	}
 
-	logx.Infof("生成 H5 authCode 成功: appId=%s, userId=%s", req.AppID, req.UserID)
 	l.logger.Info(model.LogMsg{
 		Text: "H5授权码生成成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"appId":  req.AppID,
 			"userId": req.UserID,
 		},

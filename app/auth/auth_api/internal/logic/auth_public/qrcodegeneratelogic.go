@@ -29,9 +29,9 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	util "beaver/utils/uuid"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const (
@@ -51,15 +51,15 @@ type QrcodeSession struct {
 }
 
 type QrcodeGenerateLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewQrcodeGenerateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QrcodeGenerateLogic {
 	return &QrcodeGenerateLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("qrcode_generate", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -79,9 +79,17 @@ func (l *QrcodeGenerateLogic) QrcodeGenerate(req *types.QrcodeGenerateReq) (*typ
 	key := fmt.Sprintf(QrcodeKeyFmt, token)
 
 	if err := l.svcCtx.Redis.Set(key, string(sessionJSON), QrcodeTTL).Err(); err != nil {
-		logx.Errorf("qrcode generate: redis set failed key=%s err=%v", key, err)
+		l.logger.Error(model.LogMsg{
+			Text: "二维码写入失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "二维码生成成功",
+		Data: map[string]any{"source": source},
+	})
 
 	return &types.QrcodeGenerateRes{
 		Token:    token,

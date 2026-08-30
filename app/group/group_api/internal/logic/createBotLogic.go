@@ -38,25 +38,24 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
-
 type CreateBotLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）
 func NewCreateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateBotLogic {
 	return &CreateBotLogic{
 		ctx:    ctx,
-		logger: logger.New("create_bot"),
+		logger: beaverlog.New("create_bot", ctx),
 		svcCtx: svcCtx,
 	}
 }

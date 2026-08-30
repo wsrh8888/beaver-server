@@ -33,24 +33,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type GroupJoinRequestHandleLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 处理群组申请
 func NewGroupJoinRequestHandleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupJoinRequestHandleLogic {
 	return &GroupJoinRequestHandleLogic{
 		ctx:    ctx,
-		logger: logger.New("group_join_handle"),
+		logger: beaverlog.New("group_join_handle", ctx),
 		svcCtx: svcCtx,
 	}
 }

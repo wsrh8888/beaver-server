@@ -27,7 +27,7 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/common/etcd"
 	commonMiddleware "beaver/common/middleware/http"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
 
@@ -43,16 +43,15 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	logger.Init("open_api")
+	beaverlog.Init("open_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
+	server.Use(commonMiddleware.TraceMiddleware)
+
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
-
-	// 注册全局中间件（日志）
-	server.Use(commonMiddleware.RequestLogMiddleware)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

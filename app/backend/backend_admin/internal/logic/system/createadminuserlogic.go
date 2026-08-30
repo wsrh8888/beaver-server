@@ -30,22 +30,21 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type CreateAdminUserLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateAdminUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateAdminUserLogic {
-	return &CreateAdminUserLogic{logger: logger.New("create_admin_user"), ctx: ctx, svcCtx: svcCtx}
+	return &CreateAdminUserLogic{logger: beaverlog.New("create_admin_user", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserReq) (resp *types.CreateAdminUserRes, err error) {

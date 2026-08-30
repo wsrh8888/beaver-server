@@ -34,24 +34,23 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
 	"beaver/utils/authlock"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
 	"beaver/utils/pwd"
 )
-
 
 type PhoneLoginLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewPhoneLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PhoneLoginLogic {
 	return &PhoneLoginLogic{
 		ctx:    ctx,
-		logger: logger.New("phone_login"),
+		logger: beaverlog.New("phone_login", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -77,6 +76,10 @@ func (l *PhoneLoginLogic) PhoneLogin(req *types.PhoneLoginReq) (*types.PhoneLogi
 		return nil, errors.New("用户凭证不存在")
 	}
 	if !pwd.CheckPad(credential.Password, req.Password) {
+		l.logger.Warn(model.LogMsg{
+			Text: "手机密码错误",
+			Data: map[string]any{"phone": req.Phone},
+		})
 		if lockErr := authlock.RecordFailure(l.ctx, l.svcCtx.Redis, failKey, lockKey, "login", "phone"); lockErr != nil {
 			return nil, lockErr
 		}

@@ -29,23 +29,20 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type GetTokenByCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetTokenByCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetTokenByCodeLogic {
 	return &GetTokenByCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("get_token_by_code"),
+		logger: beaverlog.New("get_token_by_code", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -63,6 +60,10 @@ func (l *GetTokenByCodeLogic) GetTokenByCode(req *types.GetTokenByCodeReq) (resp
 
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND app_secret = ? AND status = ?", req.AppID, req.AppSecret, 1).First(&app).Error; err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "应用凭证错误",
+			Data: map[string]any{"appId": req.AppID},
+		})
 		return nil, errors.New("应用不存在或凭证错误")
 	}
 
@@ -71,7 +72,10 @@ func (l *GetTokenByCodeLogic) GetTokenByCode(req *types.GetTokenByCodeReq) (resp
 		Code:  req.Code,
 	})
 	if err != nil {
-		logx.Errorf("ExchangeToken RPC 调用失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "换发令牌RPC失败",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -83,9 +87,7 @@ func (l *GetTokenByCodeLogic) GetTokenByCode(req *types.GetTokenByCodeReq) (resp
 
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth换发Token成功",
-		Data: map[string]interface{}{
-			"appId": req.AppID,
-		},
+		Data: map[string]any{"appId": req.AppID},
 	})
 
 	return &types.GetTokenByCodeRes{

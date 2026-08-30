@@ -31,8 +31,8 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -40,17 +40,16 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type LikeMomentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewLikeMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LikeMomentLogic {
 	return &LikeMomentLogic{
 		ctx:    ctx,
-		logger: logger.New("like_moment"),
+		logger: beaverlog.New("like_moment", ctx),
 		svcCtx: svcCtx,
 	}
 }

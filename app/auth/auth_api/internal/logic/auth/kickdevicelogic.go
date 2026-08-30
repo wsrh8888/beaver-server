@@ -33,23 +33,20 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type KickDeviceLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewKickDeviceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *KickDeviceLogic {
 	return &KickDeviceLogic{
 		ctx:    ctx,
-		logger: logger.New("kick_device"),
+		logger: beaverlog.New("kick_device", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -58,6 +55,10 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDevic
 	var device auth_models.AuthDeviceModel
 	if err := l.svcCtx.DB.Where("user_id = ? AND device_id = ?", req.UserID, req.DeviceID).
 		First(&device).Error; err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "踢出设备不存在",
+			Data: map[string]any{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()},
+		})
 		return nil, errors.New("设备不存在")
 	}
 
@@ -70,7 +71,10 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDevic
 		UserId:   req.UserID,
 		DeviceId: req.DeviceID,
 	}); err != nil {
-		logx.WithContext(l.ctx).Errorf("禁用 Push Token 失败: userId=%s, deviceId=%s, err=%v", req.UserID, req.DeviceID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "禁用推送令牌失败",
+			Data: map[string]any{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()},
+		})
 	}
 
 	go func() {

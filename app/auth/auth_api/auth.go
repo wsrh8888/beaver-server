@@ -29,8 +29,9 @@ import (
 	"beaver/app/auth/auth_api/internal/handler"
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/common/etcd"
+	httpMiddleware "beaver/common/middleware/http"
 	uaMiddleware "beaver/common/middleware/ua"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -44,16 +45,19 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	logger.Init("auth_api")
+	beaverlog.Init("auth_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
+	server.Use(httpMiddleware.TraceMiddleware)
+	server.Use(uaMiddleware.Middleware)
+
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
-	server.Use(uaMiddleware.Middleware)
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+
 	server.Start()
 }

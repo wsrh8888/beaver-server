@@ -32,8 +32,8 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"strings"
 
@@ -45,7 +45,7 @@ type CreateCircleLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateCircleLogic {
@@ -53,7 +53,7 @@ func NewCreateCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		logger: logger.New("create_circle"),
+		logger: beaverlog.New("create_circle", ctx),
 	}
 }
 
