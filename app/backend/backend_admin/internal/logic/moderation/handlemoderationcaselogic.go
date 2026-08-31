@@ -34,8 +34,6 @@ import (
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
@@ -62,13 +60,19 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("工单不存在")
 		}
-		logx.WithContext(l.ctx).Errorf("查询工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	for _, act := range req.Actions {
 		if actErr := executeControlAction(l.ctx, l.svcCtx, req.UserID, uint64(c.Id), act); actErr != nil {
-			logx.WithContext(l.ctx).Errorf("执行管控动作失败 action=%s: %v", act.Action, actErr)
+			l.logger.Error(model.LogMsg{
+				Text: "执行管控动作失败",
+				Data: map[string]interface{}{"action": act.Action, "err": actErr.Error()},
+			})
 			return nil, actErr
 		}
 	}
@@ -89,7 +93,10 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 		"actions_taken": actionsJSON,
 	}
 	if err = l.svcCtx.DB.Model(&c).Updates(updates).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("更新工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

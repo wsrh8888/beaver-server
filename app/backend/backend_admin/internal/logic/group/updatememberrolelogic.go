@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateMemberRoleLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateMemberRoleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateMemberRoleLogic {
-	return &UpdateMemberRoleLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateMemberRoleLogic{logger: beaverlog.New("update_member_role", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq) (resp *types.UpdateMemberRoleRes, err error) {
@@ -56,7 +56,10 @@ func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq)
 		Role: &role,
 	})
 	if err != nil {
-		l.Errorf("更新成员角色失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新成员角色失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.UpdateMemberRoleRes{}, nil

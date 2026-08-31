@@ -1,4 +1,4 @@
-Name: authrpc.rpc
+Name: auth_rpc
 ListenOn: 0.0.0.0:30100
 Etcd:
   Hosts:
@@ -7,7 +7,6 @@ Etcd:
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local
 Log:
-  ServiceName: auth_rpc
   Mode: file
   Path: logs/auth_rpc
   Encoding: json

@@ -1,4 +1,4 @@
-Name: callrpc.rpc
+Name: call_rpc
 ListenOn: 0.0.0.0:31800
 Etcd:
   Hosts:

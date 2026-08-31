@@ -27,19 +27,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type QueryLogsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewQueryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QueryLogsLogic {
 	return &QueryLogsLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("query_logs", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -57,7 +57,10 @@ func (l *QueryLogsLogic) QueryLogs(req *types.QueryLogsReq) (resp *types.QueryLo
 		PageSize:   int32(req.PageSize),
 	})
 	if err != nil {
-		l.Errorf("查询日志失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询日志失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

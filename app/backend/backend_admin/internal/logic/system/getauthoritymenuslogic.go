@@ -27,24 +27,27 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetAuthorityMenusLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetAuthorityMenusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAuthorityMenusLogic {
-	return &GetAuthorityMenusLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetAuthorityMenusLogic{logger: beaverlog.New("get_authority_menus", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetAuthorityMenusLogic) GetAuthorityMenus(req *types.GetAuthorityMenusReq) (resp *types.GetAuthorityMenusRes, err error) {
 	var rows []backend_models.AdminSystemAuthorityMenu
 	if err = l.svcCtx.DB.Where("authority_id = ?", req.Id).Find(&rows).Error; err != nil {
-		l.Errorf("查询角色菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询角色菜单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	menuIds := make([]uint, 0, len(rows))

@@ -29,19 +29,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetCircleMemberListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetCircleMemberListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCircleMemberListLogic {
 	return &GetCircleMemberListLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_circle_member_list", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -67,7 +67,10 @@ func (l *GetCircleMemberListLogic) GetCircleMemberList(req *types.GetCircleMembe
 		PageSize: int32(limit),
 	})
 	if err != nil {
-		l.Errorf("获取圈子成员列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取圈子成员列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

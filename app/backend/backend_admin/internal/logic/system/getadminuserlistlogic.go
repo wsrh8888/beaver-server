@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetAdminUserListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetAdminUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdminUserListLogic {
-	return &GetAdminUserListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetAdminUserListLogic{logger: beaverlog.New("get_admin_user_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetAdminUserListLogic) GetAdminUserList(req *types.GetAdminUserListReq) (resp *types.GetAdminUserListRes, err error) {
@@ -61,13 +61,19 @@ func (l *GetAdminUserListLogic) GetAdminUserList(req *types.GetAdminUserListReq)
 
 	var total int64
 	if err = db.Count(&total).Error; err != nil {
-		l.Errorf("统计管理员失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计管理员失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var rows []backend_models.AdminUser
 	if err = db.Order("id DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&rows).Error; err != nil {
-		l.Errorf("查询管理员失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询管理员失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

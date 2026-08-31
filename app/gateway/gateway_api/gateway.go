@@ -45,7 +45,7 @@ func main() {
 
 	conf.MustLoad(*configFile, &config)
 	logx.SetUp(config.Log)
-	beaverlog.Init("gateway_api")
+	beaverlog.Init(config.Name)
 	proxy := core.Proxy{
 		Config: config,
 	}

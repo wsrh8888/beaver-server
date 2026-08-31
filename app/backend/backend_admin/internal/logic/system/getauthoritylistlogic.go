@@ -27,24 +27,27 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetAuthorityListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetAuthorityListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAuthorityListLogic {
-	return &GetAuthorityListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetAuthorityListLogic{logger: beaverlog.New("get_authority_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetAuthorityListLogic) GetAuthorityList(req *types.GetAuthorityListReq) (resp *types.GetAuthorityListRes, err error) {
 	var rows []backend_models.AdminSystemAuthority
 	if err = l.svcCtx.DB.Order("sort ASC, id ASC").Find(&rows).Error; err != nil {
-		l.Errorf("查询角色列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询角色列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

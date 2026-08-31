@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserListLogic {
-	return &GetUserListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetUserListLogic{logger: beaverlog.New("get_user_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // GetUserList 管理后台：用户列表查询。
@@ -55,7 +55,10 @@ func (l *GetUserListLogic) GetUserList(req *types.GetUserListReq) (resp *types.G
 		UserType: int32(req.UserType),
 	})
 	if err != nil {
-		l.Errorf("获取用户列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取用户列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

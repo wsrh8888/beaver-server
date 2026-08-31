@@ -28,20 +28,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const emojiPackageContentActionAdd int32 = 1
 
 type AddEmojiToPackageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewAddEmojiToPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddEmojiToPackageLogic {
-	return &AddEmojiToPackageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AddEmojiToPackageLogic{logger: beaverlog.New("add_emoji_to_package", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // AddEmojiToPackage 管理后台：向表情包添加表情。
@@ -69,7 +69,10 @@ func (l *AddEmojiToPackageLogic) AddEmojiToPackage(req *types.AddEmojiToPackageR
 		},
 	})
 	if err != nil {
-		l.Errorf("添加表情到表情包失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "添加表情到表情包失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.AddEmojiToPackageRes{RelationId: rpcRes.RelationId}, nil

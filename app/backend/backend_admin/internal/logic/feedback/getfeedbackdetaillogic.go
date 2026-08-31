@@ -27,24 +27,27 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFeedbackDetailLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetFeedbackDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFeedbackDetailLogic {
-	return &GetFeedbackDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetFeedbackDetailLogic{logger: beaverlog.New("get_feedback_detail", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetFeedbackDetailLogic) GetFeedbackDetail(req *types.GetFeedbackDetailReq) (resp *types.GetFeedbackDetailRes, err error) {
 	rpcRes, err := l.svcCtx.PlatformRpc.GetFeedback(l.ctx, &platform_rpc.GetFeedbackReq{Id: uint64(req.Id)})
 	if err != nil {
-		l.Errorf("获取反馈详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取反馈详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

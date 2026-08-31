@@ -1,4 +1,4 @@
-Name: friend
+Name: friend_api
 Host: 0.0.0.0
 Port: 20200
 Mysql:
@@ -8,7 +8,6 @@ Redis:
   Password: '123456'
   DB: 0
 Log:
-  ServiceName: friend_api
   Mode: file
   Path: logs/friend_api
   Encoding: json

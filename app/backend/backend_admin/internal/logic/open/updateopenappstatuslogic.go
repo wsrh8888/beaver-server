@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateOpenAppStatusLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateOpenAppStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateOpenAppStatusLogic {
-	return &UpdateOpenAppStatusLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateOpenAppStatusLogic{logger: beaverlog.New("update_open_app_status", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *UpdateOpenAppStatusLogic) UpdateOpenAppStatus(req *types.UpdateOpenAppStatusReq) (resp *types.UpdateOpenAppStatusRes, err error) {
@@ -59,7 +59,10 @@ func (l *UpdateOpenAppStatusLogic) UpdateOpenAppStatus(req *types.UpdateOpenAppS
 		OperatorId: req.UserID,
 	})
 	if err != nil {
-		l.Errorf("更新应用状态失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新应用状态失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

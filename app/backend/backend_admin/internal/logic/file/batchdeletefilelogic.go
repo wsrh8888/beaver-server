@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/file/file_rpc/types/file_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchDeleteFileLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewBatchDeleteFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteFileLogic {
-	return &BatchDeleteFileLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &BatchDeleteFileLogic{logger: beaverlog.New("batch_delete_file", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *BatchDeleteFileLogic) BatchDeleteFile(req *types.BatchDeleteFileReq) (resp *types.BatchDeleteFileRes, err error) {
@@ -49,7 +49,10 @@ func (l *BatchDeleteFileLogic) BatchDeleteFile(req *types.BatchDeleteFileReq) (r
 
 	_, err = l.svcCtx.FileRpc.BatchDeleteFiles(l.ctx, &file_rpc.BatchDeleteFilesReq{Ids: ids})
 	if err != nil {
-		l.Errorf("批量删除文件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除文件失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.BatchDeleteFileRes{}, nil

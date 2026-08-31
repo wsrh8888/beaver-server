@@ -29,18 +29,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type AuditDeveloperLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewAuditDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuditDeveloperLogic {
-	return &AuditDeveloperLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AuditDeveloperLogic{logger: beaverlog.New("audit_developer", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp *types.AuditDeveloperRes, err error) {
@@ -60,7 +60,10 @@ func (l *AuditDeveloperLogic) AuditDeveloper(req *types.AuditDeveloperReq) (resp
 		AuditRemark: req.AuditRemark,
 	})
 	if err != nil {
-		l.Errorf("审核开发者失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "审核开发者失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

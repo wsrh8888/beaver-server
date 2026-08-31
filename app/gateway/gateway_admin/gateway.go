@@ -45,7 +45,7 @@ func main() {
 	var config types.Config
 	conf.MustLoad(*configFile, &config)
 	logx.SetUp(config.Log)
-	beaverlog.Init("gateway_admin")
+	beaverlog.Init(config.Name)
 
 	// 初始化代理
 	proxy := &core.Proxy{

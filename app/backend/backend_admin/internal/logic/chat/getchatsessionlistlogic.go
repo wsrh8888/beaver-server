@@ -30,12 +30,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetChatSessionListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -45,7 +45,7 @@ type GetChatSessionListLogic struct {
 // RPC 职责：ListConversations 领域查询，不与本 HTTP 接口 1:1。
 func NewGetChatSessionListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetChatSessionListLogic {
 	return &GetChatSessionListLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_chat_session_list", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -63,7 +63,10 @@ func (l *GetChatSessionListLogic) GetChatSessionList(req *types.GetChatSessionLi
 		PageSize:         int32(req.PageSize),
 	})
 	if err != nil {
-		l.Errorf("获取用户会话列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取用户会话列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -123,16 +126,16 @@ func (l *GetChatSessionListLogic) GetChatSessionList(req *types.GetChatSessionLi
 		}
 
 		list = append(list, types.GetChatSessionListItem{
-			ConversationID:     item.ConversationId,
-			ConversationType:   int(item.Type),
-			Title:              title,
-			PeerUserID:         peerID,
-			PeerUserName:       peerName,
-			ParticipantIDs:     item.ParticipantIds,
-			ParticipantNames:   names,
-			LastMessage:        item.LastMessage,
-			LastMessageTime:    item.LastMessageTime,
-			MessageCount:       item.MessageCount,
+			ConversationID:   item.ConversationId,
+			ConversationType: int(item.Type),
+			Title:            title,
+			PeerUserID:       peerID,
+			PeerUserName:     peerName,
+			ParticipantIDs:   item.ParticipantIds,
+			ParticipantNames: names,
+			LastMessage:      item.LastMessage,
+			LastMessageTime:  item.LastMessageTime,
+			MessageCount:     item.MessageCount,
 		})
 	}
 

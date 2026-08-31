@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateUserLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateUserLogic {
-	return &UpdateUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateUserLogic{logger: beaverlog.New("update_user", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // UpdateUser 管理后台：更新用户。
@@ -70,7 +70,10 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.Upda
 	if hasPatch {
 		_, err = l.svcCtx.UserRpc.UpdateUsers(l.ctx, rpcReq)
 		if err != nil {
-			l.Errorf("更新用户失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "更新用户失败",
+				Data: map[string]interface{}{"err": err.Error()},
+			})
 			return nil, err
 		}
 	}
@@ -81,7 +84,10 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.Upda
 			Status:  int32(*req.Status),
 		})
 		if err != nil {
-			l.Errorf("更新用户状态失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "更新用户状态失败",
+				Data: map[string]interface{}{"err": err.Error()},
+			})
 			return nil, err
 		}
 	}

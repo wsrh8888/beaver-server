@@ -28,17 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetModerationCaseListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetModerationCaseListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetModerationCaseListLogic {
-	return &GetModerationCaseListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetModerationCaseListLogic{logger: beaverlog.New("get_moderation_case_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetModerationCaseListLogic) GetModerationCaseList(req *types.GetModerationCaseListReq) (resp *types.GetModerationCaseListRes, err error) {
@@ -64,13 +65,19 @@ func (l *GetModerationCaseListLogic) GetModerationCaseList(req *types.GetModerat
 
 	var total int64
 	if err = db.Count(&total).Error; err != nil {
-		l.Errorf("统计工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var rows []backend_models.AdminModerationCase
 	if err = db.Order("id DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&rows).Error; err != nil {
-		l.Errorf("查询工单列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询工单列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

@@ -42,7 +42,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	beaverlog.Init("group_api")
+	beaverlog.InitFromConf(c.RestConf.ServiceConf)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

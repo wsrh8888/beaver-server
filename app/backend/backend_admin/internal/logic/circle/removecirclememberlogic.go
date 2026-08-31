@@ -28,19 +28,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RemoveCircleMemberLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewRemoveCircleMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveCircleMemberLogic {
 	return &RemoveCircleMemberLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("remove_circle_member", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -59,7 +59,10 @@ func (l *RemoveCircleMemberLogic) RemoveCircleMember(req *types.RemoveCircleMemb
 		UserIds:  req.MemberIds,
 	})
 	if err != nil {
-		l.Errorf("移除圈子成员失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "移除圈子成员失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.RemoveCircleMemberRes{}, nil

@@ -1,4 +1,4 @@
-Name: platform
+Name: platform_api
 Host: 0.0.0.0
 Port: 21600
 Mysql:

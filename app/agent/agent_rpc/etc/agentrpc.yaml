@@ -1,4 +1,4 @@
-Name: agentrpc.rpc
+Name: agent_rpc
 ListenOn: 0.0.0.0:32200
 Mode: dev
 Etcd:

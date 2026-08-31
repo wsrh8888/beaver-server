@@ -1,4 +1,4 @@
-Name: chat
+Name: chat_api
 Host: 0.0.0.0
 Port: 20300
 Mysql:

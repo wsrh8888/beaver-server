@@ -1,4 +1,4 @@
-Name: ws
+Name: ws_api
 Host: 0.0.0.0
 Port: 20400
 Mysql:

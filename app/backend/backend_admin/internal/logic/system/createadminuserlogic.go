@@ -33,8 +33,6 @@ import (
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CreateAdminUserLogic struct {
@@ -69,7 +67,10 @@ func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserReq) (r
 		CreatedBy: req.OperatorID,
 	}
 	if err = l.svcCtx.DB.Create(&adminUser).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("创建管理员失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建管理员失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -82,7 +83,10 @@ func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserReq) (r
 			})
 		}
 		if err = l.svcCtx.DB.Create(&rows).Error; err != nil {
-			logx.WithContext(l.ctx).Errorf("绑定管理员角色失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "绑定管理员角色失败",
+				Data: map[string]interface{}{"err": err.Error()},
+			})
 			return nil, err
 		}
 	}

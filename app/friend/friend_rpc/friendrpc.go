@@ -45,7 +45,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	beaverlog.Init("friend_rpc")
+	beaverlog.InitFromConf(c.RpcServerConf.ServiceConf)
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

@@ -1,4 +1,4 @@
-Name: momentrpc.rpc
+Name: moment_rpc
 ListenOn: 0.0.0.0:30800
 Etcd:
   Hosts:

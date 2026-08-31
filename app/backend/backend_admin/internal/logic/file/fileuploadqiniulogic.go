@@ -26,12 +26,12 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type FileUploadQiniuLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -39,7 +39,7 @@ type FileUploadQiniuLogic struct {
 // 文件上传七牛云
 func NewFileUploadQiniuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUploadQiniuLogic {
 	return &FileUploadQiniuLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("file_upload_qiniu", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -50,7 +50,10 @@ func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileUploadQiniuReq) (r
 	// 这里应该处理七牛云上传后的回调信息
 	// 暂时返回空结果，具体实现需要根据实际需求
 
-	logx.Infof("七牛云文件上传请求，用户ID: %s", req.UserID)
+	l.logger.Info(model.LogMsg{
+		Text: "七牛云文件上传请求",
+		Data: map[string]interface{}{"userId": req.UserID},
+	})
 
 	return &types.FileUploadQiniuRes{
 		FileURL:      "",

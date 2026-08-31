@@ -28,20 +28,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const chatMessageStatusDeleted int32 = 4
 
 type GetChatMessageListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetChatMessageListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetChatMessageListLogic {
-	return &GetChatMessageListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetChatMessageListLogic{logger: beaverlog.New("get_chat_message_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageListReq) (resp *types.GetChatMessageListRes, err error) {
@@ -66,7 +66,10 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 
 	rpcRes, err := l.svcCtx.ChatRpc.ListChatMessages(l.ctx, rpcReq)
 	if err != nil {
-		l.Errorf("获取聊天消息列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取聊天消息列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -107,7 +110,7 @@ func (l *GetChatMessageListLogic) GetChatMessageList(req *types.GetChatMessageLi
 			MsgContent:       m.MsgContent,
 			IsDeleted:        m.Status == chatMessageStatusDeleted,
 			CreateTime:       m.CreatedAt,
-			UpdateTime:     m.UpdatedAt,
+			UpdateTime:       m.UpdatedAt,
 		})
 	}
 	return &types.GetChatMessageListRes{List: list, Total: rpcRes.Total}, nil

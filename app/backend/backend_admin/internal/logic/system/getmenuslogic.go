@@ -27,12 +27,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetMenusLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -40,7 +40,7 @@ type GetMenusLogic struct {
 // 获取菜单列表
 func NewGetMenusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMenusLogic {
 	return &GetMenusLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_menus", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -51,12 +51,18 @@ func (l *GetMenusLogic) GetMenus(req *types.GetMenuListReq) (resp *types.GetMenu
 	var userAuthorities []backend_models.AdminSystemAuthorityUser
 	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).Find(&userAuthorities).Error
 	if err != nil {
-		logx.Errorf("查询用户权限失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户权限失败",
+			Data: map[string]interface{}{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	if len(userAuthorities) == 0 {
-		logx.Infof("用户%s没有任何权限", req.UserID)
+		l.logger.Info(model.LogMsg{
+			Text: "用户没有任何权限",
+			Data: map[string]interface{}{"userId": req.UserID},
+		})
 		return &types.GetMenuListRes{
 			List: []types.GetMenuListItem{},
 		}, nil
@@ -72,12 +78,18 @@ func (l *GetMenusLogic) GetMenus(req *types.GetMenuListReq) (resp *types.GetMenu
 	var authorityMenus []backend_models.AdminSystemAuthorityMenu
 	err = l.svcCtx.DB.Where("authority_id IN ?", authorityIDs).Find(&authorityMenus).Error
 	if err != nil {
-		logx.Errorf("查询权限菜单关联失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询权限菜单关联失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	if len(authorityMenus) == 0 {
-		logx.Infof("用户%s的权限没有任何菜单", req.UserID)
+		l.logger.Info(model.LogMsg{
+			Text: "用户没有任何菜单",
+			Data: map[string]interface{}{"userId": req.UserID},
+		})
 		return &types.GetMenuListRes{
 			List: []types.GetMenuListItem{},
 		}, nil
@@ -97,7 +109,10 @@ func (l *GetMenusLogic) GetMenus(req *types.GetMenuListReq) (resp *types.GetMenu
 	var menus []backend_models.AdminSystemMenu
 	err = l.svcCtx.DB.Where("id IN ? AND status = ?", menuIDs, 1).Order("sort asc").Find(&menus).Error
 	if err != nil {
-		logx.Errorf("查询菜单详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询菜单详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

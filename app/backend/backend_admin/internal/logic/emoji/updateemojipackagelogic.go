@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateEmojiPackageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateEmojiPackageLogic {
-	return &UpdateEmojiPackageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateEmojiPackageLogic{logger: beaverlog.New("update_emoji_package", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // UpdateEmojiPackage 管理后台：更新表情包。
@@ -70,7 +70,10 @@ func (l *UpdateEmojiPackageLogic) UpdateEmojiPackage(req *types.UpdateEmojiPacka
 
 	_, err = l.svcCtx.EmojiRpc.SaveEmojiPackage(l.ctx, rpcReq)
 	if err != nil {
-		l.Errorf("更新表情包失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新表情包失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.UpdateEmojiPackageRes{}, nil

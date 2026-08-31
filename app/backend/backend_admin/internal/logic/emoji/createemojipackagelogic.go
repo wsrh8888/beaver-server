@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateEmojiPackageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateEmojiPackageLogic {
-	return &CreateEmojiPackageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &CreateEmojiPackageLogic{logger: beaverlog.New("create_emoji_package", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // CreateEmojiPackage 管理后台：创建表情包。
@@ -66,7 +66,10 @@ func (l *CreateEmojiPackageLogic) CreateEmojiPackage(req *types.CreateEmojiPacka
 		Type:        req.Type,
 	})
 	if err != nil {
-		l.Errorf("创建表情包失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建表情包失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.CreateEmojiPackageRes{PackageId: rpcRes.PackageId}, nil

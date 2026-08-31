@@ -30,8 +30,6 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ResetUserPasswordLogic struct {
@@ -60,7 +58,10 @@ func (l *ResetUserPasswordLogic) ResetUserPassword(req *types.ResetUserPasswordR
 		NewPassword: req.NewPassword,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("重置用户密码失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "重置用户密码失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{

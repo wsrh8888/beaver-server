@@ -30,14 +30,14 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
 	"beaver/utils/pwd"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type LoginLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -45,7 +45,7 @@ type LoginLogic struct {
 // 管理员登录
 func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic {
 	return &LoginLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("login", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -66,7 +66,10 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 			}
 			err = l.svcCtx.DB.Create(&adminUser).Error
 			if err != nil {
-				logx.Errorf("创建超级管理员失败: %v", err)
+				l.logger.Error(model.LogMsg{
+					Text: "创建超级管理员失败",
+					Data: map[string]interface{}{"err": err.Error()},
+				})
 				return nil, errors.New("服务内部异常")
 			}
 			return nil, errors.New("管理员账户创建成功，请重新登录")
@@ -86,14 +89,20 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 		UserID:   adminUser.UserID,
 	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
 	if err != nil {
-		logx.Errorf("生成 token 失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "生成 token 失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("服务内部异常")
 	}
 
 	key := fmt.Sprintf("admin_login_%s", adminUser.UserID)
 	err = l.svcCtx.Redis.Set(key, token, time.Hour*48).Err()
 	if err != nil {
-		logx.Errorf("存储 token 失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "存储 token 失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("服务内部异常")
 	}
 

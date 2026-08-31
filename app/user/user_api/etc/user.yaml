@@ -1,4 +1,4 @@
-Name: user
+Name: user_api
 Host: 0.0.0.0
 Port: 20000
 Mysql:
@@ -8,7 +8,6 @@ Redis:
   Password: '123456'
   DB: 0
 Log:
-  ServiceName: user_api
   Mode: file
   Path: logs/user_api
   Encoding: json

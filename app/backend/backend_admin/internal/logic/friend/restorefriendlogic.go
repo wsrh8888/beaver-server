@@ -28,20 +28,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const friendActionRestore int32 = 2
 
 type RestoreFriendLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewRestoreFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RestoreFriendLogic {
-	return &RestoreFriendLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RestoreFriendLogic{logger: beaverlog.New("restore_friend", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // RestoreFriend 管理后台：恢复软删除的好友关系。
@@ -57,7 +57,10 @@ func (l *RestoreFriendLogic) RestoreFriend(req *types.RestoreFriendReq) (resp *t
 		Action:      friendActionRestore,
 	})
 	if err != nil {
-		l.Errorf("恢复好友失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "恢复好友失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.RestoreFriendRes{}, nil

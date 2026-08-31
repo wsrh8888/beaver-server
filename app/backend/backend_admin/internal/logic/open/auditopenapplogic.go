@@ -30,8 +30,6 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AuditOpenAppLogic struct {
@@ -62,7 +60,10 @@ func (l *AuditOpenAppLogic) AuditOpenApp(req *types.AuditOpenAppReq) (resp *type
 		AuditRemark: req.AuditRemark,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("审核应用失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "审核应用失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

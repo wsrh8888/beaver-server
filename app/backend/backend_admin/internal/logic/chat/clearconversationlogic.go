@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ClearConversationLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewClearConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ClearConversationLogic {
-	return &ClearConversationLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &ClearConversationLogic{logger: beaverlog.New("clear_conversation", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *ClearConversationLogic) ClearConversation(req *types.ClearConversationReq) (resp *types.ClearConversationRes, err error) {
@@ -52,7 +52,10 @@ func (l *ClearConversationLogic) ClearConversation(req *types.ClearConversationR
 		Status:         chatMessageStatusDeleted,
 	})
 	if err != nil {
-		l.Errorf("清空会话消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "清空会话消息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.ClearConversationRes{}, nil

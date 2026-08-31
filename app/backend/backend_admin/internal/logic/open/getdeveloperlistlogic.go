@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetDeveloperListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetDeveloperListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDeveloperListLogic {
-	return &GetDeveloperListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetDeveloperListLogic{logger: beaverlog.New("get_developer_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq) (resp *types.GetDeveloperListRes, err error) {
@@ -49,7 +49,10 @@ func (l *GetDeveloperListLogic) GetDeveloperList(req *types.GetDeveloperListReq)
 		Status:   int32(req.Status),
 	})
 	if err != nil {
-		l.Errorf("获取开发者列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取开发者列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

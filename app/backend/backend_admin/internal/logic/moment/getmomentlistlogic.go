@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetMomentListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetMomentListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentListLogic {
-	return &GetMomentListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetMomentListLogic{logger: beaverlog.New("get_moment_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *types.GetMomentListRes, err error) {
@@ -49,7 +49,10 @@ func (l *GetMomentListLogic) GetMomentList(req *types.GetMomentListReq) (resp *t
 		Keywords: req.Keywords,
 	})
 	if err != nil {
-		l.Errorf("获取动态列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取动态列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

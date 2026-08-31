@@ -29,8 +29,6 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ExecuteUserControlLogic struct {
@@ -57,7 +55,10 @@ func (l *ExecuteUserControlLogic) ExecuteUserControl(req *types.ExecuteUserContr
 		Reason: req.Reason,
 	}
 	if err = executeControlAction(l.ctx, l.svcCtx, req.OperatorID, req.CaseID, act); err != nil {
-		logx.WithContext(l.ctx).Errorf("用户管控失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "用户管控失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{

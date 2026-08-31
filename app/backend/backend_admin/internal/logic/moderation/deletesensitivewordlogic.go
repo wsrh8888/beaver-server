@@ -29,19 +29,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"gorm.io/gorm"
 )
 
 type DeleteSensitiveWordLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteSensitiveWordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteSensitiveWordLogic {
 	return &DeleteSensitiveWordLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("delete_sensitive_word", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -57,7 +58,10 @@ func (l *DeleteSensitiveWordLogic) DeleteSensitiveWord(req *types.DeleteSensitiv
 	}
 
 	if err = l.svcCtx.DB.Delete(&row).Error; err != nil {
-		l.Errorf("删除敏感词失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除敏感词失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

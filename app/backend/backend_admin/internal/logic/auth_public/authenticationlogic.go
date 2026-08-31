@@ -29,14 +29,13 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AuthenticationLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -44,7 +43,7 @@ type AuthenticationLogic struct {
 // 管理员 Token 认证
 func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuthenticationLogic {
 	return &AuthenticationLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("authentication", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

@@ -32,17 +32,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type EscalateContentReportLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewEscalateContentReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EscalateContentReportLogic {
-	return &EscalateContentReportLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &EscalateContentReportLogic{logger: beaverlog.New("escalate_content_report", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *EscalateContentReportLogic) EscalateContentReport(req *types.EscalateContentReportReq) (resp *types.EscalateContentReportRes, err error) {
@@ -52,7 +53,10 @@ func (l *EscalateContentReportLogic) EscalateContentReport(req *types.EscalateCo
 
 	reportRes, err := l.svcCtx.PlatformRpc.GetContentReport(l.ctx, &platform_rpc.GetContentReportReq{Id: req.ReportID})
 	if err != nil {
-		l.Errorf("获取举报详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取举报详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	if reportRes.Report == nil {
@@ -84,7 +88,10 @@ func (l *EscalateContentReportLogic) EscalateContentReport(req *types.EscalateCo
 		Status:      backend_models.CaseStatusPending,
 	}
 	if err = l.svcCtx.DB.Create(&caseRecord).Error; err != nil {
-		l.Errorf("创建工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -96,7 +103,10 @@ func (l *EscalateContentReportLogic) EscalateContentReport(req *types.EscalateCo
 		HandleRemark: "举报立案",
 	})
 	if err != nil {
-		l.Errorf("更新举报状态失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新举报状态失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

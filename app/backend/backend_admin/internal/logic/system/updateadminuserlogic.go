@@ -28,19 +28,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type UpdateAdminUserLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateAdminUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateAdminUserLogic {
-	return &UpdateAdminUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateAdminUserLogic{logger: beaverlog.New("update_admin_user", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *UpdateAdminUserLogic) UpdateAdminUser(req *types.UpdateAdminUserReq) (resp *types.UpdateAdminUserRes, err error) {
@@ -64,7 +64,10 @@ func (l *UpdateAdminUserLogic) UpdateAdminUser(req *types.UpdateAdminUserReq) (r
 	}
 	if len(updates) > 0 {
 		if err = l.svcCtx.DB.Model(&adminUser).Updates(updates).Error; err != nil {
-			l.Errorf("更新管理员失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "更新管理员失败",
+				Data: map[string]interface{}{"err": err.Error()},
+			})
 			return nil, err
 		}
 	}
@@ -83,7 +86,10 @@ func (l *UpdateAdminUserLogic) UpdateAdminUser(req *types.UpdateAdminUserReq) (r
 				})
 			}
 			if err = l.svcCtx.DB.Create(&rows).Error; err != nil {
-				l.Errorf("更新管理员角色失败: %v", err)
+				l.logger.Error(model.LogMsg{
+					Text: "更新管理员角色失败",
+					Data: map[string]interface{}{"err": err.Error()},
+				})
 				return nil, err
 			}
 		}

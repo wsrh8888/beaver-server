@@ -34,18 +34,19 @@ import (
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"gorm.io/gorm"
 )
 
 type GetModerationCaseContextLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetModerationCaseContextLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetModerationCaseContextLogic {
-	return &GetModerationCaseContextLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetModerationCaseContextLogic{logger: beaverlog.New("get_moderation_case_context", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetModerationCaseContextLogic) GetModerationCaseContext(req *types.GetModerationCaseContextReq) (resp *types.GetModerationCaseContextRes, err error) {
@@ -58,7 +59,10 @@ func (l *GetModerationCaseContextLogic) GetModerationCaseContext(req *types.GetM
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("工单不存在")
 		}
-		l.Errorf("查询工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

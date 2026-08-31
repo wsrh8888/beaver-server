@@ -26,24 +26,24 @@ import (
 	"errors"
 	"fmt"
 
+	beaverlog "beaver/utils/beaverlog"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupOperationsProfileLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetGroupOperationsProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupOperationsProfileLogic {
-	return &GetGroupOperationsProfileLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetGroupOperationsProfileLogic{logger: beaverlog.New("get_group_operations_profile", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetGroupOperationsProfileLogic) GetGroupOperationsProfile(req *types.GetGroupOperationsProfileReq) (resp *types.GetGroupOperationsProfileRes, err error) {
@@ -55,7 +55,10 @@ func (l *GetGroupOperationsProfileLogic) GetGroupOperationsProfile(req *types.Ge
 		GroupId: req.GroupID, Page: 1, PageSize: 1,
 	})
 	if err != nil {
-		l.Errorf("查询群组失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询群组失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	if len(groupRes.List) == 0 {
@@ -77,7 +80,10 @@ func (l *GetGroupOperationsProfileLogic) GetGroupOperationsProfile(req *types.Ge
 		GroupId: req.GroupID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询群成员失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询群成员失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.MemberTotal = memberRes.Total
 		resp.Members = l.mapMembers(memberRes.List)
@@ -100,7 +106,10 @@ func (l *GetGroupOperationsProfileLogic) GetGroupOperationsProfile(req *types.Ge
 		TargetType: 4, TargetId: req.GroupID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询群举报失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询群举报失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.ReportTotal = reportRes.Total
 		resp.Reports = l.mapGroupReports(reportRes.List)

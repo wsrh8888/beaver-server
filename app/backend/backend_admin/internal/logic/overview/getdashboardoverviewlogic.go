@@ -35,19 +35,19 @@ import (
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/core/coreonline"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetDashboardOverviewLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetDashboardOverviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDashboardOverviewLogic {
 	return &GetDashboardOverviewLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_dashboard_overview", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -56,7 +56,10 @@ func NewGetDashboardOverviewLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func countRPC(l *GetDashboardOverviewLogic, name string, fn func() (int64, error)) int64 {
 	total, err := fn()
 	if err != nil {
-		l.Errorf("获取%s统计失败: %v", name, err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取统计失败",
+			Data: map[string]interface{}{"name": name, "err": err.Error()},
+		})
 		return 0
 	}
 	return total
@@ -147,7 +150,10 @@ func (l *GetDashboardOverviewLogic) GetDashboardOverview(req *types.GetDashboard
 
 	var pendingCases int64
 	if err := l.svcCtx.DB.Model(&backend_models.AdminModerationCase{}).Where("status = ?", backend_models.CaseStatusPending).Count(&pendingCases).Error; err != nil {
-		l.Errorf("获取待处理工单统计失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取待处理工单统计失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.PendingCaseCount = pendingCases
 	}

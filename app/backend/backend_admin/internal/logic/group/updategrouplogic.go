@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateGroupLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateGroupLogic {
-	return &UpdateGroupLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateGroupLogic{logger: beaverlog.New("update_group", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *UpdateGroupLogic) UpdateGroup(req *types.UpdateGroupReq) (resp *types.UpdateGroupRes, err error) {
@@ -59,7 +59,10 @@ func (l *UpdateGroupLogic) UpdateGroup(req *types.UpdateGroupReq) (resp *types.U
 
 	_, err = l.svcCtx.GroupRpc.UpdateGroup(l.ctx, rpcReq)
 	if err != nil {
-		l.Errorf("更新群组信息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新群组信息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.UpdateGroupRes{}, nil

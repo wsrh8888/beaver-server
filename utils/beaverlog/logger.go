@@ -23,11 +23,13 @@ package beaverlog
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/service"
 )
 
 var (
@@ -35,11 +37,19 @@ var (
 	source   string
 )
 
-// Init 每个服务启动时调用一次，source 标识当前微服务（如 auth_api、chat_api）
+// Init 显式指定服务标识，如 auth_api、chat_rpc。
+// 新服务推荐直接用 InitFromConf，避免服务名两处维护。
 func Init(serviceSource string) {
 	sourceMu.Lock()
 	source = serviceSource
 	sourceMu.Unlock()
+}
+
+// InitFromConf 从服务配置推导 source，自动带上，杜绝漏调 Init 导致 source 为空。
+// 直接取 Name（yaml 顶层 Name，已统一为目录约定名，如 emoji_api / emoji_rpc）。
+// 用法：beaverlog.InitFromConf(c.RestConf) 或 beaverlog.InitFromConf(c.RpcConf)
+func InitFromConf(c service.ServiceConf) {
+	Init(strings.TrimSpace(c.Name))
 }
 
 func currentSource() string {
@@ -90,7 +100,9 @@ func (l *Logger) send(level string, msg model.LogMsg) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	lg := logx.WithContext(ctx)
+	// WithCallerSkip(1) 抵消 send 这一层包装，否则 caller 恒指向本文件的 Infow/Sloww/Errorw 行，
+	// 线上无法定位到真正打日志的业务代码。
+	lg := logx.WithContext(ctx).WithCallerSkip(1)
 
 	switch level {
 	case "warn":

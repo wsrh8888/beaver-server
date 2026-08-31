@@ -1,4 +1,4 @@
-Name: datasync
+Name: datasync_api
 Host: 0.0.0.0
 Port: 21700
 Mysql:

@@ -27,13 +27,14 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type UpdateMenuLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -41,7 +42,7 @@ type UpdateMenuLogic struct {
 // 更新菜单
 func NewUpdateMenuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateMenuLogic {
 	return &UpdateMenuLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_menu", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -53,10 +54,16 @@ func (l *UpdateMenuLogic) UpdateMenu(req *types.UpdateMenuReq) (resp *types.Upda
 	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&menu).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("菜单不存在: %d", req.Id)
+			l.logger.Error(model.LogMsg{
+				Text: "菜单不存在",
+				Data: map[string]interface{}{"menuId": req.Id},
+			})
 			return nil, err
 		}
-		logx.Errorf("查询菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询菜单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -80,10 +87,16 @@ func (l *UpdateMenuLogic) UpdateMenu(req *types.UpdateMenuReq) (resp *types.Upda
 	// 更新菜单
 	err = l.svcCtx.DB.Model(&menu).Updates(updateData).Error
 	if err != nil {
-		logx.Errorf("更新菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新菜单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
-	logx.Infof("菜单更新成功: ID=%d, Name=%s", req.Id, req.Name)
+	l.logger.Info(model.LogMsg{
+		Text: "菜单更新成功",
+		Data: map[string]interface{}{"menuId": req.Id, "menuName": req.Name},
+	})
 	return &types.UpdateMenuRes{}, nil
 }

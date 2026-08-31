@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteMomentCommentLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteMomentCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMomentCommentLogic {
-	return &DeleteMomentCommentLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteMomentCommentLogic{logger: beaverlog.New("delete_moment_comment", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *DeleteMomentCommentLogic) DeleteMomentComment(req *types.DeleteMomentCommentReq) (resp *types.DeleteMomentCommentRes, err error) {
@@ -51,7 +51,10 @@ func (l *DeleteMomentCommentLogic) DeleteMomentComment(req *types.DeleteMomentCo
 		CommentIds: []string{req.CommentId},
 	})
 	if err != nil {
-		l.Errorf("删除评论失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除评论失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteMomentCommentRes{}, nil

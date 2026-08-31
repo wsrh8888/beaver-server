@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetArchitecturesLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetArchitecturesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetArchitecturesLogic {
-	return &GetArchitecturesLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetArchitecturesLogic{logger: beaverlog.New("get_architectures", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetArchitecturesLogic) GetArchitectures(req *types.GetArchitecturesReq) (resp *types.GetArchitecturesRes, err error) {
@@ -54,7 +54,10 @@ func (l *GetArchitecturesLogic) GetArchitectures(req *types.GetArchitecturesReq)
 
 	rpcRes, err := l.svcCtx.PlatformRpc.ListArchitectures(l.ctx, rpcReq)
 	if err != nil {
-		l.Errorf("获取架构列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取架构列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

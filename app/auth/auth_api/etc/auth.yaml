@@ -1,8 +1,7 @@
-Name: auth
+Name: auth_api
 Host: 0.0.0.0
 Port: 20100
 Log:
-  ServiceName: auth_api
   Mode: file
   Path: logs/auth_api
   Encoding: json

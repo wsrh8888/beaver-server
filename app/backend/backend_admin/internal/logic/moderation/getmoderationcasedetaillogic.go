@@ -29,18 +29,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"gorm.io/gorm"
 )
 
 type GetModerationCaseDetailLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetModerationCaseDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetModerationCaseDetailLogic {
-	return &GetModerationCaseDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetModerationCaseDetailLogic{logger: beaverlog.New("get_moderation_case_detail", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetModerationCaseDetailLogic) GetModerationCaseDetail(req *types.GetModerationCaseDetailReq) (resp *types.GetModerationCaseDetailRes, err error) {
@@ -53,7 +54,10 @@ func (l *GetModerationCaseDetailLogic) GetModerationCaseDetail(req *types.GetMod
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("工单不存在")
 		}
-		l.Errorf("查询工单详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询工单详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.GetModerationCaseDetailRes{Case: formatCaseInfo(c)}, nil

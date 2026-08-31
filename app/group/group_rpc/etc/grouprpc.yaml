@@ -1,4 +1,4 @@
-Name: grouprpc.rpc
+Name: group_rpc
 ListenOn: 0.0.0.0:30500
 Etcd:
   Hosts:

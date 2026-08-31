@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteGroupLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteGroupLogic {
-	return &DeleteGroupLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteGroupLogic{logger: beaverlog.New("delete_group", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.DeleteGroupRes, err error) {
@@ -52,7 +52,10 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 		Status: 3,
 	})
 	if err != nil {
-		l.Errorf("解散群组失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "解散群组失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteGroupRes{}, nil

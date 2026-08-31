@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteMomentLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMomentLogic {
-	return &DeleteMomentLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteMomentLogic{logger: beaverlog.New("delete_moment", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *DeleteMomentLogic) DeleteMoment(req *types.DeleteMomentReq) (resp *types.DeleteMomentRes, err error) {
@@ -53,7 +53,10 @@ func (l *DeleteMomentLogic) DeleteMoment(req *types.DeleteMomentReq) (resp *type
 		IsDeleted: &deleted,
 	})
 	if err != nil {
-		l.Errorf("删除动态失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除动态失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteMomentRes{}, nil

@@ -1,4 +1,4 @@
-Name: agent
+Name: agent_api
 Host: 0.0.0.0
 Port: 22200
 Timeout: 0 # SSE 长连接，0=不超时（毫秒）
