@@ -28,35 +28,39 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetConversationsListByIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 批量获取会话数据
 func NewGetConversationsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetConversationsListByIdsLogic {
 	return &GetConversationsListByIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("get_conversations_by_ids", ctx),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *GetConversationsListByIdsLogic) GetConversationsListByIds(req *types.GetConversationsListByIdsReq) (resp *types.GetConversationsListByIdsRes, err error) {
-	// 直接从数据库查询会话完整信息
 	var conversations []chat_models.ChatConversationMeta
 	err = l.svcCtx.DB.Where("conversation_id IN (?)", req.ConversationIds).Find(&conversations).Error
 	if err != nil {
-		l.Errorf("查询会话信息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询会话信息失败",
+			Data: map[string]any{
+				"count": len(req.ConversationIds),
+				"err":   err.Error(),
+			},
+		})
 		return nil, err
 	}
 
-	// 转换数据库模型为API响应
 	conversationList := make([]types.ConversationById, 0, len(conversations))
 	for _, conv := range conversations {
 		conversationList = append(conversationList, types.ConversationById{
@@ -70,6 +74,13 @@ func (l *GetConversationsListByIdsLogic) GetConversationsListByIds(req *types.Ge
 		})
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "批量查询会话成功",
+		Data: map[string]any{
+			"requestCount": len(req.ConversationIds),
+			"resultCount":  len(conversationList),
+		},
+	})
 	return &types.GetConversationsListByIdsRes{
 		Conversations: conversationList,
 	}, nil

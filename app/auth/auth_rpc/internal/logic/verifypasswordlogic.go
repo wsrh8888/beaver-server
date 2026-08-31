@@ -28,27 +28,26 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/auth/auth_rpc/internal/svc"
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type VerifyPasswordLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewVerifyPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *VerifyPasswordLogic {
 	return &VerifyPasswordLogic{
 		ctx:    ctx,
+		logger: beaverlog.New("verify_password", ctx),
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
 	}
 }
 
 func (l *VerifyPasswordLogic) VerifyPassword(in *auth_rpc.VerifyPasswordReq) (*auth_rpc.VerifyPasswordRes, error) {
-	// 验证必填字段
 	if in.UserId == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -56,20 +55,28 @@ func (l *VerifyPasswordLogic) VerifyPassword(in *auth_rpc.VerifyPasswordReq) (*a
 		return nil, errors.New("密码不能为空")
 	}
 
-	// 查询用户凭证
 	var credential auth_models.AuthCredentialModel
 	err := l.svcCtx.DB.Take(&credential, "user_id = ?", in.UserId).Error
 	if err != nil {
-		logx.Errorf("查询用户凭证失败: %v", err)
-		return &auth_rpc.VerifyPasswordRes{
-			Valid: false,
-		}, nil
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户凭证失败",
+			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+		})
+		return &auth_rpc.VerifyPasswordRes{Valid: false}, nil
 	}
 
-	// 验证密码
 	valid := pwd.CheckPad(credential.Password, in.Password)
+	if !valid {
+		l.logger.Warn(model.LogMsg{
+			Text: "密码校验失败",
+			Data: map[string]any{"userId": in.UserId},
+		})
+		return &auth_rpc.VerifyPasswordRes{Valid: false}, nil
+	}
 
-	return &auth_rpc.VerifyPasswordRes{
-		Valid: valid,
-	}, nil
+	l.logger.Info(model.LogMsg{
+		Text: "密码校验通过",
+		Data: map[string]any{"userId": in.UserId},
+	})
+	return &auth_rpc.VerifyPasswordRes{Valid: true}, nil
 }

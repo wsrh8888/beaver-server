@@ -32,11 +32,11 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
-var groupMsgLog = logger.New("group_msg_send")
+var groupMsgLog = beaverlog.New("group_msg_send")
 
 func HandleGroupMessageSend(
 	ctx context.Context,

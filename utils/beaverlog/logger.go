@@ -19,12 +19,13 @@
  * beaver-server-header-v1
  */
 
-package logger
+package beaverlog
 
 import (
+	"context"
 	"sync"
 
-	"beaver/utils/logger/model"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -47,13 +48,19 @@ func currentSource() string {
 	return source
 }
 
-// Logger module 为服务内子模块，source 由 Init 统一设置
+// Logger module 为服务内子模块；ctx 可选
 type Logger struct {
 	module string
+	ctx    context.Context
 }
 
-func New(module string) *Logger {
-	return &Logger{module: module}
+// New 创建日志器。ctx 可选：beaverlog.New("module") 或 beaverlog.New("module", ctx)
+func New(module string, ctx ...context.Context) *Logger {
+	l := &Logger{module: module}
+	if len(ctx) > 0 {
+		l.ctx = ctx[0]
+	}
+	return l
 }
 
 func (l *Logger) Info(msg model.LogMsg) {
@@ -79,12 +86,18 @@ func (l *Logger) send(level string, msg model.LogMsg) {
 		fields = append(fields, logx.Field("data", msg.Data))
 	}
 
+	ctx := l.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	lg := logx.WithContext(ctx)
+
 	switch level {
 	case "warn":
-		logx.Sloww(msg.Text, fields...)
+		lg.Sloww(msg.Text, fields...)
 	case "error":
-		logx.Errorw(msg.Text, fields...)
+		lg.Errorw(msg.Text, fields...)
 	default:
-		logx.Infow(msg.Text, fields...)
+		lg.Infow(msg.Text, fields...)
 	}
 }

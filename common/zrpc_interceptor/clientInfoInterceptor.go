@@ -24,23 +24,42 @@ package zrpc_interceptor
 import (
 	"context"
 
+	"beaver/common/traceid"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
 func ClientInfoInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	var clientIP, userID string
-	cl := ctx.Value("clientIP")
-	if cl != nil {
-		clientIP = cl.(string)
+	if cl := ctx.Value("clientIP"); cl != nil {
+		if s, ok := cl.(string); ok {
+			clientIP = s
+		}
 	}
-	uid := ctx.Value("userId")
-	if uid != nil {
-		userID = uid.(string)
+	if uid := ctx.Value("userId"); uid != nil {
+		if s, ok := uid.(string); ok {
+			userID = s
+		}
 	}
 
-	md := metadata.New(map[string]string{"clientIP": clientIP, "userId": userID})
-	ctx = metadata.NewOutgoingContext(context.Background(), md)
-	err := invoker(ctx, method, req, reply, cc, opts...)
-	return err
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok {
+		md = md.Copy()
+	} else {
+		md = metadata.MD{}
+	}
+	if clientIP != "" {
+		md.Set("clientIP", clientIP)
+	}
+	if userID != "" {
+		md.Set("userId", userID)
+	}
+	if id := traceid.FromContext(ctx); id != "" {
+		md.Set(traceid.MetadataKey, id)
+	}
+
+	// 必须保留原 ctx，否则会丢掉 HTTP 侧注入的 trace 等字段
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	return invoker(ctx, method, req, reply, cc, opts...)
 }

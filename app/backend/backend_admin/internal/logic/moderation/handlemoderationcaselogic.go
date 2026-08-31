@@ -32,22 +32,21 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
-
 type HandleModerationCaseLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewHandleModerationCaseLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HandleModerationCaseLogic {
-	return &HandleModerationCaseLogic{logger: logger.New("handle_moderation_case"), ctx: ctx, svcCtx: svcCtx}
+	return &HandleModerationCaseLogic{logger: beaverlog.New("handle_moderation_case", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModerationCaseReq) (resp *types.HandleModerationCaseRes, err error) {

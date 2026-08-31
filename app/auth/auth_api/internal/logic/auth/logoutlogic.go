@@ -27,21 +27,21 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
 )
 
 type LogoutLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogic {
 	return &LogoutLogic{
 		ctx:    ctx,
-		logger: logger.New("logout"),
+		logger: beaverlog.New("logout", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -53,6 +53,10 @@ func (l *LogoutLogic) Logout(req *types.LogoutReq) (*types.LogoutRes, error) {
 	}
 
 	if err := device.Deactivate(l.svcCtx.DB, req.UserID, req.DeviceID); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "登出禁用设备失败",
+			Data: map[string]any{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()},
+		})
 		return nil, err
 	}
 

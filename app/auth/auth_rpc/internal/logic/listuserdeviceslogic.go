@@ -28,23 +28,24 @@ import (
 	"beaver/app/auth/auth_rpc/internal/svc"
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
 	"beaver/core/coreonline"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ListUserDevicesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListUserDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListUserDevicesLogic {
 	return &ListUserDevicesLogic{
 		ctx:    ctx,
+		logger: beaverlog.New("list_user_devices", ctx),
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
 	}
 }
 
@@ -53,7 +54,10 @@ func (l *ListUserDevicesLogic) ListUserDevices(in *auth_rpc.ListUserDevicesReq) 
 	if err := l.svcCtx.DB.Where("user_id = ? AND is_active = ?", in.UserId, true).
 		Order("last_login_time DESC").
 		Find(&devices).Error; err != nil {
-		l.Errorf("查询用户设备失败 userId=%s: %v", in.UserId, err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户设备失败",
+			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -67,7 +71,14 @@ func (l *ListUserDevicesLogic) ListUserDevices(in *auth_rpc.ListUserDevicesReq) 
 			continue
 		}
 		if err != nil {
-			l.Errorf("读取会话设备失败 userId=%s slot=%s: %v", in.UserId, slot, err)
+			l.logger.Error(model.LogMsg{
+				Text: "读取会话设备失败",
+				Data: map[string]any{
+					"userId": in.UserId,
+					"slot":   slot,
+					"err":    err.Error(),
+				},
+			})
 			return nil, err
 		}
 		onlineDeviceIDs[deviceID] = true
@@ -88,5 +99,13 @@ func (l *ListUserDevicesLogic) ListUserDevices(in *auth_rpc.ListUserDevicesReq) 
 		})
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "查询用户设备成功",
+		Data: map[string]any{
+			"userId":      in.UserId,
+			"count":       len(list),
+			"onlineCount": len(onlineDeviceIDs),
+		},
+	})
 	return &auth_rpc.ListUserDevicesRes{List: list}, nil
 }

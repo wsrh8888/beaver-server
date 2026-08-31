@@ -33,24 +33,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/livekit/protocol/auth"
 )
 
-
 type GetTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 接听通话并获取令牌
 func NewGetTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetTokenLogic {
 	return &GetTokenLogic{
 		ctx:    ctx,
-		logger: logger.New("get_token"),
+		logger: beaverlog.New("get_token", ctx),
 		svcCtx: svcCtx,
 	}
 }

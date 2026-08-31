@@ -28,21 +28,20 @@ import (
 	"beaver/app/moment/moment_api/internal/svc"
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type DeleteMomentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMomentLogic {
 	return &DeleteMomentLogic{
 		ctx:    ctx,
-		logger: logger.New("delete_moment"),
+		logger: beaverlog.New("delete_moment", ctx),
 		svcCtx: svcCtx,
 	}
 }

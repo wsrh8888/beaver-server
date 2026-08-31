@@ -27,21 +27,20 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type ExecuteUserControlLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewExecuteUserControlLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ExecuteUserControlLogic {
-	return &ExecuteUserControlLogic{logger: logger.New("execute_user_control"), ctx: ctx, svcCtx: svcCtx}
+	return &ExecuteUserControlLogic{logger: beaverlog.New("execute_user_control", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *ExecuteUserControlLogic) ExecuteUserControl(req *types.ExecuteUserControlReq) (resp *types.ExecuteUserControlRes, err error) {

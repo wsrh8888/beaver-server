@@ -19,33 +19,19 @@
  * beaver-server-header-v1
  */
 
-package httpMiddleware
+package grpcMiddleware
 
 import (
-	"beaver/common/middleware/utils"
-	"bytes"
-	"io"
-	"net/http"
-	"time"
+	"context"
+
+	"beaver/common/traceid"
+
+	"google.golang.org/grpc"
 )
 
-// RequestLogMiddleware 请求日志中间件
-func RequestLogMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-
-		// 读取请求体
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			utils.LogRequest(r.Method, r.URL.Path, string(body), nil, err, startTime)
-			return
-		}
-		// 恢复请求体
-		r.Body = io.NopCloser(bytes.NewBuffer(body))
-
-		next(w, r)
-
-		// 记录请求信息
-		utils.LogRequest(r.Method, r.URL.Path, string(body), nil, nil, startTime)
-	}
+// TraceServerInterceptor 从 metadata 取出服务端 x-request-id，写入 ctx 供 logx 使用。
+func TraceServerInterceptor(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	id := traceid.Ensure(traceid.FromIncomingMD(ctx))
+	ctx = traceid.WithContext(ctx, id, "")
+	return handler(ctx, req)
 }

@@ -26,7 +26,7 @@ import (
 	"beaver/app/datasync/datasync_api/internal/handler"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/common/etcd"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
 
@@ -41,7 +41,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("datasync_api")
+	beaverlog.Init("datasync_api")
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

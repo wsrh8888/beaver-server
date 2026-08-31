@@ -31,24 +31,22 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type ForwardMessageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewForwardMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ForwardMessageLogic {
 	return &ForwardMessageLogic{
 		ctx:    ctx,
-		logger: logger.New("forward_message"),
+		logger: beaverlog.New("forward_message", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -58,16 +56,32 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 	var originMessages []chat_models.ChatMessage
 	err = l.svcCtx.DB.Where("message_id IN ?", req.MessageIDs).Order("created_at asc").Find(&originMessages).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("获取待转发消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取待转发消息失败",
+			Data: map[string]any{
+				"userId":   req.UserID,
+				"targetId": req.TargetID,
+				"err":      err.Error(),
+			},
+		})
 		return nil, err
 	}
 
 	if len(originMessages) == 0 {
+		l.logger.Warn(model.LogMsg{
+			Text: "未找到可转发消息",
+			Data: map[string]any{
+				"userId":     req.UserID,
+				"targetId":   req.TargetID,
+				"messageIds": req.MessageIDs,
+			},
+		})
 		return nil, errors.New("未找到有效的转发消息")
 	}
 
 	if req.ForwardMode == 1 {
 		// --- 逐条转发模式 ---
+		failCount := 0
 		for _, m := range originMessages {
 			// 生成全新的客户端ID（简单起见使用UUID+原始ID，大厂通常由前端传入或后端补齐）
 			newMsgID := uuid.New().String()
@@ -80,9 +94,29 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 				Msg:            l.convertModelToProtoMsg(m.Msg),
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("逐条转发失败: %v", err)
+				failCount++
+				l.logger.Error(model.LogMsg{
+					Text: "逐条转发失败",
+					Data: map[string]any{
+						"userId":          req.UserID,
+						"targetId":        req.TargetID,
+						"originMessageId": m.MessageID,
+						"err":             err.Error(),
+					},
+				})
 				// 商业化项目通常会继续处理下一条，或者返回部分成功的提示
 			}
+		}
+		if failCount > 0 {
+			l.logger.Warn(model.LogMsg{
+				Text: "逐条转发部分失败",
+				Data: map[string]any{
+					"userId":       req.UserID,
+					"targetId":     req.TargetID,
+					"messageCount": len(originMessages),
+					"failCount":    failCount,
+				},
+			})
 		}
 	} else {
 		// --- 合并转发模式 ---
@@ -94,7 +128,15 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			Content:  originMessages, // 直接赋值，由 ForwardContent.Value 接口处理序列化
 		}).Error
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("创建转发详情失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "创建合并转发详情失败",
+				Data: map[string]any{
+					"userId":   req.UserID,
+					"targetId": req.TargetID,
+					"recordId": recordID,
+					"err":      err.Error(),
+				},
+			})
 			return nil, err
 		}
 
@@ -118,17 +160,25 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			},
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("发送合并转发卡片失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "发送合并转发卡片失败",
+				Data: map[string]any{
+					"userId":   req.UserID,
+					"targetId": req.TargetID,
+					"recordId": recordID,
+					"err":      err.Error(),
+				},
+			})
 			return nil, err
 		}
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "消息转发成功",
-		Data: map[string]interface{}{
-			"userId":      req.UserID,
-			"targetId":    req.TargetID,
-			"forwardMode": req.ForwardMode,
+		Data: map[string]any{
+			"userId":       req.UserID,
+			"targetId":     req.TargetID,
+			"forwardMode":  req.ForwardMode,
 			"messageCount": len(originMessages),
 		},
 	})
@@ -164,7 +214,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.VideoMsgType:
 		if m.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileUrl:       m.VideoMsg.FileUrl,
+				FileUrl:      m.VideoMsg.FileUrl,
 				Width:        int32(m.VideoMsg.Width),
 				Height:       int32(m.VideoMsg.Height),
 				Duration:     int32(m.VideoMsg.Duration),
@@ -268,7 +318,7 @@ func (l *ForwardMessageLogic) convertModelToProtoMsg(m *ctype.Msg) *chat_rpc.Msg
 	case ctype.CloudDocMsgType:
 		if m.CloudDocMsg != nil {
 			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
-				DocId: m.CloudDocMsg.DocID,
+				DocId:    m.CloudDocMsg.DocID,
 				DocType:  int32(m.CloudDocMsg.DocType),
 				Title:    m.CloudDocMsg.Title,
 				OwnerId:  m.CloudDocMsg.OwnerID,

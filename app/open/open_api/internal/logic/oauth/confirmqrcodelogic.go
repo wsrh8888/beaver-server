@@ -27,23 +27,20 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type ConfirmQrCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewConfirmQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ConfirmQrCodeLogic {
 	return &ConfirmQrCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("confirm_qrcode"),
+		logger: beaverlog.New("confirm_qrcode", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -57,13 +54,16 @@ func (l *ConfirmQrCodeLogic) ConfirmQrCode(req *types.ConfirmQrCodeReq) (resp *t
 	}
 
 	if err := l.svcCtx.OAuth.Confirm(req.SceneID, req.UserID); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码确认失败",
+			Data: map[string]any{"sceneId": req.SceneID, "userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
-	logx.Infof("扫码授权已确认: sceneId=%s, userId=%s", req.SceneID, req.UserID)
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth扫码确认成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"sceneId": req.SceneID,
 			"userId":  req.UserID,
 		},

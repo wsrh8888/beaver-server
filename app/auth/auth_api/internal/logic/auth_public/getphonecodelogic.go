@@ -29,24 +29,21 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/email"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type GetPhoneCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetPhoneCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPhoneCodeLogic {
 	return &GetPhoneCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("get_phone_code"),
+		logger: beaverlog.New("get_phone_code", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -55,7 +52,10 @@ func (l *GetPhoneCodeLogic) GetPhoneCode(req *types.GetPhoneCodeReq) (*types.Get
 	rateLimitKey := fmt.Sprintf("phone_rate_limit_%s", req.Phone)
 	exists, err := l.svcCtx.Redis.Exists(rateLimitKey).Result()
 	if err != nil {
-		logx.Errorf("检查短信发送频率限制失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "检查短信发送频率失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, errors.New("服务内部异常")
 	}
 	if exists > 0 {
@@ -64,13 +64,19 @@ func (l *GetPhoneCodeLogic) GetPhoneCode(req *types.GetPhoneCodeReq) (*types.Get
 
 	code := email.GenerateCode()
 	if err := l.sendSMS(req.Phone, code, req.Type); err != nil {
-		logx.Errorf("发送短信失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "发送短信失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, errors.New("发送验证码失败，请稍后重试")
 	}
 
 	codeKey := fmt.Sprintf("phone_code_%s_%s", req.Phone, req.Type)
 	if err := l.svcCtx.Redis.Set(codeKey, code, 5*time.Minute).Err(); err != nil {
-		logx.Errorf("存储验证码失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "存储验证码失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, errors.New("服务内部异常")
 	}
 

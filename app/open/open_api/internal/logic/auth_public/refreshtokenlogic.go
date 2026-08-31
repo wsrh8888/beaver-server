@@ -30,20 +30,20 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RefreshTokenLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RefreshTokenLogic {
 	return &RefreshTokenLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("refresh_token", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -55,9 +55,16 @@ func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (resp *type
 
 	var oldToken open_models.OpenOAuthToken
 	if err := l.svcCtx.DB.Where("refresh_token = ?", req.RefreshToken).First(&oldToken).Error; err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "刷新令牌无效",
+		})
 		return nil, errors.New("刷新令牌无效")
 	}
 	if time.Now().Unix() > oldToken.RefreshTokenExpiresAt {
+		l.logger.Warn(model.LogMsg{
+			Text: "刷新令牌已过期",
+			Data: map[string]any{"appId": oldToken.AppID},
+		})
 		return nil, errors.New("刷新令牌已过期，请重新授权")
 	}
 
@@ -66,9 +73,17 @@ func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (resp *type
 		RefreshToken: req.RefreshToken,
 	})
 	if err != nil {
-		logx.Errorf("RefreshToken RPC 调用失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "刷新令牌RPC失败",
+			Data: map[string]any{"appId": oldToken.AppID, "err": err.Error()},
+		})
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "刷新令牌成功",
+		Data: map[string]any{"appId": oldToken.AppID},
+	})
 
 	return &types.RefreshTokenRes{
 		AccessToken:  rpcResp.AccessToken,

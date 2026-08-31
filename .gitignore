@@ -3,3 +3,4 @@ package.lock.json
 static/*
 *.exe
 .rocketmq_client_go
+logs/

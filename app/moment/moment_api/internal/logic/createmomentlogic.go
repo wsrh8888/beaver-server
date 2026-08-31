@@ -31,23 +31,22 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/models/ctype"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 )
 
-
 type CreateMomentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateMomentLogic {
 	return &CreateMomentLogic{
 		ctx:    ctx,
-		logger: logger.New("create_moment"),
+		logger: beaverlog.New("create_moment", ctx),
 		svcCtx: svcCtx,
 	}
 }

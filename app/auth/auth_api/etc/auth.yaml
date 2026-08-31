@@ -2,10 +2,18 @@ Name: auth
 Host: 0.0.0.0
 Port: 20100
 Log:
+  ServiceName: auth_api
+  Mode: file
+  Path: logs/auth_api
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05
+  KeepDays: 7
   Level: info
   Stat: false
+Prometheus:
+  Host: 0.0.0.0
+  Port: 27100
+  Path: /metrics
 Etcd: 127.0.0.1:2379
 Auth:
   AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620

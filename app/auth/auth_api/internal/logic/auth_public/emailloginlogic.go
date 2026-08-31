@@ -35,23 +35,22 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
 	"beaver/utils/authlock"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
 )
-
 
 type EmailLoginLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewEmailLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EmailLoginLogic {
 	return &EmailLoginLogic{
 		ctx:    ctx,
-		logger: logger.New("email_login"),
+		logger: beaverlog.New("email_login", ctx),
 		svcCtx: svcCtx,
 	}
 }

@@ -32,26 +32,30 @@ import (
 	"beaver/common/list_query"
 	"beaver/common/models"
 	"beaver/common/models/ctype"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type SearchMessagesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewSearchMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchMessagesLogic {
 	return &SearchMessagesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("search_messages", ctx),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*types.SearchMessagesRes, error) {
 	if req.Keyword == "" {
+		l.logger.Warn(model.LogMsg{
+			Text: "搜索关键词为空",
+			Data: map[string]any{"userId": req.UserID},
+		})
 		return nil, errors.New("keyword不能为空")
 	}
 
@@ -76,6 +80,13 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 			Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 			Count(&count)
 		if count == 0 {
+			l.logger.Warn(model.LogMsg{
+				Text: "无权搜索该会话",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+				},
+			})
 			return nil, errors.New("无权搜索该会话")
 		}
 		query = query.Where("conversation_id = ?", req.ConversationID)
@@ -98,6 +109,14 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 		Where: query,
 	})
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "搜索消息失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"err":            err.Error(),
+			},
+		})
 		return nil, err
 	}
 
@@ -116,7 +135,10 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 			UserIdList: userIds,
 		})
 		if err != nil {
-			l.Errorf("批量获取用户信息失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "批量获取用户信息失败",
+				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			})
 		} else {
 			for userId, userInfo := range userListResp.UserInfo {
 				userInfoMap[userId] = types.Sender{
@@ -134,6 +156,14 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 		var msg types.Msg
 		if chat.Msg != nil {
 			if err := convertCtypeMsgToTypesMsg(*chat.Msg, &msg); err != nil {
+				l.logger.Error(model.LogMsg{
+					Text: "消息内容转换失败",
+					Data: map[string]any{
+						"userId":    req.UserID,
+						"messageId": chat.MessageID,
+						"err":       err.Error(),
+					},
+				})
 				return nil, err
 			}
 		}
@@ -162,6 +192,15 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 		})
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "搜索消息成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"count":          total,
+			"listCount":      len(list),
+		},
+	})
 	return &types.SearchMessagesRes{
 		Count: total,
 		List:  list,

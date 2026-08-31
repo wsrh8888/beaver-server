@@ -31,50 +31,48 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetTokenLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
-// 获取访问令牌
 func NewGetTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetTokenLogic {
 	return &GetTokenLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("get_token", ctx),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRes, err error) {
-	// 1. 验证应用凭证
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND app_secret = ? AND status = ?", req.AppID, req.AppSecret, 1).First(&app).Error; err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "应用凭证错误",
+			Data: map[string]any{"appId": req.AppID},
+		})
 		return nil, errors.New("应用 ID 或密钥错误")
 	}
 
-	// 2. 查询 OAuth 配置获取权限范围
 	var oauthConfig open_models.OpenAppOAuth
 	var supportedScopes string
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil {
 		supportedScopes = oauthConfig.SupportedScopes
 	}
 
-	// 3. 生成 Access Token
 	accessTokenBytes := make([]byte, 32)
 	_, _ = rand.Read(accessTokenBytes)
 	accessToken := hex.EncodeToString(accessTokenBytes)
 
-	// 4. 生成 Refresh Token
 	refreshTokenBytes := make([]byte, 32)
 	_, _ = rand.Read(refreshTokenBytes)
 	refreshToken := hex.EncodeToString(refreshTokenBytes)
 
-	// 5. 保存 Access Token（客户端凭证模式没有用户ID）
 	now := time.Now()
 	expiresAt := now.Add(2 * time.Hour).Unix()
 	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour).Unix()
@@ -89,14 +87,22 @@ func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRe
 	}
 
 	if err := l.svcCtx.DB.Create(&tokenRecord).Error; err != nil {
-		logx.Errorf("创建访问令牌失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建访问令牌失败",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
 		return nil, errors.New("生成令牌失败")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "客户端凭证令牌签发成功",
+		Data: map[string]any{"appId": req.AppID},
+	})
 
 	return &types.GetTokenRes{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    7200, // 2小时
+		ExpiresIn:    7200,
 		TokenType:    "Bearer",
 	}, nil
 }

@@ -19,9 +19,6 @@
  * beaver-server-header-v1
  */
 
-// Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
-
 package oauth_public
 
 import (
@@ -32,22 +29,21 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	util "beaver/utils/uuid"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type GenerateQrCodeLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
-// 生成扫码登录二维码
 func NewGenerateQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GenerateQrCodeLogic {
 	return &GenerateQrCodeLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("generate_qrcode", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -55,10 +51,17 @@ func NewGenerateQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp *types.GenerateQrCodeRes, err error) {
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
-		logx.Errorf("应用不存在: appId=%s, err=%v", req.AppID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "应用不存在",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("应用不存在")
 	}
 	if app.Status != 1 {
+		l.logger.Warn(model.LogMsg{
+			Text: "应用未启用",
+			Data: map[string]any{"appId": req.AppID},
+		})
 		return nil, fmt.Errorf("应用未启用")
 	}
 
@@ -73,11 +76,17 @@ func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp
 		ExpiresAt: expiresAt,
 	}
 	if err := l.svcCtx.DB.Create(&qrCode).Error; err != nil {
-		logx.Errorf("创建扫码记录失败: err=%v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建扫码记录失败",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
-	logx.Infof("生成扫码会话成功: sceneId=%s, appId=%s", sceneID, req.AppID)
+	l.logger.Info(model.LogMsg{
+		Text: "生成扫码会话成功",
+		Data: map[string]any{"sceneId": sceneID, "appId": req.AppID},
+	})
 
 	return &types.GenerateQrCodeRes{
 		SceneID:  sceneID,

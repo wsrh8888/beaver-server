@@ -289,7 +289,7 @@ func main() {
 	openDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local")
 	_ = fileseed.InitDefaultFiles(fileDB)
 	_ = platform.InitPlatform(platformDB)
-	if err := userseed.InitDefaultUser(userDB, authDB, openDB); err != nil {
+	if err := userseed.InitDefaultUser(userDB, authDB); err != nil {
 		fmt.Printf("默认用户初始化失败: %v\n", err)
 		return
 	}

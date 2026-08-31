@@ -35,24 +35,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type AddFriendLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFriendLogic {
 	return &AddFriendLogic{
 		ctx:    ctx,
-		logger: logger.New("add_friend"),
+		logger: beaverlog.New("add_friend", ctx),
 		svcCtx: svcCtx,
 	}
 }

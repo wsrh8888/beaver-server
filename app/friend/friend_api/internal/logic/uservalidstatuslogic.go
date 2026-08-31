@@ -39,24 +39,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type UserValidStatusLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUserValidStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserValidStatusLogic {
 	return &UserValidStatusLogic{
 		ctx:    ctx,
-		logger: logger.New("friend_valid"),
+		logger: beaverlog.New("friend_valid", ctx),
 		svcCtx: svcCtx,
 	}
 }

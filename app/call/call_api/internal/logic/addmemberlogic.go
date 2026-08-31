@@ -33,24 +33,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/livekit/protocol/auth"
 )
 
-
 type AddMemberLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 群聊中途加入通话
 func NewAddMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddMemberLogic {
 	return &AddMemberLogic{
 		ctx:    ctx,
-		logger: logger.New("add_member"),
+		logger: beaverlog.New("add_member", ctx),
 		svcCtx: svcCtx,
 	}
 }

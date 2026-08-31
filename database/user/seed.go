@@ -23,7 +23,6 @@ package userseed
 
 import (
 	"beaver/app/auth/auth_models"
-	"beaver/app/open/open_models"
 	"beaver/app/user/user_models"
 	"beaver/utils/pwd"
 	"fmt"
@@ -33,78 +32,103 @@ import (
 )
 
 const (
-	defaultUserEmail    = "751135385@qq.com"
 	defaultUserPassword = "e10adc3949ba59abbe56e057f20f883e" // MD5("123456")
-	defaultUserID       = "100000"
-	defaultNickName     = "默认开发者"
+	seedEmailStart      = 751135380
+	seedEmailEnd        = 751135389
+	ownerEmailLocal     = 751135385
+	ownerUserID         = "100000"
 )
 
-// InitDefaultUser 初始化默认测试账号（用户 + 密码 + 已审核开发者）
-func InitDefaultUser(userDB, authDB, openDB *gorm.DB) error {
+// seedAccounts 返回初始化账号列表（邮箱本地段 → userId）
+// 751135385 固定为 100000（开放平台默认 owner），其余顺延 100001~100009
+func seedAccounts() []struct {
+	email  string
+	userID string
+	nick   string
+} {
+	accounts := make([]struct {
+		email  string
+		userID string
+		nick   string
+	}, 0, seedEmailEnd-seedEmailStart+1)
+
+	nextID := 100001
+	for local := seedEmailStart; local <= seedEmailEnd; local++ {
+		userID := fmt.Sprintf("%d", nextID)
+		if local == ownerEmailLocal {
+			userID = ownerUserID
+		} else {
+			nextID++
+		}
+		accounts = append(accounts, struct {
+			email  string
+			userID string
+			nick   string
+		}{
+			email:  fmt.Sprintf("%d@qq.com", local),
+			userID: userID,
+			nick:   fmt.Sprintf("测试用户%d", local%1000),
+		})
+	}
+	return accounts
+}
+
+// InitDefaultUser 初始化默认测试账号（用户 + 密码）
+func InitDefaultUser(userDB, authDB *gorm.DB) error {
+	for _, acc := range seedAccounts() {
+		if err := ensureUser(userDB, acc.email, acc.userID, acc.nick); err != nil {
+			return err
+		}
+		if err := ensureCredential(authDB, acc.userID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ensureUser(userDB *gorm.DB, email, userID, nickName string) error {
 	var user user_models.UserModel
-	err := userDB.Where("email = ?", defaultUserEmail).First(&user).Error
+	err := userDB.Where("email = ?", email).First(&user).Error
 	if err == gorm.ErrRecordNotFound {
 		user = user_models.UserModel{
-			UserID:   defaultUserID,
+			UserID:   userID,
 			UserType: user_models.UserTypeNormal,
-			NickName: defaultNickName,
-			Email:    defaultUserEmail,
+			NickName: nickName,
+			Email:    email,
 			Source:   user_models.SourceEmail,
 			Status:   1,
 			Version:  1,
 		}
 		if err := userDB.Create(&user).Error; err != nil {
-			return fmt.Errorf("创建默认用户失败: %w", err)
+			return fmt.Errorf("创建默认用户失败(%s): %w", email, err)
 		}
 		log.Printf("创建默认用户成功: userId=%s, email=%s", user.UserID, user.Email)
-	} else if err != nil {
-		return fmt.Errorf("查询默认用户失败: %w", err)
-	} else {
-		log.Printf("默认用户已存在: userId=%s, email=%s", user.UserID, user.Email)
+		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("查询默认用户失败(%s): %w", email, err)
+	}
+	log.Printf("默认用户已存在: userId=%s, email=%s", user.UserID, user.Email)
+	return nil
+}
 
+func ensureCredential(authDB *gorm.DB, userID string) error {
 	var credential auth_models.AuthCredentialModel
-	err = authDB.Where("user_id = ?", user.UserID).First(&credential).Error
+	err := authDB.Where("user_id = ?", userID).First(&credential).Error
 	if err == gorm.ErrRecordNotFound {
 		credential = auth_models.AuthCredentialModel{
-			UserID:   user.UserID,
+			UserID:   userID,
 			Password: pwd.HahPwd(defaultUserPassword),
 		}
 		if err := authDB.Create(&credential).Error; err != nil {
-			return fmt.Errorf("创建默认用户凭证失败: %w", err)
+			return fmt.Errorf("创建默认用户凭证失败(userId=%s): %w", userID, err)
 		}
-		log.Printf("创建默认用户凭证成功: userId=%s", user.UserID)
-	} else if err != nil {
-		return fmt.Errorf("查询默认用户凭证失败: %w", err)
-	} else {
-		log.Printf("默认用户凭证已存在: userId=%s", user.UserID)
+		log.Printf("创建默认用户凭证成功: userId=%s", userID)
+		return nil
 	}
-
-	var developer open_models.OpenDeveloper
-	err = openDB.Where("user_id = ?", user.UserID).First(&developer).Error
-	if err == gorm.ErrRecordNotFound {
-		developer = open_models.OpenDeveloper{
-			UserID:      user.UserID,
-			RealName:    defaultNickName,
-			CompanyName: "Beaver",
-			Email:       defaultUserEmail,
-			Description: "系统初始化默认开发者",
-			Status:      1,
-		}
-		if err := openDB.Create(&developer).Error; err != nil {
-			return fmt.Errorf("创建默认开发者失败: %w", err)
-		}
-		log.Printf("创建默认开发者成功: userId=%s", user.UserID)
-	} else if err != nil {
-		return fmt.Errorf("查询默认开发者失败: %w", err)
-	} else if developer.Status != 1 {
-		if err := openDB.Model(&developer).Update("status", 1).Error; err != nil {
-			return fmt.Errorf("更新默认开发者状态失败: %w", err)
-		}
-		log.Printf("默认开发者已审核通过: userId=%s", user.UserID)
-	} else {
-		log.Printf("默认开发者已存在: userId=%s", user.UserID)
+	if err != nil {
+		return fmt.Errorf("查询默认用户凭证失败(userId=%s): %w", userID, err)
 	}
-
+	log.Printf("默认用户凭证已存在: userId=%s", userID)
 	return nil
 }

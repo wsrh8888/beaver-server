@@ -29,31 +29,37 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UserInfoLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfoLogic {
 	return &UserInfoLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("user-info-rpc", ctx),
 	}
 }
 
 func (l *UserInfoLogic) UserInfo(in *user_rpc.UserInfoReq) (*user_rpc.UserInfoRes, error) {
+	l.logger.Info(model.LogMsg{
+		Text: "rpc UserInfo",
+		Data: map[string]any{"userId": in.UserID},
+	})
+
 	var user user_models.UserModel
-
 	err := l.svcCtx.DB.Take(&user, "user_id = ?", in.UserID).Error
-
 	if err != nil {
-		logx.Errorf("查询用户失败: %s", err.Error())
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户失败",
+			Data: map[string]any{"userId": in.UserID, "err": err.Error()},
+		})
 		return nil, errors.New("用户不存在")
 	}
 

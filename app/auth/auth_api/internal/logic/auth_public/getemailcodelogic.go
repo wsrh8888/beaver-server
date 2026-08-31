@@ -31,24 +31,21 @@ import (
 
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/email"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type GetEmailCodeLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetEmailCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmailCodeLogic {
 	return &GetEmailCodeLogic{
 		ctx:    ctx,
-		logger: logger.New("get_email_code"),
+		logger: beaverlog.New("get_email_code", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -57,7 +54,10 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 	rateLimitKey := fmt.Sprintf("email_rate_limit_%s", req.Email)
 	exists, err := l.svcCtx.Redis.Exists(rateLimitKey).Result()
 	if err != nil {
-		logx.Errorf("检查邮件发送频率限制失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "检查邮件发送频率失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, errors.New("服务内部异常")
 	}
 	if exists > 0 {
@@ -70,7 +70,10 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 	// 发送验证码邮件
 	err = l.sendEmail(req.Email, code, req.Type)
 	if err != nil {
-		logx.Errorf("发送邮件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "发送邮件失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, errors.New("发送验证码失败，请稍后重试")
 	}
 
@@ -78,14 +81,20 @@ func (l *GetEmailCodeLogic) GetEmailCode(req *types.GetEmailCodeReq) (resp *type
 	codeKey := fmt.Sprintf("email_code_%s_%s", req.Email, req.Type)
 	err = l.svcCtx.Redis.Set(codeKey, code, 5*time.Minute).Err()
 	if err != nil {
-		logx.Errorf("存储验证码失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "存储验证码失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, errors.New("服务内部异常")
 	}
 
 	// 设置发送频率限制（60秒）
 	err = l.svcCtx.Redis.Set(rateLimitKey, "1", 60*time.Second).Err()
 	if err != nil {
-		logx.Errorf("设置发送频率限制失败: %v", err)
+		l.logger.Warn(model.LogMsg{
+			Text: "设置发送频率限制失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 	}
 
 	l.logger.Info(model.LogMsg{
@@ -106,7 +115,6 @@ func (l *GetEmailCodeLogic) sendEmail(to, code, codeType string) error {
 	port = l.svcCtx.Config.Email.QQ.Port
 	username = l.svcCtx.Config.Email.QQ.Username
 	password = l.svcCtx.Config.Email.QQ.Password
-	logx.Infof("QQ邮箱配置: Host=%s, Port=%d, Username=%s", host, port, username)
 
 	// 构建邮件内容
 	subject := email.GetEmailSubject(codeType)
@@ -127,8 +135,6 @@ func (l *GetEmailCodeLogic) sendEmail(to, code, codeType string) error {
 	}
 	message += "\r\n" + body
 
-	logx.Infof("准备发送邮件: From=%s, To=%s, Subject=%s", username, to, subject)
-
 	// 根据端口选择发送方式
 	var err error
 	if port == 465 {
@@ -142,11 +148,17 @@ func (l *GetEmailCodeLogic) sendEmail(to, code, codeType string) error {
 	}
 
 	if err != nil {
-		logx.Errorf("SMTP发送失败: %v, host=%s, port=%d, username=%s, to=%s", err, host, port, username, to)
+		l.logger.Error(model.LogMsg{
+			Text: "SMTP发送失败",
+			Data: map[string]any{
+				"host": host,
+				"port": port,
+				"err":  err.Error(),
+			},
+		})
 		return fmt.Errorf("发送邮件失败: %v", err)
 	}
 
-	logx.Infof("邮件发送成功: To=%s", to)
 	return nil
 }
 

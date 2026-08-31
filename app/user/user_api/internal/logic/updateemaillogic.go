@@ -28,23 +28,22 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"gorm.io/gorm"
 )
 
-
 type UpdateEmailLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateEmailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateEmailLogic {
 	return &UpdateEmailLogic{
 		ctx:    ctx,
-		logger: logger.New("update_email"),
+		logger: beaverlog.New("update_email", ctx),
 		svcCtx: svcCtx,
 	}
 }

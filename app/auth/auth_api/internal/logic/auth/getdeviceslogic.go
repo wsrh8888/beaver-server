@@ -28,22 +28,23 @@ import (
 	"beaver/app/auth/auth_api/internal/types"
 	"beaver/app/auth/auth_models"
 	"beaver/core/coreonline"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type GetDevicesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDevicesLogic {
 	return &GetDevicesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("get_devices", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -51,7 +52,10 @@ func NewGetDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDev
 func (l *GetDevicesLogic) GetDevices(req *types.GetDevicesReq) (*types.GetDevicesRes, error) {
 	var devices []auth_models.AuthDeviceModel
 	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).Order("last_login_time DESC").Find(&devices).Error; err != nil {
-		l.Errorf("查询设备失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询设备失败",
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -65,6 +69,10 @@ func (l *GetDevicesLogic) GetDevices(req *types.GetDevicesReq) (*types.GetDevice
 			continue
 		}
 		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "读取会话设备失败",
+				Data: map[string]any{"userId": req.UserID, "slot": slot, "err": err.Error()},
+			})
 			return nil, err
 		}
 		onlineDeviceIDs[deviceID] = true

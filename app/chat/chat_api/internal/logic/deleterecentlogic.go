@@ -27,40 +27,57 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type DeleteRecentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteRecentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteRecentLogic {
 	return &DeleteRecentLogic{
 		ctx:    ctx,
-		logger: logger.New("delete_recent"),
+		logger: beaverlog.New("delete_recent", ctx),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *DeleteRecentLogic) DeleteRecent(req *types.DeleteRecentReq) (resp *types.DeleteRecentRes, err error) {
 	// 假删除操作
-	err = l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
+	result := l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
 		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
-		Updates(map[string]interface{}{"is_delete": true, "is_pinned": false}).Error
-
-	if err == nil {
-		l.logger.Info(model.LogMsg{
-			Text: "删除会话成功",
-			Data: map[string]interface{}{
+		Updates(map[string]interface{}{"is_delete": true, "is_pinned": false})
+	if result.Error != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "删除会话失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"err":            result.Error.Error(),
+			},
+		})
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		l.logger.Warn(model.LogMsg{
+			Text: "会话不存在或无权删除",
+			Data: map[string]any{
 				"userId":         req.UserID,
 				"conversationId": req.ConversationID,
 			},
 		})
+		return nil, nil
 	}
 
-	return nil, err
+	l.logger.Info(model.LogMsg{
+		Text: "删除会话成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+		},
+	})
+	return nil, nil
 }

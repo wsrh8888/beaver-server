@@ -31,8 +31,8 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
 
@@ -40,17 +40,16 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type PushEventLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewPushEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PushEventLogic {
 	return &PushEventLogic{
 		ctx:    ctx,
-		logger: logger.New("push_event"),
+		logger: beaverlog.New("push_event", ctx),
 		svcCtx: svcCtx,
 	}
 }

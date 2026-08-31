@@ -26,8 +26,8 @@ import (
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/types/call_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"context"
 	"encoding/json"
 
@@ -35,18 +35,17 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-
 type LiveKitWebhookLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // LiveKit 服务器回调 (需在网关配置白名单)
 func NewLiveKitWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LiveKitWebhookLogic {
 	return &LiveKitWebhookLogic{
 		ctx:    ctx,
-		logger: logger.New("livekit_webhook"),
+		logger: beaverlog.New("livekit_webhook", ctx),
 		svcCtx: svcCtx,
 	}
 }
