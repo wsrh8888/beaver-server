@@ -33,23 +33,24 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	"beaver/core/coreonline"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 
 	"github.com/gorilla/websocket"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ChatWebsocketLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewChatWebsocketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatWebsocketLogic {
 	return &ChatWebsocketLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("chat_websocket", ctx),
 	}
 }
 func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWriter, r *http.Request) (resp *types.WsRes, err error) {
@@ -57,7 +58,10 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	userAgent := r.Header.Get("User-Agent")
 	preciseType := device.GetDeviceType(userAgent)
 	if preciseType == device.DeviceUnknown {
-		logx.Errorf("连接拒绝：非法设备接入, 用户: %s, UA: %s", req.UserID, userAgent)
+		l.logger.Error(model.LogMsg{
+			Text: "连接拒绝非法设备接入",
+			Data: map[string]any{"userId": req.UserID, "userAgent": userAgent},
+		})
 		http.Error(w, "Illegal Device", http.StatusForbidden)
 		return nil, nil
 	}
@@ -67,7 +71,10 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 
 	// 3. 鉴权：先于升级执行。使用槽位 (Group) 进行登录态比对
 	if authErr := ws_auth.VerifyWsToken(req.Token, l.svcCtx.Config.Auth.AccessSecret, req.UserID, deviceGroup, l.svcCtx.Redis); authErr != nil {
-		logx.Errorf("WS鉴权失败, 用户: %s, 精准设备: %s, 槽位: %s, 错误: %v", req.UserID, preciseType, deviceGroup, authErr)
+		l.logger.Error(model.LogMsg{
+			Text: "WS鉴权失败",
+			Data: map[string]any{"userId": req.UserID, "preciseType": preciseType, "deviceGroup": deviceGroup, "err": authErr.Error()},
+		})
 		http.Error(w, authErr.Error(), http.StatusUnauthorized)
 		return nil, nil
 	}
@@ -75,7 +82,10 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	// 2. 升级 HTTP → WebSocket
 	conn, err := upgradeToWebSocket(w, r)
 	if err != nil {
-		logx.Errorf("WebSocket升级失败, 用户: %s, 错误: %v", req.UserID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "WebSocket升级失败",
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, nil
 	}
 
@@ -89,13 +99,21 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	// 无论具体的 OS 是 windows、macos 还是 linux，在 WS 路由层统一视为 desktop 槽位
 	userKey := ws_conn.GetUserKey(req.UserID, deviceGroup)
 
-	logx.Infof("用户上线: %s, 槽位: %s (%s), 地址: %s", req.UserID, deviceGroup, preciseType, conn.RemoteAddr().String())
-	manageUserConnection(userKey, client, req.UserID, deviceGroup)
+	l.logger.Info(model.LogMsg{
+		Text: "用户上线",
+		Data: map[string]interface{}{
+			"userId":      req.UserID,
+			"deviceGroup": deviceGroup,
+			"preciseType": preciseType,
+			"remoteAddr":  conn.RemoteAddr().String(),
+		},
+	})
+	l.manageUserConnection(userKey, client, req.UserID, deviceGroup)
 	coreonline.MarkOnline(l.svcCtx.Redis, req.UserID, deviceGroup, l.svcCtx.InstanceID)
 	connAddr := conn.RemoteAddr().String()
 	defer func() {
 		conn.Close()
-		cleanupConnection(req.UserID, deviceGroup, connAddr, l.svcCtx)
+		l.cleanupConnection(req.UserID, deviceGroup, connAddr)
 	}()
 
 	// 6. 启动心跳
@@ -109,7 +127,7 @@ func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWrit
 	return nil, nil
 }
 
-func manageUserConnection(userKey string, client *ws_conn.Client, userID, deviceGroup string) {
+func (l *ChatWebsocketLogic) manageUserConnection(userKey string, client *ws_conn.Client, userID, deviceGroup string) {
 	ws_conn.WsMapMutex.Lock()
 	defer ws_conn.WsMapMutex.Unlock()
 
@@ -120,7 +138,10 @@ func manageUserConnection(userKey string, client *ws_conn.Client, userID, device
 		// 槽位级互踢：目前 desktop 和 mobile 均限制单物理设备在线
 		if deviceGroup == "desktop" || deviceGroup == "mobile" {
 			for oldAddr, oldClient := range userWsInfo.WsClientMap {
-				logx.Infof("【槽位互踢】关闭旧连接, 用户: %s, 槽位: %s, 地址: %s", userID, deviceGroup, oldAddr)
+				l.logger.Info(model.LogMsg{
+					Text: "槽位互踢关闭旧连接",
+					Data: map[string]interface{}{"userId": userID, "deviceGroup": deviceGroup, "oldAddr": oldAddr},
+				})
 				oldClient.Conn.Close()
 				delete(userWsInfo.WsClientMap, oldAddr)
 			}
@@ -132,7 +153,10 @@ func manageUserConnection(userKey string, client *ws_conn.Client, userID, device
 		}
 	}
 
-	logx.Infof("连接注册成功, 用户: %s, 槽位: %s", userID, deviceGroup)
+	l.logger.Info(model.LogMsg{
+		Text: "连接注册成功",
+		Data: map[string]interface{}{"userId": userID, "deviceGroup": deviceGroup},
+	})
 }
 
 func configureWebSocketConn(conn *websocket.Conn, svcCtx *svc.ServiceContext) {
@@ -152,21 +176,24 @@ func upgradeToWebSocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn
 	return upGrader.Upgrade(w, r, nil)
 }
 
-func cleanupConnection(userID, deviceGroup, addr string, svcCtx *svc.ServiceContext) {
+func (l *ChatWebsocketLogic) cleanupConnection(userID, deviceGroup, addr string) {
 	ws_conn.WsMapMutex.Lock()
 	defer ws_conn.WsMapMutex.Unlock()
 
 	userKey := ws_conn.GetUserKey(userID, deviceGroup)
 	userWsInfo, ok := ws_conn.UserOnlineWsMap[userKey]
 	if !ok {
-		coreonline.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
+		coreonline.MarkOffline(l.svcCtx.Redis, userID, deviceGroup, l.svcCtx.InstanceID)
 		return
 	}
 
 	delete(userWsInfo.WsClientMap, addr)
 	if len(userWsInfo.WsClientMap) == 0 {
 		delete(ws_conn.UserOnlineWsMap, userKey)
-		coreonline.MarkOffline(svcCtx.Redis, userID, deviceGroup, svcCtx.InstanceID)
-		logx.Infof("用户下线, 用户: %s, 槽位: %s", userID, deviceGroup)
+		coreonline.MarkOffline(l.svcCtx.Redis, userID, deviceGroup, l.svcCtx.InstanceID)
+		l.logger.Info(model.LogMsg{
+			Text: "用户下线",
+			Data: map[string]interface{}{"userId": userID, "deviceGroup": deviceGroup},
+		})
 	}
 }

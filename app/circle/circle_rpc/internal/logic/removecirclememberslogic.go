@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_models"
 	"beaver/app/circle/circle_rpc/internal/svc"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RemoveCircleMembersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRemoveCircleMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveCircleMembersLogic {
 	return &RemoveCircleMembersLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("remove_circle_members", ctx),
 	}
 }
 
@@ -67,6 +67,7 @@ func (l *RemoveCircleMembersLogic) RemoveCircleMembers(in *circle_rpc.RemoveCirc
 
 	if err := l.svcCtx.DB.Where("circle_id = ? AND user_id IN ?", in.CircleId, in.UserIds).
 		Delete(&circle_models.CircleMemberModel{}).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "移除圈子成员失败", Data: map[string]any{"circleId": in.CircleId, "userIds": in.UserIds, "err": err.Error()}})
 		return nil, fmt.Errorf("移除成员失败: %v", err)
 	}
 
@@ -74,6 +75,8 @@ func (l *RemoveCircleMembersLogic) RemoveCircleMembers(in *circle_rpc.RemoveCirc
 	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
 		Where("circle_id = ?", in.CircleId).
 		Update("version", circleVersion)
+
+	l.logger.Info(model.LogMsg{Text: "移除圈子成员成功", Data: map[string]interface{}{"circleId": in.CircleId, "userIds": in.UserIds}})
 
 	return &circle_rpc.RemoveCircleMembersRes{}, nil
 }

@@ -27,21 +27,20 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetMyCircleListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetMyCircleListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMyCircleListLogic {
 	return &GetMyCircleListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_my_circle_list", ctx),
 	}
 }
 

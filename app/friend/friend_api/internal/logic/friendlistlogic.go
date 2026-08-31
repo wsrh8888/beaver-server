@@ -32,22 +32,22 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/list_query"
 	"beaver/common/models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type FriendListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FriendListLogic {
 	return &FriendListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("friend_list", ctx),
 	}
 }
 
@@ -96,7 +96,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 			UserIdList: userIds,
 		})
 		if err != nil {
-			l.Logger.Errorf("批量获取用户信息失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 			// 不返回错误，继续处理，为没有用户信息的设置默认值
 		} else {
 			userInfoMap = userListResp.UserInfo
@@ -148,7 +148,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		// 生成会话Id
 		conversationID, err := conversation.GenerateConversation([]string{req.UserID, targetUserID})
 		if err != nil {
-			l.Logger.Errorf("生成会话Id失败: userID=%s, targetID=%s, error=%v", req.UserID, targetUserID, err)
+			l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "targetId": targetUserID, "err": err.Error()}})
 			return nil, fmt.Errorf("生成会话Id失败: %v", err)
 		}
 
@@ -166,7 +166,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		list = append(list, info)
 	}
 
-	l.Logger.Infof("获取好友列表成功: userID=%s, count=%d", req.UserID, len(list))
+	l.logger.Info(model.LogMsg{Text: "获取好友列表成功", Data: map[string]interface{}{"userId": req.UserID, "count": len(list)}})
 	return &types.FriendListRes{
 		List: list,
 	}, nil

@@ -27,21 +27,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchUpdateConversationLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewBatchUpdateConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchUpdateConversationLogic {
 	return &BatchUpdateConversationLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("batch_update_conversation", ctx),
 	}
 }
 
@@ -49,6 +49,7 @@ func (l *BatchUpdateConversationLogic) BatchUpdateConversation(in *chat_rpc.Batc
 	// 开启事务
 	tx := l.svcCtx.DB.Begin()
 	if tx.Error != nil {
+		l.logger.Error(model.LogMsg{Text: "开启事务失败", Data: map[string]any{"err": tx.Error.Error()}})
 		return nil, tx.Error
 	}
 
@@ -74,6 +75,7 @@ func (l *BatchUpdateConversationLogic) BatchUpdateConversation(in *chat_rpc.Batc
 				UserReadSeq:    0,
 				Version:        1, // 初始版本
 			}).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "创建用户会话记录失败", Data: map[string]any{"userId": userID, "conversationId": in.ConversationId, "err": err.Error()}})
 				tx.Rollback()
 				return nil, err
 			}
@@ -81,6 +83,7 @@ func (l *BatchUpdateConversationLogic) BatchUpdateConversation(in *chat_rpc.Batc
 			// 如果记录存在，不需要更新LastMessage（已在ChatConversationMeta中）
 			// 这里只确保会话没有被隐藏
 			if err := tx.Model(&userConvo).Update("is_hidden", false).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "更新用户会话隐藏状态失败", Data: map[string]any{"userId": userID, "conversationId": in.ConversationId, "err": err.Error()}})
 				tx.Rollback()
 				return nil, err
 			}
@@ -89,8 +92,14 @@ func (l *BatchUpdateConversationLogic) BatchUpdateConversation(in *chat_rpc.Batc
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "批量更新会话成功",
+		Data: map[string]interface{}{"conversationId": in.ConversationId, "userIds": in.UserIds},
+	})
 
 	return &chat_rpc.BatchUpdateConversationRes{
 		Success: true,

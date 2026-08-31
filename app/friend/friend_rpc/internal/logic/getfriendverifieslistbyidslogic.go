@@ -28,27 +28,26 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendVerifiesListByIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendVerifiesListByIdsLogic {
 	return &GetFriendVerifiesListByIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_friend_verifies_list_by_ids", ctx),
 	}
 }
 
 func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *friend_rpc.GetFriendVerifiesListByIdsReq) (*friend_rpc.GetFriendVerifiesListByIdsRes, error) {
 	if len(in.VerifyIds) == 0 {
-		l.Errorf("验证记录ID列表为空")
 		return &friend_rpc.GetFriendVerifiesListByIdsRes{FriendVerifies: []*friend_rpc.FriendVerifyListById{}}, nil
 	}
 
@@ -63,11 +62,11 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *friend_
 
 	err := query.Find(&friendVerifies).Error
 	if err != nil {
-		l.Errorf("查询好友验证信息失败: ids=%v, since=%d, error=%v", in.VerifyIds, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询好友验证信息失败", Data: map[string]any{"ids": in.VerifyIds, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个好友验证信息", len(friendVerifies))
+	l.logger.Info(model.LogMsg{Text: "批量查询好友验证信息", Data: map[string]interface{}{"count": len(friendVerifies)}})
 
 	// 转换为响应格式
 	var friendVerifiesList []*friend_rpc.FriendVerifyListById

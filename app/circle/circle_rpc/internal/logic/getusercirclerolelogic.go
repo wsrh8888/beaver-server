@@ -27,21 +27,20 @@ import (
 	"beaver/app/circle/circle_models"
 	"beaver/app/circle/circle_rpc/internal/svc"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetUserCircleRoleLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserCircleRoleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserCircleRoleLogic {
 	return &GetUserCircleRoleLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_circle_role", ctx),
 	}
 }
 

@@ -28,22 +28,22 @@ import (
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncEmojisLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取表情基础数据版本信息
 func NewGetSyncEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncEmojisLogic {
 	return &GetSyncEmojisLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_emojis", ctx),
 	}
 }
 
@@ -54,11 +54,14 @@ func (l *GetSyncEmojisLogic) GetSyncEmojis(req *types.GetSyncEmojisReq) (resp *t
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取表情版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		l.logger.Error(model.LogMsg{Text: "获取表情版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个表情版本信息", len(emojiResp.EmojiVersions))
+	l.logger.Info(model.LogMsg{
+		Text: "查询表情版本信息完成",
+		Data: map[string]interface{}{"userId": req.UserID, "count": len(emojiResp.EmojiVersions)},
+	})
 
 	// 转换为响应格式，确保返回空数组而不是null
 	emojiVersions := make([]types.EmojiVersionItem, 0)

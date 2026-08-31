@@ -28,22 +28,22 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojiPackageContentsByPackageIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 批量获取表情包内容详情（同步用）
 func NewGetEmojiPackageContentsByPackageIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackageContentsByPackageIdsLogic {
 	return &GetEmojiPackageContentsByPackageIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_package_contents_by_package_ids", ctx),
 	}
 }
 
@@ -58,11 +58,11 @@ func (l *GetEmojiPackageContentsByPackageIdsLogic) GetEmojiPackageContentsByPack
 	var contents []emoji_models.EmojiPackageEmoji
 	err = l.svcCtx.DB.Where("package_id IN ?", req.PackageIds).Find(&contents).Error
 	if err != nil {
-		l.Errorf("查询表情包内容详情失败: packageIds=%v, error=%v", req.PackageIds, err)
+		l.logger.Error(model.LogMsg{Text: "查询表情包内容详情失败", Data: map[string]any{"packageIds": req.PackageIds, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("批量查询表情包内容详情: 请求%d个包, 返回%d条内容", len(req.PackageIds), len(contents))
+	l.logger.Info(model.LogMsg{Text: "批量查询表情包内容详情", Data: map[string]interface{}{"packageCount": len(req.PackageIds), "resultCount": len(contents)}})
 
 	// 转换为响应格式
 	var contentItems []types.EmojiPackageContentDetailItem

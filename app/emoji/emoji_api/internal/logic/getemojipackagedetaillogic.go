@@ -27,24 +27,25 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
 type GetEmojiPackageDetailLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojiPackageDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackageDetailLogic {
 	return &GetEmojiPackageDetailLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_package_detail", ctx),
 	}
 }
 
@@ -56,6 +57,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 		if err == gorm.ErrRecordNotFound {
 			return nil, status.Error(codes.NotFound, "表情包不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "获取表情包失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取表情包失败")
 	}
 
@@ -72,7 +74,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 		Find(&emojiPackageEmojis).Error
 
 	if err != nil {
-		logx.Errorf("查询表情包与表情关联关系失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询表情包与表情关联关系失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取表情关联失败")
 	}
 
@@ -102,7 +104,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 	var emojis []emoji_models.Emoji
 	err = l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&emojis).Error
 	if err != nil {
-		logx.Errorf("查询表情详情失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询表情详情失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取表情详情失败")
 	}
 
@@ -116,6 +118,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 	var collectCount int64
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).Where("package_id = ?", req.PackageID).Count(&collectCount).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取收藏数失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取收藏数失败")
 	}
 

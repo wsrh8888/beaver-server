@@ -28,21 +28,21 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojiPackageContentsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojiPackageContentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackageContentsLogic {
 	return &GetEmojiPackageContentsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_emoji_package_contents", ctx),
 	}
 }
 
@@ -52,11 +52,11 @@ func (l *GetEmojiPackageContentsLogic) GetEmojiPackageContents(in *emoji_rpc.Get
 	// 查询所有表情包内容（去掉时间戳过滤，确保同步所有数据）
 	err := l.svcCtx.DB.Find(&packageContents).Error
 	if err != nil {
-		l.Errorf("查询表情包内容失败: error=%v", err)
+		l.logger.Error(model.LogMsg{Text: "查询表情包内容失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个表情包内容版本变更", len(packageContents))
+	l.logger.Info(model.LogMsg{Text: "查询表情包内容版本变更", Data: map[string]interface{}{"count": len(packageContents)}})
 
 	// 转换为版本摘要格式
 	var contentVersions []*emoji_rpc.EmojiPackageContentVersionItem

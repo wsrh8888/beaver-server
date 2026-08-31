@@ -32,22 +32,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type MarkReadByCategoryLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按分类标记所有通知为已读
 func NewMarkReadByCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkReadByCategoryLogic {
 	return &MarkReadByCategoryLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("mark_read_by_category", ctx),
 	}
 }
 
@@ -60,7 +60,10 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 	// 生成游标版本号（按用户+分类分区）
 	cursorVersion := l.svcCtx.VersionGen.GetNextVersion(notification_models.VersionScopeCursorPerUser, "user_id", userId)
 	if cursorVersion == -1 {
-		l.Logger.Errorf("生成游标版本号失败")
+		l.logger.Error(model.LogMsg{
+			Text: "生成通知游标版本号失败",
+			Data: map[string]any{"userId": userId, "category": category},
+		})
 		return nil, errors.New("生成版本号失败")
 	}
 
@@ -74,7 +77,10 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 		})
 
 	if result.Error != nil {
-		l.Logger.Errorf("更新游标失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{
+			Text: "更新通知已读游标失败",
+			Data: map[string]any{"userId": userId, "category": category, "err": result.Error.Error()},
+		})
 		return nil, result.Error
 	}
 
@@ -89,7 +95,10 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 
 		err = l.svcCtx.DB.Create(cursor).Error
 		if err != nil {
-			l.Logger.Errorf("创建游标失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "创建通知已读游标失败",
+				Data: map[string]any{"userId": userId, "category": category, "err": err.Error()},
+			})
 			return nil, err
 		}
 	}
@@ -125,6 +134,15 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 		}
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 	}(l.svcCtx.Config.Etcd, userId, category, cursorVersion)
+
+	l.logger.Info(model.LogMsg{
+		Text: "按分类标记通知已读成功",
+		Data: map[string]interface{}{
+			"userId":         userId,
+			"category":        category,
+			"cursorVersion":   cursorVersion,
+		},
+	})
 
 	resp = &types.MarkReadByCategoryRes{}
 

@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type UpdateArchitectureLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateArchitectureLogic {
-	return &UpdateArchitectureLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateArchitectureLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_architecture", ctx)}
 }
 
 func (l *UpdateArchitectureLogic) UpdateArchitecture(in *platform_rpc.UpdateArchitectureReq) (*platform_rpc.UpdateArchitectureRes, error) {
@@ -51,6 +52,7 @@ func (l *UpdateArchitectureLogic) UpdateArchitecture(in *platform_rpc.UpdateArch
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "架构不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询架构失败", Data: map[string]any{"id": in.Id, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -59,9 +61,11 @@ func (l *UpdateArchitectureLogic) UpdateArchitecture(in *platform_rpc.UpdateArch
 		updates["description"] = in.Description
 	}
 	if err := l.svcCtx.DB.Model(&arch).Updates(updates).Error; err != nil {
-		l.Errorf("更新架构失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新架构失败", Data: map[string]any{"id": in.Id, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "更新架构失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "更新架构成功", Data: map[string]interface{}{"id": in.Id, "isActive": in.IsActive}})
 
 	return &platform_rpc.UpdateArchitectureRes{}, nil
 }

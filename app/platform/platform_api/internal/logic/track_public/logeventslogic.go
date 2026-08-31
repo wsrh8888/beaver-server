@@ -27,23 +27,24 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	"beaver/app/platform/platform_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type LogEventsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewLogEventsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogEventsLogic {
 	return &LogEventsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("log_events", ctx),
 	}
 }
 
@@ -63,7 +64,7 @@ func (l *LogEventsLogic) LogEvents(req *types.LogEventsReq) (*types.LogEventsRes
 			return tx.CreateInBatches(logsToSave, 100).Error
 		})
 		if err != nil {
-			l.Logger.Errorf("save logs failed: %v", err)
+			l.logger.Error(model.LogMsg{Text: "保存埋点日志失败", Data: map[string]any{"count": len(logsToSave), "err": err.Error()}})
 		}
 	}(logs)
 

@@ -29,19 +29,20 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type ListUsersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListUsersLogic {
-	return &ListUsersLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListUsersLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_users", ctx)}
 }
 
 func (l *ListUsersLogic) ListUsers(in *user_rpc.ListUsersReq) (*user_rpc.ListUsersRes, error) {
@@ -51,6 +52,10 @@ func (l *ListUsersLogic) ListUsers(in *user_rpc.ListUsersReq) (*user_rpc.ListUse
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return &user_rpc.ListUsersRes{}, nil
 			}
+			l.logger.Error(model.LogMsg{
+				Text: "按ID查询用户失败",
+				Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+			})
 			return nil, err
 		}
 		return &user_rpc.ListUsersRes{
@@ -91,13 +96,19 @@ func (l *ListUsersLogic) ListUsers(in *user_rpc.ListUsersReq) (*user_rpc.ListUse
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计用户失败",
+			Data: map[string]any{"keyword": in.Keyword, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var users []user_models.UserModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&users).Error; err != nil {
-		l.Errorf("查询用户列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户列表失败",
+			Data: map[string]any{"keyword": in.Keyword, "page": page, "pageSize": pageSize, "err": err.Error()},
+		})
 		return nil, err
 	}
 

@@ -29,21 +29,21 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type SearchUserLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSearchUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchUserLogic {
 	return &SearchUserLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("search_user", ctx),
 	}
 }
 
@@ -63,7 +63,10 @@ func (l *SearchUserLogic) SearchUser(in *user_rpc.SearchUserReq) (*user_rpc.Sear
 	}
 
 	if err != nil {
-		l.Logger.Errorf("搜索用户失败: keyword=%s, type=%s, error=%v", in.Keyword, in.Type, err)
+		l.logger.Error(model.LogMsg{
+			Text: "搜索用户失败",
+			Data: map[string]any{"keyword": in.Keyword, "type": in.Type, "err": err.Error()},
+		})
 		return nil, errors.New("用户不存在")
 	}
 

@@ -31,10 +31,10 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	utils "beaver/utils/rand"
 	uuidUtil "beaver/utils/uuid"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const (
@@ -45,14 +45,14 @@ const (
 type UserCreateLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUserCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserCreateLogic {
 	return &UserCreateLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("user_create", ctx),
 	}
 }
 
@@ -61,12 +61,20 @@ func (l *UserCreateLogic) generateUserID() (string, error) {
 	// 首先确保Redis计数器已初始化
 	err := l.initializeRedisCounter()
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "初始化Redis计数器失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return "", fmt.Errorf("初始化Redis计数器失败: %v", err)
 	}
 
 	// 使用Redis INCR原子性递增
 	result := l.svcCtx.Redis.Incr(userIDKey)
 	if result.Err() != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "生成用户ID失败",
+			Data: map[string]any{"err": result.Err().Error()},
+		})
 		return "", fmt.Errorf("生成用户ID失败: %v", result.Err())
 	}
 
@@ -104,7 +112,10 @@ func (l *UserCreateLogic) initializeRedisCounter() error {
 			return fmt.Errorf("设置Redis计数器失败: %v", err)
 		}
 
-		l.Logger.Infof("Redis计数器初始化完成: nextID=%d", nextID)
+		l.logger.Info(model.LogMsg{
+			Text: "Redis计数器初始化完成",
+			Data: map[string]interface{}{"nextId": nextID},
+		})
 	}
 
 	return nil
@@ -162,7 +173,6 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		var genErr error
 		userID, genErr = l.generateUserID()
 		if genErr != nil {
-			logx.Errorf("生成用户ID失败: %v", genErr)
 			return nil, errors.New("生成用户ID失败")
 		}
 	}
@@ -170,10 +180,16 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	// 获取新版本号（用户独立递增，从1开始）
 	version := l.svcCtx.VersionGen.GetNextVersion("users", "user_id", userID)
 	if version == -1 {
-		logx.Errorf("获取版本号失败")
+		l.logger.Error(model.LogMsg{
+			Text: "获取用户版本号失败",
+			Data: map[string]any{"userId": userID},
+		})
 		return nil, errors.New("获取版本号失败")
 	}
-	logx.Infof("获取用户版本号: userID=%s, version=%d", userID, version)
+	l.logger.Info(model.LogMsg{
+		Text: "获取用户版本号",
+		Data: map[string]interface{}{"userId": userID, "version": version},
+	})
 
 	// 创建用户基础信息（不包含密码）
 	user = user_models.UserModel{
@@ -192,7 +208,10 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 
 	err = l.svcCtx.DB.Create(&user).Error
 	if err != nil {
-		logx.Errorf("创建用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
 		return nil, errors.New("创建用户失败")
 	}
 
@@ -203,7 +222,10 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 	// 记录用户创建的变更日志
 	l.recordUserCreateLog(user.UserID, version)
 
-	logx.Infof("用户创建成功: %s, version: %d", user.UserID, version)
+	l.logger.Info(model.LogMsg{
+		Text: "用户创建成功",
+		Data: map[string]interface{}{"userId": user.UserID, "version": version},
+	})
 
 	return &user_rpc.UserCreateRes{
 		UserID: user.UserID,
@@ -222,8 +244,14 @@ func (l *UserCreateLogic) recordUserCreateLog(userID string, version int64) {
 	}
 
 	if err := l.svcCtx.DB.Create(&changeLog).Error; err != nil {
-		logx.Errorf("记录用户创建日志失败: userID=%s, error=%v", userID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "记录用户创建日志失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
 	} else {
-		logx.Infof("用户创建日志记录成功: userID=%s, version=%d", userID, version)
+		l.logger.Info(model.LogMsg{
+			Text: "用户创建日志记录成功",
+			Data: map[string]interface{}{"userId": userID, "version": version},
+		})
 	}
 }

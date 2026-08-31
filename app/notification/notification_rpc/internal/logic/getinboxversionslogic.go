@@ -27,22 +27,23 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetInboxVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetInboxVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetInboxVersionsLogic {
 	return &GetInboxVersionsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_inbox_versions", ctx),
 	}
 }
 
@@ -64,9 +65,11 @@ func (l *GetInboxVersionsLogic) GetInboxVersions(in *notification_rpc.GetInboxVe
 		query = query.Limit(int(in.Limit))
 	}
 
-	l.Infof("查询通知收件箱: userId=%s, sinceVersion=%d", in.UserId, in.SinceVersion)
-
 	if err := query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通知收件箱版本失败",
+			Data: map[string]any{"userId": in.UserId, "sinceVersion": in.SinceVersion, "err": err.Error()},
+		})
 		return nil, err
 	}
 

@@ -28,21 +28,21 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UserListInfoLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUserListInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserListInfoLogic {
 	return &UserListInfoLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("user_list_info", ctx),
 	}
 }
 
@@ -66,7 +66,10 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 	err := query.Find(&userList).Error
 
 	if err != nil {
-		l.Logger.Errorf("查询用户列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户列表失败",
+			Data: map[string]any{"userIdList": in.UserIdList, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -91,13 +94,14 @@ func (l *UserListInfoLogic) UserListInfo(in *user_rpc.UserListInfoReq) (*user_rp
 		}
 	}
 
-	if in.SinceTimestamp > 0 {
-		l.Logger.Infof("增量查询用户，时间戳: %d，查询到 %d 个用户信息，请求ID数量: %d",
-			in.SinceTimestamp, len(userList), len(in.UserIdList))
-	} else {
-		l.Logger.Infof("全量查询用户，查询到 %d 个用户信息，请求ID数量: %d",
-			len(userList), len(in.UserIdList))
-	}
+	l.logger.Info(model.LogMsg{
+		Text: "查询用户列表信息完成",
+		Data: map[string]interface{}{
+			"sinceTimestamp": in.SinceTimestamp,
+			"resultCount":    len(userList),
+			"requestCount":   len(in.UserIdList),
+		},
+	})
 
 	return resp, nil
 }

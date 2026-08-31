@@ -33,18 +33,18 @@ import (
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/core/corerocketmq"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type MqConsumerLogic struct {
-	logx.Logger
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewMqConsumerLogic(svcCtx *svc.ServiceContext) *MqConsumerLogic {
 	return &MqConsumerLogic{
-		Logger: logx.WithContext(context.Background()),
+		logger: beaverlog.New("mq_consumer", context.Background()),
 		svcCtx: svcCtx,
 	}
 }
@@ -65,24 +65,24 @@ func payloadString(payload map[string]interface{}, key string) (string, error) {
 func (l *MqConsumerLogic) StartConsumer() error {
 	mqClient := l.svcCtx.RocketMQ
 	if mqClient == nil {
-		logx.Error("RocketMQ 客户端未初始化")
+		l.logger.Error(model.LogMsg{Text: "RocketMQ客户端未初始化"})
 		return nil
 	}
 
 	handler := func(msg *corerocketmq.Message) error {
 		targetID, err := payloadString(msg.Payload, "targetId")
 		if err != nil {
-			logx.Errorf("MQ 消息格式错误: %v", err)
+			l.logger.Error(model.LogMsg{Text: "MQ消息格式错误", Data: map[string]any{"field": "targetId", "err": err.Error()}})
 			return nil
 		}
 		command, err := payloadString(msg.Payload, "command")
 		if err != nil {
-			logx.Errorf("MQ 消息格式错误: %v", err)
+			l.logger.Error(model.LogMsg{Text: "MQ消息格式错误", Data: map[string]any{"field": "command", "err": err.Error()}})
 			return nil
 		}
 		msgType, err := payloadString(msg.Payload, "type")
 		if err != nil {
-			logx.Errorf("MQ 消息格式错误: %v", err)
+			l.logger.Error(model.LogMsg{Text: "MQ消息格式错误", Data: map[string]any{"field": "type", "err": err.Error()}})
 			return nil
 		}
 		// 通知/好友/群等非聊天类推送允许 conversationId 为空
@@ -95,12 +95,12 @@ func (l *MqConsumerLogic) StartConsumer() error {
 
 		body, ok := msg.Payload["body"]
 		if !ok || body == nil {
-			logx.Error("MQ 消息缺少 body 字段")
+			l.logger.Error(model.LogMsg{Text: "MQ消息缺少body字段", Data: map[string]any{"targetId": targetID}})
 			return nil
 		}
 		bodyBytes, err := json.Marshal(body)
 		if err != nil {
-			logx.Errorf("序列化 body 失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "序列化body失败", Data: map[string]any{"targetId": targetID, "err": err.Error()}})
 			return err
 		}
 
@@ -125,10 +125,10 @@ func (l *MqConsumerLogic) StartConsumer() error {
 	)
 
 	if err != nil {
-		logx.Errorf("启动 RocketMQ Consumer 失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "启动RocketMQConsumer失败", Data: map[string]any{"err": err.Error()}})
 		return err
 	}
 
-	logx.Info("WS API RocketMQ Consumer 启动成功")
+	l.logger.Info(model.LogMsg{Text: "WSAPIRocketMQConsumer启动成功"})
 	return nil
 }

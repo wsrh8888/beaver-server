@@ -28,19 +28,20 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type ListFriendsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFriendsLogic {
-	return &ListFriendsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListFriendsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_friends", ctx)}
 }
 
 func (l *ListFriendsLogic) ListFriends(in *friend_rpc.ListFriendsReq) (*friend_rpc.ListFriendsRes, error) {
@@ -50,6 +51,7 @@ func (l *ListFriendsLogic) ListFriends(in *friend_rpc.ListFriendsReq) (*friend_r
 			return &friend_rpc.ListFriendsRes{}, nil
 		}
 		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "查询好友关系记录失败", Data: map[string]any{"relationId": in.RelationId, "err": err.Error()}})
 			return nil, err
 		}
 		return &friend_rpc.ListFriendsRes{
@@ -91,13 +93,13 @@ func (l *ListFriendsLogic) ListFriends(in *friend_rpc.ListFriendsReq) (*friend_r
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计好友失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计好友失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []friend_models.FriendModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询好友列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询好友列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

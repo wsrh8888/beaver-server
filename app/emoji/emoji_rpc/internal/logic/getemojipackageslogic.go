@@ -28,21 +28,21 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojiPackagesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackagesLogic {
 	return &GetEmojiPackagesLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_emoji_packages", ctx),
 	}
 }
 
@@ -60,13 +60,13 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *emoji_rpc.GetEmojiPackagesR
 
 	err := collectQuery.Find(&collects).Error
 	if err != nil {
-		l.Errorf("查询用户收藏表情包失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏表情包失败", Data: map[string]any{"userId": in.UserId, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
 	// 如果没有收藏记录，直接返回空结果
 	if len(collects) == 0 {
-		l.Infof("用户 %s 没有收藏的表情包", in.UserId)
+		l.logger.Info(model.LogMsg{Text: "用户没有收藏的表情包", Data: map[string]any{"userId": in.UserId}})
 		return &emoji_rpc.GetEmojiPackagesRes{
 			EmojiPackageVersions: []*emoji_rpc.EmojiPackageVersionItem{},
 			ServerTimestamp:      time.Now().UnixMilli(),
@@ -84,11 +84,11 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *emoji_rpc.GetEmojiPackagesR
 	err = l.svcCtx.DB.Where("package_id IN (?) AND status = ?",
 		packageIDs, 1).Find(&packages).Error // 1=正常状态
 	if err != nil {
-		l.Errorf("查询表情包详细信息失败: userId=%s, packageIds=%v, error=%v", in.UserId, packageIDs, err)
+		l.logger.Error(model.LogMsg{Text: "查询表情包详细信息失败", Data: map[string]any{"userId": in.UserId, "packageIds": packageIDs, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到用户 %s 收藏的 %d 个表情包版本变更", in.UserId, len(packages))
+	l.logger.Info(model.LogMsg{Text: "查询用户收藏表情包版本变更", Data: map[string]interface{}{"userId": in.UserId, "count": len(packages)}})
 
 	// 转换为版本摘要格式
 	var packageVersions []*emoji_rpc.EmojiPackageVersionItem

@@ -36,9 +36,8 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 func HandleTypingSend(
@@ -76,7 +75,10 @@ func HandleTypingSend(
 			"conversationId": body.ConversationID,
 		}
 		if err := svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
-			logx.Errorf("推送 typing 通知失败: sender=%s, target=%s, error=%v", req.UserID, peerID, err)
+			logger.Error(model.LogMsg{
+				Text: "推送typing通知失败",
+				Data: map[string]any{"sender": req.UserID, "target": peerID, "err": err.Error()},
+			})
 		}
 	}
 	return nil

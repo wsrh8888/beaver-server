@@ -22,26 +22,27 @@
 package logic
 
 import (
-	"beaver/app/group/group_models"
-	"beaver/app/group/group_rpc/internal/svc"
-	"beaver/app/group/group_rpc/types/group_rpc"
 	"context"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/app/group/group_models"
+	"beaver/app/group/group_rpc/internal/svc"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserGroupRequestVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserGroupRequestVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserGroupRequestVersionsLogic {
 	return &GetUserGroupRequestVersionsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_group_request_versions", ctx),
 	}
 }
 
@@ -52,7 +53,7 @@ func (l *GetUserGroupRequestVersionsLogic) GetUserGroupRequestVersions(in *group
 	// 获取用户相关的所有群组申请版本
 	versions, err := l.getUserGroupRequestVersions(userID, in.Since)
 	if err != nil {
-		l.Errorf("获取用户群组申请版本失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户群组申请版本失败", Data: map[string]any{"userId": userID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -124,6 +125,7 @@ func (l *GetUserGroupRequestVersionsLogic) getSentRequestVersions(userID string,
 
 	err := query.Scan(&results).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询用户发出的群组申请版本失败", Data: map[string]any{"userId": userID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -161,6 +163,7 @@ func (l *GetUserGroupRequestVersionsLogic) getManagedRequestVersions(userID stri
 
 	err := query.Scan(&results).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询用户管理的群组申请版本失败", Data: map[string]any{"userId": userID, "err": err.Error()}})
 		return nil, err
 	}
 

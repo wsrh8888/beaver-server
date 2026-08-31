@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type LikePostLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewLikePostLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LikePostLogic {
 	return &LikePostLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("like_post", ctx),
 	}
 }
 
@@ -62,13 +62,17 @@ func (l *LikePostLogic) LikePost(req *types.LikePostReq) (resp *types.LikePostRe
 			CircleID: p.CircleID,
 		}
 		if err = l.svcCtx.DB.Create(&newLike).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "点赞失败", Data: map[string]any{"postId": req.PostID, "userId": req.UserID, "err": err.Error()}})
 			return nil, fmt.Errorf("点赞失败: %v", err)
 		}
 	} else if !req.Status && exists {
 		if err = l.svcCtx.DB.Delete(&like).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "取消点赞失败", Data: map[string]any{"postId": req.PostID, "userId": req.UserID, "err": err.Error()}})
 			return nil, fmt.Errorf("取消点赞失败: %v", err)
 		}
 	}
+
+	l.logger.Info(model.LogMsg{Text: "点赞操作成功", Data: map[string]interface{}{"postId": req.PostID, "userId": req.UserID, "status": req.Status}})
 
 	return &types.LikePostRes{}, nil
 }

@@ -23,7 +23,6 @@ package heartbeat
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
@@ -31,11 +30,14 @@ import (
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/core/coreonline"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/go-redis/redis"
 	"github.com/gorilla/websocket"
-	"github.com/zeromicro/go-zero/core/logx"
 )
+
+var logger = beaverlog.New("ws_heartbeat")
 
 // HandleClientPing 收到客户端 PING，续期在线态并回复 PONG。
 func HandleClientPing(rdb *redis.Client, userID, slot, instanceID string, client *ws_conn.Client, timestamp int64) {
@@ -45,9 +47,10 @@ func HandleClientPing(rdb *redis.Client, userID, slot, instanceID string, client
 		Timestamp: timestamp,
 	})
 	if err != nil {
-		fmt.Printf("回复 PONG 失败: 错误: %v, 时间戳: %d\n", err, timestamp)
-	} else {
-		fmt.Printf("已回复 PONG: 时间戳: %d\n", timestamp)
+		logger.Error(model.LogMsg{
+			Text: "回复PONG失败",
+			Data: map[string]any{"timestamp": timestamp, "err": err.Error()},
+		})
 	}
 }
 
@@ -99,7 +102,10 @@ func (m *Manager) startProtocolPing() {
 		case <-ticker.C:
 			coreonline.MarkOnline(m.svcCtx.Redis, m.userID, m.deviceGroup, m.svcCtx.InstanceID)
 			if err := m.sendProtocolPing(); err != nil {
-				logx.Errorf("协议级 ping 失败, 用户: %s, 错误: %v", m.userID, err)
+				logger.Error(model.LogMsg{
+					Text: "协议级ping失败",
+					Data: map[string]any{"userId": m.userID, "err": err.Error()},
+				})
 				return
 			}
 		}

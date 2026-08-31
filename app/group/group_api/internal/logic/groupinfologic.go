@@ -31,21 +31,21 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GroupInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupInfoLogic {
 	return &GroupInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("group_info", ctx),
 	}
 }
 
@@ -54,7 +54,7 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 	err = l.svcCtx.DB.Take(&group, "group_id = ?", req.GroupID).Error
 
 	if err != nil {
-		logx.Errorf("查询群组失败: %s", err.Error())
+		l.logger.Error(model.LogMsg{Text: "查询群组失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("群组不存在")
 	}
 

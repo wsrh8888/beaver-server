@@ -28,21 +28,21 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserEmojiCollectsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserEmojiCollectsLogic {
 	return &GetUserEmojiCollectsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_emoji_collects", ctx),
 	}
 }
 
@@ -60,7 +60,7 @@ func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *emoji_rpc.GetUserEm
 
 	err := collectQuery.Find(&collectRecords).Error
 	if err != nil {
-		l.Errorf("查询用户收藏表情记录失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏表情记录失败", Data: map[string]any{"userId": in.UserId, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 

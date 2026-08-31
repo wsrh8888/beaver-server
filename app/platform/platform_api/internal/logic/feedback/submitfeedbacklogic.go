@@ -28,21 +28,21 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type SubmitFeedbackLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewSubmitFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubmitFeedbackLogic {
 	return &SubmitFeedbackLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("submit_feedback", ctx),
 	}
 }
 
@@ -64,9 +64,11 @@ func (l *SubmitFeedbackLogic) SubmitFeedback(req *types.SubmitFeedbackReq) (*typ
 		FileNames: req.FileNames,
 	})
 	if err != nil {
-		logx.Errorf("submit feedback failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "提交反馈失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("提交反馈失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "提交反馈成功", Data: map[string]interface{}{"userId": req.UserID, "type": req.Type}})
 
 	return &types.SubmitFeedbackRes{}, nil
 }

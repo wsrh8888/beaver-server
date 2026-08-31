@@ -22,27 +22,28 @@
 package logic
 
 import (
-	"beaver/app/friend/friend_api/internal/svc"
-	"beaver/app/friend/friend_api/internal/types"
-	"beaver/app/friend/friend_models"
 	"context"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/app/friend/friend_api/internal/svc"
+	"beaver/app/friend/friend_api/internal/types"
+	"beaver/app/friend/friend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendVerifiesListByIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 批量获取好友验证数据（通过ID）
 func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendVerifiesListByIdsLogic {
 	return &GetFriendVerifiesListByIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_friend_verifies_list_by_ids", ctx),
 	}
 }
 
@@ -57,11 +58,11 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(req *types.
 	var friendVerifies []friend_models.FriendVerifyModel
 	err = l.svcCtx.DB.Where("verify_id IN (?)", req.VerifyIds).Find(&friendVerifies).Error
 	if err != nil {
-		l.Errorf("查询好友验证信息失败: ids=%v, error=%v", req.VerifyIds, err)
+		l.logger.Error(model.LogMsg{Text: "查询好友验证信息失败", Data: map[string]any{"ids": req.VerifyIds, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个好友验证信息", len(friendVerifies))
+	l.logger.Info(model.LogMsg{Text: "批量查询好友验证信息", Data: map[string]interface{}{"count": len(friendVerifies)}})
 
 	// 转换为响应格式
 	var friendVerifiesList []types.FriendVerifyById

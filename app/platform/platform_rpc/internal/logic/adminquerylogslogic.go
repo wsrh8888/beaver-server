@@ -28,21 +28,21 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type AdminQueryLogsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAdminQueryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AdminQueryLogsLogic {
 	return &AdminQueryLogsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("admin_query_logs", ctx),
 	}
 }
 
@@ -73,14 +73,14 @@ func (l *AdminQueryLogsLogic) AdminQueryLogs(in *platform_rpc.AdminQueryLogsReq)
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("查询日志总数失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询日志总数失败", Data: map[string]any{"bucketId": in.BucketId, "err": err.Error()}})
 		return nil, err
 	}
 
 	var logs []platform_models.TrackLogger
 	offset := (page - 1) * pageSize
 	if err := db.Offset(offset).Limit(pageSize).Order("timestamp DESC").Find(&logs).Error; err != nil {
-		l.Errorf("查询日志列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询日志列表失败", Data: map[string]any{"bucketId": in.BucketId, "page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

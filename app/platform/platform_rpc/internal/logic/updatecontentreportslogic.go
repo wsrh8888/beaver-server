@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -37,11 +38,11 @@ import (
 type UpdateContentReportsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateContentReportsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateContentReportsLogic {
-	return &UpdateContentReportsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateContentReportsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_content_reports", ctx)}
 }
 
 func (l *UpdateContentReportsLogic) UpdateContentReports(in *platform_rpc.UpdateContentReportsReq) (*platform_rpc.UpdateContentReportsRes, error) {
@@ -66,9 +67,10 @@ func (l *UpdateContentReportsLogic) UpdateContentReports(in *platform_rpc.Update
 
 	result := l.svcCtx.DB.Model(&platform_models.ContentReportModel{}).Where("id IN ?", in.Ids).Updates(updates)
 	if result.Error != nil {
-		l.Errorf("更新举报失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{Text: "更新举报失败", Data: map[string]any{"ids": in.Ids, "action": in.Action, "err": result.Error.Error()}})
 		return nil, status.Error(codes.Internal, "更新失败")
 	}
 	_ = time.Now()
+	l.logger.Info(model.LogMsg{Text: "更新举报成功", Data: map[string]interface{}{"ids": in.Ids, "action": in.Action, "affected": result.RowsAffected}})
 	return &platform_rpc.UpdateContentReportsRes{AffectedCount: result.RowsAffected}, nil
 }

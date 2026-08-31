@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type DeleteVersionLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteVersionLogic {
-	return &DeleteVersionLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &DeleteVersionLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_version", ctx)}
 }
 
 func (l *DeleteVersionLogic) DeleteVersion(in *platform_rpc.DeleteVersionReq) (*platform_rpc.DeleteVersionRes, error) {
@@ -55,11 +56,13 @@ func (l *DeleteVersionLogic) DeleteVersion(in *platform_rpc.DeleteVersionReq) (*
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "版本不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询版本失败", Data: map[string]any{"versionId": in.VersionId, "err": err.Error()}})
 		return nil, err
 	}
 
 	var policies []platform_models.UpdateReleasePolicy
 	if err := l.svcCtx.DB.Find(&policies).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询发版策略失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 	vid := uint(in.VersionId)
@@ -70,9 +73,11 @@ func (l *DeleteVersionLogic) DeleteVersion(in *platform_rpc.DeleteVersionReq) (*
 	}
 
 	if err := l.svcCtx.DB.Delete(&version).Error; err != nil {
-		l.Errorf("删除版本失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "删除版本失败", Data: map[string]any{"versionId": in.VersionId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "删除版本失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "删除版本成功", Data: map[string]interface{}{"versionId": in.VersionId}})
 
 	return &platform_rpc.DeleteVersionRes{}, nil
 }

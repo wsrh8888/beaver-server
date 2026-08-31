@@ -27,18 +27,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListAppsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListAppsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListAppsLogic {
-	return &ListAppsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListAppsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_apps", ctx)}
 }
 
 func (l *ListAppsLogic) ListApps(in *platform_rpc.ListAppsReq) (*platform_rpc.ListAppsRes, error) {
@@ -58,13 +58,13 @@ func (l *ListAppsLogic) ListApps(in *platform_rpc.ListAppsReq) (*platform_rpc.Li
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计应用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计应用失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var apps []platform_models.UpdateApp
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&apps).Error; err != nil {
-		l.Errorf("查询应用列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询应用列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

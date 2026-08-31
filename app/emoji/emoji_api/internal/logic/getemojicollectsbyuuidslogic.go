@@ -28,22 +28,22 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojiCollectsByUuidsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按收藏ID批量获取表情收藏记录（同步补齐）
 func NewGetEmojiCollectsByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiCollectsByUuidsLogic {
 	return &GetEmojiCollectsByUuidsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_collects_by_uuids", ctx),
 	}
 }
 
@@ -57,7 +57,7 @@ func (l *GetEmojiCollectsByUuidsLogic) GetEmojiCollectsByUuids(req *types.GetEmo
 	var collects []emoji_models.EmojiCollectEmoji
 	err = l.svcCtx.DB.Where("emoji_collect_id IN ?", req.Ids).Find(&collects).Error
 	if err != nil {
-		l.Errorf("按收藏ID批量查询表情收藏记录失败: ids=%v, error=%v", req.Ids, err)
+		l.logger.Error(model.LogMsg{Text: "按收藏ID批量查询表情收藏记录失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
 		return nil, err
 	}
 

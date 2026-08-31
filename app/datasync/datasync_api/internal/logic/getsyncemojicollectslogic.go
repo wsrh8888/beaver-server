@@ -28,22 +28,22 @@ import (
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncEmojiCollectsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取用户表情收藏的版本信息
 func NewGetSyncEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncEmojiCollectsLogic {
 	return &GetSyncEmojiCollectsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_emoji_collects", ctx),
 	}
 }
 
@@ -60,7 +60,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取用户收藏表情版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		l.logger.Error(model.LogMsg{Text: "获取用户收藏表情版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -80,7 +80,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取用户收藏表情包版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		l.logger.Error(model.LogMsg{Text: "获取用户收藏表情包版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -100,7 +100,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取表情包基础数据版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		l.logger.Error(model.LogMsg{Text: "获取表情包基础数据版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取表情包内容版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		l.logger.Error(model.LogMsg{Text: "获取表情包内容版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -134,9 +134,16 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 		}
 	}
 
-	l.Infof("用户 %s 表情收藏同步完成: 收藏表情=%d, 收藏表情包=%d, 表情包=%d, 表情包内容=%d",
-		req.UserID, len(emojiCollectVersions), len(emojiPackageCollectVersions),
-		len(emojiPackageVersions), len(emojiPackageContentVersions))
+	l.logger.Info(model.LogMsg{
+		Text: "表情收藏同步完成",
+		Data: map[string]interface{}{
+			"userId":            req.UserID,
+			"emojiCollects":     len(emojiCollectVersions),
+			"packageCollects":   len(emojiPackageCollectVersions),
+			"packages":          len(emojiPackageVersions),
+			"packageContents":   len(emojiPackageContentVersions),
+		},
+	})
 
 	return &types.GetSyncEmojiCollectsRes{
 		EmojiCollectVersions:        emojiCollectVersions,

@@ -27,18 +27,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListReleasePoliciesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListReleasePoliciesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListReleasePoliciesLogic {
-	return &ListReleasePoliciesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListReleasePoliciesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_release_policies", ctx)}
 }
 
 func (l *ListReleasePoliciesLogic) ListReleasePolicies(in *platform_rpc.ListReleasePoliciesReq) (*platform_rpc.ListReleasePoliciesRes, error) {
@@ -48,6 +48,7 @@ func (l *ListReleasePoliciesLogic) ListReleasePolicies(in *platform_rpc.ListRele
 		db = db.Where("app_id = ?", in.AppId)
 	}
 	if err := db.Order("architecture_id ASC").Find(&list).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询发版策略列表失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, err
 	}
 

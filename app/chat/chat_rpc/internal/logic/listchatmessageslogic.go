@@ -29,21 +29,21 @@ import (
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListChatMessagesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListChatMessagesLogic {
 	return &ListChatMessagesLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("list_chat_messages", ctx),
 	}
 }
 
@@ -89,7 +89,7 @@ func (l *ListChatMessagesLogic) ListChatMessages(in *chat_rpc.ListChatMessagesRe
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计聊天消息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计聊天消息失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
@@ -99,7 +99,7 @@ func (l *ListChatMessagesLogic) ListChatMessages(in *chat_rpc.ListChatMessagesRe
 		orderClause = "created_at ASC"
 	}
 	if err := db.Order(orderClause).Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询聊天消息列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询聊天消息列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

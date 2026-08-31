@@ -27,22 +27,23 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetReadCursorVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetReadCursorVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetReadCursorVersionsLogic {
 	return &GetReadCursorVersionsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_read_cursor_versions", ctx),
 	}
 }
 
@@ -62,6 +63,10 @@ func (l *GetReadCursorVersionsLogic) GetReadCursorVersions(in *notification_rpc.
 		Order("version ASC")
 
 	if err := query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通知已读游标版本失败",
+			Data: map[string]any{"userId": in.UserId, "sinceVersion": in.SinceVersion, "err": err.Error()},
+		})
 		return nil, err
 	}
 

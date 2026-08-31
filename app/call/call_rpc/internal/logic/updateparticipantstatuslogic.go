@@ -28,22 +28,23 @@ import (
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/internal/svc"
 	"beaver/app/call/call_rpc/types/call_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type UpdateParticipantStatusLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateParticipantStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateParticipantStatusLogic {
 	return &UpdateParticipantStatusLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_participant_status", ctx),
 	}
 }
 
@@ -116,8 +117,21 @@ func (l *UpdateParticipantStatusLogic) UpdateParticipantStatus(in *call_rpc.Upda
 	})
 
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "更新通话参与者状态失败",
+			Data: map[string]any{"roomId": in.RoomId, "userId": in.UserId, "status": in.Status, "err": err.Error()},
+		})
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "更新通话参与者状态成功",
+		Data: map[string]interface{}{
+			"roomId": in.RoomId,
+			"userId": in.UserId,
+			"status": in.Status,
+		},
+	})
 
 	return &call_rpc.UpdateParticipantStatusRes{Success: true}, nil
 }

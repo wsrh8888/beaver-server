@@ -28,22 +28,23 @@ import (
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetChatMessageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetChatMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetChatMessageLogic {
 	return &GetChatMessageLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_chat_message", ctx),
 	}
 }
 
@@ -58,6 +59,7 @@ func (l *GetChatMessageLogic) GetChatMessage(in *chat_rpc.GetChatMessageReq) (*c
 		return &chat_rpc.GetChatMessageRes{Found: false}, nil
 	}
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询聊天消息失败", Data: map[string]any{"conversationId": in.ConversationId, "messageId": in.MessageId, "err": err.Error()}})
 		return nil, err
 	}
 	if row.Msg == nil {

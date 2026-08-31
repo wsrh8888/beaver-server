@@ -28,22 +28,22 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetInboxByIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按ID拉取收件箱明细
 func NewGetInboxByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetInboxByIdsLogic {
 	return &GetInboxByIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_inbox_by_ids", ctx),
 	}
 }
 
@@ -58,6 +58,10 @@ func (l *GetInboxByIdsLogic) GetInboxByIds(req *types.GetInboxByIdsReq) (resp *t
 	if err = l.svcCtx.DB.WithContext(l.ctx).
 		Where("user_id = ? AND event_id IN ?", req.UserID, req.EventIDs).
 		Find(&rows).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通知收件箱列表失败",
+			Data: map[string]any{"userId": req.UserID, "eventIds": req.EventIDs, "err": err.Error()},
+		})
 		return nil, err
 	}
 

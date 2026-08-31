@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type GetContentReportLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetContentReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetContentReportLogic {
-	return &GetContentReportLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &GetContentReportLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_content_report", ctx)}
 }
 
 func (l *GetContentReportLogic) GetContentReport(in *platform_rpc.GetContentReportReq) (*platform_rpc.GetContentReportRes, error) {
@@ -51,6 +52,7 @@ func (l *GetContentReportLogic) GetContentReport(in *platform_rpc.GetContentRepo
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "举报不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询举报失败", Data: map[string]any{"id": in.Id, "err": err.Error()}})
 		return nil, err
 	}
 	return &platform_rpc.GetContentReportRes{Report: toContentReportItem(report)}, nil

@@ -28,21 +28,21 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DisablePushTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDisablePushTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DisablePushTokenLogic {
 	return &DisablePushTokenLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("disable_push_token", ctx),
 	}
 }
 
@@ -55,9 +55,17 @@ func (l *DisablePushTokenLogic) DisablePushToken(in *notification_rpc.DisablePus
 		Where("user_id = ? AND device_id = ?", in.UserId, in.DeviceId).
 		Update("enabled", false)
 	if result.Error != nil {
-		l.Errorf("禁用 Push Token 失败: userId=%s, deviceId=%s, err=%v", in.UserId, in.DeviceId, result.Error)
+		l.logger.Error(model.LogMsg{
+			Text: "禁用PushToken失败",
+			Data: map[string]any{"userId": in.UserId, "deviceId": in.DeviceId, "err": result.Error.Error()},
+		})
 		return nil, errors.New("禁用 Push Token 失败")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "禁用PushToken成功",
+		Data: map[string]interface{}{"userId": in.UserId, "deviceId": in.DeviceId},
+	})
 
 	return &notification_rpc.DisablePushTokenRes{Success: true}, nil
 }

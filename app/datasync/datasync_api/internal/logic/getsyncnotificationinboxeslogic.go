@@ -29,22 +29,22 @@ import (
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncNotificationInboxesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取通知收件箱版本摘要
 func NewGetSyncNotificationInboxesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncNotificationInboxesLogic {
 	return &GetSyncNotificationInboxesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_notification_inboxes", ctx),
 	}
 }
 
@@ -59,7 +59,7 @@ func (l *GetSyncNotificationInboxesLogic) GetSyncNotificationInboxes(req *types.
 		Limit:        req.Limit,
 	})
 	if err != nil {
-		l.Errorf("获取通知收件箱版本摘要失败: userId=%s, sinceVersion=%d, limit=%d, err=%v", req.UserID, req.SinceVersion, req.Limit, err)
+		l.logger.Error(model.LogMsg{Text: "获取通知收件箱版本摘要失败", Data: map[string]any{"userId": req.UserID, "sinceVersion": req.SinceVersion, "limit": req.Limit, "err": err.Error()}})
 		return nil, err
 	}
 

@@ -28,18 +28,18 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/moment/moment_rpc/internal/svc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListMomentCommentsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListMomentCommentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListMomentCommentsLogic {
-	return &ListMomentCommentsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListMomentCommentsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_moment_comments", ctx)}
 }
 
 func (l *ListMomentCommentsLogic) ListMomentComments(in *moment_rpc.ListMomentCommentsReq) (*moment_rpc.ListMomentCommentsRes, error) {
@@ -62,13 +62,19 @@ func (l *ListMomentCommentsLogic) ListMomentComments(in *moment_rpc.ListMomentCo
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计评论失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计动态评论失败",
+			Data: map[string]any{"momentId": in.MomentId, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var list []moment_models.MomentCommentModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询评论列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询动态评论列表失败",
+			Data: map[string]any{"momentId": in.MomentId, "page": page, "pageSize": pageSize, "err": err.Error()},
+		})
 		return nil, err
 	}
 

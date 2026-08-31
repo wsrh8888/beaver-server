@@ -27,21 +27,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateConversationLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateConversationLogic {
 	return &UpdateConversationLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_conversation", ctx),
 	}
 }
 
@@ -59,6 +59,7 @@ func (l *UpdateConversationLogic) UpdateConversation(in *chat_rpc.UpdateConversa
 			UserReadSeq:    0,
 			Version:        1, // 初始版本
 		}).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "创建用户会话记录失败", Data: map[string]any{"userId": in.UserId, "conversationId": in.ConversationId, "err": err.Error()}})
 			return nil, err
 		}
 	} else {
@@ -72,9 +73,15 @@ func (l *UpdateConversationLogic) UpdateConversation(in *chat_rpc.UpdateConversa
 		}
 
 		if err := l.svcCtx.DB.Model(&userConvo).Updates(updates).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "更新用户会话记录失败", Data: map[string]any{"userId": in.UserId, "conversationId": in.ConversationId, "err": err.Error()}})
 			return nil, err
 		}
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "更新会话成功",
+		Data: map[string]interface{}{"userId": in.UserId, "conversationId": in.ConversationId, "isPinned": in.IsPinned, "isDeleted": in.IsDeleted},
+	})
 
 	return &chat_rpc.UpdateConversationRes{
 		Success: true,

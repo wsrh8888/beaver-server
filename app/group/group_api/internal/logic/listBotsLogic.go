@@ -30,22 +30,22 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListBotsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取群内所有机器人列表
 func NewListBotsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListBotsLogic {
 	return &ListBotsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("list_bots", ctx),
 	}
 }
 
@@ -62,6 +62,7 @@ func (l *ListBotsLogic) ListBots(req *types.ListBotsReq) (resp *types.ListBotsRe
 	var bots []group_models.GroupBotModel
 	if err = l.svcCtx.DB.Where("group_id = ?", req.GroupID).
 		Order("id DESC").Find(&bots).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询群内机器人列表失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -75,6 +76,7 @@ func (l *ListBotsLogic) ListBots(req *types.ListBotsReq) (resp *types.ListBotsRe
 		UserIdList: botIDs,
 	})
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取机器人用户信息失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, err
 	}
 

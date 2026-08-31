@@ -29,26 +29,34 @@ import (
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetMomentLikesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取动态点赞列表的接口（分页）
 func NewGetMomentLikesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentLikesLogic {
 	return &GetMomentLikesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_moment_likes", ctx),
 	}
 }
 
 func (l *GetMomentLikesLogic) GetMomentLikes(req *types.GetMomentLikesReq) (resp *types.GetMomentLikesRes, err error) {
+	defer func() {
+		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "获取动态点赞列表失败",
+				Data: map[string]any{"momentId": req.MomentID, "err": err.Error()},
+			})
+		}
+	}()
 	// 分页参数处理
 	page := req.Page
 	limit := req.Limit

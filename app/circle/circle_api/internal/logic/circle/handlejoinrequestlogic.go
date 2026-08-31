@@ -32,21 +32,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type HandleJoinRequestLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewHandleJoinRequestLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HandleJoinRequestLogic {
 	return &HandleJoinRequestLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("handle_join_request", ctx),
 	}
 }
 
@@ -67,6 +67,7 @@ func (l *HandleJoinRequestLogic) HandleJoinRequest(req *types.HandleJoinRequestR
 
 	// 更新申请状态
 	if err = l.svcCtx.DB.Model(&joinReq).Update("status", req.Status).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "处理圈子申请失败", Data: map[string]any{"requestId": req.RequestID, "status": req.Status, "err": err.Error()}})
 		return nil, fmt.Errorf("处理申请失败: %v", err)
 	}
 
@@ -115,10 +116,12 @@ func (l *HandleJoinRequestLogic) HandleJoinRequest(req *types.HandleJoinRequestR
 				"conversationId": conversationID,
 			}
 			if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
-				logx.Errorf("推送圈子资料同步失败: circleID=%s, err=%v", joinReq.CircleID, err)
+				l.logger.Error(model.LogMsg{Text: "推送圈子资料同步失败", Data: map[string]any{"circleId": joinReq.CircleID, "err": err.Error()}})
 			}
 		}()
 	}
+
+	l.logger.Info(model.LogMsg{Text: "处理圈子申请成功", Data: map[string]interface{}{"requestId": req.RequestID, "circleId": joinReq.CircleID, "status": req.Status}})
 
 	return &types.HandleJoinRequestRes{}, nil
 }

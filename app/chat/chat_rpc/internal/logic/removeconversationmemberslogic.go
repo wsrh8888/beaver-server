@@ -28,21 +28,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RemoveConversationMembersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRemoveConversationMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveConversationMembersLogic {
 	return &RemoveConversationMembersLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("remove_conversation_members", ctx),
 	}
 }
 
@@ -58,13 +58,14 @@ func (l *RemoveConversationMembersLogic) RemoveConversationMembers(in *chat_rpc.
 	// 检查会话是否存在
 	var conversation chat_models.ChatConversationMeta
 	if err := l.svcCtx.DB.Where("conversation_id = ?", in.ConversationId).First(&conversation).Error; err != nil {
-		l.Errorf("会话不存在: conversationId=%s, error=%v", in.ConversationId, err)
+		l.logger.Error(model.LogMsg{Text: "会话不存在", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		return nil, errors.New("会话不存在")
 	}
 
 	// 开启事务
 	tx := l.svcCtx.DB.Begin()
 	if tx.Error != nil {
+		l.logger.Error(model.LogMsg{Text: "开启事务失败", Data: map[string]any{"err": tx.Error.Error()}})
 		return nil, tx.Error
 	}
 
@@ -80,7 +81,7 @@ func (l *RemoveConversationMembersLogic) RemoveConversationMembers(in *chat_rpc.
 		if err := tx.Model(&chat_models.ChatUserConversation{}).
 			Where("conversation_id = ? AND user_id = ?", in.ConversationId, userId).
 			Update("is_hidden", true).Error; err != nil {
-			l.Errorf("移除用户会话关系失败: userId=%s, conversationId=%s, error=%v", userId, in.ConversationId, err)
+			l.logger.Error(model.LogMsg{Text: "移除用户会话关系失败", Data: map[string]any{"userId": userId, "conversationId": in.ConversationId, "err": err.Error()}})
 			tx.Rollback()
 			return nil, errors.New("移除用户会话关系失败")
 		}
@@ -88,10 +89,14 @@ func (l *RemoveConversationMembersLogic) RemoveConversationMembers(in *chat_rpc.
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("成功移除会话成员: conversationId=%s, userIds=%v", in.ConversationId, in.UserIds)
+	l.logger.Info(model.LogMsg{
+		Text: "移除会话成员成功",
+		Data: map[string]interface{}{"conversationId": in.ConversationId, "userIds": in.UserIds},
+	})
 
 	return &chat_rpc.RemoveConversationMembersRes{
 		Success: true,

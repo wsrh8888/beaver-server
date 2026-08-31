@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -37,11 +38,11 @@ import (
 type DeleteWorkbenchAppLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteWorkbenchAppLogic {
-	return &DeleteWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &DeleteWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_workbench_app", ctx)}
 }
 
 func (l *DeleteWorkbenchAppLogic) DeleteWorkbenchApp(in *platform_rpc.DeleteWorkbenchAppReq) (*platform_rpc.DeleteWorkbenchAppRes, error) {
@@ -51,12 +52,14 @@ func (l *DeleteWorkbenchAppLogic) DeleteWorkbenchApp(in *platform_rpc.DeleteWork
 
 	result := l.svcCtx.DB.Where("workbench_app_id = ?", in.WorkbenchAppId).Delete(&platform_models.WorkbenchApp{})
 	if result.Error != nil {
-		l.Errorf("删除工作台应用失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{Text: "删除工作台应用失败", Data: map[string]any{"workbenchAppId": in.WorkbenchAppId, "err": result.Error.Error()}})
 		return nil, status.Error(codes.Internal, "删除工作台应用失败")
 	}
 	if result.RowsAffected == 0 {
 		return nil, status.Error(codes.NotFound, "工作台应用不存在")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "删除工作台应用成功", Data: map[string]interface{}{"workbenchAppId": in.WorkbenchAppId}})
 
 	return &platform_rpc.DeleteWorkbenchAppRes{}, nil
 }

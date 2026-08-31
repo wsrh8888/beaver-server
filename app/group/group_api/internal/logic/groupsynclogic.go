@@ -28,22 +28,22 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GroupSyncLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 群资料同步
 func NewGroupSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupSyncLogic {
 	return &GroupSyncLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("group_sync", ctx),
 	}
 }
 
@@ -53,7 +53,7 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 	}
 
 	if len(req.Groups) == 0 {
-		l.Infof("群资料同步完成，用户ID: %s, 无需同步的群组", req.UserID)
+		l.logger.Info(model.LogMsg{Text: "群资料同步无需群组", Data: map[string]any{"userId": req.UserID}})
 		return resp, nil
 	}
 
@@ -63,7 +63,7 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 		err = l.svcCtx.DB.Where("group_id = ? AND version >= ?", groupReq.GroupID, groupReq.Version).
 			Find(&groups).Error
 		if err != nil {
-			l.Errorf("查询群组数据失败，群组ID: %s, 错误: %v", groupReq.GroupID, err)
+			l.logger.Error(model.LogMsg{Text: "查询群组数据失败", Data: map[string]any{"groupId": groupReq.GroupID, "err": err.Error()}})
 			continue
 		}
 
@@ -83,6 +83,6 @@ func (l *GroupSyncLogic) GroupSync(req *types.GroupSyncReq) (resp *types.GroupSy
 		}
 	}
 
-	l.Infof("群资料同步完成，用户ID: %s, 返回群组变化数: %d", req.UserID, len(resp.Groups))
+	l.logger.Info(model.LogMsg{Text: "群资料同步完成", Data: map[string]interface{}{"userId": req.UserID, "count": len(resp.Groups)}})
 	return resp, nil
 }

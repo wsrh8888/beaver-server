@@ -29,21 +29,21 @@ import (
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendDetailLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFriendDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendDetailLogic {
 	return &GetFriendDetailLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_friend_detail", ctx),
 	}
 }
 
@@ -53,7 +53,7 @@ func (l *GetFriendDetailLogic) GetFriendDetail(in *friend_rpc.GetFriendDetailReq
 	err := l.svcCtx.DB.Where("((send_user_id = ? AND rev_user_id IN (?)) OR (rev_user_id = ? AND send_user_id IN (?))) AND is_deleted = ?",
 		in.UserId, in.FriendIds, in.UserId, in.FriendIds, false).Find(&friends).Error
 	if err != nil {
-		logx.Errorf("failed to query friends: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询好友关系失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -74,7 +74,7 @@ func (l *GetFriendDetailLogic) GetFriendDetail(in *friend_rpc.GetFriendDetailReq
 			UserIdList: friendIds,
 		})
 		if err != nil {
-			logx.Errorf("failed to get user info from UserRpc: %v", err)
+			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 			return nil, err
 		}
 		userInfoMap = userListRes.UserInfo

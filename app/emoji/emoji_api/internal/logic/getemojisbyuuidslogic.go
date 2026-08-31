@@ -27,21 +27,21 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojisByUuidsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojisByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojisByUuidsLogic {
 	return &GetEmojisByUuidsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emojis_by_uuids", ctx),
 	}
 }
 
@@ -52,6 +52,7 @@ func (l *GetEmojisByUuidsLogic) GetEmojisByUuids(req *types.GetEmojisByUuidsReq)
 
 	var emojis []emoji_models.Emoji
 	if err := l.svcCtx.DB.Where("emoji_id IN ? AND status = 1", req.Ids).Find(&emojis).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "按UUID查询表情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
 		return nil, err
 	}
 

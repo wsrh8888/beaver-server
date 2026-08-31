@@ -31,22 +31,23 @@ import (
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CreatePostLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewCreatePostLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreatePostLogic {
 	return &CreatePostLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("create_post", ctx),
 	}
 }
 
@@ -74,6 +75,7 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 		Files:    files,
 	}
 	if err = l.svcCtx.DB.Create(&post).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "发布帖子失败", Data: map[string]any{"circleId": req.CircleID, "userId": req.UserID, "err": err.Error()}})
 		return nil, fmt.Errorf("发布帖子失败: %v", err)
 	}
 
@@ -88,8 +90,8 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 	if len(userIDs) > 0 {
 		_, _ = l.svcCtx.ChatRpc.InitializeConversation(l.ctx, &chat_rpc.InitializeConversationReq{
 			ConversationId: conversationID,
-			Type:           3,
-			UserIds:        userIDs,
+			Type:            3,
+			UserIds:         userIDs,
 		})
 	}
 
@@ -98,7 +100,7 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 		ConversationId: conversationID,
 		MessageType:    1,
 		Content:        preview,
-		RelatedUserId:  req.UserID,
+		RelatedUserId:   req.UserID,
 		ReadUserIds:    []string{req.UserID},
 	})
 
@@ -110,6 +112,8 @@ func (l *CreatePostLogic) CreatePost(req *types.CreatePostReq) (resp *types.Crea
 			avatar = info.Avatar
 		}
 	}
+
+	l.logger.Info(model.LogMsg{Text: "发布帖子成功", Data: map[string]interface{}{"postId": postID, "circleId": req.CircleID, "userId": req.UserID}})
 
 	return &types.CreatePostRes{
 		PostID:    postID,

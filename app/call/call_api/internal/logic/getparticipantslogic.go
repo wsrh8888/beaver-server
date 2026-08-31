@@ -27,22 +27,22 @@ import (
 	"beaver/app/call/call_api/internal/svc"
 	"beaver/app/call/call_api/internal/types"
 	"beaver/app/call/call_rpc/types/call_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetParticipantsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取房间当前成员列表
 func NewGetParticipantsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetParticipantsLogic {
 	return &GetParticipantsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_participants", ctx),
 	}
 }
 
@@ -51,6 +51,10 @@ func (l *GetParticipantsLogic) GetParticipants(req *types.GetCallParticipantsReq
 		RoomId: req.RoomID,
 	})
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通话参与者列表失败",
+			Data: map[string]any{"roomId": req.RoomID, "err": err.Error()},
+		})
 		return nil, err
 	}
 	participants := make([]types.Participant, 0)

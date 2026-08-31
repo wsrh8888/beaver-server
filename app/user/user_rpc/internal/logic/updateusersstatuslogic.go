@@ -28,21 +28,21 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateUsersStatusLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateUsersStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateUsersStatusLogic {
 	return &UpdateUsersStatusLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_users_status", ctx),
 	}
 }
 
@@ -57,8 +57,15 @@ func (l *UpdateUsersStatusLogic) UpdateUsersStatus(in *user_rpc.UpdateUsersStatu
 		Where("user_id IN ?", in.UserIds).
 		Update("status", int8(in.Status))
 	if result.Error != nil {
-		l.Errorf("批量更新用户状态失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{
+			Text: "批量更新用户状态失败",
+			Data: map[string]any{"userIds": in.UserIds, "status": in.Status, "err": result.Error.Error()},
+		})
 		return nil, result.Error
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "批量更新用户状态成功",
+		Data: map[string]interface{}{"userIds": in.UserIds, "status": in.Status, "affected": result.RowsAffected},
+	})
 	return &user_rpc.UpdateUsersStatusRes{AffectedCount: result.RowsAffected}, nil
 }

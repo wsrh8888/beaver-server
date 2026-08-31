@@ -27,8 +27,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -36,11 +37,11 @@ import (
 type SubmitFeedbackLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSubmitFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubmitFeedbackLogic {
-	return &SubmitFeedbackLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &SubmitFeedbackLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("submit_feedback", ctx)}
 }
 
 func (l *SubmitFeedbackLogic) SubmitFeedback(in *platform_rpc.SubmitFeedbackReq) (*platform_rpc.SubmitFeedbackRes, error) {
@@ -56,9 +57,11 @@ func (l *SubmitFeedbackLogic) SubmitFeedback(in *platform_rpc.SubmitFeedbackReq)
 		FileNames: platform_models.FileNames(in.FileNames),
 	}
 	if err := l.svcCtx.DB.Create(&feedback).Error; err != nil {
-		l.Errorf("提交反馈失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "提交反馈失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "提交反馈失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "提交反馈成功", Data: map[string]interface{}{"id": feedback.Id, "userId": in.UserId}})
 
 	return &platform_rpc.SubmitFeedbackRes{Id: uint64(feedback.Id)}, nil
 }

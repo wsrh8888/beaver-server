@@ -28,9 +28,10 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -38,11 +39,11 @@ import (
 type CreateWorkbenchAppLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateWorkbenchAppLogic {
-	return &CreateWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &CreateWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("create_workbench_app", ctx)}
 }
 
 func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(in *platform_rpc.CreateWorkbenchAppReq) (*platform_rpc.CreateWorkbenchAppRes, error) {
@@ -91,9 +92,11 @@ func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(in *platform_rpc.CreateWork
 		LastModifiedBy: in.OperatorId,
 	}
 	if err := l.svcCtx.DB.Create(&app).Error; err != nil {
-		l.Errorf("创建工作台应用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建工作台应用失败", Data: map[string]any{"name": name, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "创建工作台应用失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "创建工作台应用成功", Data: map[string]interface{}{"workbenchAppId": app.WorkbenchAppID, "name": name}})
 
 	return &platform_rpc.CreateWorkbenchAppRes{WorkbenchAppId: app.WorkbenchAppID}, nil
 }

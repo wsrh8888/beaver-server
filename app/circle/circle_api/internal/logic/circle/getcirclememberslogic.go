@@ -29,21 +29,20 @@ import (
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetCircleMembersLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetCircleMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCircleMembersLogic {
 	return &GetCircleMembersLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_circle_members", ctx),
 	}
 }
 

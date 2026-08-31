@@ -29,22 +29,22 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type MarkReadByCursorLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按分类游标标记已读（高效批量，首版主路径）
 func NewMarkReadByCursorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkReadByCursorLogic {
 	return &MarkReadByCursorLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("mark_read_by_cursor", ctx),
 	}
 }
 
@@ -77,9 +77,22 @@ func (l *MarkReadByCursorLogic) MarkReadByCursor(req *types.MarkReadByCursorReq)
 
 	result := query.Updates(update)
 	if result.Error != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "按游标标记通知已读失败",
+			Data: map[string]any{"userId": req.UserID, "category": req.Category, "err": result.Error.Error()},
+		})
 		return nil, result.Error
 	}
 	resp.Affected = result.RowsAffected
+
+	l.logger.Info(model.LogMsg{
+		Text: "按游标标记通知已读成功",
+		Data: map[string]interface{}{
+			"userId":   req.UserID,
+			"category": req.Category,
+			"affected": resp.Affected,
+		},
+	})
 
 	return resp, nil
 }

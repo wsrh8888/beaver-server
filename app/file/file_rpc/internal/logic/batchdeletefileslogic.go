@@ -28,8 +28,9 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -37,11 +38,11 @@ import (
 type BatchDeleteFilesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewBatchDeleteFilesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteFilesLogic {
-	return &BatchDeleteFilesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &BatchDeleteFilesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("batch_delete_files", ctx)}
 }
 
 func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *file_rpc.BatchDeleteFilesReq) (*file_rpc.BatchDeleteFilesRes, error) {
@@ -51,7 +52,10 @@ func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *file_rpc.BatchDeleteFilesRe
 
 	var files []file_models.FileModel
 	if err := l.svcCtx.DB.Where("id IN ?", in.Ids).Find(&files).Error; err != nil {
-		l.Errorf("查询文件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询文件失败",
+			Data: map[string]any{"ids": in.Ids, "err": err.Error()},
+		})
 		return nil, err
 	}
 	if len(files) == 0 {
@@ -59,7 +63,10 @@ func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *file_rpc.BatchDeleteFilesRe
 	}
 
 	if err := l.svcCtx.DB.Where("id IN ?", in.Ids).Delete(&file_models.FileModel{}).Error; err != nil {
-		l.Errorf("批量删除文件记录失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除文件记录失败",
+			Data: map[string]any{"ids": in.Ids, "err": err.Error()},
+		})
 		return nil, status.Error(codes.Internal, "批量删除失败")
 	}
 
@@ -70,9 +77,17 @@ func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *file_rpc.BatchDeleteFilesRe
 		}
 		paths = append(paths, file.Path)
 		if err := os.Remove(file.Path); err != nil {
-			l.Errorf("删除物理文件失败 path=%s: %v", file.Path, err)
+			l.logger.Error(model.LogMsg{
+				Text: "删除物理文件失败",
+				Data: map[string]any{"path": file.Path, "err": err.Error()},
+			})
 		}
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "批量删除文件成功",
+		Data: map[string]interface{}{"ids": in.Ids, "paths": paths},
+	})
 
 	return &file_rpc.BatchDeleteFilesRes{Paths: paths}, nil
 }

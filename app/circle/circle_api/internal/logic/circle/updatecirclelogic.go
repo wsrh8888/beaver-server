@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateCircleLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewUpdateCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateCircleLogic {
 	return &UpdateCircleLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("update_circle", ctx),
 	}
 }
 
@@ -78,8 +78,11 @@ func (l *UpdateCircleLogic) UpdateCircle(req *types.UpdateCircleReq) (resp *type
 	if err = l.svcCtx.DB.Model(&circle_models.CircleModel{}).
 		Where("circle_id = ? AND is_deleted = false", req.CircleID).
 		Updates(updates).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新圈子失败", Data: map[string]any{"circleId": req.CircleID, "err": err.Error()}})
 		return nil, fmt.Errorf("更新圈子失败: %v", err)
 	}
+
+	l.logger.Info(model.LogMsg{Text: "更新圈子成功", Data: map[string]interface{}{"circleId": req.CircleID, "userId": req.UserID}})
 
 	return &types.UpdateCircleRes{}, nil
 }

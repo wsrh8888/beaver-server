@@ -28,8 +28,9 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
@@ -41,11 +42,11 @@ const (
 type UpdateFriendsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateFriendsLogic {
-	return &UpdateFriendsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateFriendsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_friends", ctx)}
 }
 
 func (l *UpdateFriendsLogic) UpdateFriends(in *friend_rpc.UpdateFriendsReq) (*friend_rpc.UpdateFriendsRes, error) {
@@ -72,9 +73,10 @@ func (l *UpdateFriendsLogic) hardDelete(relationIDs []string) (*friend_rpc.Updat
 		return &friend_rpc.UpdateFriendsRes{}, nil
 	}
 	if err := l.svcCtx.DB.Unscoped().Where("id IN ?", ids).Delete(&friend_models.FriendModel{}).Error; err != nil {
-		l.Errorf("删除好友失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "删除好友失败", Data: map[string]any{"ids": ids, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "删除好友成功", Data: map[string]interface{}{"count": len(ids)}})
 	return &friend_rpc.UpdateFriendsRes{AffectedCount: int64(len(ids))}, nil
 }
 
@@ -86,6 +88,7 @@ func (l *UpdateFriendsLogic) restore(relationIDs []string) (*friend_rpc.UpdateFr
 			continue
 		}
 		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "查询好友关系失败", Data: map[string]any{"relationId": rid, "err": err.Error()}})
 			return nil, err
 		}
 		if !f.IsDeleted {
@@ -93,10 +96,11 @@ func (l *UpdateFriendsLogic) restore(relationIDs []string) (*friend_rpc.UpdateFr
 			continue
 		}
 		if err := l.svcCtx.DB.Model(f).Update("is_deleted", false).Error; err != nil {
-			l.Errorf("恢复好友失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "恢复好友失败", Data: map[string]any{"relationId": rid, "err": err.Error()}})
 			return nil, err
 		}
 		affected++
 	}
+	l.logger.Info(model.LogMsg{Text: "恢复好友成功", Data: map[string]interface{}{"affected": affected}})
 	return &friend_rpc.UpdateFriendsRes{AffectedCount: affected}, nil
 }

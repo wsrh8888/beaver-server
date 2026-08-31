@@ -29,22 +29,23 @@ import (
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CreateCommentLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewCreateCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateCommentLogic {
 	return &CreateCommentLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("create_comment", ctx),
 	}
 }
 
@@ -75,6 +76,7 @@ func (l *CreateCommentLogic) CreateComment(req *types.CreateCommentReq) (resp *t
 		ReplyToUserID:    replyToUserID,
 	}
 	if err = l.svcCtx.DB.Create(&c).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "发布评论失败", Data: map[string]any{"postID": req.PostID, "userId": req.UserID, "err": err.Error()}})
 		return nil, fmt.Errorf("发布评论失败: %v", err)
 	}
 
@@ -96,6 +98,8 @@ func (l *CreateCommentLogic) CreateComment(req *types.CreateCommentReq) (resp *t
 			}
 		}
 	}
+
+	l.logger.Info(model.LogMsg{Text: "发布评论成功", Data: map[string]interface{}{"commentId": commentID, "postID": req.PostID, "userId": req.UserID}})
 
 	return &types.CreateCommentRes{
 		CommentID:        commentID,

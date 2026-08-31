@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetPostLikesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetPostLikesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPostLikesLogic {
 	return &GetPostLikesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_post_likes", ctx),
 	}
 }
 
@@ -61,6 +61,7 @@ func (l *GetPostLikesLogic) GetPostLikes(req *types.GetPostLikesReq) (resp *type
 	if err = l.svcCtx.DB.Model(&circle_models.CircleLikeModel{}).
 		Where("post_id = ?", req.PostID).
 		Count(&totalCount).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "统计帖子点赞失败", Data: map[string]any{"postId": req.PostID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -70,6 +71,7 @@ func (l *GetPostLikesLogic) GetPostLikes(req *types.GetPostLikesReq) (resp *type
 		Offset(offset).
 		Limit(limit).
 		Find(&likes).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询帖子点赞列表失败", Data: map[string]any{"postId": req.PostID, "err": err.Error()}})
 		return nil, err
 	}
 

@@ -28,21 +28,21 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListGroupMembersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListGroupMembersLogic {
 	return &ListGroupMembersLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("list_group_members", ctx),
 	}
 }
 
@@ -72,13 +72,13 @@ func (l *ListGroupMembersLogic) ListGroupMembers(in *group_rpc.ListGroupMembersR
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计群成员失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计群成员失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []group_models.GroupMemberModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询群成员列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群成员列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

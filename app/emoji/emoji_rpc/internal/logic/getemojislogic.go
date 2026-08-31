@@ -27,21 +27,21 @@ import (
 
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojisLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojisLogic {
 	return &GetEmojisLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_emojis", ctx),
 	}
 }
 
@@ -61,7 +61,7 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 	err := l.svcCtx.DB.Table("emoji_collect_emojis").Where("user_id = ?", in.UserId).
 		Select("emoji_id").Find(&userCollectRecords).Error
 	if err != nil {
-		l.Errorf("查询用户收藏表情失败: userId=%s, error=%v", in.UserId, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏表情失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -76,7 +76,7 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 	err = l.svcCtx.DB.Table("emoji_package_collects").Where("user_id = ?", in.UserId).
 		Select("package_id").Find(&packageCollectRecords).Error
 	if err != nil {
-		l.Errorf("查询用户收藏表情包失败: userId=%s, error=%v", in.UserId, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏表情包失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -93,7 +93,7 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 		err = l.svcCtx.DB.Table("emoji_package_emojis").Where("package_id IN ?", packageIDs).
 			Select("emoji_id").Find(&packageContentRecords).Error
 		if err != nil {
-			l.Errorf("查询表情包内容失败: userId=%s, packageIds=%v, error=%v", in.UserId, packageIDs, err)
+			l.logger.Error(model.LogMsg{Text: "查询表情包内容失败", Data: map[string]any{"userId": in.UserId, "packageIds": packageIDs, "err": err.Error()}})
 			return nil, err
 		}
 
@@ -133,12 +133,20 @@ func (l *GetEmojisLogic) GetEmojis(in *emoji_rpc.GetEmojisReq) (*emoji_rpc.GetEm
 	err = l.svcCtx.DB.Table("emojis").Where("emoji_id IN ? AND status = 1", allEmojiIDs).
 		Select("emoji_id, version").Find(&emojis).Error
 	if err != nil {
-		l.Errorf("查询表情基础信息失败: userId=%s, emojiIds=%v, error=%v", in.UserId, allEmojiIDs, err)
+		l.logger.Error(model.LogMsg{Text: "查询表情基础信息失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("用户 %s 表情基础数据同步: 直接收藏=%d, 表情包包含=%d, 总计=%d, 有效表情=%d",
-		in.UserId, len(userEmojiIDs), len(packageEmojiIDs), len(emojiIDMap), len(emojis))
+	l.logger.Info(model.LogMsg{
+		Text: "表情基础数据同步",
+		Data: map[string]interface{}{
+			"userId":          in.UserId,
+			"directCollect":   len(userEmojiIDs),
+			"packageContains": len(packageEmojiIDs),
+			"total":           len(emojiIDMap),
+			"validEmojis":     len(emojis),
+		},
+	})
 
 	// 转换为版本摘要格式
 	var emojiVersions []*emoji_rpc.EmojiVersionItem
