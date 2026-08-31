@@ -28,20 +28,21 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type SaveWebhookLogLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSaveWebhookLogLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveWebhookLogLogic {
 	return &SaveWebhookLogLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("save_webhook_log", ctx),
 	}
 }
 
@@ -53,7 +54,10 @@ func (l *SaveWebhookLogLogic) SaveWebhookLog(in *open_rpc.SaveWebhookLogReq) (*o
 		Status:    int(in.Status),
 	}
 	if err := l.svcCtx.DB.Create(&log).Error; err != nil {
-		l.Errorf("保存 Webhook 日志失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "保存 Webhook 日志失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &open_rpc.SaveWebhookLogRes{}, nil

@@ -39,20 +39,20 @@ import (
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/app/open/openevent"
+	beaverlog "beaver/utils/beaverlog"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type CreateEventSubscriptionLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateEventSubscriptionLogic {
 	return &CreateEventSubscriptionLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_event_subscription", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

@@ -37,7 +37,6 @@ import (
 	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
@@ -187,7 +186,7 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 				DedupHash:   comment.CommentID,
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("推送评论通知失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "推送评论通知失败", Data: map[string]interface{}{"momentId": req.MomentID, "commentId": comment.CommentID, "err": err.Error()}})
 			}
 		}
 
@@ -204,7 +203,7 @@ func (l *CreateMomentCommentLogic) CreateMomentComment(req *types.CreateMomentCo
 				DedupHash:   comment.CommentID + "_reply",
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("推送回复通知失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "推送回复通知失败", Data: map[string]interface{}{"momentId": req.MomentID, "commentId": comment.CommentID, "err": err.Error()}})
 			}
 		}
 	}()

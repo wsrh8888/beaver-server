@@ -36,8 +36,6 @@ import (
 	"beaver/common/wsEnum/wsTypeConst"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type DeleteFriendLogic struct {
@@ -112,7 +110,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logx.WithContext(l.ctx).Errorf("Robot 好友事件推送 panic: %v", r)
+				l.logger.Error(model.LogMsg{Text: "Robot 好友事件推送panic", Data: map[string]interface{}{"panic": r}})
 			}
 		}()
 		ctx := context.Background()

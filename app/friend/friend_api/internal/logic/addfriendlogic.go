@@ -39,7 +39,6 @@ import (
 	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AddFriendLogic struct {
@@ -92,7 +91,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		UserID: req.FriendID,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("目标用户不存在: friendID=%s, error=%v", req.FriendID, err)
+		l.logger.Error(model.LogMsg{Text: "目标用户不存在", Data: map[string]interface{}{"friendId": req.FriendID, "err": err.Error()}})
 		return nil, errors.New("用户不存在")
 	}
 
@@ -103,14 +102,14 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		req.UserID, req.FriendID, req.FriendID, req.UserID).Error
 
 	if err == nil {
-		logx.WithContext(l.ctx).Infof("已存在待处理的好友请求: userID=%s, friendID=%s", req.UserID, req.FriendID)
+		l.logger.Info(model.LogMsg{Text: "已存在待处理的好友请求", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID}})
 		return &types.AddFriendRes{}, nil
 	}
 
 	// 获取下一个版本号
 	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "")
 	if nextVersion == -1 {
-		logx.WithContext(l.ctx).Errorf("获取版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取版本号失败", Data: map[string]interface{}{"table": "friend_verify"}})
 		return nil, errors.New("系统错误")
 	}
 
@@ -126,7 +125,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 
 	err = l.svcCtx.DB.Create(&verifyModel).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("创建好友验证请求失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建好友验证请求失败", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
 		return nil, errors.New("添加好友请求失败")
 	}
 
@@ -134,7 +133,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logx.WithContext(l.ctx).Errorf("异步发送WebSocket消息时发生panic: %v", r)
+				l.logger.Error(model.LogMsg{Text: "异步发送WebSocket消息时发生panic", Data: map[string]interface{}{"panic": r}})
 			}
 		}()
 
@@ -154,7 +153,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			DedupHash:   verifyModel.VerifyID,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("投递好友申请通知失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "投递好友申请通知失败", Data: map[string]interface{}{"verifyId": verifyModel.VerifyID, "err": err.Error()}})
 		}
 
 		// 获取发送者和接收者的用户信息
@@ -162,14 +161,14 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			UserID: req.UserID,
 		})
 		if senderErr != nil {
-			logx.WithContext(l.ctx).Errorf("获取发送者用户信息失败: %v", senderErr)
+			l.logger.Error(model.LogMsg{Text: "获取发送者用户信息失败", Data: map[string]interface{}{"userId": req.UserID, "err": senderErr.Error()}})
 		}
 
 		receiverInfo, receiverErr := l.svcCtx.UserRpc.UserInfo(context.Background(), &user_rpc.UserInfoReq{
 			UserID: req.FriendID,
 		})
 		if receiverErr != nil {
-			logx.WithContext(l.ctx).Errorf("获取接收者用户信息失败: %v", receiverErr)
+			l.logger.Error(model.LogMsg{Text: "获取接收者用户信息失败", Data: map[string]interface{}{"userId": req.FriendID, "err": receiverErr.Error()}})
 		}
 
 		// 构建好友验证表更新数据
@@ -238,10 +237,9 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		}
 		l.svcCtx.RocketMQ.SendMessage(l.ctx, mqwsconst.MqTopicWs, payload2)
 
-		logx.WithContext(l.ctx).Infof("异步发送好友验证请求通知完成: sender=%s, receiver=%s, version=%d, verifyId=%s", req.UserID, req.FriendID, nextVersion, verifyModel.VerifyID)
+		l.logger.Info(model.LogMsg{Text: "异步发送好友验证请求通知完成", Data: map[string]interface{}{"sender": req.UserID, "receiver": req.FriendID, "version": nextVersion, "verifyId": verifyModel.VerifyID}})
 	}()
 
-	logx.WithContext(l.ctx).Infof("好友请求发送成功: userID=%s, friendID=%s, source=%s", req.UserID, req.FriendID, req.Source)
 	l.logger.Info(model.LogMsg{
 		Text: "好友请求发送成功",
 		Data: map[string]interface{}{

@@ -30,20 +30,21 @@ import (
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/app/user/user_rpc/user"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateRobotConfigLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewUpdateRobotConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateRobotConfigLogic {
 	return &UpdateRobotConfigLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("update_robot_config", ctx),
 	}
 }
 
@@ -106,7 +107,10 @@ func (l *UpdateRobotConfigLogic) UpdateRobotConfig(req *types.UpdateRobotConfigR
 			displayReq.Avatar = req.Avatar
 		}
 		if _, err := l.svcCtx.UserRpc.UserUpdateDisplay(l.ctx, displayReq); err != nil {
-			l.Errorf("同步 Robot IM 展示信息失败: robot=%s err=%v", robot.RobotID, err)
+			l.logger.Error(model.LogMsg{
+			Text: "同步 Robot IM 展示信息失败",
+			Data: map[string]interface{}{"robot": robot.RobotID, "err": err.Error()},
+		})
 			return nil, errors.New("Robot 配置已保存，但同步 IM 昵称/头像失败")
 		}
 	}

@@ -37,8 +37,6 @@ import (
 	"beaver/app/open/open_models"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type BotSendLogic struct {
@@ -60,7 +58,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 	// 1. 根据 Token 查询机器人信息
 	var bot open_models.OpenBotModel
 	if err := l.svcCtx.DB.Where("token = ?", req.Token).First(&bot).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("BotSend: query bot failed, token=%s, error=%v", req.Token, err)
+		l.logger.Error(model.LogMsg{Text: "BotSend 查询机器人失败", Data: map[string]interface{}{"token": req.Token, "err": err.Error()}})
 		return nil, fmt.Errorf("invalid token")
 	}
 
@@ -84,7 +82,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		// 验证签名：HMAC-SHA256 + Base64
 		expectedSign := generateSignature(req.Timestamp, bot.Security.SignatureSecret)
 		if req.Sign != expectedSign {
-			logx.WithContext(l.ctx).Errorf("BotSend: signature mismatch, received=%s, expected=%s", req.Sign, expectedSign)
+			l.logger.Error(model.LogMsg{Text: "BotSend 签名校验失败", Data: map[string]interface{}{"received": req.Sign, "expected": expectedSign}})
 			return nil, fmt.Errorf("invalid signature")
 		}
 	}
@@ -138,7 +136,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 			}
 		}
 		if !allowed {
-			logx.WithContext(l.ctx).Errorf("BotSend: ip not in whitelist, client=%s botID=%s", host, bot.BotID)
+			l.logger.Error(model.LogMsg{Text: "BotSend IP 不在白名单", Data: map[string]interface{}{"client": host, "bot_id": bot.BotID}})
 			return nil, fmt.Errorf("ip not in whitelist")
 		}
 	}
@@ -364,7 +362,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 
 	chatRes, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, chatReq)
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("failed to send message via chat_rpc: %v", err)
+		l.logger.Error(model.LogMsg{Text: "BotSend 调用 chat_rpc 发送消息失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, fmt.Errorf("failed to send message")
 	}
 

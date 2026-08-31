@@ -119,12 +119,15 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 				if req.Status == backend_models.CaseStatusRejected {
 					action = 2
 				}
-				_, _ = l.svcCtx.PlatformRpc.UpdateContentReports(l.ctx, &platform_rpc.UpdateContentReportsReq{
+				_, err := l.svcCtx.PlatformRpc.UpdateContentReports(l.ctx, &platform_rpc.UpdateContentReportsReq{
 					Ids:          ids,
 					Action:       action,
 					HandlerId:    req.UserID,
 					HandleRemark: req.HandleRemark,
 				})
+				if err != nil {
+					l.logger.Error(model.LogMsg{Text: "更新内容举报状态失败", Data: map[string]interface{}{"err": err.Error()}})
+				}
 			}
 		}
 	}

@@ -31,8 +31,6 @@ import (
 	"beaver/app/group/group_models"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type MuteAllGroupLogic struct {
@@ -81,7 +79,7 @@ func (l *MuteAllGroupLogic) MuteAllGroup(req *types.MuteAllGroupReq) (resp *type
 	if err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
 		Where("group_id = ?", req.GroupID).
 		Updates(updates).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("更新全员禁言失败: groupID=%s err=%v", req.GroupID, err)
+		l.logger.Error(model.LogMsg{Text: "更新全员禁言失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("操作失败")
 	}
 

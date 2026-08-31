@@ -32,19 +32,19 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/jwts"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type OAuthLoginLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewOAuthLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OAuthLoginLogic {
 	return &OAuthLoginLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("oauth_login", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -62,7 +62,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ?", appID).First(&app).Error; err != nil {
-		logx.Errorf("查询门户 OAuth 应用失败: appId=%s, err=%v", appID, err)
+		l.logger.Error(model.LogMsg{Text: "查询门户 OAuth 应用失败", Data: map[string]interface{}{"app_id": appID, "err": err.Error()}})
 		return nil, errors.New("门户 OAuth 应用不存在")
 	}
 
@@ -71,7 +71,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 		Code:  req.Code,
 	})
 	if err != nil {
-		logx.Errorf("code 换 token 失败: appId=%s, err=%v", appID, err)
+		l.logger.Error(model.LogMsg{Text: "code 换 token 失败", Data: map[string]interface{}{"app_id": appID, "err": err.Error()}})
 		return nil, errors.New("授权码换取令牌失败")
 	}
 	if rpcResp.AccessToken == "" {
@@ -80,7 +80,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 
 	var tokenRecord open_models.OpenOAuthToken
 	if err := l.svcCtx.DB.Where("token = ?", rpcResp.AccessToken).First(&tokenRecord).Error; err != nil {
-		logx.Errorf("查询 OAuth token 失败: err=%v", err)
+		l.logger.Error(model.LogMsg{Text: "查询 OAuth token 失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("获取用户信息失败")
 	}
 
@@ -88,7 +88,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 		UserID: tokenRecord.UserID,
 	})
 	if err != nil || userRes.UserInfo == nil {
-		logx.Errorf("查询用户信息失败: userId=%s, err=%v", tokenRecord.UserID, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户信息失败", Data: map[string]interface{}{"user_id": tokenRecord.UserID, "err": err.Error()}})
 		return nil, errors.New("获取用户信息失败")
 	}
 
@@ -103,12 +103,12 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 		NickName: userRes.UserInfo.NickName,
 	}, secretKey, int(expireHours))
 	if err != nil {
-		logx.Errorf("生成 token 失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "生成 token 失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("服务内部异常")
 	}
 
 	expireAt := time.Now().Add(time.Duration(expireHours) * time.Hour).UnixMilli()
-	logx.Infof("OAuth 登录成功: userId=%s, nickName=%s", userRes.UserInfo.UserId, userRes.UserInfo.NickName)
+	l.logger.Info(model.LogMsg{Text: "OAuth 登录成功", Data: map[string]interface{}{"user_id": userRes.UserInfo.UserId, "nick_name": userRes.UserInfo.NickName}})
 
 	return &types.OAuthLoginRes{
 		Token:    token,

@@ -26,9 +26,9 @@ import (
 	"net/http"
 	"strings"
 
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type DeveloperAuthMiddleware struct {
@@ -51,7 +51,8 @@ func (m *DeveloperAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc
 
 		claims, err := jwts.ParseToken(token, m.secretKey)
 		if err != nil {
-			logx.Errorf("JWT 验证失败: %v", err)
+			logger := beaverlog.New("developer_auth", r.Context())
+			logger.Error(model.LogMsg{Text: "JWT 验证失败", Data: map[string]interface{}{"err": err.Error()}})
 			http.Error(w, `{"code":401,"msg":"令牌无效或已过期"}`, http.StatusUnauthorized)
 			return
 		}

@@ -30,6 +30,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
 )
@@ -66,7 +67,11 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 	}
 
 	key := fmt.Sprintf("admin_login_%s", claims.UserID)
-	token, _ := l.svcCtx.Redis.Get(key).Result()
+	token, err := l.svcCtx.Redis.Get(key).Result()
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询管理员登录token失败", Data: map[string]interface{}{"key": key, "err": err.Error()}})
+		return nil, errors.New("token已失效")
+	}
 	if token != req.Token {
 		return nil, errors.New("token已失效")
 	}

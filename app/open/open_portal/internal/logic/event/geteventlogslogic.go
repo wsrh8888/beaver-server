@@ -28,19 +28,18 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetEventLogsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetEventLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEventLogsLogic {
 	return &GetEventLogsLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_event_logs", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

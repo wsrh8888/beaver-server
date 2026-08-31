@@ -23,6 +23,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
@@ -36,9 +37,10 @@ import (
 	"time"
 
 	"beaver/app/open/open_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type urlVerificationPayload struct {
@@ -112,6 +114,7 @@ func VerifyWebhookURL(targetURL, secret string, timeoutSec int) error {
 }
 
 func PushPlatformEvent(sub open_models.OpenAppEventSubscription, eventType string, event map[string]interface{}) error {
+	logger := beaverlog.New("push_platform_event", context.Background())
 	if sub.Status != 1 || sub.VerifyStatus != 1 {
 		return nil
 	}
@@ -159,14 +162,14 @@ func PushPlatformEvent(sub open_models.OpenAppEventSubscription, eventType strin
 
 		resp, err := client.Do(req)
 		if err != nil {
-			logx.Errorf("[webhook] push failed: app=%s event=%s err=%v", sub.AppID, eventType, err)
+			logger.Error(model.LogMsg{Text: "Webhook 推送失败", Data: map[string]interface{}{"app_id": sub.AppID, "event": eventType, "err": err.Error()}})
 			continue
 		}
 		resp.Body.Close()
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			return nil
 		}
-		logx.Errorf("[webhook] push bad status: app=%s event=%s code=%d", sub.AppID, eventType, resp.StatusCode)
+		logger.Error(model.LogMsg{Text: "Webhook 推送返回异常状态码", Data: map[string]interface{}{"app_id": sub.AppID, "event": eventType, "status_code": resp.StatusCode}})
 	}
 	return fmt.Errorf("webhook push failed after retries")
 }

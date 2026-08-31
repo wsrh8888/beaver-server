@@ -29,18 +29,18 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 	"gorm.io/gorm"
 )
 
 type GetDeveloperByUserIDLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetDeveloperByUserIDLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDeveloperByUserIDLogic {
-	return &GetDeveloperByUserIDLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &GetDeveloperByUserIDLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_developer_by_user_id", ctx)}
 }
 
 func (l *GetDeveloperByUserIDLogic) GetDeveloperByUserID(in *open_rpc.GetDeveloperByUserIDReq) (*open_rpc.GetDeveloperByUserIDRes, error) {

@@ -29,20 +29,20 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	beaverlog "beaver/utils/beaverlog"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type DeleteEventSubscriptionLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteEventSubscriptionLogic {
 	return &DeleteEventSubscriptionLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("delete_event_subscription", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

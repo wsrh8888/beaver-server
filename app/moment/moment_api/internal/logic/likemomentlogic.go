@@ -35,7 +35,6 @@ import (
 	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
@@ -140,7 +139,7 @@ func (l *LikeMomentLogic) LikeMoment(req *types.LikeMomentReq) (resp *types.Like
 			DedupHash:   likeId + "_" + eventType,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("推送点赞通知失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "推送点赞通知失败", Data: map[string]interface{}{"momentId": req.MomentID, "userId": req.UserID, "status": req.Status, "err": err.Error()}})
 		}
 	}()
 

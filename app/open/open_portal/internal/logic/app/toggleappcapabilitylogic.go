@@ -31,13 +31,14 @@ import (
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/user"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type ToggleAppCapabilityLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -45,7 +46,7 @@ type ToggleAppCapabilityLogic struct {
 // 启用/禁用应用能力（对标飞书）
 func NewToggleAppCapabilityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ToggleAppCapabilityLogic {
 	return &ToggleAppCapabilityLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("toggle_app_capability", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -93,18 +94,18 @@ func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapab
 
 	// 3. 保存更新
 	if err := l.svcCtx.DB.Save(&app).Error; err != nil {
-		logx.Errorf("更新应用能力失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新应用能力失败", Data: map[string]interface{}{"err": err}})
 		return nil, errors.New("更新应用能力失败")
 	}
 
 	if req.Capability == "robot" && req.Enable {
 		if err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
-			logx.Errorf("创建 Robot 用户失败: app_id=%s err=%v", req.AppID, err)
+			l.logger.Error(model.LogMsg{Text: "创建 Robot 用户失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
 			return nil, errors.New("启用 Robot 成功，但创建 IM 用户失败，请稍后重试")
 		}
 	}
 
-	logx.Infof("应用 %s 的 %s 能力已%s", req.AppID, req.Capability, map[bool]string{true: "启用", false: "禁用"}[req.Enable])
+	l.logger.Info(model.LogMsg{Text: "应用能力开关已更新", Data: map[string]interface{}{"app_id": req.AppID, "capability": req.Capability, "enabled": req.Enable}})
 
 	return &types.ToggleAppCapabilityRes{
 		Enabled: enabled,

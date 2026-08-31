@@ -22,13 +22,6 @@
 package handler
 
 import (
-	filecommon "beaver/app/backend/backend_admin/internal/handler/file/common"
-	logic "beaver/app/backend/backend_admin/internal/logic/file"
-	"beaver/app/backend/backend_admin/internal/svc"
-	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/common/response"
-	utils "beaver/utils/list"
-	"beaver/utils/md5"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -38,32 +31,43 @@ import (
 	"net/http"
 	"strings"
 
+	filecommon "beaver/app/backend/backend_admin/internal/handler/file/common"
+	logic "beaver/app/backend/backend_admin/internal/logic/file"
+	"beaver/app/backend/backend_admin/internal/svc"
+	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/common/response"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+	utils "beaver/utils/list"
+	"beaver/utils/md5"
+
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	"github.com/qiniu/go-sdk/v7/storagev2/http_client"
 	"github.com/qiniu/go-sdk/v7/storagev2/uploader"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		logx.Info("开始处理文件上传请求")
+		logger := beaverlog.New("file_upload_qiniu", r.Context())
+
+		logger.Info(model.LogMsg{Text: "开始处理文件上传请求"})
 
 		var req types.FileUploadQiniuReq
 		if err := httpx.Parse(r, &req); err != nil {
-			logx.Error("解析请求参数失败:", err)
+			logger.Error(model.LogMsg{Text: "解析请求参数失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, errors.New("解析请求参数失败"))
 			return
 		}
 
 		file, fileHead, err := r.FormFile("file")
 		if err != nil {
-			logx.Error("获取上传文件失败:", err)
+			logger.Error(model.LogMsg{Text: "获取上传文件失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, errors.New("获取上传文件失败"))
 			return
 		}
-		logx.Info("成功获取上传文件:", fileHead.Filename, "大小:", fileHead.Size)
+		logger.Info(model.LogMsg{Text: "成功获取上传文件", Data: map[string]interface{}{"filename": fileHead.Filename, "size": fileHead.Size}})
 
 		// 获取fileInfo
 		fileInfoStr := r.FormValue("fileInfo")
@@ -78,83 +82,88 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		originalName := fileHead.Filename
 		nameList := strings.Split(originalName, ".")
 		if len(nameList) < 2 {
-			logx.Error("文件名格式不正确:", originalName)
+			logger.Error(model.LogMsg{Text: "文件名格式不正确", Data: map[string]interface{}{"name": originalName}})
 			response.Response(r, w, nil, errors.New("文件格式不正确"))
 			return
 		}
 		suffix := strings.ToLower(nameList[len(nameList)-1])
 		if !utils.InList(svcCtx.Config.File.WhiteList, suffix) {
-			logx.Error("文件类型不在白名单中:", suffix)
+			logger.Error(model.LogMsg{Text: "文件类型不在白名单中", Data: map[string]interface{}{"suffix": suffix}})
 			response.Response(r, w, nil, errors.New("文件类型不支持"))
 			return
 		}
-		logx.Info("文件类型检查通过:", suffix)
+		logger.Info(model.LogMsg{Text: "文件类型检查通过", Data: map[string]interface{}{"suffix": suffix}})
 
 		// 确定文件类型
 		fileType := filecommon.GetFileType(suffix)
 		if fileType == "unknown" {
-			logx.Error("未知的文件类型:", suffix)
+			logger.Error(model.LogMsg{Text: "未知的文件类型", Data: map[string]interface{}{"suffix": suffix}})
 			response.Response(r, w, nil, errors.New("不支持的文件类型"))
 			return
 		}
-		logx.Info("文件类型:", fileType)
+		logger.Info(model.LogMsg{Text: "文件类型", Data: map[string]interface{}{"type": fileType}})
 
 		// 检查文件大小
 		maxSize, ok := svcCtx.Config.File.MaxSize[fileType]
 		if !ok {
-			logx.Error("配置中未找到文件类型的大小限制:", fileType)
+			logger.Error(model.LogMsg{Text: "未找到文件类型大小限制", Data: map[string]interface{}{"type": fileType}})
 			response.Response(r, w, nil, errors.New("系统配置错误"))
 			return
 		}
 		fileSizeMB := float64(fileHead.Size) / (1024 * 1024)
 		if fileSizeMB > maxSize {
-			logx.Error("文件大小超过限制:", fileSizeMB, "MB, 最大限制:", maxSize, "MB")
+			logger.Error(model.LogMsg{Text: "文件大小超过限制", Data: map[string]interface{}{"sizeMB": fileSizeMB, "maxMB": maxSize}})
 			response.Response(r, w, nil, fmt.Errorf("文件大小不能超过 %.2fMB", maxSize))
 			return
 		}
-		logx.Info("文件大小检查通过:", fileSizeMB, "MB")
+		logger.Info(model.LogMsg{Text: "文件大小检查通过", Data: map[string]interface{}{"sizeMB": fileSizeMB}})
 
 		// 读取文件内容
-		logx.Info("开始读取文件内容")
+		logger.Info(model.LogMsg{Text: "开始读取文件内容"})
 		byteData, err := io.ReadAll(file)
 		if err != nil {
-			logx.Error("读取文件内容失败:", err)
+			logger.Error(model.LogMsg{Text: "读取文件内容失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, errors.New("读取文件失败"))
 			return
 		}
-		logx.Info("文件内容读取成功, 大小:", len(byteData), "字节")
+		logger.Info(model.LogMsg{Text: "文件内容读取成功", Data: map[string]interface{}{"bytes": len(byteData)}})
 
 		fileMd5 := md5.MD5(byteData)
 		fileMd5Name := fileMd5 + "." + suffix
-		logx.Info("文件MD5:", fileMd5)
+		logger.Info(model.LogMsg{Text: "文件MD5", Data: map[string]interface{}{"md5": fileMd5}})
 
 		l := logic.NewFileUploadQiniuLogic(r.Context(), svcCtx)
-		resp, _ := l.FileUploadQiniu(&req)
+		resp, err := l.FileUploadQiniu(&req)
+		if err != nil {
+			logger.Error(model.LogMsg{Text: "七牛文件上传处理失败", Data: map[string]interface{}{"err": err.Error()}})
+			response.Response(r, w, nil, errors.New("上传文件失败"))
+			return
+		}
 
 		// 检查文件是否已经存在于数据库中
-		logx.Info("检查文件是否已存在")
+		logger.Info(model.LogMsg{Text: "检查文件是否已存在"})
 		existingFile, found, err := filecommon.FindFileByMd5(r.Context(), fileMd5, svcCtx)
 		if err != nil {
-			logx.Error("查询文件失败:", err)
+			logger.Error(model.LogMsg{Text: "查询文件失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, errors.New("查询文件失败"))
 			return
 		}
 		if found {
-			logx.Info("文件已存在，直接返回:", existingFile.FileKey, existingFile.OriginalName)
+			logger.Info(model.LogMsg{Text: "文件已存在直接返回", Data: map[string]interface{}{"fileKey": existingFile.FileKey, "name": existingFile.OriginalName}})
 			resp.OriginalName = existingFile.OriginalName
 			resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, existingFile.Path)
 			response.Response(r, w, resp, nil)
 			return
 		}
-		logx.Info("文件不存在，继续上传流程")
+		logger.Info(model.LogMsg{Text: "文件不存在继续上传"})
 
 		if fileInfoStr == "" {
-			logx.Error("fileInfo不能为空")
+			logger.Error(model.LogMsg{Text: "fileInfo不能为空"})
 			response.Response(r, w, nil, errors.New("fileInfo不能为空"))
 			return
 		}
 		if !json.Valid([]byte(fileInfoStr)) {
-			logx.Error("fileInfo格式不正确")
+			logger.Error(model.LogMsg{Text: "fileInfo格式不正确"})
 			response.Response(r, w, nil, errors.New("fileInfo格式不正确"))
 			return
 		}
@@ -168,17 +177,17 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		} else {
 			qiniuFilePath = fmt.Sprintf("%s/%s", fileType, fileMd5Name)
 		}
-		logx.Info("七牛云文件路径:", qiniuFilePath)
+		logger.Info(model.LogMsg{Text: "七牛云文件路径", Data: map[string]interface{}{"path": qiniuFilePath}})
 
 		// 上传文件到七牛云
-		logx.Info("开始上传文件到七牛云")
-		qiniuURL, err := uploadToQiniu(qiniuFilePath, byteData, svcCtx)
+		logger.Info(model.LogMsg{Text: "开始上传文件到七牛云"})
+		qiniuURL, err := uploadToQiniu(qiniuFilePath, byteData, svcCtx, logger)
 		if err != nil {
-			logx.Error("上传到七牛云失败:", err)
+			logger.Error(model.LogMsg{Text: "上传到七牛云失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, errors.New("上传文件失败"))
 			return
 		}
-		logx.Info("文件成功上传到七牛云")
+		logger.Info(model.LogMsg{Text: "文件成功上传到七牛云"})
 
 		saveReq := &types.SaveFileReq{
 			OriginalName: strings.TrimSuffix(originalName, "."+suffix),
@@ -192,33 +201,33 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		saveLogic := logic.NewSaveFileLogic(r.Context(), svcCtx)
 		saveResp, err := saveLogic.SaveFile(saveReq)
 		if err != nil {
-			logx.Error("保存文件信息失败:", err)
+			logger.Error(model.LogMsg{Text: "保存文件信息失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, errors.New("保存文件信息失败"))
 			return
 		}
-		logx.Info("数据库记录创建成功:", saveResp.FileKey)
+		logger.Info(model.LogMsg{Text: "数据库记录创建成功", Data: map[string]interface{}{"fileKey": saveResp.FileKey}})
 
 		resp.OriginalName = saveReq.OriginalName
 		resp.FileURL = filecommon.BuildQiniuFileURL(svcCtx.Config.Qiniu.Domain, qiniuURL)
 
-		logx.Info("文件上传完成, url:", resp.FileURL)
+		logger.Info(model.LogMsg{Text: "文件上传完成", Data: map[string]interface{}{"url": resp.FileURL}})
 		response.Response(r, w, resp, nil)
 	}
 }
 
-func uploadToQiniu(filePath string, fileData []byte, config *svc.ServiceContext) (string, error) {
-	logx.Info("准备上传到七牛云, 文件路径:", filePath)
+func uploadToQiniu(filePath string, fileData []byte, config *svc.ServiceContext, logger *beaverlog.Logger) (string, error) {
+	logger.Info(model.LogMsg{Text: "准备上传到七牛云", Data: map[string]interface{}{"path": filePath}})
 
 	// 设置认证信息
 	mac := credentials.NewCredentials(config.Config.Qiniu.AK, config.Config.Qiniu.SK)
-	logx.Info("七牛云认证信息设置完成")
+	logger.Info(model.LogMsg{Text: "七牛云认证信息设置完成"})
 
 	uploadManager := uploader.NewUploadManager(&uploader.UploadManagerOptions{
 		Options: http_client.Options{
 			Credentials: mac,
 		},
 	})
-	logx.Info("七牛云上传管理器创建完成")
+	logger.Info(model.LogMsg{Text: "七牛云上传管理器创建完成"})
 
 	reader := bytes.NewReader(fileData)
 	err := uploadManager.UploadReader(context.Background(), reader, &uploader.ObjectOptions{
@@ -228,10 +237,10 @@ func uploadToQiniu(filePath string, fileData []byte, config *svc.ServiceContext)
 	}, nil)
 
 	if err != nil {
-		logx.Error("七牛云上传失败:", err)
+		logger.Error(model.LogMsg{Text: "七牛云上传失败", Data: map[string]interface{}{"err": err.Error()}})
 		return "", fmt.Errorf("failed to upload file to Qiniu: %v", err)
 	}
-	logx.Info("七牛云上传成功")
+	logger.Info(model.LogMsg{Text: "七牛云上传成功"})
 
 	return filePath, nil
 }

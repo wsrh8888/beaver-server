@@ -28,13 +28,14 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ResetAppSecretLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -42,7 +43,7 @@ type ResetAppSecretLogic struct {
 // 重置应用密钥
 func NewResetAppSecretLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetAppSecretLogic {
 	return &ResetAppSecretLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("reset_app_secret", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -59,14 +60,14 @@ func (l *ResetAppSecretLogic) ResetAppSecret(req *types.ResetAppSecretReq) (resp
 		Update("app_secret", newSecret)
 
 	if result.Error != nil {
-		logx.Errorf("重置密钥失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{Text: "重置密钥失败", Data: map[string]interface{}{"err": result.Error}})
 		return nil, errors.New("重置失败")
 	}
 	if result.RowsAffected == 0 {
 		return nil, errors.New("应用不存在或无权限")
 	}
 
-	logx.Infof("应用密钥重置成功: app_id=%s", req.AppID)
+	l.logger.Info(model.LogMsg{Text: "应用密钥重置成功", Data: map[string]interface{}{"app_id": req.AppID}})
 
 	return &types.ResetAppSecretRes{
 		AppSecret: newSecret,

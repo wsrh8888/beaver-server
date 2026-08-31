@@ -34,7 +34,6 @@ import (
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
@@ -70,7 +69,7 @@ func (l *RegisterPushTokenLogic) RegisterPushToken(req *types.RegisterPushTokenR
 		DeviceId: req.DeviceID,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("校验设备状态失败: userId=%s, deviceId=%s, err=%v", req.UserID, req.DeviceID, err)
+		l.logger.Error(model.LogMsg{Text: "校验设备状态失败", Data: map[string]interface{}{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()}})
 		return nil, errors.New("校验设备状态失败")
 	}
 	if res == nil || !res.Active {
@@ -96,11 +95,10 @@ func (l *RegisterPushTokenLogic) RegisterPushToken(req *types.RegisterPushTokenR
 		}).Error
 	}
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("注册 Push Token 失败: userId=%s, deviceId=%s, err=%v", req.UserID, req.DeviceID, err)
+		l.logger.Error(model.LogMsg{Text: "注册 Push Token 失败", Data: map[string]interface{}{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()}})
 		return nil, errors.New("注册 Push Token 失败")
 	}
 
-	logx.WithContext(l.ctx).Infof("注册 Push Token: userId=%s, deviceId=%s, platform=%s", req.UserID, req.DeviceID, platform)
 	l.logger.Info(model.LogMsg{
 		Text: "PushToken注册成功",
 		Data: map[string]interface{}{

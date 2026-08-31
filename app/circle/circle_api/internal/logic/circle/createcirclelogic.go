@@ -38,11 +38,9 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CreateCircleLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logger *beaverlog.Logger
@@ -50,7 +48,6 @@ type CreateCircleLogic struct {
 
 func NewCreateCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateCircleLogic {
 	return &CreateCircleLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		logger: beaverlog.New("create_circle", ctx),
@@ -121,7 +118,10 @@ func (l *CreateCircleLogic) CreateCircle(req *types.CreateCircleReq) (resp *type
 			RelatedUserId:  req.UserID,
 		})
 		if notifyErr != nil {
-			logx.Errorf("发送圈子创建通知失败: circleID=%s, err=%v", circleID, notifyErr)
+			l.logger.Error(model.LogMsg{
+				Text: "发送圈子创建通知失败",
+				Data: map[string]interface{}{"circleId": circleID, "err": notifyErr.Error()},
+			})
 		}
 
 		// 推送圈子资料变更，客户端同步本地 circles 表后会话列表才能 join 名称/头像
@@ -146,7 +146,10 @@ func (l *CreateCircleLogic) CreateCircle(req *types.CreateCircleReq) (resp *type
 			"conversationId": conversationID,
 		}
 		if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
-			logx.Errorf("推送圈子资料同步失败: circleID=%s, err=%v", circleID, err)
+			l.logger.Error(model.LogMsg{
+				Text: "推送圈子资料同步失败",
+				Data: map[string]interface{}{"circleId": circleID, "err": err.Error()},
+			})
 		}
 	}()
 

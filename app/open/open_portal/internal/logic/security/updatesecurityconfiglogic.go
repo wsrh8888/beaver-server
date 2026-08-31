@@ -30,21 +30,21 @@ import (
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type UpdateSecurityConfigLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 更新安全配置
 func NewUpdateSecurityConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateSecurityConfigLogic {
 	return &UpdateSecurityConfigLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("update_security_config", ctx),
 	}
 }
 

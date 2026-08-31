@@ -32,7 +32,6 @@ import (
 	"encoding/json"
 
 	"github.com/livekit/protocol/livekit"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type LiveKitWebhookLogic struct {
@@ -53,7 +52,7 @@ func NewLiveKitWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Li
 func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp *types.LiveKitWebhookRes, err error) {
 	var event livekit.WebhookEvent
 	if err := json.Unmarshal(req.Body, &event); err != nil {
-		logx.WithContext(l.ctx).Errorf("解析 Webhook 事件失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "解析 Webhook 事件失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, err
 	}
 
@@ -75,7 +74,7 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 				Status: int32(call_models.ParticipantStatusJoined),
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("更新参与者状态(Joined)失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "更新参与者状态(加入)失败", Data: map[string]interface{}{"roomId": roomID, "userId": event.Participant.Identity, "err": err.Error()}})
 			}
 		}
 	case "participant_left":
@@ -87,7 +86,7 @@ func (l *LiveKitWebhookLogic) LiveKitWebhook(req *types.LiveKitWebhookReq) (resp
 				Status: int32(call_models.ParticipantStatusLeft),
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("更新参与者状态(Left)失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "更新参与者状态(离开)失败", Data: map[string]interface{}{"roomId": roomID, "userId": event.Participant.Identity, "err": err.Error()}})
 			}
 
 			// 2. 检查房间是否已经没有“加入中”的活跃成员了 (掉线或主动退出)

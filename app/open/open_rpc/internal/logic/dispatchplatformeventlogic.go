@@ -37,8 +37,9 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
@@ -46,14 +47,14 @@ import (
 type DispatchPlatformEventLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDispatchPlatformEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DispatchPlatformEventLogic {
 	return &DispatchPlatformEventLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("dispatch_platform_event", ctx),
 	}
 }
 
@@ -72,7 +73,10 @@ func (l *DispatchPlatformEventLogic) DispatchPlatformEvent(in *open_rpc.Dispatch
 
 	var event map[string]interface{}
 	if err := json.Unmarshal([]byte(in.EventJson), &event); err != nil {
-		l.Errorf("DispatchPlatformEvent 事件 JSON 无效: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "事件 JSON 解析失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return &open_rpc.DispatchPlatformEventRes{Dispatched: false}, nil
 	}
 
@@ -117,6 +121,7 @@ func listActiveSubscriptions(db *gorm.DB, appID, eventType string) ([]open_model
 }
 
 func pushPlatformEvent(sub open_models.OpenAppEventSubscription, eventType string, event map[string]interface{}) (eventID string, httpStatus int, latencyMs int64, retryCount int, err error) {
+	logger := beaverlog.New("dispatch_platform_event", context.Background())
 	if sub.Status != 1 || sub.VerifyStatus != 1 {
 		return "", 0, 0, 0, nil
 	}
@@ -170,7 +175,10 @@ func pushPlatformEvent(sub open_models.OpenAppEventSubscription, eventType strin
 		resp, err := client.Do(req)
 		latencyMs = time.Since(start).Milliseconds()
 		if err != nil {
-			logx.Errorf("[open_rpc] webhook push failed: app=%s event=%s err=%v", sub.AppID, eventType, err)
+			logger.Error(model.LogMsg{
+				Text: "Webhook 推送失败",
+				Data: map[string]interface{}{"app": sub.AppID, "event": eventType, "err": err.Error()},
+			})
 			continue
 		}
 		lastStatus = resp.StatusCode
@@ -179,7 +187,10 @@ func pushPlatformEvent(sub open_models.OpenAppEventSubscription, eventType strin
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			return eventID, httpStatus, latencyMs, retryCount, nil
 		}
-		logx.Errorf("[open_rpc] webhook push bad status: app=%s event=%s code=%d", sub.AppID, eventType, resp.StatusCode)
+		logger.Error(model.LogMsg{
+			Text: "Webhook 推送返回异常状态码",
+			Data: map[string]interface{}{"app": sub.AppID, "event": eventType, "code": resp.StatusCode},
+		})
 	}
 	return eventID, httpStatus, latencyMs, retryCount, fmt.Errorf("webhook push failed after retries")
 }

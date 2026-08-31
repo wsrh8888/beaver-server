@@ -32,18 +32,17 @@ import (
 	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/open/openevent"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type AddRobotToGroupLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewAddRobotToGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddRobotToGroupLogic {
-	return &AddRobotToGroupLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AddRobotToGroupLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("add_robot_to_group", ctx)}
 }
 
 func (l *AddRobotToGroupLogic) AddRobotToGroup(req *types.AddRobotToGroupReq, authorization string) (resp *types.AddRobotToGroupRes, err error) {

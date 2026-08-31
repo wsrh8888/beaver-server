@@ -43,7 +43,6 @@ import (
 	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type UserValidStatusLogic struct {
@@ -80,13 +79,13 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	// 查询好友验证记录，确保当前用户是接收方
 	err = l.svcCtx.DB.Take(&friendVerify, "verify_id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("好友验证记录不存在: verifyID=%s, userID=%s, error=%v", req.VerifyID, req.UserID, err)
+		l.logger.Error(model.LogMsg{Text: "好友验证记录不存在", Data: map[string]interface{}{"verifyId": req.VerifyID, "userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("好友验证不存在")
 	}
 
 	// 检查验证状态是否已处理
 	if friendVerify.RevStatus != 0 {
-		logx.WithContext(l.ctx).Errorf("好友验证已处理: verifyID=%s, currentStatus=%d", req.VerifyID, friendVerify.RevStatus)
+		l.logger.Error(model.LogMsg{Text: "好友验证已处理", Data: map[string]interface{}{"verifyId": req.VerifyID, "status": friendVerify.RevStatus}})
 		return nil, errors.New("该验证已处理，无法重复操作")
 	}
 
@@ -99,7 +98,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		// 获取下一个版本号
 		friendNextVersion = l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
 		if friendNextVersion == -1 {
-			logx.WithContext(l.ctx).Errorf("获取好友版本号失败")
+			l.logger.Error(model.LogMsg{Text: "获取好友版本号失败", Data: map[string]interface{}{"table": "friends"}})
 			return nil, errors.New("系统错误")
 		}
 
@@ -115,7 +114,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			Version:    friendNextVersion,   // 设置初始版本号
 		}).Error
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("创建好友关系失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "创建好友关系失败", Data: map[string]interface{}{"friendId": friendID, "err": err.Error()}})
 			return nil, errors.New("创建好友关系失败")
 		}
 
@@ -131,7 +130,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			UserIds:        []string{friendVerify.SendUserID, friendVerify.RevUserID},
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("初始化私聊会话失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "初始化私聊会话失败", Data: map[string]interface{}{"conversationId": conversationId, "err": err.Error()}})
 			return nil, fmt.Errorf("初始化私聊会话失败: %v", err)
 		}
 		conversationID = initResp.ConversationId
@@ -140,7 +139,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					logx.WithContext(l.ctx).Errorf("异步发送欢迎消息时发生panic: %v", r)
+					l.logger.Error(model.LogMsg{Text: "异步发送欢迎消息时发生panic", Data: map[string]interface{}{"panic": r}})
 				}
 			}()
 
@@ -153,16 +152,16 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				ReadUserIds:    []string{friendVerify.RevUserID}, // 只有同意方标记为已读
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("异步发送欢迎消息失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "异步发送欢迎消息失败", Data: map[string]interface{}{"conversationId": conversationID, "err": err.Error()}})
 			} else {
-				logx.WithContext(l.ctx).Infof("异步发送欢迎消息成功: conversationID=%s", conversationID)
+				l.logger.Info(model.LogMsg{Text: "异步发送欢迎消息成功", Data: map[string]interface{}{"conversationId": conversationID}})
 			}
 		}()
 
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					logx.WithContext(l.ctx).Errorf("Robot 好友事件推送 panic: %v", r)
+					l.logger.Error(model.LogMsg{Text: "Robot 好友事件推送panic", Data: map[string]interface{}{"panic": r}})
 				}
 			}()
 			ctx := context.Background()
@@ -200,11 +199,10 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		// 直接删除验证记录
 		err = l.svcCtx.DB.Delete(&friendVerify).Error
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("删除验证记录失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "删除验证记录失败", Data: map[string]interface{}{"verifyId": req.VerifyID, "err": err.Error()}})
 			return nil, errors.New("删除验证记录失败")
 		}
 
-		logx.WithContext(l.ctx).Infof("删除好友验证记录成功: verifyID=%s, userID=%s", req.VerifyID, req.UserID)
 		l.logger.Info(model.LogMsg{
 			Text: "好友验证记录删除成功",
 			Data: map[string]interface{}{
@@ -218,7 +216,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	// 获取下一个版本号并更新version字段
 	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friend_verify", "", "")
 	if nextVersion == -1 {
-		logx.WithContext(l.ctx).Errorf("获取版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取版本号失败", Data: map[string]interface{}{"table": "friend_verify"}})
 		return nil, errors.New("系统错误")
 	}
 	friendVerify.Version = nextVersion
@@ -226,7 +224,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	// 保存验证状态
 	err = l.svcCtx.DB.Save(&friendVerify).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("保存验证状态失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "保存验证状态失败", Data: map[string]interface{}{"verifyId": req.VerifyID, "err": err.Error()}})
 		return nil, errors.New("保存验证状态失败")
 	}
 
@@ -234,7 +232,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logx.WithContext(l.ctx).Errorf("异步发送WebSocket消息时发生panic: %v", r)
+				l.logger.Error(model.LogMsg{Text: "异步发送WebSocket消息时发生panic", Data: map[string]interface{}{"panic": r}})
 			}
 		}()
 
@@ -290,10 +288,9 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		}
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload2)
 
-		logx.WithContext(l.ctx).Infof("异步发送WebSocket通知完成: verifyID=%s, status=%d", req.VerifyID, friendVerify.RevStatus)
+		l.logger.Info(model.LogMsg{Text: "异步发送WebSocket通知完成", Data: map[string]interface{}{"verifyId": req.VerifyID, "status": friendVerify.RevStatus}})
 	}()
 
-	logx.WithContext(l.ctx).Infof("处理好友验证成功: verifyID=%s, userID=%s, status=%d, source=%s", req.VerifyID, req.UserID, req.Status, friendVerify.Source)
 	l.logger.Info(model.LogMsg{
 		Text: "好友验证处理成功",
 		Data: map[string]interface{}{
@@ -335,7 +332,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			DedupHash:   fmt.Sprintf("%s_%d", req.VerifyID, decisionStatus),
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("投递好友审核结果通知失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "投递好友审核结果通知失败", Data: map[string]interface{}{"verifyId": req.VerifyID, "err": err.Error()}})
 		}
 	}()
 

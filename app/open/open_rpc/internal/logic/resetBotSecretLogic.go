@@ -30,20 +30,20 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	uuidUtil "beaver/utils/uuid"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type ResetBotSecretLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewResetBotSecretLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetBotSecretLogic {
 	return &ResetBotSecretLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("reset_bot_secret", ctx),
 	}
 }
 

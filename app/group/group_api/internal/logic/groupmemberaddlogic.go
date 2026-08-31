@@ -37,8 +37,6 @@ import (
 	"beaver/common/wsEnum/wsTypeConst"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type GroupMemberAddLogic struct {
@@ -90,7 +88,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		// 获取该群成员的版本号（按群独立递增）
 		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 		if memberVersion == -1 {
-			logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+			l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": memberID}})
 			return nil, errors.New("获取版本号失败")
 		}
 		lastVersion = memberVersion // 记录最后一个版本号
@@ -123,7 +121,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	if len(newMembers) > 0 {
 		err = l.svcCtx.DB.Create(&newMembers).Error
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("添加群成员失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "添加群成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 			return nil, errors.New("添加失败")
 		}
 	}
@@ -139,7 +137,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 					"version":   updateMember.Version, // 更新版本号
 				}).Error
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("更新群成员状态失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": updateMember.GroupID, "userId": updateMember.UserID, "err": err.Error()}})
 				return nil, errors.New("更新成员状态失败")
 			}
 		}
@@ -154,7 +152,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		LastMessage:    "",
 	})
 	if err != nil {
-		logx.Errorf("Failed to update conversation: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新新成员会话记录失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 	}
 
 	// 异步通知群成员
@@ -171,7 +169,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 				Content:        fmt.Sprintf("%s 加入了群聊", memberID),
 				RelatedUserId:  memberID,
 			}); err != nil {
-				logx.WithContext(l.ctx).Errorf("发送入群通知消息失败: memberId=%s, error=%v", memberID, err)
+				l.logger.Error(model.LogMsg{Text: "发送入群通知消息失败", Data: map[string]interface{}{"groupId": req.GroupID, "memberId": memberID, "err": err.Error()}})
 			}
 		}
 
@@ -180,7 +178,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 			return
 		}
 
@@ -193,7 +191,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		// 获取群组版本号（用于通知群组信息变化）
 		groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 		if groupVersion == -1 {
-			logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
+			l.logger.Error(model.LogMsg{Text: "获取群组版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 			// 这里不影响主要功能，只是日志记录失败
 		}
 
@@ -275,7 +273,6 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		Version: lastVersion,
 	}
 
-	logx.WithContext(l.ctx).Infof("成功添加 %d 位成员到群组 %d", len(req.UserIds), req.GroupID)
 	l.logger.Info(model.LogMsg{
 		Text: "添加群成员成功",
 		Data: map[string]interface{}{
@@ -291,12 +288,12 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 func (l *GroupMemberAddLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {
 	defer func() {
 		if r := recover(); r != nil {
-			logx.WithContext(l.ctx).Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
+			l.logger.Error(model.LogMsg{Text: "触发开放平台 Webhook 时发生panic", Data: map[string]interface{}{"groupId": groupID, "panic": fmt.Sprintf("%v", r)}})
 		}
 	}()
 
 	// 查询该群关联的应用(如果有的话)
 	// TODO: 这里需要根据实际业务逻辑确定如何关联群和应用
 	// 暂时先不实现,等待后续需求明确
-	logx.WithContext(l.ctx).Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
+	l.logger.Info(model.LogMsg{Text: "群成员变更事件", Data: map[string]interface{}{"groupId": groupID, "action": action, "members": memberIDs}})
 }

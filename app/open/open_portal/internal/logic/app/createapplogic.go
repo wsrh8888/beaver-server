@@ -29,13 +29,14 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CreateAppLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -43,7 +44,7 @@ type CreateAppLogic struct {
 // 创建应用
 func NewCreateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateAppLogic {
 	return &CreateAppLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_app", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -67,11 +68,11 @@ func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateA
 	}
 
 	if err := l.svcCtx.DB.Create(&app).Error; err != nil {
-		logx.Errorf("创建应用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建应用失败", Data: map[string]interface{}{"err": err}})
 		return nil, errors.New("创建应用失败")
 	}
 
-	logx.Infof("应用创建成功: app_id=%s, user_id=%s", appID, req.UserID)
+	l.logger.Info(model.LogMsg{Text: "应用创建成功", Data: map[string]interface{}{"app_id": appID, "user_id": req.UserID}})
 
 	return &types.CreateAppRes{
 		AppID:     appID,

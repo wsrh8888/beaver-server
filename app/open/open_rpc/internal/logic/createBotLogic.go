@@ -30,20 +30,21 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	uuidUtil "beaver/utils/uuid"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateBotLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateBotLogic {
 	return &CreateBotLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_bot", ctx),
 	}
 }
 
@@ -78,7 +79,10 @@ func (l *CreateBotLogic) CreateBot(in *open_rpc.CreateBotReq) (*open_rpc.CreateB
 	}
 
 	if err := l.svcCtx.DB.Create(bot).Error; err != nil {
-		logx.Errorf("创建 Bot 记录失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建 Bot 记录失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("创建 Bot 记录失败")
 	}
 

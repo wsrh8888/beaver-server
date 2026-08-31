@@ -30,22 +30,23 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetUserInfoByQuickLoginLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetUserInfoByQuickLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserInfoByQuickLoginLogic {
 	return &GetUserInfoByQuickLoginLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_user_info_by_quick_login", ctx),
 	}
 }
 
@@ -63,7 +64,7 @@ func (l *GetUserInfoByQuickLoginLogic) GetUserInfoByQuickLogin(req *types.GetUse
 	}
 
 	if err := l.svcCtx.DB.Model(oauthCode).Update("used", true).Error; err != nil {
-		logx.Errorf("标记 authCode 已使用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "标记 authCode 已使用失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("服务内部异常")
 	}
 
@@ -71,7 +72,7 @@ func (l *GetUserInfoByQuickLoginLogic) GetUserInfoByQuickLogin(req *types.GetUse
 		UserID: oauthCode.UserID,
 	})
 	if err != nil {
-		logx.Errorf("查询用户信息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户信息失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("获取用户信息失败")
 	}
 	if userInfoRes.UserInfo == nil {

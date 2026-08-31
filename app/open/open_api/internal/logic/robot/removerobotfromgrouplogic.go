@@ -32,18 +32,17 @@ import (
 	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/open/openevent"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type RemoveRobotFromGroupLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewRemoveRobotFromGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveRobotFromGroupLogic {
-	return &RemoveRobotFromGroupLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RemoveRobotFromGroupLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("remove_robot_from_group", ctx)}
 }
 
 func (l *RemoveRobotFromGroupLogic) RemoveRobotFromGroup(req *types.RemoveRobotFromGroupReq, authorization string) (resp *types.RemoveRobotFromGroupRes, err error) {

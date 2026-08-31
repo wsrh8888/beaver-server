@@ -29,19 +29,18 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type ListEventSubscriptionsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewListEventSubscriptionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListEventSubscriptionsLogic {
 	return &ListEventSubscriptionsLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("list_event_subscriptions", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

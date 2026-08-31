@@ -29,8 +29,6 @@ import (
 	"beaver/app/notification/notification_models"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type DeleteNotificationLogic struct {
@@ -58,7 +56,7 @@ func (l *DeleteNotificationLogic) DeleteNotification(req *types.DeleteNotificati
 		Update("is_deleted", true)
 
 	if result.Error != nil {
-		logx.WithContext(l.ctx).Errorf("删除通知失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{Text: "删除通知失败", Data: map[string]interface{}{"userId": userId, "eventId": eventId, "err": result.Error.Error()}})
 		return nil, result.Error
 	}
 

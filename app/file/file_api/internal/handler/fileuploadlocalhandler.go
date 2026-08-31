@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"beaver/app/file/file_api/internal/handler/common"
@@ -36,6 +35,8 @@ import (
 	"beaver/app/file/file_api/internal/types"
 	"beaver/app/file/file_models"
 	"beaver/common/response"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -48,7 +49,8 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		file, fileHead, err := r.FormFile("file")
 		if err != nil {
-			logx.Error(err)
+			logger := beaverlog.New("file_upload_local", r.Context())
+			logger.Error(model.LogMsg{Text: "获取上传文件失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, err)
 			return
 		}
@@ -146,7 +148,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			resp.FileInfo = common.ConvertFileInfoToAPI(fileInfo)
 		}
 
-		logx.Infof("本地文件上传成功: %s", newFileModel.FileKey)
+		beaverlog.New("file_upload_local", r.Context()).Info(model.LogMsg{Text: "本地文件上传成功", Data: map[string]interface{}{"fileKey": newFileModel.FileKey}})
 		response.Response(r, w, resp, nil)
 	}
 }

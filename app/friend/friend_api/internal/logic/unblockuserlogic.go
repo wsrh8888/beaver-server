@@ -30,8 +30,6 @@ import (
 	"beaver/app/friend/friend_models"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type UnblockUserLogic struct {
@@ -53,7 +51,7 @@ func (l *UnblockUserLogic) UnblockUser(req *types.UnblockUserReq) (resp *types.U
 	result := l.svcCtx.DB.Where("user_id = ? AND blocked_user_id = ?", req.UserID, req.BlockedUserID).
 		Delete(&friend_models.FriendBlockModel{})
 	if result.Error != nil {
-		logx.WithContext(l.ctx).Errorf("取消拉黑失败: userID=%s blockedUserID=%s err=%v", req.UserID, req.BlockedUserID, result.Error)
+		l.logger.Error(model.LogMsg{Text: "取消拉黑失败", Data: map[string]interface{}{"userId": req.UserID, "blockedUserId": req.BlockedUserID, "err": result.Error.Error()}})
 		return nil, errors.New("操作失败")
 	}
 	l.logger.Info(model.LogMsg{

@@ -29,7 +29,7 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +38,11 @@ import (
 type GetDeveloperLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDeveloperLogic {
-	return &GetDeveloperLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &GetDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_developer", ctx)}
 }
 
 func (l *GetDeveloperLogic) GetDeveloper(in *open_rpc.GetDeveloperReq) (*open_rpc.GetDeveloperRes, error) {

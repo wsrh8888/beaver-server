@@ -30,12 +30,12 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateAppScopesLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -43,7 +43,7 @@ type UpdateAppScopesLogic struct {
 // 更新应用权限
 func NewUpdateAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateAppScopesLogic {
 	return &UpdateAppScopesLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_app_scopes", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -87,11 +87,11 @@ func (l *UpdateAppScopesLogic) UpdateAppScopes(req *types.UpdateAppScopesReq) (r
 	// 5. 序列化并保存
 	scopesJSON, _ := json.Marshal(req.Scopes)
 	if err := l.svcCtx.DB.Model(&app).Update("scopes", string(scopesJSON)).Error; err != nil {
-		logx.Errorf("更新权限失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新权限失败", Data: map[string]interface{}{"err": err}})
 		return nil, errors.New("更新权限失败")
 	}
 
-	logx.Infof("应用权限更新成功: app_id=%s, scopes=%v", req.AppID, req.Scopes)
+	l.logger.Info(model.LogMsg{Text: "应用权限更新成功", Data: map[string]interface{}{"app_id": req.AppID, "scopes": req.Scopes}})
 
 	return &types.UpdateAppScopesRes{}, nil
 }
