@@ -104,3 +104,53 @@ services:
       - JAVA_OPTS=-Drocketmq.namesrv.addr=rocketmq-namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
     depends_on:
       - rocketmq-namesrv
+
+  # ===== 日志可观测性后端（OTel 采集 → OpenSearch 存储 → Dashboards 检索）=====
+  # 应用侧在各服务 yaml 的 OtlpAddr 配置采集器地址（如 127.0.0.1:4317），beaverlog 据此把日志推到本栈。
+  opensearch:
+    image: opensearchproject/opensearch:2.19.0
+    container_name: beaver-opensearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=Beaver@2026
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  opensearch-dashboards:
+    image: opensearch-project/opensearch-dashboards:2.19.0
+    container_name: beaver-dashboards
+    restart: always
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5601:5601"
+    depends_on:
+      - opensearch
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.115.0
+    container_name: beaver-otel-collector
+    restart: always
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./logging/otel-collector-config.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP gRPC（beaverlog 走这个）
+      - "4318:4318" # OTLP HTTP
+    depends_on:
+      - opensearch
+
+# 命名卷：避免 Windows/macOS 下 bind mount 的 uid/gid 权限问题（AccessDeniedException）。
+volumes:
+  opensearch-data:

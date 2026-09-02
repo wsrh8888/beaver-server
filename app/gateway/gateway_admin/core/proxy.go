@@ -39,8 +39,12 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
+
+// gwLogger 网关管理端代理日志器（包级实例，函数无 ctx）
+var gwLogger = beaverlog.New("gateway_admin_proxy")
 
 type BaseResponse struct {
 	Code int    `json:"code"`
@@ -54,7 +58,7 @@ func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uui
 	response := BaseResponse{Code: 1, Msg: msg}
 	byteData, _ := json.Marshal(response)
 	res.Write(byteData)
-	logx.Info("response: ", "唯一标识: ", uuid, string(byteData))
+	gwLogger.Info(model.LogMsg{Text: "响应输出", Data: map[string]interface{}{"uuid": uuid, "body": string(byteData)}})
 
 }
 
@@ -72,7 +76,7 @@ func (p *Proxy) ensureRedis() {
 		return
 	}
 	p.redisClient = coreredis.InitRedis(p.Config.Redis.Addr, p.Config.Redis.Password, p.Config.Redis.Db)
-	logx.Info("Redis 客户端初始化成功，将验证 token 在 Redis 中的有效性")
+	gwLogger.Info(model.LogMsg{Text: "Redis 客户端初始化成功，将验证 token 在 Redis 中的有效性"})
 }
 
 // isWhiteList 检查路径是否在白名单中
@@ -149,7 +153,7 @@ func (p *Proxy) updateBackendAddr() error {
 		}
 	}
 
-	logx.Infof("更新后端服务地址: %s", addr)
+	gwLogger.Info(model.LogMsg{Text: "更新后端服务地址", Data: map[string]interface{}{"addr": addr}})
 	return nil
 }
 
@@ -158,26 +162,26 @@ func (p *Proxy) updateBackendAddr() error {
 func (p *Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 	// 1. 检查白名单
 	if utils.InListByRegex(p.Config.WhiteList, req.URL.Path) {
-		logx.Infof("白名单请求：%s", req.URL.Path)
+		gwLogger.Info(model.LogMsg{Text: "白名单请求", Data: map[string]interface{}{"path": req.URL.Path}})
 		return true
 	}
 
 	// 2. 获取 token
 	token := getToken(req)
 	if token == "" {
-		logx.Error("token为空")
+		gwLogger.Error(model.LogMsg{Text: "token为空"})
 		return false
 	}
 
 	// 3. 直接解析 JWT（避免 HTTP 调用，提升性能）
 	if p.Config.Auth.AccessSecret == "" {
-		logx.Error("未配置 AccessSecret，无法解析 JWT")
+		gwLogger.Error(model.LogMsg{Text: "未配置 AccessSecret，无法解析 JWT"})
 		return false
 	}
 
 	claims, err := jwts.ParseToken(token, p.Config.Auth.AccessSecret)
 	if err != nil {
-		logx.Errorf("JWT解析失败: %v", err)
+		gwLogger.Error(model.LogMsg{Text: "JWT解析失败", Data: map[string]interface{}{"err": err.Error()}})
 		return false
 	}
 
@@ -186,18 +190,18 @@ func (p *Proxy) auth(res http.ResponseWriter, req *http.Request) (ok bool) {
 		key := fmt.Sprintf("admin_login_%s", claims.UserID)
 		storedToken, err := p.redisClient.Get(key).Result()
 		if err != nil {
-			logx.Errorf("从 Redis 获取 token 失败: %v, userId=%s", err, claims.UserID)
+			gwLogger.Error(model.LogMsg{Text: "从 Redis 获取 token 失败", Data: map[string]interface{}{"err": err.Error(), "userId": claims.UserID}})
 			return false
 		}
 		if storedToken != token {
-			logx.Errorf("token 不一致，可能已被撤销: userId=%s", claims.UserID)
+			gwLogger.Error(model.LogMsg{Text: "token 不一致，可能已被撤销", Data: map[string]interface{}{"userId": claims.UserID}})
 			return false
 		}
 	}
 
 	// 5. 设置用户ID到请求头（后端服务会信任此 header，不再重复认证）
 	req.Header.Set("Beaver-User-Id", claims.UserID)
-	logx.Infof("网关JWT验证成功: userId=%s", claims.UserID)
+	gwLogger.Info(model.LogMsg{Text: "网关JWT验证成功", Data: map[string]interface{}{"userId": claims.UserID}})
 
 	return true
 }
@@ -208,7 +212,7 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	startTime := time.Now()
 	path := req.URL.Path
 
-	logx.Infof("[%s] %s %s", uuid, req.Method, path)
+	gwLogger.Info(model.LogMsg{Text: "请求接入", Data: map[string]interface{}{"uuid": uuid, "method": req.Method, "path": path}})
 
 	// 健康检查接口
 	if path == "/health" || path == "/ping" {
@@ -225,7 +229,7 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	// 检查后端服务是否已初始化，如果未初始化或需要更新，则尝试更新
 	if err := p.updateBackendAddr(); err != nil {
-		logx.Errorf("[%s] 更新后端服务地址失败: %v", uuid, err)
+		gwLogger.Error(model.LogMsg{Text: "更新后端服务地址失败", Data: map[string]interface{}{"uuid": uuid, "err": err.Error()}})
 		writeErrorResponse(res, "网关服务未就绪，请稍后重试", http.StatusServiceUnavailable, uuid)
 		return
 	}
@@ -254,7 +258,7 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	p.mu.RUnlock()
 
 	if reverseProxy == nil {
-		logx.Errorf("[%s] 反向代理未初始化", uuid)
+		gwLogger.Error(model.LogMsg{Text: "反向代理未初始化", Data: map[string]interface{}{"uuid": uuid}})
 		writeErrorResponse(res, "网关服务未就绪，请稍后重试", http.StatusServiceUnavailable, uuid)
 		return
 	}
@@ -262,7 +266,7 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	originalModifyResponse := reverseProxy.ModifyResponse
 	reverseProxy.ModifyResponse = func(resp *http.Response) error {
 		duration := time.Since(startTime)
-		logx.Infof("[%s] %s %s -> %d (耗时: %v)", uuid, req.Method, path, resp.StatusCode, duration)
+		gwLogger.Info(model.LogMsg{Text: "代理响应", Data: map[string]interface{}{"uuid": uuid, "method": req.Method, "path": path, "status": resp.StatusCode, "duration": duration.String()}})
 		if originalModifyResponse != nil {
 			return originalModifyResponse(resp)
 		}
@@ -276,11 +280,11 @@ func (p *Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func logResponseBody(uuid string, res *http.Response) {
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		logx.Errorf("读取响应体错误: %s", err)
+		gwLogger.Error(model.LogMsg{Text: "读取响应体错误", Data: map[string]interface{}{"err": err.Error()}})
 		return
 	}
 	res.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // 恢复响应体
-	logx.Info("response: ", "唯一标识: ", uuid, string(bodyBytes))
+	gwLogger.Info(model.LogMsg{Text: "响应输出", Data: map[string]interface{}{"uuid": uuid, "body": string(bodyBytes)}})
 }
 
 func getToken(req *http.Request) string {

@@ -39,9 +39,10 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
+
+// apiGwLogger 网关 API 代理包级日志器（用于无 ctx 的辅助函数）
+var apiGwLogger = beaverlog.New("gateway_api_proxy")
 
 type BaseResponse struct {
 	Code int    `json:"code"`
@@ -55,7 +56,7 @@ func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uui
 	response := BaseResponse{Code: 1, Msg: msg}
 	byteData, _ := json.Marshal(response)
 	res.Write(byteData)
-	logx.Info("response: ", "唯一标识: ", uuid, string(byteData))
+	apiGwLogger.Info(model.LogMsg{Text: "响应输出", Data: map[string]interface{}{"uuid": uuid, "body": string(byteData)}})
 
 }
 
@@ -128,14 +129,14 @@ func (p Proxy) jwtAuth(req *http.Request) bool {
 	// 获取token
 	token := getToken(req)
 	if token == "" {
-		logx.Error("token为空")
+		apiGwLogger.Error(model.LogMsg{Text: "token为空"})
 		return false
 	}
 
 	// 直接解析JWT（避免HTTP调用）
 	claims, err := jwts.ParseToken(token, p.Config.Auth.AccessSecret)
 	if err != nil {
-		logx.Errorf("JWT解析失败: %v", err)
+		apiGwLogger.Error(model.LogMsg{Text: "JWT解析失败", Data: map[string]interface{}{"err": err.Error()}})
 		return false
 	}
 
@@ -152,7 +153,7 @@ func (p Proxy) jwtAuth(req *http.Request) bool {
 		req.Header.Set("Version", version)
 	}
 
-	logx.Infof("JWT验证成功: 用户=%s, 设备=%s", claims.UserID, deviceId)
+	apiGwLogger.Info(model.LogMsg{Text: "JWT验证成功", Data: map[string]interface{}{"userId": claims.UserID, "deviceId": deviceId}})
 
 	return true
 }
@@ -284,14 +285,14 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		if addr != "" {
 			break
 		}
-		logx.Errorf("第%d次获取服务地址失败: %s_api", i+1, service)
+		lg.Error(model.LogMsg{Text: "获取服务地址失败", Data: map[string]interface{}{"attempt": i + 1, "service": service + "_api"}})
 		time.Sleep(100 * time.Millisecond)
 	}
 
 	if addr == "" {
 		writeErrorResponse(rec, "服务暂时不可用", http.StatusServiceUnavailable, serverTrace)
 		finish("服务不可用", "error", map[string]any{"service": service + "_api"})
-		logx.Errorf("未匹配到服务: %s_api", service)
+		lg.Error(model.LogMsg{Text: "未匹配到服务", Data: map[string]interface{}{"service": service + "_api"}})
 		return
 	}
 

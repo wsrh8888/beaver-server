@@ -27,10 +27,14 @@ import (
 
 	"beaver/app/chat/chat_models"
 	core "beaver/core/version"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
+
+// syncLogger 同步工具包级日志器（工具函数无 ctx，使用包级实例）
+var syncLogger = beaverlog.New("sync_utils")
 
 // CreateOrUpdateConversation 更新会话信息，返回新版本号（表记录肯定存在）
 func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, conversationID string, conversationType int, lastSeq int64, lastMessage string) (int64, error) {
@@ -48,11 +52,11 @@ func CreateOrUpdateConversation(db *gorm.DB, versionGen *core.VersionGenerator, 
 		}).Error
 
 	if err != nil {
-		logx.Errorf("更新会话信息失败: conversationID=%s, error=%v", conversationID, err)
+		syncLogger.Error(model.LogMsg{Text: "更新会话信息失败", Data: map[string]interface{}{"conversationID": conversationID, "err": err.Error()}})
 		return 0, err
 	}
 
-	logx.Infof("更新会话信息成功: conversationID=%s, version=%d", conversationID, version)
+	syncLogger.Info(model.LogMsg{Text: "更新会话信息成功", Data: map[string]interface{}{"conversationID": conversationID, "version": version}})
 	return version, nil
 }
 
@@ -78,14 +82,14 @@ func UpdateUserConversation(db *gorm.DB, versionGen *core.VersionGenerator, user
 		Updates(updateFields).Error
 
 	if err != nil {
-		logx.Errorf("更新用户会话关系失败: userID=%s, conversationID=%s, error=%v", userID, conversationID, err)
+		syncLogger.Error(model.LogMsg{Text: "更新用户会话关系失败", Data: map[string]interface{}{"userID": userID, "conversationID": conversationID, "err": err.Error()}})
 		return 0, err
 	}
 
 	if !isDeleted {
-		logx.Infof("更新用户会话关系成功并自动恢复显示: userID=%s, conversationID=%s, version=%d", userID, conversationID, version)
+		syncLogger.Info(model.LogMsg{Text: "更新用户会话关系成功并自动恢复显示", Data: map[string]interface{}{"userID": userID, "conversationID": conversationID, "version": version}})
 	} else {
-		logx.Infof("更新用户会话关系成功: userID=%s, conversationID=%s, version=%d", userID, conversationID, version)
+		syncLogger.Info(model.LogMsg{Text: "更新用户会话关系成功", Data: map[string]interface{}{"userID": userID, "conversationID": conversationID, "version": version}})
 	}
 
 	return version, nil
@@ -97,7 +101,7 @@ func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGener
 	var userConversations []chat_models.ChatUserConversation
 	err := db.Where("conversation_id = ?", conversationID).Find(&userConversations).Error
 	if err != nil {
-		logx.Errorf("查询会话用户关系失败: conversationID=%s, error=%v", conversationID, err)
+		syncLogger.Error(model.LogMsg{Text: "查询会话用户关系失败", Data: map[string]interface{}{"conversationID": conversationID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -136,7 +140,7 @@ func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGener
 
 		if shouldUpdateReadSeq {
 			updateFields["user_read_seq"] = messageSeq
-			logx.Infof("更新用户已读序列号: userID=%s, conversationID=%s, readSeq=%d, version=%d", convo.UserID, conversationID, messageSeq, version)
+			syncLogger.Info(model.LogMsg{Text: "更新用户已读序列号", Data: map[string]interface{}{"userID": convo.UserID, "conversationID": conversationID, "readSeq": messageSeq, "version": version}})
 		}
 
 		// 直接批量更新所有用户的会话关系
@@ -144,7 +148,7 @@ func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGener
 			Where("conversation_id = ? AND user_id = ?", conversationID, convo.UserID).
 			Updates(updateFields).Error
 		if err != nil {
-			logx.Errorf("更新用户会话失败: userID=%s, conversationID=%s, error=%v", convo.UserID, conversationID, err)
+			syncLogger.Error(model.LogMsg{Text: "更新用户会话失败", Data: map[string]interface{}{"userID": convo.UserID, "conversationID": conversationID, "err": err.Error()}})
 			// 继续处理其他用户，不要因为一个失败而中断整个流程
 		} else {
 			updates = append(updates, UserConversationUpdate{
@@ -155,7 +159,7 @@ func UpdateAllUserConversationsInChat(db *gorm.DB, versionGen *core.VersionGener
 		}
 	}
 
-	logx.Infof("更新会话用户关系成功: conversationID=%s, 更新用户数=%d", conversationID, len(updates))
+	syncLogger.Info(model.LogMsg{Text: "更新会话用户关系成功", Data: map[string]interface{}{"conversationID": conversationID, "count": len(updates)}})
 	return updates, nil
 }
 
@@ -165,7 +169,7 @@ func UpdateUserConversationsReadSeq(db *gorm.DB, versionGen *core.VersionGenerat
 	var userConversations []chat_models.ChatUserConversation
 	err := db.Where("conversation_id = ?", conversationID).Find(&userConversations).Error
 	if err != nil {
-		logx.Errorf("查询会话用户关系失败: conversationID=%s, error=%v", conversationID, err)
+		syncLogger.Error(model.LogMsg{Text: "查询会话用户关系失败", Data: map[string]interface{}{"conversationID": conversationID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -203,7 +207,7 @@ func UpdateUserConversationsReadSeq(db *gorm.DB, versionGen *core.VersionGenerat
 
 		if shouldUpdateReadSeq {
 			updateFields["user_read_seq"] = readSeq
-			logx.Infof("更新用户已读序列号: userID=%s, conversationID=%s, readSeq=%d, version=%d", convo.UserID, conversationID, readSeq, version)
+			syncLogger.Info(model.LogMsg{Text: "更新用户已读序列号", Data: map[string]interface{}{"userID": convo.UserID, "conversationID": conversationID, "readSeq": readSeq, "version": version}})
 		}
 
 		// 直接批量更新所有用户的会话关系
@@ -211,7 +215,7 @@ func UpdateUserConversationsReadSeq(db *gorm.DB, versionGen *core.VersionGenerat
 			Where("conversation_id = ? AND user_id = ?", conversationID, convo.UserID).
 			Updates(updateFields).Error
 		if err != nil {
-			logx.Errorf("更新用户会话失败: userID=%s, conversationID=%s, error=%v", convo.UserID, conversationID, err)
+			syncLogger.Error(model.LogMsg{Text: "更新用户会话失败", Data: map[string]interface{}{"userID": convo.UserID, "conversationID": conversationID, "err": err.Error()}})
 			// 继续处理其他用户，不要因为一个失败而中断整个流程
 		} else {
 			updates = append(updates, UserConversationUpdate{

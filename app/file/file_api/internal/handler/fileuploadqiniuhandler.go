@@ -32,7 +32,6 @@ import (
 	"github.com/qiniu/go-sdk/v7/storagev2/http_client"
 	"github.com/qiniu/go-sdk/v7/storagev2/uploader"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"beaver/app/file/file_api/internal/handler/common"
@@ -41,6 +40,8 @@ import (
 	"beaver/app/file/file_api/internal/types"
 	"beaver/app/file/file_models"
 	"beaver/common/response"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -53,7 +54,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		file, fileHead, err := r.FormFile("file")
 		if err != nil {
-			logx.Error(err)
+			beaverlog.New("file_upload_qiniu", r.Context()).Error(model.LogMsg{Text: "获取上传文件失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, err)
 			return
 		}
@@ -86,7 +87,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					Type: file_models.FileType(existingFile.Type),
 				}
 				svcCtx.DB.Save(existingFile)
-				logx.Infof("已存在文件元数据设置默认值: %s", existingFile.FileKey)
+				beaverlog.New("file_upload_qiniu", r.Context()).Info(model.LogMsg{Text: "已存在文件元数据设置默认值", Data: map[string]interface{}{"fileKey": existingFile.FileKey}})
 			}
 
 			// 转换FileInfo为API响应格式
@@ -138,7 +139,7 @@ func FileUploadQiniuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			// 更新数据库中的FileInfo
 			newFileModel.FileInfo = fileInfo
 			svcCtx.DB.Save(newFileModel)
-			logx.Infof("文件元数据获取成功: %s", newFileModel.FileKey)
+			beaverlog.New("file_upload_qiniu", r.Context()).Info(model.LogMsg{Text: "文件元数据获取成功", Data: map[string]interface{}{"fileKey": newFileModel.FileKey}})
 		}
 
 		resp.FileKey = newFileModel.FileKey

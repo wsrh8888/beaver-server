@@ -71,18 +71,11 @@ type ListWorkbenchAppsRes struct {
 	Groups []ListWorkbenchAppsGroup `json:"groups"` // array 按分类分组的应用列表
 }
 
-type LogEventItem struct {
-	Level     string `json:"level"`
-	BucketID  string `json:"bucketId"`
-	Data      string `json:"data"`
-	Timestamp int64  `json:"timestamp,optional"`
+type TrackReq struct {
+	Logs []map[string]any `json:"logs"`
 }
 
-type LogEventsReq struct {
-	Logs []LogEventItem `json:"logs"`
-}
-
-type LogEventsRes struct {
+type TrackRes struct {
 }
 
 type ReportVersionReq struct {

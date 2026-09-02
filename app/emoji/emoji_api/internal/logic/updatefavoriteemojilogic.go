@@ -35,7 +35,6 @@ import (
 	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type UpdateFavoriteEmojiLogic struct {
@@ -57,7 +56,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 	var emoji emoji_models.Emoji
 	err = l.svcCtx.DB.First(&emoji, req.EmojiID).Error
 	if err != nil {
-		logx.Error("表情不存在", err)
+		l.logger.Error(model.LogMsg{Text: "表情不存在", Data: map[string]interface{}{"emojiId": req.EmojiID, "err": err.Error()}})
 		return nil, errors.New("表情不存在")
 	}
 
@@ -69,14 +68,14 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 	case "favorite":
 		if err == nil {
 			// 已经收藏过了
-			logx.Error("表情已收藏")
+			l.logger.Error(model.LogMsg{Text: "表情已收藏", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
 			return nil, errors.New("表情已收藏")
 		}
 
 		// 生成收藏版本号（按用户ID分区）
 		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
 		if collectVersion == -1 {
-			logx.Error("生成收藏版本号失败")
+			l.logger.Error(model.LogMsg{Text: "生成收藏版本号失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
 			return nil, errors.New("生成版本号失败")
 		}
 
@@ -89,7 +88,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 		}
 		err = l.svcCtx.DB.Create(&newFavoriteEmoji).Error
 		if err != nil {
-			logx.Error("收藏表情失败", err)
+			l.logger.Error(model.LogMsg{Text: "收藏表情失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID, "err": err.Error()}})
 			return nil, errors.New("收藏表情失败")
 		}
 
@@ -128,7 +127,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 	case "unfavorite":
 		if err != nil {
 			// 没有收藏过
-			logx.Error("表情未收藏")
+			l.logger.Error(model.LogMsg{Text: "表情未收藏", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
 			return nil, errors.New("表情未收藏")
 		}
 
@@ -136,13 +135,13 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 		favoriteEmoji.IsDeleted = true
 		favoriteEmoji.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
 		if favoriteEmoji.Version == -1 {
-			logx.Error("生成版本号失败")
+			l.logger.Error(model.LogMsg{Text: "生成版本号失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
 			return nil, errors.New("生成版本号失败")
 		}
 
 		err = l.svcCtx.DB.Save(&favoriteEmoji).Error
 		if err != nil {
-			logx.Error("软删除收藏失败", err)
+			l.logger.Error(model.LogMsg{Text: "软删除收藏失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID, "err": err.Error()}})
 			return nil, errors.New("软删除收藏失败")
 		}
 
@@ -179,7 +178,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 		}(l.svcCtx.Config.Etcd, req.UserID, favoriteEmoji.EmojiCollectID, favoriteEmoji.Version)
 
 	default:
-		logx.Error("无效的操作类型")
+		l.logger.Error(model.LogMsg{Text: "无效的操作类型", Data: map[string]interface{}{"type": req.Type}})
 		return nil, errors.New("无效的操作类型")
 	}
 

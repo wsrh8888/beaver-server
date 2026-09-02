@@ -27,8 +27,8 @@ import (
 	"beaver/app/open/open_rpc/open"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/core/corewebhook"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type openRpcWebhookLogWriter struct {
@@ -51,6 +51,6 @@ func (w *openRpcWebhookLogWriter) SaveWebhookLog(ctx context.Context, configID, 
 		Status:    status,
 	})
 	if err != nil {
-		logx.WithContext(ctx).Errorf("SaveWebhookLog RPC 失败: %v", err)
+		beaverlog.New("open_webhook_log", ctx).Error(model.LogMsg{Text: "SaveWebhookLog RPC 失败", Data: map[string]interface{}{"configId": configID, "appId": appID, "eventType": eventType, "err": err.Error()}})
 	}
 }

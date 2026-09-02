@@ -24,8 +24,8 @@ package svc
 import (
 	"beaver/app/file/file_rpc/file"
 	"beaver/app/file/file_rpc/types/file_rpc"
-	platformcli "beaver/app/platform/platform_rpc/platform"
 	"beaver/app/platform/platform_api/internal/config"
+	platformcli "beaver/app/platform/platform_rpc/platform"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
@@ -47,6 +47,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
 	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
+
 	return &ServiceContext{
 		Config:      c,
 		DB:          mysqlDb,

@@ -25,6 +25,7 @@ import (
 	"beaver/app/gateway/gateway_admin/core"
 	"beaver/app/gateway/gateway_admin/types"
 	"beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"flag"
 	"fmt"
 	"net/http"
@@ -82,7 +83,15 @@ func requestLogMiddleware(w http.ResponseWriter, r *http.Request, next http.Hand
 	start := time.Now()
 	next(w, r)
 	duration := time.Since(start)
-	logx.Infof("[%s] %s %s - %v", r.Header.Get("Uuid"), r.Method, r.URL.Path, duration)
+	beaverlog.New("gateway_admin").Info(model.LogMsg{
+		Text: "请求处理完成",
+		Data: map[string]interface{}{
+			"uuid":    r.Header.Get("Uuid"),
+			"method":  r.Method,
+			"path":    r.URL.Path,
+			"duration": duration.String(),
+		},
+	})
 }
 
 func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {

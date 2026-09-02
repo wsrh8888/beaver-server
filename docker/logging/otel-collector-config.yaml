@@ -1,0 +1,31 @@
+# OTel Collector 配置
+# 角色：接收 beaverlog 发来的 OTLP 日志 → 批量 → 写入 OpenSearch
+# 这一步是"采集协议统一、后端可替换"的关键：将来要插 RocketMQ/Kafka 或换 ClickHouse，
+# 只改这里的 exporter / pipeline，不动任何业务代码。
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+
+exporters:
+  opensearch:
+    # 连接到同 compose 内的 opensearch 服务（安全已关闭，无需认证）
+    endpoints: ["http://opensearch:9200"]
+    index: "beaver-logs"
+    # otlp 映射模式：把日志属性（source/module/data 等）扁平化为可检索字段
+    mapping:
+      mode: "otlp"
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [opensearch]

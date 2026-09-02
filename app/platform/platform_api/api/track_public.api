@@ -1,16 +1,10 @@
 syntax = "v1"
 
 type (
-	LogEventsReq {
-		Logs []LogEventItem `json:"logs"`
+	TrackReq {
+		Logs []map[string]interface{} `json:"logs"`
 	}
-	LogEventItem {
-		Level     string `json:"level"`
-		BucketID  string `json:"bucketId"`
-		Data      string `json:"data"`
-		Timestamp int64  `json:"timestamp,optional"`
-	}
-	LogEventsRes {}
+	TrackRes {}
 )
 
 @server (
@@ -18,6 +12,6 @@ type (
 )
 service platform {
 	@doc "记录客户端日志"
-	@handler LogEvents
-	post /api/platform/track_public/v1/log (LogEventsReq) returns (LogEventsRes)
+	@handler Track
+	post /api/platform/track_public/v1/track (TrackReq) returns (TrackRes)
 }

@@ -34,7 +34,6 @@ import (
 	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -85,7 +84,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		// 生成收藏版本号（按用户ID分区）
 		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", req.UserID)
 		if collectVersion == -1 {
-			logx.Error("生成表情包收藏版本号失败")
+			l.logger.Error(model.LogMsg{Text: "生成表情包收藏版本号失败", Data: map[string]interface{}{"userId": req.UserID, "packageId": req.PackageID}})
 			return nil, status.Error(codes.Internal, "生成版本号失败")
 		}
 
@@ -106,7 +105,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			var packageEmojis []emoji_models.EmojiPackageEmoji
 			err := l.svcCtx.DB.Where("package_id = ?", packageId).Find(&packageEmojis).Error
 			if err != nil {
-				logx.Errorf("查询表情包内容失败: packageId=%s, error=%v", packageId, err)
+				l.logger.Error(model.LogMsg{Text: "查询表情包内容失败", Data: map[string]interface{}{"packageId": packageId, "err": err.Error()}})
 				return
 			}
 
@@ -125,7 +124,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 				err = l.svcCtx.DB.Table("emojis").Where("emoji_id IN ?", emojiIds).
 					Select("emoji_id, version").Find(&emojis).Error
 				if err != nil {
-					logx.Errorf("查询表情版本信息失败: emojiIds=%v, error=%v", emojiIds, err)
+					l.logger.Error(model.LogMsg{Text: "查询表情版本信息失败", Data: map[string]interface{}{"emojiIds": emojiIds, "err": err.Error()}})
 					return
 				}
 			}
@@ -220,13 +219,13 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 		collectRecord.IsDeleted = true
 		collectRecord.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", req.UserID)
 		if collectRecord.Version == -1 {
-			logx.Error("生成版本号失败")
+			l.logger.Error(model.LogMsg{Text: "生成版本号失败", Data: map[string]interface{}{"userId": req.UserID, "packageId": req.PackageID}})
 			return nil, status.Error(codes.Internal, "生成版本号失败")
 		}
 
 		err = l.svcCtx.DB.Save(&collectRecord).Error
 		if err != nil {
-			logx.Error("软删除收藏失败", err)
+			l.logger.Error(model.LogMsg{Text: "软删除收藏失败", Data: map[string]interface{}{"userId": req.UserID, "packageId": req.PackageID, "err": err.Error()}})
 			return nil, status.Error(codes.Internal, "软删除收藏失败")
 		}
 
