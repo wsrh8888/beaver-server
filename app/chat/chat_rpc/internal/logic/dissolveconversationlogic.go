@@ -28,21 +28,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DissolveConversationLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDissolveConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DissolveConversationLogic {
 	return &DissolveConversationLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("dissolve_conversation", ctx),
 	}
 }
 
@@ -54,13 +54,14 @@ func (l *DissolveConversationLogic) DissolveConversation(in *chat_rpc.DissolveCo
 	// 检查会话是否存在
 	var conversation chat_models.ChatConversationMeta
 	if err := l.svcCtx.DB.Where("conversation_id = ?", in.ConversationId).First(&conversation).Error; err != nil {
-		l.Errorf("会话不存在: conversationId=%s, error=%v", in.ConversationId, err)
+		l.logger.Error(model.LogMsg{Text: "会话不存在", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		return nil, errors.New("会话不存在")
 	}
 
 	// 开启事务
 	tx := l.svcCtx.DB.Begin()
 	if tx.Error != nil {
+		l.logger.Error(model.LogMsg{Text: "开启事务失败", Data: map[string]any{"err": tx.Error.Error()}})
 		return nil, tx.Error
 	}
 
@@ -73,14 +74,14 @@ func (l *DissolveConversationLogic) DissolveConversation(in *chat_rpc.DissolveCo
 
 	// 1. 删除会话元数据
 	if err := tx.Where("conversation_id = ?", in.ConversationId).Delete(&chat_models.ChatConversationMeta{}).Error; err != nil {
-		l.Errorf("删除会话元数据失败: conversationId=%s, error=%v", in.ConversationId, err)
+		l.logger.Error(model.LogMsg{Text: "删除会话元数据失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		tx.Rollback()
 		return nil, errors.New("删除会话元数据失败")
 	}
 
 	// 2. 删除所有用户的会话关系记录
 	if err := tx.Where("conversation_id = ?", in.ConversationId).Delete(&chat_models.ChatUserConversation{}).Error; err != nil {
-		l.Errorf("删除用户会话关系失败: conversationId=%s, error=%v", in.ConversationId, err)
+		l.logger.Error(model.LogMsg{Text: "删除用户会话关系失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		tx.Rollback()
 		return nil, errors.New("删除用户会话关系失败")
 	}
@@ -90,10 +91,14 @@ func (l *DissolveConversationLogic) DissolveConversation(in *chat_rpc.DissolveCo
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("成功解散会话: conversationId=%s", in.ConversationId)
+	l.logger.Info(model.LogMsg{
+		Text: "解散会话成功",
+		Data: map[string]interface{}{"conversationId": in.ConversationId},
+	})
 
 	return &chat_rpc.DissolveConversationRes{
 		Success: true,

@@ -27,7 +27,7 @@ import (
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/common/etcd"
 	"beaver/common/middleware"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
 
@@ -42,7 +42,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("file_api")
+	beaverlog.InitFromConf(c.RestConf.ServiceConf)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

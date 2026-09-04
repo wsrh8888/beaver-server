@@ -23,13 +23,14 @@ package ws_response
 
 import (
 	type_struct "beaver/app/ws/ws_api/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/common/wsEnum/wsCommandConst"
 	utils "beaver/utils/rand"
 	"encoding/json"
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type Response struct {
@@ -41,6 +42,7 @@ type Response struct {
 }
 
 func WsResponse(conn *websocket.Conn, command wsCommandConst.Command, content type_struct.WsContent) error {
+	logger := beaverlog.New("ws_response")
 	code := 0
 
 	response := Response{
@@ -53,18 +55,18 @@ func WsResponse(conn *websocket.Conn, command wsCommandConst.Command, content ty
 
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		logx.Errorf("序列化WebSocket响应失败: %v", err)
+		logger.Error(model.LogMsg{Text: "序列化WebSocket响应失败", Data: map[string]interface{}{"command": command, "err": err.Error()}})
 		return err
 	}
 
 	// 设置写入超时
 	if err := conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
-		logx.Errorf("设置WebSocket写入超时失败: %v", err)
+		logger.Error(model.LogMsg{Text: "设置WebSocket写入超时失败", Data: map[string]interface{}{"command": command, "err": err.Error()}})
 		return err
 	}
 
 	if err := conn.WriteMessage(websocket.TextMessage, responseJSON); err != nil {
-		logx.Errorf("发送WebSocket消息失败: %v", err)
+		logger.Error(model.LogMsg{Text: "发送WebSocket消息失败", Data: map[string]interface{}{"command": command, "err": err.Error()}})
 		return err
 	}
 

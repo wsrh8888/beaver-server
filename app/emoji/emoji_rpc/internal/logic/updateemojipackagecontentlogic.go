@@ -28,9 +28,10 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
@@ -43,11 +44,11 @@ const (
 type UpdateEmojiPackageContentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateEmojiPackageContentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateEmojiPackageContentLogic {
-	return &UpdateEmojiPackageContentLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateEmojiPackageContentLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_emoji_package_content", ctx)}
 }
 
 func (l *UpdateEmojiPackageContentLogic) UpdateEmojiPackageContent(in *emoji_rpc.UpdateEmojiPackageContentReq) (*emoji_rpc.UpdateEmojiPackageContentRes, error) {
@@ -67,6 +68,7 @@ func (l *UpdateEmojiPackageContentLogic) addEmoji(in *emoji_rpc.UpdateEmojiPacka
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("表情包不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询表情包失败", Data: map[string]any{"packageId": in.PackageId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -89,11 +91,13 @@ func (l *UpdateEmojiPackageContentLogic) addEmoji(in *emoji_rpc.UpdateEmojiPacka
 		Version:   emojiVersion,
 	}
 	if err := l.svcCtx.DB.Create(&emoji).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建表情失败", Data: map[string]any{"packageId": in.PackageId, "err": err.Error()}})
 		return nil, err
 	}
 
 	var relations []emoji_models.EmojiPackageEmoji
 	if err := l.svcCtx.DB.Where("package_id = ?", pkg.PackageID).Find(&relations).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包内表情关联失败", Data: map[string]any{"packageId": pkg.PackageID, "err": err.Error()}})
 		return nil, err
 	}
 	maxSort := 0
@@ -116,8 +120,10 @@ func (l *UpdateEmojiPackageContentLogic) addEmoji(in *emoji_rpc.UpdateEmojiPacka
 		Version:    contentVersion,
 	}
 	if err := l.svcCtx.DB.Create(&relation).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建表情包内容关联失败", Data: map[string]any{"packageId": pkg.PackageID, "emojiId": emoji.EmojiID, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "添加表情到表情包成功", Data: map[string]interface{}{"packageId": pkg.PackageID, "emojiId": emoji.EmojiID, "relationId": relation.RelationID}})
 	return &emoji_rpc.UpdateEmojiPackageContentRes{
 		RelationId: relation.RelationID,
 		EmojiId:    emoji.EmojiID,
@@ -131,11 +137,14 @@ func (l *UpdateEmojiPackageContentLogic) removeEmoji(in *emoji_rpc.UpdateEmojiPa
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("表情不在该表情包中")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询表情包内容关联失败", Data: map[string]any{"packageId": in.PackageId, "emojiId": in.EmojiId, "err": err.Error()}})
 		return nil, err
 	}
 
 	if err := l.svcCtx.DB.Delete(&relation).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "移除表情包内容关联失败", Data: map[string]any{"packageId": in.PackageId, "emojiId": in.EmojiId, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "从表情包移除表情成功", Data: map[string]interface{}{"packageId": in.PackageId, "emojiId": in.EmojiId}})
 	return &emoji_rpc.UpdateEmojiPackageContentRes{EmojiId: in.EmojiId}, nil
 }

@@ -29,21 +29,20 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetUserListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserListLogic {
 	return &GetUserListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_user_list", ctx),
 	}
 }
 

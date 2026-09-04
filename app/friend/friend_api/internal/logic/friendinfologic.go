@@ -30,22 +30,22 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type FriendInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewFriendInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FriendInfoLogic {
 	return &FriendInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("friend_info", ctx),
 	}
 }
 
@@ -67,7 +67,7 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		UserID: req.FriendID,
 	})
 	if err != nil {
-		l.Logger.Errorf("获取用户信息失败: friendID=%s, error=%v", req.FriendID, err)
+		l.logger.Error(model.LogMsg{Text: "获取用户信息失败", Data: map[string]any{"friendId": req.FriendID, "err": err.Error()}})
 		return nil, errors.New("用户不存在")
 	}
 
@@ -76,7 +76,7 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 	// 生成会话Id
 	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
 	if err != nil {
-		l.Logger.Errorf("生成会话Id失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
@@ -116,6 +116,6 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		Source:         source,
 	}
 
-	l.Logger.Infof("获取好友信息成功: userID=%s, friendID=%s, isFriend=%v, source=%s", req.UserID, req.FriendID, isFriend, source)
+	l.logger.Info(model.LogMsg{Text: "获取好友信息成功", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "isFriend": isFriend, "source": source}})
 	return response, nil
 }

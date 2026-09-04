@@ -28,33 +28,36 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetOpenAppListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetOpenAppListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOpenAppListLogic {
-	return &GetOpenAppListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetOpenAppListLogic{logger: beaverlog.New("get_open_app_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetOpenAppListLogic) GetOpenAppList(req *types.GetOpenAppListReq) (resp *types.GetOpenAppListRes, err error) {
 	rpcRes, err := l.svcCtx.OpenRpc.ListOpenApps(l.ctx, &open_rpc.ListOpenAppsReq{
-		Page:            int32(req.Page),
-		PageSize:        int32(req.PageSize),
-		Keyword:         req.Keyword,
-		OwnerUserId:     req.OwnerUserID,
-		AppId:           req.AppID,
-		Status:          int32(req.Status),
-		AuditStatus:     int32(req.AuditStatus),
-		CapabilityType:  int32(req.CapabilityType),
+		Page:           int32(req.Page),
+		PageSize:       int32(req.PageSize),
+		Keyword:        req.Keyword,
+		OwnerUserId:    req.OwnerUserID,
+		AppId:          req.AppID,
+		Status:         int32(req.Status),
+		AuditStatus:    int32(req.AuditStatus),
+		CapabilityType: int32(req.CapabilityType),
 	})
 	if err != nil {
-		l.Errorf("获取应用列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取应用列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

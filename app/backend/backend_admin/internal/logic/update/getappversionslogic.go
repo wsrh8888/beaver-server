@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetAppVersionsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetAppVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAppVersionsLogic {
-	return &GetAppVersionsLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetAppVersionsLogic{logger: beaverlog.New("get_app_versions", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp *types.GetAppVersionsRes, err error) {
@@ -48,7 +48,10 @@ func (l *GetAppVersionsLogic) GetAppVersions(req *types.GetAppVersionsReq) (resp
 		PageSize: int32(req.PageSize),
 	})
 	if err != nil {
-		l.Errorf("获取应用版本失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取应用版本失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

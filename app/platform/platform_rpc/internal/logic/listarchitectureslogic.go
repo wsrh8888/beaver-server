@@ -27,18 +27,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListArchitecturesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListArchitecturesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListArchitecturesLogic {
-	return &ListArchitecturesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListArchitecturesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_architectures", ctx)}
 }
 
 func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitecturesReq) (*platform_rpc.ListArchitecturesRes, error) {
@@ -61,13 +61,13 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计架构失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计架构失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, err
 	}
 
 	var list []platform_models.UpdateArchitecture
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&list).Error; err != nil {
-		l.Errorf("查询架构列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询架构列表失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -115,7 +115,7 @@ func (l *ListArchitecturesLogic) loadAppNameMap(list []platform_models.UpdateArc
 
 	var apps []platform_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id IN ?", appIDs).Find(&apps).Error; err != nil {
-		l.Errorf("查询应用名称失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询应用名称失败", Data: map[string]any{"appIds": appIDs, "err": err.Error()}})
 		return appNameMap
 	}
 	for _, app := range apps {

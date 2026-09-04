@@ -27,9 +27,11 @@ import (
 
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
+
+var logger = beaverlog.New("ws_conn")
 
 // UserOnlineWsMap key: userID_deviceType → UserWsInfo
 var UserOnlineWsMap = make(map[string]*UserWsInfo)
@@ -74,7 +76,10 @@ func SendMsgToUser(targetUserID string, command wsCommandConst.Command, content 
 
 	for _, client := range targets {
 		if err := client.SafeSend(command, content); err != nil {
-			logx.Errorf("发送消息给用户 %s 失败: %v", targetUserID, err)
+			logger.Error(model.LogMsg{
+				Text: "发送消息给用户失败",
+				Data: map[string]any{"targetUserId": targetUserID, "err": err.Error()},
+			})
 		}
 	}
 }
@@ -105,7 +110,10 @@ func SendMsgToReceiverAndSyncToSender(
 
 	for _, client := range senderTargets {
 		if err := client.SafeSend(command, senderSyncContent); err != nil {
-			logx.Errorf("同步消息给发送者 %s 失败: %v", sendUserID, err)
+			logger.Error(model.LogMsg{
+				Text: "同步消息给发送者失败",
+				Data: map[string]any{"sendUserId": sendUserID, "err": err.Error()},
+			})
 		}
 	}
 }

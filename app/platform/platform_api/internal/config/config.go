@@ -28,6 +28,7 @@ import (
 
 type Config struct {
 	rest.RestConf
+	OtlpAddr   string `json:"OtlpAddr,optional"`
 	Etcd  string
 	Mysql struct {
 		DataSource string

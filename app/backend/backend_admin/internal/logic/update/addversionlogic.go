@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type AddVersionLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewAddVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddVersionLogic {
-	return &AddVersionLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AddVersionLogic{logger: beaverlog.New("add_version", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *AddVersionLogic) AddVersion(req *types.AddVersionReq) (resp *types.AddVersionRes, err error) {
@@ -50,7 +50,10 @@ func (l *AddVersionLogic) AddVersion(req *types.AddVersionReq) (resp *types.AddV
 		ReleaseNotes:   req.ReleaseNotes,
 	})
 	if err != nil {
-		l.Errorf("创建版本失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建版本失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.AddVersionRes{VersionID: uint(rpcRes.VersionId)}, nil

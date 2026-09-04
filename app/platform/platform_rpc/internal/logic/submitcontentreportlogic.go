@@ -27,8 +27,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -36,11 +37,11 @@ import (
 type SubmitContentReportLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSubmitContentReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubmitContentReportLogic {
-	return &SubmitContentReportLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &SubmitContentReportLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("submit_content_report", ctx)}
 }
 
 func (l *SubmitContentReportLogic) SubmitContentReport(in *platform_rpc.SubmitContentReportReq) (*platform_rpc.SubmitContentReportRes, error) {
@@ -57,8 +58,9 @@ func (l *SubmitContentReportLogic) SubmitContentReport(in *platform_rpc.SubmitCo
 		Status:         platform_models.ReportStatusPending,
 	}
 	if err := l.svcCtx.DB.Create(&report).Error; err != nil {
-		l.Errorf("创建举报失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建举报失败", Data: map[string]any{"reporterUserId": in.ReporterUserId, "targetId": in.TargetId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "提交失败")
 	}
+	l.logger.Info(model.LogMsg{Text: "提交举报成功", Data: map[string]interface{}{"id": report.Id, "reporterUserId": in.ReporterUserId, "targetId": in.TargetId}})
 	return &platform_rpc.SubmitContentReportRes{Id: uint64(report.Id)}, nil
 }

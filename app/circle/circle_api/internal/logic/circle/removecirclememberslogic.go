@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RemoveCircleMembersLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewRemoveCircleMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveCircleMembersLogic {
 	return &RemoveCircleMembersLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("remove_circle_members", ctx),
 	}
 }
 
@@ -61,6 +61,7 @@ func (l *RemoveCircleMembersLogic) RemoveCircleMembers(req *types.RemoveCircleMe
 
 	var members []circle_models.CircleMemberModel
 	if err = l.svcCtx.DB.Where("circle_id = ? AND user_id IN ?", req.CircleID, req.UserIds).Find(&members).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询圈子成员失败", Data: map[string]any{"circleId": req.CircleID, "userIds": req.UserIds, "err": err.Error()}})
 		return nil, fmt.Errorf("查询成员失败")
 	}
 
@@ -81,6 +82,7 @@ func (l *RemoveCircleMembersLogic) RemoveCircleMembers(req *types.RemoveCircleMe
 
 	if err = l.svcCtx.DB.Where("circle_id = ? AND user_id IN ?", req.CircleID, req.UserIds).
 		Delete(&circle_models.CircleMemberModel{}).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "移除圈子成员失败", Data: map[string]any{"circleId": req.CircleID, "userIds": req.UserIds, "err": err.Error()}})
 		return nil, fmt.Errorf("移除成员失败: %v", err)
 	}
 
@@ -88,6 +90,8 @@ func (l *RemoveCircleMembersLogic) RemoveCircleMembers(req *types.RemoveCircleMe
 	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
 		Where("circle_id = ?", req.CircleID).
 		Update("version", circleVersion)
+
+	l.logger.Info(model.LogMsg{Text: "移除圈子成员成功", Data: map[string]interface{}{"circleId": req.CircleID, "userIds": req.UserIds}})
 
 	return &types.RemoveCircleMembersRes{}, nil
 }

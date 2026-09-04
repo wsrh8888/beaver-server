@@ -32,20 +32,21 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ExchangeTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewExchangeTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ExchangeTokenLogic {
 	return &ExchangeTokenLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("exchange_token", ctx),
 	}
 }
 
@@ -69,7 +70,10 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 
 	// 4. 标记授权码为已使用
 	if err := l.svcCtx.DB.Model(&authCode).Update("used", true).Error; err != nil {
-		logx.Errorf("更新授权码状态失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新授权码状态失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("处理授权码失败")
 	}
 
@@ -98,7 +102,10 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 	}
 
 	if err := l.svcCtx.DB.Create(&tokenRecord).Error; err != nil {
-		logx.Errorf("创建访问令牌失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建访问令牌失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("生成令牌失败")
 	}
 

@@ -31,12 +31,12 @@ import (
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/jwts"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type LoginLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -44,7 +44,7 @@ type LoginLogic struct {
 // 开发者 Portal 登录
 func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic {
 	return &LoginLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("login", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -62,7 +62,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 		})
 	}
 	if err != nil {
-		logx.Errorf("用户不存在: %s, error: %v", req.Username, err)
+		l.logger.Error(model.LogMsg{Text: "用户不存在", Data: map[string]interface{}{"username": req.Username, "err": err}})
 		return nil, errors.New("用户名或密码错误")
 	}
 
@@ -71,7 +71,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 		Password: req.Password,
 	})
 	if err != nil || !verifyRes.Valid {
-		logx.Errorf("密码错误: user_id=%s", userRes.UserInfo.UserId)
+		l.logger.Error(model.LogMsg{Text: "密码错误", Data: map[string]interface{}{"user_id": userRes.UserInfo.UserId}})
 		return nil, errors.New("用户名或密码错误")
 	}
 
@@ -86,13 +86,13 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error
 		NickName: userRes.UserInfo.NickName,
 	}, secretKey, int(expireHours))
 	if err != nil {
-		logx.Errorf("生成 token 失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "生成 token 失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("服务内部异常")
 	}
 
 	expireAt := time.Now().Add(time.Duration(expireHours) * time.Hour).UnixMilli()
 
-	logx.Infof("开放平台登录成功: user_id=%s, nick_name=%s", userRes.UserInfo.UserId, userRes.UserInfo.NickName)
+	l.logger.Info(model.LogMsg{Text: "开放平台登录成功", Data: map[string]interface{}{"user_id": userRes.UserInfo.UserId, "nick_name": userRes.UserInfo.NickName}})
 
 	return &types.LoginRes{
 		Token:    token,

@@ -31,21 +31,21 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/list_query"
 	"beaver/common/models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ValidListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewValidListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ValidListLogic {
 	return &ValidListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("valid_list", ctx),
 	}
 }
 
@@ -95,7 +95,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			UserIdList: userIds,
 		})
 		if err != nil {
-			l.Logger.Errorf("批量获取用户信息失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 			// 不返回错误，继续处理，为没有用户信息的设置默认值
 		} else {
 			userInfoMap = userListResp.UserInfo
@@ -143,7 +143,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 		list = append(list, info)
 	}
 
-	l.Logger.Infof("获取好友验证列表成功: userID=%s, count=%d", req.UserID, len(list))
+	l.logger.Info(model.LogMsg{Text: "获取好友验证列表成功", Data: map[string]interface{}{"userId": req.UserID, "count": len(list)}})
 	return &types.ValidListRes{
 		Count: count,
 		List:  list,

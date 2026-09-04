@@ -27,18 +27,18 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/moment/moment_rpc/internal/svc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteMomentCommentsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteMomentCommentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMomentCommentsLogic {
-	return &DeleteMomentCommentsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &DeleteMomentCommentsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_moment_comments", ctx)}
 }
 
 func (l *DeleteMomentCommentsLogic) DeleteMomentComments(in *moment_rpc.DeleteMomentCommentsReq) (*moment_rpc.DeleteMomentCommentsRes, error) {
@@ -46,8 +46,15 @@ func (l *DeleteMomentCommentsLogic) DeleteMomentComments(in *moment_rpc.DeleteMo
 		return &moment_rpc.DeleteMomentCommentsRes{}, nil
 	}
 	if err := l.svcCtx.DB.Where("comment_id IN ?", in.CommentIds).Delete(&moment_models.MomentCommentModel{}).Error; err != nil {
-		l.Errorf("删除评论失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除动态评论失败",
+			Data: map[string]any{"commentIds": in.CommentIds, "err": err.Error()},
+		})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "删除动态评论成功",
+		Data: map[string]any{"commentIds": in.CommentIds},
+	})
 	return &moment_rpc.DeleteMomentCommentsRes{}, nil
 }

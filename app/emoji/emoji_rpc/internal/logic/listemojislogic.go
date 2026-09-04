@@ -28,18 +28,18 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListEmojisLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListEmojisLogic {
-	return &ListEmojisLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListEmojisLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_emojis", ctx)}
 }
 
 func (l *ListEmojisLogic) ListEmojis(in *emoji_rpc.ListEmojisReq) (*emoji_rpc.ListEmojisRes, error) {
@@ -80,11 +80,13 @@ func (l *ListEmojisLogic) ListEmojis(in *emoji_rpc.ListEmojisReq) (*emoji_rpc.Li
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "统计表情失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []emoji_models.Emoji
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -99,6 +101,7 @@ func (l *ListEmojisLogic) listPackageEmojis(packageID string, page, pageSize int
 	var relations []emoji_models.EmojiPackageEmoji
 	if err := l.svcCtx.DB.Where("package_id = ?", packageID).
 		Order("sort_order asc").Find(&relations).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包内表情关联失败", Data: map[string]any{"packageId": packageID, "err": err.Error()}})
 		return nil, err
 	}
 	if len(relations) == 0 {
@@ -112,6 +115,7 @@ func (l *ListEmojisLogic) listPackageEmojis(packageID string, page, pageSize int
 
 	var emojis []emoji_models.Emoji
 	if err := l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&emojis).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包内表情详情失败", Data: map[string]any{"packageId": packageID, "err": err.Error()}})
 		return nil, err
 	}
 	emojiMap := make(map[string]emoji_models.Emoji, len(emojis))

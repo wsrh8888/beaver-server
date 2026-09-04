@@ -19,28 +19,19 @@
  * beaver-server-header-v1
  */
 
-package handler
+package grpcMiddleware
 
 import (
-	logic "beaver/app/platform/platform_api/internal/logic/track_public"
-	"beaver/app/platform/platform_api/internal/svc"
-	"beaver/app/platform/platform_api/internal/types"
-	"beaver/common/response"
-	"net/http"
+	"context"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
+	"beaver/common/traceid"
+
+	"google.golang.org/grpc"
 )
 
-func LogEventsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.LogEventsReq
-		if err := httpx.Parse(r, &req); err != nil {
-			response.Response(r, w, nil, err)
-			return
-		}
-
-		l := logic.NewLogEventsLogic(r.Context(), svcCtx)
-		resp, err := l.LogEvents(&req)
-		response.Response(r, w, resp, err)
-	}
+// TraceServerInterceptor 从 metadata 取出服务端 x-request-id，写入 ctx 供 logx 使用。
+func TraceServerInterceptor(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	id := traceid.Ensure(traceid.FromIncomingMD(ctx))
+	ctx = traceid.WithContext(ctx, id, "")
+	return handler(ctx, req)
 }

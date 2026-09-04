@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateArchitectureLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateArchitectureLogic {
-	return &UpdateArchitectureLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateArchitectureLogic{logger: beaverlog.New("update_architecture", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *UpdateArchitectureLogic) UpdateArchitecture(req *types.UpdateArchitectureReq) (resp *types.UpdateArchitectureRes, err error) {
@@ -48,7 +48,10 @@ func (l *UpdateArchitectureLogic) UpdateArchitecture(req *types.UpdateArchitectu
 		IsActive:    req.IsActive,
 	})
 	if err != nil {
-		l.Errorf("更新架构失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新架构失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.UpdateArchitectureRes{}, nil

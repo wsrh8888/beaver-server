@@ -27,6 +27,8 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"gorm.io/gorm"
 )
@@ -34,12 +36,14 @@ import (
 type GetUserSettingsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetUserSettingsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserSettingsLogic {
 	return &GetUserSettingsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_user_settings", ctx),
 	}
 }
 
@@ -91,11 +95,19 @@ func (l *GetUserSettingsLogic) getOrCreateUserSetting(userID string) (*user_mode
 		return &setting, nil
 	}
 	if err != gorm.ErrRecordNotFound {
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户设置失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	setting = user_models.DefaultUserSetting(userID)
 	if err := l.svcCtx.DB.Create(&setting).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户默认设置失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
 		return nil, err
 	}
 	return &setting, nil

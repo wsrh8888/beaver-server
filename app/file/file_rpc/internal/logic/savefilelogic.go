@@ -30,8 +30,9 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -40,11 +41,11 @@ import (
 type SaveFileLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSaveFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveFileLogic {
-	return &SaveFileLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &SaveFileLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("save_file", ctx)}
 }
 
 func (l *SaveFileLogic) SaveFile(in *file_rpc.SaveFileReq) (*file_rpc.SaveFileRes, error) {
@@ -52,6 +53,10 @@ func (l *SaveFileLogic) SaveFile(in *file_rpc.SaveFileReq) (*file_rpc.SaveFileRe
 	if err := l.svcCtx.DB.Take(&existing, "md5 = ?", in.Md5).Error; err == nil {
 		return &file_rpc.SaveFileRes{FileKey: existing.FileKey}, nil
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		l.logger.Error(model.LogMsg{
+			Text: "按md5查重文件失败",
+			Data: map[string]any{"md5": in.Md5, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -89,9 +94,22 @@ func (l *SaveFileLogic) SaveFile(in *file_rpc.SaveFileReq) (*file_rpc.SaveFileRe
 		FileInfo:     fileInfo,
 	}
 	if err := l.svcCtx.DB.Create(newFile).Error; err != nil {
-		l.Errorf("保存文件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "保存文件失败",
+			Data: map[string]any{"fileKey": fileKey, "md5": in.Md5, "err": err.Error()},
+		})
 		return nil, status.Error(codes.Internal, "保存文件失败")
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "保存文件成功",
+		Data: map[string]interface{}{
+			"fileKey": fileKey,
+			"md5":     in.Md5,
+			"size":    in.Size,
+			"source":  source,
+		},
+	})
 
 	return &file_rpc.SaveFileRes{FileKey: fileKey}, nil
 }

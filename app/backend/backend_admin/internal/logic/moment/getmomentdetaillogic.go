@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetMomentDetailLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetMomentDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentDetailLogic {
-	return &GetMomentDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetMomentDetailLogic{logger: beaverlog.New("get_moment_detail", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (resp *types.GetMomentDetailRes, err error) {
@@ -53,7 +53,10 @@ func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (r
 		PageSize: 1,
 	})
 	if err != nil {
-		l.Errorf("获取动态详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取动态详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	if len(rpcRes.List) == 0 {

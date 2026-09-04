@@ -23,37 +23,42 @@ package logic
 
 import (
 	"context"
-	"fmt"
 
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UserInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfoLogic {
 	return &UserInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("user-info", ctx),
 	}
 }
 
 func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRes, err error) {
-	fmt.Printf("获取用户的基础信息, UserID: %v\n", req.UserID)
+	l.logger.Info(model.LogMsg{
+		Text: "获取用户基础信息",
+		Data: map[string]any{"userId": req.UserID},
+	})
 
 	// 直接从数据库查询，避免RPC调用自身服务
 	var user user_models.UserModel
 	err = l.svcCtx.DB.Take(&user, "user_id = ?", req.UserID).Error
 	if err != nil {
-		fmt.Printf("[ERROR] 查询用户失败, UserID: %v, error: %v\n", req.UserID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户失败",
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 

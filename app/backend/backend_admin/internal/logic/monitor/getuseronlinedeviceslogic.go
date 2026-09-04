@@ -27,19 +27,19 @@ import (
 	"beaver/app/auth/auth_rpc/types/auth_rpc"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserOnlineDevicesLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetUserOnlineDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserOnlineDevicesLogic {
 	return &GetUserOnlineDevicesLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_online_devices", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -50,7 +50,10 @@ func (l *GetUserOnlineDevicesLogic) GetUserOnlineDevices(req *types.GetUserOnlin
 		UserId: req.UserID,
 	})
 	if err != nil {
-		l.Errorf("查询用户设备失败 userId=%s: %v", req.UserID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户设备失败",
+			Data: map[string]interface{}{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 

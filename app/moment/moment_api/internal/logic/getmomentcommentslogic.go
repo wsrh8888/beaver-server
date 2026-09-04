@@ -29,26 +29,34 @@ import (
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetMomentCommentsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取动态评论列表的接口（分页）
 func NewGetMomentCommentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentCommentsLogic {
 	return &GetMomentCommentsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_moment_comments", ctx),
 	}
 }
 
 func (l *GetMomentCommentsLogic) GetMomentComments(req *types.GetMomentCommentsReq) (resp *types.GetMomentCommentsRes, err error) {
+	defer func() {
+		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "获取动态评论列表失败",
+				Data: map[string]any{"momentId": req.MomentID, "err": err.Error()},
+			})
+		}
+	}()
 	// 分页参数处理
 	page := req.Page
 	limit := req.Limit

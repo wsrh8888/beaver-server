@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/file/file_rpc/types/file_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type SaveFileLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewSaveFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveFileLogic {
-	return &SaveFileLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &SaveFileLogic{logger: beaverlog.New("save_file", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRes, err error) {
@@ -52,7 +52,10 @@ func (l *SaveFileLogic) SaveFile(req *types.SaveFileReq) (resp *types.SaveFileRe
 		FileInfoJson: req.FileInfo,
 	})
 	if err != nil {
-		l.Errorf("保存文件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "保存文件失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.SaveFileRes{FileKey: rpcRes.FileKey}, nil

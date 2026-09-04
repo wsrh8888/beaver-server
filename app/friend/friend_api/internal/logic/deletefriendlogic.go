@@ -34,24 +34,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type DeleteFriendLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 删除好友
 func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFriendLogic {
 	return &DeleteFriendLogic{
 		ctx:    ctx,
-		logger: logger.New("delete_friend"),
+		logger: beaverlog.New("delete_friend", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -113,7 +110,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logx.WithContext(l.ctx).Errorf("Robot 好友事件推送 panic: %v", r)
+				l.logger.Error(model.LogMsg{Text: "Robot 好友事件推送panic", Data: map[string]interface{}{"panic": r}})
 			}
 		}()
 		ctx := context.Background()

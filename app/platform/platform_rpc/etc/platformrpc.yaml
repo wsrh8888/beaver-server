@@ -1,4 +1,4 @@
-Name: platformrpc.rpc
+Name: platform_rpc
 ListenOn: 0.0.0.0:31100
 Etcd:
   Hosts:

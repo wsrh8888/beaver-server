@@ -30,22 +30,22 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateBotLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 更新机器人（名称/简介/头像/启用状态）
 func NewUpdateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateBotLogic {
 	return &UpdateBotLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("update_bot", ctx),
 	}
 }
 
@@ -80,10 +80,12 @@ func (l *UpdateBotLogic) UpdateBot(req *types.UpdateBotReq) (resp *types.UpdateB
 	}
 	if len(updates) > 0 {
 		if err := l.svcCtx.DB.Model(&ref).Updates(updates).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "更新机器人信息失败", Data: map[string]any{"botId": req.BotID, "err": err.Error()}})
 			return nil, errors.New("更新机器人信息失败")
 		}
 	}
 
+	l.logger.Info(model.LogMsg{Text: "更新机器人成功", Data: map[string]interface{}{"botId": req.BotID}})
 	return &types.UpdateBotRes{}, nil
 }
 
@@ -107,7 +109,7 @@ func (l *UpdateBotLogic) updateBotUserProfile(req *types.UpdateBotReq) error {
 
 	_, err := l.svcCtx.UserRpc.UpdateUsers(l.ctx, patchReq)
 	if err != nil {
-		l.Logger.Errorf("更新机器人用户资料失败: botId=%s, error=%v", req.BotID, err)
+		l.logger.Error(model.LogMsg{Text: "更新机器人用户资料失败", Data: map[string]any{"botId": req.BotID, "err": err.Error()}})
 		return errors.New("更新机器人资料失败")
 	}
 	return nil
@@ -134,7 +136,7 @@ func (l *UpdateBotLogic) updateBotSecurity(req *types.UpdateBotReq) error {
 		},
 	})
 	if err != nil {
-		l.Logger.Errorf("更新机器人安全设置失败: botId=%s, error=%v", req.BotID, err)
+		l.logger.Error(model.LogMsg{Text: "更新机器人安全设置失败", Data: map[string]any{"botId": req.BotID, "err": err.Error()}})
 		return errors.New("更新机器人安全设置失败")
 	}
 	return nil

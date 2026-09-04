@@ -26,7 +26,7 @@ import (
 	"beaver/app/backend/backend_admin/internal/handler"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/common/etcd"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
 
@@ -41,7 +41,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("backend_admin")
+	beaverlog.InitFromConf(c.RestConf.ServiceConf)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

@@ -31,24 +31,22 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type RecallMessageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRecallMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RecallMessageLogic {
 	return &RecallMessageLogic{
 		ctx:    ctx,
-		logger: logger.New("recall_msg"),
+		logger: beaverlog.New("recall_msg", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -58,16 +56,40 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 	var msg chat_models.ChatMessage
 	err = l.svcCtx.DB.Where("message_id = ?", req.MessageID).First(&msg).Error
 	if err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "撤回消息不存在",
+			Data: map[string]any{
+				"userId":    req.UserID,
+				"messageId": req.MessageID,
+				"err":       err.Error(),
+			},
+		})
 		return nil, errors.New("消息不存在")
 	}
 
 	// 2. 权限校验
 	if msg.SendUserID == nil || *msg.SendUserID != req.UserID {
+		l.logger.Warn(model.LogMsg{
+			Text: "无权撤回他人消息",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"messageId":      req.MessageID,
+				"conversationId": msg.ConversationID,
+			},
+		})
 		return nil, errors.New("无权撤回他人消息")
 	}
 
 	// 3. 时效性校验（对标大厂：3分钟限制）
 	if time.Since(time.Time(msg.CreatedAt)) > 3*time.Minute {
+		l.logger.Warn(model.LogMsg{
+			Text: "撤回已超时",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"messageId":      req.MessageID,
+				"conversationId": msg.ConversationID,
+			},
+		})
 		return nil, errors.New("超过3分钟，无法撤回")
 	}
 
@@ -97,13 +119,21 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 		},
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("发送撤回指令失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "发送撤回指令失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"messageId":      req.MessageID,
+				"conversationId": msg.ConversationID,
+				"err":            err.Error(),
+			},
+		})
 		return nil, errors.New("撤回失败")
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "消息撤回成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"messageId":      req.MessageID,
 			"userId":         req.UserID,
 			"conversationId": msg.ConversationID,

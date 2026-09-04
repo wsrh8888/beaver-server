@@ -28,18 +28,18 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListEmojiPackagesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListEmojiPackagesLogic {
-	return &ListEmojiPackagesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListEmojiPackagesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_emoji_packages", ctx)}
 }
 
 func (l *ListEmojiPackagesLogic) ListEmojiPackages(in *emoji_rpc.ListEmojiPackagesReq) (*emoji_rpc.ListEmojiPackagesRes, error) {
@@ -84,11 +84,13 @@ func (l *ListEmojiPackagesLogic) ListEmojiPackages(in *emoji_rpc.ListEmojiPackag
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "统计表情包失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []emoji_models.EmojiPackage
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

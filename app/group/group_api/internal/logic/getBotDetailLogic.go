@@ -32,22 +32,22 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetBotDetailLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取机器人详情
 func NewGetBotDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetBotDetailLogic {
 	return &GetBotDetailLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_bot_detail", ctx),
 	}
 }
 
@@ -63,6 +63,7 @@ func (l *GetBotDetailLogic) GetBotDetail(req *types.GetBotDetailReq) (resp *type
 		UserID: bot.BotID,
 	})
 	if err != nil || userRes.UserInfo == nil {
+		l.logger.Error(model.LogMsg{Text: "获取机器人用户信息失败", Data: map[string]any{"botId": bot.BotID, "err": fmt.Sprintf("%v", err)}})
 		return nil, err
 	}
 
@@ -71,6 +72,7 @@ func (l *GetBotDetailLogic) GetBotDetail(req *types.GetBotDetailReq) (resp *type
 		BotId: bot.BotID,
 	})
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取机器人Webhook信息失败", Data: map[string]any{"botId": bot.BotID, "err": err.Error()}})
 		return nil, err
 	}
 

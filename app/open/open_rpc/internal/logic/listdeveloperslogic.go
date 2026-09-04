@@ -28,17 +28,18 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListDevelopersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListDevelopersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListDevelopersLogic {
-	return &ListDevelopersLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListDevelopersLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_developers", ctx)}
 }
 
 func (l *ListDevelopersLogic) ListDevelopers(in *open_rpc.ListDevelopersReq) (*open_rpc.ListDevelopersRes, error) {
@@ -58,13 +59,19 @@ func (l *ListDevelopersLogic) ListDevelopers(in *open_rpc.ListDevelopersReq) (*o
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计开发者失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计开发者失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var list []open_models.OpenDeveloper
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询开发者列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询开发者列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteUserLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteUserLogic {
-	return &DeleteUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteUserLogic{logger: beaverlog.New("delete_user", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // DeleteUser 管理后台：删除用户（软删）。
@@ -52,7 +52,10 @@ func (l *DeleteUserLogic) DeleteUser(req *types.DeleteUserReq) (resp *types.Dele
 		UserIds: []string{req.UserID},
 	})
 	if err != nil {
-		l.Errorf("删除用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除用户失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteUserRes{}, nil

@@ -27,21 +27,21 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojisListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojisListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojisListLogic {
 	return &GetEmojisListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emojis_list", ctx),
 	}
 }
 
@@ -50,7 +50,7 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 	var favoriteEmojis []emoji_models.EmojiCollectEmoji
 	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).Find(&favoriteEmojis).Error
 	if err != nil {
-		logx.Error("获取用户收藏的表情失败", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户收藏的表情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 	var emojis []emoji_models.Emoji
 	err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", emojiIDs, 1).Find(&emojis).Error
 	if err != nil {
-		logx.Error("获取表情详情失败", err)
+		l.logger.Error(model.LogMsg{Text: "获取表情详情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 

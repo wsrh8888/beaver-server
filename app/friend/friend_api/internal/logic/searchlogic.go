@@ -30,22 +30,22 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type SearchLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewSearchLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchLogic {
 	return &SearchLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("search", ctx),
 	}
 }
 
@@ -67,11 +67,11 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 			Type:    "email",
 		})
 		if err != nil {
-			l.Logger.Errorf("根据邮箱查询用户失败: email=%s, error=%v", req.Keyword, err)
+			l.logger.Error(model.LogMsg{Text: "根据邮箱查询用户失败", Data: map[string]any{"email": req.Keyword, "err": err.Error()}})
 			return nil, errors.New("用户不存在")
 		}
 		if searchResp.UserInfo == nil {
-			l.Logger.Errorf("根据邮箱查询用户失败: email=%s, 未找到用户", req.Keyword)
+			l.logger.Error(model.LogMsg{Text: "根据邮箱查询用户未找到", Data: map[string]any{"email": req.Keyword}})
 			return nil, errors.New("用户不存在")
 		}
 		userInfo = searchResp.UserInfo
@@ -83,11 +83,11 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 			Type:    "userId",
 		})
 		if err != nil {
-			l.Logger.Errorf("根据用户ID查询用户失败: userId=%s, error=%v", req.Keyword, err)
+			l.logger.Error(model.LogMsg{Text: "根据用户ID查询用户失败", Data: map[string]any{"userId": req.Keyword, "err": err.Error()}})
 			return nil, errors.New("用户不存在")
 		}
 		if searchResp.UserInfo == nil {
-			l.Logger.Errorf("根据用户ID查询用户失败: userId=%s, 未找到用户", req.Keyword)
+			l.logger.Error(model.LogMsg{Text: "根据用户ID查询用户未找到", Data: map[string]any{"userId": req.Keyword}})
 			return nil, errors.New("用户不存在")
 		}
 		userInfo = searchResp.UserInfo
@@ -99,11 +99,11 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 			Type:    "email",
 		})
 		if err != nil {
-			l.Logger.Errorf("根据邮箱查询用户失败: email=%s, error=%v", req.Keyword, err)
+			l.logger.Error(model.LogMsg{Text: "根据邮箱查询用户失败", Data: map[string]any{"email": req.Keyword, "err": err.Error()}})
 			return nil, errors.New("用户不存在")
 		}
 		if searchResp.UserInfo == nil {
-			l.Logger.Errorf("根据邮箱查询用户失败: email=%s, 未找到用户", req.Keyword)
+			l.logger.Error(model.LogMsg{Text: "根据邮箱查询用户未找到", Data: map[string]any{"email": req.Keyword}})
 			return nil, errors.New("用户不存在")
 		}
 		userInfo = searchResp.UserInfo
@@ -115,7 +115,7 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 		UserID: userId,
 	})
 	if err != nil {
-		l.Logger.Errorf("获取用户详细信息失败: userID=%s, error=%v", userId, err)
+		l.logger.Error(model.LogMsg{Text: "获取用户详细信息失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, errors.New("获取用户详细信息失败")
 	}
 
@@ -133,7 +133,7 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 	// 生成会话Id
 	conversationID, err := conversation.GenerateConversation([]string{req.UserID, userInfo.UserId})
 	if err != nil {
-		l.Logger.Errorf("生成会话Id失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "targetId": userInfo.UserId, "err": err.Error()}})
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
@@ -148,6 +148,6 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 		Email:          userDetail.Email,
 	}
 
-	l.Logger.Infof("搜索用户成功: userID=%s, keyword=%s, type=%s, isFriend=%v", req.UserID, req.Keyword, req.Type, isFriend)
+	l.logger.Info(model.LogMsg{Text: "搜索用户成功", Data: map[string]interface{}{"userId": req.UserID, "keyword": req.Keyword, "type": req.Type, "isFriend": isFriend}})
 	return resp, nil
 }

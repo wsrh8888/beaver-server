@@ -28,8 +28,9 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,14 +39,14 @@ import (
 type GetFileByMd5Logic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFileByMd5Logic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFileByMd5Logic {
 	return &GetFileByMd5Logic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_file_by_md5", ctx),
 	}
 }
 
@@ -60,7 +61,10 @@ func (l *GetFileByMd5Logic) GetFileByMd5(in *file_rpc.GetFileByMd5Req) (*file_rp
 			// 未命中时不返回 gRPC 错误，避免客户端拦截器把正常查重记成 fail
 			return &file_rpc.GetFileByMd5Res{}, nil
 		}
-		l.Errorf("按 md5 查询文件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "按md5查询文件失败",
+			Data: map[string]any{"md5": in.Md5, "err": err.Error()},
+		})
 		return nil, err
 	}
 

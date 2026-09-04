@@ -28,21 +28,20 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type RevokeTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRevokeTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RevokeTokenLogic {
 	return &RevokeTokenLogic{
 		ctx:    ctx,
-		logger: logger.New("revoke_token"),
+		logger: beaverlog.New("revoke_token", ctx),
 		svcCtx: svcCtx,
 	}
 }

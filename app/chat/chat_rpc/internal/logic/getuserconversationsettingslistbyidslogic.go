@@ -27,21 +27,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserConversationSettingsListByIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserConversationSettingsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserConversationSettingsListByIdsLogic {
 	return &GetUserConversationSettingsListByIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_conversation_settings_list_by_ids", ctx),
 	}
 }
 
@@ -50,7 +50,7 @@ func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsL
 	var userConversations []chat_models.ChatUserConversation
 	err := l.svcCtx.DB.Where("user_id = ? AND conversation_id IN (?)", in.UserId, in.ConversationIds).Find(&userConversations).Error
 	if err != nil {
-		l.Errorf("查询用户会话设置失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户会话设置失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 

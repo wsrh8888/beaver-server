@@ -22,35 +22,36 @@
 package logic
 
 import (
-	"beaver/app/datasync/datasync_api/internal/svc"
-	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/group/group_rpc/types/group_rpc"
 	"context"
 	"errors"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/app/datasync/datasync_api/internal/svc"
+	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncGroupRequestsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取所有需要更新的入群申请版本
 func NewGetSyncGroupRequestsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncGroupRequestsLogic {
 	return &GetSyncGroupRequestsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_group_requests", ctx),
 	}
 }
 
 func (l *GetSyncGroupRequestsLogic) GetSyncGroupRequests(req *types.GetSyncGroupRequestsReq) (resp *types.GetSyncGroupRequestsRes, err error) {
 	userId := req.UserID
 	if userId == "" {
-		l.Errorf("用户ID为空")
+		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -60,7 +61,7 @@ func (l *GetSyncGroupRequestsLogic) GetSyncGroupRequests(req *types.GetSyncGroup
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取用户群组申请版本失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户群组申请版本失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 

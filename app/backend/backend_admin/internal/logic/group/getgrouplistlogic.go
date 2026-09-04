@@ -27,19 +27,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetGroupListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupListLogic {
 	return &GetGroupListLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_group_list", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -54,7 +54,10 @@ func (l *GetGroupListLogic) GetGroupList(req *types.GetGroupListReq) (resp *type
 		Keywords: req.Keywords,
 	})
 	if err != nil {
-		l.Errorf("获取群组列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取群组列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

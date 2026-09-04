@@ -23,6 +23,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
@@ -30,20 +31,20 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type PinnedChatLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewPinnedChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PinnedChatLogic {
 	return &PinnedChatLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("pinned_chat", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -51,10 +52,8 @@ func NewPinnedChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pinned
 func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.PinnedChatRes, err error) {
 	resp = &types.PinnedChatRes{}
 
-	// 获取下一个版本号
 	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
 
-	// 更新会话置顶状态和版本号
 	err = l.svcCtx.DB.Model(&chat_models.ChatUserConversation{}).
 		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 		Updates(map[string]interface{}{
@@ -62,11 +61,28 @@ func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.Pinn
 			"version":   version,
 		}).Error
 	if err != nil {
-		l.Logger.Errorf("pinned chat update failed: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新置顶状态失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"isPinned":       req.IsPinned,
+				"err":            err.Error(),
+			},
+		})
 		return nil, err
 	}
 
-	// 发送WS通知给自己（更新本地数据）
+	l.logger.Info(model.LogMsg{
+		Text: "置顶状态更新成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"isPinned":       req.IsPinned,
+			"version":        version,
+		},
+	})
+
 	go func() {
 		l.notifyPinnedUpdate(req.ConversationID, req.UserID, version)
 	}()
@@ -74,15 +90,20 @@ func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.Pinn
 	return resp, nil
 }
 
-// 发送置顶状态更新通知
 func (l *PinnedChatLogic) notifyPinnedUpdate(conversationId, userId string, version int64) {
 	defer func() {
 		if r := recover(); r != nil {
-			l.Logger.Errorf("发送置顶通知时发生panic: %v", r)
+			l.logger.Error(model.LogMsg{
+				Text: "推送置顶通知异常",
+				Data: map[string]any{
+					"userId":         userId,
+					"conversationId": conversationId,
+					"panic":          fmt.Sprint(r),
+				},
+			})
 		}
 	}()
 
-	// 构建用户会话表更新数据
 	userConversationsUpdate := map[string]interface{}{
 		"table":          "user_conversations",
 		"userId":         userId,
@@ -94,12 +115,10 @@ func (l *PinnedChatLogic) notifyPinnedUpdate(conversationId, userId string, vers
 		},
 	}
 
-	// 发送给自己
 	tableUpdates := []map[string]interface{}{userConversationsUpdate}
-	messageType := wsTypeConst.ChatUserConversationReceive
 	payload := map[string]interface{}{
 		"command":  wsCommandConst.CHAT_MESSAGE,
-		"type":     messageType,
+		"type":     wsTypeConst.ChatUserConversationReceive,
 		"senderId": userId,
 		"targetId": userId,
 		"body": map[string]interface{}{
@@ -107,8 +126,24 @@ func (l *PinnedChatLogic) notifyPinnedUpdate(conversationId, userId string, vers
 		},
 		"conversationId": conversationId,
 	}
-	l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
+	if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "推送置顶通知失败",
+			Data: map[string]any{
+				"userId":         userId,
+				"conversationId": conversationId,
+				"err":            err.Error(),
+			},
+		})
+		return
+	}
 
-	l.Logger.Infof("发送置顶状态更新通知: user=%s, conversation=%s, version=%d",
-		userId, conversationId, version)
+	l.logger.Info(model.LogMsg{
+		Text: "推送置顶状态更新通知",
+		Data: map[string]any{
+			"userId":         userId,
+			"conversationId": conversationId,
+			"version":        version,
+		},
+	})
 }

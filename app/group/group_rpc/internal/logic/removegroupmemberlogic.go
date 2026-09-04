@@ -29,22 +29,23 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type RemoveGroupMemberLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRemoveGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveGroupMemberLogic {
 	return &RemoveGroupMemberLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("remove_group_member", ctx),
 	}
 }
 
@@ -55,6 +56,7 @@ func (l *RemoveGroupMemberLogic) RemoveGroupMember(in *group_rpc.RemoveGroupMemb
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("成员不在群内")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -74,6 +76,7 @@ func (l *RemoveGroupMemberLogic) RemoveGroupMember(in *group_rpc.RemoveGroupMemb
 		"status":  memberStatus,
 		"version": memberVersion,
 	}).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "移除群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -89,6 +92,8 @@ func (l *RemoveGroupMemberLogic) RemoveGroupMember(in *group_rpc.RemoveGroupMemb
 		ChangeTime: time.Now(),
 		Version:    memberVersion,
 	}).Error
+
+	l.logger.Info(model.LogMsg{Text: "移除群成员成功", Data: map[string]interface{}{"groupId": in.GroupId, "userId": in.UserId, "kick": in.Kick, "memberVersion": memberVersion}})
 
 	return &group_rpc.RemoveGroupMemberRes{MemberVersion: memberVersion}, nil
 }

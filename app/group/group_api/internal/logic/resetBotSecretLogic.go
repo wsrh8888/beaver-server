@@ -29,22 +29,21 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type ResetBotSecretLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 重置机器人的签名密钥（旧 Secret 立即失效）
 func NewResetBotSecretLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetBotSecretLogic {
 	return &ResetBotSecretLogic{
 		ctx:    ctx,
-		logger: logger.New("reset_bot_secret"),
+		logger: beaverlog.New("reset_bot_secret", ctx),
 		svcCtx: svcCtx,
 	}
 }

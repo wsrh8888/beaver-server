@@ -28,19 +28,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetCircleDetailLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetCircleDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCircleDetailLogic {
 	return &GetCircleDetailLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_circle_detail", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -57,7 +57,10 @@ func (l *GetCircleDetailLogic) GetCircleDetail(req *types.GetCircleDetailReq) (r
 		PageSize: 1,
 	})
 	if err != nil {
-		l.Errorf("获取圈子详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取圈子详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	if len(rpcRes.List) == 0 {

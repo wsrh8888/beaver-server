@@ -33,24 +33,22 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type OAuthCodeLoginLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewOAuthCodeLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OAuthCodeLoginLogic {
 	return &OAuthCodeLoginLogic{
 		ctx:    ctx,
-		logger: logger.New("oauth_code_login"),
+		logger: beaverlog.New("oauth_code_login", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -72,7 +70,10 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 		Code:  req.Code,
 	})
 	if err != nil {
-		logx.Errorf("OAuth code 换 token 失败: appId=%s, err=%v", req.AppID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "OAuth换取令牌失败",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
 		return nil, errors.New("授权码无效或已过期")
 	}
 	if rpcResp.UserId == "" {
@@ -108,7 +109,7 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, profile, req.ClientIP)
 
 	l.logger.Info(model.LogMsg{
-		Text: "OAuth 授权码登录成功",
+		Text: "OAuth授权码登录成功",
 		Data: map[string]interface{}{
 			"userId":      userInfo.UserId,
 			"appId":       req.AppID,

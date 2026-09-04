@@ -22,35 +22,36 @@
 package logic
 
 import (
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	"beaver/app/datasync/datasync_api/internal/svc"
-	"beaver/app/datasync/datasync_api/internal/types"
 	"context"
 	"errors"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/datasync/datasync_api/internal/svc"
+	"beaver/app/datasync/datasync_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncChatConversationsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取所有需要更新的会话元信息版本
 func NewGetSyncChatConversationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncChatConversationsLogic {
 	return &GetSyncChatConversationsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_chat_conversations", ctx),
 	}
 }
 
 func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetSyncChatConversationsReq) (resp *types.GetSyncChatConversationsRes, err error) {
 	userId := req.UserID
 	if userId == "" {
-		l.Errorf("用户ID为空")
+		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -59,7 +60,7 @@ func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetS
 		UserId: userId,
 	})
 	if err != nil {
-		l.Errorf("获取用户会话列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户会话列表失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -83,7 +84,7 @@ func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetS
 		Since:           req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取变更的会话版本信息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取变更的会话版本信息失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 

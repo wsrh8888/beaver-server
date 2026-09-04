@@ -30,21 +30,21 @@ import (
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type UpdateOAuthConfigLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 更新 OAuth 配置
 func NewUpdateOAuthConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateOAuthConfigLogic {
 	return &UpdateOAuthConfigLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("update_oauth_config", ctx),
 	}
 }
 

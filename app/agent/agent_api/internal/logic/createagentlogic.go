@@ -8,19 +8,19 @@ import (
 	"beaver/app/agent/agent_api/internal/svc"
 	"beaver/app/agent/agent_api/internal/types"
 	"beaver/app/agent/agent_rpc/types/agent_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateAgentLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateAgentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateAgentLogic {
 	return &CreateAgentLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_agent", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -44,7 +44,7 @@ func (l *CreateAgentLogic) CreateAgent(req *types.CreateAgentReq) (*types.Create
 		Description: strings.TrimSpace(req.Description),
 	})
 	if err != nil {
-		l.Errorf("CreateAgent rpc failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建智能体失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, err
 	}
 

@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteChatMessageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteChatMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteChatMessageLogic {
-	return &DeleteChatMessageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteChatMessageLogic{logger: beaverlog.New("delete_chat_message", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *DeleteChatMessageLogic) DeleteChatMessage(req *types.DeleteChatMessageReq) (resp *types.DeleteChatMessageRes, err error) {
@@ -52,7 +52,10 @@ func (l *DeleteChatMessageLogic) DeleteChatMessage(req *types.DeleteChatMessageR
 		Status:     chatMessageStatusDeleted,
 	})
 	if err != nil {
-		l.Errorf("删除聊天消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除聊天消息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteChatMessageRes{}, nil

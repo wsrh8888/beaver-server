@@ -33,22 +33,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type InviteMemberLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 群聊中邀请成员入场
 func NewInviteMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InviteMemberLogic {
 	return &InviteMemberLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("invite_member", ctx),
 	}
 }
 
@@ -56,6 +56,10 @@ func (l *InviteMemberLogic) InviteMember(req *types.InviteCallMemberReq) (resp *
 	// 1. 获取会话信息 (主要为了拿到 ConversationID 和 CallType)
 	session, err := l.svcCtx.CallRpc.GetSession(l.ctx, &call_rpc.GetSessionReq{RoomId: req.RoomID})
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "获取通话会话失败",
+			Data: map[string]any{"roomId": req.RoomID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -120,6 +124,16 @@ func (l *InviteMemberLogic) InviteMember(req *types.InviteCallMemberReq) (resp *
 		// 5. 开启超时处理定时器 (60秒未接听则自动设为超时)
 		l.startTimeoutTimer(req.RoomID, targetID)
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "邀请通话成员成功",
+		Data: map[string]interface{}{
+			"roomId":         req.RoomID,
+			"callerId":       req.UserID,
+			"targetIds":      req.TargetIds,
+			"conversationId": session.ConversationId,
+		},
+	})
 
 	return &types.InviteCallMemberRes{}, nil
 }

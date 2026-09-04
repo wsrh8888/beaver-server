@@ -28,8 +28,9 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type GetFileByIdLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFileByIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFileByIdLogic {
-	return &GetFileByIdLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &GetFileByIdLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_file_by_id", ctx)}
 }
 
 func (l *GetFileByIdLogic) GetFileById(in *file_rpc.GetFileByIdReq) (*file_rpc.GetFileByIdRes, error) {
@@ -51,6 +52,10 @@ func (l *GetFileByIdLogic) GetFileById(in *file_rpc.GetFileByIdReq) (*file_rpc.G
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "文件不存在")
 		}
+		l.logger.Error(model.LogMsg{
+			Text: "按ID查询文件失败",
+			Data: map[string]any{"id": in.Id, "err": err.Error()},
+		})
 		return nil, err
 	}
 	return &file_rpc.GetFileByIdRes{File: toFileItem(file)}, nil

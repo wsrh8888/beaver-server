@@ -28,22 +28,23 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type SearchValidInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewSearchValidInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchValidInfoLogic {
 	return &SearchValidInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("search_valid_info", ctx),
 	}
 }
 
@@ -68,16 +69,16 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			l.Logger.Infof("好友验证记录不存在: userID=%s, friendID=%s", req.UserID, req.FriendID)
+			l.logger.Info(model.LogMsg{Text: "好友验证记录不存在", Data: map[string]any{"userId": req.UserID, "friendId": req.FriendID}})
 			return nil, errors.New("好友验证不存在")
 		}
-		l.Logger.Errorf("查询好友验证记录失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询好友验证记录失败", Data: map[string]any{"err": err.Error()}})
 		return nil, errors.New("查询好友验证记录失败")
 	}
 
 	// 检查验证状态
 	if friendVerify.RevStatus != 0 {
-		l.Logger.Errorf("好友验证已处理: verifyID=%s, status=%d", friendVerify.VerifyID, friendVerify.RevStatus)
+		l.logger.Error(model.LogMsg{Text: "好友验证已处理", Data: map[string]any{"verifyId": friendVerify.VerifyID, "status": friendVerify.RevStatus}})
 		return nil, errors.New("该验证已处理，无法重复操作")
 	}
 
@@ -86,6 +87,6 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 		ValidID: friendVerify.VerifyID, // 返回验证记录ID
 	}
 
-	l.Logger.Infof("查询好友验证信息成功: userID=%s, friendID=%s, validID=%s", req.UserID, req.FriendID, friendVerify.VerifyID)
+	l.logger.Info(model.LogMsg{Text: "查询好友验证信息成功", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "validId": friendVerify.VerifyID}})
 	return resp, nil
 }

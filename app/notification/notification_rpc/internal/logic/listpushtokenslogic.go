@@ -28,21 +28,21 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListPushTokensLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListPushTokensLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListPushTokensLogic {
 	return &ListPushTokensLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("list_push_tokens", ctx),
 	}
 }
 
@@ -53,7 +53,10 @@ func (l *ListPushTokensLogic) ListPushTokens(in *notification_rpc.ListPushTokens
 
 	var rows []notification_models.PushRegistrationModel
 	if err := l.svcCtx.DB.Where("user_id = ? AND enabled = ?", in.UserId, true).Find(&rows).Error; err != nil {
-		l.Errorf("查询 Push Token 失败: userId=%s, err=%v", in.UserId, err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询PushToken列表失败",
+			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+		})
 		return nil, errors.New("查询 Push Token 失败")
 	}
 

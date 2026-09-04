@@ -27,21 +27,21 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserGroupIDsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserGroupIDsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserGroupIDsLogic {
 	return &GetUserGroupIDsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_group_ids", ctx),
 	}
 }
 
@@ -54,7 +54,7 @@ func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *group_rpc.GetUserGroupIDsReq)
 		Find(&members).Error
 
 	if err != nil {
-		l.Errorf("查询用户群组ID失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户群组ID失败", Data: map[string]any{"userId": in.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -64,7 +64,7 @@ func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *group_rpc.GetUserGroupIDsReq)
 		groupIDs = append(groupIDs, member.GroupID)
 	}
 
-	l.Infof("获取用户群组ID成功，用户ID: %s, 群组数: %d", in.UserID, len(groupIDs))
+	l.logger.Info(model.LogMsg{Text: "获取用户群组ID成功", Data: map[string]interface{}{"userId": in.UserID, "count": len(groupIDs)}})
 
 	return &group_rpc.GetUserGroupIDsRes{
 		GroupIDs: groupIDs,

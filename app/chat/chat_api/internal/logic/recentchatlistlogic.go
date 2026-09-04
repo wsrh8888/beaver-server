@@ -31,20 +31,20 @@ import (
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/utils/conversation"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RecentChatListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewRecentChatListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RecentChatListLogic {
 	return &RecentChatListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("recent_chat_list", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -58,6 +58,10 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		Order("is_pinned DESC, updated_at DESC").
 		Find(&userConversations).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询最近会话失败",
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -71,6 +75,10 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		err = l.svcCtx.DB.Where("conversation_id IN (?)", conversationIds).
 			Find(&conversationMetas).Error
 		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "查询会话元数据失败",
+				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			})
 			return nil, err
 		}
 	}
@@ -116,7 +124,10 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			FriendIds: userIds,
 		})
 		if err != nil {
-			logx.Errorf("获取好友详情失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "获取好友详情失败",
+				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			})
 			return nil, err
 		}
 		friendDetails = friendDetailRes.Friends
@@ -139,7 +150,10 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 				GroupIDs: actualGroupIds,
 			})
 			if err != nil {
-				logx.Errorf("获取群组详情失败: %v", err)
+				l.logger.Error(model.LogMsg{
+					Text: "获取群组详情失败",
+					Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+				})
 				return nil, err
 			}
 			groupDetails = groupRes.Groups
@@ -222,6 +236,13 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		respList = append(respList, chatInfo)
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "拉取最近会话成功",
+		Data: map[string]any{
+			"userId": req.UserID,
+			"count":  len(respList),
+		},
+	})
 	return &types.RecentChatListRes{
 		List:  respList,
 		Count: int64(len(respList)),

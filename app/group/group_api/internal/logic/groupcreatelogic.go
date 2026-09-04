@@ -36,23 +36,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	utils "beaver/utils/rand"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type GroupCreateLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGroupCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupCreateLogic {
 	return &GroupCreateLogic{
 		ctx:    ctx,
-		logger: logger.New("group_create"),
+		logger: beaverlog.New("group_create", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -65,7 +63,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	// 获取该群组的版本号（每个群独立递增）
 	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", groupID)
 	if groupVersion == -1 {
-		logx.Errorf("获取群组版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取群组版本号失败", Data: map[string]interface{}{"groupId": groupID}})
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -85,7 +83,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 
 	err = l.svcCtx.DB.Create(&groupModel).Error
 	if err != nil {
-		logx.Errorf("创建群失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建群失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("创建群失败")
 	}
 
@@ -108,7 +106,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	}
 
 	if err = l.svcCtx.DB.Create(&members).Error; err != nil {
-		logx.Errorf("创建群成员失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建群成员失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("创建群成员失败")
 	}
 
@@ -121,7 +119,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		MaxUses:   0,
 		Status:    1,
 	}).Error; err != nil {
-		logx.Errorf("创建群邀请失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建群邀请失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("创建群邀请失败")
 	}
 
@@ -131,7 +129,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		// 获取全局递增的变更日志版本号
 		logVersion := l.svcCtx.VersionGen.GetNextVersion("group_member_logs", "", "")
 		if logVersion == -1 {
-			logx.Errorf("获取变更日志版本号失败，用户ID: %s", member.UserID)
+			l.logger.Error(model.LogMsg{Text: "获取变更日志版本号失败", Data: map[string]interface{}{"userId": member.UserID}})
 			return nil, errors.New("获取版本号失败")
 		}
 
@@ -148,7 +146,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 
 	err = l.svcCtx.DB.Create(&changeLogs).Error
 	if err != nil {
-		logx.Errorf("创建群成员变更日志失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建群成员变更日志失败", Data: map[string]interface{}{"err": err.Error()}})
 		// 这里不返回错误，因为主要功能已经完成，只是日志记录失败
 	}
 
@@ -161,7 +159,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			GroupID: groupModel.GroupID,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": groupModel.GroupID, "err": err.Error()}})
 			return
 		}
 
@@ -173,7 +171,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			UserIds:        allUserIDs,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("初始化群聊会话失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "初始化群聊会话失败", Data: map[string]interface{}{"groupId": groupModel.GroupID, "err": err.Error()}})
 			return
 		}
 
@@ -181,7 +179,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					logx.WithContext(l.ctx).Errorf("异步发送群创建消息时发生panic: %v", r)
+					l.logger.Error(model.LogMsg{Text: "异步发送群创建消息时发生panic", Data: map[string]interface{}{"panic": fmt.Sprintf("%v", r)}})
 				}
 			}()
 
@@ -193,9 +191,9 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 				RelatedUserId:  req.UserID,                          // 创建者ID
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("异步发送群创建消息失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "异步发送群创建消息失败", Data: map[string]interface{}{"groupId": groupModel.GroupID, "err": err.Error()}})
 			} else {
-				logx.WithContext(l.ctx).Infof("异步发送群创建消息成功: groupID=%s", groupModel.GroupID)
+				l.logger.Info(model.LogMsg{Text: "异步发送群创建消息成功", Data: map[string]interface{}{"groupId": groupModel.GroupID}})
 			}
 		}()
 

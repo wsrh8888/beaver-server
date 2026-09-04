@@ -29,28 +29,31 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UserSyncLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 用户数据同步
 func NewUserSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserSyncLogic {
 	return &UserSyncLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("user_sync", ctx),
 	}
 }
 
 func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRes, err error) {
 	if len(req.UserVersions) == 0 {
-		l.Infof("没有指定要同步的用户数据，用户ID: %s", req.UserID)
+		l.logger.Info(model.LogMsg{
+			Text: "未指定同步用户数据",
+			Data: map[string]any{"userId": req.UserID},
+		})
 		return &types.UserSyncRes{Users: []types.UserSyncItem{}}, nil
 	}
 
@@ -67,7 +70,10 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	var users []user_models.UserModel
 	if err = l.svcCtx.DB.Where(strings.Join(conditions, " OR "), args...).
 		Order("version ASC").Find(&users).Error; err != nil {
-		l.Errorf("查询相关用户数据失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询相关用户数据失败",
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -90,8 +96,14 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 		}
 	}
 
-	l.Infof("用户数据同步完成，用户ID: %s, 请求同步用户数: %d, 返回用户数: %d",
-		req.UserID, len(req.UserVersions), len(userItems))
+	l.logger.Info(model.LogMsg{
+		Text: "用户数据同步完成",
+		Data: map[string]interface{}{
+			"userId":       req.UserID,
+			"requestCount": len(req.UserVersions),
+			"resultCount":  len(userItems),
+		},
+	})
 
 	return &types.UserSyncRes{Users: userItems}, nil
 }

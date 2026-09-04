@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RemoveGroupMemberLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewRemoveGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveGroupMemberLogic {
-	return &RemoveGroupMemberLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RemoveGroupMemberLogic{logger: beaverlog.New("remove_group_member", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *RemoveGroupMemberLogic) RemoveGroupMember(req *types.RemoveGroupMemberReq) (resp *types.RemoveGroupMemberRes, err error) {
@@ -56,7 +56,10 @@ func (l *RemoveGroupMemberLogic) RemoveGroupMember(req *types.RemoveGroupMemberR
 			UserId:  userID,
 			Kick:    true,
 		}); err != nil {
-			l.Errorf("移除群成员失败 groupId=%s userId=%s: %v", req.GroupId, userID, err)
+			l.logger.Error(model.LogMsg{
+				Text: "移除群成员失败",
+				Data: map[string]interface{}{"groupId": req.GroupId, "userId": userID, "err": err.Error()},
+			})
 			return nil, err
 		}
 	}

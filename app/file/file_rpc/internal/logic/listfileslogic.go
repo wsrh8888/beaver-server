@@ -27,18 +27,18 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListFilesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListFilesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFilesLogic {
-	return &ListFilesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListFilesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_files", ctx)}
 }
 
 func (l *ListFilesLogic) ListFiles(in *file_rpc.ListFilesReq) (*file_rpc.ListFilesRes, error) {
@@ -64,13 +64,19 @@ func (l *ListFilesLogic) ListFiles(in *file_rpc.ListFilesReq) (*file_rpc.ListFil
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计文件失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计文件失败",
+			Data: map[string]any{"type": in.Type, "keywords": in.Keywords, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var list []file_models.FileModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询文件列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询文件列表失败",
+			Data: map[string]any{"type": in.Type, "keywords": in.Keywords, "page": page, "pageSize": pageSize, "err": err.Error()},
+		})
 		return nil, err
 	}
 

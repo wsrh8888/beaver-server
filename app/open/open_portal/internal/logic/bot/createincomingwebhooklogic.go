@@ -34,19 +34,19 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/user"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateIncomingWebhookLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateIncomingWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateIncomingWebhookLogic {
 	return &CreateIncomingWebhookLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_incoming_webhook", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -106,7 +106,7 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 	})
 	if err != nil {
 		_, _ = l.svcCtx.OpenRpc.DeleteBot(l.ctx, &open_rpc.DeleteBotReq{Id: rpcRes.Id})
-		logx.Errorf("推送 Bot 入群失败: group=%s bot=%s err=%v", req.GroupID, userRes.UserID, err)
+		l.logger.Error(model.LogMsg{Text: "推送 Bot 入群失败", Data: map[string]interface{}{"group_id": req.GroupID, "user_id": userRes.UserID, "err": err}})
 		return nil, errors.New("推送 Bot 入群失败")
 	}
 

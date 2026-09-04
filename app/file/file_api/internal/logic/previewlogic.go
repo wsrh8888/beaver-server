@@ -26,21 +26,20 @@ import (
 
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type PreviewLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewPreviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PreviewLogic {
 	return &PreviewLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("preview", ctx),
 	}
 }
 

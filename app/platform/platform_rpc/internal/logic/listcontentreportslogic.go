@@ -27,18 +27,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListContentReportsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListContentReportsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListContentReportsLogic {
-	return &ListContentReportsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListContentReportsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_content_reports", ctx)}
 }
 
 func (l *ListContentReportsLogic) ListContentReports(in *platform_rpc.ListContentReportsReq) (*platform_rpc.ListContentReportsRes, error) {
@@ -70,11 +70,13 @@ func (l *ListContentReportsLogic) ListContentReports(in *platform_rpc.ListConten
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "统计举报失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []platform_models.ContentReportModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询举报列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

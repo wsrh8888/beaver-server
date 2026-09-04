@@ -29,18 +29,17 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetWebhookListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetWebhookListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetWebhookListLogic {
-	return &GetWebhookListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetWebhookListLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_webhook_list", ctx)}
 }
 
 func (l *GetWebhookListLogic) GetWebhookList(req *types.GetWebhookListReq, authorization string) (resp *types.GetWebhookListRes, err error) {

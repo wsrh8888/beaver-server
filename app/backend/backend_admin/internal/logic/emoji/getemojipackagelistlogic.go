@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEmojiPackageListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetEmojiPackageListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackageListLogic {
-	return &GetEmojiPackageListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetEmojiPackageListLogic{logger: beaverlog.New("get_emoji_package_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // GetEmojiPackageList 管理后台：表情包列表查询。
@@ -56,7 +56,10 @@ func (l *GetEmojiPackageListLogic) GetEmojiPackageList(req *types.GetEmojiPackag
 		EndTime:   req.EndTime,
 	})
 	if err != nil {
-		l.Errorf("获取表情包列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取表情包列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

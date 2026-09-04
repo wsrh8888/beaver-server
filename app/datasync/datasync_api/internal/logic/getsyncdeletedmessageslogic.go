@@ -29,22 +29,22 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncDeletedMessagesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取所有需要更新的已删除消息ID列表
 func NewGetSyncDeletedMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncDeletedMessagesLogic {
 	return &GetSyncDeletedMessagesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_deleted_messages", ctx),
 	}
 }
 
@@ -60,7 +60,7 @@ func (l *GetSyncDeletedMessagesLogic) GetSyncDeletedMessages(req *types.GetSyncD
 
 	err = query.Find(&deletes).Error
 	if err != nil {
-		l.Logger.Errorf("同步已删除消息失败: userId=%s, error=%v", req.UserID, err)
+		l.logger.Error(model.LogMsg{Text: "同步已删除消息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("同步失败")
 	}
 

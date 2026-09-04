@@ -27,21 +27,21 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserGroupMembersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserGroupMembersLogic {
 	return &GetUserGroupMembersLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_group_members", ctx),
 	}
 }
 
@@ -54,7 +54,7 @@ func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *group_rpc.GetUserGrou
 		Find(&userMembers).Error
 
 	if err != nil {
-		l.Errorf("查询用户群组失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户群组失败", Data: map[string]any{"userId": in.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *group_rpc.GetUserGrou
 	}
 
 	if len(groupIDs) == 0 {
-		l.Infof("用户未加入任何群组，用户ID: %s", in.UserID)
+		l.logger.Info(model.LogMsg{Text: "用户未加入任何群组", Data: map[string]any{"userId": in.UserID}})
 		return &group_rpc.GetUserGroupMembersRes{
 			MemberIDs: []string{},
 		}, nil
@@ -78,7 +78,7 @@ func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *group_rpc.GetUserGrou
 		Find(&allMembers).Error
 
 	if err != nil {
-		l.Errorf("查询群组成员失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组成员失败", Data: map[string]any{"userId": in.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -93,7 +93,7 @@ func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *group_rpc.GetUserGrou
 		}
 	}
 
-	l.Infof("获取用户群成员成功，用户ID: %s, 群成员数: %d", in.UserID, len(allMemberIDs))
+	l.logger.Info(model.LogMsg{Text: "获取用户群成员成功", Data: map[string]interface{}{"userId": in.UserID, "count": len(allMemberIDs)}})
 
 	return &group_rpc.GetUserGroupMembersRes{
 		MemberIDs: allMemberIDs,

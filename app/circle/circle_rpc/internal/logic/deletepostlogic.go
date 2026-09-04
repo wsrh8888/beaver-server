@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_models"
 	"beaver/app/circle/circle_rpc/internal/svc"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeletePostLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeletePostLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeletePostLogic {
 	return &DeletePostLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("delete_post", ctx),
 	}
 }
 
@@ -53,8 +53,11 @@ func (l *DeletePostLogic) DeletePost(in *circle_rpc.DeletePostReq) (*circle_rpc.
 	}
 
 	if err := l.svcCtx.DB.Model(&post).Update("is_deleted", true).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "删除帖子失败", Data: map[string]any{"postId": in.PostId, "err": err.Error()}})
 		return nil, fmt.Errorf("删除帖子失败: %v", err)
 	}
+
+	l.logger.Info(model.LogMsg{Text: "删除帖子成功", Data: map[string]interface{}{"postId": in.PostId}})
 
 	return &circle_rpc.DeletePostRes{}, nil
 }

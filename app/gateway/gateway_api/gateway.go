@@ -24,7 +24,7 @@ package main
 import (
 	"beaver/app/gateway/gateway_api/core"
 	"beaver/app/gateway/gateway_api/types"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
 	"net/http"
@@ -45,7 +45,7 @@ func main() {
 
 	conf.MustLoad(*configFile, &config)
 	logx.SetUp(config.Log)
-	logger.Init("gateway_api")
+	beaverlog.Init(config.Name)
 	proxy := core.Proxy{
 		Config: config,
 	}
@@ -67,6 +67,7 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFun
 	w.Header().Set("Access-Control-Allow-Origin", "*") // 设置允许的源域名
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Expose-Headers", "X-Request-Id, Uuid")
 
 	// 如果是预检请求，直接返回
 	if r.Method == http.MethodOptions {

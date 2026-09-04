@@ -32,21 +32,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type InviteCircleMembersLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewInviteCircleMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InviteCircleMembersLogic {
 	return &InviteCircleMembersLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("invite_circle_members", ctx),
 	}
 }
 
@@ -83,6 +83,7 @@ func (l *InviteCircleMembersLogic) InviteCircleMembers(req *types.InviteCircleMe
 			Role:     3,
 		}
 		if err = l.svcCtx.DB.Create(&member).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "添加圈子成员失败", Data: map[string]any{"circleId": req.CircleID, "userId": userID, "err": err.Error()}})
 			return nil, fmt.Errorf("添加成员失败: %v", err)
 		}
 		addedUserIds = append(addedUserIds, userID)
@@ -128,10 +129,12 @@ func (l *InviteCircleMembersLogic) InviteCircleMembers(req *types.InviteCircleMe
 				"conversationId": conversationID,
 			}
 			if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
-				logx.Errorf("推送圈子资料同步失败: circleID=%s, targetID=%s, err=%v", req.CircleID, targetID, err)
+				l.logger.Error(model.LogMsg{Text: "推送圈子资料同步失败", Data: map[string]any{"circleId": req.CircleID, "targetId": targetID, "err": err.Error()}})
 			}
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{Text: "邀请圈子成员成功", Data: map[string]interface{}{"circleId": req.CircleID, "addedUserIds": addedUserIds}})
 
 	return &types.InviteCircleMembersRes{}, nil
 }

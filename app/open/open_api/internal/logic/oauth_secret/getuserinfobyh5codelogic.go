@@ -28,21 +28,21 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserInfoByH5CodeLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetUserInfoByH5CodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserInfoByH5CodeLogic {
 	return &GetUserInfoByH5CodeLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_user_info_by_h5_code", ctx),
 	}
 }
 
@@ -60,7 +60,7 @@ func (l *GetUserInfoByH5CodeLogic) GetUserInfoByH5Code(req *types.GetUserInfoByH
 	}
 
 	if err := l.svcCtx.DB.Model(oauthCode).Update("used", true).Error; err != nil {
-		logx.Errorf("标记 authCode 已使用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "标记 authCode 已使用失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("服务内部异常")
 	}
 
@@ -68,7 +68,7 @@ func (l *GetUserInfoByH5CodeLogic) GetUserInfoByH5Code(req *types.GetUserInfoByH
 		UserID: oauthCode.UserID,
 	})
 	if err != nil {
-		logx.Errorf("查询用户信息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户信息失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("获取用户信息失败")
 	}
 	if userInfoRes.UserInfo == nil {

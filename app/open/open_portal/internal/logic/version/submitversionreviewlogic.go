@@ -28,21 +28,21 @@ import (
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type SubmitVersionReviewLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 提交版本审核
 func NewSubmitVersionReviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubmitVersionReviewLogic {
 	return &SubmitVersionReviewLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("submit_version_review", ctx),
 	}
 }
 

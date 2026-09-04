@@ -27,21 +27,21 @@ import (
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/internal/svc"
 	"beaver/app/call/call_rpc/types/call_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetParticipantsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetParticipantsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetParticipantsLogic {
 	return &GetParticipantsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_participants", ctx),
 	}
 }
 
@@ -49,6 +49,10 @@ func NewGetParticipantsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 func (l *GetParticipantsLogic) GetParticipants(in *call_rpc.GetParticipantsReq) (*call_rpc.GetParticipantsRes, error) {
 	var participants []call_models.CallParticipant
 	if err := l.svcCtx.DB.Where("room_id = ?", in.RoomId).Find(&participants).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通话参与者列表失败",
+			Data: map[string]any{"roomId": in.RoomId, "err": err.Error()},
+		})
 		return nil, err
 	}
 

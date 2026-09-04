@@ -27,21 +27,20 @@ import (
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type ConfirmQrCodeLoginLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewConfirmQrCodeLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ConfirmQrCodeLoginLogic {
 	return &ConfirmQrCodeLoginLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("confirm_qrcode_login", ctx),
 	}
 }
 

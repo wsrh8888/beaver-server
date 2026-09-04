@@ -27,21 +27,18 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type ExecuteUserControlLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewExecuteUserControlLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ExecuteUserControlLogic {
-	return &ExecuteUserControlLogic{logger: logger.New("execute_user_control"), ctx: ctx, svcCtx: svcCtx}
+	return &ExecuteUserControlLogic{logger: beaverlog.New("execute_user_control", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *ExecuteUserControlLogic) ExecuteUserControl(req *types.ExecuteUserControlReq) (resp *types.ExecuteUserControlRes, err error) {
@@ -58,7 +55,10 @@ func (l *ExecuteUserControlLogic) ExecuteUserControl(req *types.ExecuteUserContr
 		Reason: req.Reason,
 	}
 	if err = executeControlAction(l.ctx, l.svcCtx, req.OperatorID, req.CaseID, act); err != nil {
-		logx.WithContext(l.ctx).Errorf("用户管控失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "用户管控失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{

@@ -1,4 +1,4 @@
-Name: emoji
+Name: emoji_api
 Host: 0.0.0.0
 Port: 20700
 Mysql:

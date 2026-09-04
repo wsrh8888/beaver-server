@@ -29,7 +29,8 @@ import (
 	"beaver/app/user/user_api/internal/handler"
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/common/etcd"
-	"beaver/utils/logger"
+	httpMiddleware "beaver/common/middleware/http"
+	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -42,10 +43,12 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("user_api")
+	beaverlog.InitFromConf(c.RestConf.ServiceConf)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
+
+	server.Use(httpMiddleware.TraceMiddleware)
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
@@ -53,5 +56,6 @@ func main() {
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+
 	server.Start()
 }

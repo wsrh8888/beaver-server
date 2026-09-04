@@ -31,29 +31,29 @@ import (
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncAllUsersLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取需要同步的用户列表
 func NewGetSyncAllUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncAllUsersLogic {
 	return &GetSyncAllUsersLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_all_users", ctx),
 	}
 }
 
 func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (resp *types.GetSyncAllUsersRes, err error) {
 	userId := req.UserID
 	if userId == "" {
-		l.Errorf("用户ID为空")
+		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -76,7 +76,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 			UserID: userId,
 		})
 		if err != nil {
-			l.Errorf("获取好友列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取好友列表失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 			return nil, err
 		}
 		for _, uid := range friendResp.FriendIds {
@@ -90,7 +90,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 			UserID: userId,
 		})
 		if err != nil {
-			l.Errorf("获取群成员列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 			return nil, err
 		}
 		for _, uid := range groupResp.MemberIDs {
@@ -105,7 +105,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 			Since:  0, // 获取所有相关验证，不需要增量
 		})
 		if err != nil {
-			l.Errorf("获取好友验证列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取好友验证列表失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 			return nil, err
 		}
 
@@ -120,7 +120,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 				VerifyIds: verifyIds,
 			})
 			if err != nil {
-				l.Errorf("获取好友验证详情失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "获取好友验证详情失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 				return nil, err
 			}
 
@@ -140,7 +140,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 			UserID: userId,
 		})
 		if err != nil {
-			l.Errorf("获取用户群组ID列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取用户群组ID列表失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 			return nil, err
 		}
 
@@ -151,7 +151,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 				Since:    0, // 获取所有申请，不需要增量
 			})
 			if err != nil {
-				l.Errorf("获取群加入申请失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "获取群加入申请失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 				return nil, err
 			}
 
@@ -164,7 +164,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 	// 检查是否有不支持的类型
 	if !needFriends && !needGroups {
-		l.Errorf("不支持的类型: %s", req.Type)
+		l.logger.Error(model.LogMsg{Text: "不支持的类型", Data: map[string]any{"type": req.Type}})
 		return nil, errors.New("不支持的类型")
 	}
 
@@ -186,7 +186,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 		SinceTimestamp: req.Since, // 传递since参数进行增量过滤
 	})
 	if err != nil {
-		l.Errorf("调用user RPC获取用户信息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "调用userRPC获取用户信息失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 

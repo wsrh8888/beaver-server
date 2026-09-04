@@ -29,27 +29,36 @@ import (
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetMomentDetailLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取动态详情的接口（包含更多评论和点赞）
 func NewGetMomentDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentDetailLogic {
 	return &GetMomentDetailLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_moment_detail", ctx),
 	}
 }
 
 func (l *GetMomentDetailLogic) GetMomentDetail(req *types.GetMomentDetailReq) (resp *types.GetMomentDetailRes, err error) {
+	defer func() {
+		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "获取动态详情失败",
+				Data: map[string]any{"momentId": req.MomentID, "err": err.Error()},
+			})
+		}
+	}()
 	// 获取动态信息
 	var moment moment_models.MomentModel
 	if err := l.svcCtx.DB.Where("moment_id = ? AND is_deleted = false", req.MomentID).First(&moment).Error; err != nil {

@@ -28,12 +28,12 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateAppLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -41,7 +41,7 @@ type UpdateAppLogic struct {
 // 更新应用
 func NewUpdateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateAppLogic {
 	return &UpdateAppLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_app", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -72,11 +72,11 @@ func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateA
 	}
 
 	if err := l.svcCtx.DB.Model(&app).Updates(updates).Error; err != nil {
-		logx.Errorf("更新应用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新应用失败", Data: map[string]interface{}{"err": err}})
 		return nil, errors.New("更新失败")
 	}
 
-	logx.Infof("应用更新成功: app_id=%s", req.AppID)
+	l.logger.Info(model.LogMsg{Text: "应用更新成功", Data: map[string]interface{}{"app_id": req.AppID}})
 
 	return &types.UpdateAppRes{}, nil
 }

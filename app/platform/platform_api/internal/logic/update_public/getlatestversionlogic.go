@@ -30,22 +30,23 @@ import (
 	"beaver/app/platform/platform_api/internal/types"
 	"beaver/app/platform/platform_models"
 	"beaver/core/coreupdate"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetLatestVersionLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetLatestVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetLatestVersionLogic {
 	return &GetLatestVersionLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_latest_version", ctx),
 	}
 }
 
@@ -59,6 +60,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("应用不存在或已停用")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询应用失败", Data: map[string]any{"appId": req.AppID, "err": err.Error()}})
 		return nil, fmt.Errorf("查询应用失败")
 	}
 
@@ -68,6 +70,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("不支持的平台或架构")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询架构失败", Data: map[string]any{"appId": req.AppID, "platformId": req.PlatformID, "archId": req.ArchID, "err": err.Error()}})
 		return nil, fmt.Errorf("查询架构失败")
 	}
 
@@ -96,6 +99,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &types.GetLatestVersionRes{HasUpdate: false}, nil
 		}
+		l.logger.Error(model.LogMsg{Text: "查询目标版本失败", Data: map[string]any{"targetVersionId": resolved.TargetVersionID, "err": err.Error()}})
 		return nil, fmt.Errorf("查询目标版本失败")
 	}
 
@@ -113,8 +117,17 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		ReleaseNotes:   target.ReleaseNotes,
 	}
 
-	logx.Infof("检查更新: app=%s arch=%d current=%s target=%s gray=%v force=%v",
-		req.AppID, architecture.Id, req.Version, target.Version, resolved.InGrayRollout, resolved.ForceUpdate)
+	l.logger.Info(model.LogMsg{
+		Text: "检查更新",
+		Data: map[string]interface{}{
+			"appId":         req.AppID,
+			"archId":        architecture.Id,
+			"currentVersion": req.Version,
+			"targetVersion": target.Version,
+			"inGrayRollout":  resolved.InGrayRollout,
+			"forceUpdate":    resolved.ForceUpdate,
+		},
+	})
 
 	return resp, nil
 }

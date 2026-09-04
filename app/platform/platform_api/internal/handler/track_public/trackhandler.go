@@ -19,33 +19,29 @@
  * beaver-server-header-v1
  */
 
-package httpMiddleware
+package handler
 
 import (
-	"beaver/common/middleware/utils"
-	"bytes"
-	"io"
 	"net/http"
-	"time"
+
+	logic "beaver/app/platform/platform_api/internal/logic/track_public"
+	"beaver/app/platform/platform_api/internal/svc"
+	"beaver/app/platform/platform_api/internal/types"
+	"beaver/common/response"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// RequestLogMiddleware 请求日志中间件
-func RequestLogMiddleware(next http.HandlerFunc) http.HandlerFunc {
+func TrackHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-
-		// 读取请求体
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			utils.LogRequest(r.Method, r.URL.Path, string(body), nil, err, startTime)
+		var req types.TrackReq
+		if err := httpx.Parse(r, &req); err != nil {
+			response.Response(r, w, nil, err)
 			return
 		}
-		// 恢复请求体
-		r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-		next(w, r)
-
-		// 记录请求信息
-		utils.LogRequest(r.Method, r.URL.Path, string(body), nil, nil, startTime)
+		l := logic.NewTrackLogic(r.Context(), svcCtx)
+		resp, err := l.Track(&req)
+		response.Response(r, w, resp, err)
 	}
 }

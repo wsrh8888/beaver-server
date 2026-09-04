@@ -32,20 +32,20 @@ import (
 	"beaver/common/list_query"
 	"beaver/common/models"
 	"beaver/common/models/ctype"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ChatHistoryLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewChatHistoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatHistoryLogic {
 	return &ChatHistoryLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("chat_history", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -67,6 +67,14 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 	})
 
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询聊天历史失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"err":            err.Error(),
+			},
+		})
 		return nil, err
 	}
 
@@ -89,7 +97,14 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 			UserIdList: userIds,
 		})
 		if err != nil {
-			l.Logger.Errorf("批量获取用户信息失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "批量获取用户信息失败",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+					"err":            err.Error(),
+				},
+			})
 			// 不返回错误，继续处理，为没有用户信息的消息设置默认值
 		} else {
 			// 转换用户信息
@@ -112,6 +127,14 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		if chat.Msg != nil {
 			err := convertCtypeMsgToTypesMsg(*chat.Msg, &msg)
 			if err != nil {
+				l.logger.Error(model.LogMsg{
+					Text: "消息内容转换失败",
+					Data: map[string]any{
+						"userId":    req.UserID,
+						"messageId": chat.MessageID,
+						"err":       err.Error(),
+					},
+				})
 				return nil, err
 			}
 		}
@@ -157,6 +180,15 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		chatHistory = append(chatHistory, message)
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "查询聊天历史成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"count":          count,
+			"listCount":      len(chatHistory),
+		},
+	})
 	return &types.ChatHistoryRes{
 		Count: count,
 		List:  chatHistory,

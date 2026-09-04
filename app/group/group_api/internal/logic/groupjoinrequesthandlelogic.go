@@ -33,24 +33,21 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type GroupJoinRequestHandleLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 处理群组申请
 func NewGroupJoinRequestHandleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupJoinRequestHandleLogic {
 	return &GroupJoinRequestHandleLogic{
 		ctx:    ctx,
-		logger: logger.New("group_join_handle"),
+		logger: beaverlog.New("group_join_handle", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -60,13 +57,13 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 	var request group_models.GroupJoinRequestModel
 	err = l.svcCtx.DB.Where("id = ?", req.RequestID).First(&request).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("查询群组申请记录失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组申请记录失败", Data: map[string]interface{}{"requestId": req.RequestID, "err": err.Error()}})
 		return nil, err
 	}
 
 	// 检查申请状态
 	if request.Status != 0 {
-		logx.WithContext(l.ctx).Errorf("申请已被处理，申请ID: %d, 当前状态: %d", req.RequestID, request.Status)
+		l.logger.Error(model.LogMsg{Text: "申请已被处理", Data: map[string]interface{}{"requestId": req.RequestID, "status": request.Status}})
 		return nil, err
 	}
 
@@ -87,7 +84,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 	}).Error
 	if err != nil {
 		tx.Rollback()
-		logx.WithContext(l.ctx).Errorf("更新申请状态失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新申请状态失败", Data: map[string]interface{}{"requestId": req.RequestID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -101,7 +98,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 			err = tx.Model(&existingMember).Update("status", 1).Error
 			if err != nil {
 				tx.Rollback()
-				logx.WithContext(l.ctx).Errorf("更新群成员状态失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": request.GroupID, "userId": request.ApplicantUserID, "err": err.Error()}})
 				return nil, err
 			}
 		} else {
@@ -125,7 +122,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 			err = tx.Create(&member).Error
 			if err != nil {
 				tx.Rollback()
-				logx.WithContext(l.ctx).Errorf("添加群成员失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "添加群成员失败", Data: map[string]interface{}{"groupId": request.GroupID, "userId": request.ApplicantUserID, "err": err.Error()}})
 				return nil, err
 			}
 		}
@@ -141,7 +138,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 		err = tx.Create(&changeLog).Error
 		if err != nil {
 			tx.Rollback()
-			logx.WithContext(l.ctx).Errorf("记录群成员变更日志失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "记录群成员变更日志失败", Data: map[string]interface{}{"groupId": request.GroupID, "userId": request.ApplicantUserID, "err": err.Error()}})
 			return nil, err
 		}
 	}
@@ -149,14 +146,14 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 	// 提交事务
 	err = tx.Commit().Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("提交事务失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]interface{}{"groupId": request.GroupID, "err": err.Error()}})
 		return nil, err
 	}
 
 	// 获取该群入群申请的版本号（按群独立递增）
 	requestVersion := l.svcCtx.VersionGen.GetNextVersion("group_join_requests", "group_id", request.GroupID)
 	if requestVersion == -1 {
-		logx.WithContext(l.ctx).Errorf("获取入群申请版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取入群申请版本号失败", Data: map[string]interface{}{"groupId": request.GroupID}})
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -175,7 +172,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 				GroupID: request.GroupID,
 			})
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": request.GroupID, "err": err.Error()}})
 				return
 			}
 
@@ -223,12 +220,6 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 		}()
 	}
 
-	statusText := "拒绝"
-	if req.Status == 1 {
-		statusText = "同意"
-	}
-
-	logx.WithContext(l.ctx).Infof("处理群组申请完成，申请ID: %d, 处理结果: %s, 处理者: %s", req.RequestID, statusText, req.UserID)
 	l.logger.Info(model.LogMsg{
 		Text: "入群申请处理成功",
 		Data: map[string]interface{}{

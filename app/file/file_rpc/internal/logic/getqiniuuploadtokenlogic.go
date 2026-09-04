@@ -27,23 +27,24 @@ import (
 
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type GetQiniuUploadTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetQiniuUploadTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetQiniuUploadTokenLogic {
 	return &GetQiniuUploadTokenLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_qiniu_upload_token", ctx),
 	}
 }
 
@@ -64,7 +65,10 @@ func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(in *file_rpc.GetQiniuUplo
 	// 使用配置的过期时间（秒）
 	expiresIn := l.svcCtx.Config.Qiniu.ExpireTime
 
-	l.Logger.Infof("生成七牛云上传token成功，过期时间: %d秒", expiresIn)
+	l.logger.Info(model.LogMsg{
+		Text: "生成七牛云上传token成功",
+		Data: map[string]interface{}{"expiresIn": expiresIn},
+	})
 
 	return &file_rpc.GetQiniuUploadTokenRes{
 		UploadToken: uploadToken,

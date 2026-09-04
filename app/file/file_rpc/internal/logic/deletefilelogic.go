@@ -29,8 +29,9 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -39,11 +40,11 @@ import (
 type DeleteFileLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFileLogic {
-	return &DeleteFileLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &DeleteFileLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_file", ctx)}
 }
 
 func (l *DeleteFileLogic) DeleteFile(in *file_rpc.DeleteFileReq) (*file_rpc.DeleteFileRes, error) {
@@ -52,19 +53,34 @@ func (l *DeleteFileLogic) DeleteFile(in *file_rpc.DeleteFileReq) (*file_rpc.Dele
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "文件不存在")
 		}
+		l.logger.Error(model.LogMsg{
+			Text: "查询文件失败",
+			Data: map[string]any{"id": in.Id, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	if err := l.svcCtx.DB.Delete(&file).Error; err != nil {
-		l.Errorf("删除文件记录失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除文件记录失败",
+			Data: map[string]any{"id": in.Id, "err": err.Error()},
+		})
 		return nil, status.Error(codes.Internal, "删除文件失败")
 	}
 
 	if file.Path != "" {
 		if err := os.Remove(file.Path); err != nil {
-			l.Errorf("删除物理文件失败 path=%s: %v", file.Path, err)
+			l.logger.Error(model.LogMsg{
+				Text: "删除物理文件失败",
+				Data: map[string]any{"path": file.Path, "err": err.Error()},
+			})
 		}
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "删除文件成功",
+		Data: map[string]interface{}{"id": in.Id, "path": file.Path},
+	})
 
 	return &file_rpc.DeleteFileRes{Path: file.Path}, nil
 }

@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type HandleFeedbackLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewHandleFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HandleFeedbackLogic {
-	return &HandleFeedbackLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &HandleFeedbackLogic{logger: beaverlog.New("handle_feedback", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *HandleFeedbackLogic) HandleFeedback(req *types.HandleFeedbackReq) (resp *types.HandleFeedbackRes, err error) {
@@ -49,7 +49,10 @@ func (l *HandleFeedbackLogic) HandleFeedback(req *types.HandleFeedbackReq) (resp
 		HandlerId:    req.UserID,
 	})
 	if err != nil {
-		l.Errorf("处理反馈失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "处理反馈失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.HandleFeedbackRes{}, nil

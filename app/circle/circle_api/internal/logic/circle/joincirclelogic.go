@@ -33,22 +33,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type JoinCircleLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewJoinCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinCircleLogic {
 	return &JoinCircleLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("join_circle", ctx),
 	}
 }
 
@@ -97,6 +98,7 @@ func (l *JoinCircleLogic) JoinCircle(req *types.JoinCircleReq) (resp *types.Join
 			Reason:   req.Reason,
 		}
 		if err = l.svcCtx.DB.Create(&joinReq).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "提交圈子申请失败", Data: map[string]any{"circleId": circleID, "userId": req.UserID, "err": err.Error()}})
 			return nil, fmt.Errorf("提交申请失败: %v", err)
 		}
 		l.bumpInviteUse(invite)
@@ -109,6 +111,7 @@ func (l *JoinCircleLogic) JoinCircle(req *types.JoinCircleReq) (resp *types.Join
 		Role:     3,
 	}
 	if err = l.svcCtx.DB.Create(&member).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "加入圈子失败", Data: map[string]any{"circleId": circleID, "userId": req.UserID, "err": err.Error()}})
 		return nil, fmt.Errorf("加入圈子失败: %v", err)
 	}
 
@@ -148,9 +151,11 @@ func (l *JoinCircleLogic) JoinCircle(req *types.JoinCircleReq) (resp *types.Join
 			"conversationId": conversationID,
 		}
 		if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
-			logx.Errorf("推送圈子资料同步失败: circleID=%s, err=%v", circleID, err)
+			l.logger.Error(model.LogMsg{Text: "推送圈子资料同步失败", Data: map[string]any{"circleId": circleID, "err": err.Error()}})
 		}
 	}()
+
+	l.logger.Info(model.LogMsg{Text: "加入圈子成功", Data: map[string]interface{}{"circleId": circleID, "userId": req.UserID}})
 
 	return &types.JoinCircleRes{Status: 1, CircleID: circleID}, nil
 }

@@ -29,9 +29,10 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -41,11 +42,11 @@ import (
 type CreateAppLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateAppLogic {
-	return &CreateAppLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &CreateAppLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("create_app", ctx)}
 }
 
 func (l *CreateAppLogic) CreateApp(in *platform_rpc.CreateAppReq) (*platform_rpc.CreateAppRes, error) {
@@ -53,6 +54,7 @@ func (l *CreateAppLogic) CreateApp(in *platform_rpc.CreateAppReq) (*platform_rpc
 	if err := l.svcCtx.DB.Where("name = ?", in.Name).First(&existing).Error; err == nil {
 		return nil, status.Error(codes.AlreadyExists, "应用名称已存在")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		l.logger.Error(model.LogMsg{Text: "查询应用名称唯一性失败", Data: map[string]any{"name": in.Name, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -63,9 +65,11 @@ func (l *CreateAppLogic) CreateApp(in *platform_rpc.CreateAppReq) (*platform_rpc
 		IsActive:    true,
 	}
 	if err := l.svcCtx.DB.Create(&app).Error; err != nil {
-		l.Errorf("创建应用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建应用失败", Data: map[string]any{"name": in.Name, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "创建应用失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "创建应用成功", Data: map[string]interface{}{"appId": app.AppID, "name": in.Name}})
 
 	return &platform_rpc.CreateAppRes{Id: uint64(app.Id), AppId: app.AppID}, nil
 }

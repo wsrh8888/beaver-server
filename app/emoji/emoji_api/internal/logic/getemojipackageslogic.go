@@ -27,23 +27,24 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type GetEmojiPackagesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackagesLogic {
 	return &GetEmojiPackagesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_packages", ctx),
 	}
 }
 
@@ -65,6 +66,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	var total int64
 	err := query.Count(&total).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包总数失败", Data: map[string]any{"categoryID": req.CategoryID, "type": req.Type, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取总数失败")
 	}
 
@@ -72,6 +74,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	var packages []emoji_models.EmojiPackage
 	err = query.Offset((req.Page - 1) * req.Size).Limit(req.Size).Find(&packages).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包列表失败", Data: map[string]any{"page": req.Page, "size": req.Size, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取列表失败")
 	}
 
@@ -93,6 +96,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 		Group("package_id").
 		Find(&collects).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包收藏数失败", Data: map[string]any{"err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取收藏数失败")
 	}
 	for _, c := range collects {
@@ -111,6 +115,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 		Group("package_id").
 		Find(&emojiCountsData).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包内表情数量失败", Data: map[string]any{"err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取表情数量失败")
 	}
 	for _, c := range emojiCountsData {
@@ -192,6 +197,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageIDs).
 			Find(&userCollectList).Error
 		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "获取用户收藏状态失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 			return nil, status.Error(codes.Internal, "获取收藏状态失败")
 		}
 		for _, c := range userCollectList {

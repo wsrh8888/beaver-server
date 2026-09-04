@@ -28,19 +28,20 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/moment/moment_rpc/internal/svc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type UpdateMomentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateMomentLogic {
-	return &UpdateMomentLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateMomentLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_moment", ctx)}
 }
 
 func (l *UpdateMomentLogic) UpdateMoment(in *moment_rpc.UpdateMomentReq) (*moment_rpc.UpdateMomentRes, error) {
@@ -49,15 +50,28 @@ func (l *UpdateMomentLogic) UpdateMoment(in *moment_rpc.UpdateMomentReq) (*momen
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("动态不存在")
 		}
+		l.logger.Error(model.LogMsg{
+			Text: "查询动态失败",
+			Data: map[string]any{"momentId": in.MomentId, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	if in.IsDeleted != nil && *in.IsDeleted {
 		if err := l.svcCtx.DB.Model(&moment).Update("is_deleted", true).Error; err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "更新动态失败",
+				Data: map[string]any{"momentId": in.MomentId, "err": err.Error()},
+			})
 			return nil, err
 		}
 		_ = l.svcCtx.DB.Where("moment_id = ?", in.MomentId).Delete(&moment_models.MomentCommentModel{}).Error
 		_ = l.svcCtx.DB.Where("moment_id = ?", in.MomentId).Delete(&moment_models.MomentLikeModel{}).Error
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "更新动态成功",
+		Data: map[string]any{"momentId": in.MomentId, "isDeleted": in.IsDeleted},
+	})
 	return &moment_rpc.UpdateMomentRes{}, nil
 }

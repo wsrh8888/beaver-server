@@ -29,22 +29,23 @@ import (
 	"beaver/app/auth/auth_api/internal/logic/auth_public"
 	"beaver/app/auth/auth_api/internal/svc"
 	"beaver/app/auth/auth_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type QrcodeScanLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewQrcodeScanLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QrcodeScanLogic {
 	return &QrcodeScanLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("qrcode_scan", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -52,6 +53,10 @@ func NewQrcodeScanLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Qrcode
 func (l *QrcodeScanLogic) QrcodeScan(req *types.QrcodeScanReq) (*types.QrcodeScanRes, error) {
 	claims, err := jwts.ParseToken(req.AuthToken, l.svcCtx.Config.Auth.AccessSecret)
 	if err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "扫码鉴权失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("身份验证失败，请重新登录")
 	}
 
@@ -61,12 +66,19 @@ func (l *QrcodeScanLogic) QrcodeScan(req *types.QrcodeScanReq) (*types.QrcodeSca
 		return nil, fmt.Errorf("二维码已过期，请刷新后重试")
 	}
 	if err != nil {
-		logx.Errorf("qrcode scan: redis get failed key=%s err=%v", key, err)
+		l.logger.Error(model.LogMsg{
+			Text: "扫码读取会话失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
 	var session auth_public.QrcodeSession
 	if err = json.Unmarshal([]byte(sessionStr), &session); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码会话解析失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 	if session.Status != auth_public.QrcodeStatusPending {
@@ -79,9 +91,16 @@ func (l *QrcodeScanLogic) QrcodeScan(req *types.QrcodeScanReq) (*types.QrcodeSca
 	updatedJSON, _ := json.Marshal(session)
 
 	if err = l.svcCtx.Redis.Set(key, string(updatedJSON), ttl).Err(); err != nil {
-		logx.Errorf("qrcode scan: redis update failed key=%s err=%v", key, err)
+		l.logger.Error(model.LogMsg{
+			Text: "扫码更新会话失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "扫码确认成功",
+		Data: map[string]any{"userId": claims.UserID},
+	})
 	return &types.QrcodeScanRes{}, nil
 }

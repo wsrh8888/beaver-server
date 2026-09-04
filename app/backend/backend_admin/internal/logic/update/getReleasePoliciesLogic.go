@@ -30,19 +30,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetReleasePoliciesLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetReleasePoliciesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetReleasePoliciesLogic {
 	return &GetReleasePoliciesLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_release_policies", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -53,7 +53,10 @@ func (l *GetReleasePoliciesLogic) GetReleasePolicies(req *types.GetReleasePolici
 		AppId: req.AppID,
 	})
 	if err != nil {
-		l.Errorf("获取发版策略失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取发版策略失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

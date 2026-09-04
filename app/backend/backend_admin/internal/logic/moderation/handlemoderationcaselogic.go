@@ -32,22 +32,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"gorm.io/gorm"
 )
-
 
 type HandleModerationCaseLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewHandleModerationCaseLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HandleModerationCaseLogic {
-	return &HandleModerationCaseLogic{logger: logger.New("handle_moderation_case"), ctx: ctx, svcCtx: svcCtx}
+	return &HandleModerationCaseLogic{logger: beaverlog.New("handle_moderation_case", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModerationCaseReq) (resp *types.HandleModerationCaseRes, err error) {
@@ -63,13 +60,19 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("工单不存在")
 		}
-		logx.WithContext(l.ctx).Errorf("查询工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	for _, act := range req.Actions {
 		if actErr := executeControlAction(l.ctx, l.svcCtx, req.UserID, uint64(c.Id), act); actErr != nil {
-			logx.WithContext(l.ctx).Errorf("执行管控动作失败 action=%s: %v", act.Action, actErr)
+			l.logger.Error(model.LogMsg{
+				Text: "执行管控动作失败",
+				Data: map[string]interface{}{"action": act.Action, "err": actErr.Error()},
+			})
 			return nil, actErr
 		}
 	}
@@ -90,7 +93,10 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 		"actions_taken": actionsJSON,
 	}
 	if err = l.svcCtx.DB.Model(&c).Updates(updates).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("更新工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -113,12 +119,15 @@ func (l *HandleModerationCaseLogic) HandleModerationCase(req *types.HandleModera
 				if req.Status == backend_models.CaseStatusRejected {
 					action = 2
 				}
-				_, _ = l.svcCtx.PlatformRpc.UpdateContentReports(l.ctx, &platform_rpc.UpdateContentReportsReq{
+				_, err := l.svcCtx.PlatformRpc.UpdateContentReports(l.ctx, &platform_rpc.UpdateContentReportsReq{
 					Ids:          ids,
 					Action:       action,
 					HandlerId:    req.UserID,
 					HandleRemark: req.HandleRemark,
 				})
+				if err != nil {
+					l.logger.Error(model.LogMsg{Text: "更新内容举报状态失败", Data: map[string]interface{}{"err": err.Error()}})
+				}
 			}
 		}
 	}

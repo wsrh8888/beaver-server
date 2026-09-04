@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024-2026 Beaver IM Team
  * SPDX-License-Identifier: MIT
  * Project: beaver-server
@@ -19,10 +19,23 @@
  * beaver-server-header-v1
  */
 
-package model
+package httpMiddleware
 
-// LogMsg 结构化日志内容
-type LogMsg struct {
-	Text string      `json:"text"`
-	Data interface{} `json:"data,omitempty"`
+import (
+	"net/http"
+
+	"beaver/common/traceid"
+)
+
+// TraceMiddleware 使用网关下发的服务端 X-Request-Id；客户端 Uuid 只记日志，不混用。
+func TraceMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		clientUuid := traceid.ClientUuidFromHeaders(r.Header)
+		// 只认服务端头；直连调试时没有则本地补一个（不碰 Uuid）
+		serverTrace := traceid.Ensure(traceid.ServerTraceFromHeaders(r.Header))
+		traceid.AttachServerTrace(w, r, serverTrace)
+
+		ctx := traceid.WithContext(r.Context(), serverTrace, clientUuid)
+		next(w, r.WithContext(ctx))
+	}
 }

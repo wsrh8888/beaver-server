@@ -28,21 +28,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserConversationVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserConversationVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserConversationVersionsLogic {
 	return &GetUserConversationVersionsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_conversation_versions", ctx),
 	}
 }
 
@@ -59,7 +59,7 @@ func (l *GetUserConversationVersionsLogic) GetUserConversationVersions(in *chat_
 
 	err := query.Find(&userConversations).Error
 	if err != nil {
-		l.Errorf("查询用户会话设置失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户会话设置失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 

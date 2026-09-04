@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchRestoreChatMessagesLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewBatchRestoreChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchRestoreChatMessagesLogic {
-	return &BatchRestoreChatMessagesLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &BatchRestoreChatMessagesLogic{logger: beaverlog.New("batch_restore_chat_messages", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *BatchRestoreChatMessagesLogic) BatchRestoreChatMessages(req *types.BatchRestoreChatMessagesReq) (resp *types.BatchRestoreChatMessagesRes, err error) {
@@ -52,7 +52,10 @@ func (l *BatchRestoreChatMessagesLogic) BatchRestoreChatMessages(req *types.Batc
 		Status:     1,
 	})
 	if err != nil {
-		l.Errorf("批量恢复聊天消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量恢复聊天消息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.BatchRestoreChatMessagesRes{}, nil

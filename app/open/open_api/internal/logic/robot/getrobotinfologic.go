@@ -27,18 +27,17 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetRobotInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetRobotInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetRobotInfoLogic {
-	return &GetRobotInfoLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetRobotInfoLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_robot_info", ctx)}
 }
 
 func (l *GetRobotInfoLogic) GetRobotInfo(authorization string) (resp *types.GetRobotInfoRes, err error) {

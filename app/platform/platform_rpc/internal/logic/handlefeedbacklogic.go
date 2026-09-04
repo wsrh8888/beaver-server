@@ -30,8 +30,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -40,11 +41,11 @@ import (
 type HandleFeedbackLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewHandleFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HandleFeedbackLogic {
-	return &HandleFeedbackLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &HandleFeedbackLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("handle_feedback", ctx)}
 }
 
 func (l *HandleFeedbackLogic) HandleFeedback(in *platform_rpc.HandleFeedbackReq) (*platform_rpc.HandleFeedbackRes, error) {
@@ -57,7 +58,7 @@ func (l *HandleFeedbackLogic) HandleFeedback(in *platform_rpc.HandleFeedbackReq)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "反馈记录不存在")
 		}
-		l.Errorf("查询反馈失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询反馈失败", Data: map[string]any{"id": in.Id, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -70,9 +71,11 @@ func (l *HandleFeedbackLogic) HandleFeedback(in *platform_rpc.HandleFeedbackReq)
 		"handle_time":   &now,
 		"updated_at":    now,
 	}).Error; err != nil {
-		l.Errorf("处理反馈失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "处理反馈失败", Data: map[string]any{"id": in.Id, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "处理反馈失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "处理反馈成功", Data: map[string]interface{}{"id": in.Id, "status": in.Status}})
 
 	return &platform_rpc.HandleFeedbackRes{}, nil
 }

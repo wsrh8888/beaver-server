@@ -28,22 +28,23 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type UserUpdateDisplayLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUserUpdateDisplayLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserUpdateDisplayLogic {
 	return &UserUpdateDisplayLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("user_update_display", ctx),
 	}
 }
 
@@ -60,6 +61,10 @@ func (l *UserUpdateDisplayLogic) UserUpdateDisplay(in *user_rpc.UserUpdateDispla
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("用户不存在")
 		}
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户失败",
+			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -78,8 +83,17 @@ func (l *UserUpdateDisplayLogic) UserUpdateDisplay(in *user_rpc.UserUpdateDispla
 	updates["version"] = version
 
 	if err := l.svcCtx.DB.Model(&user).Updates(updates).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "更新用户展示信息失败",
+			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+		})
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "更新用户展示信息成功",
+		Data: map[string]interface{}{"userId": in.UserId, "version": version},
+	})
 
 	return &user_rpc.UserUpdateDisplayRes{Version: version}, nil
 }

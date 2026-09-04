@@ -29,7 +29,8 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -37,11 +38,11 @@ import (
 type UpdateOpenAppsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateOpenAppsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateOpenAppsLogic {
-	return &UpdateOpenAppsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateOpenAppsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_open_apps", ctx)}
 }
 
 func (l *UpdateOpenAppsLogic) UpdateOpenApps(in *open_rpc.UpdateOpenAppsReq) (*open_rpc.UpdateOpenAppsRes, error) {
@@ -72,7 +73,10 @@ func (l *UpdateOpenAppsLogic) UpdateOpenApps(in *open_rpc.UpdateOpenAppsReq) (*o
 
 	result := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("app_id IN ?", in.AppIds).Updates(updates)
 	if result.Error != nil {
-		l.Errorf("更新应用状态失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{
+			Text: "更新应用状态失败",
+			Data: map[string]interface{}{"err": result.Error.Error()},
+		})
 		return nil, status.Error(codes.Internal, "操作失败")
 	}
 

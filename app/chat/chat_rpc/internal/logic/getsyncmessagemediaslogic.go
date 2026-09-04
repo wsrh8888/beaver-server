@@ -28,21 +28,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncMessageMediasLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetSyncMessageMediasLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncMessageMediasLogic {
 	return &GetSyncMessageMediasLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_sync_message_medias", ctx),
 	}
 }
 
@@ -55,7 +55,7 @@ func (l *GetSyncMessageMediasLogic) GetSyncMessageMedias(in *chat_rpc.GetSyncMes
 	}
 
 	if err := query.Find(&records).Error; err != nil {
-		l.Errorf("同步消息媒体状态失败: userId=%s, error=%v", in.UserId, err)
+		l.logger.Error(model.LogMsg{Text: "同步消息媒体状态失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 

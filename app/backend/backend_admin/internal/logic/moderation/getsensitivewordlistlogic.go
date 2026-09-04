@@ -28,18 +28,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSensitiveWordListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetSensitiveWordListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSensitiveWordListLogic {
 	return &GetSensitiveWordListLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_sensitive_word_list", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -66,13 +67,19 @@ func (l *GetSensitiveWordListLogic) GetSensitiveWordList(req *types.GetSensitive
 
 	var total int64
 	if err = db.Count(&total).Error; err != nil {
-		l.Errorf("统计敏感词失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计敏感词失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
 	var rows []backend_models.AdminSensitiveWord
 	if err = db.Order("id DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&rows).Error; err != nil {
-		l.Errorf("查询敏感词失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询敏感词失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

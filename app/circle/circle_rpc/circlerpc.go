@@ -29,6 +29,7 @@ import (
 	"beaver/app/circle/circle_rpc/internal/server"
 	"beaver/app/circle/circle_rpc/internal/svc"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
+	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -44,6 +45,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	beaverlog.InitFromConf(c.RpcServerConf.ServiceConf)
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

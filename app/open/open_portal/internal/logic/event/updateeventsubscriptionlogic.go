@@ -30,20 +30,20 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	beaverlog "beaver/utils/beaverlog"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type UpdateEventSubscriptionLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateEventSubscriptionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateEventSubscriptionLogic {
 	return &UpdateEventSubscriptionLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_event_subscription", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

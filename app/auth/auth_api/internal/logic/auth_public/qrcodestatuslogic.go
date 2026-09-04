@@ -32,23 +32,24 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/common/middleware/ua"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"
 	"beaver/utils/jwts"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type QrcodeStatusLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewQrcodeStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QrcodeStatusLogic {
 	return &QrcodeStatusLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("qrcode_status", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -60,11 +61,19 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 		return &types.QrcodeStatusRes{Status: QrcodeStatusExpired}, nil
 	}
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "二维码状态读取失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
 	var session QrcodeSession
 	if err = json.Unmarshal([]byte(sessionStr), &session); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "二维码会话解析失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 	if session.Status == QrcodeStatusPending {
@@ -76,6 +85,10 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 
 	infoRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{UserID: session.ScannedUserID})
 	if err != nil || infoRes.UserInfo == nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码用户查询失败",
+			Data: map[string]any{"userId": session.ScannedUserID},
+		})
 		return nil, fmt.Errorf("用户不存在")
 	}
 	user := infoRes.UserInfo
@@ -91,6 +104,10 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 		DeviceID: req.DeviceID,
 	}, l.svcCtx.Config.Auth.AccessSecret, jwtExpireHours)
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码登录签发令牌失败",
+			Data: map[string]any{"userId": user.UserId, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
@@ -101,6 +118,10 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 		"source": session.Source,
 	})
 	if err = l.svcCtx.Redis.Set(loginKey, string(loginInfo), time.Duration(jwtExpireHours)*time.Hour).Err(); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码登录写入会话失败",
+			Data: map[string]any{"userId": user.UserId, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
@@ -115,6 +136,16 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 	_ = device.UpsertOnLogin(l.svcCtx.DB, user.UserId, req.DeviceID, profile, req.ClientIP)
 
 	l.svcCtx.Redis.Del(key)
+
+	l.logger.Info(model.LogMsg{
+		Text: "扫码登录成功",
+		Data: map[string]any{
+			"userId":      user.UserId,
+			"deviceGroup": deviceGroup,
+			"source":      session.Source,
+		},
+	})
+
 	return &types.QrcodeStatusRes{
 		Status: QrcodeStatusConfirmed,
 		Token:  token,

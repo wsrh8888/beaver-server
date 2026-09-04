@@ -27,23 +27,24 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetUnreadSummaryLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取未读汇总（红点）
 func NewGetUnreadSummaryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUnreadSummaryLogic {
 	return &GetUnreadSummaryLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_unread_summary", ctx),
 	}
 }
 
@@ -91,6 +92,10 @@ func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq)
 		}
 
 		if err = query.Count(&unreadCount).Error; err != nil && err != gorm.ErrRecordNotFound {
+			l.logger.Error(model.LogMsg{
+				Text: "统计通知未读数失败",
+				Data: map[string]any{"userId": req.UserID, "category": category, "err": err.Error()},
+			})
 			return nil, err
 		}
 

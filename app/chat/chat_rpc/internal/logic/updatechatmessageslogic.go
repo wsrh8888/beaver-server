@@ -28,21 +28,21 @@ import (
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateChatMessagesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateChatMessagesLogic {
 	return &UpdateChatMessagesLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_chat_messages", ctx),
 	}
 }
 
@@ -70,12 +70,16 @@ func (l *UpdateChatMessagesLogic) UpdateChatMessages(in *chat_rpc.UpdateChatMess
 
 	var count int64
 	if err := db.Count(&count).Error; err != nil {
-		l.Errorf("统计消息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计消息失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 	if err := db.Update("status", in.Status).Error; err != nil {
-		l.Errorf("更新消息状态失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新消息状态失败", Data: map[string]any{"status": in.Status, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "更新消息状态成功",
+		Data: map[string]interface{}{"status": in.Status, "affected": count},
+	})
 	return &chat_rpc.UpdateChatMessagesRes{AffectedCount: count}, nil
 }

@@ -31,27 +31,31 @@ import (
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ProxySendMsgLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewProxySendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ProxySendMsgLogic {
 	return &ProxySendMsgLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("proxy_send_msg", ctx),
 	}
 }
 
 func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *types.ProxySendMsgRes, err error) {
 	bodyBytes, err := json.Marshal(req.Body)
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "代理消息序列化body失败",
+			Data: map[string]any{"targetId": req.TargetID, "command": req.Command, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -64,6 +68,11 @@ func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *type
 	}
 
 	ws_conn.SendMsgToUser(req.TargetID, wsCommandConst.Command(req.Command), content)
+
+	l.logger.Info(model.LogMsg{
+		Text: "代理发送消息成功",
+		Data: map[string]interface{}{"targetId": req.TargetID, "command": req.Command, "type": req.Type},
+	})
 
 	return &types.ProxySendMsgRes{}, nil
 }

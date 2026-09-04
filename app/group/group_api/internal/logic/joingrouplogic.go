@@ -38,23 +38,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type JoinGroupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGroupLogic {
 	return &JoinGroupLogic{
 		ctx:    ctx,
-		logger: logger.New("join_group"),
+		logger: beaverlog.New("join_group", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -93,7 +92,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 	var group group_models.GroupModel
 	err = l.svcCtx.DB.Where("group_id = ? AND status = ?", groupID, 1).First(&group).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("群组不存在或已解散，群组ID: %s", groupID)
+		l.logger.Error(model.LogMsg{Text: "群组不存在或已解散", Data: map[string]interface{}{"groupId": groupID}})
 		return nil, err
 	}
 
@@ -103,13 +102,13 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 	if err == nil {
 		// 用户已经是群成员
 		if existingMember.Status == 1 {
-			logx.WithContext(l.ctx).Errorf("用户已经是群成员，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
+			l.logger.Error(model.LogMsg{Text: "用户已经是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID}})
 			return nil, err
 		} else {
 			// 用户之前被踢出，现在重新加入
 			memberVersion = l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 			if memberVersion == -1 {
-				logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+				l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 				return nil, errors.New("获取版本号失败")
 			}
 			err = l.svcCtx.DB.Model(&existingMember).Updates(map[string]interface{}{
@@ -118,7 +117,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				"version":   memberVersion,
 			}).Error
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("更新群成员状态失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 				return nil, err
 			}
 
@@ -131,7 +130,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			// 获取该群入群申请的版本号（按群独立递增）
 			requestVersion := l.svcCtx.VersionGen.GetNextVersion("group_join_requests", "group_id", req.GroupID)
 			if requestVersion == -1 {
-				logx.WithContext(l.ctx).Errorf("获取入群申请版本号失败")
+				l.logger.Error(model.LogMsg{Text: "获取入群申请版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 				return nil, errors.New("获取版本号失败")
 			}
 
@@ -144,7 +143,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			}
 			err = l.svcCtx.DB.Create(&joinRequest).Error
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("创建入群申请失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "创建入群申请失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 				return nil, err
 			}
 
@@ -154,7 +153,6 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				GroupID: req.GroupID,
 			}
 			l.bumpInviteUse(invite)
-			logx.WithContext(l.ctx).Infof("用户申请加入群组，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 			l.logger.Info(model.LogMsg{
 				Text: "入群申请提交成功",
 				Data: map[string]interface{}{
@@ -171,7 +169,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				if err := l.svcCtx.DB.WithContext(ctx).
 					Where("group_id = ? AND status = 1 AND role IN (?)", req.GroupID, []int{1, 2}).
 					Find(&admins).Error; err != nil {
-					logx.WithContext(l.ctx).Errorf("获取群管理员/群主失败(用于通知): %v", err)
+					l.logger.Error(model.LogMsg{Text: "获取群管理员/群主失败(用于通知)", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 					return
 				}
 				var toUsers []string
@@ -198,7 +196,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 					DedupHash:   fmt.Sprintf("%s_%d", req.GroupID, requestVersion),
 				})
 				if err != nil {
-					logx.WithContext(l.ctx).Errorf("投递入群申请通知失败: %v", err)
+					l.logger.Error(model.LogMsg{Text: "投递入群申请通知失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 				}
 			}()
 
@@ -207,7 +205,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			// 获取该群成员的版本号（按群独立递增）
 			memberVersion = l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 			if memberVersion == -1 {
-				logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+				l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 				return nil, errors.New("获取版本号失败")
 			}
 
@@ -222,7 +220,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			}
 			err = l.svcCtx.DB.Create(&member).Error
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("添加群成员失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "添加群成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 				return nil, err
 			}
 
@@ -238,7 +236,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			}
 			err = l.svcCtx.DB.Create(&changeLog).Error
 			if err != nil {
-				logx.WithContext(l.ctx).Errorf("记录群成员变更日志失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "记录群成员变更日志失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 				return nil, err
 			}
 		}
@@ -248,7 +246,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 	if memberVersion == 0 {
 		memberVersion = l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 		if memberVersion == -1 {
-			logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+			l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 			return nil, errors.New("获取版本号失败")
 		}
 	}
@@ -260,7 +258,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		LastMessage:    "",
 	})
 	if err != nil {
-		logx.Errorf("Failed to update conversation: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新新成员会话记录失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 	}
 
 	// 异步通知群成员
@@ -275,20 +273,20 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			Content:        fmt.Sprintf("%s 加入了群聊", req.UserID),
 			RelatedUserId:  req.UserID,
 		}); err != nil {
-			logx.WithContext(l.ctx).Errorf("发送入群通知消息失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "发送入群通知消息失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 		}
 
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 			return
 		}
 
 		groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 		if groupVersion == -1 {
-			logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
+			l.logger.Error(model.LogMsg{Text: "获取群组版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 		}
 
 		joinMemberData := []map[string]interface{}{
@@ -365,7 +363,6 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 
 	l.bumpInviteUse(invite)
 
-	logx.WithContext(l.ctx).Infof("用户加入群组成功，群组ID: %s, 用户ID: %s", req.GroupID, req.UserID)
 	l.logger.Info(model.LogMsg{
 		Text: "加入群组成功",
 		Data: map[string]interface{}{
@@ -392,9 +389,9 @@ func (l *JoinGroupLogic) bumpInviteUse(invite *group_models.GroupInviteLinkModel
 func (l *JoinGroupLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {
 	defer func() {
 		if r := recover(); r != nil {
-			logx.WithContext(l.ctx).Errorf("触发开放平台 Webhook 时发生 panic: %v", r)
+			l.logger.Error(model.LogMsg{Text: "触发开放平台 Webhook 时发生panic", Data: map[string]interface{}{"groupId": groupID, "panic": fmt.Sprintf("%v", r)}})
 		}
 	}()
 
-	logx.WithContext(l.ctx).Infof("群成员变更事件: group_id=%s, action=%s, members=%v", groupID, action, memberIDs)
+	l.logger.Info(model.LogMsg{Text: "群成员变更事件", Data: map[string]interface{}{"groupId": groupID, "action": action, "members": memberIDs}})
 }

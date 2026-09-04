@@ -27,10 +27,13 @@ import (
 	"fmt"
 
 	"beaver/utils/jwts"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 )
+
+var logger = beaverlog.New("ws_auth")
 
 // VerifyWsToken 验证 WS 连接鉴权：JWT 签名 + Redis 登录态
 // platform: desktop, mobile, web 等
@@ -70,8 +73,10 @@ func VerifyWsToken(token, accessSecret, userID, platform string, rdb *redis.Clie
 			// 确保当前连接的 Token 确实是给当前这台物理设备签发的
 			if claims.DeviceID != "" {
 				if storedDeviceID, ok := info["device_id"].(string); ok && storedDeviceID != claims.DeviceID {
-					logx.Errorf("设备指纹不匹配: 用户 %s, Token绑定的设备: %s, 当前登录态设备: %s",
-						userID, claims.DeviceID, storedDeviceID)
+					logger.Error(model.LogMsg{
+						Text: "设备指纹不匹配",
+						Data: map[string]any{"userId": userID, "tokenDeviceId": claims.DeviceID, "loginDeviceId": storedDeviceID},
+					})
 					return errors.New("设备标识符不匹配，疑似冒用")
 				}
 			}

@@ -27,12 +27,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateAuthorityMenuLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -40,7 +40,7 @@ type UpdateAuthorityMenuLogic struct {
 // 更新权限菜单
 func NewUpdateAuthorityMenuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateAuthorityMenuLogic {
 	return &UpdateAuthorityMenuLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_authority_menu", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -50,7 +50,10 @@ func (l *UpdateAuthorityMenuLogic) UpdateAuthorityMenu(req *types.UpdateAuthorit
 	// 先删除该角色原有的所有菜单关联
 	err = l.svcCtx.DB.Where("authority_id = ?", req.Id).Delete(&backend_models.AdminSystemAuthorityMenu{}).Error
 	if err != nil {
-		logx.Errorf("删除原有的菜单关联失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除原有的菜单关联失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -66,11 +69,17 @@ func (l *UpdateAuthorityMenuLogic) UpdateAuthorityMenu(req *types.UpdateAuthorit
 
 		err = l.svcCtx.DB.Create(&authorityMenus).Error
 		if err != nil {
-			logx.Errorf("创建新的菜单关联失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "创建新的菜单关联失败",
+				Data: map[string]interface{}{"err": err.Error()},
+			})
 			return nil, err
 		}
 	}
 
-	logx.Infof("权限菜单更新成功: 权限ID=%d, 菜单数量=%d", req.Id, len(req.Menus))
+	l.logger.Info(model.LogMsg{
+		Text: "权限菜单更新成功",
+		Data: map[string]interface{}{"authorityId": req.Id, "menuCount": len(req.Menus)},
+	})
 	return &types.UpdateAuthorityMenuRes{}, nil
 }

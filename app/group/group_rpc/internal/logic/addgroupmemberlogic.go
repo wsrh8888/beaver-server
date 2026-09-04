@@ -29,22 +29,23 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type AddGroupMemberLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAddGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddGroupMemberLogic {
 	return &AddGroupMemberLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("add_group_member", ctx),
 	}
 }
 
@@ -81,6 +82,7 @@ func (l *AddGroupMemberLogic) AddGroupMember(in *group_rpc.AddGroupMemberReq) (*
 			"join_time": now,
 			"version":   memberVersion,
 		}).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "恢复群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 			return nil, errors.New("恢复群成员失败")
 		}
 		added = true
@@ -94,10 +96,12 @@ func (l *AddGroupMemberLogic) AddGroupMember(in *group_rpc.AddGroupMemberReq) (*
 			Version:  memberVersion,
 		}
 		if err := l.svcCtx.DB.Create(&member).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "添加群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 			return nil, errors.New("添加群成员失败")
 		}
 		added = true
 	} else {
+		l.logger.Error(model.LogMsg{Text: "查询群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 		return nil, errors.New("查询群成员失败")
 	}
 
@@ -115,6 +119,8 @@ func (l *AddGroupMemberLogic) AddGroupMember(in *group_rpc.AddGroupMemberReq) (*
 			Version:    memberVersion,
 		}).Error
 	}
+
+	l.logger.Info(model.LogMsg{Text: "添加群成员成功", Data: map[string]interface{}{"groupId": in.GroupId, "userId": in.UserId, "added": added, "memberVersion": memberVersion}})
 
 	return &group_rpc.AddGroupMemberRes{
 		Added:         added,

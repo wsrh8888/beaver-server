@@ -25,6 +25,7 @@ import (
 	"context"
 	"errors"
 
+	beaverlog "beaver/utils/beaverlog"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
@@ -34,20 +35,19 @@ import (
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/beaverlog/model"
 )
 
 const opsPreviewLimit int32 = 10
 
 type GetUserOperationsProfileLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetUserOperationsProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserOperationsProfileLogic {
-	return &GetUserOperationsProfileLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetUserOperationsProfileLogic{logger: beaverlog.New("get_user_operations_profile", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetUserOperationsProfileReq) (resp *types.GetUserOperationsProfileRes, err error) {
@@ -57,7 +57,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 
 	userRes, err := l.svcCtx.UserRpc.ListUsers(l.ctx, &user_rpc.ListUsersReq{UserId: req.UserID})
 	if err != nil {
-		l.Errorf("查询用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	if len(userRes.List) == 0 {
@@ -84,7 +87,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 		UserId: req.UserID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询好友失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询好友失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.FriendTotal = friendRes.Total
 		resp.Friends = l.mapFriends(friendRes.List, req.UserID)
@@ -92,7 +98,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 
 	groupIDsRes, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &group_rpc.GetUserGroupIDsReq{UserID: req.UserID})
 	if err != nil {
-		l.Errorf("查询用户群组ID失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户群组ID失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else if groupIDsRes != nil {
 		resp.GroupTotal = int64(len(groupIDsRes.GroupIDs))
 		resp.Groups = l.mapGroups(groupIDsRes.GroupIDs)
@@ -100,7 +109,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 
 	circleIDsRes, err := l.svcCtx.CircleRpc.GetUserCircleIDs(l.ctx, &circle_rpc.GetUserCircleIDsReq{UserId: req.UserID})
 	if err != nil {
-		l.Errorf("查询用户圈子ID失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户圈子ID失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else if circleIDsRes != nil {
 		resp.CircleTotal = int64(len(circleIDsRes.CircleIds))
 		resp.Circles = l.mapCircles(req.UserID, circleIDsRes.CircleIds)
@@ -110,7 +122,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 		UserId: req.UserID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询会话失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询会话失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.SessionTotal = sessionRes.Total
 		resp.Sessions = l.mapSessions(sessionRes.List, req.UserID)
@@ -120,7 +135,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 		UserId: req.UserID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询动态失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询动态失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.MomentTotal = momentRes.Total
 		for _, m := range momentRes.List {
@@ -134,7 +152,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 		ReporterUserId: req.UserID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询举报失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询举报失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.ReportTotal = reportRes.Total
 		for _, r := range reportRes.List {
@@ -149,7 +170,10 @@ func (l *GetUserOperationsProfileLogic) GetUserOperationsProfile(req *types.GetU
 		UserId: req.UserID, Page: 1, PageSize: opsPreviewLimit,
 	})
 	if err != nil {
-		l.Errorf("查询黑名单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询黑名单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		resp.BlockTotal = blockRes.Total
 		resp.Blocks = l.mapBlocks(blockRes.List)

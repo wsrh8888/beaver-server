@@ -28,35 +28,40 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserConversationSettingsListByIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 批量获取用户会话设置数据
 func NewGetUserConversationSettingsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserConversationSettingsListByIdsLogic {
 	return &GetUserConversationSettingsListByIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("get_user_conversation_settings", ctx),
 		svcCtx: svcCtx,
 	}
 }
 
 func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsListByIds(req *types.GetUserConversationSettingsListByIdsReq) (resp *types.GetUserConversationSettingsListByIdsRes, err error) {
-	// 只查询用户会话设置表的数据
 	var userConversations []chat_models.ChatUserConversation
 	err = l.svcCtx.DB.Where("user_id = ? AND conversation_id IN (?)", req.UserID, req.ConversationIds).Find(&userConversations).Error
 	if err != nil {
-		l.Errorf("查询用户会话设置失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户会话设置失败",
+			Data: map[string]any{
+				"userId": req.UserID,
+				"count":  len(req.ConversationIds),
+				"err":    err.Error(),
+			},
+		})
 		return nil, err
 	}
 
-	// 转换数据库模型为API响应
 	conversationSettings := make([]types.UserConversationSettingById, 0, len(userConversations))
 	for _, uc := range userConversations {
 		conversationSettings = append(conversationSettings, types.UserConversationSettingById{
@@ -72,6 +77,14 @@ func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsL
 		})
 	}
 
+	l.logger.Info(model.LogMsg{
+		Text: "批量查询用户会话设置成功",
+		Data: map[string]any{
+			"userId":       req.UserID,
+			"requestCount": len(req.ConversationIds),
+			"resultCount":  len(conversationSettings),
+		},
+	})
 	return &types.GetUserConversationSettingsListByIdsRes{
 		UserConversationSettings: conversationSettings,
 	}, nil

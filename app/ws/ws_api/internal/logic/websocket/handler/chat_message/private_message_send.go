@@ -32,11 +32,11 @@ import (
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
-var privateMsgLog = logger.New("private_msg_send")
+var privateMsgLog = beaverlog.New("private_msg_send")
 
 func HandlePrivateMessageSend(
 	ctx context.Context,

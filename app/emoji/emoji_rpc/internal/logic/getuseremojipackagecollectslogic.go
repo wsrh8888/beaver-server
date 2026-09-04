@@ -28,21 +28,21 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserEmojiPackageCollectsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserEmojiPackageCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserEmojiPackageCollectsLogic {
 	return &GetUserEmojiPackageCollectsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_emoji_package_collects", ctx),
 	}
 }
 
@@ -58,11 +58,11 @@ func (l *GetUserEmojiPackageCollectsLogic) GetUserEmojiPackageCollects(in *emoji
 
 	err := query.Find(&packageCollects).Error
 	if err != nil {
-		l.Errorf("查询用户收藏表情包版本失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏表情包版本失败", Data: map[string]any{"userId": in.UserId, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到用户 %s 的 %d 个收藏表情包版本变更", in.UserId, len(packageCollects))
+	l.logger.Info(model.LogMsg{Text: "查询用户收藏表情包版本变更", Data: map[string]interface{}{"userId": in.UserId, "count": len(packageCollects)}})
 
 	// 转换为版本摘要格式
 	var packageCollectVersions []*emoji_rpc.EmojiPackageCollectVersionItem

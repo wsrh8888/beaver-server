@@ -29,14 +29,14 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AuthenticationLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -44,7 +44,7 @@ type AuthenticationLogic struct {
 // 管理员 Token 认证
 func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuthenticationLogic {
 	return &AuthenticationLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("authentication", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -67,7 +67,11 @@ func (l *AuthenticationLogic) Authentication(req *types.AuthenticationReq) (resp
 	}
 
 	key := fmt.Sprintf("admin_login_%s", claims.UserID)
-	token, _ := l.svcCtx.Redis.Get(key).Result()
+	token, err := l.svcCtx.Redis.Get(key).Result()
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询管理员登录token失败", Data: map[string]interface{}{"key": key, "err": err.Error()}})
+		return nil, errors.New("token已失效")
+	}
 	if token != req.Token {
 		return nil, errors.New("token已失效")
 	}

@@ -27,13 +27,14 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type DeleteMenuLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -41,7 +42,7 @@ type DeleteMenuLogic struct {
 // 删除菜单
 func NewDeleteMenuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMenuLogic {
 	return &DeleteMenuLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("delete_menu", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -53,10 +54,16 @@ func (l *DeleteMenuLogic) DeleteMenu(req *types.DeleteMenuReq) (resp *types.Dele
 	err = l.svcCtx.DB.Where("id = ?", req.Id).First(&menu).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logx.Errorf("菜单不存在: %d", req.Id)
+			l.logger.Error(model.LogMsg{
+				Text: "菜单不存在",
+				Data: map[string]interface{}{"menuId": req.Id},
+			})
 			return nil, err
 		}
-		logx.Errorf("查询菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "查询菜单失败",
+			Data: map[string]interface{}{"menuId": req.Id, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -64,29 +71,44 @@ func (l *DeleteMenuLogic) DeleteMenu(req *types.DeleteMenuReq) (resp *types.Dele
 	var childCount int64
 	err = l.svcCtx.DB.Model(&backend_models.AdminSystemMenu{}).Where("parent_id = ?", req.Id).Count(&childCount).Error
 	if err != nil {
-		logx.Errorf("检查子菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "检查子菜单失败",
+			Data: map[string]interface{}{"menuId": req.Id, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	if childCount > 0 {
-		logx.Errorf("无法删除菜单，存在%d个子菜单", childCount)
+		l.logger.Error(model.LogMsg{
+			Text: "无法删除菜单：存在子菜单",
+			Data: map[string]interface{}{"menuId": req.Id, "childCount": childCount},
+		})
 		return nil, err
 	}
 
 	// 删除菜单
 	err = l.svcCtx.DB.Delete(&menu).Error
 	if err != nil {
-		logx.Errorf("删除菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除菜单失败",
+			Data: map[string]interface{}{"menuId": req.Id, "err": err.Error()},
+		})
 		return nil, err
 	}
 
 	// 删除相关的权限关联
 	err = l.svcCtx.DB.Where("menu_id = ?", req.Id).Delete(&backend_models.AdminSystemAuthorityMenu{}).Error
 	if err != nil {
-		logx.Errorf("删除菜单权限关联失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除菜单权限关联失败",
+			Data: map[string]interface{}{"menuId": req.Id, "err": err.Error()},
+		})
 		// 这里不返回错误，因为菜单已经删除了
 	}
 
-	logx.Infof("菜单删除成功: ID=%d, Name=%s", req.Id, menu.Name)
+	l.logger.Info(model.LogMsg{
+		Text: "菜单删除成功",
+		Data: map[string]interface{}{"menuId": req.Id, "menuName": menu.Name},
+	})
 	return &types.DeleteMenuRes{}, nil
 }

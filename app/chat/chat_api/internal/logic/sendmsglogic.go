@@ -31,23 +31,20 @@ import (
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/common/models/ctype"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type SendMsgLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
 	return &SendMsgLogic{
 		ctx:    ctx,
-		logger: logger.New("send_msg"),
+		logger: beaverlog.New("send_msg", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -80,7 +77,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.VideoMsgType:
 		if apiMsg.VideoMsg != nil {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileUrl:       apiMsg.VideoMsg.FileUrl,
+				FileUrl:      apiMsg.VideoMsg.FileUrl,
 				Width:        int32(apiMsg.VideoMsg.Width),
 				Height:       int32(apiMsg.VideoMsg.Height),
 				Duration:     int32(apiMsg.VideoMsg.Duration),
@@ -169,7 +166,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.CloudDocMsgType:
 		if apiMsg.CloudDocMsg != nil {
 			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
-				DocId: apiMsg.CloudDocMsg.DocID,
+				DocId:    apiMsg.CloudDocMsg.DocID,
 				DocType:  int32(apiMsg.CloudDocMsg.DocType),
 				Title:    apiMsg.CloudDocMsg.Title,
 				OwnerId:  apiMsg.CloudDocMsg.OwnerID,
@@ -196,16 +193,17 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	// 调用 RPC 服务
 	rpcResp, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, rpcReq)
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("failed to send message via RPC: %v", err)
 		l.logger.Error(model.LogMsg{
 			Text: "发送消息失败",
-			Data: map[string]interface{}{
+			Data: map[string]any{
 				"userId":         req.UserID,
 				"conversationId": req.ConversationID,
+				"messageId":      req.MessageID,
 				"messageType":    req.Msg.Type,
+				"err":            err.Error(),
 			},
 		})
-		return nil, errors.New("failed to send message")
+		return nil, errors.New("发送消息失败")
 	}
 
 	// 构建 API 响应
@@ -227,11 +225,12 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 
 	l.logger.Info(model.LogMsg{
 		Text: "发送消息成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"userId":         req.UserID,
 			"conversationId": req.ConversationID,
 			"messageId":      rpcResp.MessageId,
 			"messageType":    req.Msg.Type,
+			"seq":            rpcResp.Seq,
 		},
 	})
 	return resp, nil

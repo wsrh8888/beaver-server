@@ -27,24 +27,27 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/file/file_rpc/types/file_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFileDetailLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetFileDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFileDetailLogic {
-	return &GetFileDetailLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetFileDetailLogic{logger: beaverlog.New("get_file_detail", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetFileDetailLogic) GetFileDetail(req *types.GetFileDetailReq) (resp *types.GetFileDetailRes, err error) {
 	rpcRes, err := l.svcCtx.FileRpc.GetFileById(l.ctx, &file_rpc.GetFileByIdReq{Id: uint64(req.Id)})
 	if err != nil {
-		l.Errorf("获取文件详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取文件详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

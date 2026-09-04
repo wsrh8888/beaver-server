@@ -26,21 +26,20 @@ import (
 
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type FileUploadQiniuLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewFileUploadQiniuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUploadQiniuLogic {
 	return &FileUploadQiniuLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("file_upload_qiniu", ctx),
 	}
 }
 

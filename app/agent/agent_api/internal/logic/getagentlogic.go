@@ -8,19 +8,19 @@ import (
 	"beaver/app/agent/agent_api/internal/svc"
 	"beaver/app/agent/agent_api/internal/types"
 	"beaver/app/agent/agent_rpc/types/agent_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetAgentLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetAgentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAgentLogic {
 	return &GetAgentLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_agent", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -42,7 +42,7 @@ func (l *GetAgentLogic) GetAgent(req *types.GetAgentReq) (*types.GetAgentRes, er
 		AgentId: req.AgentId,
 	})
 	if err != nil {
-		l.Errorf("GetAgent rpc failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取智能体失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, err
 	}
 

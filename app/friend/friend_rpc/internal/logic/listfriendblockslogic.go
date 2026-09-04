@@ -28,19 +28,20 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type ListFriendBlocksLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListFriendBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFriendBlocksLogic {
-	return &ListFriendBlocksLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListFriendBlocksLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_friend_blocks", ctx)}
 }
 
 func (l *ListFriendBlocksLogic) ListFriendBlocks(in *friend_rpc.ListFriendBlocksReq) (*friend_rpc.ListFriendBlocksRes, error) {
@@ -50,6 +51,7 @@ func (l *ListFriendBlocksLogic) ListFriendBlocks(in *friend_rpc.ListFriendBlocks
 			return &friend_rpc.ListFriendBlocksRes{}, nil
 		}
 		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "查询黑名单记录失败", Data: map[string]any{"blockId": in.BlockId, "err": err.Error()}})
 			return nil, err
 		}
 		return &friend_rpc.ListFriendBlocksRes{
@@ -80,13 +82,13 @@ func (l *ListFriendBlocksLogic) ListFriendBlocks(in *friend_rpc.ListFriendBlocks
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计黑名单失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计黑名单失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []friend_models.FriendBlockModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询黑名单列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询黑名单列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

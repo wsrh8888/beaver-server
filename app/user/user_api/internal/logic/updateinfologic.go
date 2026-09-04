@@ -35,24 +35,22 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
-
 
 type UpdateInfoLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateInfoLogic {
 	return &UpdateInfoLogic{
 		ctx:    ctx,
-		logger: logger.New("update_info"),
+		logger: beaverlog.New("update_info", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -89,7 +87,7 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		// 获取新版本号（用户独立递增）
 		version = l.svcCtx.VersionGen.GetNextVersion("users", "user_id", req.UserID)
 		if version == -1 {
-			logx.WithContext(l.ctx).Errorf("获取版本号失败")
+			l.logger.Error(model.LogMsg{Text: "获取版本号失败", Data: map[string]interface{}{"userId": req.UserID}})
 			return nil, errors.New("获取版本号失败")
 		}
 
@@ -101,7 +99,6 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 			return nil, err
 		}
 
-		logx.WithContext(l.ctx).Infof("用户信息更新成功: userID=%s, version=%d", req.UserID, version)
 		l.logger.Info(model.LogMsg{
 			Text: "用户信息更新成功",
 			Data: map[string]interface{}{
@@ -123,11 +120,11 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 			// 获取所有需要推送的用户ID
 			allRecipients, err := l.getAllRelatedUserIds(ctx, req.UserID)
 			if err != nil {
-				logx.Errorf("获取相关用户ID失败: %v", err)
+				l.logger.Error(model.LogMsg{Text: "获取相关用户ID失败", Data: map[string]interface{}{"userId": req.UserID, "err": err.Error()}})
 				return
 			}
 
-			logx.Infof("推送用户信息变更给 %d 个用户: %v", len(allRecipients), allRecipients)
+			l.logger.Info(model.LogMsg{Text: "推送用户信息变更", Data: map[string]interface{}{"userId": req.UserID, "count": len(allRecipients), "recipients": allRecipients}})
 
 			// 通过 RocketMQ 异步推送给所有相关用户
 			for _, recipientID := range allRecipients {
@@ -193,9 +190,9 @@ func (l *UpdateInfoLogic) recordUserChangeLog(userID string, version int64, upda
 	// 批量插入变更日志
 	if len(changeLogs) > 0 {
 		if err := l.svcCtx.DB.Create(&changeLogs).Error; err != nil {
-			logx.WithContext(l.ctx).Errorf("记录用户变更日志失败: userID=%s, error=%v", userID, err)
+			l.logger.Error(model.LogMsg{Text: "记录用户变更日志失败", Data: map[string]interface{}{"userId": userID, "err": err.Error()}})
 		} else {
-			logx.WithContext(l.ctx).Infof("用户变更日志记录成功: userID=%s, 变更数=%d", userID, len(changeLogs))
+			l.logger.Info(model.LogMsg{Text: "用户变更日志记录成功", Data: map[string]interface{}{"userId": userID, "count": len(changeLogs)}})
 		}
 	}
 }
@@ -215,7 +212,7 @@ func (l *UpdateInfoLogic) getAllRelatedUserIds(ctx context.Context, userID strin
 		UserID: userID,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("获取好友列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取好友列表失败", Data: map[string]interface{}{"userId": userID, "err": err.Error()}})
 		return nil, err
 	}
 	for _, uid := range friendResp.FriendIds {
@@ -227,7 +224,7 @@ func (l *UpdateInfoLogic) getAllRelatedUserIds(ctx context.Context, userID strin
 		UserID: userID,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"userId": userID, "err": err.Error()}})
 		return nil, err
 	}
 	for _, uid := range groupResp.MemberIDs {

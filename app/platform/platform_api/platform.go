@@ -26,7 +26,7 @@ import (
 	"beaver/app/platform/platform_api/internal/handler"
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/common/etcd"
-	"beaver/utils/logger"
+	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
 
@@ -41,7 +41,8 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("platform_api")
+	beaverlog.InitFromConf(c.RestConf.ServiceConf)
+	beaverlog.SetOtlpAddr(c.OtlpAddr)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

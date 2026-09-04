@@ -29,21 +29,21 @@ import (
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupMembersLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupMembersLogic {
 	return &GetGroupMembersLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_group_members", ctx),
 	}
 }
 
@@ -71,7 +71,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 	var groupCount int64
 	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).Where("group_id = ?", req.GroupID).Count(&groupCount).Error
 	if err != nil {
-		l.Logger.Errorf("查询群组失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("查询群组失败")
 	}
 
@@ -85,7 +85,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 		Count(&count).Error
 
 	if err != nil {
-		l.Logger.Errorf("统计群成员数量失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计群成员数量失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("获取群成员列表失败")
 	}
 
@@ -96,7 +96,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 		Find(&members).Error
 
 	if err != nil {
-		l.Logger.Errorf("获取群成员列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("获取群成员列表失败")
 	}
 
@@ -123,7 +123,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GroupMemberListReq) (r
 	})
 
 	if err != nil {
-		l.Logger.Errorf("获取用户信息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户信息失败", Data: map[string]any{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("获取用户信息失败")
 	}
 

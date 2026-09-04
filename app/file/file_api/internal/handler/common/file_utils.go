@@ -38,8 +38,8 @@ import (
 	"beaver/app/file/file_models"
 	utils "beaver/utils/list"
 	"beaver/utils/md5"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 // FileTypeMapper maps file extensions to file types.
@@ -160,7 +160,7 @@ func CreateFileRecord(req *FileUploadRequest, filePath string, source file_model
 		return nil, fmt.Errorf("保存文件记录失败: %v", err)
 	}
 
-	logx.Infof("文件记录创建成功: %s, 来源: %s", newFileModel.FileKey, source)
+	beaverlog.New("file_utils").Info(model.LogMsg{Text: "文件记录创建成功", Data: map[string]interface{}{"fileKey": newFileModel.FileKey, "source": source}})
 	return newFileModel, nil
 }
 
@@ -285,7 +285,7 @@ func SaveFileToLocal(filePath string, data []byte) error {
 		return fmt.Errorf("保存文件失败: %v", err)
 	}
 
-	logx.Infof("文件保存成功: %s", filePath)
+	beaverlog.New("file_utils").Info(model.LogMsg{Text: "文件保存成功", Data: map[string]interface{}{"filePath": filePath}})
 	return nil
 }
 

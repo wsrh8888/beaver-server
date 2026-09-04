@@ -27,21 +27,21 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendVerifyVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFriendVerifyVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendVerifyVersionsLogic {
 	return &GetFriendVerifyVersionsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_friend_verify_versions", ctx),
 	}
 }
 
@@ -57,11 +57,11 @@ func (l *GetFriendVerifyVersionsLogic) GetFriendVerifyVersions(in *friend_rpc.Ge
 
 	err := query.Find(&friendVerifies).Error
 	if err != nil {
-		l.Errorf("查询用户好友验证版本信息失败: userId=%s, since=%d, error=%v", in.UserId, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询用户好友验证版本信息失败", Data: map[string]any{"userId": in.UserId, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到用户 %s 的 %d 个好友验证版本信息", in.UserId, len(friendVerifies))
+	l.logger.Info(model.LogMsg{Text: "查询用户好友验证版本信息", Data: map[string]interface{}{"userId": in.UserId, "count": len(friendVerifies)}})
 
 	// 转换为响应格式
 	var friendVerifyVersions []*friend_rpc.GetFriendVerifyVersionsRes_FriendVerifyVersion

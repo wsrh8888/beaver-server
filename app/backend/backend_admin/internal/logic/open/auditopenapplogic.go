@@ -28,21 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type AuditOpenAppLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAuditOpenAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuditOpenAppLogic {
-	return &AuditOpenAppLogic{logger: logger.New("audit_open_app"), ctx: ctx, svcCtx: svcCtx}
+	return &AuditOpenAppLogic{logger: beaverlog.New("audit_open_app", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *AuditOpenAppLogic) AuditOpenApp(req *types.AuditOpenAppReq) (resp *types.AuditOpenAppRes, err error) {
@@ -57,13 +54,16 @@ func (l *AuditOpenAppLogic) AuditOpenApp(req *types.AuditOpenAppReq) (resp *type
 	}
 
 	_, err = l.svcCtx.OpenRpc.UpdateOpenApps(l.ctx, &open_rpc.UpdateOpenAppsReq{
-		AppIds:     []string{req.AppID},
-		Action:     int32(req.Status),
-		OperatorId: req.UserID,
+		AppIds:      []string{req.AppID},
+		Action:      int32(req.Status),
+		OperatorId:  req.UserID,
 		AuditRemark: req.AuditRemark,
 	})
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("审核应用失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "审核应用失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

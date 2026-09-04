@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type CreateArchitectureLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateArchitectureLogic {
-	return &CreateArchitectureLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &CreateArchitectureLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("create_architecture", ctx)}
 }
 
 func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArchitectureReq) (*platform_rpc.CreateArchitectureRes, error) {
@@ -51,6 +52,7 @@ func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArch
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "应用不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询应用失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -58,6 +60,7 @@ func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArch
 	if err := l.svcCtx.DB.Where("app_id = ? AND platform_id = ? AND arch_id = ?", in.AppId, in.PlatformId, in.ArchId).First(&existing).Error; err == nil {
 		return nil, status.Error(codes.AlreadyExists, "架构已存在")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		l.logger.Error(model.LogMsg{Text: "查询架构唯一性失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -69,9 +72,11 @@ func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArch
 		IsActive:    true,
 	}
 	if err := l.svcCtx.DB.Create(&arch).Error; err != nil {
-		l.Errorf("创建架构失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建架构失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "创建架构失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "创建架构成功", Data: map[string]interface{}{"appId": in.AppId, "archId": arch.Id}})
 
 	return &platform_rpc.CreateArchitectureRes{Id: uint64(arch.Id)}, nil
 }

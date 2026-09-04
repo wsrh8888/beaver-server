@@ -26,12 +26,11 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type FileUploadLocalLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -39,7 +38,7 @@ type FileUploadLocalLogic struct {
 // 文件上传本地
 func NewFileUploadLocalLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUploadLocalLogic {
 	return &FileUploadLocalLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("file_upload_local", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

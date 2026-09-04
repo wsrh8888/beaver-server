@@ -28,25 +28,23 @@ import (
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type BlockUserLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 拉黑用户
 func NewBlockUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BlockUserLogic {
 	return &BlockUserLogic{
 		ctx:    ctx,
-		logger: logger.New("block_user"),
+		logger: beaverlog.New("block_user", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -69,7 +67,7 @@ func (l *BlockUserLogic) BlockUser(req *types.BlockUserReq) (resp *types.BlockUs
 		BlockedUserID: req.BlockedUserID,
 	}
 	if err = l.svcCtx.DB.Create(&block).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("拉黑用户失败: userID=%s blockedUserID=%s err=%v", req.UserID, req.BlockedUserID, err)
+		l.logger.Error(model.LogMsg{Text: "拉黑用户失败", Data: map[string]interface{}{"userId": req.UserID, "blockedUserId": req.BlockedUserID, "err": err.Error()}})
 		return nil, errors.New("操作失败")
 	}
 

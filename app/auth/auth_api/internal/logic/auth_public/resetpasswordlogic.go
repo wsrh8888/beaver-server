@@ -30,24 +30,21 @@ import (
 	"beaver/app/auth/auth_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/utils/authlock"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
-
 
 type ResetPasswordLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewResetPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResetPasswordLogic {
 	return &ResetPasswordLogic{
 		ctx:    ctx,
-		logger: logger.New("reset_password"),
+		logger: beaverlog.New("reset_password", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -67,19 +64,24 @@ func (l *ResetPasswordLogic) ResetPassword(req *types.ResetPasswordReq) (*types.
 
 	var credential auth_models.AuthCredentialModel
 	if err := l.svcCtx.DB.Take(&credential, "user_id = ?", searchRes.UserInfo.UserId).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户凭证失败",
+			Data: map[string]any{"userId": searchRes.UserInfo.UserId, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("重置密码失败")
 	}
 	credential.Password = pwd.HahPwd(req.Password)
 	if err := l.svcCtx.DB.Save(&credential).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "重置密码失败",
+			Data: map[string]any{"userId": searchRes.UserInfo.UserId, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("重置密码失败")
 	}
 
-	logx.Infof("用户 %s 密码重置成功", req.Email)
 	l.logger.Info(model.LogMsg{
 		Text: "密码重置成功",
-		Data: map[string]interface{}{
-			"userId": searchRes.UserInfo.UserId,
-		},
+		Data: map[string]any{"userId": searchRes.UserInfo.UserId},
 	})
 	return &types.ResetPasswordRes{}, nil
 }

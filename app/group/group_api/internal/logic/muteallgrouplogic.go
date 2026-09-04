@@ -29,24 +29,21 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type MuteAllGroupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 全员禁言/解禁
 func NewMuteAllGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteAllGroupLogic {
 	return &MuteAllGroupLogic{
 		ctx:    ctx,
-		logger: logger.New("mute_all_group"),
+		logger: beaverlog.New("mute_all_group", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -82,7 +79,7 @@ func (l *MuteAllGroupLogic) MuteAllGroup(req *types.MuteAllGroupReq) (resp *type
 	if err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
 		Where("group_id = ?", req.GroupID).
 		Updates(updates).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("更新全员禁言失败: groupID=%s err=%v", req.GroupID, err)
+		l.logger.Error(model.LogMsg{Text: "更新全员禁言失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("操作失败")
 	}
 

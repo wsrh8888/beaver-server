@@ -32,23 +32,20 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type GroupDeleteLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGroupDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupDeleteLogic {
 	return &GroupDeleteLogic{
 		ctx:    ctx,
-		logger: logger.New("group_delete"),
+		logger: beaverlog.New("group_delete", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -66,7 +63,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 	// 获取该群的版本号（独立递增）
 	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
 	if groupVersion == -1 {
-		logx.WithContext(l.ctx).Errorf("获取群组版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取群组版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -80,7 +77,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 	// 获取群成员版本号（按群独立递增）
 	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 	if memberVersion == -1 {
-		logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -103,7 +100,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 			"version": memberVersion,
 		}).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("更新群成员状态失败: groupId=%s, err=%v", req.GroupID, err)
+		l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 		return nil, errors.New("解散群组失败")
 	}
 
@@ -111,7 +108,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 	if _, dissolveErr := l.svcCtx.ChatRpc.DissolveConversation(l.ctx, &chat_rpc.DissolveConversationReq{
 		ConversationId: conversationId,
 	}); dissolveErr != nil {
-		logx.WithContext(l.ctx).Errorf("解散群会话失败: groupId=%s, err=%v", req.GroupID, dissolveErr)
+		l.logger.Error(model.LogMsg{Text: "解散群会话失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": dissolveErr.Error()}})
 	}
 
 	// 异步通知所有成员：群资料解散 + 成员关系失效
@@ -144,7 +141,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 						},
 						{
 							"table": "group_members",
-							"data": memberData,
+							"data":  memberData,
 						},
 					},
 				},

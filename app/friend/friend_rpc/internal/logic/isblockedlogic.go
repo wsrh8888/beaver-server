@@ -27,21 +27,20 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type IsBlockedLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewIsBlockedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsBlockedLogic {
 	return &IsBlockedLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("is_blocked", ctx),
 	}
 }
 

@@ -29,20 +29,20 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type UpdateBotLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateBotLogic {
 	return &UpdateBotLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_bot", ctx),
 	}
 }
 

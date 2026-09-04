@@ -27,22 +27,23 @@ import (
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/internal/svc"
 	"beaver/app/call/call_rpc/types/call_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type CreateSessionLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateSessionLogic {
 	return &CreateSessionLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_session", ctx),
 	}
 }
 
@@ -103,8 +104,21 @@ func (l *CreateSessionLogic) CreateSession(in *call_rpc.CreateSessionReq) (*call
 	})
 
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "创建通话会话失败",
+			Data: map[string]any{"roomId": in.RoomId, "callerId": in.CallerId, "callType": in.CallType, "err": err.Error()},
+		})
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "创建通话会话成功",
+		Data: map[string]interface{}{
+			"roomId":   in.RoomId,
+			"callerId": in.CallerId,
+			"callType": in.CallType,
+		},
+	})
 
 	return &call_rpc.CreateSessionRes{
 		Success:      true,

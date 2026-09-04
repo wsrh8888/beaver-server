@@ -34,23 +34,23 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	util "beaver/utils/uuid"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type PasswordLoginLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
-// 账号密码登录
 func NewPasswordLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PasswordLoginLogic {
 	return &PasswordLoginLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("password_login", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -58,10 +58,17 @@ func NewPasswordLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pas
 func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *types.PasswordLoginRes, err error) {
 	var app open_models.OpenApp
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
-		logx.Errorf("应用不存在: appId=%s, err=%v", req.AppID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "应用不存在",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("应用不存在")
 	}
 	if app.Status != 1 {
+		l.logger.Warn(model.LogMsg{
+			Text: "应用未启用",
+			Data: map[string]any{"appId": req.AppID},
+		})
 		return nil, fmt.Errorf("应用未启用")
 	}
 
@@ -76,7 +83,10 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 		})
 	}
 	if err != nil {
-		logx.Errorf("用户不存在: account=%s, err=%v", req.Account, err)
+		l.logger.Warn(model.LogMsg{
+			Text: "账号不存在",
+			Data: map[string]any{"appId": req.AppID, "account": req.Account},
+		})
 		return nil, errors.New("账号或密码错误")
 	}
 
@@ -85,17 +95,38 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 		Password: req.Password,
 	})
 	if err != nil || !verifyRes.Valid {
-		logx.Errorf("密码错误: userId=%s", userRes.UserInfo.UserId)
+		l.logger.Warn(model.LogMsg{
+			Text: "密码校验失败",
+			Data: map[string]any{
+				"appId":   req.AppID,
+				"account": req.Account,
+				"userId":  userRes.UserInfo.UserId,
+			},
+		})
 		return nil, errors.New("账号或密码错误")
 	}
 
 	code, expireIn, err := createOAuthCode(l.svcCtx.DB, req.AppID, userRes.UserInfo.UserId, "password", "")
 	if err != nil {
-		logx.Errorf("生成授权码失败: userId=%s, err=%v", userRes.UserInfo.UserId, err)
+		l.logger.Error(model.LogMsg{
+			Text: "生成授权码失败",
+			Data: map[string]any{
+				"appId":  req.AppID,
+				"userId": userRes.UserInfo.UserId,
+				"err":    err.Error(),
+			},
+		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
-	logx.Infof("账号密码登录成功: userId=%s, appId=%s, account=%s", userRes.UserInfo.UserId, req.AppID, req.Account)
+	l.logger.Info(model.LogMsg{
+		Text: "账号密码登录成功",
+		Data: map[string]any{
+			"appId":   req.AppID,
+			"account": req.Account,
+			"userId":  userRes.UserInfo.UserId,
+		},
+	})
 
 	return &types.PasswordLoginRes{
 		Code:     code,

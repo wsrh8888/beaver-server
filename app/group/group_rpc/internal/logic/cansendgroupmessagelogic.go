@@ -29,22 +29,23 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type CanSendGroupMessageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCanSendGroupMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CanSendGroupMessageLogic {
 	return &CanSendGroupMessageLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("can_send_group_message", ctx),
 	}
 }
 
@@ -55,6 +56,7 @@ func (l *CanSendGroupMessageLogic) CanSendGroupMessage(in *group_rpc.CanSendGrou
 		if err == gorm.ErrRecordNotFound {
 			return &group_rpc.CanSendGroupMessageRes{Allowed: false, Reason: "你不是该群成员"}, nil
 		}
+		l.logger.Error(model.LogMsg{Text: "查询群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 

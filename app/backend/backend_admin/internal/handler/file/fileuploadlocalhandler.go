@@ -32,15 +32,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/common/response"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"net/http"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		logger := beaverlog.New("file_upload_local", r.Context())
+
 		var req types.FileUploadLocalReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
@@ -50,7 +53,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 从表单获取文件
 		file, fileHeader, err := r.FormFile("file")
 		if err != nil {
-			logx.Error(err)
+			logger.Error(model.LogMsg{Text: "获取上传文件失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, err)
 			return
 		}
@@ -75,6 +78,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		l := logic.NewFileUploadLocalLogic(r.Context(), svcCtx)
 		resp, err := l.FileUploadLocal(&req)
 		if err != nil {
+			logger.Error(model.LogMsg{Text: "本地文件上传处理失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, err)
 			return
 		}
@@ -109,7 +113,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		localFilePath := generateFilePath(uploadDir, projectName, fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
 
 		// 保存文件到本地
-		if err := saveFileToLocal(localFilePath, fileReq.ByteData); err != nil {
+		if err := saveFileToLocal(localFilePath, fileReq.ByteData, logger); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
@@ -131,6 +135,7 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		saveLogic := logic.NewSaveFileLogic(r.Context(), svcCtx)
 		saveResp, err := saveLogic.SaveFile(saveReq)
 		if err != nil {
+			logger.Error(model.LogMsg{Text: "保存文件信息失败", Data: map[string]interface{}{"err": err.Error()}})
 			response.Response(r, w, nil, err)
 			return
 		}
@@ -138,13 +143,13 @@ func FileUploadLocalHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		resp.OriginalName = fileReq.OriginalName
 		resp.FileURL = filecommon.BuildLocalFileURL(svcCtx.Config.Domain, saveResp.FileKey)
 
-		logx.Infof("本地文件上传成功, url: %s", resp.FileURL)
+		logger.Info(model.LogMsg{Text: "本地文件上传成功", Data: map[string]interface{}{"url": resp.FileURL}})
 		response.Response(r, w, resp, nil)
 	}
 }
 
 // saveFileToLocal 保存文件到本地
-func saveFileToLocal(filePath string, data []byte) error {
+func saveFileToLocal(filePath string, data []byte, logger *beaverlog.Logger) error {
 	// 确保目录存在
 	dir := filepath.Dir(filePath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -156,7 +161,7 @@ func saveFileToLocal(filePath string, data []byte) error {
 		return fmt.Errorf("保存文件失败: %v", err)
 	}
 
-	logx.Infof("文件保存成功: %s", filePath)
+	logger.Info(model.LogMsg{Text: "文件保存成功", Data: map[string]interface{}{"path": filePath}})
 	return nil
 }
 

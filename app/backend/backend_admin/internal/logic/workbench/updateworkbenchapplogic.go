@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type UpdateWorkbenchAppLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateWorkbenchAppLogic {
-	return &UpdateWorkbenchAppLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &UpdateWorkbenchAppLogic{logger: beaverlog.New("update_workbench_app", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(req *types.UpdateWorkbenchAppReq) (*types.UpdateWorkbenchAppRes, error) {
@@ -78,7 +78,10 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(req *types.UpdateWorkbenchA
 
 	_, err := l.svcCtx.PlatformRpc.UpdateWorkbenchApp(l.ctx, in)
 	if err != nil {
-		l.Errorf("更新工作台应用失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新工作台应用失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

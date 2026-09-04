@@ -28,12 +28,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendBlockListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -43,7 +43,7 @@ type GetFriendBlockListLogic struct {
 // RPC 职责：ListFriendBlocks 领域查询，不与本 HTTP 接口 1:1。
 func NewGetFriendBlockListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendBlockListLogic {
 	return &GetFriendBlockListLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_friend_block_list", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -57,7 +57,10 @@ func (l *GetFriendBlockListLogic) GetFriendBlockList(req *types.GetFriendBlockLi
 		BlockedUserId: req.BlockedUserID,
 	})
 	if err != nil {
-		l.Errorf("获取黑名单列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取黑名单列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

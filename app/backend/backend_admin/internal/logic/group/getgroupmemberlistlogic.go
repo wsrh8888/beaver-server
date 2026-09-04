@@ -29,18 +29,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupMemberListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetGroupMemberListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupMemberListLogic {
-	return &GetGroupMemberListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetGroupMemberListLogic{logger: beaverlog.New("get_group_member_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetGroupMemberListLogic) GetGroupMemberList(req *types.GetGroupMemberListReq) (resp *types.GetGroupMemberListRes, err error) {
@@ -56,7 +56,10 @@ func (l *GetGroupMemberListLogic) GetGroupMemberList(req *types.GetGroupMemberLi
 		Status:   int32(req.Status),
 	})
 	if err != nil {
-		l.Errorf("获取群成员列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取群成员列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

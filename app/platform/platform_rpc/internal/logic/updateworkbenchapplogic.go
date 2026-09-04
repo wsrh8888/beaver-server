@@ -29,8 +29,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -39,11 +40,11 @@ import (
 type UpdateWorkbenchAppLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateWorkbenchAppLogic {
-	return &UpdateWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_workbench_app", ctx)}
 }
 
 func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(in *platform_rpc.UpdateWorkbenchAppReq) (*platform_rpc.UpdateWorkbenchAppRes, error) {
@@ -56,6 +57,7 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(in *platform_rpc.UpdateWork
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "工作台应用不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询工作台应用失败", Data: map[string]any{"workbenchAppId": in.WorkbenchAppId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -120,9 +122,11 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(in *platform_rpc.UpdateWork
 	}
 
 	if err := l.svcCtx.DB.Model(&app).Updates(updates).Error; err != nil {
-		l.Errorf("更新工作台应用失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新工作台应用失败", Data: map[string]any{"workbenchAppId": in.WorkbenchAppId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "更新工作台应用失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "更新工作台应用成功", Data: map[string]interface{}{"workbenchAppId": in.WorkbenchAppId, "operatorId": in.OperatorId}})
 
 	return &platform_rpc.UpdateWorkbenchAppRes{}, nil
 }

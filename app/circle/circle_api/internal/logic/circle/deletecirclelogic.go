@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteCircleLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewDeleteCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteCircleLogic {
 	return &DeleteCircleLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("delete_circle", ctx),
 	}
 }
 
@@ -63,8 +63,11 @@ func (l *DeleteCircleLogic) DeleteCircle(req *types.DeleteCircleReq) (resp *type
 			"is_deleted": true,
 			"version":    circleVersion,
 		}).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "解散圈子失败", Data: map[string]any{"circleId": req.CircleID, "err": err.Error()}})
 		return nil, fmt.Errorf("解散圈子失败: %v", err)
 	}
+
+	l.logger.Info(model.LogMsg{Text: "解散圈子成功", Data: map[string]interface{}{"circleId": req.CircleID, "userId": req.UserID}})
 
 	return &types.DeleteCircleRes{}, nil
 }

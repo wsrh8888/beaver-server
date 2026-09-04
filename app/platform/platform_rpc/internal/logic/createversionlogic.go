@@ -28,8 +28,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type CreateVersionLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewCreateVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateVersionLogic {
-	return &CreateVersionLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &CreateVersionLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("create_version", ctx)}
 }
 
 func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*platform_rpc.CreateVersionRes, error) {
@@ -54,6 +55,7 @@ func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "架构不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询架构失败", Data: map[string]any{"architectureId": in.ArchitectureId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -65,9 +67,11 @@ func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*
 		ReleaseNotes:   in.ReleaseNotes,
 	}
 	if err := l.svcCtx.DB.Create(&version).Error; err != nil {
-		l.Errorf("创建版本失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "创建版本失败", Data: map[string]any{"architectureId": in.ArchitectureId, "version": in.Version, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "创建版本失败")
 	}
+
+	l.logger.Info(model.LogMsg{Text: "创建版本成功", Data: map[string]interface{}{"versionId": version.Id, "version": in.Version}})
 
 	return &platform_rpc.CreateVersionRes{VersionId: uint64(version.Id)}, nil
 }

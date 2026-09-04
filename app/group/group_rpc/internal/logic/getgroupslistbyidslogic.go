@@ -28,27 +28,26 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupsListByIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetGroupsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupsListByIdsLogic {
 	return &GetGroupsListByIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_groups_list_by_ids", ctx),
 	}
 }
 
 func (l *GetGroupsListByIdsLogic) GetGroupsListByIds(in *group_rpc.GetGroupsListByIdsReq) (*group_rpc.GetGroupsListByIdsRes, error) {
 	if len(in.GroupIDs) == 0 {
-		l.Errorf("群组ID列表为空")
 		return &group_rpc.GetGroupsListByIdsRes{Groups: []*group_rpc.GroupListById{}}, nil
 	}
 	// 查询指定群组ID列表中的群组资料 - 只查询需要的字段
@@ -66,11 +65,11 @@ func (l *GetGroupsListByIdsLogic) GetGroupsListByIds(in *group_rpc.GetGroupsList
 
 	err := query.Find(&groupsData).Error
 	if err != nil {
-		l.Errorf("查询群组资料失败: groupIDs=%v, since=%d, error=%v", in.GroupIDs, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询群组资料失败", Data: map[string]any{"groupIds": in.GroupIDs, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个群组资料", len(groupsData))
+	l.logger.Info(model.LogMsg{Text: "批量查询群组资料", Data: map[string]interface{}{"count": len(groupsData)}})
 
 	// 转换为响应格式
 	var groups []*group_rpc.GroupListById

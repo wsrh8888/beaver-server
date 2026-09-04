@@ -27,21 +27,21 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteUsersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteUsersLogic {
 	return &DeleteUsersLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("delete_users", ctx),
 	}
 }
 
@@ -53,8 +53,15 @@ func (l *DeleteUsersLogic) DeleteUsers(in *user_rpc.DeleteUsersReq) (*user_rpc.D
 		Where("user_id IN ?", in.UserIds).
 		Update("status", 3)
 	if result.Error != nil {
-		l.Errorf("删除用户失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{
+			Text: "删除用户失败",
+			Data: map[string]any{"userIds": in.UserIds, "err": result.Error.Error()},
+		})
 		return nil, result.Error
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "删除用户成功",
+		Data: map[string]interface{}{"userIds": in.UserIds, "affected": result.RowsAffected},
+	})
 	return &user_rpc.DeleteUsersRes{AffectedCount: result.RowsAffected}, nil
 }

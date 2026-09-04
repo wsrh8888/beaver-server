@@ -27,21 +27,21 @@ import (
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/internal/svc"
 	"beaver/app/call/call_rpc/types/call_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSessionLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSessionLogic {
 	return &GetSessionLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_session", ctx),
 	}
 }
 
@@ -49,6 +49,10 @@ func NewGetSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSes
 func (l *GetSessionLogic) GetSession(in *call_rpc.GetSessionReq) (*call_rpc.GetSessionRes, error) {
 	var session call_models.CallSession
 	if err := l.svcCtx.DB.Where("room_id = ?", in.RoomId).First(&session).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通话会话失败",
+			Data: map[string]any{"roomId": in.RoomId, "err": err.Error()},
+		})
 		return nil, err
 	}
 

@@ -30,19 +30,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetDashboardTrendsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetDashboardTrendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDashboardTrendsLogic {
 	return &GetDashboardTrendsLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_dashboard_trends", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -108,7 +108,10 @@ func (l *GetDashboardTrendsLogic) countCasesByDay(days []string, since time.Time
 		Where("created_at >= ?", since).
 		Group("DATE(created_at)").
 		Scan(&rows).Error; err != nil {
-		l.Errorf("统计工单趋势失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计工单趋势失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return counts
 	}
 	for _, r := range rows {
@@ -131,7 +134,10 @@ func (l *GetDashboardTrendsLogic) countAuditOpsByDay(days []string, since time.T
 		Where("created_at >= ?", since).
 		Group("DATE(created_at)").
 		Scan(&rows).Error; err != nil {
-		l.Errorf("统计审计操作趋势失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计审计操作趋势失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return counts
 	}
 	for _, r := range rows {
@@ -148,7 +154,10 @@ func (l *GetDashboardTrendsLogic) countReportsByDay(days []string, since time.Ti
 		Page: 1, PageSize: 500,
 	})
 	if err != nil {
-		l.Errorf("统计举报趋势失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计举报趋势失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return counts
 	}
 	sinceDate := since.Format("2006-01-02")
@@ -170,7 +179,10 @@ func (l *GetDashboardTrendsLogic) countFeedbackByDay(days []string, since time.T
 		Page: 1, PageSize: 500,
 	})
 	if err != nil {
-		l.Errorf("统计反馈趋势失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "统计反馈趋势失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return counts
 	}
 	sinceDate := since.Format("2006-01-02")

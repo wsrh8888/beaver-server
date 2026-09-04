@@ -29,22 +29,23 @@ import (
 	"beaver/app/call/call_rpc/internal/svc"
 	"beaver/app/call/call_rpc/types/call_rpc"
 	"beaver/app/chat/chat_rpc/chat"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type FinalizeSessionLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewFinalizeSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FinalizeSessionLogic {
 	return &FinalizeSessionLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("finalize_session", ctx),
 	}
 }
 
@@ -53,6 +54,10 @@ func (l *FinalizeSessionLogic) FinalizeSession(in *call_rpc.FinalizeSessionReq) 
 	// 1. 获取会话原始信息 (为了拿到锚点 MessageID 和会话ID)
 	var session call_models.CallSession
 	if err := l.svcCtx.DB.Where("room_id = ?", in.RoomId).First(&session).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通话会话失败",
+			Data: map[string]any{"roomId": in.RoomId, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -60,6 +65,10 @@ func (l *FinalizeSessionLogic) FinalizeSession(in *call_rpc.FinalizeSessionReq) 
 	if session.Status == call_models.SessionStatusEnded ||
 		session.Status == call_models.SessionStatusMissed ||
 		session.Status == call_models.SessionStatusRejected {
+		l.logger.Warn(model.LogMsg{
+			Text: "通话已结束跳过重复处理",
+			Data: map[string]any{"roomId": in.RoomId, "status": session.Status},
+		})
 		return &call_rpc.FinalizeSessionRes{Success: true}, nil
 	}
 
@@ -71,6 +80,10 @@ func (l *FinalizeSessionLogic) FinalizeSession(in *call_rpc.FinalizeSessionReq) 
 		"duration": in.Duration,
 	}).Error
 	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "更新通话会话状态失败",
+			Data: map[string]any{"roomId": in.RoomId, "status": in.Status, "err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -89,6 +102,16 @@ func (l *FinalizeSessionLogic) FinalizeSession(in *call_rpc.FinalizeSessionReq) 
 				Status:   2, // 2-已结束
 				Duration: int64(in.Duration),
 			},
+		},
+	})
+
+	l.logger.Info(model.LogMsg{
+		Text: "结束通话记录成功",
+		Data: map[string]interface{}{
+			"roomId":   in.RoomId,
+			"callerId": session.CallerID,
+			"status":   in.Status,
+			"duration": in.Duration,
 		},
 	})
 

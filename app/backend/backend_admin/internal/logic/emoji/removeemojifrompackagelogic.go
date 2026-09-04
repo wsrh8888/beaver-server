@@ -28,20 +28,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const emojiPackageContentActionRemove int32 = 2
 
 type RemoveEmojiFromPackageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewRemoveEmojiFromPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveEmojiFromPackageLogic {
-	return &RemoveEmojiFromPackageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RemoveEmojiFromPackageLogic{logger: beaverlog.New("remove_emoji_from_package", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // RemoveEmojiFromPackage 管理后台：从表情包移除表情。
@@ -61,7 +61,10 @@ func (l *RemoveEmojiFromPackageLogic) RemoveEmojiFromPackage(req *types.RemoveEm
 		EmojiId:   req.EmojiId,
 	})
 	if err != nil {
-		l.Errorf("从表情包移除表情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "从表情包移除表情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.RemoveEmojiFromPackageRes{}, nil

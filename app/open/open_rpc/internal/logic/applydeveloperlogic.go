@@ -29,7 +29,8 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -38,11 +39,11 @@ import (
 type ApplyDeveloperLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewApplyDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ApplyDeveloperLogic {
-	return &ApplyDeveloperLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ApplyDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("apply_developer", ctx)}
 }
 
 func (l *ApplyDeveloperLogic) ApplyDeveloper(in *open_rpc.ApplyDeveloperReq) (*open_rpc.ApplyDeveloperRes, error) {
@@ -69,7 +70,10 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(in *open_rpc.ApplyDeveloperReq) (*o
 			existing.AuditTime = 0
 			existing.AuditRemark = ""
 			if err := l.svcCtx.DB.Save(&existing).Error; err != nil {
-				l.Errorf("重新申请开发者失败: %v", err)
+				l.logger.Error(model.LogMsg{
+					Text: "重新申请开发者失败",
+					Data: map[string]interface{}{"err": err.Error()},
+				})
 				return nil, status.Error(codes.Internal, "申请失败")
 			}
 			return &open_rpc.ApplyDeveloperRes{Id: uint64(existing.Id)}, nil
@@ -91,7 +95,10 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(in *open_rpc.ApplyDeveloperReq) (*o
 		Status:      0,
 	}
 	if err := l.svcCtx.DB.Create(&dev).Error; err != nil {
-		l.Errorf("创建开发者申请失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建开发者申请失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, status.Error(codes.Internal, "申请失败")
 	}
 

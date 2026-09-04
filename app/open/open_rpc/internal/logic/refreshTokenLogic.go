@@ -32,20 +32,21 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RefreshTokenLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RefreshTokenLogic {
 	return &RefreshTokenLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("refresh_token", ctx),
 	}
 }
 
@@ -82,7 +83,10 @@ func (l *RefreshTokenLogic) RefreshToken(in *open_rpc.RefreshTokenReq) (*open_rp
 		"expires_at":               expiresAt,
 		"refresh_token_expires_at": refreshTokenExpiresAt,
 	}).Error; err != nil {
-		logx.Errorf("更新令牌失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新令牌失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("刷新令牌失败")
 	}
 

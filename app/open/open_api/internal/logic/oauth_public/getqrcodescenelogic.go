@@ -32,21 +32,20 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetQrCodeSceneLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetQrCodeSceneLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetQrCodeSceneLogic {
 	return &GetQrCodeSceneLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_qrcode_scene", ctx),
 	}
 }
 

@@ -32,21 +32,21 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/user"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 	"gorm.io/gorm"
 )
 
 type GetRobotConfigLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetRobotConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetRobotConfigLogic {
 	return &GetRobotConfigLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_robot_config", ctx),
 	}
 }
 

@@ -28,20 +28,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const friendActionHardDelete int32 = 1
 
 type DeleteFriendLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFriendLogic {
-	return &DeleteFriendLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteFriendLogic{logger: beaverlog.New("delete_friend", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // DeleteFriend 管理后台：强制删除单条好友关系。
@@ -57,7 +57,10 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 		Action:      friendActionHardDelete,
 	})
 	if err != nil {
-		l.Errorf("删除好友失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除好友失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteFriendRes{}, nil

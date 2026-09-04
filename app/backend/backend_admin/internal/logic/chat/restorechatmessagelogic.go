@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RestoreChatMessageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewRestoreChatMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RestoreChatMessageLogic {
-	return &RestoreChatMessageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RestoreChatMessageLogic{logger: beaverlog.New("restore_chat_message", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *RestoreChatMessageLogic) RestoreChatMessage(req *types.RestoreChatMessageReq) (resp *types.RestoreChatMessageRes, err error) {
@@ -52,7 +52,10 @@ func (l *RestoreChatMessageLogic) RestoreChatMessage(req *types.RestoreChatMessa
 		Status:     1,
 	})
 	if err != nil {
-		l.Errorf("恢复聊天消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "恢复聊天消息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.RestoreChatMessageRes{}, nil

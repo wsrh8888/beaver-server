@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/file/file_rpc/types/file_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFileListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetFileListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFileListLogic {
-	return &GetFileListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetFileListLogic{logger: beaverlog.New("get_file_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetFileListLogic) GetFileList(req *types.GetFileListReq) (resp *types.GetFileListRes, err error) {
@@ -50,7 +50,10 @@ func (l *GetFileListLogic) GetFileList(req *types.GetFileListReq) (resp *types.G
 		Keywords: req.Keywords,
 	})
 	if err != nil {
-		l.Errorf("获取文件列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取文件列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

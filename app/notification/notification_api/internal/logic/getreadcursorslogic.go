@@ -27,23 +27,24 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetReadCursorsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按分类拉取通知已读游标
 func NewGetReadCursorsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetReadCursorsLogic {
 	return &GetReadCursorsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_read_cursors", ctx),
 	}
 }
 
@@ -63,6 +64,10 @@ func (l *GetReadCursorsLogic) GetReadCursors(req *types.GetReadCursorsReq) (resp
 	}
 
 	if err = query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通知已读游标失败",
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+		})
 		return nil, err
 	}
 

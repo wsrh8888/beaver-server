@@ -28,21 +28,20 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type ResolveGroupInviteLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewResolveGroupInviteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResolveGroupInviteLogic {
 	return &ResolveGroupInviteLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("resolve_group_invite", ctx),
 	}
 }
 

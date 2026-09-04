@@ -28,8 +28,8 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const friendVerifyActionDelete int32 = 1 // 删除好友验证记录
@@ -37,11 +37,11 @@ const friendVerifyActionDelete int32 = 1 // 删除好友验证记录
 type UpdateFriendVerifiesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateFriendVerifiesLogic {
-	return &UpdateFriendVerifiesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateFriendVerifiesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_friend_verifies", ctx)}
 }
 
 func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *friend_rpc.UpdateFriendVerifiesReq) (*friend_rpc.UpdateFriendVerifiesRes, error) {
@@ -62,8 +62,9 @@ func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *friend_rpc.UpdateFr
 	}
 
 	if err := l.svcCtx.DB.Where("id IN ?", ids).Delete(&friend_models.FriendVerifyModel{}).Error; err != nil {
-		l.Errorf("删除好友验证失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "删除好友验证失败", Data: map[string]any{"ids": ids, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "删除好友验证成功", Data: map[string]interface{}{"count": len(ids)}})
 	return &friend_rpc.UpdateFriendVerifiesRes{AffectedCount: int64(len(ids))}, nil
 }

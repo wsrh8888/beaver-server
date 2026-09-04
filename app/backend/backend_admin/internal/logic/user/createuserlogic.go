@@ -29,18 +29,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateUserLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateUserLogic {
-	return &CreateUserLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &CreateUserLogic{logger: beaverlog.New("create_user", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // CreateUser 管理后台：创建用户。
@@ -61,7 +61,10 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 		Source:   2,
 	})
 	if err != nil {
-		l.Errorf("创建用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
@@ -70,7 +73,10 @@ func (l *CreateUserLogic) CreateUser(req *types.CreateUserReq) (resp *types.Crea
 		Password: req.Password,
 	})
 	if err != nil || !credRes.Success {
-		l.Errorf("创建用户凭证失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户凭证失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("创建用户凭证失败")
 	}
 

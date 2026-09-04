@@ -30,17 +30,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateModerationCaseLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateModerationCaseLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateModerationCaseLogic {
-	return &CreateModerationCaseLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &CreateModerationCaseLogic{logger: beaverlog.New("create_moderation_case", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *CreateModerationCaseLogic) CreateModerationCase(req *types.CreateModerationCaseReq) (resp *types.CreateModerationCaseRes, err error) {
@@ -67,7 +68,10 @@ func (l *CreateModerationCaseLogic) CreateModerationCase(req *types.CreateModera
 		Status:      backend_models.CaseStatusPending,
 	}
 	if err = l.svcCtx.DB.Create(&caseRecord).Error; err != nil {
-		l.Errorf("创建工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

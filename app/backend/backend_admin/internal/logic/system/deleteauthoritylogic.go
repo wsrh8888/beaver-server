@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteAuthorityLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteAuthorityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteAuthorityLogic {
-	return &DeleteAuthorityLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteAuthorityLogic{logger: beaverlog.New("delete_authority", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *DeleteAuthorityLogic) DeleteAuthority(req *types.DeleteAuthorityReq) (resp *types.DeleteAuthorityRes, err error) {
@@ -59,7 +59,10 @@ func (l *DeleteAuthorityLogic) DeleteAuthority(req *types.DeleteAuthorityReq) (r
 		return nil, err
 	}
 	if err = l.svcCtx.DB.Delete(&backend_models.AdminSystemAuthority{}, req.Id).Error; err != nil {
-		l.Errorf("删除角色失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除角色失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteAuthorityRes{}, nil

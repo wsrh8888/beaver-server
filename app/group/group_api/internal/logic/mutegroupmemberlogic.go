@@ -29,24 +29,21 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type MuteGroupMemberLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 禁言/解禁群成员
 func NewMuteGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteGroupMemberLogic {
 	return &MuteGroupMemberLogic{
 		ctx:    ctx,
-		logger: logger.New("mute_group_member"),
+		logger: beaverlog.New("mute_group_member", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -94,7 +91,7 @@ func (l *MuteGroupMemberLogic) MuteGroupMember(req *types.MuteGroupMemberReq) (r
 		"muted_until": mutedUntil,
 		"version":     nextVersion,
 	}).Error; err != nil {
-		logx.WithContext(l.ctx).Errorf("更新禁言状态失败: groupID=%s memberID=%s err=%v", req.GroupID, req.MemberID, err)
+		l.logger.Error(model.LogMsg{Text: "更新禁言状态失败", Data: map[string]interface{}{"groupId": req.GroupID, "memberId": req.MemberID, "err": err.Error()}})
 		return nil, errors.New("操作失败")
 	}
 

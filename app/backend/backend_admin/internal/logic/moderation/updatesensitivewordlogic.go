@@ -30,19 +30,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"gorm.io/gorm"
 )
 
 type UpdateSensitiveWordLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewUpdateSensitiveWordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateSensitiveWordLogic {
 	return &UpdateSensitiveWordLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_sensitive_word", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -77,7 +78,10 @@ func (l *UpdateSensitiveWordLogic) UpdateSensitiveWord(req *types.UpdateSensitiv
 	}
 
 	if err = l.svcCtx.DB.Model(&row).Updates(updates).Error; err != nil {
-		l.Errorf("更新敏感词失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "更新敏感词失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("更新失败")
 	}
 

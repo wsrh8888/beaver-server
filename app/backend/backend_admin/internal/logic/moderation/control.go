@@ -33,6 +33,8 @@ import (
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"encoding/json"
 )
@@ -42,9 +44,15 @@ const (
 )
 
 func executeControlAction(ctx context.Context, svcCtx *svc.ServiceContext, operatorID string, caseID uint64, act types.ModerationControlAction) error {
+	logger := beaverlog.New("moderation_control", ctx)
+
 	target := strings.TrimSpace(act.Target)
 	extra := strings.TrimSpace(act.Extra)
-	detail, _ := json.Marshal(act)
+	detail, mErr := json.Marshal(act)
+	if mErr != nil {
+		logger.Error(model.LogMsg{Text: "序列化处置动作失败", Data: map[string]interface{}{"err": mErr.Error()}})
+		return mErr
+	}
 
 	var err error
 	switch act.Action {

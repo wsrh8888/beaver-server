@@ -27,21 +27,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetConversationsListByIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetConversationsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetConversationsListByIdsLogic {
 	return &GetConversationsListByIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_conversations_list_by_ids", ctx),
 	}
 }
 
@@ -58,7 +58,7 @@ func (l *GetConversationsListByIdsLogic) GetConversationsListByIds(in *chat_rpc.
 	var conversations []chat_models.ChatConversationMeta
 	err := query.Find(&conversations).Error
 	if err != nil {
-		l.Errorf("查询会话信息失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询会话信息失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 

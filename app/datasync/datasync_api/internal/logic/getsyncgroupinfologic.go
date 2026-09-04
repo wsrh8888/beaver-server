@@ -22,35 +22,36 @@
 package logic
 
 import (
-	"beaver/app/datasync/datasync_api/internal/svc"
-	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/group/group_rpc/types/group_rpc"
 	"context"
 	"errors"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/app/datasync/datasync_api/internal/svc"
+	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncGroupInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取所有需要更新的群组信息版本
 func NewGetSyncGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncGroupInfoLogic {
 	return &GetSyncGroupInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_group_info", ctx),
 	}
 }
 
 func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq) (resp *types.GetSyncGroupInfoRes, err error) {
 	userId := req.UserID
 	if userId == "" {
-		l.Errorf("用户ID为空")
+		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -59,7 +60,7 @@ func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq)
 		UserID: userId,
 	})
 	if err != nil {
-		l.Errorf("获取用户群组ID列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户群组ID列表失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -79,7 +80,7 @@ func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq)
 		Since:    req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取变更的群组资料失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取变更的群组资料失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 

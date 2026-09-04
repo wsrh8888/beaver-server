@@ -14,23 +14,24 @@ import (
 	"beaver/app/agent/pyagent"
 	"beaver/common/models/ctype"
 	"beaver/common/sse"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 const maxTextRunes = 5000
 
 type SendAgentMessageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewSendAgentMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendAgentMessageLogic {
 	return &SendAgentMessageLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("send_agent_message", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -49,7 +50,7 @@ func (l *SendAgentMessageLogic) SendAgentMessage(emit sse.Emitter, req *types.Se
 	content := strings.TrimSpace(req.Content)
 	userMessageID, seq, err := l.persistUserMessage(req.UserID, req.AgentId, content, req.ClientMsgId)
 	if err != nil {
-		l.Errorf("persist user message failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "持久化用户消息失败", Data: map[string]interface{}{"err": err.Error()}})
 		_ = emit("error", map[string]any{"message": err.Error()})
 		return
 	}
@@ -79,7 +80,7 @@ func (l *SendAgentMessageLogic) SendAgentMessage(emit sse.Emitter, req *types.Se
 		ModelJson:     modelJSON,
 	})
 	if err != nil {
-		l.Errorf("StreamAgentMessage open failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "打开智能体流式回复失败", Data: map[string]interface{}{"err": err.Error()}})
 		_ = emit("error", map[string]any{"message": err.Error()})
 		return
 	}
@@ -93,7 +94,7 @@ func (l *SendAgentMessageLogic) SendAgentMessage(emit sse.Emitter, req *types.Se
 			break
 		}
 		if recvErr != nil {
-			l.Errorf("StreamAgentMessage recv failed: %v", recvErr)
+			l.logger.Error(model.LogMsg{Text: "接收智能体流式回复失败", Data: map[string]interface{}{"err": recvErr.Error()}})
 			_ = emit("error", map[string]any{"message": recvErr.Error()})
 			return
 		}
@@ -140,7 +141,7 @@ func (l *SendAgentMessageLogic) SendAgentMessage(emit sse.Emitter, req *types.Se
 		req.UserID, req.AgentId, reply, "reply_"+userMessageID, llmMetaJSON,
 	)
 	if err != nil {
-		l.Errorf("persist assistant message failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "持久化AI回复失败", Data: map[string]interface{}{"err": err.Error()}})
 		_ = emit("error", map[string]any{"message": "persist failed: " + err.Error()})
 		return
 	}

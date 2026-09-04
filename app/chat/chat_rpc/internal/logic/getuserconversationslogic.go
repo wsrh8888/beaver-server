@@ -27,21 +27,21 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetUserConversationsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserConversationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserConversationsLogic {
 	return &GetUserConversationsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_conversations", ctx),
 	}
 }
 
@@ -49,7 +49,7 @@ func (l *GetUserConversationsLogic) GetUserConversations(in *chat_rpc.GetUserCon
 	var userConversations []chat_models.ChatUserConversation
 	err := l.svcCtx.DB.Where("user_id = ?", in.UserId).Find(&userConversations).Error
 	if err != nil {
-		l.Errorf("查询用户会话失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户会话失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -59,7 +59,7 @@ func (l *GetUserConversationsLogic) GetUserConversations(in *chat_rpc.GetUserCon
 		var conversation chat_models.ChatConversationMeta
 		err := l.svcCtx.DB.Where("conversation_id = ?", uc.ConversationID).First(&conversation).Error
 		if err != nil {
-			l.Errorf("查询会话信息失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "查询会话信息失败", Data: map[string]any{"conversationId": uc.ConversationID, "err": err.Error()}})
 			continue
 		}
 

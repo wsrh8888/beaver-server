@@ -22,21 +22,27 @@
 package grpcMiddleware
 
 import (
-	"beaver/common/middleware/utils"
 	"context"
 	"time"
 
+	"beaver/common/middleware/utils"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
 // RequestLogInterceptor gRPC 请求日志拦截器
 func RequestLogInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	startTime := time.Now()
-
-	// 调用下一个处理器
 	resp, err := handler(ctx, req)
-	// 记录请求信息
-	utils.LogRequest("gRPC", info.FullMethod, req, resp, err, startTime)
-
+	code := 0
+	if err != nil {
+		if st, ok := status.FromError(err); ok {
+			code = int(st.Code())
+		} else {
+			code = 13 // Internal
+		}
+	}
+	utils.LogRequest(ctx, "gRPC", info.FullMethod, req, resp, err, code, startTime)
 	return resp, err
 }

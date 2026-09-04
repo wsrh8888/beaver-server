@@ -28,22 +28,23 @@ import (
 	"beaver/app/call/call_models"
 	"beaver/app/call/call_rpc/internal/svc"
 	"beaver/app/call/call_rpc/types/call_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetUserStatusLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetUserStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStatusLogic {
 	return &GetUserStatusLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_user_status", ctx),
 	}
 }
 
@@ -57,6 +58,10 @@ func (l *GetUserStatusLogic) GetUserStatus(in *call_rpc.GetUserStatusReq) (*call
 				IsBusy: false,
 			}, nil
 		}
+		l.logger.Error(model.LogMsg{
+			Text: "查询用户通话状态失败",
+			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
+		})
 		return nil, err
 	}
 

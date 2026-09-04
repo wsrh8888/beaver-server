@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type AddArchitectureLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewAddArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddArchitectureLogic {
-	return &AddArchitectureLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AddArchitectureLogic{logger: beaverlog.New("add_architecture", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *AddArchitectureLogic) AddArchitecture(req *types.AddArchitectureReq) (resp *types.AddArchitectureRes, err error) {
@@ -49,7 +49,10 @@ func (l *AddArchitectureLogic) AddArchitecture(req *types.AddArchitectureReq) (r
 		Description: req.Description,
 	})
 	if err != nil {
-		l.Errorf("创建架构失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建架构失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.AddArchitectureRes{Id: uint(rpcRes.Id)}, nil

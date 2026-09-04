@@ -31,17 +31,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type RejectContentReportLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewRejectContentReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RejectContentReportLogic {
-	return &RejectContentReportLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RejectContentReportLogic{logger: beaverlog.New("reject_content_report", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *RejectContentReportLogic) RejectContentReport(req *types.RejectContentReportReq) (resp *types.RejectContentReportRes, err error) {
@@ -51,7 +52,10 @@ func (l *RejectContentReportLogic) RejectContentReport(req *types.RejectContentR
 
 	reportRes, err := l.svcCtx.PlatformRpc.GetContentReport(l.ctx, &platform_rpc.GetContentReportReq{Id: req.ReportID})
 	if err != nil {
-		l.Errorf("获取举报详情失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取举报详情失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	if reportRes.Report == nil {
@@ -74,7 +78,10 @@ func (l *RejectContentReportLogic) RejectContentReport(req *types.RejectContentR
 		HandleRemark: remark,
 	})
 	if err != nil {
-		l.Errorf("驳回举报失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "驳回举报失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

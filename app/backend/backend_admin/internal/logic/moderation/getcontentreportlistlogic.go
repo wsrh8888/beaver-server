@@ -29,17 +29,18 @@ import (
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetContentReportListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetContentReportListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetContentReportListLogic {
-	return &GetContentReportListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetContentReportListLogic{logger: beaverlog.New("get_content_report_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetContentReportListLogic) GetContentReportList(req *types.GetContentReportListReq) (resp *types.GetContentReportListRes, err error) {
@@ -51,7 +52,10 @@ func (l *GetContentReportListLogic) GetContentReportList(req *types.GetContentRe
 		TargetId:   req.TargetID,
 	})
 	if err != nil {
-		l.Errorf("获取内容举报列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取内容举报列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

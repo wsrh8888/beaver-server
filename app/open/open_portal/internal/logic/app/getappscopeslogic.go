@@ -29,22 +29,21 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type GetAppScopesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取应用权限列表
 func NewGetAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAppScopesLogic {
 	return &GetAppScopesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_app_scopes", ctx),
 	}
 }
 

@@ -28,21 +28,21 @@ import (
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupMembersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupMembersLogic {
 	return &GetGroupMembersLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_group_members", ctx),
 	}
 }
 
@@ -51,7 +51,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 	var groupMembers []group_models.GroupMemberModel
 	err := l.svcCtx.DB.Where("group_id = ?", in.GroupID).Find(&groupMembers).Error
 	if err != nil {
-		logx.Error("查询群组成员失败:", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组成员失败", Data: map[string]any{"groupId": in.GroupID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -73,7 +73,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *group_rpc.GetGroupMembersReq)
 		UserIdList: userIDs,
 	})
 	if err != nil {
-		logx.Error("查询用户信息失败:", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户信息失败", Data: map[string]any{"groupId": in.GroupID, "err": err.Error()}})
 		return nil, err
 	}
 

@@ -28,20 +28,20 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 const friendVerifyActionDelete int32 = 1
 
 type DeleteFriendVerifyLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteFriendVerifyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteFriendVerifyLogic {
-	return &DeleteFriendVerifyLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteFriendVerifyLogic{logger: beaverlog.New("delete_friend_verify", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // DeleteFriendVerify 管理后台：删除单条好友验证记录。
@@ -57,7 +57,10 @@ func (l *DeleteFriendVerifyLogic) DeleteFriendVerify(req *types.DeleteFriendVeri
 		Action:    friendVerifyActionDelete,
 	})
 	if err != nil {
-		l.Errorf("删除好友验证失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除好友验证失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteFriendVerifyRes{}, nil

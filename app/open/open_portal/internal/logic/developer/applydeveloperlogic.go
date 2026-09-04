@@ -28,18 +28,18 @@ import (
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ApplyDeveloperLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewApplyDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ApplyDeveloperLogic {
-	return &ApplyDeveloperLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &ApplyDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("apply_developer", ctx)}
 }
 
 func (l *ApplyDeveloperLogic) ApplyDeveloper(req *types.ApplyDeveloperReq) (resp *types.ApplyDeveloperRes, err error) {
@@ -57,7 +57,7 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(req *types.ApplyDeveloperReq) (resp
 		Description: req.Description,
 	})
 	if err != nil {
-		logx.Errorf("开发者申请失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "开发者申请失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, err
 	}
 

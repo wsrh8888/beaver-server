@@ -30,21 +30,20 @@ import (
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
 	"beaver/app/open/open_rpc/types/open_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type DeleteIncomingWebhookLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewDeleteIncomingWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteIncomingWebhookLogic {
 	return &DeleteIncomingWebhookLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("delete_incoming_webhook", ctx),
 	}
 }
 

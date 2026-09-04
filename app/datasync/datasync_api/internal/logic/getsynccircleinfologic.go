@@ -22,35 +22,36 @@
 package logic
 
 import (
-	"beaver/app/circle/circle_rpc/types/circle_rpc"
-	"beaver/app/datasync/datasync_api/internal/svc"
-	"beaver/app/datasync/datasync_api/internal/types"
 	"context"
 	"errors"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/app/circle/circle_rpc/types/circle_rpc"
+	"beaver/app/datasync/datasync_api/internal/svc"
+	"beaver/app/datasync/datasync_api/internal/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncCircleInfoLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取所有需要更新的圈子信息版本
 func NewGetSyncCircleInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncCircleInfoLogic {
 	return &GetSyncCircleInfoLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_circle_info", ctx),
 	}
 }
 
 func (l *GetSyncCircleInfoLogic) GetSyncCircleInfo(req *types.GetSyncCircleInfoReq) (resp *types.GetSyncCircleInfoRes, err error) {
 	userId := req.UserID
 	if userId == "" {
-		l.Errorf("用户ID为空")
+		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -61,7 +62,7 @@ func (l *GetSyncCircleInfoLogic) GetSyncCircleInfo(req *types.GetSyncCircleInfoR
 		Version: req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取变更的圈子资料失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取变更的圈子资料失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
 		return nil, err
 	}
 

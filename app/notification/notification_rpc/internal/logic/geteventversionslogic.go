@@ -27,22 +27,23 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/internal/svc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type GetEventVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetEventVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEventVersionsLogic {
 	return &GetEventVersionsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_event_versions", ctx),
 	}
 }
 
@@ -62,6 +63,10 @@ func (l *GetEventVersionsLogic) GetEventVersions(in *notification_rpc.GetEventVe
 	}
 
 	if err := query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通知事件版本失败",
+			Data: map[string]any{"sinceVersion": in.SinceVersion, "err": err.Error()},
+		})
 		return nil, err
 	}
 

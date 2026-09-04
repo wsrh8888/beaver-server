@@ -28,22 +28,22 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type SearchGroupsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 搜索群组
 func NewSearchGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SearchGroupsLogic {
 	return &SearchGroupsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("search_groups", ctx),
 	}
 }
 
@@ -83,7 +83,7 @@ func (l *SearchGroupsLogic) SearchGroups(req *types.GroupSearchReq) (resp *types
 	var total int64
 	err = query.Count(&total).Error
 	if err != nil {
-		l.Errorf("查询群组总数失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组总数失败", Data: map[string]any{"keyword": req.Keyword, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (l *SearchGroupsLogic) SearchGroups(req *types.GroupSearchReq) (resp *types
 	var groups []group_models.GroupModel
 	err = query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&groups).Error
 	if err != nil {
-		l.Errorf("查询群组列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组列表失败", Data: map[string]any{"keyword": req.Keyword, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -102,7 +102,7 @@ func (l *SearchGroupsLogic) SearchGroups(req *types.GroupSearchReq) (resp *types
 			Where("group_id = ? AND status = 1", group.GroupID).
 			Count(&memberCount).Error
 		if err != nil {
-			l.Errorf("查询群组成员数量失败, groupId: %s, error: %v", group.GroupID, err)
+			l.logger.Error(model.LogMsg{Text: "查询群组成员数量失败", Data: map[string]any{"groupId": group.GroupID, "err": err.Error()}})
 			memberCount = 0
 		}
 
@@ -118,6 +118,6 @@ func (l *SearchGroupsLogic) SearchGroups(req *types.GroupSearchReq) (resp *types
 
 	resp.Count = total
 
-	l.Infof("搜索群组完成，关键词: %s, 返回群组数: %d, 总数: %d", req.Keyword, len(resp.List), total)
+	l.logger.Info(model.LogMsg{Text: "搜索群组完成", Data: map[string]interface{}{"keyword": req.Keyword, "count": len(resp.List), "total": total}})
 	return resp, nil
 }

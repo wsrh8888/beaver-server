@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetVersionListLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetVersionListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetVersionListLogic {
-	return &GetVersionListLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetVersionListLogic{logger: beaverlog.New("get_version_list", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp *types.GetVersionListRes, err error) {
@@ -48,7 +48,10 @@ func (l *GetVersionListLogic) GetVersionList(req *types.GetVersionListReq) (resp
 		PageSize:       int32(req.PageSize),
 	})
 	if err != nil {
-		l.Errorf("获取版本列表失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取版本列表失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

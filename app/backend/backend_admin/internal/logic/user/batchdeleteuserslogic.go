@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchDeleteUsersLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewBatchDeleteUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteUsersLogic {
-	return &BatchDeleteUsersLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &BatchDeleteUsersLogic{logger: beaverlog.New("batch_delete_users", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // BatchDeleteUsers 管理后台：批量软删除用户。
@@ -54,7 +54,10 @@ func (l *BatchDeleteUsersLogic) BatchDeleteUsers(req *types.BatchDeleteUsersReq)
 		UserIds: req.Ids,
 	})
 	if err != nil {
-		l.Errorf("批量删除用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除用户失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.BatchDeleteUsersRes{}, nil

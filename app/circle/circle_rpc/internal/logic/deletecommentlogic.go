@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_models"
 	"beaver/app/circle/circle_rpc/internal/svc"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteCommentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewDeleteCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteCommentLogic {
 	return &DeleteCommentLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("delete_comment", ctx),
 	}
 }
 
@@ -53,8 +53,11 @@ func (l *DeleteCommentLogic) DeleteComment(in *circle_rpc.DeleteCommentReq) (*ci
 	}
 
 	if err := l.svcCtx.DB.Model(&comment).Update("is_deleted", true).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "删除评论失败", Data: map[string]any{"commentId": in.CommentId, "err": err.Error()}})
 		return nil, fmt.Errorf("删除评论失败: %v", err)
 	}
+
+	l.logger.Info(model.LogMsg{Text: "删除评论成功", Data: map[string]interface{}{"commentId": in.CommentId}})
 
 	return &circle_rpc.DeleteCommentRes{}, nil
 }

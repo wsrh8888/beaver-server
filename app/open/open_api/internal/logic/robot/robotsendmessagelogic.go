@@ -32,19 +32,19 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_models"
+	beaverlog "beaver/utils/beaverlog"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type RobotSendMessageLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewRobotSendMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RobotSendMessageLogic {
-	return &RobotSendMessageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RobotSendMessageLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("robot_send_message", ctx)}
 }
 
 func (l *RobotSendMessageLogic) RobotSendMessage(req *types.RobotSendMessageReq, authorization string) (resp *types.RobotSendMessageRes, err error) {

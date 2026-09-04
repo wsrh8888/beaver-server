@@ -31,19 +31,19 @@ import (
 	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_models"
 	"beaver/app/open/openevent"
+	beaverlog "beaver/utils/beaverlog"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type RegisterWebhookLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewRegisterWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RegisterWebhookLogic {
-	return &RegisterWebhookLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &RegisterWebhookLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("register_webhook", ctx)}
 }
 
 func (l *RegisterWebhookLogic) RegisterWebhook(req *types.RegisterWebhookReq, authorization string) (resp *types.RegisterWebhookRes, err error) {

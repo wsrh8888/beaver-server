@@ -27,8 +27,8 @@ import (
 	"beaver/app/user/user_api/internal/svc"
 	"beaver/app/user/user_api/internal/types"
 	"beaver/app/user/user_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"gorm.io/gorm"
 )
@@ -36,13 +36,13 @@ import (
 type UpdateUserSettingsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateUserSettingsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateUserSettingsLogic {
 	return &UpdateUserSettingsLogic{
 		ctx:    ctx,
-		logger: logger.New("update_user_settings"),
+		logger: beaverlog.New("update_user_settings", ctx),
 		svcCtx: svcCtx,
 	}
 }

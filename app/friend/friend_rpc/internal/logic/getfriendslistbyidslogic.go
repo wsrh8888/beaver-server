@@ -28,27 +28,26 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendsListByIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFriendsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendsListByIdsLogic {
 	return &GetFriendsListByIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_friends_list_by_ids", ctx),
 	}
 }
 
 func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *friend_rpc.GetFriendsListByIdsReq) (*friend_rpc.GetFriendsListByIdsRes, error) {
 	if len(in.Ids) == 0 {
-		l.Errorf("ID列表为空")
 		return &friend_rpc.GetFriendsListByIdsRes{Friends: []*friend_rpc.FriendListById{}}, nil
 	}
 
@@ -63,11 +62,11 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *friend_rpc.GetFriends
 
 	err := query.Find(&friends).Error
 	if err != nil {
-		l.Errorf("查询好友信息失败: ids=%v, since=%d, error=%v", in.Ids, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询好友信息失败", Data: map[string]any{"ids": in.Ids, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个好友信息", len(friends))
+	l.logger.Info(model.LogMsg{Text: "批量查询好友信息", Data: map[string]interface{}{"count": len(friends)}})
 
 	// 转换为响应格式
 	var friendsList []*friend_rpc.FriendListById

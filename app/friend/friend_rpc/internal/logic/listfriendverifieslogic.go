@@ -28,19 +28,20 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type ListFriendVerifiesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFriendVerifiesLogic {
-	return &ListFriendVerifiesLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListFriendVerifiesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_friend_verifies", ctx)}
 }
 
 func (l *ListFriendVerifiesLogic) ListFriendVerifies(in *friend_rpc.ListFriendVerifiesReq) (*friend_rpc.ListFriendVerifiesRes, error) {
@@ -50,6 +51,7 @@ func (l *ListFriendVerifiesLogic) ListFriendVerifies(in *friend_rpc.ListFriendVe
 			return &friend_rpc.ListFriendVerifiesRes{}, nil
 		}
 		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "查询好友验证记录失败", Data: map[string]any{"verifyId": in.VerifyId, "err": err.Error()}})
 			return nil, err
 		}
 		return &friend_rpc.ListFriendVerifiesRes{
@@ -92,13 +94,13 @@ func (l *ListFriendVerifiesLogic) ListFriendVerifies(in *friend_rpc.ListFriendVe
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计好友验证失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计好友验证失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []friend_models.FriendVerifyModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询好友验证列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询好友验证列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

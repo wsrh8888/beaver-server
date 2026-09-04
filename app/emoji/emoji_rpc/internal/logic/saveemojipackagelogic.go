@@ -28,9 +28,10 @@ import (
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/emoji/emoji_rpc/internal/svc"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
@@ -38,11 +39,11 @@ import (
 type SaveEmojiPackageLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewSaveEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveEmojiPackageLogic {
-	return &SaveEmojiPackageLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &SaveEmojiPackageLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("save_emoji_package", ctx)}
 }
 
 func (l *SaveEmojiPackageLogic) SaveEmojiPackage(in *emoji_rpc.SaveEmojiPackageReq) (*emoji_rpc.SaveEmojiPackageRes, error) {
@@ -59,6 +60,7 @@ func (l *SaveEmojiPackageLogic) createPackage(in *emoji_rpc.SaveEmojiPackageReq)
 	var count int64
 	if err := l.svcCtx.DB.Model(&emoji_models.EmojiPackage{}).
 		Where("title = ? AND user_id = ?", in.Title, in.UserId).Count(&count).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "校验表情包名称唯一性失败", Data: map[string]any{"title": in.Title, "userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 	if count > 0 {
@@ -81,8 +83,10 @@ func (l *SaveEmojiPackageLogic) createPackage(in *emoji_rpc.SaveEmojiPackageReq)
 		Version:     version,
 	}
 	if err := l.svcCtx.DB.Create(&pkg).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建表情包失败", Data: map[string]any{"title": in.Title, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "创建表情包成功", Data: map[string]interface{}{"packageId": pkg.PackageID, "title": in.Title}})
 	return &emoji_rpc.SaveEmojiPackageRes{PackageId: pkg.PackageID}, nil
 }
 
@@ -92,6 +96,7 @@ func (l *SaveEmojiPackageLogic) updatePackage(in *emoji_rpc.SaveEmojiPackageReq)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("表情包不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询表情包失败", Data: map[string]any{"packageId": in.PackageId, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -102,6 +107,7 @@ func (l *SaveEmojiPackageLogic) updatePackage(in *emoji_rpc.SaveEmojiPackageReq)
 			if err := l.svcCtx.DB.Model(&emoji_models.EmojiPackage{}).
 				Where("title = ? AND user_id = ? AND package_id != ?", *in.PatchTitle, pkg.UserID, in.PackageId).
 				Count(&count).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "校验表情包名称唯一性失败", Data: map[string]any{"packageId": in.PackageId, "err": err.Error()}})
 				return nil, err
 			}
 			if count > 0 {
@@ -133,8 +139,10 @@ func (l *SaveEmojiPackageLogic) updatePackage(in *emoji_rpc.SaveEmojiPackageReq)
 	updates["version"] = version
 
 	if err := l.svcCtx.DB.Model(&pkg).Updates(updates).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新表情包失败", Data: map[string]any{"packageId": in.PackageId, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "更新表情包成功", Data: map[string]interface{}{"packageId": in.PackageId, "version": version}})
 	return &emoji_rpc.SaveEmojiPackageRes{PackageId: in.PackageId}, nil
 }
 
@@ -144,10 +152,13 @@ func (l *SaveEmojiPackageLogic) deletePackage(packageID string) (*emoji_rpc.Save
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("表情包不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询表情包失败", Data: map[string]any{"packageId": packageID, "err": err.Error()}})
 		return nil, err
 	}
 	if err := l.svcCtx.DB.Delete(&pkg).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "删除表情包失败", Data: map[string]any{"packageId": packageID, "err": err.Error()}})
 		return nil, err
 	}
+	l.logger.Info(model.LogMsg{Text: "删除表情包成功", Data: map[string]interface{}{"packageId": packageID}})
 	return &emoji_rpc.SaveEmojiPackageRes{PackageId: packageID}, nil
 }

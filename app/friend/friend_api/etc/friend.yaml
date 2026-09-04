@@ -1,4 +1,4 @@
-Name: friend
+Name: friend_api
 Host: 0.0.0.0
 Port: 20200
 Mysql:
@@ -8,9 +8,17 @@ Redis:
   Password: '123456'
   DB: 0
 Log:
+  Mode: file
+  Path: logs/friend_api
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05
+  KeepDays: 7
   Stat: false
+# go-zero 自带：在独立端口暴露 /metrics（业务口 20200 + 7000）
+Prometheus:
+  Host: 0.0.0.0
+  Port: 27200
+  Path: /metrics
 Etcd: 127.0.0.1:2379
 UserRpc:
   Etcd:

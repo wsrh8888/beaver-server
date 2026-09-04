@@ -27,24 +27,21 @@ import (
 	"beaver/app/chat/chat_api/internal/svc"
 	"beaver/app/chat/chat_api/internal/types"
 	"beaver/app/chat/chat_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type DeleteMessagesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 批量删除消息(仅自己不可见)
 func NewDeleteMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteMessagesLogic {
 	return &DeleteMessagesLogic{
 		ctx:    ctx,
-		logger: logger.New("delete_messages"),
+		logger: beaverlog.New("delete_messages", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -63,16 +60,31 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 		})
 	}
 
+	if len(deleteRecords) == 0 {
+		l.logger.Warn(model.LogMsg{
+			Text: "删除消息列表为空",
+			Data: map[string]any{"userId": req.UserID},
+		})
+		return &types.DeleteMessagesRes{}, nil
+	}
+
 	// 3. 执行入库 (使用 Create 批量插入)
 	err = l.svcCtx.DB.Create(&deleteRecords).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("用户 %s 批量删除消息失败: %v", req.UserID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除消息失败",
+			Data: map[string]any{
+				"userId": req.UserID,
+				"count":  len(req.MessageIDs),
+				"err":    err.Error(),
+			},
+		})
 		return nil, err
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "批量删除消息成功",
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"userId": req.UserID,
 			"count":  len(req.MessageIDs),
 		},

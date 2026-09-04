@@ -31,25 +31,33 @@ import (
 	"beaver/app/moment/moment_api/internal/types"
 	"beaver/app/moment/moment_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetMomentsListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetMomentsListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMomentsListLogic {
 	return &GetMomentsListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_moments_list", ctx),
 	}
 }
 
 func (l *GetMomentsListLogic) GetMomentsList(req *types.GetMomentsReq) (resp *types.GetMomentsRes, err error) {
+	defer func() {
+		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "获取动态列表失败",
+				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			})
+		}
+	}()
 	// 获取好友列表
 	friendResp, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, &friend_rpc.GetFriendIdsRequest{
 		UserID: req.UserID,

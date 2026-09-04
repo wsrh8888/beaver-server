@@ -32,23 +32,20 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
-
 
 type GroupMemberRemoveLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGroupMemberRemoveLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupMemberRemoveLogic {
 	return &GroupMemberRemoveLogic{
 		ctx:    ctx,
-		logger: logger.New("group_member_remove"),
+		logger: beaverlog.New("group_member_remove", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -89,7 +86,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 	// 获取该群成员的版本号（按群独立递增）
 	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 	if memberVersion == -1 {
-		logx.WithContext(l.ctx).Errorf("获取群成员版本号失败")
+		l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
 		return nil, errors.New("获取版本号失败")
 	}
 
@@ -101,7 +98,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 			"version": memberVersion,
 		}).Error
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("移除成员失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "移除成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "count": len(req.UserIds), "err": err.Error()}})
 		return nil, errors.New("移除成员失败")
 	}
 
@@ -119,7 +116,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 			GroupID: req.GroupID,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("获取群成员列表失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
 			return
 		}
 

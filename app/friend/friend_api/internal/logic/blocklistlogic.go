@@ -29,22 +29,22 @@ import (
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BlockListLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取黑名单列表
 func NewBlockListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BlockListLogic {
 	return &BlockListLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("block_list", ctx),
 	}
 }
 
@@ -63,9 +63,11 @@ func (l *BlockListLogic) BlockList(req *types.BlockListReq) (resp *types.BlockLi
 	var count int64
 	query := l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).Where("user_id = ?", req.UserID)
 	if err = query.Count(&count).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "统计黑名单失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("查询失败")
 	}
 	if err = query.Offset(offset).Limit(limit).Find(&blocks).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询黑名单列表失败", Data: map[string]any{"userId": req.UserID, "page": page, "limit": limit, "err": err.Error()}})
 		return nil, errors.New("查询失败")
 	}
 

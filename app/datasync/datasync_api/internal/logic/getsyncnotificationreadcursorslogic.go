@@ -29,22 +29,22 @@ import (
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncNotificationReadCursorsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取通知已读游标版本摘要
 func NewGetSyncNotificationReadCursorsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncNotificationReadCursorsLogic {
 	return &GetSyncNotificationReadCursorsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_notification_read_cursors", ctx),
 	}
 }
 
@@ -58,7 +58,7 @@ func (l *GetSyncNotificationReadCursorsLogic) GetSyncNotificationReadCursors(req
 		SinceVersion: req.SinceVersion,
 	})
 	if err != nil {
-		l.Errorf("获取通知已读游标版本摘要失败: userId=%s, sinceVersion=%d, err=%v", req.UserID, req.SinceVersion, err)
+		l.logger.Error(model.LogMsg{Text: "获取通知已读游标版本摘要失败", Data: map[string]any{"userId": req.UserID, "sinceVersion": req.SinceVersion, "err": err.Error()}})
 		return nil, err
 	}
 

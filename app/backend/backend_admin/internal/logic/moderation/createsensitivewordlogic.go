@@ -30,18 +30,19 @@ import (
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateSensitiveWordLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateSensitiveWordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateSensitiveWordLogic {
 	return &CreateSensitiveWordLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_sensitive_word", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -65,7 +66,10 @@ func (l *CreateSensitiveWordLogic) CreateSensitiveWord(req *types.CreateSensitiv
 		Remark:   strings.TrimSpace(req.Remark),
 	}
 	if err = l.svcCtx.DB.Create(&row).Error; err != nil {
-		l.Errorf("创建敏感词失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建敏感词失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, errors.New("创建失败，可能已存在相同词条")
 	}
 

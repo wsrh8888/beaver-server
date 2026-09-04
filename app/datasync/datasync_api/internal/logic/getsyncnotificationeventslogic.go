@@ -28,22 +28,22 @@ import (
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncNotificationEventsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取通知事件版本摘要
 func NewGetSyncNotificationEventsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncNotificationEventsLogic {
 	return &GetSyncNotificationEventsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_notification_events", ctx),
 	}
 }
 
@@ -53,7 +53,7 @@ func (l *GetSyncNotificationEventsLogic) GetSyncNotificationEvents(req *types.Ge
 		Limit:        req.Limit,
 	})
 	if err != nil {
-		l.Errorf("获取通知事件版本摘要失败: sinceVersion=%d, limit=%d, err=%v", req.SinceVersion, req.Limit, err)
+		l.logger.Error(model.LogMsg{Text: "获取通知事件版本摘要失败", Data: map[string]any{"sinceVersion": req.SinceVersion, "limit": req.Limit, "err": err.Error()}})
 		return nil, err
 	}
 

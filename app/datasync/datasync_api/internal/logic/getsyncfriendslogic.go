@@ -28,22 +28,22 @@ import (
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetSyncFriendsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取所有需要更新的好友版本
 func NewGetSyncFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSyncFriendsLogic {
 	return &GetSyncFriendsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_sync_friends", ctx),
 	}
 }
 
@@ -54,11 +54,14 @@ func (l *GetSyncFriendsLogic) GetSyncFriends(req *types.GetSyncFriendsReq) (resp
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.Errorf("获取好友版本信息失败: userId=%s, since=%d, error=%v", req.UserID, req.Since, err)
+		l.logger.Error(model.LogMsg{Text: "获取好友版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个好友版本信息", len(friendResp.FriendVersions))
+	l.logger.Info(model.LogMsg{
+		Text: "查询好友版本信息完成",
+		Data: map[string]interface{}{"userId": req.UserID, "count": len(friendResp.FriendVersions)},
+	})
 
 	// 转换为响应格式，确保返回空数组而不是null
 	friendVersions := make([]types.FriendVersionItem, 0)

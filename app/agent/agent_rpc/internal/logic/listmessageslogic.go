@@ -10,21 +10,21 @@ import (
 	"beaver/app/agent/agent_models"
 	"beaver/app/agent/agent_rpc/internal/svc"
 	"beaver/app/agent/agent_rpc/types/agent_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListMessagesLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListMessagesLogic {
 	return &ListMessagesLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("list_messages", ctx),
 	}
 }
 
@@ -55,7 +55,7 @@ func (l *ListMessagesLogic) ListMessages(in *agent_rpc.ListMessagesReq) (*agent_
 
 	var rows []agent_models.AgentMessage
 	if err := q.Order("seq DESC").Limit(limit).Find(&rows).Error; err != nil {
-		l.Errorf("ListMessages query failed: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询智能体消息失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, err
 	}
 

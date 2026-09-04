@@ -27,22 +27,22 @@ import (
 	"beaver/app/group/group_api/internal/svc"
 	"beaver/app/group/group_api/internal/types"
 	"beaver/app/group/group_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GroupMineLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 获取我加入的群组列表
 func NewGroupMineLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupMineLogic {
 	return &GroupMineLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("group_mine", ctx),
 	}
 }
 
@@ -67,7 +67,7 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 		Limit(limit).
 		Find(&groupMembers).Error
 	if err != nil {
-		l.Errorf("查询用户群组失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户群组失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -77,7 +77,7 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 		Where("user_id = ? AND status = ?", req.UserID, 1).
 		Count(&total).Error
 	if err != nil {
-		l.Errorf("获取用户群组总数失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取用户群组总数失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -89,7 +89,7 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 		var group group_models.GroupModel
 		err = l.svcCtx.DB.Where("group_id = ?", member.GroupID).First(&group).Error
 		if err != nil {
-			l.Errorf("查询群组信息失败，群组ID: %s, 错误: %v", member.GroupID, err)
+			l.logger.Error(model.LogMsg{Text: "查询群组信息失败", Data: map[string]any{"groupId": member.GroupID, "err": err.Error()}})
 			continue
 		}
 
@@ -99,7 +99,7 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 			Where("group_id = ? AND status = ?", group.GroupID, 1).
 			Count(&memberCount).Error
 		if err != nil {
-			l.Errorf("获取群成员数量失败，群组ID: %s, 错误: %v", group.GroupID, err)
+			l.logger.Error(model.LogMsg{Text: "获取群成员数量失败", Data: map[string]any{"groupId": group.GroupID, "err": err.Error()}})
 			continue
 		}
 
@@ -118,6 +118,6 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 		Count: int(total),
 	}
 
-	l.Infof("获取用户群组列表完成，用户ID: %s, 返回群组数: %d", req.UserID, len(groupItems))
+	l.logger.Info(model.LogMsg{Text: "获取用户群组列表完成", Data: map[string]interface{}{"userId": req.UserID, "count": len(groupItems)}})
 	return resp, nil
 }

@@ -29,7 +29,8 @@ import (
 	"beaver/app/user/user_rpc/internal/server"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/utils/logger"
+	grpcMiddleware "beaver/common/middleware/grpc"
+	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -45,7 +46,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	logger.Init("user_rpc")
+	beaverlog.InitFromConf(c.RpcServerConf.ServiceConf)
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
@@ -57,6 +58,9 @@ func main() {
 	})
 	defer s.Stop()
 
+	s.AddUnaryInterceptors(grpcMiddleware.TraceServerInterceptor)
+
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
+	fmt.Printf("metrics: http://127.0.0.1:%d/metrics (grpc health 由 go-zero 默认开启)\n", c.Prometheus.Port)
 	s.Start()
 }

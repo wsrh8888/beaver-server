@@ -31,26 +31,24 @@ import (
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
 
-
 type LikeMomentLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewLikeMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LikeMomentLogic {
 	return &LikeMomentLogic{
 		ctx:    ctx,
-		logger: logger.New("like_moment"),
+		logger: beaverlog.New("like_moment", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -141,7 +139,7 @@ func (l *LikeMomentLogic) LikeMoment(req *types.LikeMomentReq) (resp *types.Like
 			DedupHash:   likeId + "_" + eventType,
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorf("推送点赞通知失败: %v", err)
+			l.logger.Error(model.LogMsg{Text: "推送点赞通知失败", Data: map[string]interface{}{"momentId": req.MomentID, "userId": req.UserID, "status": req.Status, "err": err.Error()}})
 		}
 	}()
 

@@ -26,23 +26,23 @@ import (
 	"errors"
 	"strings"
 
+	beaverlog "beaver/utils/beaverlog"
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"beaver/utils/beaverlog/model"
 )
 
 type AdminUnifiedSearchLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewAdminUnifiedSearchLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AdminUnifiedSearchLogic {
-	return &AdminUnifiedSearchLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &AdminUnifiedSearchLogic{logger: beaverlog.New("admin_unified_search", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *AdminUnifiedSearchLogic) AdminUnifiedSearch(req *types.AdminUnifiedSearchReq) (resp *types.AdminUnifiedSearchRes, err error) {
@@ -71,7 +71,10 @@ func (l *AdminUnifiedSearchLogic) AdminUnifiedSearch(req *types.AdminUnifiedSear
 	}
 	userRes, err := l.svcCtx.UserRpc.ListUsers(l.ctx, userReq)
 	if err != nil {
-		l.Errorf("检索用户失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "检索用户失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, u := range userRes.List {
 			resp.Users = append(resp.Users, types.SearchUserHit{
@@ -84,7 +87,10 @@ func (l *AdminUnifiedSearchLogic) AdminUnifiedSearch(req *types.AdminUnifiedSear
 		Keywords: keyword, GroupId: keyword, Page: 1, PageSize: int32(limit),
 	})
 	if err != nil {
-		l.Errorf("检索群组失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "检索群组失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, g := range groupRes.List {
 			resp.Groups = append(resp.Groups, types.SearchGroupHit{
@@ -98,7 +104,10 @@ func (l *AdminUnifiedSearchLogic) AdminUnifiedSearch(req *types.AdminUnifiedSear
 		MessageId: keyword, Page: 1, PageSize: int32(limit), WithContent: false,
 	})
 	if err != nil {
-		l.Errorf("检索消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "检索消息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		msgList = msgRes.List
 		for _, m := range msgList {

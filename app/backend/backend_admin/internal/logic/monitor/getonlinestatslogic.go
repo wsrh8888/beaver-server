@@ -27,12 +27,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/core/coreonline"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetOnlineStatsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -40,7 +40,7 @@ type GetOnlineStatsLogic struct {
 // 在线用户统计
 func NewGetOnlineStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOnlineStatsLogic {
 	return &GetOnlineStatsLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_online_stats", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -49,7 +49,10 @@ func NewGetOnlineStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 func (l *GetOnlineStatsLogic) GetOnlineStats(req *types.GetOnlineStatsReq) (resp *types.GetOnlineStatsRes, err error) {
 	online, err := coreonline.List(l.svcCtx.Redis)
 	if err != nil {
-		l.Errorf("获取在线用户统计失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "获取在线用户统计失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

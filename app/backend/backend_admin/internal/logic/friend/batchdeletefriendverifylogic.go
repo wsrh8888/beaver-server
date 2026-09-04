@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchDeleteFriendVerifyLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewBatchDeleteFriendVerifyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteFriendVerifyLogic {
-	return &BatchDeleteFriendVerifyLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &BatchDeleteFriendVerifyLogic{logger: beaverlog.New("batch_delete_friend_verify", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // BatchDeleteFriendVerify 管理后台：批量删除好友验证记录。
@@ -55,7 +55,10 @@ func (l *BatchDeleteFriendVerifyLogic) BatchDeleteFriendVerify(req *types.BatchD
 		Action:    friendVerifyActionDelete,
 	})
 	if err != nil {
-		l.Errorf("批量删除好友验证失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除好友验证失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.BatchDeleteFriendVerifyRes{}, nil

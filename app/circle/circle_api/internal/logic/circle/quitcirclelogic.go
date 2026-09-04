@@ -28,21 +28,21 @@ import (
 	"beaver/app/circle/circle_api/internal/svc"
 	"beaver/app/circle/circle_api/internal/types"
 	"beaver/app/circle/circle_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type QuitCircleLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewQuitCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QuitCircleLogic {
 	return &QuitCircleLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("quit_circle", ctx),
 	}
 }
 
@@ -56,6 +56,7 @@ func (l *QuitCircleLogic) QuitCircle(req *types.QuitCircleReq) (resp *types.Quit
 	}
 
 	if err = l.svcCtx.DB.Delete(&member).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "退出圈子失败", Data: map[string]any{"circleId": req.CircleID, "userId": req.UserID, "err": err.Error()}})
 		return nil, fmt.Errorf("退出圈子失败: %v", err)
 	}
 
@@ -64,6 +65,8 @@ func (l *QuitCircleLogic) QuitCircle(req *types.QuitCircleReq) (resp *types.Quit
 	l.svcCtx.DB.Model(&circle_models.CircleModel{}).
 		Where("circle_id = ?", req.CircleID).
 		Update("version", circleVersion)
+
+	l.logger.Info(model.LogMsg{Text: "退出圈子成功", Data: map[string]interface{}{"circleId": req.CircleID, "userId": req.UserID}})
 
 	return &types.QuitCircleRes{}, nil
 }

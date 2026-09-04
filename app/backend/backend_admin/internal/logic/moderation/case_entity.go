@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"time"
 
-	"beaver/app/backend/backend_models"
 	"beaver/app/backend/backend_admin/internal/types"
+	"beaver/app/backend/backend_models"
 )
 
 func formatCaseInfo(c backend_models.AdminModerationCase) types.ModerationCaseInfo {

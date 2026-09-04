@@ -28,22 +28,22 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetEventsByIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按ID拉取通知事件明细
 func NewGetEventsByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEventsByIdsLogic {
 	return &GetEventsByIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_events_by_ids", ctx),
 	}
 }
 
@@ -58,6 +58,10 @@ func (l *GetEventsByIdsLogic) GetEventsByIds(req *types.GetEventsByIdsReq) (resp
 	if err = l.svcCtx.DB.WithContext(l.ctx).
 		Where("event_id IN ?", req.EventIDs).
 		Find(&rows).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询通知事件列表失败",
+			Data: map[string]any{"eventIds": req.EventIDs, "err": err.Error()},
+		})
 		return nil, err
 	}
 

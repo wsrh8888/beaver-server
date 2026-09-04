@@ -27,12 +27,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateAuthorityLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -40,7 +40,7 @@ type CreateAuthorityLogic struct {
 // 创建权限
 func NewCreateAuthorityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateAuthorityLogic {
 	return &CreateAuthorityLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_authority", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -58,10 +58,16 @@ func (l *CreateAuthorityLogic) CreateAuthority(req *types.CreateAuthorityReq) (r
 	// 创建权限
 	err = l.svcCtx.DB.Create(&authority).Error
 	if err != nil {
-		logx.Errorf("创建权限失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建权限失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
-	logx.Infof("权限创建成功: ID=%d, Name=%s", authority.Id, authority.Name)
+	l.logger.Info(model.LogMsg{
+		Text: "权限创建成功",
+		Data: map[string]interface{}{"authorityId": authority.Id, "authorityName": authority.Name},
+	})
 	return &types.CreateAuthorityRes{}, nil
 }

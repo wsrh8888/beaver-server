@@ -27,18 +27,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateWorkbenchAppLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewCreateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateWorkbenchAppLogic {
-	return &CreateWorkbenchAppLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &CreateWorkbenchAppLogic{logger: beaverlog.New("create_workbench_app", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(req *types.CreateWorkbenchAppReq) (*types.CreateWorkbenchAppRes, error) {
@@ -57,7 +57,10 @@ func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(req *types.CreateWorkbenchA
 		OperatorId:  req.UserID,
 	})
 	if err != nil {
-		l.Errorf("创建工作台应用失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建工作台应用失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 

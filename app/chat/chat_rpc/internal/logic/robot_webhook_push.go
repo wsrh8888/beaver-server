@@ -24,6 +24,7 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"beaver/app/chat/chat_rpc/internal/svc"
@@ -31,25 +32,25 @@ import (
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/open/openevent"
 	"beaver/common/models/ctype"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type robotWebhookPusher struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func newRobotWebhookPusher(ctx context.Context, svcCtx *svc.ServiceContext) *robotWebhookPusher {
-	return &robotWebhookPusher{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &robotWebhookPusher{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("robot_webhook_push", ctx)}
 }
 
 func (p *robotWebhookPusher) tryPush(in *chat_rpc.SendMsgReq, msg *ctype.Msg) {
 	defer func() {
 		if r := recover(); r != nil {
-			p.Errorf("Robot Webhook 推送 panic: %v", r)
+			p.logger.Error(model.LogMsg{Text: "RobotWebhook推送panic", Data: map[string]any{"err": fmt.Sprintf("%v", r)}})
 		}
 	}()
 
@@ -106,7 +107,7 @@ func (p *robotWebhookPusher) pushGroupAt(senderID, conversationID string, msg *c
 func (p *robotWebhookPusher) dispatch(appID, eventType string, event map[string]interface{}) {
 	body, err := json.Marshal(event)
 	if err != nil {
-		p.Errorf("Robot Webhook 事件序列化失败: %v", err)
+		p.logger.Error(model.LogMsg{Text: "RobotWebhook事件序列化失败", Data: map[string]any{"err": err.Error()}})
 		return
 	}
 	_, err = p.svcCtx.OpenRpc.DispatchPlatformEvent(p.ctx, &open_rpc.DispatchPlatformEventReq{
@@ -115,7 +116,7 @@ func (p *robotWebhookPusher) dispatch(appID, eventType string, event map[string]
 		EventJson: string(body),
 	})
 	if err != nil {
-		p.Errorf("Robot Webhook 推送 RPC 失败: app=%s event=%s err=%v", appID, eventType, err)
+		p.logger.Error(model.LogMsg{Text: "RobotWebhook推送RPC失败", Data: map[string]any{"app": appID, "event": eventType, "err": err.Error()}})
 	}
 }
 

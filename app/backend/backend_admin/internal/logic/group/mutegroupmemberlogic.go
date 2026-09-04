@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type MuteGroupMemberLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewMuteGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteGroupMemberLogic {
-	return &MuteGroupMemberLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &MuteGroupMemberLogic{logger: beaverlog.New("mute_group_member", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *MuteGroupMemberLogic) MuteGroupMember(req *types.MuteGroupMemberReq) (resp *types.MuteGroupMemberRes, err error) {
@@ -56,7 +56,10 @@ func (l *MuteGroupMemberLogic) MuteGroupMember(req *types.MuteGroupMemberReq) (r
 		MuteMinutes: &minutes,
 	})
 	if err != nil {
-		l.Errorf("禁言群成员失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "禁言群成员失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.MuteGroupMemberRes{}, nil

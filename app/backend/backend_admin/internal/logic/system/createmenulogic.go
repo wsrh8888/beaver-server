@@ -27,12 +27,12 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CreateMenuLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -40,7 +40,7 @@ type CreateMenuLogic struct {
 // 创建菜单
 func NewCreateMenuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateMenuLogic {
 	return &CreateMenuLogic{
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("create_menu", ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
@@ -66,10 +66,16 @@ func (l *CreateMenuLogic) CreateMenu(req *types.CreateMenuReq) (resp *types.Crea
 	// 创建菜单
 	err = l.svcCtx.DB.Create(&menu).Error
 	if err != nil {
-		logx.Errorf("创建菜单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "创建菜单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 
-	logx.Infof("菜单创建成功: ID=%d, Name=%s", menu.Id, menu.Name)
+	l.logger.Info(model.LogMsg{
+		Text: "菜单创建成功",
+		Data: map[string]interface{}{"menuId": menu.Id, "menuName": menu.Name},
+	})
 	return &types.CreateMenuRes{}, nil
 }

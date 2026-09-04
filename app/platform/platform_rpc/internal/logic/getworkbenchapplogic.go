@@ -29,8 +29,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -39,11 +40,11 @@ import (
 type GetWorkbenchAppLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetWorkbenchAppLogic {
-	return &GetWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &GetWorkbenchAppLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_workbench_app", ctx)}
 }
 
 func (l *GetWorkbenchAppLogic) GetWorkbenchApp(in *platform_rpc.GetWorkbenchAppReq) (*platform_rpc.GetWorkbenchAppRes, error) {
@@ -56,6 +57,7 @@ func (l *GetWorkbenchAppLogic) GetWorkbenchApp(in *platform_rpc.GetWorkbenchAppR
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "工作台应用不存在")
 		}
+		l.logger.Error(model.LogMsg{Text: "查询工作台应用失败", Data: map[string]any{"workbenchAppId": in.WorkbenchAppId, "err": err.Error()}})
 		return nil, err
 	}
 

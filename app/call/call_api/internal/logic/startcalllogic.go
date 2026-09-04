@@ -34,26 +34,25 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
 
 	"github.com/google/uuid"
 	"github.com/livekit/protocol/auth"
 )
 
-
 type StartCallLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 发起音视频通话
 func NewStartCallLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StartCallLogic {
 	return &StartCallLogic{
 		ctx:    ctx,
-		logger: logger.New("start_call"),
+		logger: beaverlog.New("start_call", ctx),
 		svcCtx: svcCtx,
 	}
 }

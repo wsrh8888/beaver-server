@@ -27,21 +27,21 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFriendIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFriendIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendIdsLogic {
 	return &GetFriendIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_friend_ids", ctx),
 	}
 }
 
@@ -49,7 +49,7 @@ func (l *GetFriendIdsLogic) GetFriendIds(in *friend_rpc.GetFriendIdsRequest) (*f
 	var friends []friend_models.FriendModel
 	err := l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = false", in.UserID, in.UserID).Find(&friends).Error
 	if err != nil {
-		logx.Errorf("failed to query friends: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询好友ID列表失败", Data: map[string]any{"userId": in.UserID, "err": err.Error()}})
 		return nil, err
 	}
 

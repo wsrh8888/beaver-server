@@ -30,8 +30,9 @@ import (
 	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/internal/svc"
 	"beaver/app/user/user_rpc/types/user_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -40,11 +41,11 @@ import (
 type UpdateUsersLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateUsersLogic {
-	return &UpdateUsersLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateUsersLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_users", ctx)}
 }
 
 func (l *UpdateUsersLogic) UpdateUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.UpdateUsersRes, error) {
@@ -55,6 +56,10 @@ func (l *UpdateUsersLogic) UpdateUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.U
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				continue
 			}
+			l.logger.Error(model.LogMsg{
+				Text: "查询用户失败",
+				Data: map[string]any{"userId": uid, "err": err.Error()},
+			})
 			return nil, err
 		}
 
@@ -63,6 +68,10 @@ func (l *UpdateUsersLogic) UpdateUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.U
 			if err := l.svcCtx.DB.Where("email = ? AND user_id != ?", *in.PatchEmail, uid).First(&exist).Error; err == nil {
 				return nil, status.Error(codes.AlreadyExists, "邮箱已存在")
 			} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+				l.logger.Error(model.LogMsg{
+					Text: "校验邮箱唯一性失败",
+					Data: map[string]any{"userId": uid, "email": *in.PatchEmail, "err": err.Error()},
+				})
 				return nil, err
 			}
 		}
@@ -92,12 +101,19 @@ func (l *UpdateUsersLogic) UpdateUsers(in *user_rpc.UpdateUsersReq) (*user_rpc.U
 		updates["version"] = version
 
 		if err := l.svcCtx.DB.Model(&user).Updates(updates).Error; err != nil {
-			l.Errorf("更新用户失败: %v", err)
+			l.logger.Error(model.LogMsg{
+				Text: "更新用户失败",
+				Data: map[string]any{"userId": uid, "err": err.Error()},
+			})
 			return nil, err
 		}
 		l.recordUserChangeLog(uid, version, updates)
 		affected++
 	}
+	l.logger.Info(model.LogMsg{
+		Text: "更新用户成功",
+		Data: map[string]interface{}{"userIds": in.UserIds, "affected": affected},
+	})
 	return &user_rpc.UpdateUsersRes{AffectedCount: affected}, nil
 }
 
@@ -129,7 +145,10 @@ func (l *UpdateUsersLogic) recordUserChangeLog(userID string, version int64, upd
 
 	if len(changeLogs) > 0 {
 		if err := l.svcCtx.DB.Create(&changeLogs).Error; err != nil {
-			l.Errorf("记录用户变更日志失败: userId=%s, error=%v", userID, err)
+			l.logger.Error(model.LogMsg{
+				Text: "记录用户变更日志失败",
+				Data: map[string]any{"userId": userID, "err": err.Error()},
+			})
 		}
 	}
 }

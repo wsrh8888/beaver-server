@@ -29,22 +29,23 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
 type UpdateGroupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateGroupLogic {
 	return &UpdateGroupLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("update_group", ctx),
 	}
 }
 
@@ -54,7 +55,7 @@ func (l *UpdateGroupLogic) UpdateGroup(in *group_rpc.UpdateGroupReq) (*group_rpc
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("群组不存在")
 		}
-		l.Errorf("查询群组失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询群组失败", Data: map[string]any{"id": in.Id, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -94,8 +95,11 @@ func (l *UpdateGroupLogic) UpdateGroup(in *group_rpc.UpdateGroupReq) (*group_rpc
 	updates["version"] = groupVersion
 
 	if err := l.svcCtx.DB.Model(&group).Updates(updates).Error; err != nil {
-		l.Errorf("更新群组失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "更新群组失败", Data: map[string]any{"id": in.Id, "groupId": group.GroupID, "err": err.Error()}})
 		return nil, err
 	}
+
+	l.logger.Info(model.LogMsg{Text: "更新群组成功", Data: map[string]interface{}{"id": in.Id, "groupId": group.GroupID, "version": groupVersion}})
+
 	return &group_rpc.UpdateGroupRes{}, nil
 }

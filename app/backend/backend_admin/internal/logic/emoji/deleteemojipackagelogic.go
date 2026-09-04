@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type DeleteEmojiPackageLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewDeleteEmojiPackageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteEmojiPackageLogic {
-	return &DeleteEmojiPackageLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteEmojiPackageLogic{logger: beaverlog.New("delete_emoji_package", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // DeleteEmojiPackage 管理后台：删除表情包。
@@ -56,7 +56,10 @@ func (l *DeleteEmojiPackageLogic) DeleteEmojiPackage(req *types.DeleteEmojiPacka
 		Delete:    &del,
 	})
 	if err != nil {
-		l.Errorf("删除表情包失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "删除表情包失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.DeleteEmojiPackageRes{}, nil

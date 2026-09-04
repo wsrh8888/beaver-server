@@ -27,18 +27,18 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type ListFeedbackLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFeedbackLogic {
-	return &ListFeedbackLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListFeedbackLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_feedback", ctx)}
 }
 
 func (l *ListFeedbackLogic) ListFeedback(in *platform_rpc.ListFeedbackReq) (*platform_rpc.ListFeedbackRes, error) {
@@ -70,13 +70,13 @@ func (l *ListFeedbackLogic) ListFeedback(in *platform_rpc.ListFeedbackReq) (*pla
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计反馈失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计反馈失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err
 	}
 
 	var list []platform_models.FeedbackModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.Errorf("查询反馈列表失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询反馈列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err
 	}
 

@@ -31,7 +31,11 @@ import (
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
 	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
+
+var logger = beaverlog.New("chat_message")
 
 func Handle(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r *http.Request, client *ws_conn.Client, content type_struct.WsContent) error {
 	switch content.Data.Type {
@@ -42,7 +46,10 @@ func Handle(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r
 	case wsTypeConst.TypingSend:
 		return HandleTypingSend(ctx, svcCtx, req, r, client, content.Data.Body)
 	default:
-		fmt.Println("未支持的消息类型:", content.Data.Type)
+		logger.Warn(model.LogMsg{
+			Text: "未支持的消息类型",
+			Data: map[string]any{"type": content.Data.Type},
+		})
 		return fmt.Errorf("unsupported message type: %s", content.Data.Type)
 	}
 }

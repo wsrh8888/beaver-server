@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchDeleteChatMessagesLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewBatchDeleteChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteChatMessagesLogic {
-	return &BatchDeleteChatMessagesLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &BatchDeleteChatMessagesLogic{logger: beaverlog.New("batch_delete_chat_messages", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *BatchDeleteChatMessagesLogic) BatchDeleteChatMessages(req *types.BatchDeleteChatMessagesReq) (resp *types.BatchDeleteChatMessagesRes, err error) {
@@ -52,7 +52,10 @@ func (l *BatchDeleteChatMessagesLogic) BatchDeleteChatMessages(req *types.BatchD
 		Status:     chatMessageStatusDeleted,
 	})
 	if err != nil {
-		l.Errorf("批量删除聊天消息失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除聊天消息失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.BatchDeleteChatMessagesRes{}, nil

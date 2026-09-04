@@ -30,7 +30,8 @@ import (
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -39,11 +40,11 @@ import (
 type AuditDeveloperLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAuditDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AuditDeveloperLogic {
-	return &AuditDeveloperLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &AuditDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("audit_developer", ctx)}
 }
 
 func (l *AuditDeveloperLogic) AuditDeveloper(in *open_rpc.AuditDeveloperReq) (*open_rpc.AuditDeveloperRes, error) {
@@ -70,7 +71,10 @@ func (l *AuditDeveloperLogic) AuditDeveloper(in *open_rpc.AuditDeveloperReq) (*o
 		"audit_remark": in.AuditRemark,
 		"updated_at":   now,
 	}).Error; err != nil {
-		l.Errorf("审核开发者失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "审核开发者失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, status.Error(codes.Internal, "审核失败")
 	}
 

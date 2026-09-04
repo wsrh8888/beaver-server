@@ -28,21 +28,21 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/file/file_rpc/internal/svc"
 	"beaver/app/file/file_rpc/types/file_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetFileDetailLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetFileDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFileDetailLogic {
 	return &GetFileDetailLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_file_detail", ctx),
 	}
 }
 
@@ -53,7 +53,10 @@ func (l *GetFileDetailLogic) GetFileDetail(in *file_rpc.GetFileDetailReq) (*file
 	// 通过fileName查询文件信息
 	err := l.svcCtx.DB.Take(&file, "file_key = ?", in.FileKey).Error
 	if err != nil {
-		logx.Errorf("查询文件失败: %s", err.Error())
+		l.logger.Error(model.LogMsg{
+			Text: "查询文件详情失败",
+			Data: map[string]any{"fileKey": in.FileKey, "err": err.Error()},
+		})
 		return nil, errors.New("文件不存在")
 	}
 

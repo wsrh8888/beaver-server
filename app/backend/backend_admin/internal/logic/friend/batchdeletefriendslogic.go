@@ -28,18 +28,18 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type BatchDeleteFriendsLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewBatchDeleteFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchDeleteFriendsLogic {
-	return &BatchDeleteFriendsLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &BatchDeleteFriendsLogic{logger: beaverlog.New("batch_delete_friends", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 // BatchDeleteFriends 管理后台：批量强制删除好友关系。
@@ -55,7 +55,10 @@ func (l *BatchDeleteFriendsLogic) BatchDeleteFriends(req *types.BatchDeleteFrien
 		Action:      friendActionHardDelete,
 	})
 	if err != nil {
-		l.Errorf("批量删除好友失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "批量删除好友失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 		return nil, err
 	}
 	return &types.BatchDeleteFriendsRes{}, nil

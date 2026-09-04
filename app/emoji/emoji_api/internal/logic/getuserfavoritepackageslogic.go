@@ -27,23 +27,24 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type GetUserFavoritePackagesLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewGetUserFavoritePackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserFavoritePackagesLogic {
 	return &GetUserFavoritePackagesLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("get_user_favorite_packages", ctx),
 	}
 }
 
@@ -56,7 +57,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		Find(&packageCollects).Error
 
 	if err != nil {
-		logx.Errorf("查询用户收藏的表情包失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏的表情包失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "查询收藏的表情包失败")
 	}
 
@@ -66,7 +67,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		Where("user_id = ?", req.UserID).
 		Count(&total).Error
 	if err != nil {
-		logx.Errorf("获取收藏总数失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取收藏总数失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取收藏总数失败")
 	}
 
@@ -88,7 +89,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 	var packages []emoji_models.EmojiPackage
 	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", packageIDs, 1).Find(&packages).Error
 	if err != nil {
-		logx.Errorf("查询表情包详情失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "查询表情包详情失败")
 	}
 
@@ -110,7 +111,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		Group("package_id").
 		Find(&emojiCountsData).Error
 	if err != nil {
-		logx.Errorf("获取表情数量失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取表情数量失败", Data: map[string]any{"err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取表情数量失败")
 	}
 	for _, c := range emojiCountsData {
@@ -129,7 +130,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 		Group("package_id").
 		Find(&collectCountsData).Error
 	if err != nil {
-		logx.Errorf("获取收藏数失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "获取收藏数失败", Data: map[string]any{"err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取收藏数失败")
 	}
 	for _, c := range collectCountsData {

@@ -1,4 +1,4 @@
-Name: openrpc.rpc
+Name: open_rpc
 ListenOn: 0.0.0.0:30900
 Etcd:
   Hosts:

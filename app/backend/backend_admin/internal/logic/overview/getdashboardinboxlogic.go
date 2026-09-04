@@ -31,23 +31,23 @@ import (
 	"beaver/app/backend/backend_models"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type inboxRow struct {
-	item      types.DashboardInboxItem
-	sortKey   string
+	item    types.DashboardInboxItem
+	sortKey string
 }
 
 type GetDashboardInboxLogic struct {
-	logx.Logger
+	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
 func NewGetDashboardInboxLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDashboardInboxLogic {
-	return &GetDashboardInboxLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &GetDashboardInboxLogic{logger: beaverlog.New("get_dashboard_inbox", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
 func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxReq) (resp *types.GetDashboardInboxRes, err error) {
@@ -66,14 +66,17 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 		Status: 1, Page: 1, PageSize: perSource,
 	})
 	if err != nil {
-		l.Errorf("收件箱拉取举报失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "收件箱拉取举报失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, r := range reportRes.List {
 			rows = append(rows, inboxRow{
 				sortKey: r.CreatedAt,
 				item: types.DashboardInboxItem{
 					Category: "report", Title: "待处理举报",
-					Summary: fmt.Sprintf("%s 举报 %s", r.ReporterUserId, r.TargetId),
+					Summary:  fmt.Sprintf("%s 举报 %s", r.ReporterUserId, r.TargetId),
 					EntityID: fmt.Sprintf("%d", r.Id), CreatedAt: r.CreatedAt,
 					Action: fmt.Sprintf("/safety/cases?tab=reports&reportId=%d", r.Id),
 				},
@@ -84,14 +87,17 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 	var cases []backend_models.AdminModerationCase
 	if err := l.svcCtx.DB.Where("status = ?", backend_models.CaseStatusPending).
 		Order("id DESC").Limit(int(perSource)).Find(&cases).Error; err != nil {
-		l.Errorf("收件箱拉取工单失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "收件箱拉取工单失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, c := range cases {
 			rows = append(rows, inboxRow{
 				sortKey: c.CreatedAt.String(),
 				item: types.DashboardInboxItem{
 					Category: "case", Title: "待处理工单",
-					Summary: fmt.Sprintf("%s · %s", c.CaseNo, c.Title),
+					Summary:  fmt.Sprintf("%s · %s", c.CaseNo, c.Title),
 					EntityID: fmt.Sprintf("%d", c.Id), CreatedAt: c.CreatedAt.String(),
 					Action: fmt.Sprintf("/safety/cases?tab=cases&caseId=%d", c.Id),
 				},
@@ -103,7 +109,10 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 		Status: 1, Page: 1, PageSize: perSource,
 	})
 	if err != nil {
-		l.Errorf("收件箱拉取反馈失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "收件箱拉取反馈失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, f := range feedbackRes.List {
 			rows = append(rows, inboxRow{
@@ -121,7 +130,10 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 		Status: 0, Page: 1, PageSize: perSource,
 	})
 	if err != nil {
-		l.Errorf("收件箱拉取开发者审核失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "收件箱拉取开发者审核失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, d := range devRes.List {
 			createdAt := fmt.Sprintf("%d", d.CreatedAt)
@@ -129,7 +141,7 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 				sortKey: createdAt,
 				item: types.DashboardInboxItem{
 					Category: "developer", Title: "待审开发者",
-					Summary: fmt.Sprintf("%s (%s)", d.RealName, d.Email),
+					Summary:  fmt.Sprintf("%s (%s)", d.RealName, d.Email),
 					EntityID: d.UserId, CreatedAt: createdAt, Action: "/open/developers",
 				},
 			})
@@ -140,7 +152,10 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 		AuditStatus: 0, Page: 1, PageSize: perSource,
 	})
 	if err != nil {
-		l.Errorf("收件箱拉取应用审核失败: %v", err)
+		l.logger.Error(model.LogMsg{
+			Text: "收件箱拉取应用审核失败",
+			Data: map[string]interface{}{"err": err.Error()},
+		})
 	} else {
 		for _, a := range appRes.List {
 			createdAt := fmt.Sprintf("%d", a.CreatedAt)

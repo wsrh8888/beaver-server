@@ -30,20 +30,20 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type CheckQrCodeStatusLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewCheckQrCodeStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CheckQrCodeStatusLogic {
 	return &CheckQrCodeStatusLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
+		logger: beaverlog.New("check_qrcode_status", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -51,7 +51,10 @@ func NewCheckQrCodeStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *CheckQrCodeStatusLogic) CheckQrCodeStatus(req *types.CheckQrCodeStatusReq) (resp *types.CheckQrCodeStatusRes, err error) {
 	var qrCode open_models.OpenOAuthQrCode
 	if err := l.svcCtx.DB.Where("scene_id = ?", req.SceneID).First(&qrCode).Error; err != nil {
-		logx.Errorf("扫码记录不存在: sceneId=%s, err=%v", req.SceneID, err)
+		l.logger.Warn(model.LogMsg{
+			Text: "扫码记录不存在",
+			Data: map[string]any{"sceneId": req.SceneID, "err": err.Error()},
+		})
 		return nil, fmt.Errorf("二维码不存在或已过期")
 	}
 
@@ -68,8 +71,6 @@ func (l *CheckQrCodeStatusLogic) CheckQrCodeStatus(req *types.CheckQrCodeStatusR
 			code = c
 		}
 	}
-
-	logx.Infof("查询扫码状态: sceneId=%s, status=%s", req.SceneID, status)
 
 	return &types.CheckQrCodeStatusRes{
 		Status: status,

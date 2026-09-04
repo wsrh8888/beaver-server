@@ -38,25 +38,23 @@ import (
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
-
 
 type CreateBotLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 // 在群里创建通知机器人（群管理员操作，返回 Webhook URL + Secret）
 func NewCreateBotLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateBotLogic {
 	return &CreateBotLogic{
 		ctx:    ctx,
-		logger: logger.New("create_bot"),
+		logger: beaverlog.New("create_bot", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -195,7 +193,7 @@ func (l *CreateBotLogic) prepareGroupMember(groupID, userID string) (memberRow *
 func (l *CreateBotLogic) notifyBotCreated(groupID, operatorID string, memberVersion int64) {
 	defer func() {
 		if r := recover(); r != nil {
-			logx.Errorf("异步通知群机器人创建时发生panic: %v", r)
+			l.logger.Error(model.LogMsg{Text: "异步通知群机器人创建时发生panic", Data: map[string]interface{}{"panic": fmt.Sprintf("%v", r)}})
 		}
 	}()
 
@@ -209,7 +207,7 @@ func (l *CreateBotLogic) notifyBotCreated(groupID, operatorID string, memberVers
 		RelatedUserId:  operatorID,
 	})
 	if err != nil {
-		logx.Errorf("发送群机器人创建通知失败: groupId=%s, error=%v", groupID, err)
+		l.logger.Error(model.LogMsg{Text: "发送群机器人创建通知失败", Data: map[string]interface{}{"groupId": groupID, "err": err.Error()}})
 	}
 
 	if memberVersion <= 0 {
@@ -220,7 +218,7 @@ func (l *CreateBotLogic) notifyBotCreated(groupID, operatorID string, memberVers
 		GroupID: groupID,
 	})
 	if err != nil {
-		logx.Errorf("获取群成员列表失败: groupId=%s, error=%v", groupID, err)
+		l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": groupID, "err": err.Error()}})
 		return
 	}
 
@@ -242,7 +240,7 @@ func (l *CreateBotLogic) notifyBotCreated(groupID, operatorID string, memberVers
 			"conversationId": "",
 		}
 		if err := l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload); err != nil {
-			logx.Errorf("推送群成员更新失败: groupId=%s, targetId=%s, error=%v", groupID, member.UserID, err)
+			l.logger.Error(model.LogMsg{Text: "推送群成员更新失败", Data: map[string]interface{}{"groupId": groupID, "targetId": member.UserID, "err": err.Error()}})
 		}
 	}
 }

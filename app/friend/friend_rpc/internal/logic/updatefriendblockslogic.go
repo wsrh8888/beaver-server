@@ -27,8 +27,9 @@ import (
 	"beaver/app/friend/friend_models"
 	"beaver/app/friend/friend_rpc/internal/svc"
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -36,11 +37,11 @@ import (
 type UpdateFriendBlocksLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewUpdateFriendBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateFriendBlocksLogic {
-	return &UpdateFriendBlocksLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &UpdateFriendBlocksLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_friend_blocks", ctx)}
 }
 
 func (l *UpdateFriendBlocksLogic) UpdateFriendBlocks(in *friend_rpc.UpdateFriendBlocksReq) (*friend_rpc.UpdateFriendBlocksRes, error) {
@@ -53,16 +54,18 @@ func (l *UpdateFriendBlocksLogic) UpdateFriendBlocks(in *friend_rpc.UpdateFriend
 
 	result := l.svcCtx.DB.Where("block_id IN ?", in.BlockIds).Delete(&friend_models.FriendBlockModel{})
 	if result.Error != nil {
-		l.Errorf("解除黑名单失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{Text: "解除黑名单失败", Data: map[string]any{"blockIds": in.BlockIds, "err": result.Error.Error()}})
 		return nil, status.Error(codes.Internal, "操作失败")
 	}
 	if result.RowsAffected == 0 {
 		result = l.svcCtx.DB.Where("id IN ?", in.BlockIds).Delete(&friend_models.FriendBlockModel{})
 		if result.Error != nil {
-			l.Errorf("解除黑名单失败: %v", result.Error)
+			l.logger.Error(model.LogMsg{Text: "解除黑名单失败", Data: map[string]any{"blockIds": in.BlockIds, "err": result.Error.Error()}})
 			return nil, status.Error(codes.Internal, "操作失败")
 		}
 	}
+
+	l.logger.Info(model.LogMsg{Text: "解除黑名单成功", Data: map[string]interface{}{"blockIds": in.BlockIds, "affected": result.RowsAffected}})
 
 	return &friend_rpc.UpdateFriendBlocksRes{AffectedCount: result.RowsAffected}, nil
 }

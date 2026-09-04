@@ -27,8 +27,9 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -36,11 +37,11 @@ import (
 type ListAppVersionsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewListAppVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListAppVersionsLogic {
-	return &ListAppVersionsLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+	return &ListAppVersionsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_app_versions", ctx)}
 }
 
 func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsReq) (*platform_rpc.ListAppVersionsRes, error) {
@@ -60,13 +61,13 @@ func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsR
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
-		l.Errorf("统计架构失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "统计架构失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取架构总数失败")
 	}
 
 	var architectures []platform_models.UpdateArchitecture
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&architectures).Error; err != nil {
-		l.Errorf("查询架构失败: %v", err)
+		l.logger.Error(model.LogMsg{Text: "查询架构失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取架构列表失败")
 	}
 
@@ -74,7 +75,7 @@ func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsR
 	for _, arch := range architectures {
 		var versions []platform_models.UpdateVersion
 		if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").Find(&versions).Error; err != nil {
-			l.Errorf("查询架构版本失败 arch=%d: %v", arch.Id, err)
+			l.logger.Error(model.LogMsg{Text: "查询架构版本失败", Data: map[string]any{"archId": arch.Id, "err": err.Error()}})
 			continue
 		}
 

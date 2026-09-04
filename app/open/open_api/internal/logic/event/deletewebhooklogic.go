@@ -29,18 +29,17 @@ import (
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
 	"beaver/app/open/open_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type DeleteWebhookLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 func NewDeleteWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteWebhookLogic {
-	return &DeleteWebhookLogic{Logger: logx.WithContext(ctx), ctx: ctx, svcCtx: svcCtx}
+	return &DeleteWebhookLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_webhook", ctx)}
 }
 
 func (l *DeleteWebhookLogic) DeleteWebhook(req *types.DeleteWebhookReq, authorization string) (resp *types.DeleteWebhookRes, err error) {

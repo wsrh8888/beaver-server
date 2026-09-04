@@ -27,27 +27,26 @@ import (
 	"beaver/app/group/group_models"
 	"beaver/app/group/group_rpc/internal/svc"
 	"beaver/app/group/group_rpc/types/group_rpc"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type GetGroupMembersListByIdsLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
 func NewGetGroupMembersListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupMembersListByIdsLogic {
 	return &GetGroupMembersListByIdsLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("get_group_members_list_by_ids", ctx),
 	}
 }
 
 func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *group_rpc.GetGroupMembersListByIdsReq) (*group_rpc.GetGroupMembersListByIdsRes, error) {
 	if len(in.GroupIDs) == 0 {
-		l.Errorf("群组ID列表为空")
 		return &group_rpc.GetGroupMembersListByIdsRes{Members: []*group_rpc.GroupMemberListById{}}, nil
 	}
 
@@ -62,11 +61,11 @@ func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *group_rpc.G
 
 	err := query.Find(&membersData).Error
 	if err != nil {
-		l.Errorf("查询群成员失败: groupIDs=%v, since=%d, error=%v", in.GroupIDs, in.Since, err)
+		l.logger.Error(model.LogMsg{Text: "查询群成员失败", Data: map[string]any{"groupIds": in.GroupIDs, "since": in.Since, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.Infof("查询到 %d 个群成员", len(membersData))
+	l.logger.Info(model.LogMsg{Text: "批量查询群成员", Data: map[string]interface{}{"count": len(membersData)}})
 
 	// 转换为响应格式
 	var members []*group_rpc.GroupMemberListById

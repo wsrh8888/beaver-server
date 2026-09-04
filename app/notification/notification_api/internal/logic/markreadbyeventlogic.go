@@ -28,22 +28,22 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type MarkReadByEventLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // 按事件ID标记单个通知已读
 func NewMarkReadByEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarkReadByEventLogic {
 	return &MarkReadByEventLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("mark_read_by_event", ctx),
 	}
 }
 
@@ -60,9 +60,21 @@ func (l *MarkReadByEventLogic) MarkReadByEvent(req *types.MarkReadByEventReq) (r
 		})
 
 	if result.Error != nil {
-		l.Logger.Errorf("标记单个通知已读失败: %v", result.Error)
+		l.logger.Error(model.LogMsg{
+			Text: "按事件标记通知已读失败",
+			Data: map[string]any{"userId": userId, "eventId": eventId, "err": result.Error.Error()},
+		})
 		return nil, result.Error
 	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "按事件标记通知已读成功",
+		Data: map[string]interface{}{
+			"userId":  userId,
+			"eventId": eventId,
+			"affected": result.RowsAffected,
+		},
+	})
 
 	resp = &types.MarkReadByEventRes{}
 

@@ -29,26 +29,24 @@ import (
 	"beaver/app/emoji/emoji_api/internal/svc"
 	"beaver/app/emoji/emoji_api/internal/types"
 	"beaver/app/emoji/emoji_models"
-	"beaver/utils/logger"
-	"beaver/utils/logger/model"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
 
-
 type AddEmojiLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logger *logger.Logger
+	logger *beaverlog.Logger
 }
 
 func NewAddEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddEmojiLogic {
 	return &AddEmojiLogic{
 		ctx:    ctx,
-		logger: logger.New("add_emoji"),
+		logger: beaverlog.New("add_emoji", ctx),
 		svcCtx: svcCtx,
 	}
 }
@@ -65,7 +63,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		emojiVersion := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
 		if emojiVersion == -1 {
-			logx.Error("生成表情版本号失败")
+			l.logger.Error(model.LogMsg{Text: "生成表情版本号失败", Data: map[string]interface{}{"fileKey": req.FileKey}})
 			return nil, errors.New("生成版本号失败")
 		}
 
@@ -81,7 +79,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 		}
 
 		if err := l.svcCtx.DB.Create(&emoji).Error; err != nil {
-			logx.Error("添加表情失败", err)
+			l.logger.Error(model.LogMsg{Text: "添加表情失败", Data: map[string]interface{}{"fileKey": req.FileKey, "err": err.Error()}})
 			return nil, err
 		}
 	}
@@ -89,7 +87,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	// 生成收藏版本号（按用户ID分区）
 	collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
 	if collectVersion == -1 {
-		logx.Error("生成收藏版本号失败")
+		l.logger.Error(model.LogMsg{Text: "生成收藏版本号失败", Data: map[string]interface{}{"userId": req.UserID}})
 		return nil, errors.New("生成版本号失败")
 	}
 
@@ -110,7 +108,7 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		if err := l.svcCtx.DB.Create(&favoriteEmoji).Error; err != nil {
-			logx.Error("收藏表情失败", err)
+			l.logger.Error(model.LogMsg{Text: "收藏表情失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": emoji.EmojiID, "err": err.Error()}})
 			return nil, err
 		}
 
