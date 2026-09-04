@@ -46,7 +46,6 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 
 	beaverlog.InitFromConf(c.RestConf.ServiceConf)
-	beaverlog.SetOtlpAddr(c.OtlpAddr)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

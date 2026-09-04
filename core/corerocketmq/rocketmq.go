@@ -111,6 +111,57 @@ func (c *Client) SendMessage(ctx context.Context, topic mqwsconst.TopicType, pay
 	return nil
 }
 
+// SendRawJSON 发送顶层扁平 JSON（不加 Message 信封）。
+// 用于客户端日志等需原样透传到 OpenSearch 的场景，body 即文档本身。
+func (c *Client) SendRawJSON(ctx context.Context, topic mqwsconst.TopicType, v any) error {
+	if c == nil || c.Producer == nil {
+		return fmt.Errorf("RocketMQ 未初始化")
+	}
+	body, err := json.Marshal(v)
+	if err != nil {
+		return fmt.Errorf("序列化消息失败: %v", err)
+	}
+	result, err := c.Producer.SendSync(ctx, primitive.NewMessage(string(topic), body))
+	if err != nil {
+		return fmt.Errorf("发送消息失败: %v", err)
+	}
+	if result.Status != primitive.SendOK {
+		return fmt.Errorf("消息发送状态异常: %v", result.Status)
+	}
+	return nil
+}
+
+// RegisterRawConsumer 消费原始 JSON body，不解析 Message 信封。
+func (c *Client) RegisterRawConsumer(group mqwsconst.GroupType, addr string, topic mqwsconst.TopicType, handler func(body []byte) error) error {
+	c2, err := rocketmq.NewPushConsumer(
+		consumer.WithGroupName(string(group)),
+		consumer.WithNameServer([]string{addr}),
+		consumer.WithConsumerModel(consumer.Clustering),
+	)
+	if err != nil {
+		return fmt.Errorf("创建 Consumer 失败: %v", err)
+	}
+
+	err = c2.Subscribe(string(topic), consumer.MessageSelector{}, func(ctx context.Context, msgs ...*primitive.MessageExt) (consumer.ConsumeResult, error) {
+		for _, msg := range msgs {
+			if err := handler(msg.Body); err != nil {
+				logx.Errorf("处理原始消息失败: %v", err)
+				return consumer.ConsumeRetryLater, nil
+			}
+		}
+		return consumer.ConsumeSuccess, nil
+	})
+	if err != nil {
+		return fmt.Errorf("订阅 Topic 失败: %v", err)
+	}
+	if err = c2.Start(); err != nil {
+		return fmt.Errorf("启动 Consumer 失败: %v", err)
+	}
+	c.Consumer = c2
+	logx.Infof("RocketMQ RawConsumer 启动成功, Group: %s, Topic: %s", group, topic)
+	return nil
+}
+
 // RegisterConsumer 注册消费者；broadcast=true 时每个 WS 实例都会收到推送（内存连接表不共享）
 func (c *Client) RegisterConsumer(group mqwsconst.GroupType, addr string, topic mqwsconst.TopicType, broadcast bool, handler func(msg *Message) error) error {
 	model := consumer.Clustering

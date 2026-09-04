@@ -28,7 +28,9 @@ import (
 	platformcli "beaver/app/platform/platform_rpc/platform"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
+	"beaver/core/coreopensearch"
 	"beaver/core/coreredis"
+	"beaver/core/corerocketmq"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -41,6 +43,8 @@ type ServiceContext struct {
 	Redis       *redis.Client
 	FileRpc     file_rpc.FileClient
 	PlatformRpc platformcli.Platform
+	RocketMQ    *corerocketmq.Client
+	OpenSearch  *coreopensearch.Client
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -54,5 +58,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:       client,
 		FileRpc:     file.NewFile(zrpc.MustNewClient(c.FileRpc, rpcOpt)),
 		PlatformRpc: platformcli.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt)),
+		RocketMQ:    corerocketmq.InitRocketMQ(c.RocketMQ.Addr),
+		OpenSearch:  coreopensearch.New(c.OpenSearch.Addr),
 	}
 }

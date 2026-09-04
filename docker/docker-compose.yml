@@ -92,7 +92,9 @@ services:
       - rocketmq-broker
     restart: on-failure
     entrypoint: >
-      sh -c "sleep 10 && mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t ws_push_topic"
+      sh -c "sleep 10 &&
+      mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t ws_push_topic &&
+      mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t beaver_logs"
 
   rocketmq-console:
     image: apacherocketmq/rocketmq-dashboard:latest
@@ -105,8 +107,9 @@ services:
     depends_on:
       - rocketmq-namesrv
 
-  # ===== 日志可观测性后端（OTel 采集 → OpenSearch 存储 → Dashboards 检索）=====
-  # 应用侧在各服务 yaml 的 OtlpAddr 配置采集器地址（如 127.0.0.1:4317），beaverlog 据此把日志推到本栈。
+  # ===== 客户端日志存储（扁平 JSON → OpenSearch；经 RocketMQ 解耦，无 OTel）=====
+  # platform_api Track → topic beaver_logs → Consumer → 索引 beaver-logs
+  # 与服务端 beaverlog（仅本地 logx）完全隔离，Dashboards 建索引模式 beaver-logs*
   opensearch:
     image: opensearchproject/opensearch:2.19.0
     container_name: beaver-opensearch
@@ -127,7 +130,7 @@ services:
       retries: 12
 
   opensearch-dashboards:
-    image: opensearch-project/opensearch-dashboards:2.19.0
+    image: opensearchproject/opensearch-dashboards:2.19.0
     container_name: beaver-dashboards
     restart: always
     environment:
@@ -135,19 +138,6 @@ services:
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
     ports:
       - "5601:5601"
-    depends_on:
-      - opensearch
-
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.115.0
-    container_name: beaver-otel-collector
-    restart: always
-    command: ["--config=/etc/otel/config.yaml"]
-    volumes:
-      - ./logging/otel-collector-config.yaml:/etc/otel/config.yaml:ro
-    ports:
-      - "4317:4317" # OTLP gRPC（beaverlog 走这个）
-      - "4318:4318" # OTLP HTTP
     depends_on:
       - opensearch
 

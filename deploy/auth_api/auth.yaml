@@ -7,7 +7,6 @@ Log:
   Level: info
   Stat: false
 Etcd: 127.0.0.1:2379
-OtlpAddr: 127.0.0.1:4317
 Auth:
   AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600

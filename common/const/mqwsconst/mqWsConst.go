@@ -28,6 +28,8 @@ type TopicType string
 const (
 	// MqTopicWs WebSocket 推送专用 Topic
 	MqTopicWs TopicType = "ws_push_topic"
+	// MqTopicClientLog 客户端日志扁平 JSON（无 Message 信封）
+	MqTopicClientLog TopicType = "beaver_logs"
 )
 
 // RocketMQ Consumer Group 类型
@@ -37,4 +39,6 @@ type GroupType string
 const (
 	// MqGroupWs WS API 消费者组
 	MqGroupWs GroupType = "ws_api_consumer_group"
+	// MqGroupClientLog 客户端日志写入 OpenSearch 的消费者组
+	MqGroupClientLog GroupType = "platform_client_log_group"
 )

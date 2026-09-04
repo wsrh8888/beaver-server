@@ -28,8 +28,7 @@ import (
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
-	beaverlog "beaver/utils/beaverlog"
-	"beaver/utils/beaverlog/model"
+	"beaver/common/const/mqwsconst"
 )
 
 // 字段上限：限制单次请求规模与单条日志体积，防止异常 payload 撑爆 OpenSearch 索引映射。
@@ -47,18 +46,21 @@ func NewTrackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TrackLogic 
 	return &TrackLogic{ctx: ctx, svcCtx: svcCtx}
 }
 
-// Track 客户端日志网关：校验量级/单条体积 → 透传至 OpenSearch（不写库）。
-// 令牌校验与限流交由前置网关处理。每条日志原文（map）直接透传，
-// 绝不信任客户端自报的 source/module（防伪造 source: auth_api 污染日志）。
-// 契约对齐阿里云 SLS 匿名上报：logs 是自由字段数组，无桶/无多余包装。
+// Track 客户端日志网关：校验量级/单条体积 → 扁平 JSON 原样写入 RocketMQ。
+// 不走 beaverlog / OTel，避免 attributes 包装与服务端日志混入同一索引。
+// 消费端写入索引 beaver-logs，字段顶层扁平，查询对齐 SLS。
 func (l *TrackLogic) Track(req *types.TrackReq) (*types.TrackRes, error) {
+	if l.svcCtx.RocketMQ == nil {
+		return nil, fmt.Errorf("client log rocketmq not configured")
+	}
 	if len(req.Logs) > maxClientLogItems {
 		return nil, fmt.Errorf("too many log items: %d > %d", len(req.Logs), maxClientLogItems)
 	}
 
-	clientLogger := beaverlog.New("client_log", l.ctx)
-
 	for _, item := range req.Logs {
+		if item == nil {
+			continue
+		}
 		b, err := json.Marshal(item)
 		if err != nil {
 			continue
@@ -66,29 +68,10 @@ func (l *TrackLogic) Track(req *types.TrackReq) (*types.TrackRes, error) {
 		if len(b) > maxClientLogItemLen {
 			return nil, fmt.Errorf("client log item too large")
 		}
-		// 客户端内容一律当不可信透传
-		msg := model.LogMsg{Text: "客户端日志上报", Data: item}
-		switch levelOf(item) {
-		case "error":
-			clientLogger.Error(msg)
-		case "warn":
-			clientLogger.Warn(msg)
-		default:
-			clientLogger.Info(msg)
+		// 原样透传：不加 Text/Data/attributes，不注入 source/module/traceId
+		if err := l.svcCtx.RocketMQ.SendRawJSON(l.ctx, mqwsconst.MqTopicClientLog, item); err != nil {
+			return nil, fmt.Errorf("forward client logs failed: %w", err)
 		}
 	}
-
 	return &types.TrackRes{}, nil
-}
-
-// levelOf 根据日志内 level 字段映射 beaverlog 严重级别，缺省 info
-func levelOf(item map[string]any) string {
-	switch fmt.Sprintf("%v", item["level"]) {
-	case "error", "fatal":
-		return "error"
-	case "warn", "warning":
-		return "warn"
-	default:
-		return "info"
-	}
 }

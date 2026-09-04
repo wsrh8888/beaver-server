@@ -28,7 +28,6 @@ import (
 
 type Config struct {
 	rest.RestConf
-	OtlpAddr   string
 	Mysql struct {
 		DataSource string
 	}

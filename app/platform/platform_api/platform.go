@@ -24,6 +24,7 @@ package main
 import (
 	"beaver/app/platform/platform_api/internal/config"
 	"beaver/app/platform/platform_api/internal/handler"
+	"beaver/app/platform/platform_api/internal/logic"
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/common/etcd"
 	"beaver/utils/beaverlog"
@@ -42,13 +43,21 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	beaverlog.InitFromConf(c.RestConf.ServiceConf)
-	beaverlog.SetOtlpAddr(c.OtlpAddr)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	// 客户端日志：RocketMQ → OpenSearch（索引 beaver-logs）
+	if ctx.RocketMQ != nil && ctx.OpenSearch != nil {
+		go func() {
+			if err := logic.NewClientLogConsumerLogic(ctx).StartConsumer(); err != nil {
+				fmt.Printf("客户端日志 Consumer 启动失败: %v\n", err)
+			}
+		}()
+	}
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
