@@ -107,12 +107,12 @@ services:
     depends_on:
       - rocketmq-namesrv
 
-  # ===== 客户端日志存储（扁平 JSON → OpenSearch；经 RocketMQ 解耦，无 OTel）=====
-  # platform_api Track → topic beaver_logs → Consumer → 索引 beaver-logs
-  # 与服务端 beaverlog（仅本地 logx）完全隔离，Dashboards 建索引模式 beaver-logs*
+  # ===== 日志存储（扁平 JSON → OpenSearch；经 RocketMQ 解耦，无 OTel）=====
+  # 客户端 Track / 服务端 beaverlog → topic beaver_logs → Consumer → 索引 beaver-logs
+  # 靠 projectName（beaver-desktop / beaver-server）区分，Dashboards 建索引模式 beaver-logs*
   opensearch:
     image: opensearchproject/opensearch:2.19.0
-    container_name: beaver-opensearch
+    container_name: opensearch
     restart: always
     environment:
       - discovery.type=single-node
@@ -122,16 +122,15 @@ services:
     ports:
       - "9200:9200"
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - ./opensearch:/usr/share/opensearch/data
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 12
-
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.19.0
-    container_name: beaver-dashboards
+    container_name: opensearch-dashboards
     restart: always
     environment:
       - OPENSEARCH_HOSTS=["http://opensearch:9200"]
@@ -140,7 +139,6 @@ services:
       - "5601:5601"
     depends_on:
       - opensearch
-
 # 命名卷：避免 Windows/macOS 下 bind mount 的 uid/gid 权限问题（AccessDeniedException）。
 volumes:
   opensearch-data:

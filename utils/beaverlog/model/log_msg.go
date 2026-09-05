@@ -21,7 +21,7 @@
 
 package model
 
-// LogMsg 结构化日志内容。
+// LogMsg 业务日志内容。写日志只填这两项；user_id/traceId 等公参由 logger 从 ctx 自动抽取。
 // Text 用中文短语，禁止空格；细节放 Data。
 type LogMsg struct {
 	Text string      `json:"text"`

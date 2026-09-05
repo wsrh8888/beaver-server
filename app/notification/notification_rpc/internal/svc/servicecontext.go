@@ -29,6 +29,7 @@ import (
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
+	"beaver/utils/beaverlog"
 	versionPkg "beaver/core/version"
 
 	"github.com/go-redis/redis"
@@ -55,6 +56,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 初始化 RocketMQ 客户端
 
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
+	beaverlog.SetRocketMQ(mqClient)
 
 	return &ServiceContext{
 		Config:     c,

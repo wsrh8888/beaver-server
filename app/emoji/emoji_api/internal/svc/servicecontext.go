@@ -27,6 +27,7 @@ import (
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
+	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
 	"gorm.io/gorm"
@@ -46,6 +47,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
 
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
+	beaverlog.SetRocketMQ(mqClient)
 
 	return &ServiceContext{
 		Config:     c,

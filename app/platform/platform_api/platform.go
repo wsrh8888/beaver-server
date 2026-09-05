@@ -50,7 +50,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	// 客户端日志：RocketMQ → OpenSearch（索引 beaver-logs）
+	// 客户端日志 / 服务端 beaverlog：RocketMQ → OpenSearch（索引 beaver-logs）
 	if ctx.RocketMQ != nil && ctx.OpenSearch != nil {
 		go func() {
 			if err := logic.NewClientLogConsumerLogic(ctx).StartConsumer(); err != nil {

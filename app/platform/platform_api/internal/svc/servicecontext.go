@@ -31,6 +31,7 @@ import (
 	"beaver/core/coreopensearch"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
+	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -51,6 +52,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
 	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
+	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
+	beaverlog.SetRocketMQ(mqClient)
 
 	return &ServiceContext{
 		Config:      c,
@@ -58,7 +61,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:       client,
 		FileRpc:     file.NewFile(zrpc.MustNewClient(c.FileRpc, rpcOpt)),
 		PlatformRpc: platformcli.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt)),
-		RocketMQ:    corerocketmq.InitRocketMQ(c.RocketMQ.Addr),
+		RocketMQ:    mqClient,
 		OpenSearch:  coreopensearch.New(c.OpenSearch.Addr),
 	}
 }

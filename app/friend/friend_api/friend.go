@@ -29,6 +29,8 @@ import (
 	"beaver/app/friend/friend_api/internal/handler"
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/common/etcd"
+	httpMiddleware "beaver/common/middleware/http"
+	uaMiddleware "beaver/common/middleware/ua"
 	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -46,6 +48,10 @@ func main() {
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
+
+	server.Use(httpMiddleware.TraceMiddleware)
+	server.Use(uaMiddleware.Middleware)
+	server.Use(beaverlog.Middleware)
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)

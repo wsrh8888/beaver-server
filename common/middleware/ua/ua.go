@@ -55,7 +55,7 @@ func Profile(ctx context.Context) device.UAProfile {
 func Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		uaStr := r.Header.Get("User-Agent")
-		deviceID := r.Header.Get("DeviceID")
+		deviceID := r.Header.Get("Beaver-Device-Id")
 		preciseType := device.GetDeviceType(uaStr)
 		deviceGroup := device.GetDeviceGroup(preciseType)
 		profile := device.ParseUAProfile(uaStr)

@@ -29,10 +29,12 @@ import (
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
 	utils "beaver/utils/list"
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -177,6 +179,25 @@ func (r *statusRecorder) Write(b []byte) (int, error) {
 	return r.ResponseWriter.Write(b)
 }
 
+// Hijack 透传到底层 Writer，否则 ReverseProxy 无法升级 WebSocket（会回 502）。
+func (r *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hj, ok := r.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("response writer does not support hijacking")
+	}
+	return hj.Hijack()
+}
+
+func (r *statusRecorder) Flush() {
+	if f, ok := r.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+func isWebSocketRequest(req *http.Request) bool {
+	return strings.EqualFold(req.Header.Get("Upgrade"), "websocket")
+}
+
 func bodyForLog(raw []byte) any {
 	if len(raw) == 0 {
 		return nil
@@ -315,7 +336,15 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	reverseProxy.ServeHTTP(rec, req)
+	// WebSocket 必须走原始 ResponseWriter：避免缓冲响应体，并保证 Hijack 可用
+	out := http.ResponseWriter(rec)
+	if isWebSocketRequest(req) {
+		out = res
+	}
+	reverseProxy.ServeHTTP(out, req)
+	if isWebSocketRequest(req) && rec.status == http.StatusOK {
+		rec.status = http.StatusSwitchingProtocols
+	}
 	finish("网关请求完成", "info", map[string]any{"service": service + "_api"})
 }
 

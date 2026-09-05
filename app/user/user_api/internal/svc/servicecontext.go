@@ -32,6 +32,7 @@ import (
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
+	"beaver/utils/beaverlog"
 	versionPkg "beaver/core/version"
 
 	"beaver/common/zrpc_interceptor"
@@ -58,6 +59,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	versionGen := versionPkg.NewVersionGenerator(client, mysqlDb)
 
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
+	beaverlog.SetRocketMQ(mqClient)
 
 	return &ServiceContext{
 		Config:     c,

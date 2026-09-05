@@ -39,22 +39,25 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var logger = beaverlog.New("ws_handle")
-
 func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, deviceGroup string, r *http.Request, client *ws_conn.Client) {
+	// 入口挂一次公参（含 url/query/params + traceId），后续打日志只写 Text/Data
+	ctx = beaverlog.Attach(ctx, r, req.UserID, map[string]any{
+		"device_id":          req.DeviceID,
+		"client_remote_addr": client.Conn.RemoteAddr().String(),
+		"user_agent":         r.Header.Get("User-Agent"),
+	})
+	logger := beaverlog.New("ws_handle", ctx)
+
 	for {
 		_, p, err := client.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logger.Error(model.LogMsg{
 					Text: "WebSocket连接异常关闭",
-					Data: map[string]interface{}{"userId": req.UserID, "err": err.Error()},
+					Data: map[string]interface{}{"err": err.Error()},
 				})
 			} else {
-				logger.Info(model.LogMsg{
-					Text: "WebSocket连接正常关闭",
-					Data: map[string]interface{}{"userId": req.UserID},
-				})
+				logger.Info(model.LogMsg{Text: "WebSocket连接正常关闭"})
 			}
 			break
 		}
@@ -63,26 +66,15 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		if err = json.Unmarshal(p, &wsMessage); err != nil {
 			logger.Error(model.LogMsg{
 				Text: "WS消息解析错误",
-				Data: map[string]interface{}{"userId": req.UserID, "err": err.Error()},
+				Data: map[string]interface{}{"err": err.Error()},
 			})
 			continue
-		}
-
-		source := map[string]string{
-			"platform":   req.Platform,
-			"deviceId":   req.DeviceID,
-			"remoteAddr": client.Conn.RemoteAddr().String(),
-			"userAgent":  r.Header.Get("User-Agent"),
 		}
 
 		if wsMessage.Command == "" {
 			logger.Info(model.LogMsg{
 				Text: "收到WS消息",
-				Data: map[string]interface{}{
-					"userId":  req.UserID,
-					"content": json.RawMessage(p),
-					"source":  source,
-				},
+				Data: map[string]interface{}{"content": json.RawMessage(p)},
 			})
 			continue
 		}
@@ -91,12 +83,10 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		logger.Info(model.LogMsg{
 			Text: "收到WS消息",
 			Data: map[string]interface{}{
-				"userId": req.UserID,
 				"content": map[string]interface{}{
 					"command": wsMessage.Command,
 					"content": wsMessage.Content,
 				},
-				"source": source,
 			},
 		})
 
@@ -111,7 +101,7 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 			// 仅服务端推送，客户端不应发送
 			logger.Info(model.LogMsg{
 				Text: "客户端不应发送此命令",
-				Data: map[string]interface{}{"userId": req.UserID, "command": cmd},
+				Data: map[string]interface{}{"command": cmd},
 			})
 			continue
 		}
@@ -130,14 +120,14 @@ func HandleWebSocketMessages(ctx context.Context, svcCtx *svc.ServiceContext, re
 		default:
 			logger.Info(model.LogMsg{
 				Text: "未支持的命令类型",
-				Data: map[string]interface{}{"userId": req.UserID, "command": wsMessage.Command},
+				Data: map[string]interface{}{"command": wsMessage.Command},
 			})
 		}
 
 		if handlerErr != nil {
 			logger.Error(model.LogMsg{
 				Text: "处理命令失败",
-				Data: map[string]interface{}{"userId": req.UserID, "command": cmd, "err": handlerErr.Error()},
+				Data: map[string]interface{}{"command": cmd, "err": handlerErr.Error()},
 			})
 		}
 	}

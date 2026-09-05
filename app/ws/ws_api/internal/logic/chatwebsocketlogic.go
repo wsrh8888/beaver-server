@@ -54,13 +54,21 @@ func NewChatWebsocketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cha
 	}
 }
 func (l *ChatWebsocketLogic) ChatWebsocket(req *types.WsReq, w http.ResponseWriter, r *http.Request) (resp *types.WsRes, err error) {
+	// 连接入口即挂公参 + trace，后续日志自动带上
+	l.ctx = beaverlog.Attach(l.ctx, r, req.UserID, map[string]any{
+		"device_id":          req.DeviceID,
+		"client_remote_addr": r.RemoteAddr,
+		"user_agent":         r.Header.Get("User-Agent"),
+	})
+	l.logger = beaverlog.New("chat_websocket", l.ctx)
+
 	// 1. 基础入口校验：精准识别设备
 	userAgent := r.Header.Get("User-Agent")
 	preciseType := device.GetDeviceType(userAgent)
 	if preciseType == device.DeviceUnknown {
 		l.logger.Error(model.LogMsg{
 			Text: "连接拒绝非法设备接入",
-			Data: map[string]any{"userId": req.UserID, "userAgent": userAgent},
+			Data: map[string]any{"userAgent": userAgent},
 		})
 		http.Error(w, "Illegal Device", http.StatusForbidden)
 		return nil, nil
