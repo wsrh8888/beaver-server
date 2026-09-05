@@ -55,8 +55,12 @@ func main() {
 		go func() {
 			if err := logic.NewClientLogConsumerLogic(ctx).StartConsumer(); err != nil {
 				fmt.Printf("客户端日志 Consumer 启动失败: %v\n", err)
+				return
 			}
+			fmt.Println("客户端日志 Consumer 已启动: topic=beaver_logs → index=beaver-logs")
 		}()
+	} else {
+		fmt.Println("跳过客户端日志 Consumer: RocketMQ 或 OpenSearch 未配置")
 	}
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))

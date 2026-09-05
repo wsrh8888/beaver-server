@@ -1,5 +1,5 @@
 # Webhook 优化方案 (大厂实践版)
-
+curl.exe -X DELETE "http://127.0.0.1:9200/beaver-logs"
 针对您在 `common/webhook/callback_sender.go` 中提出的问题，目前的实现虽然能通，但确实存在一些隐患。以下是大厂在处理这类需求时的通用做法和优化建议。
 
 ## 1. 核心改进点：大厂是怎么做的？

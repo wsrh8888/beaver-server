@@ -175,6 +175,7 @@ type logPayload struct {
 	Level            string `json:"level"`
 	TraceID          string `json:"traceId"`
 	UserID           string `json:"user_id"`
+	ProjectName      string `json:"project_name"`
 	DeviceID         string `json:"device_id"`
 	ClientRemoteAddr string `json:"client_remote_addr"`
 	HTTPRequestURL   string `json:"http_request_url"`
@@ -246,6 +247,7 @@ func (l *Logger) publishMQ(level string, msg model.LogMsg, userID, traceID strin
 		Module:           currentSource(),
 		Level:            level,
 		TraceID:          traceID,
+		ProjectName:      "beaver-server",
 		UserID:           userID,
 		DeviceID:         mapString(req, "device_id"),
 		ClientRemoteAddr: mapString(req, "client_remote_addr"),
@@ -257,7 +259,7 @@ func (l *Logger) publishMQ(level string, msg model.LogMsg, userID, traceID strin
 
 	go func() {
 		if err := mq.SendRawJSON(context.Background(), mqwsconst.MqTopicClientLog, payload); err != nil {
-			logx.Debugf("beaverlog mq publish failed: %v", err)
+			logx.Errorf("beaverlog mq publish failed: %v", err)
 		}
 	}()
 }
