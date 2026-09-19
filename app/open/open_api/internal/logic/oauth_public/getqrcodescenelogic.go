@@ -65,7 +65,7 @@ func (l *GetQrCodeSceneLogic) GetQrCodeScene(req *types.GetQrCodeSceneReq) (resp
 		expireIn = 0
 	}
 
-	var oauthConfig open_models.OpenAppOAuth
+	var oauthConfig open_models.OpenOAuthConfig
 	scopeStr := ""
 	if err := l.svcCtx.DB.Where("app_id = ?", qrCode.AppID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
 		scopeStr = oauthConfig.SupportedScopes

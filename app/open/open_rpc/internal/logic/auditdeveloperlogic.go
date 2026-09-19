@@ -24,14 +24,12 @@ package logic
 import (
 	"context"
 	"errors"
-	"time"
 
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
 	beaverlog "beaver/utils/beaverlog"
-	"beaver/utils/beaverlog/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -47,35 +45,15 @@ func NewAuditDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 	return &AuditDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("audit_developer", ctx)}
 }
 
+// AuditDeveloper 开发者登记已改为「登记即生效」，不再有审核流程。
+// 该接口保留仅为兼容既有调用方：只校验记录存在，不做任何状态变更。
 func (l *AuditDeveloperLogic) AuditDeveloper(in *open_rpc.AuditDeveloperReq) (*open_rpc.AuditDeveloperRes, error) {
-	if in.Status != 1 && in.Status != 2 {
-		return nil, status.Error(codes.InvalidArgument, "无效的审核状态")
-	}
-
 	var dev open_models.OpenDeveloper
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&dev).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, "申请记录不存在")
+			return nil, status.Error(codes.NotFound, "开发者记录不存在")
 		}
 		return nil, err
-	}
-	if dev.Status != 0 {
-		return nil, status.Error(codes.FailedPrecondition, "该申请已审核")
-	}
-
-	now := time.Now()
-	if err := l.svcCtx.DB.Model(&dev).Updates(map[string]interface{}{
-		"status":       int(in.Status),
-		"audit_by":     in.AuditBy,
-		"audit_time":   now.UnixMilli(),
-		"audit_remark": in.AuditRemark,
-		"updated_at":   now,
-	}).Error; err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "审核开发者失败",
-			Data: map[string]interface{}{"err": err.Error()},
-		})
-		return nil, status.Error(codes.Internal, "审核失败")
 	}
 
 	return &open_rpc.AuditDeveloperRes{}, nil

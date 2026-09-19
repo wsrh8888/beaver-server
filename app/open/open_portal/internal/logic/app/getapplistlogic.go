@@ -52,7 +52,7 @@ func (l *GetAppListLogic) GetAppList(req *types.GetAppListReq) (resp *types.GetA
 	}
 
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("owner_user_id = ?", req.UserID)
+	query := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("owner_id = ?", req.UserID)
 
 	// 3. 如果指定了状态，添加状态过滤
 	if req.Status != 0 {

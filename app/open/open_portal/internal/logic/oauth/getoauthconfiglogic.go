@@ -58,14 +58,14 @@ func (l *GetOAuthConfigLogic) GetOAuthConfig(req *types.GetOAuthConfigReq) (resp
 	}
 
 	// 验证 UserID 是否为应用所有者
-	if app.OwnerUserID != req.UserID {
+	if app.OwnerID != req.UserID {
 		return nil, errors.New("无权查看此应用")
 	}
 
 	resp = &types.GetOAuthConfigRes{}
 
 	// 查询 OAuth 配置
-	var oauth open_models.OpenAppOAuth
+	var oauth open_models.OpenOAuthConfig
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauth).Error; err != nil {
 		// 如果没有配置，返回空配置
 		return resp, nil
@@ -76,7 +76,6 @@ func (l *GetOAuthConfigLogic) GetOAuthConfig(req *types.GetOAuthConfigReq) (resp
 		resp.H5Config = &types.H5OAuthConfigInfo{
 			Enabled:      oauth.H5.Enabled,
 			RedirectURIs: oauth.H5.RedirectURIs,
-			JsSdkDomains: oauth.H5.JsSdkDomains,
 		}
 	}
 

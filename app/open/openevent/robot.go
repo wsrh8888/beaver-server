@@ -23,7 +23,7 @@ package openevent
 
 import "fmt"
 
-// 智能机器人 Robot 平台 Webhook 事件类型
+// 智能机器人 Robot 平台事件类型（经长连接下发给机器人）
 const (
 	EventIMMessageReceive       = "im.message.receive"
 	EventIMMessageReceiveGroup  = "im.message.receive.group_at"

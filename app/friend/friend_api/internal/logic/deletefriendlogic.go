@@ -23,7 +23,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"beaver/app/friend/friend_api/internal/svc"
@@ -110,33 +109,30 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				l.logger.Error(model.LogMsg{Text: "Robot 好友事件推送panic", Data: map[string]interface{}{"panic": r}})
+				l.logger.Error(model.LogMsg{Text: "机器人取关事件投递panic", Data: map[string]interface{}{"panic": r}})
 			}
 		}()
 		ctx := context.Background()
+		// 删除好友时，若其中一方是机器人，则向其投递「被取关」事件
 		res, err := l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.FriendID})
 		if err == nil && res != nil && res.Found {
-			body, _ := json.Marshal(map[string]interface{}{
-				"robot_id": req.FriendID,
-				"user_id":  req.UserID,
-			})
-			_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
-				AppId:     res.AppId,
-				EventType: openevent.EventIMBotUnfollowed,
-				EventJson: string(body),
-			})
+			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.FriendID,
+				openevent.EventIMBotUnfollowed, "", map[string]interface{}{
+					"robot_id": req.FriendID,
+					"user_id":  req.UserID,
+				}); pushErr != nil {
+				l.logger.Error(model.LogMsg{Text: "机器人取关事件投递失败", Data: map[string]interface{}{"robotId": req.FriendID, "err": pushErr.Error()}})
+			}
 		}
 		res, err = l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.UserID})
 		if err == nil && res != nil && res.Found {
-			body, _ := json.Marshal(map[string]interface{}{
-				"robot_id": req.UserID,
-				"user_id":  req.FriendID,
-			})
-			_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(ctx, &open_rpc.DispatchPlatformEventReq{
-				AppId:     res.AppId,
-				EventType: openevent.EventIMBotUnfollowed,
-				EventJson: string(body),
-			})
+			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.UserID,
+				openevent.EventIMBotUnfollowed, "", map[string]interface{}{
+					"robot_id": req.UserID,
+					"user_id":  req.FriendID,
+				}); pushErr != nil {
+				l.logger.Error(model.LogMsg{Text: "机器人取关事件投递失败", Data: map[string]interface{}{"robotId": req.UserID, "err": pushErr.Error()}})
+			}
 		}
 	}()
 

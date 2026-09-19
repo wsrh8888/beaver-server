@@ -77,21 +77,10 @@ func (l *ListOpenAppsLogic) ListOpenApps(in *open_rpc.ListOpenAppsReq) (*open_rp
 		db = db.Where("name LIKE ? OR description LIKE ?", like, like)
 	}
 	if in.OwnerUserId != "" {
-		db = db.Where("owner_user_id = ?", in.OwnerUserId)
+		db = db.Where("owner_id = ?", in.OwnerUserId)
 	}
 	if in.Status > 0 {
 		db = db.Where("status = ?", in.Status-1) // 1草稿 2已发布 3禁用 -> 库内 0/1/2
-	}
-	if in.AuditStatus > 0 {
-		db = db.Where("audit_status = ?", in.AuditStatus-1) // 1待审 2通过 3拒绝 -> 库内 0/1/2
-	}
-	switch in.CapabilityType {
-	case 1:
-		db = db.Where("enable_robot = ?", 1)
-	case 2:
-		db = db.Where("enable_webhook = ?", 1)
-	case 3:
-		db = db.Where("enable_robot = ? OR enable_webhook = ?", 1, 1)
 	}
 
 	var total int64

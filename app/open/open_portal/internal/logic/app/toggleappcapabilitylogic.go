@@ -56,67 +56,72 @@ func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapab
 
 	// 查询应用
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限操作")
 	}
 
-	// 2. 根据能力类型更新对应的开关
+	// 2. 应用表不再持有能力开关：「具备某能力」由对应能力表是否存在有效记录表达。
 	var enabled bool
 	switch req.Capability {
 	case "robot":
 		if req.Enable {
-			app.EnableRobot = 1
-			app.EnableWebhook = 1
+			if err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
+				l.logger.Error(model.LogMsg{Text: "创建 Robot 用户失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
+				return nil, errors.New("启用 Robot 失败：创建 IM 用户失败，请稍后重试")
+			}
 			enabled = true
 		} else {
-			app.EnableRobot = 0
+			if err := l.svcCtx.DB.Model(&open_models.OpenRobot{}).
+				Where("app_id = ?", app.AppID).Update("status", 0).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "停用 Robot 失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
+				return nil, errors.New("停用 Robot 失败")
+			}
 			enabled = false
 		}
 	case "oauth":
 		if req.Enable {
-			app.EnableOAuth = 1
+			var oauthConfig open_models.OpenOAuthConfig
+			err := l.svcCtx.DB.Where("app_id = ?", app.AppID).First(&oauthConfig).Error
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				if err := l.svcCtx.DB.Create(&open_models.OpenOAuthConfig{AppID: app.AppID}).Error; err != nil {
+					l.logger.Error(model.LogMsg{Text: "启用 OAuth 失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
+					return nil, errors.New("启用 OAuth 失败")
+				}
+			} else if err != nil {
+				return nil, errors.New("启用 OAuth 失败")
+			}
 			enabled = true
 		} else {
-			app.EnableOAuth = 0
+			if err := l.svcCtx.DB.Unscoped().Where("app_id = ?", app.AppID).
+				Delete(&open_models.OpenOAuthConfig{}).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "停用 OAuth 失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
+				return nil, errors.New("停用 OAuth 失败")
+			}
 			enabled = false
 		}
 	case "webhook":
-		if req.Enable {
-			app.EnableWebhook = 1
-			enabled = true
-		} else {
-			app.EnableWebhook = 0
-			enabled = false
-		}
+		return nil, errors.New("Webhook 能力已下线，平台事件改由长连接下发")
 	default:
 		return nil, errors.New("不支持的能力类型")
 	}
 
-	// 3. 保存更新
-	if err := l.svcCtx.DB.Save(&app).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "更新应用能力失败", Data: map[string]interface{}{"err": err}})
-		return nil, errors.New("更新应用能力失败")
-	}
-
-	if req.Capability == "robot" && req.Enable {
-		if err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
-			l.logger.Error(model.LogMsg{Text: "创建 Robot 用户失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
-			return nil, errors.New("启用 Robot 成功，但创建 IM 用户失败，请稍后重试")
-		}
-	}
-
-	l.logger.Info(model.LogMsg{Text: "应用能力开关已更新", Data: map[string]interface{}{"app_id": req.AppID, "capability": req.Capability, "enabled": req.Enable}})
+	l.logger.Info(model.LogMsg{Text: "应用能力已更新", Data: map[string]interface{}{"app_id": req.AppID, "capability": req.Capability, "enabled": req.Enable}})
 
 	return &types.ToggleAppCapabilityRes{
 		Enabled: enabled,
 	}, nil
 }
 
+// ensurePortalAppRobot 确保应用已有可用的 Robot 记录（RobotID 即 IM 用户ID）。
+// 昵称/头像不再由平台冗余存储，行为配置由机器人自己维护。
 func ensurePortalAppRobot(ctx context.Context, db *gorm.DB, userRpc user.User, app *open_models.OpenApp) error {
-	var robot open_models.OpenAppRobot
+	var robot open_models.OpenRobot
 	err := db.Where("app_id = ?", app.AppID).First(&robot).Error
 	if err == nil && robot.RobotID != "" {
-		return nil
+		if robot.Status == 1 {
+			return nil
+		}
+		return db.Model(&robot).Update("status", 1).Error
 	}
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -136,15 +141,10 @@ func ensurePortalAppRobot(ctx context.Context, db *gorm.DB, userRpc user.User, a
 		return fmt.Errorf("user create: %w", err)
 	}
 
-	robot = open_models.OpenAppRobot{
-		AppID:            app.AppID,
-		RobotID:          createRes.UserID,
-		RobotName:        nickName,
-		Avatar:           app.Icon,
-		Status:           1,
-		EnableSingleChat: 1,
-		EnableGroupChat:  1,
-		EnableAtMention:  1,
+	robot = open_models.OpenRobot{
+		AppID:   app.AppID,
+		RobotID: createRes.UserID,
+		Status:  1,
 	}
 	return db.Save(&robot).Error
 }

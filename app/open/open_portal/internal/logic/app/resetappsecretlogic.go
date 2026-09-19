@@ -56,7 +56,7 @@ func (l *ResetAppSecretLogic) ResetAppSecret(req *types.ResetAppSecretReq) (resp
 
 	// 更新密钥
 	result := l.svcCtx.DB.Model(&open_models.OpenApp{}).
-		Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).
+		Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).
 		Update("app_secret", newSecret)
 
 	if result.Error != nil {

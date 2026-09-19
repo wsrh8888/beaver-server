@@ -61,15 +61,16 @@ func (s *OpenBotSecurity) Scan(value interface{}) error {
 
 // OpenBotModel 推送机器人模型（群内创建的通知机器人，用于接收 Webhook 推送）
 // 例如：Jenkins、GitLab、监控告警等第三方服务推送消息到群
+//
+// 说明：显示名称取 UserModel 的资料（BotID 即 IM 用户ID），本表不再冗余存储。
 type OpenBotModel struct {
 	gorm.Model
 	AppID   string `gorm:"type:varchar(64);index;comment:开放平台应用ID（Portal 创建时写入）"`
-	Name    string `gorm:"type:varchar(100);comment:显示名称"`
-	BotID   string `gorm:"type:varchar(64);uniqueIndex;comment:Bot的UserID"`
+	BotID   string `gorm:"type:varchar(64);uniqueIndex;comment:Bot 的 IM 用户ID"`
 	GroupID string `gorm:"type:varchar(64);index;not null;comment:目标群组ID"`
 	Token   string `gorm:"type:varchar(128);uniqueIndex;comment:Webhook Token（URL参数）"`
 	Status  int    `gorm:"type:tinyint;default:1;comment:状态 1启用 0禁用"`
 
-	// 安全设置（JSON 格式，用于 Webhook 推送时校验）
+	// 安全设置（JSON）：关键词 / IP 白名单 / 加签，用于校验入站推送
 	Security OpenBotSecurity `gorm:"type:json;comment:安全设置"`
 }

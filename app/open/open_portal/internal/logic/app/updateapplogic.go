@@ -51,7 +51,7 @@ func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateA
 
 	// 查询应用并验证权限
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限")
 	}
 

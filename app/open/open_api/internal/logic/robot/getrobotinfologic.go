@@ -27,6 +27,7 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
+	"beaver/app/user/user_rpc/types/user_rpc"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -49,7 +50,7 @@ func (l *GetRobotInfoLogic) GetRobotInfo(authorization string) (resp *types.GetR
 	if err != nil {
 		return nil, err
 	}
-	if err := utils.RequireAppCapability(app, true, false); err != nil {
+	if err := utils.RequireAppEnabled(app); err != nil {
 		return nil, err
 	}
 
@@ -58,10 +59,14 @@ func (l *GetRobotInfoLogic) GetRobotInfo(authorization string) (resp *types.GetR
 		return nil, err
 	}
 
-	return &types.GetRobotInfoRes{
-		RobotID:   robot.RobotID,
-		RobotName: robot.RobotName,
-		Avatar:    robot.Avatar,
-		AppID:     app.AppID,
-	}, nil
+	// 昵称/头像不再由开放平台存储，统一取 IM 用户资料（RobotID 即 IM 用户ID）
+	resp = &types.GetRobotInfoRes{
+		RobotID: robot.RobotID,
+		AppID:   app.AppID,
+	}
+	if userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{UserID: robot.RobotID}); err == nil && userRes.UserInfo != nil {
+		resp.RobotName = userRes.UserInfo.NickName
+		resp.Avatar = userRes.UserInfo.Avatar
+	}
+	return resp, nil
 }

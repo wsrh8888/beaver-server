@@ -28,6 +28,7 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	"beaver/app/user/user_rpc/user"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -51,7 +52,7 @@ func (l *ListIncomingWebhooksLogic) ListIncomingWebhooks(req *types.ListIncoming
 	}
 
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限操作")
 	}
 
@@ -78,9 +79,27 @@ func (l *ListIncomingWebhooksLogic) ListIncomingWebhooks(req *types.ListIncoming
 		return nil, errors.New("查询失败")
 	}
 
+	// 显示名不再存储在机器人表，批量取 IM 用户资料（BotID 即 IM 用户ID）
+	names := make(map[string]string, len(bots))
+	botIDs := make([]string, 0, len(bots))
+	for i := range bots {
+		if bots[i].BotID != "" {
+			botIDs = append(botIDs, bots[i].BotID)
+		}
+	}
+	if len(botIDs) > 0 {
+		if userRes, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user.UserListInfoReq{UserIdList: botIDs}); err == nil && userRes.UserInfo != nil {
+			for id, info := range userRes.UserInfo {
+				if info != nil {
+					names[id] = info.NickName
+				}
+			}
+		}
+	}
+
 	list := make([]types.IncomingWebhookInfo, 0, len(bots))
 	for i := range bots {
-		list = append(list, toIncomingWebhookInfo(&bots[i], l.svcCtx.Config.Domain, false))
+		list = append(list, toIncomingWebhookInfo(&bots[i], l.svcCtx.Config.Domain, false, names[bots[i].BotID]))
 	}
 
 	return &types.ListIncomingWebhooksRes{

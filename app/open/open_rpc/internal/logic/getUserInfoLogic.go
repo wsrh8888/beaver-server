@@ -53,7 +53,7 @@ func (l *GetUserInfoLogic) GetUserInfo(in *open_rpc.GetUserInfoReq) (*open_rpc.G
 	if err := l.svcCtx.DB.Where("token = ?", in.AccessToken).First(&token).Error; err != nil {
 		return nil, errors.New("无效的访问令牌")
 	}
-	if time.Now().Unix() > token.ExpiresAt {
+	if time.Now().After(token.ExpiresAt) {
 		return nil, errors.New("访问令牌已过期")
 	}
 

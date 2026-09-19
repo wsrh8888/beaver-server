@@ -469,8 +469,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		l.sendOfflinePushIfNeeded(in.ConversationId, in.UserId, chatModel, recipientIdsFromUpdates(allUserConversationUpdates, in.ConversationId))
 	}()
 
-	// 6. 异步推送 Robot Webhook 事件
-	go newRobotWebhookPusher(context.Background(), l.svcCtx).tryPush(in, msg)
+	// 6. 异步推送机器人事件（投 MQ，由 open_api 的长连接消费者下发）
+	go newRobotEventPusher(context.Background(), l.svcCtx).tryPush(in, msg)
 
 	l.logger.Info(model.LogMsg{
 		Text: "消息发送成功",

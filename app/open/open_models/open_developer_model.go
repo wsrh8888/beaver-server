@@ -23,7 +23,10 @@ package open_models
 
 import "beaver/common/models"
 
-// OpenDeveloper 开发者申请表
+// OpenDeveloper 开发者登记（一个用户一份开发者身份）
+//
+// 不做审核：登记即可创建应用 —— "谁有资格创建应用"由这条记录本身表达。
+// 因此不存任何流程态字段（待审核 / 审核人 / 审核时间 / 申请说明）。
 type OpenDeveloper struct {
 	models.Model
 	UserID      string `gorm:"size:64;uniqueIndex;not null;comment:用户ID"`
@@ -31,9 +34,4 @@ type OpenDeveloper struct {
 	CompanyName string `gorm:"size:64;comment:公司名称"`
 	Phone       string `gorm:"size:11;comment:联系电话"`
 	Email       string `gorm:"size:128;comment:邮箱"`
-	Description string `gorm:"type:text;comment:申请说明"`
-	Status      int    `gorm:"default:0;comment:状态 0待审核 1已通过 2已拒绝"`
-	AuditBy     string `gorm:"size:64;comment:审核人ID"`
-	AuditTime   int64  `gorm:"comment:审核时间"`
-	AuditRemark string `gorm:"type:text;comment:审核备注"`
 }

@@ -22,7 +22,6 @@
 package main
 
 import (
-	"beaver/app/agent/agent_models"
 	"beaver/app/auth/auth_models"
 	"beaver/app/backend/backend_models"
 	"beaver/app/call/call_models"
@@ -39,7 +38,6 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
-	agentseed "beaver/database/agent"
 	fileseed "beaver/database/file"
 	openseed "beaver/database/open"
 	"beaver/database/platform"
@@ -209,16 +207,12 @@ func main() {
 				return db.AutoMigrate(
 					&open_models.OpenDeveloper{},
 					&open_models.OpenApp{},
-					&open_models.OpenAppOAuth{},
-					&open_models.OpenAppRobot{},
-					&open_models.OpenAppSecurity{},
-					&open_models.OpenAppEventSubscription{},
+					&open_models.OpenOAuthConfig{},
+					&open_models.OpenRobot{},
 					&open_models.OpenOAuthToken{},
 					&open_models.OpenOAuthCode{},
 					&open_models.OpenOAuthQrCode{},
 					&open_models.OpenBotModel{},
-					&open_models.OpenWebhookLog{},
-					&open_models.OpenRobotSendLog{},
 				)
 			},
 		},
@@ -263,19 +257,6 @@ func main() {
 				return db.AutoMigrate(&datasync_models.DatasyncModel{})
 			},
 		},
-		{
-			name: "beaver_agent",
-			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_agent?charset=utf8mb4&parseTime=True&loc=Local",
-			run: func(db *gorm.DB) error {
-				return db.AutoMigrate(
-					&agent_models.Agent{},
-					&agent_models.AgentMessage{},
-					&agent_models.AgentUserModel{},
-					&agent_models.AgentOfficialModel{},
-					&agent_models.AgentModelRole{},
-				)
-			},
-		},
 	}
 
 	for _, m := range migrations {
@@ -294,7 +275,6 @@ func main() {
 	userDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_user?charset=utf8mb4&parseTime=True&loc=Local")
 	authDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_auth?charset=utf8mb4&parseTime=True&loc=Local")
 	openDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local")
-	agentDB := coregorm.InitGorm("root:123456@tcp(127.0.0.1:3306)/beaver_agent?charset=utf8mb4&parseTime=True&loc=Local")
 	_ = fileseed.InitDefaultFiles(fileDB)
 	_ = platform.InitPlatform(platformDB)
 	if err := userseed.InitDefaultUser(userDB, authDB); err != nil {
@@ -303,10 +283,6 @@ func main() {
 	}
 	if err := openseed.InitQuickLoginApp(openDB); err != nil {
 		fmt.Printf("默认开放应用初始化失败: %v\n", err)
-		return
-	}
-	if err := agentseed.InitOfficialModels(agentDB); err != nil {
-		fmt.Printf("默认官方模型初始化失败: %v\n", err)
 		return
 	}
 

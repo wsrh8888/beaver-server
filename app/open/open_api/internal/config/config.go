@@ -42,4 +42,17 @@ type Config struct {
 	ChatRpc    zrpc.RpcClientConf
 	GroupRpc zrpc.RpcClientConf
 	OpenRpc  zrpc.RpcClientConf
+
+	// RocketMQ：接收 IM 事件（由 chat_rpc 投递）并推送给在线机器人连接
+	RocketMQ struct {
+		Addr string
+	}
+
+	// WebSocket：开放平台长连接参数
+	WebSocket struct {
+		PongWait       int // 读超时（秒）
+		WriteWait      int // 写超时（秒）
+		PingPeriod     int // 心跳间隔（秒），应小于 PongWait
+		MaxMessageSize int // 单帧最大字节
+	}
 }

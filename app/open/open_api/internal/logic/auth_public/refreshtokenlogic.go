@@ -60,7 +60,7 @@ func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (resp *type
 		})
 		return nil, errors.New("刷新令牌无效")
 	}
-	if time.Now().Unix() > oldToken.RefreshTokenExpiresAt {
+	if time.Now().After(oldToken.RefreshTokenExpiresAt) {
 		l.logger.Warn(model.LogMsg{
 			Text: "刷新令牌已过期",
 			Data: map[string]any{"appId": oldToken.AppID},

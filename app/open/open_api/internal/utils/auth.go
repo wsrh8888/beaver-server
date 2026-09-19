@@ -52,21 +52,18 @@ func ValidateAppAccessToken(db *gorm.DB, authorization string) (*open_models.Ope
 	if err := db.Where("token = ?", token).First(&record).Error; err != nil {
 		return nil, errors.New("访问令牌无效")
 	}
-	if time.Now().Unix() > record.ExpiresAt {
+	if time.Now().After(record.ExpiresAt) {
 		return nil, errors.New("访问令牌已过期")
 	}
 	return &record, nil
 }
 
-func RequireAppCapability(app *open_models.OpenApp, needRobot, needWebhook bool) error {
+// RequireAppEnabled 校验应用是否处于可用状态。
+// 「应用具备哪些能力」由各能力表（OpenOAuthConfig / OpenRobot / OpenBotModel）是否存在记录决定，
+// 应用主表不再持有能力开关。
+func RequireAppEnabled(app *open_models.OpenApp) error {
 	if app.Status != 1 {
-		return errors.New("应用未发布或已禁用")
-	}
-	if needRobot && app.EnableRobot != 1 {
-		return errors.New("应用未启用智能机器人能力")
-	}
-	if needWebhook && app.EnableWebhook != 1 {
-		return errors.New("应用未启用 Webhook 能力")
+		return errors.New("应用已禁用")
 	}
 	return nil
 }

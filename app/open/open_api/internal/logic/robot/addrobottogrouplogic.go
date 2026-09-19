@@ -23,16 +23,15 @@ package robot
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
-	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/open/openevent"
 	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 type AddRobotToGroupLogic struct {
@@ -58,16 +57,13 @@ func (l *AddRobotToGroupLogic) AddRobotToGroup(req *types.AddRobotToGroupReq, au
 	if err != nil {
 		return nil, err
 	}
-	if err := utils.RequireAppCapability(app, true, false); err != nil {
+	if err := utils.RequireAppEnabled(app); err != nil {
 		return nil, err
 	}
 
 	robot, err := utils.EnsureAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, app)
 	if err != nil {
 		return nil, err
-	}
-	if robot.EnableGroupChat != 1 {
-		return nil, errors.New("Robot 未启用群聊能力")
 	}
 
 	groupRes, err := l.svcCtx.GroupRpc.GetGroupsListByIds(l.ctx, &group_rpc.GetGroupsListByIdsReq{
@@ -87,16 +83,18 @@ func (l *AddRobotToGroupLogic) AddRobotToGroup(req *types.AddRobotToGroupReq, au
 	}
 
 	go func() {
-		body, _ := json.Marshal(map[string]interface{}{
+		body := map[string]interface{}{
 			"group_id":    req.GroupID,
 			"robot_id":    robot.RobotID,
 			"operator_id": token.AppID,
-		})
-		_, _ = l.svcCtx.OpenRpc.DispatchPlatformEvent(context.Background(), &open_rpc.DispatchPlatformEventReq{
-			AppId:     token.AppID,
-			EventType: openevent.EventIMChatMemberBotAdded,
-			EventJson: string(body),
-		})
+		}
+		if err := openevent.Push(context.Background(), l.svcCtx.RocketMQ, robot.RobotID,
+			openevent.EventIMChatMemberBotAdded, "group_"+req.GroupID, body); err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "机器人进群事件投递失败",
+				Data: map[string]any{"robotId": robot.RobotID, "groupId": req.GroupID, "err": err.Error()},
+			})
+		}
 	}()
 
 	return &types.AddRobotToGroupRes{

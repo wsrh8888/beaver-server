@@ -26,8 +26,11 @@ type TopicType string
 
 // RocketMQ Topic 常量
 const (
-	// MqTopicWs WebSocket 推送专用 Topic
+	// MqTopicWs WebSocket 推送专用 Topic（用户侧）
 	MqTopicWs TopicType = "ws_push_topic"
+	// MqTopicWsBot 机器人长连接推送专用 Topic（开放平台侧）
+	// 与用户侧 ws_push_topic 分离，用户侧 ws_api 消费者完全看不到机器人事件
+	MqTopicWsBot TopicType = "ws_bot_push_topic"
 	// MqTopicClientLog 客户端日志扁平 JSON（无 Message 信封）
 	MqTopicClientLog TopicType = "beaver_logs"
 )
@@ -39,6 +42,8 @@ type GroupType string
 const (
 	// MqGroupWs WS API 消费者组
 	MqGroupWs GroupType = "ws_api_consumer_group"
+	// MqGroupWsBot 开放平台机器人长连接消费者组
+	MqGroupWsBot GroupType = "open_api_bot_consumer_group"
 	// MqGroupClientLog 客户端日志写入 OpenSearch 的消费者组
 	MqGroupClientLog GroupType = "platform_client_log_group"
 )

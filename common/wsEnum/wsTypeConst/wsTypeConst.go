@@ -40,7 +40,11 @@ const (
 	ChatPeerReadReceive            Type = "chat_peer_read_receive"            //  服务端->客户端 对端已读序列号同步
 	ChatMessageMediaReceive        Type = "chat_message_media_receive"        //  服务端->客户端 消息媒体状态同步（语音已听等）
 	TypingSend                     Type = "typing_send"                       //  客户端->服务端 正在输入
-	TypingReceive                  Type = "typing_receive"                      //  服务端->客户端 对端正在输入
+	TypingReceive                  Type = "typing_receive"                    //  服务端->客户端 对端正在输入
+
+	// 机器人流式增量（旁路：不落库、不占 seq、可丢帧；终稿仍走 chat_conversation_message_receive）
+	ChatMessageStreamSend    Type = "chat_message_stream_send"    //  客户端->服务端 机器人上行流式增量
+	ChatMessageStreamReceive Type = "chat_message_stream_receive" //  服务端->客户端 机器人流式增量转发
 )
 const (
 	// -------------------------------------------------------------------------------------

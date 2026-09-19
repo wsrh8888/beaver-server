@@ -20,5 +20,4 @@ wt new-tab --title "Gateway API" cmd /k "cd /d !ROOT_DIR!\app\gateway\gateway_ap
   ; new-tab --title "Call API" cmd /k "cd /d !ROOT_DIR!\app\call\call_api && go run call.go" ^
   ; new-tab --title "Open API" cmd /k "cd /d !ROOT_DIR!\app\open\open_api && go run open.go" ^
   ; new-tab --title "Circle API" cmd /k "cd /d !ROOT_DIR!\app\circle\circle_api && go run circle.go" ^
-  ; new-tab --title "Agent API" cmd /k "cd /d !ROOT_DIR!\app\agent\agent_api && go run agent.go"
   

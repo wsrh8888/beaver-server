@@ -62,7 +62,7 @@ func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateA
 		AppSecret:   appSecret,
 		Name:        req.Name,
 		Description: req.Description,
-		OwnerUserID: req.UserID,
+		OwnerID: req.UserID,
 		Status:      0, // 0=草稿，1=已发布，2=禁用
 		Icon:        req.Icon,
 	}

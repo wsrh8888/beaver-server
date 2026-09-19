@@ -71,36 +71,6 @@ type CreateAppRes struct {
 	AppSecret string `json:"appSecret"`
 }
 
-type CreateEventSubscriptionReq struct {
-	AppID      string `json:"appId"`               // string 应用 ID
-	EventType  string `json:"eventType"`           // string 事件类型，如 im.message.receive
-	TargetURL  string `json:"targetUrl"`           // string Webhook 推送目标 URL
-	Secret     string `json:"secret,optional"`     // string HMAC 签名密钥，可选
-	RetryCount int    `json:"retryCount,optional"` // int 推送失败重试次数，默认 3
-	Timeout    int    `json:"timeout,optional"`    // int 推送超时秒数，默认 5
-	UserID     string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
-}
-
-type CreateEventSubscriptionRes struct {
-	Subscription CreateEventSubscriptionResSubscription `json:"subscription"` // 创建的订阅信息
-}
-
-type CreateEventSubscriptionResSubscription struct {
-	ID             string `json:"id"`                      // string 订阅 ID
-	AppID          string `json:"appId"`                   // string 应用 ID
-	EventType      string `json:"eventType"`               // string 事件类型
-	TargetURL      string `json:"targetUrl"`               // string Webhook 推送目标 URL
-	Secret         string `json:"secret"`                  // string 签名密钥
-	Status         int    `json:"status"`                  // int 0 未就绪/禁用 1 启用
-	VerifyStatus   int    `json:"verifyStatus"`            // int 0 待验证 1 已通过 2 失败
-	LastError      string `json:"lastError,optional"`      // string 失败原因
-	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间
-	RetryCount     int    `json:"retryCount"`              // int 重试次数
-	Timeout        int    `json:"timeout"`                 // int 超时秒数
-	CreatedAt      int64  `json:"createdAt"`               // int64 创建时间 Unix 秒
-	UpdatedAt      int64  `json:"updatedAt"`               // int64 更新时间 Unix 秒
-}
-
 type CreateIncomingWebhookReq struct {
 	AppID   string `json:"appId"`            // string 应用 ID
 	GroupID string `json:"groupId"`          // string 目标群组 ID
@@ -130,14 +100,6 @@ type DeleteAppReq struct {
 }
 
 type DeleteAppRes struct {
-}
-
-type DeleteEventSubscriptionReq struct {
-	ID     string `json:"id"`               // string 订阅 ID
-	UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
-}
-
-type DeleteEventSubscriptionRes struct {
 }
 
 type DeleteIncomingWebhookReq struct {
@@ -218,32 +180,6 @@ type GetDeveloperListRes struct {
 	List  []DeveloperInfo `json:"list"`
 }
 
-type GetEventLogsReq struct {
-	AppID          string `form:"appId"`                   // string 应用 ID
-	SubscriptionID uint64 `form:"subscriptionId,optional"` // uint64 订阅 ID 筛选，可选
-	Page           int    `form:"page,default=1"`          // int 页码，从 1 开始
-	PageSize       int    `form:"pageSize,default=20"`     // int 每页条数
-	UserID         string `header:"Beaver-User-Id"`        // string 当前开发者用户 ID
-}
-
-type GetEventLogsRes struct {
-	Total int64                 `json:"total"` // int64 总条数
-	List  []GetEventLogsResItem `json:"list"`  // 日志列表
-}
-
-type GetEventLogsResItem struct {
-	ID           uint64 `json:"id"`                // uint64 日志 ID
-	EventID      string `json:"eventId"`           // string 事件 ID
-	EventType    string `json:"eventType"`         // string 事件类型
-	TargetURL    string `json:"targetUrl"`         // string 推送目标 URL
-	ResponseCode int    `json:"responseCode"`      // int HTTP 响应状态码
-	CostMs       int64  `json:"costMs"`            // int64 推送耗时毫秒
-	RetryCount   int    `json:"retryCount"`        // int 重试次数
-	Status       int    `json:"status"`            // int 状态：0 失败 1 成功
-	ErrorMsg     string `json:"errorMsg,optional"` // string 错误信息，可选
-	CreatedAt    int64  `json:"createdAt"`         // int64 创建时间 Unix 秒
-}
-
 type GetOAuthConfigReq struct {
 	AppID  string `form:"appId"`
 	UserID string `header:"Beaver-User-Id"`
@@ -264,15 +200,6 @@ type GetRobotConfigRes struct {
 	Config RobotConfigInfo `json:"config"` // Robot 配置
 }
 
-type GetSecurityConfigReq struct {
-	AppID  string `form:"appId"`
-	UserID string `header:"Beaver-User-Id"`
-}
-
-type GetSecurityConfigRes struct {
-	Config SecurityConfigInfo `json:"config"`
-}
-
 type GetVersionListReq struct {
 	AppID    string `form:"appId"`
 	Page     int    `form:"page,default=1"`
@@ -288,7 +215,6 @@ type GetVersionListRes struct {
 type H5OAuthConfigInfo struct {
 	Enabled      bool     `json:"enabled"`
 	RedirectURIs []string `json:"redirectUris"`
-	JsSdkDomains []string `json:"jsSdkDomains"` // JS-SDK 安全域名
 	EnablePKCE   bool     `json:"enablePKCE"`
 }
 
@@ -303,35 +229,6 @@ type IncomingWebhookInfo struct {
 	WebhookURL string `json:"webhookUrl"`      // string Webhook 调用地址
 	Status     int    `json:"status"`          // int 状态：0 禁用 1 启用
 	CreatedAt  int64  `json:"createdAt"`       // int64 创建时间 Unix 秒
-}
-
-type ListEventSubscriptionsReq struct {
-	AppID     string `form:"appId"`               // string 应用 ID
-	EventType string `form:"eventType,optional"`  // string 事件类型筛选，可选
-	Page      int    `form:"page,default=1"`      // int 页码，从 1 开始
-	PageSize  int    `form:"pageSize,default=20"` // int 每页条数
-	UserID    string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
-}
-
-type ListEventSubscriptionsRes struct {
-	Total int64                           `json:"total"` // int64 总条数
-	List  []ListEventSubscriptionsResItem `json:"list"`  // 订阅列表
-}
-
-type ListEventSubscriptionsResItem struct {
-	ID             string `json:"id"`                      // string 订阅 ID
-	AppID          string `json:"appId"`                   // string 应用 ID
-	EventType      string `json:"eventType"`               // string 事件类型
-	TargetURL      string `json:"targetUrl"`               // string Webhook 推送目标 URL
-	Secret         string `json:"secret"`                  // string 签名密钥
-	Status         int    `json:"status"`                  // int 0 未就绪/禁用 1 启用
-	VerifyStatus   int    `json:"verifyStatus"`            // int 0 待验证 1 已通过 2 失败
-	LastError      string `json:"lastError,optional"`      // string 失败原因
-	LastVerifiedAt int64  `json:"lastVerifiedAt,optional"` // int64 上次验证通过时间
-	RetryCount     int    `json:"retryCount"`              // int 重试次数
-	Timeout        int    `json:"timeout"`                 // int 超时秒数
-	CreatedAt      int64  `json:"createdAt"`               // int64 创建时间 Unix 秒
-	UpdatedAt      int64  `json:"updatedAt"`               // int64 更新时间 Unix 秒
 }
 
 type ListIncomingWebhooksReq struct {
@@ -437,12 +334,6 @@ type ScopeInfo struct {
 	Required    bool   `json:"required"`    // 是否需要审核
 }
 
-type SecurityConfigInfo struct {
-	AppID          string   `json:"appId"`
-	IPWhitelist    []string `json:"ipWhitelist"`    // IP白名单
-	TrustedDomains []string `json:"trustedDomains"` // H5可信域名
-}
-
 type SubmitVersionReviewReq struct {
 	VersionID string `json:"versionId"`
 	UserID    string `header:"Beaver-User-Id"`
@@ -483,19 +374,6 @@ type UpdateAppScopesReq struct {
 type UpdateAppScopesRes struct {
 }
 
-type UpdateEventSubscriptionReq struct {
-	ID         string `json:"id"`                  // string 订阅 ID
-	TargetURL  string `json:"targetUrl,optional"`  // string 新的 Webhook URL，可选
-	Secret     string `json:"secret,optional"`     // string 新的签名密钥，可选
-	Status     *int   `json:"status,optional"`     // int 状态：0 禁用 1 启用，可选
-	RetryCount *int   `json:"retryCount,optional"` // int 重试次数，可选
-	Timeout    *int   `json:"timeout,optional"`    // int 超时秒数，可选
-	UserID     string `header:"Beaver-User-Id"`    // string 当前开发者用户 ID
-}
-
-type UpdateEventSubscriptionRes struct {
-}
-
 type UpdateOAuthConfigReq struct {
 	AppID     string `json:"appId"`
 	OAuthType string `json:"oauthType"` // h5 | desktop | mobile
@@ -520,16 +398,6 @@ type UpdateRobotConfigReq struct {
 }
 
 type UpdateRobotConfigRes struct {
-}
-
-type UpdateSecurityConfigReq struct {
-	AppID          string   `json:"appId"`
-	IPWhitelist    []string `json:"ipWhitelist,optional"`    // IP白名单
-	TrustedDomains []string `json:"trustedDomains,optional"` // H5可信域名
-	UserID         string   `header:"Beaver-User-Id"`
-}
-
-type UpdateSecurityConfigRes struct {
 }
 
 type VersionInfo struct {

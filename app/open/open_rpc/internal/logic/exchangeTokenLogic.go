@@ -64,7 +64,7 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 	}
 
 	// 3. 检查授权码是否过期
-	if time.Now().Unix() > authCode.ExpiresAt {
+	if time.Now().After(authCode.ExpiresAt) {
 		return nil, errors.New("授权码已过期")
 	}
 
@@ -89,8 +89,8 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 
 	// 7. 保存 Access Token
 	now := time.Now()
-	expiresAt := now.Add(2 * time.Hour).Unix()                    // access_token 2小时过期
-	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour).Unix() // refresh_token 180天过期
+	expiresAt := now.Add(2 * time.Hour)                    // access_token 2小时过期
+	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour) // refresh_token 180天过期
 	tokenRecord := open_models.OpenOAuthToken{
 		AppID:                 in.AppId,
 		Token:                 accessToken,

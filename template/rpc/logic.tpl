@@ -5,20 +5,20 @@ import (
 
 	{{.imports}}
 
-	
+	beaverlog "beaver/utils/beaverlog"
 )
 
 type {{.logicName}} struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	logx.Logger
+	logger *beaverlog.Logger
 }
 
-func New{{.logicName}}(ctx context.Context,svcCtx *svc.ServiceContext) *{{.logicName}} {
+func New{{.logicName}}(ctx context.Context, svcCtx *svc.ServiceContext) *{{.logicName}} {
 	return &{{.logicName}}{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		logger: beaverlog.New("{{.logicName}}", ctx),
 	}
 }
 {{.functions}}

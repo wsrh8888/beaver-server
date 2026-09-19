@@ -56,7 +56,7 @@ func (l *ValidateTokenLogic) ValidateToken(in *open_rpc.ValidateTokenReq) (*open
 	}
 
 	// 检查 Token 是否过期
-	valid := time.Now().Unix() <= token.ExpiresAt
+	valid := !time.Now().After(token.ExpiresAt)
 
 	return &open_rpc.ValidateTokenRes{
 		Valid:  valid,

@@ -63,7 +63,7 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 		return nil, errors.New("应用不存在或未启用")
 	}
 
-	var oauthConfig open_models.OpenAppOAuth
+	var oauthConfig open_models.OpenOAuthConfig
 	scope := ""
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
 		scope = oauthConfig.SupportedScopes
@@ -83,7 +83,7 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 		AppID:     req.AppID,
 		UserID:    req.UserID,
 		Scope:     scope,
-		ExpiresAt: time.Now().Add(ttl).Unix(),
+		ExpiresAt: time.Now().Add(ttl),
 		Scene:     "h5_sso",
 	}
 	if err := l.svcCtx.DB.Create(&record).Error; err != nil {

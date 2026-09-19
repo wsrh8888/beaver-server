@@ -24,6 +24,7 @@ package main
 import (
 	"beaver/app/open/open_api/internal/config"
 	"beaver/app/open/open_api/internal/handler"
+	wssvc "beaver/app/open/open_api/internal/logic/ws"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/common/etcd"
 	commonMiddleware "beaver/common/middleware/http"
@@ -52,6 +53,17 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	// 启动机器人事件消费者：chat_rpc 把 IM 事件投到 ws_bot_push_topic，
+	// 本服务消费后推给持有该机器人长连接的实例。
+	if ctx.RocketMQ != nil {
+		mqConsumer := wssvc.NewMqConsumerLogic(ctx)
+		go func() {
+			if err := mqConsumer.StartConsumer(); err != nil {
+				fmt.Printf("机器人事件消费者启动失败: %v\n", err)
+			}
+		}()
+	}
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

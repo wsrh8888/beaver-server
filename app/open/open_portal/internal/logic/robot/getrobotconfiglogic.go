@@ -56,11 +56,8 @@ func (l *GetRobotConfigLogic) GetRobotConfig(req *types.GetRobotConfigReq) (resp
 	}
 
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限操作")
-	}
-	if app.EnableRobot != 1 {
-		return nil, errors.New("应用未启用智能机器人能力，请先在应用能力中开启 robot")
 	}
 
 	robot, err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app)
@@ -68,28 +65,25 @@ func (l *GetRobotConfigLogic) GetRobotConfig(req *types.GetRobotConfigReq) (resp
 		return nil, errors.New("获取 Robot 配置失败")
 	}
 
+	config := types.RobotConfigInfo{
+		AppID:   req.AppID,
+		RobotID: robot.RobotID,
+		Status:  robot.Status,
+	}
+	// 昵称/头像取 IM 用户资料（RobotID 即 IM 用户ID）。
+	// 欢迎语/命令前缀/单聊群聊开关不再由平台存储，由机器人自己维护。
+	if userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user.UserInfoReq{UserID: robot.RobotID}); err == nil && userRes.UserInfo != nil {
+		config.RobotName = userRes.UserInfo.NickName
+		config.Avatar = userRes.UserInfo.Avatar
+	}
+
 	return &types.GetRobotConfigRes{
-		Config: robotConfigFromModel(req.AppID, robot),
+		Config: config,
 	}, nil
 }
 
-func robotConfigFromModel(appID string, robot *open_models.OpenAppRobot) types.RobotConfigInfo {
-	return types.RobotConfigInfo{
-		AppID:            appID,
-		RobotID:          robot.RobotID,
-		RobotName:        robot.RobotName,
-		Avatar:           robot.Avatar,
-		WelcomeMessage:   robot.WelcomeMessage,
-		CommandPrefix:    robot.CommandPrefix,
-		EnableSingleChat: robot.EnableSingleChat == 1,
-		EnableGroupChat:  robot.EnableGroupChat == 1,
-		EnableAtMention:  robot.EnableAtMention == 1,
-		Status:           robot.Status,
-	}
-}
-
-func ensurePortalAppRobot(ctx context.Context, db *gorm.DB, userRpc user.User, app *open_models.OpenApp) (*open_models.OpenAppRobot, error) {
-	var robot open_models.OpenAppRobot
+func ensurePortalAppRobot(ctx context.Context, db *gorm.DB, userRpc user.User, app *open_models.OpenApp) (*open_models.OpenRobot, error) {
+	var robot open_models.OpenRobot
 	err := db.Where("app_id = ?", app.AppID).First(&robot).Error
 	if err == nil && robot.RobotID != "" {
 		return &robot, nil
@@ -112,16 +106,10 @@ func ensurePortalAppRobot(ctx context.Context, db *gorm.DB, userRpc user.User, a
 		return nil, fmt.Errorf("user create: %w", err)
 	}
 
-	robot = open_models.OpenAppRobot{
-		AppID:            app.AppID,
-		RobotID:          createRes.UserID,
-		RobotName:        nickName,
-		Avatar:           app.Icon,
-		Status:           1,
-		EnableSingleChat: 1,
-		EnableGroupChat:  1,
-		EnableAtMention:  1,
-		CommandPrefix:    "/",
+	robot = open_models.OpenRobot{
+		AppID:   app.AppID,
+		RobotID: createRes.UserID,
+		Status:  1,
 	}
 	if err := db.Save(&robot).Error; err != nil {
 		return nil, err

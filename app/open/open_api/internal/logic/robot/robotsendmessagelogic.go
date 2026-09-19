@@ -31,10 +31,7 @@ import (
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_api/internal/utils"
-	"beaver/app/open/open_models"
 	beaverlog "beaver/utils/beaverlog"
-
-	"gorm.io/gorm"
 )
 
 type RobotSendMessageLogic struct {
@@ -56,7 +53,7 @@ func (l *RobotSendMessageLogic) RobotSendMessage(req *types.RobotSendMessageReq,
 	if err != nil {
 		return nil, err
 	}
-	if err := utils.RequireAppCapability(app, true, false); err != nil {
+	if err := utils.RequireAppEnabled(app); err != nil {
 		return nil, err
 	}
 
@@ -67,19 +64,6 @@ func (l *RobotSendMessageLogic) RobotSendMessage(req *types.RobotSendMessageReq,
 
 	if req.ConversationID == "" || req.Content == "" {
 		return nil, errors.New("conversationId 和 content 不能为空")
-	}
-
-	if req.IdempotentKey != "" {
-		var existing open_models.OpenRobotSendLog
-		if err := l.svcCtx.DB.Where("app_id = ? AND idempotent_key = ?", token.AppID, req.IdempotentKey).
-			First(&existing).Error; err == nil {
-			return &types.RobotSendMessageRes{
-				MessageID: existing.MessageID,
-				SendTime:  existing.CreatedAt.Unix(),
-			}, nil
-		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("幂等查询失败")
-		}
 	}
 
 	msgType := req.MsgType
@@ -123,15 +107,6 @@ func (l *RobotSendMessageLogic) RobotSendMessage(req *types.RobotSendMessageReq,
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	if req.IdempotentKey != "" {
-		_ = l.svcCtx.DB.Create(&open_models.OpenRobotSendLog{
-			AppID:          token.AppID,
-			IdempotentKey:  req.IdempotentKey,
-			MessageID:      chatRes.MessageId,
-			ConversationID: req.ConversationID,
-		}).Error
 	}
 
 	return &types.RobotSendMessageRes{

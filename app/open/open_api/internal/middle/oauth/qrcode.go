@@ -175,7 +175,7 @@ func (q *Qrcode) FindConfirmedCode(sceneID string, qrCode *open_models.OpenOAuth
 }
 
 func (q *Qrcode) createOAuthCode(appID, userID, scene, sceneRef string) error {
-	var oauthConfig open_models.OpenAppOAuth
+	var oauthConfig open_models.OpenOAuthConfig
 	scope := ""
 	if err := q.db.Where("app_id = ?", appID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
 		scope = oauthConfig.SupportedScopes
@@ -194,7 +194,7 @@ func (q *Qrcode) createOAuthCode(appID, userID, scene, sceneRef string) error {
 		AppID:     appID,
 		UserID:    userID,
 		Scope:     scope,
-		ExpiresAt: time.Now().Add(oauthCodeTTL).Unix(),
+		ExpiresAt: time.Now().Add(oauthCodeTTL),
 		Scene:     scene,
 		State:     sceneRef,
 	}

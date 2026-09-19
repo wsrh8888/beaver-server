@@ -51,35 +51,22 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(in *open_rpc.ApplyDeveloperReq) (*o
 		return nil, status.Error(codes.InvalidArgument, "用户ID不能为空")
 	}
 
+	// 开发者登记不做审核：提交即生效，已有记录则覆盖登记信息。
 	var existing open_models.OpenDeveloper
 	err := l.svcCtx.DB.Where("user_id = ?", in.UserId).First(&existing).Error
 	if err == nil {
-		switch existing.Status {
-		case 1:
-			return nil, status.Error(codes.AlreadyExists, "您已经是认证开发者")
-		case 0:
-			return nil, status.Error(codes.AlreadyExists, "申请正在审核中")
-		case 2:
-			existing.RealName = in.RealName
-			existing.CompanyName = in.CompanyName
-			existing.Phone = in.Phone
-			existing.Email = in.Email
-			existing.Description = in.Description
-			existing.Status = 0
-			existing.AuditBy = ""
-			existing.AuditTime = 0
-			existing.AuditRemark = ""
-			if err := l.svcCtx.DB.Save(&existing).Error; err != nil {
-				l.logger.Error(model.LogMsg{
-					Text: "重新申请开发者失败",
-					Data: map[string]interface{}{"err": err.Error()},
-				})
-				return nil, status.Error(codes.Internal, "申请失败")
-			}
-			return &open_rpc.ApplyDeveloperRes{Id: uint64(existing.Id)}, nil
-		default:
-			return nil, status.Error(codes.FailedPrecondition, "申请状态异常")
+		existing.RealName = in.RealName
+		existing.CompanyName = in.CompanyName
+		existing.Phone = in.Phone
+		existing.Email = in.Email
+		if err := l.svcCtx.DB.Save(&existing).Error; err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "更新开发者登记失败",
+				Data: map[string]interface{}{"err": err.Error()},
+			})
+			return nil, status.Error(codes.Internal, "提交失败")
 		}
+		return &open_rpc.ApplyDeveloperRes{Id: uint64(existing.Id)}, nil
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
@@ -91,15 +78,13 @@ func (l *ApplyDeveloperLogic) ApplyDeveloper(in *open_rpc.ApplyDeveloperReq) (*o
 		CompanyName: in.CompanyName,
 		Phone:       in.Phone,
 		Email:       in.Email,
-		Description: in.Description,
-		Status:      0,
 	}
 	if err := l.svcCtx.DB.Create(&dev).Error; err != nil {
 		l.logger.Error(model.LogMsg{
-			Text: "创建开发者申请失败",
+			Text: "创建开发者登记失败",
 			Data: map[string]interface{}{"err": err.Error()},
 		})
-		return nil, status.Error(codes.Internal, "申请失败")
+		return nil, status.Error(codes.Internal, "提交失败")
 	}
 
 	return &open_rpc.ApplyDeveloperRes{Id: uint64(dev.Id)}, nil

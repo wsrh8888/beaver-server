@@ -36,11 +36,8 @@ func toDeveloperItem(dev open_models.OpenDeveloper) *open_rpc.DeveloperItem {
 		CompanyName: dev.CompanyName,
 		Phone:       dev.Phone,
 		Email:       dev.Email,
-		Description: dev.Description,
-		Status:      int32(dev.Status),
-		AuditBy:     dev.AuditBy,
-		AuditTime:   dev.AuditTime,
-		AuditRemark: dev.AuditRemark,
-		CreatedAt:   time.Time(dev.CreatedAt).UnixMilli(),
+		// 开发者登记即生效，不再有审核流程，状态恒为「已通过」。
+		Status:    1,
+		CreatedAt: time.Time(dev.CreatedAt).UnixMilli(),
 	}
 }

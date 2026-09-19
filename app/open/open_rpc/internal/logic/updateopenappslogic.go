@@ -51,22 +51,13 @@ func (l *UpdateOpenAppsLogic) UpdateOpenApps(in *open_rpc.UpdateOpenAppsReq) (*o
 	}
 
 	now := time.Now()
-	updates := map[string]interface{}{"updated_at": now, "last_modified_by": in.OperatorId}
+	updates := map[string]interface{}{"updated_at": now}
 
 	switch in.Action {
-	case 1: // 审核通过
-		updates["audit_status"] = 1
+	case 1, 4: // 审核通过 / 启用 -> 启用
 		updates["status"] = 1
-		updates["audited_by"] = in.OperatorId
-		updates["audited_at"] = now
-	case 2: // 审核拒绝
-		updates["audit_status"] = 2
-		updates["audited_by"] = in.OperatorId
-		updates["audited_at"] = now
-	case 3: // 禁用
-		updates["status"] = 2
-	case 4: // 启用（已发布）
-		updates["status"] = 1
+	case 2, 3: // 审核拒绝 / 禁用 -> 禁用
+		updates["status"] = 0
 	default:
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")
 	}

@@ -29,10 +29,8 @@ import (
 	auth_public "beaver/app/open/open_portal/internal/handler/auth_public"
 	bot "beaver/app/open/open_portal/internal/handler/bot"
 	developer "beaver/app/open/open_portal/internal/handler/developer"
-	event "beaver/app/open/open_portal/internal/handler/event"
 	oauth "beaver/app/open/open_portal/internal/handler/oauth"
 	robot "beaver/app/open/open_portal/internal/handler/robot"
-	security "beaver/app/open/open_portal/internal/handler/security"
 	version "beaver/app/open/open_portal/internal/handler/version"
 	"beaver/app/open/open_portal/internal/svc"
 
@@ -202,44 +200,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
-					// 创建事件订阅
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/event/v1/create",
-					Handler: event.CreateEventSubscriptionHandler(serverCtx),
-				},
-				{
-					// 删除事件订阅
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/event/v1/delete",
-					Handler: event.DeleteEventSubscriptionHandler(serverCtx),
-				},
-				{
-					// 获取事件订阅列表
-					Method:  http.MethodGet,
-					Path:    "/api/open_portal/event/v1/list",
-					Handler: event.ListEventSubscriptionsHandler(serverCtx),
-				},
-				{
-					// 获取事件推送日志
-					Method:  http.MethodGet,
-					Path:    "/api/open_portal/event/v1/logs",
-					Handler: event.GetEventLogsHandler(serverCtx),
-				},
-				{
-					// 更新事件订阅
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/event/v1/update",
-					Handler: event.UpdateEventSubscriptionHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
-			[]rest.Route{
-				{
 					// 获取 OAuth 配置
 					Method:  http.MethodGet,
 					Path:    "/api/open_portal/oauth/v1/config",
@@ -270,26 +230,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/robot/v1/config_update",
 					Handler: robot.UpdateRobotConfigHandler(serverCtx),
-				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
-			[]rest.Route{
-				{
-					// 获取安全配置
-					Method:  http.MethodGet,
-					Path:    "/api/open_portal/security/v1/config",
-					Handler: security.GetSecurityConfigHandler(serverCtx),
-				},
-				{
-					// 更新安全配置
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/security/v1/config_update",
-					Handler: security.UpdateSecurityConfigHandler(serverCtx),
 				},
 			}...,
 		),

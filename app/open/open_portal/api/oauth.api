@@ -22,7 +22,6 @@ type (
 	H5OAuthConfigInfo {
 		Enabled      bool     `json:"enabled"` // bool 是否启用 H5 OAuth
 		RedirectURIs []string `json:"redirectUris"` // []string 授权回调地址列表
-		JsSdkDomains []string `json:"jsSdkDomains"` // []string JS-SDK 安全域名列表
 		EnablePKCE   bool     `json:"enablePKCE"` // bool 是否启用 PKCE
 	}
 	DesktopOAuthConfigInfo {

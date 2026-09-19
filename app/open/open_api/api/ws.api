@@ -1,0 +1,54 @@
+syntax = "v1"
+
+// ==================== 开放平台长连接（WebSocket）====================
+//
+// 接入方（agent / OpenClaw / 自研服务）通过此端点建立长连接，接收 IM 事件。
+//
+// 鉴权：连接时在 URL query 携带 appId + ticket
+//   ticket = POST /api/open/auth_public/v1/token 换来的 accessToken
+//   服务端据 appId 找到对应的机器人（OpenRobot），该连接即代表这个机器人
+//
+// 收发解耦（与参考实现一致）：
+//   接收 —— 走本连接（服务端主动推送事件）
+//   回复 —— 统一走 OAPI（POST /api/open/robot/v1/send_message），不走本连接
+//
+// 连接建立后的帧：
+//   服务端 → 客户端  事件帧（JSON）
+//   客户端 → 服务端  PING 心跳，服务端回 PONG
+//
+// 事件帧示例（im.message.receive）：
+//   {
+//     "command": "im.message.receive",
+//     "content": {
+//       "data": {
+//         "type": "1",
+//         "conversationId": "private_userA_userB",
+//         "body": {
+//           "msgId": "xxx",
+//           "senderId": "user_xxx",
+//           "msgType": "text",
+//           "content": "你好"
+//         }
+//       }
+//     }
+//   }
+
+type (
+	// 建立长连接（WebSocket 升级）
+	OpenWsReq {
+		AppID  string `form:"appId"`  // string 应用 ID
+		Ticket string `form:"ticket"` // string 访问令牌（auth_public/v1/token 获取）
+	}
+
+	OpenWsRes {
+	}
+)
+
+@server (
+	group: ws
+)
+service open {
+	@doc "建立长连接（WebSocket 升级；本端点不返回 JSON，升级后走 WS 帧协议）"
+	@handler OpenWs
+	get /api/open/ws/v1/connect (OpenWsReq) returns (OpenWsRes)
+}

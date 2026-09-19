@@ -107,7 +107,7 @@ func findOAuthCode(db *gorm.DB, appID, code string) (*open_models.OpenOAuthCode,
 	if record.Used {
 		return nil, errors.New("授权码已使用")
 	}
-	if time.Now().Unix() > record.ExpiresAt {
+	if time.Now().After(record.ExpiresAt) {
 		return nil, errors.New("授权码已过期")
 	}
 	return &record, nil

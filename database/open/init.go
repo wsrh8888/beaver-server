@@ -54,8 +54,6 @@ func InitDefaultDeveloper(db *gorm.DB) error {
 			RealName:    defaultOwnerRealName,
 			CompanyName: "Beaver",
 			Email:       defaultOwnerEmail,
-			Description: "系统初始化默认开发者",
-			Status:      1,
 		}
 		if err := db.Create(&developer).Error; err != nil {
 			return fmt.Errorf("创建默认开发者失败: %w", err)
@@ -65,13 +63,6 @@ func InitDefaultDeveloper(db *gorm.DB) error {
 	}
 	if err != nil {
 		return fmt.Errorf("查询默认开发者失败: %w", err)
-	}
-	if developer.Status != 1 {
-		if err := db.Model(&developer).Update("status", 1).Error; err != nil {
-			return fmt.Errorf("更新默认开发者状态失败: %w", err)
-		}
-		log.Printf("默认开发者已审核通过: userId=%s", defaultOwnerUserID)
-		return nil
 	}
 	log.Printf("默认开发者已存在: userId=%s", defaultOwnerUserID)
 	return nil
@@ -91,14 +82,8 @@ func InitQuickLoginApp(db *gorm.DB) error {
 			AppSecret:   defaultAppSecret,
 			Name:        defaultAppName,
 			Description: defaultAppDesc,
-			OwnerUserID: defaultOwnerUserID,
-			AppType:     1,
-			Category:    "tool",
-			Status:      1, // 已发布
-			AuditStatus: 1, // 已通过
-			EnableOAuth: 1,
-			Scheme:      defaultDesktopScheme,
-			Version:     1,
+			OwnerID:     defaultOwnerUserID,
+			Status:      1,
 		}
 		if err := db.Create(&app).Error; err != nil {
 			return fmt.Errorf("创建默认应用失败: %w", err)
@@ -116,15 +101,6 @@ func InitQuickLoginApp(db *gorm.DB) error {
 		}
 		if app.Status != 1 {
 			updates["status"] = 1
-		}
-		if app.AuditStatus != 1 {
-			updates["audit_status"] = 1
-		}
-		if app.EnableOAuth != 1 {
-			updates["enable_oauth"] = 1
-		}
-		if app.Scheme == "" {
-			updates["scheme"] = defaultDesktopScheme
 		}
 		if len(updates) > 0 {
 			if err := db.Model(&app).Updates(updates).Error; err != nil {
@@ -153,17 +129,12 @@ func InitQuickLoginApp(db *gorm.DB) error {
 			"http://127.0.0.1:4012/",
 			"https://fe.wsrh8888.com/open/",
 		},
-		JsSdkDomains: []string{
-			"http://localhost:4012",
-			"http://127.0.0.1:4012",
-			"https://fe.wsrh8888.com",
-		},
 	}
 
-	var oauth open_models.OpenAppOAuth
+	var oauth open_models.OpenOAuthConfig
 	err = db.Where("app_id = ?", defaultAppID).First(&oauth).Error
 	if err == gorm.ErrRecordNotFound {
-		oauth = open_models.OpenAppOAuth{
+		oauth = open_models.OpenOAuthConfig{
 			AppID:           defaultAppID,
 			SupportedScopes: string(scopes),
 			AccessTokenTTL:  7200,
@@ -195,10 +166,6 @@ func InitQuickLoginApp(db *gorm.DB) error {
 	} else {
 		if len(oauth.H5.RedirectURIs) == 0 {
 			oauth.H5.RedirectURIs = h5Cfg.RedirectURIs
-			needSave = true
-		}
-		if len(oauth.H5.JsSdkDomains) == 0 {
-			oauth.H5.JsSdkDomains = h5Cfg.JsSdkDomains
 			needSave = true
 		}
 	}

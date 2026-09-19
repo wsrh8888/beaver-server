@@ -1,7 +1,8 @@
 syntax = "v1"
 
 // ==================== Robot 接口（智能机器人） ====================
-// Robot 通过 Webhook 收消息，通过此 API 回消息到 IM
+// Robot 通过**长连接**接收 IM 事件（连接端点由长连接服务提供），
+// 通过此 API 把回复发回 IM。
 
 type (
 	// 获取 Robot 自身信息
@@ -10,8 +11,8 @@ type (
 
 	GetRobotInfoRes {
 		RobotID   string `json:"robotId"` // string Robot 在 IM 中的用户 ID，用于 @ 提及
-		RobotName string `json:"robotName"` // string Robot 昵称
-		Avatar    string `json:"avatar,optional"` // string 头像 URL，可选
+		RobotName string `json:"robotName"` // string Robot 昵称（取自用户资料）
+		Avatar    string `json:"avatar,optional"` // string 头像 URL，可选（取自用户资料）
 		AppID     string `json:"appId"` // string 所属应用 ID
 	}
 )
@@ -19,11 +20,10 @@ type (
 type (
 	// Robot 发送消息
 	RobotSendMessageReq {
-		ConversationID string `json:"conversationId"` // string 会话 ID，从 Webhook 事件中获取
+		ConversationID string `json:"conversationId"` // string 会话 ID，从长连接事件中获取
 		MsgType        string `json:"msgType"` // string 消息类型：text / markdown
 		Content        string `json:"content"` // string 消息内容
 		ReplyMsgID     string `json:"replyMsgId,optional"` // string 引用回复的消息 ID，可选
-		IdempotentKey  string `json:"idempotentKey,optional"` // string 幂等键，防重复发送，可选
 	}
 
 	RobotSendMessageRes {

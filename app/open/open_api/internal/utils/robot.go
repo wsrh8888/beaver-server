@@ -38,8 +38,8 @@ type UserCreator interface {
 	UserCreate(ctx context.Context, in *user_rpc.UserCreateReq, opts ...grpc.CallOption) (*user_rpc.UserCreateRes, error)
 }
 
-func EnsureAppRobot(ctx context.Context, db *gorm.DB, userRpc UserCreator, app *open_models.OpenApp) (*open_models.OpenAppRobot, error) {
-	var robot open_models.OpenAppRobot
+func EnsureAppRobot(ctx context.Context, db *gorm.DB, userRpc UserCreator, app *open_models.OpenApp) (*open_models.OpenRobot, error) {
+	var robot open_models.OpenRobot
 	err := db.Where("app_id = ?", app.AppID).First(&robot).Error
 	if err == nil && robot.RobotID != "" {
 		return &robot, nil
@@ -62,15 +62,10 @@ func EnsureAppRobot(ctx context.Context, db *gorm.DB, userRpc UserCreator, app *
 		return nil, fmt.Errorf("创建 Robot IM 用户失败: %w", err)
 	}
 
-	robot = open_models.OpenAppRobot{
-		AppID:            app.AppID,
-		RobotID:          createRes.UserID,
-		RobotName:        nickName,
-		Avatar:           app.Icon,
-		Status:           1,
-		EnableSingleChat: 1,
-		EnableGroupChat:  1,
-		EnableAtMention:  1,
+	robot = open_models.OpenRobot{
+		AppID:   app.AppID,
+		RobotID: createRes.UserID,
+		Status:  1,
 	}
 	if err := db.Save(&robot).Error; err != nil {
 		return nil, err

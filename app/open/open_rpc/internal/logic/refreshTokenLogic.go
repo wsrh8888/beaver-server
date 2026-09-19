@@ -58,7 +58,7 @@ func (l *RefreshTokenLogic) RefreshToken(in *open_rpc.RefreshTokenReq) (*open_rp
 	}
 
 	// 2. 检查 Refresh Token 是否过期
-	if time.Now().Unix() > token.RefreshTokenExpiresAt {
+	if time.Now().After(token.RefreshTokenExpiresAt) {
 		return nil, errors.New("刷新令牌已过期，请重新授权")
 	}
 
@@ -74,8 +74,8 @@ func (l *RefreshTokenLogic) RefreshToken(in *open_rpc.RefreshTokenReq) (*open_rp
 
 	// 5. 更新数据库
 	now := time.Now()
-	expiresAt := now.Add(2 * time.Hour).Unix()                    // access_token 2小时过期
-	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour).Unix() // refresh_token 180天过期
+	expiresAt := now.Add(2 * time.Hour)                    // access_token 2小时过期
+	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour) // refresh_token 180天过期
 
 	if err := l.svcCtx.DB.Model(&token).Updates(map[string]interface{}{
 		"token":                    newAccessToken,

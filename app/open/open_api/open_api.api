@@ -1,10 +1,9 @@
+import "api/ws.api"
 import "api/auth_public.api"
 import "api/oauth_public.api"
 import "api/oauth.api"
 import "api/oauth_secret.api"
-import "api/user.api"
 import "api/robot.api"
 import "api/bot_public.api"
-import "api/event.api"
 
 // goctl api go -api open_api.api -dir . --home ../../../template

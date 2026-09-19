@@ -54,11 +54,8 @@ func (l *UpdateRobotConfigLogic) UpdateRobotConfig(req *types.UpdateRobotConfigR
 	}
 
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限操作")
-	}
-	if app.EnableRobot != 1 {
-		return nil, errors.New("应用未启用智能机器人能力")
 	}
 
 	robot, err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app)
@@ -66,35 +63,11 @@ func (l *UpdateRobotConfigLogic) UpdateRobotConfig(req *types.UpdateRobotConfigR
 		return nil, errors.New("更新 Robot 配置失败")
 	}
 
-	updates := map[string]interface{}{}
-	if req.RobotName != "" {
-		updates["robot_name"] = req.RobotName
-	}
-	if req.Avatar != "" {
-		updates["avatar"] = req.Avatar
-	}
-	if req.WelcomeMessage != "" {
-		updates["welcome_message"] = req.WelcomeMessage
-	}
-	if req.CommandPrefix != "" {
-		updates["command_prefix"] = req.CommandPrefix
-	}
-	if req.EnableSingleChat != nil {
-		updates["enable_single_chat"] = boolToTinyInt(*req.EnableSingleChat)
-	}
-	if req.EnableGroupChat != nil {
-		updates["enable_group_chat"] = boolToTinyInt(*req.EnableGroupChat)
-	}
-	if req.EnableAtMention != nil {
-		updates["enable_at_mention"] = boolToTinyInt(*req.EnableAtMention)
-	}
+	// 只有「启用/禁用」还留在机器人表上；
+	// 昵称/头像直接写 IM 用户资料，欢迎语/命令前缀/单聊群聊开关由机器人自己维护。
 	if req.Status != nil {
-		updates["status"] = *req.Status
-	}
-
-	if len(updates) > 0 {
-		if err := l.svcCtx.DB.Model(robot).Updates(updates).Error; err != nil {
-			return nil, errors.New("更新 Robot 配置失败")
+		if err := l.svcCtx.DB.Model(robot).Update("status", *req.Status).Error; err != nil {
+			return nil, errors.New("更新 Robot 状态失败")
 		}
 	}
 
@@ -108,19 +81,12 @@ func (l *UpdateRobotConfigLogic) UpdateRobotConfig(req *types.UpdateRobotConfigR
 		}
 		if _, err := l.svcCtx.UserRpc.UserUpdateDisplay(l.ctx, displayReq); err != nil {
 			l.logger.Error(model.LogMsg{
-			Text: "同步 Robot IM 展示信息失败",
-			Data: map[string]interface{}{"robot": robot.RobotID, "err": err.Error()},
-		})
+				Text: "同步 Robot IM 展示信息失败",
+				Data: map[string]interface{}{"robot": robot.RobotID, "err": err.Error()},
+			})
 			return nil, errors.New("Robot 配置已保存，但同步 IM 昵称/头像失败")
 		}
 	}
 
 	return &types.UpdateRobotConfigRes{}, nil
-}
-
-func boolToTinyInt(v bool) int {
-	if v {
-		return 1
-	}
-	return 0
 }

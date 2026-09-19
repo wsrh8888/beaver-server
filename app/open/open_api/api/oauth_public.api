@@ -73,14 +73,3 @@ service open {
 	@handler PasswordLogin
 	post /api/open/oauth_public/v1/password_login (PasswordLoginReq) returns (PasswordLoginRes)
 }
-
-// 以下类型仅保留给历史 handler 编译，不再注册路由
-type (
-	ConfirmQrCodeLoginReq {
-		SceneID string `json:"sceneId"`
-		UserID  string `json:"userId"`
-	}
-	ConfirmQrCodeLoginRes {
-		Success bool `json:"success"`
-	}
-)

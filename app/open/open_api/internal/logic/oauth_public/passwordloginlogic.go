@@ -144,7 +144,7 @@ func createOAuthCode(db *gorm.DB, appID, userID, scene, sceneRef string) (string
 		return "", 0, errors.New("应用不存在或未启用")
 	}
 
-	var oauthConfig open_models.OpenAppOAuth
+	var oauthConfig open_models.OpenOAuthConfig
 	scope := ""
 	if err := db.Where("app_id = ?", appID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
 		scope = oauthConfig.SupportedScopes
@@ -164,7 +164,7 @@ func createOAuthCode(db *gorm.DB, appID, userID, scene, sceneRef string) (string
 		AppID:     appID,
 		UserID:    userID,
 		Scope:     scope,
-		ExpiresAt: time.Now().Add(ttl).Unix(),
+		ExpiresAt: time.Now().Add(ttl),
 		Scene:     scene,
 		State:     sceneRef,
 	}

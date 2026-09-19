@@ -36,6 +36,7 @@ import (
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
+	"beaver/core/corerocketmq"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -52,16 +53,19 @@ type ServiceContext struct {
 	ChatRpc  chat_rpc.ChatClient
 	GroupRpc group_rpc.GroupClient
 	OpenRpc  open_rpc.OpenClient
+	RocketMQ *corerocketmq.Client
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
 	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
+	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 
 	return &ServiceContext{
 		Config:   c,
 		DB:       mysqlDb,
 		Redis:    client,
+		RocketMQ: mqClient,
 		OAuth:    oauthmiddle.NewQrcode(mysqlDb),
 		UserRpc:  user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		AuthRpc:  auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),

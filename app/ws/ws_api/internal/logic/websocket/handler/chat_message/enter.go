@@ -45,6 +45,8 @@ func Handle(ctx context.Context, svcCtx *svc.ServiceContext, req *types.WsReq, r
 		return HandlePrivateMessageSend(ctx, svcCtx, req, r, client, content.MessageID, content.Data.Body)
 	case wsTypeConst.TypingSend:
 		return HandleTypingSend(ctx, svcCtx, req, r, client, content.Data.Body)
+	case wsTypeConst.ChatMessageStreamSend:
+		return HandleStreamSend(ctx, svcCtx, req, r, client, content.Data.ConversationID, content.Data.Body)
 	default:
 		logger.Warn(model.LogMsg{
 			Text: "未支持的消息类型",

@@ -90,10 +90,7 @@ func (p Proxy) auth(req *http.Request) (ok bool, errMsg string) {
 	}
 
 	// 5. 统一 JWT 鉴权
-	if !p.jwtAuth(req) {
-		return false, "网关鉴权失败"
-	}
-	return true, ""
+	return p.jwtAuth(req)
 }
 
 func (p Proxy) oauthSecretAuth(req *http.Request) (bool, string) {
@@ -126,38 +123,36 @@ func isOpenApiPassThrough(path string) bool {
 	return true
 }
 
-// jwtAuth JWT认证（普通用户）
-func (p Proxy) jwtAuth(req *http.Request) bool {
-	// 获取token
+// jwtAuth JWT认证（普通用户）。客户端版本头只透传，不在网关拦截。
+func (p Proxy) jwtAuth(req *http.Request) (ok bool, errMsg string) {
 	token := getToken(req)
 	if token == "" {
 		apiGwLogger.Error(model.LogMsg{Text: "token为空"})
-		return false
+		return false, "网关鉴权失败"
 	}
 
-	// 直接解析JWT（避免HTTP调用）
 	claims, err := jwts.ParseToken(token, p.Config.Auth.AccessSecret)
 	if err != nil {
 		apiGwLogger.Error(model.LogMsg{Text: "JWT解析失败", Data: map[string]interface{}{"err": err.Error()}})
-		return false
+		return false, "网关鉴权失败"
 	}
 
-	// 设置用户ID和设备ID到请求头
 	req.Header.Set("Beaver-User-Id", claims.UserID)
 
-	// 从请求头获取设备ID
 	deviceId := req.Header.Get("deviceId")
 	if deviceId != "" {
 		req.Header.Set("Beaver-Device-Id", deviceId)
 	}
 	version := req.Header.Get("version")
+	if version == "" {
+		version = req.Header.Get("Version")
+	}
 	if version != "" {
 		req.Header.Set("Version", version)
 	}
 
 	apiGwLogger.Info(model.LogMsg{Text: "JWT验证成功", Data: map[string]interface{}{"userId": claims.UserID, "deviceId": deviceId}})
-
-	return true
+	return true, ""
 }
 
 type statusRecorder struct {

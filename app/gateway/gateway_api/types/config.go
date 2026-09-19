@@ -31,8 +31,9 @@ type Config struct {
 	Prometheus PrometheusConfig
 	Limit          LimitConfig
 	Auth           AuthConfig
-	PublicList     []string `json:",optional"` // Gateway 不鉴权（含 *_public）
-	CustomAuthList []string `json:",optional"` // 透传，由下游服务 middleware 鉴权
+	CompatibleVersion string   `json:",optional"` // 已停用，网关不再按客户端版本拦截
+	PublicList        []string `json:",optional"` // Gateway 不鉴权（含 *_public）
+	CustomAuthList    []string `json:",optional"` // 透传，由下游服务 middleware 鉴权
 }
 
 type AuthConfig struct {

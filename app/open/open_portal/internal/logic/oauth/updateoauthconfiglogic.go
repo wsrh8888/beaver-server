@@ -57,15 +57,15 @@ func (l *UpdateOAuthConfigLogic) UpdateOAuthConfig(req *types.UpdateOAuthConfigR
 	}
 
 	// 验证 UserID 是否为应用所有者
-	if app.OwnerUserID != req.UserID {
+	if app.OwnerID != req.UserID {
 		return nil, errors.New("无权修改此应用")
 	}
 
 	// 查询或创建 OAuth 配置
-	var oauth open_models.OpenAppOAuth
+	var oauth open_models.OpenOAuthConfig
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauth).Error; err != nil {
 		// 如果不存在，创建新记录
-		oauth = open_models.OpenAppOAuth{
+		oauth = open_models.OpenOAuthConfig{
 			AppID: req.AppID,
 		}
 	}

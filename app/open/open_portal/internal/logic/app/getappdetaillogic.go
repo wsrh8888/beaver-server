@@ -53,12 +53,25 @@ func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *type
 
 	// 查询应用详情
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限访问")
 	}
 
 	// 2. 对 AppSecret 进行掩码处理（只显示前8位和后8位）
 	maskedSecret := maskSecret(app.AppSecret)
+
+	// 3. 能力是否存在由对应能力表的记录决定，应用表不再持有能力开关。
+	//    Webhook 能力已下线（事件改由长连接接收），恒为 0。
+	var robot open_models.OpenRobot
+	enableRobot := 0
+	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", app.AppID, 1).First(&robot).Error; err == nil {
+		enableRobot = 1
+	}
+	var oauthConfig open_models.OpenOAuthConfig
+	enableOAuth := 0
+	if err := l.svcCtx.DB.Where("app_id = ?", app.AppID).First(&oauthConfig).Error; err == nil {
+		enableOAuth = 1
+	}
 
 	return &types.GetAppDetailRes{
 		App: types.AppInfo{
@@ -68,11 +81,9 @@ func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *type
 			Icon:        app.Icon,
 			AppSecret:   maskedSecret,
 			Status:      app.Status,
-			// 能力开关
-			EnableRobot:   app.EnableRobot,
-			EnableOAuth:   app.EnableOAuth,
-			EnableWebhook: app.EnableWebhook,
-			CreatedAt:     app.CreatedAt.Unix(),
+			EnableRobot: enableRobot,
+			EnableOAuth: enableOAuth,
+			CreatedAt:   app.CreatedAt.Unix(),
 		},
 	}, nil
 }

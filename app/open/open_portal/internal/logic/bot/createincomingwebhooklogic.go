@@ -58,7 +58,7 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 	}
 
 	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_user_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限操作")
 	}
 
@@ -93,7 +93,6 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 
 	if err := l.svcCtx.DB.Model(&open_models.OpenBotModel{}).Where("id = ?", rpcRes.Id).Updates(map[string]interface{}{
 		"app_id": req.AppID,
-		"name":   name,
 	}).Error; err != nil {
 		_, _ = l.svcCtx.OpenRpc.DeleteBot(l.ctx, &open_rpc.DeleteBotReq{Id: rpcRes.Id})
 		return nil, errors.New("保存 Bot 元数据失败")
@@ -116,18 +115,19 @@ func (l *CreateIncomingWebhookLogic) CreateIncomingWebhook(req *types.CreateInco
 	}
 
 	return &types.CreateIncomingWebhookRes{
-		Webhook: toIncomingWebhookInfo(&bot, l.svcCtx.Config.Domain, true),
+		Webhook: toIncomingWebhookInfo(&bot, l.svcCtx.Config.Domain, true, name),
 	}, nil
 }
 
-func toIncomingWebhookInfo(bot *open_models.OpenBotModel, apiBase string, withSecret bool) types.IncomingWebhookInfo {
+// toIncomingWebhookInfo 组装响应；显示名不再存在机器人表，由调用方从 IM 用户资料取得。
+func toIncomingWebhookInfo(bot *open_models.OpenBotModel, apiBase string, withSecret bool, name string) types.IncomingWebhookInfo {
 	info := types.IncomingWebhookInfo{
 		ID:         fmt.Sprintf("%d", bot.ID),
 		Token:      bot.Token,
 		AppID:      bot.AppID,
 		GroupID:    bot.GroupID,
 		BotID:      bot.BotID,
-		Name:       bot.Name,
+		Name:       name,
 		WebhookURL: buildBotWebhookURL(apiBase, bot.Token),
 		Status:     bot.Status,
 		CreatedAt:  bot.CreatedAt.Unix(),

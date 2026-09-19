@@ -22,7 +22,6 @@
 package database
 
 import (
-	"beaver/app/agent/agent_models"
 	"beaver/app/auth/auth_models"
 	"beaver/app/backend/backend_models"
 	"beaver/app/call/call_models"
@@ -38,7 +37,6 @@ import (
 	"beaver/app/platform/platform_models"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
-	agentseed "beaver/database/agent"
 	fileseed "beaver/database/file"
 	openseed "beaver/database/open"
 	platformseed "beaver/database/platform"
@@ -157,16 +155,12 @@ func AllMigrations() []Migration {
 			Models: []any{
 				&open_models.OpenDeveloper{},
 				&open_models.OpenApp{},
-				&open_models.OpenAppOAuth{},
-				&open_models.OpenAppRobot{},
-				&open_models.OpenAppSecurity{},
-				&open_models.OpenAppEventSubscription{},
+				&open_models.OpenOAuthConfig{},
+				&open_models.OpenRobot{},
 				&open_models.OpenOAuthToken{},
 				&open_models.OpenOAuthCode{},
 				&open_models.OpenOAuthQrCode{},
 				&open_models.OpenBotModel{},
-				&open_models.OpenWebhookLog{},
-				&open_models.OpenRobotSendLog{},
 			},
 			Init: openseed.InitQuickLoginApp,
 		},
@@ -198,17 +192,6 @@ func AllMigrations() []Migration {
 		{
 			Name:   "beaver_datasync",
 			Models: []any{&datasync_models.DatasyncModel{}},
-		},
-		{
-			Name: "beaver_agent",
-			Models: []any{
-				&agent_models.Agent{},
-				&agent_models.AgentMessage{},
-				&agent_models.AgentUserModel{},
-				&agent_models.AgentOfficialModel{},
-				&agent_models.AgentModelRole{},
-			},
-			Init: agentseed.InitOfficialModels,
 		},
 	}
 }

@@ -50,17 +50,15 @@ func (l *GetRobotByUserIDLogic) GetRobotByUserID(in *open_rpc.GetRobotByUserIDRe
 		return &open_rpc.GetRobotByUserIDRes{Found: false}, nil
 	}
 
-	var robot open_models.OpenAppRobot
+	var robot open_models.OpenRobot
 	if err := l.svcCtx.DB.Where("robot_user_id = ? AND status = 1", in.RobotUserId).First(&robot).Error; err != nil {
 		return &open_rpc.GetRobotByUserIDRes{Found: false}, nil
 	}
 
+	// 单聊/群聊/@ 响应行为不再由平台存储，由机器人自己决定，这里不再返回开关。
 	return &open_rpc.GetRobotByUserIDRes{
-		Found:            true,
-		AppId:            robot.AppID,
-		RobotUserId:      robot.RobotID,
-		EnableSingleChat: robot.EnableSingleChat == 1,
-		EnableGroupChat:  robot.EnableGroupChat == 1,
-		EnableAtMention:  robot.EnableAtMention == 1,
+		Found:       true,
+		AppId:       robot.AppID,
+		RobotUserId: robot.RobotID,
 	}, nil
 }

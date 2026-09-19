@@ -17,4 +17,3 @@ wt new-tab --title "User RPC" cmd /k "cd /d !ROOT_DIR!\app\user\user_rpc && go r
   ; new-tab --title "Platform RPC" cmd /k "cd /d !ROOT_DIR!\app\platform\platform_rpc && go run platformrpc.go" ^
   ; new-tab --title "Chat RPC" cmd /k "cd /d !ROOT_DIR!\app\chat\chat_rpc && go run chatrpc.go" ^
   ; new-tab --title "Circle RPC" cmd /k "cd /d !ROOT_DIR!\app\circle\circle_rpc && go run circlerpc.go" ^
-  ; new-tab --title "Agent RPC" cmd /k "cd /d !ROOT_DIR!\app\agent\agent_rpc && go run agentrpc.go"

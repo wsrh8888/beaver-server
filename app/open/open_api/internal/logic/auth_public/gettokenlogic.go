@@ -59,7 +59,7 @@ func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRe
 		return nil, errors.New("应用 ID 或密钥错误")
 	}
 
-	var oauthConfig open_models.OpenAppOAuth
+	var oauthConfig open_models.OpenOAuthConfig
 	var supportedScopes string
 	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil {
 		supportedScopes = oauthConfig.SupportedScopes
@@ -74,8 +74,8 @@ func (l *GetTokenLogic) GetToken(req *types.GetTokenReq) (resp *types.GetTokenRe
 	refreshToken := hex.EncodeToString(refreshTokenBytes)
 
 	now := time.Now()
-	expiresAt := now.Add(2 * time.Hour).Unix()
-	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour).Unix()
+	expiresAt := now.Add(2 * time.Hour)
+	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour)
 	tokenRecord := open_models.OpenOAuthToken{
 		AppID:                 req.AppID,
 		Token:                 accessToken,
