@@ -42,6 +42,8 @@ type Config struct {
 	WhiteList   []string
 	BlackList   []string
 	UserRpc     zrpc.RpcClientConf
+	// StorageType 通用上传接口(/api/file/v1/upload)使用的默认存储后端：local|qiniu|minio
+	StorageType string
 	Local       struct {
 		UploadDir   string // 本地文件上传目录
 		ProjectName string // 项目名称，用于文件路径前缀（为空则使用根目录）
@@ -53,5 +55,13 @@ type Config struct {
 		Bucket      string
 		Domain      string // 七牛云文件访问域名
 		ExpireTime  int64
+	}
+	Minio struct {
+		Endpoint    string // MinIO服务地址，如 127.0.0.1:9000
+		AccessKey   string // MinIO访问密钥
+		SecretKey   string // MinIO秘密密钥
+		Bucket      string // MinIO存储桶名称
+		UseSSL      bool   // 是否启用SSL
+		ProjectName string // 项目名称，用于文件路径前缀（为空则使用根目录）
 	}
 }

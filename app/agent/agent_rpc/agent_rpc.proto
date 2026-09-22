@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package agent;
+
+option go_package = "./agent_rpc";
+
+// 内部服务。库、LangChain、队列消费都在实现这个接口的进程里。
+// agent_api 只做 HTTP 转发。datasync 以后也调这里补历史，不调 HTTP。
+service Agent {
+  rpc SendMessage(SendMessageReq) returns (Reply);
+  rpc ListMessages(ListMessagesReq) returns (Reply);
+  rpc SubmitHostResult(SubmitHostResultReq) returns (Reply);
+  rpc CreateModel(CreateModelReq) returns (Reply);
+  rpc UpdateModel(UpdateModelReq) returns (Reply);
+  rpc DeleteModel(DeleteModelReq) returns (Reply);
+  rpc ListModels(ListModelsReq) returns (Reply);
+}
+
+message Reply {
+  int32 code = 1;
+  string msg = 2;
+  string result_json = 3;
+}
+
+message SendMessageReq {
+  string user_id = 1;
+  string device_id = 2;
+  string trace_id = 3;
+  string conversation_id = 4;
+  string topic_id = 5;
+  string content = 6;
+  string model_id = 7;
+  string model_source = 8;
+}
+
+message ListMessagesReq {
+  string user_id = 1;
+  string topic_id = 2;
+  int64 before_id = 3;
+  int32 limit = 4;
+}
+
+message SubmitHostResultReq {
+  string user_id = 1;
+  string request_id = 2;
+  bool ok = 3;
+  string data_json = 4;
+  string error = 5;
+}
+
+message CreateModelReq {
+  string user_id = 1;
+  string name = 2;
+  string endpoint = 3;
+  string api_key = 4;
+  string tier = 5;
+  string capabilities_json = 6;
+}
+
+message UpdateModelReq {
+  string user_id = 1;
+  string model_id = 2;
+  string name = 3;
+  string endpoint = 4;
+  string api_key = 5;
+  string tier = 6;
+  string capabilities_json = 7;
+  bool has_status = 8;
+  int32 status = 9;
+}
+
+message DeleteModelReq {
+  string user_id = 1;
+  string model_id = 2;
+}
+
+message ListModelsReq {
+  string user_id = 1;
+}

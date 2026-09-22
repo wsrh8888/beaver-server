@@ -36,6 +36,7 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
 	"beaver/app/platform/platform_models"
+	org_models "beaver/app/platform/platform_models/org"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
 	fileseed "beaver/database/file"
@@ -231,6 +232,11 @@ func main() {
 					&platform_models.UpdateReleasePolicy{},
 					&platform_models.UpdateReport{},
 					&platform_models.WorkbenchApp{},
+					&org_models.Organization{},
+					&org_models.Department{},
+					&org_models.Staff{},
+					&org_models.DeptUser{},
+					&org_models.Admin{},
 				)
 			},
 		},
@@ -285,6 +291,5 @@ func main() {
 		fmt.Printf("默认开放应用初始化失败: %v\n", err)
 		return
 	}
-
 	fmt.Println("所有库表结构生成完成")
 }

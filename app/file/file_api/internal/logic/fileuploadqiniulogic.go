@@ -23,9 +23,12 @@ package logic
 
 import (
 	"context"
+	"mime/multipart"
 
+	"beaver/app/file/file_api/internal/handler/common"
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
+	"beaver/app/file/file_models"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -43,8 +46,8 @@ func NewFileUploadQiniuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 	}
 }
 
-func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileReq) (resp *types.FileRes, err error) {
-	// todo: add your logic here and delete this line
-
-	return &types.FileRes{}, nil
+func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileRes, error) {
+	// 七牛云存储后端
+	store := common.NewQiniuStorage(l.svcCtx.Config.Qiniu.AK, l.svcCtx.Config.Qiniu.SK, l.svcCtx.Config.Qiniu.Bucket)
+	return common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.QiniuSource)
 }

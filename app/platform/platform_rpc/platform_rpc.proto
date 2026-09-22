@@ -453,6 +453,45 @@ message ListEnabledWorkbenchAppsRes {
   repeated WorkbenchAppPublicItem list = 1; // array 上架应用列表
 }
 
+// ==================== 组织（后台调整：新增、修改、删除）====================
+
+message CreateOrgDepartmentReq {
+  string parent_id = 1; // string 父部门 ID，必须已存在
+  string name = 2; // string 部门名
+}
+
+message CreateOrgDepartmentRes {
+  string dept_id = 1; // string 新部门 ID
+}
+
+message UpdateOrgDepartmentReq {
+  string dept_id = 1; // string 部门 ID
+  optional string parent_id = 2; // string 新父部门，不传则不改。根部门不能改父级
+  optional string name = 3; // string 新名称，不传则不改
+  optional int32 sort = 4; // int32 新排序，不传则不改
+}
+
+message UpdateOrgDepartmentRes {}
+
+message DeleteOrgDepartmentReq {
+  string dept_id = 1; // string 部门 ID
+}
+
+message DeleteOrgDepartmentRes {}
+
+message AddOrgMemberReq {
+  string user_id = 1; // string 已注册用户 ID
+  string dept_id = 2; // string 目标部门
+}
+
+message AddOrgMemberRes {}
+
+message RemoveOrgMemberReq {
+  string user_id = 1; // string 要移出的用户 ID。不能移出拥有者
+}
+
+message RemoveOrgMemberRes {}
+
 service platform {
   rpc AdminQueryLogs(AdminQueryLogsReq) returns (AdminQueryLogsRes);
 
@@ -485,6 +524,12 @@ service platform {
   rpc GetWorkbenchApp(GetWorkbenchAppReq) returns (GetWorkbenchAppRes);
   rpc ListWorkbenchApps(ListWorkbenchAppsReq) returns (ListWorkbenchAppsRes);
   rpc ListEnabledWorkbenchApps(ListEnabledWorkbenchAppsReq) returns (ListEnabledWorkbenchAppsRes);
+
+  rpc CreateOrgDepartment(CreateOrgDepartmentReq) returns (CreateOrgDepartmentRes);
+  rpc UpdateOrgDepartment(UpdateOrgDepartmentReq) returns (UpdateOrgDepartmentRes);
+  rpc DeleteOrgDepartment(DeleteOrgDepartmentReq) returns (DeleteOrgDepartmentRes);
+  rpc AddOrgMember(AddOrgMemberReq) returns (AddOrgMemberRes);
+  rpc RemoveOrgMember(RemoveOrgMemberReq) returns (RemoveOrgMemberRes);
 }
 
 // goctl rpc protoc platform_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

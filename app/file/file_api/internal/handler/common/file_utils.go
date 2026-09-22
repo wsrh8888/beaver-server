@@ -22,6 +22,9 @@
 package common
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	_ "image/gif"
@@ -32,15 +35,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
+	"github.com/qiniu/go-sdk/v7/storagev2/http_client"
+	"github.com/qiniu/go-sdk/v7/storagev2/uploader"
 
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
 	"beaver/app/file/file_models"
-	utils "beaver/utils/list"
-	"beaver/utils/md5"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+	utils "beaver/utils/list"
+	"beaver/utils/md5"
 )
+
+// minioPresignExpiry MinIO预签名URL有效期
+const minioPresignExpiry = 3600 // 秒
 
 // FileTypeMapper maps file extensions to file types.
 var FileTypeMapper = map[string]string{
@@ -331,4 +343,206 @@ func ParseDuration(durationStr string) int {
 	}
 
 	return 0
+}
+
+// ============================================================
+// 存储后端抽象层
+// ============================================================
+
+// Storage 存储后端抽象接口，各实现只负责"把字节流存到某处"这一件事
+type Storage interface {
+	// Upload 上传文件，objectKey 为相对路径（如 beaver/image/md5.jpg），返回实际存储路径
+	Upload(ctx context.Context, data []byte, objectKey string) (storedPath string, err error)
+}
+
+// LocalStorage 本地磁盘存储
+type LocalStorage struct {
+	UploadDir string
+}
+
+func NewLocalStorage(uploadDir string) *LocalStorage {
+	return &LocalStorage{UploadDir: uploadDir}
+}
+
+func (s *LocalStorage) Upload(ctx context.Context, data []byte, objectKey string) (string, error) {
+	filePath := filepath.Join(s.UploadDir, objectKey)
+	if err := SaveFileToLocal(filePath, data); err != nil {
+		return "", err
+	}
+	// 本地存储的 Path 字段存相对路径（objectKey），预览时再拼接 UploadDir
+	return objectKey, nil
+}
+
+// QiniuStorage 七牛云对象存储
+type QiniuStorage struct {
+	AK     string
+	SK     string
+	Bucket string
+}
+
+func NewQiniuStorage(ak, sk, bucket string) *QiniuStorage {
+	return &QiniuStorage{AK: ak, SK: sk, Bucket: bucket}
+}
+
+func (s *QiniuStorage) Upload(ctx context.Context, data []byte, objectKey string) (string, error) {
+	mac := credentials.NewCredentials(s.AK, s.SK)
+	uploadManager := uploader.NewUploadManager(&uploader.UploadManagerOptions{
+		Options: http_client.Options{Credentials: mac},
+	})
+	reader := bytes.NewReader(data)
+	err := uploadManager.UploadReader(ctx, reader, &uploader.ObjectOptions{
+		BucketName: s.Bucket,
+		FileName:   objectKey,
+		ObjectName: &objectKey,
+	}, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload file to Qiniu: %v", err)
+	}
+	return objectKey, nil
+}
+
+// MinioStorage MinIO对象存储
+type MinioStorage struct {
+	Client *minio.Client
+	Bucket string
+}
+
+func NewMinioStorage(client *minio.Client, bucket string) *MinioStorage {
+	return &MinioStorage{Client: client, Bucket: bucket}
+}
+
+func (s *MinioStorage) Upload(ctx context.Context, data []byte, objectKey string) (string, error) {
+	reader := bytes.NewReader(data)
+	_, err := s.Client.PutObject(ctx, s.Bucket, objectKey, reader, int64(len(data)), minio.PutObjectOptions{
+		ContentType: "application/octet-stream",
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to upload file to MinIO: %v", err)
+	}
+	return objectKey, nil
+}
+
+// DefaultStorage 根据yaml StorageType配置返回默认存储后端
+func DefaultStorage(svcCtx *svc.ServiceContext) (Storage, file_models.FileSource, error) {
+	switch svcCtx.Config.StorageType {
+	case "qiniu":
+		return NewQiniuStorage(svcCtx.Config.Qiniu.AK, svcCtx.Config.Qiniu.SK, svcCtx.Config.Qiniu.Bucket), file_models.QiniuSource, nil
+	case "minio":
+		if svcCtx.MinioClient == nil {
+			return nil, "", errors.New("MinIO未配置")
+		}
+		return NewMinioStorage(svcCtx.MinioClient, svcCtx.Config.Minio.Bucket), file_models.MinioSource, nil
+	default: // "local" 或空值
+		return NewLocalStorage(svcCtx.Config.Local.UploadDir), file_models.LocalSource, nil
+	}
+}
+
+// buildFileURL 按文件来源拼接对外访问URL
+func buildFileURL(svcCtx *svc.ServiceContext, source file_models.FileSource, m *file_models.FileModel) string {
+	switch source {
+	case file_models.QiniuSource:
+		domain := svcCtx.Config.Qiniu.Domain
+		if domain != "" && domain != "your_qiniu_domain" {
+			return fmt.Sprintf("https://%s/%s", domain, m.Path)
+		}
+		return ""
+	case file_models.MinioSource:
+		// 走预览端点，由 previewhandler 生成 MinIO 预签名URL重定向
+		if svcCtx.Config.Domain != "" {
+			return fmt.Sprintf("%s/api/file/preview/%s", svcCtx.Config.Domain, m.FileKey)
+		}
+		return fmt.Sprintf("/api/file/preview/%s", m.FileKey)
+	case file_models.LocalSource:
+		if svcCtx.Config.Domain != "" {
+			return fmt.Sprintf("%s/api/file/preview/%s", svcCtx.Config.Domain, m.FileKey)
+		}
+		return fmt.Sprintf("/api/file/preview/%s", m.FileKey)
+	}
+	return ""
+}
+
+// projectNameFor 按来源取对应的项目名前缀
+func projectNameFor(source file_models.FileSource, svcCtx *svc.ServiceContext) string {
+	switch source {
+	case file_models.QiniuSource:
+		return svcCtx.Config.Qiniu.ProjectName
+	case file_models.MinioSource:
+		return svcCtx.Config.Minio.ProjectName
+	default:
+		return svcCtx.Config.Local.ProjectName
+	}
+}
+
+// UploadFile 共享上传流程：校验 -> MD5去重 -> 存储 -> 建DB记录 -> 拼URL
+// handler 负责从 *http.Request 解析 multipart.File/fileHeader/fileInfoStr，
+// logic 层调用本函数完成业务编排，避免 logic 直接依赖 *http.Request
+func UploadFile(ctx context.Context, svcCtx *svc.ServiceContext, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string, store Storage, source file_models.FileSource) (*types.FileRes, error) {
+	// 校验并处理文件
+	fileReq, err := ValidateAndProcessFile(file, fileHead, svcCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	// MD5去重：命中则直接返回已存记录
+	existingFile, err := CheckFileExists(fileReq.FileMd5, svcCtx)
+	if err == nil {
+		resp := &types.FileRes{
+			FileKey:      existingFile.FileKey,
+			OriginalName: existingFile.OriginalName,
+			FileURL:      buildFileURL(svcCtx, source, existingFile),
+		}
+		if existingFile.FileInfo != nil {
+			resp.FileInfo = ConvertFileInfoToAPI(existingFile.FileInfo)
+		}
+		return resp, nil
+	}
+
+	// 生成相对路径作为 objectKey
+	objectKey := GenerateRelativePath(projectNameFor(source, svcCtx), fileReq.FileType, fileReq.FileMd5, fileReq.Suffix)
+
+	// 存储到指定后端
+	storedPath, err := store.Upload(ctx, fileReq.ByteData, objectKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// 创建文件记录
+	newFileModel, err := CreateFileRecord(fileReq, storedPath, source, svcCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 解析FormData中的fileInfo字段
+	var fileInfo *file_models.FileInfo
+	if fileInfoStr != "" {
+		var apiFileInfo types.FileInfo
+		if json.Unmarshal([]byte(fileInfoStr), &apiFileInfo) == nil {
+			fileInfo = ConvertAPIFileInfoToModel(&apiFileInfo)
+		}
+	}
+	if fileInfo != nil {
+		newFileModel.FileInfo = fileInfo
+		svcCtx.DB.Save(newFileModel)
+	}
+
+	resp := &types.FileRes{
+		FileKey:      newFileModel.FileKey,
+		OriginalName: newFileModel.OriginalName,
+		FileURL:      buildFileURL(svcCtx, source, newFileModel),
+	}
+	if fileInfo != nil {
+		resp.FileInfo = ConvertFileInfoToAPI(fileInfo)
+	}
+
+	beaverlog.New("file_upload").Info(model.LogMsg{Text: "文件上传成功", Data: map[string]interface{}{"fileKey": newFileModel.FileKey, "source": string(source)}})
+	return resp, nil
+}
+
+// PresignMinioURL 生成MinIO预签名访问URL（供 previewhandler 调用）
+func PresignMinioURL(ctx context.Context, client *minio.Client, bucket, objectKey string) (string, error) {
+	u, err := client.PresignedGetObject(ctx, bucket, objectKey, minioPresignExpiry*time.Second, nil)
+	if err != nil {
+		return "", fmt.Errorf("生成MinIO预签名URL失败: %v", err)
+	}
+	return u.String(), nil
 }

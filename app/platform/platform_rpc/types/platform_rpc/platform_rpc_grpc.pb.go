@@ -46,6 +46,11 @@ const (
 	Platform_GetWorkbenchApp_FullMethodName          = "/platform_rpc.platform/GetWorkbenchApp"
 	Platform_ListWorkbenchApps_FullMethodName        = "/platform_rpc.platform/ListWorkbenchApps"
 	Platform_ListEnabledWorkbenchApps_FullMethodName = "/platform_rpc.platform/ListEnabledWorkbenchApps"
+	Platform_CreateOrgDepartment_FullMethodName      = "/platform_rpc.platform/CreateOrgDepartment"
+	Platform_UpdateOrgDepartment_FullMethodName      = "/platform_rpc.platform/UpdateOrgDepartment"
+	Platform_DeleteOrgDepartment_FullMethodName      = "/platform_rpc.platform/DeleteOrgDepartment"
+	Platform_AddOrgMember_FullMethodName             = "/platform_rpc.platform/AddOrgMember"
+	Platform_RemoveOrgMember_FullMethodName          = "/platform_rpc.platform/RemoveOrgMember"
 )
 
 // PlatformClient is the client API for Platform service.
@@ -79,6 +84,11 @@ type PlatformClient interface {
 	GetWorkbenchApp(ctx context.Context, in *GetWorkbenchAppReq, opts ...grpc.CallOption) (*GetWorkbenchAppRes, error)
 	ListWorkbenchApps(ctx context.Context, in *ListWorkbenchAppsReq, opts ...grpc.CallOption) (*ListWorkbenchAppsRes, error)
 	ListEnabledWorkbenchApps(ctx context.Context, in *ListEnabledWorkbenchAppsReq, opts ...grpc.CallOption) (*ListEnabledWorkbenchAppsRes, error)
+	CreateOrgDepartment(ctx context.Context, in *CreateOrgDepartmentReq, opts ...grpc.CallOption) (*CreateOrgDepartmentRes, error)
+	UpdateOrgDepartment(ctx context.Context, in *UpdateOrgDepartmentReq, opts ...grpc.CallOption) (*UpdateOrgDepartmentRes, error)
+	DeleteOrgDepartment(ctx context.Context, in *DeleteOrgDepartmentReq, opts ...grpc.CallOption) (*DeleteOrgDepartmentRes, error)
+	AddOrgMember(ctx context.Context, in *AddOrgMemberReq, opts ...grpc.CallOption) (*AddOrgMemberRes, error)
+	RemoveOrgMember(ctx context.Context, in *RemoveOrgMemberReq, opts ...grpc.CallOption) (*RemoveOrgMemberRes, error)
 }
 
 type platformClient struct {
@@ -359,6 +369,56 @@ func (c *platformClient) ListEnabledWorkbenchApps(ctx context.Context, in *ListE
 	return out, nil
 }
 
+func (c *platformClient) CreateOrgDepartment(ctx context.Context, in *CreateOrgDepartmentReq, opts ...grpc.CallOption) (*CreateOrgDepartmentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateOrgDepartmentRes)
+	err := c.cc.Invoke(ctx, Platform_CreateOrgDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateOrgDepartment(ctx context.Context, in *UpdateOrgDepartmentReq, opts ...grpc.CallOption) (*UpdateOrgDepartmentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateOrgDepartmentRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateOrgDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteOrgDepartment(ctx context.Context, in *DeleteOrgDepartmentReq, opts ...grpc.CallOption) (*DeleteOrgDepartmentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteOrgDepartmentRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteOrgDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) AddOrgMember(ctx context.Context, in *AddOrgMemberReq, opts ...grpc.CallOption) (*AddOrgMemberRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddOrgMemberRes)
+	err := c.cc.Invoke(ctx, Platform_AddOrgMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) RemoveOrgMember(ctx context.Context, in *RemoveOrgMemberReq, opts ...grpc.CallOption) (*RemoveOrgMemberRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveOrgMemberRes)
+	err := c.cc.Invoke(ctx, Platform_RemoveOrgMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServer is the server API for Platform service.
 // All implementations must embed UnimplementedPlatformServer
 // for forward compatibility.
@@ -390,6 +450,11 @@ type PlatformServer interface {
 	GetWorkbenchApp(context.Context, *GetWorkbenchAppReq) (*GetWorkbenchAppRes, error)
 	ListWorkbenchApps(context.Context, *ListWorkbenchAppsReq) (*ListWorkbenchAppsRes, error)
 	ListEnabledWorkbenchApps(context.Context, *ListEnabledWorkbenchAppsReq) (*ListEnabledWorkbenchAppsRes, error)
+	CreateOrgDepartment(context.Context, *CreateOrgDepartmentReq) (*CreateOrgDepartmentRes, error)
+	UpdateOrgDepartment(context.Context, *UpdateOrgDepartmentReq) (*UpdateOrgDepartmentRes, error)
+	DeleteOrgDepartment(context.Context, *DeleteOrgDepartmentReq) (*DeleteOrgDepartmentRes, error)
+	AddOrgMember(context.Context, *AddOrgMemberReq) (*AddOrgMemberRes, error)
+	RemoveOrgMember(context.Context, *RemoveOrgMemberReq) (*RemoveOrgMemberRes, error)
 	mustEmbedUnimplementedPlatformServer()
 }
 
@@ -480,6 +545,21 @@ func (UnimplementedPlatformServer) ListWorkbenchApps(context.Context, *ListWorkb
 }
 func (UnimplementedPlatformServer) ListEnabledWorkbenchApps(context.Context, *ListEnabledWorkbenchAppsReq) (*ListEnabledWorkbenchAppsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListEnabledWorkbenchApps not implemented")
+}
+func (UnimplementedPlatformServer) CreateOrgDepartment(context.Context, *CreateOrgDepartmentReq) (*CreateOrgDepartmentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOrgDepartment not implemented")
+}
+func (UnimplementedPlatformServer) UpdateOrgDepartment(context.Context, *UpdateOrgDepartmentReq) (*UpdateOrgDepartmentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrgDepartment not implemented")
+}
+func (UnimplementedPlatformServer) DeleteOrgDepartment(context.Context, *DeleteOrgDepartmentReq) (*DeleteOrgDepartmentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrgDepartment not implemented")
+}
+func (UnimplementedPlatformServer) AddOrgMember(context.Context, *AddOrgMemberReq) (*AddOrgMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddOrgMember not implemented")
+}
+func (UnimplementedPlatformServer) RemoveOrgMember(context.Context, *RemoveOrgMemberReq) (*RemoveOrgMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveOrgMember not implemented")
 }
 func (UnimplementedPlatformServer) mustEmbedUnimplementedPlatformServer() {}
 func (UnimplementedPlatformServer) testEmbeddedByValue()                  {}
@@ -988,6 +1068,96 @@ func _Platform_ListEnabledWorkbenchApps_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Platform_CreateOrgDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOrgDepartmentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateOrgDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateOrgDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateOrgDepartment(ctx, req.(*CreateOrgDepartmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateOrgDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOrgDepartmentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateOrgDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateOrgDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateOrgDepartment(ctx, req.(*UpdateOrgDepartmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteOrgDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteOrgDepartmentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteOrgDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteOrgDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteOrgDepartment(ctx, req.(*DeleteOrgDepartmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_AddOrgMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddOrgMemberReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).AddOrgMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_AddOrgMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).AddOrgMember(ctx, req.(*AddOrgMemberReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_RemoveOrgMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveOrgMemberReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).RemoveOrgMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_RemoveOrgMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).RemoveOrgMember(ctx, req.(*RemoveOrgMemberReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Platform_ServiceDesc is the grpc.ServiceDesc for Platform service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1102,6 +1272,26 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListEnabledWorkbenchApps",
 			Handler:    _Platform_ListEnabledWorkbenchApps_Handler,
+		},
+		{
+			MethodName: "CreateOrgDepartment",
+			Handler:    _Platform_CreateOrgDepartment_Handler,
+		},
+		{
+			MethodName: "UpdateOrgDepartment",
+			Handler:    _Platform_UpdateOrgDepartment_Handler,
+		},
+		{
+			MethodName: "DeleteOrgDepartment",
+			Handler:    _Platform_DeleteOrgDepartment_Handler,
+		},
+		{
+			MethodName: "AddOrgMember",
+			Handler:    _Platform_AddOrgMember_Handler,
+		},
+		{
+			MethodName: "RemoveOrgMember",
+			Handler:    _Platform_RemoveOrgMember_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

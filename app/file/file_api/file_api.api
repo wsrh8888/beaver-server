@@ -51,6 +51,14 @@ service file {
 	@doc "文件上传本地"
 	@handler FileUploadLocal
 	post /api/file/v1/uploadLocal (FileReq) returns (FileRes)
+
+	@doc "文件上传MinIO"
+	@handler FileUploadMinio
+	post /api/file/v1/uploadMinio (FileReq) returns (FileRes)
+
+	@doc "文件通用上传(按yaml StorageType配置路由到local/qiniu/minio)"
+	@handler FileUpload
+	post /api/file/v1/upload (FileReq) returns (FileRes)
 }
 
 // goctl api go -api file_api.api -dir . --home ../../../template

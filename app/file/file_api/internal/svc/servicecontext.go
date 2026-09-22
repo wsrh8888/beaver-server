@@ -28,22 +28,38 @@ import (
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
 
 type ServiceContext struct {
-	Config  config.Config
-	UserRpc user_rpc.UserClient
-	DB      *gorm.DB
+	Config      config.Config
+	UserRpc     user_rpc.UserClient
+	DB          *gorm.DB
+	MinioClient *minio.Client // MinIO客户端，仅在配置了Endpoint时初始化，供上传与预览预签名使用
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
 
-	return &ServiceContext{
+	svc := &ServiceContext{
 		Config:  c,
 		DB:      mysqlDb,
 		UserRpc: user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 	}
+
+	// 初始化MinIO客户端（仅在配置了Endpoint时）
+	if c.Minio.Endpoint != "" {
+		client, err := minio.New(c.Minio.Endpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(c.Minio.AccessKey, c.Minio.SecretKey, ""),
+			Secure: c.Minio.UseSSL,
+		})
+		if err == nil {
+			svc.MinioClient = client
+		}
+	}
+
+	return svc
 }

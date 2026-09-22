@@ -27,3 +27,10 @@ PlatformRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: platformrpc.rpc
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: userrpc.rpc
+Deploy:
+  OrgName: 海狸

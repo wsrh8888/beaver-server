@@ -92,6 +92,19 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			// 直接返回文件内容
 			http.ServeFile(w, r, localFilePath)
 
+		case file_models.MinioSource:
+			// MinIO文件预览：生成预签名URL并重定向
+			if svcCtx.MinioClient == nil {
+				http.Error(w, "MinIO未配置", http.StatusBadRequest)
+				return
+			}
+			presignedURL, err := common.PresignMinioURL(r.Context(), svcCtx.MinioClient, svcCtx.Config.Minio.Bucket, fileModel.Path)
+			if err != nil {
+				http.Error(w, "生成预签名URL失败", http.StatusInternalServerError)
+				return
+			}
+			http.Redirect(w, r, presignedURL, http.StatusFound)
+
 		default:
 			// 不支持的文件来源，返回400错误
 			http.Error(w, "不支持的文件来源", http.StatusBadRequest)

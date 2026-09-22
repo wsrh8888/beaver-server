@@ -22,6 +22,8 @@
 package svc
 
 import (
+	"errors"
+
 	"beaver/app/file/file_rpc/file"
 	"beaver/app/file/file_rpc/types/file_rpc"
 	"beaver/app/platform/platform_api/internal/config"
@@ -31,12 +33,20 @@ import (
 	"beaver/core/coreopensearch"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
+	orgseed "beaver/database/org"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
+
+type InstanceView struct {
+	OrgID   string
+	OrgName string
+	ErrMsg  string
+}
 
 type ServiceContext struct {
 	Config      config.Config
@@ -46,6 +56,7 @@ type ServiceContext struct {
 	PlatformRpc platformcli.Platform
 	RocketMQ    *corerocketmq.Client
 	OpenSearch  *coreopensearch.Client
+	Instance    InstanceView
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -63,5 +74,21 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		PlatformRpc: platformcli.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt)),
 		RocketMQ:    mqClient,
 		OpenSearch:  coreopensearch.New(c.OpenSearch.Addr),
+		Instance:    loadInstance(mysqlDb),
+	}
+}
+
+func loadInstance(orgDB *gorm.DB) InstanceView {
+	orgInfo, err := orgseed.Load(orgDB)
+	if err != nil {
+		logx.Errorf("加载组织失败: %v", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return InstanceView{ErrMsg: "组织尚未初始化"}
+		}
+		return InstanceView{ErrMsg: "查询组织失败"}
+	}
+	return InstanceView{
+		OrgID:   orgInfo.OrgID,
+		OrgName: orgInfo.OrgName,
 	}
 }

@@ -23,9 +23,12 @@ package logic
 
 import (
 	"context"
+	"mime/multipart"
 
+	"beaver/app/file/file_api/internal/handler/common"
 	"beaver/app/file/file_api/internal/svc"
 	"beaver/app/file/file_api/internal/types"
+	"beaver/app/file/file_models"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -44,8 +47,8 @@ func NewFileUploadLocalLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 	}
 }
 
-func (l *FileUploadLocalLogic) FileUploadLocal(req *types.FileReq) (resp *types.FileRes, err error) {
-	// todo: add your logic here and delete this line
-
-	return &types.FileRes{}, nil
+func (l *FileUploadLocalLogic) FileUploadLocal(req *types.FileReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileRes, error) {
+	// 本地存储后端
+	store := common.NewLocalStorage(l.svcCtx.Config.Local.UploadDir)
+	return common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.LocalSource)
 }

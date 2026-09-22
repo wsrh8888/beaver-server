@@ -90,6 +90,7 @@ type FileSource string
 const (
 	QiniuSource FileSource = "qiniu" // 七牛云
 	LocalSource FileSource = "local" // 本地存储
+	MinioSource FileSource = "minio" // MinIO对象存储
 )
 
 type FileModel struct {

@@ -28,7 +28,7 @@ import (
 
 type Config struct {
 	rest.RestConf
-	Etcd string
+	Etcd  string
 	Mysql struct {
 		DataSource string
 	}
@@ -47,4 +47,8 @@ type Config struct {
 	}
 	FileRpc     zrpc.RpcClientConf
 	PlatformRpc zrpc.RpcClientConf
+	UserRpc     zrpc.RpcClientConf
+	Deploy      struct {
+		OrgName string `json:",optional"`
+	}
 }

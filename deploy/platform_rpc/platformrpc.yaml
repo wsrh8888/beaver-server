@@ -6,6 +6,11 @@ Etcd:
   Key: platformrpc.rpc
 Mysql:
   DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_platform?charset=utf8mb4&parseTime=True&loc=Local
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: userrpc.rpc
 Log:
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05

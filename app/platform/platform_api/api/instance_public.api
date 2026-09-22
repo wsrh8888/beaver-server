@@ -1,0 +1,20 @@
+syntax = "v1"
+
+// ==================== 当前组织（无需认证，Gateway 白名单）====================
+// 这里不区分陌生人还是办公内网，默认就是这一套安装的组织。
+
+type (
+	GetInstanceRes {
+		OrgID string `json:"orgId"` // string 组织 ID
+		Name  string `json:"name"` // string 组织名
+	}
+)
+
+@server (
+	group: instance_public
+)
+service platform {
+	@doc "查询当前组织"
+	@handler GetInstance
+	get /api/platform/v1/instance returns (GetInstanceRes)
+}

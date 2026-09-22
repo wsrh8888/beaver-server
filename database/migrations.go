@@ -35,6 +35,7 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
 	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/org"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
 	fileseed "beaver/database/file"
@@ -176,6 +177,11 @@ func AllMigrations() []Migration {
 				&platform_models.UpdateReleasePolicy{},
 				&platform_models.UpdateReport{},
 				&platform_models.WorkbenchApp{},
+				&org_models.Organization{},
+				&org_models.Department{},
+				&org_models.Staff{},
+				&org_models.DeptUser{},
+				&org_models.Admin{},
 			},
 			Init: platformseed.InitPlatform,
 		},

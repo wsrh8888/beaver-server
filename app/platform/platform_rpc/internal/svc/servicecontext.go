@@ -23,24 +23,30 @@ package svc
 
 import (
 	"beaver/app/platform/platform_rpc/internal/config"
+	usercli "beaver/app/user/user_rpc/user"
+	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/database/platform/track"
 	"beaver/database/platform/update"
 
+	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
 
 type ServiceContext struct {
-	Config config.Config
-	DB     *gorm.DB
+	Config  config.Config
+	DB      *gorm.DB
+	UserRpc usercli.User
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	db := coregorm.InitGorm(c.Mysql.DataSource)
 	_ = update.InitUpdateApp(db)
 	_ = track.InitBuckets(db)
+	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
 	return &ServiceContext{
-		Config: c,
-		DB:     db,
+		Config:  c,
+		DB:      db,
+		UserRpc: usercli.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
 	}
 }

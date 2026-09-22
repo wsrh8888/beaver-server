@@ -26,6 +26,7 @@ import (
 	"net/http"
 
 	feedback "beaver/app/platform/platform_api/internal/handler/feedback"
+	instance_public "beaver/app/platform/platform_api/internal/handler/instance_public"
 	track_public "beaver/app/platform/platform_api/internal/handler/track_public"
 	update_public "beaver/app/platform/platform_api/internal/handler/update_public"
 	workbench "beaver/app/platform/platform_api/internal/handler/workbench"
@@ -70,6 +71,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/platform/update_public/v1/report",
 				Handler: update_public.ReportVersionHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 查询当前组织
+				Method:  http.MethodGet,
+				Path:    "/api/platform/v1/instance",
+				Handler: instance_public.GetInstanceHandler(serverCtx),
 			},
 		},
 	)

@@ -105,3 +105,8 @@ type WorkbenchEntryConfig struct {
 	PC     string `json:"pc,optional"`     // string PC 入口，可选
 	Mobile string `json:"mobile,optional"` // string 移动端入口，可选
 }
+
+type GetInstanceRes struct {
+	OrgID string `json:"orgId"` // string 组织 ID
+	Name  string `json:"name"`  // string 组织名
+}
