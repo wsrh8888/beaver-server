@@ -4,3 +4,9 @@ static/*
 *.exe
 .rocketmq_client_go
 logs/
+
+# 压测本地配置（含密码，勿提交）
+scripts/stress/.env
+scripts/stress/accounts.json
+scripts/stress/**/report.json
+scripts/stress/**/report.html
