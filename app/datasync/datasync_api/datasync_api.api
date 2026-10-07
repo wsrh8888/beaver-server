@@ -285,6 +285,31 @@ type (
 	}
 )
 
+// 同步 Agent 会话（消息游标摘要；since=0 全量，>0 增量）
+type (
+	GetSyncAgentConversationsReq {
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 会话 version 游标，只返回 version > since；不传或 0 则全量
+		Module string `json:"module,optional"` // 入口模块：workspace/chat/circle/moment，不传则不过滤
+		Limit  int32  `json:"limit,optional"` // 分页大小，默认 100，最大 200
+	}
+	GetSyncAgentConversationsRes {
+		ConversationVersions []AgentConversationVersionItem `json:"conversationVersions"` // 变更的 Agent 会话摘要
+		ServerVersion        int64                          `json:"serverVersion"` // 本次最大会话 version，作客户端游标
+		ServerTimestamp      int64                          `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	AgentConversationVersionItem {
+		ConversationID string `json:"conversationId"` // 会话ID
+		Version        int64  `json:"version"` // 会话版本号（消息同步游标）
+		LatestTopicId  string `json:"latestTopicId"` // 最新话题ID，便于客户端拉消息
+		Title          string `json:"title"` // 会话标题
+		UpdatedAt      int64  `json:"updatedAt"` // 更新时间毫秒
+		Preview        string `json:"preview"` // 最新消息预览
+		Module         string `json:"module"` // 入口模块
+		Workspace      string `json:"workspace"` // cloud=云端轻会话；local=本机空间（可远程控盘）
+	}
+)
+
 // 同步服务
 service datasync {
 	@doc "获取所有需要更新的用户版本信息"
@@ -354,6 +379,10 @@ service datasync {
 	@doc "获取通知已读游标版本摘要"
 	@handler getSyncNotificationReadCursors
 	post /api/datasync/v1/getSyncNotificationReadCursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
+
+	@doc "获取 Agent 会话版本摘要（增量/全量游标）"
+	@handler getSyncAgentConversations
+	post /api/datasync/v1/getSyncAgentConversations (GetSyncAgentConversationsReq) returns (GetSyncAgentConversationsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

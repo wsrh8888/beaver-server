@@ -19,33 +19,29 @@
  * beaver-server-header-v1
  */
 
-package config
+package handler
 
 import (
-	"github.com/zeromicro/go-zero/rest"
-	"github.com/zeromicro/go-zero/zrpc"
+	"net/http"
+
+	"beaver/app/datasync/datasync_api/internal/logic"
+	"beaver/app/datasync/datasync_api/internal/svc"
+	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/common/response"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-type Config struct {
-	rest.RestConf
-	Etcd string
+func getSyncAgentConversationsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.GetSyncAgentConversationsReq
+		if err := httpx.Parse(r, &req); err != nil {
+			response.Response(r, w, nil, err)
+			return
+		}
 
-	Mysql struct {
-		DataSource string
+		l := logic.NewGetSyncAgentConversationsLogic(r.Context(), svcCtx)
+		resp, err := l.GetSyncAgentConversations(&req)
+		response.Response(r, w, resp, err)
 	}
-	Redis struct {
-		Addr     string
-		Password string
-		Db       int
-	}
-	FriendRpc       zrpc.RpcClientConf
-	GroupRpc        zrpc.RpcClientConf
-	CircleRpc       zrpc.RpcClientConf
-	UserRpc         zrpc.RpcClientConf
-	ChatRpc         zrpc.RpcClientConf
-	MomentRpc       zrpc.RpcClientConf
-	EmojiRpc        zrpc.RpcClientConf
-	DatasyncRpc     zrpc.RpcClientConf
-	NotificationRpc zrpc.RpcClientConf
-	AgentRpc        zrpc.RpcClientConf
 }

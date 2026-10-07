@@ -22,6 +22,7 @@
 package svc
 
 import (
+	"beaver/app/agent/agent_rpc/agent"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/circle/circle_rpc/types/circle_rpc"
 	"beaver/app/datasync/datasync_api/internal/config"
@@ -50,6 +51,7 @@ type ServiceContext struct {
 	ChatRpc         chat_rpc.ChatClient
 	EmojiRpc        emoji_rpc.EmojiClient
 	NotificationRpc notification_rpc.NotificationClient
+	AgentRpc        agent.Agent
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -66,5 +68,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ChatRpc:         chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:        emoji_rpc.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
 		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
+		AgentRpc:        agent.NewAgent(zrpc.MustNewClient(c.AgentRpc, zrpc.WithTimeout(time.Duration(c.AgentRpc.Timeout)*time.Millisecond))),
 	}
 }

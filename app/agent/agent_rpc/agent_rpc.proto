@@ -4,16 +4,20 @@ package agent;
 
 option go_package = "./agent_rpc";
 
-// 内部服务。库、LangChain、队列消费都在实现这个接口的进程里。
-// agent_api 只做 HTTP 转发。datasync 以后也调这里补历史，不调 HTTP。
+// 内部服务。有进程内态的方法 + 同步拉取（结果走 Reply.result_json）。
+// 权威定义在 beaver-agent/agent_server/grpc/agent/agent_rpc.proto，两边须保持一致。
 service Agent {
   rpc SendMessage(SendMessageReq) returns (Reply);
-  rpc ListMessages(ListMessagesReq) returns (Reply);
   rpc SubmitHostResult(SubmitHostResultReq) returns (Reply);
-  rpc CreateModel(CreateModelReq) returns (Reply);
-  rpc UpdateModel(UpdateModelReq) returns (Reply);
-  rpc DeleteModel(DeleteModelReq) returns (Reply);
-  rpc ListModels(ListModelsReq) returns (Reply);
+  // 模型改/删后通知 rpc 进程作废缓存实例(跨进程失效)。
+  rpc InvalidateModel(InvalidateModelReq) returns (Reply);
+
+  // 桌面 datasync：增量列会话（since = 本地游标 version）
+  rpc ListConversations(ListConversationsReq) returns (Reply);
+  // 列某会话下话题
+  rpc ListTopics(ListTopicsReq) returns (Reply);
+  // 某话题消息增量（after_version）
+  rpc ListMessages(ListMessagesReq) returns (Reply);
 }
 
 message Reply {
@@ -28,16 +32,15 @@ message SendMessageReq {
   string trace_id = 3;
   string conversation_id = 4;
   string topic_id = 5;
-  string content = 6;
-  string model_id = 7;
-  string model_source = 8;
-}
-
-message ListMessagesReq {
-  string user_id = 1;
-  string topic_id = 2;
-  int64 before_id = 3;
-  int32 limit = 4;
+  string model_id = 6;
+  string model_source = 7;
+  // 多模态 parts JSON 数组（权威用户内容）。
+  string parts_json = 8;
+  // local=本机空间（可经 HostSession 操作用户目录）；cloud=云端轻会话（无本机文件权限）
+  string workspace = 9;
+  // default | full；仅 workspace=local 有意义
+  string permission_mode = 10;
+  string client_msg_id = 11;
 }
 
 message SubmitHostResultReq {
@@ -48,32 +51,29 @@ message SubmitHostResultReq {
   string error = 5;
 }
 
-message CreateModelReq {
-  string user_id = 1;
-  string name = 2;
-  string endpoint = 3;
-  string api_key = 4;
-  string tier = 5;
-  string capabilities_json = 6;
+message InvalidateModelReq {
+  string model_id = 1;
 }
 
-message UpdateModelReq {
+// since: 只返回 version > since 的会话；0=全量
+message ListConversationsReq {
   string user_id = 1;
-  string model_id = 2;
-  string name = 3;
-  string endpoint = 4;
-  string api_key = 5;
-  string tier = 6;
-  string capabilities_json = 7;
-  bool has_status = 8;
-  int32 status = 9;
+  int64 since = 2;
+  string module = 3;
+  int32 limit = 4;
 }
 
-message DeleteModelReq {
+message ListTopicsReq {
   string user_id = 1;
-  string model_id = 2;
+  string conversation_id = 2;
 }
 
-message ListModelsReq {
+message ListMessagesReq {
   string user_id = 1;
+  string topic_id = 2;
+  int64 after_version = 3;
+  int64 before_id = 4;
+  int32 limit = 5;
 }
+
+// goctl rpc protoc agent_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

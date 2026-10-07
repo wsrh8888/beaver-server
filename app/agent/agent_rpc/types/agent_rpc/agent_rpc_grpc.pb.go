@@ -19,29 +19,31 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Agent_SendMessage_FullMethodName      = "/agent.Agent/SendMessage"
-	Agent_ListMessages_FullMethodName     = "/agent.Agent/ListMessages"
-	Agent_SubmitHostResult_FullMethodName = "/agent.Agent/SubmitHostResult"
-	Agent_CreateModel_FullMethodName      = "/agent.Agent/CreateModel"
-	Agent_UpdateModel_FullMethodName      = "/agent.Agent/UpdateModel"
-	Agent_DeleteModel_FullMethodName      = "/agent.Agent/DeleteModel"
-	Agent_ListModels_FullMethodName       = "/agent.Agent/ListModels"
+	Agent_SendMessage_FullMethodName       = "/agent.Agent/SendMessage"
+	Agent_SubmitHostResult_FullMethodName  = "/agent.Agent/SubmitHostResult"
+	Agent_InvalidateModel_FullMethodName   = "/agent.Agent/InvalidateModel"
+	Agent_ListConversations_FullMethodName = "/agent.Agent/ListConversations"
+	Agent_ListTopics_FullMethodName        = "/agent.Agent/ListTopics"
+	Agent_ListMessages_FullMethodName      = "/agent.Agent/ListMessages"
 )
 
 // AgentClient is the client API for Agent service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// 内部服务。库、LangChain、队列消费都在实现这个接口的进程里。
-// agent_api 只做 HTTP 转发。datasync 以后也调这里补历史，不调 HTTP。
+// 内部服务。有进程内态的方法 + 同步拉取（结果走 Reply.result_json）。
+// 权威定义在 beaver-agent/agent_server/grpc/agent/agent_rpc.proto，两边须保持一致。
 type AgentClient interface {
 	SendMessage(ctx context.Context, in *SendMessageReq, opts ...grpc.CallOption) (*Reply, error)
-	ListMessages(ctx context.Context, in *ListMessagesReq, opts ...grpc.CallOption) (*Reply, error)
 	SubmitHostResult(ctx context.Context, in *SubmitHostResultReq, opts ...grpc.CallOption) (*Reply, error)
-	CreateModel(ctx context.Context, in *CreateModelReq, opts ...grpc.CallOption) (*Reply, error)
-	UpdateModel(ctx context.Context, in *UpdateModelReq, opts ...grpc.CallOption) (*Reply, error)
-	DeleteModel(ctx context.Context, in *DeleteModelReq, opts ...grpc.CallOption) (*Reply, error)
-	ListModels(ctx context.Context, in *ListModelsReq, opts ...grpc.CallOption) (*Reply, error)
+	// 模型改/删后通知 rpc 进程作废缓存实例(跨进程失效)。
+	InvalidateModel(ctx context.Context, in *InvalidateModelReq, opts ...grpc.CallOption) (*Reply, error)
+	// 桌面 datasync：增量列会话（since = 本地游标 version）
+	ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*Reply, error)
+	// 列某会话下话题
+	ListTopics(ctx context.Context, in *ListTopicsReq, opts ...grpc.CallOption) (*Reply, error)
+	// 某话题消息增量（after_version）
+	ListMessages(ctx context.Context, in *ListMessagesReq, opts ...grpc.CallOption) (*Reply, error)
 }
 
 type agentClient struct {
@@ -62,16 +64,6 @@ func (c *agentClient) SendMessage(ctx context.Context, in *SendMessageReq, opts 
 	return out, nil
 }
 
-func (c *agentClient) ListMessages(ctx context.Context, in *ListMessagesReq, opts ...grpc.CallOption) (*Reply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Reply)
-	err := c.cc.Invoke(ctx, Agent_ListMessages_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *agentClient) SubmitHostResult(ctx context.Context, in *SubmitHostResultReq, opts ...grpc.CallOption) (*Reply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Reply)
@@ -82,40 +74,40 @@ func (c *agentClient) SubmitHostResult(ctx context.Context, in *SubmitHostResult
 	return out, nil
 }
 
-func (c *agentClient) CreateModel(ctx context.Context, in *CreateModelReq, opts ...grpc.CallOption) (*Reply, error) {
+func (c *agentClient) InvalidateModel(ctx context.Context, in *InvalidateModelReq, opts ...grpc.CallOption) (*Reply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, Agent_CreateModel_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Agent_InvalidateModel_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *agentClient) UpdateModel(ctx context.Context, in *UpdateModelReq, opts ...grpc.CallOption) (*Reply, error) {
+func (c *agentClient) ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*Reply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, Agent_UpdateModel_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Agent_ListConversations_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *agentClient) DeleteModel(ctx context.Context, in *DeleteModelReq, opts ...grpc.CallOption) (*Reply, error) {
+func (c *agentClient) ListTopics(ctx context.Context, in *ListTopicsReq, opts ...grpc.CallOption) (*Reply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, Agent_DeleteModel_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Agent_ListTopics_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *agentClient) ListModels(ctx context.Context, in *ListModelsReq, opts ...grpc.CallOption) (*Reply, error) {
+func (c *agentClient) ListMessages(ctx context.Context, in *ListMessagesReq, opts ...grpc.CallOption) (*Reply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, Agent_ListModels_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Agent_ListMessages_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -126,16 +118,19 @@ func (c *agentClient) ListModels(ctx context.Context, in *ListModelsReq, opts ..
 // All implementations must embed UnimplementedAgentServer
 // for forward compatibility.
 //
-// 内部服务。库、LangChain、队列消费都在实现这个接口的进程里。
-// agent_api 只做 HTTP 转发。datasync 以后也调这里补历史，不调 HTTP。
+// 内部服务。有进程内态的方法 + 同步拉取（结果走 Reply.result_json）。
+// 权威定义在 beaver-agent/agent_server/grpc/agent/agent_rpc.proto，两边须保持一致。
 type AgentServer interface {
 	SendMessage(context.Context, *SendMessageReq) (*Reply, error)
-	ListMessages(context.Context, *ListMessagesReq) (*Reply, error)
 	SubmitHostResult(context.Context, *SubmitHostResultReq) (*Reply, error)
-	CreateModel(context.Context, *CreateModelReq) (*Reply, error)
-	UpdateModel(context.Context, *UpdateModelReq) (*Reply, error)
-	DeleteModel(context.Context, *DeleteModelReq) (*Reply, error)
-	ListModels(context.Context, *ListModelsReq) (*Reply, error)
+	// 模型改/删后通知 rpc 进程作废缓存实例(跨进程失效)。
+	InvalidateModel(context.Context, *InvalidateModelReq) (*Reply, error)
+	// 桌面 datasync：增量列会话（since = 本地游标 version）
+	ListConversations(context.Context, *ListConversationsReq) (*Reply, error)
+	// 列某会话下话题
+	ListTopics(context.Context, *ListTopicsReq) (*Reply, error)
+	// 某话题消息增量（after_version）
+	ListMessages(context.Context, *ListMessagesReq) (*Reply, error)
 	mustEmbedUnimplementedAgentServer()
 }
 
@@ -149,23 +144,20 @@ type UnimplementedAgentServer struct{}
 func (UnimplementedAgentServer) SendMessage(context.Context, *SendMessageReq) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedAgentServer) ListMessages(context.Context, *ListMessagesReq) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMessages not implemented")
-}
 func (UnimplementedAgentServer) SubmitHostResult(context.Context, *SubmitHostResultReq) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitHostResult not implemented")
 }
-func (UnimplementedAgentServer) CreateModel(context.Context, *CreateModelReq) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateModel not implemented")
+func (UnimplementedAgentServer) InvalidateModel(context.Context, *InvalidateModelReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InvalidateModel not implemented")
 }
-func (UnimplementedAgentServer) UpdateModel(context.Context, *UpdateModelReq) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateModel not implemented")
+func (UnimplementedAgentServer) ListConversations(context.Context, *ListConversationsReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListConversations not implemented")
 }
-func (UnimplementedAgentServer) DeleteModel(context.Context, *DeleteModelReq) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteModel not implemented")
+func (UnimplementedAgentServer) ListTopics(context.Context, *ListTopicsReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTopics not implemented")
 }
-func (UnimplementedAgentServer) ListModels(context.Context, *ListModelsReq) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListModels not implemented")
+func (UnimplementedAgentServer) ListMessages(context.Context, *ListMessagesReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMessages not implemented")
 }
 func (UnimplementedAgentServer) mustEmbedUnimplementedAgentServer() {}
 func (UnimplementedAgentServer) testEmbeddedByValue()               {}
@@ -206,24 +198,6 @@ func _Agent_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Agent_ListMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMessagesReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AgentServer).ListMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Agent_ListMessages_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentServer).ListMessages(ctx, req.(*ListMessagesReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Agent_SubmitHostResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SubmitHostResultReq)
 	if err := dec(in); err != nil {
@@ -242,74 +216,74 @@ func _Agent_SubmitHostResult_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Agent_CreateModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateModelReq)
+func _Agent_InvalidateModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InvalidateModelReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AgentServer).CreateModel(ctx, in)
+		return srv.(AgentServer).InvalidateModel(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Agent_CreateModel_FullMethodName,
+		FullMethod: Agent_InvalidateModel_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentServer).CreateModel(ctx, req.(*CreateModelReq))
+		return srv.(AgentServer).InvalidateModel(ctx, req.(*InvalidateModelReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Agent_UpdateModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateModelReq)
+func _Agent_ListConversations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListConversationsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AgentServer).UpdateModel(ctx, in)
+		return srv.(AgentServer).ListConversations(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Agent_UpdateModel_FullMethodName,
+		FullMethod: Agent_ListConversations_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentServer).UpdateModel(ctx, req.(*UpdateModelReq))
+		return srv.(AgentServer).ListConversations(ctx, req.(*ListConversationsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Agent_DeleteModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteModelReq)
+func _Agent_ListTopics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTopicsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AgentServer).DeleteModel(ctx, in)
+		return srv.(AgentServer).ListTopics(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Agent_DeleteModel_FullMethodName,
+		FullMethod: Agent_ListTopics_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentServer).DeleteModel(ctx, req.(*DeleteModelReq))
+		return srv.(AgentServer).ListTopics(ctx, req.(*ListTopicsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Agent_ListModels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListModelsReq)
+func _Agent_ListMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMessagesReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AgentServer).ListModels(ctx, in)
+		return srv.(AgentServer).ListMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Agent_ListModels_FullMethodName,
+		FullMethod: Agent_ListMessages_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentServer).ListModels(ctx, req.(*ListModelsReq))
+		return srv.(AgentServer).ListMessages(ctx, req.(*ListMessagesReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -326,28 +300,24 @@ var Agent_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Agent_SendMessage_Handler,
 		},
 		{
-			MethodName: "ListMessages",
-			Handler:    _Agent_ListMessages_Handler,
-		},
-		{
 			MethodName: "SubmitHostResult",
 			Handler:    _Agent_SubmitHostResult_Handler,
 		},
 		{
-			MethodName: "CreateModel",
-			Handler:    _Agent_CreateModel_Handler,
+			MethodName: "InvalidateModel",
+			Handler:    _Agent_InvalidateModel_Handler,
 		},
 		{
-			MethodName: "UpdateModel",
-			Handler:    _Agent_UpdateModel_Handler,
+			MethodName: "ListConversations",
+			Handler:    _Agent_ListConversations_Handler,
 		},
 		{
-			MethodName: "DeleteModel",
-			Handler:    _Agent_DeleteModel_Handler,
+			MethodName: "ListTopics",
+			Handler:    _Agent_ListTopics_Handler,
 		},
 		{
-			MethodName: "ListModels",
-			Handler:    _Agent_ListModels_Handler,
+			MethodName: "ListMessages",
+			Handler:    _Agent_ListMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
