@@ -118,7 +118,7 @@ message CanSendGroupMessageRes {
   string reason = 2;
 }
 
-// 添加群成员（供开放平台 Robot 入群等内部调用）
+// 添加群成员（供开放平台 Digital 入群等内部调用）
 message AddGroupMemberReq {
   string group_id = 1; // string 群组 ID
   string user_id = 2; // string 要加入的用户 ID

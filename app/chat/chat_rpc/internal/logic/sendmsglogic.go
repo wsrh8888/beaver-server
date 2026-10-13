@@ -317,7 +317,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	conversationType, userIds := conversation.ParseConversationWithType(in.ConversationId)
 
 	if conversationType == 1 {
-		// 私聊需要验证好友关系（与 Robot 对话时跳过）
+		// 私聊需要验证好友关系（与 Digital 对话时跳过）
 		if !strings.Contains(in.ConversationId, in.UserId) {
 			l.logger.Error(model.LogMsg{Text: "用户id不匹配", Data: map[string]interface{}{"userId": in.UserId, "conversationId": in.ConversationId}})
 			return nil, errors.New("异常操作")
@@ -328,10 +328,10 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 			return nil, errors.New("无效的私聊会话ID")
 		}
 
-		skipFriendCheck := isOpenRobotSender(in.DeviceId)
+		skipFriendCheck := isOpenDigitalSender(in.DeviceId)
 		if !skipFriendCheck {
 			for _, uid := range userIds {
-				if uid != in.UserId && isRobotPeer(l.ctx, l.svcCtx.OpenRpc, uid) {
+				if uid != in.UserId && isDigitalPeer(l.ctx, l.svcCtx.OpenRpc, uid) {
 					skipFriendCheck = true
 					break
 				}
@@ -470,7 +470,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	}()
 
 	// 6. 异步推送机器人事件（投 MQ，由 open_api 的长连接消费者下发）
-	go newRobotEventPusher(context.Background(), l.svcCtx).tryPush(in, msg)
+	go newDigitalEventPusher(context.Background(), l.svcCtx).tryPush(in, msg)
 
 	l.logger.Info(model.LogMsg{
 		Text: "消息发送成功",

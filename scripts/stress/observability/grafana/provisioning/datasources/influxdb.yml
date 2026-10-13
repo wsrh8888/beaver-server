@@ -1,0 +1,12 @@
+# Grafana 数据源自动注入：k6 写入的 InfluxDB
+# 启动 docker compose 后 Grafana 自动配置好，无需手动加数据源。
+apiVersion: 1
+
+datasources:
+  - name: k6-influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: k6
+    isDefault: true
+    editable: true

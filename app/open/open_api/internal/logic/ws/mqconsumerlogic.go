@@ -43,7 +43,7 @@ import (
 // 事件由 chat_rpc 在消息落库后投递到 MqTopicWsBot，payload 形如：
 //
 //	{
-//	  "targetId":       "<robotId>",              // 路由键：机器人的 IM 用户 ID
+//	  "targetId":       "<digitalId>",              // 路由键：机器人的 IM 用户 ID
 //	  "command":        "CHAT_MESSAGE",
 //	  "type":           "im.message.receive",     // 事件类型
 //	  "conversationId": "private_a_b",
@@ -95,7 +95,7 @@ func (l *MqConsumerLogic) StartConsumer() error {
 		if !ws_conn.IsOnline(targetID) {
 			l.logger.Info(model.LogMsg{
 				Text: "机器人当前无连接事件已丢弃",
-				Data: map[string]any{"robotId": targetID},
+				Data: map[string]any{"digitalId": targetID},
 			})
 			return nil
 		}
@@ -120,12 +120,12 @@ func (l *MqConsumerLogic) StartConsumer() error {
 
 		body, ok := msg.Payload["body"]
 		if !ok || body == nil {
-			l.logger.Error(model.LogMsg{Text: "机器人事件缺少body", Data: map[string]any{"robotId": targetID}})
+			l.logger.Error(model.LogMsg{Text: "机器人事件缺少body", Data: map[string]any{"digitalId": targetID}})
 			return nil
 		}
 		bodyBytes, err := json.Marshal(body)
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "序列化机器人事件body失败", Data: map[string]any{"robotId": targetID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "序列化机器人事件body失败", Data: map[string]any{"digitalId": targetID, "err": err.Error()}})
 			return err
 		}
 
@@ -139,7 +139,7 @@ func (l *MqConsumerLogic) StartConsumer() error {
 			},
 		}
 
-		ws_conn.SendMsgToRobot(targetID, wsCommandConst.Command(command), content)
+		ws_conn.SendMsgToDigital(targetID, wsCommandConst.Command(command), content)
 		return nil
 	}
 

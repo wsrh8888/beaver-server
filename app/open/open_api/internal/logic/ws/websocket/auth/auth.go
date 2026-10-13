@@ -30,22 +30,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// RobotIdentity 机器人建连鉴权结果
-type RobotIdentity struct {
-	AppID   string // 应用 ID（接入方身份）
-	RobotID string // 机器人 IM 用户 ID（事件路由目标）
+// DigitalIdentity 外接数字伙伴建连鉴权结果。
+type DigitalIdentity struct {
+	AppID     string // 应用 ID
+	DigitalID string // 数字伙伴 PartnerID = IM 用户 ID
 }
 
-// VerifyRobotToken 校验机器人建连凭据，返回该连接代表的机器人身份。
-//
-// 凭据：appId + ticket。ticket 复用开放平台 OAPI 的 accessToken
-// （POST /api/open/auth_public/v1/token 获取），因此服务端无需新增鉴权接口。
-//
-// 校验链：ticket 有效 → ticket 归属该 appId → 应用处于启用状态 → 应用已开启机器人能力。
-//
-// 与用户侧 ws_api 的 VerifyWsToken 完全分离：机器人没有用户登录态，
-// 那条链路依赖 Redis 的 user_authentication_session:*，不可复用。
-func VerifyRobotToken(db *gorm.DB, appID, ticket string) (*RobotIdentity, error) {
+// VerifyDigitalToken 校验建连凭据：ticket → app → 外接数字伙伴。
+func VerifyDigitalToken(db *gorm.DB, appID, ticket string) (*DigitalIdentity, error) {
 	if appID == "" {
 		return nil, errors.New("缺少 appId")
 	}
@@ -69,13 +61,16 @@ func VerifyRobotToken(db *gorm.DB, appID, ticket string) (*RobotIdentity, error)
 		return nil, err
 	}
 
-	var robot open_models.OpenRobot
-	if err = db.Where("app_id = ? AND status = 1", appID).First(&robot).Error; err != nil {
-		return nil, errors.New("该应用未开启机器人能力")
+	var partner open_models.OpenDigitalPartner
+	if err = db.Where(
+		"app_id = ? AND runtime = ? AND status = 1",
+		appID, open_models.PartnerRuntimeExternal,
+	).First(&partner).Error; err != nil {
+		return nil, errors.New("该应用未挂接外接数字伙伴")
 	}
-	if robot.RobotID == "" {
-		return nil, errors.New("机器人身份未就绪")
+	if partner.PartnerID == "" {
+		return nil, errors.New("数字伙伴身份未就绪")
 	}
 
-	return &RobotIdentity{AppID: appID, RobotID: robot.RobotID}, nil
+	return &DigitalIdentity{AppID: appID, DigitalID: partner.PartnerID}, nil
 }

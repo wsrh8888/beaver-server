@@ -99,7 +99,7 @@ func (l *GetOpenAppListLogic) GetOpenAppList(req *types.GetOpenAppListReq) (resp
 			AuditStatus:   int(app.AuditStatus),
 			AuditedBy:     app.AuditedBy,
 			AuditedAt:     app.AuditedAt,
-			EnableRobot:   int(app.EnableRobot),
+			EnableDigital:   int(app.EnableDigital),
 			EnableOAuth:   int(app.EnableOauth),
 			EnableWebhook: int(app.EnableWebhook),
 			CreatedAt:     app.CreatedAt,

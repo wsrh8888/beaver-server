@@ -29,7 +29,7 @@ const (
 	Open_GetBotInfo_FullMethodName            = "/open_rpc.open/GetBotInfo"
 	Open_UpdateBot_FullMethodName             = "/open_rpc.open/UpdateBot"
 	Open_SaveWebhookLog_FullMethodName        = "/open_rpc.open/SaveWebhookLog"
-	Open_GetRobotByUserID_FullMethodName      = "/open_rpc.open/GetRobotByUserID"
+	Open_GetDigitalByUserID_FullMethodName    = "/open_rpc.open/GetDigitalByUserID"
 	Open_DispatchPlatformEvent_FullMethodName = "/open_rpc.open/DispatchPlatformEvent"
 	Open_ApplyDeveloper_FullMethodName        = "/open_rpc.open/ApplyDeveloper"
 	Open_GetDeveloperByUserID_FullMethodName  = "/open_rpc.open/GetDeveloperByUserID"
@@ -55,7 +55,7 @@ type OpenClient interface {
 	GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 	UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
 	SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
-	GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
+	GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error)
 	DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
 	ApplyDeveloper(ctx context.Context, in *ApplyDeveloperReq, opts ...grpc.CallOption) (*ApplyDeveloperRes, error)
 	GetDeveloperByUserID(ctx context.Context, in *GetDeveloperByUserIDReq, opts ...grpc.CallOption) (*GetDeveloperByUserIDRes, error)
@@ -175,10 +175,10 @@ func (c *openClient) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, 
 	return out, nil
 }
 
-func (c *openClient) GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error) {
+func (c *openClient) GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRobotByUserIDRes)
-	err := c.cc.Invoke(ctx, Open_GetRobotByUserID_FullMethodName, in, out, cOpts...)
+	out := new(GetDigitalByUserIDRes)
+	err := c.cc.Invoke(ctx, Open_GetDigitalByUserID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ type OpenServer interface {
 	GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error)
 	UpdateBot(context.Context, *UpdateBotReq) (*UpdateBotRes, error)
 	SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error)
-	GetRobotByUserID(context.Context, *GetRobotByUserIDReq) (*GetRobotByUserIDRes, error)
+	GetDigitalByUserID(context.Context, *GetDigitalByUserIDReq) (*GetDigitalByUserIDRes, error)
 	DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error)
 	ApplyDeveloper(context.Context, *ApplyDeveloperReq) (*ApplyDeveloperRes, error)
 	GetDeveloperByUserID(context.Context, *GetDeveloperByUserIDReq) (*GetDeveloperByUserIDRes, error)
@@ -339,8 +339,8 @@ func (UnimplementedOpenServer) UpdateBot(context.Context, *UpdateBotReq) (*Updat
 func (UnimplementedOpenServer) SaveWebhookLog(context.Context, *SaveWebhookLogReq) (*SaveWebhookLogRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveWebhookLog not implemented")
 }
-func (UnimplementedOpenServer) GetRobotByUserID(context.Context, *GetRobotByUserIDReq) (*GetRobotByUserIDRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRobotByUserID not implemented")
+func (UnimplementedOpenServer) GetDigitalByUserID(context.Context, *GetDigitalByUserIDReq) (*GetDigitalByUserIDRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDigitalByUserID not implemented")
 }
 func (UnimplementedOpenServer) DispatchPlatformEvent(context.Context, *DispatchPlatformEventReq) (*DispatchPlatformEventRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DispatchPlatformEvent not implemented")
@@ -570,20 +570,20 @@ func _Open_SaveWebhookLog_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Open_GetRobotByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRobotByUserIDReq)
+func _Open_GetDigitalByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDigitalByUserIDReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OpenServer).GetRobotByUserID(ctx, in)
+		return srv.(OpenServer).GetDigitalByUserID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Open_GetRobotByUserID_FullMethodName,
+		FullMethod: Open_GetDigitalByUserID_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OpenServer).GetRobotByUserID(ctx, req.(*GetRobotByUserIDReq))
+		return srv.(OpenServer).GetDigitalByUserID(ctx, req.(*GetDigitalByUserIDReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -798,8 +798,8 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Open_SaveWebhookLog_Handler,
 		},
 		{
-			MethodName: "GetRobotByUserID",
-			Handler:    _Open_GetRobotByUserID_Handler,
+			MethodName: "GetDigitalByUserID",
+			Handler:    _Open_GetDigitalByUserID_Handler,
 		},
 		{
 			MethodName: "DispatchPlatformEvent",

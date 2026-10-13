@@ -36,27 +36,27 @@ import (
 // 保证 MQ payload 形状一致 —— open_api 侧的长连接消费者依赖这个形状解析并下发。
 //
 // 参数：
-//   - robotID        机器人 IM 用户 ID。既是路由键（open_api 的连接注册表按 robotId 索引），
-//                    也是事件归属的机器人。
+//   - digitalID      数字伙伴 IM 用户 ID。既是路由键（open_api 的连接注册表按 digitalId 索引），
+//                    也是事件归属的数字伙伴。
 //   - eventType      事件类型，取值见本包 Event* 常量。会作为 WS 帧的 data.type 下发。
 //   - conversationID 会话 ID。消息类事件必填；关系类事件（关注/取关/进群/出群）可传空串。
 //   - body           事件体，原样进入 WS 帧的 content.data.body。
 //
 // 投递后由 open_api 的消费者在本地连接表中查找该机器人：有连接则推送，无连接则丢弃
 // （长连接模式下「没连上」即「对方离线」，离线期间事件不补推）。
-func Push(ctx context.Context, mq *corerocketmq.Client, robotID, eventType, conversationID string, body map[string]interface{}) error {
+func Push(ctx context.Context, mq *corerocketmq.Client, digitalID, eventType, conversationID string, body map[string]interface{}) error {
 	if mq == nil {
 		return errors.New("RocketMQ 未初始化")
 	}
-	if robotID == "" {
-		return errors.New("缺少 robotId")
+	if digitalID == "" {
+		return errors.New("缺少 digitalId")
 	}
 	if eventType == "" {
 		return errors.New("缺少 eventType")
 	}
 
 	return mq.SendMessage(ctx, mqwsconst.MqTopicWsBot, map[string]interface{}{
-		"targetId":       robotID,
+		"targetId":       digitalID,
 		"command":        string(wsCommandConst.CHAT_MESSAGE),
 		"type":           eventType,
 		"conversationId": conversationID,

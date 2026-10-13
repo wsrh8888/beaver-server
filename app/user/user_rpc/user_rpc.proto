@@ -9,7 +9,7 @@ message UserCreateReq {
   int32 source = 2; // 注册来源：1-手机号注册，2-邮箱注册
   string email = 3; // 邮箱（与phone二选一）
   string nick_name = 4; // 昵称（可选）
-  int32 user_type = 5; // 用户类型：1-普通用户，2-bot，3-robot（可选，默认1）
+  int32 user_type = 5; // 用户类型：1-普通用户，2-bot，3-digital（可选，默认1）
   string abstract = 6; // 个性签名（可选）
 }
 
@@ -121,7 +121,7 @@ message SearchUserRes {
   UserInfo user_info = 1; // 用户信息
 }
 
-// 更新用户展示信息（昵称/头像，供开放平台 Robot/Bot 等内部服务调用）
+// 更新用户展示信息（昵称/头像，供开放平台 Digital/Bot 等内部服务调用）
 message UserUpdateDisplayReq {
   string user_id = 1; // string IM 用户 ID
   string nick_name = 2; // string 新昵称，空表示不修改

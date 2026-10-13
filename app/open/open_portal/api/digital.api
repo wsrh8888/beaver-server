@@ -1,0 +1,45 @@
+syntax = "v1"
+
+// ==================== 外接数字伙伴 Digital ====================
+
+type (
+	GetDigitalConfigReq {
+		AppID  string `form:"appId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DigitalConfigInfo {
+		AppID       string `json:"appId"`
+		DigitalID   string `json:"digitalId"` // PartnerID = IM 用户 ID
+		DigitalName string `json:"digitalName"`
+		Avatar      string `json:"avatar,optional"`
+		Status      int    `json:"status"` // 1启用 2停用
+	}
+	GetDigitalConfigRes {
+		Config DigitalConfigInfo `json:"config"`
+	}
+)
+
+type (
+	UpdateDigitalConfigReq {
+		AppID       string `json:"appId"`
+		DigitalName string `json:"digitalName,optional"`
+		Avatar      string `json:"avatar,optional"`
+		Status      *int   `json:"status,optional"` // 1启用 2停用
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	UpdateDigitalConfigRes {}
+)
+
+@server (
+	group: digital
+	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
+)
+service open {
+	@doc "获取外接数字伙伴配置"
+	@handler GetDigitalConfig
+	get /api/open_portal/digital/v1/config (GetDigitalConfigReq) returns (GetDigitalConfigRes)
+
+	@doc "更新外接数字伙伴配置"
+	@handler UpdateDigitalConfig
+	post /api/open_portal/digital/v1/config_update (UpdateDigitalConfigReq) returns (UpdateDigitalConfigRes)
+}

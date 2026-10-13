@@ -55,7 +55,7 @@ type (
 		AppID           string `form:"appId,optional"`
 		Status          int    `form:"status,optional"`          // 0全部 1草稿 2已发布 3禁用
 		AuditStatus     int    `form:"auditStatus,optional"`     // 0全部 1待审核 2已通过 3已拒绝
-		CapabilityType  int    `form:"capabilityType,optional"`  // 0全部 1Robot 2Webhook 3Robot或Webhook
+		CapabilityType  int    `form:"capabilityType,optional"`  // 0全部 1Digital 2Webhook 3Digital或Webhook
 	}
 	GetOpenAppListRes {
 		Total int64         `json:"total"`
@@ -74,7 +74,7 @@ type (
 		AuditStatus   int    `json:"auditStatus"`
 		AuditedBy     string `json:"auditedBy"`
 		AuditedAt     int64  `json:"auditedAt"`
-		EnableRobot   int    `json:"enableRobot"`
+		EnableDigital   int    `json:"enableDigital"`
 		EnableOAuth   int    `json:"enableOAuth"`
 		EnableWebhook int    `json:"enableWebhook"`
 		CreatedAt     int64  `json:"createdAt"`

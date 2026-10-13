@@ -333,7 +333,7 @@ type Sender struct {
 	UserID   string `json:"userId"`
 	Avatar   string `json:"avatar"`
 	NickName string `json:"nickName"`
-	UserType int8   `json:"userType"` // 1普通用户 2bot 3robot
+	UserType int8   `json:"userType"` // 1普通用户 2bot 3digital
 }
 
 type TextMsg struct {

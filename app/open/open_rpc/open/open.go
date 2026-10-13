@@ -34,8 +34,8 @@ type (
 	GetDeveloperByUserIDRes  = open_rpc.GetDeveloperByUserIDRes
 	GetDeveloperReq          = open_rpc.GetDeveloperReq
 	GetDeveloperRes          = open_rpc.GetDeveloperRes
-	GetRobotByUserIDReq      = open_rpc.GetRobotByUserIDReq
-	GetRobotByUserIDRes      = open_rpc.GetRobotByUserIDRes
+	GetDigitalByUserIDReq    = open_rpc.GetDigitalByUserIDReq
+	GetDigitalByUserIDRes    = open_rpc.GetDigitalByUserIDRes
 	GetUserInfoReq           = open_rpc.GetUserInfoReq
 	GetUserInfoRes           = open_rpc.GetUserInfoRes
 	ListDevelopersReq        = open_rpc.ListDevelopersReq
@@ -70,7 +70,7 @@ type (
 		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 		UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
 		SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq, opts ...grpc.CallOption) (*SaveWebhookLogRes, error)
-		GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error)
+		GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error)
 		DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error)
 		ApplyDeveloper(ctx context.Context, in *ApplyDeveloperReq, opts ...grpc.CallOption) (*ApplyDeveloperRes, error)
 		GetDeveloperByUserID(ctx context.Context, in *GetDeveloperByUserIDReq, opts ...grpc.CallOption) (*GetDeveloperByUserIDRes, error)
@@ -143,9 +143,9 @@ func (m *defaultOpen) SaveWebhookLog(ctx context.Context, in *SaveWebhookLogReq,
 	return client.SaveWebhookLog(ctx, in, opts...)
 }
 
-func (m *defaultOpen) GetRobotByUserID(ctx context.Context, in *GetRobotByUserIDReq, opts ...grpc.CallOption) (*GetRobotByUserIDRes, error) {
+func (m *defaultOpen) GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
-	return client.GetRobotByUserID(ctx, in, opts...)
+	return client.GetDigitalByUserID(ctx, in, opts...)
 }
 
 func (m *defaultOpen) DispatchPlatformEvent(ctx context.Context, in *DispatchPlatformEventReq, opts ...grpc.CallOption) (*DispatchPlatformEventRes, error) {

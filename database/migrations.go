@@ -31,6 +31,7 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
+	"beaver/app/media/media_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
@@ -152,16 +153,25 @@ func AllMigrations() []Migration {
 			},
 		},
 		{
+			Name: "beaver_media",
+			Models: []any{
+				&media_models.MediaJob{},
+				&media_models.MediaArtifact{},
+				&media_models.MediaSpeechSession{},
+			},
+		},
+		{
 			Name: "beaver_open",
 			Models: []any{
-				&open_models.OpenDeveloper{},
 				&open_models.OpenApp{},
 				&open_models.OpenOAuthConfig{},
-				&open_models.OpenRobot{},
 				&open_models.OpenOAuthToken{},
 				&open_models.OpenOAuthCode{},
 				&open_models.OpenOAuthQrCode{},
 				&open_models.OpenBotModel{},
+				&open_models.OpenDigitalPartner{},
+				&open_models.OpenDigitalPartnerAdmin{},
+				&open_models.OpenDigitalPartnerViewer{},
 			},
 			Init: openseed.InitQuickLoginApp,
 		},

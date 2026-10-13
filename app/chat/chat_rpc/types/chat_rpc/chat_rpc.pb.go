@@ -1365,7 +1365,7 @@ type Sender struct {
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Avatar        string                 `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	NickName      string                 `protobuf:"bytes,3,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`
-	UserType      int32                  `protobuf:"varint,4,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // 1普通用户 2bot 3robot
+	UserType      int32                  `protobuf:"varint,4,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // 1普通用户 2bot 3digital
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

@@ -32,13 +32,13 @@ import (
 
 var logger = beaverlog.New("open_ws_conn")
 
-// BotOnlineWsMap 机器人连接注册表，key: robotID（= OpenRobot.RobotID = IM 用户 ID）
+// BotOnlineWsMap 数字伙伴连接注册表，key: partnerID（= OpenDigitalPartner.PartnerID = IM 用户 ID）
 //
 // 刻意与用户侧 ws_api 的 UserOnlineWsMap 完全分离，原因：
 //  1. 机器人不是「在线用户」，混入会污染 coreonline 在线态与后台在线统计
 //  2. 用户侧推送是 O(N) 全表扫描，混入只会放大开销
 //
-// 索引直接用 robotID 而非前缀匹配，命中是 O(1)。
+// 索引直接用 digitalID 而非前缀匹配，命中是 O(1)。
 var (
 	BotOnlineWsMap = make(map[string]*BotWsInfo)
 	BotWsMapMutex  sync.RWMutex
@@ -51,16 +51,16 @@ type BotWsInfo struct {
 
 // Register 注册一条机器人连接。
 // 同一机器人重复建连时踢掉旧连接（一个机器人实例一条连接），返回被踢掉的数量。
-func Register(robotID string, client *Client) int {
+func Register(digitalID string, client *Client) int {
 	BotWsMapMutex.Lock()
 	defer BotWsMapMutex.Unlock()
 
 	addr := client.Conn.RemoteAddr().String()
 	kicked := 0
 
-	info, ok := BotOnlineWsMap[robotID]
+	info, ok := BotOnlineWsMap[digitalID]
 	if !ok {
-		BotOnlineWsMap[robotID] = &BotWsInfo{
+		BotOnlineWsMap[digitalID] = &BotWsInfo{
 			WsClientMap: map[string]*Client{addr: client},
 		}
 		return 0
@@ -72,7 +72,7 @@ func Register(robotID string, client *Client) int {
 		}
 		logger.Info(model.LogMsg{
 			Text: "机器人重复建连关闭旧连接",
-			Data: map[string]any{"robotId": robotID, "oldAddr": oldAddr},
+			Data: map[string]any{"digitalId": digitalID, "oldAddr": oldAddr},
 		})
 		_ = oldClient.Conn.Close()
 		delete(info.WsClientMap, oldAddr)
@@ -83,35 +83,35 @@ func Register(robotID string, client *Client) int {
 }
 
 // Unregister 注销一条机器人连接；连接全部断开时删除该机器人的条目。
-func Unregister(robotID, addr string) {
+func Unregister(digitalID, addr string) {
 	BotWsMapMutex.Lock()
 	defer BotWsMapMutex.Unlock()
 
-	info, ok := BotOnlineWsMap[robotID]
+	info, ok := BotOnlineWsMap[digitalID]
 	if !ok {
 		return
 	}
 	delete(info.WsClientMap, addr)
 	if len(info.WsClientMap) == 0 {
-		delete(BotOnlineWsMap, robotID)
+		delete(BotOnlineWsMap, digitalID)
 	}
 }
 
-// IsOnline 判断机器人当前是否有活跃连接（供事件生产侧判断投递方式）
-func IsOnline(robotID string) bool {
+// IsOnline 判断数字伙伴当前是否有活跃连接（供事件生产侧判断投递方式）
+func IsOnline(digitalID string) bool {
 	BotWsMapMutex.RLock()
 	defer BotWsMapMutex.RUnlock()
 
-	info, ok := BotOnlineWsMap[robotID]
+	info, ok := BotOnlineWsMap[digitalID]
 	return ok && len(info.WsClientMap) > 0
 }
 
-// SendMsgToRobot 把事件推送给指定机器人的所有活跃连接。
+// SendMsgToDigital 把事件推送给指定数字伙伴的所有活跃连接。
 // 先在读锁下收集目标连接，再释放锁后发送，避免在锁内写 WebSocket。
-func SendMsgToRobot(robotID string, command wsCommandConst.Command, content type_struct.WsContent) {
+func SendMsgToDigital(digitalID string, command wsCommandConst.Command, content type_struct.WsContent) {
 	BotWsMapMutex.RLock()
 	var targets []*Client
-	if info, ok := BotOnlineWsMap[robotID]; ok {
+	if info, ok := BotOnlineWsMap[digitalID]; ok {
 		for _, client := range info.WsClientMap {
 			targets = append(targets, client)
 		}
@@ -122,7 +122,7 @@ func SendMsgToRobot(robotID string, command wsCommandConst.Command, content type
 		if err := client.SafeSend(command, content); err != nil {
 			logger.Error(model.LogMsg{
 				Text: "推送事件给机器人失败",
-				Data: map[string]any{"robotId": robotID, "err": err.Error()},
+				Data: map[string]any{"digitalId": digitalID, "err": err.Error()},
 			})
 		}
 	}

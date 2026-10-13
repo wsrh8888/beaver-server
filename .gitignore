@@ -8,5 +8,6 @@ logs/
 # 压测本地配置（含密码，勿提交）
 scripts/stress/.env
 scripts/stress/accounts.json
+scripts/stress/friends.json
 scripts/stress/**/report.json
-scripts/stress/**/report.html
+scripts/stress/data/

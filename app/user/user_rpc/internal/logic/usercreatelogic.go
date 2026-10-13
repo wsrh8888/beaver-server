@@ -122,8 +122,8 @@ func (l *UserCreateLogic) initializeRedisCounter() error {
 }
 
 func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.UserCreateRes, error) {
-	// 验证必填字段（机器人/Robot 用户不需要联系方式）
-	isSystemUser := in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeRobot)
+	// 验证必填字段（Bot / Digital 用户不需要联系方式）
+	isSystemUser := in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeDigital)
 	if !isSystemUser {
 		if in.Phone == "" && in.Email == "" {
 			return nil, errors.New("手机号或邮箱至少需要提供一个")
@@ -163,9 +163,9 @@ func (l *UserCreateLogic) UserCreate(in *user_rpc.UserCreateReq) (*user_rpc.User
 		nickName = in.NickName
 	}
 
-	// 生成用户ID（普通用户用递增数字，机器人/Robot 用 UUID）
+	// 生成用户ID（普通用户用递增数字，Bot / Digital 用 UUID）
 	var userID string
-	if in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeRobot) {
+	if in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeDigital) {
 		// 机器人用户：生成 UUID 格式的 ID
 		userID = uuidUtil.NewV4().String()
 	} else {

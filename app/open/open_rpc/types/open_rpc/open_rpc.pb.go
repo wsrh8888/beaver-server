@@ -1171,28 +1171,28 @@ func (*SaveWebhookLogRes) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{20}
 }
 
-// 根据 IM 用户 ID 反查智能机器人
-type GetRobotByUserIDReq struct {
+// 根据 IM 用户 ID 反查外接数字伙伴
+type GetDigitalByUserIDReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RobotUserId   string                 `protobuf:"bytes,1,opt,name=robot_user_id,json=robotUserId,proto3" json:"robot_user_id,omitempty"` // string Robot 的 IM 用户 ID
+	DigitalUserId string                 `protobuf:"bytes,1,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"` // string Digital 的 IM 用户 ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetRobotByUserIDReq) Reset() {
-	*x = GetRobotByUserIDReq{}
+func (x *GetDigitalByUserIDReq) Reset() {
+	*x = GetDigitalByUserIDReq{}
 	mi := &file_open_rpc_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetRobotByUserIDReq) String() string {
+func (x *GetDigitalByUserIDReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetRobotByUserIDReq) ProtoMessage() {}
+func (*GetDigitalByUserIDReq) ProtoMessage() {}
 
-func (x *GetRobotByUserIDReq) ProtoReflect() protoreflect.Message {
+func (x *GetDigitalByUserIDReq) ProtoReflect() protoreflect.Message {
 	mi := &file_open_rpc_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1204,44 +1204,41 @@ func (x *GetRobotByUserIDReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetRobotByUserIDReq.ProtoReflect.Descriptor instead.
-func (*GetRobotByUserIDReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetDigitalByUserIDReq.ProtoReflect.Descriptor instead.
+func (*GetDigitalByUserIDReq) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{21}
 }
 
-func (x *GetRobotByUserIDReq) GetRobotUserId() string {
+func (x *GetDigitalByUserIDReq) GetDigitalUserId() string {
 	if x != nil {
-		return x.RobotUserId
+		return x.DigitalUserId
 	}
 	return ""
 }
 
-type GetRobotByUserIDRes struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Found            bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`                                                 // bool 是否找到对应 Robot
-	AppId            string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                                     // string 所属应用 ID
-	RobotUserId      string                 `protobuf:"bytes,3,opt,name=robot_user_id,json=robotUserId,proto3" json:"robot_user_id,omitempty"`                 // string Robot 的 IM 用户 ID
-	EnableSingleChat bool                   `protobuf:"varint,4,opt,name=enable_single_chat,json=enableSingleChat,proto3" json:"enable_single_chat,omitempty"` // bool 是否启用私聊
-	EnableGroupChat  bool                   `protobuf:"varint,5,opt,name=enable_group_chat,json=enableGroupChat,proto3" json:"enable_group_chat,omitempty"`    // bool 是否启用群聊
-	EnableAtMention  bool                   `protobuf:"varint,6,opt,name=enable_at_mention,json=enableAtMention,proto3" json:"enable_at_mention,omitempty"`    // bool 是否启用 @ 提及
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+type GetDigitalByUserIDRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Found         bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`                                       // bool 是否找到对应 Digital
+	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                           // string 所属应用 ID
+	DigitalUserId string                 `protobuf:"bytes,3,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"` // string Digital 的 IM 用户 ID（PartnerID）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetRobotByUserIDRes) Reset() {
-	*x = GetRobotByUserIDRes{}
+func (x *GetDigitalByUserIDRes) Reset() {
+	*x = GetDigitalByUserIDRes{}
 	mi := &file_open_rpc_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetRobotByUserIDRes) String() string {
+func (x *GetDigitalByUserIDRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetRobotByUserIDRes) ProtoMessage() {}
+func (*GetDigitalByUserIDRes) ProtoMessage() {}
 
-func (x *GetRobotByUserIDRes) ProtoReflect() protoreflect.Message {
+func (x *GetDigitalByUserIDRes) ProtoReflect() protoreflect.Message {
 	mi := &file_open_rpc_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1253,51 +1250,30 @@ func (x *GetRobotByUserIDRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetRobotByUserIDRes.ProtoReflect.Descriptor instead.
-func (*GetRobotByUserIDRes) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetDigitalByUserIDRes.ProtoReflect.Descriptor instead.
+func (*GetDigitalByUserIDRes) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *GetRobotByUserIDRes) GetFound() bool {
+func (x *GetDigitalByUserIDRes) GetFound() bool {
 	if x != nil {
 		return x.Found
 	}
 	return false
 }
 
-func (x *GetRobotByUserIDRes) GetAppId() string {
+func (x *GetDigitalByUserIDRes) GetAppId() string {
 	if x != nil {
 		return x.AppId
 	}
 	return ""
 }
 
-func (x *GetRobotByUserIDRes) GetRobotUserId() string {
+func (x *GetDigitalByUserIDRes) GetDigitalUserId() string {
 	if x != nil {
-		return x.RobotUserId
+		return x.DigitalUserId
 	}
 	return ""
-}
-
-func (x *GetRobotByUserIDRes) GetEnableSingleChat() bool {
-	if x != nil {
-		return x.EnableSingleChat
-	}
-	return false
-}
-
-func (x *GetRobotByUserIDRes) GetEnableGroupChat() bool {
-	if x != nil {
-		return x.EnableGroupChat
-	}
-	return false
-}
-
-func (x *GetRobotByUserIDRes) GetEnableAtMention() bool {
-	if x != nil {
-		return x.EnableAtMention
-	}
-	return false
 }
 
 // 向应用已注册的 Webhook 推送开放平台事件
@@ -2078,7 +2054,7 @@ type OpenAppItem struct {
 	AuditStatus   int32                  `protobuf:"varint,9,opt,name=audit_status,json=auditStatus,proto3" json:"audit_status,omitempty"`        // int32 审核状态 0待审核 1已通过 2已拒绝
 	AuditedBy     string                 `protobuf:"bytes,10,opt,name=audited_by,json=auditedBy,proto3" json:"audited_by,omitempty"`              // string 审核人 ID
 	AuditedAt     int64                  `protobuf:"varint,11,opt,name=audited_at,json=auditedAt,proto3" json:"audited_at,omitempty"`             // int64 审核时间戳毫秒
-	EnableRobot   int32                  `protobuf:"varint,12,opt,name=enable_robot,json=enableRobot,proto3" json:"enable_robot,omitempty"`       // int32 是否启用 Robot
+	EnableDigital int32                  `protobuf:"varint,12,opt,name=enable_digital,json=enableDigital,proto3" json:"enable_digital,omitempty"` // int32 是否启用 Digital
 	EnableOauth   int32                  `protobuf:"varint,13,opt,name=enable_oauth,json=enableOauth,proto3" json:"enable_oauth,omitempty"`       // int32 是否启用 OAuth
 	EnableWebhook int32                  `protobuf:"varint,14,opt,name=enable_webhook,json=enableWebhook,proto3" json:"enable_webhook,omitempty"` // int32 是否启用 Webhook
 	CreatedAt     int64                  `protobuf:"varint,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`             // int64 创建时间戳毫秒
@@ -2193,9 +2169,9 @@ func (x *OpenAppItem) GetAuditedAt() int64 {
 	return 0
 }
 
-func (x *OpenAppItem) GetEnableRobot() int32 {
+func (x *OpenAppItem) GetEnableDigital() int32 {
 	if x != nil {
-		return x.EnableRobot
+		return x.EnableDigital
 	}
 	return 0
 }
@@ -2231,7 +2207,7 @@ type ListOpenAppsReq struct {
 	Status         int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                                       // int32 状态筛选，0 表示全部
 	AuditStatus    int32                  `protobuf:"varint,6,opt,name=audit_status,json=auditStatus,proto3" json:"audit_status,omitempty"`          // int32 审核状态筛选，0 表示全部
 	AppId          string                 `protobuf:"bytes,7,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                             // string 应用 ID 精确查，可选
-	CapabilityType int32                  `protobuf:"varint,8,opt,name=capability_type,json=capabilityType,proto3" json:"capability_type,omitempty"` // int32 能力筛选：0全部 1Robot 2Webhook 3Robot或Webhook
+	CapabilityType int32                  `protobuf:"varint,8,opt,name=capability_type,json=capabilityType,proto3" json:"capability_type,omitempty"` // int32 能力筛选：0全部 1Digital 2Webhook 3Digital或Webhook
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -2818,16 +2794,13 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\n" +
 	"event_type\x18\x03 \x01(\tR\teventType\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\"\x13\n" +
-	"\x11SaveWebhookLogRes\"9\n" +
-	"\x13GetRobotByUserIDReq\x12\"\n" +
-	"\rrobot_user_id\x18\x01 \x01(\tR\vrobotUserId\"\xec\x01\n" +
-	"\x13GetRobotByUserIDRes\x12\x14\n" +
+	"\x11SaveWebhookLogRes\"?\n" +
+	"\x15GetDigitalByUserIDReq\x12&\n" +
+	"\x0fdigital_user_id\x18\x01 \x01(\tR\rdigitalUserId\"l\n" +
+	"\x15GetDigitalByUserIDRes\x12\x14\n" +
 	"\x05found\x18\x01 \x01(\bR\x05found\x12\x15\n" +
-	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12\"\n" +
-	"\rrobot_user_id\x18\x03 \x01(\tR\vrobotUserId\x12,\n" +
-	"\x12enable_single_chat\x18\x04 \x01(\bR\x10enableSingleChat\x12*\n" +
-	"\x11enable_group_chat\x18\x05 \x01(\bR\x0fenableGroupChat\x12*\n" +
-	"\x11enable_at_mention\x18\x06 \x01(\bR\x0fenableAtMention\"o\n" +
+	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12&\n" +
+	"\x0fdigital_user_id\x18\x03 \x01(\tR\rdigitalUserId\"o\n" +
 	"\x18DispatchPlatformEventReq\x12\x15\n" +
 	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x1d\n" +
 	"\n" +
@@ -2884,7 +2857,7 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x19\n" +
 	"\baudit_by\x18\x03 \x01(\tR\aauditBy\x12!\n" +
 	"\faudit_remark\x18\x04 \x01(\tR\vauditRemark\"\x13\n" +
-	"\x11AuditDeveloperRes\"\xce\x03\n" +
+	"\x11AuditDeveloperRes\"\xd2\x03\n" +
 	"\vOpenAppItem\x12\x15\n" +
 	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -2899,8 +2872,8 @@ const file_open_rpc_proto_rawDesc = "" +
 	"audited_by\x18\n" +
 	" \x01(\tR\tauditedBy\x12\x1d\n" +
 	"\n" +
-	"audited_at\x18\v \x01(\x03R\tauditedAt\x12!\n" +
-	"\fenable_robot\x18\f \x01(\x05R\venableRobot\x12!\n" +
+	"audited_at\x18\v \x01(\x03R\tauditedAt\x12%\n" +
+	"\x0eenable_digital\x18\f \x01(\x05R\renableDigital\x12!\n" +
 	"\fenable_oauth\x18\r \x01(\x05R\venableOauth\x12%\n" +
 	"\x0eenable_webhook\x18\x0e \x01(\x05R\renableWebhook\x12\x1d\n" +
 	"\n" +
@@ -2953,7 +2926,7 @@ const file_open_rpc_proto_rawDesc = "" +
 	"operatorId\x12!\n" +
 	"\faudit_remark\x18\x04 \x01(\tR\vauditRemark\":\n" +
 	"\x11UpdateOpenAppsRes\x12%\n" +
-	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount2\xcc\v\n" +
+	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount2\xd2\v\n" +
 	"\x04open\x12G\n" +
 	"\rExchangeToken\x12\x1a.open_rpc.ExchangeTokenReq\x1a\x1a.open_rpc.ExchangeTokenRes\x12A\n" +
 	"\vGetUserInfo\x12\x18.open_rpc.GetUserInfoReq\x1a\x18.open_rpc.GetUserInfoRes\x12G\n" +
@@ -2965,8 +2938,8 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\n" +
 	"GetBotInfo\x12\x17.open_rpc.GetBotInfoReq\x1a\x17.open_rpc.GetBotInfoRes\x12;\n" +
 	"\tUpdateBot\x12\x16.open_rpc.UpdateBotReq\x1a\x16.open_rpc.UpdateBotRes\x12J\n" +
-	"\x0eSaveWebhookLog\x12\x1b.open_rpc.SaveWebhookLogReq\x1a\x1b.open_rpc.SaveWebhookLogRes\x12P\n" +
-	"\x10GetRobotByUserID\x12\x1d.open_rpc.GetRobotByUserIDReq\x1a\x1d.open_rpc.GetRobotByUserIDRes\x12_\n" +
+	"\x0eSaveWebhookLog\x12\x1b.open_rpc.SaveWebhookLogReq\x1a\x1b.open_rpc.SaveWebhookLogRes\x12V\n" +
+	"\x12GetDigitalByUserID\x12\x1f.open_rpc.GetDigitalByUserIDReq\x1a\x1f.open_rpc.GetDigitalByUserIDRes\x12_\n" +
 	"\x15DispatchPlatformEvent\x12\".open_rpc.DispatchPlatformEventReq\x1a\".open_rpc.DispatchPlatformEventRes\x12J\n" +
 	"\x0eApplyDeveloper\x12\x1b.open_rpc.ApplyDeveloperReq\x1a\x1b.open_rpc.ApplyDeveloperRes\x12\\\n" +
 	"\x14GetDeveloperByUserID\x12!.open_rpc.GetDeveloperByUserIDReq\x1a!.open_rpc.GetDeveloperByUserIDRes\x12D\n" +
@@ -3013,8 +2986,8 @@ var file_open_rpc_proto_goTypes = []any{
 	(*UpdateBotRes)(nil),             // 18: open_rpc.UpdateBotRes
 	(*SaveWebhookLogReq)(nil),        // 19: open_rpc.SaveWebhookLogReq
 	(*SaveWebhookLogRes)(nil),        // 20: open_rpc.SaveWebhookLogRes
-	(*GetRobotByUserIDReq)(nil),      // 21: open_rpc.GetRobotByUserIDReq
-	(*GetRobotByUserIDRes)(nil),      // 22: open_rpc.GetRobotByUserIDRes
+	(*GetDigitalByUserIDReq)(nil),    // 21: open_rpc.GetDigitalByUserIDReq
+	(*GetDigitalByUserIDRes)(nil),    // 22: open_rpc.GetDigitalByUserIDRes
 	(*DispatchPlatformEventReq)(nil), // 23: open_rpc.DispatchPlatformEventReq
 	(*DispatchPlatformEventRes)(nil), // 24: open_rpc.DispatchPlatformEventRes
 	(*DeveloperItem)(nil),            // 25: open_rpc.DeveloperItem
@@ -3055,7 +3028,7 @@ var file_open_rpc_proto_depIdxs = []int32{
 	14, // 14: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
 	17, // 15: open_rpc.open.UpdateBot:input_type -> open_rpc.UpdateBotReq
 	19, // 16: open_rpc.open.SaveWebhookLog:input_type -> open_rpc.SaveWebhookLogReq
-	21, // 17: open_rpc.open.GetRobotByUserID:input_type -> open_rpc.GetRobotByUserIDReq
+	21, // 17: open_rpc.open.GetDigitalByUserID:input_type -> open_rpc.GetDigitalByUserIDReq
 	23, // 18: open_rpc.open.DispatchPlatformEvent:input_type -> open_rpc.DispatchPlatformEventReq
 	26, // 19: open_rpc.open.ApplyDeveloper:input_type -> open_rpc.ApplyDeveloperReq
 	28, // 20: open_rpc.open.GetDeveloperByUserID:input_type -> open_rpc.GetDeveloperByUserIDReq
@@ -3075,7 +3048,7 @@ var file_open_rpc_proto_depIdxs = []int32{
 	16, // 34: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
 	18, // 35: open_rpc.open.UpdateBot:output_type -> open_rpc.UpdateBotRes
 	20, // 36: open_rpc.open.SaveWebhookLog:output_type -> open_rpc.SaveWebhookLogRes
-	22, // 37: open_rpc.open.GetRobotByUserID:output_type -> open_rpc.GetRobotByUserIDRes
+	22, // 37: open_rpc.open.GetDigitalByUserID:output_type -> open_rpc.GetDigitalByUserIDRes
 	24, // 38: open_rpc.open.DispatchPlatformEvent:output_type -> open_rpc.DispatchPlatformEventRes
 	27, // 39: open_rpc.open.ApplyDeveloper:output_type -> open_rpc.ApplyDeveloperRes
 	29, // 40: open_rpc.open.GetDeveloperByUserID:output_type -> open_rpc.GetDeveloperByUserIDRes

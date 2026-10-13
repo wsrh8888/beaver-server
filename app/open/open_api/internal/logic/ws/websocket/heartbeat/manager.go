@@ -56,18 +56,18 @@ func HandleClientPing(client *ws_conn.Client, timestamp int64) {
 // 维护协议级 WebSocket ping 帧，确保链路不被中间件（如 Nginx/ELB）超时断开。
 type Manager struct {
 	client     *ws_conn.Client
-	robotID    string
+	digitalID    string
 	pingPeriod time.Duration
 	writeWait  time.Duration
 	ctx        context.Context
 	cancel     context.CancelFunc
 }
 
-func NewManager(client *ws_conn.Client, robotID string, pingPeriod, writeWait time.Duration) *Manager {
+func NewManager(client *ws_conn.Client, digitalID string, pingPeriod, writeWait time.Duration) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Manager{
 		client:     client,
-		robotID:    robotID,
+		digitalID:    digitalID,
 		pingPeriod: pingPeriod,
 		writeWait:  writeWait,
 		ctx:        ctx,
@@ -96,7 +96,7 @@ func (m *Manager) startProtocolPing() {
 			if err := m.sendProtocolPing(); err != nil {
 				logger.Error(model.LogMsg{
 					Text: "协议级ping失败",
-					Data: map[string]any{"robotId": m.robotID, "err": err.Error()},
+					Data: map[string]any{"digitalId": m.digitalID, "err": err.Error()},
 				})
 				return
 			}

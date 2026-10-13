@@ -30,7 +30,7 @@ import (
 	bot "beaver/app/open/open_portal/internal/handler/bot"
 	developer "beaver/app/open/open_portal/internal/handler/developer"
 	oauth "beaver/app/open/open_portal/internal/handler/oauth"
-	robot "beaver/app/open/open_portal/internal/handler/robot"
+	digital "beaver/app/open/open_portal/internal/handler/digital"
 	version "beaver/app/open/open_portal/internal/handler/version"
 	"beaver/app/open/open_portal/internal/svc"
 
@@ -220,16 +220,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.DeveloperAuthMiddleware, serverCtx.RequireDeveloperMiddleware},
 			[]rest.Route{
 				{
-					// 获取智能机器人 Robot 配置
+					// 获取智能机器人 Digital 配置
 					Method:  http.MethodGet,
-					Path:    "/api/open_portal/robot/v1/config",
-					Handler: robot.GetRobotConfigHandler(serverCtx),
+					Path:    "/api/open_portal/digital/v1/config",
+					Handler: digital.GetDigitalConfigHandler(serverCtx),
 				},
 				{
-					// 更新智能机器人 Robot 配置
+					// 更新智能机器人 Digital 配置
 					Method:  http.MethodPost,
-					Path:    "/api/open_portal/robot/v1/config_update",
-					Handler: robot.UpdateRobotConfigHandler(serverCtx),
+					Path:    "/api/open_portal/digital/v1/config_update",
+					Handler: digital.UpdateDigitalConfigHandler(serverCtx),
 				},
 			}...,
 		),

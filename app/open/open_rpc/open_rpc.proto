@@ -125,20 +125,17 @@ message SaveWebhookLogReq {
 
 message SaveWebhookLogRes {}
 
-// ==================== 智能机器人 Webhook ====================
+// ==================== 外接数字伙伴 Digital ====================
 
-// 根据 IM 用户 ID 反查智能机器人
-message GetRobotByUserIDReq {
-  string robot_user_id = 1; // string Robot 的 IM 用户 ID
+// 根据 IM 用户 ID 反查外接数字伙伴
+message GetDigitalByUserIDReq {
+  string digital_user_id = 1; // string Digital 的 IM 用户 ID
 }
 
-message GetRobotByUserIDRes {
-  bool found = 1; // bool 是否找到对应 Robot
+message GetDigitalByUserIDRes {
+  bool found = 1; // bool 是否找到对应 Digital
   string app_id = 2; // string 所属应用 ID
-  string robot_user_id = 3; // string Robot 的 IM 用户 ID
-  bool enable_single_chat = 4; // bool 是否启用私聊
-  bool enable_group_chat = 5; // bool 是否启用群聊
-  bool enable_at_mention = 6; // bool 是否启用 @ 提及
+  string digital_user_id = 3; // string Digital 的 IM 用户 ID（PartnerID）
 }
 
 // 向应用已注册的 Webhook 推送开放平台事件
@@ -233,7 +230,7 @@ message OpenAppItem {
   int32 audit_status = 9; // int32 审核状态 0待审核 1已通过 2已拒绝
   string audited_by = 10; // string 审核人 ID
   int64 audited_at = 11; // int64 审核时间戳毫秒
-  int32 enable_robot = 12; // int32 是否启用 Robot
+  int32 enable_digital = 12; // int32 是否启用 Digital
   int32 enable_oauth = 13; // int32 是否启用 OAuth
   int32 enable_webhook = 14; // int32 是否启用 Webhook
   int64 created_at = 15; // int64 创建时间戳毫秒
@@ -248,7 +245,7 @@ message ListOpenAppsReq {
   int32 status = 5; // int32 状态筛选，0 表示全部
   int32 audit_status = 6; // int32 审核状态筛选，0 表示全部
   string app_id = 7; // string 应用 ID 精确查，可选
-  int32 capability_type = 8; // int32 能力筛选：0全部 1Robot 2Webhook 3Robot或Webhook
+  int32 capability_type = 8; // int32 能力筛选：0全部 1Digital 2Webhook 3Digital或Webhook
 }
 
 message ListOpenAppsRes {
@@ -307,7 +304,7 @@ service open {
   rpc GetBotInfo(GetBotInfoReq) returns (GetBotInfoRes); // 获取推送机器人信息
   rpc UpdateBot(UpdateBotReq) returns (UpdateBotRes); // 更新推送机器人
   rpc SaveWebhookLog(SaveWebhookLogReq) returns (SaveWebhookLogRes); // 记录 Webhook 回调日志
-  rpc GetRobotByUserID(GetRobotByUserIDReq) returns (GetRobotByUserIDRes); // 根据 IM 用户 ID 反查 Robot
+  rpc GetDigitalByUserID(GetDigitalByUserIDReq) returns (GetDigitalByUserIDRes); // 根据 IM 用户 ID 反查 Digital
   rpc DispatchPlatformEvent(DispatchPlatformEventReq) returns (DispatchPlatformEventRes); // 推送开放平台事件
 
   rpc ApplyDeveloper(ApplyDeveloperReq) returns (ApplyDeveloperRes); // 提交开发者申请

@@ -59,7 +59,7 @@ func ValidateAppAccessToken(db *gorm.DB, authorization string) (*open_models.Ope
 }
 
 // RequireAppEnabled 校验应用是否处于可用状态。
-// 「应用具备哪些能力」由各能力表（OpenOAuthConfig / OpenRobot / OpenBotModel）是否存在记录决定，
+// 「应用具备哪些能力」由各能力表（OpenOAuthConfig / OpenDigitalPartner / OpenBotModel）是否存在记录决定，
 // 应用主表不再持有能力开关。
 func RequireAppEnabled(app *open_models.OpenApp) error {
 	if app.Status != 1 {

@@ -29,7 +29,7 @@ import (
 const (
 	UserTypeNormal int8 = 1 // 普通用户
 	UserTypeBot    int8 = 2 // 推送机器人（通知机器人）
-	UserTypeRobot  int8 = 3 // 智能机器人（AI 对话机器人）
+	UserTypeDigital int8 = 3 // 外接数字伙伴（智能体）
 )
 
 // 注册来源常量
@@ -43,7 +43,7 @@ const (
 type UserModel struct {
 	models.Model
 	UserID   string `gorm:"size:64;uniqueIndex" json:"userId"`
-	UserType int8   `gorm:"default:1;index" json:"userType"`                                                                           // 用户类型：1普通用户 2bot 3robot
+	UserType int8   `gorm:"default:1;index" json:"userType"`                                                                           // 用户类型：1普通用户 2bot 3digital
 	NickName string `gorm:"size:32;index" json:"nickName"`                                                                             // 昵称
 	Avatar   string `gorm:"size:256;default:https://server.wsrh8888.com/beaver/api/file/preview/a9de5548bef8c10b92428fff61275c72.png"` // 头像URL
 	Abstract string `gorm:"size:128" json:"abstract"`                                                                                  // 个性签名

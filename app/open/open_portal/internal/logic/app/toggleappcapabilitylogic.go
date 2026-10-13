@@ -63,18 +63,19 @@ func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapab
 	// 2. 应用表不再持有能力开关：「具备某能力」由对应能力表是否存在有效记录表达。
 	var enabled bool
 	switch req.Capability {
-	case "robot":
+	case "digital":
 		if req.Enable {
-			if err := ensurePortalAppRobot(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
-				l.logger.Error(model.LogMsg{Text: "创建 Robot 用户失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
-				return nil, errors.New("启用 Robot 失败：创建 IM 用户失败，请稍后重试")
+			if _, err := ensurePortalAppExternalPartner(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, &app); err != nil {
+				l.logger.Error(model.LogMsg{Text: "创建外接数字伙伴失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
+				return nil, errors.New("启用失败：创建数字伙伴 IM 用户失败，请稍后重试")
 			}
 			enabled = true
 		} else {
-			if err := l.svcCtx.DB.Model(&open_models.OpenRobot{}).
-				Where("app_id = ?", app.AppID).Update("status", 0).Error; err != nil {
-				l.logger.Error(model.LogMsg{Text: "停用 Robot 失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
-				return nil, errors.New("停用 Robot 失败")
+			if err := l.svcCtx.DB.Model(&open_models.OpenDigitalPartner{}).
+				Where("app_id = ? AND runtime = ?", app.AppID, open_models.PartnerRuntimeExternal).
+				Update("status", 2).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "停用外接数字伙伴失败", Data: map[string]interface{}{"app_id": req.AppID, "err": err.Error()}})
+				return nil, errors.New("停用失败")
 			}
 			enabled = false
 		}
@@ -112,39 +113,50 @@ func (l *ToggleAppCapabilityLogic) ToggleAppCapability(req *types.ToggleAppCapab
 	}, nil
 }
 
-// ensurePortalAppRobot 确保应用已有可用的 Robot 记录（RobotID 即 IM 用户ID）。
-// 昵称/头像不再由平台冗余存储，行为配置由机器人自己维护。
-func ensurePortalAppRobot(ctx context.Context, db *gorm.DB, userRpc user.User, app *open_models.OpenApp) error {
-	var robot open_models.OpenRobot
-	err := db.Where("app_id = ?", app.AppID).First(&robot).Error
-	if err == nil && robot.RobotID != "" {
-		if robot.Status == 1 {
-			return nil
+// ensurePortalAppExternalPartner 确保应用挂有外接数字伙伴（PartnerID = IM 用户 ID）。
+func ensurePortalAppExternalPartner(ctx context.Context, db *gorm.DB, userRpc user.User, app *open_models.OpenApp) (*open_models.OpenDigitalPartner, error) {
+	var partner open_models.OpenDigitalPartner
+	err := db.Where(
+		"app_id = ? AND runtime = ?",
+		app.AppID, open_models.PartnerRuntimeExternal,
+	).First(&partner).Error
+	if err == nil && partner.PartnerID != "" {
+		if partner.Status != 1 {
+			if err := db.Model(&partner).Update("status", 1).Error; err != nil {
+				return nil, err
+			}
+			partner.Status = 1
 		}
-		return db.Model(&robot).Update("status", 1).Error
+		return &partner, nil
 	}
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
+		return nil, err
 	}
 
 	nickName := app.Name
 	if nickName == "" {
-		nickName = "Robot"
+		nickName = "数字伙伴"
 	}
 
 	createRes, err := userRpc.UserCreate(ctx, &user.UserCreateReq{
 		NickName: nickName,
-		UserType: int32(user_models.UserTypeRobot),
+		UserType: int32(user_models.UserTypeDigital),
 		Source:   int32(user_models.SourceGroup),
 	})
 	if err != nil {
-		return fmt.Errorf("user create: %w", err)
+		return nil, fmt.Errorf("user create: %w", err)
 	}
 
-	robot = open_models.OpenRobot{
-		AppID:   app.AppID,
-		RobotID: createRes.UserID,
-		Status:  1,
+	partner = open_models.OpenDigitalPartner{
+		PartnerID:  createRes.UserID,
+		OwnerID:    app.OwnerID,
+		Runtime:    open_models.PartnerRuntimeExternal,
+		AppID:      app.AppID,
+		Visibility: open_models.PartnerVisibilityPrivate,
+		Status:     1,
 	}
-	return db.Save(&robot).Error
+	if err := db.Create(&partner).Error; err != nil {
+		return nil, err
+	}
+	return &partner, nil
 }

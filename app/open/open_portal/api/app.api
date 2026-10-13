@@ -62,7 +62,7 @@ type (
 		Icon          string `json:"icon,optional"` // string 应用图标 URL，可选
 		AppSecret     string `json:"appSecret"` // string 应用密钥（掩码展示）
 		Status        int    `json:"status"` // int 状态：0 草稿 1 已发布 2 禁用
-		EnableRobot   int    `json:"enableRobot"` // int 是否启用智能机器人：0 否 1 是
+		EnableDigital int    `json:"enableDigital"` // int 是否启用外接数字伙伴：0 否 1 是
 		EnableOAuth   int    `json:"enableOAuth"` // int 是否启用 OAuth：0 否 1 是
 		EnableWebhook int    `json:"enableWebhook"` // int 是否启用 Webhook：0 否 1 是
 		WebhookURL    string `json:"webhookUrl"` // string 应用级 Webhook URL
@@ -132,7 +132,7 @@ type (
 	// 启用/禁用应用能力
 	ToggleAppCapabilityReq {
 		AppID      string `json:"appId"` // string 应用 ID
-		Capability string `json:"capability" validate:"required,oneof=robot oauth webhook"` // string 能力类型：robot / oauth / webhook
+		Capability string `json:"capability" validate:"required,oneof=digital oauth webhook"` // string 能力类型：digital / oauth / webhook
 		Enable     bool   `json:"enable"` // bool true 启用 false 禁用
 		UserID     string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 	}

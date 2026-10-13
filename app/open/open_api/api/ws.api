@@ -6,11 +6,11 @@ syntax = "v1"
 //
 // 鉴权：连接时在 URL query 携带 appId + ticket
 //   ticket = POST /api/open/auth_public/v1/token 换来的 accessToken
-//   服务端据 appId 找到对应的机器人（OpenRobot），该连接即代表这个机器人
+//   服务端据 appId 找到对应的外接数字伙伴（OpenDigitalPartner），该连接即代表这个数字伙伴
 //
 // 收发解耦（与参考实现一致）：
 //   接收 —— 走本连接（服务端主动推送事件）
-//   回复 —— 统一走 OAPI（POST /api/open/robot/v1/send_message），不走本连接
+//   回复 —— 统一走 OAPI（POST /api/open/digital/v1/send_message），不走本连接
 //
 // 连接建立后的帧：
 //   服务端 → 客户端  事件帧（JSON）

@@ -68,9 +68,14 @@ func (s *OpenServer) UpdateBot(ctx context.Context, in *open_rpc.UpdateBotReq) (
 	return l.UpdateBot(in)
 }
 
-func (s *OpenServer) GetRobotByUserID(ctx context.Context, in *open_rpc.GetRobotByUserIDReq) (*open_rpc.GetRobotByUserIDRes, error) {
-	l := logic.NewGetRobotByUserIDLogic(ctx, s.svcCtx)
-	return l.GetRobotByUserID(in)
+func (s *OpenServer) SaveWebhookLog(ctx context.Context, in *open_rpc.SaveWebhookLogReq) (*open_rpc.SaveWebhookLogRes, error) {
+	l := logic.NewSaveWebhookLogLogic(ctx, s.svcCtx)
+	return l.SaveWebhookLog(in)
+}
+
+func (s *OpenServer) GetDigitalByUserID(ctx context.Context, in *open_rpc.GetDigitalByUserIDReq) (*open_rpc.GetDigitalByUserIDRes, error) {
+	l := logic.NewGetDigitalByUserIDLogic(ctx, s.svcCtx)
+	return l.GetDigitalByUserID(in)
 }
 
 func (s *OpenServer) DispatchPlatformEvent(ctx context.Context, in *open_rpc.DispatchPlatformEventReq) (*open_rpc.DispatchPlatformEventRes, error) {
@@ -111,4 +116,9 @@ func (s *OpenServer) ListOpenApps(ctx context.Context, in *open_rpc.ListOpenApps
 func (s *OpenServer) UpdateOpenApps(ctx context.Context, in *open_rpc.UpdateOpenAppsReq) (*open_rpc.UpdateOpenAppsRes, error) {
 	l := logic.NewUpdateOpenAppsLogic(ctx, s.svcCtx)
 	return l.UpdateOpenApps(in)
+}
+
+func (s *OpenServer) ListWebhookLogs(ctx context.Context, in *open_rpc.ListWebhookLogsReq) (*open_rpc.ListWebhookLogsRes, error) {
+	l := logic.NewListWebhookLogsLogic(ctx, s.svcCtx)
+	return l.ListWebhookLogs(in)
 }

@@ -1449,7 +1449,7 @@ type GetOpenAppListReq struct {
 	AppID          string `form:"appId,optional"`
 	Status         int    `form:"status,optional"`         // 0全部 1草稿 2已发布 3禁用
 	AuditStatus    int    `form:"auditStatus,optional"`    // 0全部 1待审核 2已通过 3已拒绝
-	CapabilityType int    `form:"capabilityType,optional"` // 0全部 1Robot 2Webhook 3Robot或Webhook
+	CapabilityType int    `form:"capabilityType,optional"` // 0全部 1Digital 2Webhook 3Digital或Webhook
 }
 
 type GetOpenAppListRes struct {
@@ -1539,7 +1539,7 @@ type GetUserListReq struct {
 	Keyword  string `form:"keyword,optional"` // 昵称/邮箱/手机号模糊搜索
 	Status   int    `form:"status,optional"`
 	Source   int    `form:"source,optional"`
-	UserType int    `form:"userType,optional"` // 用户类型：1普通 2bot 3robot，0全部
+	UserType int    `form:"userType,optional"` // 用户类型：1普通 2bot 3digital，0全部
 }
 
 type GetUserListRes struct {
@@ -1782,7 +1782,7 @@ type OpenAppInfo struct {
 	AuditStatus   int    `json:"auditStatus"`
 	AuditedBy     string `json:"auditedBy"`
 	AuditedAt     int64  `json:"auditedAt"`
-	EnableRobot   int    `json:"enableRobot"`
+	EnableDigital   int    `json:"enableDigital"`
 	EnableOAuth   int    `json:"enableOAuth"`
 	EnableWebhook int    `json:"enableWebhook"`
 	CreatedAt     int64  `json:"createdAt"`

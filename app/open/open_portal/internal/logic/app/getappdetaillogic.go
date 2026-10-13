@@ -62,10 +62,13 @@ func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *type
 
 	// 3. 能力是否存在由对应能力表的记录决定，应用表不再持有能力开关。
 	//    Webhook 能力已下线（事件改由长连接接收），恒为 0。
-	var robot open_models.OpenRobot
-	enableRobot := 0
-	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", app.AppID, 1).First(&robot).Error; err == nil {
-		enableRobot = 1
+	var partner open_models.OpenDigitalPartner
+	enableDigital := 0
+	if err := l.svcCtx.DB.Where(
+		"app_id = ? AND runtime = ? AND status = ?",
+		app.AppID, open_models.PartnerRuntimeExternal, 1,
+	).First(&partner).Error; err == nil {
+		enableDigital = 1
 	}
 	var oauthConfig open_models.OpenOAuthConfig
 	enableOAuth := 0
@@ -81,7 +84,7 @@ func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *type
 			Icon:        app.Icon,
 			AppSecret:   maskedSecret,
 			Status:      app.Status,
-			EnableRobot: enableRobot,
+			EnableDigital: enableDigital,
 			EnableOAuth: enableOAuth,
 			CreatedAt:   app.CreatedAt.Unix(),
 		},

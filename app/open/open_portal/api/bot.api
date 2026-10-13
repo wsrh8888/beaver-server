@@ -1,7 +1,7 @@
 syntax = "v1"
 
 // ==================== 推送机器人 Bot（群内通知机器人，user_type=2，第三方 Webhook 推消息进群）====================
-// 与智能机器人 Robot 无关；Robot 配置见 robot.api，事件订阅见 event.api
+// 与外接数字伙伴 Digital 无关；Digital 配置见 digital.api
 
 // ==================== Incoming Webhook（按群创建推送 Bot）====================
 type (

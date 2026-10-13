@@ -9,7 +9,7 @@ import (
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
 	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
 	oauth_secret "beaver/app/open/open_api/internal/handler/oauth_secret"
-	robot "beaver/app/open/open_api/internal/handler/robot"
+	digital "beaver/app/open/open_api/internal/handler/digital"
 	ws "beaver/app/open/open_api/internal/handler/ws"
 	"beaver/app/open/open_api/internal/svc"
 
@@ -135,28 +135,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 将 Robot 加入群
+				// 将 Digital 加入群
 				Method:  http.MethodPost,
-				Path:    "/api/open/robot/v1/add_to_group",
-				Handler: robot.AddRobotToGroupHandler(serverCtx),
+				Path:    "/api/open/digital/v1/add_to_group",
+				Handler: digital.AddDigitalToGroupHandler(serverCtx),
 			},
 			{
-				// 获取 Robot 自身信息
+				// 获取 Digital 自身信息
 				Method:  http.MethodGet,
-				Path:    "/api/open/robot/v1/info",
-				Handler: robot.GetRobotInfoHandler(serverCtx),
+				Path:    "/api/open/digital/v1/info",
+				Handler: digital.GetDigitalInfoHandler(serverCtx),
 			},
 			{
-				// 将 Robot 从群移除
+				// 将 Digital 从群移除
 				Method:  http.MethodPost,
-				Path:    "/api/open/robot/v1/remove_from_group",
-				Handler: robot.RemoveRobotFromGroupHandler(serverCtx),
+				Path:    "/api/open/digital/v1/remove_from_group",
+				Handler: digital.RemoveDigitalFromGroupHandler(serverCtx),
 			},
 			{
-				// Robot 发送消息到 IM 会话
+				// Digital 发送消息到 IM 会话
 				Method:  http.MethodPost,
-				Path:    "/api/open/robot/v1/send_message",
-				Handler: robot.RobotSendMessageHandler(serverCtx),
+				Path:    "/api/open/digital/v1/send_message",
+				Handler: digital.DigitalSendMessageHandler(serverCtx),
 			},
 		},
 	)

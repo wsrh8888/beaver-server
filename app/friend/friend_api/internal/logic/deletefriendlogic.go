@@ -109,29 +109,28 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				l.logger.Error(model.LogMsg{Text: "机器人取关事件投递panic", Data: map[string]interface{}{"panic": r}})
+				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递panic", Data: map[string]interface{}{"panic": r}})
 			}
 		}()
 		ctx := context.Background()
-		// 删除好友时，若其中一方是机器人，则向其投递「被取关」事件
-		res, err := l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.FriendID})
+		res, err := l.svcCtx.OpenRpc.GetDigitalByUserID(ctx, &open_rpc.GetDigitalByUserIDReq{DigitalUserId: req.FriendID})
 		if err == nil && res != nil && res.Found {
 			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.FriendID,
-				openevent.EventIMBotUnfollowed, "", map[string]interface{}{
-					"robot_id": req.FriendID,
-					"user_id":  req.UserID,
+				openevent.EventIMDigitalUnfollowed, "", map[string]interface{}{
+					"digital_id": req.FriendID,
+					"user_id":    req.UserID,
 				}); pushErr != nil {
-				l.logger.Error(model.LogMsg{Text: "机器人取关事件投递失败", Data: map[string]interface{}{"robotId": req.FriendID, "err": pushErr.Error()}})
+				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递失败", Data: map[string]interface{}{"digitalId": req.FriendID, "err": pushErr.Error()}})
 			}
 		}
-		res, err = l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: req.UserID})
+		res, err = l.svcCtx.OpenRpc.GetDigitalByUserID(ctx, &open_rpc.GetDigitalByUserIDReq{DigitalUserId: req.UserID})
 		if err == nil && res != nil && res.Found {
 			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.UserID,
-				openevent.EventIMBotUnfollowed, "", map[string]interface{}{
-					"robot_id": req.UserID,
-					"user_id":  req.FriendID,
+				openevent.EventIMDigitalUnfollowed, "", map[string]interface{}{
+					"digital_id": req.UserID,
+					"user_id":    req.FriendID,
 				}); pushErr != nil {
-				l.logger.Error(model.LogMsg{Text: "机器人取关事件投递失败", Data: map[string]interface{}{"robotId": req.UserID, "err": pushErr.Error()}})
+				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递失败", Data: map[string]interface{}{"digitalId": req.UserID, "err": pushErr.Error()}})
 			}
 		}
 	}()

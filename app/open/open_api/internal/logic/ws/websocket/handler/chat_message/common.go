@@ -41,7 +41,7 @@ var logger = beaverlog.New("open_ws_chat_message")
 // 收件人算法与 ws_api 的 typing 收件人（getTypingPeerIDs）保持一致：
 //   - 私聊：会话 ID 里就是两个用户 ID，取不是机器人的那个
 //   - 群聊 / 圈子：以 chat_user_conversations 为准（会话成员表）
-func resolveRecipients(ctx context.Context, svcCtx *svc.ServiceContext, robotID, conversationID string) ([]string, error) {
+func resolveRecipients(ctx context.Context, svcCtx *svc.ServiceContext, digitalID, conversationID string) ([]string, error) {
 	if conversationID == "" {
 		return nil, errors.New("conversationId 不能为空")
 	}
@@ -51,7 +51,7 @@ func resolveRecipients(ctx context.Context, svcCtx *svc.ServiceContext, robotID,
 		recipients := make([]string, 0, 1)
 		inConversation := false
 		for _, uid := range userIDs {
-			if uid == robotID {
+			if uid == digitalID {
 				inConversation = true
 				continue
 			}
@@ -66,7 +66,7 @@ func resolveRecipients(ctx context.Context, svcCtx *svc.ServiceContext, robotID,
 		return recipients, nil
 	}
 
-	return resolveGroupRecipients(ctx, svcCtx, robotID, conversationID)
+	return resolveGroupRecipients(ctx, svcCtx, digitalID, conversationID)
 }
 
 // resolveGroupRecipients 群聊 / 圈子的收件人解析。
@@ -74,7 +74,7 @@ func resolveRecipients(ctx context.Context, svcCtx *svc.ServiceContext, robotID,
 // 直接读 chat_user_conversations，而不是调 GroupRpc：
 //  1. 一张表同时覆盖群聊与圈子，且能顺带完成「机器人在不在这个会话里」的校验
 //  2. 不引入新的 RPC 依赖，也不会有 RPC 失败导致推送整体不可用
-func resolveGroupRecipients(ctx context.Context, svcCtx *svc.ServiceContext, robotID, conversationID string) ([]string, error) {
+func resolveGroupRecipients(ctx context.Context, svcCtx *svc.ServiceContext, digitalID, conversationID string) ([]string, error) {
 	var rows []chat_models.ChatUserConversation
 	if err := svcCtx.DB.WithContext(ctx).Where("conversation_id = ?", conversationID).Find(&rows).Error; err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func resolveGroupRecipients(ctx context.Context, svcCtx *svc.ServiceContext, rob
 	recipients := make([]string, 0, len(rows))
 	inConversation := false
 	for _, row := range rows {
-		if row.UserID == robotID {
+		if row.UserID == digitalID {
 			inConversation = true
 			continue
 		}

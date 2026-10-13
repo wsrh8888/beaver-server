@@ -29,7 +29,7 @@ type AppInfo struct {
 	Icon          string `json:"icon,optional"` // 应用图标 URL
 	AppSecret     string `json:"appSecret"`     // 应用密钥（掩码形式）
 	Status        int    `json:"status"`        // 0=草稿，1=已发布，2=禁用
-	EnableRobot   int    `json:"enableRobot"`   // 是否启用智能机器人能力
+	EnableDigital int    `json:"enableDigital"`   // 是否启用外接数字伙伴能力
 	EnableOAuth   int    `json:"enableOAuth"`   // 是否启用OAuth能力
 	EnableWebhook int    `json:"enableWebhook"` // 是否启用Webhook能力
 	WebhookURL    string `json:"webhookUrl"`
@@ -191,13 +191,13 @@ type GetOAuthConfigRes struct {
 	MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`
 }
 
-type GetRobotConfigReq struct {
+type GetDigitalConfigReq struct {
 	AppID  string `form:"appId"`            // string 应用 ID
 	UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
 }
 
-type GetRobotConfigRes struct {
-	Config RobotConfigInfo `json:"config"` // Robot 配置
+type GetDigitalConfigRes struct {
+	Config DigitalConfigInfo `json:"config"` // Digital 配置
 }
 
 type GetVersionListReq struct {
@@ -313,17 +313,12 @@ type ResetIncomingWebhookSecretRes struct {
 	Secret string `json:"secret"` // string 新的加签密钥
 }
 
-type RobotConfigInfo struct {
-	AppID            string `json:"appId"`                   // string 应用 ID
-	RobotID          string `json:"robotId"`                 // string Robot 在 IM 中的用户 ID
-	RobotName        string `json:"robotName"`               // string Robot 昵称
-	Avatar           string `json:"avatar,optional"`         // string 头像 URL，可选
-	WelcomeMessage   string `json:"welcomeMessage,optional"` // string 欢迎语，可选
-	CommandPrefix    string `json:"commandPrefix,optional"`  // string 命令前缀，可选
-	EnableSingleChat bool   `json:"enableSingleChat"`        // bool 是否启用单聊
-	EnableGroupChat  bool   `json:"enableGroupChat"`         // bool 是否启用群聊
-	EnableAtMention  bool   `json:"enableAtMention"`         // bool 是否允许 @ 提及
-	Status           int    `json:"status"`                  // int 状态：0 禁用 1 启用
+type DigitalConfigInfo struct {
+	AppID       string `json:"appId"`
+	DigitalID   string `json:"digitalId"` // PartnerID = IM 用户 ID
+	DigitalName string `json:"digitalName"`
+	Avatar      string `json:"avatar,optional"`
+	Status      int    `json:"status"` // 1启用 2停用
 }
 
 type ScopeInfo struct {
@@ -344,7 +339,7 @@ type SubmitVersionReviewRes struct {
 
 type ToggleAppCapabilityReq struct {
 	AppID      string `json:"appId"`
-	Capability string `json:"capability" validate:"required,oneof=robot oauth webhook"` // 能力类型：robot/oauth/webhook
+	Capability string `json:"capability" validate:"required,oneof=digital oauth webhook"` // 能力类型：digital/oauth/webhook
 	Enable     bool   `json:"enable"`                                                   // true=启用，false=禁用
 	UserID     string `header:"Beaver-User-Id"`                                         // 当前用户ID（由网关注入）
 }
@@ -384,20 +379,15 @@ type UpdateOAuthConfigReq struct {
 type UpdateOAuthConfigRes struct {
 }
 
-type UpdateRobotConfigReq struct {
-	AppID            string `json:"appId"`                     // string 应用 ID
-	RobotName        string `json:"robotName,optional"`        // string Robot 昵称，可选
-	Avatar           string `json:"avatar,optional"`           // string 头像 URL，可选
-	WelcomeMessage   string `json:"welcomeMessage,optional"`   // string 欢迎语，可选
-	CommandPrefix    string `json:"commandPrefix,optional"`    // string 命令前缀，可选
-	EnableSingleChat *bool  `json:"enableSingleChat,optional"` // bool 是否启用单聊，可选
-	EnableGroupChat  *bool  `json:"enableGroupChat,optional"`  // bool 是否启用群聊，可选
-	EnableAtMention  *bool  `json:"enableAtMention,optional"`  // bool 是否允许 @ 提及，可选
-	Status           *int   `json:"status,optional"`           // int 状态，可选
-	UserID           string `header:"Beaver-User-Id"`          // string 当前开发者用户 ID
+type UpdateDigitalConfigReq struct {
+	AppID       string `json:"appId"`
+	DigitalName string `json:"digitalName,optional"`
+	Avatar      string `json:"avatar,optional"`
+	Status      *int   `json:"status,optional"` // 1启用 2停用
+	UserID      string `header:"Beaver-User-Id"`
 }
 
-type UpdateRobotConfigRes struct {
+type UpdateDigitalConfigRes struct {
 }
 
 type VersionInfo struct {

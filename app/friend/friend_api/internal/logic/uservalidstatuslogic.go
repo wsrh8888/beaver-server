@@ -161,29 +161,28 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					l.logger.Error(model.LogMsg{Text: "机器人关注事件投递panic", Data: map[string]interface{}{"panic": r}})
+					l.logger.Error(model.LogMsg{Text: "数字伙伴关注事件投递panic", Data: map[string]interface{}{"panic": r}})
 				}
 			}()
 			ctx := context.Background()
-			// 通过好友验证时，若其中一方是机器人，则向其投递「被关注」事件
-			res, err := l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: friendVerify.RevUserID})
+			res, err := l.svcCtx.OpenRpc.GetDigitalByUserID(ctx, &open_rpc.GetDigitalByUserIDReq{DigitalUserId: friendVerify.RevUserID})
 			if err == nil && res != nil && res.Found {
 				if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, friendVerify.RevUserID,
-					openevent.EventIMBotFollowed, "", map[string]interface{}{
-						"robot_id": friendVerify.RevUserID,
-						"user_id":  friendVerify.SendUserID,
+					openevent.EventIMDigitalFollowed, "", map[string]interface{}{
+						"digital_id": friendVerify.RevUserID,
+						"user_id":    friendVerify.SendUserID,
 					}); pushErr != nil {
-					l.logger.Error(model.LogMsg{Text: "机器人关注事件投递失败", Data: map[string]interface{}{"robotId": friendVerify.RevUserID, "err": pushErr.Error()}})
+					l.logger.Error(model.LogMsg{Text: "数字伙伴关注事件投递失败", Data: map[string]interface{}{"digitalId": friendVerify.RevUserID, "err": pushErr.Error()}})
 				}
 			}
-			res, err = l.svcCtx.OpenRpc.GetRobotByUserID(ctx, &open_rpc.GetRobotByUserIDReq{RobotUserId: friendVerify.SendUserID})
+			res, err = l.svcCtx.OpenRpc.GetDigitalByUserID(ctx, &open_rpc.GetDigitalByUserIDReq{DigitalUserId: friendVerify.SendUserID})
 			if err == nil && res != nil && res.Found {
 				if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, friendVerify.SendUserID,
-					openevent.EventIMBotFollowed, "", map[string]interface{}{
-						"robot_id": friendVerify.SendUserID,
-						"user_id":  friendVerify.RevUserID,
+					openevent.EventIMDigitalFollowed, "", map[string]interface{}{
+						"digital_id": friendVerify.SendUserID,
+						"user_id":    friendVerify.RevUserID,
 					}); pushErr != nil {
-					l.logger.Error(model.LogMsg{Text: "机器人关注事件投递失败", Data: map[string]interface{}{"robotId": friendVerify.SendUserID, "err": pushErr.Error()}})
+					l.logger.Error(model.LogMsg{Text: "数字伙伴关注事件投递失败", Data: map[string]interface{}{"digitalId": friendVerify.SendUserID, "err": pushErr.Error()}})
 				}
 			}
 		}()

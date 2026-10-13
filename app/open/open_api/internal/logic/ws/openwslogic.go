@@ -59,7 +59,7 @@ func NewOpenWsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OpenWsLogi
 
 func (l *OpenWsLogic) OpenWs(req *types.OpenWsReq, w http.ResponseWriter, r *http.Request) (resp *types.OpenWsRes, err error) {
 	// 1. 鉴权先于升级执行：校验失败直接以 HTTP 状态码拒绝，不建立连接
-	identity, authErr := ws_auth.VerifyRobotToken(l.svcCtx.DB, req.AppID, req.Ticket)
+	identity, authErr := ws_auth.VerifyDigitalToken(l.svcCtx.DB, req.AppID, req.Ticket)
 	if authErr != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "机器人长连接鉴权失败",
@@ -88,38 +88,38 @@ func (l *OpenWsLogic) OpenWs(req *types.OpenWsReq, w http.ResponseWriter, r *htt
 	client := ws_conn.NewClient(wsConn)
 	addr := wsConn.RemoteAddr().String()
 
-	// 4. 注册到独立注册表（key = robotId），同一机器人重复建连会踢掉旧连接
-	if kicked := ws_conn.Register(identity.RobotID, client); kicked > 0 {
+	// 4. 注册到独立注册表（key = digitalId），同一机器人重复建连会踢掉旧连接
+	if kicked := ws_conn.Register(identity.DigitalID, client); kicked > 0 {
 		l.logger.Info(model.LogMsg{
 			Text: "机器人长连接已接管旧连接",
-			Data: map[string]any{"robotId": identity.RobotID, "kicked": kicked},
+			Data: map[string]any{"digitalId": identity.DigitalID, "kicked": kicked},
 		})
 	}
 	l.logger.Info(model.LogMsg{
 		Text: "机器人长连接已建立",
 		Data: map[string]any{
 			"appId":      identity.AppID,
-			"robotId":    identity.RobotID,
+			"digitalId":    identity.DigitalID,
 			"remoteAddr": addr,
 		},
 	})
 
 	defer func() {
 		_ = wsConn.Close()
-		ws_conn.Unregister(identity.RobotID, addr)
+		ws_conn.Unregister(identity.DigitalID, addr)
 		l.logger.Info(model.LogMsg{
 			Text: "机器人长连接已断开",
-			Data: map[string]any{"appId": identity.AppID, "robotId": identity.RobotID, "remoteAddr": addr},
+			Data: map[string]any{"appId": identity.AppID, "digitalId": identity.DigitalID, "remoteAddr": addr},
 		})
 	}()
 
 	// 5. 启动服务端主动心跳
-	hbManager := heartbeat.NewManager(client, identity.RobotID, l.pingPeriod(), l.writeWait())
+	hbManager := heartbeat.NewManager(client, identity.DigitalID, l.pingPeriod(), l.writeWait())
 	defer hbManager.Stop()
 	hbManager.Start()
 
 	// 6. 消息循环（阻塞至连接关闭）
-	ws.HandleRobotMessages(l.ctx, l.svcCtx, identity.RobotID, client)
+	ws.HandleDigitalMessages(l.ctx, l.svcCtx, identity.DigitalID, client)
 
 	return nil, nil
 }

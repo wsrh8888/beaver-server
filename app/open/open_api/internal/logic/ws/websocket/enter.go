@@ -48,12 +48,12 @@ type inboundFrame struct {
 	Content   *type_struct.WsContent `json:"content"`
 }
 
-// HandleRobotMessages 机器人连接的消息循环。
+// HandleDigitalMessages 机器人连接的消息循环。
 //
 // 与用户侧最大的区别：机器人的「回复」不走 WS，统一走 OAPI
-// （POST /api/open/robot/v1/send_message），因此上行只有两类帧：
+// （POST /api/open/digital/v1/send_message），因此上行只有两类帧：
 // 心跳，以及流式增量（chat_message_stream_send）。
-func HandleRobotMessages(ctx context.Context, svcCtx *svc.ServiceContext, robotID string, client *ws_conn.Client) {
+func HandleDigitalMessages(ctx context.Context, svcCtx *svc.ServiceContext, digitalID string, client *ws_conn.Client) {
 	logger := beaverlog.New("open_ws_handle", ctx)
 
 	for {
@@ -62,12 +62,12 @@ func HandleRobotMessages(ctx context.Context, svcCtx *svc.ServiceContext, robotI
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logger.Error(model.LogMsg{
 					Text: "机器人连接异常关闭",
-					Data: map[string]any{"robotId": robotID, "err": err.Error()},
+					Data: map[string]any{"digitalId": digitalID, "err": err.Error()},
 				})
 			} else {
 				logger.Info(model.LogMsg{
 					Text: "机器人连接正常关闭",
-					Data: map[string]any{"robotId": robotID},
+					Data: map[string]any{"digitalId": digitalID},
 				})
 			}
 			break
@@ -77,7 +77,7 @@ func HandleRobotMessages(ctx context.Context, svcCtx *svc.ServiceContext, robotI
 		if err = json.Unmarshal(p, &frame); err != nil {
 			logger.Error(model.LogMsg{
 				Text: "机器人WS消息解析错误",
-				Data: map[string]any{"robotId": robotID, "err": err.Error()},
+				Data: map[string]any{"digitalId": digitalID, "err": err.Error()},
 			})
 			continue
 		}
@@ -91,21 +91,21 @@ func HandleRobotMessages(ctx context.Context, svcCtx *svc.ServiceContext, robotI
 			if frame.Content == nil {
 				logger.Error(model.LogMsg{
 					Text: "机器人业务帧缺少content",
-					Data: map[string]any{"robotId": robotID},
+					Data: map[string]any{"digitalId": digitalID},
 				})
 				continue
 			}
-			if err = chat_message.Handle(ctx, svcCtx, robotID, *frame.Content); err != nil {
+			if err = chat_message.Handle(ctx, svcCtx, digitalID, *frame.Content); err != nil {
 				logger.Error(model.LogMsg{
 					Text: "机器人业务帧处理失败",
-					Data: map[string]any{"robotId": robotID, "type": frame.Content.Data.Type, "err": err.Error()},
+					Data: map[string]any{"digitalId": digitalID, "type": frame.Content.Data.Type, "err": err.Error()},
 				})
 			}
 		default:
 			// 不再静默丢弃：带上具体 command，否则龙虾侧调试时会以为帧发出去了
 			logger.Error(model.LogMsg{
 				Text: "机器人发来未知命令已忽略",
-				Data: map[string]any{"robotId": robotID, "command": frame.Command},
+				Data: map[string]any{"digitalId": digitalID, "command": frame.Command},
 			})
 		}
 	}

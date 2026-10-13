@@ -34,11 +34,11 @@ import (
 //
 // 与用户侧 ws_api 的 chat_message.Handle 结构一致：按 content.Data.Type 分派。
 // 机器人当前只有一种上行业务类型（流式增量）—— 机器人的「回复」不走 WS，
-// 统一走 OAPI（POST /api/open/robot/v1/send_message），这样出站逻辑只有一份。
-func Handle(ctx context.Context, svcCtx *svc.ServiceContext, robotID string, content type_struct.WsContent) error {
+// 统一走 OAPI（POST /api/open/digital/v1/send_message），这样出站逻辑只有一份。
+func Handle(ctx context.Context, svcCtx *svc.ServiceContext, digitalID string, content type_struct.WsContent) error {
 	switch content.Data.Type {
 	case wsTypeConst.ChatMessageStreamSend:
-		return HandleStreamSend(ctx, svcCtx, robotID, content)
+		return HandleStreamSend(ctx, svcCtx, digitalID, content)
 	default:
 		// 不再静默丢弃：带上具体 type 打日志，否则龙虾侧调试时会以为帧发出去了
 		return fmt.Errorf("不支持的机器人上行消息类型: %s", content.Data.Type)

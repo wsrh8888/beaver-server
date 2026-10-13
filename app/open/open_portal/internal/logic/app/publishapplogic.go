@@ -56,7 +56,7 @@ func (l *PublishAppLogic) PublishApp(req *types.PublishAppReq) (resp *types.Publ
 	}
 
 	// 应用不再有草稿/发布/审核流程态，发布即把应用置为启用。
-	// 智能机器人的创建由「启用 robot 能力」负责，不在这里顺带处理。
+	// 外接数字伙伴的创建由「启用 digital 能力」负责，不在这里顺带处理。
 	if err := l.svcCtx.DB.Model(&app).Update("status", 1).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "发布应用失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("发布应用失败")

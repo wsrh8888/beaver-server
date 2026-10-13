@@ -24,12 +24,10 @@ package logic
 import (
 	"context"
 
-	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
 	beaverlog "beaver/utils/beaverlog"
-	"beaver/utils/beaverlog/model"
 )
 
 type ListDevelopersLogic struct {
@@ -43,42 +41,8 @@ func NewListDevelopersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Li
 }
 
 func (l *ListDevelopersLogic) ListDevelopers(in *open_rpc.ListDevelopersReq) (*open_rpc.ListDevelopersRes, error) {
-	page := int(in.Page)
-	if page <= 0 {
-		page = 1
-	}
-	pageSize := int(in.PageSize)
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-
-	db := l.svcCtx.DB.Model(&open_models.OpenDeveloper{})
-	if in.Status > 0 {
-		db = db.Where("status = ?", in.Status)
-	}
-
-	var total int64
-	if err := db.Count(&total).Error; err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "统计开发者失败",
-			Data: map[string]interface{}{"err": err.Error()},
-		})
-		return nil, err
-	}
-
-	var list []open_models.OpenDeveloper
-	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "查询开发者列表失败",
-			Data: map[string]interface{}{"err": err.Error()},
-		})
-		return nil, err
-	}
-
-	items := make([]*open_rpc.DeveloperItem, 0, len(list))
-	for _, dev := range list {
-		items = append(items, toDeveloperItem(dev))
-	}
-
-	return &open_rpc.ListDevelopersRes{Total: total, List: items}, nil
+	return &open_rpc.ListDevelopersRes{
+		Total: 0,
+		List:  []*open_rpc.DeveloperItem{},
+	}, nil
 }

@@ -23,17 +23,13 @@ package logic
 
 import (
 	"context"
-	"errors"
 
-	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
 	beaverlog "beaver/utils/beaverlog"
-	"beaver/utils/beaverlog/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"gorm.io/gorm"
 )
 
 type ApplyDeveloperLogic struct {
@@ -46,46 +42,10 @@ func NewApplyDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ap
 	return &ApplyDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("apply_developer", ctx)}
 }
 
+// ApplyDeveloper 已取消开发者表：登录用户即可用开放平台，本接口空成功（兼容旧客户端）。
 func (l *ApplyDeveloperLogic) ApplyDeveloper(in *open_rpc.ApplyDeveloperReq) (*open_rpc.ApplyDeveloperRes, error) {
 	if in.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "用户ID不能为空")
 	}
-
-	// 开发者登记不做审核：提交即生效，已有记录则覆盖登记信息。
-	var existing open_models.OpenDeveloper
-	err := l.svcCtx.DB.Where("user_id = ?", in.UserId).First(&existing).Error
-	if err == nil {
-		existing.RealName = in.RealName
-		existing.CompanyName = in.CompanyName
-		existing.Phone = in.Phone
-		existing.Email = in.Email
-		if err := l.svcCtx.DB.Save(&existing).Error; err != nil {
-			l.logger.Error(model.LogMsg{
-				Text: "更新开发者登记失败",
-				Data: map[string]interface{}{"err": err.Error()},
-			})
-			return nil, status.Error(codes.Internal, "提交失败")
-		}
-		return &open_rpc.ApplyDeveloperRes{Id: uint64(existing.Id)}, nil
-	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-
-	dev := open_models.OpenDeveloper{
-		UserID:      in.UserId,
-		RealName:    in.RealName,
-		CompanyName: in.CompanyName,
-		Phone:       in.Phone,
-		Email:       in.Email,
-	}
-	if err := l.svcCtx.DB.Create(&dev).Error; err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "创建开发者登记失败",
-			Data: map[string]interface{}{"err": err.Error()},
-		})
-		return nil, status.Error(codes.Internal, "提交失败")
-	}
-
-	return &open_rpc.ApplyDeveloperRes{Id: uint64(dev.Id)}, nil
+	return &open_rpc.ApplyDeveloperRes{Id: 0}, nil
 }

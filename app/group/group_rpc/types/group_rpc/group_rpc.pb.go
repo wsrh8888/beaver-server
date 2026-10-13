@@ -1151,7 +1151,7 @@ func (x *CanSendGroupMessageRes) GetReason() string {
 	return ""
 }
 
-// 添加群成员（供开放平台 Robot 入群等内部调用）
+// 添加群成员（供开放平台 Digital 入群等内部调用）
 type AddGroupMemberReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`          // string 群组 ID

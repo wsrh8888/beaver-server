@@ -206,14 +206,15 @@ func main() {
 			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_open?charset=utf8mb4&parseTime=True&loc=Local",
 			run: func(db *gorm.DB) error {
 				return db.AutoMigrate(
-					&open_models.OpenDeveloper{},
 					&open_models.OpenApp{},
 					&open_models.OpenOAuthConfig{},
-					&open_models.OpenRobot{},
 					&open_models.OpenOAuthToken{},
 					&open_models.OpenOAuthCode{},
 					&open_models.OpenOAuthQrCode{},
 					&open_models.OpenBotModel{},
+					&open_models.OpenDigitalPartner{},
+					&open_models.OpenDigitalPartnerAdmin{},
+					&open_models.OpenDigitalPartnerViewer{},
 				)
 			},
 		},

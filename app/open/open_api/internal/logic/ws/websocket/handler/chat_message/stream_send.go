@@ -59,7 +59,7 @@ type StreamBody struct {
 //  2. **可丢帧** —— 下一帧会补齐，终稿兜底，因此不需要 ACK 与重传。
 //  3. **走 ws_push_topic（用户侧通道）** —— 因为收件人是普通 IM 用户，
 //     机器人专用 topic（ws_bot_push_topic）只用于「IM → 机器人」这一个方向。
-func HandleStreamSend(ctx context.Context, svcCtx *svc.ServiceContext, robotID string, content type_struct.WsContent) error {
+func HandleStreamSend(ctx context.Context, svcCtx *svc.ServiceContext, digitalID string, content type_struct.WsContent) error {
 	conversationID := content.Data.ConversationID
 	if conversationID == "" {
 		return errors.New("流式帧缺少 conversationId")
@@ -77,11 +77,11 @@ func HandleStreamSend(ctx context.Context, svcCtx *svc.ServiceContext, robotID s
 	}
 
 	// 解析收件人的同时校验「机器人确实在这个会话里」，防越权刷屏
-	recipients, err := resolveRecipients(ctx, svcCtx, robotID, conversationID)
+	recipients, err := resolveRecipients(ctx, svcCtx, digitalID, conversationID)
 	if err != nil {
 		logger.Error(model.LogMsg{
 			Text: "流式帧收件人解析失败",
-			Data: map[string]any{"robotId": robotID, "conversationId": conversationID, "err": err.Error()},
+			Data: map[string]any{"digitalId": digitalID, "conversationId": conversationID, "err": err.Error()},
 		})
 		return err
 	}
@@ -93,7 +93,7 @@ func HandleStreamSend(ctx context.Context, svcCtx *svc.ServiceContext, robotID s
 
 	outBody := map[string]interface{}{
 		"streamId": body.StreamID,
-		"senderId": robotID,
+		"senderId": digitalID,
 		"delta":    body.Delta,
 		"seq":      body.Seq,
 		"done":     body.Done,
@@ -104,7 +104,7 @@ func HandleStreamSend(ctx context.Context, svcCtx *svc.ServiceContext, robotID s
 		payload := map[string]interface{}{
 			"command":        wsCommandConst.CHAT_MESSAGE,
 			"type":           wsTypeConst.ChatMessageStreamReceive,
-			"senderId":       robotID,
+			"senderId":       digitalID,
 			"targetId":       recipientID,
 			"body":           outBody,
 			"conversationId": conversationID,
@@ -113,7 +113,7 @@ func HandleStreamSend(ctx context.Context, svcCtx *svc.ServiceContext, robotID s
 			logger.Error(model.LogMsg{
 				Text: "流式帧投递失败",
 				Data: map[string]any{
-					"robotId": robotID, "targetId": recipientID,
+					"digitalId": digitalID, "targetId": recipientID,
 					"conversationId": conversationID, "streamId": body.StreamID,
 					"err": err.Error(),
 				},

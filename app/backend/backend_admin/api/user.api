@@ -9,7 +9,7 @@ type (
 		Keyword  string `form:"keyword,optional"` // 昵称/邮箱/手机号模糊搜索
 		Status   int    `form:"status,optional"`
 		Source   int    `form:"source,optional"`
-		UserType int    `form:"userType,optional"` // 用户类型：1普通 2bot 3robot，0全部
+		UserType int    `form:"userType,optional"` // 用户类型：1普通 2bot 3digital，0全部
 	}
 	GetUserListRes {
 		List  []UserInfo `json:"list"`

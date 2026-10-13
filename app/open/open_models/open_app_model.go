@@ -31,10 +31,11 @@ import (
 //
 // 职责边界：本表**只是接入凭据** —— 它是谁、叫什么、归谁、开没开。
 // 「这个应用能做什么」由各能力表表达，不要塞回本表：
-//   OAuth 配置   → OpenOAuthConfig
-//   智能机器人   → OpenRobot
-//   通知机器人   → OpenBotModel
+//   OAuth 配置     → OpenOAuthConfig
+//   通知机器人     → OpenBotModel（单向推送）
+//   可聊智能体     → OpenDigitalPartner（含 Runtime=external 挂本应用长连接）
 //   （客户端微应用 / JSSDK 鉴权如需支持，应独立成表）
+
 type OpenApp struct {
 	gorm.Model
 	// 身份认证

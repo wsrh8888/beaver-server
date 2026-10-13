@@ -23,16 +23,11 @@ package logic
 
 import (
 	"context"
-	"errors"
 
-	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
 	beaverlog "beaver/utils/beaverlog"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"gorm.io/gorm"
 )
 
 type AuditDeveloperLogic struct {
@@ -45,16 +40,6 @@ func NewAuditDeveloperLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 	return &AuditDeveloperLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("audit_developer", ctx)}
 }
 
-// AuditDeveloper 开发者登记已改为「登记即生效」，不再有审核流程。
-// 该接口保留仅为兼容既有调用方：只校验记录存在，不做任何状态变更。
 func (l *AuditDeveloperLogic) AuditDeveloper(in *open_rpc.AuditDeveloperReq) (*open_rpc.AuditDeveloperRes, error) {
-	var dev open_models.OpenDeveloper
-	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&dev).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, "开发者记录不存在")
-		}
-		return nil, err
-	}
-
 	return &open_rpc.AuditDeveloperRes{}, nil
 }

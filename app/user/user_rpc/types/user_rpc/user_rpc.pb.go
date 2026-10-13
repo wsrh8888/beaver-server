@@ -27,7 +27,7 @@ type UserCreateReq struct {
 	Source        int32                  `protobuf:"varint,2,opt,name=source,proto3" json:"source,omitempty"`                     // 注册来源：1-手机号注册，2-邮箱注册
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`                        // 邮箱（与phone二选一）
 	NickName      string                 `protobuf:"bytes,4,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`  // 昵称（可选）
-	UserType      int32                  `protobuf:"varint,5,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // 用户类型：1-普通用户，2-bot，3-robot（可选，默认1）
+	UserType      int32                  `protobuf:"varint,5,opt,name=user_type,json=userType,proto3" json:"user_type,omitempty"` // 用户类型：1-普通用户，2-bot，3-digital（可选，默认1）
 	Abstract      string                 `protobuf:"bytes,6,opt,name=abstract,proto3" json:"abstract,omitempty"`                  // 个性签名（可选）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1161,7 +1161,7 @@ func (x *SearchUserRes) GetUserInfo() *UserInfo {
 	return nil
 }
 
-// 更新用户展示信息（昵称/头像，供开放平台 Robot/Bot 等内部服务调用）
+// 更新用户展示信息（昵称/头像，供开放平台 Digital/Bot 等内部服务调用）
 type UserUpdateDisplayReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`       // string IM 用户 ID

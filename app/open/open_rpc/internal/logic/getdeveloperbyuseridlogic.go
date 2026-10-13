@@ -23,14 +23,11 @@ package logic
 
 import (
 	"context"
-	"errors"
 
-	"beaver/app/open/open_models"
 	"beaver/app/open/open_rpc/internal/svc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 
 	beaverlog "beaver/utils/beaverlog"
-	"gorm.io/gorm"
 )
 
 type GetDeveloperByUserIDLogic struct {
@@ -43,17 +40,16 @@ func NewGetDeveloperByUserIDLogic(ctx context.Context, svcCtx *svc.ServiceContex
 	return &GetDeveloperByUserIDLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_developer_by_user_id", ctx)}
 }
 
+// GetDeveloperByUserID 已取消开发者表：凡有 userId 即视为可用。
 func (l *GetDeveloperByUserIDLogic) GetDeveloperByUserID(in *open_rpc.GetDeveloperByUserIDReq) (*open_rpc.GetDeveloperByUserIDRes, error) {
-	var dev open_models.OpenDeveloper
-	err := l.svcCtx.DB.Where("user_id = ?", in.UserId).First(&dev).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if in.UserId == "" {
 		return &open_rpc.GetDeveloperByUserIDRes{Found: false}, nil
 	}
-	if err != nil {
-		return nil, err
-	}
 	return &open_rpc.GetDeveloperByUserIDRes{
-		Found:     true,
-		Developer: toDeveloperItem(dev),
+		Found: true,
+		Developer: &open_rpc.DeveloperItem{
+			UserId: in.UserId,
+			Status: 1,
+		},
 	}, nil
 }
