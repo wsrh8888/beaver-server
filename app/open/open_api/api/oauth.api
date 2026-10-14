@@ -3,47 +3,43 @@ syntax = "v1"
 // ==================== OAuth 用户级接口（JWT，Gateway 注入 Beaver-User-Id）====================
 
 type (
-	// PC 客户端生成 H5 快捷登录 authCode
 	GetH5AuthCodeReq {
-		UserID string `header:"Beaver-User-Id"` // string 当前登录用户 ID（Gateway 注入）
-		AppID  string `json:"appId"` // string 第三方应用 ID
+		UserID  string `header:"Beaver-User-Id"`
+		OAuthID string `json:"oauthId"`
 	}
 	GetH5AuthCodeRes {
-		AuthCode string `json:"authCode"` // string 一次性授权码
-		ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
+		AuthCode string `json:"authCode"`
+		ExpireIn int64  `json:"expireIn"`
 	}
 )
 
 type (
-	// 移动端标记已扫码（IM App 已登录用户）
 	ScanQrCodeReq {
-		UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
-		SceneID string `json:"sceneId"` // string 扫码场景 ID
+		UserID  string `header:"Beaver-User-Id"`
+		SceneID string `json:"sceneId"`
 	}
 	ScanQrCodeRes {
-		Success bool `json:"success"` // bool 是否标记成功
+		Success bool `json:"success"`
 	}
 )
 
 type (
-	// 移动端确认扫码授权（IM App 已登录用户）
 	ConfirmQrCodeReq {
-		UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
-		SceneID string `json:"sceneId"` // string 扫码场景 ID
+		UserID  string `header:"Beaver-User-Id"`
+		SceneID string `json:"sceneId"`
 	}
 	ConfirmQrCodeRes {
-		Success bool `json:"success"` // bool 是否确认成功
+		Success bool `json:"success"`
 	}
 )
 
 type (
-	// 移动端取消扫码授权
 	CancelQrCodeReq {
-		UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
-		SceneID string `json:"sceneId"` // string 扫码场景 ID
+		UserID  string `header:"Beaver-User-Id"`
+		SceneID string `json:"sceneId"`
 	}
 	CancelQrCodeRes {
-		Success bool `json:"success"` // bool 是否取消成功
+		Success bool `json:"success"`
 	}
 )
 

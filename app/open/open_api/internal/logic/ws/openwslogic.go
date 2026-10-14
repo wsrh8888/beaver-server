@@ -59,11 +59,11 @@ func NewOpenWsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OpenWsLogi
 
 func (l *OpenWsLogic) OpenWs(req *types.OpenWsReq, w http.ResponseWriter, r *http.Request) (resp *types.OpenWsRes, err error) {
 	// 1. 鉴权先于升级执行：校验失败直接以 HTTP 状态码拒绝，不建立连接
-	identity, authErr := ws_auth.VerifyDigitalToken(l.svcCtx.DB, req.AppID, req.Ticket)
+	identity, authErr := ws_auth.VerifyDigitalToken(l.svcCtx.DB, req.AppKey, req.Ticket)
 	if authErr != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "机器人长连接鉴权失败",
-			Data: map[string]any{"appId": req.AppID, "remoteAddr": r.RemoteAddr, "err": authErr.Error()},
+			Data: map[string]any{"appKey": req.AppKey, "remoteAddr": r.RemoteAddr, "err": authErr.Error()},
 		})
 		http.Error(w, authErr.Error(), http.StatusUnauthorized)
 		return nil, nil
@@ -77,7 +77,7 @@ func (l *OpenWsLogic) OpenWs(req *types.OpenWsReq, w http.ResponseWriter, r *htt
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "机器人长连接升级失败",
-			Data: map[string]any{"appId": identity.AppID, "err": err.Error()},
+			Data: map[string]any{"appKey": identity.AppKey, "err": err.Error()},
 		})
 		return nil, nil
 	}
@@ -98,8 +98,8 @@ func (l *OpenWsLogic) OpenWs(req *types.OpenWsReq, w http.ResponseWriter, r *htt
 	l.logger.Info(model.LogMsg{
 		Text: "机器人长连接已建立",
 		Data: map[string]any{
-			"appId":      identity.AppID,
-			"digitalId":    identity.DigitalID,
+			"appKey":   identity.AppKey,
+			"digitalId":  identity.DigitalID,
 			"remoteAddr": addr,
 		},
 	})
@@ -109,7 +109,7 @@ func (l *OpenWsLogic) OpenWs(req *types.OpenWsReq, w http.ResponseWriter, r *htt
 		ws_conn.Unregister(identity.DigitalID, addr)
 		l.logger.Info(model.LogMsg{
 			Text: "机器人长连接已断开",
-			Data: map[string]any{"appId": identity.AppID, "digitalId": identity.DigitalID, "remoteAddr": addr},
+			Data: map[string]any{"appKey": identity.AppKey, "digitalId": identity.DigitalID, "remoteAddr": addr},
 		})
 	}()
 

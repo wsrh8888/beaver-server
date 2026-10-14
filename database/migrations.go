@@ -31,12 +31,11 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
-	"beaver/app/media/media_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
 	"beaver/app/platform/platform_models"
-	"beaver/app/platform/platform_models/org"
+	org_models "beaver/app/platform/platform_models/org"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
 	fileseed "beaver/database/file"
@@ -99,7 +98,6 @@ func AllMigrations() []Migration {
 				&group_models.GroupMemberModel{},
 				&group_models.GroupJoinRequestModel{},
 				&group_models.GroupMemberChangeLogModel{},
-				&group_models.GroupBotModel{},
 			},
 		},
 		{
@@ -153,25 +151,18 @@ func AllMigrations() []Migration {
 			},
 		},
 		{
-			Name: "beaver_media",
-			Models: []any{
-				&media_models.MediaJob{},
-				&media_models.MediaArtifact{},
-				&media_models.MediaSpeechSession{},
-			},
-		},
-		{
 			Name: "beaver_open",
 			Models: []any{
-				&open_models.OpenApp{},
-				&open_models.OpenOAuthConfig{},
+				&open_models.OpenOAuth{},
 				&open_models.OpenOAuthToken{},
 				&open_models.OpenOAuthCode{},
 				&open_models.OpenOAuthQrCode{},
-				&open_models.OpenBotModel{},
-				&open_models.OpenDigitalPartner{},
-				&open_models.OpenDigitalPartnerAdmin{},
-				&open_models.OpenDigitalPartnerViewer{},
+				&open_models.OpenBot{},
+				&open_models.OpenBotMember{},
+				&open_models.OpenDigital{},
+				&open_models.OpenDigitalMember{},
+				&open_models.OpenDigitalToken{},
+				&open_models.OpenDigitalConfig{},
 			},
 			Init: openseed.InitQuickLoginApp,
 		},

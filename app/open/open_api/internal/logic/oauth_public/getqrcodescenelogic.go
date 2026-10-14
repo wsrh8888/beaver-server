@@ -55,8 +55,8 @@ func (l *GetQrCodeSceneLogic) GetQrCodeScene(req *types.GetQrCodeSceneReq) (resp
 		return nil, err
 	}
 
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", qrCode.AppID, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND status = ?", qrCode.OAuthID, 1).First(&app).Error; err != nil {
 		return nil, err
 	}
 
@@ -65,11 +65,8 @@ func (l *GetQrCodeSceneLogic) GetQrCodeScene(req *types.GetQrCodeSceneReq) (resp
 		expireIn = 0
 	}
 
-	var oauthConfig open_models.OpenOAuthConfig
-	scopeStr := ""
-	if err := l.svcCtx.DB.Where("app_id = ?", qrCode.AppID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
-		scopeStr = oauthConfig.SupportedScopes
-	} else {
+	scopeStr := app.SupportedScopes
+	if scopeStr == "" {
 		scopes := []string{
 			string(constants.ScopeUserProfileRead),
 			string(constants.ScopeUserAvatarRead),
@@ -80,7 +77,7 @@ func (l *GetQrCodeSceneLogic) GetQrCodeScene(req *types.GetQrCodeSceneReq) (resp
 
 	return &types.GetQrCodeSceneRes{
 		SceneID:  qrCode.SceneID,
-		AppID:    qrCode.AppID,
+		OAuthID:    qrCode.OAuthID,
 		AppName:  app.Name,
 		AppIcon:  app.Icon,
 		Status:   oauthmiddle.QrStatusText(qrCode.Status),

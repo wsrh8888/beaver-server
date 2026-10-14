@@ -33,6 +33,8 @@ const (
 	MqTopicWsBot TopicType = "ws_bot_push_topic"
 	// MqTopicClientLog 客户端日志扁平 JSON（无 Message 信封）
 	MqTopicClientLog TopicType = "beaver_logs"
+	// MqTopicAgentTask builtin 数字伙伴消息投递 Topic（chat_rpc 投 → agent 消费跑 LLM）
+	MqTopicAgentTask TopicType = "agent_task"
 )
 
 // RocketMQ Consumer Group 类型

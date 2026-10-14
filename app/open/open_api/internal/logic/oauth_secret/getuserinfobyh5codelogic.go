@@ -24,6 +24,7 @@ package oauth_secret
 import (
 	"context"
 	"errors"
+	"time"
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
@@ -47,11 +48,11 @@ func NewGetUserInfoByH5CodeLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *GetUserInfoByH5CodeLogic) GetUserInfoByH5Code(req *types.GetUserInfoByH5CodeReq) (resp *types.GetUserInfoByH5CodeRes, err error) {
-	if _, err := verifyApp(l.svcCtx.DB, req.AppID, req.AppSecret); err != nil {
+	if _, err := verifyApp(l.svcCtx.DB, req.OAuthID, req.OAuthSecret); err != nil {
 		return nil, err
 	}
 
-	oauthCode, err := findOAuthCode(l.svcCtx.DB, req.AppID, req.AuthCode)
+	oauthCode, err := findOAuthCode(l.svcCtx.DB, req.OAuthID, req.AuthCode)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (l *GetUserInfoByH5CodeLogic) GetUserInfoByH5Code(req *types.GetUserInfoByH
 		return nil, errors.New("授权码场景无效")
 	}
 
-	if err := l.svcCtx.DB.Model(oauthCode).Update("used", true).Error; err != nil {
+	if err := l.svcCtx.DB.Model(oauthCode).Update("used_at", time.Now()).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "标记 authCode 已使用失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("服务内部异常")
 	}

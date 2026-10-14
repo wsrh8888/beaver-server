@@ -52,7 +52,7 @@ func (l *GetAppListLogic) GetAppList(req *types.GetAppListReq) (resp *types.GetA
 	}
 
 	// 构建查询条件
-	query := l.svcCtx.DB.Model(&open_models.OpenApp{}).Where("owner_id = ?", req.UserID)
+	query := l.svcCtx.DB.Model(&open_models.OpenOAuth{}).Where("owner_id = ?", req.UserID)
 
 	// 3. 如果指定了状态，添加状态过滤
 	if req.Status != 0 {
@@ -66,7 +66,7 @@ func (l *GetAppListLogic) GetAppList(req *types.GetAppListReq) (resp *types.GetA
 	}
 
 	// 5. 分页查询
-	var apps []open_models.OpenApp
+	var apps []open_models.OpenOAuth
 	offset := (req.Page - 1) * req.PageSize
 	if err := query.Offset(offset).Limit(req.PageSize).Order("created_at DESC").Find(&apps).Error; err != nil {
 		return nil, errors.New("查询失败")
@@ -76,9 +76,11 @@ func (l *GetAppListLogic) GetAppList(req *types.GetAppListReq) (resp *types.GetA
 	list := make([]types.AppInfo, 0, len(apps))
 	for _, app := range apps {
 		list = append(list, types.AppInfo{
-			AppID:       app.AppID,
+			OAuthID:     app.OAuthID,
 			Name:        app.Name,
 			Description: app.Description,
+			Icon:        app.Icon,
+			OAuthSecret: maskSecret(app.OAuthSecret),
 			Status:      app.Status,
 			CreatedAt:   app.CreatedAt.Unix(),
 		})

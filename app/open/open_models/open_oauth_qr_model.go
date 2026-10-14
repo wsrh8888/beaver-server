@@ -27,16 +27,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// OpenOAuthQrCode 扫码登录记录（一次扫码会话一条，用完可清理）
+const (
+	OAuthQrStatusWaiting   = 0
+	OAuthQrStatusScanned   = 1
+	OAuthQrStatusConfirmed = 2
+	OAuthQrStatusCancelled = 3
+	OAuthQrStatusExpired   = 4
+)
+
+// OpenOAuthQrCode 扫码登录会话（挂 OpenOAuth；短寿命，生产可迁 Redis）。
 type OpenOAuthQrCode struct {
 	gorm.Model
-	SceneID   string    `gorm:"column:scene_id;type:varchar(64);not null;index"`
-	AppID     string    `gorm:"column:app_id;type:varchar(64);not null;index"`
-	UserID    string    `gorm:"column:user_id;type:varchar(64);comment:扫码用户，空表示尚未扫码"`
-	Status    int       `gorm:"column:status;type:tinyint;not null;default:0;comment:0等待扫码 1已扫码 2已确认 3已取消 4已过期"`
-	ExpiresAt time.Time `gorm:"column:expires_at;type:datetime;not null"`
+	SceneID   string    `gorm:"column:scene_id;type:varchar(64);uniqueIndex;not null;comment:扫码场景ID"`
+	OAuthID   string    `gorm:"column:oauth_id;type:varchar(64);index;not null;comment:OpenOAuth.OAuthID"`
+	UserID    string    `gorm:"column:user_id;type:varchar(64);index;comment:扫码用户，空表示尚未扫码"`
+	Status    int       `gorm:"column:status;type:tinyint;not null;default:0;index;comment:0等待 1已扫 2已确认 3已取消 4已过期"`
+	ExpiresAt time.Time `gorm:"column:expires_at;type:datetime;index;not null;comment:过期时间"`
 }
 
-func (OpenOAuthQrCode) TableName() string {
-	return "open_oauth_qr_codes"
-}
+func (OpenOAuthQrCode) TableName() string { return "open_oauth_qr_codes" }

@@ -4,18 +4,6 @@
  * Project: beaver-server
  * https://github.com/wsrh8888/beaver-server
  *
- * 中文：
- * 本文件为海狸 IM（Beaver IM）开源项目源代码。
- * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
- * 禁止删除、篡改或替换本文件头部版权与许可声明。
- * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
- *
- * English:
- * This file is part of the Beaver IM open-source project.
- * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
- * Do not remove, alter, or replace this copyright and license header.
- * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
- *
  * beaver-server-header-v1
  */
 
@@ -51,25 +39,21 @@ func NewExchangeTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Exc
 }
 
 func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open_rpc.ExchangeTokenRes, error) {
-	// 1. 验证应用是否存在
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", in.AppId, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND status = ?", in.OauthId, 1).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或已禁用")
 	}
 
-	// 2. 查询授权码
 	var authCode open_models.OpenOAuthCode
-	if err := l.svcCtx.DB.Where("code = ? AND app_id = ? AND used = ?", in.Code, in.AppId, false).First(&authCode).Error; err != nil {
+	if err := l.svcCtx.DB.Where("code_hash = ? AND oauth_id = ? AND used_at IS NULL", in.Code, in.OauthId).First(&authCode).Error; err != nil {
 		return nil, errors.New("授权码无效或已使用")
 	}
 
-	// 3. 检查授权码是否过期
 	if time.Now().After(authCode.ExpiresAt) {
 		return nil, errors.New("授权码已过期")
 	}
 
-	// 4. 标记授权码为已使用
-	if err := l.svcCtx.DB.Model(&authCode).Update("used", true).Error; err != nil {
+	if err := l.svcCtx.DB.Model(&authCode).Update("used_at", time.Now()).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "更新授权码状态失败",
 			Data: map[string]interface{}{"err": err.Error()},
@@ -77,22 +61,27 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 		return nil, errors.New("处理授权码失败")
 	}
 
-	// 5. 生成 Access Token
 	accessTokenBytes := make([]byte, 32)
 	_, _ = rand.Read(accessTokenBytes)
 	accessToken := hex.EncodeToString(accessTokenBytes)
 
-	// 6. 生成 Refresh Token
 	refreshTokenBytes := make([]byte, 32)
 	_, _ = rand.Read(refreshTokenBytes)
 	refreshToken := hex.EncodeToString(refreshTokenBytes)
 
-	// 7. 保存 Access Token
 	now := time.Now()
-	expiresAt := now.Add(2 * time.Hour)                    // access_token 2小时过期
-	refreshTokenExpiresAt := now.Add(180 * 24 * time.Hour) // refresh_token 180天过期
+	accessTTL := app.AccessTokenTTL
+	if accessTTL <= 0 {
+		accessTTL = 7200
+	}
+	refreshTTL := app.RefreshTokenTTL
+	if refreshTTL <= 0 {
+		refreshTTL = 2592000
+	}
+	expiresAt := now.Add(time.Duration(accessTTL) * time.Second)
+	refreshTokenExpiresAt := now.Add(time.Duration(refreshTTL) * time.Second)
 	tokenRecord := open_models.OpenOAuthToken{
-		AppID:                 in.AppId,
+		OAuthID:               in.OauthId,
 		Token:                 accessToken,
 		RefreshToken:          refreshToken,
 		ExpiresAt:             expiresAt,
@@ -112,7 +101,7 @@ func (l *ExchangeTokenLogic) ExchangeToken(in *open_rpc.ExchangeTokenReq) (*open
 	return &open_rpc.ExchangeTokenRes{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    7200, // 2小时
+		ExpiresIn:    int64(accessTTL),
 		TokenType:    "Bearer",
 		UserId:       authCode.UserID,
 	}, nil

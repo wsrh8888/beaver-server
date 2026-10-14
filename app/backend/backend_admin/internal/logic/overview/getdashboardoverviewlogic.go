@@ -31,7 +31,6 @@ import (
 	"beaver/app/friend/friend_rpc/types/friend_rpc"
 	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/moment/moment_rpc/types/moment_rpc"
-	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/core/coreonline"
@@ -110,22 +109,6 @@ func (l *GetDashboardOverviewLogic) GetDashboardOverview(req *types.GetDashboard
 
 	resp.BlockTotal = countRPC(l, "黑名单", func() (int64, error) {
 		res, err := l.svcCtx.FriendRpc.ListFriendBlocks(l.ctx, &friend_rpc.ListFriendBlocksReq{Page: 1, PageSize: 1})
-		if err != nil {
-			return 0, err
-		}
-		return res.Total, nil
-	})
-
-	resp.PendingDeveloperCount = countRPC(l, "待审开发者", func() (int64, error) {
-		res, err := l.svcCtx.OpenRpc.ListDevelopers(l.ctx, &open_rpc.ListDevelopersReq{Page: 1, PageSize: 1, Status: 0})
-		if err != nil {
-			return 0, err
-		}
-		return res.Total, nil
-	})
-
-	resp.PendingAppCount = countRPC(l, "待审应用", func() (int64, error) {
-		res, err := l.svcCtx.OpenRpc.ListOpenApps(l.ctx, &open_rpc.ListOpenAppsReq{Page: 1, PageSize: 1, AuditStatus: 0})
 		if err != nil {
 			return 0, err
 		}

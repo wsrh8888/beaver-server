@@ -1,46 +1,44 @@
 syntax = "v1"
 
-// ==================== OAuth 配置管理（开发者门户）====================
+// ==================== OAuth 端配置（开发者门户）====================
 
 type (
-	// 更新 OAuth 配置
 	UpdateOAuthConfigReq {
-		AppID     string `json:"appId"` // string 应用 ID
-		OAuthType string `json:"oauthType"` // string 平台类型：h5 / desktop / mobile
-		Config    string `json:"config"` // string 配置 JSON，字段随 OAuthType 不同
-		UserID    string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID   string `json:"oauthId"`
+		OAuthType string `json:"oauthType"` // h5 / desktop / mobile
+		Config    string `json:"config"`
+		UserID    string `header:"Beaver-User-Id"`
 	}
 	UpdateOAuthConfigRes {}
 )
 
 type (
-	// 获取 OAuth 配置
 	GetOAuthConfigReq {
-		AppID  string `form:"appId"` // string 应用 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID string `form:"oauthId"`
+		UserID  string `header:"Beaver-User-Id"`
 	}
 	H5OAuthConfigInfo {
-		Enabled      bool     `json:"enabled"` // bool 是否启用 H5 OAuth
-		RedirectURIs []string `json:"redirectUris"` // []string 授权回调地址列表
-		EnablePKCE   bool     `json:"enablePKCE"` // bool 是否启用 PKCE
+		Enabled      bool     `json:"enabled"`
+		RedirectURIs []string `json:"redirectUris"`
+		EnablePKCE   bool     `json:"enablePKCE"`
 	}
 	DesktopOAuthConfigInfo {
-		Enabled      bool   `json:"enabled"` // bool 是否启用桌面端 OAuth
-		CustomScheme string `json:"customScheme"` // string 自定义 URL Scheme
-		AuthPageURL  string `json:"authPageUrl"` // string 授权页完整 URL（服务端生成）
+		Enabled      bool   `json:"enabled"`
+		CustomScheme string `json:"customScheme"`
+		AuthPageURL  string `json:"authPageUrl"`
 	}
 	MobileOAuthConfigInfo {
-		Enabled            bool   `json:"enabled"` // bool 是否启用移动端 OAuth
-		IOSBundleID        string `json:"iosBundleId"` // string iOS Bundle ID
-		AndroidPackageName string `json:"androidPackageName"` // string Android 包名
-		UniversalLink      string `json:"universalLink"` // string Universal Link
-		CustomScheme       string `json:"customScheme"` // string 自定义 URL Scheme
-		EnablePKCE         bool   `json:"enablePKCE"` // bool 是否启用 PKCE
+		Enabled            bool   `json:"enabled"`
+		IOSBundleID        string `json:"iosBundleId"`
+		AndroidPackageName string `json:"androidPackageName"`
+		UniversalLink      string `json:"universalLink"`
+		CustomScheme       string `json:"customScheme"`
+		EnablePKCE         bool   `json:"enablePKCE"`
 	}
 	GetOAuthConfigRes {
-		H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"` // object H5 配置，可选
-		DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"` // object 桌面端配置，可选
-		MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"` // object 移动端配置，可选
+		H5Config      *H5OAuthConfigInfo      `json:"h5Config,optional"`
+		DesktopConfig *DesktopOAuthConfigInfo `json:"desktopConfig,optional"`
+		MobileConfig  *MobileOAuthConfigInfo  `json:"mobileConfig,optional"`
 	}
 )
 

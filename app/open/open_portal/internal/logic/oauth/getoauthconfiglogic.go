@@ -40,7 +40,6 @@ type GetOAuthConfigLogic struct {
 	logger *beaverlog.Logger
 }
 
-// 获取 OAuth 配置
 func NewGetOAuthConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOAuthConfigLogic {
 	return &GetOAuthConfigLogic{
 		ctx:    ctx,
@@ -50,62 +49,44 @@ func NewGetOAuthConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetOAuthConfigLogic) GetOAuthConfig(req *types.GetOAuthConfigReq) (resp *types.GetOAuthConfigRes, err error) {
-
-	// 查询应用信息
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ?", req.OAuthID).First(&app).Error; err != nil {
 		return nil, err
 	}
-
-	// 验证 UserID 是否为应用所有者
 	if app.OwnerID != req.UserID {
 		return nil, errors.New("无权查看此应用")
 	}
 
 	resp = &types.GetOAuthConfigRes{}
-
-	// 查询 OAuth 配置
-	var oauth open_models.OpenOAuthConfig
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauth).Error; err != nil {
-		// 如果没有配置，返回空配置
-		return resp, nil
-	}
-
-	// 返回 H5 配置
-	if oauth.H5 != nil {
+	enablePKCE := app.RequirePKCE == 1
+	if app.H5 != nil {
 		resp.H5Config = &types.H5OAuthConfigInfo{
-			Enabled:      oauth.H5.Enabled,
-			RedirectURIs: oauth.H5.RedirectURIs,
+			Enabled:      app.H5.Enabled,
+			RedirectURIs: app.H5.RedirectURIs,
+			EnablePKCE:   enablePKCE,
 		}
 	}
-
-	// 返回桌面端配置
-	if oauth.Desktop != nil && oauth.Desktop.Enabled {
+	if app.Desktop != nil && app.Desktop.Enabled {
 		authPageURL := ""
-		if oauth.Desktop.CustomScheme != "" {
-			oauthBaseUrl := l.svcCtx.Config.OAuth.BaseUrl
-			redirectURI := oauth.Desktop.CustomScheme
+		if app.Desktop.CustomScheme != "" {
 			authPageURL = fmt.Sprintf("%s/desktop/auth?appId=%s&redirectUri=%s",
-				oauthBaseUrl, req.AppID, url.QueryEscape(redirectURI))
+				l.svcCtx.Config.OAuth.BaseUrl, req.OAuthID, url.QueryEscape(app.Desktop.CustomScheme))
 		}
-
 		resp.DesktopConfig = &types.DesktopOAuthConfigInfo{
-			Enabled:      oauth.Desktop.Enabled,
-			CustomScheme: oauth.Desktop.CustomScheme,
+			Enabled:      app.Desktop.Enabled,
+			CustomScheme: app.Desktop.CustomScheme,
 			AuthPageURL:  authPageURL,
 		}
 	}
-
-	// 返回移动端配置
-	if oauth.Mobile != nil {
+	if app.Mobile != nil {
 		resp.MobileConfig = &types.MobileOAuthConfigInfo{
-			Enabled:            oauth.Mobile.Enabled,
-			IOSBundleID:        oauth.Mobile.IOSBundleID,
-			AndroidPackageName: oauth.Mobile.AndroidPackageName,
-			UniversalLink:      oauth.Mobile.UniversalLink,
-			CustomScheme:       oauth.Mobile.CustomScheme,
+			Enabled:            app.Mobile.Enabled,
+			IOSBundleID:        app.Mobile.IOSBundleID,
+			AndroidPackageName: app.Mobile.AndroidPackageName,
+			UniversalLink:      app.Mobile.UniversalLink,
+			CustomScheme:       app.Mobile.CustomScheme,
+			EnablePKCE:         enablePKCE,
 		}
 	}
-
 	return resp, nil
 }

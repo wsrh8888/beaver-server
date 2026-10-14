@@ -30,6 +30,7 @@ import (
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/open/openevent"
+	"beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -84,7 +85,14 @@ func (p *digitalEventPusher) pushPrivateChat(senderID string, userIDs []string, 
 		return
 	}
 
-	p.dispatch(res.DigitalUserId, res.AppId, openevent.EventIMMessageReceive, event)
+	// builtin 模式：投 agent_task，由 beaver-agent 消费跑 LLM。
+	if res.Runtime == "builtin" {
+		p.pushAgentTask(res.DigitalUserId, event)
+		return
+	}
+
+	// external 模式：走 openevent → WS 长连接下发外部 agent。
+	p.dispatch(res.DigitalUserId, openevent.EventIMMessageReceive, event)
 }
 
 func (p *digitalEventPusher) pushGroupAt(senderID, conversationID string, msg *ctype.Msg, event map[string]interface{}) {
@@ -99,16 +107,47 @@ func (p *digitalEventPusher) pushGroupAt(senderID, conversationID string, msg *c
 		}
 		groupEvent := copyEventMap(event)
 		groupEvent["group_id"] = conversation.GetTargetIDByConversation(conversationID, senderID)
-		p.dispatch(res.DigitalUserId, res.AppId, openevent.EventIMMessageReceiveGroup, groupEvent)
+		// builtin 模式：投 agent_task。
+		if res.Runtime == "builtin" {
+			p.pushAgentTask(res.DigitalUserId, groupEvent)
+			continue
+		}
+		// external 模式：走 openevent。
+		p.dispatch(res.DigitalUserId, openevent.EventIMMessageReceiveGroup, groupEvent)
 	}
 }
 
-func (p *digitalEventPusher) dispatch(digitalID, appID, eventType string, event map[string]interface{}) {
+// dispatch external 模式：走 openevent → WS 长连接下发外部 agent。
+func (p *digitalEventPusher) dispatch(digitalID, eventType string, event map[string]interface{}) {
 	conversationID, _ := event["conversation_id"].(string)
 	if err := openevent.Push(p.ctx, p.svcCtx.RocketMQ, digitalID, eventType, conversationID, event); err != nil {
 		p.logger.Error(model.LogMsg{
 			Text: "数字伙伴事件投递失败",
-			Data: map[string]any{"digitalId": digitalID, "app": appID, "event": eventType, "err": err.Error()},
+			Data: map[string]any{"digitalId": digitalID, "event": eventType, "err": err.Error()},
+		})
+	}
+}
+
+// pushAgentTask builtin 模式：投 agent_task topic，由 beaver-agent 消费跑 LLM。
+// 消息体对齐 agent consumer.py 的 payload 结构：digitalId + userId + conversationId + content + messageId。
+func (p *digitalEventPusher) pushAgentTask(digitalID string, event map[string]interface{}) {
+	conversationID, _ := event["conversation_id"].(string)
+	senderID, _ := event["sender_id"].(string)
+	messageID, _ := event["message_id"].(string)
+	content, _ := event["content"].(string)
+
+	payload := map[string]interface{}{
+		"messageId":      messageID,
+		"userId":        senderID,
+		"conversationId": conversationID,
+		"content":       content,
+		"digitalId":     digitalID,
+	}
+	envelope := map[string]interface{}{"payload": payload}
+	if err := p.svcCtx.RocketMQ.SendMessage(p.ctx, mqwsconst.MqTopicAgentTask, envelope); err != nil {
+		p.logger.Error(model.LogMsg{
+			Text: "agent_task 投递失败",
+			Data: map[string]any{"digitalId": digitalID, "messageId": messageID, "err": err.Error()},
 		})
 	}
 }

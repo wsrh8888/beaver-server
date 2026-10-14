@@ -4,18 +4,6 @@
  * Project: beaver-server
  * https://github.com/wsrh8888/beaver-server
  *
- * 中文：
- * 本文件为海狸 IM（Beaver IM）开源项目源代码。
- * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
- * 禁止删除、篡改或替换本文件头部版权与许可声明。
- * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
- *
- * English:
- * This file is part of the Beaver IM open-source project.
- * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
- * Do not remove, alter, or replace this copyright and license header.
- * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
- *
  * beaver-server-header-v1
  */
 
@@ -125,8 +113,8 @@ func (q *Qrcode) Confirm(sceneID, userID string) error {
 		return errors.New("二维码已被其他用户扫描")
 	}
 
-	var app open_models.OpenApp
-	if err := q.db.Where("app_id = ? AND status = ?", qrCode.AppID, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := q.db.Where("oauth_id = ? AND status = ?", qrCode.OAuthID, 1).First(&app).Error; err != nil {
 		return errors.New("应用不存在或未启用")
 	}
 
@@ -137,7 +125,7 @@ func (q *Qrcode) Confirm(sceneID, userID string) error {
 		return errors.New("更新扫码状态失败")
 	}
 
-	return q.createOAuthCode(qrCode.AppID, userID, "pc_scan", sceneID)
+	return q.createOAuthCode(qrCode.OAuthID, userID, "pc_scan", sceneID)
 }
 
 func (q *Qrcode) Cancel(sceneID, userID string) error {
@@ -165,8 +153,8 @@ func (q *Qrcode) Cancel(sceneID, userID string) error {
 func (q *Qrcode) FindConfirmedCode(sceneID string, qrCode *open_models.OpenOAuthQrCode) (string, error) {
 	var oauthCode open_models.OpenOAuthCode
 	err := q.db.Where(
-		"app_id = ? AND user_id = ? AND scene = ? AND used = ? AND state = ?",
-		qrCode.AppID, qrCode.UserID, "pc_scan", false, sceneID,
+		"oauth_id = ? AND user_id = ? AND scene = ? AND used_at IS NULL AND state = ?",
+		qrCode.OAuthID, qrCode.UserID, "pc_scan", sceneID,
 	).Order("id DESC").First(&oauthCode).Error
 	if err != nil {
 		return "", err
@@ -174,11 +162,11 @@ func (q *Qrcode) FindConfirmedCode(sceneID string, qrCode *open_models.OpenOAuth
 	return oauthCode.Code, nil
 }
 
-func (q *Qrcode) createOAuthCode(appID, userID, scene, sceneRef string) error {
-	var oauthConfig open_models.OpenOAuthConfig
+func (q *Qrcode) createOAuthCode(oauthID, userID, scene, sceneRef string) error {
+	var app open_models.OpenOAuth
 	scope := ""
-	if err := q.db.Where("app_id = ?", appID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
-		scope = oauthConfig.SupportedScopes
+	if err := q.db.Where("oauth_id = ?", oauthID).First(&app).Error; err == nil && app.SupportedScopes != "" {
+		scope = app.SupportedScopes
 	} else {
 		scopes := []string{
 			string(constants.ScopeUserProfileRead),
@@ -191,7 +179,7 @@ func (q *Qrcode) createOAuthCode(appID, userID, scene, sceneRef string) error {
 	code := util.NewV4().String()
 	record := open_models.OpenOAuthCode{
 		Code:      code,
-		AppID:     appID,
+		OAuthID:   oauthID,
 		UserID:    userID,
 		Scope:     scope,
 		ExpiresAt: time.Now().Add(oauthCodeTTL),

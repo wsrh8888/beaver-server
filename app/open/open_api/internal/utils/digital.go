@@ -4,80 +4,65 @@
  * Project: beaver-server
  * https://github.com/wsrh8888/beaver-server
  *
- * 中文：
- * 本文件为海狸 IM（Beaver IM）开源项目源代码。
- * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
- * 禁止删除、篡改或替换本文件头部版权与许可声明。
- * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
- *
- * English:
- * This file is part of the Beaver IM open-source project.
- * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
- * Do not remove, alter, or replace this copyright and license header.
- * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
- *
  * beaver-server-header-v1
  */
 
 package utils
 
 import (
-	"context"
 	"errors"
-	"fmt"
 
 	"beaver/app/open/open_models"
-	"beaver/app/user/user_models"
-	"beaver/app/user/user_rpc/types/user_rpc"
 
-	"google.golang.org/grpc"
 	"gorm.io/gorm"
 )
 
-type UserCreator interface {
-	UserCreate(ctx context.Context, in *user_rpc.UserCreateReq, opts ...grpc.CallOption) (*user_rpc.UserCreateRes, error)
-}
-
-// EnsureAppDigital 确保应用挂有外接数字伙伴。
-// 返回的 PartnerID 即 IM 用户 ID，供长连接事件路由 / 发消息使用。
-func EnsureAppDigital(ctx context.Context, db *gorm.DB, userRpc UserCreator, app *open_models.OpenApp) (*open_models.OpenDigitalPartner, error) {
-	var partner open_models.OpenDigitalPartner
-	err := db.Where(
-		"app_id = ? AND runtime = ? AND status = 1",
-		app.AppID, open_models.PartnerRuntimeExternal,
-	).First(&partner).Error
-	if err == nil && partner.PartnerID != "" {
-		return &partner, nil
+func LoadDigitalByAppKey(db *gorm.DB, appKey string) (*open_models.OpenDigital, error) {
+	if appKey == "" {
+		return nil, errors.New("缺少 appKey")
 	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
+	var partner open_models.OpenDigital
+	if err := db.Where(
+		"app_key = ? AND runtime = ?",
+		appKey, open_models.DigitalRuntimeExternal,
+	).First(&partner).Error; err != nil {
+		return nil, errors.New("数字伙伴不存在")
 	}
-
-	nickName := app.Name
-	if nickName == "" {
-		nickName = "数字伙伴"
-	}
-
-	createRes, err := userRpc.UserCreate(ctx, &user_rpc.UserCreateReq{
-		NickName: nickName,
-		UserType: int32(user_models.UserTypeDigital),
-		Source:   int32(user_models.SourceGroup),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("创建数字伙伴 IM 用户失败: %w", err)
-	}
-
-	partner = open_models.OpenDigitalPartner{
-		PartnerID:   createRes.UserID,
-		OwnerID:     app.OwnerID,
-		Description: "",
-		Runtime:     open_models.PartnerRuntimeExternal,
-		AppID:       app.AppID,
-		Visibility:  open_models.PartnerVisibilityPrivate,
-		Status:      1,
-	}
-	if err := db.Create(&partner).Error; err != nil {
-		return nil, err
+	if partner.DigitalID == "" {
+		return nil, errors.New("数字伙伴身份未就绪")
 	}
 	return &partner, nil
+}
+
+func LoadDigitalByDigitalID(db *gorm.DB, partnerID string) (*open_models.OpenDigital, error) {
+	if partnerID == "" {
+		return nil, errors.New("缺少 digitalId")
+	}
+	var partner open_models.OpenDigital
+	if err := db.Where("digital_id = ?", partnerID).First(&partner).Error; err != nil {
+		return nil, errors.New("数字伙伴不存在")
+	}
+	return &partner, nil
+}
+
+func RequireDigitalEnabled(partner *open_models.OpenDigital) error {
+	if partner == nil {
+		return errors.New("数字伙伴不存在")
+	}
+	if partner.Status != open_models.DigitalStatusEnabled {
+		return errors.New("数字伙伴已禁用")
+	}
+	return nil
+}
+
+// ResolveDigitalFromToken 从 access token 的 DigitalID 解析外接数字伙伴。
+func ResolveDigitalFromToken(db *gorm.DB, digitalID string) (*open_models.OpenDigital, error) {
+	partner, err := LoadDigitalByDigitalID(db, digitalID)
+	if err != nil {
+		return nil, err
+	}
+	if err := RequireDigitalEnabled(partner); err != nil {
+		return nil, err
+	}
+	return partner, nil
 }

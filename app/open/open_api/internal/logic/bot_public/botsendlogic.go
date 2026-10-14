@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/group/group_rpc/types/group_rpc"
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
 	"beaver/app/open/open_models"
@@ -56,19 +57,19 @@ func NewBotSendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BotSendLo
 
 func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *types.BotSendRes, err error) {
 	// 1. 根据 Token 查询机器人信息
-	var bot open_models.OpenBotModel
-	if err := l.svcCtx.DB.Where("token = ?", req.Token).First(&bot).Error; err != nil {
+	var bot open_models.OpenBot
+	if err := l.svcCtx.DB.Where("token_hash = ?", req.Token).First(&bot).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "BotSend 查询机器人失败", Data: map[string]interface{}{"token": req.Token, "err": err.Error()}})
 		return nil, fmt.Errorf("invalid token")
 	}
 
 	// 2. 校验机器人状态
-	if bot.Status != 1 {
-		return nil, fmt.Errorf("bot is disabled")
+	if bot.Status != open_models.BotStatusEnabled {
+		return nil, fmt.Errorf("bot disabled")
 	}
 
 	// 3. 安全校验（如果启用了签名校验）
-	if bot.Security.SignatureEnabled {
+	if bot.SignatureEnabled == 1 {
 		if req.Timestamp == 0 || req.Sign == "" {
 			return nil, fmt.Errorf("timestamp and sign are required")
 		}
@@ -80,7 +81,7 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 		}
 
 		// 验证签名：HMAC-SHA256 + Base64
-		expectedSign := generateSignature(req.Timestamp, bot.Security.SignatureSecret)
+		expectedSign := generateSignature(req.Timestamp, bot.SignatureSecret)
 		if req.Sign != expectedSign {
 			l.logger.Error(model.LogMsg{Text: "BotSend 签名校验失败", Data: map[string]interface{}{"received": req.Sign, "expected": expectedSign}})
 			return nil, fmt.Errorf("invalid signature")
@@ -302,14 +303,6 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 			Type:    1,
 			TextMsg: &chat_rpc.TextMsg{Content: "[消息]"},
 		}
-		convID := "group_" + bot.GroupID
-		getRes, getErr := l.svcCtx.ChatRpc.GetChatMessage(l.ctx, &chat_rpc.GetChatMessageReq{
-			ConversationId: convID,
-			MessageId:      req.Reply.OriginMsgID,
-		})
-		if getErr == nil && getRes != nil && getRes.Found && getRes.Msg != nil {
-			originSnap = getRes.Msg
-		}
 		msg.Type = 11
 		msg.ReplyMsg = &chat_rpc.ReplyMsg{
 			OriginMsgId: req.Reply.OriginMsgID,
@@ -347,39 +340,55 @@ func (l *BotSendLogic) BotSend(req *types.BotSendReq, clientIP string) (resp *ty
 	// 设置 @ 用户列表
 	msg.AtUserIds = atUserIds
 
-	// 7. 生成消息 ID
-	messageId := fmt.Sprintf("bot_%d_%d", bot.ID, time.Now().UnixNano())
-
-	// 8. 调用 chat_rpc 发送消息
-	// ConversationId 增加 group_ 前缀表示群聊
-	chatReq := &chat_rpc.SendMsgReq{
-		UserId:         bot.BotID, // 使用机器人的 UserID 作为发送者
-		ConversationId: "group_" + bot.GroupID,
-		MessageId:      messageId,
-		Msg:            msg,
-		DeviceId:       "webhook",
+	groupRes, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &group_rpc.GetUserGroupIDsReq{UserID: bot.BotID})
+	if err != nil || groupRes == nil || len(groupRes.GroupIDs) == 0 {
+		return nil, fmt.Errorf("bot is not in any group")
 	}
 
-	chatRes, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, chatReq)
-	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "BotSend 调用 chat_rpc 发送消息失败", Data: map[string]interface{}{"err": err.Error()}})
+	var lastMessageID string
+	var lastSendTime int64
+	for _, groupID := range groupRes.GroupIDs {
+		if msg.ReplyMsg != nil {
+			getRes, getErr := l.svcCtx.ChatRpc.GetChatMessage(l.ctx, &chat_rpc.GetChatMessageReq{
+				ConversationId: "group_" + groupID,
+				MessageId:      msg.ReplyMsg.OriginMsgId,
+			})
+			if getErr == nil && getRes != nil && getRes.Found && getRes.Msg != nil {
+				msg.ReplyMsg.OriginMsg = getRes.Msg
+			}
+		}
+
+		messageId := fmt.Sprintf("bot_%d_%d", bot.ID, time.Now().UnixNano())
+		chatRes, sendErr := l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
+			UserId:         bot.BotID,
+			ConversationId: "group_" + groupID,
+			MessageId:      messageId,
+			Msg:            msg,
+			DeviceId:       "webhook",
+		})
+		if sendErr != nil {
+			l.logger.Error(model.LogMsg{Text: "BotSend 调用 chat_rpc 发送消息失败", Data: map[string]interface{}{"groupId": groupID, "err": sendErr.Error()}})
+			continue
+		}
+		lastMessageID = chatRes.MessageId
+		lastSendTime = parseTime(chatRes.CreatedAt)
+		l.logger.Info(model.LogMsg{
+			Text: "Bot推送成功",
+			Data: map[string]interface{}{
+				"botId":     bot.BotID,
+				"groupId":   groupID,
+				"messageId": chatRes.MessageId,
+				"msgType":   req.MsgType,
+			},
+		})
+	}
+	if lastMessageID == "" {
 		return nil, fmt.Errorf("failed to send message")
 	}
 
-	l.logger.Info(model.LogMsg{
-		Text: "Bot推送成功",
-		Data: map[string]interface{}{
-			"botId":     bot.BotID,
-			"groupId":   bot.GroupID,
-			"messageId": chatRes.MessageId,
-			"msgType":   req.MsgType,
-		},
-	})
-
-	// 9. 返回响应
 	return &types.BotSendRes{
-		MessageID: chatRes.MessageId,
-		SendTime:  parseTime(chatRes.CreatedAt),
+		MessageID: lastMessageID,
+		SendTime:  lastSendTime,
 	}, nil
 }
 

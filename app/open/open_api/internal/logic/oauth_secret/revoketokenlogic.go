@@ -24,6 +24,7 @@ package oauth_secret
 import (
 	"context"
 	"errors"
+	"time"
 
 	"beaver/app/open/open_api/internal/svc"
 	"beaver/app/open/open_api/internal/types"
@@ -54,28 +55,28 @@ func (l *RevokeTokenLogic) RevokeToken(req *types.RevokeTokenReq, appID, appSecr
 		return nil, errors.New("应用凭证不能为空")
 	}
 
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND app_secret = ? AND status = ?", appID, appSecret, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND oauth_secret_hash = ? AND status = ?", appID, appSecret, 1).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或凭证错误")
 	}
 
 	var tokenRecord open_models.OpenOAuthToken
-	if err := l.svcCtx.DB.Where("token = ? OR refresh_token = ?", req.Token, req.Token).First(&tokenRecord).Error; err != nil {
+	if err := l.svcCtx.DB.Where("access_token_hash = ? OR refresh_token_hash = ?", req.Token, req.Token).First(&tokenRecord).Error; err != nil {
 		return nil, errors.New("令牌不存在")
 	}
-	if tokenRecord.AppID != appID {
+	if tokenRecord.OAuthID != appID {
 		return nil, errors.New("无权撤销该令牌")
 	}
 
-	result := l.svcCtx.DB.Where("id = ?", tokenRecord.ID).Delete(&open_models.OpenOAuthToken{})
-	if result.Error != nil {
+	now := time.Now()
+	if err := l.svcCtx.DB.Model(&tokenRecord).Update("revoked_at", now).Error; err != nil {
 		return nil, errors.New("撤销令牌失败")
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth撤销Token成功",
 		Data: map[string]interface{}{
-			"appId": appID,
+			"oauthId": appID,
 		},
 	})
 

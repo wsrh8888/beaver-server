@@ -1,144 +1,105 @@
 syntax = "v1"
 
-// ==================== 应用管理（开发者门户）====================
+// ==================== OAuth 应用管理（开发者门户，对应 OpenOAuth）====================
 
 type (
-	// 创建应用
 	CreateAppReq {
-		Name        string `json:"name" validate:"required,min=2,max=50"` // string 应用名称，2-50 字符
-		Description string `json:"description,optional" validate:"max=200"` // string 应用描述，可选
-		Icon        string `json:"icon,optional"` // string 应用图标 URL，可选
-		UserID      string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		Name        string `json:"name" validate:"required,min=2,max=50"`
+		Description string `json:"description,optional" validate:"max=200"`
+		Icon        string `json:"icon,optional"`
+		UserID      string `header:"Beaver-User-Id"`
 	}
 	CreateAppRes {
-		AppID     string `json:"appId"` // string 应用唯一 ID
-		AppSecret string `json:"appSecret"` // string 应用密钥（明文，仅创建时返回）
+		OAuthID     string `json:"oauthId"`
+		OAuthSecret string `json:"oauthSecret"`
 	}
 )
 
 type (
-	// 更新应用
 	UpdateAppReq {
-		AppID       string `json:"appId"` // string 应用 ID
-		Name        string `json:"name,optional"` // string 应用名称，可选
-		Description string `json:"description,optional"` // string 应用描述，可选
-		Icon        string `json:"icon,optional"` // string 应用图标 URL，可选
-		WebhookURL  string `json:"webhookUrl,optional"` // string 应用级 Webhook URL，可选
-		UserID      string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID     string `json:"oauthId"`
+		Name        string `json:"name,optional"`
+		Description string `json:"description,optional"`
+		Icon        string `json:"icon,optional"`
+		UserID      string `header:"Beaver-User-Id"`
 	}
 	UpdateAppRes {}
 )
 
 type (
-	// 删除应用
 	DeleteAppReq {
-		AppID  string `json:"appId"` // string 应用 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID string `json:"oauthId"`
+		UserID  string `header:"Beaver-User-Id"`
 	}
 	DeleteAppRes {}
 )
 
 type (
-	// 重置应用密钥
 	ResetAppSecretReq {
-		AppID  string `json:"appId"` // string 应用 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID string `json:"oauthId"`
+		UserID  string `header:"Beaver-User-Id"`
 	}
 	ResetAppSecretRes {
-		AppSecret string `json:"appSecret"` // string 新的应用密钥（明文）
+		OAuthSecret string `json:"oauthSecret"`
 	}
 )
 
 type (
-	// 获取应用详情
 	GetAppDetailReq {
-		AppID  string `form:"appId"` // string 应用 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID string `form:"oauthId"`
+		UserID  string `header:"Beaver-User-Id"`
 	}
 	AppInfo {
-		AppID         string `json:"appId"` // string 应用 ID
-		Name          string `json:"name"` // string 应用名称
-		Description   string `json:"description"` // string 应用描述
-		Icon          string `json:"icon,optional"` // string 应用图标 URL，可选
-		AppSecret     string `json:"appSecret"` // string 应用密钥（掩码展示）
-		Status        int    `json:"status"` // int 状态：0 草稿 1 已发布 2 禁用
-		EnableDigital int    `json:"enableDigital"` // int 是否启用外接数字伙伴：0 否 1 是
-		EnableOAuth   int    `json:"enableOAuth"` // int 是否启用 OAuth：0 否 1 是
-		EnableWebhook int    `json:"enableWebhook"` // int 是否启用 Webhook：0 否 1 是
-		WebhookURL    string `json:"webhookUrl"` // string 应用级 Webhook URL
-		CreatedAt     int64  `json:"createdAt"` // int64 创建时间 Unix 秒
+		OAuthID     string `json:"oauthId"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Icon        string `json:"icon,optional"`
+		OAuthSecret string `json:"oauthSecret"`
+		Status      int    `json:"status"` // 1启用 0禁用
+		CreatedAt   int64  `json:"createdAt"`
 	}
 	GetAppDetailRes {
-		App AppInfo `json:"app"` // object 应用详情
+		App AppInfo `json:"app"`
 	}
 )
 
 type (
-	// 获取应用列表
 	GetAppListReq {
-		Page     int    `form:"page,default=1"` // int 页码，从 1 开始
-		PageSize int    `form:"pageSize,default=10"` // int 每页条数
-		Status   int    `form:"status,optional"` // int 状态筛选：0 草稿 1 已发布 2 禁用，可选
-		UserID   string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=10"`
+		Status   int    `form:"status,optional"`
+		UserID   string `header:"Beaver-User-Id"`
 	}
 	GetAppListRes {
-		Total int64     `json:"total"` // int64 总条数
-		List  []AppInfo `json:"list"` // array 应用列表
+		Total int64     `json:"total"`
+		List  []AppInfo `json:"list"`
 	}
 )
 
 type (
-	// 获取应用权限列表
 	GetAppScopesReq {
-		AppID  string `form:"appId"` // string 应用 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID string `form:"oauthId"`
+		UserID  string `header:"Beaver-User-Id"`
 	}
 	ScopeInfo {
-		Scope       string `json:"scope"` // string 权限标识
-		Name        string `json:"name"` // string 权限名称
-		Description string `json:"description"` // string 权限描述
-		Enabled     bool   `json:"enabled"` // bool 是否已开通
-		Required    bool   `json:"required"` // bool 是否需要审核
+		Scope       string `json:"scope"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Enabled     bool   `json:"enabled"`
+		Required    bool   `json:"required"`
 	}
 	GetAppScopesRes {
-		Scopes []ScopeInfo `json:"scopes"` // array 权限列表
+		Scopes []ScopeInfo `json:"scopes"`
 	}
 )
 
 type (
-	// 更新应用权限
 	UpdateAppScopesReq {
-		AppID  string   `json:"appId"` // string 应用 ID
-		Scopes []string `json:"scopes"` // []string 要开通的权限标识列表
-		UserID string   `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+		OAuthID string   `json:"oauthId"`
+		Scopes  []string `json:"scopes"`
+		UserID  string   `header:"Beaver-User-Id"`
 	}
 	UpdateAppScopesRes {}
-)
-
-type (
-	// 发布应用（将草稿应用设为已发布，Open API 方可调用）
-	PublishAppReq {
-		AppID       string `json:"appId"` // string 应用 ID
-		Version     string `json:"version,optional" validate:"max=20"` // string 版本号备注，如 1.0.0，可选
-		Description string `json:"description,optional" validate:"max=500"` // string 发布说明，可选
-		UserID      string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
-	}
-	PublishAppRes {
-		Status int `json:"status"` // int 发布后状态：1 已发布
-	}
-)
-
-type (
-	// 启用/禁用应用能力
-	ToggleAppCapabilityReq {
-		AppID      string `json:"appId"` // string 应用 ID
-		Capability string `json:"capability" validate:"required,oneof=digital oauth webhook"` // string 能力类型：digital / oauth / webhook
-		Enable     bool   `json:"enable"` // bool true 启用 false 禁用
-		UserID     string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
-	}
-	ToggleAppCapabilityRes {
-		Enabled bool `json:"enabled"` // bool 操作后的开关状态
-	}
 )
 
 @server (
@@ -146,7 +107,7 @@ type (
 	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
 )
 service open {
-	@doc "创建应用"
+	@doc "创建 OAuth 应用"
 	@handler CreateApp
 	post /api/open_portal/app/v1/create (CreateAppReq) returns (CreateAppRes)
 
@@ -177,12 +138,4 @@ service open {
 	@doc "更新应用权限"
 	@handler UpdateAppScopes
 	post /api/open_portal/app/v1/scopes/update (UpdateAppScopesReq) returns (UpdateAppScopesRes)
-
-	@doc "发布应用"
-	@handler PublishApp
-	post /api/open_portal/app/v1/publish (PublishAppReq) returns (PublishAppRes)
-
-	@doc "启用/禁用应用能力"
-	@handler ToggleAppCapability
-	post /api/open_portal/app/v1/capability/toggle (ToggleAppCapabilityReq) returns (ToggleAppCapabilityRes)
 }

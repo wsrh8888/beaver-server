@@ -29,7 +29,6 @@ import (
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
 	"beaver/app/backend/backend_models"
-	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -121,49 +120,6 @@ func (l *GetDashboardInboxLogic) GetDashboardInbox(req *types.GetDashboardInboxR
 					Category: "feedback", Title: "待处理反馈",
 					Summary: f.Content, EntityID: fmt.Sprintf("%d", f.Id),
 					CreatedAt: f.CreatedAt, Action: "/service/feedback",
-				},
-			})
-		}
-	}
-
-	devRes, err := l.svcCtx.OpenRpc.ListDevelopers(l.ctx, &open_rpc.ListDevelopersReq{
-		Status: 0, Page: 1, PageSize: perSource,
-	})
-	if err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "收件箱拉取开发者审核失败",
-			Data: map[string]interface{}{"err": err.Error()},
-		})
-	} else {
-		for _, d := range devRes.List {
-			createdAt := fmt.Sprintf("%d", d.CreatedAt)
-			rows = append(rows, inboxRow{
-				sortKey: createdAt,
-				item: types.DashboardInboxItem{
-					Category: "developer", Title: "待审开发者",
-					Summary:  fmt.Sprintf("%s (%s)", d.RealName, d.Email),
-					EntityID: d.UserId, CreatedAt: createdAt, Action: "/open/developers",
-				},
-			})
-		}
-	}
-
-	appRes, err := l.svcCtx.OpenRpc.ListOpenApps(l.ctx, &open_rpc.ListOpenAppsReq{
-		AuditStatus: 0, Page: 1, PageSize: perSource,
-	})
-	if err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "收件箱拉取应用审核失败",
-			Data: map[string]interface{}{"err": err.Error()},
-		})
-	} else {
-		for _, a := range appRes.List {
-			createdAt := fmt.Sprintf("%d", a.CreatedAt)
-			rows = append(rows, inboxRow{
-				sortKey: createdAt,
-				item: types.DashboardInboxItem{
-					Category: "app", Title: "待审应用",
-					Summary: a.Name, EntityID: a.AppId, CreatedAt: createdAt, Action: "/open/apps",
 				},
 			})
 		}

@@ -56,18 +56,18 @@ func NewPasswordLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pas
 }
 
 func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *types.PasswordLoginRes, err error) {
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ?", req.OAuthID).First(&app).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "应用不存在",
-			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+			Data: map[string]any{"appId": req.OAuthID, "err": err.Error()},
 		})
 		return nil, fmt.Errorf("应用不存在")
 	}
 	if app.Status != 1 {
 		l.logger.Warn(model.LogMsg{
 			Text: "应用未启用",
-			Data: map[string]any{"appId": req.AppID},
+			Data: map[string]any{"appId": req.OAuthID},
 		})
 		return nil, fmt.Errorf("应用未启用")
 	}
@@ -85,7 +85,7 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 	if err != nil {
 		l.logger.Warn(model.LogMsg{
 			Text: "账号不存在",
-			Data: map[string]any{"appId": req.AppID, "account": req.Account},
+			Data: map[string]any{"appId": req.OAuthID, "account": req.Account},
 		})
 		return nil, errors.New("账号或密码错误")
 	}
@@ -98,7 +98,7 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 		l.logger.Warn(model.LogMsg{
 			Text: "密码校验失败",
 			Data: map[string]any{
-				"appId":   req.AppID,
+				"appId":   req.OAuthID,
 				"account": req.Account,
 				"userId":  userRes.UserInfo.UserId,
 			},
@@ -106,12 +106,12 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 		return nil, errors.New("账号或密码错误")
 	}
 
-	code, expireIn, err := createOAuthCode(l.svcCtx.DB, req.AppID, userRes.UserInfo.UserId, "password", "")
+	code, expireIn, err := createOAuthCode(l.svcCtx.DB, req.OAuthID, userRes.UserInfo.UserId, "password", "")
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "生成授权码失败",
 			Data: map[string]any{
-				"appId":  req.AppID,
+				"appId":  req.OAuthID,
 				"userId": userRes.UserInfo.UserId,
 				"err":    err.Error(),
 			},
@@ -122,7 +122,7 @@ func (l *PasswordLoginLogic) PasswordLogin(req *types.PasswordLoginReq) (resp *t
 	l.logger.Info(model.LogMsg{
 		Text: "账号密码登录成功",
 		Data: map[string]any{
-			"appId":   req.AppID,
+			"appId":   req.OAuthID,
 			"account": req.Account,
 			"userId":  userRes.UserInfo.UserId,
 		},
@@ -139,16 +139,13 @@ func createOAuthCode(db *gorm.DB, appID, userID, scene, sceneRef string) (string
 		return "", 0, errors.New("参数不完整")
 	}
 
-	var app open_models.OpenApp
-	if err := db.Where("app_id = ? AND status = ?", appID, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := db.Where("oauth_id = ? AND status = ?", appID, 1).First(&app).Error; err != nil {
 		return "", 0, errors.New("应用不存在或未启用")
 	}
 
-	var oauthConfig open_models.OpenOAuthConfig
-	scope := ""
-	if err := db.Where("app_id = ?", appID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
-		scope = oauthConfig.SupportedScopes
-	} else {
+	scope := app.SupportedScopes
+	if scope == "" {
 		scopes := []string{
 			string(constants.ScopeUserProfileRead),
 			string(constants.ScopeUserAvatarRead),
@@ -161,7 +158,7 @@ func createOAuthCode(db *gorm.DB, appID, userID, scene, sceneRef string) (string
 	code := util.NewV4().String()
 	record := open_models.OpenOAuthCode{
 		Code:      code,
-		AppID:     appID,
+		OAuthID:     appID,
 		UserID:    userID,
 		Scope:     scope,
 		ExpiresAt: time.Now().Add(ttl),

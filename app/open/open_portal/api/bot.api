@@ -1,67 +1,105 @@
 syntax = "v1"
 
-// ==================== 推送机器人 Bot（群内通知机器人，user_type=2，第三方 Webhook 推消息进群）====================
-// 与外接数字伙伴 Digital 无关；Digital 配置见 digital.api
+// ==================== 群通知机器人（一级开放能力）====================
 
-// ==================== Incoming Webhook（按群创建推送 Bot）====================
 type (
-	// 创建推送 Bot Incoming Webhook
-	CreateIncomingWebhookReq {
-		AppID   string `json:"appId"` // string 应用 ID
-		GroupID string `json:"groupId"` // string 目标群组 ID
-		Name    string `json:"name,optional"` // string 机器人名称，可选
-		UserID  string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	CreateBotReq {
+		Name        string `json:"name" validate:"required,min=2,max=50"`
+		Description string `json:"description,optional" validate:"max=512"`
+		Avatar      string `json:"avatar,optional"`
+		GroupID     string `json:"groupId,optional"` // 创建后拉入该群（不落 Bot 表）
+		Visibility  string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
+		UserID      string `header:"Beaver-User-Id"`
 	}
-	IncomingWebhookInfo {
-		ID         string `json:"id"` // string 记录 ID
-		Token      string `json:"token"` // string Webhook access_token
-		Secret     string `json:"secret,optional"` // string 加签密钥，仅创建时返回
-		AppID      string `json:"appId"` // string 应用 ID
-		GroupID    string `json:"groupId"` // string 群组 ID
-		BotID      string `json:"botId"` // string 推送 Bot 的 IM 用户 ID（user_type=2）
-		Name       string `json:"name"` // string 名称
-		WebhookURL string `json:"webhookUrl"` // string Webhook 调用地址
-		Status     int    `json:"status"` // int 状态：0 禁用 1 启用
-		CreatedAt  int64  `json:"createdAt"` // int64 创建时间 Unix 秒
-	}
-	CreateIncomingWebhookRes {
-		Webhook IncomingWebhookInfo `json:"webhook"` // 创建的 Webhook
+	CreateBotRes {
+		BotID      string `json:"botId"`
+		WebhookURL string `json:"webhookUrl"`
+		Token      string `json:"token"`
+		Secret     string `json:"secret"`
 	}
 )
 
 type (
-	// 获取推送 Bot Incoming Webhook 列表
-	ListIncomingWebhooksReq {
-		AppID    string `form:"appId"` // string 应用 ID
-		GroupID  string `form:"groupId,optional"` // string 按群筛选，可选
-		Page     int    `form:"page,default=1"` // int 页码
-		PageSize int    `form:"pageSize,default=20"` // int 每页条数
-		UserID   string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
-	}
-	ListIncomingWebhooksRes {
-		Total int64                 `json:"total"` // int64 总条数
-		List  []IncomingWebhookInfo `json:"list"` // Webhook 列表
+	BotInfo {
+		BotID       string   `json:"botId"`
+		Name        string   `json:"name"`
+		Avatar      string   `json:"avatar,optional"`
+		Description string   `json:"description,optional"`
+		Visibility  string   `json:"visibility"`
+		WebhookURL  string   `json:"webhookUrl"`
+		AdminIDs    []string `json:"adminIds,optional"`
+		ViewerIDs   []string `json:"viewerIds,optional"`
+		CreatedAt   int64    `json:"createdAt"`
 	}
 )
 
 type (
-	// 删除推送 Bot Incoming Webhook
-	DeleteIncomingWebhookReq {
-		ID     string `json:"id"` // string 记录 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	ListBotReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=10"`
+		UserID   string `header:"Beaver-User-Id"`
 	}
-	DeleteIncomingWebhookRes {}
+	ListBotRes {
+		Total int64     `json:"total"`
+		List  []BotInfo `json:"list"`
+	}
 )
 
 type (
-	// 重置推送 Bot 加签密钥
-	ResetIncomingWebhookSecretReq {
-		ID     string `json:"id"` // string open_bots 记录 ID
-		UserID string `header:"Beaver-User-Id"` // string 当前开发者用户 ID
+	GetBotDetailReq {
+		BotID  string `form:"botId"`
+		UserID string `header:"Beaver-User-Id"`
 	}
-	ResetIncomingWebhookSecretRes {
-		Secret string `json:"secret"` // string 新的加签密钥
+	GetBotDetailRes {
+		Bot BotInfo `json:"bot"`
 	}
+)
+
+type (
+	UpdateBotReq {
+		BotID      string `json:"botId"`
+		Name       string `json:"name,optional"`
+		Avatar     string `json:"avatar,optional"`
+		Visibility string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
+		UserID     string `header:"Beaver-User-Id"`
+	}
+	UpdateBotRes {}
+)
+
+type (
+	DeleteBotReq {
+		BotID  string `json:"botId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	DeleteBotRes {}
+)
+
+type (
+	ResetBotSecretReq {
+		BotID  string `json:"botId"`
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ResetBotSecretRes {
+		Secret string `json:"secret"`
+	}
+)
+
+type (
+	SetBotAdminsReq {
+		BotID   string   `json:"botId"`
+		UserIDs []string `json:"userIds"`
+		UserID  string   `header:"Beaver-User-Id"`
+	}
+	SetBotAdminsRes {}
+)
+
+type (
+	SetBotViewersReq {
+		BotID   string   `json:"botId"`
+		UserIDs []string `json:"userIds"`
+		UserID  string   `header:"Beaver-User-Id"`
+	}
+	SetBotViewersRes {}
 )
 
 @server (
@@ -69,19 +107,35 @@ type (
 	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
 )
 service open {
-	@doc "创建推送 Bot Incoming Webhook（按群）"
-	@handler CreateIncomingWebhook
-	post /api/open_portal/bot/v1/incoming_create (CreateIncomingWebhookReq) returns (CreateIncomingWebhookRes)
+	@doc "创建群通知机器人"
+	@handler CreateBot
+	post /api/open_portal/bot/v1/create (CreateBotReq) returns (CreateBotRes)
 
-	@doc "获取推送 Bot Incoming Webhook 列表"
-	@handler ListIncomingWebhooks
-	get /api/open_portal/bot/v1/incoming_list (ListIncomingWebhooksReq) returns (ListIncomingWebhooksRes)
+	@doc "机器人列表"
+	@handler ListBot
+	get /api/open_portal/bot/v1/list (ListBotReq) returns (ListBotRes)
 
-	@doc "删除推送 Bot Incoming Webhook"
-	@handler DeleteIncomingWebhook
-	post /api/open_portal/bot/v1/incoming_delete (DeleteIncomingWebhookReq) returns (DeleteIncomingWebhookRes)
+	@doc "机器人详情"
+	@handler GetBotDetail
+	get /api/open_portal/bot/v1/detail (GetBotDetailReq) returns (GetBotDetailRes)
 
-	@doc "重置推送 Bot 加签密钥"
-	@handler ResetIncomingWebhookSecret
-	post /api/open_portal/bot/v1/incoming_reset_secret (ResetIncomingWebhookSecretReq) returns (ResetIncomingWebhookSecretRes)
+	@doc "更新机器人"
+	@handler UpdateBot
+	post /api/open_portal/bot/v1/update (UpdateBotReq) returns (UpdateBotRes)
+
+	@doc "删除机器人"
+	@handler DeleteBot
+	post /api/open_portal/bot/v1/delete (DeleteBotReq) returns (DeleteBotRes)
+
+	@doc "重置加签密钥"
+	@handler ResetBotSecret
+	post /api/open_portal/bot/v1/reset_secret (ResetBotSecretReq) returns (ResetBotSecretRes)
+
+	@doc "设置机器人管理员"
+	@handler SetBotAdmins
+	post /api/open_portal/bot/v1/admins/set (SetBotAdminsReq) returns (SetBotAdminsRes)
+
+	@doc "设置机器人可见用户（partial）"
+	@handler SetBotViewers
+	post /api/open_portal/bot/v1/viewers/set (SetBotViewersReq) returns (SetBotViewersRes)
 }

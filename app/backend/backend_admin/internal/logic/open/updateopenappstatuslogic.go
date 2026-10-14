@@ -49,13 +49,13 @@ func (l *UpdateOpenAppStatusLogic) UpdateOpenAppStatus(req *types.UpdateOpenAppS
 	if len(req.AppIDs) == 0 {
 		return nil, errors.New("请选择应用")
 	}
-	if req.Action != 3 && req.Action != 4 {
+	if req.Action != 0 && req.Action != 1 {
 		return nil, errors.New("无效的操作类型")
 	}
 
 	_, err = l.svcCtx.OpenRpc.UpdateOpenApps(l.ctx, &open_rpc.UpdateOpenAppsReq{
 		AppIds:     req.AppIDs,
-		Action:     int32(req.Action),
+		Status:     int32(req.Action),
 		OperatorId: req.UserID,
 	})
 	if err != nil {

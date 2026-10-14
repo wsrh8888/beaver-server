@@ -24,19 +24,25 @@ package open_models
 import (
 	"time"
 
-	"beaver/common/models"
+	"gorm.io/gorm"
 )
 
-// OpenOAuthCode OAuth 授权码表（短生命周期，一次性；Scene: oauth/h5_sso/pc_scan）
+// OpenOAuthCode OAuth 授权码（短生命周期、一次性；生产可迁 Redis，本表作持久/审计兜底）。
+// Code 仅存哈希；换票时校验 code_challenge / method。
 type OpenOAuthCode struct {
-	models.Model
-	Code        string    `gorm:"size:128;uniqueIndex;not null;comment:授权码"`
-	AppID       string    `gorm:"size:64;index;not null;comment:应用ID"`
-	UserID      string    `gorm:"size:64;not null;comment:用户ID"`
-	RedirectURI string    `gorm:"size:256;comment:回调地址"`
-	Scope       string    `gorm:"size:256;comment:权限范围"`
-	State       string    `gorm:"size:128;comment:CSRF state"`
-	ExpiresAt   time.Time `gorm:"not null;comment:过期时间"`
-	Used        bool      `gorm:"default:false;comment:是否已使用"`
-	Scene       string    `gorm:"size:20;default:oauth;comment:场景 oauth/h5_sso/pc_scan"`
+	gorm.Model
+	Code                string     `gorm:"column:code_hash;type:varchar(128);uniqueIndex;not null;comment:授权码哈希"`
+	OAuthID             string     `gorm:"column:oauth_id;type:varchar(64);index;not null;comment:OpenOAuth.OAuthID"`
+	UserID              string     `gorm:"column:user_id;type:varchar(64);index;not null;comment:用户ID"`
+	RedirectURI         string     `gorm:"column:redirect_uri;type:varchar(512);comment:回调地址"`
+	Scope               string     `gorm:"type:varchar(512);comment:权限范围"`
+	State               string     `gorm:"type:varchar(128);comment:CSRF state"`
+	CodeChallenge       string     `gorm:"column:code_challenge;type:varchar(128);comment:PKCE code_challenge"`
+	CodeChallengeMethod string     `gorm:"column:code_challenge_method;type:varchar(16);comment:PKCE method S256|plain"`
+	Nonce               string     `gorm:"type:varchar(128);comment:OIDC nonce"`
+	ExpiresAt           time.Time  `gorm:"column:expires_at;type:datetime;index;not null;comment:过期时间"`
+	UsedAt              *time.Time `gorm:"column:used_at;type:datetime;index;comment:使用时间，空表示未使用"`
+	Scene               string     `gorm:"type:varchar(20);not null;default:oauth;index;comment:场景 oauth/h5_sso/pc_scan"`
 }
+
+func (OpenOAuthCode) TableName() string { return "open_oauth_codes" }

@@ -60,18 +60,18 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 		return nil, errors.New("门户 OAuth 未配置")
 	}
 
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ?", appID).First(&app).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询门户 OAuth 应用失败", Data: map[string]interface{}{"app_id": appID, "err": err.Error()}})
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ?", appID).First(&app).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询门户 OAuth 应用失败", Data: map[string]interface{}{"oauth_id": appID, "err": err.Error()}})
 		return nil, errors.New("门户 OAuth 应用不存在")
 	}
 
 	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
-		AppId: appID,
+		OauthId: appID,
 		Code:  req.Code,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "code 换 token 失败", Data: map[string]interface{}{"app_id": appID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "code 换 token 失败", Data: map[string]interface{}{"oauth_id": appID, "err": err.Error()}})
 		return nil, errors.New("授权码换取令牌失败")
 	}
 	if rpcResp.AccessToken == "" {
@@ -79,7 +79,7 @@ func (l *OAuthLoginLogic) OAuthLogin(req *types.OAuthLoginReq) (resp *types.OAut
 	}
 
 	var tokenRecord open_models.OpenOAuthToken
-	if err := l.svcCtx.DB.Where("token = ?", rpcResp.AccessToken).First(&tokenRecord).Error; err != nil {
+	if err := l.svcCtx.DB.Where("access_token_hash = ?", rpcResp.AccessToken).First(&tokenRecord).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询 OAuth token 失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("获取用户信息失败")
 	}

@@ -32,7 +32,7 @@ import (
 
 var logger = beaverlog.New("open_ws_conn")
 
-// BotOnlineWsMap 数字伙伴连接注册表，key: partnerID（= OpenDigitalPartner.PartnerID = IM 用户 ID）
+// BotOnlineWsMap 数字伙伴连接注册表，key: digitalID（= OpenDigital.DigitalID = IM 用户 ID）
 //
 // 刻意与用户侧 ws_api 的 UserOnlineWsMap 完全分离，原因：
 //  1. 机器人不是「在线用户」，混入会污染 coreonline 在线态与后台在线统计

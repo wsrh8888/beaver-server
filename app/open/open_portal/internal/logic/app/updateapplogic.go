@@ -50,8 +50,8 @@ func NewUpdateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateA
 func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateAppRes, err error) {
 
 	// 查询应用并验证权限
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND owner_id = ?", req.OAuthID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限")
 	}
 
@@ -76,7 +76,7 @@ func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateA
 		return nil, errors.New("更新失败")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "应用更新成功", Data: map[string]interface{}{"app_id": req.AppID}})
+	l.logger.Info(model.LogMsg{Text: "应用更新成功", Data: map[string]interface{}{"oauth_id": req.OAuthID}})
 
 	return &types.UpdateAppRes{}, nil
 }

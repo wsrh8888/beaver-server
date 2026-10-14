@@ -49,7 +49,7 @@ func NewValidateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 func (l *ValidateTokenLogic) ValidateToken(in *open_rpc.ValidateTokenReq) (*open_rpc.ValidateTokenRes, error) {
 	// 查询 Access Token
 	var token open_models.OpenOAuthToken
-	if err := l.svcCtx.DB.Where("token = ?", in.AccessToken).First(&token).Error; err != nil {
+	if err := l.svcCtx.DB.Where("access_token_hash = ? AND revoked_at IS NULL", in.AccessToken).First(&token).Error; err != nil {
 		return &open_rpc.ValidateTokenRes{
 			Valid: false,
 		}, nil
@@ -59,8 +59,8 @@ func (l *ValidateTokenLogic) ValidateToken(in *open_rpc.ValidateTokenReq) (*open
 	valid := !time.Now().After(token.ExpiresAt)
 
 	return &open_rpc.ValidateTokenRes{
-		Valid:  valid,
-		UserId: token.UserID,
-		AppId:  token.AppID,
+		Valid:   valid,
+		UserId:  token.UserID,
+		OauthId: token.OAuthID,
 	}, nil
 }

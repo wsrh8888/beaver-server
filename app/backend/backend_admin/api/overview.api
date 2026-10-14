@@ -9,10 +9,8 @@ type (
 		FriendTotal           int64 `json:"friendTotal"`
 		MessageTotal          int64 `json:"messageTotal"`
 		MomentTotal           int64 `json:"momentTotal"`
-		BlockTotal            int64 `json:"blockTotal"`
-		PendingDeveloperCount int64 `json:"pendingDeveloperCount"`
-		PendingAppCount       int64 `json:"pendingAppCount"`
-		PendingFeedbackCount  int64 `json:"pendingFeedbackCount"`
+		BlockTotal           int64 `json:"blockTotal"`
+		PendingFeedbackCount int64 `json:"pendingFeedbackCount"`
 		PendingReportCount    int64 `json:"pendingReportCount"`
 		PendingCaseCount      int64 `json:"pendingCaseCount"`
 		OnlineUserCount       int64 `json:"onlineUserCount"`

@@ -96,40 +96,6 @@ type AdminUserInfo struct {
 	AuthorityNames []string `json:"authorityNames"`
 }
 
-type ApplyDeveloperReq struct {
-	ApplicantUserID string `json:"applicantUserId,optional"` // 代申请目标用户ID，空则取当前登录用户
-	RealName        string `json:"realName"`
-	CompanyName     string `json:"companyName,optional"`
-	Phone           string `json:"phone"`
-	Email           string `json:"email"`
-	Description     string `json:"description,optional"`
-	UserID          string `header:"Beaver-User-Id"` // 操作人ID（由网关注入）
-}
-
-type ApplyDeveloperRes struct {
-	ID string `json:"id"`
-}
-
-type AuditDeveloperReq struct {
-	ID          string `json:"id"`
-	Status      int    `json:"status"` // 1通过 2拒绝
-	AuditRemark string `json:"auditRemark,optional"`
-	UserID      string `header:"Beaver-User-Id"` // 审核人ID（由网关注入）
-}
-
-type AuditDeveloperRes struct {
-}
-
-type AuditOpenAppReq struct {
-	AppID       string `json:"appId"`
-	Status      int    `json:"status"` // 1通过 2拒绝
-	AuditRemark string `json:"auditRemark,optional"`
-	UserID      string `header:"Beaver-User-Id"`
-}
-
-type AuditOpenAppRes struct {
-}
-
 type AuthenticationReq struct {
 	Token     string `header:"Token,optional"`     // string JWT，可选
 	ValidPath string `header:"ValidPath,optional"` // string 当前请求路径，用于白名单判断
@@ -522,21 +488,6 @@ type DeleteWorkbenchAppReq struct {
 type DeleteWorkbenchAppRes struct {
 }
 
-type DeveloperInfo struct {
-	ID          string `json:"id"`
-	UserID      string `json:"userId"`
-	RealName    string `json:"realName"`
-	CompanyName string `json:"companyName"`
-	Phone       string `json:"phone"`
-	Email       string `json:"email"`
-	Description string `json:"description"`
-	Status      int    `json:"status"`
-	AuditBy     string `json:"auditBy"`
-	AuditTime   int64  `json:"auditTime"`
-	AuditRemark string `json:"auditRemark"`
-	CreatedAt   int64  `json:"createdAt"`
-}
-
 type EmojiInfo struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
@@ -892,10 +843,8 @@ type GetDashboardOverviewRes struct {
 	FriendTotal           int64 `json:"friendTotal"`
 	MessageTotal          int64 `json:"messageTotal"`
 	MomentTotal           int64 `json:"momentTotal"`
-	BlockTotal            int64 `json:"blockTotal"`
-	PendingDeveloperCount int64 `json:"pendingDeveloperCount"`
-	PendingAppCount       int64 `json:"pendingAppCount"`
-	PendingFeedbackCount  int64 `json:"pendingFeedbackCount"`
+	BlockTotal           int64 `json:"blockTotal"`
+	PendingFeedbackCount int64 `json:"pendingFeedbackCount"`
 	PendingReportCount    int64 `json:"pendingReportCount"`
 	PendingCaseCount      int64 `json:"pendingCaseCount"`
 	OnlineUserCount       int64 `json:"onlineUserCount"`
@@ -908,17 +857,6 @@ type GetDashboardTrendsReq struct {
 type GetDashboardTrendsRes struct {
 	Days   []string               `json:"days"`
 	Series []DashboardTrendSeries `json:"series"`
-}
-
-type GetDeveloperListReq struct {
-	Page     int `form:"page,default=1"`
-	PageSize int `form:"pageSize,default=10"`
-	Status   int `form:"status,optional"` // 0待审核 1已通过 2已拒绝
-}
-
-type GetDeveloperListRes struct {
-	Total int64           `json:"total"`
-	List  []DeveloperInfo `json:"list"`
 }
 
 type GetEmojiCollectListItem struct {
@@ -1447,27 +1385,12 @@ type GetOpenAppListReq struct {
 	Keyword        string `form:"keyword,optional"`
 	OwnerUserID    string `form:"ownerUserId,optional"`
 	AppID          string `form:"appId,optional"`
-	Status         int    `form:"status,optional"`         // 0全部 1草稿 2已发布 3禁用
-	AuditStatus    int    `form:"auditStatus,optional"`    // 0全部 1待审核 2已通过 3已拒绝
-	CapabilityType int    `form:"capabilityType,optional"` // 0全部 1Digital 2Webhook 3Digital或Webhook
+	Status         int    `form:"status,optional,default=-1"` // -1全部 0禁用 1启用
 }
 
 type GetOpenAppListRes struct {
 	Total int64         `json:"total"`
 	List  []OpenAppInfo `json:"list"`
-}
-
-type GetOpenWebhookLogListReq struct {
-	Page      int    `form:"page,default=1"`
-	PageSize  int    `form:"pageSize,default=20"`
-	AppID     string `form:"appId,optional"`
-	EventType string `form:"eventType,optional"`
-	Status    int    `form:"status,optional"` // 0全部 1成功 2失败
-}
-
-type GetOpenWebhookLogListRes struct {
-	Total int64                `json:"total"`
-	List  []OpenWebhookLogInfo `json:"list"`
 }
 
 type GetOperationLogListReq struct {
@@ -1776,30 +1699,9 @@ type OpenAppInfo struct {
 	Icon          string `json:"icon"`
 	OwnerUserID   string `json:"ownerUserId"`
 	OwnerUserName string `json:"ownerUserName"`
-	AppType       int    `json:"appType"`
-	Category      string `json:"category"`
 	Status        int    `json:"status"`
-	AuditStatus   int    `json:"auditStatus"`
-	AuditedBy     string `json:"auditedBy"`
-	AuditedAt     int64  `json:"auditedAt"`
-	EnableDigital   int    `json:"enableDigital"`
-	EnableOAuth   int    `json:"enableOAuth"`
-	EnableWebhook int    `json:"enableWebhook"`
+	EnableOAuth int `json:"enableOAuth"`
 	CreatedAt     int64  `json:"createdAt"`
-}
-
-type OpenWebhookLogInfo struct {
-	ID           uint64 `json:"id"`
-	AppID        string `json:"appId"`
-	EventID      string `json:"eventId"`
-	EventType    string `json:"eventType"`
-	TargetURL    string `json:"targetUrl"`
-	HTTPStatus   int    `json:"httpStatus"`
-	LatencyMs    int64  `json:"latencyMs"`
-	RetryCount   int    `json:"retryCount"`
-	Status       int    `json:"status"`
-	ErrorMessage string `json:"errorMessage"`
-	CreatedAt    int64  `json:"createdAt"`
 }
 
 type OperationLogInfo struct {
@@ -2078,7 +1980,7 @@ type UpdateMenuRes struct {
 
 type UpdateOpenAppStatusReq struct {
 	AppIDs []string `json:"appIds"`
-	Action int      `json:"action"` // 3禁用 4启用
+	Action int      `json:"action"` // 0禁用 1启用
 	UserID string   `header:"Beaver-User-Id"`
 }
 

@@ -49,19 +49,11 @@ func (l *AddDigitalToGroupLogic) AddDigitalToGroup(req *types.AddDigitalToGroupR
 		return nil, errors.New("groupId 不能为空")
 	}
 
-	token, err := utils.ValidateAppAccessToken(l.svcCtx.DB, authorization)
+	token, err := utils.ValidateDigitalAccessToken(l.svcCtx.DB, authorization)
 	if err != nil {
 		return nil, err
 	}
-	app, err := utils.LoadAppByID(l.svcCtx.DB, token.AppID)
-	if err != nil {
-		return nil, err
-	}
-	if err := utils.RequireAppEnabled(app); err != nil {
-		return nil, err
-	}
-
-	digital, err := utils.EnsureAppDigital(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, app)
+	digital, err := utils.ResolveDigitalFromToken(l.svcCtx.DB, token.DigitalID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +67,8 @@ func (l *AddDigitalToGroupLogic) AddDigitalToGroup(req *types.AddDigitalToGroupR
 
 	_, err = l.svcCtx.GroupRpc.AddGroupMember(l.ctx, &group_rpc.AddGroupMemberReq{
 		GroupId:    req.GroupID,
-		UserId:     digital.PartnerID,
-		OperatedBy: token.AppID,
+		UserId:     digital.DigitalID,
+		OperatedBy: token.DigitalID,
 	})
 	if err != nil {
 		return nil, err
@@ -85,19 +77,19 @@ func (l *AddDigitalToGroupLogic) AddDigitalToGroup(req *types.AddDigitalToGroupR
 	go func() {
 		body := map[string]interface{}{
 			"group_id":    req.GroupID,
-			"digital_id":    digital.PartnerID,
-			"operator_id": token.AppID,
+			"digital_id":    digital.DigitalID,
+			"operator_id": token.DigitalID,
 		}
-		if err := openevent.Push(context.Background(), l.svcCtx.RocketMQ, digital.PartnerID,
+		if err := openevent.Push(context.Background(), l.svcCtx.RocketMQ, digital.DigitalID,
 			openevent.EventIMChatMemberDigitalAdded, "group_"+req.GroupID, body); err != nil {
 			l.logger.Error(model.LogMsg{
 				Text: "数字伙伴进群事件投递失败",
-				Data: map[string]any{"digitalId": digital.PartnerID, "groupId": req.GroupID, "err": err.Error()},
+				Data: map[string]any{"digitalId": digital.DigitalID, "groupId": req.GroupID, "err": err.Error()},
 			})
 		}
 	}()
 
 	return &types.AddDigitalToGroupRes{
-		DigitalID: digital.PartnerID,
+		DigitalID: digital.DigitalID,
 	}, nil
 }

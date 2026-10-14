@@ -21,11 +21,10 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 用授权码换取 Token 请求
 type ExchangeTokenReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"` // 应用 ID
-	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`                // 授权码
+	OauthId       string                 `protobuf:"bytes,1,opt,name=oauth_id,json=oauthId,proto3" json:"oauth_id,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,9 +59,9 @@ func (*ExchangeTokenReq) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ExchangeTokenReq) GetAppId() string {
+func (x *ExchangeTokenReq) GetOauthId() string {
 	if x != nil {
-		return x.AppId
+		return x.OauthId
 	}
 	return ""
 }
@@ -76,11 +75,11 @@ func (x *ExchangeTokenReq) GetCode() string {
 
 type ExchangeTokenRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`    // 访问令牌
-	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"` // 刷新令牌
-	ExpiresIn     int64                  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`         // 过期时间（秒）
-	TokenType     string                 `protobuf:"bytes,4,opt,name=token_type,json=tokenType,proto3" json:"token_type,omitempty"`          // Token 类型（Bearer）
-	UserId        string                 `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                   // 用户 ID
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	ExpiresIn     int64                  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	TokenType     string                 `protobuf:"bytes,4,opt,name=token_type,json=tokenType,proto3" json:"token_type,omitempty"`
+	UserId        string                 `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -150,10 +149,9 @@ func (x *ExchangeTokenRes) GetUserId() string {
 	return ""
 }
 
-// 获取用户信息请求
 type GetUserInfoReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // 访问令牌
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -197,11 +195,11 @@ func (x *GetUserInfoReq) GetAccessToken() string {
 
 type GetUserInfoRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`       // 用户 ID
-	NickName      string                 `protobuf:"bytes,2,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"` // 昵称
-	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`                     // 头像 URL
-	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`                       // 手机号
-	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`                       // 邮箱
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	NickName      string                 `protobuf:"bytes,2,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`
+	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -271,10 +269,9 @@ func (x *GetUserInfoRes) GetEmail() string {
 	return ""
 }
 
-// 验证 Token 请求
 type ValidateTokenReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // 访问令牌
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -318,9 +315,9 @@ func (x *ValidateTokenReq) GetAccessToken() string {
 
 type ValidateTokenRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`                // 是否有效
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // 用户 ID（如果有效）
-	AppId         string                 `protobuf:"bytes,3,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`    // 应用 ID
+	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	OauthId       string                 `protobuf:"bytes,3,opt,name=oauth_id,json=oauthId,proto3" json:"oauth_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -369,18 +366,17 @@ func (x *ValidateTokenRes) GetUserId() string {
 	return ""
 }
 
-func (x *ValidateTokenRes) GetAppId() string {
+func (x *ValidateTokenRes) GetOauthId() string {
 	if x != nil {
-		return x.AppId
+		return x.OauthId
 	}
 	return ""
 }
 
-// 刷新 Token 请求
 type RefreshTokenReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                      // 应用 ID
-	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"` // 刷新令牌
+	OauthId       string                 `protobuf:"bytes,1,opt,name=oauth_id,json=oauthId,proto3" json:"oauth_id,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -415,9 +411,9 @@ func (*RefreshTokenReq) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *RefreshTokenReq) GetAppId() string {
+func (x *RefreshTokenReq) GetOauthId() string {
 	if x != nil {
-		return x.AppId
+		return x.OauthId
 	}
 	return ""
 }
@@ -431,9 +427,9 @@ func (x *RefreshTokenReq) GetRefreshToken() string {
 
 type RefreshTokenRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`    // 新的访问令牌
-	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"` // 新的刷新令牌
-	ExpiresIn     int64                  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`         // 过期时间（秒）
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	ExpiresIn     int64                  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -489,11 +485,11 @@ func (x *RefreshTokenRes) GetExpiresIn() int64 {
 	return 0
 }
 
-// 创建推送机器人
 type CreateBotReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // 目标群组 ID
-	BotId         string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`       // 机器人用户 ID（由 user_rpc 生成）
+	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	OwnerId       string                 `protobuf:"bytes,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Visibility    string                 `protobuf:"bytes,3,opt,name=visibility,proto3" json:"visibility,omitempty"` // private|partial|public，默认 private
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -528,13 +524,6 @@ func (*CreateBotReq) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *CreateBotReq) GetGroupId() string {
-	if x != nil {
-		return x.GroupId
-	}
-	return ""
-}
-
 func (x *CreateBotReq) GetBotId() string {
 	if x != nil {
 		return x.BotId
@@ -542,14 +531,29 @@ func (x *CreateBotReq) GetBotId() string {
 	return ""
 }
 
+func (x *CreateBotReq) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
+	}
+	return ""
+}
+
+func (x *CreateBotReq) GetVisibility() string {
+	if x != nil {
+		return x.Visibility
+	}
+	return ""
+}
+
 type CreateBotRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                  // 机器人 ID（open_bots.id）
-	BotId         string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`                // 机器人用户 ID
-	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`                             // Webhook Token
-	WebhookUrl    string                 `protobuf:"bytes,4,opt,name=webhook_url,json=webhookUrl,proto3" json:"webhook_url,omitempty"` // Webhook 基础 URL（不含 token）
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BotId           string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	Token           string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	WebhookUrl      string                 `protobuf:"bytes,4,opt,name=webhook_url,json=webhookUrl,proto3" json:"webhook_url,omitempty"`
+	SignatureSecret string                 `protobuf:"bytes,5,opt,name=signature_secret,json=signatureSecret,proto3" json:"signature_secret,omitempty"` // 仅创建时返回明文
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreateBotRes) Reset() {
@@ -610,10 +614,16 @@ func (x *CreateBotRes) GetWebhookUrl() string {
 	return ""
 }
 
-// 删除推送机器人（软删除，设置 status=0）
+func (x *CreateBotRes) GetSignatureSecret() string {
+	if x != nil {
+		return x.SignatureSecret
+	}
+	return ""
+}
+
 type DeleteBotReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // open_bots.id
+	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -648,11 +658,11 @@ func (*DeleteBotReq) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *DeleteBotReq) GetId() uint32 {
+func (x *DeleteBotReq) GetBotId() string {
 	if x != nil {
-		return x.Id
+		return x.BotId
 	}
-	return 0
+	return ""
 }
 
 type DeleteBotRes struct {
@@ -691,10 +701,9 @@ func (*DeleteBotRes) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{11}
 }
 
-// 重置签名密钥
 type ResetBotSecretReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -729,16 +738,16 @@ func (*ResetBotSecretReq) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *ResetBotSecretReq) GetId() uint32 {
+func (x *ResetBotSecretReq) GetBotId() string {
 	if x != nil {
-		return x.Id
+		return x.BotId
 	}
-	return 0
+	return ""
 }
 
 type ResetBotSecretRes struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	SignatureSecret string                 `protobuf:"bytes,1,opt,name=signature_secret,json=signatureSecret,proto3" json:"signature_secret,omitempty"` // 新密钥
+	SignatureSecret string                 `protobuf:"bytes,1,opt,name=signature_secret,json=signatureSecret,proto3" json:"signature_secret,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -780,10 +789,9 @@ func (x *ResetBotSecretRes) GetSignatureSecret() string {
 	return ""
 }
 
-// 获取推送机器人信息
 type GetBotInfoReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"` // 机器人用户ID
+	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -831,8 +839,6 @@ type BotSecurity struct {
 	Keywords           []string               `protobuf:"bytes,2,rep,name=keywords,proto3" json:"keywords,omitempty"`
 	IpWhitelistEnabled bool                   `protobuf:"varint,3,opt,name=ip_whitelist_enabled,json=ipWhitelistEnabled,proto3" json:"ip_whitelist_enabled,omitempty"`
 	IpWhitelist        []string               `protobuf:"bytes,4,rep,name=ip_whitelist,json=ipWhitelist,proto3" json:"ip_whitelist,omitempty"`
-	SignatureEnabled   bool                   `protobuf:"varint,5,opt,name=signature_enabled,json=signatureEnabled,proto3" json:"signature_enabled,omitempty"`
-	SignatureSecret    string                 `protobuf:"bytes,6,opt,name=signature_secret,json=signatureSecret,proto3" json:"signature_secret,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -895,28 +901,16 @@ func (x *BotSecurity) GetIpWhitelist() []string {
 	return nil
 }
 
-func (x *BotSecurity) GetSignatureEnabled() bool {
-	if x != nil {
-		return x.SignatureEnabled
-	}
-	return false
-}
-
-func (x *BotSecurity) GetSignatureSecret() string {
-	if x != nil {
-		return x.SignatureSecret
-	}
-	return ""
-}
-
 type GetBotInfoRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                   // open_bots.id
-	BotId         string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"` // 机器人用户ID
-	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`              // Webhook Token
-	Security      *BotSecurity           `protobuf:"bytes,4,opt,name=security,proto3" json:"security,omitempty"`        // 安全设置
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BotId            string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	OwnerId          string                 `protobuf:"bytes,3,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Visibility       string                 `protobuf:"bytes,4,opt,name=visibility,proto3" json:"visibility,omitempty"`
+	SignatureEnabled int32                  `protobuf:"varint,5,opt,name=signature_enabled,json=signatureEnabled,proto3" json:"signature_enabled,omitempty"`
+	Security         *BotSecurity           `protobuf:"bytes,6,opt,name=security,proto3" json:"security,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetBotInfoRes) Reset() {
@@ -963,11 +957,25 @@ func (x *GetBotInfoRes) GetBotId() string {
 	return ""
 }
 
-func (x *GetBotInfoRes) GetToken() string {
+func (x *GetBotInfoRes) GetOwnerId() string {
 	if x != nil {
-		return x.Token
+		return x.OwnerId
 	}
 	return ""
+}
+
+func (x *GetBotInfoRes) GetVisibility() string {
+	if x != nil {
+		return x.Visibility
+	}
+	return ""
+}
+
+func (x *GetBotInfoRes) GetSignatureEnabled() int32 {
+	if x != nil {
+		return x.SignatureEnabled
+	}
+	return 0
 }
 
 func (x *GetBotInfoRes) GetSecurity() *BotSecurity {
@@ -977,13 +985,14 @@ func (x *GetBotInfoRes) GetSecurity() *BotSecurity {
 	return nil
 }
 
-// 更新推送机器人（安全设置等）
 type UpdateBotReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	BotId         string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"` // 机器人用户 ID
-	Security      *BotSecurity           `protobuf:"bytes,2,opt,name=security,proto3" json:"security,omitempty"`        // 安全设置
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	BotId            string                 `protobuf:"bytes,1,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	Visibility       string                 `protobuf:"bytes,2,opt,name=visibility,proto3" json:"visibility,omitempty"`
+	SignatureEnabled int32                  `protobuf:"varint,3,opt,name=signature_enabled,json=signatureEnabled,proto3" json:"signature_enabled,omitempty"` // -1 表示不改；0/1 设置
+	Security         *BotSecurity           `protobuf:"bytes,4,opt,name=security,proto3" json:"security,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *UpdateBotReq) Reset() {
@@ -1021,6 +1030,20 @@ func (x *UpdateBotReq) GetBotId() string {
 		return x.BotId
 	}
 	return ""
+}
+
+func (x *UpdateBotReq) GetVisibility() string {
+	if x != nil {
+		return x.Visibility
+	}
+	return ""
+}
+
+func (x *UpdateBotReq) GetSignatureEnabled() int32 {
+	if x != nil {
+		return x.SignatureEnabled
+	}
+	return 0
 }
 
 func (x *UpdateBotReq) GetSecurity() *BotSecurity {
@@ -1066,122 +1089,16 @@ func (*UpdateBotRes) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{18}
 }
 
-// 记录 Webhook 回调日志（供 chat 等域通过 RPC 写入，不直连 beaver_open）
-type SaveWebhookLogReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ConfigId      string                 `protobuf:"bytes,1,opt,name=config_id,json=configId,proto3" json:"config_id,omitempty"`    // 配置 ID
-	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`             // 应用 ID
-	EventType     string                 `protobuf:"bytes,3,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // 事件类型
-	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`                       // 0 失败 1 成功
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SaveWebhookLogReq) Reset() {
-	*x = SaveWebhookLogReq{}
-	mi := &file_open_rpc_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SaveWebhookLogReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SaveWebhookLogReq) ProtoMessage() {}
-
-func (x *SaveWebhookLogReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SaveWebhookLogReq.ProtoReflect.Descriptor instead.
-func (*SaveWebhookLogReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *SaveWebhookLogReq) GetConfigId() string {
-	if x != nil {
-		return x.ConfigId
-	}
-	return ""
-}
-
-func (x *SaveWebhookLogReq) GetAppId() string {
-	if x != nil {
-		return x.AppId
-	}
-	return ""
-}
-
-func (x *SaveWebhookLogReq) GetEventType() string {
-	if x != nil {
-		return x.EventType
-	}
-	return ""
-}
-
-func (x *SaveWebhookLogReq) GetStatus() int32 {
-	if x != nil {
-		return x.Status
-	}
-	return 0
-}
-
-type SaveWebhookLogRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SaveWebhookLogRes) Reset() {
-	*x = SaveWebhookLogRes{}
-	mi := &file_open_rpc_proto_msgTypes[20]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SaveWebhookLogRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SaveWebhookLogRes) ProtoMessage() {}
-
-func (x *SaveWebhookLogRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[20]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SaveWebhookLogRes.ProtoReflect.Descriptor instead.
-func (*SaveWebhookLogRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{20}
-}
-
-// 根据 IM 用户 ID 反查外接数字伙伴
 type GetDigitalByUserIDReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DigitalUserId string                 `protobuf:"bytes,1,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"` // string Digital 的 IM 用户 ID
+	DigitalUserId string                 `protobuf:"bytes,1,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetDigitalByUserIDReq) Reset() {
 	*x = GetDigitalByUserIDReq{}
-	mi := &file_open_rpc_proto_msgTypes[21]
+	mi := &file_open_rpc_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1193,7 +1110,7 @@ func (x *GetDigitalByUserIDReq) String() string {
 func (*GetDigitalByUserIDReq) ProtoMessage() {}
 
 func (x *GetDigitalByUserIDReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[21]
+	mi := &file_open_rpc_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1206,7 +1123,7 @@ func (x *GetDigitalByUserIDReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDigitalByUserIDReq.ProtoReflect.Descriptor instead.
 func (*GetDigitalByUserIDReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{21}
+	return file_open_rpc_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GetDigitalByUserIDReq) GetDigitalUserId() string {
@@ -1218,16 +1135,17 @@ func (x *GetDigitalByUserIDReq) GetDigitalUserId() string {
 
 type GetDigitalByUserIDRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Found         bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`                                       // bool 是否找到对应 Digital
-	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                           // string 所属应用 ID
-	DigitalUserId string                 `protobuf:"bytes,3,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"` // string Digital 的 IM 用户 ID（PartnerID）
+	Found         bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`
+	AppKey        string                 `protobuf:"bytes,2,opt,name=app_key,json=appKey,proto3" json:"app_key,omitempty"`
+	DigitalUserId string                 `protobuf:"bytes,3,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"`
+	Runtime       string                 `protobuf:"bytes,4,opt,name=runtime,proto3" json:"runtime,omitempty"` // builtin|external|workflow
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetDigitalByUserIDRes) Reset() {
 	*x = GetDigitalByUserIDRes{}
-	mi := &file_open_rpc_proto_msgTypes[22]
+	mi := &file_open_rpc_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1239,7 +1157,7 @@ func (x *GetDigitalByUserIDRes) String() string {
 func (*GetDigitalByUserIDRes) ProtoMessage() {}
 
 func (x *GetDigitalByUserIDRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[22]
+	mi := &file_open_rpc_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1252,7 +1170,7 @@ func (x *GetDigitalByUserIDRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDigitalByUserIDRes.ProtoReflect.Descriptor instead.
 func (*GetDigitalByUserIDRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{22}
+	return file_open_rpc_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetDigitalByUserIDRes) GetFound() bool {
@@ -1262,9 +1180,9 @@ func (x *GetDigitalByUserIDRes) GetFound() bool {
 	return false
 }
 
-func (x *GetDigitalByUserIDRes) GetAppId() string {
+func (x *GetDigitalByUserIDRes) GetAppKey() string {
 	if x != nil {
-		return x.AppId
+		return x.AppKey
 	}
 	return ""
 }
@@ -1276,30 +1194,160 @@ func (x *GetDigitalByUserIDRes) GetDigitalUserId() string {
 	return ""
 }
 
-// 向应用已注册的 Webhook 推送开放平台事件
-type DispatchPlatformEventReq struct {
+func (x *GetDigitalByUserIDRes) GetRuntime() string {
+	if x != nil {
+		return x.Runtime
+	}
+	return ""
+}
+
+type GetDigitalConfigReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`             // string 应用 ID
-	EventType     string                 `protobuf:"bytes,2,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // string 事件类型，如 im.message.receive
-	EventJson     string                 `protobuf:"bytes,3,opt,name=event_json,json=eventJson,proto3" json:"event_json,omitempty"` // string 事件内容 JSON 字符串
+	DigitalId     string                 `protobuf:"bytes,1,opt,name=digital_id,json=digitalId,proto3" json:"digital_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DispatchPlatformEventReq) Reset() {
-	*x = DispatchPlatformEventReq{}
+func (x *GetDigitalConfigReq) Reset() {
+	*x = GetDigitalConfigReq{}
+	mi := &file_open_rpc_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDigitalConfigReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDigitalConfigReq) ProtoMessage() {}
+
+func (x *GetDigitalConfigReq) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDigitalConfigReq.ProtoReflect.Descriptor instead.
+func (*GetDigitalConfigReq) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetDigitalConfigReq) GetDigitalId() string {
+	if x != nil {
+		return x.DigitalId
+	}
+	return ""
+}
+
+type GetDigitalConfigRes struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	DigitalId      string                 `protobuf:"bytes,1,opt,name=digital_id,json=digitalId,proto3" json:"digital_id,omitempty"`
+	Runtime        string                 `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`                                     // builtin|external|workflow
+	BuiltinConfig  string                 `protobuf:"bytes,3,opt,name=builtin_config,json=builtinConfig,proto3" json:"builtin_config,omitempty"`    // BuiltinConfig JSON（Runtime=builtin 时非空）
+	ExternalConfig string                 `protobuf:"bytes,4,opt,name=external_config,json=externalConfig,proto3" json:"external_config,omitempty"` // ExternalConfig JSON（Runtime=external 时非空）
+	WorkflowConfig string                 `protobuf:"bytes,5,opt,name=workflow_config,json=workflowConfig,proto3" json:"workflow_config,omitempty"` // WorkflowConfig JSON（Runtime=workflow 时非空）
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetDigitalConfigRes) Reset() {
+	*x = GetDigitalConfigRes{}
+	mi := &file_open_rpc_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDigitalConfigRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDigitalConfigRes) ProtoMessage() {}
+
+func (x *GetDigitalConfigRes) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDigitalConfigRes.ProtoReflect.Descriptor instead.
+func (*GetDigitalConfigRes) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetDigitalConfigRes) GetDigitalId() string {
+	if x != nil {
+		return x.DigitalId
+	}
+	return ""
+}
+
+func (x *GetDigitalConfigRes) GetRuntime() string {
+	if x != nil {
+		return x.Runtime
+	}
+	return ""
+}
+
+func (x *GetDigitalConfigRes) GetBuiltinConfig() string {
+	if x != nil {
+		return x.BuiltinConfig
+	}
+	return ""
+}
+
+func (x *GetDigitalConfigRes) GetExternalConfig() string {
+	if x != nil {
+		return x.ExternalConfig
+	}
+	return ""
+}
+
+func (x *GetDigitalConfigRes) GetWorkflowConfig() string {
+	if x != nil {
+		return x.WorkflowConfig
+	}
+	return ""
+}
+
+type OpenOAuthItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OauthId       string                 `protobuf:"bytes,1,opt,name=oauth_id,json=oauthId,proto3" json:"oauth_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Icon          string                 `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	OwnerUserId   string                 `protobuf:"bytes,5,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OpenOAuthItem) Reset() {
+	*x = OpenOAuthItem{}
 	mi := &file_open_rpc_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DispatchPlatformEventReq) String() string {
+func (x *OpenOAuthItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DispatchPlatformEventReq) ProtoMessage() {}
+func (*OpenOAuthItem) ProtoMessage() {}
 
-func (x *DispatchPlatformEventReq) ProtoReflect() protoreflect.Message {
+func (x *OpenOAuthItem) ProtoReflect() protoreflect.Message {
 	mi := &file_open_rpc_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1311,922 +1359,87 @@ func (x *DispatchPlatformEventReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DispatchPlatformEventReq.ProtoReflect.Descriptor instead.
-func (*DispatchPlatformEventReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use OpenOAuthItem.ProtoReflect.Descriptor instead.
+func (*OpenOAuthItem) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{23}
 }
 
-func (x *DispatchPlatformEventReq) GetAppId() string {
+func (x *OpenOAuthItem) GetOauthId() string {
 	if x != nil {
-		return x.AppId
+		return x.OauthId
 	}
 	return ""
 }
 
-func (x *DispatchPlatformEventReq) GetEventType() string {
-	if x != nil {
-		return x.EventType
-	}
-	return ""
-}
-
-func (x *DispatchPlatformEventReq) GetEventJson() string {
-	if x != nil {
-		return x.EventJson
-	}
-	return ""
-}
-
-type DispatchPlatformEventRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Dispatched    bool                   `protobuf:"varint,1,opt,name=dispatched,proto3" json:"dispatched,omitempty"` // bool 是否至少推送成功一次
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DispatchPlatformEventRes) Reset() {
-	*x = DispatchPlatformEventRes{}
-	mi := &file_open_rpc_proto_msgTypes[24]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DispatchPlatformEventRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DispatchPlatformEventRes) ProtoMessage() {}
-
-func (x *DispatchPlatformEventRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[24]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DispatchPlatformEventRes.ProtoReflect.Descriptor instead.
-func (*DispatchPlatformEventRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{24}
-}
-
-func (x *DispatchPlatformEventRes) GetDispatched() bool {
-	if x != nil {
-		return x.Dispatched
-	}
-	return false
-}
-
-type DeveloperItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                      // uint64 记录 ID
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                 // string 用户 ID
-	RealName      string                 `protobuf:"bytes,3,opt,name=real_name,json=realName,proto3" json:"real_name,omitempty"`           // string 真实姓名
-	CompanyName   string                 `protobuf:"bytes,4,opt,name=company_name,json=companyName,proto3" json:"company_name,omitempty"`  // string 公司名称
-	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`                                 // string 联系电话
-	Email         string                 `protobuf:"bytes,6,opt,name=email,proto3" json:"email,omitempty"`                                 // string 邮箱
-	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`                     // string 申请说明
-	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`                              // int32 状态 0待审核 1已通过 2已拒绝
-	AuditBy       string                 `protobuf:"bytes,9,opt,name=audit_by,json=auditBy,proto3" json:"audit_by,omitempty"`              // string 审核人 ID
-	AuditTime     int64                  `protobuf:"varint,10,opt,name=audit_time,json=auditTime,proto3" json:"audit_time,omitempty"`      // int64 审核时间戳毫秒
-	AuditRemark   string                 `protobuf:"bytes,11,opt,name=audit_remark,json=auditRemark,proto3" json:"audit_remark,omitempty"` // string 审核备注
-	CreatedAt     int64                  `protobuf:"varint,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`      // int64 创建时间戳毫秒
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeveloperItem) Reset() {
-	*x = DeveloperItem{}
-	mi := &file_open_rpc_proto_msgTypes[25]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeveloperItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeveloperItem) ProtoMessage() {}
-
-func (x *DeveloperItem) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[25]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeveloperItem.ProtoReflect.Descriptor instead.
-func (*DeveloperItem) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{25}
-}
-
-func (x *DeveloperItem) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *DeveloperItem) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetRealName() string {
-	if x != nil {
-		return x.RealName
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetCompanyName() string {
-	if x != nil {
-		return x.CompanyName
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetPhone() string {
-	if x != nil {
-		return x.Phone
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetStatus() int32 {
-	if x != nil {
-		return x.Status
-	}
-	return 0
-}
-
-func (x *DeveloperItem) GetAuditBy() string {
-	if x != nil {
-		return x.AuditBy
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetAuditTime() int64 {
-	if x != nil {
-		return x.AuditTime
-	}
-	return 0
-}
-
-func (x *DeveloperItem) GetAuditRemark() string {
-	if x != nil {
-		return x.AuditRemark
-	}
-	return ""
-}
-
-func (x *DeveloperItem) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
-}
-
-type ApplyDeveloperReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                // string 用户 ID
-	RealName      string                 `protobuf:"bytes,2,opt,name=real_name,json=realName,proto3" json:"real_name,omitempty"`          // string 真实姓名
-	CompanyName   string                 `protobuf:"bytes,3,opt,name=company_name,json=companyName,proto3" json:"company_name,omitempty"` // string 公司名称
-	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`                                // string 联系电话
-	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`                                // string 邮箱
-	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`                    // string 申请说明
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ApplyDeveloperReq) Reset() {
-	*x = ApplyDeveloperReq{}
-	mi := &file_open_rpc_proto_msgTypes[26]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ApplyDeveloperReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ApplyDeveloperReq) ProtoMessage() {}
-
-func (x *ApplyDeveloperReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[26]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ApplyDeveloperReq.ProtoReflect.Descriptor instead.
-func (*ApplyDeveloperReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{26}
-}
-
-func (x *ApplyDeveloperReq) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *ApplyDeveloperReq) GetRealName() string {
-	if x != nil {
-		return x.RealName
-	}
-	return ""
-}
-
-func (x *ApplyDeveloperReq) GetCompanyName() string {
-	if x != nil {
-		return x.CompanyName
-	}
-	return ""
-}
-
-func (x *ApplyDeveloperReq) GetPhone() string {
-	if x != nil {
-		return x.Phone
-	}
-	return ""
-}
-
-func (x *ApplyDeveloperReq) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *ApplyDeveloperReq) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-type ApplyDeveloperRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // uint64 记录 ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ApplyDeveloperRes) Reset() {
-	*x = ApplyDeveloperRes{}
-	mi := &file_open_rpc_proto_msgTypes[27]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ApplyDeveloperRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ApplyDeveloperRes) ProtoMessage() {}
-
-func (x *ApplyDeveloperRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[27]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ApplyDeveloperRes.ProtoReflect.Descriptor instead.
-func (*ApplyDeveloperRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{27}
-}
-
-func (x *ApplyDeveloperRes) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetDeveloperByUserIDReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // string 用户 ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDeveloperByUserIDReq) Reset() {
-	*x = GetDeveloperByUserIDReq{}
-	mi := &file_open_rpc_proto_msgTypes[28]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDeveloperByUserIDReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDeveloperByUserIDReq) ProtoMessage() {}
-
-func (x *GetDeveloperByUserIDReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[28]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDeveloperByUserIDReq.ProtoReflect.Descriptor instead.
-func (*GetDeveloperByUserIDReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{28}
-}
-
-func (x *GetDeveloperByUserIDReq) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-type GetDeveloperByUserIDRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Found         bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`        // bool 是否存在记录
-	Developer     *DeveloperItem         `protobuf:"bytes,2,opt,name=developer,proto3" json:"developer,omitempty"` // object 开发者信息
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDeveloperByUserIDRes) Reset() {
-	*x = GetDeveloperByUserIDRes{}
-	mi := &file_open_rpc_proto_msgTypes[29]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDeveloperByUserIDRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDeveloperByUserIDRes) ProtoMessage() {}
-
-func (x *GetDeveloperByUserIDRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[29]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDeveloperByUserIDRes.ProtoReflect.Descriptor instead.
-func (*GetDeveloperByUserIDRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{29}
-}
-
-func (x *GetDeveloperByUserIDRes) GetFound() bool {
-	if x != nil {
-		return x.Found
-	}
-	return false
-}
-
-func (x *GetDeveloperByUserIDRes) GetDeveloper() *DeveloperItem {
-	if x != nil {
-		return x.Developer
-	}
-	return nil
-}
-
-type GetDeveloperReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // uint64 记录 ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDeveloperReq) Reset() {
-	*x = GetDeveloperReq{}
-	mi := &file_open_rpc_proto_msgTypes[30]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDeveloperReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDeveloperReq) ProtoMessage() {}
-
-func (x *GetDeveloperReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[30]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDeveloperReq.ProtoReflect.Descriptor instead.
-func (*GetDeveloperReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{30}
-}
-
-func (x *GetDeveloperReq) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetDeveloperRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Developer     *DeveloperItem         `protobuf:"bytes,1,opt,name=developer,proto3" json:"developer,omitempty"` // object 开发者信息
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDeveloperRes) Reset() {
-	*x = GetDeveloperRes{}
-	mi := &file_open_rpc_proto_msgTypes[31]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDeveloperRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDeveloperRes) ProtoMessage() {}
-
-func (x *GetDeveloperRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[31]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDeveloperRes.ProtoReflect.Descriptor instead.
-func (*GetDeveloperRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *GetDeveloperRes) GetDeveloper() *DeveloperItem {
-	if x != nil {
-		return x.Developer
-	}
-	return nil
-}
-
-type ListDevelopersReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                         // int32 页码
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // int32 每页条数
-	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`                     // int32 状态筛选，0 表示全部
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListDevelopersReq) Reset() {
-	*x = ListDevelopersReq{}
-	mi := &file_open_rpc_proto_msgTypes[32]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListDevelopersReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListDevelopersReq) ProtoMessage() {}
-
-func (x *ListDevelopersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[32]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListDevelopersReq.ProtoReflect.Descriptor instead.
-func (*ListDevelopersReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{32}
-}
-
-func (x *ListDevelopersReq) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *ListDevelopersReq) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (x *ListDevelopersReq) GetStatus() int32 {
-	if x != nil {
-		return x.Status
-	}
-	return 0
-}
-
-type ListDevelopersRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
-	List          []*DeveloperItem       `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 开发者列表
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListDevelopersRes) Reset() {
-	*x = ListDevelopersRes{}
-	mi := &file_open_rpc_proto_msgTypes[33]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListDevelopersRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListDevelopersRes) ProtoMessage() {}
-
-func (x *ListDevelopersRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[33]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListDevelopersRes.ProtoReflect.Descriptor instead.
-func (*ListDevelopersRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{33}
-}
-
-func (x *ListDevelopersRes) GetTotal() int64 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-func (x *ListDevelopersRes) GetList() []*DeveloperItem {
-	if x != nil {
-		return x.List
-	}
-	return nil
-}
-
-type AuditDeveloperReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                     // uint64 记录 ID
-	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`                             // int32 审核结果 1通过 2拒绝
-	AuditBy       string                 `protobuf:"bytes,3,opt,name=audit_by,json=auditBy,proto3" json:"audit_by,omitempty"`             // string 审核人 ID
-	AuditRemark   string                 `protobuf:"bytes,4,opt,name=audit_remark,json=auditRemark,proto3" json:"audit_remark,omitempty"` // string 审核备注
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AuditDeveloperReq) Reset() {
-	*x = AuditDeveloperReq{}
-	mi := &file_open_rpc_proto_msgTypes[34]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AuditDeveloperReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AuditDeveloperReq) ProtoMessage() {}
-
-func (x *AuditDeveloperReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[34]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AuditDeveloperReq.ProtoReflect.Descriptor instead.
-func (*AuditDeveloperReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{34}
-}
-
-func (x *AuditDeveloperReq) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *AuditDeveloperReq) GetStatus() int32 {
-	if x != nil {
-		return x.Status
-	}
-	return 0
-}
-
-func (x *AuditDeveloperReq) GetAuditBy() string {
-	if x != nil {
-		return x.AuditBy
-	}
-	return ""
-}
-
-func (x *AuditDeveloperReq) GetAuditRemark() string {
-	if x != nil {
-		return x.AuditRemark
-	}
-	return ""
-}
-
-type AuditDeveloperRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AuditDeveloperRes) Reset() {
-	*x = AuditDeveloperRes{}
-	mi := &file_open_rpc_proto_msgTypes[35]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AuditDeveloperRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AuditDeveloperRes) ProtoMessage() {}
-
-func (x *AuditDeveloperRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[35]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AuditDeveloperRes.ProtoReflect.Descriptor instead.
-func (*AuditDeveloperRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{35}
-}
-
-type OpenAppItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                           // string 应用 ID
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                          // string 应用名称
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                            // string 应用描述
-	Icon          string                 `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`                                          // string 图标 URL
-	OwnerUserId   string                 `protobuf:"bytes,5,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`       // string 所属用户 ID
-	AppType       int32                  `protobuf:"varint,6,opt,name=app_type,json=appType,proto3" json:"app_type,omitempty"`                    // int32 应用类型 1自建 2第三方
-	Category      string                 `protobuf:"bytes,7,opt,name=category,proto3" json:"category,omitempty"`                                  // string 分类
-	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`                                     // int32 状态 0草稿 1已发布 2禁用
-	AuditStatus   int32                  `protobuf:"varint,9,opt,name=audit_status,json=auditStatus,proto3" json:"audit_status,omitempty"`        // int32 审核状态 0待审核 1已通过 2已拒绝
-	AuditedBy     string                 `protobuf:"bytes,10,opt,name=audited_by,json=auditedBy,proto3" json:"audited_by,omitempty"`              // string 审核人 ID
-	AuditedAt     int64                  `protobuf:"varint,11,opt,name=audited_at,json=auditedAt,proto3" json:"audited_at,omitempty"`             // int64 审核时间戳毫秒
-	EnableDigital int32                  `protobuf:"varint,12,opt,name=enable_digital,json=enableDigital,proto3" json:"enable_digital,omitempty"` // int32 是否启用 Digital
-	EnableOauth   int32                  `protobuf:"varint,13,opt,name=enable_oauth,json=enableOauth,proto3" json:"enable_oauth,omitempty"`       // int32 是否启用 OAuth
-	EnableWebhook int32                  `protobuf:"varint,14,opt,name=enable_webhook,json=enableWebhook,proto3" json:"enable_webhook,omitempty"` // int32 是否启用 Webhook
-	CreatedAt     int64                  `protobuf:"varint,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`             // int64 创建时间戳毫秒
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OpenAppItem) Reset() {
-	*x = OpenAppItem{}
-	mi := &file_open_rpc_proto_msgTypes[36]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OpenAppItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OpenAppItem) ProtoMessage() {}
-
-func (x *OpenAppItem) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[36]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OpenAppItem.ProtoReflect.Descriptor instead.
-func (*OpenAppItem) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{36}
-}
-
-func (x *OpenAppItem) GetAppId() string {
-	if x != nil {
-		return x.AppId
-	}
-	return ""
-}
-
-func (x *OpenAppItem) GetName() string {
+func (x *OpenOAuthItem) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *OpenAppItem) GetDescription() string {
+func (x *OpenOAuthItem) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *OpenAppItem) GetIcon() string {
+func (x *OpenOAuthItem) GetIcon() string {
 	if x != nil {
 		return x.Icon
 	}
 	return ""
 }
 
-func (x *OpenAppItem) GetOwnerUserId() string {
+func (x *OpenOAuthItem) GetOwnerUserId() string {
 	if x != nil {
 		return x.OwnerUserId
 	}
 	return ""
 }
 
-func (x *OpenAppItem) GetAppType() int32 {
-	if x != nil {
-		return x.AppType
-	}
-	return 0
-}
-
-func (x *OpenAppItem) GetCategory() string {
-	if x != nil {
-		return x.Category
-	}
-	return ""
-}
-
-func (x *OpenAppItem) GetStatus() int32 {
+func (x *OpenOAuthItem) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-func (x *OpenAppItem) GetAuditStatus() int32 {
-	if x != nil {
-		return x.AuditStatus
-	}
-	return 0
-}
-
-func (x *OpenAppItem) GetAuditedBy() string {
-	if x != nil {
-		return x.AuditedBy
-	}
-	return ""
-}
-
-func (x *OpenAppItem) GetAuditedAt() int64 {
-	if x != nil {
-		return x.AuditedAt
-	}
-	return 0
-}
-
-func (x *OpenAppItem) GetEnableDigital() int32 {
-	if x != nil {
-		return x.EnableDigital
-	}
-	return 0
-}
-
-func (x *OpenAppItem) GetEnableOauth() int32 {
-	if x != nil {
-		return x.EnableOauth
-	}
-	return 0
-}
-
-func (x *OpenAppItem) GetEnableWebhook() int32 {
-	if x != nil {
-		return x.EnableWebhook
-	}
-	return 0
-}
-
-func (x *OpenAppItem) GetCreatedAt() int64 {
+func (x *OpenOAuthItem) GetCreatedAt() int64 {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return 0
 }
 
-// ListOpenApps：应用查询（列表 + app_id 精确查详情）
-type ListOpenAppsReq struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Page           int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                                           // int32 页码
-	PageSize       int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`                   // int32 每页条数
-	Keyword        string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"`                                      // string 名称/描述模糊搜索，可选
-	OwnerUserId    string                 `protobuf:"bytes,4,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`         // string 所属用户 ID，可选
-	Status         int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                                       // int32 状态筛选，0 表示全部
-	AuditStatus    int32                  `protobuf:"varint,6,opt,name=audit_status,json=auditStatus,proto3" json:"audit_status,omitempty"`          // int32 审核状态筛选，0 表示全部
-	AppId          string                 `protobuf:"bytes,7,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                             // string 应用 ID 精确查，可选
-	CapabilityType int32                  `protobuf:"varint,8,opt,name=capability_type,json=capabilityType,proto3" json:"capability_type,omitempty"` // int32 能力筛选：0全部 1Digital 2Webhook 3Digital或Webhook
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+type ListOpenOAuthReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Keyword       string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"`
+	OwnerUserId   string                 `protobuf:"bytes,4,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	OauthId       string                 `protobuf:"bytes,6,opt,name=oauth_id,json=oauthId,proto3" json:"oauth_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListOpenAppsReq) Reset() {
-	*x = ListOpenAppsReq{}
-	mi := &file_open_rpc_proto_msgTypes[37]
+func (x *ListOpenOAuthReq) Reset() {
+	*x = ListOpenOAuthReq{}
+	mi := &file_open_rpc_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListOpenAppsReq) String() string {
+func (x *ListOpenOAuthReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListOpenAppsReq) ProtoMessage() {}
+func (*ListOpenOAuthReq) ProtoMessage() {}
 
-func (x *ListOpenAppsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[37]
+func (x *ListOpenOAuthReq) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2237,90 +1450,76 @@ func (x *ListOpenAppsReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListOpenAppsReq.ProtoReflect.Descriptor instead.
-func (*ListOpenAppsReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{37}
+// Deprecated: Use ListOpenOAuthReq.ProtoReflect.Descriptor instead.
+func (*ListOpenOAuthReq) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{24}
 }
 
-func (x *ListOpenAppsReq) GetPage() int32 {
+func (x *ListOpenOAuthReq) GetPage() int32 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListOpenAppsReq) GetPageSize() int32 {
+func (x *ListOpenOAuthReq) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
 	}
 	return 0
 }
 
-func (x *ListOpenAppsReq) GetKeyword() string {
+func (x *ListOpenOAuthReq) GetKeyword() string {
 	if x != nil {
 		return x.Keyword
 	}
 	return ""
 }
 
-func (x *ListOpenAppsReq) GetOwnerUserId() string {
+func (x *ListOpenOAuthReq) GetOwnerUserId() string {
 	if x != nil {
 		return x.OwnerUserId
 	}
 	return ""
 }
 
-func (x *ListOpenAppsReq) GetStatus() int32 {
+func (x *ListOpenOAuthReq) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-func (x *ListOpenAppsReq) GetAuditStatus() int32 {
+func (x *ListOpenOAuthReq) GetOauthId() string {
 	if x != nil {
-		return x.AuditStatus
-	}
-	return 0
-}
-
-func (x *ListOpenAppsReq) GetAppId() string {
-	if x != nil {
-		return x.AppId
+		return x.OauthId
 	}
 	return ""
 }
 
-func (x *ListOpenAppsReq) GetCapabilityType() int32 {
-	if x != nil {
-		return x.CapabilityType
-	}
-	return 0
-}
-
-type ListOpenAppsRes struct {
+type ListOpenOAuthRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
-	List          []*OpenAppItem         `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 应用列表
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	List          []*OpenOAuthItem       `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListOpenAppsRes) Reset() {
-	*x = ListOpenAppsRes{}
-	mi := &file_open_rpc_proto_msgTypes[38]
+func (x *ListOpenOAuthRes) Reset() {
+	*x = ListOpenOAuthRes{}
+	mi := &file_open_rpc_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListOpenAppsRes) String() string {
+func (x *ListOpenOAuthRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListOpenAppsRes) ProtoMessage() {}
+func (*ListOpenOAuthRes) ProtoMessage() {}
 
-func (x *ListOpenAppsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[38]
+func (x *ListOpenOAuthRes) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2331,52 +1530,49 @@ func (x *ListOpenAppsRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListOpenAppsRes.ProtoReflect.Descriptor instead.
-func (*ListOpenAppsRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{38}
+// Deprecated: Use ListOpenOAuthRes.ProtoReflect.Descriptor instead.
+func (*ListOpenOAuthRes) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *ListOpenAppsRes) GetTotal() int64 {
+func (x *ListOpenOAuthRes) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListOpenAppsRes) GetList() []*OpenAppItem {
+func (x *ListOpenOAuthRes) GetList() []*OpenOAuthItem {
 	if x != nil {
 		return x.List
 	}
 	return nil
 }
 
-// ListWebhookLogs：Webhook 投递日志（运营后台）
-type ListWebhookLogsReq struct {
+type UpdateOpenOAuthReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                           // int32 页码
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // int32 每页条数
-	AppId         string                 `protobuf:"bytes,3,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`             // string 应用 ID，可选
-	EventType     string                 `protobuf:"bytes,4,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // string 事件类型，可选
-	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                       // int32 投递结果：0全部 1成功 2失败
+	OauthIds      []string               `protobuf:"bytes,1,rep,name=oauth_ids,json=oauthIds,proto3" json:"oauth_ids,omitempty"`
+	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	OperatorId    string                 `protobuf:"bytes,3,opt,name=operator_id,json=operatorId,proto3" json:"operator_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListWebhookLogsReq) Reset() {
-	*x = ListWebhookLogsReq{}
-	mi := &file_open_rpc_proto_msgTypes[39]
+func (x *UpdateOpenOAuthReq) Reset() {
+	*x = UpdateOpenOAuthReq{}
+	mi := &file_open_rpc_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListWebhookLogsReq) String() string {
+func (x *UpdateOpenOAuthReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListWebhookLogsReq) ProtoMessage() {}
+func (*UpdateOpenOAuthReq) ProtoMessage() {}
 
-func (x *ListWebhookLogsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[39]
+func (x *UpdateOpenOAuthReq) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2387,313 +1583,54 @@ func (x *ListWebhookLogsReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListWebhookLogsReq.ProtoReflect.Descriptor instead.
-func (*ListWebhookLogsReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{39}
+// Deprecated: Use UpdateOpenOAuthReq.ProtoReflect.Descriptor instead.
+func (*UpdateOpenOAuthReq) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *ListWebhookLogsReq) GetPage() int32 {
+func (x *UpdateOpenOAuthReq) GetOauthIds() []string {
 	if x != nil {
-		return x.Page
+		return x.OauthIds
 	}
-	return 0
+	return nil
 }
 
-func (x *ListWebhookLogsReq) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (x *ListWebhookLogsReq) GetAppId() string {
-	if x != nil {
-		return x.AppId
-	}
-	return ""
-}
-
-func (x *ListWebhookLogsReq) GetEventType() string {
-	if x != nil {
-		return x.EventType
-	}
-	return ""
-}
-
-func (x *ListWebhookLogsReq) GetStatus() int32 {
+func (x *UpdateOpenOAuthReq) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-type WebhookLogItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                         // uint64 日志 ID
-	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                       // string 应用 ID
-	EventId       string                 `protobuf:"bytes,3,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`                 // string 事件 ID
-	EventType     string                 `protobuf:"bytes,4,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`           // string 事件类型
-	TargetUrl     string                 `protobuf:"bytes,5,opt,name=target_url,json=targetUrl,proto3" json:"target_url,omitempty"`           // string 目标 URL
-	HttpStatus    int32                  `protobuf:"varint,6,opt,name=http_status,json=httpStatus,proto3" json:"http_status,omitempty"`       // int32 HTTP 状态码
-	LatencyMs     int64                  `protobuf:"varint,7,opt,name=latency_ms,json=latencyMs,proto3" json:"latency_ms,omitempty"`          // int64 耗时毫秒
-	RetryCount    int32                  `protobuf:"varint,8,opt,name=retry_count,json=retryCount,proto3" json:"retry_count,omitempty"`       // int32 重试次数
-	Status        int32                  `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`                                 // int32 1成功 0失败
-	ErrorMessage  string                 `protobuf:"bytes,10,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"` // string 错误信息
-	CreatedAt     int64                  `protobuf:"varint,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`         // int64 创建时间戳秒
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *WebhookLogItem) Reset() {
-	*x = WebhookLogItem{}
-	mi := &file_open_rpc_proto_msgTypes[40]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *WebhookLogItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*WebhookLogItem) ProtoMessage() {}
-
-func (x *WebhookLogItem) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[40]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use WebhookLogItem.ProtoReflect.Descriptor instead.
-func (*WebhookLogItem) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{40}
-}
-
-func (x *WebhookLogItem) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *WebhookLogItem) GetAppId() string {
-	if x != nil {
-		return x.AppId
-	}
-	return ""
-}
-
-func (x *WebhookLogItem) GetEventId() string {
-	if x != nil {
-		return x.EventId
-	}
-	return ""
-}
-
-func (x *WebhookLogItem) GetEventType() string {
-	if x != nil {
-		return x.EventType
-	}
-	return ""
-}
-
-func (x *WebhookLogItem) GetTargetUrl() string {
-	if x != nil {
-		return x.TargetUrl
-	}
-	return ""
-}
-
-func (x *WebhookLogItem) GetHttpStatus() int32 {
-	if x != nil {
-		return x.HttpStatus
-	}
-	return 0
-}
-
-func (x *WebhookLogItem) GetLatencyMs() int64 {
-	if x != nil {
-		return x.LatencyMs
-	}
-	return 0
-}
-
-func (x *WebhookLogItem) GetRetryCount() int32 {
-	if x != nil {
-		return x.RetryCount
-	}
-	return 0
-}
-
-func (x *WebhookLogItem) GetStatus() int32 {
-	if x != nil {
-		return x.Status
-	}
-	return 0
-}
-
-func (x *WebhookLogItem) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
-}
-
-func (x *WebhookLogItem) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
-}
-
-type ListWebhookLogsRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // int64 总数
-	List          []*WebhookLogItem      `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // array 日志列表
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListWebhookLogsRes) Reset() {
-	*x = ListWebhookLogsRes{}
-	mi := &file_open_rpc_proto_msgTypes[41]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListWebhookLogsRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListWebhookLogsRes) ProtoMessage() {}
-
-func (x *ListWebhookLogsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[41]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListWebhookLogsRes.ProtoReflect.Descriptor instead.
-func (*ListWebhookLogsRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{41}
-}
-
-func (x *ListWebhookLogsRes) GetTotal() int64 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-func (x *ListWebhookLogsRes) GetList() []*WebhookLogItem {
-	if x != nil {
-		return x.List
-	}
-	return nil
-}
-
-// UpdateOpenApps：应用状态变更（审核 / 启用禁用，支持批量）
-type UpdateOpenAppsReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AppIds        []string               `protobuf:"bytes,1,rep,name=app_ids,json=appIds,proto3" json:"app_ids,omitempty"`                // array 应用 ID
-	Action        int32                  `protobuf:"varint,2,opt,name=action,proto3" json:"action,omitempty"`                             // int32 操作：1审核通过 2审核拒绝 3禁用 4启用
-	OperatorId    string                 `protobuf:"bytes,3,opt,name=operator_id,json=operatorId,proto3" json:"operator_id,omitempty"`    // string 操作人 ID
-	AuditRemark   string                 `protobuf:"bytes,4,opt,name=audit_remark,json=auditRemark,proto3" json:"audit_remark,omitempty"` // string 审核备注，可选
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateOpenAppsReq) Reset() {
-	*x = UpdateOpenAppsReq{}
-	mi := &file_open_rpc_proto_msgTypes[42]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateOpenAppsReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateOpenAppsReq) ProtoMessage() {}
-
-func (x *UpdateOpenAppsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[42]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateOpenAppsReq.ProtoReflect.Descriptor instead.
-func (*UpdateOpenAppsReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{42}
-}
-
-func (x *UpdateOpenAppsReq) GetAppIds() []string {
-	if x != nil {
-		return x.AppIds
-	}
-	return nil
-}
-
-func (x *UpdateOpenAppsReq) GetAction() int32 {
-	if x != nil {
-		return x.Action
-	}
-	return 0
-}
-
-func (x *UpdateOpenAppsReq) GetOperatorId() string {
+func (x *UpdateOpenOAuthReq) GetOperatorId() string {
 	if x != nil {
 		return x.OperatorId
 	}
 	return ""
 }
 
-func (x *UpdateOpenAppsReq) GetAuditRemark() string {
-	if x != nil {
-		return x.AuditRemark
-	}
-	return ""
-}
-
-type UpdateOpenAppsRes struct {
+type UpdateOpenOAuthRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AffectedCount int64                  `protobuf:"varint,1,opt,name=affected_count,json=affectedCount,proto3" json:"affected_count,omitempty"` // int64 影响条数
+	AffectedCount int64                  `protobuf:"varint,1,opt,name=affected_count,json=affectedCount,proto3" json:"affected_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateOpenAppsRes) Reset() {
-	*x = UpdateOpenAppsRes{}
-	mi := &file_open_rpc_proto_msgTypes[43]
+func (x *UpdateOpenOAuthRes) Reset() {
+	*x = UpdateOpenOAuthRes{}
+	mi := &file_open_rpc_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateOpenAppsRes) String() string {
+func (x *UpdateOpenOAuthRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateOpenAppsRes) ProtoMessage() {}
+func (*UpdateOpenOAuthRes) ProtoMessage() {}
 
-func (x *UpdateOpenAppsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[43]
+func (x *UpdateOpenOAuthRes) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2704,12 +1641,12 @@ func (x *UpdateOpenAppsRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateOpenAppsRes.ProtoReflect.Descriptor instead.
-func (*UpdateOpenAppsRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{43}
+// Deprecated: Use UpdateOpenOAuthRes.ProtoReflect.Descriptor instead.
+func (*UpdateOpenOAuthRes) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *UpdateOpenAppsRes) GetAffectedCount() int64 {
+func (x *UpdateOpenOAuthRes) GetAffectedCount() int64 {
 	if x != nil {
 		return x.AffectedCount
 	}
@@ -2720,9 +1657,9 @@ var File_open_rpc_proto protoreflect.FileDescriptor
 
 const file_open_rpc_proto_rawDesc = "" +
 	"\n" +
-	"\x0eopen_rpc.proto\x12\bopen_rpc\"=\n" +
-	"\x10ExchangeTokenReq\x12\x15\n" +
-	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x12\n" +
+	"\x0eopen_rpc.proto\x12\bopen_rpc\"A\n" +
+	"\x10ExchangeTokenReq\x12\x19\n" +
+	"\boauth_id\x18\x01 \x01(\tR\aoauthId\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\tR\x04code\"\xb1\x01\n" +
 	"\x10ExchangeTokenRes\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
@@ -2741,192 +1678,106 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x14\n" +
 	"\x05email\x18\x05 \x01(\tR\x05email\"5\n" +
 	"\x10ValidateTokenReq\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"X\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"\\\n" +
 	"\x10ValidateTokenRes\x12\x14\n" +
 	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x15\n" +
-	"\x06app_id\x18\x03 \x01(\tR\x05appId\"M\n" +
-	"\x0fRefreshTokenReq\x12\x15\n" +
-	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12#\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x19\n" +
+	"\boauth_id\x18\x03 \x01(\tR\aoauthId\"Q\n" +
+	"\x0fRefreshTokenReq\x12\x19\n" +
+	"\boauth_id\x18\x01 \x01(\tR\aoauthId\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"x\n" +
 	"\x0fRefreshTokenRes\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x03 \x01(\x03R\texpiresIn\"@\n" +
-	"\fCreateBotReq\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x15\n" +
-	"\x06bot_id\x18\x02 \x01(\tR\x05botId\"l\n" +
+	"expires_in\x18\x03 \x01(\x03R\texpiresIn\"`\n" +
+	"\fCreateBotReq\x12\x15\n" +
+	"\x06bot_id\x18\x01 \x01(\tR\x05botId\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\tR\aownerId\x12\x1e\n" +
+	"\n" +
+	"visibility\x18\x03 \x01(\tR\n" +
+	"visibility\"\x97\x01\n" +
 	"\fCreateBotRes\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x15\n" +
 	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x14\n" +
 	"\x05token\x18\x03 \x01(\tR\x05token\x12\x1f\n" +
 	"\vwebhook_url\x18\x04 \x01(\tR\n" +
-	"webhookUrl\"\x1e\n" +
-	"\fDeleteBotReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\"\x0e\n" +
-	"\fDeleteBotRes\"#\n" +
-	"\x11ResetBotSecretReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\">\n" +
+	"webhookUrl\x12)\n" +
+	"\x10signature_secret\x18\x05 \x01(\tR\x0fsignatureSecret\"%\n" +
+	"\fDeleteBotReq\x12\x15\n" +
+	"\x06bot_id\x18\x01 \x01(\tR\x05botId\"\x0e\n" +
+	"\fDeleteBotRes\"*\n" +
+	"\x11ResetBotSecretReq\x12\x15\n" +
+	"\x06bot_id\x18\x01 \x01(\tR\x05botId\">\n" +
 	"\x11ResetBotSecretRes\x12)\n" +
 	"\x10signature_secret\x18\x01 \x01(\tR\x0fsignatureSecret\"&\n" +
 	"\rGetBotInfoReq\x12\x15\n" +
-	"\x06bot_id\x18\x01 \x01(\tR\x05botId\"\x81\x02\n" +
+	"\x06bot_id\x18\x01 \x01(\tR\x05botId\"\xa9\x01\n" +
 	"\vBotSecurity\x12)\n" +
 	"\x10keywords_enabled\x18\x01 \x01(\bR\x0fkeywordsEnabled\x12\x1a\n" +
 	"\bkeywords\x18\x02 \x03(\tR\bkeywords\x120\n" +
 	"\x14ip_whitelist_enabled\x18\x03 \x01(\bR\x12ipWhitelistEnabled\x12!\n" +
-	"\fip_whitelist\x18\x04 \x03(\tR\vipWhitelist\x12+\n" +
-	"\x11signature_enabled\x18\x05 \x01(\bR\x10signatureEnabled\x12)\n" +
-	"\x10signature_secret\x18\x06 \x01(\tR\x0fsignatureSecret\"\x7f\n" +
+	"\fip_whitelist\x18\x04 \x03(\tR\vipWhitelist\"\xd1\x01\n" +
 	"\rGetBotInfoRes\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x15\n" +
-	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x14\n" +
-	"\x05token\x18\x03 \x01(\tR\x05token\x121\n" +
-	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"X\n" +
+	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x19\n" +
+	"\bowner_id\x18\x03 \x01(\tR\aownerId\x12\x1e\n" +
+	"\n" +
+	"visibility\x18\x04 \x01(\tR\n" +
+	"visibility\x12+\n" +
+	"\x11signature_enabled\x18\x05 \x01(\x05R\x10signatureEnabled\x121\n" +
+	"\bsecurity\x18\x06 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"\xa5\x01\n" +
 	"\fUpdateBotReq\x12\x15\n" +
-	"\x06bot_id\x18\x01 \x01(\tR\x05botId\x121\n" +
-	"\bsecurity\x18\x02 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"\x0e\n" +
-	"\fUpdateBotRes\"~\n" +
-	"\x11SaveWebhookLogReq\x12\x1b\n" +
-	"\tconfig_id\x18\x01 \x01(\tR\bconfigId\x12\x15\n" +
-	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12\x1d\n" +
+	"\x06bot_id\x18\x01 \x01(\tR\x05botId\x12\x1e\n" +
 	"\n" +
-	"event_type\x18\x03 \x01(\tR\teventType\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\x05R\x06status\"\x13\n" +
-	"\x11SaveWebhookLogRes\"?\n" +
+	"visibility\x18\x02 \x01(\tR\n" +
+	"visibility\x12+\n" +
+	"\x11signature_enabled\x18\x03 \x01(\x05R\x10signatureEnabled\x121\n" +
+	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"\x0e\n" +
+	"\fUpdateBotRes\"?\n" +
 	"\x15GetDigitalByUserIDReq\x12&\n" +
-	"\x0fdigital_user_id\x18\x01 \x01(\tR\rdigitalUserId\"l\n" +
+	"\x0fdigital_user_id\x18\x01 \x01(\tR\rdigitalUserId\"\x88\x01\n" +
 	"\x15GetDigitalByUserIDRes\x12\x14\n" +
-	"\x05found\x18\x01 \x01(\bR\x05found\x12\x15\n" +
-	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12&\n" +
-	"\x0fdigital_user_id\x18\x03 \x01(\tR\rdigitalUserId\"o\n" +
-	"\x18DispatchPlatformEventReq\x12\x15\n" +
-	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x1d\n" +
+	"\x05found\x18\x01 \x01(\bR\x05found\x12\x17\n" +
+	"\aapp_key\x18\x02 \x01(\tR\x06appKey\x12&\n" +
+	"\x0fdigital_user_id\x18\x03 \x01(\tR\rdigitalUserId\x12\x18\n" +
+	"\aruntime\x18\x04 \x01(\tR\aruntime\"4\n" +
+	"\x13GetDigitalConfigReq\x12\x1d\n" +
 	"\n" +
-	"event_type\x18\x02 \x01(\tR\teventType\x12\x1d\n" +
+	"digital_id\x18\x01 \x01(\tR\tdigitalId\"\xc7\x01\n" +
+	"\x13GetDigitalConfigRes\x12\x1d\n" +
 	"\n" +
-	"event_json\x18\x03 \x01(\tR\teventJson\":\n" +
-	"\x18DispatchPlatformEventRes\x12\x1e\n" +
-	"\n" +
-	"dispatched\x18\x01 \x01(\bR\n" +
-	"dispatched\"\xda\x02\n" +
-	"\rDeveloperItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
-	"\treal_name\x18\x03 \x01(\tR\brealName\x12!\n" +
-	"\fcompany_name\x18\x04 \x01(\tR\vcompanyName\x12\x14\n" +
-	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x14\n" +
-	"\x05email\x18\x06 \x01(\tR\x05email\x12 \n" +
-	"\vdescription\x18\a \x01(\tR\vdescription\x12\x16\n" +
-	"\x06status\x18\b \x01(\x05R\x06status\x12\x19\n" +
-	"\baudit_by\x18\t \x01(\tR\aauditBy\x12\x1d\n" +
-	"\n" +
-	"audit_time\x18\n" +
-	" \x01(\x03R\tauditTime\x12!\n" +
-	"\faudit_remark\x18\v \x01(\tR\vauditRemark\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\f \x01(\x03R\tcreatedAt\"\xba\x01\n" +
-	"\x11ApplyDeveloperReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
-	"\treal_name\x18\x02 \x01(\tR\brealName\x12!\n" +
-	"\fcompany_name\x18\x03 \x01(\tR\vcompanyName\x12\x14\n" +
-	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\"#\n" +
-	"\x11ApplyDeveloperRes\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\"2\n" +
-	"\x17GetDeveloperByUserIDReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"f\n" +
-	"\x17GetDeveloperByUserIDRes\x12\x14\n" +
-	"\x05found\x18\x01 \x01(\bR\x05found\x125\n" +
-	"\tdeveloper\x18\x02 \x01(\v2\x17.open_rpc.DeveloperItemR\tdeveloper\"!\n" +
-	"\x0fGetDeveloperReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\"H\n" +
-	"\x0fGetDeveloperRes\x125\n" +
-	"\tdeveloper\x18\x01 \x01(\v2\x17.open_rpc.DeveloperItemR\tdeveloper\"\\\n" +
-	"\x11ListDevelopersReq\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\x05R\x06status\"V\n" +
-	"\x11ListDevelopersRes\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x03R\x05total\x12+\n" +
-	"\x04list\x18\x02 \x03(\v2\x17.open_rpc.DeveloperItemR\x04list\"y\n" +
-	"\x11AuditDeveloperReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x19\n" +
-	"\baudit_by\x18\x03 \x01(\tR\aauditBy\x12!\n" +
-	"\faudit_remark\x18\x04 \x01(\tR\vauditRemark\"\x13\n" +
-	"\x11AuditDeveloperRes\"\xd2\x03\n" +
-	"\vOpenAppItem\x12\x15\n" +
-	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x12\n" +
+	"digital_id\x18\x01 \x01(\tR\tdigitalId\x12\x18\n" +
+	"\aruntime\x18\x02 \x01(\tR\aruntime\x12%\n" +
+	"\x0ebuiltin_config\x18\x03 \x01(\tR\rbuiltinConfig\x12'\n" +
+	"\x0fexternal_config\x18\x04 \x01(\tR\x0eexternalConfig\x12'\n" +
+	"\x0fworkflow_config\x18\x05 \x01(\tR\x0eworkflowConfig\"\xcf\x01\n" +
+	"\rOpenOAuthItem\x12\x19\n" +
+	"\boauth_id\x18\x01 \x01(\tR\aoauthId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\"\n" +
-	"\rowner_user_id\x18\x05 \x01(\tR\vownerUserId\x12\x19\n" +
-	"\bapp_type\x18\x06 \x01(\x05R\aappType\x12\x1a\n" +
-	"\bcategory\x18\a \x01(\tR\bcategory\x12\x16\n" +
-	"\x06status\x18\b \x01(\x05R\x06status\x12!\n" +
-	"\faudit_status\x18\t \x01(\x05R\vauditStatus\x12\x1d\n" +
+	"\rowner_user_id\x18\x05 \x01(\tR\vownerUserId\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x1d\n" +
 	"\n" +
-	"audited_by\x18\n" +
-	" \x01(\tR\tauditedBy\x12\x1d\n" +
-	"\n" +
-	"audited_at\x18\v \x01(\x03R\tauditedAt\x12%\n" +
-	"\x0eenable_digital\x18\f \x01(\x05R\renableDigital\x12!\n" +
-	"\fenable_oauth\x18\r \x01(\x05R\venableOauth\x12%\n" +
-	"\x0eenable_webhook\x18\x0e \x01(\x05R\renableWebhook\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x0f \x01(\x03R\tcreatedAt\"\xfb\x01\n" +
-	"\x0fListOpenAppsReq\x12\x12\n" +
+	"created_at\x18\a \x01(\x03R\tcreatedAt\"\xb4\x01\n" +
+	"\x10ListOpenOAuthReq\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x18\n" +
 	"\akeyword\x18\x03 \x01(\tR\akeyword\x12\"\n" +
 	"\rowner_user_id\x18\x04 \x01(\tR\vownerUserId\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\x05R\x06status\x12!\n" +
-	"\faudit_status\x18\x06 \x01(\x05R\vauditStatus\x12\x15\n" +
-	"\x06app_id\x18\a \x01(\tR\x05appId\x12'\n" +
-	"\x0fcapability_type\x18\b \x01(\x05R\x0ecapabilityType\"R\n" +
-	"\x0fListOpenAppsRes\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x03R\x05total\x12)\n" +
-	"\x04list\x18\x02 \x03(\v2\x15.open_rpc.OpenAppItemR\x04list\"\x93\x01\n" +
-	"\x12ListWebhookLogsReq\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x15\n" +
-	"\x06app_id\x18\x03 \x01(\tR\x05appId\x12\x1d\n" +
-	"\n" +
-	"event_type\x18\x04 \x01(\tR\teventType\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\x05R\x06status\"\xcd\x02\n" +
-	"\x0eWebhookLogItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x15\n" +
-	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12\x19\n" +
-	"\bevent_id\x18\x03 \x01(\tR\aeventId\x12\x1d\n" +
-	"\n" +
-	"event_type\x18\x04 \x01(\tR\teventType\x12\x1d\n" +
-	"\n" +
-	"target_url\x18\x05 \x01(\tR\ttargetUrl\x12\x1f\n" +
-	"\vhttp_status\x18\x06 \x01(\x05R\n" +
-	"httpStatus\x12\x1d\n" +
-	"\n" +
-	"latency_ms\x18\a \x01(\x03R\tlatencyMs\x12\x1f\n" +
-	"\vretry_count\x18\b \x01(\x05R\n" +
-	"retryCount\x12\x16\n" +
-	"\x06status\x18\t \x01(\x05R\x06status\x12#\n" +
-	"\rerror_message\x18\n" +
-	" \x01(\tR\ferrorMessage\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\v \x01(\x03R\tcreatedAt\"X\n" +
-	"\x12ListWebhookLogsRes\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x03R\x05total\x12,\n" +
-	"\x04list\x18\x02 \x03(\v2\x18.open_rpc.WebhookLogItemR\x04list\"\x88\x01\n" +
-	"\x11UpdateOpenAppsReq\x12\x17\n" +
-	"\aapp_ids\x18\x01 \x03(\tR\x06appIds\x12\x16\n" +
-	"\x06action\x18\x02 \x01(\x05R\x06action\x12\x1f\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x19\n" +
+	"\boauth_id\x18\x06 \x01(\tR\aoauthId\"U\n" +
+	"\x10ListOpenOAuthRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12+\n" +
+	"\x04list\x18\x02 \x03(\v2\x17.open_rpc.OpenOAuthItemR\x04list\"j\n" +
+	"\x12UpdateOpenOAuthReq\x12\x1b\n" +
+	"\toauth_ids\x18\x01 \x03(\tR\boauthIds\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x1f\n" +
 	"\voperator_id\x18\x03 \x01(\tR\n" +
-	"operatorId\x12!\n" +
-	"\faudit_remark\x18\x04 \x01(\tR\vauditRemark\":\n" +
-	"\x11UpdateOpenAppsRes\x12%\n" +
-	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount2\xd2\v\n" +
+	"operatorId\";\n" +
+	"\x12UpdateOpenOAuthRes\x12%\n" +
+	"\x0eaffected_count\x18\x01 \x01(\x03R\raffectedCount2\xa6\a\n" +
 	"\x04open\x12G\n" +
 	"\rExchangeToken\x12\x1a.open_rpc.ExchangeTokenReq\x1a\x1a.open_rpc.ExchangeTokenRes\x12A\n" +
 	"\vGetUserInfo\x12\x18.open_rpc.GetUserInfoReq\x1a\x18.open_rpc.GetUserInfoRes\x12G\n" +
@@ -2937,18 +1788,11 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\x0eResetBotSecret\x12\x1b.open_rpc.ResetBotSecretReq\x1a\x1b.open_rpc.ResetBotSecretRes\x12>\n" +
 	"\n" +
 	"GetBotInfo\x12\x17.open_rpc.GetBotInfoReq\x1a\x17.open_rpc.GetBotInfoRes\x12;\n" +
-	"\tUpdateBot\x12\x16.open_rpc.UpdateBotReq\x1a\x16.open_rpc.UpdateBotRes\x12J\n" +
-	"\x0eSaveWebhookLog\x12\x1b.open_rpc.SaveWebhookLogReq\x1a\x1b.open_rpc.SaveWebhookLogRes\x12V\n" +
-	"\x12GetDigitalByUserID\x12\x1f.open_rpc.GetDigitalByUserIDReq\x1a\x1f.open_rpc.GetDigitalByUserIDRes\x12_\n" +
-	"\x15DispatchPlatformEvent\x12\".open_rpc.DispatchPlatformEventReq\x1a\".open_rpc.DispatchPlatformEventRes\x12J\n" +
-	"\x0eApplyDeveloper\x12\x1b.open_rpc.ApplyDeveloperReq\x1a\x1b.open_rpc.ApplyDeveloperRes\x12\\\n" +
-	"\x14GetDeveloperByUserID\x12!.open_rpc.GetDeveloperByUserIDReq\x1a!.open_rpc.GetDeveloperByUserIDRes\x12D\n" +
-	"\fGetDeveloper\x12\x19.open_rpc.GetDeveloperReq\x1a\x19.open_rpc.GetDeveloperRes\x12J\n" +
-	"\x0eListDevelopers\x12\x1b.open_rpc.ListDevelopersReq\x1a\x1b.open_rpc.ListDevelopersRes\x12J\n" +
-	"\x0eAuditDeveloper\x12\x1b.open_rpc.AuditDeveloperReq\x1a\x1b.open_rpc.AuditDeveloperRes\x12D\n" +
-	"\fListOpenApps\x12\x19.open_rpc.ListOpenAppsReq\x1a\x19.open_rpc.ListOpenAppsRes\x12J\n" +
-	"\x0eUpdateOpenApps\x12\x1b.open_rpc.UpdateOpenAppsReq\x1a\x1b.open_rpc.UpdateOpenAppsRes\x12M\n" +
-	"\x0fListWebhookLogs\x12\x1c.open_rpc.ListWebhookLogsReq\x1a\x1c.open_rpc.ListWebhookLogsResB\fZ\n" +
+	"\tUpdateBot\x12\x16.open_rpc.UpdateBotReq\x1a\x16.open_rpc.UpdateBotRes\x12V\n" +
+	"\x12GetDigitalByUserID\x12\x1f.open_rpc.GetDigitalByUserIDReq\x1a\x1f.open_rpc.GetDigitalByUserIDRes\x12P\n" +
+	"\x10GetDigitalConfig\x12\x1d.open_rpc.GetDigitalConfigReq\x1a\x1d.open_rpc.GetDigitalConfigRes\x12G\n" +
+	"\rListOpenOAuth\x12\x1a.open_rpc.ListOpenOAuthReq\x1a\x1a.open_rpc.ListOpenOAuthRes\x12M\n" +
+	"\x0fUpdateOpenOAuth\x12\x1c.open_rpc.UpdateOpenOAuthReq\x1a\x1c.open_rpc.UpdateOpenOAuthResB\fZ\n" +
 	"./open_rpcb\x06proto3"
 
 var (
@@ -2963,106 +1807,72 @@ func file_open_rpc_proto_rawDescGZIP() []byte {
 	return file_open_rpc_proto_rawDescData
 }
 
-var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 44)
+var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_open_rpc_proto_goTypes = []any{
-	(*ExchangeTokenReq)(nil),         // 0: open_rpc.ExchangeTokenReq
-	(*ExchangeTokenRes)(nil),         // 1: open_rpc.ExchangeTokenRes
-	(*GetUserInfoReq)(nil),           // 2: open_rpc.GetUserInfoReq
-	(*GetUserInfoRes)(nil),           // 3: open_rpc.GetUserInfoRes
-	(*ValidateTokenReq)(nil),         // 4: open_rpc.ValidateTokenReq
-	(*ValidateTokenRes)(nil),         // 5: open_rpc.ValidateTokenRes
-	(*RefreshTokenReq)(nil),          // 6: open_rpc.RefreshTokenReq
-	(*RefreshTokenRes)(nil),          // 7: open_rpc.RefreshTokenRes
-	(*CreateBotReq)(nil),             // 8: open_rpc.CreateBotReq
-	(*CreateBotRes)(nil),             // 9: open_rpc.CreateBotRes
-	(*DeleteBotReq)(nil),             // 10: open_rpc.DeleteBotReq
-	(*DeleteBotRes)(nil),             // 11: open_rpc.DeleteBotRes
-	(*ResetBotSecretReq)(nil),        // 12: open_rpc.ResetBotSecretReq
-	(*ResetBotSecretRes)(nil),        // 13: open_rpc.ResetBotSecretRes
-	(*GetBotInfoReq)(nil),            // 14: open_rpc.GetBotInfoReq
-	(*BotSecurity)(nil),              // 15: open_rpc.BotSecurity
-	(*GetBotInfoRes)(nil),            // 16: open_rpc.GetBotInfoRes
-	(*UpdateBotReq)(nil),             // 17: open_rpc.UpdateBotReq
-	(*UpdateBotRes)(nil),             // 18: open_rpc.UpdateBotRes
-	(*SaveWebhookLogReq)(nil),        // 19: open_rpc.SaveWebhookLogReq
-	(*SaveWebhookLogRes)(nil),        // 20: open_rpc.SaveWebhookLogRes
-	(*GetDigitalByUserIDReq)(nil),    // 21: open_rpc.GetDigitalByUserIDReq
-	(*GetDigitalByUserIDRes)(nil),    // 22: open_rpc.GetDigitalByUserIDRes
-	(*DispatchPlatformEventReq)(nil), // 23: open_rpc.DispatchPlatformEventReq
-	(*DispatchPlatformEventRes)(nil), // 24: open_rpc.DispatchPlatformEventRes
-	(*DeveloperItem)(nil),            // 25: open_rpc.DeveloperItem
-	(*ApplyDeveloperReq)(nil),        // 26: open_rpc.ApplyDeveloperReq
-	(*ApplyDeveloperRes)(nil),        // 27: open_rpc.ApplyDeveloperRes
-	(*GetDeveloperByUserIDReq)(nil),  // 28: open_rpc.GetDeveloperByUserIDReq
-	(*GetDeveloperByUserIDRes)(nil),  // 29: open_rpc.GetDeveloperByUserIDRes
-	(*GetDeveloperReq)(nil),          // 30: open_rpc.GetDeveloperReq
-	(*GetDeveloperRes)(nil),          // 31: open_rpc.GetDeveloperRes
-	(*ListDevelopersReq)(nil),        // 32: open_rpc.ListDevelopersReq
-	(*ListDevelopersRes)(nil),        // 33: open_rpc.ListDevelopersRes
-	(*AuditDeveloperReq)(nil),        // 34: open_rpc.AuditDeveloperReq
-	(*AuditDeveloperRes)(nil),        // 35: open_rpc.AuditDeveloperRes
-	(*OpenAppItem)(nil),              // 36: open_rpc.OpenAppItem
-	(*ListOpenAppsReq)(nil),          // 37: open_rpc.ListOpenAppsReq
-	(*ListOpenAppsRes)(nil),          // 38: open_rpc.ListOpenAppsRes
-	(*ListWebhookLogsReq)(nil),       // 39: open_rpc.ListWebhookLogsReq
-	(*WebhookLogItem)(nil),           // 40: open_rpc.WebhookLogItem
-	(*ListWebhookLogsRes)(nil),       // 41: open_rpc.ListWebhookLogsRes
-	(*UpdateOpenAppsReq)(nil),        // 42: open_rpc.UpdateOpenAppsReq
-	(*UpdateOpenAppsRes)(nil),        // 43: open_rpc.UpdateOpenAppsRes
+	(*ExchangeTokenReq)(nil),      // 0: open_rpc.ExchangeTokenReq
+	(*ExchangeTokenRes)(nil),      // 1: open_rpc.ExchangeTokenRes
+	(*GetUserInfoReq)(nil),        // 2: open_rpc.GetUserInfoReq
+	(*GetUserInfoRes)(nil),        // 3: open_rpc.GetUserInfoRes
+	(*ValidateTokenReq)(nil),      // 4: open_rpc.ValidateTokenReq
+	(*ValidateTokenRes)(nil),      // 5: open_rpc.ValidateTokenRes
+	(*RefreshTokenReq)(nil),       // 6: open_rpc.RefreshTokenReq
+	(*RefreshTokenRes)(nil),       // 7: open_rpc.RefreshTokenRes
+	(*CreateBotReq)(nil),          // 8: open_rpc.CreateBotReq
+	(*CreateBotRes)(nil),          // 9: open_rpc.CreateBotRes
+	(*DeleteBotReq)(nil),          // 10: open_rpc.DeleteBotReq
+	(*DeleteBotRes)(nil),          // 11: open_rpc.DeleteBotRes
+	(*ResetBotSecretReq)(nil),     // 12: open_rpc.ResetBotSecretReq
+	(*ResetBotSecretRes)(nil),     // 13: open_rpc.ResetBotSecretRes
+	(*GetBotInfoReq)(nil),         // 14: open_rpc.GetBotInfoReq
+	(*BotSecurity)(nil),           // 15: open_rpc.BotSecurity
+	(*GetBotInfoRes)(nil),         // 16: open_rpc.GetBotInfoRes
+	(*UpdateBotReq)(nil),          // 17: open_rpc.UpdateBotReq
+	(*UpdateBotRes)(nil),          // 18: open_rpc.UpdateBotRes
+	(*GetDigitalByUserIDReq)(nil), // 19: open_rpc.GetDigitalByUserIDReq
+	(*GetDigitalByUserIDRes)(nil), // 20: open_rpc.GetDigitalByUserIDRes
+	(*GetDigitalConfigReq)(nil),   // 21: open_rpc.GetDigitalConfigReq
+	(*GetDigitalConfigRes)(nil),   // 22: open_rpc.GetDigitalConfigRes
+	(*OpenOAuthItem)(nil),         // 23: open_rpc.OpenOAuthItem
+	(*ListOpenOAuthReq)(nil),      // 24: open_rpc.ListOpenOAuthReq
+	(*ListOpenOAuthRes)(nil),      // 25: open_rpc.ListOpenOAuthRes
+	(*UpdateOpenOAuthReq)(nil),    // 26: open_rpc.UpdateOpenOAuthReq
+	(*UpdateOpenOAuthRes)(nil),    // 27: open_rpc.UpdateOpenOAuthRes
 }
 var file_open_rpc_proto_depIdxs = []int32{
 	15, // 0: open_rpc.GetBotInfoRes.security:type_name -> open_rpc.BotSecurity
 	15, // 1: open_rpc.UpdateBotReq.security:type_name -> open_rpc.BotSecurity
-	25, // 2: open_rpc.GetDeveloperByUserIDRes.developer:type_name -> open_rpc.DeveloperItem
-	25, // 3: open_rpc.GetDeveloperRes.developer:type_name -> open_rpc.DeveloperItem
-	25, // 4: open_rpc.ListDevelopersRes.list:type_name -> open_rpc.DeveloperItem
-	36, // 5: open_rpc.ListOpenAppsRes.list:type_name -> open_rpc.OpenAppItem
-	40, // 6: open_rpc.ListWebhookLogsRes.list:type_name -> open_rpc.WebhookLogItem
-	0,  // 7: open_rpc.open.ExchangeToken:input_type -> open_rpc.ExchangeTokenReq
-	2,  // 8: open_rpc.open.GetUserInfo:input_type -> open_rpc.GetUserInfoReq
-	4,  // 9: open_rpc.open.ValidateToken:input_type -> open_rpc.ValidateTokenReq
-	6,  // 10: open_rpc.open.RefreshToken:input_type -> open_rpc.RefreshTokenReq
-	8,  // 11: open_rpc.open.CreateBot:input_type -> open_rpc.CreateBotReq
-	10, // 12: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
-	12, // 13: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
-	14, // 14: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
-	17, // 15: open_rpc.open.UpdateBot:input_type -> open_rpc.UpdateBotReq
-	19, // 16: open_rpc.open.SaveWebhookLog:input_type -> open_rpc.SaveWebhookLogReq
-	21, // 17: open_rpc.open.GetDigitalByUserID:input_type -> open_rpc.GetDigitalByUserIDReq
-	23, // 18: open_rpc.open.DispatchPlatformEvent:input_type -> open_rpc.DispatchPlatformEventReq
-	26, // 19: open_rpc.open.ApplyDeveloper:input_type -> open_rpc.ApplyDeveloperReq
-	28, // 20: open_rpc.open.GetDeveloperByUserID:input_type -> open_rpc.GetDeveloperByUserIDReq
-	30, // 21: open_rpc.open.GetDeveloper:input_type -> open_rpc.GetDeveloperReq
-	32, // 22: open_rpc.open.ListDevelopers:input_type -> open_rpc.ListDevelopersReq
-	34, // 23: open_rpc.open.AuditDeveloper:input_type -> open_rpc.AuditDeveloperReq
-	37, // 24: open_rpc.open.ListOpenApps:input_type -> open_rpc.ListOpenAppsReq
-	42, // 25: open_rpc.open.UpdateOpenApps:input_type -> open_rpc.UpdateOpenAppsReq
-	39, // 26: open_rpc.open.ListWebhookLogs:input_type -> open_rpc.ListWebhookLogsReq
-	1,  // 27: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
-	3,  // 28: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
-	5,  // 29: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
-	7,  // 30: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
-	9,  // 31: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
-	11, // 32: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
-	13, // 33: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
-	16, // 34: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
-	18, // 35: open_rpc.open.UpdateBot:output_type -> open_rpc.UpdateBotRes
-	20, // 36: open_rpc.open.SaveWebhookLog:output_type -> open_rpc.SaveWebhookLogRes
-	22, // 37: open_rpc.open.GetDigitalByUserID:output_type -> open_rpc.GetDigitalByUserIDRes
-	24, // 38: open_rpc.open.DispatchPlatformEvent:output_type -> open_rpc.DispatchPlatformEventRes
-	27, // 39: open_rpc.open.ApplyDeveloper:output_type -> open_rpc.ApplyDeveloperRes
-	29, // 40: open_rpc.open.GetDeveloperByUserID:output_type -> open_rpc.GetDeveloperByUserIDRes
-	31, // 41: open_rpc.open.GetDeveloper:output_type -> open_rpc.GetDeveloperRes
-	33, // 42: open_rpc.open.ListDevelopers:output_type -> open_rpc.ListDevelopersRes
-	35, // 43: open_rpc.open.AuditDeveloper:output_type -> open_rpc.AuditDeveloperRes
-	38, // 44: open_rpc.open.ListOpenApps:output_type -> open_rpc.ListOpenAppsRes
-	43, // 45: open_rpc.open.UpdateOpenApps:output_type -> open_rpc.UpdateOpenAppsRes
-	41, // 46: open_rpc.open.ListWebhookLogs:output_type -> open_rpc.ListWebhookLogsRes
-	27, // [27:47] is the sub-list for method output_type
-	7,  // [7:27] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	23, // 2: open_rpc.ListOpenOAuthRes.list:type_name -> open_rpc.OpenOAuthItem
+	0,  // 3: open_rpc.open.ExchangeToken:input_type -> open_rpc.ExchangeTokenReq
+	2,  // 4: open_rpc.open.GetUserInfo:input_type -> open_rpc.GetUserInfoReq
+	4,  // 5: open_rpc.open.ValidateToken:input_type -> open_rpc.ValidateTokenReq
+	6,  // 6: open_rpc.open.RefreshToken:input_type -> open_rpc.RefreshTokenReq
+	8,  // 7: open_rpc.open.CreateBot:input_type -> open_rpc.CreateBotReq
+	10, // 8: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
+	12, // 9: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
+	14, // 10: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
+	17, // 11: open_rpc.open.UpdateBot:input_type -> open_rpc.UpdateBotReq
+	19, // 12: open_rpc.open.GetDigitalByUserID:input_type -> open_rpc.GetDigitalByUserIDReq
+	21, // 13: open_rpc.open.GetDigitalConfig:input_type -> open_rpc.GetDigitalConfigReq
+	24, // 14: open_rpc.open.ListOpenOAuth:input_type -> open_rpc.ListOpenOAuthReq
+	26, // 15: open_rpc.open.UpdateOpenOAuth:input_type -> open_rpc.UpdateOpenOAuthReq
+	1,  // 16: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
+	3,  // 17: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
+	5,  // 18: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
+	7,  // 19: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
+	9,  // 20: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
+	11, // 21: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
+	13, // 22: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
+	16, // 23: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
+	18, // 24: open_rpc.open.UpdateBot:output_type -> open_rpc.UpdateBotRes
+	20, // 25: open_rpc.open.GetDigitalByUserID:output_type -> open_rpc.GetDigitalByUserIDRes
+	22, // 26: open_rpc.open.GetDigitalConfig:output_type -> open_rpc.GetDigitalConfigRes
+	25, // 27: open_rpc.open.ListOpenOAuth:output_type -> open_rpc.ListOpenOAuthRes
+	27, // 28: open_rpc.open.UpdateOpenOAuth:output_type -> open_rpc.UpdateOpenOAuthRes
+	16, // [16:29] is the sub-list for method output_type
+	3,  // [3:16] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_open_rpc_proto_init() }
@@ -3076,7 +1886,7 @@ func file_open_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_open_rpc_proto_rawDesc), len(file_open_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   44,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

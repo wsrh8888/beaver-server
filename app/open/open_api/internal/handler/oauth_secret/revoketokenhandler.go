@@ -40,7 +40,7 @@ func RevokeTokenHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewRevokeTokenLogic(r.Context(), svcCtx)
-		resp, err := l.RevokeToken(&req, r.Header.Get("App-Id"), r.Header.Get("App-Secret"))
+		resp, err := l.RevokeToken(&req, r.Header.Get("OAuth-Id"), r.Header.Get("OAuth-Secret"))
 		response.Response(r, w, resp, err)
 	}
 }

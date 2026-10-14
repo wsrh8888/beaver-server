@@ -54,20 +54,17 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	if req.AppID == "" {
+	if req.OAuthID == "" {
 		return nil, errors.New("appId 不能为空")
 	}
 
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND status = ?", req.AppID, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND status = ?", req.OAuthID, 1).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或未启用")
 	}
 
-	var oauthConfig open_models.OpenOAuthConfig
-	scope := ""
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&oauthConfig).Error; err == nil && oauthConfig.SupportedScopes != "" {
-		scope = oauthConfig.SupportedScopes
-	} else {
+	scope := app.SupportedScopes
+	if scope == "" {
 		scopes := []string{
 			string(constants.ScopeUserProfileRead),
 			string(constants.ScopeUserAvatarRead),
@@ -80,7 +77,7 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 	authCode := util.NewV4().String()
 	record := open_models.OpenOAuthCode{
 		Code:      authCode,
-		AppID:     req.AppID,
+		OAuthID:     req.OAuthID,
 		UserID:    req.UserID,
 		Scope:     scope,
 		ExpiresAt: time.Now().Add(ttl),
@@ -89,7 +86,7 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 	if err := l.svcCtx.DB.Create(&record).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "生成H5授权码失败",
-			Data: map[string]any{"appId": req.AppID, "userId": req.UserID, "err": err.Error()},
+			Data: map[string]any{"appId": req.OAuthID, "userId": req.UserID, "err": err.Error()},
 		})
 		return nil, errors.New("生成授权码失败")
 	}
@@ -97,7 +94,7 @@ func (l *GetH5AuthCodeLogic) GetH5AuthCode(req *types.GetH5AuthCodeReq) (resp *t
 	l.logger.Info(model.LogMsg{
 		Text: "H5授权码生成成功",
 		Data: map[string]any{
-			"appId":  req.AppID,
+			"appId":  req.OAuthID,
 			"userId": req.UserID,
 		},
 	})

@@ -4,18 +4,6 @@
  * Project: beaver-server
  * https://github.com/wsrh8888/beaver-server
  *
- * 中文：
- * 本文件为海狸 IM（Beaver IM）开源项目源代码。
- * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
- * 禁止删除、篡改或替换本文件头部版权与许可声明。
- * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
- *
- * English:
- * This file is part of the Beaver IM open-source project.
- * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
- * Do not remove, alter, or replace this copyright and license header.
- * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
- *
  * beaver-server-header-v1
  */
 
@@ -49,7 +37,7 @@ func ValidateAppAccessToken(db *gorm.DB, authorization string) (*open_models.Ope
 	}
 
 	var record open_models.OpenOAuthToken
-	if err := db.Where("token = ?", token).First(&record).Error; err != nil {
+	if err := db.Where("access_token_hash = ? AND revoked_at IS NULL", token).First(&record).Error; err != nil {
 		return nil, errors.New("访问令牌无效")
 	}
 	if time.Now().After(record.ExpiresAt) {
@@ -58,19 +46,37 @@ func ValidateAppAccessToken(db *gorm.DB, authorization string) (*open_models.Ope
 	return &record, nil
 }
 
-// RequireAppEnabled 校验应用是否处于可用状态。
-// 「应用具备哪些能力」由各能力表（OpenOAuthConfig / OpenDigitalPartner / OpenBotModel）是否存在记录决定，
-// 应用主表不再持有能力开关。
-func RequireAppEnabled(app *open_models.OpenApp) error {
+// ValidateDigitalAccessToken 校验外接数字伙伴短时 access_token。
+func ValidateDigitalAccessToken(db *gorm.DB, authorization string) (*open_models.OpenDigitalToken, error) {
+	token := parseBearerToken(authorization)
+	if token == "" {
+		return nil, errors.New("缺少访问令牌")
+	}
+
+	var record open_models.OpenDigitalToken
+	if err := db.Where("access_token_hash = ? AND revoked_at IS NULL", token).First(&record).Error; err != nil {
+		return nil, errors.New("访问令牌无效")
+	}
+	if time.Now().After(record.ExpiresAt) {
+		return nil, errors.New("访问令牌已过期")
+	}
+	return &record, nil
+}
+
+// RequireOAuthEnabled 校验 OAuth 应用是否处于可用状态。
+func RequireOAuthEnabled(app *open_models.OpenOAuth) error {
+	if app == nil {
+		return errors.New("应用不存在")
+	}
 	if app.Status != 1 {
 		return errors.New("应用已禁用")
 	}
 	return nil
 }
 
-func LoadAppByID(db *gorm.DB, appID string) (*open_models.OpenApp, error) {
-	var app open_models.OpenApp
-	if err := db.Where("app_id = ?", appID).First(&app).Error; err != nil {
+func LoadOAuthByID(db *gorm.DB, oauthID string) (*open_models.OpenOAuth, error) {
+	var app open_models.OpenOAuth
+	if err := db.Where("oauth_id = ?", oauthID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在")
 	}
 	return &app, nil

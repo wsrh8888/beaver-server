@@ -19,7 +19,7 @@
  * beaver-server-header-v1
  */
 
-package handler
+package bot_public
 
 import (
 	logic "beaver/app/open/open_api/internal/logic/bot_public"

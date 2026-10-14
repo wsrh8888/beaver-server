@@ -51,11 +51,11 @@ func NewGetUserInfoByQuickLoginLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *GetUserInfoByQuickLoginLogic) GetUserInfoByQuickLogin(req *types.GetUserInfoByQuickLoginReq) (resp *types.GetUserInfoByQuickLoginRes, err error) {
-	if _, err := verifyApp(l.svcCtx.DB, req.AppID, req.AppSecret); err != nil {
+	if _, err := verifyApp(l.svcCtx.DB, req.OAuthID, req.OAuthSecret); err != nil {
 		return nil, err
 	}
 
-	oauthCode, err := findOAuthCode(l.svcCtx.DB, req.AppID, req.AuthCode)
+	oauthCode, err := findOAuthCode(l.svcCtx.DB, req.OAuthID, req.AuthCode)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (l *GetUserInfoByQuickLoginLogic) GetUserInfoByQuickLogin(req *types.GetUse
 		return nil, errors.New("授权码场景无效")
 	}
 
-	if err := l.svcCtx.DB.Model(oauthCode).Update("used", true).Error; err != nil {
+	if err := l.svcCtx.DB.Model(oauthCode).Update("used_at", time.Now()).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "标记 authCode 已使用失败", Data: map[string]interface{}{"err": err.Error()}})
 		return nil, errors.New("服务内部异常")
 	}
@@ -88,23 +88,23 @@ func (l *GetUserInfoByQuickLoginLogic) GetUserInfoByQuickLogin(req *types.GetUse
 	}, nil
 }
 
-func verifyApp(db *gorm.DB, appID, appSecret string) (*open_models.OpenApp, error) {
-	if appID == "" || appSecret == "" {
+func verifyApp(db *gorm.DB, oauthID, oauthSecret string) (*open_models.OpenOAuth, error) {
+	if oauthID == "" || oauthSecret == "" {
 		return nil, errors.New("应用凭证不完整")
 	}
-	var app open_models.OpenApp
-	if err := db.Where("app_id = ? AND app_secret = ? AND status = ?", appID, appSecret, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := db.Where("oauth_id = ? AND oauth_secret_hash = ? AND status = ?", oauthID, oauthSecret, 1).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或凭证错误")
 	}
 	return &app, nil
 }
 
-func findOAuthCode(db *gorm.DB, appID, code string) (*open_models.OpenOAuthCode, error) {
+func findOAuthCode(db *gorm.DB, oauthID, code string) (*open_models.OpenOAuthCode, error) {
 	var record open_models.OpenOAuthCode
-	if err := db.Where("code = ? AND app_id = ?", code, appID).First(&record).Error; err != nil {
+	if err := db.Where("code_hash = ? AND oauth_id = ?", code, oauthID).First(&record).Error; err != nil {
 		return nil, errors.New("授权码无效")
 	}
-	if record.Used {
+	if record.UsedAt != nil {
 		return nil, errors.New("授权码已使用")
 	}
 	if time.Now().After(record.ExpiresAt) {

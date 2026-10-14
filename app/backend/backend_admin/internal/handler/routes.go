@@ -624,11 +624,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  http.MethodPost,
-				Path:    "/admin/open/v1/app/audit",
-				Handler: open.AuditOpenAppHandler(serverCtx),
-			},
-			{
 				Method:  http.MethodGet,
 				Path:    "/admin/open/v1/app/list",
 				Handler: open.GetOpenAppListHandler(serverCtx),
@@ -637,26 +632,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/admin/open/v1/app/update_status",
 				Handler: open.UpdateOpenAppStatusHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/admin/open/v1/developer/apply",
-				Handler: open.ApplyDeveloperHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/admin/open/v1/developer/audit",
-				Handler: open.AuditDeveloperHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/admin/open/v1/developer/list",
-				Handler: open.GetDeveloperListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/admin/open/v1/webhook/list_logs",
-				Handler: open.GetOpenWebhookLogListHandler(serverCtx),
 			},
 		},
 	)

@@ -1,33 +1,126 @@
 syntax = "v1"
 
-// ==================== 外接数字伙伴 Digital ====================
+// ==================== 数字伙伴（一级实体）====================
 
 type (
-	GetDigitalConfigReq {
-		AppID  string `form:"appId"`
-		UserID string `header:"Beaver-User-Id"`
-	}
-	DigitalConfigInfo {
-		AppID       string `json:"appId"`
-		DigitalID   string `json:"digitalId"` // PartnerID = IM 用户 ID
-		DigitalName string `json:"digitalName"`
+	CreateDigitalReq {
+		Name        string `json:"name" validate:"required,min=2,max=50"`
+		Description string `json:"description,optional" validate:"max=512"`
 		Avatar      string `json:"avatar,optional"`
-		Status      int    `json:"status"` // 1启用 2停用
+		Runtime     string `json:"runtime" validate:"required,oneof=builtin external workflow"`
+		Visibility  string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
+		UserID      string `header:"Beaver-User-Id"`
 	}
-	GetDigitalConfigRes {
-		Config DigitalConfigInfo `json:"config"`
+	CreateDigitalRes {
+		DigitalID string `json:"digitalId"`
+		AppKey    string `json:"appKey,optional"`
+		AppSecret string `json:"appSecret,optional"` // 仅 external 创建时返回一次
 	}
 )
 
 type (
-	UpdateDigitalConfigReq {
-		AppID       string `json:"appId"`
-		DigitalName string `json:"digitalName,optional"`
+	DigitalInfo {
+		DigitalID   string   `json:"digitalId"`
+		Name        string   `json:"name"`
+		Avatar      string   `json:"avatar,optional"`
+		Description string   `json:"description"`
+		Runtime     string   `json:"runtime"`
+		Visibility  string   `json:"visibility"`
+		AppKey      string   `json:"appKey,optional"`
+		AppSecret   string   `json:"appSecret,optional"` // 掩码；external 才有
+		AdminIDs    []string `json:"adminIds,optional"`
+		ViewerIDs   []string `json:"viewerIds,optional"`
+		CreatedAt   int64    `json:"createdAt"`
+	}
+)
+
+type (
+	ListDigitalReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=10"`
+		UserID   string `header:"Beaver-User-Id"`
+	}
+	ListDigitalRes {
+		Total int64         `json:"total"`
+		List  []DigitalInfo `json:"list"`
+	}
+)
+
+type (
+	GetDigitalDetailReq {
+		DigitalID string `form:"digitalId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	GetDigitalDetailRes {
+		Digital DigitalInfo `json:"digital"`
+	}
+)
+
+type (
+	UpdateDigitalReq {
+		DigitalID   string `json:"digitalId"`
+		Name        string `json:"name,optional"`
 		Avatar      string `json:"avatar,optional"`
-		Status      *int   `json:"status,optional"` // 1启用 2停用
+		Description string `json:"description,optional"`
+		Visibility  string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
 		UserID      string `header:"Beaver-User-Id"`
 	}
-	UpdateDigitalConfigRes {}
+	UpdateDigitalRes {}
+)
+
+type (
+	ResetDigitalSecretReq {
+		DigitalID string `json:"digitalId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	ResetDigitalSecretRes {
+		AppSecret string `json:"appSecret"`
+	}
+)
+
+type (
+	SetDigitalAdminsReq {
+		DigitalID string   `json:"digitalId"`
+		UserIDs   []string `json:"userIds"`
+		UserID    string   `header:"Beaver-User-Id"`
+	}
+	SetDigitalAdminsRes {}
+)
+
+type (
+	SetDigitalViewersReq {
+		DigitalID string   `json:"digitalId"`
+		UserIDs   []string `json:"userIds"`
+		UserID    string   `header:"Beaver-User-Id"`
+	}
+	SetDigitalViewersRes {}
+)
+
+// ==================== 数字伙伴编排配置 ====================
+
+type (
+	GetDigitalConfigReq {
+		DigitalID string `form:"digitalId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	GetDigitalConfigRes {
+		DigitalID      string `json:"digitalId"`
+		Runtime        string `json:"runtime"`                       // builtin|external|workflow
+		BuiltinConfig  string `json:"builtinConfig,optional"`  // BuiltinConfig JSON（Runtime=builtin 时非空）
+		ExternalConfig string `json:"externalConfig,optional"` // ExternalConfig JSON（Runtime=external 时非空）
+		WorkflowConfig string `json:"workflowConfig,optional"` // WorkflowConfig JSON（Runtime=workflow 时非空）
+	}
+)
+
+type (
+	SaveDigitalConfigReq {
+		DigitalID      string `json:"digitalId"`
+		BuiltinConfig  string `json:"builtinConfig,optional"`  // BuiltinConfig JSON（Runtime=builtin 时传）
+		ExternalConfig string `json:"externalConfig,optional"` // ExternalConfig JSON（Runtime=external 时传）
+		WorkflowConfig string `json:"workflowConfig,optional"` // WorkflowConfig JSON（Runtime=workflow 时传）
+		UserID         string `header:"Beaver-User-Id"`
+	}
+	SaveDigitalConfigRes {}
 )
 
 @server (
@@ -35,11 +128,39 @@ type (
 	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
 )
 service open {
-	@doc "获取外接数字伙伴配置"
-	@handler GetDigitalConfig
-	get /api/open_portal/digital/v1/config (GetDigitalConfigReq) returns (GetDigitalConfigRes)
+	@doc "创建数字伙伴"
+	@handler CreateDigital
+	post /api/open_portal/digital/v1/create (CreateDigitalReq) returns (CreateDigitalRes)
 
-	@doc "更新外接数字伙伴配置"
-	@handler UpdateDigitalConfig
-	post /api/open_portal/digital/v1/config_update (UpdateDigitalConfigReq) returns (UpdateDigitalConfigRes)
+	@doc "数字伙伴列表"
+	@handler ListDigital
+	get /api/open_portal/digital/v1/list (ListDigitalReq) returns (ListDigitalRes)
+
+	@doc "数字伙伴详情"
+	@handler GetDigitalDetail
+	get /api/open_portal/digital/v1/detail (GetDigitalDetailReq) returns (GetDigitalDetailRes)
+
+	@doc "更新数字伙伴"
+	@handler UpdateDigital
+	post /api/open_portal/digital/v1/update (UpdateDigitalReq) returns (UpdateDigitalRes)
+
+	@doc "重置外接凭据密钥"
+	@handler ResetDigitalSecret
+	post /api/open_portal/digital/v1/reset_secret (ResetDigitalSecretReq) returns (ResetDigitalSecretRes)
+
+	@doc "设置数字伙伴管理员"
+	@handler SetDigitalAdmins
+	post /api/open_portal/digital/v1/admins/set (SetDigitalAdminsReq) returns (SetDigitalAdminsRes)
+
+	@doc "设置数字伙伴可见用户（partial）"
+	@handler SetDigitalViewers
+	post /api/open_portal/digital/v1/viewers/set (SetDigitalViewersReq) returns (SetDigitalViewersRes)
+
+	@doc "获取数字伙伴编排配置"
+	@handler GetDigitalConfig
+	get /api/open_portal/digital/v1/config/get (GetDigitalConfigReq) returns (GetDigitalConfigRes)
+
+	@doc "保存数字伙伴编排配置"
+	@handler SaveDigitalConfig
+	post /api/open_portal/digital/v1/config/save (SaveDigitalConfigReq) returns (SaveDigitalConfigRes)
 }

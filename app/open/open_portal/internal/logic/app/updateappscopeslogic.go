@@ -52,8 +52,8 @@ func NewUpdateAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 func (l *UpdateAppScopesLogic) UpdateAppScopes(req *types.UpdateAppScopesReq) (resp *types.UpdateAppScopesRes, err error) {
 
 	// 查询应用
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND owner_id = ?", req.OAuthID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限")
 	}
 
@@ -91,7 +91,7 @@ func (l *UpdateAppScopesLogic) UpdateAppScopes(req *types.UpdateAppScopesReq) (r
 		return nil, errors.New("更新权限失败")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "应用权限更新成功", Data: map[string]interface{}{"app_id": req.AppID, "scopes": req.Scopes}})
+	l.logger.Info(model.LogMsg{Text: "应用权限更新成功", Data: map[string]interface{}{"oauth_id": req.OAuthID, "scopes": req.Scopes}})
 
 	return &types.UpdateAppScopesRes{}, nil
 }

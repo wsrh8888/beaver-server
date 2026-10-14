@@ -6,10 +6,10 @@ import (
 
 	auth_public "beaver/app/open/open_api/internal/handler/auth_public"
 	bot_public "beaver/app/open/open_api/internal/handler/bot_public"
+	digital "beaver/app/open/open_api/internal/handler/digital"
 	oauth "beaver/app/open/open_api/internal/handler/oauth"
 	oauth_public "beaver/app/open/open_api/internal/handler/oauth_public"
 	oauth_secret "beaver/app/open/open_api/internal/handler/oauth_secret"
-	digital "beaver/app/open/open_api/internal/handler/digital"
 	ws "beaver/app/open/open_api/internal/handler/ws"
 	"beaver/app/open/open_api/internal/svc"
 
@@ -20,13 +20,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 刷新访问令牌
-				Method:  http.MethodPost,
-				Path:    "/api/open/auth_public/v1/refresh",
-				Handler: auth_public.RefreshTokenHandler(serverCtx),
-			},
-			{
-				// 获取访问令牌（客户端凭证模式）
+				// 获取访问令牌（AppKey + AppSecret 换短时 access_token）
 				Method:  http.MethodPost,
 				Path:    "/api/open/auth_public/v1/token",
 				Handler: auth_public.GetTokenHandler(serverCtx),
@@ -41,6 +35,35 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/open/bot_public/v1/send",
 				Handler: bot_public.BotSendHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 将 Digital 加入群
+				Method:  http.MethodPost,
+				Path:    "/api/open/digital/v1/add_to_group",
+				Handler: digital.AddDigitalToGroupHandler(serverCtx),
+			},
+			{
+				// 获取 Digital 自身信息
+				Method:  http.MethodGet,
+				Path:    "/api/open/digital/v1/info",
+				Handler: digital.GetDigitalInfoHandler(serverCtx),
+			},
+			{
+				// 将 Digital 从群移除
+				Method:  http.MethodPost,
+				Path:    "/api/open/digital/v1/remove_from_group",
+				Handler: digital.RemoveDigitalFromGroupHandler(serverCtx),
+			},
+			{
+				// Digital 发送消息到 IM 会话
+				Method:  http.MethodPost,
+				Path:    "/api/open/digital/v1/send_message",
+				Handler: digital.DigitalSendMessageHandler(serverCtx),
 			},
 		},
 	)
@@ -135,36 +158,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// 将 Digital 加入群
-				Method:  http.MethodPost,
-				Path:    "/api/open/digital/v1/add_to_group",
-				Handler: digital.AddDigitalToGroupHandler(serverCtx),
-			},
-			{
-				// 获取 Digital 自身信息
-				Method:  http.MethodGet,
-				Path:    "/api/open/digital/v1/info",
-				Handler: digital.GetDigitalInfoHandler(serverCtx),
-			},
-			{
-				// 将 Digital 从群移除
-				Method:  http.MethodPost,
-				Path:    "/api/open/digital/v1/remove_from_group",
-				Handler: digital.RemoveDigitalFromGroupHandler(serverCtx),
-			},
-			{
-				// Digital 发送消息到 IM 会话
-				Method:  http.MethodPost,
-				Path:    "/api/open/digital/v1/send_message",
-				Handler: digital.DigitalSendMessageHandler(serverCtx),
-			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 建立长连接（WebSocket 升级；本端点不返回 JSON，升级后走 WS 帧协议）
+				// 建立长连接（WebSocket 升级）
 				Method:  http.MethodGet,
 				Path:    "/api/open/ws/v1/connect",
 				Handler: ws.OpenWsHandler(serverCtx),

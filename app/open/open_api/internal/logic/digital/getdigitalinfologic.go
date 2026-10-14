@@ -42,29 +42,20 @@ func NewGetDigitalInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetDigitalInfoLogic) GetDigitalInfo(authorization string) (resp *types.GetDigitalInfoRes, err error) {
-	token, err := utils.ValidateAppAccessToken(l.svcCtx.DB, authorization)
+	token, err := utils.ValidateDigitalAccessToken(l.svcCtx.DB, authorization)
 	if err != nil {
 		return nil, err
 	}
-	app, err := utils.LoadAppByID(l.svcCtx.DB, token.AppID)
-	if err != nil {
-		return nil, err
-	}
-	if err := utils.RequireAppEnabled(app); err != nil {
-		return nil, err
-	}
-
-	digital, err := utils.EnsureAppDigital(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, app)
+	partner, err := utils.ResolveDigitalFromToken(l.svcCtx.DB, token.DigitalID)
 	if err != nil {
 		return nil, err
 	}
 
-	// 昵称/头像取 IM 用户资料（PartnerID 即 IM 用户ID）
 	resp = &types.GetDigitalInfoRes{
-		DigitalID: digital.PartnerID,
-		AppID:   app.AppID,
+		DigitalID: partner.DigitalID,
+		AppKey:    partner.AppKey,
 	}
-	if userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{UserID: digital.PartnerID}); err == nil && userRes.UserInfo != nil {
+	if userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{UserID: partner.DigitalID}); err == nil && userRes.UserInfo != nil {
 		resp.DigitalName = userRes.UserInfo.NickName
 		resp.Avatar = userRes.UserInfo.Avatar
 	}

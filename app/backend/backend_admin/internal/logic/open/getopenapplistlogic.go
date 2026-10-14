@@ -50,8 +50,6 @@ func (l *GetOpenAppListLogic) GetOpenAppList(req *types.GetOpenAppListReq) (resp
 		OwnerUserId:    req.OwnerUserID,
 		AppId:          req.AppID,
 		Status:         int32(req.Status),
-		AuditStatus:    int32(req.AuditStatus),
-		CapabilityType: int32(req.CapabilityType),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{
@@ -93,15 +91,8 @@ func (l *GetOpenAppListLogic) GetOpenAppList(req *types.GetOpenAppListReq) (resp
 			Icon:          app.Icon,
 			OwnerUserID:   app.OwnerUserId,
 			OwnerUserName: ownerName,
-			AppType:       int(app.AppType),
-			Category:      app.Category,
 			Status:        int(app.Status),
-			AuditStatus:   int(app.AuditStatus),
-			AuditedBy:     app.AuditedBy,
-			AuditedAt:     app.AuditedAt,
-			EnableDigital:   int(app.EnableDigital),
-			EnableOAuth:   int(app.EnableOauth),
-			EnableWebhook: int(app.EnableWebhook),
+			EnableOAuth: int(app.EnableOauth),
 			CreatedAt:     app.CreatedAt,
 		})
 	}

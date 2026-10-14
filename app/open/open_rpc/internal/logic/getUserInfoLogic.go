@@ -50,7 +50,7 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 
 func (l *GetUserInfoLogic) GetUserInfo(in *open_rpc.GetUserInfoReq) (*open_rpc.GetUserInfoRes, error) {
 	var token open_models.OpenOAuthToken
-	if err := l.svcCtx.DB.Where("token = ?", in.AccessToken).First(&token).Error; err != nil {
+	if err := l.svcCtx.DB.Where("access_token_hash = ? AND revoked_at IS NULL", in.AccessToken).First(&token).Error; err != nil {
 		return nil, errors.New("无效的访问令牌")
 	}
 	if time.Now().After(token.ExpiresAt) {

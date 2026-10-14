@@ -50,7 +50,7 @@ func NewDeleteAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteA
 func (l *DeleteAppLogic) DeleteApp(req *types.DeleteAppReq) (resp *types.DeleteAppRes, err error) {
 
 	// 软删除应用（GORM 的 Delete 会设置 deleted_at）
-	result := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).Delete(&open_models.OpenApp{})
+	result := l.svcCtx.DB.Where("oauth_id = ? AND owner_id = ?", req.OAuthID, req.UserID).Delete(&open_models.OpenOAuth{})
 	if result.Error != nil {
 		l.logger.Error(model.LogMsg{Text: "删除应用失败", Data: map[string]interface{}{"err": result.Error}})
 		return nil, errors.New("删除失败")
@@ -59,7 +59,7 @@ func (l *DeleteAppLogic) DeleteApp(req *types.DeleteAppReq) (resp *types.DeleteA
 		return nil, errors.New("应用不存在或无权限")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "应用删除成功", Data: map[string]interface{}{"app_id": req.AppID}})
+	l.logger.Info(model.LogMsg{Text: "应用删除成功", Data: map[string]interface{}{"oauth_id": req.OAuthID}})
 
 	return &types.DeleteAppRes{}, nil
 }

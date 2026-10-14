@@ -50,8 +50,8 @@ func NewGetAppScopesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetA
 func (l *GetAppScopesLogic) GetAppScopes(req *types.GetAppScopesReq) (resp *types.GetAppScopesRes, err error) {
 
 	// 查询应用
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND owner_id = ?", req.OAuthID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限")
 	}
 

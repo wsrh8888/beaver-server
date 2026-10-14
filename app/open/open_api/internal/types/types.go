@@ -2,11 +2,11 @@
 package types
 
 type AddDigitalToGroupReq struct {
-	GroupID string `json:"groupId"` // string 群组 ID
+	GroupID string `json:"groupId"`
 }
 
 type AddDigitalToGroupRes struct {
-	DigitalID string `json:"digitalId"` // string Digital 在群内的用户 ID
+	DigitalID string `json:"digitalId"`
 }
 
 type BotAtInfo struct {
@@ -129,194 +129,183 @@ type BotWithdrawContent struct {
 }
 
 type CancelQrCodeReq struct {
-	UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
-	SceneID string `json:"sceneId"`          // string 扫码场景 ID
+	UserID  string `header:"Beaver-User-Id"`
+	SceneID string `json:"sceneId"`
 }
 
 type CancelQrCodeRes struct {
-	Success bool `json:"success"` // bool 是否取消成功
+	Success bool `json:"success"`
 }
 
 type CheckQrCodeStatusReq struct {
-	SceneID string `form:"sceneId"` // string 扫码场景 ID
+	SceneID string `form:"sceneId"`
 }
 
 type CheckQrCodeStatusRes struct {
-	Status string `json:"status"`        // string 状态：waiting / scanned / confirmed / cancelled / expired
-	Code   string `json:"code,optional"` // string 授权码，confirmed 时返回
+	Status string `json:"status"` // waiting / scanned / confirmed / cancelled / expired
+	Code   string `json:"code,optional"`
 }
 
 type ConfirmQrCodeReq struct {
-	UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
-	SceneID string `json:"sceneId"`          // string 扫码场景 ID
+	UserID  string `header:"Beaver-User-Id"`
+	SceneID string `json:"sceneId"`
 }
 
 type ConfirmQrCodeRes struct {
-	Success bool `json:"success"` // bool 是否确认成功
+	Success bool `json:"success"`
+}
+
+type DigitalSendMessageReq struct {
+	ConversationID string `json:"conversationId"`
+	MsgType        string `json:"msgType"` // text / markdown
+	Content        string `json:"content"`
+	ReplyMsgID     string `json:"replyMsgId,optional"`
+}
+
+type DigitalSendMessageRes struct {
+	MessageID string `json:"messageId"`
+	SendTime  int64  `json:"sendTime"`
 }
 
 type GenerateQrCodeReq struct {
-	AppID string `json:"appId"` // string 第三方应用 ID
+	OAuthID string `json:"oauthId"`
 }
 
 type GenerateQrCodeRes struct {
-	SceneID  string `json:"sceneId"`  // string 扫码场景 ID，用于轮询状态与拼接 QR
-	ExpireIn int64  `json:"expireIn"` // int64 二维码有效期秒
-}
-
-type GetH5AuthCodeReq struct {
-	UserID string `header:"Beaver-User-Id"` // string 当前登录用户 ID（Gateway 注入）
-	AppID  string `json:"appId"`            // string 第三方应用 ID
-}
-
-type GetH5AuthCodeRes struct {
-	AuthCode string `json:"authCode"` // string 一次性授权码
-	ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
-}
-
-type GetQrCodeSceneReq struct {
-	SceneID string `form:"sceneId"` // string 扫码场景 ID
-}
-
-type GetQrCodeSceneRes struct {
-	SceneID  string   `json:"sceneId"`  // string 扫码场景 ID
-	AppID    string   `json:"appId"`    // string 第三方应用 ID
-	AppName  string   `json:"appName"`  // string 应用名称
-	AppIcon  string   `json:"appIcon"`  // string 应用图标 URL
-	Status   string   `json:"status"`   // string waiting/scanned/confirmed/cancelled/expired
-	ExpireIn int64    `json:"expireIn"` // int64 剩余有效秒数
-	Scopes   []string `json:"scopes"`   // []string 请求的权限范围
+	SceneID  string `json:"sceneId"`
+	ExpireIn int64  `json:"expireIn"`
 }
 
 type GetDigitalInfoReq struct {
 }
 
 type GetDigitalInfoRes struct {
-	DigitalID   string `json:"digitalId"`         // string Digital 在 IM 中的用户 ID，用于 @ 提及
-	DigitalName string `json:"digitalName"`       // string Digital 昵称（取自用户资料）
-	Avatar    string `json:"avatar,optional"` // string 头像 URL，可选（取自用户资料）
-	AppID     string `json:"appId"`           // string 所属应用 ID
+	DigitalID   string `json:"digitalId"`
+	DigitalName string `json:"digitalName"`
+	Avatar      string `json:"avatar,optional"`
+	AppKey      string `json:"appKey"`
+}
+
+type GetH5AuthCodeReq struct {
+	UserID  string `header:"Beaver-User-Id"`
+	OAuthID string `json:"oauthId"`
+}
+
+type GetH5AuthCodeRes struct {
+	AuthCode string `json:"authCode"`
+	ExpireIn int64  `json:"expireIn"`
+}
+
+type GetQrCodeSceneReq struct {
+	SceneID string `form:"sceneId"`
+}
+
+type GetQrCodeSceneRes struct {
+	SceneID  string   `json:"sceneId"`
+	OAuthID  string   `json:"oauthId"`
+	AppName  string   `json:"appName"`
+	AppIcon  string   `json:"appIcon"`
+	Status   string   `json:"status"`
+	ExpireIn int64    `json:"expireIn"`
+	Scopes   []string `json:"scopes"`
 }
 
 type GetTokenByCodeReq struct {
-	AppID        string `json:"appId"`                 // string 应用 ID
-	AppSecret    string `json:"appSecret,optional"`    // string 应用密钥，PKCE 流程可省略
-	Code         string `json:"code"`                  // string OAuth 授权码
-	RedirectURI  string `json:"redirectUri,optional"`  // string 回调地址，需与授权时一致，可选
-	CodeVerifier string `json:"codeVerifier,optional"` // string PKCE code_verifier，可选
+	OAuthID      string `json:"oauthId"`
+	OAuthSecret  string `json:"oauthSecret,optional"` // PKCE 流程可省略
+	Code         string `json:"code"`
+	RedirectURI  string `json:"redirectUri,optional"`
+	CodeVerifier string `json:"codeVerifier,optional"`
 }
 
 type GetTokenByCodeRes struct {
-	AccessToken  string `json:"accessToken"`           // string 访问令牌
-	RefreshToken string `json:"refreshToken,optional"` // string 刷新令牌，可选
-	ExpiresIn    int64  `json:"expiresIn"`             // int64 访问令牌有效期秒
-	TokenType    string `json:"tokenType"`             // string 令牌类型，一般为 Bearer
-	Scope        string `json:"scope,optional"`        // string 授权范围，可选
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken,optional"`
+	ExpiresIn    int64  `json:"expiresIn"`
+	TokenType    string `json:"tokenType"`
+	Scope        string `json:"scope,optional"`
 }
 
 type GetTokenReq struct {
-	AppID     string `json:"appId"`     // string 应用 ID
-	AppSecret string `json:"appSecret"` // string 应用密钥
+	AppKey    string `json:"appKey"`
+	AppSecret string `json:"appSecret"`
 }
 
 type GetTokenRes struct {
-	AccessToken  string `json:"accessToken"`           // string 访问令牌
-	RefreshToken string `json:"refreshToken,optional"` // string 刷新令牌，可选
-	ExpiresIn    int64  `json:"expiresIn"`             // int64 访问令牌有效期秒
-	TokenType    string `json:"tokenType"`             // string 令牌类型，一般为 Bearer
+	AccessToken string `json:"accessToken"`
+	ExpiresIn   int64  `json:"expiresIn"`
+	TokenType   string `json:"tokenType"`
 }
 
 type GetUserInfoByH5CodeReq struct {
-	AppID     string `json:"appId"`     // string 应用 ID
-	AppSecret string `json:"appSecret"` // string 应用密钥
-	AuthCode  string `json:"authCode"`  // string H5 一次性 authCode
+	OAuthID     string `json:"oauthId"`
+	OAuthSecret string `json:"oauthSecret"`
+	AuthCode    string `json:"authCode"`
 }
 
 type GetUserInfoByH5CodeRes struct {
-	UserID   string `json:"userId"`          // string IM 用户 ID
-	NickName string `json:"nickName"`        // string 用户昵称
-	Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
-	Phone    string `json:"phone,optional"`  // string 手机号，可选
-	Email    string `json:"email,optional"`  // string 邮箱，可选
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Avatar   string `json:"avatar,optional"`
+	Phone    string `json:"phone,optional"`
+	Email    string `json:"email,optional"`
 }
 
 type GetUserInfoByQuickLoginReq struct {
-	AppID     string `json:"appId"`     // string 应用 ID
-	AppSecret string `json:"appSecret"` // string 应用密钥
-	AuthCode  string `json:"authCode"`  // string PC 端生成的 authCode
+	OAuthID     string `json:"oauthId"`
+	OAuthSecret string `json:"oauthSecret"`
+	AuthCode    string `json:"authCode"`
 }
 
 type GetUserInfoByQuickLoginRes struct {
-	UserID   string `json:"userId"`          // string IM 用户 ID
-	NickName string `json:"nickName"`        // string 用户昵称
-	Avatar   string `json:"avatar,optional"` // string 头像 URL，可选
-	Phone    string `json:"phone,optional"`  // string 手机号，可选
-	Email    string `json:"email,optional"`  // string 邮箱，可选
+	UserID   string `json:"userId"`
+	NickName string `json:"nickName"`
+	Avatar   string `json:"avatar,optional"`
+	Phone    string `json:"phone,optional"`
+	Email    string `json:"email,optional"`
 }
 
 type OpenWsReq struct {
-	AppID  string `form:"appId"`  // string 应用 ID
-	Ticket string `form:"ticket"` // string 访问令牌（auth_public/v1/token 获取）
+	AppKey string `form:"appKey"`
+	Ticket string `form:"ticket"`
 }
 
 type OpenWsRes struct {
 }
 
 type PasswordLoginReq struct {
-	AppID    string `json:"appId"`    // string 第三方应用 ID
-	Account  string `json:"account"`  // string 手机号或邮箱
-	Password string `json:"password"` // string 登录密码
+	OAuthID  string `json:"oauthId"`
+	Account  string `json:"account"`
+	Password string `json:"password"`
 }
 
 type PasswordLoginRes struct {
-	Code     string `json:"code"`     // string OAuth 授权码
-	ExpireIn int64  `json:"expireIn"` // int64 授权码有效期秒
-}
-
-type RefreshTokenReq struct {
-	RefreshToken string `json:"refreshToken"` // string 刷新令牌
-}
-
-type RefreshTokenRes struct {
-	AccessToken  string `json:"accessToken"`           // string 新的访问令牌
-	RefreshToken string `json:"refreshToken,optional"` // string 新的刷新令牌，可选
-	ExpiresIn    int64  `json:"expiresIn"`             // int64 访问令牌有效期秒
+	Code     string `json:"code"`
+	ExpireIn int64  `json:"expireIn"`
 }
 
 type RemoveDigitalFromGroupReq struct {
-	GroupID string `json:"groupId"` // string 群组 ID
+	GroupID string `json:"groupId"`
 }
 
 type RemoveDigitalFromGroupRes struct {
-	Success bool `json:"success"` // bool 是否成功
+	Success bool `json:"success"`
 }
 
 type RevokeTokenReq struct {
-	Token         string `json:"token"`                  // string 要撤销的 token
-	TokenTypeHint string `json:"tokenTypeHint,optional"` // string 提示类型：access_token / refresh_token，可选
+	Token         string `json:"token"`
+	TokenTypeHint string `json:"tokenTypeHint,optional"` // access_token / refresh_token
 }
 
 type RevokeTokenRes struct {
-	Success bool `json:"success"` // bool 是否撤销成功
-}
-
-type DigitalSendMessageReq struct {
-	ConversationID string `json:"conversationId"`      // string 会话 ID，从长连接事件中获取
-	MsgType        string `json:"msgType"`             // string 消息类型：text / markdown
-	Content        string `json:"content"`             // string 消息内容
-	ReplyMsgID     string `json:"replyMsgId,optional"` // string 引用回复的消息 ID，可选
-}
-
-type DigitalSendMessageRes struct {
-	MessageID string `json:"messageId"` // string 消息 ID
-	SendTime  int64  `json:"sendTime"`  // int64 发送时间 Unix 秒
+	Success bool `json:"success"`
 }
 
 type ScanQrCodeReq struct {
-	UserID  string `header:"Beaver-User-Id"` // string 当前登录 IM 用户 ID（Gateway 注入）
-	SceneID string `json:"sceneId"`          // string 扫码场景 ID
+	UserID  string `header:"Beaver-User-Id"`
+	SceneID string `json:"sceneId"`
 }
 
 type ScanQrCodeRes struct {
-	Success bool `json:"success"` // bool 是否标记成功
+	Success bool `json:"success"`
 }

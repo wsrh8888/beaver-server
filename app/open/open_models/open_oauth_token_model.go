@@ -27,16 +27,20 @@ import (
 	"gorm.io/gorm"
 )
 
-// OpenOAuthToken 用户授权令牌表（含 refresh token）
+// OpenOAuthToken OAuth 用户授权令牌（authorization_code / 扫码等），仅服务 OpenOAuth。
+// Access/Refresh 仅存哈希；身份用 UserID。
+// TokenFamilyID 用于 refresh 轮换与 reuse detection。
 type OpenOAuthToken struct {
 	gorm.Model
-	AppID                 string    `gorm:"type:varchar(64);index;not null;comment:应用ID"`
-	Token                 string    `gorm:"type:varchar(256);uniqueIndex;not null;comment:访问令牌"`
-	RefreshToken          string    `gorm:"type:varchar(256);index;comment:刷新令牌"`
-	ExpiresAt             time.Time `gorm:"type:datetime;not null;comment:access_token 过期时间"`
-	RefreshTokenExpiresAt time.Time `gorm:"type:datetime;not null;comment:refresh_token 过期时间"`
-	Scope                 string    `gorm:"type:text;comment:授权范围"`
-	UserID                string    `gorm:"type:varchar(64);index;comment:用户ID"`
-	OpenID                string    `gorm:"type:varchar(64);index;comment:授权用户在本应用内的唯一标识"`
-	UnionID               string    `gorm:"type:varchar(64);index;comment:同一开发者下的用户统一标识"`
+	OAuthID               string     `gorm:"column:oauth_id;type:varchar(64);index;not null;comment:OpenOAuth.OAuthID"`
+	UserID                string     `gorm:"column:user_id;type:varchar(64);index;not null;comment:授权用户ID"`
+	Token                 string     `gorm:"column:access_token_hash;type:varchar(128);uniqueIndex;not null;comment:access_token 哈希"`
+	RefreshToken          string     `gorm:"column:refresh_token_hash;type:varchar(128);index;comment:refresh_token 哈希"`
+	TokenFamilyID         string     `gorm:"column:token_family_id;type:varchar(64);index;not null;default:'';comment:refresh 令牌族ID"`
+	ExpiresAt             time.Time  `gorm:"column:expires_at;type:datetime;index;not null;comment:access_token 过期时间"`
+	RefreshTokenExpiresAt time.Time `gorm:"column:refresh_token_expires_at;type:datetime;index;comment:refresh_token 过期时间（无 refresh 时为零值）"`
+	RevokedAt             *time.Time `gorm:"column:revoked_at;type:datetime;index;comment:撤销时间"`
+	Scope                 string     `gorm:"type:varchar(512);comment:授权范围"`
 }
+
+func (OpenOAuthToken) TableName() string { return "open_oauth_tokens" }

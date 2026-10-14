@@ -49,18 +49,18 @@ func NewGenerateQrCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp *types.GenerateQrCodeRes, err error) {
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ?", req.AppID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ?", req.OAuthID).First(&app).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "应用不存在",
-			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+			Data: map[string]any{"oauthId": req.OAuthID, "err": err.Error()},
 		})
 		return nil, fmt.Errorf("应用不存在")
 	}
 	if app.Status != 1 {
 		l.logger.Warn(model.LogMsg{
 			Text: "应用未启用",
-			Data: map[string]any{"appId": req.AppID},
+			Data: map[string]any{"oauthId": req.OAuthID},
 		})
 		return nil, fmt.Errorf("应用未启用")
 	}
@@ -71,21 +71,21 @@ func (l *GenerateQrCodeLogic) GenerateQrCode(req *types.GenerateQrCodeReq) (resp
 
 	qrCode := open_models.OpenOAuthQrCode{
 		SceneID:   sceneID,
-		AppID:     req.AppID,
+		OAuthID:     req.OAuthID,
 		Status:    0,
 		ExpiresAt: expiresAt,
 	}
 	if err := l.svcCtx.DB.Create(&qrCode).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "创建扫码记录失败",
-			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+			Data: map[string]any{"oauthId": req.OAuthID, "err": err.Error()},
 		})
 		return nil, fmt.Errorf("服务内部异常")
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "生成扫码会话成功",
-		Data: map[string]any{"sceneId": sceneID, "appId": req.AppID},
+		Data: map[string]any{"sceneId": sceneID, "oauthId": req.OAuthID},
 	})
 
 	return &types.GenerateQrCodeRes{

@@ -45,19 +45,11 @@ func NewDigitalSendMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *DigitalSendMessageLogic) DigitalSendMessage(req *types.DigitalSendMessageReq, authorization string) (resp *types.DigitalSendMessageRes, err error) {
-	token, err := utils.ValidateAppAccessToken(l.svcCtx.DB, authorization)
+	token, err := utils.ValidateDigitalAccessToken(l.svcCtx.DB, authorization)
 	if err != nil {
 		return nil, err
 	}
-	app, err := utils.LoadAppByID(l.svcCtx.DB, token.AppID)
-	if err != nil {
-		return nil, err
-	}
-	if err := utils.RequireAppEnabled(app); err != nil {
-		return nil, err
-	}
-
-	digital, err := utils.EnsureAppDigital(l.ctx, l.svcCtx.DB, l.svcCtx.UserRpc, app)
+	digital, err := utils.ResolveDigitalFromToken(l.svcCtx.DB, token.DigitalID)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +89,9 @@ func (l *DigitalSendMessageLogic) DigitalSendMessage(req *types.DigitalSendMessa
 		}
 	}
 
-	messageID := fmt.Sprintf("digital_%s_%d", token.AppID, time.Now().UnixNano())
+	messageID := fmt.Sprintf("digital_%s_%d", token.DigitalID, time.Now().UnixNano())
 	chatRes, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-		UserId:         digital.PartnerID,
+		UserId:         digital.DigitalID,
 		ConversationId: req.ConversationID,
 		MessageId:      messageID,
 		Msg:            msg,

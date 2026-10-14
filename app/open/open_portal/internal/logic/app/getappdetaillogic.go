@@ -37,7 +37,6 @@ type GetAppDetailLogic struct {
 	logger *beaverlog.Logger
 }
 
-// 获取应用详情
 func NewGetAppDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAppDetailLogic {
 	return &GetAppDetailLogic{
 		ctx:    ctx,
@@ -51,47 +50,24 @@ func (l *GetAppDetailLogic) GetAppDetail(req *types.GetAppDetailReq) (resp *type
 		return nil, errors.New("未登录")
 	}
 
-	// 查询应用详情
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND owner_id = ?", req.AppID, req.UserID).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND owner_id = ?", req.OAuthID, req.UserID).First(&app).Error; err != nil {
 		return nil, errors.New("应用不存在或无权限访问")
-	}
-
-	// 2. 对 AppSecret 进行掩码处理（只显示前8位和后8位）
-	maskedSecret := maskSecret(app.AppSecret)
-
-	// 3. 能力是否存在由对应能力表的记录决定，应用表不再持有能力开关。
-	//    Webhook 能力已下线（事件改由长连接接收），恒为 0。
-	var partner open_models.OpenDigitalPartner
-	enableDigital := 0
-	if err := l.svcCtx.DB.Where(
-		"app_id = ? AND runtime = ? AND status = ?",
-		app.AppID, open_models.PartnerRuntimeExternal, 1,
-	).First(&partner).Error; err == nil {
-		enableDigital = 1
-	}
-	var oauthConfig open_models.OpenOAuthConfig
-	enableOAuth := 0
-	if err := l.svcCtx.DB.Where("app_id = ?", app.AppID).First(&oauthConfig).Error; err == nil {
-		enableOAuth = 1
 	}
 
 	return &types.GetAppDetailRes{
 		App: types.AppInfo{
-			AppID:       app.AppID,
+			OAuthID:     app.OAuthID,
 			Name:        app.Name,
 			Description: app.Description,
 			Icon:        app.Icon,
-			AppSecret:   maskedSecret,
+			OAuthSecret: maskSecret(app.OAuthSecret),
 			Status:      app.Status,
-			EnableDigital: enableDigital,
-			EnableOAuth: enableOAuth,
 			CreatedAt:   app.CreatedAt.Unix(),
 		},
 	}, nil
 }
 
-// maskSecret 对密钥进行掩码处理
 func maskSecret(secret string) string {
 	if len(secret) <= 16 {
 		return "****"

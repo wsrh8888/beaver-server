@@ -48,46 +48,46 @@ func NewGetTokenByCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetTokenByCodeLogic) GetTokenByCode(req *types.GetTokenByCodeReq) (resp *types.GetTokenByCodeRes, err error) {
-	if req.AppID == "" {
-		return nil, errors.New("appId 不能为空")
+	if req.OAuthID == "" {
+		return nil, errors.New("oauthId 不能为空")
 	}
-	if req.AppSecret == "" {
-		return nil, errors.New("appSecret 不能为空")
+	if req.OAuthSecret == "" {
+		return nil, errors.New("oauthSecret 不能为空")
 	}
 	if req.Code == "" {
 		return nil, errors.New("code 不能为空")
 	}
 
-	var app open_models.OpenApp
-	if err := l.svcCtx.DB.Where("app_id = ? AND app_secret = ? AND status = ?", req.AppID, req.AppSecret, 1).First(&app).Error; err != nil {
+	var app open_models.OpenOAuth
+	if err := l.svcCtx.DB.Where("oauth_id = ? AND oauth_secret_hash = ? AND status = ?", req.OAuthID, req.OAuthSecret, 1).First(&app).Error; err != nil {
 		l.logger.Warn(model.LogMsg{
 			Text: "应用凭证错误",
-			Data: map[string]any{"appId": req.AppID},
+			Data: map[string]any{"oauthId": req.OAuthID},
 		})
 		return nil, errors.New("应用不存在或凭证错误")
 	}
 
 	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
-		AppId: req.AppID,
+		OauthId: req.OAuthID,
 		Code:  req.Code,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "换发令牌RPC失败",
-			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+			Data: map[string]any{"oauthId": req.OAuthID, "err": err.Error()},
 		})
 		return nil, err
 	}
 
 	scope := ""
 	var tokenRecord open_models.OpenOAuthToken
-	if err := l.svcCtx.DB.Where("token = ?", rpcResp.AccessToken).First(&tokenRecord).Error; err == nil {
+	if err := l.svcCtx.DB.Where("access_token_hash = ?", rpcResp.AccessToken).First(&tokenRecord).Error; err == nil {
 		scope = tokenRecord.Scope
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "OAuth换发Token成功",
-		Data: map[string]any{"appId": req.AppID},
+		Data: map[string]any{"oauthId": req.OAuthID},
 	})
 
 	return &types.GetTokenByCodeRes{

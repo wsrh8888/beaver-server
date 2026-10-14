@@ -4,18 +4,6 @@
  * Project: beaver-server
  * https://github.com/wsrh8888/beaver-server
  *
- * 中文：
- * 本文件为海狸 IM（Beaver IM）开源项目源代码。
- * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
- * 禁止删除、篡改或替换本文件头部版权与许可声明。
- * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
- *
- * English:
- * This file is part of the Beaver IM open-source project.
- * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
- * Do not remove, alter, or replace this copyright and license header.
- * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
- *
  * beaver-server-header-v1
  */
 
@@ -33,67 +21,26 @@ import (
 )
 
 const (
-	// 与 beaver-desktop / beaver-open 的 openAppId 保持一致
-	defaultAppID         = "app_2db39e38"
-	defaultAppSecret     = "beaver_im_oauth_secret_dev"
+	defaultOAuthID       = "oauth_2db39e38"
+	defaultOAuthSecret   = "beaver_im_oauth_secret_dev"
 	defaultOwnerUserID   = "100000"
 	defaultAppName       = "海狸IM"
 	defaultAppDesc       = "系统初始化默认应用（OAuth 登录）"
 	defaultDesktopScheme = "beaver://"
 )
 
-// InitQuickLoginApp 初始化开放平台默认「海狸IM」应用（启用 Desktop + H5 OAuth，不含机器人等能力）
+// InitQuickLoginApp 初始化开放平台默认「海狸IM」OAuth 应用（凭据 + OAuth 配置同表）
 func InitQuickLoginApp(db *gorm.DB) error {
-	var app open_models.OpenApp
-	err := db.Where("app_id = ?", defaultAppID).First(&app).Error
-	if err == gorm.ErrRecordNotFound {
-		app = open_models.OpenApp{
-			AppID:       defaultAppID,
-			AppSecret:   defaultAppSecret,
-			Name:        defaultAppName,
-			Description: defaultAppDesc,
-			OwnerID:     defaultOwnerUserID,
-			Status:      1,
-		}
-		if err := db.Create(&app).Error; err != nil {
-			return fmt.Errorf("创建默认应用失败: %w", err)
-		}
-		log.Printf("创建默认应用成功: appId=%s name=%s", defaultAppID, defaultAppName)
-	} else if err != nil {
-		return fmt.Errorf("查询默认应用失败: %w", err)
-	} else {
-		updates := map[string]interface{}{}
-		if app.Name != defaultAppName {
-			updates["name"] = defaultAppName
-		}
-		if app.Description != defaultAppDesc {
-			updates["description"] = defaultAppDesc
-		}
-		if app.Status != 1 {
-			updates["status"] = 1
-		}
-		if len(updates) > 0 {
-			if err := db.Model(&app).Updates(updates).Error; err != nil {
-				return fmt.Errorf("更新默认应用失败: %w", err)
-			}
-			log.Printf("默认应用已校正: appId=%s", defaultAppID)
-		} else {
-			log.Printf("默认应用已存在: appId=%s", defaultAppID)
-		}
-	}
-
 	scopes, _ := json.Marshal([]string{
 		string(constants.ScopeUserProfileRead),
 		string(constants.ScopeUserAvatarRead),
 	})
-
 	desktopCfg := &open_models.DesktopOAuth{
 		Enabled:      true,
 		CustomScheme: defaultDesktopScheme,
 	}
 	h5Cfg := &open_models.H5OAuth{
 		Enabled: true,
-		// beaver-open 本地开发默认回调（hash 模式下 code 落在 origin/）
 		RedirectURIs: []string{
 			"http://localhost:4012/",
 			"http://127.0.0.1:4012/",
@@ -101,56 +48,78 @@ func InitQuickLoginApp(db *gorm.DB) error {
 		},
 	}
 
-	var oauth open_models.OpenOAuthConfig
-	err = db.Where("app_id = ?", defaultAppID).First(&oauth).Error
+	var app open_models.OpenOAuth
+	err := db.Where("oauth_id = ?", defaultOAuthID).First(&app).Error
 	if err == gorm.ErrRecordNotFound {
-		oauth = open_models.OpenOAuthConfig{
-			AppID:           defaultAppID,
+		app = open_models.OpenOAuth{
+			OAuthID:         defaultOAuthID,
+			OAuthSecret:     defaultOAuthSecret,
+			Name:            defaultAppName,
+			Description:     defaultAppDesc,
+			OwnerID:         defaultOwnerUserID,
+			Status:          1,
 			SupportedScopes: string(scopes),
 			AccessTokenTTL:  7200,
 			RefreshTokenTTL: 2592000,
 			Desktop:         desktopCfg,
 			H5:              h5Cfg,
 		}
-		if err := db.Create(&oauth).Error; err != nil {
-			return fmt.Errorf("创建默认 OAuth 配置失败: %w", err)
+		if err := db.Create(&app).Error; err != nil {
+			return fmt.Errorf("创建默认 OAuth 应用失败: %w", err)
 		}
-		log.Printf("创建默认 OAuth 配置成功: appId=%s desktop+h5", defaultAppID)
+		log.Printf("创建默认 OAuth 应用成功: oauthId=%s desktop+h5", defaultOAuthID)
 		return nil
 	}
 	if err != nil {
-		return fmt.Errorf("查询默认 OAuth 配置失败: %w", err)
+		return fmt.Errorf("查询默认 OAuth 应用失败: %w", err)
 	}
 
 	needSave := false
-	if oauth.Desktop == nil || !oauth.Desktop.Enabled {
-		oauth.Desktop = desktopCfg
-		needSave = true
-	} else if oauth.Desktop.CustomScheme == "" {
-		oauth.Desktop.CustomScheme = defaultDesktopScheme
+	if app.Name != defaultAppName {
+		app.Name = defaultAppName
 		needSave = true
 	}
-	if oauth.H5 == nil || !oauth.H5.Enabled {
-		oauth.H5 = h5Cfg
+	if app.Description != defaultAppDesc {
+		app.Description = defaultAppDesc
 		needSave = true
-	} else {
-		if len(oauth.H5.RedirectURIs) == 0 {
-			oauth.H5.RedirectURIs = h5Cfg.RedirectURIs
-			needSave = true
-		}
 	}
-	if oauth.SupportedScopes == "" {
-		oauth.SupportedScopes = string(scopes)
+	if app.Status != 1 {
+		app.Status = 1
+		needSave = true
+	}
+	if app.SupportedScopes == "" {
+		app.SupportedScopes = string(scopes)
+		needSave = true
+	}
+	if app.AccessTokenTTL == 0 {
+		app.AccessTokenTTL = 7200
+		needSave = true
+	}
+	if app.RefreshTokenTTL == 0 {
+		app.RefreshTokenTTL = 2592000
+		needSave = true
+	}
+	if app.Desktop == nil || !app.Desktop.Enabled {
+		app.Desktop = desktopCfg
+		needSave = true
+	} else if app.Desktop.CustomScheme == "" {
+		app.Desktop.CustomScheme = defaultDesktopScheme
+		needSave = true
+	}
+	if app.H5 == nil || !app.H5.Enabled {
+		app.H5 = h5Cfg
+		needSave = true
+	} else if len(app.H5.RedirectURIs) == 0 {
+		app.H5.RedirectURIs = h5Cfg.RedirectURIs
 		needSave = true
 	}
 	if needSave {
-		if err := db.Save(&oauth).Error; err != nil {
-			return fmt.Errorf("更新默认 OAuth 配置失败: %w", err)
+		if err := db.Save(&app).Error; err != nil {
+			return fmt.Errorf("更新默认 OAuth 应用失败: %w", err)
 		}
-		log.Printf("默认 OAuth 配置已校正: appId=%s desktop+h5", defaultAppID)
+		log.Printf("默认 OAuth 应用已校正: oauthId=%s desktop+h5", defaultOAuthID)
 	} else {
-		log.Printf("默认 OAuth 配置已存在: appId=%s", defaultAppID)
+		log.Printf("默认 OAuth 应用已存在: oauthId=%s", defaultOAuthID)
 	}
-
 	return nil
 }
