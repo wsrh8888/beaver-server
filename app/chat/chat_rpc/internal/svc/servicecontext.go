@@ -27,6 +27,8 @@ import (
 
 	"beaver/app/chat/chat_rpc/internal/config"
 
+	"beaver/app/agent/agent_rpc/agent"
+
 	"beaver/app/friend/friend_rpc/friend"
 
 	"beaver/app/group/group_rpc/group"
@@ -34,6 +36,8 @@ import (
 	"beaver/app/notification/notification_rpc/notification"
 
 	"beaver/app/open/open_rpc/open"
+
+	"beaver/app/platform/platform_rpc/platform"
 
 	"beaver/app/user/user_rpc/user"
 
@@ -85,6 +89,10 @@ type ServiceContext struct {
 
 	NotificationRpc notification.Notification
 
+	AgentRpc agent.Agent
+
+	PlatformRpc platform.Platform
+
 	RocketMQ        *corerocketmq.Client
 
 	WebhookSender   *corewebhook.WebhookSender
@@ -115,6 +123,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	notificationRpc := notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, rpcOpt))
 
+	agentRpc := agent.NewAgent(zrpc.MustNewClient(c.AgentRpc, rpcOpt))
+
+	platformRpc := platform.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt))
+
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 
 	beaverlog.SetRocketMQ(mqClient)
@@ -138,6 +150,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		OpenRpc:         openRpc,
 
 		NotificationRpc: notificationRpc,
+
+		AgentRpc: agentRpc,
+
+		PlatformRpc: platformRpc,
 
 		RocketMQ:        mqClient,
 

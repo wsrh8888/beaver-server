@@ -2142,3 +2142,205 @@ type WorkbenchEntryConfig struct {
 	PC     string `json:"pc,optional"`     // string PC 入口，可选
 	Mobile string `json:"mobile,optional"` // string 移动端入口，可选
 }
+
+// —— AI 应用管理（agent_apps，渠道无关通用配置，平台级场景标签）——
+
+type AgentAppInfo struct {
+	AppID            string `json:"appId"`
+	Name             string `json:"name"`
+	Scene            string `json:"scene"`            // 场景标签：digital_builtin/window_default/chat/moment
+	SystemPrompt     string `json:"systemPrompt"`
+	LLMModelID       string `json:"llmModelId"`
+	ModelParams      string `json:"modelParams"`      // JSON
+	Tools            string `json:"tools"`           // JSON [toolId]
+	McpServerIDs     string `json:"mcpServerIds"`    // JSON [mcpServerId]
+	KnowledgeIDs     string `json:"knowledgeIds"`    // JSON [knowledgeId]
+	OpeningMessage   string `json:"openingMessage"`
+	OpeningQuestions string `json:"openingQuestions"` // JSON
+	Variables        string `json:"variables"`       // JSON
+	Status           int    `json:"status"`
+	Sort             int    `json:"sort"`
+	CreatedBy        string `json:"createdBy"`
+}
+
+type GetAgentAppListReq struct {
+	Scene    string `form:"scene,optional"` // 可选过滤
+	Status   int    `form:"status,optional"` // 0全部 1启用 2停用
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"pageSize,default=10"`
+}
+
+type GetAgentAppListRes struct {
+	Total int64          `json:"total"`
+	List  []AgentAppInfo `json:"list"`
+}
+
+type GetAgentAppReq struct {
+	AppID string `form:"appId,optional"`
+	Scene string `form:"scene,optional"` // 按 app_id 取，或按 scene 取默认（sort 最小启用项）
+}
+
+type GetAgentAppRes struct {
+	App AgentAppInfo `json:"app"`
+}
+
+type CreateAgentAppReq struct {
+	Name             string `json:"name"`
+	Scene            string `json:"scene"`
+	SystemPrompt     string `json:"systemPrompt,optional"`
+	LLMModelID       string `json:"llmModelId,optional"`
+	ModelParams      string `json:"modelParams,optional"`      // JSON
+	Tools            string `json:"tools,optional"`            // JSON [toolId]
+	McpServerIDs     string `json:"mcpServerIds,optional"`     // JSON [mcpServerId]
+	KnowledgeIDs     string `json:"knowledgeIds,optional"`     // JSON [knowledgeId]
+	OpeningMessage   string `json:"openingMessage,optional"`
+	OpeningQuestions string `json:"openingQuestions,optional"` // JSON
+	Variables        string `json:"variables,optional"`        // JSON
+	Status           int    `json:"status,optional,default=1"`
+	Sort             int    `json:"sort,optional"`
+	UserID           string `header:"Beaver-User-Id"`
+}
+
+type CreateAgentAppRes struct {
+	AppID string `json:"appId"`
+}
+
+type UpdateAgentAppReq struct {
+	AppID            string `json:"appId"`
+	Name             string `json:"name,optional"`
+	Scene            string `json:"scene,optional"`
+	SystemPrompt     string `json:"systemPrompt,optional"`
+	LLMModelID       string `json:"llmModelId,optional"`
+	ModelParams      string `json:"modelParams,optional"`
+	Tools            string `json:"tools,optional"`
+	McpServerIDs     string `json:"mcpServerIds,optional"`
+	KnowledgeIDs     string `json:"knowledgeIds,optional"`
+	OpeningMessage   string `json:"openingMessage,optional"`
+	OpeningQuestions string `json:"openingQuestions,optional"`
+	Variables        string `json:"variables,optional"`
+	Status           int    `json:"status,optional"`
+	Sort             int    `json:"sort,optional"`
+}
+
+type UpdateAgentAppRes struct{}
+
+type DeleteAgentAppReq struct {
+	AppID string `json:"appId"`
+}
+
+type DeleteAgentAppRes struct{}
+
+// —— 工具目录（agent_tools）——
+
+type AgentToolInfo struct {
+	ToolID   string `json:"toolId"`
+	Name     string `json:"name"`
+	ToolType string `json:"toolType"` // builtin|mcp|api
+	Config   string `json:"config"`   // JSON
+	Status   int    `json:"status"`
+	Sort     int    `json:"sort"`
+}
+
+type GetAgentToolListReq struct {
+	Status int `form:"status,optional"` // 0全部 1启用 2停用
+}
+
+type GetAgentToolListRes struct {
+	List []AgentToolInfo `json:"list"`
+}
+
+type GetAgentToolReq struct {
+	ToolID string `form:"toolId"`
+}
+
+type GetAgentToolRes struct {
+	Tool AgentToolInfo `json:"tool"`
+}
+
+type CreateAgentToolReq struct {
+	Name     string `json:"name"`
+	ToolType string `json:"toolType"`
+	Config   string `json:"config,optional"` // JSON
+	Status   int    `json:"status,optional,default=1"`
+	Sort     int    `json:"sort,optional"`
+}
+
+type CreateAgentToolRes struct {
+	ToolID string `json:"toolId"`
+}
+
+type UpdateAgentToolReq struct {
+	ToolID   string `json:"toolId"`
+	Name     string `json:"name,optional"`
+	ToolType string `json:"toolType,optional"`
+	Config   string `json:"config,optional"`
+	Status   int    `json:"status,optional"`
+	Sort     int    `json:"sort,optional"`
+}
+
+type UpdateAgentToolRes struct{}
+
+type DeleteAgentToolReq struct {
+	ToolID string `json:"toolId"`
+}
+
+type DeleteAgentToolRes struct{}
+
+// —— MCP 服务目录（agent_mcp_servers）——
+
+type AgentMcpServerInfo struct {
+	McpServerID string `json:"mcpServerId"`
+	Name        string `json:"name"`
+	ServerName  string `json:"serverName"`
+	Transport   string `json:"transport"` // stdio|sse|websocket
+	Config      string `json:"config"`    // JSON 连接配置
+	Tools       string `json:"tools"`     // JSON 能力清单
+	Status      int    `json:"status"`
+}
+
+type GetAgentMcpServerListReq struct {
+	Status int `form:"status,optional"` // 0全部 1启用 2停用
+}
+
+type GetAgentMcpServerListRes struct {
+	List []AgentMcpServerInfo `json:"list"`
+}
+
+type GetAgentMcpServerReq struct {
+	McpServerID string `form:"mcpServerId"`
+}
+
+type GetAgentMcpServerRes struct {
+	Server AgentMcpServerInfo `json:"server"`
+}
+
+type CreateAgentMcpServerReq struct {
+	Name       string `json:"name"`
+	ServerName string `json:"serverName"`
+	Transport  string `json:"transport"`
+	Config     string `json:"config,optional"` // JSON
+	Tools      string `json:"tools,optional"`  // JSON
+	Status     int    `json:"status,optional,default=1"`
+}
+
+type CreateAgentMcpServerRes struct {
+	McpServerID string `json:"mcpServerId"`
+}
+
+type UpdateAgentMcpServerReq struct {
+	McpServerID string `json:"mcpServerId"`
+	Name        string `json:"name,optional"`
+	ServerName  string `json:"serverName,optional"`
+	Transport   string `json:"transport,optional"`
+	Config      string `json:"config,optional"`
+	Tools       string `json:"tools,optional"`
+	Status      int    `json:"status,optional"`
+}
+
+type UpdateAgentMcpServerRes struct{}
+
+type DeleteAgentMcpServerReq struct {
+	McpServerID string `json:"mcpServerId"`
+}
+
+type DeleteAgentMcpServerRes struct{}

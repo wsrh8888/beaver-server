@@ -47,6 +47,7 @@ func (l *GetDigitalConfigLogic) GetDigitalConfig(in *open_rpc.GetDigitalConfigRe
 	// 查编排配置
 	var cfg open_models.OpenDigitalConfig
 	if err := l.svcCtx.DB.Where("digital_id = ?", in.DigitalId).First(&cfg).Error; err == nil {
+		res.AppId = cfg.AppID
 		// 按 Runtime 序列化对应配置 JSON，其余留空
 		switch digital.Runtime {
 		case open_models.DigitalRuntimeBuiltin:

@@ -4814,6 +4814,3582 @@ func (*RemoveOrgMemberRes) Descriptor() ([]byte, []int) {
 	return file_platform_rpc_proto_rawDescGZIP(), []int{75}
 }
 
+type AgentAppItem struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	AppId            string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	Name             string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Scene            string                 `protobuf:"bytes,4,opt,name=scene,proto3" json:"scene,omitempty"`
+	SystemPrompt     string                 `protobuf:"bytes,5,opt,name=system_prompt,json=systemPrompt,proto3" json:"system_prompt,omitempty"`
+	LlmModelId       string                 `protobuf:"bytes,6,opt,name=llm_model_id,json=llmModelId,proto3" json:"llm_model_id,omitempty"`
+	ModelParams      string                 `protobuf:"bytes,7,opt,name=model_params,json=modelParams,proto3" json:"model_params,omitempty"`      // JSON
+	Tools            string                 `protobuf:"bytes,8,opt,name=tools,proto3" json:"tools,omitempty"`                                     // JSON [toolId]
+	McpServerIds     string                 `protobuf:"bytes,9,opt,name=mcp_server_ids,json=mcpServerIds,proto3" json:"mcp_server_ids,omitempty"` // JSON [mcpServerId]
+	KnowledgeIds     string                 `protobuf:"bytes,10,opt,name=knowledge_ids,json=knowledgeIds,proto3" json:"knowledge_ids,omitempty"`  // JSON [knowledgeId]
+	OpeningMessage   string                 `protobuf:"bytes,11,opt,name=opening_message,json=openingMessage,proto3" json:"opening_message,omitempty"`
+	OpeningQuestions string                 `protobuf:"bytes,12,opt,name=opening_questions,json=openingQuestions,proto3" json:"opening_questions,omitempty"` // JSON
+	Variables        string                 `protobuf:"bytes,13,opt,name=variables,proto3" json:"variables,omitempty"`                                       // JSON
+	Status           int32                  `protobuf:"varint,14,opt,name=status,proto3" json:"status,omitempty"`
+	Sort             int32                  `protobuf:"varint,15,opt,name=sort,proto3" json:"sort,omitempty"`
+	CreatedBy        string                 `protobuf:"bytes,16,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedAt        string                 `protobuf:"bytes,17,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        string                 `protobuf:"bytes,18,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *AgentAppItem) Reset() {
+	*x = AgentAppItem{}
+	mi := &file_platform_rpc_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentAppItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentAppItem) ProtoMessage() {}
+
+func (x *AgentAppItem) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentAppItem.ProtoReflect.Descriptor instead.
+func (*AgentAppItem) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *AgentAppItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AgentAppItem) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetScene() string {
+	if x != nil {
+		return x.Scene
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetSystemPrompt() string {
+	if x != nil {
+		return x.SystemPrompt
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetLlmModelId() string {
+	if x != nil {
+		return x.LlmModelId
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetModelParams() string {
+	if x != nil {
+		return x.ModelParams
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetTools() string {
+	if x != nil {
+		return x.Tools
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetMcpServerIds() string {
+	if x != nil {
+		return x.McpServerIds
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetKnowledgeIds() string {
+	if x != nil {
+		return x.KnowledgeIds
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetOpeningMessage() string {
+	if x != nil {
+		return x.OpeningMessage
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetOpeningQuestions() string {
+	if x != nil {
+		return x.OpeningQuestions
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetVariables() string {
+	if x != nil {
+		return x.Variables
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *AgentAppItem) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *AgentAppItem) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *AgentAppItem) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type GetAgentAppReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	Scene         string                 `protobuf:"bytes,2,opt,name=scene,proto3" json:"scene,omitempty"` // 可选，按场景取默认应用
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentAppReq) Reset() {
+	*x = GetAgentAppReq{}
+	mi := &file_platform_rpc_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentAppReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentAppReq) ProtoMessage() {}
+
+func (x *GetAgentAppReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentAppReq.ProtoReflect.Descriptor instead.
+func (*GetAgentAppReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *GetAgentAppReq) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *GetAgentAppReq) GetScene() string {
+	if x != nil {
+		return x.Scene
+	}
+	return ""
+}
+
+type GetAgentAppRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	App           *AgentAppItem          `protobuf:"bytes,1,opt,name=app,proto3" json:"app,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentAppRes) Reset() {
+	*x = GetAgentAppRes{}
+	mi := &file_platform_rpc_proto_msgTypes[78]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentAppRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentAppRes) ProtoMessage() {}
+
+func (x *GetAgentAppRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[78]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentAppRes.ProtoReflect.Descriptor instead.
+func (*GetAgentAppRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{78}
+}
+
+func (x *GetAgentAppRes) GetApp() *AgentAppItem {
+	if x != nil {
+		return x.App
+	}
+	return nil
+}
+
+type ListAgentAppsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Scene         string                 `protobuf:"bytes,1,opt,name=scene,proto3" json:"scene,omitempty"`    // 可选过滤
+	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"` // 可选，0=全部
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentAppsReq) Reset() {
+	*x = ListAgentAppsReq{}
+	mi := &file_platform_rpc_proto_msgTypes[79]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentAppsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentAppsReq) ProtoMessage() {}
+
+func (x *ListAgentAppsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[79]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentAppsReq.ProtoReflect.Descriptor instead.
+func (*ListAgentAppsReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *ListAgentAppsReq) GetScene() string {
+	if x != nil {
+		return x.Scene
+	}
+	return ""
+}
+
+func (x *ListAgentAppsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListAgentAppsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAgentAppsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListAgentAppsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Apps          []*AgentAppItem        `protobuf:"bytes,2,rep,name=apps,proto3" json:"apps,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentAppsRes) Reset() {
+	*x = ListAgentAppsRes{}
+	mi := &file_platform_rpc_proto_msgTypes[80]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentAppsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentAppsRes) ProtoMessage() {}
+
+func (x *ListAgentAppsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[80]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentAppsRes.ProtoReflect.Descriptor instead.
+func (*ListAgentAppsRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{80}
+}
+
+func (x *ListAgentAppsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListAgentAppsRes) GetApps() []*AgentAppItem {
+	if x != nil {
+		return x.Apps
+	}
+	return nil
+}
+
+type CreateAgentAppReq struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Name             string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Scene            string                 `protobuf:"bytes,2,opt,name=scene,proto3" json:"scene,omitempty"`
+	SystemPrompt     string                 `protobuf:"bytes,3,opt,name=system_prompt,json=systemPrompt,proto3" json:"system_prompt,omitempty"`
+	LlmModelId       string                 `protobuf:"bytes,4,opt,name=llm_model_id,json=llmModelId,proto3" json:"llm_model_id,omitempty"`
+	ModelParams      string                 `protobuf:"bytes,5,opt,name=model_params,json=modelParams,proto3" json:"model_params,omitempty"`      // JSON
+	Tools            string                 `protobuf:"bytes,6,opt,name=tools,proto3" json:"tools,omitempty"`                                     // JSON
+	McpServerIds     string                 `protobuf:"bytes,7,opt,name=mcp_server_ids,json=mcpServerIds,proto3" json:"mcp_server_ids,omitempty"` // JSON
+	KnowledgeIds     string                 `protobuf:"bytes,8,opt,name=knowledge_ids,json=knowledgeIds,proto3" json:"knowledge_ids,omitempty"`   // JSON
+	OpeningMessage   string                 `protobuf:"bytes,9,opt,name=opening_message,json=openingMessage,proto3" json:"opening_message,omitempty"`
+	OpeningQuestions string                 `protobuf:"bytes,10,opt,name=opening_questions,json=openingQuestions,proto3" json:"opening_questions,omitempty"` // JSON
+	Variables        string                 `protobuf:"bytes,11,opt,name=variables,proto3" json:"variables,omitempty"`                                       // JSON
+	Status           int32                  `protobuf:"varint,12,opt,name=status,proto3" json:"status,omitempty"`
+	Sort             int32                  `protobuf:"varint,13,opt,name=sort,proto3" json:"sort,omitempty"`
+	CreatedBy        string                 `protobuf:"bytes,14,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *CreateAgentAppReq) Reset() {
+	*x = CreateAgentAppReq{}
+	mi := &file_platform_rpc_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentAppReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentAppReq) ProtoMessage() {}
+
+func (x *CreateAgentAppReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentAppReq.ProtoReflect.Descriptor instead.
+func (*CreateAgentAppReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{81}
+}
+
+func (x *CreateAgentAppReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetScene() string {
+	if x != nil {
+		return x.Scene
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetSystemPrompt() string {
+	if x != nil {
+		return x.SystemPrompt
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetLlmModelId() string {
+	if x != nil {
+		return x.LlmModelId
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetModelParams() string {
+	if x != nil {
+		return x.ModelParams
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetTools() string {
+	if x != nil {
+		return x.Tools
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetMcpServerIds() string {
+	if x != nil {
+		return x.McpServerIds
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetKnowledgeIds() string {
+	if x != nil {
+		return x.KnowledgeIds
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetOpeningMessage() string {
+	if x != nil {
+		return x.OpeningMessage
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetOpeningQuestions() string {
+	if x != nil {
+		return x.OpeningQuestions
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetVariables() string {
+	if x != nil {
+		return x.Variables
+	}
+	return ""
+}
+
+func (x *CreateAgentAppReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *CreateAgentAppReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *CreateAgentAppReq) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+type CreateAgentAppRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAgentAppRes) Reset() {
+	*x = CreateAgentAppRes{}
+	mi := &file_platform_rpc_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentAppRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentAppRes) ProtoMessage() {}
+
+func (x *CreateAgentAppRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentAppRes.ProtoReflect.Descriptor instead.
+func (*CreateAgentAppRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{82}
+}
+
+func (x *CreateAgentAppRes) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+type UpdateAgentAppReq struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	AppId            string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	Name             string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Scene            string                 `protobuf:"bytes,3,opt,name=scene,proto3" json:"scene,omitempty"`
+	SystemPrompt     string                 `protobuf:"bytes,4,opt,name=system_prompt,json=systemPrompt,proto3" json:"system_prompt,omitempty"`
+	LlmModelId       string                 `protobuf:"bytes,5,opt,name=llm_model_id,json=llmModelId,proto3" json:"llm_model_id,omitempty"`
+	ModelParams      string                 `protobuf:"bytes,6,opt,name=model_params,json=modelParams,proto3" json:"model_params,omitempty"`      // JSON
+	Tools            string                 `protobuf:"bytes,7,opt,name=tools,proto3" json:"tools,omitempty"`                                     // JSON
+	McpServerIds     string                 `protobuf:"bytes,8,opt,name=mcp_server_ids,json=mcpServerIds,proto3" json:"mcp_server_ids,omitempty"` // JSON
+	KnowledgeIds     string                 `protobuf:"bytes,9,opt,name=knowledge_ids,json=knowledgeIds,proto3" json:"knowledge_ids,omitempty"`   // JSON
+	OpeningMessage   string                 `protobuf:"bytes,10,opt,name=opening_message,json=openingMessage,proto3" json:"opening_message,omitempty"`
+	OpeningQuestions string                 `protobuf:"bytes,11,opt,name=opening_questions,json=openingQuestions,proto3" json:"opening_questions,omitempty"` // JSON
+	Variables        string                 `protobuf:"bytes,12,opt,name=variables,proto3" json:"variables,omitempty"`                                       // JSON
+	Status           int32                  `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`
+	Sort             int32                  `protobuf:"varint,14,opt,name=sort,proto3" json:"sort,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *UpdateAgentAppReq) Reset() {
+	*x = UpdateAgentAppReq{}
+	mi := &file_platform_rpc_proto_msgTypes[83]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentAppReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentAppReq) ProtoMessage() {}
+
+func (x *UpdateAgentAppReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[83]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentAppReq.ProtoReflect.Descriptor instead.
+func (*UpdateAgentAppReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{83}
+}
+
+func (x *UpdateAgentAppReq) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetScene() string {
+	if x != nil {
+		return x.Scene
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetSystemPrompt() string {
+	if x != nil {
+		return x.SystemPrompt
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetLlmModelId() string {
+	if x != nil {
+		return x.LlmModelId
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetModelParams() string {
+	if x != nil {
+		return x.ModelParams
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetTools() string {
+	if x != nil {
+		return x.Tools
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetMcpServerIds() string {
+	if x != nil {
+		return x.McpServerIds
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetKnowledgeIds() string {
+	if x != nil {
+		return x.KnowledgeIds
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetOpeningMessage() string {
+	if x != nil {
+		return x.OpeningMessage
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetOpeningQuestions() string {
+	if x != nil {
+		return x.OpeningQuestions
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetVariables() string {
+	if x != nil {
+		return x.Variables
+	}
+	return ""
+}
+
+func (x *UpdateAgentAppReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UpdateAgentAppReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type UpdateAgentAppRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentAppRes) Reset() {
+	*x = UpdateAgentAppRes{}
+	mi := &file_platform_rpc_proto_msgTypes[84]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentAppRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentAppRes) ProtoMessage() {}
+
+func (x *UpdateAgentAppRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[84]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentAppRes.ProtoReflect.Descriptor instead.
+func (*UpdateAgentAppRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{84}
+}
+
+type DeleteAgentAppReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentAppReq) Reset() {
+	*x = DeleteAgentAppReq{}
+	mi := &file_platform_rpc_proto_msgTypes[85]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentAppReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentAppReq) ProtoMessage() {}
+
+func (x *DeleteAgentAppReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[85]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentAppReq.ProtoReflect.Descriptor instead.
+func (*DeleteAgentAppReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{85}
+}
+
+func (x *DeleteAgentAppReq) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+type DeleteAgentAppRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentAppRes) Reset() {
+	*x = DeleteAgentAppRes{}
+	mi := &file_platform_rpc_proto_msgTypes[86]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentAppRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentAppRes) ProtoMessage() {}
+
+func (x *DeleteAgentAppRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[86]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentAppRes.ProtoReflect.Descriptor instead.
+func (*DeleteAgentAppRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{86}
+}
+
+type AgentModelItem struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ModelId            string                 `protobuf:"bytes,2,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	Source             string                 `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"` // official|custom
+	UserId             string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name               string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	Provider           string                 `protobuf:"bytes,6,opt,name=provider,proto3" json:"provider,omitempty"`
+	ModelName          string                 `protobuf:"bytes,7,opt,name=model_name,json=modelName,proto3" json:"model_name,omitempty"`
+	Endpoint           string                 `protobuf:"bytes,8,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	ApiKey             string                 `protobuf:"bytes,9,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"` // 接口只出掩码
+	ContextWindow      int64                  `protobuf:"varint,10,opt,name=context_window,json=contextWindow,proto3" json:"context_window,omitempty"`
+	MaxOutputTokens    int32                  `protobuf:"varint,11,opt,name=max_output_tokens,json=maxOutputTokens,proto3" json:"max_output_tokens,omitempty"`
+	InputModalities    string                 `protobuf:"bytes,12,opt,name=input_modalities,json=inputModalities,proto3" json:"input_modalities,omitempty"`    // JSON
+	OutputModalities   string                 `protobuf:"bytes,13,opt,name=output_modalities,json=outputModalities,proto3" json:"output_modalities,omitempty"` // JSON
+	MaxTokensFlash     int32                  `protobuf:"varint,14,opt,name=max_tokens_flash,json=maxTokensFlash,proto3" json:"max_tokens_flash,omitempty"`
+	MaxTokensLow       int32                  `protobuf:"varint,15,opt,name=max_tokens_low,json=maxTokensLow,proto3" json:"max_tokens_low,omitempty"`
+	MaxTokensMedium    int32                  `protobuf:"varint,16,opt,name=max_tokens_medium,json=maxTokensMedium,proto3" json:"max_tokens_medium,omitempty"`
+	MaxTokensHigh      int32                  `protobuf:"varint,17,opt,name=max_tokens_high,json=maxTokensHigh,proto3" json:"max_tokens_high,omitempty"`
+	InstructionRole    string                 `protobuf:"bytes,18,opt,name=instruction_role,json=instructionRole,proto3" json:"instruction_role,omitempty"`
+	SupportsThinking   bool                   `protobuf:"varint,19,opt,name=supports_thinking,json=supportsThinking,proto3" json:"supports_thinking,omitempty"`
+	ThinkingCanDisable bool                   `protobuf:"varint,20,opt,name=thinking_can_disable,json=thinkingCanDisable,proto3" json:"thinking_can_disable,omitempty"`
+	ThinkingLevels     string                 `protobuf:"bytes,21,opt,name=thinking_levels,json=thinkingLevels,proto3" json:"thinking_levels,omitempty"` // JSON
+	SupportsTools      bool                   `protobuf:"varint,22,opt,name=supports_tools,json=supportsTools,proto3" json:"supports_tools,omitempty"`
+	SupportsVision     bool                   `protobuf:"varint,23,opt,name=supports_vision,json=supportsVision,proto3" json:"supports_vision,omitempty"`
+	Sort               int32                  `protobuf:"varint,24,opt,name=sort,proto3" json:"sort,omitempty"`
+	Status             int32                  `protobuf:"varint,25,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AgentModelItem) Reset() {
+	*x = AgentModelItem{}
+	mi := &file_platform_rpc_proto_msgTypes[87]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentModelItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentModelItem) ProtoMessage() {}
+
+func (x *AgentModelItem) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[87]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentModelItem.ProtoReflect.Descriptor instead.
+func (*AgentModelItem) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{87}
+}
+
+func (x *AgentModelItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetModelName() string {
+	if x != nil {
+		return x.ModelName
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetEndpoint() string {
+	if x != nil {
+		return x.Endpoint
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetApiKey() string {
+	if x != nil {
+		return x.ApiKey
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetContextWindow() int64 {
+	if x != nil {
+		return x.ContextWindow
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetMaxOutputTokens() int32 {
+	if x != nil {
+		return x.MaxOutputTokens
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetInputModalities() string {
+	if x != nil {
+		return x.InputModalities
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetOutputModalities() string {
+	if x != nil {
+		return x.OutputModalities
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetMaxTokensFlash() int32 {
+	if x != nil {
+		return x.MaxTokensFlash
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetMaxTokensLow() int32 {
+	if x != nil {
+		return x.MaxTokensLow
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetMaxTokensMedium() int32 {
+	if x != nil {
+		return x.MaxTokensMedium
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetMaxTokensHigh() int32 {
+	if x != nil {
+		return x.MaxTokensHigh
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetInstructionRole() string {
+	if x != nil {
+		return x.InstructionRole
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetSupportsThinking() bool {
+	if x != nil {
+		return x.SupportsThinking
+	}
+	return false
+}
+
+func (x *AgentModelItem) GetThinkingCanDisable() bool {
+	if x != nil {
+		return x.ThinkingCanDisable
+	}
+	return false
+}
+
+func (x *AgentModelItem) GetThinkingLevels() string {
+	if x != nil {
+		return x.ThinkingLevels
+	}
+	return ""
+}
+
+func (x *AgentModelItem) GetSupportsTools() bool {
+	if x != nil {
+		return x.SupportsTools
+	}
+	return false
+}
+
+func (x *AgentModelItem) GetSupportsVision() bool {
+	if x != nil {
+		return x.SupportsVision
+	}
+	return false
+}
+
+func (x *AgentModelItem) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *AgentModelItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type GetAgentModelReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ModelId       string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	ModelSource   string                 `protobuf:"bytes,2,opt,name=model_source,json=modelSource,proto3" json:"model_source,omitempty"` // official|custom；空=official
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                // custom 时按用户取
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentModelReq) Reset() {
+	*x = GetAgentModelReq{}
+	mi := &file_platform_rpc_proto_msgTypes[88]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentModelReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentModelReq) ProtoMessage() {}
+
+func (x *GetAgentModelReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[88]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentModelReq.ProtoReflect.Descriptor instead.
+func (*GetAgentModelReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{88}
+}
+
+func (x *GetAgentModelReq) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *GetAgentModelReq) GetModelSource() string {
+	if x != nil {
+		return x.ModelSource
+	}
+	return ""
+}
+
+func (x *GetAgentModelReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type GetAgentModelRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Model         *AgentModelItem        `protobuf:"bytes,1,opt,name=model,proto3" json:"model,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentModelRes) Reset() {
+	*x = GetAgentModelRes{}
+	mi := &file_platform_rpc_proto_msgTypes[89]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentModelRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentModelRes) ProtoMessage() {}
+
+func (x *GetAgentModelRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[89]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentModelRes.ProtoReflect.Descriptor instead.
+func (*GetAgentModelRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{89}
+}
+
+func (x *GetAgentModelRes) GetModel() *AgentModelItem {
+	if x != nil {
+		return x.Model
+	}
+	return nil
+}
+
+type ListAgentModelsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`               // official|custom；空=全部
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // custom 时按用户取
+	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`              // 0=全部
+	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentModelsReq) Reset() {
+	*x = ListAgentModelsReq{}
+	mi := &file_platform_rpc_proto_msgTypes[90]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentModelsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentModelsReq) ProtoMessage() {}
+
+func (x *ListAgentModelsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[90]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentModelsReq.ProtoReflect.Descriptor instead.
+func (*ListAgentModelsReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{90}
+}
+
+func (x *ListAgentModelsReq) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *ListAgentModelsReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListAgentModelsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListAgentModelsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAgentModelsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListAgentModelsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Models        []*AgentModelItem      `protobuf:"bytes,2,rep,name=models,proto3" json:"models,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentModelsRes) Reset() {
+	*x = ListAgentModelsRes{}
+	mi := &file_platform_rpc_proto_msgTypes[91]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentModelsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentModelsRes) ProtoMessage() {}
+
+func (x *ListAgentModelsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[91]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentModelsRes.ProtoReflect.Descriptor instead.
+func (*ListAgentModelsRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{91}
+}
+
+func (x *ListAgentModelsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListAgentModelsRes) GetModels() []*AgentModelItem {
+	if x != nil {
+		return x.Models
+	}
+	return nil
+}
+
+type CreateAgentModelReq struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Name               string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Source             string                 `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"` // official|custom
+	UserId             string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Provider           string                 `protobuf:"bytes,4,opt,name=provider,proto3" json:"provider,omitempty"`
+	ModelName          string                 `protobuf:"bytes,5,opt,name=model_name,json=modelName,proto3" json:"model_name,omitempty"`
+	Endpoint           string                 `protobuf:"bytes,6,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	ApiKey             string                 `protobuf:"bytes,7,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	ContextWindow      int64                  `protobuf:"varint,8,opt,name=context_window,json=contextWindow,proto3" json:"context_window,omitempty"`
+	MaxOutputTokens    int32                  `protobuf:"varint,9,opt,name=max_output_tokens,json=maxOutputTokens,proto3" json:"max_output_tokens,omitempty"`
+	InputModalities    string                 `protobuf:"bytes,10,opt,name=input_modalities,json=inputModalities,proto3" json:"input_modalities,omitempty"`    // JSON
+	OutputModalities   string                 `protobuf:"bytes,11,opt,name=output_modalities,json=outputModalities,proto3" json:"output_modalities,omitempty"` // JSON
+	MaxTokensFlash     int32                  `protobuf:"varint,12,opt,name=max_tokens_flash,json=maxTokensFlash,proto3" json:"max_tokens_flash,omitempty"`
+	MaxTokensLow       int32                  `protobuf:"varint,13,opt,name=max_tokens_low,json=maxTokensLow,proto3" json:"max_tokens_low,omitempty"`
+	MaxTokensMedium    int32                  `protobuf:"varint,14,opt,name=max_tokens_medium,json=maxTokensMedium,proto3" json:"max_tokens_medium,omitempty"`
+	MaxTokensHigh      int32                  `protobuf:"varint,15,opt,name=max_tokens_high,json=maxTokensHigh,proto3" json:"max_tokens_high,omitempty"`
+	InstructionRole    string                 `protobuf:"bytes,16,opt,name=instruction_role,json=instructionRole,proto3" json:"instruction_role,omitempty"`
+	SupportsThinking   bool                   `protobuf:"varint,17,opt,name=supports_thinking,json=supportsThinking,proto3" json:"supports_thinking,omitempty"`
+	ThinkingCanDisable bool                   `protobuf:"varint,18,opt,name=thinking_can_disable,json=thinkingCanDisable,proto3" json:"thinking_can_disable,omitempty"`
+	ThinkingLevels     string                 `protobuf:"bytes,19,opt,name=thinking_levels,json=thinkingLevels,proto3" json:"thinking_levels,omitempty"` // JSON
+	SupportsTools      bool                   `protobuf:"varint,20,opt,name=supports_tools,json=supportsTools,proto3" json:"supports_tools,omitempty"`
+	SupportsVision     bool                   `protobuf:"varint,21,opt,name=supports_vision,json=supportsVision,proto3" json:"supports_vision,omitempty"`
+	Sort               int32                  `protobuf:"varint,22,opt,name=sort,proto3" json:"sort,omitempty"`
+	Status             int32                  `protobuf:"varint,23,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *CreateAgentModelReq) Reset() {
+	*x = CreateAgentModelReq{}
+	mi := &file_platform_rpc_proto_msgTypes[92]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentModelReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentModelReq) ProtoMessage() {}
+
+func (x *CreateAgentModelReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[92]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentModelReq.ProtoReflect.Descriptor instead.
+func (*CreateAgentModelReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{92}
+}
+
+func (x *CreateAgentModelReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetModelName() string {
+	if x != nil {
+		return x.ModelName
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetEndpoint() string {
+	if x != nil {
+		return x.Endpoint
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetApiKey() string {
+	if x != nil {
+		return x.ApiKey
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetContextWindow() int64 {
+	if x != nil {
+		return x.ContextWindow
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetMaxOutputTokens() int32 {
+	if x != nil {
+		return x.MaxOutputTokens
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetInputModalities() string {
+	if x != nil {
+		return x.InputModalities
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetOutputModalities() string {
+	if x != nil {
+		return x.OutputModalities
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetMaxTokensFlash() int32 {
+	if x != nil {
+		return x.MaxTokensFlash
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetMaxTokensLow() int32 {
+	if x != nil {
+		return x.MaxTokensLow
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetMaxTokensMedium() int32 {
+	if x != nil {
+		return x.MaxTokensMedium
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetMaxTokensHigh() int32 {
+	if x != nil {
+		return x.MaxTokensHigh
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetInstructionRole() string {
+	if x != nil {
+		return x.InstructionRole
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetSupportsThinking() bool {
+	if x != nil {
+		return x.SupportsThinking
+	}
+	return false
+}
+
+func (x *CreateAgentModelReq) GetThinkingCanDisable() bool {
+	if x != nil {
+		return x.ThinkingCanDisable
+	}
+	return false
+}
+
+func (x *CreateAgentModelReq) GetThinkingLevels() string {
+	if x != nil {
+		return x.ThinkingLevels
+	}
+	return ""
+}
+
+func (x *CreateAgentModelReq) GetSupportsTools() bool {
+	if x != nil {
+		return x.SupportsTools
+	}
+	return false
+}
+
+func (x *CreateAgentModelReq) GetSupportsVision() bool {
+	if x != nil {
+		return x.SupportsVision
+	}
+	return false
+}
+
+func (x *CreateAgentModelReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *CreateAgentModelReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type CreateAgentModelRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ModelId       string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAgentModelRes) Reset() {
+	*x = CreateAgentModelRes{}
+	mi := &file_platform_rpc_proto_msgTypes[93]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentModelRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentModelRes) ProtoMessage() {}
+
+func (x *CreateAgentModelRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[93]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentModelRes.ProtoReflect.Descriptor instead.
+func (*CreateAgentModelRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{93}
+}
+
+func (x *CreateAgentModelRes) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+type UpdateAgentModelReq struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	ModelId            string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	Name               string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Provider           string                 `protobuf:"bytes,3,opt,name=provider,proto3" json:"provider,omitempty"`
+	ModelName          string                 `protobuf:"bytes,4,opt,name=model_name,json=modelName,proto3" json:"model_name,omitempty"`
+	Endpoint           string                 `protobuf:"bytes,5,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	ApiKey             string                 `protobuf:"bytes,6,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	ContextWindow      int64                  `protobuf:"varint,7,opt,name=context_window,json=contextWindow,proto3" json:"context_window,omitempty"`
+	MaxOutputTokens    int32                  `protobuf:"varint,8,opt,name=max_output_tokens,json=maxOutputTokens,proto3" json:"max_output_tokens,omitempty"`
+	InputModalities    string                 `protobuf:"bytes,9,opt,name=input_modalities,json=inputModalities,proto3" json:"input_modalities,omitempty"`     // JSON
+	OutputModalities   string                 `protobuf:"bytes,10,opt,name=output_modalities,json=outputModalities,proto3" json:"output_modalities,omitempty"` // JSON
+	MaxTokensFlash     int32                  `protobuf:"varint,11,opt,name=max_tokens_flash,json=maxTokensFlash,proto3" json:"max_tokens_flash,omitempty"`
+	MaxTokensLow       int32                  `protobuf:"varint,12,opt,name=max_tokens_low,json=maxTokensLow,proto3" json:"max_tokens_low,omitempty"`
+	MaxTokensMedium    int32                  `protobuf:"varint,13,opt,name=max_tokens_medium,json=maxTokensMedium,proto3" json:"max_tokens_medium,omitempty"`
+	MaxTokensHigh      int32                  `protobuf:"varint,14,opt,name=max_tokens_high,json=maxTokensHigh,proto3" json:"max_tokens_high,omitempty"`
+	InstructionRole    string                 `protobuf:"bytes,15,opt,name=instruction_role,json=instructionRole,proto3" json:"instruction_role,omitempty"`
+	SupportsThinking   bool                   `protobuf:"varint,16,opt,name=supports_thinking,json=supportsThinking,proto3" json:"supports_thinking,omitempty"`
+	ThinkingCanDisable bool                   `protobuf:"varint,17,opt,name=thinking_can_disable,json=thinkingCanDisable,proto3" json:"thinking_can_disable,omitempty"`
+	ThinkingLevels     string                 `protobuf:"bytes,18,opt,name=thinking_levels,json=thinkingLevels,proto3" json:"thinking_levels,omitempty"` // JSON
+	SupportsTools      bool                   `protobuf:"varint,19,opt,name=supports_tools,json=supportsTools,proto3" json:"supports_tools,omitempty"`
+	SupportsVision     bool                   `protobuf:"varint,20,opt,name=supports_vision,json=supportsVision,proto3" json:"supports_vision,omitempty"`
+	Sort               int32                  `protobuf:"varint,21,opt,name=sort,proto3" json:"sort,omitempty"`
+	Status             int32                  `protobuf:"varint,22,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *UpdateAgentModelReq) Reset() {
+	*x = UpdateAgentModelReq{}
+	mi := &file_platform_rpc_proto_msgTypes[94]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentModelReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentModelReq) ProtoMessage() {}
+
+func (x *UpdateAgentModelReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[94]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentModelReq.ProtoReflect.Descriptor instead.
+func (*UpdateAgentModelReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{94}
+}
+
+func (x *UpdateAgentModelReq) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetModelName() string {
+	if x != nil {
+		return x.ModelName
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetEndpoint() string {
+	if x != nil {
+		return x.Endpoint
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetApiKey() string {
+	if x != nil {
+		return x.ApiKey
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetContextWindow() int64 {
+	if x != nil {
+		return x.ContextWindow
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetMaxOutputTokens() int32 {
+	if x != nil {
+		return x.MaxOutputTokens
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetInputModalities() string {
+	if x != nil {
+		return x.InputModalities
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetOutputModalities() string {
+	if x != nil {
+		return x.OutputModalities
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetMaxTokensFlash() int32 {
+	if x != nil {
+		return x.MaxTokensFlash
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetMaxTokensLow() int32 {
+	if x != nil {
+		return x.MaxTokensLow
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetMaxTokensMedium() int32 {
+	if x != nil {
+		return x.MaxTokensMedium
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetMaxTokensHigh() int32 {
+	if x != nil {
+		return x.MaxTokensHigh
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetInstructionRole() string {
+	if x != nil {
+		return x.InstructionRole
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetSupportsThinking() bool {
+	if x != nil {
+		return x.SupportsThinking
+	}
+	return false
+}
+
+func (x *UpdateAgentModelReq) GetThinkingCanDisable() bool {
+	if x != nil {
+		return x.ThinkingCanDisable
+	}
+	return false
+}
+
+func (x *UpdateAgentModelReq) GetThinkingLevels() string {
+	if x != nil {
+		return x.ThinkingLevels
+	}
+	return ""
+}
+
+func (x *UpdateAgentModelReq) GetSupportsTools() bool {
+	if x != nil {
+		return x.SupportsTools
+	}
+	return false
+}
+
+func (x *UpdateAgentModelReq) GetSupportsVision() bool {
+	if x != nil {
+		return x.SupportsVision
+	}
+	return false
+}
+
+func (x *UpdateAgentModelReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *UpdateAgentModelReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type UpdateAgentModelRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentModelRes) Reset() {
+	*x = UpdateAgentModelRes{}
+	mi := &file_platform_rpc_proto_msgTypes[95]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentModelRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentModelRes) ProtoMessage() {}
+
+func (x *UpdateAgentModelRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[95]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentModelRes.ProtoReflect.Descriptor instead.
+func (*UpdateAgentModelRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{95}
+}
+
+type DeleteAgentModelReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ModelId       string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	Source        string                 `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"` // 必须为 custom
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentModelReq) Reset() {
+	*x = DeleteAgentModelReq{}
+	mi := &file_platform_rpc_proto_msgTypes[96]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentModelReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentModelReq) ProtoMessage() {}
+
+func (x *DeleteAgentModelReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[96]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentModelReq.ProtoReflect.Descriptor instead.
+func (*DeleteAgentModelReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{96}
+}
+
+func (x *DeleteAgentModelReq) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *DeleteAgentModelReq) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *DeleteAgentModelReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type DeleteAgentModelRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentModelRes) Reset() {
+	*x = DeleteAgentModelRes{}
+	mi := &file_platform_rpc_proto_msgTypes[97]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentModelRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentModelRes) ProtoMessage() {}
+
+func (x *DeleteAgentModelRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[97]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentModelRes.ProtoReflect.Descriptor instead.
+func (*DeleteAgentModelRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{97}
+}
+
+type AgentToolItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ToolId        string                 `protobuf:"bytes,2,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	ToolType      string                 `protobuf:"bytes,4,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"` // builtin|mcp|api
+	Config        string                 `protobuf:"bytes,5,opt,name=config,proto3" json:"config,omitempty"`                     // JSON
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	Sort          int32                  `protobuf:"varint,7,opt,name=sort,proto3" json:"sort,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AgentToolItem) Reset() {
+	*x = AgentToolItem{}
+	mi := &file_platform_rpc_proto_msgTypes[98]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentToolItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentToolItem) ProtoMessage() {}
+
+func (x *AgentToolItem) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[98]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentToolItem.ProtoReflect.Descriptor instead.
+func (*AgentToolItem) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{98}
+}
+
+func (x *AgentToolItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AgentToolItem) GetToolId() string {
+	if x != nil {
+		return x.ToolId
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetToolType() string {
+	if x != nil {
+		return x.ToolType
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *AgentToolItem) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type ListAgentToolsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"` // 0=全部
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentToolsReq) Reset() {
+	*x = ListAgentToolsReq{}
+	mi := &file_platform_rpc_proto_msgTypes[99]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentToolsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentToolsReq) ProtoMessage() {}
+
+func (x *ListAgentToolsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[99]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentToolsReq.ProtoReflect.Descriptor instead.
+func (*ListAgentToolsReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{99}
+}
+
+func (x *ListAgentToolsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type ListAgentToolsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tools         []*AgentToolItem       `protobuf:"bytes,1,rep,name=tools,proto3" json:"tools,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentToolsRes) Reset() {
+	*x = ListAgentToolsRes{}
+	mi := &file_platform_rpc_proto_msgTypes[100]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentToolsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentToolsRes) ProtoMessage() {}
+
+func (x *ListAgentToolsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[100]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentToolsRes.ProtoReflect.Descriptor instead.
+func (*ListAgentToolsRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{100}
+}
+
+func (x *ListAgentToolsRes) GetTools() []*AgentToolItem {
+	if x != nil {
+		return x.Tools
+	}
+	return nil
+}
+
+type GetAgentToolReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ToolId        string                 `protobuf:"bytes,1,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentToolReq) Reset() {
+	*x = GetAgentToolReq{}
+	mi := &file_platform_rpc_proto_msgTypes[101]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentToolReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentToolReq) ProtoMessage() {}
+
+func (x *GetAgentToolReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[101]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentToolReq.ProtoReflect.Descriptor instead.
+func (*GetAgentToolReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{101}
+}
+
+func (x *GetAgentToolReq) GetToolId() string {
+	if x != nil {
+		return x.ToolId
+	}
+	return ""
+}
+
+type GetAgentToolRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tool          *AgentToolItem         `protobuf:"bytes,1,opt,name=tool,proto3" json:"tool,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentToolRes) Reset() {
+	*x = GetAgentToolRes{}
+	mi := &file_platform_rpc_proto_msgTypes[102]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentToolRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentToolRes) ProtoMessage() {}
+
+func (x *GetAgentToolRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[102]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentToolRes.ProtoReflect.Descriptor instead.
+func (*GetAgentToolRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{102}
+}
+
+func (x *GetAgentToolRes) GetTool() *AgentToolItem {
+	if x != nil {
+		return x.Tool
+	}
+	return nil
+}
+
+type CreateAgentToolReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ToolType      string                 `protobuf:"bytes,2,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"` // builtin|mcp|api
+	Config        string                 `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`                     // JSON
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	Sort          int32                  `protobuf:"varint,5,opt,name=sort,proto3" json:"sort,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAgentToolReq) Reset() {
+	*x = CreateAgentToolReq{}
+	mi := &file_platform_rpc_proto_msgTypes[103]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentToolReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentToolReq) ProtoMessage() {}
+
+func (x *CreateAgentToolReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[103]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentToolReq.ProtoReflect.Descriptor instead.
+func (*CreateAgentToolReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{103}
+}
+
+func (x *CreateAgentToolReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateAgentToolReq) GetToolType() string {
+	if x != nil {
+		return x.ToolType
+	}
+	return ""
+}
+
+func (x *CreateAgentToolReq) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *CreateAgentToolReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *CreateAgentToolReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type CreateAgentToolRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ToolId        string                 `protobuf:"bytes,1,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAgentToolRes) Reset() {
+	*x = CreateAgentToolRes{}
+	mi := &file_platform_rpc_proto_msgTypes[104]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentToolRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentToolRes) ProtoMessage() {}
+
+func (x *CreateAgentToolRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[104]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentToolRes.ProtoReflect.Descriptor instead.
+func (*CreateAgentToolRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{104}
+}
+
+func (x *CreateAgentToolRes) GetToolId() string {
+	if x != nil {
+		return x.ToolId
+	}
+	return ""
+}
+
+type UpdateAgentToolReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ToolId        string                 `protobuf:"bytes,1,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ToolType      string                 `protobuf:"bytes,3,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"`
+	Config        string                 `protobuf:"bytes,4,opt,name=config,proto3" json:"config,omitempty"` // JSON
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	Sort          int32                  `protobuf:"varint,6,opt,name=sort,proto3" json:"sort,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentToolReq) Reset() {
+	*x = UpdateAgentToolReq{}
+	mi := &file_platform_rpc_proto_msgTypes[105]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentToolReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentToolReq) ProtoMessage() {}
+
+func (x *UpdateAgentToolReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[105]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentToolReq.ProtoReflect.Descriptor instead.
+func (*UpdateAgentToolReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{105}
+}
+
+func (x *UpdateAgentToolReq) GetToolId() string {
+	if x != nil {
+		return x.ToolId
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetToolType() string {
+	if x != nil {
+		return x.ToolType
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UpdateAgentToolReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type UpdateAgentToolRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentToolRes) Reset() {
+	*x = UpdateAgentToolRes{}
+	mi := &file_platform_rpc_proto_msgTypes[106]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentToolRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentToolRes) ProtoMessage() {}
+
+func (x *UpdateAgentToolRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[106]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentToolRes.ProtoReflect.Descriptor instead.
+func (*UpdateAgentToolRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{106}
+}
+
+type DeleteAgentToolReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ToolId        string                 `protobuf:"bytes,1,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentToolReq) Reset() {
+	*x = DeleteAgentToolReq{}
+	mi := &file_platform_rpc_proto_msgTypes[107]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentToolReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentToolReq) ProtoMessage() {}
+
+func (x *DeleteAgentToolReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[107]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentToolReq.ProtoReflect.Descriptor instead.
+func (*DeleteAgentToolReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{107}
+}
+
+func (x *DeleteAgentToolReq) GetToolId() string {
+	if x != nil {
+		return x.ToolId
+	}
+	return ""
+}
+
+type DeleteAgentToolRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentToolRes) Reset() {
+	*x = DeleteAgentToolRes{}
+	mi := &file_platform_rpc_proto_msgTypes[108]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentToolRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentToolRes) ProtoMessage() {}
+
+func (x *DeleteAgentToolRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[108]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentToolRes.ProtoReflect.Descriptor instead.
+func (*DeleteAgentToolRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{108}
+}
+
+type AgentMcpServerItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	McpServerId   string                 `protobuf:"bytes,2,opt,name=mcp_server_id,json=mcpServerId,proto3" json:"mcp_server_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	ServerName    string                 `protobuf:"bytes,4,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
+	Transport     string                 `protobuf:"bytes,5,opt,name=transport,proto3" json:"transport,omitempty"` // stdio|sse|websocket
+	Config        string                 `protobuf:"bytes,6,opt,name=config,proto3" json:"config,omitempty"`       // JSON
+	Tools         string                 `protobuf:"bytes,7,opt,name=tools,proto3" json:"tools,omitempty"`         // JSON
+	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AgentMcpServerItem) Reset() {
+	*x = AgentMcpServerItem{}
+	mi := &file_platform_rpc_proto_msgTypes[109]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentMcpServerItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentMcpServerItem) ProtoMessage() {}
+
+func (x *AgentMcpServerItem) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[109]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentMcpServerItem.ProtoReflect.Descriptor instead.
+func (*AgentMcpServerItem) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{109}
+}
+
+func (x *AgentMcpServerItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AgentMcpServerItem) GetMcpServerId() string {
+	if x != nil {
+		return x.McpServerId
+	}
+	return ""
+}
+
+func (x *AgentMcpServerItem) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentMcpServerItem) GetServerName() string {
+	if x != nil {
+		return x.ServerName
+	}
+	return ""
+}
+
+func (x *AgentMcpServerItem) GetTransport() string {
+	if x != nil {
+		return x.Transport
+	}
+	return ""
+}
+
+func (x *AgentMcpServerItem) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *AgentMcpServerItem) GetTools() string {
+	if x != nil {
+		return x.Tools
+	}
+	return ""
+}
+
+func (x *AgentMcpServerItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type ListAgentMcpServersReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"` // 0=全部
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentMcpServersReq) Reset() {
+	*x = ListAgentMcpServersReq{}
+	mi := &file_platform_rpc_proto_msgTypes[110]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentMcpServersReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentMcpServersReq) ProtoMessage() {}
+
+func (x *ListAgentMcpServersReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[110]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentMcpServersReq.ProtoReflect.Descriptor instead.
+func (*ListAgentMcpServersReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{110}
+}
+
+func (x *ListAgentMcpServersReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type ListAgentMcpServersRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Servers       []*AgentMcpServerItem  `protobuf:"bytes,1,rep,name=servers,proto3" json:"servers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAgentMcpServersRes) Reset() {
+	*x = ListAgentMcpServersRes{}
+	mi := &file_platform_rpc_proto_msgTypes[111]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAgentMcpServersRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAgentMcpServersRes) ProtoMessage() {}
+
+func (x *ListAgentMcpServersRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[111]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAgentMcpServersRes.ProtoReflect.Descriptor instead.
+func (*ListAgentMcpServersRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{111}
+}
+
+func (x *ListAgentMcpServersRes) GetServers() []*AgentMcpServerItem {
+	if x != nil {
+		return x.Servers
+	}
+	return nil
+}
+
+type GetAgentMcpServerReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	McpServerId   string                 `protobuf:"bytes,1,opt,name=mcp_server_id,json=mcpServerId,proto3" json:"mcp_server_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentMcpServerReq) Reset() {
+	*x = GetAgentMcpServerReq{}
+	mi := &file_platform_rpc_proto_msgTypes[112]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentMcpServerReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentMcpServerReq) ProtoMessage() {}
+
+func (x *GetAgentMcpServerReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[112]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentMcpServerReq.ProtoReflect.Descriptor instead.
+func (*GetAgentMcpServerReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{112}
+}
+
+func (x *GetAgentMcpServerReq) GetMcpServerId() string {
+	if x != nil {
+		return x.McpServerId
+	}
+	return ""
+}
+
+type GetAgentMcpServerRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Server        *AgentMcpServerItem    `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAgentMcpServerRes) Reset() {
+	*x = GetAgentMcpServerRes{}
+	mi := &file_platform_rpc_proto_msgTypes[113]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentMcpServerRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentMcpServerRes) ProtoMessage() {}
+
+func (x *GetAgentMcpServerRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[113]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentMcpServerRes.ProtoReflect.Descriptor instead.
+func (*GetAgentMcpServerRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{113}
+}
+
+func (x *GetAgentMcpServerRes) GetServer() *AgentMcpServerItem {
+	if x != nil {
+		return x.Server
+	}
+	return nil
+}
+
+type CreateAgentMcpServerReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ServerName    string                 `protobuf:"bytes,2,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
+	Transport     string                 `protobuf:"bytes,3,opt,name=transport,proto3" json:"transport,omitempty"` // stdio|sse|websocket
+	Config        string                 `protobuf:"bytes,4,opt,name=config,proto3" json:"config,omitempty"`       // JSON 连接配置
+	Tools         string                 `protobuf:"bytes,5,opt,name=tools,proto3" json:"tools,omitempty"`         // JSON 能力清单
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAgentMcpServerReq) Reset() {
+	*x = CreateAgentMcpServerReq{}
+	mi := &file_platform_rpc_proto_msgTypes[114]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentMcpServerReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentMcpServerReq) ProtoMessage() {}
+
+func (x *CreateAgentMcpServerReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[114]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentMcpServerReq.ProtoReflect.Descriptor instead.
+func (*CreateAgentMcpServerReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{114}
+}
+
+func (x *CreateAgentMcpServerReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateAgentMcpServerReq) GetServerName() string {
+	if x != nil {
+		return x.ServerName
+	}
+	return ""
+}
+
+func (x *CreateAgentMcpServerReq) GetTransport() string {
+	if x != nil {
+		return x.Transport
+	}
+	return ""
+}
+
+func (x *CreateAgentMcpServerReq) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *CreateAgentMcpServerReq) GetTools() string {
+	if x != nil {
+		return x.Tools
+	}
+	return ""
+}
+
+func (x *CreateAgentMcpServerReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type CreateAgentMcpServerRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	McpServerId   string                 `protobuf:"bytes,1,opt,name=mcp_server_id,json=mcpServerId,proto3" json:"mcp_server_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAgentMcpServerRes) Reset() {
+	*x = CreateAgentMcpServerRes{}
+	mi := &file_platform_rpc_proto_msgTypes[115]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAgentMcpServerRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAgentMcpServerRes) ProtoMessage() {}
+
+func (x *CreateAgentMcpServerRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[115]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAgentMcpServerRes.ProtoReflect.Descriptor instead.
+func (*CreateAgentMcpServerRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{115}
+}
+
+func (x *CreateAgentMcpServerRes) GetMcpServerId() string {
+	if x != nil {
+		return x.McpServerId
+	}
+	return ""
+}
+
+type UpdateAgentMcpServerReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	McpServerId   string                 `protobuf:"bytes,1,opt,name=mcp_server_id,json=mcpServerId,proto3" json:"mcp_server_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ServerName    string                 `protobuf:"bytes,3,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
+	Transport     string                 `protobuf:"bytes,4,opt,name=transport,proto3" json:"transport,omitempty"`
+	Config        string                 `protobuf:"bytes,5,opt,name=config,proto3" json:"config,omitempty"` // JSON
+	Tools         string                 `protobuf:"bytes,6,opt,name=tools,proto3" json:"tools,omitempty"`   // JSON
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentMcpServerReq) Reset() {
+	*x = UpdateAgentMcpServerReq{}
+	mi := &file_platform_rpc_proto_msgTypes[116]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentMcpServerReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentMcpServerReq) ProtoMessage() {}
+
+func (x *UpdateAgentMcpServerReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[116]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentMcpServerReq.ProtoReflect.Descriptor instead.
+func (*UpdateAgentMcpServerReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{116}
+}
+
+func (x *UpdateAgentMcpServerReq) GetMcpServerId() string {
+	if x != nil {
+		return x.McpServerId
+	}
+	return ""
+}
+
+func (x *UpdateAgentMcpServerReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateAgentMcpServerReq) GetServerName() string {
+	if x != nil {
+		return x.ServerName
+	}
+	return ""
+}
+
+func (x *UpdateAgentMcpServerReq) GetTransport() string {
+	if x != nil {
+		return x.Transport
+	}
+	return ""
+}
+
+func (x *UpdateAgentMcpServerReq) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *UpdateAgentMcpServerReq) GetTools() string {
+	if x != nil {
+		return x.Tools
+	}
+	return ""
+}
+
+func (x *UpdateAgentMcpServerReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type UpdateAgentMcpServerRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentMcpServerRes) Reset() {
+	*x = UpdateAgentMcpServerRes{}
+	mi := &file_platform_rpc_proto_msgTypes[117]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentMcpServerRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentMcpServerRes) ProtoMessage() {}
+
+func (x *UpdateAgentMcpServerRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[117]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentMcpServerRes.ProtoReflect.Descriptor instead.
+func (*UpdateAgentMcpServerRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{117}
+}
+
+type DeleteAgentMcpServerReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	McpServerId   string                 `protobuf:"bytes,1,opt,name=mcp_server_id,json=mcpServerId,proto3" json:"mcp_server_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentMcpServerReq) Reset() {
+	*x = DeleteAgentMcpServerReq{}
+	mi := &file_platform_rpc_proto_msgTypes[118]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentMcpServerReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentMcpServerReq) ProtoMessage() {}
+
+func (x *DeleteAgentMcpServerReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[118]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentMcpServerReq.ProtoReflect.Descriptor instead.
+func (*DeleteAgentMcpServerReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{118}
+}
+
+func (x *DeleteAgentMcpServerReq) GetMcpServerId() string {
+	if x != nil {
+		return x.McpServerId
+	}
+	return ""
+}
+
+type DeleteAgentMcpServerRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAgentMcpServerRes) Reset() {
+	*x = DeleteAgentMcpServerRes{}
+	mi := &file_platform_rpc_proto_msgTypes[119]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAgentMcpServerRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAgentMcpServerRes) ProtoMessage() {}
+
+func (x *DeleteAgentMcpServerRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[119]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAgentMcpServerRes.ProtoReflect.Descriptor instead.
+func (*DeleteAgentMcpServerRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{119}
+}
+
+type GetLatestWorkspaceReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLatestWorkspaceReq) Reset() {
+	*x = GetLatestWorkspaceReq{}
+	mi := &file_platform_rpc_proto_msgTypes[120]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLatestWorkspaceReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLatestWorkspaceReq) ProtoMessage() {}
+
+func (x *GetLatestWorkspaceReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[120]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLatestWorkspaceReq.ProtoReflect.Descriptor instead.
+func (*GetLatestWorkspaceReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{120}
+}
+
+func (x *GetLatestWorkspaceReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetLatestWorkspaceReq) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+type GetLatestWorkspaceRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Path          string                 `protobuf:"bytes,5,opt,name=path,proto3" json:"path,omitempty"`
+	Version       int64                  `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLatestWorkspaceRes) Reset() {
+	*x = GetLatestWorkspaceRes{}
+	mi := &file_platform_rpc_proto_msgTypes[121]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLatestWorkspaceRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLatestWorkspaceRes) ProtoMessage() {}
+
+func (x *GetLatestWorkspaceRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[121]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLatestWorkspaceRes.ProtoReflect.Descriptor instead.
+func (*GetLatestWorkspaceRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{121}
+}
+
+func (x *GetLatestWorkspaceRes) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *GetLatestWorkspaceRes) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetLatestWorkspaceRes) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *GetLatestWorkspaceRes) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GetLatestWorkspaceRes) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *GetLatestWorkspaceRes) GetVersion() int64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+type SaveWorkspacePathReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,3,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Path          string                 `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveWorkspacePathReq) Reset() {
+	*x = SaveWorkspacePathReq{}
+	mi := &file_platform_rpc_proto_msgTypes[122]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveWorkspacePathReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveWorkspacePathReq) ProtoMessage() {}
+
+func (x *SaveWorkspacePathReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[122]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveWorkspacePathReq.ProtoReflect.Descriptor instead.
+func (*SaveWorkspacePathReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{122}
+}
+
+func (x *SaveWorkspacePathReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SaveWorkspacePathReq) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *SaveWorkspacePathReq) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *SaveWorkspacePathReq) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+type SaveWorkspacePathRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveWorkspacePathRes) Reset() {
+	*x = SaveWorkspacePathRes{}
+	mi := &file_platform_rpc_proto_msgTypes[123]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveWorkspacePathRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveWorkspacePathRes) ProtoMessage() {}
+
+func (x *SaveWorkspacePathRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[123]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveWorkspacePathRes.ProtoReflect.Descriptor instead.
+func (*SaveWorkspacePathRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{123}
+}
+
+func (x *SaveWorkspacePathRes) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+type UpsertWorkspaceReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,3,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Path          string                 `protobuf:"bytes,5,opt,name=path,proto3" json:"path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertWorkspaceReq) Reset() {
+	*x = UpsertWorkspaceReq{}
+	mi := &file_platform_rpc_proto_msgTypes[124]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertWorkspaceReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertWorkspaceReq) ProtoMessage() {}
+
+func (x *UpsertWorkspaceReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[124]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertWorkspaceReq.ProtoReflect.Descriptor instead.
+func (*UpsertWorkspaceReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{124}
+}
+
+func (x *UpsertWorkspaceReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpsertWorkspaceReq) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *UpsertWorkspaceReq) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *UpsertWorkspaceReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpsertWorkspaceReq) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+type UpsertWorkspaceRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertWorkspaceRes) Reset() {
+	*x = UpsertWorkspaceRes{}
+	mi := &file_platform_rpc_proto_msgTypes[125]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertWorkspaceRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertWorkspaceRes) ProtoMessage() {}
+
+func (x *UpsertWorkspaceRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[125]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertWorkspaceRes.ProtoReflect.Descriptor instead.
+func (*UpsertWorkspaceRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{125}
+}
+
+type ListWorkspacesByUserReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorkspacesByUserReq) Reset() {
+	*x = ListWorkspacesByUserReq{}
+	mi := &file_platform_rpc_proto_msgTypes[126]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorkspacesByUserReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorkspacesByUserReq) ProtoMessage() {}
+
+func (x *ListWorkspacesByUserReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[126]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorkspacesByUserReq.ProtoReflect.Descriptor instead.
+func (*ListWorkspacesByUserReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{126}
+}
+
+func (x *ListWorkspacesByUserReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type ListWorkspacesByUserRes struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Workspaces    []*GetLatestWorkspaceRes `protobuf:"bytes,1,rep,name=workspaces,proto3" json:"workspaces,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorkspacesByUserRes) Reset() {
+	*x = ListWorkspacesByUserRes{}
+	mi := &file_platform_rpc_proto_msgTypes[127]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorkspacesByUserRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorkspacesByUserRes) ProtoMessage() {}
+
+func (x *ListWorkspacesByUserRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[127]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorkspacesByUserRes.ProtoReflect.Descriptor instead.
+func (*ListWorkspacesByUserRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{127}
+}
+
+func (x *ListWorkspacesByUserRes) GetWorkspaces() []*GetLatestWorkspaceRes {
+	if x != nil {
+		return x.Workspaces
+	}
+	return nil
+}
+
 var File_platform_rpc_proto protoreflect.FileDescriptor
 
 const file_platform_rpc_proto_rawDesc = "" +
@@ -5217,7 +8793,293 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x0fAddOrgMemberRes\"-\n" +
 	"\x12RemoveOrgMemberReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x14\n" +
-	"\x12RemoveOrgMemberRes2\xbb\x16\n" +
+	"\x12RemoveOrgMemberRes\"\xa7\x04\n" +
+	"\fAgentAppItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x15\n" +
+	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
+	"\x05scene\x18\x04 \x01(\tR\x05scene\x12#\n" +
+	"\rsystem_prompt\x18\x05 \x01(\tR\fsystemPrompt\x12 \n" +
+	"\fllm_model_id\x18\x06 \x01(\tR\n" +
+	"llmModelId\x12!\n" +
+	"\fmodel_params\x18\a \x01(\tR\vmodelParams\x12\x14\n" +
+	"\x05tools\x18\b \x01(\tR\x05tools\x12$\n" +
+	"\x0emcp_server_ids\x18\t \x01(\tR\fmcpServerIds\x12#\n" +
+	"\rknowledge_ids\x18\n" +
+	" \x01(\tR\fknowledgeIds\x12'\n" +
+	"\x0fopening_message\x18\v \x01(\tR\x0eopeningMessage\x12+\n" +
+	"\x11opening_questions\x18\f \x01(\tR\x10openingQuestions\x12\x1c\n" +
+	"\tvariables\x18\r \x01(\tR\tvariables\x12\x16\n" +
+	"\x06status\x18\x0e \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\x0f \x01(\x05R\x04sort\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x10 \x01(\tR\tcreatedBy\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x11 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x12 \x01(\tR\tupdatedAt\"=\n" +
+	"\x0eGetAgentAppReq\x12\x15\n" +
+	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x14\n" +
+	"\x05scene\x18\x02 \x01(\tR\x05scene\">\n" +
+	"\x0eGetAgentAppRes\x12,\n" +
+	"\x03app\x18\x01 \x01(\v2\x1a.platform_rpc.AgentAppItemR\x03app\"q\n" +
+	"\x10ListAgentAppsReq\x12\x14\n" +
+	"\x05scene\x18\x01 \x01(\tR\x05scene\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"X\n" +
+	"\x10ListAgentAppsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12.\n" +
+	"\x04apps\x18\x02 \x03(\v2\x1a.platform_rpc.AgentAppItemR\x04apps\"\xc7\x03\n" +
+	"\x11CreateAgentAppReq\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05scene\x18\x02 \x01(\tR\x05scene\x12#\n" +
+	"\rsystem_prompt\x18\x03 \x01(\tR\fsystemPrompt\x12 \n" +
+	"\fllm_model_id\x18\x04 \x01(\tR\n" +
+	"llmModelId\x12!\n" +
+	"\fmodel_params\x18\x05 \x01(\tR\vmodelParams\x12\x14\n" +
+	"\x05tools\x18\x06 \x01(\tR\x05tools\x12$\n" +
+	"\x0emcp_server_ids\x18\a \x01(\tR\fmcpServerIds\x12#\n" +
+	"\rknowledge_ids\x18\b \x01(\tR\fknowledgeIds\x12'\n" +
+	"\x0fopening_message\x18\t \x01(\tR\x0eopeningMessage\x12+\n" +
+	"\x11opening_questions\x18\n" +
+	" \x01(\tR\x10openingQuestions\x12\x1c\n" +
+	"\tvariables\x18\v \x01(\tR\tvariables\x12\x16\n" +
+	"\x06status\x18\f \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\r \x01(\x05R\x04sort\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x0e \x01(\tR\tcreatedBy\"*\n" +
+	"\x11CreateAgentAppRes\x12\x15\n" +
+	"\x06app_id\x18\x01 \x01(\tR\x05appId\"\xbf\x03\n" +
+	"\x11UpdateAgentAppReq\x12\x15\n" +
+	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05scene\x18\x03 \x01(\tR\x05scene\x12#\n" +
+	"\rsystem_prompt\x18\x04 \x01(\tR\fsystemPrompt\x12 \n" +
+	"\fllm_model_id\x18\x05 \x01(\tR\n" +
+	"llmModelId\x12!\n" +
+	"\fmodel_params\x18\x06 \x01(\tR\vmodelParams\x12\x14\n" +
+	"\x05tools\x18\a \x01(\tR\x05tools\x12$\n" +
+	"\x0emcp_server_ids\x18\b \x01(\tR\fmcpServerIds\x12#\n" +
+	"\rknowledge_ids\x18\t \x01(\tR\fknowledgeIds\x12'\n" +
+	"\x0fopening_message\x18\n" +
+	" \x01(\tR\x0eopeningMessage\x12+\n" +
+	"\x11opening_questions\x18\v \x01(\tR\x10openingQuestions\x12\x1c\n" +
+	"\tvariables\x18\f \x01(\tR\tvariables\x12\x16\n" +
+	"\x06status\x18\r \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\x0e \x01(\x05R\x04sort\"\x13\n" +
+	"\x11UpdateAgentAppRes\"*\n" +
+	"\x11DeleteAgentAppReq\x12\x15\n" +
+	"\x06app_id\x18\x01 \x01(\tR\x05appId\"\x13\n" +
+	"\x11DeleteAgentAppRes\"\xee\x06\n" +
+	"\x0eAgentModelItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x19\n" +
+	"\bmodel_id\x18\x02 \x01(\tR\amodelId\x12\x16\n" +
+	"\x06source\x18\x03 \x01(\tR\x06source\x12\x17\n" +
+	"\auser_id\x18\x04 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04name\x18\x05 \x01(\tR\x04name\x12\x1a\n" +
+	"\bprovider\x18\x06 \x01(\tR\bprovider\x12\x1d\n" +
+	"\n" +
+	"model_name\x18\a \x01(\tR\tmodelName\x12\x1a\n" +
+	"\bendpoint\x18\b \x01(\tR\bendpoint\x12\x17\n" +
+	"\aapi_key\x18\t \x01(\tR\x06apiKey\x12%\n" +
+	"\x0econtext_window\x18\n" +
+	" \x01(\x03R\rcontextWindow\x12*\n" +
+	"\x11max_output_tokens\x18\v \x01(\x05R\x0fmaxOutputTokens\x12)\n" +
+	"\x10input_modalities\x18\f \x01(\tR\x0finputModalities\x12+\n" +
+	"\x11output_modalities\x18\r \x01(\tR\x10outputModalities\x12(\n" +
+	"\x10max_tokens_flash\x18\x0e \x01(\x05R\x0emaxTokensFlash\x12$\n" +
+	"\x0emax_tokens_low\x18\x0f \x01(\x05R\fmaxTokensLow\x12*\n" +
+	"\x11max_tokens_medium\x18\x10 \x01(\x05R\x0fmaxTokensMedium\x12&\n" +
+	"\x0fmax_tokens_high\x18\x11 \x01(\x05R\rmaxTokensHigh\x12)\n" +
+	"\x10instruction_role\x18\x12 \x01(\tR\x0finstructionRole\x12+\n" +
+	"\x11supports_thinking\x18\x13 \x01(\bR\x10supportsThinking\x120\n" +
+	"\x14thinking_can_disable\x18\x14 \x01(\bR\x12thinkingCanDisable\x12'\n" +
+	"\x0fthinking_levels\x18\x15 \x01(\tR\x0ethinkingLevels\x12%\n" +
+	"\x0esupports_tools\x18\x16 \x01(\bR\rsupportsTools\x12'\n" +
+	"\x0fsupports_vision\x18\x17 \x01(\bR\x0esupportsVision\x12\x12\n" +
+	"\x04sort\x18\x18 \x01(\x05R\x04sort\x12\x16\n" +
+	"\x06status\x18\x19 \x01(\x05R\x06status\"i\n" +
+	"\x10GetAgentModelReq\x12\x19\n" +
+	"\bmodel_id\x18\x01 \x01(\tR\amodelId\x12!\n" +
+	"\fmodel_source\x18\x02 \x01(\tR\vmodelSource\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"F\n" +
+	"\x10GetAgentModelRes\x122\n" +
+	"\x05model\x18\x01 \x01(\v2\x1c.platform_rpc.AgentModelItemR\x05model\"\x8e\x01\n" +
+	"\x12ListAgentModelsReq\x12\x16\n" +
+	"\x06source\x18\x01 \x01(\tR\x06source\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\"`\n" +
+	"\x12ListAgentModelsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x124\n" +
+	"\x06models\x18\x02 \x03(\v2\x1c.platform_rpc.AgentModelItemR\x06models\"\xc8\x06\n" +
+	"\x13CreateAgentModelReq\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06source\x18\x02 \x01(\tR\x06source\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x1a\n" +
+	"\bprovider\x18\x04 \x01(\tR\bprovider\x12\x1d\n" +
+	"\n" +
+	"model_name\x18\x05 \x01(\tR\tmodelName\x12\x1a\n" +
+	"\bendpoint\x18\x06 \x01(\tR\bendpoint\x12\x17\n" +
+	"\aapi_key\x18\a \x01(\tR\x06apiKey\x12%\n" +
+	"\x0econtext_window\x18\b \x01(\x03R\rcontextWindow\x12*\n" +
+	"\x11max_output_tokens\x18\t \x01(\x05R\x0fmaxOutputTokens\x12)\n" +
+	"\x10input_modalities\x18\n" +
+	" \x01(\tR\x0finputModalities\x12+\n" +
+	"\x11output_modalities\x18\v \x01(\tR\x10outputModalities\x12(\n" +
+	"\x10max_tokens_flash\x18\f \x01(\x05R\x0emaxTokensFlash\x12$\n" +
+	"\x0emax_tokens_low\x18\r \x01(\x05R\fmaxTokensLow\x12*\n" +
+	"\x11max_tokens_medium\x18\x0e \x01(\x05R\x0fmaxTokensMedium\x12&\n" +
+	"\x0fmax_tokens_high\x18\x0f \x01(\x05R\rmaxTokensHigh\x12)\n" +
+	"\x10instruction_role\x18\x10 \x01(\tR\x0finstructionRole\x12+\n" +
+	"\x11supports_thinking\x18\x11 \x01(\bR\x10supportsThinking\x120\n" +
+	"\x14thinking_can_disable\x18\x12 \x01(\bR\x12thinkingCanDisable\x12'\n" +
+	"\x0fthinking_levels\x18\x13 \x01(\tR\x0ethinkingLevels\x12%\n" +
+	"\x0esupports_tools\x18\x14 \x01(\bR\rsupportsTools\x12'\n" +
+	"\x0fsupports_vision\x18\x15 \x01(\bR\x0esupportsVision\x12\x12\n" +
+	"\x04sort\x18\x16 \x01(\x05R\x04sort\x12\x16\n" +
+	"\x06status\x18\x17 \x01(\x05R\x06status\"0\n" +
+	"\x13CreateAgentModelRes\x12\x19\n" +
+	"\bmodel_id\x18\x01 \x01(\tR\amodelId\"\xb2\x06\n" +
+	"\x13UpdateAgentModelReq\x12\x19\n" +
+	"\bmodel_id\x18\x01 \x01(\tR\amodelId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
+	"\bprovider\x18\x03 \x01(\tR\bprovider\x12\x1d\n" +
+	"\n" +
+	"model_name\x18\x04 \x01(\tR\tmodelName\x12\x1a\n" +
+	"\bendpoint\x18\x05 \x01(\tR\bendpoint\x12\x17\n" +
+	"\aapi_key\x18\x06 \x01(\tR\x06apiKey\x12%\n" +
+	"\x0econtext_window\x18\a \x01(\x03R\rcontextWindow\x12*\n" +
+	"\x11max_output_tokens\x18\b \x01(\x05R\x0fmaxOutputTokens\x12)\n" +
+	"\x10input_modalities\x18\t \x01(\tR\x0finputModalities\x12+\n" +
+	"\x11output_modalities\x18\n" +
+	" \x01(\tR\x10outputModalities\x12(\n" +
+	"\x10max_tokens_flash\x18\v \x01(\x05R\x0emaxTokensFlash\x12$\n" +
+	"\x0emax_tokens_low\x18\f \x01(\x05R\fmaxTokensLow\x12*\n" +
+	"\x11max_tokens_medium\x18\r \x01(\x05R\x0fmaxTokensMedium\x12&\n" +
+	"\x0fmax_tokens_high\x18\x0e \x01(\x05R\rmaxTokensHigh\x12)\n" +
+	"\x10instruction_role\x18\x0f \x01(\tR\x0finstructionRole\x12+\n" +
+	"\x11supports_thinking\x18\x10 \x01(\bR\x10supportsThinking\x120\n" +
+	"\x14thinking_can_disable\x18\x11 \x01(\bR\x12thinkingCanDisable\x12'\n" +
+	"\x0fthinking_levels\x18\x12 \x01(\tR\x0ethinkingLevels\x12%\n" +
+	"\x0esupports_tools\x18\x13 \x01(\bR\rsupportsTools\x12'\n" +
+	"\x0fsupports_vision\x18\x14 \x01(\bR\x0esupportsVision\x12\x12\n" +
+	"\x04sort\x18\x15 \x01(\x05R\x04sort\x12\x16\n" +
+	"\x06status\x18\x16 \x01(\x05R\x06status\"\x15\n" +
+	"\x13UpdateAgentModelRes\"a\n" +
+	"\x13DeleteAgentModelReq\x12\x19\n" +
+	"\bmodel_id\x18\x01 \x01(\tR\amodelId\x12\x16\n" +
+	"\x06source\x18\x02 \x01(\tR\x06source\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"\x15\n" +
+	"\x13DeleteAgentModelRes\"\xad\x01\n" +
+	"\rAgentToolItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x17\n" +
+	"\atool_id\x18\x02 \x01(\tR\x06toolId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1b\n" +
+	"\ttool_type\x18\x04 \x01(\tR\btoolType\x12\x16\n" +
+	"\x06config\x18\x05 \x01(\tR\x06config\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\a \x01(\x05R\x04sort\"+\n" +
+	"\x11ListAgentToolsReq\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\x05R\x06status\"F\n" +
+	"\x11ListAgentToolsRes\x121\n" +
+	"\x05tools\x18\x01 \x03(\v2\x1b.platform_rpc.AgentToolItemR\x05tools\"*\n" +
+	"\x0fGetAgentToolReq\x12\x17\n" +
+	"\atool_id\x18\x01 \x01(\tR\x06toolId\"B\n" +
+	"\x0fGetAgentToolRes\x12/\n" +
+	"\x04tool\x18\x01 \x01(\v2\x1b.platform_rpc.AgentToolItemR\x04tool\"\x89\x01\n" +
+	"\x12CreateAgentToolReq\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
+	"\ttool_type\x18\x02 \x01(\tR\btoolType\x12\x16\n" +
+	"\x06config\x18\x03 \x01(\tR\x06config\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\x05 \x01(\x05R\x04sort\"-\n" +
+	"\x12CreateAgentToolRes\x12\x17\n" +
+	"\atool_id\x18\x01 \x01(\tR\x06toolId\"\xa2\x01\n" +
+	"\x12UpdateAgentToolReq\x12\x17\n" +
+	"\atool_id\x18\x01 \x01(\tR\x06toolId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\ttool_type\x18\x03 \x01(\tR\btoolType\x12\x16\n" +
+	"\x06config\x18\x04 \x01(\tR\x06config\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\x06 \x01(\x05R\x04sort\"\x14\n" +
+	"\x12UpdateAgentToolRes\"-\n" +
+	"\x12DeleteAgentToolReq\x12\x17\n" +
+	"\atool_id\x18\x01 \x01(\tR\x06toolId\"\x14\n" +
+	"\x12DeleteAgentToolRes\"\xe1\x01\n" +
+	"\x12AgentMcpServerItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\"\n" +
+	"\rmcp_server_id\x18\x02 \x01(\tR\vmcpServerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1f\n" +
+	"\vserver_name\x18\x04 \x01(\tR\n" +
+	"serverName\x12\x1c\n" +
+	"\ttransport\x18\x05 \x01(\tR\ttransport\x12\x16\n" +
+	"\x06config\x18\x06 \x01(\tR\x06config\x12\x14\n" +
+	"\x05tools\x18\a \x01(\tR\x05tools\x12\x16\n" +
+	"\x06status\x18\b \x01(\x05R\x06status\"0\n" +
+	"\x16ListAgentMcpServersReq\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\x05R\x06status\"T\n" +
+	"\x16ListAgentMcpServersRes\x12:\n" +
+	"\aservers\x18\x01 \x03(\v2 .platform_rpc.AgentMcpServerItemR\aservers\":\n" +
+	"\x14GetAgentMcpServerReq\x12\"\n" +
+	"\rmcp_server_id\x18\x01 \x01(\tR\vmcpServerId\"P\n" +
+	"\x14GetAgentMcpServerRes\x128\n" +
+	"\x06server\x18\x01 \x01(\v2 .platform_rpc.AgentMcpServerItemR\x06server\"\xb2\x01\n" +
+	"\x17CreateAgentMcpServerReq\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
+	"\vserver_name\x18\x02 \x01(\tR\n" +
+	"serverName\x12\x1c\n" +
+	"\ttransport\x18\x03 \x01(\tR\ttransport\x12\x16\n" +
+	"\x06config\x18\x04 \x01(\tR\x06config\x12\x14\n" +
+	"\x05tools\x18\x05 \x01(\tR\x05tools\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\"=\n" +
+	"\x17CreateAgentMcpServerRes\x12\"\n" +
+	"\rmcp_server_id\x18\x01 \x01(\tR\vmcpServerId\"\xd6\x01\n" +
+	"\x17UpdateAgentMcpServerReq\x12\"\n" +
+	"\rmcp_server_id\x18\x01 \x01(\tR\vmcpServerId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
+	"\vserver_name\x18\x03 \x01(\tR\n" +
+	"serverName\x12\x1c\n" +
+	"\ttransport\x18\x04 \x01(\tR\ttransport\x12\x16\n" +
+	"\x06config\x18\x05 \x01(\tR\x06config\x12\x14\n" +
+	"\x05tools\x18\x06 \x01(\tR\x05tools\x12\x16\n" +
+	"\x06status\x18\a \x01(\x05R\x06status\"\x19\n" +
+	"\x17UpdateAgentMcpServerRes\"=\n" +
+	"\x17DeleteAgentMcpServerReq\x12\"\n" +
+	"\rmcp_server_id\x18\x01 \x01(\tR\vmcpServerId\"\x19\n" +
+	"\x17DeleteAgentMcpServerRes\"M\n" +
+	"\x15GetLatestWorkspaceReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\"\x9f\x01\n" +
+	"\x15GetLatestWorkspaceRes\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
+	"\x04path\x18\x05 \x01(\tR\x04path\x12\x18\n" +
+	"\aversion\x18\x06 \x01(\x03R\aversion\"\x83\x01\n" +
+	"\x14SaveWorkspacePathReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12!\n" +
+	"\fworkspace_id\x18\x03 \x01(\tR\vworkspaceId\x12\x12\n" +
+	"\x04path\x18\x04 \x01(\tR\x04path\"*\n" +
+	"\x14SaveWorkspacePathRes\x12\x12\n" +
+	"\x04path\x18\x01 \x01(\tR\x04path\"\x95\x01\n" +
+	"\x12UpsertWorkspaceReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12!\n" +
+	"\fworkspace_id\x18\x03 \x01(\tR\vworkspaceId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
+	"\x04path\x18\x05 \x01(\tR\x04path\"\x14\n" +
+	"\x12UpsertWorkspaceRes\"2\n" +
+	"\x17ListWorkspacesByUserReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"^\n" +
+	"\x17ListWorkspacesByUserRes\x12C\n" +
+	"\n" +
+	"workspaces\x18\x01 \x03(\v2#.platform_rpc.GetLatestWorkspaceResR\n" +
+	"workspaces2\x9c'\n" +
 	"\bplatform\x12R\n" +
 	"\x0eAdminQueryLogs\x12\x1f.platform_rpc.AdminQueryLogsReq\x1a\x1f.platform_rpc.AdminQueryLogsRes\x12C\n" +
 	"\tCreateApp\x12\x1a.platform_rpc.CreateAppReq\x1a\x1a.platform_rpc.CreateAppRes\x12@\n" +
@@ -5250,7 +9112,31 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x13UpdateOrgDepartment\x12$.platform_rpc.UpdateOrgDepartmentReq\x1a$.platform_rpc.UpdateOrgDepartmentRes\x12a\n" +
 	"\x13DeleteOrgDepartment\x12$.platform_rpc.DeleteOrgDepartmentReq\x1a$.platform_rpc.DeleteOrgDepartmentRes\x12L\n" +
 	"\fAddOrgMember\x12\x1d.platform_rpc.AddOrgMemberReq\x1a\x1d.platform_rpc.AddOrgMemberRes\x12U\n" +
-	"\x0fRemoveOrgMember\x12 .platform_rpc.RemoveOrgMemberReq\x1a .platform_rpc.RemoveOrgMemberResB\x10Z\x0e./platform_rpcb\x06proto3"
+	"\x0fRemoveOrgMember\x12 .platform_rpc.RemoveOrgMemberReq\x1a .platform_rpc.RemoveOrgMemberRes\x12I\n" +
+	"\vGetAgentApp\x12\x1c.platform_rpc.GetAgentAppReq\x1a\x1c.platform_rpc.GetAgentAppRes\x12O\n" +
+	"\rListAgentApps\x12\x1e.platform_rpc.ListAgentAppsReq\x1a\x1e.platform_rpc.ListAgentAppsRes\x12R\n" +
+	"\x0eCreateAgentApp\x12\x1f.platform_rpc.CreateAgentAppReq\x1a\x1f.platform_rpc.CreateAgentAppRes\x12R\n" +
+	"\x0eUpdateAgentApp\x12\x1f.platform_rpc.UpdateAgentAppReq\x1a\x1f.platform_rpc.UpdateAgentAppRes\x12R\n" +
+	"\x0eDeleteAgentApp\x12\x1f.platform_rpc.DeleteAgentAppReq\x1a\x1f.platform_rpc.DeleteAgentAppRes\x12O\n" +
+	"\rGetAgentModel\x12\x1e.platform_rpc.GetAgentModelReq\x1a\x1e.platform_rpc.GetAgentModelRes\x12U\n" +
+	"\x0fListAgentModels\x12 .platform_rpc.ListAgentModelsReq\x1a .platform_rpc.ListAgentModelsRes\x12X\n" +
+	"\x10CreateAgentModel\x12!.platform_rpc.CreateAgentModelReq\x1a!.platform_rpc.CreateAgentModelRes\x12X\n" +
+	"\x10UpdateAgentModel\x12!.platform_rpc.UpdateAgentModelReq\x1a!.platform_rpc.UpdateAgentModelRes\x12X\n" +
+	"\x10DeleteAgentModel\x12!.platform_rpc.DeleteAgentModelReq\x1a!.platform_rpc.DeleteAgentModelRes\x12L\n" +
+	"\fGetAgentTool\x12\x1d.platform_rpc.GetAgentToolReq\x1a\x1d.platform_rpc.GetAgentToolRes\x12R\n" +
+	"\x0eListAgentTools\x12\x1f.platform_rpc.ListAgentToolsReq\x1a\x1f.platform_rpc.ListAgentToolsRes\x12U\n" +
+	"\x0fCreateAgentTool\x12 .platform_rpc.CreateAgentToolReq\x1a .platform_rpc.CreateAgentToolRes\x12U\n" +
+	"\x0fUpdateAgentTool\x12 .platform_rpc.UpdateAgentToolReq\x1a .platform_rpc.UpdateAgentToolRes\x12U\n" +
+	"\x0fDeleteAgentTool\x12 .platform_rpc.DeleteAgentToolReq\x1a .platform_rpc.DeleteAgentToolRes\x12[\n" +
+	"\x11GetAgentMcpServer\x12\".platform_rpc.GetAgentMcpServerReq\x1a\".platform_rpc.GetAgentMcpServerRes\x12a\n" +
+	"\x13ListAgentMcpServers\x12$.platform_rpc.ListAgentMcpServersReq\x1a$.platform_rpc.ListAgentMcpServersRes\x12d\n" +
+	"\x14CreateAgentMcpServer\x12%.platform_rpc.CreateAgentMcpServerReq\x1a%.platform_rpc.CreateAgentMcpServerRes\x12d\n" +
+	"\x14UpdateAgentMcpServer\x12%.platform_rpc.UpdateAgentMcpServerReq\x1a%.platform_rpc.UpdateAgentMcpServerRes\x12d\n" +
+	"\x14DeleteAgentMcpServer\x12%.platform_rpc.DeleteAgentMcpServerReq\x1a%.platform_rpc.DeleteAgentMcpServerRes\x12^\n" +
+	"\x12GetLatestWorkspace\x12#.platform_rpc.GetLatestWorkspaceReq\x1a#.platform_rpc.GetLatestWorkspaceRes\x12[\n" +
+	"\x11SaveWorkspacePath\x12\".platform_rpc.SaveWorkspacePathReq\x1a\".platform_rpc.SaveWorkspacePathRes\x12U\n" +
+	"\x0fUpsertWorkspace\x12 .platform_rpc.UpsertWorkspaceReq\x1a .platform_rpc.UpsertWorkspaceRes\x12d\n" +
+	"\x14ListWorkspacesByUser\x12%.platform_rpc.ListWorkspacesByUserReq\x1a%.platform_rpc.ListWorkspacesByUserResB\x10Z\x0e./platform_rpcb\x06proto3"
 
 var (
 	file_platform_rpc_proto_rawDescOnce sync.Once
@@ -5264,7 +9150,7 @@ func file_platform_rpc_proto_rawDescGZIP() []byte {
 	return file_platform_rpc_proto_rawDescData
 }
 
-var file_platform_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 76)
+var file_platform_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 128)
 var file_platform_rpc_proto_goTypes = []any{
 	(*AdminQueryLogsReq)(nil),           // 0: platform_rpc.AdminQueryLogsReq
 	(*AdminLogItem)(nil),                // 1: platform_rpc.AdminLogItem
@@ -5342,95 +9228,204 @@ var file_platform_rpc_proto_goTypes = []any{
 	(*AddOrgMemberRes)(nil),             // 73: platform_rpc.AddOrgMemberRes
 	(*RemoveOrgMemberReq)(nil),          // 74: platform_rpc.RemoveOrgMemberReq
 	(*RemoveOrgMemberRes)(nil),          // 75: platform_rpc.RemoveOrgMemberRes
+	(*AgentAppItem)(nil),                // 76: platform_rpc.AgentAppItem
+	(*GetAgentAppReq)(nil),              // 77: platform_rpc.GetAgentAppReq
+	(*GetAgentAppRes)(nil),              // 78: platform_rpc.GetAgentAppRes
+	(*ListAgentAppsReq)(nil),            // 79: platform_rpc.ListAgentAppsReq
+	(*ListAgentAppsRes)(nil),            // 80: platform_rpc.ListAgentAppsRes
+	(*CreateAgentAppReq)(nil),           // 81: platform_rpc.CreateAgentAppReq
+	(*CreateAgentAppRes)(nil),           // 82: platform_rpc.CreateAgentAppRes
+	(*UpdateAgentAppReq)(nil),           // 83: platform_rpc.UpdateAgentAppReq
+	(*UpdateAgentAppRes)(nil),           // 84: platform_rpc.UpdateAgentAppRes
+	(*DeleteAgentAppReq)(nil),           // 85: platform_rpc.DeleteAgentAppReq
+	(*DeleteAgentAppRes)(nil),           // 86: platform_rpc.DeleteAgentAppRes
+	(*AgentModelItem)(nil),              // 87: platform_rpc.AgentModelItem
+	(*GetAgentModelReq)(nil),            // 88: platform_rpc.GetAgentModelReq
+	(*GetAgentModelRes)(nil),            // 89: platform_rpc.GetAgentModelRes
+	(*ListAgentModelsReq)(nil),          // 90: platform_rpc.ListAgentModelsReq
+	(*ListAgentModelsRes)(nil),          // 91: platform_rpc.ListAgentModelsRes
+	(*CreateAgentModelReq)(nil),         // 92: platform_rpc.CreateAgentModelReq
+	(*CreateAgentModelRes)(nil),         // 93: platform_rpc.CreateAgentModelRes
+	(*UpdateAgentModelReq)(nil),         // 94: platform_rpc.UpdateAgentModelReq
+	(*UpdateAgentModelRes)(nil),         // 95: platform_rpc.UpdateAgentModelRes
+	(*DeleteAgentModelReq)(nil),         // 96: platform_rpc.DeleteAgentModelReq
+	(*DeleteAgentModelRes)(nil),         // 97: platform_rpc.DeleteAgentModelRes
+	(*AgentToolItem)(nil),               // 98: platform_rpc.AgentToolItem
+	(*ListAgentToolsReq)(nil),           // 99: platform_rpc.ListAgentToolsReq
+	(*ListAgentToolsRes)(nil),           // 100: platform_rpc.ListAgentToolsRes
+	(*GetAgentToolReq)(nil),             // 101: platform_rpc.GetAgentToolReq
+	(*GetAgentToolRes)(nil),             // 102: platform_rpc.GetAgentToolRes
+	(*CreateAgentToolReq)(nil),          // 103: platform_rpc.CreateAgentToolReq
+	(*CreateAgentToolRes)(nil),          // 104: platform_rpc.CreateAgentToolRes
+	(*UpdateAgentToolReq)(nil),          // 105: platform_rpc.UpdateAgentToolReq
+	(*UpdateAgentToolRes)(nil),          // 106: platform_rpc.UpdateAgentToolRes
+	(*DeleteAgentToolReq)(nil),          // 107: platform_rpc.DeleteAgentToolReq
+	(*DeleteAgentToolRes)(nil),          // 108: platform_rpc.DeleteAgentToolRes
+	(*AgentMcpServerItem)(nil),          // 109: platform_rpc.AgentMcpServerItem
+	(*ListAgentMcpServersReq)(nil),      // 110: platform_rpc.ListAgentMcpServersReq
+	(*ListAgentMcpServersRes)(nil),      // 111: platform_rpc.ListAgentMcpServersRes
+	(*GetAgentMcpServerReq)(nil),        // 112: platform_rpc.GetAgentMcpServerReq
+	(*GetAgentMcpServerRes)(nil),        // 113: platform_rpc.GetAgentMcpServerRes
+	(*CreateAgentMcpServerReq)(nil),     // 114: platform_rpc.CreateAgentMcpServerReq
+	(*CreateAgentMcpServerRes)(nil),     // 115: platform_rpc.CreateAgentMcpServerRes
+	(*UpdateAgentMcpServerReq)(nil),     // 116: platform_rpc.UpdateAgentMcpServerReq
+	(*UpdateAgentMcpServerRes)(nil),     // 117: platform_rpc.UpdateAgentMcpServerRes
+	(*DeleteAgentMcpServerReq)(nil),     // 118: platform_rpc.DeleteAgentMcpServerReq
+	(*DeleteAgentMcpServerRes)(nil),     // 119: platform_rpc.DeleteAgentMcpServerRes
+	(*GetLatestWorkspaceReq)(nil),       // 120: platform_rpc.GetLatestWorkspaceReq
+	(*GetLatestWorkspaceRes)(nil),       // 121: platform_rpc.GetLatestWorkspaceRes
+	(*SaveWorkspacePathReq)(nil),        // 122: platform_rpc.SaveWorkspacePathReq
+	(*SaveWorkspacePathRes)(nil),        // 123: platform_rpc.SaveWorkspacePathRes
+	(*UpsertWorkspaceReq)(nil),          // 124: platform_rpc.UpsertWorkspaceReq
+	(*UpsertWorkspaceRes)(nil),          // 125: platform_rpc.UpsertWorkspaceRes
+	(*ListWorkspacesByUserReq)(nil),     // 126: platform_rpc.ListWorkspacesByUserReq
+	(*ListWorkspacesByUserRes)(nil),     // 127: platform_rpc.ListWorkspacesByUserRes
 }
 var file_platform_rpc_proto_depIdxs = []int32{
-	1,  // 0: platform_rpc.AdminQueryLogsRes.logs:type_name -> platform_rpc.AdminLogItem
-	3,  // 1: platform_rpc.ListAppsRes.apps:type_name -> platform_rpc.AppItem
-	8,  // 2: platform_rpc.ListArchitecturesRes.architectures:type_name -> platform_rpc.ArchitectureItem
-	15, // 3: platform_rpc.ListVersionsRes.versions:type_name -> platform_rpc.VersionItem
-	22, // 4: platform_rpc.AppVersionsArchItem.versions:type_name -> platform_rpc.AppVersionBrief
-	23, // 5: platform_rpc.ListAppVersionsRes.architectures:type_name -> platform_rpc.AppVersionsArchItem
-	26, // 6: platform_rpc.ListReleasePoliciesRes.policies:type_name -> platform_rpc.ReleasePolicyItem
-	31, // 7: platform_rpc.ListFeedbackRes.list:type_name -> platform_rpc.FeedbackItem
-	31, // 8: platform_rpc.GetFeedbackRes.feedback:type_name -> platform_rpc.FeedbackItem
-	42, // 9: platform_rpc.ListContentReportsRes.list:type_name -> platform_rpc.ContentReportItem
-	42, // 10: platform_rpc.GetContentReportRes.report:type_name -> platform_rpc.ContentReportItem
-	51, // 11: platform_rpc.WorkbenchAppItem.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
-	51, // 12: platform_rpc.WorkbenchAppPublicItem.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
-	51, // 13: platform_rpc.CreateWorkbenchAppReq.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
-	51, // 14: platform_rpc.UpdateWorkbenchAppReq.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
-	52, // 15: platform_rpc.GetWorkbenchAppRes.app:type_name -> platform_rpc.WorkbenchAppItem
-	52, // 16: platform_rpc.ListWorkbenchAppsRes.list:type_name -> platform_rpc.WorkbenchAppItem
-	53, // 17: platform_rpc.ListEnabledWorkbenchAppsRes.list:type_name -> platform_rpc.WorkbenchAppPublicItem
-	0,  // 18: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
-	4,  // 19: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
-	6,  // 20: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
-	9,  // 21: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
-	11, // 22: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
-	13, // 23: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
-	16, // 24: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
-	18, // 25: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
-	20, // 26: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
-	24, // 27: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
-	27, // 28: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
-	29, // 29: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
-	32, // 30: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
-	34, // 31: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
-	36, // 32: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
-	38, // 33: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
-	40, // 34: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
-	43, // 35: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
-	45, // 36: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
-	47, // 37: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
-	49, // 38: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
-	54, // 39: platform_rpc.platform.CreateWorkbenchApp:input_type -> platform_rpc.CreateWorkbenchAppReq
-	56, // 40: platform_rpc.platform.UpdateWorkbenchApp:input_type -> platform_rpc.UpdateWorkbenchAppReq
-	58, // 41: platform_rpc.platform.DeleteWorkbenchApp:input_type -> platform_rpc.DeleteWorkbenchAppReq
-	60, // 42: platform_rpc.platform.GetWorkbenchApp:input_type -> platform_rpc.GetWorkbenchAppReq
-	62, // 43: platform_rpc.platform.ListWorkbenchApps:input_type -> platform_rpc.ListWorkbenchAppsReq
-	64, // 44: platform_rpc.platform.ListEnabledWorkbenchApps:input_type -> platform_rpc.ListEnabledWorkbenchAppsReq
-	66, // 45: platform_rpc.platform.CreateOrgDepartment:input_type -> platform_rpc.CreateOrgDepartmentReq
-	68, // 46: platform_rpc.platform.UpdateOrgDepartment:input_type -> platform_rpc.UpdateOrgDepartmentReq
-	70, // 47: platform_rpc.platform.DeleteOrgDepartment:input_type -> platform_rpc.DeleteOrgDepartmentReq
-	72, // 48: platform_rpc.platform.AddOrgMember:input_type -> platform_rpc.AddOrgMemberReq
-	74, // 49: platform_rpc.platform.RemoveOrgMember:input_type -> platform_rpc.RemoveOrgMemberReq
-	2,  // 50: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
-	5,  // 51: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
-	7,  // 52: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
-	10, // 53: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
-	12, // 54: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
-	14, // 55: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
-	17, // 56: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
-	19, // 57: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
-	21, // 58: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
-	25, // 59: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
-	28, // 60: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
-	30, // 61: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
-	33, // 62: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
-	35, // 63: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
-	37, // 64: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
-	39, // 65: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
-	41, // 66: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
-	44, // 67: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
-	46, // 68: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
-	48, // 69: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
-	50, // 70: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
-	55, // 71: platform_rpc.platform.CreateWorkbenchApp:output_type -> platform_rpc.CreateWorkbenchAppRes
-	57, // 72: platform_rpc.platform.UpdateWorkbenchApp:output_type -> platform_rpc.UpdateWorkbenchAppRes
-	59, // 73: platform_rpc.platform.DeleteWorkbenchApp:output_type -> platform_rpc.DeleteWorkbenchAppRes
-	61, // 74: platform_rpc.platform.GetWorkbenchApp:output_type -> platform_rpc.GetWorkbenchAppRes
-	63, // 75: platform_rpc.platform.ListWorkbenchApps:output_type -> platform_rpc.ListWorkbenchAppsRes
-	65, // 76: platform_rpc.platform.ListEnabledWorkbenchApps:output_type -> platform_rpc.ListEnabledWorkbenchAppsRes
-	67, // 77: platform_rpc.platform.CreateOrgDepartment:output_type -> platform_rpc.CreateOrgDepartmentRes
-	69, // 78: platform_rpc.platform.UpdateOrgDepartment:output_type -> platform_rpc.UpdateOrgDepartmentRes
-	71, // 79: platform_rpc.platform.DeleteOrgDepartment:output_type -> platform_rpc.DeleteOrgDepartmentRes
-	73, // 80: platform_rpc.platform.AddOrgMember:output_type -> platform_rpc.AddOrgMemberRes
-	75, // 81: platform_rpc.platform.RemoveOrgMember:output_type -> platform_rpc.RemoveOrgMemberRes
-	50, // [50:82] is the sub-list for method output_type
-	18, // [18:50] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	1,   // 0: platform_rpc.AdminQueryLogsRes.logs:type_name -> platform_rpc.AdminLogItem
+	3,   // 1: platform_rpc.ListAppsRes.apps:type_name -> platform_rpc.AppItem
+	8,   // 2: platform_rpc.ListArchitecturesRes.architectures:type_name -> platform_rpc.ArchitectureItem
+	15,  // 3: platform_rpc.ListVersionsRes.versions:type_name -> platform_rpc.VersionItem
+	22,  // 4: platform_rpc.AppVersionsArchItem.versions:type_name -> platform_rpc.AppVersionBrief
+	23,  // 5: platform_rpc.ListAppVersionsRes.architectures:type_name -> platform_rpc.AppVersionsArchItem
+	26,  // 6: platform_rpc.ListReleasePoliciesRes.policies:type_name -> platform_rpc.ReleasePolicyItem
+	31,  // 7: platform_rpc.ListFeedbackRes.list:type_name -> platform_rpc.FeedbackItem
+	31,  // 8: platform_rpc.GetFeedbackRes.feedback:type_name -> platform_rpc.FeedbackItem
+	42,  // 9: platform_rpc.ListContentReportsRes.list:type_name -> platform_rpc.ContentReportItem
+	42,  // 10: platform_rpc.GetContentReportRes.report:type_name -> platform_rpc.ContentReportItem
+	51,  // 11: platform_rpc.WorkbenchAppItem.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
+	51,  // 12: platform_rpc.WorkbenchAppPublicItem.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
+	51,  // 13: platform_rpc.CreateWorkbenchAppReq.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
+	51,  // 14: platform_rpc.UpdateWorkbenchAppReq.entry_config:type_name -> platform_rpc.WorkbenchEntryConfig
+	52,  // 15: platform_rpc.GetWorkbenchAppRes.app:type_name -> platform_rpc.WorkbenchAppItem
+	52,  // 16: platform_rpc.ListWorkbenchAppsRes.list:type_name -> platform_rpc.WorkbenchAppItem
+	53,  // 17: platform_rpc.ListEnabledWorkbenchAppsRes.list:type_name -> platform_rpc.WorkbenchAppPublicItem
+	76,  // 18: platform_rpc.GetAgentAppRes.app:type_name -> platform_rpc.AgentAppItem
+	76,  // 19: platform_rpc.ListAgentAppsRes.apps:type_name -> platform_rpc.AgentAppItem
+	87,  // 20: platform_rpc.GetAgentModelRes.model:type_name -> platform_rpc.AgentModelItem
+	87,  // 21: platform_rpc.ListAgentModelsRes.models:type_name -> platform_rpc.AgentModelItem
+	98,  // 22: platform_rpc.ListAgentToolsRes.tools:type_name -> platform_rpc.AgentToolItem
+	98,  // 23: platform_rpc.GetAgentToolRes.tool:type_name -> platform_rpc.AgentToolItem
+	109, // 24: platform_rpc.ListAgentMcpServersRes.servers:type_name -> platform_rpc.AgentMcpServerItem
+	109, // 25: platform_rpc.GetAgentMcpServerRes.server:type_name -> platform_rpc.AgentMcpServerItem
+	121, // 26: platform_rpc.ListWorkspacesByUserRes.workspaces:type_name -> platform_rpc.GetLatestWorkspaceRes
+	0,   // 27: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
+	4,   // 28: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
+	6,   // 29: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
+	9,   // 30: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
+	11,  // 31: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
+	13,  // 32: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
+	16,  // 33: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
+	18,  // 34: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
+	20,  // 35: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
+	24,  // 36: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
+	27,  // 37: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
+	29,  // 38: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
+	32,  // 39: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
+	34,  // 40: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
+	36,  // 41: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
+	38,  // 42: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
+	40,  // 43: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
+	43,  // 44: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
+	45,  // 45: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
+	47,  // 46: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
+	49,  // 47: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
+	54,  // 48: platform_rpc.platform.CreateWorkbenchApp:input_type -> platform_rpc.CreateWorkbenchAppReq
+	56,  // 49: platform_rpc.platform.UpdateWorkbenchApp:input_type -> platform_rpc.UpdateWorkbenchAppReq
+	58,  // 50: platform_rpc.platform.DeleteWorkbenchApp:input_type -> platform_rpc.DeleteWorkbenchAppReq
+	60,  // 51: platform_rpc.platform.GetWorkbenchApp:input_type -> platform_rpc.GetWorkbenchAppReq
+	62,  // 52: platform_rpc.platform.ListWorkbenchApps:input_type -> platform_rpc.ListWorkbenchAppsReq
+	64,  // 53: platform_rpc.platform.ListEnabledWorkbenchApps:input_type -> platform_rpc.ListEnabledWorkbenchAppsReq
+	66,  // 54: platform_rpc.platform.CreateOrgDepartment:input_type -> platform_rpc.CreateOrgDepartmentReq
+	68,  // 55: platform_rpc.platform.UpdateOrgDepartment:input_type -> platform_rpc.UpdateOrgDepartmentReq
+	70,  // 56: platform_rpc.platform.DeleteOrgDepartment:input_type -> platform_rpc.DeleteOrgDepartmentReq
+	72,  // 57: platform_rpc.platform.AddOrgMember:input_type -> platform_rpc.AddOrgMemberReq
+	74,  // 58: platform_rpc.platform.RemoveOrgMember:input_type -> platform_rpc.RemoveOrgMemberReq
+	77,  // 59: platform_rpc.platform.GetAgentApp:input_type -> platform_rpc.GetAgentAppReq
+	79,  // 60: platform_rpc.platform.ListAgentApps:input_type -> platform_rpc.ListAgentAppsReq
+	81,  // 61: platform_rpc.platform.CreateAgentApp:input_type -> platform_rpc.CreateAgentAppReq
+	83,  // 62: platform_rpc.platform.UpdateAgentApp:input_type -> platform_rpc.UpdateAgentAppReq
+	85,  // 63: platform_rpc.platform.DeleteAgentApp:input_type -> platform_rpc.DeleteAgentAppReq
+	88,  // 64: platform_rpc.platform.GetAgentModel:input_type -> platform_rpc.GetAgentModelReq
+	90,  // 65: platform_rpc.platform.ListAgentModels:input_type -> platform_rpc.ListAgentModelsReq
+	92,  // 66: platform_rpc.platform.CreateAgentModel:input_type -> platform_rpc.CreateAgentModelReq
+	94,  // 67: platform_rpc.platform.UpdateAgentModel:input_type -> platform_rpc.UpdateAgentModelReq
+	96,  // 68: platform_rpc.platform.DeleteAgentModel:input_type -> platform_rpc.DeleteAgentModelReq
+	101, // 69: platform_rpc.platform.GetAgentTool:input_type -> platform_rpc.GetAgentToolReq
+	99,  // 70: platform_rpc.platform.ListAgentTools:input_type -> platform_rpc.ListAgentToolsReq
+	103, // 71: platform_rpc.platform.CreateAgentTool:input_type -> platform_rpc.CreateAgentToolReq
+	105, // 72: platform_rpc.platform.UpdateAgentTool:input_type -> platform_rpc.UpdateAgentToolReq
+	107, // 73: platform_rpc.platform.DeleteAgentTool:input_type -> platform_rpc.DeleteAgentToolReq
+	112, // 74: platform_rpc.platform.GetAgentMcpServer:input_type -> platform_rpc.GetAgentMcpServerReq
+	110, // 75: platform_rpc.platform.ListAgentMcpServers:input_type -> platform_rpc.ListAgentMcpServersReq
+	114, // 76: platform_rpc.platform.CreateAgentMcpServer:input_type -> platform_rpc.CreateAgentMcpServerReq
+	116, // 77: platform_rpc.platform.UpdateAgentMcpServer:input_type -> platform_rpc.UpdateAgentMcpServerReq
+	118, // 78: platform_rpc.platform.DeleteAgentMcpServer:input_type -> platform_rpc.DeleteAgentMcpServerReq
+	120, // 79: platform_rpc.platform.GetLatestWorkspace:input_type -> platform_rpc.GetLatestWorkspaceReq
+	122, // 80: platform_rpc.platform.SaveWorkspacePath:input_type -> platform_rpc.SaveWorkspacePathReq
+	124, // 81: platform_rpc.platform.UpsertWorkspace:input_type -> platform_rpc.UpsertWorkspaceReq
+	126, // 82: platform_rpc.platform.ListWorkspacesByUser:input_type -> platform_rpc.ListWorkspacesByUserReq
+	2,   // 83: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
+	5,   // 84: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
+	7,   // 85: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
+	10,  // 86: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
+	12,  // 87: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
+	14,  // 88: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
+	17,  // 89: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
+	19,  // 90: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
+	21,  // 91: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
+	25,  // 92: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
+	28,  // 93: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
+	30,  // 94: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
+	33,  // 95: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
+	35,  // 96: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
+	37,  // 97: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
+	39,  // 98: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
+	41,  // 99: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
+	44,  // 100: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
+	46,  // 101: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
+	48,  // 102: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
+	50,  // 103: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
+	55,  // 104: platform_rpc.platform.CreateWorkbenchApp:output_type -> platform_rpc.CreateWorkbenchAppRes
+	57,  // 105: platform_rpc.platform.UpdateWorkbenchApp:output_type -> platform_rpc.UpdateWorkbenchAppRes
+	59,  // 106: platform_rpc.platform.DeleteWorkbenchApp:output_type -> platform_rpc.DeleteWorkbenchAppRes
+	61,  // 107: platform_rpc.platform.GetWorkbenchApp:output_type -> platform_rpc.GetWorkbenchAppRes
+	63,  // 108: platform_rpc.platform.ListWorkbenchApps:output_type -> platform_rpc.ListWorkbenchAppsRes
+	65,  // 109: platform_rpc.platform.ListEnabledWorkbenchApps:output_type -> platform_rpc.ListEnabledWorkbenchAppsRes
+	67,  // 110: platform_rpc.platform.CreateOrgDepartment:output_type -> platform_rpc.CreateOrgDepartmentRes
+	69,  // 111: platform_rpc.platform.UpdateOrgDepartment:output_type -> platform_rpc.UpdateOrgDepartmentRes
+	71,  // 112: platform_rpc.platform.DeleteOrgDepartment:output_type -> platform_rpc.DeleteOrgDepartmentRes
+	73,  // 113: platform_rpc.platform.AddOrgMember:output_type -> platform_rpc.AddOrgMemberRes
+	75,  // 114: platform_rpc.platform.RemoveOrgMember:output_type -> platform_rpc.RemoveOrgMemberRes
+	78,  // 115: platform_rpc.platform.GetAgentApp:output_type -> platform_rpc.GetAgentAppRes
+	80,  // 116: platform_rpc.platform.ListAgentApps:output_type -> platform_rpc.ListAgentAppsRes
+	82,  // 117: platform_rpc.platform.CreateAgentApp:output_type -> platform_rpc.CreateAgentAppRes
+	84,  // 118: platform_rpc.platform.UpdateAgentApp:output_type -> platform_rpc.UpdateAgentAppRes
+	86,  // 119: platform_rpc.platform.DeleteAgentApp:output_type -> platform_rpc.DeleteAgentAppRes
+	89,  // 120: platform_rpc.platform.GetAgentModel:output_type -> platform_rpc.GetAgentModelRes
+	91,  // 121: platform_rpc.platform.ListAgentModels:output_type -> platform_rpc.ListAgentModelsRes
+	93,  // 122: platform_rpc.platform.CreateAgentModel:output_type -> platform_rpc.CreateAgentModelRes
+	95,  // 123: platform_rpc.platform.UpdateAgentModel:output_type -> platform_rpc.UpdateAgentModelRes
+	97,  // 124: platform_rpc.platform.DeleteAgentModel:output_type -> platform_rpc.DeleteAgentModelRes
+	102, // 125: platform_rpc.platform.GetAgentTool:output_type -> platform_rpc.GetAgentToolRes
+	100, // 126: platform_rpc.platform.ListAgentTools:output_type -> platform_rpc.ListAgentToolsRes
+	104, // 127: platform_rpc.platform.CreateAgentTool:output_type -> platform_rpc.CreateAgentToolRes
+	106, // 128: platform_rpc.platform.UpdateAgentTool:output_type -> platform_rpc.UpdateAgentToolRes
+	108, // 129: platform_rpc.platform.DeleteAgentTool:output_type -> platform_rpc.DeleteAgentToolRes
+	113, // 130: platform_rpc.platform.GetAgentMcpServer:output_type -> platform_rpc.GetAgentMcpServerRes
+	111, // 131: platform_rpc.platform.ListAgentMcpServers:output_type -> platform_rpc.ListAgentMcpServersRes
+	115, // 132: platform_rpc.platform.CreateAgentMcpServer:output_type -> platform_rpc.CreateAgentMcpServerRes
+	117, // 133: platform_rpc.platform.UpdateAgentMcpServer:output_type -> platform_rpc.UpdateAgentMcpServerRes
+	119, // 134: platform_rpc.platform.DeleteAgentMcpServer:output_type -> platform_rpc.DeleteAgentMcpServerRes
+	121, // 135: platform_rpc.platform.GetLatestWorkspace:output_type -> platform_rpc.GetLatestWorkspaceRes
+	123, // 136: platform_rpc.platform.SaveWorkspacePath:output_type -> platform_rpc.SaveWorkspacePathRes
+	125, // 137: platform_rpc.platform.UpsertWorkspace:output_type -> platform_rpc.UpsertWorkspaceRes
+	127, // 138: platform_rpc.platform.ListWorkspacesByUser:output_type -> platform_rpc.ListWorkspacesByUserRes
+	83,  // [83:139] is the sub-list for method output_type
+	27,  // [27:83] is the sub-list for method input_type
+	27,  // [27:27] is the sub-list for extension type_name
+	27,  // [27:27] is the sub-list for extension extendee
+	0,   // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_platform_rpc_proto_init() }
@@ -5450,7 +9445,7 @@ func file_platform_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_platform_rpc_proto_rawDesc), len(file_platform_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   76,
+			NumMessages:   128,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

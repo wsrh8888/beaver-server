@@ -91,6 +91,12 @@ func (p *digitalEventPusher) pushPrivateChat(senderID string, userIDs []string, 
 		return
 	}
 
+	// workflow 模式：投 workflow_task，由 workflow 引擎消费（按 Nodes/Edges 调度）。
+	if res.Runtime == "workflow" {
+		p.pushWorkflowTask(res.DigitalUserId, event)
+		return
+	}
+
 	// external 模式：走 openevent → WS 长连接下发外部 agent。
 	p.dispatch(res.DigitalUserId, openevent.EventIMMessageReceive, event)
 }
@@ -110,6 +116,11 @@ func (p *digitalEventPusher) pushGroupAt(senderID, conversationID string, msg *c
 		// builtin 模式：投 agent_task。
 		if res.Runtime == "builtin" {
 			p.pushAgentTask(res.DigitalUserId, groupEvent)
+			continue
+		}
+		// workflow 模式：投 workflow_task。
+		if res.Runtime == "workflow" {
+			p.pushWorkflowTask(res.DigitalUserId, groupEvent)
 			continue
 		}
 		// external 模式：走 openevent。
@@ -147,6 +158,29 @@ func (p *digitalEventPusher) pushAgentTask(digitalID string, event map[string]in
 	if err := p.svcCtx.RocketMQ.SendMessage(p.ctx, mqwsconst.MqTopicAgentTask, envelope); err != nil {
 		p.logger.Error(model.LogMsg{
 			Text: "agent_task 投递失败",
+			Data: map[string]any{"digitalId": digitalID, "messageId": messageID, "err": err.Error()},
+		})
+	}
+}
+
+// pushWorkflowTask workflow 模式：投 workflow_task topic，由 workflow 引擎消费（按 Nodes/Edges 调度）。
+func (p *digitalEventPusher) pushWorkflowTask(digitalID string, event map[string]interface{}) {
+	conversationID, _ := event["conversation_id"].(string)
+	senderID, _ := event["sender_id"].(string)
+	messageID, _ := event["message_id"].(string)
+	content, _ := event["content"].(string)
+
+	payload := map[string]interface{}{
+		"messageId":      messageID,
+		"userId":         senderID,
+		"conversationId": conversationID,
+		"content":       content,
+		"digitalId":     digitalID,
+	}
+	envelope := map[string]interface{}{"payload": payload}
+	if err := p.svcCtx.RocketMQ.SendMessage(p.ctx, mqwsconst.MqTopicWorkflowTask, envelope); err != nil {
+		p.logger.Error(model.LogMsg{
+			Text: "workflow_task 投递失败",
 			Data: map[string]any{"digitalId": digitalID, "messageId": messageID, "err": err.Error()},
 		})
 	}

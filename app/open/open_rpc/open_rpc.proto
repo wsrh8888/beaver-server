@@ -135,6 +135,7 @@ message GetDigitalConfigRes {
   string builtin_config = 3;        // BuiltinConfig JSON（Runtime=builtin 时非空）
   string external_config = 4;       // ExternalConfig JSON（Runtime=external 时非空）
   string workflow_config = 5;       // WorkflowConfig JSON（Runtime=workflow 时非空）
+  string app_id = 6;                // 引用 agent_apps.app_id（builtin 模式，platform 取 AI 应用配置）
 }
 
 // ==================== OAuth 应用（门户/管理）====================

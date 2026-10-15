@@ -1252,6 +1252,7 @@ type GetDigitalConfigRes struct {
 	BuiltinConfig  string                 `protobuf:"bytes,3,opt,name=builtin_config,json=builtinConfig,proto3" json:"builtin_config,omitempty"`    // BuiltinConfig JSON（Runtime=builtin 时非空）
 	ExternalConfig string                 `protobuf:"bytes,4,opt,name=external_config,json=externalConfig,proto3" json:"external_config,omitempty"` // ExternalConfig JSON（Runtime=external 时非空）
 	WorkflowConfig string                 `protobuf:"bytes,5,opt,name=workflow_config,json=workflowConfig,proto3" json:"workflow_config,omitempty"` // WorkflowConfig JSON（Runtime=workflow 时非空）
+	AppId          string                 `protobuf:"bytes,6,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`                            // 引用 agent_apps.app_id（builtin 模式，platform 取 AI 应用配置）
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1317,6 +1318,13 @@ func (x *GetDigitalConfigRes) GetExternalConfig() string {
 func (x *GetDigitalConfigRes) GetWorkflowConfig() string {
 	if x != nil {
 		return x.WorkflowConfig
+	}
+	return ""
+}
+
+func (x *GetDigitalConfigRes) GetAppId() string {
+	if x != nil {
+		return x.AppId
 	}
 	return ""
 }
@@ -1744,14 +1752,15 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\aruntime\x18\x04 \x01(\tR\aruntime\"4\n" +
 	"\x13GetDigitalConfigReq\x12\x1d\n" +
 	"\n" +
-	"digital_id\x18\x01 \x01(\tR\tdigitalId\"\xc7\x01\n" +
+	"digital_id\x18\x01 \x01(\tR\tdigitalId\"\xde\x01\n" +
 	"\x13GetDigitalConfigRes\x12\x1d\n" +
 	"\n" +
 	"digital_id\x18\x01 \x01(\tR\tdigitalId\x12\x18\n" +
 	"\aruntime\x18\x02 \x01(\tR\aruntime\x12%\n" +
 	"\x0ebuiltin_config\x18\x03 \x01(\tR\rbuiltinConfig\x12'\n" +
 	"\x0fexternal_config\x18\x04 \x01(\tR\x0eexternalConfig\x12'\n" +
-	"\x0fworkflow_config\x18\x05 \x01(\tR\x0eworkflowConfig\"\xcf\x01\n" +
+	"\x0fworkflow_config\x18\x05 \x01(\tR\x0eworkflowConfig\x12\x15\n" +
+	"\x06app_id\x18\x06 \x01(\tR\x05appId\"\xcf\x01\n" +
 	"\rOpenOAuthItem\x12\x19\n" +
 	"\boauth_id\x18\x01 \x01(\tR\aoauthId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +

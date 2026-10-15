@@ -492,6 +492,323 @@ message RemoveOrgMemberReq {
 
 message RemoveOrgMemberRes {}
 
+// ==================== AI 业务 message ====================
+
+message AgentAppItem {
+  uint64 id = 1;
+  string app_id = 2;
+  string name = 3;
+  string scene = 4;
+  string system_prompt = 5;
+  string llm_model_id = 6;
+  string model_params = 7; // JSON
+  string tools = 8; // JSON [toolId]
+  string mcp_server_ids = 9; // JSON [mcpServerId]
+  string knowledge_ids = 10; // JSON [knowledgeId]
+  string opening_message = 11;
+  string opening_questions = 12; // JSON
+  string variables = 13; // JSON
+  int32 status = 14;
+  int32 sort = 15;
+  string created_by = 16;
+  string created_at = 17;
+  string updated_at = 18;
+}
+
+message GetAgentAppReq {
+  string app_id = 1;
+  string scene = 2; // 可选，按场景取默认应用
+}
+message GetAgentAppRes {
+  AgentAppItem app = 1;
+}
+message ListAgentAppsReq {
+  string scene = 1; // 可选过滤
+  int32 status = 2; // 可选，0=全部
+  int32 page = 3;
+  int32 page_size = 4;
+}
+message ListAgentAppsRes {
+  int64 total = 1;
+  repeated AgentAppItem apps = 2;
+}
+message CreateAgentAppReq {
+  string name = 1;
+  string scene = 2;
+  string system_prompt = 3;
+  string llm_model_id = 4;
+  string model_params = 5; // JSON
+  string tools = 6; // JSON
+  string mcp_server_ids = 7; // JSON
+  string knowledge_ids = 8; // JSON
+  string opening_message = 9;
+  string opening_questions = 10; // JSON
+  string variables = 11; // JSON
+  int32 status = 12;
+  int32 sort = 13;
+  string created_by = 14;
+}
+message CreateAgentAppRes {
+  string app_id = 1;
+}
+message UpdateAgentAppReq {
+  string app_id = 1;
+  string name = 2;
+  string scene = 3;
+  string system_prompt = 4;
+  string llm_model_id = 5;
+  string model_params = 6; // JSON
+  string tools = 7; // JSON
+  string mcp_server_ids = 8; // JSON
+  string knowledge_ids = 9; // JSON
+  string opening_message = 10;
+  string opening_questions = 11; // JSON
+  string variables = 12; // JSON
+  int32 status = 13;
+  int32 sort = 14;
+}
+message UpdateAgentAppRes {}
+message DeleteAgentAppReq {
+  string app_id = 1;
+}
+message DeleteAgentAppRes {}
+
+message AgentModelItem {
+  uint64 id = 1;
+  string model_id = 2;
+  string source = 3; // official|custom
+  string user_id = 4;
+  string name = 5;
+  string provider = 6;
+  string model_name = 7;
+  string endpoint = 8;
+  string api_key = 9; // 接口只出掩码
+  int64 context_window = 10;
+  int32 max_output_tokens = 11;
+  string input_modalities = 12; // JSON
+  string output_modalities = 13; // JSON
+  int32 max_tokens_flash = 14;
+  int32 max_tokens_low = 15;
+  int32 max_tokens_medium = 16;
+  int32 max_tokens_high = 17;
+  string instruction_role = 18;
+  bool supports_thinking = 19;
+  bool thinking_can_disable = 20;
+  string thinking_levels = 21; // JSON
+  bool supports_tools = 22;
+  bool supports_vision = 23;
+  int32 sort = 24;
+  int32 status = 25;
+}
+
+message GetAgentModelReq {
+  string model_id = 1;
+  string model_source = 2; // official|custom；空=official
+  string user_id = 3; // custom 时按用户取
+}
+message GetAgentModelRes {
+  AgentModelItem model = 1;
+}
+message ListAgentModelsReq {
+  string source = 1; // official|custom；空=全部
+  string user_id = 2; // custom 时按用户取
+  int32 status = 3; // 0=全部
+  int32 page = 4;
+  int32 page_size = 5;
+}
+message ListAgentModelsRes {
+  int64 total = 1;
+  repeated AgentModelItem models = 2;
+}
+message CreateAgentModelReq {
+  string name = 1;
+  string source = 2; // official|custom
+  string user_id = 3;
+  string provider = 4;
+  string model_name = 5;
+  string endpoint = 6;
+  string api_key = 7;
+  int64 context_window = 8;
+  int32 max_output_tokens = 9;
+  string input_modalities = 10; // JSON
+  string output_modalities = 11; // JSON
+  int32 max_tokens_flash = 12;
+  int32 max_tokens_low = 13;
+  int32 max_tokens_medium = 14;
+  int32 max_tokens_high = 15;
+  string instruction_role = 16;
+  bool supports_thinking = 17;
+  bool thinking_can_disable = 18;
+  string thinking_levels = 19; // JSON
+  bool supports_tools = 20;
+  bool supports_vision = 21;
+  int32 sort = 22;
+  int32 status = 23;
+}
+message CreateAgentModelRes {
+  string model_id = 1;
+}
+message UpdateAgentModelReq {
+  string model_id = 1;
+  string name = 2;
+  string provider = 3;
+  string model_name = 4;
+  string endpoint = 5;
+  string api_key = 6;
+  int64 context_window = 7;
+  int32 max_output_tokens = 8;
+  string input_modalities = 9; // JSON
+  string output_modalities = 10; // JSON
+  int32 max_tokens_flash = 11;
+  int32 max_tokens_low = 12;
+  int32 max_tokens_medium = 13;
+  int32 max_tokens_high = 14;
+  string instruction_role = 15;
+  bool supports_thinking = 16;
+  bool thinking_can_disable = 17;
+  string thinking_levels = 18; // JSON
+  bool supports_tools = 19;
+  bool supports_vision = 20;
+  int32 sort = 21;
+  int32 status = 22;
+}
+message UpdateAgentModelRes {}
+message DeleteAgentModelReq {
+  string model_id = 1;
+  string source = 2; // 必须为 custom
+  string user_id = 3;
+}
+message DeleteAgentModelRes {}
+
+message AgentToolItem {
+  uint64 id = 1;
+  string tool_id = 2;
+  string name = 3;
+  string tool_type = 4; // builtin|mcp|api
+  string config = 5; // JSON
+  int32 status = 6;
+  int32 sort = 7;
+}
+message ListAgentToolsReq {
+  int32 status = 1; // 0=全部
+}
+message ListAgentToolsRes {
+  repeated AgentToolItem tools = 1;
+}
+message GetAgentToolReq {
+  string tool_id = 1;
+}
+message GetAgentToolRes {
+  AgentToolItem tool = 1;
+}
+message CreateAgentToolReq {
+  string name = 1;
+  string tool_type = 2; // builtin|mcp|api
+  string config = 3; // JSON
+  int32 status = 4;
+  int32 sort = 5;
+}
+message CreateAgentToolRes {
+  string tool_id = 1;
+}
+message UpdateAgentToolReq {
+  string tool_id = 1;
+  string name = 2;
+  string tool_type = 3;
+  string config = 4; // JSON
+  int32 status = 5;
+  int32 sort = 6;
+}
+message UpdateAgentToolRes {}
+message DeleteAgentToolReq {
+  string tool_id = 1;
+}
+message DeleteAgentToolRes {}
+
+message AgentMcpServerItem {
+  uint64 id = 1;
+  string mcp_server_id = 2;
+  string name = 3;
+  string server_name = 4;
+  string transport = 5; // stdio|sse|websocket
+  string config = 6; // JSON
+  string tools = 7; // JSON
+  int32 status = 8;
+}
+message ListAgentMcpServersReq {
+  int32 status = 1; // 0=全部
+}
+message ListAgentMcpServersRes {
+  repeated AgentMcpServerItem servers = 1;
+}
+message GetAgentMcpServerReq {
+  string mcp_server_id = 1;
+}
+message GetAgentMcpServerRes {
+  AgentMcpServerItem server = 1;
+}
+message CreateAgentMcpServerReq {
+  string name = 1;
+  string server_name = 2;
+  string transport = 3; // stdio|sse|websocket
+  string config = 4; // JSON 连接配置
+  string tools = 5; // JSON 能力清单
+  int32 status = 6;
+}
+message CreateAgentMcpServerRes {
+  string mcp_server_id = 1;
+}
+message UpdateAgentMcpServerReq {
+  string mcp_server_id = 1;
+  string name = 2;
+  string server_name = 3;
+  string transport = 4;
+  string config = 5; // JSON
+  string tools = 6; // JSON
+  int32 status = 7;
+}
+message UpdateAgentMcpServerRes {}
+message DeleteAgentMcpServerReq {
+  string mcp_server_id = 1;
+}
+message DeleteAgentMcpServerRes {}
+
+message GetLatestWorkspaceReq {
+  string user_id = 1;
+  string device_id = 2;
+}
+message GetLatestWorkspaceRes {
+  string id = 1;
+  string user_id = 2;
+  string device_id = 3;
+  string name = 4;
+  string path = 5;
+  int64 version = 6;
+}
+message SaveWorkspacePathReq {
+  string user_id = 1;
+  string device_id = 2;
+  string workspace_id = 3;
+  string path = 4;
+}
+message SaveWorkspacePathRes {
+  string path = 1;
+}
+message UpsertWorkspaceReq {
+  string user_id = 1;
+  string device_id = 2;
+  string workspace_id = 3;
+  string name = 4;
+  string path = 5;
+}
+message UpsertWorkspaceRes {}
+message ListWorkspacesByUserReq {
+  string user_id = 1;
+}
+message ListWorkspacesByUserRes {
+  repeated GetLatestWorkspaceRes workspaces = 1;
+}
+
 service platform {
   rpc AdminQueryLogs(AdminQueryLogsReq) returns (AdminQueryLogsRes);
 
@@ -530,6 +847,42 @@ service platform {
   rpc DeleteOrgDepartment(DeleteOrgDepartmentReq) returns (DeleteOrgDepartmentRes);
   rpc AddOrgMember(AddOrgMemberReq) returns (AddOrgMemberRes);
   rpc RemoveOrgMember(RemoveOrgMemberReq) returns (RemoveOrgMemberRes);
+
+  // ==================== AI 业务（通用配置态：agent/ + ai/）====================
+
+  // —— AI 应用（agent/ 通用，渠道无关）——
+  rpc GetAgentApp(GetAgentAppReq) returns (GetAgentAppRes);
+  rpc ListAgentApps(ListAgentAppsReq) returns (ListAgentAppsRes);
+  rpc CreateAgentApp(CreateAgentAppReq) returns (CreateAgentAppRes);
+  rpc UpdateAgentApp(UpdateAgentAppReq) returns (UpdateAgentAppRes);
+  rpc DeleteAgentApp(DeleteAgentAppReq) returns (DeleteAgentAppRes);
+
+  // —— 模型目录（agent/ 通用）——
+  rpc GetAgentModel(GetAgentModelReq) returns (GetAgentModelRes);
+  rpc ListAgentModels(ListAgentModelsReq) returns (ListAgentModelsRes);
+  rpc CreateAgentModel(CreateAgentModelReq) returns (CreateAgentModelRes);
+  rpc UpdateAgentModel(UpdateAgentModelReq) returns (UpdateAgentModelRes);
+  rpc DeleteAgentModel(DeleteAgentModelReq) returns (DeleteAgentModelRes);
+
+  // —— 工具目录（agent/ 通用）——
+  rpc GetAgentTool(GetAgentToolReq) returns (GetAgentToolRes);
+  rpc ListAgentTools(ListAgentToolsReq) returns (ListAgentToolsRes);
+  rpc CreateAgentTool(CreateAgentToolReq) returns (CreateAgentToolRes);
+  rpc UpdateAgentTool(UpdateAgentToolReq) returns (UpdateAgentToolRes);
+  rpc DeleteAgentTool(DeleteAgentToolReq) returns (DeleteAgentToolRes);
+
+  // —— MCP 服务目录（agent/ 通用）——
+  rpc GetAgentMcpServer(GetAgentMcpServerReq) returns (GetAgentMcpServerRes);
+  rpc ListAgentMcpServers(ListAgentMcpServersReq) returns (ListAgentMcpServersRes);
+  rpc CreateAgentMcpServer(CreateAgentMcpServerReq) returns (CreateAgentMcpServerRes);
+  rpc UpdateAgentMcpServer(UpdateAgentMcpServerReq) returns (UpdateAgentMcpServerRes);
+  rpc DeleteAgentMcpServer(DeleteAgentMcpServerReq) returns (DeleteAgentMcpServerRes);
+
+  // —— 工作空间/设备（ai/ AI助手桌面端特有）——
+  rpc GetLatestWorkspace(GetLatestWorkspaceReq) returns (GetLatestWorkspaceRes);
+  rpc SaveWorkspacePath(SaveWorkspacePathReq) returns (SaveWorkspacePathRes);
+  rpc UpsertWorkspace(UpsertWorkspaceReq) returns (UpsertWorkspaceRes);
+  rpc ListWorkspacesByUser(ListWorkspacesByUserReq) returns (ListWorkspacesByUserRes);
 }
 
 // goctl rpc protoc platform_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

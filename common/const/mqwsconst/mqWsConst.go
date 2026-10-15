@@ -35,6 +35,10 @@ const (
 	MqTopicClientLog TopicType = "beaver_logs"
 	// MqTopicAgentTask builtin 数字伙伴消息投递 Topic（chat_rpc 投 → agent 消费跑 LLM）
 	MqTopicAgentTask TopicType = "agent_task"
+	// MqTopicAgentDone agent 终稿回投 Topic（agent 跑完 LLM → chat_rpc 消费落库）
+	MqTopicAgentDone TopicType = "agent_done"
+	// MqTopicWorkflowTask workflow 数字伙伴消息投递 Topic（chat_rpc 投 → workflow 引擎消费）
+	MqTopicWorkflowTask TopicType = "workflow_task"
 )
 
 // RocketMQ Consumer Group 类型
@@ -48,4 +52,10 @@ const (
 	MqGroupWsBot GroupType = "open_api_bot_consumer_group"
 	// MqGroupClientLog 客户端日志写入 OpenSearch 的消费者组
 	MqGroupClientLog GroupType = "platform_client_log_group"
+	// MqGroupAgentTask chat_rpc 消费 agent_task 的消费者组（CLUSTERING，builtin 编排层）
+	MqGroupAgentTask GroupType = "chat_rpc_agent_task_group"
+	// MqGroupAgentDone chat_rpc 消费 agent_done 的消费者组（CLUSTERING，终稿落库）
+	MqGroupAgentDone GroupType = "chat_rpc_agent_done_group"
+	// MqGroupWorkflowTask workflow 引擎消费 workflow_task 的消费者组（CLUSTERING）
+	MqGroupWorkflowTask GroupType = "workflow_engine_group"
 )

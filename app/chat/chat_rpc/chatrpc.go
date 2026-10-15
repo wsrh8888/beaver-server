@@ -26,6 +26,7 @@ import (
 	"fmt"
 
 	"beaver/app/chat/chat_rpc/internal/config"
+	"beaver/app/chat/chat_rpc/internal/logic"
 	"beaver/app/chat/chat_rpc/internal/server"
 	"beaver/app/chat/chat_rpc/internal/svc"
 	"beaver/app/chat/chat_rpc/types/chat_rpc"
@@ -61,6 +62,22 @@ func main() {
 
 	// 添加拦截器
 	s.AddUnaryInterceptors(grpcMiddleware.RequestLogInterceptor)
+
+	// 启动 RocketMQ Consumer（agent_task 编排层 + agent_done 终稿落库）
+	if ctx.RocketMQ != nil {
+		agentTaskConsumer := logic.NewAgentTaskConsumerLogic(ctx)
+		go func() {
+			if err := agentTaskConsumer.StartConsumer(); err != nil {
+				fmt.Printf("agent_task Consumer 启动失败: %v\n", err)
+			}
+		}()
+		agentDoneConsumer := logic.NewAgentDoneConsumerLogic(ctx)
+		go func() {
+			if err := agentDoneConsumer.StartConsumer(); err != nil {
+				fmt.Printf("agent_done Consumer 启动失败: %v\n", err)
+			}
+		}()
+	}
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

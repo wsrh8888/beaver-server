@@ -1,3 +1,4 @@
+import "api/agent.api"
 import "api/auth_public.api"
 import "api/chat.api"
 import "api/circle.api"

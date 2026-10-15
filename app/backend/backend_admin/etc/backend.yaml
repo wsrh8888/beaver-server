@@ -115,3 +115,8 @@ CircleRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: circlerpc.rpc
+AgentRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: agentrpc.rpc

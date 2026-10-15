@@ -5,12 +5,16 @@ package agent;
 option go_package = "./agent_rpc";
 
 // 内部服务。有进程内态的方法 + 同步拉取（结果走 Reply.result_json）。
-// 权威定义在 beaver-agent/agent_server/grpc/agent/agent_rpc.proto，两边须保持一致。
+// 每加一个 rpc，须在 agent_rpc/internal/logic/message 与 internal/server 各加对应文件。
 service Agent {
   rpc SendMessage(SendMessageReq) returns (Reply);
   rpc SubmitClientToolResult(SubmitClientToolResultReq) returns (Reply);
   // 模型改/删后通知 rpc 进程作废缓存实例(跨进程失效)。
   rpc InvalidateModel(InvalidateModelReq) returns (Reply);
+
+  // 客户端能力上报：桌面/Flutter 启动或会话建立时上报 MCP 能力清单，
+  // 进程内缓存供 get_enabled_tools() 动态装配客户端工具。
+  rpc ReportCapabilities(ReportCapabilitiesReq) returns (Reply);
 
   // 桌面 datasync：增量列会话（since = 本地游标 version）
   rpc ListConversations(ListConversationsReq) returns (Reply);
@@ -18,6 +22,8 @@ service Agent {
   rpc ListTopics(ListTopicsReq) returns (Reply);
   // 某话题消息增量（after_version）
   rpc ListMessages(ListMessagesReq) returns (Reply);
+  // 桌面创建/打开文件夹时登记空间。device_id 用请求头里的本机设备号。
+  rpc UpsertWorkspace(UpsertWorkspaceReq) returns (Reply);
 }
 
 message Reply {
@@ -36,11 +42,19 @@ message SendMessageReq {
   string model_source = 7;
   // 多模态 parts JSON 数组（权威用户内容）。
   string parts_json = 8;
-  // local=本机空间（可经 ClientSession 操作用户目录）；cloud=云端轻会话（无本机文件权限）
-  string workspace = 9;
-  // default | full；仅 workspace=local 有意义
+  // 本机空间 id（客户端 spaceId）；空=云端轻会话（无本机文件权限），有值=本机空间（可经 ClientSession 操作用户目录）
+  string workspace_id = 9;
+  // default | full；仅 workspace_id 非空有意义
   string permission_mode = 10;
   string client_msg_id = 11;
+  // 本机空间绝对路径。workspace_id 非空时由客户端上报，供提示和列表展示。
+  string workspace_path = 12;
+  // 要控制的电脑。空=调用方自己这台设备；手机选中在线电脑时填那台电脑的 device_id。
+  string target_device_id = 13;
+  // 数字伙伴的 system_prompt（路径 B 编排层传入；路径 A 独立 AI 窗口为空）。
+  string system_prompt = 14;
+  // 数字伙伴 ID（路径 B 编排层传入；路径 A 为空。非空时终稿投 agent_done topic 让 chat 落库）。
+  string digital_id = 15;
 }
 
 message SubmitClientToolResultReq {
@@ -53,6 +67,18 @@ message SubmitClientToolResultReq {
 
 message InvalidateModelReq {
   string model_id = 1;
+}
+
+// MCP server(客户端或微服务)能力清单上报。manifest_json = MCP tools/list 风格的 servers 数组 JSON。
+message ReportCapabilitiesReq {
+  string user_id = 1;
+  string device_id = 2;
+  // 仅 client 来源有意义:空=设备级;非空=绑该会话
+  string conversation_id = 3;
+  // MCP servers 数组 JSON: [{name,version,tools:[{name,description,inputSchema}]}]
+  string manifest_json = 4;
+  // 来源: "client"(客户端) | "service"(微服务,全局共享)
+  string source = 5;
 }
 
 // since: 只返回 version > since 的会话；0=全量
@@ -74,6 +100,14 @@ message ListMessagesReq {
   int64 after_version = 3;
   int64 before_id = 4;
   int32 limit = 5;
+}
+
+message UpsertWorkspaceReq {
+  string user_id = 1;
+  string device_id = 2;
+  string workspace_id = 3;
+  string name = 4;
+  string path = 5;
 }
 
 // goctl rpc protoc agent_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.

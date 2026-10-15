@@ -36,6 +36,8 @@ import (
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
 	"beaver/app/platform/platform_models"
+	agent_models "beaver/app/platform/platform_models/agent"
+	ai_models "beaver/app/platform/platform_models/ai"
 	org_models "beaver/app/platform/platform_models/org"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
@@ -238,6 +240,12 @@ func main() {
 					&org_models.Staff{},
 					&org_models.DeptUser{},
 					&org_models.Admin{},
+					// AI 业务表（agent/ 通用 + ai/ AI助手桌面端特有）
+					&agent_models.AgentApp{},
+					&agent_models.AgentModel{},
+					&agent_models.AgentTool{},
+					&agent_models.AgentMcpServer{},
+					&ai_models.AgentWorkspace{},
 				)
 			},
 		},

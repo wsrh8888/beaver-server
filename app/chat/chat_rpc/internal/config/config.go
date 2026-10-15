@@ -44,6 +44,8 @@ type Config struct {
 	GroupRpc        zrpc.RpcClientConf
 	OpenRpc         zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf
+	AgentRpc        zrpc.RpcClientConf
+	PlatformRpc     zrpc.RpcClientConf
 	Push        struct {
 		Enabled bool
 		FCM     struct {

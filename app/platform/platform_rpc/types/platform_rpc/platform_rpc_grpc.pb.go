@@ -51,6 +51,30 @@ const (
 	Platform_DeleteOrgDepartment_FullMethodName      = "/platform_rpc.platform/DeleteOrgDepartment"
 	Platform_AddOrgMember_FullMethodName             = "/platform_rpc.platform/AddOrgMember"
 	Platform_RemoveOrgMember_FullMethodName          = "/platform_rpc.platform/RemoveOrgMember"
+	Platform_GetAgentApp_FullMethodName              = "/platform_rpc.platform/GetAgentApp"
+	Platform_ListAgentApps_FullMethodName            = "/platform_rpc.platform/ListAgentApps"
+	Platform_CreateAgentApp_FullMethodName           = "/platform_rpc.platform/CreateAgentApp"
+	Platform_UpdateAgentApp_FullMethodName           = "/platform_rpc.platform/UpdateAgentApp"
+	Platform_DeleteAgentApp_FullMethodName           = "/platform_rpc.platform/DeleteAgentApp"
+	Platform_GetAgentModel_FullMethodName            = "/platform_rpc.platform/GetAgentModel"
+	Platform_ListAgentModels_FullMethodName          = "/platform_rpc.platform/ListAgentModels"
+	Platform_CreateAgentModel_FullMethodName         = "/platform_rpc.platform/CreateAgentModel"
+	Platform_UpdateAgentModel_FullMethodName         = "/platform_rpc.platform/UpdateAgentModel"
+	Platform_DeleteAgentModel_FullMethodName         = "/platform_rpc.platform/DeleteAgentModel"
+	Platform_GetAgentTool_FullMethodName             = "/platform_rpc.platform/GetAgentTool"
+	Platform_ListAgentTools_FullMethodName           = "/platform_rpc.platform/ListAgentTools"
+	Platform_CreateAgentTool_FullMethodName          = "/platform_rpc.platform/CreateAgentTool"
+	Platform_UpdateAgentTool_FullMethodName          = "/platform_rpc.platform/UpdateAgentTool"
+	Platform_DeleteAgentTool_FullMethodName          = "/platform_rpc.platform/DeleteAgentTool"
+	Platform_GetAgentMcpServer_FullMethodName        = "/platform_rpc.platform/GetAgentMcpServer"
+	Platform_ListAgentMcpServers_FullMethodName      = "/platform_rpc.platform/ListAgentMcpServers"
+	Platform_CreateAgentMcpServer_FullMethodName     = "/platform_rpc.platform/CreateAgentMcpServer"
+	Platform_UpdateAgentMcpServer_FullMethodName     = "/platform_rpc.platform/UpdateAgentMcpServer"
+	Platform_DeleteAgentMcpServer_FullMethodName     = "/platform_rpc.platform/DeleteAgentMcpServer"
+	Platform_GetLatestWorkspace_FullMethodName       = "/platform_rpc.platform/GetLatestWorkspace"
+	Platform_SaveWorkspacePath_FullMethodName        = "/platform_rpc.platform/SaveWorkspacePath"
+	Platform_UpsertWorkspace_FullMethodName          = "/platform_rpc.platform/UpsertWorkspace"
+	Platform_ListWorkspacesByUser_FullMethodName     = "/platform_rpc.platform/ListWorkspacesByUser"
 )
 
 // PlatformClient is the client API for Platform service.
@@ -89,6 +113,35 @@ type PlatformClient interface {
 	DeleteOrgDepartment(ctx context.Context, in *DeleteOrgDepartmentReq, opts ...grpc.CallOption) (*DeleteOrgDepartmentRes, error)
 	AddOrgMember(ctx context.Context, in *AddOrgMemberReq, opts ...grpc.CallOption) (*AddOrgMemberRes, error)
 	RemoveOrgMember(ctx context.Context, in *RemoveOrgMemberReq, opts ...grpc.CallOption) (*RemoveOrgMemberRes, error)
+	// —— AI 应用（agent/ 通用，渠道无关）——
+	GetAgentApp(ctx context.Context, in *GetAgentAppReq, opts ...grpc.CallOption) (*GetAgentAppRes, error)
+	ListAgentApps(ctx context.Context, in *ListAgentAppsReq, opts ...grpc.CallOption) (*ListAgentAppsRes, error)
+	CreateAgentApp(ctx context.Context, in *CreateAgentAppReq, opts ...grpc.CallOption) (*CreateAgentAppRes, error)
+	UpdateAgentApp(ctx context.Context, in *UpdateAgentAppReq, opts ...grpc.CallOption) (*UpdateAgentAppRes, error)
+	DeleteAgentApp(ctx context.Context, in *DeleteAgentAppReq, opts ...grpc.CallOption) (*DeleteAgentAppRes, error)
+	// —— 模型目录（agent/ 通用）——
+	GetAgentModel(ctx context.Context, in *GetAgentModelReq, opts ...grpc.CallOption) (*GetAgentModelRes, error)
+	ListAgentModels(ctx context.Context, in *ListAgentModelsReq, opts ...grpc.CallOption) (*ListAgentModelsRes, error)
+	CreateAgentModel(ctx context.Context, in *CreateAgentModelReq, opts ...grpc.CallOption) (*CreateAgentModelRes, error)
+	UpdateAgentModel(ctx context.Context, in *UpdateAgentModelReq, opts ...grpc.CallOption) (*UpdateAgentModelRes, error)
+	DeleteAgentModel(ctx context.Context, in *DeleteAgentModelReq, opts ...grpc.CallOption) (*DeleteAgentModelRes, error)
+	// —— 工具目录（agent/ 通用）——
+	GetAgentTool(ctx context.Context, in *GetAgentToolReq, opts ...grpc.CallOption) (*GetAgentToolRes, error)
+	ListAgentTools(ctx context.Context, in *ListAgentToolsReq, opts ...grpc.CallOption) (*ListAgentToolsRes, error)
+	CreateAgentTool(ctx context.Context, in *CreateAgentToolReq, opts ...grpc.CallOption) (*CreateAgentToolRes, error)
+	UpdateAgentTool(ctx context.Context, in *UpdateAgentToolReq, opts ...grpc.CallOption) (*UpdateAgentToolRes, error)
+	DeleteAgentTool(ctx context.Context, in *DeleteAgentToolReq, opts ...grpc.CallOption) (*DeleteAgentToolRes, error)
+	// —— MCP 服务目录（agent/ 通用）——
+	GetAgentMcpServer(ctx context.Context, in *GetAgentMcpServerReq, opts ...grpc.CallOption) (*GetAgentMcpServerRes, error)
+	ListAgentMcpServers(ctx context.Context, in *ListAgentMcpServersReq, opts ...grpc.CallOption) (*ListAgentMcpServersRes, error)
+	CreateAgentMcpServer(ctx context.Context, in *CreateAgentMcpServerReq, opts ...grpc.CallOption) (*CreateAgentMcpServerRes, error)
+	UpdateAgentMcpServer(ctx context.Context, in *UpdateAgentMcpServerReq, opts ...grpc.CallOption) (*UpdateAgentMcpServerRes, error)
+	DeleteAgentMcpServer(ctx context.Context, in *DeleteAgentMcpServerReq, opts ...grpc.CallOption) (*DeleteAgentMcpServerRes, error)
+	// —— 工作空间/设备（ai/ AI助手桌面端特有）——
+	GetLatestWorkspace(ctx context.Context, in *GetLatestWorkspaceReq, opts ...grpc.CallOption) (*GetLatestWorkspaceRes, error)
+	SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error)
+	UpsertWorkspace(ctx context.Context, in *UpsertWorkspaceReq, opts ...grpc.CallOption) (*UpsertWorkspaceRes, error)
+	ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error)
 }
 
 type platformClient struct {
@@ -419,6 +472,246 @@ func (c *platformClient) RemoveOrgMember(ctx context.Context, in *RemoveOrgMembe
 	return out, nil
 }
 
+func (c *platformClient) GetAgentApp(ctx context.Context, in *GetAgentAppReq, opts ...grpc.CallOption) (*GetAgentAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAgentAppRes)
+	err := c.cc.Invoke(ctx, Platform_GetAgentApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListAgentApps(ctx context.Context, in *ListAgentAppsReq, opts ...grpc.CallOption) (*ListAgentAppsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentAppsRes)
+	err := c.cc.Invoke(ctx, Platform_ListAgentApps_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) CreateAgentApp(ctx context.Context, in *CreateAgentAppReq, opts ...grpc.CallOption) (*CreateAgentAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAgentAppRes)
+	err := c.cc.Invoke(ctx, Platform_CreateAgentApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateAgentApp(ctx context.Context, in *UpdateAgentAppReq, opts ...grpc.CallOption) (*UpdateAgentAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAgentAppRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateAgentApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteAgentApp(ctx context.Context, in *DeleteAgentAppReq, opts ...grpc.CallOption) (*DeleteAgentAppRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAgentAppRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteAgentApp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetAgentModel(ctx context.Context, in *GetAgentModelReq, opts ...grpc.CallOption) (*GetAgentModelRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAgentModelRes)
+	err := c.cc.Invoke(ctx, Platform_GetAgentModel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListAgentModels(ctx context.Context, in *ListAgentModelsReq, opts ...grpc.CallOption) (*ListAgentModelsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentModelsRes)
+	err := c.cc.Invoke(ctx, Platform_ListAgentModels_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) CreateAgentModel(ctx context.Context, in *CreateAgentModelReq, opts ...grpc.CallOption) (*CreateAgentModelRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAgentModelRes)
+	err := c.cc.Invoke(ctx, Platform_CreateAgentModel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateAgentModel(ctx context.Context, in *UpdateAgentModelReq, opts ...grpc.CallOption) (*UpdateAgentModelRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAgentModelRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateAgentModel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteAgentModel(ctx context.Context, in *DeleteAgentModelReq, opts ...grpc.CallOption) (*DeleteAgentModelRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAgentModelRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteAgentModel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetAgentTool(ctx context.Context, in *GetAgentToolReq, opts ...grpc.CallOption) (*GetAgentToolRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAgentToolRes)
+	err := c.cc.Invoke(ctx, Platform_GetAgentTool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListAgentTools(ctx context.Context, in *ListAgentToolsReq, opts ...grpc.CallOption) (*ListAgentToolsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentToolsRes)
+	err := c.cc.Invoke(ctx, Platform_ListAgentTools_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) CreateAgentTool(ctx context.Context, in *CreateAgentToolReq, opts ...grpc.CallOption) (*CreateAgentToolRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAgentToolRes)
+	err := c.cc.Invoke(ctx, Platform_CreateAgentTool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateAgentTool(ctx context.Context, in *UpdateAgentToolReq, opts ...grpc.CallOption) (*UpdateAgentToolRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAgentToolRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateAgentTool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteAgentTool(ctx context.Context, in *DeleteAgentToolReq, opts ...grpc.CallOption) (*DeleteAgentToolRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAgentToolRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteAgentTool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetAgentMcpServer(ctx context.Context, in *GetAgentMcpServerReq, opts ...grpc.CallOption) (*GetAgentMcpServerRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAgentMcpServerRes)
+	err := c.cc.Invoke(ctx, Platform_GetAgentMcpServer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListAgentMcpServers(ctx context.Context, in *ListAgentMcpServersReq, opts ...grpc.CallOption) (*ListAgentMcpServersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentMcpServersRes)
+	err := c.cc.Invoke(ctx, Platform_ListAgentMcpServers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) CreateAgentMcpServer(ctx context.Context, in *CreateAgentMcpServerReq, opts ...grpc.CallOption) (*CreateAgentMcpServerRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAgentMcpServerRes)
+	err := c.cc.Invoke(ctx, Platform_CreateAgentMcpServer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateAgentMcpServer(ctx context.Context, in *UpdateAgentMcpServerReq, opts ...grpc.CallOption) (*UpdateAgentMcpServerRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAgentMcpServerRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateAgentMcpServer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteAgentMcpServer(ctx context.Context, in *DeleteAgentMcpServerReq, opts ...grpc.CallOption) (*DeleteAgentMcpServerRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAgentMcpServerRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteAgentMcpServer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetLatestWorkspace(ctx context.Context, in *GetLatestWorkspaceReq, opts ...grpc.CallOption) (*GetLatestWorkspaceRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLatestWorkspaceRes)
+	err := c.cc.Invoke(ctx, Platform_GetLatestWorkspace_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveWorkspacePathRes)
+	err := c.cc.Invoke(ctx, Platform_SaveWorkspacePath_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpsertWorkspace(ctx context.Context, in *UpsertWorkspaceReq, opts ...grpc.CallOption) (*UpsertWorkspaceRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertWorkspaceRes)
+	err := c.cc.Invoke(ctx, Platform_UpsertWorkspace_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListWorkspacesByUserRes)
+	err := c.cc.Invoke(ctx, Platform_ListWorkspacesByUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServer is the server API for Platform service.
 // All implementations must embed UnimplementedPlatformServer
 // for forward compatibility.
@@ -455,6 +748,35 @@ type PlatformServer interface {
 	DeleteOrgDepartment(context.Context, *DeleteOrgDepartmentReq) (*DeleteOrgDepartmentRes, error)
 	AddOrgMember(context.Context, *AddOrgMemberReq) (*AddOrgMemberRes, error)
 	RemoveOrgMember(context.Context, *RemoveOrgMemberReq) (*RemoveOrgMemberRes, error)
+	// —— AI 应用（agent/ 通用，渠道无关）——
+	GetAgentApp(context.Context, *GetAgentAppReq) (*GetAgentAppRes, error)
+	ListAgentApps(context.Context, *ListAgentAppsReq) (*ListAgentAppsRes, error)
+	CreateAgentApp(context.Context, *CreateAgentAppReq) (*CreateAgentAppRes, error)
+	UpdateAgentApp(context.Context, *UpdateAgentAppReq) (*UpdateAgentAppRes, error)
+	DeleteAgentApp(context.Context, *DeleteAgentAppReq) (*DeleteAgentAppRes, error)
+	// —— 模型目录（agent/ 通用）——
+	GetAgentModel(context.Context, *GetAgentModelReq) (*GetAgentModelRes, error)
+	ListAgentModels(context.Context, *ListAgentModelsReq) (*ListAgentModelsRes, error)
+	CreateAgentModel(context.Context, *CreateAgentModelReq) (*CreateAgentModelRes, error)
+	UpdateAgentModel(context.Context, *UpdateAgentModelReq) (*UpdateAgentModelRes, error)
+	DeleteAgentModel(context.Context, *DeleteAgentModelReq) (*DeleteAgentModelRes, error)
+	// —— 工具目录（agent/ 通用）——
+	GetAgentTool(context.Context, *GetAgentToolReq) (*GetAgentToolRes, error)
+	ListAgentTools(context.Context, *ListAgentToolsReq) (*ListAgentToolsRes, error)
+	CreateAgentTool(context.Context, *CreateAgentToolReq) (*CreateAgentToolRes, error)
+	UpdateAgentTool(context.Context, *UpdateAgentToolReq) (*UpdateAgentToolRes, error)
+	DeleteAgentTool(context.Context, *DeleteAgentToolReq) (*DeleteAgentToolRes, error)
+	// —— MCP 服务目录（agent/ 通用）——
+	GetAgentMcpServer(context.Context, *GetAgentMcpServerReq) (*GetAgentMcpServerRes, error)
+	ListAgentMcpServers(context.Context, *ListAgentMcpServersReq) (*ListAgentMcpServersRes, error)
+	CreateAgentMcpServer(context.Context, *CreateAgentMcpServerReq) (*CreateAgentMcpServerRes, error)
+	UpdateAgentMcpServer(context.Context, *UpdateAgentMcpServerReq) (*UpdateAgentMcpServerRes, error)
+	DeleteAgentMcpServer(context.Context, *DeleteAgentMcpServerReq) (*DeleteAgentMcpServerRes, error)
+	// —— 工作空间/设备（ai/ AI助手桌面端特有）——
+	GetLatestWorkspace(context.Context, *GetLatestWorkspaceReq) (*GetLatestWorkspaceRes, error)
+	SaveWorkspacePath(context.Context, *SaveWorkspacePathReq) (*SaveWorkspacePathRes, error)
+	UpsertWorkspace(context.Context, *UpsertWorkspaceReq) (*UpsertWorkspaceRes, error)
+	ListWorkspacesByUser(context.Context, *ListWorkspacesByUserReq) (*ListWorkspacesByUserRes, error)
 	mustEmbedUnimplementedPlatformServer()
 }
 
@@ -560,6 +882,78 @@ func (UnimplementedPlatformServer) AddOrgMember(context.Context, *AddOrgMemberRe
 }
 func (UnimplementedPlatformServer) RemoveOrgMember(context.Context, *RemoveOrgMemberReq) (*RemoveOrgMemberRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveOrgMember not implemented")
+}
+func (UnimplementedPlatformServer) GetAgentApp(context.Context, *GetAgentAppReq) (*GetAgentAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAgentApp not implemented")
+}
+func (UnimplementedPlatformServer) ListAgentApps(context.Context, *ListAgentAppsReq) (*ListAgentAppsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentApps not implemented")
+}
+func (UnimplementedPlatformServer) CreateAgentApp(context.Context, *CreateAgentAppReq) (*CreateAgentAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAgentApp not implemented")
+}
+func (UnimplementedPlatformServer) UpdateAgentApp(context.Context, *UpdateAgentAppReq) (*UpdateAgentAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgentApp not implemented")
+}
+func (UnimplementedPlatformServer) DeleteAgentApp(context.Context, *DeleteAgentAppReq) (*DeleteAgentAppRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentApp not implemented")
+}
+func (UnimplementedPlatformServer) GetAgentModel(context.Context, *GetAgentModelReq) (*GetAgentModelRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAgentModel not implemented")
+}
+func (UnimplementedPlatformServer) ListAgentModels(context.Context, *ListAgentModelsReq) (*ListAgentModelsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentModels not implemented")
+}
+func (UnimplementedPlatformServer) CreateAgentModel(context.Context, *CreateAgentModelReq) (*CreateAgentModelRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAgentModel not implemented")
+}
+func (UnimplementedPlatformServer) UpdateAgentModel(context.Context, *UpdateAgentModelReq) (*UpdateAgentModelRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgentModel not implemented")
+}
+func (UnimplementedPlatformServer) DeleteAgentModel(context.Context, *DeleteAgentModelReq) (*DeleteAgentModelRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentModel not implemented")
+}
+func (UnimplementedPlatformServer) GetAgentTool(context.Context, *GetAgentToolReq) (*GetAgentToolRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAgentTool not implemented")
+}
+func (UnimplementedPlatformServer) ListAgentTools(context.Context, *ListAgentToolsReq) (*ListAgentToolsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentTools not implemented")
+}
+func (UnimplementedPlatformServer) CreateAgentTool(context.Context, *CreateAgentToolReq) (*CreateAgentToolRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAgentTool not implemented")
+}
+func (UnimplementedPlatformServer) UpdateAgentTool(context.Context, *UpdateAgentToolReq) (*UpdateAgentToolRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgentTool not implemented")
+}
+func (UnimplementedPlatformServer) DeleteAgentTool(context.Context, *DeleteAgentToolReq) (*DeleteAgentToolRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentTool not implemented")
+}
+func (UnimplementedPlatformServer) GetAgentMcpServer(context.Context, *GetAgentMcpServerReq) (*GetAgentMcpServerRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAgentMcpServer not implemented")
+}
+func (UnimplementedPlatformServer) ListAgentMcpServers(context.Context, *ListAgentMcpServersReq) (*ListAgentMcpServersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentMcpServers not implemented")
+}
+func (UnimplementedPlatformServer) CreateAgentMcpServer(context.Context, *CreateAgentMcpServerReq) (*CreateAgentMcpServerRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAgentMcpServer not implemented")
+}
+func (UnimplementedPlatformServer) UpdateAgentMcpServer(context.Context, *UpdateAgentMcpServerReq) (*UpdateAgentMcpServerRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgentMcpServer not implemented")
+}
+func (UnimplementedPlatformServer) DeleteAgentMcpServer(context.Context, *DeleteAgentMcpServerReq) (*DeleteAgentMcpServerRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentMcpServer not implemented")
+}
+func (UnimplementedPlatformServer) GetLatestWorkspace(context.Context, *GetLatestWorkspaceReq) (*GetLatestWorkspaceRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLatestWorkspace not implemented")
+}
+func (UnimplementedPlatformServer) SaveWorkspacePath(context.Context, *SaveWorkspacePathReq) (*SaveWorkspacePathRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveWorkspacePath not implemented")
+}
+func (UnimplementedPlatformServer) UpsertWorkspace(context.Context, *UpsertWorkspaceReq) (*UpsertWorkspaceRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertWorkspace not implemented")
+}
+func (UnimplementedPlatformServer) ListWorkspacesByUser(context.Context, *ListWorkspacesByUserReq) (*ListWorkspacesByUserRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWorkspacesByUser not implemented")
 }
 func (UnimplementedPlatformServer) mustEmbedUnimplementedPlatformServer() {}
 func (UnimplementedPlatformServer) testEmbeddedByValue()                  {}
@@ -1158,6 +1552,438 @@ func _Platform_RemoveOrgMember_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Platform_GetAgentApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetAgentApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetAgentApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetAgentApp(ctx, req.(*GetAgentAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListAgentApps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentAppsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListAgentApps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListAgentApps_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListAgentApps(ctx, req.(*ListAgentAppsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_CreateAgentApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAgentAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateAgentApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateAgentApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateAgentApp(ctx, req.(*CreateAgentAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateAgentApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAgentAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateAgentApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateAgentApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateAgentApp(ctx, req.(*UpdateAgentAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteAgentApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAgentAppReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteAgentApp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteAgentApp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteAgentApp(ctx, req.(*DeleteAgentAppReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetAgentModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentModelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetAgentModel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetAgentModel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetAgentModel(ctx, req.(*GetAgentModelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListAgentModels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentModelsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListAgentModels(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListAgentModels_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListAgentModels(ctx, req.(*ListAgentModelsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_CreateAgentModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAgentModelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateAgentModel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateAgentModel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateAgentModel(ctx, req.(*CreateAgentModelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateAgentModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAgentModelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateAgentModel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateAgentModel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateAgentModel(ctx, req.(*UpdateAgentModelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteAgentModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAgentModelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteAgentModel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteAgentModel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteAgentModel(ctx, req.(*DeleteAgentModelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetAgentTool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentToolReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetAgentTool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetAgentTool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetAgentTool(ctx, req.(*GetAgentToolReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListAgentTools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentToolsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListAgentTools(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListAgentTools_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListAgentTools(ctx, req.(*ListAgentToolsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_CreateAgentTool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAgentToolReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateAgentTool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateAgentTool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateAgentTool(ctx, req.(*CreateAgentToolReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateAgentTool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAgentToolReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateAgentTool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateAgentTool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateAgentTool(ctx, req.(*UpdateAgentToolReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteAgentTool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAgentToolReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteAgentTool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteAgentTool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteAgentTool(ctx, req.(*DeleteAgentToolReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetAgentMcpServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentMcpServerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetAgentMcpServer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetAgentMcpServer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetAgentMcpServer(ctx, req.(*GetAgentMcpServerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListAgentMcpServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentMcpServersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListAgentMcpServers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListAgentMcpServers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListAgentMcpServers(ctx, req.(*ListAgentMcpServersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_CreateAgentMcpServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAgentMcpServerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateAgentMcpServer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateAgentMcpServer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateAgentMcpServer(ctx, req.(*CreateAgentMcpServerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateAgentMcpServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAgentMcpServerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateAgentMcpServer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateAgentMcpServer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateAgentMcpServer(ctx, req.(*UpdateAgentMcpServerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteAgentMcpServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAgentMcpServerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteAgentMcpServer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteAgentMcpServer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteAgentMcpServer(ctx, req.(*DeleteAgentMcpServerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetLatestWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLatestWorkspaceReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetLatestWorkspace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetLatestWorkspace_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetLatestWorkspace(ctx, req.(*GetLatestWorkspaceReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_SaveWorkspacePath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveWorkspacePathReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).SaveWorkspacePath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_SaveWorkspacePath_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).SaveWorkspacePath(ctx, req.(*SaveWorkspacePathReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpsertWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertWorkspaceReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpsertWorkspace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpsertWorkspace_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpsertWorkspace(ctx, req.(*UpsertWorkspaceReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListWorkspacesByUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWorkspacesByUserReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListWorkspacesByUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListWorkspacesByUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListWorkspacesByUser(ctx, req.(*ListWorkspacesByUserReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Platform_ServiceDesc is the grpc.ServiceDesc for Platform service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1292,6 +2118,102 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveOrgMember",
 			Handler:    _Platform_RemoveOrgMember_Handler,
+		},
+		{
+			MethodName: "GetAgentApp",
+			Handler:    _Platform_GetAgentApp_Handler,
+		},
+		{
+			MethodName: "ListAgentApps",
+			Handler:    _Platform_ListAgentApps_Handler,
+		},
+		{
+			MethodName: "CreateAgentApp",
+			Handler:    _Platform_CreateAgentApp_Handler,
+		},
+		{
+			MethodName: "UpdateAgentApp",
+			Handler:    _Platform_UpdateAgentApp_Handler,
+		},
+		{
+			MethodName: "DeleteAgentApp",
+			Handler:    _Platform_DeleteAgentApp_Handler,
+		},
+		{
+			MethodName: "GetAgentModel",
+			Handler:    _Platform_GetAgentModel_Handler,
+		},
+		{
+			MethodName: "ListAgentModels",
+			Handler:    _Platform_ListAgentModels_Handler,
+		},
+		{
+			MethodName: "CreateAgentModel",
+			Handler:    _Platform_CreateAgentModel_Handler,
+		},
+		{
+			MethodName: "UpdateAgentModel",
+			Handler:    _Platform_UpdateAgentModel_Handler,
+		},
+		{
+			MethodName: "DeleteAgentModel",
+			Handler:    _Platform_DeleteAgentModel_Handler,
+		},
+		{
+			MethodName: "GetAgentTool",
+			Handler:    _Platform_GetAgentTool_Handler,
+		},
+		{
+			MethodName: "ListAgentTools",
+			Handler:    _Platform_ListAgentTools_Handler,
+		},
+		{
+			MethodName: "CreateAgentTool",
+			Handler:    _Platform_CreateAgentTool_Handler,
+		},
+		{
+			MethodName: "UpdateAgentTool",
+			Handler:    _Platform_UpdateAgentTool_Handler,
+		},
+		{
+			MethodName: "DeleteAgentTool",
+			Handler:    _Platform_DeleteAgentTool_Handler,
+		},
+		{
+			MethodName: "GetAgentMcpServer",
+			Handler:    _Platform_GetAgentMcpServer_Handler,
+		},
+		{
+			MethodName: "ListAgentMcpServers",
+			Handler:    _Platform_ListAgentMcpServers_Handler,
+		},
+		{
+			MethodName: "CreateAgentMcpServer",
+			Handler:    _Platform_CreateAgentMcpServer_Handler,
+		},
+		{
+			MethodName: "UpdateAgentMcpServer",
+			Handler:    _Platform_UpdateAgentMcpServer_Handler,
+		},
+		{
+			MethodName: "DeleteAgentMcpServer",
+			Handler:    _Platform_DeleteAgentMcpServer_Handler,
+		},
+		{
+			MethodName: "GetLatestWorkspace",
+			Handler:    _Platform_GetLatestWorkspace_Handler,
+		},
+		{
+			MethodName: "SaveWorkspacePath",
+			Handler:    _Platform_SaveWorkspacePath_Handler,
+		},
+		{
+			MethodName: "UpsertWorkspace",
+			Handler:    _Platform_UpsertWorkspace_Handler,
+		},
+		{
+			MethodName: "ListWorkspacesByUser",
+			Handler:    _Platform_ListWorkspacesByUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

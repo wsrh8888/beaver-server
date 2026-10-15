@@ -38,6 +38,8 @@ type OpenDigitalConfig struct {
 	gorm.Model
 	DigitalID string `gorm:"column:digital_id;type:varchar(64);uniqueIndex;not null;comment:数字伙伴ID（OpenDigital.DigitalID）"`
 
+	AppID         string            `gorm:"column:app_id;type:varchar(64);not null;default:'';index;comment:引用 agent_apps.app_id（builtin 模式）"`
+	OverrideConfig string           `gorm:"column:override_config;type:json;comment:覆盖 AI 应用部分字段的 JSON（可空）"`
 	BuiltinConfig   *BuiltinConfig   `gorm:"column:builtin_config;type:json;comment:提示词模式配置 JSON（Runtime=builtin）"`
 	ExternalConfig  *ExternalConfig  `gorm:"column:external_config;type:json;comment:长链接模式配置 JSON（Runtime=external）"`
 	WorkflowConfig  *WorkflowConfig  `gorm:"column:workflow_config;type:json;comment:工作流模式配置 JSON（Runtime=workflow）"`

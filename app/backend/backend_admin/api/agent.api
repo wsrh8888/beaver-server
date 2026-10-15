@@ -1,0 +1,225 @@
+type (
+	// AgentAppInfo AI 应用配置项（对应 platform_rpc.AgentAppItem）
+	AgentAppInfo {
+		AppID           string `json:"appId"`
+		Name            string `json:"name"`
+		Scene           string `json:"scene"`           // 场景标签：digital_builtin/window_default/chat/moment
+		SystemPrompt    string `json:"systemPrompt"`
+		LLMModelID      string `json:"llmModelId"`
+		ModelParams     string `json:"modelParams"`     // JSON
+		Tools           string `json:"tools"`          // JSON [toolId]
+		McpServerIDs    string `json:"mcpServerIds"`    // JSON [mcpServerId]
+		KnowledgeIDs    string `json:"knowledgeIds"`   // JSON [knowledgeId]
+		OpeningMessage  string `json:"openingMessage"`
+		OpeningQuestions string `json:"openingQuestions"` // JSON
+		Variables       string `json:"variables"`       // JSON
+		Status          int    `json:"status"`
+		Sort            int    `json:"sort"`
+		CreatedBy       string `json:"createdBy"`
+	}
+
+	GetAgentAppListReq {
+		Scene     string `form:"scene,optional"`     // 可选过滤
+		Status    int    `form:"status,optional"`    // 0全部 1启用 2停用
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"pageSize,default=10"`
+	}
+	GetAgentAppListRes {
+		Total int64           `json:"total"`
+		List  []AgentAppInfo  `json:"list"`
+	}
+
+	GetAgentAppReq {
+		AppID string `form:"appId,optional"`
+		Scene string `form:"scene,optional"` // 按 app_id 取，或按 scene 取默认（sort 最小启用项）
+	}
+	GetAgentAppRes {
+		App AgentAppInfo `json:"app"`
+	}
+
+	CreateAgentAppReq {
+		Name             string `json:"name"`
+		Scene            string `json:"scene"`
+		SystemPrompt     string `json:"systemPrompt,optional"`
+		LLMModelID       string `json:"llmModelId,optional"`
+		ModelParams      string `json:"modelParams,optional"`      // JSON
+		Tools            string `json:"tools,optional"`            // JSON [toolId]
+		McpServerIDs     string `json:"mcpServerIds,optional"`     // JSON [mcpServerId]
+		KnowledgeIDs     string `json:"knowledgeIds,optional"`     // JSON [knowledgeId]
+		OpeningMessage   string `json:"openingMessage,optional"`
+		OpeningQuestions string `json:"openingQuestions,optional"` // JSON
+		Variables        string `json:"variables,optional"`        // JSON
+		Status           int    `json:"status,optional,default=1"`
+		Sort             int    `json:"sort,optional"`
+		UserID           string `header:"Beaver-User-Id"`
+	}
+	CreateAgentAppRes {
+		AppID string `json:"appId"`
+	}
+
+	UpdateAgentAppReq {
+		AppID            string `json:"appId"`
+		Name             string `json:"name,optional"`
+		Scene            string `json:"scene,optional"`
+		SystemPrompt     string `json:"systemPrompt,optional"`
+		LLMModelID       string `json:"llmModelId,optional"`
+		ModelParams      string `json:"modelParams,optional"`
+		Tools            string `json:"tools,optional"`
+		McpServerIDs     string `json:"mcpServerIds,optional"`
+		KnowledgeIDs     string `json:"knowledgeIds,optional"`
+		OpeningMessage   string `json:"openingMessage,optional"`
+		OpeningQuestions string `json:"openingQuestions,optional"`
+		Variables        string `json:"variables,optional"`
+		Status           int    `json:"status,optional"`
+		Sort             int    `json:"sort,optional"`
+	}
+	UpdateAgentAppRes {}
+
+	DeleteAgentAppReq {
+		AppID string `json:"appId"`
+	}
+	DeleteAgentAppRes {}
+
+	// —— 工具目录（agent_tools）——
+	AgentToolInfo {
+		ToolID   string `json:"toolId"`
+		Name     string `json:"name"`
+		ToolType string `json:"toolType"` // builtin|mcp|api
+		Config   string `json:"config"`   // JSON
+		Status   int    `json:"status"`
+		Sort     int    `json:"sort"`
+	}
+	GetAgentToolListReq {
+		Status int `form:"status,optional"` // 0全部 1启用 2停用
+	}
+	GetAgentToolListRes {
+		List []AgentToolInfo `json:"list"`
+	}
+	GetAgentToolReq {
+		ToolID string `form:"toolId"`
+	}
+	GetAgentToolRes {
+		Tool AgentToolInfo `json:"tool"`
+	}
+	CreateAgentToolReq {
+		Name     string `json:"name"`
+		ToolType string `json:"toolType"`
+		Config   string `json:"config,optional"` // JSON
+		Status   int    `json:"status,optional,default=1"`
+		Sort     int    `json:"sort,optional"`
+	}
+	CreateAgentToolRes {
+		ToolID string `json:"toolId"`
+	}
+	UpdateAgentToolReq {
+		ToolID   string `json:"toolId"`
+		Name     string `json:"name,optional"`
+		ToolType string `json:"toolType,optional"`
+		Config   string `json:"config,optional"`
+		Status   int    `json:"status,optional"`
+		Sort     int    `json:"sort,optional"`
+	}
+	UpdateAgentToolRes {}
+	DeleteAgentToolReq {
+		ToolID string `json:"toolId"`
+	}
+	DeleteAgentToolRes {}
+
+	// —— MCP 服务目录（agent_mcp_servers）——
+	AgentMcpServerInfo {
+		McpServerID string `json:"mcpServerId"`
+		Name        string `json:"name"`
+		ServerName  string `json:"serverName"`
+		Transport   string `json:"transport"` // stdio|sse|websocket
+		Config      string `json:"config"`    // JSON 连接配置
+		Tools       string `json:"tools"`     // JSON 能力清单
+		Status      int    `json:"status"`
+	}
+	GetAgentMcpServerListReq {
+		Status int `form:"status,optional"` // 0全部 1启用 2停用
+	}
+	GetAgentMcpServerListRes {
+		List []AgentMcpServerInfo `json:"list"`
+	}
+	GetAgentMcpServerReq {
+		McpServerID string `form:"mcpServerId"`
+	}
+	GetAgentMcpServerRes {
+		Server AgentMcpServerInfo `json:"server"`
+	}
+	CreateAgentMcpServerReq {
+		Name       string `json:"name"`
+		ServerName string `json:"serverName"`
+		Transport  string `json:"transport"`
+		Config     string `json:"config,optional"` // JSON
+		Tools      string `json:"tools,optional"`  // JSON
+		Status     int    `json:"status,optional,default=1"`
+	}
+	CreateAgentMcpServerRes {
+		McpServerID string `json:"mcpServerId"`
+	}
+	UpdateAgentMcpServerReq {
+		McpServerID string `json:"mcpServerId"`
+		Name        string `json:"name,optional"`
+		ServerName  string `json:"serverName,optional"`
+		Transport   string `json:"transport,optional"`
+		Config      string `json:"config,optional"`
+		Tools       string `json:"tools,optional"`
+		Status      int    `json:"status,optional"`
+	}
+	UpdateAgentMcpServerRes {}
+	DeleteAgentMcpServerReq {
+		McpServerID string `json:"mcpServerId"`
+	}
+	DeleteAgentMcpServerRes {}
+)
+
+@server (
+	group: agent
+)
+service backend {
+	@handler GetAgentAppList
+	get /admin/agent/v1/app/list (GetAgentAppListReq) returns (GetAgentAppListRes)
+
+	@handler GetAgentApp
+	get /admin/agent/v1/app (GetAgentAppReq) returns (GetAgentAppRes)
+
+	@handler CreateAgentApp
+	post /admin/agent/v1/app (CreateAgentAppReq) returns (CreateAgentAppRes)
+
+	@handler UpdateAgentApp
+	put /admin/agent/v1/app (UpdateAgentAppReq) returns (UpdateAgentAppRes)
+
+	@handler DeleteAgentApp
+	delete /admin/agent/v1/app (DeleteAgentAppReq) returns (DeleteAgentAppRes)
+
+	@handler GetAgentToolList
+	get /admin/agent/v1/tool/list (GetAgentToolListReq) returns (GetAgentToolListRes)
+
+	@handler GetAgentTool
+	get /admin/agent/v1/tool (GetAgentToolReq) returns (GetAgentToolRes)
+
+	@handler CreateAgentTool
+	post /admin/agent/v1/tool (CreateAgentToolReq) returns (CreateAgentToolRes)
+
+	@handler UpdateAgentTool
+	put /admin/agent/v1/tool (UpdateAgentToolReq) returns (UpdateAgentToolRes)
+
+	@handler DeleteAgentTool
+	delete /admin/agent/v1/tool (DeleteAgentToolReq) returns (DeleteAgentToolRes)
+
+	@handler GetAgentMcpServerList
+	get /admin/agent/v1/mcp/list (GetAgentMcpServerListReq) returns (GetAgentMcpServerListRes)
+
+	@handler GetAgentMcpServer
+	get /admin/agent/v1/mcp (GetAgentMcpServerReq) returns (GetAgentMcpServerRes)
+
+	@handler CreateAgentMcpServer
+	post /admin/agent/v1/mcp (CreateAgentMcpServerReq) returns (CreateAgentMcpServerRes)
+
+	@handler UpdateAgentMcpServer
+	put /admin/agent/v1/mcp (UpdateAgentMcpServerReq) returns (UpdateAgentMcpServerRes)
+
+	@handler DeleteAgentMcpServer
+	delete /admin/agent/v1/mcp (DeleteAgentMcpServerReq) returns (DeleteAgentMcpServerRes)
+}

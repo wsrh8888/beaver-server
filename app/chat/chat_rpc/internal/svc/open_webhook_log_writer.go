@@ -25,7 +25,6 @@ import (
 	"context"
 
 	"beaver/app/open/open_rpc/open"
-	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/core/corewebhook"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -40,17 +39,14 @@ func newOpenRpcWebhookLogWriter(openRpc open.Open) corewebhook.LogWriter {
 }
 
 func (w *openRpcWebhookLogWriter) SaveWebhookLog(ctx context.Context, configID, appID, eventType string, success bool) {
-	status := int32(0)
+	// NOTE: open_rpc 在「开放平台 Digital/Bot 模型与门户能力重构」中移除了 SaveWebhookLog RPC，
+	// 此处暂以本地日志替代，待 open 侧补回日志接口后再恢复 RPC 调用。
+	status := "fail"
 	if success {
-		status = 1
+		status = "ok"
 	}
-	_, err := w.openRpc.SaveWebhookLog(ctx, &open_rpc.SaveWebhookLogReq{
-		ConfigId:  configID,
-		AppId:     appID,
-		EventType: eventType,
-		Status:    status,
+	beaverlog.New("open_webhook_log", ctx).Info(model.LogMsg{
+		Text: "webhook 日志（open_rpc 暂无 SaveWebhookLog 接口，本地记录）",
+		Data: map[string]interface{}{"configId": configID, "appId": appID, "eventType": eventType, "status": status},
 	})
-	if err != nil {
-		beaverlog.New("open_webhook_log", ctx).Error(model.LogMsg{Text: "SaveWebhookLog RPC 失败", Data: map[string]interface{}{"configId": configID, "appId": appID, "eventType": eventType, "err": err.Error()}})
-	}
 }

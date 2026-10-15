@@ -26,6 +26,7 @@ import (
 	"net/http"
 
 	auth_public "beaver/app/backend/backend_admin/internal/handler/auth_public"
+	agent "beaver/app/backend/backend_admin/internal/handler/agent"
 	chat "beaver/app/backend/backend_admin/internal/handler/chat"
 	circle "beaver/app/backend/backend_admin/internal/handler/circle"
 	emoji "beaver/app/backend/backend_admin/internal/handler/emoji"
@@ -632,6 +633,101 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/admin/open/v1/app/update_status",
 				Handler: open.UpdateOpenAppStatusHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 获取AI应用列表
+				Method:  http.MethodGet,
+				Path:    "/admin/agent/v1/app/list",
+				Handler: agent.GetAgentAppListHandler(serverCtx),
+			},
+			{
+				// 获取AI应用详情（按 appId 或 scene 取默认）
+				Method:  http.MethodGet,
+				Path:    "/admin/agent/v1/app",
+				Handler: agent.GetAgentAppHandler(serverCtx),
+			},
+			{
+				// 创建AI应用
+				Method:  http.MethodPost,
+				Path:    "/admin/agent/v1/app",
+				Handler: agent.CreateAgentAppHandler(serverCtx),
+			},
+			{
+				// 更新AI应用
+				Method:  http.MethodPut,
+				Path:    "/admin/agent/v1/app",
+				Handler: agent.UpdateAgentAppHandler(serverCtx),
+			},
+			{
+				// 删除AI应用
+				Method:  http.MethodDelete,
+				Path:    "/admin/agent/v1/app",
+				Handler: agent.DeleteAgentAppHandler(serverCtx),
+			},
+			{
+				// 获取工具列表
+				Method:  http.MethodGet,
+				Path:    "/admin/agent/v1/tool/list",
+				Handler: agent.GetAgentToolListHandler(serverCtx),
+			},
+			{
+				// 获取工具详情
+				Method:  http.MethodGet,
+				Path:    "/admin/agent/v1/tool",
+				Handler: agent.GetAgentToolHandler(serverCtx),
+			},
+			{
+				// 创建工具
+				Method:  http.MethodPost,
+				Path:    "/admin/agent/v1/tool",
+				Handler: agent.CreateAgentToolHandler(serverCtx),
+			},
+			{
+				// 更新工具
+				Method:  http.MethodPut,
+				Path:    "/admin/agent/v1/tool",
+				Handler: agent.UpdateAgentToolHandler(serverCtx),
+			},
+			{
+				// 删除工具
+				Method:  http.MethodDelete,
+				Path:    "/admin/agent/v1/tool",
+				Handler: agent.DeleteAgentToolHandler(serverCtx),
+			},
+			{
+				// 获取MCP服务列表
+				Method:  http.MethodGet,
+				Path:    "/admin/agent/v1/mcp/list",
+				Handler: agent.GetAgentMcpServerListHandler(serverCtx),
+			},
+			{
+				// 获取MCP服务详情
+				Method:  http.MethodGet,
+				Path:    "/admin/agent/v1/mcp",
+				Handler: agent.GetAgentMcpServerHandler(serverCtx),
+			},
+			{
+				// 创建MCP服务
+				Method:  http.MethodPost,
+				Path:    "/admin/agent/v1/mcp",
+				Handler: agent.CreateAgentMcpServerHandler(serverCtx),
+			},
+			{
+				// 更新MCP服务
+				Method:  http.MethodPut,
+				Path:    "/admin/agent/v1/mcp",
+				Handler: agent.UpdateAgentMcpServerHandler(serverCtx),
+			},
+			{
+				// 删除MCP服务
+				Method:  http.MethodDelete,
+				Path:    "/admin/agent/v1/mcp",
+				Handler: agent.DeleteAgentMcpServerHandler(serverCtx),
 			},
 		},
 	)
