@@ -173,13 +173,13 @@ type (
 service backend {
 	@doc "用户运营360"
 	@handler getUserOperationsProfile
-	get /admin/operations/v1/user_profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
+	get /admin/backend/operations/v1/user_profile (GetUserOperationsProfileReq) returns (GetUserOperationsProfileRes)
 
 	@doc "运营统一检索"
 	@handler adminUnifiedSearch
-	get /admin/operations/v1/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
+	get /admin/backend/operations/v1/search (AdminUnifiedSearchReq) returns (AdminUnifiedSearchRes)
 
 	@doc "群组运营360"
 	@handler getGroupOperationsProfile
-	get /admin/operations/v1/group_profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
+	get /admin/backend/operations/v1/group_profile (GetGroupOperationsProfileReq) returns (GetGroupOperationsProfileRes)
 }

@@ -71,6 +71,8 @@ const (
 	Platform_CreateAgentMcpServer_FullMethodName     = "/platform_rpc.platform/CreateAgentMcpServer"
 	Platform_UpdateAgentMcpServer_FullMethodName     = "/platform_rpc.platform/UpdateAgentMcpServer"
 	Platform_DeleteAgentMcpServer_FullMethodName     = "/platform_rpc.platform/DeleteAgentMcpServer"
+	Platform_GetAiAssistant_FullMethodName           = "/platform_rpc.platform/GetAiAssistant"
+	Platform_SaveAiAssistant_FullMethodName          = "/platform_rpc.platform/SaveAiAssistant"
 	Platform_GetLatestWorkspace_FullMethodName       = "/platform_rpc.platform/GetLatestWorkspace"
 	Platform_SaveWorkspacePath_FullMethodName        = "/platform_rpc.platform/SaveWorkspacePath"
 	Platform_UpsertWorkspace_FullMethodName          = "/platform_rpc.platform/UpsertWorkspace"
@@ -137,6 +139,8 @@ type PlatformClient interface {
 	CreateAgentMcpServer(ctx context.Context, in *CreateAgentMcpServerReq, opts ...grpc.CallOption) (*CreateAgentMcpServerRes, error)
 	UpdateAgentMcpServer(ctx context.Context, in *UpdateAgentMcpServerReq, opts ...grpc.CallOption) (*UpdateAgentMcpServerRes, error)
 	DeleteAgentMcpServer(ctx context.Context, in *DeleteAgentMcpServerReq, opts ...grpc.CallOption) (*DeleteAgentMcpServerRes, error)
+	GetAiAssistant(ctx context.Context, in *GetAiAssistantReq, opts ...grpc.CallOption) (*GetAiAssistantRes, error)
+	SaveAiAssistant(ctx context.Context, in *SaveAiAssistantReq, opts ...grpc.CallOption) (*SaveAiAssistantRes, error)
 	// —— 工作空间/设备（ai/ AI助手桌面端特有）——
 	GetLatestWorkspace(ctx context.Context, in *GetLatestWorkspaceReq, opts ...grpc.CallOption) (*GetLatestWorkspaceRes, error)
 	SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error)
@@ -672,6 +676,26 @@ func (c *platformClient) DeleteAgentMcpServer(ctx context.Context, in *DeleteAge
 	return out, nil
 }
 
+func (c *platformClient) GetAiAssistant(ctx context.Context, in *GetAiAssistantReq, opts ...grpc.CallOption) (*GetAiAssistantRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAiAssistantRes)
+	err := c.cc.Invoke(ctx, Platform_GetAiAssistant_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) SaveAiAssistant(ctx context.Context, in *SaveAiAssistantReq, opts ...grpc.CallOption) (*SaveAiAssistantRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveAiAssistantRes)
+	err := c.cc.Invoke(ctx, Platform_SaveAiAssistant_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformClient) GetLatestWorkspace(ctx context.Context, in *GetLatestWorkspaceReq, opts ...grpc.CallOption) (*GetLatestWorkspaceRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetLatestWorkspaceRes)
@@ -772,6 +796,8 @@ type PlatformServer interface {
 	CreateAgentMcpServer(context.Context, *CreateAgentMcpServerReq) (*CreateAgentMcpServerRes, error)
 	UpdateAgentMcpServer(context.Context, *UpdateAgentMcpServerReq) (*UpdateAgentMcpServerRes, error)
 	DeleteAgentMcpServer(context.Context, *DeleteAgentMcpServerReq) (*DeleteAgentMcpServerRes, error)
+	GetAiAssistant(context.Context, *GetAiAssistantReq) (*GetAiAssistantRes, error)
+	SaveAiAssistant(context.Context, *SaveAiAssistantReq) (*SaveAiAssistantRes, error)
 	// —— 工作空间/设备（ai/ AI助手桌面端特有）——
 	GetLatestWorkspace(context.Context, *GetLatestWorkspaceReq) (*GetLatestWorkspaceRes, error)
 	SaveWorkspacePath(context.Context, *SaveWorkspacePathReq) (*SaveWorkspacePathRes, error)
@@ -942,6 +968,12 @@ func (UnimplementedPlatformServer) UpdateAgentMcpServer(context.Context, *Update
 }
 func (UnimplementedPlatformServer) DeleteAgentMcpServer(context.Context, *DeleteAgentMcpServerReq) (*DeleteAgentMcpServerRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentMcpServer not implemented")
+}
+func (UnimplementedPlatformServer) GetAiAssistant(context.Context, *GetAiAssistantReq) (*GetAiAssistantRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAiAssistant not implemented")
+}
+func (UnimplementedPlatformServer) SaveAiAssistant(context.Context, *SaveAiAssistantReq) (*SaveAiAssistantRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveAiAssistant not implemented")
 }
 func (UnimplementedPlatformServer) GetLatestWorkspace(context.Context, *GetLatestWorkspaceReq) (*GetLatestWorkspaceRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLatestWorkspace not implemented")
@@ -1912,6 +1944,42 @@ func _Platform_DeleteAgentMcpServer_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Platform_GetAiAssistant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAiAssistantReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetAiAssistant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetAiAssistant_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetAiAssistant(ctx, req.(*GetAiAssistantReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_SaveAiAssistant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveAiAssistantReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).SaveAiAssistant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_SaveAiAssistant_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).SaveAiAssistant(ctx, req.(*SaveAiAssistantReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Platform_GetLatestWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetLatestWorkspaceReq)
 	if err := dec(in); err != nil {
@@ -2198,6 +2266,14 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAgentMcpServer",
 			Handler:    _Platform_DeleteAgentMcpServer_Handler,
+		},
+		{
+			MethodName: "GetAiAssistant",
+			Handler:    _Platform_GetAiAssistant_Handler,
+		},
+		{
+			MethodName: "SaveAiAssistant",
+			Handler:    _Platform_SaveAiAssistant_Handler,
 		},
 		{
 			MethodName: "GetLatestWorkspace",

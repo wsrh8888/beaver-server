@@ -53,8 +53,8 @@ func (l *UpdateOpenAppStatusLogic) UpdateOpenAppStatus(req *types.UpdateOpenAppS
 		return nil, errors.New("无效的操作类型")
 	}
 
-	_, err = l.svcCtx.OpenRpc.UpdateOpenApps(l.ctx, &open_rpc.UpdateOpenAppsReq{
-		AppIds:     req.AppIDs,
+	_, err = l.svcCtx.OpenRpc.UpdateOpenOAuth(l.ctx, &open_rpc.UpdateOpenOAuthReq{
+		OauthIds:   req.AppIDs,
 		Status:     int32(req.Action),
 		OperatorId: req.UserID,
 	})

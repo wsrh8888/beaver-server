@@ -30,6 +30,9 @@ func (l *ListAgentToolsLogic) ListAgentTools(in *platform_rpc.ListAgentToolsReq)
 	if in.Status != 0 {
 		q = q.Where("status = ?", int(in.Status))
 	}
+	if in.Source != "" {
+		q = q.Where("source = ?", in.Source)
+	}
 	var rows []agent_models.AgentTool
 	q.Order("sort ASC, id ASC").Find(&rows)
 	out := make([]*platform_rpc.AgentToolItem, 0, len(rows))
@@ -42,6 +45,8 @@ func (l *ListAgentToolsLogic) ListAgentTools(in *platform_rpc.ListAgentToolsReq)
 			Config:   row.Config,
 			Status:   int32(row.Status),
 			Sort:     int32(row.Sort),
+			Source:   row.Source,
+			UserId:   row.UserID,
 		})
 	}
 	return &platform_rpc.ListAgentToolsRes{Tools: out}, nil

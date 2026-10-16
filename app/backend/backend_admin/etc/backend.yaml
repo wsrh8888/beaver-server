@@ -19,8 +19,8 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /admin/auth_public/v1/login
-  - /admin/auth_public/v1/authentication
+  - /admin/backend/auth_public/v1/login
+  - /admin/backend/auth_public/v1/authentication
 BlackList: []
 File:
   WhiteList:

@@ -32,6 +32,9 @@ const (
 	Open_GetDigitalConfig_FullMethodName   = "/open_rpc.open/GetDigitalConfig"
 	Open_ListOpenOAuth_FullMethodName      = "/open_rpc.open/ListOpenOAuth"
 	Open_UpdateOpenOAuth_FullMethodName    = "/open_rpc.open/UpdateOpenOAuth"
+	Open_ListDigitals_FullMethodName       = "/open_rpc.open/ListDigitals"
+	Open_CreateDigital_FullMethodName      = "/open_rpc.open/CreateDigital"
+	Open_UpdateDigital_FullMethodName      = "/open_rpc.open/UpdateDigital"
 )
 
 // OpenClient is the client API for Open service.
@@ -51,6 +54,9 @@ type OpenClient interface {
 	GetDigitalConfig(ctx context.Context, in *GetDigitalConfigReq, opts ...grpc.CallOption) (*GetDigitalConfigRes, error)
 	ListOpenOAuth(ctx context.Context, in *ListOpenOAuthReq, opts ...grpc.CallOption) (*ListOpenOAuthRes, error)
 	UpdateOpenOAuth(ctx context.Context, in *UpdateOpenOAuthReq, opts ...grpc.CallOption) (*UpdateOpenOAuthRes, error)
+	ListDigitals(ctx context.Context, in *ListDigitalsReq, opts ...grpc.CallOption) (*ListDigitalsRes, error)
+	CreateDigital(ctx context.Context, in *CreateDigitalReq, opts ...grpc.CallOption) (*CreateDigitalRes, error)
+	UpdateDigital(ctx context.Context, in *UpdateDigitalReq, opts ...grpc.CallOption) (*UpdateDigitalRes, error)
 }
 
 type openClient struct {
@@ -191,6 +197,36 @@ func (c *openClient) UpdateOpenOAuth(ctx context.Context, in *UpdateOpenOAuthReq
 	return out, nil
 }
 
+func (c *openClient) ListDigitals(ctx context.Context, in *ListDigitalsReq, opts ...grpc.CallOption) (*ListDigitalsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDigitalsRes)
+	err := c.cc.Invoke(ctx, Open_ListDigitals_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) CreateDigital(ctx context.Context, in *CreateDigitalReq, opts ...grpc.CallOption) (*CreateDigitalRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDigitalRes)
+	err := c.cc.Invoke(ctx, Open_CreateDigital_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *openClient) UpdateDigital(ctx context.Context, in *UpdateDigitalReq, opts ...grpc.CallOption) (*UpdateDigitalRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDigitalRes)
+	err := c.cc.Invoke(ctx, Open_UpdateDigital_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OpenServer is the server API for Open service.
 // All implementations must embed UnimplementedOpenServer
 // for forward compatibility.
@@ -208,6 +244,9 @@ type OpenServer interface {
 	GetDigitalConfig(context.Context, *GetDigitalConfigReq) (*GetDigitalConfigRes, error)
 	ListOpenOAuth(context.Context, *ListOpenOAuthReq) (*ListOpenOAuthRes, error)
 	UpdateOpenOAuth(context.Context, *UpdateOpenOAuthReq) (*UpdateOpenOAuthRes, error)
+	ListDigitals(context.Context, *ListDigitalsReq) (*ListDigitalsRes, error)
+	CreateDigital(context.Context, *CreateDigitalReq) (*CreateDigitalRes, error)
+	UpdateDigital(context.Context, *UpdateDigitalReq) (*UpdateDigitalRes, error)
 	mustEmbedUnimplementedOpenServer()
 }
 
@@ -256,6 +295,15 @@ func (UnimplementedOpenServer) ListOpenOAuth(context.Context, *ListOpenOAuthReq)
 }
 func (UnimplementedOpenServer) UpdateOpenOAuth(context.Context, *UpdateOpenOAuthReq) (*UpdateOpenOAuthRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateOpenOAuth not implemented")
+}
+func (UnimplementedOpenServer) ListDigitals(context.Context, *ListDigitalsReq) (*ListDigitalsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDigitals not implemented")
+}
+func (UnimplementedOpenServer) CreateDigital(context.Context, *CreateDigitalReq) (*CreateDigitalRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDigital not implemented")
+}
+func (UnimplementedOpenServer) UpdateDigital(context.Context, *UpdateDigitalReq) (*UpdateDigitalRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDigital not implemented")
 }
 func (UnimplementedOpenServer) mustEmbedUnimplementedOpenServer() {}
 func (UnimplementedOpenServer) testEmbeddedByValue()              {}
@@ -512,6 +560,60 @@ func _Open_UpdateOpenOAuth_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_ListDigitals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDigitalsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ListDigitals(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ListDigitals_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ListDigitals(ctx, req.(*ListDigitalsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_CreateDigital_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDigitalReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).CreateDigital(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_CreateDigital_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).CreateDigital(ctx, req.(*CreateDigitalReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Open_UpdateDigital_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDigitalReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).UpdateDigital(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_UpdateDigital_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).UpdateDigital(ctx, req.(*UpdateDigitalReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Open_ServiceDesc is the grpc.ServiceDesc for Open service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -570,6 +672,18 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateOpenOAuth",
 			Handler:    _Open_UpdateOpenOAuth_Handler,
+		},
+		{
+			MethodName: "ListDigitals",
+			Handler:    _Open_ListDigitals_Handler,
+		},
+		{
+			MethodName: "CreateDigital",
+			Handler:    _Open_CreateDigital_Handler,
+		},
+		{
+			MethodName: "UpdateDigital",
+			Handler:    _Open_UpdateDigital_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -50,7 +50,8 @@ func (l *ListOpenOAuthLogic) ListOpenOAuth(in *open_rpc.ListOpenOAuthReq) (*open
 	if in.OauthId != "" {
 		query = query.Where("oauth_id = ?", in.OauthId)
 	}
-	if in.Status != 0 {
+	// status < 0 表示全部（管理端默认 -1）；0 禁用，1 启用
+	if in.Status >= 0 {
 		query = query.Where("status = ?", in.Status)
 	}
 	if in.Keyword != "" {

@@ -1,0 +1,77 @@
+type (
+	GetDigitalListReq {
+		Source   string `form:"source"`                     // string system系统创建 open开放平台创建
+		Status   int    `form:"status,optional,default=-1"` // int -1全部 0禁用 1启用
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=10"`
+	}
+	DigitalAdminInfo {
+		DigitalID   string `json:"digitalId"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Avatar      string `json:"avatar"`
+		OwnerID     string `json:"ownerId"`
+		Runtime     string `json:"runtime"`    // builtin|external
+		Visibility  string `json:"visibility"` // private|partial|public
+		Status      int    `json:"status"`     // 1启用 0禁用
+		Source      string `json:"source"`     // system|open
+		AppID       string `json:"appId"`
+		SystemPrompt string `json:"systemPrompt"`
+		LLMModelID   string `json:"llmModelId"`
+		Tools        string `json:"tools"`
+		McpServerIDs string `json:"mcpServerIds"`
+		CreatedAt   int64  `json:"createdAt"`
+	}
+	GetDigitalListRes {
+		Total int64              `json:"total"`
+		List  []DigitalAdminInfo `json:"list"`
+	}
+)
+
+type (
+	CreateSystemDigitalReq {
+		Name        string `json:"name"`
+		Description string `json:"description,optional"`
+		Avatar      string `json:"avatar,optional"`
+		Runtime     string `json:"runtime"`              // builtin|external
+		Visibility  string `json:"visibility,optional"`  // private|partial|public
+		SystemPrompt string `json:"systemPrompt,optional"`
+		LLMModelID   string `json:"llmModelId,optional"`
+		Tools        string `json:"tools,optional"`
+		McpServerIDs string `json:"mcpServerIds,optional"`
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	CreateSystemDigitalRes {
+		DigitalID string `json:"digitalId"`
+		AppKey    string `json:"appKey,optional"`
+		AppSecret string `json:"appSecret,optional"` // 仅 external 创建时返回一次
+	}
+)
+
+type (
+	UpdateDigitalReq {
+		DigitalID  string `json:"digitalId"`
+		Name       string `json:"name,optional"`
+		Visibility string `json:"visibility,optional"`
+		Status     int    `json:"status"` // 0禁用 1启用
+		SystemPrompt string `json:"systemPrompt,optional"`
+		LLMModelID   string `json:"llmModelId,optional"`
+		Tools        string `json:"tools,optional"`
+		McpServerIDs string `json:"mcpServerIds,optional"`
+	}
+	UpdateDigitalRes {}
+)
+
+@server (
+	group: digital
+)
+service backend {
+	@handler GetDigitalList
+	get /admin/backend/digital/v1/list (GetDigitalListReq) returns (GetDigitalListRes)
+
+	@handler CreateSystemDigital
+	post /admin/backend/digital/v1/create (CreateSystemDigitalReq) returns (CreateSystemDigitalRes)
+
+	@handler UpdateDigital
+	put /admin/backend/digital/v1/update (UpdateDigitalReq) returns (UpdateDigitalRes)
+}

@@ -30,9 +30,14 @@ func (l *CreateAgentMcpServerLogic) CreateAgentMcpServer(in *platform_rpc.Create
 		Config:      in.Config,
 		Tools:       in.Tools,
 		Status:      int(in.Status),
+		Source:      in.Source,
+		UserID:      in.UserId,
 	}
 	if row.Transport == "" {
 		row.Transport = "stdio"
+	}
+	if row.Source == "" {
+		row.Source = "official"
 	}
 	if row.Status == 0 {
 		row.Status = 1

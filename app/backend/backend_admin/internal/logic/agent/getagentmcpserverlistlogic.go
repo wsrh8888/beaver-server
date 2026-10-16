@@ -32,6 +32,7 @@ func NewGetAgentMcpServerListLogic(ctx context.Context, svcCtx *svc.ServiceConte
 func (l *GetAgentMcpServerListLogic) GetAgentMcpServerList(req *types.GetAgentMcpServerListReq) (resp *types.GetAgentMcpServerListRes, err error) {
 	rpcRes, err := l.svcCtx.PlatformRpc.ListAgentMcpServers(l.ctx, &platform_rpc.ListAgentMcpServersReq{
 		Status: int32(req.Status),
+		Source: req.Source,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "获取MCP服务列表失败", Data: map[string]any{"err": err.Error()}})

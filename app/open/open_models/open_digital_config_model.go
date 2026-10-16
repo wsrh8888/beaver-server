@@ -56,6 +56,7 @@ type BuiltinConfig struct {
 	OpeningQuestions []string          `json:"openingQuestions,omitempty"` // 开场问题
 	Variables       []ConfigVariable  `json:"variables,omitempty"`        // 表单变量（用户对话前填写，替换 {{variable}}）
 	Tools           []string           `json:"tools,omitempty"`            // 启用的工具ID列表
+	McpServerIDs    []string           `json:"mcpServerIds,omitempty"`     // 启用的 MCP 服务 ID 列表
 	KnowledgeIDs    []string           `json:"knowledgeIds,omitempty"`      // 绑定的知识库ID列表，跨服务只存ID
 }
 

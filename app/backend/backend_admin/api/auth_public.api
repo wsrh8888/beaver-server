@@ -31,9 +31,9 @@ type (
 service backend {
 	@doc "管理员登录"
 	@handler Login
-	post /admin/auth_public/v1/login (LoginReq) returns (LoginRes)
+	post /admin/backend/auth_public/v1/login (LoginReq) returns (LoginRes)
 
 	@doc "管理员 Token 认证"
 	@handler Authentication
-	get /admin/auth_public/v1/authentication (AuthenticationReq) returns (AuthenticationRes)
+	get /admin/backend/auth_public/v1/authentication (AuthenticationReq) returns (AuthenticationRes)
 }

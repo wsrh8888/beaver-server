@@ -35,8 +35,8 @@ type (
 )
 service backend {
 	@handler GetOpenAppList
-	get /admin/open/v1/app/list (GetOpenAppListReq) returns (GetOpenAppListRes)
+	get /admin/backend/open/v1/app_list (GetOpenAppListReq) returns (GetOpenAppListRes)
 
 	@handler UpdateOpenAppStatus
-	post /admin/open/v1/app/update_status (UpdateOpenAppStatusReq) returns (UpdateOpenAppStatusRes)
+	post /admin/backend/open/v1/app_update_status (UpdateOpenAppStatusReq) returns (UpdateOpenAppStatusRes)
 }

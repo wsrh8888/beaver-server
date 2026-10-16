@@ -59,13 +59,13 @@ type (
 service backend {
 	@doc "在线用户统计"
 	@handler getOnlineStats
-	get /admin/monitor/v1/stats (GetOnlineStatsReq) returns (GetOnlineStatsRes)
+	get /admin/backend/monitor/v1/stats (GetOnlineStatsReq) returns (GetOnlineStatsRes)
 
 	@doc "在线用户列表"
 	@handler getOnlineUserList
-	get /admin/monitor/v1/list (GetOnlineUserListReq) returns (GetOnlineUserListRes)
+	get /admin/backend/monitor/v1/list (GetOnlineUserListReq) returns (GetOnlineUserListRes)
 
 	@doc "用户登录设备详情"
 	@handler getUserOnlineDevices
-	get /admin/monitor/v1/devices (GetUserOnlineDevicesReq) returns (GetUserOnlineDevicesRes)
+	get /admin/backend/monitor/v1/devices (GetUserOnlineDevicesReq) returns (GetUserOnlineDevicesRes)
 }

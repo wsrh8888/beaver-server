@@ -150,37 +150,37 @@ type (
 service backend {
 	@doc "获取圈子列表"
 	@handler GetCircleList
-	get /admin/circle/v1/list (GetCircleListReq) returns (GetCircleListRes)
+	get /admin/backend/circle/v1/list (GetCircleListReq) returns (GetCircleListRes)
 
 	@doc "获取圈子详情"
 	@handler GetCircleDetail
-	get /admin/circle/v1/detail (GetCircleDetailReq) returns (GetCircleDetailRes)
+	get /admin/backend/circle/v1/detail (GetCircleDetailReq) returns (GetCircleDetailRes)
 
 	@doc "解散圈子"
 	@handler DeleteCircle
-	post /admin/circle/v1/delete (DeleteCircleReq) returns (DeleteCircleRes)
+	post /admin/backend/circle/v1/delete (DeleteCircleReq) returns (DeleteCircleRes)
 
 	@doc "获取圈子成员列表"
 	@handler GetCircleMemberList
-	get /admin/circle/v1/members (GetCircleMemberListReq) returns (GetCircleMemberListRes)
+	get /admin/backend/circle/v1/members (GetCircleMemberListReq) returns (GetCircleMemberListRes)
 
 	@doc "移除圈子成员"
 	@handler RemoveCircleMember
-	post /admin/circle/v1/remove_member (RemoveCircleMemberReq) returns (RemoveCircleMemberRes)
+	post /admin/backend/circle/v1/remove_member (RemoveCircleMemberReq) returns (RemoveCircleMemberRes)
 
 	@doc "获取圈子帖子列表"
 	@handler GetCirclePostList
-	get /admin/circle/v1/posts (GetCirclePostListReq) returns (GetCirclePostListRes)
+	get /admin/backend/circle/v1/posts (GetCirclePostListReq) returns (GetCirclePostListRes)
 
 	@doc "删除圈子帖子"
 	@handler DeleteCirclePost
-	post /admin/circle/v1/delete_post (DeleteCirclePostReq) returns (DeleteCirclePostRes)
+	post /admin/backend/circle/v1/delete_post (DeleteCirclePostReq) returns (DeleteCirclePostRes)
 
 	@doc "获取帖子评论列表"
 	@handler GetCircleCommentList
-	get /admin/circle/v1/comments (GetCircleCommentListReq) returns (GetCircleCommentListRes)
+	get /admin/backend/circle/v1/comments (GetCircleCommentListReq) returns (GetCircleCommentListRes)
 
 	@doc "删除帖子评论"
 	@handler DeleteCircleComment
-	post /admin/circle/v1/delete_comment (DeleteCircleCommentReq) returns (DeleteCircleCommentRes)
+	post /admin/backend/circle/v1/delete_comment (DeleteCircleCommentReq) returns (DeleteCircleCommentRes)
 }

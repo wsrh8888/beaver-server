@@ -118,21 +118,21 @@ type (
 service backend {
 	@doc "获取工作台应用列表"
 	@handler GetWorkbenchAppList
-	get /admin/workbench/v1/list (GetWorkbenchAppListReq) returns (GetWorkbenchAppListRes)
+	get /admin/backend/workbench/v1/list (GetWorkbenchAppListReq) returns (GetWorkbenchAppListRes)
 
 	@doc "创建工作台应用"
 	@handler CreateWorkbenchApp
-	post /admin/workbench/v1/create (CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes)
+	post /admin/backend/workbench/v1/create (CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes)
 
 	@doc "获取工作台应用详情"
 	@handler GetWorkbenchApp
-	get /admin/workbench/v1/detail (GetWorkbenchAppReq) returns (GetWorkbenchAppRes)
+	get /admin/backend/workbench/v1/detail (GetWorkbenchAppReq) returns (GetWorkbenchAppRes)
 
 	@doc "更新工作台应用"
 	@handler UpdateWorkbenchApp
-	post /admin/workbench/v1/update (UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes)
+	post /admin/backend/workbench/v1/update (UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes)
 
 	@doc "删除工作台应用"
 	@handler DeleteWorkbenchApp
-	post /admin/workbench/v1/delete (DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes)
+	post /admin/backend/workbench/v1/delete (DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes)
 }

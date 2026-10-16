@@ -8,8 +8,8 @@ type AgentConversationVersionItem struct {
 	Title          string `json:"title"`          // 会话标题
 	UpdatedAt      int64  `json:"updatedAt"`      // 更新时间毫秒
 	Preview        string `json:"preview"`        // 最新消息预览
-	Module         string `json:"module"`         // 入口模块
-	Workspace      string `json:"workspace"`      // cloud=云端轻会话；local=本机空间（可远程控盘）
+	Module         string `json:"module"`      // 入口模块
+	WorkspaceId    string `json:"workspaceId"` // 本机空间 id；空=云端轻会话
 }
 
 type ChatConversationVersionItem struct {

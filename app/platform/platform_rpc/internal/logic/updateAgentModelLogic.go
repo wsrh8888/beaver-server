@@ -49,17 +49,17 @@ func (l *UpdateAgentModelLogic) UpdateAgentModel(in *platform_rpc.UpdateAgentMod
 	if in.OutputModalities != "" {
 		updates["output_modalities"] = in.OutputModalities
 	}
-	updates["token_tiers"] = &agent_models.TokenTiers{
-		Flash:  int(in.MaxTokensFlash),
-		Low:    int(in.MaxTokensLow),
-		Medium: int(in.MaxTokensMedium),
-		High:   int(in.MaxTokensHigh),
+	if in.MaxTokensFlash != 0 || in.MaxTokensLow != 0 || in.MaxTokensMedium != 0 || in.MaxTokensHigh != 0 {
+		updates["token_tiers"] = &agent_models.TokenTiers{
+			Flash:  int(in.MaxTokensFlash),
+			Low:    int(in.MaxTokensLow),
+			Medium: int(in.MaxTokensMedium),
+			High:   int(in.MaxTokensHigh),
+		}
 	}
 	if in.InstructionRole != "" {
 		updates["instruction_role"] = in.InstructionRole
 	}
-	updates["supports_thinking"] = in.SupportsThinking
-	updates["thinking_can_disable"] = in.ThinkingCanDisable
 	if in.ThinkingLevels != "" {
 		updates["thinking_levels"] = in.ThinkingLevels
 	}

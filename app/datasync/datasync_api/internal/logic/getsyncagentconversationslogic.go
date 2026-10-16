@@ -59,7 +59,7 @@ type agentConversationItem struct {
 	Title          string `json:"title"`
 	Avatar         string `json:"avatar"`
 	Module         string `json:"module"`
-	Workspace      string `json:"workspace"`
+	WorkspaceId    string `json:"workspaceId"`
 	UpdatedAt      int64  `json:"updatedAt"`
 	LatestTopicId  string `json:"latestTopicId"`
 	Preview        string `json:"preview"`
@@ -109,10 +109,6 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 
 	versions := make([]types.AgentConversationVersionItem, 0, len(result.List))
 	for _, item := range result.List {
-		ws := item.Workspace
-		if ws != "local" && ws != "cloud" {
-			ws = "cloud"
-		}
 		versions = append(versions, types.AgentConversationVersionItem{
 			ConversationID: item.ConversationID,
 			Version:        item.Version,
@@ -121,7 +117,7 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 			UpdatedAt:      item.UpdatedAt,
 			Preview:        item.Preview,
 			Module:         item.Module,
-			Workspace:      ws,
+			WorkspaceId:    item.WorkspaceId,
 		})
 	}
 

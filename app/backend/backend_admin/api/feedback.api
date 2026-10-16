@@ -74,17 +74,17 @@ type (
 service backend {
 	@doc "获取反馈列表"
 	@handler GetFeedbackList
-	get /admin/feedback/v1/list (GetFeedbackListReq) returns (GetFeedbackListRes)
+	get /admin/backend/feedback/v1/list (GetFeedbackListReq) returns (GetFeedbackListRes)
 
 	@doc "获取反馈详情"
 	@handler GetFeedbackDetail
-	get /admin/feedback/v1/detail (GetFeedbackDetailReq) returns (GetFeedbackDetailRes)
+	get /admin/backend/feedback/v1/detail (GetFeedbackDetailReq) returns (GetFeedbackDetailRes)
 
 	@doc "处理反馈"
 	@handler HandleFeedback
-	post /admin/feedback/v1/handle (HandleFeedbackReq) returns (HandleFeedbackRes)
+	post /admin/backend/feedback/v1/handle (HandleFeedbackReq) returns (HandleFeedbackRes)
 
 	@doc "删除反馈"
 	@handler DeleteFeedback
-	post /admin/feedback/v1/delete (DeleteFeedbackReq) returns (DeleteFeedbackRes)
+	post /admin/backend/feedback/v1/delete (DeleteFeedbackReq) returns (DeleteFeedbackRes)
 }

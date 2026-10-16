@@ -90,7 +90,8 @@ type (
 		Sort     int    `json:"sort"`
 	}
 	GetAgentToolListReq {
-		Status int `form:"status,optional"` // 0全部 1启用 2停用
+		Status int    `form:"status,optional"` // 0全部 1启用 2停用
+		Source string `form:"source,optional"` // official|custom，空为全部
 	}
 	GetAgentToolListRes {
 		List []AgentToolInfo `json:"list"`
@@ -136,7 +137,8 @@ type (
 		Status      int    `json:"status"`
 	}
 	GetAgentMcpServerListReq {
-		Status int `form:"status,optional"` // 0全部 1启用 2停用
+		Status int    `form:"status,optional"` // 0全部 1启用 2停用
+		Source string `form:"source,optional"` // official|custom，空为全部
 	}
 	GetAgentMcpServerListRes {
 		List []AgentMcpServerInfo `json:"list"`
@@ -174,52 +176,185 @@ type (
 	DeleteAgentMcpServerRes {}
 )
 
+type (
+	AgentModelInfo {
+		ModelID         string `json:"modelId"`
+		Source          string `json:"source"` // official|custom
+		UserID          string `json:"userId"`
+		Name            string `json:"name"`
+		Provider        string `json:"provider"`
+		ModelName       string `json:"modelName"`
+		Endpoint        string `json:"endpoint"`
+		APIKey          string `json:"apiKey"` // 掩码
+		ContextWindow   int64  `json:"contextWindow"`
+		MaxOutputTokens int    `json:"maxOutputTokens"`
+		SupportsTools   bool   `json:"supportsTools"`
+		SupportsVision  bool   `json:"supportsVision"`
+		Sort            int    `json:"sort"`
+		Status          int    `json:"status"`
+	}
+	GetAgentModelListReq {
+		Source   string `form:"source,optional"` // official|custom，空为全部
+		UserID   string `form:"userId,optional"`
+		Status   int    `form:"status,optional"` // 0全部 1启用 2停用
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"pageSize,default=20"`
+	}
+	GetAgentModelListRes {
+		Total int64            `json:"total"`
+		List  []AgentModelInfo `json:"list"`
+	}
+	GetAgentModelReq {
+		ModelID string `form:"modelId"`
+		Source  string `form:"source,optional"`
+		UserID  string `form:"userId,optional"`
+	}
+	GetAgentModelRes {
+		Model AgentModelInfo `json:"model"`
+	}
+	CreateAgentModelReq {
+		Name            string `json:"name"`
+		Source          string `json:"source"` // official|custom
+		UserID          string `json:"userId,optional"`
+		Provider        string `json:"provider,optional"`
+		ModelName       string `json:"modelName,optional"`
+		Endpoint        string `json:"endpoint,optional"`
+		APIKey          string `json:"apiKey,optional"`
+		ContextWindow   int64  `json:"contextWindow,optional"`
+		MaxOutputTokens int    `json:"maxOutputTokens,optional"`
+		SupportsTools   bool   `json:"supportsTools,optional"`
+		SupportsVision  bool   `json:"supportsVision,optional"`
+		Sort            int    `json:"sort,optional"`
+		Status          int    `json:"status,optional,default=1"`
+	}
+	CreateAgentModelRes {
+		ModelID string `json:"modelId"`
+	}
+	UpdateAgentModelReq {
+		ModelID         string `json:"modelId"`
+		Name            string `json:"name,optional"`
+		Provider        string `json:"provider,optional"`
+		ModelName       string `json:"modelName,optional"`
+		Endpoint        string `json:"endpoint,optional"`
+		APIKey          string `json:"apiKey,optional"`
+		ContextWindow   int64  `json:"contextWindow,optional"`
+		MaxOutputTokens int    `json:"maxOutputTokens,optional"`
+		SupportsTools   bool   `json:"supportsTools,optional"`
+		SupportsVision  bool   `json:"supportsVision,optional"`
+		Sort            int    `json:"sort,optional"`
+		Status          int    `json:"status,optional"`
+	}
+	UpdateAgentModelRes {}
+	DeleteAgentModelReq {
+		ModelID string `json:"modelId"`
+		Source  string `json:"source,optional"`
+		UserID  string `json:"userId,optional"`
+	}
+	DeleteAgentModelRes {}
+)
+
+type (
+	GetAiAssistantReq {
+		Scene string `form:"scene"` // assistant|chat|moment|workbench
+	}
+	AiAssistantInfo {
+		Scene          string `json:"scene"`
+		Name           string `json:"name"`
+		SystemPrompt   string `json:"systemPrompt"`
+		LLMModelID     string `json:"llmModelId"`
+		ModelParams    string `json:"modelParams"`
+		Tools          string `json:"tools"`
+		McpServerIDs   string `json:"mcpServerIds"`
+		OpeningMessage string `json:"openingMessage"`
+		Status         int    `json:"status"`
+	}
+	GetAiAssistantRes {
+		Assistant AiAssistantInfo `json:"assistant"`
+	}
+)
+
+type (
+	SaveAiAssistantReq {
+		Scene          string `json:"scene"`
+		Name           string `json:"name,optional"`
+		SystemPrompt   string `json:"systemPrompt,optional"`
+		LLMModelID     string `json:"llmModelId,optional"`
+		ModelParams    string `json:"modelParams,optional"`
+		Tools          string `json:"tools,optional"`
+		McpServerIDs   string `json:"mcpServerIds,optional"`
+		OpeningMessage string `json:"openingMessage,optional"`
+		Status         int    `json:"status,optional"`
+	}
+	SaveAiAssistantRes {}
+)
+
 @server (
 	group: agent
 )
 service backend {
 	@handler GetAgentAppList
-	get /admin/agent/v1/app/list (GetAgentAppListReq) returns (GetAgentAppListRes)
+	get /admin/backend/agent/v1/app_list (GetAgentAppListReq) returns (GetAgentAppListRes)
 
 	@handler GetAgentApp
-	get /admin/agent/v1/app (GetAgentAppReq) returns (GetAgentAppRes)
+	get /admin/backend/agent/v1/app_detail (GetAgentAppReq) returns (GetAgentAppRes)
 
 	@handler CreateAgentApp
-	post /admin/agent/v1/app (CreateAgentAppReq) returns (CreateAgentAppRes)
+	post /admin/backend/agent/v1/app_create (CreateAgentAppReq) returns (CreateAgentAppRes)
 
 	@handler UpdateAgentApp
-	put /admin/agent/v1/app (UpdateAgentAppReq) returns (UpdateAgentAppRes)
+	put /admin/backend/agent/v1/app_update (UpdateAgentAppReq) returns (UpdateAgentAppRes)
 
 	@handler DeleteAgentApp
-	delete /admin/agent/v1/app (DeleteAgentAppReq) returns (DeleteAgentAppRes)
+	delete /admin/backend/agent/v1/app_delete (DeleteAgentAppReq) returns (DeleteAgentAppRes)
 
 	@handler GetAgentToolList
-	get /admin/agent/v1/tool/list (GetAgentToolListReq) returns (GetAgentToolListRes)
+	get /admin/backend/agent/v1/tool_list (GetAgentToolListReq) returns (GetAgentToolListRes)
 
 	@handler GetAgentTool
-	get /admin/agent/v1/tool (GetAgentToolReq) returns (GetAgentToolRes)
+	get /admin/backend/agent/v1/tool_detail (GetAgentToolReq) returns (GetAgentToolRes)
 
 	@handler CreateAgentTool
-	post /admin/agent/v1/tool (CreateAgentToolReq) returns (CreateAgentToolRes)
+	post /admin/backend/agent/v1/tool_create (CreateAgentToolReq) returns (CreateAgentToolRes)
 
 	@handler UpdateAgentTool
-	put /admin/agent/v1/tool (UpdateAgentToolReq) returns (UpdateAgentToolRes)
+	put /admin/backend/agent/v1/tool_update (UpdateAgentToolReq) returns (UpdateAgentToolRes)
 
 	@handler DeleteAgentTool
-	delete /admin/agent/v1/tool (DeleteAgentToolReq) returns (DeleteAgentToolRes)
+	delete /admin/backend/agent/v1/tool_delete (DeleteAgentToolReq) returns (DeleteAgentToolRes)
 
 	@handler GetAgentMcpServerList
-	get /admin/agent/v1/mcp/list (GetAgentMcpServerListReq) returns (GetAgentMcpServerListRes)
+	get /admin/backend/agent/v1/mcp_list (GetAgentMcpServerListReq) returns (GetAgentMcpServerListRes)
 
 	@handler GetAgentMcpServer
-	get /admin/agent/v1/mcp (GetAgentMcpServerReq) returns (GetAgentMcpServerRes)
+	get /admin/backend/agent/v1/mcp_detail (GetAgentMcpServerReq) returns (GetAgentMcpServerRes)
 
 	@handler CreateAgentMcpServer
-	post /admin/agent/v1/mcp (CreateAgentMcpServerReq) returns (CreateAgentMcpServerRes)
+	post /admin/backend/agent/v1/mcp_create (CreateAgentMcpServerReq) returns (CreateAgentMcpServerRes)
 
 	@handler UpdateAgentMcpServer
-	put /admin/agent/v1/mcp (UpdateAgentMcpServerReq) returns (UpdateAgentMcpServerRes)
+	put /admin/backend/agent/v1/mcp_update (UpdateAgentMcpServerReq) returns (UpdateAgentMcpServerRes)
 
 	@handler DeleteAgentMcpServer
-	delete /admin/agent/v1/mcp (DeleteAgentMcpServerReq) returns (DeleteAgentMcpServerRes)
+	delete /admin/backend/agent/v1/mcp_delete (DeleteAgentMcpServerReq) returns (DeleteAgentMcpServerRes)
+
+	@handler GetAgentModelList
+	get /admin/backend/agent/v1/model_list (GetAgentModelListReq) returns (GetAgentModelListRes)
+
+	@handler GetAgentModel
+	get /admin/backend/agent/v1/model_detail (GetAgentModelReq) returns (GetAgentModelRes)
+
+	@handler CreateAgentModel
+	post /admin/backend/agent/v1/model_create (CreateAgentModelReq) returns (CreateAgentModelRes)
+
+	@handler UpdateAgentModel
+	put /admin/backend/agent/v1/model_update (UpdateAgentModelReq) returns (UpdateAgentModelRes)
+
+	@handler DeleteAgentModel
+	delete /admin/backend/agent/v1/model_delete (DeleteAgentModelReq) returns (DeleteAgentModelRes)
+
+	@handler GetAiAssistant
+	get /admin/backend/agent/v1/assistant_detail (GetAiAssistantReq) returns (GetAiAssistantRes)
+
+	@handler SaveAiAssistant
+	put /admin/backend/agent/v1/assistant_save (SaveAiAssistantReq) returns (SaveAiAssistantRes)
 }

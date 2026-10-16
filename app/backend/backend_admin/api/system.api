@@ -178,53 +178,53 @@ type (
 service backend {
 	@doc "创建菜单"
 	@handler createMenu
-	post /admin/system/v1/create_menu (CreateMenuReq) returns (CreateMenuRes)
+	post /admin/backend/system/v1/create_menu (CreateMenuReq) returns (CreateMenuRes)
 
 	@doc "更新菜单"
 	@handler updateMenu
-	post /admin/system/v1/update_menu (UpdateMenuReq) returns (UpdateMenuRes)
+	post /admin/backend/system/v1/update_menu (UpdateMenuReq) returns (UpdateMenuRes)
 
 	@doc "删除菜单"
 	@handler deleteMenu
-	post /admin/system/v1/delete_menu (DeleteMenuReq) returns (DeleteMenuRes)
+	post /admin/backend/system/v1/delete_menu (DeleteMenuReq) returns (DeleteMenuRes)
 
 	@doc "获取菜单列表"
 	@handler getMenus
-	get /admin/system/v1/list_menus (GetMenuListReq) returns (GetMenuListRes)
+	get /admin/backend/system/v1/list_menus (GetMenuListReq) returns (GetMenuListRes)
 
 	@doc "创建权限"
 	@handler createAuthority
-	post /admin/system/v1/create_authority (CreateAuthorityReq) returns (CreateAuthorityRes)
+	post /admin/backend/system/v1/create_authority (CreateAuthorityReq) returns (CreateAuthorityRes)
 
 	@doc "更新权限菜单"
 	@handler updateAuthorityMenu
-	post /admin/system/v1/update_authority_menu (UpdateAuthorityMenuReq) returns (UpdateAuthorityMenuRes)
+	post /admin/backend/system/v1/update_authority_menu (UpdateAuthorityMenuReq) returns (UpdateAuthorityMenuRes)
 
 	@doc "角色列表"
 	@handler getAuthorityList
-	get /admin/system/v1/list_authorities (GetAuthorityListReq) returns (GetAuthorityListRes)
+	get /admin/backend/system/v1/list_authorities (GetAuthorityListReq) returns (GetAuthorityListRes)
 
 	@doc "更新角色"
 	@handler updateAuthority
-	post /admin/system/v1/update_authority (UpdateAuthorityReq) returns (UpdateAuthorityRes)
+	post /admin/backend/system/v1/update_authority (UpdateAuthorityReq) returns (UpdateAuthorityRes)
 
 	@doc "删除角色"
 	@handler deleteAuthority
-	post /admin/system/v1/delete_authority (DeleteAuthorityReq) returns (DeleteAuthorityRes)
+	post /admin/backend/system/v1/delete_authority (DeleteAuthorityReq) returns (DeleteAuthorityRes)
 
 	@doc "角色已授权菜单"
 	@handler getAuthorityMenus
-	get /admin/system/v1/authority_menus (GetAuthorityMenusReq) returns (GetAuthorityMenusRes)
+	get /admin/backend/system/v1/authority_menus (GetAuthorityMenusReq) returns (GetAuthorityMenusRes)
 
 	@doc "管理员列表"
 	@handler getAdminUserList
-	get /admin/system/v1/list_admins (GetAdminUserListReq) returns (GetAdminUserListRes)
+	get /admin/backend/system/v1/list_admins (GetAdminUserListReq) returns (GetAdminUserListRes)
 
 	@doc "创建管理员"
 	@handler createAdminUser
-	post /admin/system/v1/create_admin (CreateAdminUserReq) returns (CreateAdminUserRes)
+	post /admin/backend/system/v1/create_admin (CreateAdminUserReq) returns (CreateAdminUserRes)
 
 	@doc "更新管理员"
 	@handler updateAdminUser
-	post /admin/system/v1/update_admin (UpdateAdminUserReq) returns (UpdateAdminUserRes)
+	post /admin/backend/system/v1/update_admin (UpdateAdminUserReq) returns (UpdateAdminUserRes)
 }

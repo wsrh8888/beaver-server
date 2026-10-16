@@ -246,6 +246,7 @@ func main() {
 					&agent_models.AgentTool{},
 					&agent_models.AgentMcpServer{},
 					&ai_models.AgentWorkspace{},
+					&ai_models.AiAssistant{},
 				)
 			},
 		},

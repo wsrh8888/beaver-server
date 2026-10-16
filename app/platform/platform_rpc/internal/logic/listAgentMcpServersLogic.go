@@ -30,6 +30,9 @@ func (l *ListAgentMcpServersLogic) ListAgentMcpServers(in *platform_rpc.ListAgen
 	if in.Status != 0 {
 		q = q.Where("status = ?", int(in.Status))
 	}
+	if in.Source != "" {
+		q = q.Where("source = ?", in.Source)
+	}
 	var rows []agent_models.AgentMcpServer
 	q.Order("id ASC").Find(&rows)
 	out := make([]*platform_rpc.AgentMcpServerItem, 0, len(rows))
@@ -43,6 +46,8 @@ func (l *ListAgentMcpServersLogic) ListAgentMcpServers(in *platform_rpc.ListAgen
 			Config:     row.Config,
 			Tools:      row.Tools,
 			Status:     int32(row.Status),
+			Source:     row.Source,
+			UserId:     row.UserID,
 		})
 	}
 	return &platform_rpc.ListAgentMcpServersRes{Servers: out}, nil

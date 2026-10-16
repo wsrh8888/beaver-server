@@ -41,6 +41,11 @@ const (
 	DigitalStatusDisabled = 0
 )
 
+const (
+	DigitalSourceSystem = "system" // 管理后台创建的系统数字伙伴
+	DigitalSourceOpen   = "open"   // 开放平台创建
+)
+
 // OpenDigital 开放平台三大能力之一：数字伙伴（一级实体，不挂 OpenOAuth）。
 //
 // DigitalID = UserModel.UserID；名字/头像/简介只在 UserModel，本表不存展示字段。
@@ -59,6 +64,7 @@ type OpenDigital struct {
 
 	Visibility string `gorm:"type:varchar(16);not null;index;comment:private|partial|public"`
 	Status     int    `gorm:"column:status;type:tinyint;not null;default:1;index;comment:1启用 0禁用"`
+	Source     string `gorm:"column:source;type:varchar(16);not null;default:'open';index;comment:system系统创建 open开放平台创建"`
 }
 
 func (OpenDigital) TableName() string { return "open_digital" }

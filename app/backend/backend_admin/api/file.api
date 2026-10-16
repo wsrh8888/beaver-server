@@ -122,37 +122,37 @@ type (
 service backend {
 	@doc "获取文件列表"
 	@handler GetFileList
-	get /admin/file/v1/list (GetFileListReq) returns (GetFileListRes)
+	get /admin/backend/file/v1/list (GetFileListReq) returns (GetFileListRes)
 
 	@doc "获取文件详情"
 	@handler GetFileDetail
-	get /admin/file/v1/detail (GetFileDetailReq) returns (GetFileDetailRes)
+	get /admin/backend/file/v1/detail (GetFileDetailReq) returns (GetFileDetailRes)
 
 	@doc "删除文件"
 	@handler DeleteFile
-	post /admin/file/v1/delete (DeleteFileReq) returns (DeleteFileRes)
+	post /admin/backend/file/v1/delete (DeleteFileReq) returns (DeleteFileRes)
 
 	@doc "批量删除文件"
 	@handler BatchDeleteFile
-	post /admin/file/v1/batch_delete (BatchDeleteFileReq) returns (BatchDeleteFileRes)
+	post /admin/backend/file/v1/batch_delete (BatchDeleteFileReq) returns (BatchDeleteFileRes)
 
 	@doc "文件预览"
 	@handler Preview
-	get /admin/file/v1/preview (PreviewReq) returns (PreviewRes)
+	get /admin/backend/file/v1/preview (PreviewReq) returns (PreviewRes)
 
 	@doc "文件上传本地"
 	@handler FileUploadLocal
-	post /admin/file/v1/upload_local (FileUploadLocalReq) returns (FileUploadLocalRes)
+	post /admin/backend/file/v1/upload_local (FileUploadLocalReq) returns (FileUploadLocalRes)
 
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
-	post /admin/file/v1/upload_qiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
+	post /admin/backend/file/v1/upload_qiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
 
 	@doc "获取七牛云上传token"
 	@handler GetQiniuUploadToken
-	post /admin/file/v1/qiniu_token (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
+	post /admin/backend/file/v1/qiniu_token (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
 
 	@doc "保存文件信息到数据库"
 	@handler SaveFile
-	post /admin/file/v1/save (SaveFileReq) returns (SaveFileRes)
+	post /admin/backend/file/v1/save (SaveFileReq) returns (SaveFileRes)
 }

@@ -88,21 +88,21 @@ type (
 service backend {
 	@doc "获取动态列表"
 	@handler GetMomentList
-	get /admin/moment/v1/list (GetMomentListReq) returns (GetMomentListRes)
+	get /admin/backend/moment/v1/list (GetMomentListReq) returns (GetMomentListRes)
 
 	@doc "获取动态详情"
 	@handler GetMomentDetail
-	get /admin/moment/v1/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
+	get /admin/backend/moment/v1/detail (GetMomentDetailReq) returns (GetMomentDetailRes)
 
 	@doc "删除动态"
 	@handler DeleteMoment
-	post /admin/moment/v1/delete (DeleteMomentReq) returns (DeleteMomentRes)
+	post /admin/backend/moment/v1/delete (DeleteMomentReq) returns (DeleteMomentRes)
 
 	@doc "获取动态评论列表"
 	@handler GetMomentCommentList
-	get /admin/moment/v1/comments (GetMomentCommentListReq) returns (GetMomentCommentListRes)
+	get /admin/backend/moment/v1/comments (GetMomentCommentListReq) returns (GetMomentCommentListRes)
 
 	@doc "删除动态评论"
 	@handler DeleteMomentComment
-	post /admin/moment/v1/delete_comment (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
+	post /admin/backend/moment/v1/delete_comment (DeleteMomentCommentReq) returns (DeleteMomentCommentRes)
 }

@@ -23,6 +23,8 @@ type AgentMcpServer struct {
 	Config      string `gorm:"type:json;comment:连接配置 {command/url/env等}" json:"config"`
 	Tools       string `gorm:"type:json;comment:能力清单" json:"tools"`
 	Status      int    `gorm:"type:tinyint;not null;default:1;index;comment:1启用 2停用" json:"status"`
+	Source      string `gorm:"type:varchar(16);not null;default:'official';index;comment:official官方 custom用户" json:"source"`
+	UserID      string `gorm:"column:user_id;type:varchar(64);not null;default:'';index;comment:用户自建时的用户ID，官方为空" json:"userId"`
 }
 
 func (AgentMcpServer) TableName() string { return "agent_mcp_servers" }

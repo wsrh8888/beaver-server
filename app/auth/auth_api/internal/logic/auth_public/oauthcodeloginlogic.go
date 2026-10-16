@@ -66,8 +66,8 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 	deviceGroup := ua.DeviceGroup(l.ctx)
 
 	rpcResp, err := l.svcCtx.OpenRpc.ExchangeToken(l.ctx, &open_rpc.ExchangeTokenReq{
-		AppId: req.AppID,
-		Code:  req.Code,
+		OauthId: req.AppID,
+		Code:    req.Code,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{

@@ -140,37 +140,37 @@ type (
 service backend {
 	@doc "获取用户会话列表"
 	@handler getChatSessionList
-	get /admin/chat/v1/sessions (GetChatSessionListReq) returns (GetChatSessionListRes)
+	get /admin/backend/chat/v1/sessions (GetChatSessionListReq) returns (GetChatSessionListRes)
 
 	@doc "获取聊天消息列表"
 	@handler getChatMessageList
-	get /admin/chat/v1/list (GetChatMessageListReq) returns (GetChatMessageListRes)
+	get /admin/backend/chat/v1/list (GetChatMessageListReq) returns (GetChatMessageListRes)
 
 	@doc "获取聊天消息详情"
 	@handler getChatMessageDetail
-	get /admin/chat/v1/detail (GetChatMessageDetailReq) returns (GetChatMessageDetailRes)
+	get /admin/backend/chat/v1/detail (GetChatMessageDetailReq) returns (GetChatMessageDetailRes)
 
 	@doc "删除聊天消息"
 	@handler deleteChatMessage
-	post /admin/chat/v1/delete (DeleteChatMessageReq) returns (DeleteChatMessageRes)
+	post /admin/backend/chat/v1/delete (DeleteChatMessageReq) returns (DeleteChatMessageRes)
 
 	@doc "批量删除聊天消息"
 	@handler batchDeleteChatMessages
-	post /admin/chat/v1/batch_delete (BatchDeleteChatMessagesReq) returns (BatchDeleteChatMessagesRes)
+	post /admin/backend/chat/v1/batch_delete (BatchDeleteChatMessagesReq) returns (BatchDeleteChatMessagesRes)
 
 	@doc "恢复已删除的消息"
 	@handler restoreChatMessage
-	post /admin/chat/v1/restore (RestoreChatMessageReq) returns (RestoreChatMessageRes)
+	post /admin/backend/chat/v1/restore (RestoreChatMessageReq) returns (RestoreChatMessageRes)
 
 	@doc "批量恢复消息"
 	@handler batchRestoreChatMessages
-	post /admin/chat/v1/batch_restore (BatchRestoreChatMessagesReq) returns (BatchRestoreChatMessagesRes)
+	post /admin/backend/chat/v1/batch_restore (BatchRestoreChatMessagesReq) returns (BatchRestoreChatMessagesRes)
 
 	@doc "清空会话消息"
 	@handler clearConversation
-	post /admin/chat/v1/clear_conversation (ClearConversationReq) returns (ClearConversationRes)
+	post /admin/backend/chat/v1/clear_conversation (ClearConversationReq) returns (ClearConversationRes)
 
 	@doc "按消息类型删除"
 	@handler deleteMessagesByType
-	post /admin/chat/v1/delete_by_type (DeleteMessagesByTypeReq) returns (DeleteMessagesByTypeRes)
+	post /admin/backend/chat/v1/delete_by_type (DeleteMessagesByTypeReq) returns (DeleteMessagesByTypeRes)
 }

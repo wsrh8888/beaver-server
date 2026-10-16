@@ -43,13 +43,13 @@ func NewGetOpenAppListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetOpenAppListLogic) GetOpenAppList(req *types.GetOpenAppListReq) (resp *types.GetOpenAppListRes, err error) {
-	rpcRes, err := l.svcCtx.OpenRpc.ListOpenApps(l.ctx, &open_rpc.ListOpenAppsReq{
-		Page:           int32(req.Page),
-		PageSize:       int32(req.PageSize),
-		Keyword:        req.Keyword,
-		OwnerUserId:    req.OwnerUserID,
-		AppId:          req.AppID,
-		Status:         int32(req.Status),
+	rpcRes, err := l.svcCtx.OpenRpc.ListOpenOAuth(l.ctx, &open_rpc.ListOpenOAuthReq{
+		Page:        int32(req.Page),
+		PageSize:    int32(req.PageSize),
+		Keyword:     req.Keyword,
+		OwnerUserId: req.OwnerUserID,
+		OauthId:     req.AppID,
+		Status:      int32(req.Status),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{
@@ -85,14 +85,13 @@ func (l *GetOpenAppListLogic) GetOpenAppList(req *types.GetOpenAppListReq) (resp
 			ownerName = u.NickName
 		}
 		list = append(list, types.OpenAppInfo{
-			AppID:         app.AppId,
+			AppID:         app.OauthId,
 			Name:          app.Name,
 			Description:   app.Description,
 			Icon:          app.Icon,
 			OwnerUserID:   app.OwnerUserId,
 			OwnerUserName: ownerName,
 			Status:        int(app.Status),
-			EnableOAuth: int(app.EnableOauth),
 			CreatedAt:     app.CreatedAt,
 		})
 	}

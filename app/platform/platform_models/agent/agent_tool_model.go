@@ -21,6 +21,8 @@ type AgentTool struct {
 	Config    string `gorm:"type:json;comment:工具配置" json:"config"`
 	Status    int    `gorm:"type:tinyint;not null;default:1;index;comment:1启用 2停用" json:"status"`
 	Sort      int    `gorm:"type:int;not null;default:0;comment:排序" json:"sort"`
+	Source    string `gorm:"type:varchar(16);not null;default:'official';index;comment:official官方 custom用户" json:"source"`
+	UserID    string `gorm:"column:user_id;type:varchar(64);not null;default:'';index;comment:用户自建时的用户ID，官方为空" json:"userId"`
 }
 
 func (AgentTool) TableName() string { return "agent_tools" }

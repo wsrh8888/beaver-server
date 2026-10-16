@@ -32,7 +32,7 @@ type Department struct {
 	ParentID string `gorm:"column:parent_id;size:64;not null;default:'';index;comment:父部门ID空字符串为根" json:"parentId"` // 父部门 ID，空字符串表示根
 	Name     string `gorm:"size:128;not null;comment:部门名" json:"name"`                                              // 部门名
 	Sort     int    `gorm:"not null;default:0;comment:同级排序" json:"sort"`                                            // 同级排序，越小越靠前
-	Path     string `gorm:"size:1024;not null;default:'';index;comment:从根到自身的路径" json:"path"`                       // 如 /根部门ID/当前部门ID
+	Path     string `gorm:"size:1024;not null;default:'';comment:从根到自身的路径" json:"path"`                             // 如 /根部门ID/当前部门ID
 }
 
 func (Department) TableName() string { return "org_department" }

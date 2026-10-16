@@ -32,6 +32,7 @@ func NewGetAgentToolListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *GetAgentToolListLogic) GetAgentToolList(req *types.GetAgentToolListReq) (resp *types.GetAgentToolListRes, err error) {
 	rpcRes, err := l.svcCtx.PlatformRpc.ListAgentTools(l.ctx, &platform_rpc.ListAgentToolsReq{
 		Status: int32(req.Status),
+		Source: req.Source,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "获取工具列表失败", Data: map[string]any{"err": err.Error()}})

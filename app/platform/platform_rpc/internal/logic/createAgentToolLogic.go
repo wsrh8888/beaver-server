@@ -29,9 +29,14 @@ func (l *CreateAgentToolLogic) CreateAgentTool(in *platform_rpc.CreateAgentToolR
 		Config:   in.Config,
 		Status:   int(in.Status),
 		Sort:     int(in.Sort),
+		Source:   in.Source,
+		UserID:   in.UserId,
 	}
 	if row.ToolType == "" {
 		row.ToolType = "builtin"
+	}
+	if row.Source == "" {
+		row.Source = "official"
 	}
 	if row.Status == 0 {
 		row.Status = 1

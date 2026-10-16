@@ -71,6 +71,7 @@ func (l *CreateDigitalLogic) CreateDigital(req *types.CreateDigitalReq) (resp *t
 		OwnerID:    req.UserID,
 		Runtime:    runtime,
 		Visibility: visibility,
+		Source:     open_models.DigitalSourceOpen,
 	}
 
 	res := &types.CreateDigitalRes{DigitalID: partner.DigitalID}

@@ -117,33 +117,33 @@ type (
 service backend {
 	@doc "获取用户列表"
 	@handler getUserList
-	get /admin/user/v1/list (GetUserListReq) returns (GetUserListRes)
+	get /admin/backend/user/v1/list (GetUserListReq) returns (GetUserListRes)
 
 	@doc "获取用户详情"
 	@handler getUserDetail
-	get /admin/user/v1/detail (GetUserDetailReq) returns (GetUserDetailRes)
+	get /admin/backend/user/v1/detail (GetUserDetailReq) returns (GetUserDetailRes)
 
 	@doc "创建用户"
 	@handler createUser
-	post /admin/user/v1/create (CreateUserReq) returns (CreateUserRes)
+	post /admin/backend/user/v1/create (CreateUserReq) returns (CreateUserRes)
 
 	@doc "更新用户"
 	@handler updateUser
-	post /admin/user/v1/update (UpdateUserReq) returns (UpdateUserRes)
+	post /admin/backend/user/v1/update (UpdateUserReq) returns (UpdateUserRes)
 
 	@doc "删除用户"
 	@handler deleteUser
-	post /admin/user/v1/delete (DeleteUserReq) returns (DeleteUserRes)
+	post /admin/backend/user/v1/delete (DeleteUserReq) returns (DeleteUserRes)
 
 	@doc "批量删除用户"
 	@handler batchDeleteUsers
-	post /admin/user/v1/batch_delete (BatchDeleteUsersReq) returns (BatchDeleteUsersRes)
+	post /admin/backend/user/v1/batch_delete (BatchDeleteUsersReq) returns (BatchDeleteUsersRes)
 
 	@doc "重置用户密码"
 	@handler resetUserPassword
-	post /admin/user/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
+	post /admin/backend/user/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
 
 	@doc "批量更新用户状态"
 	@handler batchUpdateUserStatus
-	post /admin/user/v1/batch_update_status (BatchUpdateUserStatusReq) returns (BatchUpdateUserStatusRes)
+	post /admin/backend/user/v1/batch_update_status (BatchUpdateUserStatusReq) returns (BatchUpdateUserStatusRes)
 }

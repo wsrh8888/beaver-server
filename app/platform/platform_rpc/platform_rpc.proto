@@ -688,9 +688,12 @@ message AgentToolItem {
   string config = 5; // JSON
   int32 status = 6;
   int32 sort = 7;
+  string source = 8; // official|custom
+  string user_id = 9;
 }
 message ListAgentToolsReq {
   int32 status = 1; // 0=全部
+  string source = 2; // official|custom，空表示全部
 }
 message ListAgentToolsRes {
   repeated AgentToolItem tools = 1;
@@ -707,6 +710,8 @@ message CreateAgentToolReq {
   string config = 3; // JSON
   int32 status = 4;
   int32 sort = 5;
+  string source = 6; // 空则 official
+  string user_id = 7;
 }
 message CreateAgentToolRes {
   string tool_id = 1;
@@ -734,9 +739,12 @@ message AgentMcpServerItem {
   string config = 6; // JSON
   string tools = 7; // JSON
   int32 status = 8;
+  string source = 9; // official|custom
+  string user_id = 10;
 }
 message ListAgentMcpServersReq {
   int32 status = 1; // 0=全部
+  string source = 2; // official|custom，空表示全部
 }
 message ListAgentMcpServersRes {
   repeated AgentMcpServerItem servers = 1;
@@ -754,6 +762,8 @@ message CreateAgentMcpServerReq {
   string config = 4; // JSON 连接配置
   string tools = 5; // JSON 能力清单
   int32 status = 6;
+  string source = 7;
+  string user_id = 8;
 }
 message CreateAgentMcpServerRes {
   string mcp_server_id = 1;
@@ -772,6 +782,37 @@ message DeleteAgentMcpServerReq {
   string mcp_server_id = 1;
 }
 message DeleteAgentMcpServerRes {}
+
+// AiAssistant 某个场景里的唯一智能体，不是用户。scene：assistant/chat/moment/workbench。
+message AiAssistantItem {
+  string scene = 1;
+  string name = 2;
+  string system_prompt = 3;
+  string llm_model_id = 4;
+  string model_params = 5;
+  string tools = 6;
+  string mcp_server_ids = 7;
+  string opening_message = 8;
+  int32 status = 9;
+}
+message GetAiAssistantReq {
+  string scene = 1;
+}
+message GetAiAssistantRes {
+  AiAssistantItem assistant = 1;
+}
+message SaveAiAssistantReq {
+  string scene = 1;
+  string name = 2;
+  string system_prompt = 3;
+  string llm_model_id = 4;
+  string model_params = 5;
+  string tools = 6;
+  string mcp_server_ids = 7;
+  string opening_message = 8;
+  int32 status = 9;
+}
+message SaveAiAssistantRes {}
 
 message GetLatestWorkspaceReq {
   string user_id = 1;
@@ -877,6 +918,9 @@ service platform {
   rpc CreateAgentMcpServer(CreateAgentMcpServerReq) returns (CreateAgentMcpServerRes);
   rpc UpdateAgentMcpServer(UpdateAgentMcpServerReq) returns (UpdateAgentMcpServerRes);
   rpc DeleteAgentMcpServer(DeleteAgentMcpServerReq) returns (DeleteAgentMcpServerRes);
+
+  rpc GetAiAssistant(GetAiAssistantReq) returns (GetAiAssistantRes);
+  rpc SaveAiAssistant(SaveAiAssistantReq) returns (SaveAiAssistantRes);
 
   // —— 工作空间/设备（ai/ AI助手桌面端特有）——
   rpc GetLatestWorkspace(GetLatestWorkspaceReq) returns (GetLatestWorkspaceRes);
