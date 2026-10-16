@@ -30,7 +30,8 @@ type AddFriendReq struct {
 }
 
 type AddFriendRes struct {
-	Version int64 `json:"version"` // 好友验证版本号
+	Version int64 `json:"version"`         // 好友验证版本号；数字伙伴直接加好友时是好友表版本号
+	Direct  bool  `json:"direct,optional"` // true：对方是数字伙伴，已经直接成为好友
 }
 
 type BlockListReq struct {

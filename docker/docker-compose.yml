@@ -94,7 +94,9 @@ services:
     entrypoint: >
       sh -c "sleep 10 &&
       mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t ws_push_topic &&
-      mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t beaver_logs"
+      mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t beaver_logs &&
+      mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t agent_task &&
+      mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t agent_done"
 
   rocketmq-console:
     image: apacherocketmq/rocketmq-dashboard:latest

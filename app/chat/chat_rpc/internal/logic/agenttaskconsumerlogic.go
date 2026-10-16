@@ -27,9 +27,9 @@ import (
 	"fmt"
 	"strings"
 
+	"beaver/app/agent/agent_rpc/agent"
 	chat_models "beaver/app/chat/chat_models"
 	"beaver/app/chat/chat_rpc/internal/svc"
-	"beaver/app/agent/agent_rpc/agent"
 	"beaver/app/open/open_rpc/types/open_rpc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/common/const/mqwsconst"
@@ -93,15 +93,17 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 			return nil
 		}
 
-		// 取 AI 应用配置（platform 层，渠道无关通用配置）。
-		appRes, err := l.svcCtx.PlatformRpc.GetAgentApp(ctx, &platform_rpc.GetAgentAppReq{AppId: cfgRes.AppId})
-		if err != nil || appRes == nil || appRes.App == nil {
-			l.logger.Error(model.LogMsg{Text: "GetAgentApp 失败", Data: map[string]any{"digitalId": digitalID, "appId": cfgRes.AppId, "err": fmt.Sprintf("%v", err)}})
-			return nil
+		// 人设优先用数字伙伴自己的 BuiltinConfig。没有再回退到引用的 AI 应用。
+		// 模型不在这里指定，空 model_id 由 agent 按 auto 选。
+		systemPrompt := builtinSystemPrompt(cfgRes.BuiltinConfig)
+		if systemPrompt == "" && cfgRes.AppId != "" {
+			appRes, appErr := l.svcCtx.PlatformRpc.GetAgentApp(ctx, &platform_rpc.GetAgentAppReq{AppId: cfgRes.AppId})
+			if appErr != nil || appRes == nil || appRes.App == nil {
+				l.logger.Error(model.LogMsg{Text: "GetAgentApp 失败", Data: map[string]any{"digitalId": digitalID, "appId": cfgRes.AppId, "err": fmt.Sprintf("%v", appErr)}})
+			} else {
+				systemPrompt = appRes.App.SystemPrompt
+			}
 		}
-		app := appRes.App
-		systemPrompt := app.SystemPrompt
-		llmModelID := app.LlmModelId
 
 		// 拼最近聊天记录上下文。
 		historyCtx := l.buildHistoryContext(ctx, conversationID, userID, digitalID)
@@ -122,7 +124,7 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 		reply, err := l.svcCtx.AgentRpc.SendMessage(ctx, &agent.SendMessageReq{
 			UserId:         userID,
 			ConversationId: conversationID,
-			ModelId:        llmModelID,
+			ModelId:        "",
 			PartsJson:      string(partsJSON),
 			SystemPrompt:   systemPrompt,
 			DigitalId:      digitalID,
@@ -204,15 +206,35 @@ func extractHistoryText(msg *ctype.Msg) string {
 	return ""
 }
 
-// extractPayload 从 SendMessage 投递的信封 {payload: {...}} 中取出内层 payload map。
+func builtinSystemPrompt(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	var cfg struct {
+		SystemPrompt string `json:"systemPrompt"`
+	}
+	if err := json.Unmarshal([]byte(raw), &cfg); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(cfg.SystemPrompt)
+}
+
+// extractPayload 从信封里取出业务字段。
+// Go 投递是 {payload:{...}}；Python 终稿若少包一层，字段就直接在这一层。两种都认。
 func extractPayload(envelope map[string]interface{}) (map[string]interface{}, error) {
+	if envelope == nil {
+		return nil, fmt.Errorf("信封为空")
+	}
 	v, ok := envelope["payload"]
-	if !ok || v == nil {
-		return nil, fmt.Errorf("信封缺少 payload 字段")
+	if ok && v != nil {
+		inner, ok := v.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("payload 不是 map[string]interface{}")
+		}
+		return inner, nil
 	}
-	inner, ok := v.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("payload 不是 map[string]interface{}")
+	if _, has := envelope["digitalId"]; has {
+		return envelope, nil
 	}
-	return inner, nil
+	return nil, fmt.Errorf("信封缺少 payload 字段")
 }

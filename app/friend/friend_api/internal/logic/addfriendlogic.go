@@ -25,12 +25,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"sort"
 
+	"beaver/app/chat/chat_rpc/types/chat_rpc"
 	"beaver/app/friend/friend_api/internal/svc"
 	"beaver/app/friend/friend_api/internal/types"
 	"beaver/app/friend/friend_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	"beaver/app/user/user_models"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
@@ -87,12 +91,16 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	}
 
 	// 检查目标用户是否存在（通过RPC）
-	_, err = l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
+	friendInfo, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user_rpc.UserInfoReq{
 		UserID: req.FriendID,
 	})
-	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "目标用户不存在", Data: map[string]interface{}{"friendId": req.FriendID, "err": err.Error()}})
+	if err != nil || friendInfo == nil || friendInfo.UserInfo == nil {
+		l.logger.Error(model.LogMsg{Text: "目标用户不存在", Data: map[string]interface{}{"friendId": req.FriendID, "err": fmt.Sprintf("%v", err)}})
 		return nil, errors.New("用户不存在")
+	}
+	// 数字伙伴没有人点同意，搜索到了就直接成为好友，并建好私聊。
+	if friendInfo.UserInfo.UserType == int32(user_models.UserTypeDigital) {
+		return l.addDigitalFriend(req)
 	}
 
 	// 检查是否已经有待处理的好友请求
@@ -254,4 +262,91 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	}
 
 	return resp, nil
+}
+
+// addDigitalFriend 数字伙伴直接成为好友：写好友表、建私聊、发欢迎语，并通知两端同步。
+func (l *AddFriendLogic) addDigitalFriend(req *types.AddFriendReq) (*types.AddFriendRes, error) {
+	friendNextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
+	if friendNextVersion == -1 {
+		return nil, errors.New("系统错误")
+	}
+	friendID := uuid.New().String()
+	// 之前已经发出去的验证，数字伙伴不会点，这里直接收掉。
+	l.svcCtx.DB.Model(&friend_models.FriendVerifyModel{}).
+		Where("((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND rev_status = 0",
+			req.UserID, req.FriendID, req.FriendID, req.UserID).
+		Update("rev_status", 1)
+	err := l.svcCtx.DB.Create(&friend_models.FriendModel{
+		FriendID:   friendID,
+		SendUserID: req.UserID,
+		RevUserID:  req.FriendID,
+		Source:     req.Source,
+		Version:    friendNextVersion,
+	}).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建数字伙伴好友关系失败", Data: map[string]interface{}{"friendId": req.FriendID, "err": err.Error()}})
+		return nil, errors.New("添加好友失败")
+	}
+
+	userIds := []string{req.UserID, req.FriendID}
+	sort.Strings(userIds)
+	conversationId := fmt.Sprintf("private_%s_%s", userIds[0], userIds[1])
+	initResp, err := l.svcCtx.ChatRpc.InitializeConversation(l.ctx, &chat_rpc.InitializeConversationReq{
+		ConversationId: conversationId,
+		Type:           1,
+		UserIds:        []string{req.UserID, req.FriendID},
+	})
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "初始化数字伙伴私聊失败", Data: map[string]interface{}{"conversationId": conversationId, "err": err.Error()}})
+		return nil, errors.New("初始化私聊失败")
+	}
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.logger.Error(model.LogMsg{Text: "发送数字伙伴欢迎消息panic", Data: map[string]interface{}{"panic": r}})
+			}
+		}()
+		_, err := l.svcCtx.ChatRpc.SendNotificationMessage(context.Background(), &chat_rpc.SendNotificationMessageReq{
+			ConversationId: initResp.ConversationId,
+			MessageType:    1,
+			Content:        "我们已经是好友了，开始聊天吧",
+			RelatedUserId:  req.UserID,
+			ReadUserIds:    []string{req.UserID},
+		})
+		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "发送数字伙伴欢迎消息失败", Data: map[string]interface{}{"conversationId": initResp.ConversationId, "err": err.Error()}})
+		}
+	}()
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.logger.Error(model.LogMsg{Text: "通知数字伙伴好友关系panic", Data: map[string]interface{}{"panic": r}})
+			}
+		}()
+		tableUpdates := []map[string]interface{}{
+			{
+				"table": "friends",
+				"data": []map[string]interface{}{
+					{"version": friendNextVersion, "friendId": friendID},
+				},
+			},
+		}
+		for _, pair := range [][2]string{{req.UserID, req.FriendID}, {req.FriendID, req.UserID}} {
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, map[string]interface{}{
+				"command":        wsCommandConst.FRIEND_OPERATION,
+				"type":           wsTypeConst.FriendVerifyReceive,
+				"senderId":       pair[0],
+				"targetId":       pair[1],
+				"conversationId": initResp.ConversationId,
+				"body": map[string]interface{}{
+					"tableUpdates": tableUpdates,
+				},
+			})
+		}
+	}()
+
+	l.logger.Info(model.LogMsg{Text: "数字伙伴已直接加为好友", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "conversationId": initResp.ConversationId}})
+	return &types.AddFriendRes{Version: friendNextVersion, Direct: true}, nil
 }

@@ -9,7 +9,8 @@ type (
 		Source   string `json:"source"` // 添加好友来源：email(邮箱搜索)/qrcode(扫码)/userId(用户ID搜索)
 	}
 	AddFriendRes {
-		Version int64 `json:"version"` // 好友验证版本号
+		Version int64 `json:"version"` // 好友验证版本号；数字伙伴直接加好友时是好友表版本号
+		Direct  bool  `json:"direct,optional"` // true：对方是数字伙伴，已经直接成为好友
 	}
 )
 

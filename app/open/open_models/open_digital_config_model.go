@@ -38,26 +38,56 @@ type OpenDigitalConfig struct {
 	gorm.Model
 	DigitalID string `gorm:"column:digital_id;type:varchar(64);uniqueIndex;not null;comment:数字伙伴ID（OpenDigital.DigitalID）"`
 
-	AppID         string            `gorm:"column:app_id;type:varchar(64);not null;default:'';index;comment:引用 agent_apps.app_id（builtin 模式）"`
-	OverrideConfig string           `gorm:"column:override_config;type:json;comment:覆盖 AI 应用部分字段的 JSON（可空）"`
-	BuiltinConfig   *BuiltinConfig   `gorm:"column:builtin_config;type:json;comment:提示词模式配置 JSON（Runtime=builtin）"`
-	ExternalConfig  *ExternalConfig  `gorm:"column:external_config;type:json;comment:长链接模式配置 JSON（Runtime=external）"`
-	WorkflowConfig  *WorkflowConfig  `gorm:"column:workflow_config;type:json;comment:工作流模式配置 JSON（Runtime=workflow）"`
+	AppID          string          `gorm:"column:app_id;type:varchar(64);not null;default:'';index;comment:引用 agent_apps.app_id（builtin 模式）"`
+	OverrideConfig *OverrideConfig `gorm:"column:override_config;type:json" json:"overrideConfig,omitempty"` // 覆盖 AI 应用的部分字段，空则不覆盖
+	BuiltinConfig  *BuiltinConfig  `gorm:"column:builtin_config;type:json" json:"builtinConfig,omitempty"`   // 提示词模式（Runtime=builtin）
+	ExternalConfig *ExternalConfig `gorm:"column:external_config;type:json" json:"externalConfig,omitempty"` // 长链接模式（Runtime=external）
+	WorkflowConfig *WorkflowConfig `gorm:"column:workflow_config;type:json" json:"workflowConfig,omitempty"` // 工作流模式（Runtime=workflow）
 }
 
 func (OpenDigitalConfig) TableName() string { return "open_digital_config" }
 
+// OverrideConfig 引用 AI 应用时，只盖掉要改的字段。指针为空表示不覆盖。
+type OverrideConfig struct {
+	SystemPrompt     *string        `json:"systemPrompt,omitempty"`
+	LLMModelID       *string        `json:"llmModelId,omitempty"`
+	ModelParams      map[string]any `json:"modelParams,omitempty"`
+	Tools            []string       `json:"tools,omitempty"`
+	McpServerIDs     []string       `json:"mcpServerIds,omitempty"`
+	KnowledgeIDs     []string       `json:"knowledgeIds,omitempty"`
+	OpeningMessage   *string        `json:"openingMessage,omitempty"`
+	OpeningQuestions []string       `json:"openingQuestions,omitempty"`
+}
+
+func (c *OverrideConfig) Value() (driver.Value, error) {
+	if c == nil {
+		return nil, nil
+	}
+	return json.Marshal(c)
+}
+
+func (c *OverrideConfig) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(bytes, c)
+}
+
 // BuiltinConfig 提示词模式配置（Runtime=builtin）。
 type BuiltinConfig struct {
-	SystemPrompt    string            `json:"systemPrompt"`              // 人设提示词
-	LLMModelID       string            `json:"llmModelId"`               // 模型ID，引用 agent_models.model_id
-	ModelParams      map[string]any    `json:"modelParams,omitempty"`     // 模型参数 temperature、max_turns 等
-	OpeningMessage   string            `json:"openingMessage,omitempty"`  // 对话开场白，空=不主动开口
-	OpeningQuestions []string          `json:"openingQuestions,omitempty"` // 开场问题
-	Variables       []ConfigVariable  `json:"variables,omitempty"`        // 表单变量（用户对话前填写，替换 {{variable}}）
-	Tools           []string           `json:"tools,omitempty"`            // 启用的工具ID列表
-	McpServerIDs    []string           `json:"mcpServerIds,omitempty"`     // 启用的 MCP 服务 ID 列表
-	KnowledgeIDs    []string           `json:"knowledgeIds,omitempty"`      // 绑定的知识库ID列表，跨服务只存ID
+	SystemPrompt     string           `json:"systemPrompt"`               // 人设提示词
+	LLMModelID       string           `json:"llmModelId"`                 // 模型ID，引用 agent_models.model_id
+	ModelParams      map[string]any   `json:"modelParams,omitempty"`      // 模型参数 temperature、max_turns 等
+	OpeningMessage   string           `json:"openingMessage,omitempty"`   // 对话开场白，空=不主动开口
+	OpeningQuestions []string         `json:"openingQuestions,omitempty"` // 开场问题
+	Variables        []ConfigVariable `json:"variables,omitempty"`        // 表单变量（用户对话前填写，替换 {{variable}}）
+	Tools            []string         `json:"tools,omitempty"`            // 启用的工具ID列表
+	McpServerIDs     []string         `json:"mcpServerIds,omitempty"`     // 启用的 MCP 服务 ID 列表
+	KnowledgeIDs     []string         `json:"knowledgeIds,omitempty"`     // 绑定的知识库ID列表，跨服务只存ID
 }
 
 // ExternalConfig 长链接模式配置（Runtime=external）。
@@ -83,18 +113,18 @@ type WorkflowNode struct {
 
 // WorkflowEdge 工作流连线。
 type WorkflowEdge struct {
-	EdgeID    string `json:"edgeId"`             // 连线ID
-	FromNode  string `json:"fromNode"`           // 起点节点ID
-	ToNode    string `json:"toNode"`             // 终点节点ID
+	EdgeID   string `json:"edgeId"`   // 连线ID
+	FromNode string `json:"fromNode"` // 起点节点ID
+	ToNode   string `json:"toNode"`   // 终点节点ID
 	// 条件分支：condition 节点出边按 Condition 匹配决定走哪条；普通节点出边 Condition 为空。
 	Condition string `json:"condition,omitempty"` // 条件表达式（condition 节点分支用）
 }
 
 // ConfigVariable 表单变量（用户在对话前填写，替换提示词中的 {{variable}}）。
 type ConfigVariable struct {
-	Name     string   `json:"name"`               // 变量名（提示词中 {{name}} 引用）
-	Label    string   `json:"label"`              // 展示标签
-	Type     string   `json:"type"`               // text|number|select
+	Name     string   `json:"name"`  // 变量名（提示词中 {{name}} 引用）
+	Label    string   `json:"label"` // 展示标签
+	Type     string   `json:"type"`  // text|number|select
 	Default  string   `json:"default,omitempty"`
 	Required bool     `json:"required,omitempty"`
 	Options  []string `json:"options,omitempty"` // type=select 时的选项

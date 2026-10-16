@@ -54,6 +54,11 @@ func (p *digitalEventPusher) tryPush(in *chat_rpc.SendMsgReq, msg *ctype.Msg) {
 		}
 	}()
 
+	// 数字伙伴自己的回复不再投回去，避免群里来回叫醒。
+	if isOpenDigitalSender(in.DeviceId) {
+		return
+	}
+
 	conversationType, userIDs := conversation.ParseConversationWithType(in.ConversationId)
 	eventBody := p.buildEventBody(in, msg)
 
@@ -220,6 +225,11 @@ func msgTypeName(msg *ctype.Msg) string {
 func extractTextContent(msg *ctype.Msg) string {
 	if msg == nil {
 		return ""
+	}
+	if msg.ReplyMsg != nil && msg.ReplyMsg.ReplyMsg != nil {
+		if text := extractTextContent(msg.ReplyMsg.ReplyMsg); text != "" {
+			return text
+		}
 	}
 	if msg.TextMsg != nil {
 		return msg.TextMsg.Content

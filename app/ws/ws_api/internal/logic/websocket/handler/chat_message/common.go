@@ -79,7 +79,7 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 	case 3:
 		if videoMsg, ok := msgData["videoMsg"].(map[string]interface{}); ok {
 			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
-				FileUrl:       fileUrlFromMap(videoMsg),
+				FileUrl:      fileUrlFromMap(videoMsg),
 				ThumbnailUrl: thumbnailUrlFromMap(videoMsg),
 			}
 			if width, ok := videoMsg["width"].(float64); ok {
@@ -294,6 +294,14 @@ func convertToRpcMsg(msg json.RawMessage) (*chat_rpc.Msg, error) {
 			}
 			if inviteToken, ok := cardMsg["inviteToken"].(string); ok {
 				rpcMsg.CardMsg.InviteToken = inviteToken
+			}
+		}
+	}
+
+	if raw, ok := msgData["atUserIds"].([]interface{}); ok {
+		for _, item := range raw {
+			if id, ok := item.(string); ok && id != "" {
+				rpcMsg.AtUserIds = append(rpcMsg.AtUserIds, id)
 			}
 		}
 	}

@@ -34,6 +34,7 @@ import (
 	"beaver/app/user/user_rpc/types/user_rpc"
 
 	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"github.com/google/uuid"
 )
 
@@ -113,6 +114,7 @@ func (l *CreateDigitalLogic) CreateDigital(in *open_rpc.CreateDigitalReq) (*open
 		}
 		cfg := open_models.OpenDigitalConfig{DigitalID: partner.DigitalID, AppID: in.AppId, BuiltinConfig: builtin}
 		if err := l.svcCtx.DB.Create(&cfg).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "保存数字伙伴配置失败", Data: map[string]any{"err": err.Error(), "digitalId": partner.DigitalID}})
 			return nil, errors.New("保存数字伙伴配置失败")
 		}
 	}
