@@ -55,6 +55,11 @@ message SendMessageReq {
   string system_prompt = 14;
   // 数字伙伴 ID（路径 B 编排层传入；路径 A 为空。非空时终稿投 agent_done topic 让 chat 落库）。
   string digital_id = 15;
+  // 入口场景：workspace=AI 助手窗口，chat=聊天侧栏，moment=朋友圈，circle=圈子。
+  string module = 16;
+  // 数字伙伴引用的 AgentApp（路径 B 编排层传入）：非空时 agent 按 app_id 回查 AgentApp，
+  // 吃到其 tools/mcp/knowledge/model 绑定（配置即执行）；为空时按 scene 回查。
+  string app_id = 17;
 }
 
 message SubmitClientToolResultReq {

@@ -30,6 +30,10 @@ func NewCreateAgentAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 }
 
 func (l *CreateAgentAppLogic) CreateAgentApp(req *types.CreateAgentAppReq) (resp *types.CreateAgentAppRes, err error) {
+	if err := validateKnowledgeBindings(l.ctx, l.svcCtx, req.KnowledgeIDs); err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建AI应用：知识库绑定校验失败", Data: map[string]any{"err": err.Error()}})
+		return nil, err
+	}
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateAgentApp(l.ctx, &platform_rpc.CreateAgentAppReq{
 		Name:             req.Name,
 		Scene:            req.Scene,

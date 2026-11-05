@@ -31,6 +31,7 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
+	knowledge_models "beaver/app/knowledge/knowledge_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
@@ -199,6 +200,14 @@ func AllMigrations() []Migration {
 		{
 			Name:   "beaver_datasync",
 			Models: []any{&datasync_models.DatasyncModel{}},
+		},
+		{
+			Name: "beaver_knowledge",
+			Models: []any{
+				&knowledge_models.KnowledgeCollection{},
+				&knowledge_models.KnowledgeDocument{},
+				&knowledge_models.KnowledgeChunk{},
+			},
 		},
 	}
 }

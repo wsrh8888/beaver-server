@@ -73,4 +73,5 @@ type Config struct {
 	EmojiRpc     zrpc.RpcClientConf
 	CircleRpc    zrpc.RpcClientConf
 	AgentRpc     zrpc.RpcClientConf
+	KnowledgeRpc zrpc.RpcClientConf
 }

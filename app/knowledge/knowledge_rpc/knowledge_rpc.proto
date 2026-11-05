@@ -1,0 +1,189 @@
+syntax = "proto3";
+
+package knowledge_rpc;
+
+option go_package = "./knowledge_rpc";
+
+// ==================== 知识库集合（collection）====================
+
+message KnowledgeCollectionItem {
+  uint64 id = 1; // uint64 记录 ID
+  string collection_id = 2; // string 集合业务ID
+  string parent_id = 3; // string 父集合ID，空为根
+  string name = 4; // string 集合名
+  string kind = 5; // string 类型 docs|faq|...
+  string storage_ref = 6; // string 对象存储引用
+  string acl_mode = 7; // string user_scoped|internal
+  string index_config = 8; // string 分段/清洗/检索/嵌入模型配置 JSON
+  string description = 9; // string 描述
+  string owner_user_id = 10; // string 归属用户
+  int32 status = 11; // int32 1启用 2停用
+  int32 sort = 12; // int32 排序
+}
+
+message CreateCollectionReq {
+  string parent_id = 1; // string 父集合ID，空为根
+  string name = 2; // string 集合名
+  string kind = 3; // string 类型
+  string acl_mode = 4; // string user_scoped|internal
+  string index_config = 5; // string JSON
+  string description = 6; // string 描述
+  int32 status = 7; // int32 默认1
+  int32 sort = 8; // int32
+}
+message CreateCollectionRes {
+  string collection_id = 1; // string
+}
+
+message UpdateCollectionReq {
+  string collection_id = 1; // string
+  string name = 2; // string
+  string kind = 3; // string
+  string acl_mode = 4; // string
+  string index_config = 5; // string JSON
+  string description = 6; // string
+  int32 status = 7; // int32
+  int32 sort = 8; // int32
+}
+message UpdateCollectionRes {}
+
+message DeleteCollectionReq {
+  string collection_id = 1; // string 级联软删其下文档并清索引
+}
+message DeleteCollectionRes {}
+
+message GetCollectionReq {
+  string collection_id = 1; // string
+}
+message GetCollectionRes {
+  KnowledgeCollectionItem collection = 1; // 集合详情
+}
+
+message ListCollectionsReq {
+  int32 status = 1; // int32 0全部 1启用 2停用
+  int32 page = 2; // int32
+  int32 page_size = 3; // int32
+}
+message ListCollectionsRes {
+  int64 total = 1; // int64
+  repeated KnowledgeCollectionItem collections = 2; // array
+}
+
+// ==================== 知识文档（document）====================
+
+message KnowledgeDocumentItem {
+  uint64 id = 1; // uint64 记录 ID
+  string document_id = 2; // string 文档业务ID
+  string collection_id = 3; // string 所属集合
+  string title = 4; // string 标题
+  string media_type = 5; // string MIME
+  string doc_type = 6; // string guide|policy|faq|product
+  int64 byte_size = 7; // int64 字节数
+  string source_ref = 8; // string 对象存储键
+  string metadata_text = 9; // string JSON
+  bool rag_enabled = 10; // bool 是否参与检索
+  string index_status = 11; // string pending|indexing|ready|failed
+  int32 index_retry_count = 12; // int32 重试次数
+  string index_error = 13; // string 最近失败原因
+  string indexed_at = 14; // string 索引完成时间 RFC3339
+  int32 version = 15; // int32 版本
+  int32 status = 16; // int32 1启用 2停用
+  string owner_user_id = 17; // string
+  string updated_by = 18; // string
+}
+
+message CreateDocumentReq {
+  string collection_id = 1; // string 所属集合
+  string title = 2; // string 标题
+  string media_type = 3; // string MIME
+  string doc_type = 4; // string
+  string source_ref = 5; // string 对象存储键（上传后回填）
+  string content_text = 6; // string 正文（纯文本直接入库；文件上传时由解析回填）
+  string metadata_text = 7; // string JSON
+  bool rag_enabled = 8; // bool 默认 true
+  string owner_user_id = 9; // string
+}
+message CreateDocumentRes {
+  string document_id = 1; // string
+}
+
+message UpdateDocumentReq {
+  string document_id = 1; // string
+  string title = 2; // string
+  string doc_type = 3; // string
+  string content_text = 4; // string 变更则重新入队索引
+  string metadata_text = 5; // string JSON
+  bool rag_enabled = 6; // bool
+  int32 status = 7; // int32
+  string updated_by = 8; // string
+}
+message UpdateDocumentRes {}
+
+message DeleteDocumentReq {
+  string document_id = 1; // string 软删并同步清 OpenSearch 索引
+}
+message DeleteDocumentRes {}
+
+message GetDocumentReq {
+  string document_id = 1; // string
+}
+message GetDocumentRes {
+  KnowledgeDocumentItem document = 1; // 文档详情
+}
+
+message ListDocumentsReq {
+  string collection_id = 1; // string 按集合过滤
+  string index_status = 2; // string 按索引状态过滤，可选
+  int32 status = 3; // int32 0全部
+  int32 page = 4; // int32
+  int32 page_size = 5; // int32
+}
+message ListDocumentsRes {
+  int64 total = 1; // int64
+  repeated KnowledgeDocumentItem documents = 2; // array
+}
+
+message ReindexDocumentReq {
+  string document_id = 1; // string 重新入队索引
+}
+message ReindexDocumentRes {}
+
+// ==================== 运行时检索（供 agent 调用）====================
+
+message SearchKnowledgeReq {
+  string app_id = 1; // string 应用ID：只认其绑定的 knowledge_ids，不接受调用方指定分区
+  string scene = 2; // string 无 app_id 时按场景默认应用解析绑定
+  string query = 3; // string 检索词
+  int32 top_k = 4; // int32 返回条数，<=0 用集合默认
+  string user_id = 5; // string user_scoped 集合按此隔离
+}
+
+message KnowledgeHit {
+  string document_id = 1; // string 命中文档
+  string title = 2; // string 文档标题
+  int32 chunk_index = 3; // int32 段号（对齐原文可回溯）
+  string content = 4; // string 分段正文
+  double score = 5; // double 相关度
+  string collection_id = 6; // string 命中集合
+}
+
+message SearchKnowledgeRes {
+  repeated KnowledgeHit hits = 1; // array 无命中/停用/无绑定一律返回空，不报错
+}
+
+service knowledge {
+  rpc CreateCollection(CreateCollectionReq) returns (CreateCollectionRes);
+  rpc UpdateCollection(UpdateCollectionReq) returns (UpdateCollectionRes);
+  rpc DeleteCollection(DeleteCollectionReq) returns (DeleteCollectionRes);
+  rpc GetCollection(GetCollectionReq) returns (GetCollectionRes);
+  rpc ListCollections(ListCollectionsReq) returns (ListCollectionsRes);
+
+  rpc CreateDocument(CreateDocumentReq) returns (CreateDocumentRes);
+  rpc UpdateDocument(UpdateDocumentReq) returns (UpdateDocumentRes);
+  rpc DeleteDocument(DeleteDocumentReq) returns (DeleteDocumentRes);
+  rpc GetDocument(GetDocumentReq) returns (GetDocumentRes);
+  rpc ListDocuments(ListDocumentsReq) returns (ListDocumentsRes);
+  rpc ReindexDocument(ReindexDocumentReq) returns (ReindexDocumentRes);
+
+  rpc SearchKnowledge(SearchKnowledgeReq) returns (SearchKnowledgeRes);
+}

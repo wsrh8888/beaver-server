@@ -30,6 +30,10 @@ func NewUpdateAgentAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Up
 }
 
 func (l *UpdateAgentAppLogic) UpdateAgentApp(req *types.UpdateAgentAppReq) (resp *types.UpdateAgentAppRes, err error) {
+	if err := validateKnowledgeBindings(l.ctx, l.svcCtx, req.KnowledgeIDs); err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新AI应用：知识库绑定校验失败", Data: map[string]any{"appId": req.AppID, "err": err.Error()}})
+		return nil, err
+	}
 	_, err = l.svcCtx.PlatformRpc.UpdateAgentApp(l.ctx, &platform_rpc.UpdateAgentAppReq{
 		AppId:            req.AppID,
 		Name:             req.Name,

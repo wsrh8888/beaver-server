@@ -22,20 +22,21 @@
 package svc
 
 import (
-	"beaver/app/backend/backend_models"
-	"beaver/app/backend/backend_admin/internal/config"
+	agentcli "beaver/app/agent/agent_rpc/agent"
 	"beaver/app/auth/auth_rpc/auth"
+	"beaver/app/backend/backend_admin/internal/config"
+	"beaver/app/backend/backend_models"
 	chatcli "beaver/app/chat/chat_rpc/chat"
+	circlecli "beaver/app/circle/circle_rpc/circle"
 	emojicli "beaver/app/emoji/emoji_rpc/emoji"
 	"beaver/app/file/file_rpc/file"
 	"beaver/app/file/file_rpc/types/file_rpc"
 	friendcli "beaver/app/friend/friend_rpc/friend"
 	groupcli "beaver/app/group/group_rpc/group"
+	knowledgecli "beaver/app/knowledge/knowledge_rpc/knowledge"
 	momentcli "beaver/app/moment/moment_rpc/moment"
 	opencli "beaver/app/open/open_rpc/open"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	agentcli "beaver/app/agent/agent_rpc/agent"
-	circlecli "beaver/app/circle/circle_rpc/circle"
 	"beaver/app/user/user_rpc/types/user_rpc"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
@@ -49,22 +50,23 @@ import (
 )
 
 type ServiceContext struct {
-	Config      config.Config
-	DB          *gorm.DB
-	Redis       *redis.Client
-	VersionGen  *versionPkg.VersionGenerator
-	UserRpc     user_rpc.UserClient
-	AuthRpc     auth.Auth
-	FileRpc     file_rpc.FileClient
-	PlatformRpc platformcli.Platform
-	OpenRpc     opencli.Open
-	FriendRpc   friendcli.Friend
-	GroupRpc    groupcli.Group
-	ChatRpc     chatcli.Chat
-	MomentRpc   momentcli.Moment
-	EmojiRpc    emojicli.Emoji
-	CircleRpc   circlecli.Circle
-	AgentRpc    agentcli.Agent
+	Config       config.Config
+	DB           *gorm.DB
+	Redis        *redis.Client
+	VersionGen   *versionPkg.VersionGenerator
+	UserRpc      user_rpc.UserClient
+	AuthRpc      auth.Auth
+	FileRpc      file_rpc.FileClient
+	PlatformRpc  platformcli.Platform
+	OpenRpc      opencli.Open
+	FriendRpc    friendcli.Friend
+	GroupRpc     groupcli.Group
+	ChatRpc      chatcli.Chat
+	MomentRpc    momentcli.Moment
+	EmojiRpc     emojicli.Emoji
+	CircleRpc    circlecli.Circle
+	AgentRpc     agentcli.Agent
+	KnowledgeRpc knowledgecli.Knowledge
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -73,22 +75,23 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
 
 	return &ServiceContext{
-		Config:      c,
-		DB:          mysqlDb,
-		Redis:       client,
-		VersionGen:  versionPkg.NewVersionGenerator(client, mysqlDb),
-		UserRpc:     user.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
-		AuthRpc:     auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, rpcOpt)),
-		FileRpc:     file.NewFile(zrpc.MustNewClient(c.FileRpc, rpcOpt)),
-		PlatformRpc: platformcli.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt)),
-		OpenRpc:     opencli.NewOpen(zrpc.MustNewClient(c.OpenRpc, rpcOpt)),
-		FriendRpc:   friendcli.NewFriend(zrpc.MustNewClient(c.FriendRpc, rpcOpt)),
-		GroupRpc:    groupcli.NewGroup(zrpc.MustNewClient(c.GroupRpc, rpcOpt)),
-		ChatRpc:     chatcli.NewChat(zrpc.MustNewClient(c.ChatRpc, rpcOpt)),
-		MomentRpc:   momentcli.NewMoment(zrpc.MustNewClient(c.MomentRpc, rpcOpt)),
-		EmojiRpc:    emojicli.NewEmoji(zrpc.MustNewClient(c.EmojiRpc, rpcOpt)),
-		CircleRpc:   circlecli.NewCircle(zrpc.MustNewClient(c.CircleRpc, rpcOpt)),
-		AgentRpc:    agentcli.NewAgent(zrpc.MustNewClient(c.AgentRpc, rpcOpt)),
+		Config:       c,
+		DB:           mysqlDb,
+		Redis:        client,
+		VersionGen:   versionPkg.NewVersionGenerator(client, mysqlDb),
+		UserRpc:      user.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
+		AuthRpc:      auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, rpcOpt)),
+		FileRpc:      file.NewFile(zrpc.MustNewClient(c.FileRpc, rpcOpt)),
+		PlatformRpc:  platformcli.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt)),
+		OpenRpc:      opencli.NewOpen(zrpc.MustNewClient(c.OpenRpc, rpcOpt)),
+		FriendRpc:    friendcli.NewFriend(zrpc.MustNewClient(c.FriendRpc, rpcOpt)),
+		GroupRpc:     groupcli.NewGroup(zrpc.MustNewClient(c.GroupRpc, rpcOpt)),
+		ChatRpc:      chatcli.NewChat(zrpc.MustNewClient(c.ChatRpc, rpcOpt)),
+		MomentRpc:    momentcli.NewMoment(zrpc.MustNewClient(c.MomentRpc, rpcOpt)),
+		EmojiRpc:     emojicli.NewEmoji(zrpc.MustNewClient(c.EmojiRpc, rpcOpt)),
+		CircleRpc:    circlecli.NewCircle(zrpc.MustNewClient(c.CircleRpc, rpcOpt)),
+		AgentRpc:     agentcli.NewAgent(zrpc.MustNewClient(c.AgentRpc, rpcOpt)),
+		KnowledgeRpc: knowledgecli.NewKnowledge(zrpc.MustNewClient(c.KnowledgeRpc, rpcOpt)),
 	}
 }
 

@@ -121,6 +121,8 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 		}
 
 		// 调用 Python agent_rpc SendMessage（fire-and-forget：只取 code，不等终稿）。
+		// AppId：数字伙伴引用的 AgentApp，透传给 agent 驱动"配置即执行"——
+		// agent 据此回查 AgentApp 的 tools/mcp/knowledge/model 绑定；未引用则空，agent 回落旧默认。
 		reply, err := l.svcCtx.AgentRpc.SendMessage(ctx, &agent.SendMessageReq{
 			UserId:         userID,
 			ConversationId: conversationID,
@@ -128,6 +130,7 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 			PartsJson:      string(partsJSON),
 			SystemPrompt:   systemPrompt,
 			DigitalId:      digitalID,
+			AppId:          cfgRes.AppId,
 			ClientMsgId:    messageID,
 		})
 		if err != nil {

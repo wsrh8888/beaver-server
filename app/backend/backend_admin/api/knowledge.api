@@ -1,0 +1,174 @@
+type (
+	// KnowledgeCollectionInfo 知识库集合（对应 knowledge_rpc.KnowledgeCollectionItem）
+	KnowledgeCollectionInfo {
+		Id          int64  `json:"id"`
+		CollectionID string `json:"collectionId"`
+		ParentID    string `json:"parentId"`    // 父集合ID，空为根；仅两层
+		Name        string `json:"name"`
+		Kind        string `json:"kind"`        // docs|faq|...
+		AclMode     string `json:"aclMode"`     // user_scoped|internal
+		IndexConfig string `json:"indexConfig"` // JSON：分段/检索/embedding 配置
+		Description string `json:"description"`
+		OwnerUserID string `json:"ownerUserId"`
+		Status      int    `json:"status"` // 1启用 2停用
+		Sort        int    `json:"sort"`
+	}
+
+	// KnowledgeDocumentInfo 知识文档（对应 knowledge_rpc.KnowledgeDocumentItem，不含正文）
+	KnowledgeDocumentInfo {
+		Id              int64  `json:"id"`
+		DocumentID      string `json:"documentId"`
+		CollectionID    string `json:"collectionId"`
+		Title           string `json:"title"`
+		MediaType       string `json:"mediaType"`
+		DocType         string `json:"docType"` // guide|policy|faq|product
+		ByteSize        int64  `json:"byteSize"`
+		SourceRef       string `json:"sourceRef"`
+		MetadataText    string `json:"metadataText"`
+		RagEnabled      bool   `json:"ragEnabled"`
+		IndexStatus     string `json:"indexStatus"` // pending|indexing|ready|failed
+		IndexRetryCount int    `json:"indexRetryCount"`
+		IndexError      string `json:"indexError"`
+		IndexedAt       string `json:"indexedAt"`
+		Version         int    `json:"version"`
+		Status          int    `json:"status"`
+		OwnerUserID     string `json:"ownerUserId"`
+		UpdatedBy       string `json:"updatedBy"`
+	}
+
+	// —— 集合 CRUD ——
+	GetKnowledgeCollectionListReq {
+		Status   int `form:"status,optional"` // 0全部 1启用 2停用
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"pageSize,default=20"`
+	}
+	GetKnowledgeCollectionListRes {
+		Total int64                     `json:"total"`
+		List  []KnowledgeCollectionInfo `json:"list"`
+	}
+	GetKnowledgeCollectionReq {
+		CollectionID string `form:"collectionId"`
+	}
+	GetKnowledgeCollectionRes {
+		Collection KnowledgeCollectionInfo `json:"collection"`
+	}
+	CreateKnowledgeCollectionReq {
+		ParentID    string `json:"parentId,optional"`
+		Name        string `json:"name"`
+		Kind        string `json:"kind,optional,default=docs"`
+		AclMode     string `json:"aclMode,optional,default=internal"`
+		IndexConfig string `json:"indexConfig,optional"` // JSON
+		Description string `json:"description,optional"`
+		Status      int    `json:"status,optional,default=1"`
+		Sort        int    `json:"sort,optional"`
+	}
+	CreateKnowledgeCollectionRes {
+		CollectionID string `json:"collectionId"`
+	}
+	UpdateKnowledgeCollectionReq {
+		CollectionID string `json:"collectionId"`
+		Name         string `json:"name,optional"`
+		Kind         string `json:"kind,optional"`
+		AclMode      string `json:"aclMode,optional"`
+		IndexConfig  string `json:"indexConfig,optional"`
+		Description  string `json:"description,optional"`
+		Status       int    `json:"status,optional"`
+		Sort         int    `json:"sort,optional"`
+	}
+	UpdateKnowledgeCollectionRes {}
+	DeleteKnowledgeCollectionReq {
+		CollectionID string `json:"collectionId"` // 级联软删其下文档并清索引
+	}
+	DeleteKnowledgeCollectionRes {}
+
+	// —— 文档 CRUD ——
+	GetKnowledgeDocumentListReq {
+		CollectionID string `form:"collectionId,optional"`
+		IndexStatus  string `form:"indexStatus,optional"`
+		Status       int    `form:"status,optional"`
+		Page         int    `form:"page,default=1"`
+		PageSize     int    `form:"pageSize,default=20"`
+	}
+	GetKnowledgeDocumentListRes {
+		Total int64                    `json:"total"`
+		List  []KnowledgeDocumentInfo  `json:"list"`
+	}
+	GetKnowledgeDocumentReq {
+		DocumentID string `form:"documentId"`
+	}
+	GetKnowledgeDocumentRes {
+		Document KnowledgeDocumentInfo `json:"document"`
+	}
+	CreateKnowledgeDocumentReq {
+		CollectionID  string `json:"collectionId"`
+		Title         string `json:"title"`
+		MediaType     string `json:"mediaType,optional"`
+		DocType       string `json:"docType,optional,default=guide"`
+		SourceRef     string `json:"sourceRef,optional"` // 上传后回填的对象存储键
+		ContentText   string `json:"contentText,optional"` // 纯文本正文；有则入队索引
+		MetadataText  string `json:"metadataText,optional"`
+		RagEnabled    bool   `json:"ragEnabled,optional,default=true"`
+		OwnerUserID   string `json:"ownerUserId,optional"`
+		UserID        string `header:"Beaver-User-Id"`
+	}
+	CreateKnowledgeDocumentRes {
+		DocumentID string `json:"documentId"`
+	}
+	UpdateKnowledgeDocumentReq {
+		DocumentID   string `json:"documentId"`
+		Title        string `json:"title,optional"`
+		DocType      string `json:"docType,optional"`
+		ContentText  string `json:"contentText,optional"` // 变更则重新入队索引
+		MetadataText string `json:"metadataText,optional"`
+		RagEnabled   bool   `json:"ragEnabled,optional"`
+		Status       int    `json:"status,optional"`
+		UpdatedBy    string `header:"Beaver-User-Id"`
+	}
+	UpdateKnowledgeDocumentRes {}
+	DeleteKnowledgeDocumentReq {
+		DocumentID string `json:"documentId"` // 软删并同步清 OpenSearch 索引
+	}
+	DeleteKnowledgeDocumentRes {}
+	ReindexKnowledgeDocumentReq {
+		DocumentID string `json:"documentId"` // 重新入队索引
+	}
+	ReindexKnowledgeDocumentRes {}
+)
+
+@server (
+	group: knowledge
+)
+service backend {
+	@handler GetKnowledgeCollectionList
+	get /admin/backend/knowledge/v1/collection_list (GetKnowledgeCollectionListReq) returns (GetKnowledgeCollectionListRes)
+
+	@handler GetKnowledgeCollection
+	get /admin/backend/knowledge/v1/collection_detail (GetKnowledgeCollectionReq) returns (GetKnowledgeCollectionRes)
+
+	@handler CreateKnowledgeCollection
+	post /admin/backend/knowledge/v1/collection_create (CreateKnowledgeCollectionReq) returns (CreateKnowledgeCollectionRes)
+
+	@handler UpdateKnowledgeCollection
+	put /admin/backend/knowledge/v1/collection_update (UpdateKnowledgeCollectionReq) returns (UpdateKnowledgeCollectionRes)
+
+	@handler DeleteKnowledgeCollection
+	delete /admin/backend/knowledge/v1/collection_delete (DeleteKnowledgeCollectionReq) returns (DeleteKnowledgeCollectionRes)
+
+	@handler GetKnowledgeDocumentList
+	get /admin/backend/knowledge/v1/document_list (GetKnowledgeDocumentListReq) returns (GetKnowledgeDocumentListRes)
+
+	@handler GetKnowledgeDocument
+	get /admin/backend/knowledge/v1/document_detail (GetKnowledgeDocumentReq) returns (GetKnowledgeDocumentRes)
+
+	@handler CreateKnowledgeDocument
+	post /admin/backend/knowledge/v1/document_create (CreateKnowledgeDocumentReq) returns (CreateKnowledgeDocumentRes)
+
+	@handler UpdateKnowledgeDocument
+	put /admin/backend/knowledge/v1/document_update (UpdateKnowledgeDocumentReq) returns (UpdateKnowledgeDocumentRes)
+
+	@handler DeleteKnowledgeDocument
+	delete /admin/backend/knowledge/v1/document_delete (DeleteKnowledgeDocumentReq) returns (DeleteKnowledgeDocumentRes)
+
+	@handler ReindexKnowledgeDocument
+	post /admin/backend/knowledge/v1/document_reindex (ReindexKnowledgeDocumentReq) returns (ReindexKnowledgeDocumentRes)
+}

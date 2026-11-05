@@ -1,0 +1,28 @@
+Name: knowledgerpc.rpc
+ListenOn: 0.0.0.0:31200
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: knowledgerpc.rpc
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_knowledge?charset=utf8mb4&parseTime=True&loc=Local
+OpenSearch:
+  Addr: http://127.0.0.1:9200
+  ChunkIndex: beaver-knowledge-chunks
+PlatformRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: platformrpc.rpc
+Index:
+  Enabled: true
+  IntervalSeconds: 5
+  BatchSize: 16
+  MaxRetry: 3
+  Dims: 1536
+  ChunkSize: 800
+  Overlap: 80
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false

@@ -120,3 +120,8 @@ AgentRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: agentrpc.rpc
+KnowledgeRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: knowledgerpc.rpc
