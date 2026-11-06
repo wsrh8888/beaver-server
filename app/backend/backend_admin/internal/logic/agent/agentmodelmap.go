@@ -37,8 +37,8 @@ func toAgentModelInfo(item *platform_rpc.AgentModelItem) types.AgentModelInfo {
 		Name:            item.Name,
 		Provider:        item.Provider,
 		ModelName:       item.ModelName,
-		Endpoint:        item.Endpoint,
-		APIKey:          maskAPIKey(item.ApiKey),
+		CredentialID:    item.CredentialId,
+		ChannelName:     item.ChannelName,
 		ContextWindow:   item.ContextWindow,
 		MaxOutputTokens: int(item.MaxOutputTokens),
 		SupportsTools:   item.SupportsTools,
@@ -46,14 +46,4 @@ func toAgentModelInfo(item *platform_rpc.AgentModelItem) types.AgentModelInfo {
 		Sort:            int(item.Sort),
 		Status:          int(item.Status),
 	}
-}
-
-func maskAPIKey(key string) string {
-	if key == "" {
-		return ""
-	}
-	if len(key) <= 8 {
-		return "****"
-	}
-	return key[:4] + "****" + key[len(key)-4:]
 }

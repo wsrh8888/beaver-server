@@ -12,7 +12,7 @@ require (
 	github.com/livekit/protocol v1.44.0
 	github.com/minio/minio-go/v7 v7.3.0
 	github.com/qiniu/go-sdk/v7 v7.25.1
-	golang.org/x/time v0.8.0
+	golang.org/x/time v0.10.0
 	google.golang.org/grpc v1.83.1
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -120,7 +120,8 @@ require (
 	github.com/prometheus/common v0.64.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
-	github.com/redis/go-redis/v9 v9.11.0 // indirect
+	github.com/redis/go-redis/v9 v9.18.0 // indirect
+	github.com/reearth/ygo v1.55.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect

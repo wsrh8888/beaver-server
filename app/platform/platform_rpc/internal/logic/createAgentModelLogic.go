@@ -56,25 +56,14 @@ func (l *CreateAgentModelLogic) CreateAgentModel(in *platform_rpc.CreateAgentMod
 		uid := in.UserId
 		userID = &uid
 	}
-	var provider *string
-	if in.Provider != "" {
-		p := in.Provider
-		provider = &p
+	// 接入通道是厂商/地址/密钥的唯一来源：绑定不合法（不存在/停用/scope 不匹配）直接拒绝。
+	if !validCredentialBinding(l.svcCtx.DB, in.CredentialId, source, in.UserId) {
+		return &platform_rpc.CreateAgentModelRes{}, nil
 	}
 	var modelName *string
 	if in.ModelName != "" {
 		mn := in.ModelName
 		modelName = &mn
-	}
-	var endpoint *string
-	if in.Endpoint != "" {
-		ep := in.Endpoint
-		endpoint = &ep
-	}
-	var apiKey *string
-	if in.ApiKey != "" {
-		ak := in.ApiKey
-		apiKey = &ak
 	}
 	status := int(in.Status)
 	if status == 0 {
@@ -85,10 +74,8 @@ func (l *CreateAgentModelLogic) CreateAgentModel(in *platform_rpc.CreateAgentMod
 		Source:           source,
 		UserID:           userID,
 		Name:             in.Name,
-		Provider:         provider,
 		ModelName:        modelName,
-		Endpoint:         endpoint,
-		APIKey:           apiKey,
+		CredentialID:     in.CredentialId,
 		ContextWindow:    in.ContextWindow,
 		MaxOutputTokens:  int(in.MaxOutputTokens),
 		InputModalities:  in.InputModalities,

@@ -17,19 +17,18 @@ import (
 	"beaver/common/models"
 )
 
-// AgentModel 模型目录。表 agent_models。
-// 从 Python ai_models.ai_model 迁入。后台配、AI 应用引用、agent/编排层运行时只读 RPC。
-// 官方和用户自定义在同一张表。
+// AgentModel 模型目录（上架模型）。表 agent_models。
+// 两层货架的下层：本表只存「模型规格 + 绑哪条接入通道」，不再平铺 endpoint/apiKey/provider。
+// 厂商、地址、密钥一律由 CredentialID 关联 agent_model_credentials 解析（见 platform_rpc GetAgentModel JOIN）。
+// 官方(source=official)与用户自定义(source=custom)同表，用 Source+UserID 区分。
 type AgentModel struct {
 	models.Model
 	ModelID            string      `gorm:"column:model_id;type:varchar(64);uniqueIndex;not null;comment:模型业务ID" json:"modelId"`
 	Source             string      `gorm:"type:varchar(16);not null;default:'custom';index;comment:official官方 custom用户自定义" json:"source"`
 	UserID             *string     `gorm:"column:user_id;type:varchar(64);index;comment:自定义模型所属用户。官方为NULL" json:"userId"`
 	Name               string      `gorm:"type:varchar(128);not null;comment:展示名称" json:"name"`
-	Provider           *string     `gorm:"type:varchar(64);comment:供应商标识 openai_compatible|openai|anthropic等" json:"provider"`
 	ModelName          *string     `gorm:"column:model_name;type:varchar(128);comment:实际调用的模型名" json:"modelName"`
-	Endpoint           *string     `gorm:"type:varchar(500);comment:接口地址" json:"endpoint"`
-	APIKey             *string     `gorm:"column:api_key;type:varchar(512);comment:API Key。接口只出掩码" json:"apiKey"`
+	CredentialID       string      `gorm:"column:credential_id;type:varchar(64);index;comment:关联接入通道 credential_id。provider/endpoint/api_key 由通道解析" json:"credentialId"`
 	ContextWindow      int64       `gorm:"column:context_window;type:bigint;not null;default:0;index;comment:上下文窗口tokens" json:"contextWindow"`
 	MaxOutputTokens    int         `gorm:"column:max_output_tokens;type:int;not null;default:0;comment:最大输出tokens" json:"maxOutputTokens"`
 	InputModalities    string      `gorm:"column:input_modalities;type:json;comment:输入模态[text|image|audio]" json:"inputModalities"`

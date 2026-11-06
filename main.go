@@ -28,6 +28,7 @@ import (
 	"beaver/app/chat/chat_models"
 	"beaver/app/circle/circle_models"
 	"beaver/app/datasync/datasync_models"
+	"beaver/app/doc/doc_models"
 	"beaver/app/emoji/emoji_models"
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
@@ -72,6 +73,7 @@ func main() {
 		"beaver_user", "beaver_auth", "beaver_friend", "beaver_group", "beaver_chat",
 		"beaver_circle", "beaver_moment", "beaver_emoji", "beaver_file", "beaver_notification", "beaver_call",
 		"beaver_open", "beaver_platform", "beaver_backend", "beaver_datasync", "beaver_agent",
+		"beaver_doc",
 	}
 	for _, name := range databases {
 		if err := serverDB.Exec("CREATE DATABASE IF NOT EXISTS `" + name + "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci").Error; err != nil {
@@ -243,6 +245,7 @@ func main() {
 					// AI 业务表（agent/ 通用 + ai/ AI助手桌面端特有）
 					&agent_models.AgentApp{},
 					&agent_models.AgentModel{},
+					&agent_models.AgentModelCredential{},
 					&agent_models.AgentTool{},
 					&agent_models.AgentMcpServer{},
 					&ai_models.AgentWorkspace{},
@@ -271,6 +274,21 @@ func main() {
 			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_datasync?charset=utf8mb4&parseTime=True&loc=Local",
 			run: func(db *gorm.DB) error {
 				return db.AutoMigrate(&datasync_models.DatasyncModel{})
+			},
+		},
+		{
+			name: "beaver_doc",
+			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_doc?charset=utf8mb4&parseTime=True&loc=Local",
+			run: func(db *gorm.DB) error {
+				return db.AutoMigrate(
+					&doc_models.DocSpace{},
+					&doc_models.DocNode{},
+					&doc_models.DocDocument{},
+					&doc_models.DocYjsUpdate{},
+					&doc_models.DocYjsSnapshot{},
+					&doc_models.DocRevision{},
+					&doc_models.DocPermission{},
+				)
 			},
 		},
 	}

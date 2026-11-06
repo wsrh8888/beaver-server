@@ -182,10 +182,10 @@ type (
 		Source          string `json:"source"` // official|custom
 		UserID          string `json:"userId"`
 		Name            string `json:"name"`
-		Provider        string `json:"provider"`
+		Provider        string `json:"provider"` // 由接入通道解析（厂商族）
 		ModelName       string `json:"modelName"`
-		Endpoint        string `json:"endpoint"`
-		APIKey          string `json:"apiKey"` // 掩码
+		CredentialID    string `json:"credentialId"` // 绑定的接入通道
+		ChannelName     string `json:"channelName"`  // 通道展示名，列表回显「走哪条通道」
 		ContextWindow   int64  `json:"contextWindow"`
 		MaxOutputTokens int    `json:"maxOutputTokens"`
 		SupportsTools   bool   `json:"supportsTools"`
@@ -216,10 +216,8 @@ type (
 		Name            string `json:"name"`
 		Source          string `json:"source"` // official|custom
 		UserID          string `json:"userId,optional"`
-		Provider        string `json:"provider,optional"`
+		CredentialID    string `json:"credentialId"` // 绑接入通道（取代原 provider/endpoint/apiKey）
 		ModelName       string `json:"modelName,optional"`
-		Endpoint        string `json:"endpoint,optional"`
-		APIKey          string `json:"apiKey,optional"`
 		ContextWindow   int64  `json:"contextWindow,optional"`
 		MaxOutputTokens int    `json:"maxOutputTokens,optional"`
 		SupportsTools   bool   `json:"supportsTools,optional"`
@@ -233,10 +231,8 @@ type (
 	UpdateAgentModelReq {
 		ModelID         string `json:"modelId"`
 		Name            string `json:"name,optional"`
-		Provider        string `json:"provider,optional"`
+		CredentialID    string `json:"credentialId,optional"` // 改绑接入通道，空=不改
 		ModelName       string `json:"modelName,optional"`
-		Endpoint        string `json:"endpoint,optional"`
-		APIKey          string `json:"apiKey,optional"`
 		ContextWindow   int64  `json:"contextWindow,optional"`
 		MaxOutputTokens int    `json:"maxOutputTokens,optional"`
 		SupportsTools   bool   `json:"supportsTools,optional"`
@@ -251,6 +247,52 @@ type (
 		UserID  string `json:"userId,optional"`
 	}
 	DeleteAgentModelRes {}
+
+	// —— 模型接入通道（官方渠道，密钥只进不出）——
+	AgentCredentialInfo {
+		CredentialID  string `json:"credentialId"`
+		Name          string `json:"name"`
+		ModelService  string `json:"modelService"`
+		ChannelType   string `json:"channelType"`
+		BaseURL       string `json:"baseUrl"`
+		KeyHint       string `json:"keyHint"`
+		KeyConfigured bool   `json:"keyConfigured"`
+		Sort          int    `json:"sort"`
+		Status        int    `json:"status"`
+	}
+	GetAgentCredentialListReq {
+		Status int `form:"status,optional"` // 0全部 1启用 2停用
+	}
+	GetAgentCredentialListRes {
+		List []AgentCredentialInfo `json:"list"`
+	}
+	CreateAgentCredentialReq {
+		Name         string `json:"name"`
+		ModelService string `json:"modelService"`
+		ChannelType  string `json:"channelType,optional"`
+		BaseURL      string `json:"baseUrl"`
+		APIKey       string `json:"apiKey,optional"` // 明文入，加密落库，不回显
+		Sort         int    `json:"sort,optional"`
+		Status       int    `json:"status,optional,default=1"`
+	}
+	CreateAgentCredentialRes {
+		CredentialID string `json:"credentialId"`
+	}
+	UpdateAgentCredentialReq {
+		CredentialID string `json:"credentialId"`
+		Name         string `json:"name,optional"`
+		ModelService string `json:"modelService,optional"`
+		ChannelType  string `json:"channelType,optional"`
+		BaseURL      string `json:"baseUrl,optional"`
+		APIKey       string `json:"apiKey,optional"` // 空=不改
+		Sort         int    `json:"sort,optional"`
+		Status       int    `json:"status,optional"`
+	}
+	UpdateAgentCredentialRes {}
+	DeleteAgentCredentialReq {
+		CredentialID string `json:"credentialId"`
+	}
+	DeleteAgentCredentialRes {}
 )
 
 type (
@@ -351,6 +393,18 @@ service backend {
 
 	@handler DeleteAgentModel
 	delete /admin/backend/agent/v1/model_delete (DeleteAgentModelReq) returns (DeleteAgentModelRes)
+
+	@handler GetAgentCredentialList
+	get /admin/backend/agent/v1/credential_list (GetAgentCredentialListReq) returns (GetAgentCredentialListRes)
+
+	@handler CreateAgentCredential
+	post /admin/backend/agent/v1/credential_create (CreateAgentCredentialReq) returns (CreateAgentCredentialRes)
+
+	@handler UpdateAgentCredential
+	put /admin/backend/agent/v1/credential_update (UpdateAgentCredentialReq) returns (UpdateAgentCredentialRes)
+
+	@handler DeleteAgentCredential
+	delete /admin/backend/agent/v1/credential_delete (DeleteAgentCredentialReq) returns (DeleteAgentCredentialRes)
 
 	@handler GetAiAssistant
 	get /admin/backend/agent/v1/assistant_detail (GetAiAssistantReq) returns (GetAiAssistantRes)

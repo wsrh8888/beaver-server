@@ -118,3 +118,11 @@ RUN go build -ldflags="-s -w" -o open_portal/open app/open/open_portal/open.go
 # open_rpc
 RUN go build -ldflags="-s -w" -o open_rpc/openrpc app/open/open_rpc/openRpc.go
 
+# ==================== DOC 相关服务（在线文档域）====================
+# doc_api
+RUN go build -ldflags="-s -w" -o doc_api/doc app/doc/doc_api/doc.go
+# doc_rpc
+RUN go build -ldflags="-s -w" -o doc_rpc/docrpc app/doc/doc_rpc/docrpc.go
+# doc_sync_ws
+RUN go build -ldflags="-s -w" -o doc_sync_ws/docsync app/doc/doc_sync_ws/docsync.go
+

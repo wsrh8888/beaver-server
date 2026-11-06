@@ -29,4 +29,7 @@ type Config struct {
 		DataSource string
 	}
 	UserRpc zrpc.RpcClientConf
+	// SecretKey 接入通道 API Key 的 AES-256-GCM 主密钥（32 字节 base64）。
+	// 缺失会导致服务启动即失败，避免运行到解密调用点才崩。
+	SecretKey string
 }

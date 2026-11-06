@@ -599,6 +599,11 @@ message AgentModelItem {
   bool supports_vision = 23;
   int32 sort = 24;
   int32 status = 25;
+  // 以下为接入通道快照（GetAgentModel/ListAgentModels JOIN agent_model_credentials 后回填）。
+  // provider/endpoint/api_key 不再平铺在 agent_models，而是由 CredentialID 关联通道解析得到。
+  string credential_id = 26;
+  string channel_name = 27; // 通道展示名，供后台列表回显
+  string channel_type = 28; // official|openai_compatible|azure
 }
 
 message GetAgentModelReq {
@@ -624,26 +629,24 @@ message CreateAgentModelReq {
   string name = 1;
   string source = 2; // official|custom
   string user_id = 3;
-  string provider = 4;
+  string credential_id = 4; // 绑接入通道（取代原 provider/endpoint/api_key）
   string model_name = 5;
-  string endpoint = 6;
-  string api_key = 7;
-  int64 context_window = 8;
-  int32 max_output_tokens = 9;
-  string input_modalities = 10; // JSON
-  string output_modalities = 11; // JSON
-  int32 max_tokens_flash = 12;
-  int32 max_tokens_low = 13;
-  int32 max_tokens_medium = 14;
-  int32 max_tokens_high = 15;
-  string instruction_role = 16;
-  bool supports_thinking = 17;
-  bool thinking_can_disable = 18;
-  string thinking_levels = 19; // JSON
-  bool supports_tools = 20;
-  bool supports_vision = 21;
-  int32 sort = 22;
-  int32 status = 23;
+  int64 context_window = 6;
+  int32 max_output_tokens = 7;
+  string input_modalities = 8; // JSON
+  string output_modalities = 9; // JSON
+  int32 max_tokens_flash = 10;
+  int32 max_tokens_low = 11;
+  int32 max_tokens_medium = 12;
+  int32 max_tokens_high = 13;
+  string instruction_role = 14;
+  bool supports_thinking = 15;
+  bool thinking_can_disable = 16;
+  string thinking_levels = 17; // JSON
+  bool supports_tools = 18;
+  bool supports_vision = 19;
+  int32 sort = 20;
+  int32 status = 21;
 }
 message CreateAgentModelRes {
   string model_id = 1;
@@ -651,26 +654,24 @@ message CreateAgentModelRes {
 message UpdateAgentModelReq {
   string model_id = 1;
   string name = 2;
-  string provider = 3;
+  string credential_id = 3; // 改绑接入通道（空=不改）
   string model_name = 4;
-  string endpoint = 5;
-  string api_key = 6;
-  int64 context_window = 7;
-  int32 max_output_tokens = 8;
-  string input_modalities = 9; // JSON
-  string output_modalities = 10; // JSON
-  int32 max_tokens_flash = 11;
-  int32 max_tokens_low = 12;
-  int32 max_tokens_medium = 13;
-  int32 max_tokens_high = 14;
-  string instruction_role = 15;
-  bool supports_thinking = 16;
-  bool thinking_can_disable = 17;
-  string thinking_levels = 18; // JSON
-  bool supports_tools = 19;
-  bool supports_vision = 20;
-  int32 sort = 21;
-  int32 status = 22;
+  int64 context_window = 5;
+  int32 max_output_tokens = 6;
+  string input_modalities = 7; // JSON
+  string output_modalities = 8; // JSON
+  int32 max_tokens_flash = 9;
+  int32 max_tokens_low = 10;
+  int32 max_tokens_medium = 11;
+  int32 max_tokens_high = 12;
+  string instruction_role = 13;
+  bool supports_thinking = 14;
+  bool thinking_can_disable = 15;
+  string thinking_levels = 16; // JSON
+  bool supports_tools = 17;
+  bool supports_vision = 18;
+  int32 sort = 19;
+  int32 status = 20;
 }
 message UpdateAgentModelRes {}
 message DeleteAgentModelReq {
@@ -679,6 +680,59 @@ message DeleteAgentModelReq {
   string user_id = 3;
 }
 message DeleteAgentModelRes {}
+
+// —— 模型接入通道（agent/ 通用，两层货架上层）——
+message AgentCredentialItem {
+  uint64 id = 1;
+  string credential_id = 2;
+  string name = 3;
+  string model_service = 4; // openai|azure|anthropic|deepseek|openai_compatible
+  string channel_type = 5;  // official|openai_compatible|azure
+  string base_url = 6;
+  string key_hint = 7;         // 脱敏回显，仅展示用
+  bool key_configured = 8;     // 是否已设密钥
+  string scope = 9;            // platform|user
+  string user_id = 10;
+  int32 sort = 11;
+  int32 status = 12;
+}
+message ListAgentCredentialsReq {
+  string scope = 1;   // platform|user，空=全部
+  string user_id = 2; // scope=user 时按用户
+  int32 status = 3;   // 0=全部
+}
+message ListAgentCredentialsRes {
+  repeated AgentCredentialItem credentials = 1;
+}
+message CreateAgentCredentialReq {
+  string name = 1;
+  string model_service = 2;
+  string channel_type = 3;
+  string base_url = 4;
+  string api_key = 5; // 明文入，服务端加密落库，不回显
+  string scope = 6;   // platform|user，空=platform
+  string user_id = 7;
+  int32 sort = 8;
+  int32 status = 9;
+}
+message CreateAgentCredentialRes {
+  string credential_id = 1;
+}
+message UpdateAgentCredentialReq {
+  string credential_id = 1;
+  string name = 2;
+  string model_service = 3;
+  string channel_type = 4;
+  string base_url = 5;
+  string api_key = 6; // 空=不改；有值才重算密文与 hint
+  int32 sort = 7;
+  int32 status = 8;
+}
+message UpdateAgentCredentialRes {}
+message DeleteAgentCredentialReq {
+  string credential_id = 1;
+}
+message DeleteAgentCredentialRes {}
 
 message AgentToolItem {
   uint64 id = 1;
@@ -904,6 +958,12 @@ service platform {
   rpc CreateAgentModel(CreateAgentModelReq) returns (CreateAgentModelRes);
   rpc UpdateAgentModel(UpdateAgentModelReq) returns (UpdateAgentModelRes);
   rpc DeleteAgentModel(DeleteAgentModelReq) returns (DeleteAgentModelRes);
+
+  // —— 模型接入通道（agent/ 通用，密钥只进不出）——
+  rpc ListAgentCredentials(ListAgentCredentialsReq) returns (ListAgentCredentialsRes);
+  rpc CreateAgentCredential(CreateAgentCredentialReq) returns (CreateAgentCredentialRes);
+  rpc UpdateAgentCredential(UpdateAgentCredentialReq) returns (UpdateAgentCredentialRes);
+  rpc DeleteAgentCredential(DeleteAgentCredentialReq) returns (DeleteAgentCredentialRes);
 
   // —— 工具目录（agent/ 通用）——
   rpc GetAgentTool(GetAgentToolReq) returns (GetAgentToolRes);

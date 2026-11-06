@@ -68,9 +68,15 @@ func (l *ListAgentModelsLogic) ListAgentModels(in *platform_rpc.ListAgentModelsR
 	}
 	var rows []agent_models.AgentModel
 	q.Order("sort ASC, id ASC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&rows)
+	// 批量 JOIN 通道（避免逐行 N+1）；列表不透真实 Key，只回通道名/类型。
+	ids := make([]string, 0, len(rows))
+	for i := range rows {
+		ids = append(ids, rows[i].CredentialID)
+	}
+	credMap := fetchCredentialMap(l.svcCtx.DB, ids)
 	out := make([]*platform_rpc.AgentModelItem, 0, len(rows))
 	for i := range rows {
-		out = append(out, toAgentModelItem(&rows[i]))
+		out = append(out, toAgentModelItem(&rows[i], credMap[rows[i].CredentialID], l.svcCtx.Secret, false))
 	}
 	return &platform_rpc.ListAgentModelsRes{Total: total, Models: out}, nil
 }

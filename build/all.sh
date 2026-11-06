@@ -35,6 +35,7 @@ modules=(
     "platform_rpc"
     "call_rpc"
     "open_rpc"
+    "doc_rpc"
     
     # ==================== API 服务 ====================
     "auth_api"
@@ -54,6 +55,8 @@ modules=(
     "call_api"
     "open_api"
     "open_portal"
+    "doc_api"
+    "doc_sync_ws"
     
     # ==================== ADMIN 服务 ====================
     "backend_admin"

@@ -1,0 +1,376 @@
+syntax = "proto3";
+
+package doc_rpc;
+
+option go_package = "./doc_rpc";
+
+// ==================== 文档空间（space）====================
+// 在线文档权威源的顶层容器。单租户：无 org_id / product_scope。
+// 每个 space 在 knowledge 侧对应一个 collection（RAG 派生投影），由 doc 域单向同步。
+
+message SpaceItem {
+  uint64 id = 1; // uint64 记录 ID
+  string space_id = 2; // string 空间业务ID
+  string name = 3; // string 空间名
+  string kind = 4; // string owner个人 team团队 im会话内嵌
+  string owner_user_id = 5; // string 归属用户
+  string parent_id = 6; // string 父空间ID，空为根
+  string icon = 7; // string 图标标识
+  string description = 8; // string 描述
+  int32 status = 9; // int32 1启用 2停用
+  int32 sort = 10; // int32 排序
+  string created_at = 11; // string RFC3339
+}
+
+message CreateSpaceReq {
+  string name = 1; // string
+  string kind = 2; // string 默认 owner
+  string owner_user_id = 3; // string 请求者（鉴权后注入）
+  string parent_id = 4; // string 可空
+  string icon = 5; // string
+  string description = 6; // string
+  int32 sort = 7; // int32
+}
+message CreateSpaceRes {
+  string space_id = 1; // string
+}
+
+message UpdateSpaceReq {
+  string space_id = 1; // string
+  string name = 2; // string
+  string icon = 3; // string
+  string description = 4; // string
+  string parent_id = 5; // string 移动
+  int32 status = 6; // int32
+  int32 sort = 7; // int32
+}
+message UpdateSpaceRes {}
+
+message DeleteSpaceReq {
+  string space_id = 1; // string 级联软删其下节点/文档并清 RAG 投影
+  string operator_user_id = 2; // string
+}
+message DeleteSpaceRes {}
+
+message GetSpaceReq {
+  string space_id = 1; // string
+  string user_id = 2; // string 鉴权主体
+}
+message GetSpaceRes {
+  SpaceItem space = 1; // 空间详情
+}
+
+message ListSpacesReq {
+  string user_id = 1; // string 仅返回该用户可见（owner 或被授权）的空间
+  int32 status = 2; // int32 0全部
+  int32 page = 3; // int32
+  int32 page_size = 4; // int32
+}
+message ListSpacesRes {
+  int64 total = 1; // int64
+  repeated SpaceItem spaces = 2; // array
+}
+
+// ==================== 节点树（node：page|folder）====================
+
+message NodeItem {
+  uint64 id = 1; // uint64
+  string node_id = 2; // string 节点业务ID
+  string space_id = 3; // string 所属空间
+  string parent_id = 4; // string 父节点，空为空间根
+  string title = 5; // string 标题
+  string icon = 6; // string
+  string type = 7; // string page|folder
+  int32 sort = 8; // int32
+  string doc_id = 9; // string type=page 时关联文档，folder 为空
+}
+
+message CreateNodeReq {
+  string space_id = 1; // string
+  string parent_id = 2; // string 空为根
+  string title = 3; // string
+  string type = 4; // string page|folder，默认 page
+  string icon = 5; // string
+  int32 sort = 6; // int32
+  string operator_user_id = 7; // string
+}
+message CreateNodeRes {
+  string node_id = 1; // string
+  string doc_id = 2; // string type=page 时新建文档的ID
+}
+
+message UpdateNodeReq {
+  string node_id = 1; // string
+  string title = 2; // string
+  string icon = 3; // string
+  string parent_id = 4; // string 移动
+  int32 sort = 5; // int32
+  string operator_user_id = 6; // string
+}
+message UpdateNodeRes {}
+
+message DeleteNodeReq {
+  string node_id = 1; // string folder 递归删除子节点
+  string operator_user_id = 2; // string
+}
+message DeleteNodeRes {}
+
+message ListNodesReq {
+  string space_id = 1; // string
+  string user_id = 2; // string 鉴权主体
+}
+message ListNodesRes {
+  repeated NodeItem nodes = 1; // array 扁平返回，客户端按 parent_id 组装树
+}
+
+// ==================== 文档（document，权威正文）====================
+
+message DocItem {
+  uint64 id = 1; // uint64
+  string doc_id = 2; // string 文档业务ID
+  string node_id = 3; // string
+  string space_id = 4; // string
+  string title = 5; // string
+  string content_json = 6; // string block 结构化快照 JSON
+  int32 version = 7; // int32 单调递增
+  string owner_user_id = 8; // string
+  string last_edited_by = 9; // string
+  bool rag_enabled = 10; // bool 是否投影进 RAG
+  int32 status = 11; // int32 1启用 2停用
+  string updated_at = 12; // string RFC3339
+  string created_at = 13; // string RFC3339
+}
+
+message CreateDocReq {
+  string space_id = 1; // string
+  string node_id = 2; // string 可空，空则仅按 space 归属
+  string title = 3; // string
+  string content_json = 4; // string 初始 block，空则空文档骨架
+  string owner_user_id = 5; // string
+  bool rag_enabled = 6; // bool 默认 true（proto3 bool 零值 false，logic 侧对未传按 true 由 api 层控制）
+}
+message CreateDocRes {
+  string doc_id = 1; // string
+}
+
+message GetDocReq {
+  string doc_id = 1; // string
+  string user_id = 2; // string 鉴权主体
+}
+message GetDocRes {
+  DocItem doc = 1; // 文档详情（含 content_json）
+}
+
+message UpdateDocMetaReq {
+  string doc_id = 1; // string
+  string title = 2; // string
+  bool rag_enabled = 3; // bool
+  int32 status = 4; // int32
+  string operator_user_id = 5; // string
+}
+message UpdateDocMetaRes {}
+
+message DeleteDocReq {
+  string doc_id = 1; // string 软删并清 RAG 投影
+  string operator_user_id = 2; // string
+}
+message DeleteDocRes {}
+
+// 协同/HTTP 保存正文：落 content_json + 派生 content_text，bump version，生成 revision，触发 RAG 重投影。
+message SaveDocContentReq {
+  string doc_id = 1; // string
+  string content_json = 2; // string block 快照
+  string content_text = 3; // string 派生纯文本（供 RAG；由网关 yjs-go 解码或编辑器上传）
+  string operator_user_id = 4; // string
+}
+message SaveDocContentRes {
+  int32 version = 1; // int32 保存后新版本
+}
+
+// ==================== 协同持久化原语（供 doc_sync_ws 调用）====================
+
+// 拉取某文档的 Yjs 初始状态：最近一次快照 + 快照之后的增量 update 列表。
+message GetDocSyncStateReq {
+  string doc_id = 1; // string
+}
+message GetDocSyncStateRes {
+  bytes snapshot = 1; // bytes 压缩后的 Yjs 全量 state（lib0 编码），无则空
+  repeated bytes updates = 2; // bytes[] 快照之后的增量 update，按时序
+  int32 version = 3; // int32 当前版本
+}
+
+// 追加一条客户端 Yjs update（增量日志，重放/合并用）。
+message AppendDocUpdateReq {
+  string doc_id = 1; // string
+  bytes update = 2; // bytes Yjs update 二进制
+  string origin_user_id = 3; // string
+}
+message AppendDocUpdateRes {
+  int64 seq = 1; // int64 写入的递增序号
+}
+
+// 压实：提交一份新的全量快照，并可同时携带解码后的正文以更新权威文档 + 生成版本。
+message CommitDocSnapshotReq {
+  string doc_id = 1; // string
+  bytes snapshot = 2; // bytes 全量 state
+  string content_json = 3; // string 解码 block 快照
+  string content_text = 4; // string 派生纯文本
+  string operator_user_id = 5; // string
+}
+message CommitDocSnapshotRes {
+  int32 version = 1; // int32 压实后版本
+}
+
+// ==================== 权限 / 分享（permission）====================
+
+message PermItem {
+  uint64 id = 1; // uint64
+  string resource_type = 2; // string space|doc
+  string resource_id = 3; // string
+  string principal_type = 4; // string user|group|dept
+  string principal_id = 5; // string
+  string role = 6; // string owner|editor|commenter|viewer
+}
+
+message SetPermissionReq {
+  string resource_type = 1; // string space|doc
+  string resource_id = 2; // string
+  string principal_type = 3; // string user|group|dept
+  string principal_id = 4; // string
+  string role = 5; // string editor|commenter|viewer（owner 不通过此接口授予）
+  string operator_user_id = 6; // string 需对该资源有管理权
+}
+message SetPermissionRes {}
+
+message DeletePermissionReq {
+  string resource_type = 1; // string
+  string resource_id = 2; // string
+  string principal_type = 3; // string
+  string principal_id = 4; // string
+  string operator_user_id = 5; // string
+}
+message DeletePermissionRes {}
+
+message ListPermissionsReq {
+  string resource_type = 1; // string
+  string resource_id = 2; // string
+}
+message ListPermissionsRes {
+  repeated PermItem permissions = 1; // array
+}
+
+// 计算某主体对某资源的有效角色（含经 space 继承）。owner/editor/commenter/viewer/""。
+message CheckPermissionReq {
+  string resource_type = 1; // string space|doc
+  string resource_id = 2; // string
+  string user_id = 3; // string
+}
+message CheckPermissionRes {
+  string role = 1; // string 有效角色，无权限为空串
+}
+
+// ==================== 版本历史（revision）====================
+
+message RevisionItem {
+  string revision_id = 1; // string
+  string doc_id = 2; // string
+  int32 version = 3; // int32
+  string title = 4; // string
+  string label = 5; // string 用户命名
+  string created_by = 6; // string
+  string created_at = 7; // string RFC3339
+}
+
+message ListRevisionsReq {
+  string doc_id = 1; // string
+  int32 page = 2; // int32
+  int32 page_size = 3; // int32
+}
+message ListRevisionsRes {
+  int64 total = 1; // int64
+  repeated RevisionItem revisions = 2; // array
+}
+
+message GetRevisionReq {
+  string revision_id = 1; // string
+}
+message GetRevisionRes {
+  RevisionItem revision = 1; // 元信息
+  string content_json = 2; // string 该版本 block 快照
+}
+
+message RollbackRevisionReq {
+  string doc_id = 1; // string
+  string revision_id = 2; // string
+  string operator_user_id = 3; // string
+}
+message RollbackRevisionRes {
+  int32 version = 1; // int32 回滚产生的新版本
+}
+
+// ==================== 检索重排 / 文件导入（rag & import）====================
+
+// 触发某文档的 RAG 重新索引（投影缺失时先补投影，再入队索引）。
+message ReindexDocReq {
+  string doc_id = 1; // string
+  string operator_user_id = 2; // string 需对该文档有编辑及以上权限
+}
+message ReindexDocRes {
+  bool ok = 1; // bool 是否已入队
+  string knowledge_doc_id = 2; // string 对应的 knowledge 投影文档 id（无投影为空）
+}
+
+// 从上传文件（docx/pdf）导入生成一篇文档：解析正文 -> 建 node + doc -> 投影 RAG。
+message ImportDocReq {
+  string space_id = 1; // string 目标空间
+  string parent_node_id = 2; // string 目标文件夹节点，空则挂空间根
+  string title = 3; // string 文档标题，空则取文件名
+  string file_name = 4; // string 原始文件名（据后缀判定 docx/pdf）
+  bytes data = 5; // bytes 文件二进制
+  string operator_user_id = 6; // string
+}
+message ImportDocRes {
+  string doc_id = 1; // string
+  string node_id = 2; // string
+  string content_text = 3; // string 解析出的纯文本
+  string file_kind = 4; // string docx|pdf|unsupported
+  bool parsed = 5; // bool 是否成功解析正文（pdf 依赖缺失时 false，仅登记附件不解析）
+  string message = 6; // string 解析状态说明
+}
+
+service doc {
+  rpc CreateSpace(CreateSpaceReq) returns (CreateSpaceRes);
+  rpc UpdateSpace(UpdateSpaceReq) returns (UpdateSpaceRes);
+  rpc DeleteSpace(DeleteSpaceReq) returns (DeleteSpaceRes);
+  rpc GetSpace(GetSpaceReq) returns (GetSpaceRes);
+  rpc ListSpaces(ListSpacesReq) returns (ListSpacesRes);
+
+  rpc CreateNode(CreateNodeReq) returns (CreateNodeRes);
+  rpc UpdateNode(UpdateNodeReq) returns (UpdateNodeRes);
+  rpc DeleteNode(DeleteNodeReq) returns (DeleteNodeRes);
+  rpc ListNodes(ListNodesReq) returns (ListNodesRes);
+
+  rpc CreateDoc(CreateDocReq) returns (CreateDocRes);
+  rpc GetDoc(GetDocReq) returns (GetDocRes);
+  rpc UpdateDocMeta(UpdateDocMetaReq) returns (UpdateDocMetaRes);
+  rpc DeleteDoc(DeleteDocReq) returns (DeleteDocRes);
+  rpc SaveDocContent(SaveDocContentReq) returns (SaveDocContentRes);
+
+  rpc GetDocSyncState(GetDocSyncStateReq) returns (GetDocSyncStateRes);
+  rpc AppendDocUpdate(AppendDocUpdateReq) returns (AppendDocUpdateRes);
+  rpc CommitDocSnapshot(CommitDocSnapshotReq) returns (CommitDocSnapshotRes);
+
+  rpc SetPermission(SetPermissionReq) returns (SetPermissionRes);
+  rpc DeletePermission(DeletePermissionReq) returns (DeletePermissionRes);
+  rpc ListPermissions(ListPermissionsReq) returns (ListPermissionsRes);
+  rpc CheckPermission(CheckPermissionReq) returns (CheckPermissionRes);
+
+  rpc ListRevisions(ListRevisionsReq) returns (ListRevisionsRes);
+  rpc GetRevision(GetRevisionReq) returns (GetRevisionRes);
+  rpc RollbackRevision(RollbackRevisionReq) returns (RollbackRevisionRes);
+
+  rpc ReindexDoc(ReindexDocReq) returns (ReindexDocRes);
+  rpc ImportDoc(ImportDocReq) returns (ImportDocRes);
+}
+
+// goctl rpc protoc doc_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

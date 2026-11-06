@@ -1,0 +1,11 @@
+
+services:
+  doc_rpc:
+    image: wsrh8888/doc_rpc:1.0.0
+    container_name: doc_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./docrpc.yaml:/etc/docrpc.yaml:ro
+    restart: "no"
+    pull_policy: always

@@ -45,10 +45,8 @@ func (l *UpdateAgentModelLogic) UpdateAgentModel(req *types.UpdateAgentModelReq)
 	_, err = l.svcCtx.PlatformRpc.UpdateAgentModel(l.ctx, &platform_rpc.UpdateAgentModelReq{
 		ModelId:         req.ModelID,
 		Name:            req.Name,
-		Provider:        req.Provider,
+		CredentialId:    req.CredentialID,
 		ModelName:       req.ModelName,
-		Endpoint:        req.Endpoint,
-		ApiKey:          req.APIKey,
 		ContextWindow:   req.ContextWindow,
 		MaxOutputTokens: int32(req.MaxOutputTokens),
 		SupportsTools:   req.SupportsTools,

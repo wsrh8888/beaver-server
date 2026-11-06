@@ -49,14 +49,15 @@ func (l *CreateAgentModelLogic) CreateAgentModel(req *types.CreateAgentModelReq)
 	if req.Source == "custom" && req.UserID == "" {
 		return nil, errors.New("个人模型需要用户 ID")
 	}
+	if req.CredentialID == "" {
+		return nil, errors.New("请先选择接入通道")
+	}
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateAgentModel(l.ctx, &platform_rpc.CreateAgentModelReq{
 		Name:             req.Name,
 		Source:           req.Source,
 		UserId:           req.UserID,
-		Provider:         req.Provider,
+		CredentialId:     req.CredentialID,
 		ModelName:        req.ModelName,
-		Endpoint:         req.Endpoint,
-		ApiKey:           req.APIKey,
 		ContextWindow:    req.ContextWindow,
 		MaxOutputTokens:  int32(req.MaxOutputTokens),
 		InputModalities:  "[]",

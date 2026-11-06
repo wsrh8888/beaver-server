@@ -61,6 +61,10 @@ const (
 	Platform_CreateAgentModel_FullMethodName         = "/platform_rpc.platform/CreateAgentModel"
 	Platform_UpdateAgentModel_FullMethodName         = "/platform_rpc.platform/UpdateAgentModel"
 	Platform_DeleteAgentModel_FullMethodName         = "/platform_rpc.platform/DeleteAgentModel"
+	Platform_ListAgentCredentials_FullMethodName     = "/platform_rpc.platform/ListAgentCredentials"
+	Platform_CreateAgentCredential_FullMethodName    = "/platform_rpc.platform/CreateAgentCredential"
+	Platform_UpdateAgentCredential_FullMethodName    = "/platform_rpc.platform/UpdateAgentCredential"
+	Platform_DeleteAgentCredential_FullMethodName    = "/platform_rpc.platform/DeleteAgentCredential"
 	Platform_GetAgentTool_FullMethodName             = "/platform_rpc.platform/GetAgentTool"
 	Platform_ListAgentTools_FullMethodName           = "/platform_rpc.platform/ListAgentTools"
 	Platform_CreateAgentTool_FullMethodName          = "/platform_rpc.platform/CreateAgentTool"
@@ -127,6 +131,11 @@ type PlatformClient interface {
 	CreateAgentModel(ctx context.Context, in *CreateAgentModelReq, opts ...grpc.CallOption) (*CreateAgentModelRes, error)
 	UpdateAgentModel(ctx context.Context, in *UpdateAgentModelReq, opts ...grpc.CallOption) (*UpdateAgentModelRes, error)
 	DeleteAgentModel(ctx context.Context, in *DeleteAgentModelReq, opts ...grpc.CallOption) (*DeleteAgentModelRes, error)
+	// —— 模型接入通道（agent/ 通用，密钥只进不出）——
+	ListAgentCredentials(ctx context.Context, in *ListAgentCredentialsReq, opts ...grpc.CallOption) (*ListAgentCredentialsRes, error)
+	CreateAgentCredential(ctx context.Context, in *CreateAgentCredentialReq, opts ...grpc.CallOption) (*CreateAgentCredentialRes, error)
+	UpdateAgentCredential(ctx context.Context, in *UpdateAgentCredentialReq, opts ...grpc.CallOption) (*UpdateAgentCredentialRes, error)
+	DeleteAgentCredential(ctx context.Context, in *DeleteAgentCredentialReq, opts ...grpc.CallOption) (*DeleteAgentCredentialRes, error)
 	// —— 工具目录（agent/ 通用）——
 	GetAgentTool(ctx context.Context, in *GetAgentToolReq, opts ...grpc.CallOption) (*GetAgentToolRes, error)
 	ListAgentTools(ctx context.Context, in *ListAgentToolsReq, opts ...grpc.CallOption) (*ListAgentToolsRes, error)
@@ -576,6 +585,46 @@ func (c *platformClient) DeleteAgentModel(ctx context.Context, in *DeleteAgentMo
 	return out, nil
 }
 
+func (c *platformClient) ListAgentCredentials(ctx context.Context, in *ListAgentCredentialsReq, opts ...grpc.CallOption) (*ListAgentCredentialsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentCredentialsRes)
+	err := c.cc.Invoke(ctx, Platform_ListAgentCredentials_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) CreateAgentCredential(ctx context.Context, in *CreateAgentCredentialReq, opts ...grpc.CallOption) (*CreateAgentCredentialRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAgentCredentialRes)
+	err := c.cc.Invoke(ctx, Platform_CreateAgentCredential_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateAgentCredential(ctx context.Context, in *UpdateAgentCredentialReq, opts ...grpc.CallOption) (*UpdateAgentCredentialRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAgentCredentialRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateAgentCredential_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteAgentCredential(ctx context.Context, in *DeleteAgentCredentialReq, opts ...grpc.CallOption) (*DeleteAgentCredentialRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAgentCredentialRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteAgentCredential_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformClient) GetAgentTool(ctx context.Context, in *GetAgentToolReq, opts ...grpc.CallOption) (*GetAgentToolRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetAgentToolRes)
@@ -784,6 +833,11 @@ type PlatformServer interface {
 	CreateAgentModel(context.Context, *CreateAgentModelReq) (*CreateAgentModelRes, error)
 	UpdateAgentModel(context.Context, *UpdateAgentModelReq) (*UpdateAgentModelRes, error)
 	DeleteAgentModel(context.Context, *DeleteAgentModelReq) (*DeleteAgentModelRes, error)
+	// —— 模型接入通道（agent/ 通用，密钥只进不出）——
+	ListAgentCredentials(context.Context, *ListAgentCredentialsReq) (*ListAgentCredentialsRes, error)
+	CreateAgentCredential(context.Context, *CreateAgentCredentialReq) (*CreateAgentCredentialRes, error)
+	UpdateAgentCredential(context.Context, *UpdateAgentCredentialReq) (*UpdateAgentCredentialRes, error)
+	DeleteAgentCredential(context.Context, *DeleteAgentCredentialReq) (*DeleteAgentCredentialRes, error)
 	// —— 工具目录（agent/ 通用）——
 	GetAgentTool(context.Context, *GetAgentToolReq) (*GetAgentToolRes, error)
 	ListAgentTools(context.Context, *ListAgentToolsReq) (*ListAgentToolsRes, error)
@@ -938,6 +992,18 @@ func (UnimplementedPlatformServer) UpdateAgentModel(context.Context, *UpdateAgen
 }
 func (UnimplementedPlatformServer) DeleteAgentModel(context.Context, *DeleteAgentModelReq) (*DeleteAgentModelRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentModel not implemented")
+}
+func (UnimplementedPlatformServer) ListAgentCredentials(context.Context, *ListAgentCredentialsReq) (*ListAgentCredentialsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentCredentials not implemented")
+}
+func (UnimplementedPlatformServer) CreateAgentCredential(context.Context, *CreateAgentCredentialReq) (*CreateAgentCredentialRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAgentCredential not implemented")
+}
+func (UnimplementedPlatformServer) UpdateAgentCredential(context.Context, *UpdateAgentCredentialReq) (*UpdateAgentCredentialRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgentCredential not implemented")
+}
+func (UnimplementedPlatformServer) DeleteAgentCredential(context.Context, *DeleteAgentCredentialReq) (*DeleteAgentCredentialRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgentCredential not implemented")
 }
 func (UnimplementedPlatformServer) GetAgentTool(context.Context, *GetAgentToolReq) (*GetAgentToolRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAgentTool not implemented")
@@ -1764,6 +1830,78 @@ func _Platform_DeleteAgentModel_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Platform_ListAgentCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentCredentialsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListAgentCredentials(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListAgentCredentials_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListAgentCredentials(ctx, req.(*ListAgentCredentialsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_CreateAgentCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAgentCredentialReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateAgentCredential(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateAgentCredential_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateAgentCredential(ctx, req.(*CreateAgentCredentialReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateAgentCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAgentCredentialReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateAgentCredential(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateAgentCredential_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateAgentCredential(ctx, req.(*UpdateAgentCredentialReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteAgentCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAgentCredentialReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteAgentCredential(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteAgentCredential_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteAgentCredential(ctx, req.(*DeleteAgentCredentialReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Platform_GetAgentTool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetAgentToolReq)
 	if err := dec(in); err != nil {
@@ -2226,6 +2364,22 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAgentModel",
 			Handler:    _Platform_DeleteAgentModel_Handler,
+		},
+		{
+			MethodName: "ListAgentCredentials",
+			Handler:    _Platform_ListAgentCredentials_Handler,
+		},
+		{
+			MethodName: "CreateAgentCredential",
+			Handler:    _Platform_CreateAgentCredential_Handler,
+		},
+		{
+			MethodName: "UpdateAgentCredential",
+			Handler:    _Platform_UpdateAgentCredential_Handler,
+		},
+		{
+			MethodName: "DeleteAgentCredential",
+			Handler:    _Platform_DeleteAgentCredential_Handler,
 		},
 		{
 			MethodName: "GetAgentTool",

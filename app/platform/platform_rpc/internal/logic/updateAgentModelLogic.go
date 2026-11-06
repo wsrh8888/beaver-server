@@ -46,21 +46,23 @@ func NewUpdateAgentModelLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *UpdateAgentModelLogic) UpdateAgentModel(in *platform_rpc.UpdateAgentModelReq) (*platform_rpc.UpdateAgentModelRes, error) {
+	var row agent_models.AgentModel
+	if err := l.svcCtx.DB.Where("model_id = ?", in.ModelId).First(&row).Error; err != nil {
+		return &platform_rpc.UpdateAgentModelRes{}, nil
+	}
 	updates := map[string]any{}
 	if in.Name != "" {
 		updates["name"] = in.Name
 	}
-	if in.Provider != "" {
-		updates["provider"] = in.Provider
+	if in.CredentialId != "" {
+		// 改绑通道同样要校验 scope 匹配（官方→平台通道，个人→本人通道）。
+		if !validCredentialBinding(l.svcCtx.DB, in.CredentialId, row.Source, strVal(row.UserID)) {
+			return &platform_rpc.UpdateAgentModelRes{}, nil
+		}
+		updates["credential_id"] = in.CredentialId
 	}
 	if in.ModelName != "" {
 		updates["model_name"] = in.ModelName
-	}
-	if in.Endpoint != "" {
-		updates["endpoint"] = in.Endpoint
-	}
-	if in.ApiKey != "" {
-		updates["api_key"] = in.ApiKey
 	}
 	updates["context_window"] = in.ContextWindow
 	updates["max_output_tokens"] = int(in.MaxOutputTokens)

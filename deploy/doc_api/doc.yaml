@@ -1,0 +1,13 @@
+Name: doc
+Host: 0.0.0.0
+Port: 22400
+Etcd: 127.0.0.1:2379
+DocRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: docrpc.rpc
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Stat: false

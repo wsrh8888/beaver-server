@@ -1,0 +1,447 @@
+syntax = "v1"
+
+// ==================== 文档空间 space ====================
+type (
+	CreateSpaceReq {
+		UserId      string `header:"Beaver-User-Id"`
+		Name        string `json:"name"`
+		Kind        string `json:"kind,optional"`
+		ParentId    string `json:"parentId,optional"`
+		Icon        string `json:"icon,optional"`
+		Description string `json:"description,optional"`
+		Sort        int    `json:"sort,optional"`
+	}
+	CreateSpaceRes {
+		SpaceId string `json:"spaceId"`
+	}
+)
+
+type (
+	UpdateSpaceReq {
+		UserId      string `header:"Beaver-User-Id"`
+		SpaceId     string `json:"spaceId"`
+		Name        string `json:"name,optional"`
+		Icon        string `json:"icon,optional"`
+		Description string `json:"description,optional"`
+		ParentId    string `json:"parentId,optional"`
+		Status      int    `json:"status,optional"`
+		Sort        int    `json:"sort,optional"`
+	}
+	UpdateSpaceRes  {}
+)
+
+type (
+	DeleteSpaceReq {
+		UserId  string `header:"Beaver-User-Id"`
+		SpaceId string `json:"spaceId"`
+	}
+	DeleteSpaceRes  {}
+)
+
+type SpaceItem {
+	SpaceId     string `json:"spaceId"`
+	Name        string `json:"name"`
+	Kind        string `json:"kind"`
+	OwnerUserId string `json:"ownerUserId"`
+	ParentId    string `json:"parentId"`
+	Icon        string `json:"icon"`
+	Description string `json:"description"`
+	Status      int    `json:"status"`
+	Sort        int    `json:"sort"`
+	CreatedAt   string `json:"createdAt"`
+}
+
+type (
+	GetSpaceReq {
+		UserId  string `header:"Beaver-User-Id"`
+		SpaceId string `json:"spaceId"`
+	}
+	GetSpaceRes {
+		Space *SpaceItem `json:"space"`
+	}
+)
+
+type (
+	ListSpacesReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Status   int    `json:"status,optional"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	ListSpacesRes {
+		Total  int64       `json:"total"`
+		Spaces []SpaceItem `json:"spaces"`
+	}
+)
+
+// ==================== 节点树 node ====================
+type (
+	CreateNodeReq {
+		UserId   string `header:"Beaver-User-Id"`
+		SpaceId  string `json:"spaceId"`
+		ParentId string `json:"parentId,optional"`
+		Title    string `json:"title"`
+		Type     string `json:"type,optional"`
+		Icon     string `json:"icon,optional"`
+		Sort     int    `json:"sort,optional"`
+	}
+	CreateNodeRes {
+		NodeId string `json:"nodeId"`
+		DocId  string `json:"docId"`
+	}
+)
+
+type (
+	UpdateNodeReq {
+		UserId   string `header:"Beaver-User-Id"`
+		NodeId   string `json:"nodeId"`
+		Title    string `json:"title,optional"`
+		Icon     string `json:"icon,optional"`
+		ParentId string `json:"parentId,optional"`
+		Sort     int    `json:"sort,optional"`
+	}
+	UpdateNodeRes  {}
+)
+
+type (
+	DeleteNodeReq {
+		UserId string `header:"Beaver-User-Id"`
+		NodeId string `json:"nodeId"`
+	}
+	DeleteNodeRes  {}
+)
+
+type NodeItem {
+	NodeId   string `json:"nodeId"`
+	SpaceId  string `json:"spaceId"`
+	ParentId string `json:"parentId"`
+	Title    string `json:"title"`
+	Icon     string `json:"icon"`
+	Type     string `json:"type"`
+	Sort     int    `json:"sort"`
+	DocId    string `json:"docId"`
+}
+
+type (
+	ListNodesReq {
+		UserId  string `header:"Beaver-User-Id"`
+		SpaceId string `json:"spaceId"`
+	}
+	ListNodesRes {
+		Nodes []NodeItem `json:"nodes"`
+	}
+)
+
+// ==================== 文档 document ====================
+type (
+	CreateDocReq {
+		UserId      string `header:"Beaver-User-Id"`
+		SpaceId     string `json:"spaceId"`
+		NodeId      string `json:"nodeId,optional"`
+		Title       string `json:"title"`
+		ContentJson string `json:"contentJson,optional"`
+		RagEnabled  bool   `json:"ragEnabled,optional"`
+	}
+	CreateDocRes {
+		DocId string `json:"docId"`
+	}
+)
+
+type DocItem {
+	DocId        string `json:"docId"`
+	NodeId       string `json:"nodeId"`
+	SpaceId      string `json:"spaceId"`
+	Title        string `json:"title"`
+	ContentJson  string `json:"contentJson"`
+	Version      int    `json:"version"`
+	OwnerUserId  string `json:"ownerUserId"`
+	LastEditedBy string `json:"lastEditedBy"`
+	RagEnabled   bool   `json:"ragEnabled"`
+	Status       int    `json:"status"`
+	UpdatedAt    string `json:"updatedAt"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type (
+	GetDocReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	GetDocRes {
+		Doc *DocItem `json:"doc"`
+	}
+)
+
+type (
+	UpdateDocMetaReq {
+		UserId     string `header:"Beaver-User-Id"`
+		DocId      string `json:"docId"`
+		Title      string `json:"title,optional"`
+		RagEnabled bool   `json:"ragEnabled"`
+		Status     int    `json:"status,optional"`
+	}
+	UpdateDocMetaRes  {}
+)
+
+type (
+	DeleteDocReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	DeleteDocRes  {}
+)
+
+type (
+	SaveDocContentReq {
+		UserId      string `header:"Beaver-User-Id"`
+		DocId       string `json:"docId"`
+		ContentJson string `json:"contentJson"`
+		ContentText string `json:"contentText,optional"`
+	}
+	SaveDocContentRes {
+		Version int `json:"version"`
+	}
+)
+
+// 初始快照拉取（编辑器首次连接或降级为纯 HTTP 模式时的全量入口）。
+type (
+	GetDocSyncStateReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	GetDocSyncStateRes {
+		Snapshot []byte   `json:"snapshot"`
+		Updates  [][]byte `json:"updates"`
+		Version  int      `json:"version"`
+	}
+)
+
+// ==================== 权限 / 分享 permission ====================
+type (
+	SetPermissionReq {
+		UserId        string `header:"Beaver-User-Id"`
+		ResourceType  string `json:"resourceType"`
+		ResourceId    string `json:"resourceId"`
+		PrincipalType string `json:"principalType,optional"`
+		PrincipalId   string `json:"principalId"`
+		Role          string `json:"role"`
+	}
+	SetPermissionRes  {}
+)
+
+type (
+	DeletePermissionReq {
+		UserId        string `header:"Beaver-User-Id"`
+		ResourceType  string `json:"resourceType"`
+		ResourceId    string `json:"resourceId"`
+		PrincipalType string `json:"principalType,optional"`
+		PrincipalId   string `json:"principalId"`
+	}
+	DeletePermissionRes  {}
+)
+
+type PermItem {
+	ResourceType  string `json:"resourceType"`
+	ResourceId    string `json:"resourceId"`
+	PrincipalType string `json:"principalType"`
+	PrincipalId   string `json:"principalId"`
+	Role          string `json:"role"`
+}
+
+type (
+	ListPermissionsReq {
+		UserId       string `header:"Beaver-User-Id"`
+		ResourceType string `json:"resourceType"`
+		ResourceId   string `json:"resourceId"`
+	}
+	ListPermissionsRes {
+		Permissions []PermItem `json:"permissions"`
+	}
+)
+
+type (
+	CheckPermissionReq {
+		UserId       string `header:"Beaver-User-Id"`
+		ResourceType string `json:"resourceType"`
+		ResourceId   string `json:"resourceId"`
+	}
+	CheckPermissionRes {
+		Role string `json:"role"`
+	}
+)
+
+// ==================== 版本历史 revision ====================
+type (
+	ListRevisionsReq {
+		UserId   string `header:"Beaver-User-Id"`
+		DocId    string `json:"docId"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	RevisionItem {
+		RevisionId string `json:"revisionId"`
+		DocId      string `json:"docId"`
+		Version    int    `json:"version"`
+		Title      string `json:"title"`
+		Label      string `json:"label"`
+		CreatedBy  string `json:"createdBy"`
+		CreatedAt  string `json:"createdAt"`
+	}
+	ListRevisionsRes {
+		Total     int64          `json:"total"`
+		Revisions []RevisionItem `json:"revisions"`
+	}
+)
+
+type (
+	GetRevisionReq {
+		UserId     string `header:"Beaver-User-Id"`
+		RevisionId string `json:"revisionId"`
+	}
+	GetRevisionRes {
+		Revision    *RevisionItem `json:"revision"`
+		ContentJson string        `json:"contentJson"`
+	}
+)
+
+type (
+	RollbackRevisionReq {
+		UserId     string `header:"Beaver-User-Id"`
+		DocId      string `json:"docId"`
+		RevisionId string `json:"revisionId"`
+	}
+	RollbackRevisionRes {
+		Version int `json:"version"`
+	}
+)
+
+// ==================== RAG 重索引 / 文件导入 ====================
+type (
+	ReindexDocReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	ReindexDocRes {
+		Ok             bool   `json:"ok"`
+		KnowledgeDocId string `json:"knowledgeDocId"`
+	}
+)
+
+type (
+	ImportDocReq {
+		UserId       string `header:"Beaver-User-Id"`
+		SpaceId      string `json:"spaceId"`
+		ParentNodeId string `json:"parentNodeId,optional"`
+		Title        string `json:"title,optional"`
+		FileName     string `json:"fileName"`
+		Data         string `json:"data"` // base64 编码的文件二进制
+	}
+	ImportDocRes {
+		DocId       string `json:"docId"`
+		NodeId      string `json:"nodeId"`
+		ContentText string `json:"contentText"`
+		FileKind    string `json:"fileKind"`
+		Parsed      bool   `json:"parsed"`
+		Message     string `json:"message"`
+	}
+)
+
+service doc {
+	@doc "创建文档空间"
+	@handler CreateSpace
+	post /api/doc/v1/space/create (CreateSpaceReq) returns (CreateSpaceRes)
+
+	@doc "更新文档空间"
+	@handler UpdateSpace
+	post /api/doc/v1/space/update (UpdateSpaceReq) returns (UpdateSpaceRes)
+
+	@doc "删除文档空间"
+	@handler DeleteSpace
+	post /api/doc/v1/space/delete (DeleteSpaceReq) returns (DeleteSpaceRes)
+
+	@doc "获取文档空间详情"
+	@handler GetSpace
+	post /api/doc/v1/space/get (GetSpaceReq) returns (GetSpaceRes)
+
+	@doc "列出可见空间"
+	@handler ListSpaces
+	post /api/doc/v1/space/list (ListSpacesReq) returns (ListSpacesRes)
+
+	@doc "创建节点"
+	@handler CreateNode
+	post /api/doc/v1/node/create (CreateNodeReq) returns (CreateNodeRes)
+
+	@doc "更新节点"
+	@handler UpdateNode
+	post /api/doc/v1/node/update (UpdateNodeReq) returns (UpdateNodeRes)
+
+	@doc "删除节点"
+	@handler DeleteNode
+	post /api/doc/v1/node/delete (DeleteNodeReq) returns (DeleteNodeRes)
+
+	@doc "列出节点树"
+	@handler ListNodes
+	post /api/doc/v1/node/list (ListNodesReq) returns (ListNodesRes)
+
+	@doc "创建文档"
+	@handler CreateDoc
+	post /api/doc/v1/doc/create (CreateDocReq) returns (CreateDocRes)
+
+	@doc "获取文档详情"
+	@handler GetDoc
+	post /api/doc/v1/doc/get (GetDocReq) returns (GetDocRes)
+
+	@doc "更新文档元信息"
+	@handler UpdateDocMeta
+	post /api/doc/v1/doc/updateMeta (UpdateDocMetaReq) returns (UpdateDocMetaRes)
+
+	@doc "删除文档"
+	@handler DeleteDoc
+	post /api/doc/v1/doc/delete (DeleteDocReq) returns (DeleteDocRes)
+
+	@doc "保存文档正文"
+	@handler SaveDocContent
+	post /api/doc/v1/doc/saveContent (SaveDocContentReq) returns (SaveDocContentRes)
+
+	@doc "拉取文档初始同步状态"
+	@handler GetDocSyncState
+	post /api/doc/v1/doc/syncState (GetDocSyncStateReq) returns (GetDocSyncStateRes)
+
+	@doc "设置权限/分享"
+	@handler SetPermission
+	post /api/doc/v1/perm/set (SetPermissionReq) returns (SetPermissionRes)
+
+	@doc "删除权限"
+	@handler DeletePermission
+	post /api/doc/v1/perm/delete (DeletePermissionReq) returns (DeletePermissionRes)
+
+	@doc "列出权限"
+	@handler ListPermissions
+	post /api/doc/v1/perm/list (ListPermissionsReq) returns (ListPermissionsRes)
+
+	@doc "检查有效权限"
+	@handler CheckPermission
+	post /api/doc/v1/perm/check (CheckPermissionReq) returns (CheckPermissionRes)
+
+	@doc "列出版本历史"
+	@handler ListRevisions
+	post /api/doc/v1/revision/list (ListRevisionsReq) returns (ListRevisionsRes)
+
+	@doc "获取版本详情"
+	@handler GetRevision
+	post /api/doc/v1/revision/get (GetRevisionReq) returns (GetRevisionRes)
+
+	@doc "回滚到版本"
+	@handler RollbackRevision
+	post /api/doc/v1/revision/rollback (RollbackRevisionReq) returns (RollbackRevisionRes)
+
+	@doc "触发文档 RAG 重索引"
+	@handler ReindexDoc
+	post /api/doc/v1/doc/reindex (ReindexDocReq) returns (ReindexDocRes)
+
+	@doc "导入 docx/pdf 文件为文档"
+	@handler ImportDoc
+	post /api/doc/v1/doc/import (ImportDocReq) returns (ImportDocRes)
+}
+
+// goctl api go -api doc.api -dir . --home ../../../template

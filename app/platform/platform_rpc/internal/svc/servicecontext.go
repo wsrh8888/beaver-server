@@ -28,6 +28,7 @@ import (
 	"beaver/core/coregorm"
 	"beaver/database/platform/track"
 	"beaver/database/platform/update"
+	"beaver/utils/secret"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
@@ -37,6 +38,8 @@ type ServiceContext struct {
 	Config  config.Config
 	DB      *gorm.DB
 	UserRpc usercli.User
+	// Secret 接入通道 API Key 加解密器，由 SecretKey 构建；启动时 mustCipher 校验，缺失即崩。
+	Secret *secret.Cipher
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -48,5 +51,15 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:  c,
 		DB:      db,
 		UserRpc: usercli.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
+		Secret:  mustCipher(c.SecretKey),
 	}
+}
+
+// mustCipher 用主密钥构造加解密器；任何错误都视为致命（未配密钥就无法解密通道 Key）。
+func mustCipher(base64Key string) *secret.Cipher {
+	cipher, err := secret.NewCipher(base64Key)
+	if err != nil {
+		panic(err)
+	}
+	return cipher
 }
