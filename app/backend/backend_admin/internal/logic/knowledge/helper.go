@@ -23,11 +23,11 @@ package knowledge
 
 import (
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 )
 
-// toCollectionInfo 把 knowledge_rpc 集合项映射为后台 API 结构体。
-func toCollectionInfo(c *knowledge_rpc.KnowledgeCollectionItem) types.KnowledgeCollectionInfo {
+// toCollectionInfo 把 platform_rpc 集合项映射为后台 API 结构体。
+func toCollectionInfo(c *platform_rpc.KnowledgeCollectionItem) types.KnowledgeCollectionInfo {
 	if c == nil {
 		return types.KnowledgeCollectionInfo{}
 	}
@@ -46,8 +46,8 @@ func toCollectionInfo(c *knowledge_rpc.KnowledgeCollectionItem) types.KnowledgeC
 	}
 }
 
-// toDocumentInfo 把 knowledge_rpc 文档项映射为后台 API 结构体（不含正文）。
-func toDocumentInfo(d *knowledge_rpc.KnowledgeDocumentItem) types.KnowledgeDocumentInfo {
+// toDocumentInfo 把 platform_rpc 文档项映射为后台 API 结构体（不含正文）。
+func toDocumentInfo(d *platform_rpc.KnowledgeDocumentItem) types.KnowledgeDocumentInfo {
 	if d == nil {
 		return types.KnowledgeDocumentInfo{}
 	}
@@ -59,16 +59,18 @@ func toDocumentInfo(d *knowledge_rpc.KnowledgeDocumentItem) types.KnowledgeDocum
 		MediaType:       d.MediaType,
 		DocType:         d.DocType,
 		ByteSize:        d.ByteSize,
-		SourceRef:       d.SourceRef,
+		SourceType:      d.SourceType,
+		SourceDocId:     d.SourceDocId,
+		SourceRevision:  d.SourceRevision,
+		SyncMode:        d.SyncMode,
+		SyncInterval:    int(d.SyncInterval),
+		LastSyncedAt:    d.LastSyncedAt,
 		MetadataText:    d.MetadataText,
 		RagEnabled:      d.RagEnabled,
 		IndexStatus:     d.IndexStatus,
 		IndexRetryCount: int(d.IndexRetryCount),
 		IndexError:      d.IndexError,
 		IndexedAt:       d.IndexedAt,
-		Version:         int(d.Version),
 		Status:          int(d.Status),
-		OwnerUserID:     d.OwnerUserId,
-		UpdatedBy:       d.UpdatedBy,
 	}
 }

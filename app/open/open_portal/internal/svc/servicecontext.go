@@ -27,6 +27,7 @@ import (
 	"beaver/app/open/open_portal/internal/config"
 	"beaver/app/open/open_portal/internal/middleware"
 	"beaver/app/open/open_rpc/open"
+	platformcli "beaver/app/platform/platform_rpc/platform"
 	"beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
@@ -43,6 +44,7 @@ type ServiceContext struct {
 	AuthRpc                    auth.Auth
 	GroupRpc                   group.Group
 	OpenRpc                    open.Open
+	PlatformRpc                platformcli.Platform
 	DeveloperAuthMiddleware    rest.Middleware
 	RequireDeveloperMiddleware rest.Middleware
 }
@@ -58,6 +60,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AuthRpc:                    auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, rpcOpt)),
 		GroupRpc:                   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, rpcOpt)),
 		OpenRpc:                    openRpc,
+		PlatformRpc:                platformcli.NewPlatform(zrpc.MustNewClient(c.PlatformRpc, rpcOpt)),
 		DeveloperAuthMiddleware:    middleware.NewDeveloperAuthMiddleware(c.Auth.AccessSecret).Handle,
 		RequireDeveloperMiddleware: middleware.NewRequireDeveloperMiddleware(openRpc).Handle,
 	}

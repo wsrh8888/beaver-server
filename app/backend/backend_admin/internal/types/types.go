@@ -411,11 +411,13 @@ type CreateKnowledgeDocumentReq struct {
 	Title        string `json:"title"`
 	MediaType    string `json:"mediaType,optional"`
 	DocType      string `json:"docType,optional,default=guide"`
-	SourceRef    string `json:"sourceRef,optional"`   // 上传后回填的对象存储键
-	ContentText  string `json:"contentText,optional"` // 纯文本正文；有则入队索引
+	SourceType   string `json:"sourceType,optional"`              // doc|file，空则按 sourceDocId 推断
+	SourceDocId  string `json:"sourceDocId,optional"`             // 平台在线文档ID（sourceType=doc 时必填）
+	SyncMode     string `json:"syncMode,optional,default=import"` // import|direct
+	SyncInterval int    `json:"syncInterval,optional"`            // 自动同步间隔秒
+	ContentText  string `json:"contentText,optional"`             // 上传文件解析正文（sourceType=file 时必填；doc 来源忽略）
 	MetadataText string `json:"metadataText,optional"`
 	RagEnabled   bool   `json:"ragEnabled,optional,default=true"`
-	OwnerUserID  string `json:"ownerUserId,optional"`
 	UserID       string `header:"Beaver-User-Id"`
 }
 
@@ -2060,17 +2062,19 @@ type KnowledgeDocumentInfo struct {
 	MediaType       string `json:"mediaType"`
 	DocType         string `json:"docType"` // guide|policy|faq|product
 	ByteSize        int64  `json:"byteSize"`
-	SourceRef       string `json:"sourceRef"`
+	SourceType      string `json:"sourceType"`     // doc平台在线文档|file上传文件
+	SourceDocId     string `json:"sourceDocId"`    // 平台在线文档ID（doc 业务的 doc_id）
+	SourceRevision  string `json:"sourceRevision"` // 来源版本（doc version）
+	SyncMode        string `json:"syncMode"`       // import单次导入|direct自动同步
+	SyncInterval    int    `json:"syncInterval"`   // 自动同步间隔秒
+	LastSyncedAt    string `json:"lastSyncedAt"`
 	MetadataText    string `json:"metadataText"`
 	RagEnabled      bool   `json:"ragEnabled"`
 	IndexStatus     string `json:"indexStatus"` // pending|indexing|ready|failed
 	IndexRetryCount int    `json:"indexRetryCount"`
 	IndexError      string `json:"indexError"`
 	IndexedAt       string `json:"indexedAt"`
-	Version         int    `json:"version"`
 	Status          int    `json:"status"`
-	OwnerUserID     string `json:"ownerUserId"`
-	UpdatedBy       string `json:"updatedBy"`
 }
 
 type LoginReq struct {
@@ -2520,11 +2524,13 @@ type UpdateKnowledgeDocumentReq struct {
 	DocumentID   string `json:"documentId"`
 	Title        string `json:"title,optional"`
 	DocType      string `json:"docType,optional"`
-	ContentText  string `json:"contentText,optional"` // 变更则重新入队索引
+	SourceDocId  string `json:"sourceDocId,optional"` // 平台在线文档ID（变更则重新读取正文）
+	SyncMode     string `json:"syncMode,optional"`
+	SyncInterval int    `json:"syncInterval,optional"`
+	ContentText  string `json:"contentText,optional"` // 上传文件正文（doc 来源忽略）
 	MetadataText string `json:"metadataText,optional"`
 	RagEnabled   bool   `json:"ragEnabled,optional"`
 	Status       int    `json:"status,optional"`
-	UpdatedBy    string `header:"Beaver-User-Id"`
 }
 
 type UpdateKnowledgeDocumentRes struct {

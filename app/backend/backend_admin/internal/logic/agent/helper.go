@@ -28,11 +28,11 @@ import (
 	"strings"
 
 	"beaver/app/backend/backend_admin/internal/svc"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 )
 
 // validateKnowledgeBindings 保存 AgentApp 时校验其 knowledge_ids 绑定：
-// 逐个回查 knowledge_rpc，集合不存在即拒绝——防止把应用绑到不存在/已删的知识库，
+// 逐个回查 platform_rpc，集合不存在即拒绝——防止把应用绑到不存在/已删的知识库，
 // 让运行时的知识检索在配置期就对齐，而非等到发消息才发现查不到。
 // knowledge_ids 为空或解析失败视为「未绑定」，放行（向后兼容旧配置）。
 func validateKnowledgeBindings(ctx context.Context, svcCtx *svc.ServiceContext, knowledgeIDsJSON string) error {
@@ -49,7 +49,7 @@ func validateKnowledgeBindings(ctx context.Context, svcCtx *svc.ServiceContext, 
 		if id == "" {
 			continue
 		}
-		res, err := svcCtx.KnowledgeRpc.GetCollection(ctx, &knowledge_rpc.GetCollectionReq{CollectionId: id})
+		res, err := svcCtx.PlatformRpc.GetCollection(ctx, &platform_rpc.GetCollectionReq{CollectionId: id})
 		if err != nil {
 			return fmt.Errorf("校验知识库绑定失败 %s: %w", id, err)
 		}

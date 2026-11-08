@@ -188,6 +188,66 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: digital.SaveDigitalConfigHandler(serverCtx),
 				},
 				{
+					// 知识源列表（平台知识库 + 绑定状态）
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/digital/v1/knowledge/list",
+					Handler: digital.ListDigitalKnowledgeHandler(serverCtx),
+				},
+				{
+					// 新建/更新知识库
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/save",
+					Handler: digital.SaveDigitalKnowledgeHandler(serverCtx),
+				},
+				{
+					// 删除知识库
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/delete",
+					Handler: digital.DeleteDigitalKnowledgeHandler(serverCtx),
+				},
+				{
+					// 知识库文档列表
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/digital/v1/knowledge/docs",
+					Handler: digital.ListDigitalKnowledgeDocHandler(serverCtx),
+				},
+				{
+					// 新增/更新知识文档
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/doc/save",
+					Handler: digital.SaveDigitalKnowledgeDocHandler(serverCtx),
+				},
+				{
+					// 删除知识文档
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/doc/delete",
+					Handler: digital.DeleteDigitalKnowledgeDocHandler(serverCtx),
+				},
+				{
+					// 召回测试
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/retrieve",
+					Handler: digital.RetrieveDigitalKnowledgeHandler(serverCtx),
+				},
+				{
+					// 工具与 MCP 目录
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/digital/v1/tool/catalog",
+					Handler: digital.ListDigitalCatalogHandler(serverCtx),
+				},
+				{
+					// 新建/更新 MCP 服务
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/tool/mcp/save",
+					Handler: digital.SaveDigitalMcpHandler(serverCtx),
+				},
+				{
+					// 删除 MCP 服务
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/tool/mcp/delete",
+					Handler: digital.DeleteDigitalMcpHandler(serverCtx),
+				},
+				{
 					// 创建数字伙伴
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/digital/v1/create",
@@ -198,6 +258,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/open_portal/digital/v1/detail",
 					Handler: digital.GetDigitalDetailHandler(serverCtx),
+				},
+				{
+					// 删除数字伙伴
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/delete",
+					Handler: digital.DeleteDigitalHandler(serverCtx),
 				},
 				{
 					// 数字伙伴列表

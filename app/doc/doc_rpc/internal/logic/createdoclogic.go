@@ -56,7 +56,6 @@ func (l *CreateDocLogic) CreateDoc(in *doc_rpc.CreateDocReq) (*doc_rpc.CreateDoc
 		ContentJSON: contentJSON,
 		Version:     1,
 		OwnerUserID: trim(in.OwnerUserId),
-		RagEnabled:  in.RagEnabled,
 		Status:      1,
 	}
 	row.ContentDigest = sha256hex(row.ContentText)

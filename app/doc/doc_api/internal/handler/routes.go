@@ -37,12 +37,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ImportDocHandler(serverCtx),
 			},
 			{
-				// 触发文档 RAG 重索引
-				Method:  http.MethodPost,
-				Path:    "/api/doc/v1/doc/reindex",
-				Handler: ReindexDocHandler(serverCtx),
-			},
-			{
 				// 保存文档正文
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/doc/saveContent",
@@ -155,6 +149,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/space/update",
 				Handler: UpdateSpaceHandler(serverCtx),
+			},
+			{
+				// 文档实时协同 WebSocket 网关（y-websocket sync + awareness）
+				Method:  http.MethodGet,
+				Path:    "/api/doc/v1/ws",
+				Handler: DocSyncWebsocketHandler(serverCtx),
 			},
 		},
 	)

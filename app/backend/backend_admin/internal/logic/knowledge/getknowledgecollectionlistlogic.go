@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewGetKnowledgeCollectionListLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *GetKnowledgeCollectionListLogic) GetKnowledgeCollectionList(req *types.GetKnowledgeCollectionListReq) (resp *types.GetKnowledgeCollectionListRes, err error) {
-	rpcRes, err := l.svcCtx.KnowledgeRpc.ListCollections(l.ctx, &knowledge_rpc.ListCollectionsReq{
+	rpcRes, err := l.svcCtx.PlatformRpc.ListCollections(l.ctx, &platform_rpc.ListCollectionsReq{
 		Status:   int32(req.Status),
 		Page:     int32(req.Page),
 		PageSize: int32(req.PageSize),

@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,15 +42,17 @@ func NewUpdateKnowledgeDocumentLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *UpdateKnowledgeDocumentLogic) UpdateKnowledgeDocument(req *types.UpdateKnowledgeDocumentReq) (resp *types.UpdateKnowledgeDocumentRes, err error) {
-	_, err = l.svcCtx.KnowledgeRpc.UpdateDocument(l.ctx, &knowledge_rpc.UpdateDocumentReq{
+	_, err = l.svcCtx.PlatformRpc.UpdateDocument(l.ctx, &platform_rpc.UpdateDocumentReq{
 		DocumentId:   req.DocumentID,
 		Title:        req.Title,
 		DocType:      req.DocType,
+		SourceDocId:  req.SourceDocId,
+		SyncMode:     req.SyncMode,
+		SyncInterval: int32(req.SyncInterval),
 		ContentText:  req.ContentText,
 		MetadataText: req.MetadataText,
 		RagEnabled:   req.RagEnabled,
 		Status:       int32(req.Status),
-		UpdatedBy:    req.UpdatedBy,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "更新知识文档失败", Data: map[string]any{"err": err.Error()}})

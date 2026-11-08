@@ -28,7 +28,7 @@ func trim(s string) string {
 	return strings.TrimSpace(s)
 }
 
-// sha256hex 正文指纹，用于 RAG 投影判重。
+// sha256hex 正文指纹，用于版本判重。
 func sha256hex(s string) string {
 	sum := sha256.Sum256([]byte(s))
 	return hex.EncodeToString(sum[:])
@@ -96,17 +96,17 @@ func toSpaceItem(row *doc_models.DocSpace) *doc_rpc.SpaceItem {
 		return nil
 	}
 	return &doc_rpc.SpaceItem{
-		Id:           uint64(row.Id),
-		SpaceId:      row.SpaceID,
-		Name:         row.Name,
-		Kind:         row.Kind,
-		OwnerUserId:  row.OwnerUserID,
-		ParentId:     row.ParentID,
-		Icon:         row.Icon,
-		Description:  row.Description,
-		Status:       int32(row.Status),
-		Sort:         int32(row.Sort),
-		CreatedAt:    time.Time(row.CreatedAt).Format(time.RFC3339),
+		Id:          uint64(row.Id),
+		SpaceId:     row.SpaceID,
+		Name:        row.Name,
+		Kind:        row.Kind,
+		OwnerUserId: row.OwnerUserID,
+		ParentId:    row.ParentID,
+		Icon:        row.Icon,
+		Description: row.Description,
+		Status:      int32(row.Status),
+		Sort:        int32(row.Sort),
+		CreatedAt:   time.Time(row.CreatedAt).Format(time.RFC3339),
 	}
 }
 
@@ -141,7 +141,6 @@ func toDocItem(row *doc_models.DocDocument) *doc_rpc.DocItem {
 		Version:      int32(row.Version),
 		OwnerUserId:  row.OwnerUserID,
 		LastEditedBy: row.LastEditedBy,
-		RagEnabled:   row.RagEnabled,
 		Status:       int32(row.Status),
 		UpdatedAt:    time.Time(row.UpdatedAt).Format(time.RFC3339),
 		CreatedAt:    time.Time(row.CreatedAt).Format(time.RFC3339),

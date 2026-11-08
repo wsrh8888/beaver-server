@@ -1,11 +1,7 @@
 package logic
 
 import (
-	"context"
-
 	doc_models "beaver/app/doc/doc_models"
-	"beaver/app/doc/doc_rpc/internal/svc"
-	knowledgecli "beaver/app/knowledge/knowledge_rpc/knowledge"
 
 	"gorm.io/gorm"
 )
@@ -82,98 +78,4 @@ func loadNode(db *gorm.DB, nodeID string) (*doc_models.DocNode, error) {
 		return nil, err
 	}
 	return &row, nil
-}
-
-// ---- RAG 投影：把文档正文单向同步进 knowledge 域（collection=空间，document=文档）----
-// 全部尽力而为：投影失败只记录，不阻断文档主流程（知识库是派生层）。
-
-// ensureSpaceCollection 保证空间有对应的 knowledge collection，回填 space.knowledge_collection_id。
-func ensureSpaceCollection(ctx context.Context, svcCtx *svc.ServiceContext, space *doc_models.DocSpace) string {
-	if trim(space.KnowledgeCollectionID) != "" {
-		return space.KnowledgeCollectionID
-	}
-	if !svcCtx.Config.Rag.Enabled {
-		return ""
-	}
-	aclMode := "internal"
-	if space.Kind == "owner" {
-		aclMode = "user_scoped"
-	}
-	kind := svcCtx.Config.Rag.CollectionKind
-	if trim(kind) == "" {
-		kind = "docs"
-	}
-	res, err := svcCtx.KnowledgeRpc.CreateCollection(ctx, &knowledgecli.CreateCollectionReq{
-		Name:        space.Name,
-		Kind:        kind,
-		AclMode:     aclMode,
-		Description: "doc space projection",
-	})
-	if err != nil || res == nil {
-		return ""
-	}
-	cid := res.GetCollectionId()
-	if cid == "" {
-		return ""
-	}
-	_ = svcCtx.DB.Model(&doc_models.DocSpace{}).Where("space_id = ?", space.SpaceID).
-		Update("knowledge_collection_id", cid).Error
-	space.KnowledgeCollectionID = cid
-	return cid
-}
-
-// projectDoc 保存文档正文后投影进 RAG：正文判重（digest）变化才重新入队。
-func projectDoc(ctx context.Context, svcCtx *svc.ServiceContext, space *doc_models.DocSpace, doc *doc_models.DocDocument) {
-	if !svcCtx.Config.Rag.Enabled || !doc.RagEnabled || space == nil {
-		return
-	}
-	cid := ensureSpaceCollection(ctx, svcCtx, space)
-	if cid == "" {
-		return
-	}
-	if trim(doc.KnowledgeDocID) == "" {
-		res, err := svcCtx.KnowledgeRpc.CreateDocument(ctx, &knowledgecli.CreateDocumentReq{
-			CollectionId: cid,
-			Title:        doc.Title,
-			DocType:      "doc",
-			SourceRef:    "doc:" + doc.DocID,
-			ContentText:  doc.ContentText,
-			OwnerUserId:  doc.OwnerUserID,
-			RagEnabled:   true,
-		})
-		if err != nil || res == nil {
-			return
-		}
-		kid := res.GetDocumentId()
-		if kid != "" {
-			_ = svcCtx.DB.Model(&doc_models.DocDocument{}).Where("doc_id = ?", doc.DocID).
-				Update("knowledge_doc_id", kid).Error
-			doc.KnowledgeDocID = kid
-		}
-		return
-	}
-	_, _ = svcCtx.KnowledgeRpc.UpdateDocument(ctx, &knowledgecli.UpdateDocumentReq{
-		DocumentId:   doc.KnowledgeDocID,
-		Title:        doc.Title,
-		ContentText:  doc.ContentText,
-		UpdatedBy:    doc.LastEditedBy,
-		RagEnabled:   doc.RagEnabled,
-		Status:       int32(doc.Status),
-	})
-}
-
-// deleteDocProjection 文档软删/停用/关闭检索时清掉 RAG 投影行。
-func deleteDocProjection(ctx context.Context, svcCtx *svc.ServiceContext, doc *doc_models.DocDocument) {
-	if !svcCtx.Config.Rag.Enabled || trim(doc.KnowledgeDocID) == "" {
-		return
-	}
-	_, _ = svcCtx.KnowledgeRpc.DeleteDocument(ctx, &knowledgecli.DeleteDocumentReq{DocumentId: doc.KnowledgeDocID})
-}
-
-// deleteSpaceProjection 空间删除时整库清投影（DeleteCollection 级联软删其下文档并清索引）。
-func deleteSpaceProjection(ctx context.Context, svcCtx *svc.ServiceContext, space *doc_models.DocSpace) {
-	if !svcCtx.Config.Rag.Enabled || trim(space.KnowledgeCollectionID) == "" {
-		return
-	}
-	_, _ = svcCtx.KnowledgeRpc.DeleteCollection(ctx, &knowledgecli.DeleteCollectionReq{CollectionId: space.KnowledgeCollectionID})
 }

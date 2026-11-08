@@ -24,7 +24,6 @@ func (l *CreateDocLogic) CreateDoc(req *types.CreateDocReq) (resp *types.CreateD
 		Title:       req.Title,
 		ContentJson: req.ContentJson,
 		OwnerUserId: req.UserId,
-		RagEnabled:  req.RagEnabled,
 	})
 	if err != nil {
 		return nil, err

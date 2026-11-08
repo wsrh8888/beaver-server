@@ -43,4 +43,4 @@ Domain: "https://server.wsrh8888.com/beaver"
 
 # 门户自身 OAuth 客户端（code 换 token 在服务端完成，appSecret 不下发前端）
 PortalOAuth:
-  AppId: app_2db39e38
+  AppId: oauth_2db39e38

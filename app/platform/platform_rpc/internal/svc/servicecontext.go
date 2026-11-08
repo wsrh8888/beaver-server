@@ -22,10 +22,12 @@
 package svc
 
 import (
+	doccli "beaver/app/doc/doc_rpc/doc"
 	"beaver/app/platform/platform_rpc/internal/config"
 	usercli "beaver/app/user/user_rpc/user"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
+	"beaver/core/coreopensearch"
 	"beaver/database/platform/track"
 	"beaver/database/platform/update"
 	"beaver/utils/secret"
@@ -34,12 +36,18 @@ import (
 	"gorm.io/gorm"
 )
 
+const defaultChunkIndex = "beaver-knowledge-chunks"
+
 type ServiceContext struct {
 	Config  config.Config
 	DB      *gorm.DB
 	UserRpc usercli.User
+	// DocRpc 读取平台在线文档正文（知识导入/自动同步）。
+	DocRpc doccli.Doc
 	// Secret 接入通道 API Key 加解密器，由 SecretKey 构建；启动时 mustCipher 校验，缺失即崩。
-	Secret *secret.Cipher
+	Secret     *secret.Cipher
+	OpenSearch *coreopensearch.Client
+	ChunkIndex string
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -47,11 +55,18 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	_ = update.InitUpdateApp(db)
 	_ = track.InitBuckets(db)
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
+	chunkIndex := c.OpenSearch.ChunkIndex
+	if chunkIndex == "" {
+		chunkIndex = defaultChunkIndex
+	}
 	return &ServiceContext{
-		Config:  c,
-		DB:      db,
-		UserRpc: usercli.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
-		Secret:  mustCipher(c.SecretKey),
+		Config:     c,
+		DB:         db,
+		UserRpc:    usercli.NewUser(zrpc.MustNewClient(c.UserRpc, rpcOpt)),
+		DocRpc:     doccli.NewDoc(zrpc.MustNewClient(c.DocRpc, rpcOpt)),
+		Secret:     mustCipher(c.SecretKey),
+		OpenSearch: coreopensearch.New(c.OpenSearch.Addr),
+		ChunkIndex: chunkIndex,
 	}
 }
 

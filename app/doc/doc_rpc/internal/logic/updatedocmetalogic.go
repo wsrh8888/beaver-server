@@ -30,10 +30,6 @@ func (l *UpdateDocMetaLogic) UpdateDocMeta(in *doc_rpc.UpdateDocMetaReq) (*doc_r
 	if err != nil {
 		return nil, errNotFound
 	}
-	space, err := loadSpace(l.svcCtx.DB, doc.SpaceID)
-	if err != nil {
-		return nil, errNotFound
-	}
 	role, err := resolveDocRole(l.svcCtx.DB, doc.SpaceID, doc.DocID, in.OperatorUserId)
 	if err != nil {
 		return nil, err
@@ -42,9 +38,7 @@ func (l *UpdateDocMetaLogic) UpdateDocMeta(in *doc_rpc.UpdateDocMetaReq) (*doc_r
 		return nil, errNoPermission
 	}
 
-	upd := map[string]any{
-		"rag_enabled": in.RagEnabled,
-	}
+	upd := map[string]any{}
 	if title := trim(in.Title); title != "" {
 		upd["title"] = title
 	}
@@ -59,16 +53,8 @@ func (l *UpdateDocMetaLogic) UpdateDocMeta(in *doc_rpc.UpdateDocMetaReq) (*doc_r
 	if title := trim(in.Title); title != "" {
 		doc.Title = title
 	}
-	doc.RagEnabled = in.RagEnabled
 	if in.Status > 0 {
 		doc.Status = int(in.Status)
-	}
-
-	// RAG 开关切换：关闭则清投影，开启则重新投影。
-	if !doc.RagEnabled {
-		deleteDocProjection(l.ctx, l.svcCtx, doc)
-	} else {
-		projectDoc(l.ctx, l.svcCtx, space, doc)
 	}
 
 	return &doc_rpc.UpdateDocMetaRes{}, nil

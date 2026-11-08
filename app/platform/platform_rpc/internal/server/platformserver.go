@@ -338,3 +338,68 @@ func (s *PlatformServer) ListWorkspacesByUser(ctx context.Context, in *platform_
 	l := logic.NewListWorkspacesByUserLogic(ctx, s.svcCtx)
 	return l.ListWorkspacesByUser(in)
 }
+
+func (s *PlatformServer) CreateCollection(ctx context.Context, in *platform_rpc.CreateCollectionReq) (*platform_rpc.CreateCollectionRes, error) {
+	l := logic.NewCreateCollectionLogic(ctx, s.svcCtx)
+	return l.CreateCollection(in)
+}
+
+func (s *PlatformServer) UpdateCollection(ctx context.Context, in *platform_rpc.UpdateCollectionReq) (*platform_rpc.UpdateCollectionRes, error) {
+	l := logic.NewUpdateCollectionLogic(ctx, s.svcCtx)
+	return l.UpdateCollection(in)
+}
+
+func (s *PlatformServer) DeleteCollection(ctx context.Context, in *platform_rpc.DeleteCollectionReq) (*platform_rpc.DeleteCollectionRes, error) {
+	l := logic.NewDeleteCollectionLogic(ctx, s.svcCtx)
+	return l.DeleteCollection(in)
+}
+
+func (s *PlatformServer) GetCollection(ctx context.Context, in *platform_rpc.GetCollectionReq) (*platform_rpc.GetCollectionRes, error) {
+	l := logic.NewGetCollectionLogic(ctx, s.svcCtx)
+	return l.GetCollection(in)
+}
+
+func (s *PlatformServer) ListCollections(ctx context.Context, in *platform_rpc.ListCollectionsReq) (*platform_rpc.ListCollectionsRes, error) {
+	l := logic.NewListCollectionsLogic(ctx, s.svcCtx)
+	return l.ListCollections(in)
+}
+
+func (s *PlatformServer) CreateDocument(ctx context.Context, in *platform_rpc.CreateDocumentReq) (*platform_rpc.CreateDocumentRes, error) {
+	l := logic.NewCreateDocumentLogic(ctx, s.svcCtx)
+	return l.CreateDocument(in)
+}
+
+func (s *PlatformServer) UpdateDocument(ctx context.Context, in *platform_rpc.UpdateDocumentReq) (*platform_rpc.UpdateDocumentRes, error) {
+	l := logic.NewUpdateDocumentLogic(ctx, s.svcCtx)
+	return l.UpdateDocument(in)
+}
+
+func (s *PlatformServer) DeleteDocument(ctx context.Context, in *platform_rpc.DeleteDocumentReq) (*platform_rpc.DeleteDocumentRes, error) {
+	l := logic.NewDeleteDocumentLogic(ctx, s.svcCtx)
+	return l.DeleteDocument(in)
+}
+
+func (s *PlatformServer) GetDocument(ctx context.Context, in *platform_rpc.GetDocumentReq) (*platform_rpc.GetDocumentRes, error) {
+	l := logic.NewGetDocumentLogic(ctx, s.svcCtx)
+	return l.GetDocument(in)
+}
+
+func (s *PlatformServer) ListDocuments(ctx context.Context, in *platform_rpc.ListDocumentsReq) (*platform_rpc.ListDocumentsRes, error) {
+	l := logic.NewListDocumentsLogic(ctx, s.svcCtx)
+	return l.ListDocuments(in)
+}
+
+func (s *PlatformServer) ReindexDocument(ctx context.Context, in *platform_rpc.ReindexDocumentReq) (*platform_rpc.ReindexDocumentRes, error) {
+	l := logic.NewReindexDocumentLogic(ctx, s.svcCtx)
+	return l.ReindexDocument(in)
+}
+
+func (s *PlatformServer) SearchKnowledge(ctx context.Context, in *platform_rpc.SearchKnowledgeReq) (*platform_rpc.SearchKnowledgeRes, error) {
+	l := logic.NewSearchKnowledgeLogic(ctx, s.svcCtx)
+	return l.SearchKnowledge(in)
+}
+
+func (s *PlatformServer) RetrieveCollection(ctx context.Context, in *platform_rpc.RetrieveCollectionReq) (*platform_rpc.RetrieveCollectionRes, error) {
+	l := logic.NewRetrieveCollectionLogic(ctx, s.svcCtx)
+	return l.RetrieveCollection(in)
+}

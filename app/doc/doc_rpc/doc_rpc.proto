@@ -6,7 +6,6 @@ option go_package = "./doc_rpc";
 
 // ==================== 文档空间（space）====================
 // 在线文档权威源的顶层容器。单租户：无 org_id / product_scope。
-// 每个 space 在 knowledge 侧对应一个 collection（RAG 派生投影），由 doc 域单向同步。
 
 message SpaceItem {
   uint64 id = 1; // uint64 记录 ID
@@ -47,7 +46,7 @@ message UpdateSpaceReq {
 message UpdateSpaceRes {}
 
 message DeleteSpaceReq {
-  string space_id = 1; // string 级联软删其下节点/文档并清 RAG 投影
+  string space_id = 1; // string 级联软删其下节点/文档
   string operator_user_id = 2; // string
 }
 message DeleteSpaceRes {}
@@ -135,7 +134,6 @@ message DocItem {
   int32 version = 7; // int32 单调递增
   string owner_user_id = 8; // string
   string last_edited_by = 9; // string
-  bool rag_enabled = 10; // bool 是否投影进 RAG
   int32 status = 11; // int32 1启用 2停用
   string updated_at = 12; // string RFC3339
   string created_at = 13; // string RFC3339
@@ -147,7 +145,6 @@ message CreateDocReq {
   string title = 3; // string
   string content_json = 4; // string 初始 block，空则空文档骨架
   string owner_user_id = 5; // string
-  bool rag_enabled = 6; // bool 默认 true（proto3 bool 零值 false，logic 侧对未传按 true 由 api 层控制）
 }
 message CreateDocRes {
   string doc_id = 1; // string
@@ -164,30 +161,29 @@ message GetDocRes {
 message UpdateDocMetaReq {
   string doc_id = 1; // string
   string title = 2; // string
-  bool rag_enabled = 3; // bool
   int32 status = 4; // int32
   string operator_user_id = 5; // string
 }
 message UpdateDocMetaRes {}
 
 message DeleteDocReq {
-  string doc_id = 1; // string 软删并清 RAG 投影
+  string doc_id = 1; // string 软删
   string operator_user_id = 2; // string
 }
 message DeleteDocRes {}
 
-// 协同/HTTP 保存正文：落 content_json + 派生 content_text，bump version，生成 revision，触发 RAG 重投影。
+// 协同/HTTP 保存正文：落 content_json + 派生 content_text，bump version，生成 revision。
 message SaveDocContentReq {
   string doc_id = 1; // string
   string content_json = 2; // string block 快照
-  string content_text = 3; // string 派生纯文本（供 RAG；由网关 yjs-go 解码或编辑器上传）
+  string content_text = 3; // string 派生纯文本（由网关 yjs-go 解码或编辑器上传）
   string operator_user_id = 4; // string
 }
 message SaveDocContentRes {
   int32 version = 1; // int32 保存后新版本
 }
 
-// ==================== 协同持久化原语（供 doc_sync_ws 调用）====================
+// ==================== 协同持久化原语（供 doc_api 协同网关调用）====================
 
 // 拉取某文档的 Yjs 初始状态：最近一次快照 + 快照之后的增量 update 列表。
 message GetDocSyncStateReq {
@@ -308,19 +304,9 @@ message RollbackRevisionRes {
   int32 version = 1; // int32 回滚产生的新版本
 }
 
-// ==================== 检索重排 / 文件导入（rag & import）====================
+// ==================== 文件导入（import）====================
 
-// 触发某文档的 RAG 重新索引（投影缺失时先补投影，再入队索引）。
-message ReindexDocReq {
-  string doc_id = 1; // string
-  string operator_user_id = 2; // string 需对该文档有编辑及以上权限
-}
-message ReindexDocRes {
-  bool ok = 1; // bool 是否已入队
-  string knowledge_doc_id = 2; // string 对应的 knowledge 投影文档 id（无投影为空）
-}
-
-// 从上传文件（docx/pdf）导入生成一篇文档：解析正文 -> 建 node + doc -> 投影 RAG。
+// 从上传文件（docx/pdf）导入生成一篇文档：解析正文 -> 建 node + doc。
 message ImportDocReq {
   string space_id = 1; // string 目标空间
   string parent_node_id = 2; // string 目标文件夹节点，空则挂空间根
@@ -336,6 +322,20 @@ message ImportDocRes {
   string file_kind = 4; // string docx|pdf|unsupported
   bool parsed = 5; // bool 是否成功解析正文（pdf 依赖缺失时 false，仅登记附件不解析）
   string message = 6; // string 解析状态说明
+}
+
+// ==================== 内部：知识库按 ID 读取正文 ====================
+
+// 供平台知识库导入/自动同步按 doc_id 读取权威快照；服务间内部调用，不做用户鉴权。
+message GetDocContentReq {
+  string doc_id = 1; // string
+}
+message GetDocContentRes {
+  string doc_id = 1; // string
+  string title = 2; // string
+  string content_text = 3; // string 派生纯文本
+  int32 version = 4; // int32 版本号，作为知识快照 revision
+  int32 status = 5; // int32 1启用 2停用
 }
 
 service doc {
@@ -369,8 +369,9 @@ service doc {
   rpc GetRevision(GetRevisionReq) returns (GetRevisionRes);
   rpc RollbackRevision(RollbackRevisionReq) returns (RollbackRevisionRes);
 
-  rpc ReindexDoc(ReindexDocReq) returns (ReindexDocRes);
   rpc ImportDoc(ImportDocReq) returns (ImportDocRes);
+
+  rpc GetDocContent(GetDocContentReq) returns (GetDocContentRes);
 }
 
 // goctl rpc protoc doc_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template

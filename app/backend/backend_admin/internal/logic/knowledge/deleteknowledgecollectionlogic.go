@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewDeleteKnowledgeCollectionLogic(ctx context.Context, svcCtx *svc.ServiceC
 }
 
 func (l *DeleteKnowledgeCollectionLogic) DeleteKnowledgeCollection(req *types.DeleteKnowledgeCollectionReq) (resp *types.DeleteKnowledgeCollectionRes, err error) {
-	_, err = l.svcCtx.KnowledgeRpc.DeleteCollection(l.ctx, &knowledge_rpc.DeleteCollectionReq{
+	_, err = l.svcCtx.PlatformRpc.DeleteCollection(l.ctx, &platform_rpc.DeleteCollectionReq{
 		CollectionId: req.CollectionID,
 	})
 	if err != nil {

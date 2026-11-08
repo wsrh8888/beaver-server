@@ -411,7 +411,7 @@ func (*UpdateSpaceRes) Descriptor() ([]byte, []int) {
 
 type DeleteSpaceReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	SpaceId        string                 `protobuf:"bytes,1,opt,name=space_id,json=spaceId,proto3" json:"space_id,omitempty"`                        // string 级联软删其下节点/文档并清 RAG 投影
+	SpaceId        string                 `protobuf:"bytes,1,opt,name=space_id,json=spaceId,proto3" json:"space_id,omitempty"`                        // string 级联软删其下节点/文档
 	OperatorUserId string                 `protobuf:"bytes,2,opt,name=operator_user_id,json=operatorUserId,proto3" json:"operator_user_id,omitempty"` // string
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -1280,7 +1280,6 @@ type DocItem struct {
 	Version       int32                  `protobuf:"varint,7,opt,name=version,proto3" json:"version,omitempty"`                                // int32 单调递增
 	OwnerUserId   string                 `protobuf:"bytes,8,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`    // string
 	LastEditedBy  string                 `protobuf:"bytes,9,opt,name=last_edited_by,json=lastEditedBy,proto3" json:"last_edited_by,omitempty"` // string
-	RagEnabled    bool                   `protobuf:"varint,10,opt,name=rag_enabled,json=ragEnabled,proto3" json:"rag_enabled,omitempty"`       // bool 是否投影进 RAG
 	Status        int32                  `protobuf:"varint,11,opt,name=status,proto3" json:"status,omitempty"`                                 // int32 1启用 2停用
 	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`           // string RFC3339
 	CreatedAt     string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`           // string RFC3339
@@ -1381,13 +1380,6 @@ func (x *DocItem) GetLastEditedBy() string {
 	return ""
 }
 
-func (x *DocItem) GetRagEnabled() bool {
-	if x != nil {
-		return x.RagEnabled
-	}
-	return false
-}
-
 func (x *DocItem) GetStatus() int32 {
 	if x != nil {
 		return x.Status
@@ -1416,7 +1408,6 @@ type CreateDocReq struct {
 	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                                  // string
 	ContentJson   string                 `protobuf:"bytes,4,opt,name=content_json,json=contentJson,proto3" json:"content_json,omitempty"`   // string 初始 block，空则空文档骨架
 	OwnerUserId   string                 `protobuf:"bytes,5,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"` // string
-	RagEnabled    bool                   `protobuf:"varint,6,opt,name=rag_enabled,json=ragEnabled,proto3" json:"rag_enabled,omitempty"`     // bool 默认 true（proto3 bool 零值 false，logic 侧对未传按 true 由 api 层控制）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1484,13 +1475,6 @@ func (x *CreateDocReq) GetOwnerUserId() string {
 		return x.OwnerUserId
 	}
 	return ""
-}
-
-func (x *CreateDocReq) GetRagEnabled() bool {
-	if x != nil {
-		return x.RagEnabled
-	}
-	return false
 }
 
 type CreateDocRes struct {
@@ -1637,7 +1621,6 @@ type UpdateDocMetaReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	DocId          string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"`                              // string
 	Title          string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                                           // string
-	RagEnabled     bool                   `protobuf:"varint,3,opt,name=rag_enabled,json=ragEnabled,proto3" json:"rag_enabled,omitempty"`              // bool
 	Status         int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`                                        // int32
 	OperatorUserId string                 `protobuf:"bytes,5,opt,name=operator_user_id,json=operatorUserId,proto3" json:"operator_user_id,omitempty"` // string
 	unknownFields  protoimpl.UnknownFields
@@ -1686,13 +1669,6 @@ func (x *UpdateDocMetaReq) GetTitle() string {
 		return x.Title
 	}
 	return ""
-}
-
-func (x *UpdateDocMetaReq) GetRagEnabled() bool {
-	if x != nil {
-		return x.RagEnabled
-	}
-	return false
 }
 
 func (x *UpdateDocMetaReq) GetStatus() int32 {
@@ -1747,7 +1723,7 @@ func (*UpdateDocMetaRes) Descriptor() ([]byte, []int) {
 
 type DeleteDocReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	DocId          string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"`                              // string 软删并清 RAG 投影
+	DocId          string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"`                              // string 软删
 	OperatorUserId string                 `protobuf:"bytes,2,opt,name=operator_user_id,json=operatorUserId,proto3" json:"operator_user_id,omitempty"` // string
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -1833,12 +1809,12 @@ func (*DeleteDocRes) Descriptor() ([]byte, []int) {
 	return file_doc_rpc_proto_rawDescGZIP(), []int{28}
 }
 
-// 协同/HTTP 保存正文：落 content_json + 派生 content_text，bump version，生成 revision，触发 RAG 重投影。
+// 协同/HTTP 保存正文：落 content_json + 派生 content_text，bump version，生成 revision。
 type SaveDocContentReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	DocId          string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"`                              // string
 	ContentJson    string                 `protobuf:"bytes,2,opt,name=content_json,json=contentJson,proto3" json:"content_json,omitempty"`            // string block 快照
-	ContentText    string                 `protobuf:"bytes,3,opt,name=content_text,json=contentText,proto3" json:"content_text,omitempty"`            // string 派生纯文本（供 RAG；由网关 yjs-go 解码或编辑器上传）
+	ContentText    string                 `protobuf:"bytes,3,opt,name=content_text,json=contentText,proto3" json:"content_text,omitempty"`            // string 派生纯文本（由网关 yjs-go 解码或编辑器上传）
 	OperatorUserId string                 `protobuf:"bytes,4,opt,name=operator_user_id,json=operatorUserId,proto3" json:"operator_user_id,omitempty"` // string
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -3198,112 +3174,7 @@ func (x *RollbackRevisionRes) GetVersion() int32 {
 	return 0
 }
 
-// 触发某文档的 RAG 重新索引（投影缺失时先补投影，再入队索引）。
-type ReindexDocReq struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	DocId          string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"`                              // string
-	OperatorUserId string                 `protobuf:"bytes,2,opt,name=operator_user_id,json=operatorUserId,proto3" json:"operator_user_id,omitempty"` // string 需对该文档有编辑及以上权限
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *ReindexDocReq) Reset() {
-	*x = ReindexDocReq{}
-	mi := &file_doc_rpc_proto_msgTypes[53]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReindexDocReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReindexDocReq) ProtoMessage() {}
-
-func (x *ReindexDocReq) ProtoReflect() protoreflect.Message {
-	mi := &file_doc_rpc_proto_msgTypes[53]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReindexDocReq.ProtoReflect.Descriptor instead.
-func (*ReindexDocReq) Descriptor() ([]byte, []int) {
-	return file_doc_rpc_proto_rawDescGZIP(), []int{53}
-}
-
-func (x *ReindexDocReq) GetDocId() string {
-	if x != nil {
-		return x.DocId
-	}
-	return ""
-}
-
-func (x *ReindexDocReq) GetOperatorUserId() string {
-	if x != nil {
-		return x.OperatorUserId
-	}
-	return ""
-}
-
-type ReindexDocRes struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Ok             bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`                                                // bool 是否已入队
-	KnowledgeDocId string                 `protobuf:"bytes,2,opt,name=knowledge_doc_id,json=knowledgeDocId,proto3" json:"knowledge_doc_id,omitempty"` // string 对应的 knowledge 投影文档 id（无投影为空）
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *ReindexDocRes) Reset() {
-	*x = ReindexDocRes{}
-	mi := &file_doc_rpc_proto_msgTypes[54]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReindexDocRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReindexDocRes) ProtoMessage() {}
-
-func (x *ReindexDocRes) ProtoReflect() protoreflect.Message {
-	mi := &file_doc_rpc_proto_msgTypes[54]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReindexDocRes.ProtoReflect.Descriptor instead.
-func (*ReindexDocRes) Descriptor() ([]byte, []int) {
-	return file_doc_rpc_proto_rawDescGZIP(), []int{54}
-}
-
-func (x *ReindexDocRes) GetOk() bool {
-	if x != nil {
-		return x.Ok
-	}
-	return false
-}
-
-func (x *ReindexDocRes) GetKnowledgeDocId() string {
-	if x != nil {
-		return x.KnowledgeDocId
-	}
-	return ""
-}
-
-// 从上传文件（docx/pdf）导入生成一篇文档：解析正文 -> 建 node + doc -> 投影 RAG。
+// 从上传文件（docx/pdf）导入生成一篇文档：解析正文 -> 建 node + doc。
 type ImportDocReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	SpaceId        string                 `protobuf:"bytes,1,opt,name=space_id,json=spaceId,proto3" json:"space_id,omitempty"`                        // string 目标空间
@@ -3318,7 +3189,7 @@ type ImportDocReq struct {
 
 func (x *ImportDocReq) Reset() {
 	*x = ImportDocReq{}
-	mi := &file_doc_rpc_proto_msgTypes[55]
+	mi := &file_doc_rpc_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3330,7 +3201,7 @@ func (x *ImportDocReq) String() string {
 func (*ImportDocReq) ProtoMessage() {}
 
 func (x *ImportDocReq) ProtoReflect() protoreflect.Message {
-	mi := &file_doc_rpc_proto_msgTypes[55]
+	mi := &file_doc_rpc_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3343,7 +3214,7 @@ func (x *ImportDocReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportDocReq.ProtoReflect.Descriptor instead.
 func (*ImportDocReq) Descriptor() ([]byte, []int) {
-	return file_doc_rpc_proto_rawDescGZIP(), []int{55}
+	return file_doc_rpc_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ImportDocReq) GetSpaceId() string {
@@ -3402,7 +3273,7 @@ type ImportDocRes struct {
 
 func (x *ImportDocRes) Reset() {
 	*x = ImportDocRes{}
-	mi := &file_doc_rpc_proto_msgTypes[56]
+	mi := &file_doc_rpc_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3414,7 +3285,7 @@ func (x *ImportDocRes) String() string {
 func (*ImportDocRes) ProtoMessage() {}
 
 func (x *ImportDocRes) ProtoReflect() protoreflect.Message {
-	mi := &file_doc_rpc_proto_msgTypes[56]
+	mi := &file_doc_rpc_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3427,7 +3298,7 @@ func (x *ImportDocRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportDocRes.ProtoReflect.Descriptor instead.
 func (*ImportDocRes) Descriptor() ([]byte, []int) {
-	return file_doc_rpc_proto_rawDescGZIP(), []int{56}
+	return file_doc_rpc_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *ImportDocRes) GetDocId() string {
@@ -3470,6 +3341,127 @@ func (x *ImportDocRes) GetMessage() string {
 		return x.Message
 	}
 	return ""
+}
+
+// 供平台知识库导入/自动同步按 doc_id 读取权威快照；服务间内部调用，不做用户鉴权。
+type GetDocContentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocId         string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"` // string
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDocContentReq) Reset() {
+	*x = GetDocContentReq{}
+	mi := &file_doc_rpc_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDocContentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDocContentReq) ProtoMessage() {}
+
+func (x *GetDocContentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_doc_rpc_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDocContentReq.ProtoReflect.Descriptor instead.
+func (*GetDocContentReq) Descriptor() ([]byte, []int) {
+	return file_doc_rpc_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *GetDocContentReq) GetDocId() string {
+	if x != nil {
+		return x.DocId
+	}
+	return ""
+}
+
+type GetDocContentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocId         string                 `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"`                   // string
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                                // string
+	ContentText   string                 `protobuf:"bytes,3,opt,name=content_text,json=contentText,proto3" json:"content_text,omitempty"` // string 派生纯文本
+	Version       int32                  `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`                           // int32 版本号，作为知识快照 revision
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                             // int32 1启用 2停用
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDocContentRes) Reset() {
+	*x = GetDocContentRes{}
+	mi := &file_doc_rpc_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDocContentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDocContentRes) ProtoMessage() {}
+
+func (x *GetDocContentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_doc_rpc_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDocContentRes.ProtoReflect.Descriptor instead.
+func (*GetDocContentRes) Descriptor() ([]byte, []int) {
+	return file_doc_rpc_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *GetDocContentRes) GetDocId() string {
+	if x != nil {
+		return x.DocId
+	}
+	return ""
+}
+
+func (x *GetDocContentRes) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *GetDocContentRes) GetContentText() string {
+	if x != nil {
+		return x.ContentText
+	}
+	return ""
+}
+
+func (x *GetDocContentRes) GetVersion() int32 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *GetDocContentRes) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
 }
 
 var File_doc_rpc_proto protoreflect.FileDescriptor
@@ -3564,7 +3556,7 @@ const file_doc_rpc_proto_rawDesc = "" +
 	"\bspace_id\x18\x01 \x01(\tR\aspaceId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"7\n" +
 	"\fListNodesRes\x12'\n" +
-	"\x05nodes\x18\x01 \x03(\v2\x11.doc_rpc.NodeItemR\x05nodes\"\xf8\x02\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x11.doc_rpc.NodeItemR\x05nodes\"\xd7\x02\n" +
 	"\aDocItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x15\n" +
 	"\x06doc_id\x18\x02 \x01(\tR\x05docId\x12\x17\n" +
@@ -3574,35 +3566,28 @@ const file_doc_rpc_proto_rawDesc = "" +
 	"\fcontent_json\x18\x06 \x01(\tR\vcontentJson\x12\x18\n" +
 	"\aversion\x18\a \x01(\x05R\aversion\x12\"\n" +
 	"\rowner_user_id\x18\b \x01(\tR\vownerUserId\x12$\n" +
-	"\x0elast_edited_by\x18\t \x01(\tR\flastEditedBy\x12\x1f\n" +
-	"\vrag_enabled\x18\n" +
-	" \x01(\bR\n" +
-	"ragEnabled\x12\x16\n" +
+	"\x0elast_edited_by\x18\t \x01(\tR\flastEditedBy\x12\x16\n" +
 	"\x06status\x18\v \x01(\x05R\x06status\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\f \x01(\tR\tupdatedAt\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\r \x01(\tR\tcreatedAt\"\xc0\x01\n" +
+	"created_at\x18\r \x01(\tR\tcreatedAt\"\x9f\x01\n" +
 	"\fCreateDocReq\x12\x19\n" +
 	"\bspace_id\x18\x01 \x01(\tR\aspaceId\x12\x17\n" +
 	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12\x14\n" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12!\n" +
 	"\fcontent_json\x18\x04 \x01(\tR\vcontentJson\x12\"\n" +
-	"\rowner_user_id\x18\x05 \x01(\tR\vownerUserId\x12\x1f\n" +
-	"\vrag_enabled\x18\x06 \x01(\bR\n" +
-	"ragEnabled\"%\n" +
+	"\rowner_user_id\x18\x05 \x01(\tR\vownerUserId\"%\n" +
 	"\fCreateDocRes\x12\x15\n" +
 	"\x06doc_id\x18\x01 \x01(\tR\x05docId\";\n" +
 	"\tGetDocReq\x12\x15\n" +
 	"\x06doc_id\x18\x01 \x01(\tR\x05docId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"/\n" +
 	"\tGetDocRes\x12\"\n" +
-	"\x03doc\x18\x01 \x01(\v2\x10.doc_rpc.DocItemR\x03doc\"\xa2\x01\n" +
+	"\x03doc\x18\x01 \x01(\v2\x10.doc_rpc.DocItemR\x03doc\"\x81\x01\n" +
 	"\x10UpdateDocMetaReq\x12\x15\n" +
 	"\x06doc_id\x18\x01 \x01(\tR\x05docId\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1f\n" +
-	"\vrag_enabled\x18\x03 \x01(\bR\n" +
-	"ragEnabled\x12\x16\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\x12(\n" +
 	"\x10operator_user_id\x18\x05 \x01(\tR\x0eoperatorUserId\"\x12\n" +
 	"\x10UpdateDocMetaRes\"O\n" +
@@ -3705,13 +3690,7 @@ const file_doc_rpc_proto_rawDesc = "" +
 	"revisionId\x12(\n" +
 	"\x10operator_user_id\x18\x03 \x01(\tR\x0eoperatorUserId\"/\n" +
 	"\x13RollbackRevisionRes\x12\x18\n" +
-	"\aversion\x18\x01 \x01(\x05R\aversion\"P\n" +
-	"\rReindexDocReq\x12\x15\n" +
-	"\x06doc_id\x18\x01 \x01(\tR\x05docId\x12(\n" +
-	"\x10operator_user_id\x18\x02 \x01(\tR\x0eoperatorUserId\"I\n" +
-	"\rReindexDocRes\x12\x0e\n" +
-	"\x02ok\x18\x01 \x01(\bR\x02ok\x12(\n" +
-	"\x10knowledge_doc_id\x18\x02 \x01(\tR\x0eknowledgeDocId\"\xc0\x01\n" +
+	"\aversion\x18\x01 \x01(\x05R\aversion\"\xc0\x01\n" +
 	"\fImportDocReq\x12\x19\n" +
 	"\bspace_id\x18\x01 \x01(\tR\aspaceId\x12$\n" +
 	"\x0eparent_node_id\x18\x02 \x01(\tR\fparentNodeId\x12\x14\n" +
@@ -3725,7 +3704,15 @@ const file_doc_rpc_proto_rawDesc = "" +
 	"\fcontent_text\x18\x03 \x01(\tR\vcontentText\x12\x1b\n" +
 	"\tfile_kind\x18\x04 \x01(\tR\bfileKind\x12\x16\n" +
 	"\x06parsed\x18\x05 \x01(\bR\x06parsed\x12\x18\n" +
-	"\amessage\x18\x06 \x01(\tR\amessage2\xdb\r\n" +
+	"\amessage\x18\x06 \x01(\tR\amessage\")\n" +
+	"\x10GetDocContentReq\x12\x15\n" +
+	"\x06doc_id\x18\x01 \x01(\tR\x05docId\"\x94\x01\n" +
+	"\x10GetDocContentRes\x12\x15\n" +
+	"\x06doc_id\x18\x01 \x01(\tR\x05docId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12!\n" +
+	"\fcontent_text\x18\x03 \x01(\tR\vcontentText\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\x05R\aversion\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status2\xe4\r\n" +
 	"\x03doc\x12?\n" +
 	"\vCreateSpace\x12\x17.doc_rpc.CreateSpaceReq\x1a\x17.doc_rpc.CreateSpaceRes\x12?\n" +
 	"\vUpdateSpace\x12\x17.doc_rpc.UpdateSpaceReq\x1a\x17.doc_rpc.UpdateSpaceRes\x12?\n" +
@@ -3754,10 +3741,9 @@ const file_doc_rpc_proto_rawDesc = "" +
 	"\x0fCheckPermission\x12\x1b.doc_rpc.CheckPermissionReq\x1a\x1b.doc_rpc.CheckPermissionRes\x12E\n" +
 	"\rListRevisions\x12\x19.doc_rpc.ListRevisionsReq\x1a\x19.doc_rpc.ListRevisionsRes\x12?\n" +
 	"\vGetRevision\x12\x17.doc_rpc.GetRevisionReq\x1a\x17.doc_rpc.GetRevisionRes\x12N\n" +
-	"\x10RollbackRevision\x12\x1c.doc_rpc.RollbackRevisionReq\x1a\x1c.doc_rpc.RollbackRevisionRes\x12<\n" +
-	"\n" +
-	"ReindexDoc\x12\x16.doc_rpc.ReindexDocReq\x1a\x16.doc_rpc.ReindexDocRes\x129\n" +
-	"\tImportDoc\x12\x15.doc_rpc.ImportDocReq\x1a\x15.doc_rpc.ImportDocResB\vZ\t./doc_rpcb\x06proto3"
+	"\x10RollbackRevision\x12\x1c.doc_rpc.RollbackRevisionReq\x1a\x1c.doc_rpc.RollbackRevisionRes\x129\n" +
+	"\tImportDoc\x12\x15.doc_rpc.ImportDocReq\x1a\x15.doc_rpc.ImportDocRes\x12E\n" +
+	"\rGetDocContent\x12\x19.doc_rpc.GetDocContentReq\x1a\x19.doc_rpc.GetDocContentResB\vZ\t./doc_rpcb\x06proto3"
 
 var (
 	file_doc_rpc_proto_rawDescOnce sync.Once
@@ -3826,10 +3812,10 @@ var file_doc_rpc_proto_goTypes = []any{
 	(*GetRevisionRes)(nil),       // 50: doc_rpc.GetRevisionRes
 	(*RollbackRevisionReq)(nil),  // 51: doc_rpc.RollbackRevisionReq
 	(*RollbackRevisionRes)(nil),  // 52: doc_rpc.RollbackRevisionRes
-	(*ReindexDocReq)(nil),        // 53: doc_rpc.ReindexDocReq
-	(*ReindexDocRes)(nil),        // 54: doc_rpc.ReindexDocRes
-	(*ImportDocReq)(nil),         // 55: doc_rpc.ImportDocReq
-	(*ImportDocRes)(nil),         // 56: doc_rpc.ImportDocRes
+	(*ImportDocReq)(nil),         // 53: doc_rpc.ImportDocReq
+	(*ImportDocRes)(nil),         // 54: doc_rpc.ImportDocRes
+	(*GetDocContentReq)(nil),     // 55: doc_rpc.GetDocContentReq
+	(*GetDocContentRes)(nil),     // 56: doc_rpc.GetDocContentRes
 }
 var file_doc_rpc_proto_depIdxs = []int32{
 	0,  // 0: doc_rpc.GetSpaceRes.space:type_name -> doc_rpc.SpaceItem
@@ -3863,8 +3849,8 @@ var file_doc_rpc_proto_depIdxs = []int32{
 	47, // 28: doc_rpc.doc.ListRevisions:input_type -> doc_rpc.ListRevisionsReq
 	49, // 29: doc_rpc.doc.GetRevision:input_type -> doc_rpc.GetRevisionReq
 	51, // 30: doc_rpc.doc.RollbackRevision:input_type -> doc_rpc.RollbackRevisionReq
-	53, // 31: doc_rpc.doc.ReindexDoc:input_type -> doc_rpc.ReindexDocReq
-	55, // 32: doc_rpc.doc.ImportDoc:input_type -> doc_rpc.ImportDocReq
+	53, // 31: doc_rpc.doc.ImportDoc:input_type -> doc_rpc.ImportDocReq
+	55, // 32: doc_rpc.doc.GetDocContent:input_type -> doc_rpc.GetDocContentReq
 	2,  // 33: doc_rpc.doc.CreateSpace:output_type -> doc_rpc.CreateSpaceRes
 	4,  // 34: doc_rpc.doc.UpdateSpace:output_type -> doc_rpc.UpdateSpaceRes
 	6,  // 35: doc_rpc.doc.DeleteSpace:output_type -> doc_rpc.DeleteSpaceRes
@@ -3889,8 +3875,8 @@ var file_doc_rpc_proto_depIdxs = []int32{
 	48, // 54: doc_rpc.doc.ListRevisions:output_type -> doc_rpc.ListRevisionsRes
 	50, // 55: doc_rpc.doc.GetRevision:output_type -> doc_rpc.GetRevisionRes
 	52, // 56: doc_rpc.doc.RollbackRevision:output_type -> doc_rpc.RollbackRevisionRes
-	54, // 57: doc_rpc.doc.ReindexDoc:output_type -> doc_rpc.ReindexDocRes
-	56, // 58: doc_rpc.doc.ImportDoc:output_type -> doc_rpc.ImportDocRes
+	54, // 57: doc_rpc.doc.ImportDoc:output_type -> doc_rpc.ImportDocRes
+	56, // 58: doc_rpc.doc.GetDocContent:output_type -> doc_rpc.GetDocContentRes
 	33, // [33:59] is the sub-list for method output_type
 	7,  // [7:33] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name

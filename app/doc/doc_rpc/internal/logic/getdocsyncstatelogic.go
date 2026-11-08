@@ -25,7 +25,7 @@ func NewGetDocSyncStateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 }
 
 func (l *GetDocSyncStateLogic) GetDocSyncState(in *doc_rpc.GetDocSyncStateReq) (*doc_rpc.GetDocSyncStateRes, error) {
-	// 内部可信调用（doc_sync_ws 网关），权限在网关建连时按 token 校验。
+	// 内部可信调用（doc_api 协同网关），权限在网关建连时按 token 校验。
 	doc, err := loadDoc(l.svcCtx.DB, in.DocId)
 	if err != nil {
 		return nil, errNotFound

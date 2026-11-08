@@ -33,7 +33,6 @@ import (
 	"beaver/app/file/file_rpc/types/file_rpc"
 	friendcli "beaver/app/friend/friend_rpc/friend"
 	groupcli "beaver/app/group/group_rpc/group"
-	knowledgecli "beaver/app/knowledge/knowledge_rpc/knowledge"
 	momentcli "beaver/app/moment/moment_rpc/moment"
 	opencli "beaver/app/open/open_rpc/open"
 	platformcli "beaver/app/platform/platform_rpc/platform"
@@ -50,23 +49,22 @@ import (
 )
 
 type ServiceContext struct {
-	Config       config.Config
-	DB           *gorm.DB
-	Redis        *redis.Client
-	VersionGen   *versionPkg.VersionGenerator
-	UserRpc      user_rpc.UserClient
-	AuthRpc      auth.Auth
-	FileRpc      file_rpc.FileClient
-	PlatformRpc  platformcli.Platform
-	OpenRpc      opencli.Open
-	FriendRpc    friendcli.Friend
-	GroupRpc     groupcli.Group
-	ChatRpc      chatcli.Chat
-	MomentRpc    momentcli.Moment
-	EmojiRpc     emojicli.Emoji
-	CircleRpc    circlecli.Circle
-	AgentRpc     agentcli.Agent
-	KnowledgeRpc knowledgecli.Knowledge
+	Config      config.Config
+	DB          *gorm.DB
+	Redis       *redis.Client
+	VersionGen  *versionPkg.VersionGenerator
+	UserRpc     user_rpc.UserClient
+	AuthRpc     auth.Auth
+	FileRpc     file_rpc.FileClient
+	PlatformRpc platformcli.Platform
+	OpenRpc     opencli.Open
+	FriendRpc   friendcli.Friend
+	GroupRpc    groupcli.Group
+	ChatRpc     chatcli.Chat
+	MomentRpc   momentcli.Moment
+	EmojiRpc    emojicli.Emoji
+	CircleRpc   circlecli.Circle
+	AgentRpc    agentcli.Agent
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -91,7 +89,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		EmojiRpc:     emojicli.NewEmoji(zrpc.MustNewClient(c.EmojiRpc, rpcOpt)),
 		CircleRpc:    circlecli.NewCircle(zrpc.MustNewClient(c.CircleRpc, rpcOpt)),
 		AgentRpc:     agentcli.NewAgent(zrpc.MustNewClient(c.AgentRpc, rpcOpt)),
-		KnowledgeRpc: knowledgecli.NewKnowledge(zrpc.MustNewClient(c.KnowledgeRpc, rpcOpt)),
 	}
 }
 

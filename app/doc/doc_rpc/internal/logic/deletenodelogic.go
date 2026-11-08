@@ -54,13 +54,8 @@ func (l *DeleteNodeLogic) DeleteNode(in *doc_rpc.DeleteNodeReq) (*doc_rpc.Delete
 		return nil, err
 	}
 	if len(docIDs) > 0 {
-		var docs []doc_models.DocDocument
-		l.svcCtx.DB.Where("doc_id IN ? AND deleted_at = ?", docIDs, "1970-01-01 00:00:00").Find(&docs)
 		if err := l.svcCtx.DB.Model(&doc_models.DocDocument{}).Where("doc_id IN ?", docIDs).Update("deleted_at", now).Error; err != nil {
 			l.logger.Error(model.LogMsg{Text: "删除节点文档失败", Data: err})
-		}
-		for i := range docs {
-			deleteDocProjection(l.ctx, l.svcCtx, &docs[i])
 		}
 	}
 

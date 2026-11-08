@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewReindexKnowledgeDocumentLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *ReindexKnowledgeDocumentLogic) ReindexKnowledgeDocument(req *types.ReindexKnowledgeDocumentReq) (resp *types.ReindexKnowledgeDocumentRes, err error) {
-	_, err = l.svcCtx.KnowledgeRpc.ReindexDocument(l.ctx, &knowledge_rpc.ReindexDocumentReq{
+	_, err = l.svcCtx.PlatformRpc.ReindexDocument(l.ctx, &platform_rpc.ReindexDocumentReq{
 		DocumentId: req.DocumentID,
 	})
 	if err != nil {

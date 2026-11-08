@@ -1,8 +1,8 @@
 package logic
 
 import (
-	doc_rpc "beaver/app/doc/doc_rpc/types/doc_rpc"
 	"beaver/app/doc/doc_api/internal/types"
+	doc_rpc "beaver/app/doc/doc_rpc/types/doc_rpc"
 )
 
 // convSpaceItem 把 doc_rpc 的 item 映射为 api 出参（去掉内部自增 id，字段对齐 proto）。
@@ -69,7 +69,6 @@ func convDocItem(it *doc_rpc.DocItem) *types.DocItem {
 		Version:      int(it.Version),
 		OwnerUserId:  it.OwnerUserId,
 		LastEditedBy: it.LastEditedBy,
-		RagEnabled:   it.RagEnabled,
 		Status:       int(it.Status),
 		UpdatedAt:    it.UpdatedAt,
 		CreatedAt:    it.CreatedAt,

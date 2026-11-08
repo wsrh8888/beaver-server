@@ -26,7 +26,7 @@ func NewAppendDocUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *A
 }
 
 func (l *AppendDocUpdateLogic) AppendDocUpdate(in *doc_rpc.AppendDocUpdateReq) (*doc_rpc.AppendDocUpdateRes, error) {
-	// 内部可信调用（doc_sync_ws）。文档内 seq 递增，作为增量日志重放顺序。
+	// 内部可信调用（doc_api 协同网关）。文档内 seq 递增，作为增量日志重放顺序。
 	var maxSeq int64
 	l.svcCtx.DB.Model(&doc_models.DocYjsUpdate{}).Where("doc_id = ?", in.DocId).Select("COALESCE(MAX(seq), 0)").Scan(&maxSeq)
 

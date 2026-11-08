@@ -21,7 +21,6 @@ func (l *UpdateDocMetaLogic) UpdateDocMeta(req *types.UpdateDocMetaReq) (resp *t
 	_, err = l.svcCtx.Doc.UpdateDocMeta(l.ctx, &doc_rpc.UpdateDocMetaReq{
 		DocId:          req.DocId,
 		Title:          req.Title,
-		RagEnabled:     req.RagEnabled,
 		Status:         int32(req.Status),
 		OperatorUserId: req.UserId,
 	})

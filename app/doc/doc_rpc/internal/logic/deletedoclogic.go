@@ -47,7 +47,6 @@ func (l *DeleteDocLogic) DeleteDoc(in *doc_rpc.DeleteDocReq) (*doc_rpc.DeleteDoc
 	if doc.NodeID != "" {
 		_ = l.svcCtx.DB.Model(&doc_models.DocNode{}).Where("node_id = ?", doc.NodeID).Update("deleted_at", time.Now()).Error
 	}
-	deleteDocProjection(l.ctx, l.svcCtx, doc)
 
 	return &doc_rpc.DeleteDocRes{}, nil
 }

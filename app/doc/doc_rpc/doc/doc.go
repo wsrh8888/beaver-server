@@ -35,6 +35,8 @@ type (
 	DeleteSpaceReq       = doc_rpc.DeleteSpaceReq
 	DeleteSpaceRes       = doc_rpc.DeleteSpaceRes
 	DocItem              = doc_rpc.DocItem
+	GetDocContentReq     = doc_rpc.GetDocContentReq
+	GetDocContentRes     = doc_rpc.GetDocContentRes
 	GetDocReq            = doc_rpc.GetDocReq
 	GetDocRes            = doc_rpc.GetDocRes
 	GetDocSyncStateReq   = doc_rpc.GetDocSyncStateReq
@@ -55,8 +57,6 @@ type (
 	ListSpacesRes        = doc_rpc.ListSpacesRes
 	NodeItem             = doc_rpc.NodeItem
 	PermItem             = doc_rpc.PermItem
-	ReindexDocReq        = doc_rpc.ReindexDocReq
-	ReindexDocRes        = doc_rpc.ReindexDocRes
 	RevisionItem         = doc_rpc.RevisionItem
 	RollbackRevisionReq  = doc_rpc.RollbackRevisionReq
 	RollbackRevisionRes  = doc_rpc.RollbackRevisionRes
@@ -97,8 +97,8 @@ type (
 		ListRevisions(ctx context.Context, in *ListRevisionsReq, opts ...grpc.CallOption) (*ListRevisionsRes, error)
 		GetRevision(ctx context.Context, in *GetRevisionReq, opts ...grpc.CallOption) (*GetRevisionRes, error)
 		RollbackRevision(ctx context.Context, in *RollbackRevisionReq, opts ...grpc.CallOption) (*RollbackRevisionRes, error)
-		ReindexDoc(ctx context.Context, in *ReindexDocReq, opts ...grpc.CallOption) (*ReindexDocRes, error)
 		ImportDoc(ctx context.Context, in *ImportDocReq, opts ...grpc.CallOption) (*ImportDocRes, error)
+		GetDocContent(ctx context.Context, in *GetDocContentReq, opts ...grpc.CallOption) (*GetDocContentRes, error)
 	}
 
 	defaultDoc struct {
@@ -232,12 +232,12 @@ func (m *defaultDoc) RollbackRevision(ctx context.Context, in *RollbackRevisionR
 	return client.RollbackRevision(ctx, in, opts...)
 }
 
-func (m *defaultDoc) ReindexDoc(ctx context.Context, in *ReindexDocReq, opts ...grpc.CallOption) (*ReindexDocRes, error) {
-	client := doc_rpc.NewDocClient(m.cli.Conn())
-	return client.ReindexDoc(ctx, in, opts...)
-}
-
 func (m *defaultDoc) ImportDoc(ctx context.Context, in *ImportDocReq, opts ...grpc.CallOption) (*ImportDocRes, error) {
 	client := doc_rpc.NewDocClient(m.cli.Conn())
 	return client.ImportDoc(ctx, in, opts...)
+}
+
+func (m *defaultDoc) GetDocContent(ctx context.Context, in *GetDocContentReq, opts ...grpc.CallOption) (*GetDocContentRes, error) {
+	client := doc_rpc.NewDocClient(m.cli.Conn())
+	return client.GetDocContent(ctx, in, opts...)
 }

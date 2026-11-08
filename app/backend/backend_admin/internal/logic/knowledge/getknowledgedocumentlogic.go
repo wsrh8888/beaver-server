@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewGetKnowledgeDocumentLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *GetKnowledgeDocumentLogic) GetKnowledgeDocument(req *types.GetKnowledgeDocumentReq) (resp *types.GetKnowledgeDocumentRes, err error) {
-	rpcRes, err := l.svcCtx.KnowledgeRpc.GetDocument(l.ctx, &knowledge_rpc.GetDocumentReq{
+	rpcRes, err := l.svcCtx.PlatformRpc.GetDocument(l.ctx, &platform_rpc.GetDocumentReq{
 		DocumentId: req.DocumentID,
 	})
 	if err != nil {

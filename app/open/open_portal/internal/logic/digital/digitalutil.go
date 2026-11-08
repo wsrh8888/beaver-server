@@ -13,6 +13,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
@@ -103,13 +104,20 @@ func syncDigitalMembers(tx *gorm.DB, digitalID, role string, wantIDs []string, o
 }
 
 func fillDigitalInfo(ctx context.Context, svcCtx *svc.ServiceContext, partner *open_models.OpenDigital) types.DigitalInfo {
+	tools, knowledge, mcp := loadDigitalConfigCounts(svcCtx.DB, partner.DigitalID)
 	info := types.DigitalInfo{
-		DigitalID:  partner.DigitalID,
-		Runtime:    partner.Runtime,
-		Visibility: partner.Visibility,
-		AdminIDs:   loadDigitalAdminIDs(svcCtx.DB, partner.DigitalID),
-		ViewerIDs:  loadDigitalViewerIDs(svcCtx.DB, partner.DigitalID),
-		CreatedAt:  partner.CreatedAt.Unix(),
+		DigitalID:      partner.DigitalID,
+		WorkID:         partner.WorkID,
+		Runtime:        partner.Runtime,
+		Visibility:     partner.Visibility,
+		Status:         partner.Status,
+		AdminIDs:       loadDigitalAdminIDs(svcCtx.DB, partner.DigitalID),
+		ViewerIDs:      loadDigitalViewerIDs(svcCtx.DB, partner.DigitalID),
+		ToolCount:      tools,
+		KnowledgeCount: knowledge,
+		McpCount:       mcp,
+		CreatedAt:      partner.CreatedAt.Unix(),
+		UpdatedAt:      partner.UpdatedAt.Unix(),
 	}
 	if partner.Runtime == open_models.DigitalRuntimeExternal {
 		info.AppKey = partner.AppKey
@@ -123,8 +131,51 @@ func fillDigitalInfo(ctx context.Context, svcCtx *svc.ServiceContext, partner *o
 	return info
 }
 
+// loadDigitalConfigCounts 取编排配置里引用的工具 / 知识库 / MCP 数量。
+// 只有 builtin（提示词编排）会在平台侧挂这些能力，其余 runtime 不统计，返回 0。
+func loadDigitalConfigCounts(db *gorm.DB, digitalID string) (tools, knowledge, mcp int) {
+	var cfg open_models.OpenDigitalConfig
+	// 用 Find 而不是 First：还没配过的数字伙伴没有配置行，First 会刷一条 not found 日志
+	if err := db.Where("digital_id = ?", digitalID).Limit(1).Find(&cfg).Error; err != nil {
+		return 0, 0, 0
+	}
+	if cfg.BuiltinConfig == nil {
+		return 0, 0, 0
+	}
+	return len(cfg.BuiltinConfig.Tools), len(cfg.BuiltinConfig.KnowledgeIDs), len(cfg.BuiltinConfig.McpServerIDs)
+}
+
 func generateExternalCredentials() (appKey, appSecret string) {
 	appKey = fmt.Sprintf("dig_%s", uuid.New().String()[:8])
 	appSecret = uuid.New().String() + uuid.New().String()
 	return appKey, appSecret
+}
+
+// applyWorkID 分配一个未被占用的工号：DG + 6 位数字，冲突重试。
+func applyWorkID(db *gorm.DB) (string, error) {
+	for i := 0; i < 30; i++ {
+		candidate := fmt.Sprintf("DG%06d", rand.Intn(1000000))
+		var count int64
+		if err := db.Model(&open_models.OpenDigital{}).Where("work_id = ?", candidate).Count(&count).Error; err != nil {
+			return "", errors.New("工号生成失败，请重试")
+		}
+		if count == 0 {
+			return candidate, nil
+		}
+	}
+	return "", errors.New("工号生成失败，请重试")
+}
+
+// checkWorkIDAvailable 自定义工号时校验唯一：排除自己，被别人占用则拒绝。
+func checkWorkIDAvailable(db *gorm.DB, workID, selfDigitalID string) error {
+	var count int64
+	if err := db.Model(&open_models.OpenDigital{}).
+		Where("work_id = ? AND digital_id <> ?", workID, selfDigitalID).
+		Count(&count).Error; err != nil {
+		return errors.New("工号校验失败，请重试")
+	}
+	if count > 0 {
+		return errors.New("该工号已被占用")
+	}
+	return nil
 }

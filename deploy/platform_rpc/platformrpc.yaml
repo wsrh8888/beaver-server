@@ -13,6 +13,17 @@ UserRpc:
     Key: userrpc.rpc
 # 接入通道 API Key 主密钥（32 字节 base64）。下值为本地开发占位，生产必须换成随机密钥并通过部署密钥管理注入。
 SecretKey: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+OpenSearch:
+  Addr: http://127.0.0.1:9200
+  ChunkIndex: beaver-knowledge-chunks
+Index:
+  Enabled: true
+  IntervalSeconds: 5
+  BatchSize: 16
+  MaxRetry: 3
+  Dims: 1536
+  ChunkSize: 800
+  Overlap: 80
 Log:
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05

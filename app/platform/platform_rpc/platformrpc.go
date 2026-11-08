@@ -22,12 +22,17 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"beaver/app/platform/platform_rpc/internal/config"
 	"beaver/app/platform/platform_rpc/internal/server"
 	"beaver/app/platform/platform_rpc/internal/svc"
+	"beaver/app/platform/platform_rpc/internal/worker"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	"beaver/utils/beaverlog"
 
@@ -47,6 +52,11 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 	beaverlog.InitFromConf(c.RpcServerConf.ServiceConf)
 	ctx := svc.NewServiceContext(c)
+
+	// 进程内知识索引 worker：随主进程起停，收到退出信号即取消 context 收尾。
+	workerCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	go worker.Start(workerCtx, ctx)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		platform_rpc.RegisterPlatformServer(grpcServer, server.NewPlatformServer(ctx))

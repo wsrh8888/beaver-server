@@ -55,8 +55,5 @@ func (l *DeleteSpaceLogic) DeleteSpace(in *doc_rpc.DeleteSpaceReq) (*doc_rpc.Del
 			l.logger.Error(model.LogMsg{Text: "级联删除文档失败", Data: err})
 		}
 	}
-	// 清 RAG 投影：整库删除 collection（级联软删其下 knowledge document 并清索引）。
-	deleteSpaceProjection(l.ctx, l.svcCtx, space)
-
 	return &doc_rpc.DeleteSpaceRes{}, nil
 }

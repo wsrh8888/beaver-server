@@ -56,7 +56,6 @@ modules=(
     "open_api"
     "open_portal"
     "doc_api"
-    "doc_sync_ws"
     
     # ==================== ADMIN 服务 ====================
     "backend_admin"

@@ -39,6 +39,7 @@ import (
 	"beaver/app/platform/platform_models"
 	agent_models "beaver/app/platform/platform_models/agent"
 	ai_models "beaver/app/platform/platform_models/ai"
+	knowledge_models "beaver/app/platform/platform_models/knowledge"
 	org_models "beaver/app/platform/platform_models/org"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
@@ -242,6 +243,9 @@ func main() {
 					&org_models.Staff{},
 					&org_models.DeptUser{},
 					&org_models.Admin{},
+					&knowledge_models.KnowledgeCollection{},
+					&knowledge_models.KnowledgeDocument{},
+					&knowledge_models.KnowledgeChunk{},
 					// AI 业务表（agent/ 通用 + ai/ AI助手桌面端特有）
 					&agent_models.AgentApp{},
 					&agent_models.AgentModel{},

@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,16 +42,18 @@ func NewCreateKnowledgeDocumentLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *CreateKnowledgeDocumentLogic) CreateKnowledgeDocument(req *types.CreateKnowledgeDocumentReq) (resp *types.CreateKnowledgeDocumentRes, err error) {
-	rpcRes, err := l.svcCtx.KnowledgeRpc.CreateDocument(l.ctx, &knowledge_rpc.CreateDocumentReq{
+	rpcRes, err := l.svcCtx.PlatformRpc.CreateDocument(l.ctx, &platform_rpc.CreateDocumentReq{
 		CollectionId: req.CollectionID,
 		Title:        req.Title,
 		MediaType:    req.MediaType,
 		DocType:      req.DocType,
-		SourceRef:    req.SourceRef,
+		SourceType:   req.SourceType,
+		SourceDocId:  req.SourceDocId,
+		SyncMode:     req.SyncMode,
+		SyncInterval: int32(req.SyncInterval),
 		ContentText:  req.ContentText,
 		MetadataText: req.MetadataText,
 		RagEnabled:   req.RagEnabled,
-		OwnerUserId:  req.OwnerUserID,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "创建知识文档失败", Data: map[string]any{"err": err.Error()}})

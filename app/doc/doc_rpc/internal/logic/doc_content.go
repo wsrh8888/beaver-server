@@ -2,8 +2,8 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"encoding/json"
+	"errors"
 	"strings"
 
 	doc_models "beaver/app/doc/doc_models"
@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	errNotFound    = errors.New("doc: 资源不存在")
+	errNotFound     = errors.New("doc: 资源不存在")
 	errNoPermission = errors.New("doc: 无权限")
-	errInvalidArg  = errors.New("doc: 参数非法")
+	errInvalidArg   = errors.New("doc: 参数非法")
 )
 
-// applyDocContent 写入正文：更新 content/digest/version/last_edited_by，生成一条 revision，投影 RAG。
+// applyDocContent 写入正文：更新 content/digest/version/last_edited_by，生成一条 revision。
 // 由 SaveDocContent / RollbackRevision / CommitDocSnapshot 复用，保证版本语义单一来源。
 func applyDocContent(ctx context.Context, svcCtx *svc.ServiceContext, doc *doc_models.DocDocument, space *doc_models.DocSpace, contentJSON, contentText, operator string) (int, error) {
 	newVersion := doc.Version + 1
@@ -49,20 +49,19 @@ func applyDocContent(ctx context.Context, svcCtx *svc.ServiceContext, doc *doc_m
 		return 0, err
 	}
 
-	// 回填内存态并投影 RAG。
+	// 回填内存态。
 	doc.ContentJSON = contentJSON
 	doc.ContentText = contentText
 	doc.ContentDigest = digest
 	doc.Version = newVersion
 	doc.LastEditedBy = operator
-	projectDoc(ctx, svcCtx, space, doc)
 	return newVersion, nil
 }
 
 // skeletonContentJSON 空文档初始 block（ProseMirror/Tiptap 兼容的单空段落）。
 const skeletonContentJSON = `{"type":"doc","content":[{"type":"paragraph"}]}`
 
-// extractTextFromJSON 从 ProseMirror block JSON 递归抽取纯文本（供回滚后重建 RAG 正文）。
+// extractTextFromJSON 从 ProseMirror block JSON 递归抽取纯文本（供回滚后重建正文）。
 // 文本节点取 text 字段；块级节点（段落/标题等）之间以换行分隔。解析失败返回空串。
 func extractTextFromJSON(contentJSON string) string {
 	if trim(contentJSON) == "" {

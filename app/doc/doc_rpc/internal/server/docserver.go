@@ -143,12 +143,12 @@ func (s *DocServer) RollbackRevision(ctx context.Context, in *doc_rpc.RollbackRe
 	return l.RollbackRevision(in)
 }
 
-func (s *DocServer) ReindexDoc(ctx context.Context, in *doc_rpc.ReindexDocReq) (*doc_rpc.ReindexDocRes, error) {
-	l := logic.NewReindexDocLogic(ctx, s.svcCtx)
-	return l.ReindexDoc(in)
-}
-
 func (s *DocServer) ImportDoc(ctx context.Context, in *doc_rpc.ImportDocReq) (*doc_rpc.ImportDocRes, error) {
 	l := logic.NewImportDocLogic(ctx, s.svcCtx)
 	return l.ImportDoc(in)
+}
+
+func (s *DocServer) GetDocContent(ctx context.Context, in *doc_rpc.GetDocContentReq) (*doc_rpc.GetDocContentRes, error) {
+	l := logic.NewGetDocContentLogic(ctx, s.svcCtx)
+	return l.GetDocContent(in)
 }

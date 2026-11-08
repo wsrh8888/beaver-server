@@ -65,6 +65,10 @@ type OpenDigital struct {
 	Visibility string `gorm:"type:varchar(16);not null;index;comment:private|partial|public"`
 	Status     int    `gorm:"column:status;type:tinyint;not null;default:1;index;comment:1启用 0禁用"`
 	Source     string `gorm:"column:source;type:varchar(16);not null;default:'open';index;comment:system系统创建 open开放平台创建"`
+
+	// WorkID 工号：数字伙伴在组织里的成员工号，空串=未申请。
+	// 只在开放平台门户展示与检索（唯一性由申请时校验），不参与鉴权，鉴权只认 DigitalID/AppKey。
+	WorkID string `gorm:"column:work_id;type:varchar(32);not null;default:'';index;comment:数字伙伴工号，空=未申请"`
 }
 
 func (OpenDigital) TableName() string { return "open_digital" }

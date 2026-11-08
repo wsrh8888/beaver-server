@@ -28,7 +28,7 @@ func NewCommitDocSnapshotLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *CommitDocSnapshotLogic) CommitDocSnapshot(in *doc_rpc.CommitDocSnapshotReq) (*doc_rpc.CommitDocSnapshotRes, error) {
-	// 内部可信调用（doc_sync_ws 压实）：写全量快照 + 解码正文落权威文档 + 生成版本。
+	// 内部可信调用（doc_api 协同网关压实）：写全量快照 + 解码正文落权威文档 + 生成版本。
 	doc, err := loadDoc(l.svcCtx.DB, in.DocId)
 	if err != nil {
 		return nil, errNotFound
@@ -69,7 +69,7 @@ func (l *CommitDocSnapshotLogic) CommitDocSnapshot(in *doc_rpc.CommitDocSnapshot
 	}
 
 	// content_json 为空表示纯快照压实：仅收敛增量日志/写快照，不改动权威正文与版本。
-	// 携带解码正文时才走 applyDocContent（更新 content + 生成版本 + RAG 投影）。
+	// 携带解码正文时才走 applyDocContent（更新 content + 生成版本）。
 	if trim(in.ContentJson) == "" {
 		return &doc_rpc.CommitDocSnapshotRes{Version: int32(doc.Version)}, nil
 	}

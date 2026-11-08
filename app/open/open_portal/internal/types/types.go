@@ -103,6 +103,14 @@ type DeleteBotReq struct {
 type DeleteBotRes struct {
 }
 
+type DeleteDigitalReq struct {
+	DigitalID string `json:"digitalId"`
+	UserID    string `header:"Beaver-User-Id"`
+}
+
+type DeleteDigitalRes struct {
+}
+
 type DesktopOAuthConfigInfo struct {
 	Enabled      bool   `json:"enabled"`
 	CustomScheme string `json:"customScheme"`
@@ -113,14 +121,21 @@ type DigitalInfo struct {
 	DigitalID   string   `json:"digitalId"`
 	Name        string   `json:"name"`
 	Avatar      string   `json:"avatar,optional"`
+	WorkID      string   `json:"workId,optional"`
 	Description string   `json:"description"`
 	Runtime     string   `json:"runtime"`
 	Visibility  string   `json:"visibility"`
+	Status      int      `json:"status"`
 	AppKey      string   `json:"appKey,optional"`
 	AppSecret   string   `json:"appSecret,optional"` // 掩码；external 才有
 	AdminIDs    []string `json:"adminIds,optional"`
 	ViewerIDs   []string `json:"viewerIds,optional"`
-	CreatedAt   int64    `json:"createdAt"`
+	// 编排配置里的引用数量，列表卡片直接展示，免去逐条拉配置
+	ToolCount      int   `json:"toolCount"`
+	KnowledgeCount int   `json:"knowledgeCount"`
+	McpCount       int   `json:"mcpCount"`
+	CreatedAt      int64 `json:"createdAt"`
+	UpdatedAt      int64 `json:"updatedAt"`
 }
 
 type GetAppDetailReq struct {
@@ -293,6 +308,174 @@ type SaveDigitalConfigReq struct {
 type SaveDigitalConfigRes struct {
 }
 
+// ==================== 知识源（平台知识库门面）====================
+
+type DigitalKnowledgeItem struct {
+	CollectionID  string `json:"collectionId"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Kind          string `json:"kind"`
+	Status        int    `json:"status"`
+	TopK          int    `json:"topK"`
+	DocumentCount int64  `json:"documentCount"`
+	Bound         bool   `json:"bound"`
+	IndexConfig   string `json:"indexConfig,optional"`
+}
+
+type ListDigitalKnowledgeReq struct {
+	DigitalID string `form:"digitalId"`
+	UserID    string `header:"Beaver-User-Id"`
+}
+
+type ListDigitalKnowledgeRes struct {
+	List  []DigitalKnowledgeItem `json:"list"`
+	Total int64                  `json:"total"`
+}
+
+type SaveDigitalKnowledgeReq struct {
+	DigitalID    string `json:"digitalId"`
+	CollectionID string `json:"collectionId,optional"`
+	Name         string `json:"name,optional"`
+	Description  string `json:"description,optional"`
+	TopK         int    `json:"topK,optional"`
+	IndexConfig  string `json:"indexConfig,optional"`
+	UserID       string `header:"Beaver-User-Id"`
+}
+
+type SaveDigitalKnowledgeRes struct {
+	CollectionID string `json:"collectionId"`
+}
+
+type DeleteDigitalKnowledgeReq struct {
+	DigitalID    string `json:"digitalId"`
+	CollectionID string `json:"collectionId"`
+	UserID       string `header:"Beaver-User-Id"`
+}
+
+type DeleteDigitalKnowledgeRes struct {
+}
+
+type DigitalKnowledgeDoc struct {
+	DocumentID  string `json:"documentId"`
+	Title       string `json:"title"`
+	DocType     string `json:"docType"`
+	ByteSize    int64  `json:"byteSize"`
+	IndexStatus string `json:"indexStatus"`
+	IndexError  string `json:"indexError,optional"`
+	IndexedAt   int64  `json:"indexedAt"`
+}
+
+type ListDigitalKnowledgeDocReq struct {
+	DigitalID    string `form:"digitalId"`
+	CollectionID string `form:"collectionId"`
+	Keyword      string `form:"keyword,optional"`
+	UserID       string `header:"Beaver-User-Id"`
+}
+
+type ListDigitalKnowledgeDocRes struct {
+	List  []DigitalKnowledgeDoc `json:"list"`
+	Total int64                 `json:"total"`
+}
+
+type SaveDigitalKnowledgeDocReq struct {
+	DigitalID    string `json:"digitalId"`
+	CollectionID string `json:"collectionId,optional"`
+	DocumentID   string `json:"documentId,optional"`
+	Title        string `json:"title"`
+	ContentText  string `json:"contentText,optional"`
+	Reindex      bool   `json:"reindex,optional"`
+	UserID       string `header:"Beaver-User-Id"`
+}
+
+type SaveDigitalKnowledgeDocRes struct {
+	DocumentID string `json:"documentId"`
+}
+
+type DeleteDigitalKnowledgeDocReq struct {
+	DigitalID  string `json:"digitalId"`
+	DocumentID string `json:"documentId"`
+	UserID     string `header:"Beaver-User-Id"`
+}
+
+type DeleteDigitalKnowledgeDocRes struct {
+}
+
+type RetrieveDigitalKnowledgeReq struct {
+	DigitalID    string `json:"digitalId"`
+	CollectionID string `json:"collectionId"`
+	Query        string `json:"query"`
+	TopK         int    `json:"topK,optional"`
+	UserID       string `header:"Beaver-User-Id"`
+}
+
+type DigitalKnowledgeHit struct {
+	DocumentID string  `json:"documentId"`
+	Title      string  `json:"title"`
+	ChunkIndex int     `json:"chunkIndex"`
+	Content    string  `json:"content"`
+	Score      float64 `json:"score"`
+}
+
+type RetrieveDigitalKnowledgeRes struct {
+	Hits   []DigitalKnowledgeHit `json:"hits"`
+	Notice string                `json:"notice,optional"`
+}
+
+// ==================== 工具与 MCP 目录 ====================
+
+type DigitalToolItem struct {
+	ToolID   string `json:"toolId"`
+	Name     string `json:"name"`
+	ToolType string `json:"toolType"`
+	Source   string `json:"source"`
+	Status   int    `json:"status"`
+	Config   string `json:"config,optional"`
+}
+
+type DigitalMcpItem struct {
+	McpServerID string `json:"mcpServerId"`
+	Name        string `json:"name"`
+	ServerName  string `json:"serverName"`
+	Transport   string `json:"transport"`
+	Source      string `json:"source"`
+	Status      int    `json:"status"`
+	Config      string `json:"config,optional"`
+	Tools       string `json:"tools,optional"`
+}
+
+type ListDigitalCatalogReq struct {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type ListDigitalCatalogRes struct {
+	Tools      []DigitalToolItem `json:"tools"`
+	McpServers []DigitalMcpItem  `json:"mcpServers"`
+}
+
+type SaveDigitalMcpReq struct {
+	DigitalID   string `json:"digitalId"`
+	McpServerID string `json:"mcpServerId,optional"`
+	Name        string `json:"name,optional"`
+	ServerName  string `json:"serverName,optional"`
+	Transport   string `json:"transport,optional"`
+	Config      string `json:"config,optional"`
+	Tools       string `json:"tools,optional"`
+	UserID      string `header:"Beaver-User-Id"`
+}
+
+type SaveDigitalMcpRes struct {
+	McpServerID string `json:"mcpServerId"`
+}
+
+type DeleteDigitalMcpReq struct {
+	DigitalID   string `json:"digitalId"`
+	McpServerID string `json:"mcpServerId"`
+	UserID      string `header:"Beaver-User-Id"`
+}
+
+type DeleteDigitalMcpRes struct {
+}
+
 type ScopeInfo struct {
 	Scope       string `json:"scope"`
 	Name        string `json:"name"`
@@ -372,12 +555,17 @@ type UpdateDigitalReq struct {
 	DigitalID   string `json:"digitalId"`
 	Name        string `json:"name,optional"`
 	Avatar      string `json:"avatar,optional"`
+	WorkID      string `json:"workId,optional"`
+	ApplyWorkID bool   `json:"applyWorkId,optional"`
 	Description string `json:"description,optional"`
 	Visibility  string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
+	Runtime     string `json:"runtime,optional" validate:"omitempty,oneof=builtin external workflow"`
 	UserID      string `header:"Beaver-User-Id"`
 }
 
 type UpdateDigitalRes struct {
+	AppKey    string `json:"appKey,optional"`
+	AppSecret string `json:"appSecret,optional"`
 }
 
 type UpdateOAuthConfigReq struct {

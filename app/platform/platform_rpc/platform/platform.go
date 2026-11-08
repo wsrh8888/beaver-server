@@ -44,6 +44,10 @@ type (
 	CreateAppRes                = platform_rpc.CreateAppRes
 	CreateArchitectureReq       = platform_rpc.CreateArchitectureReq
 	CreateArchitectureRes       = platform_rpc.CreateArchitectureRes
+	CreateCollectionReq         = platform_rpc.CreateCollectionReq
+	CreateCollectionRes         = platform_rpc.CreateCollectionRes
+	CreateDocumentReq           = platform_rpc.CreateDocumentReq
+	CreateDocumentRes           = platform_rpc.CreateDocumentRes
 	CreateOrgDepartmentReq      = platform_rpc.CreateOrgDepartmentReq
 	CreateOrgDepartmentRes      = platform_rpc.CreateOrgDepartmentRes
 	CreateVersionReq            = platform_rpc.CreateVersionReq
@@ -60,6 +64,10 @@ type (
 	DeleteAgentModelRes         = platform_rpc.DeleteAgentModelRes
 	DeleteAgentToolReq          = platform_rpc.DeleteAgentToolReq
 	DeleteAgentToolRes          = platform_rpc.DeleteAgentToolRes
+	DeleteCollectionReq         = platform_rpc.DeleteCollectionReq
+	DeleteCollectionRes         = platform_rpc.DeleteCollectionRes
+	DeleteDocumentReq           = platform_rpc.DeleteDocumentReq
+	DeleteDocumentRes           = platform_rpc.DeleteDocumentRes
 	DeleteFeedbackReq           = platform_rpc.DeleteFeedbackReq
 	DeleteFeedbackRes           = platform_rpc.DeleteFeedbackRes
 	DeleteOrgDepartmentReq      = platform_rpc.DeleteOrgDepartmentReq
@@ -79,8 +87,12 @@ type (
 	GetAgentToolRes             = platform_rpc.GetAgentToolRes
 	GetAiAssistantReq           = platform_rpc.GetAiAssistantReq
 	GetAiAssistantRes           = platform_rpc.GetAiAssistantRes
+	GetCollectionReq            = platform_rpc.GetCollectionReq
+	GetCollectionRes            = platform_rpc.GetCollectionRes
 	GetContentReportReq         = platform_rpc.GetContentReportReq
 	GetContentReportRes         = platform_rpc.GetContentReportRes
+	GetDocumentReq              = platform_rpc.GetDocumentReq
+	GetDocumentRes              = platform_rpc.GetDocumentRes
 	GetFeedbackReq              = platform_rpc.GetFeedbackReq
 	GetFeedbackRes              = platform_rpc.GetFeedbackRes
 	GetLatestWorkspaceReq       = platform_rpc.GetLatestWorkspaceReq
@@ -89,6 +101,9 @@ type (
 	GetWorkbenchAppRes          = platform_rpc.GetWorkbenchAppRes
 	HandleFeedbackReq           = platform_rpc.HandleFeedbackReq
 	HandleFeedbackRes           = platform_rpc.HandleFeedbackRes
+	KnowledgeCollectionItem     = platform_rpc.KnowledgeCollectionItem
+	KnowledgeDocumentItem       = platform_rpc.KnowledgeDocumentItem
+	KnowledgeHit                = platform_rpc.KnowledgeHit
 	ListAgentAppsReq            = platform_rpc.ListAgentAppsReq
 	ListAgentAppsRes            = platform_rpc.ListAgentAppsRes
 	ListAgentCredentialsReq     = platform_rpc.ListAgentCredentialsReq
@@ -105,8 +120,12 @@ type (
 	ListAppsRes                 = platform_rpc.ListAppsRes
 	ListArchitecturesReq        = platform_rpc.ListArchitecturesReq
 	ListArchitecturesRes        = platform_rpc.ListArchitecturesRes
+	ListCollectionsReq          = platform_rpc.ListCollectionsReq
+	ListCollectionsRes          = platform_rpc.ListCollectionsRes
 	ListContentReportsReq       = platform_rpc.ListContentReportsReq
 	ListContentReportsRes       = platform_rpc.ListContentReportsRes
+	ListDocumentsReq            = platform_rpc.ListDocumentsReq
+	ListDocumentsRes            = platform_rpc.ListDocumentsRes
 	ListEnabledWorkbenchAppsReq = platform_rpc.ListEnabledWorkbenchAppsReq
 	ListEnabledWorkbenchAppsRes = platform_rpc.ListEnabledWorkbenchAppsRes
 	ListFeedbackReq             = platform_rpc.ListFeedbackReq
@@ -119,13 +138,19 @@ type (
 	ListWorkbenchAppsRes        = platform_rpc.ListWorkbenchAppsRes
 	ListWorkspacesByUserReq     = platform_rpc.ListWorkspacesByUserReq
 	ListWorkspacesByUserRes     = platform_rpc.ListWorkspacesByUserRes
+	ReindexDocumentReq          = platform_rpc.ReindexDocumentReq
+	ReindexDocumentRes          = platform_rpc.ReindexDocumentRes
 	ReleasePolicyItem           = platform_rpc.ReleasePolicyItem
 	RemoveOrgMemberReq          = platform_rpc.RemoveOrgMemberReq
 	RemoveOrgMemberRes          = platform_rpc.RemoveOrgMemberRes
+	RetrieveCollectionReq       = platform_rpc.RetrieveCollectionReq
+	RetrieveCollectionRes       = platform_rpc.RetrieveCollectionRes
 	SaveAiAssistantReq          = platform_rpc.SaveAiAssistantReq
 	SaveAiAssistantRes          = platform_rpc.SaveAiAssistantRes
 	SaveWorkspacePathReq        = platform_rpc.SaveWorkspacePathReq
 	SaveWorkspacePathRes        = platform_rpc.SaveWorkspacePathRes
+	SearchKnowledgeReq          = platform_rpc.SearchKnowledgeReq
+	SearchKnowledgeRes          = platform_rpc.SearchKnowledgeRes
 	SubmitContentReportReq      = platform_rpc.SubmitContentReportReq
 	SubmitContentReportRes      = platform_rpc.SubmitContentReportRes
 	SubmitFeedbackReq           = platform_rpc.SubmitFeedbackReq
@@ -142,8 +167,12 @@ type (
 	UpdateAgentToolRes          = platform_rpc.UpdateAgentToolRes
 	UpdateArchitectureReq       = platform_rpc.UpdateArchitectureReq
 	UpdateArchitectureRes       = platform_rpc.UpdateArchitectureRes
+	UpdateCollectionReq         = platform_rpc.UpdateCollectionReq
+	UpdateCollectionRes         = platform_rpc.UpdateCollectionRes
 	UpdateContentReportsReq     = platform_rpc.UpdateContentReportsReq
 	UpdateContentReportsRes     = platform_rpc.UpdateContentReportsRes
+	UpdateDocumentReq           = platform_rpc.UpdateDocumentReq
+	UpdateDocumentRes           = platform_rpc.UpdateDocumentRes
 	UpdateOrgDepartmentReq      = platform_rpc.UpdateOrgDepartmentReq
 	UpdateOrgDepartmentRes      = platform_rpc.UpdateOrgDepartmentRes
 	UpdateWorkbenchAppReq       = platform_rpc.UpdateWorkbenchAppReq
@@ -226,6 +255,19 @@ type (
 		SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error)
 		UpsertWorkspace(ctx context.Context, in *UpsertWorkspaceReq, opts ...grpc.CallOption) (*UpsertWorkspaceRes, error)
 		ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error)
+		CreateCollection(ctx context.Context, in *CreateCollectionReq, opts ...grpc.CallOption) (*CreateCollectionRes, error)
+		UpdateCollection(ctx context.Context, in *UpdateCollectionReq, opts ...grpc.CallOption) (*UpdateCollectionRes, error)
+		DeleteCollection(ctx context.Context, in *DeleteCollectionReq, opts ...grpc.CallOption) (*DeleteCollectionRes, error)
+		GetCollection(ctx context.Context, in *GetCollectionReq, opts ...grpc.CallOption) (*GetCollectionRes, error)
+		ListCollections(ctx context.Context, in *ListCollectionsReq, opts ...grpc.CallOption) (*ListCollectionsRes, error)
+		CreateDocument(ctx context.Context, in *CreateDocumentReq, opts ...grpc.CallOption) (*CreateDocumentRes, error)
+		UpdateDocument(ctx context.Context, in *UpdateDocumentReq, opts ...grpc.CallOption) (*UpdateDocumentRes, error)
+		DeleteDocument(ctx context.Context, in *DeleteDocumentReq, opts ...grpc.CallOption) (*DeleteDocumentRes, error)
+		GetDocument(ctx context.Context, in *GetDocumentReq, opts ...grpc.CallOption) (*GetDocumentRes, error)
+		ListDocuments(ctx context.Context, in *ListDocumentsReq, opts ...grpc.CallOption) (*ListDocumentsRes, error)
+		ReindexDocument(ctx context.Context, in *ReindexDocumentReq, opts ...grpc.CallOption) (*ReindexDocumentRes, error)
+		SearchKnowledge(ctx context.Context, in *SearchKnowledgeReq, opts ...grpc.CallOption) (*SearchKnowledgeRes, error)
+		RetrieveCollection(ctx context.Context, in *RetrieveCollectionReq, opts ...grpc.CallOption) (*RetrieveCollectionRes, error)
 	}
 
 	defaultPlatform struct {
@@ -553,4 +595,69 @@ func (m *defaultPlatform) UpsertWorkspace(ctx context.Context, in *UpsertWorkspa
 func (m *defaultPlatform) ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error) {
 	client := platform_rpc.NewPlatformClient(m.cli.Conn())
 	return client.ListWorkspacesByUser(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) CreateCollection(ctx context.Context, in *CreateCollectionReq, opts ...grpc.CallOption) (*CreateCollectionRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.CreateCollection(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) UpdateCollection(ctx context.Context, in *UpdateCollectionReq, opts ...grpc.CallOption) (*UpdateCollectionRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.UpdateCollection(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) DeleteCollection(ctx context.Context, in *DeleteCollectionReq, opts ...grpc.CallOption) (*DeleteCollectionRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.DeleteCollection(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) GetCollection(ctx context.Context, in *GetCollectionReq, opts ...grpc.CallOption) (*GetCollectionRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.GetCollection(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) ListCollections(ctx context.Context, in *ListCollectionsReq, opts ...grpc.CallOption) (*ListCollectionsRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.ListCollections(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) CreateDocument(ctx context.Context, in *CreateDocumentReq, opts ...grpc.CallOption) (*CreateDocumentRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.CreateDocument(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) UpdateDocument(ctx context.Context, in *UpdateDocumentReq, opts ...grpc.CallOption) (*UpdateDocumentRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.UpdateDocument(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) DeleteDocument(ctx context.Context, in *DeleteDocumentReq, opts ...grpc.CallOption) (*DeleteDocumentRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.DeleteDocument(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) GetDocument(ctx context.Context, in *GetDocumentReq, opts ...grpc.CallOption) (*GetDocumentRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.GetDocument(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) ListDocuments(ctx context.Context, in *ListDocumentsReq, opts ...grpc.CallOption) (*ListDocumentsRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.ListDocuments(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) ReindexDocument(ctx context.Context, in *ReindexDocumentReq, opts ...grpc.CallOption) (*ReindexDocumentRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.ReindexDocument(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) SearchKnowledge(ctx context.Context, in *SearchKnowledgeReq, opts ...grpc.CallOption) (*SearchKnowledgeRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.SearchKnowledge(ctx, in, opts...)
+}
+
+func (m *defaultPlatform) RetrieveCollection(ctx context.Context, in *RetrieveCollectionReq, opts ...grpc.CallOption) (*RetrieveCollectionRes, error) {
+	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	return client.RetrieveCollection(ctx, in, opts...)
 }

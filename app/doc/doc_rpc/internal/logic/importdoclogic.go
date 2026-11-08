@@ -28,7 +28,7 @@ func NewImportDocLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ImportD
 	}
 }
 
-// ImportDoc 导入 docx/pdf 为文档域权威文档：解析正文 -> 建 page 节点 + 文档 -> 写正文并投影 RAG。
+// ImportDoc 导入 docx/pdf 为文档域权威文档：解析正文 -> 建 page 节点 + 文档 -> 写正文。
 // pdf 依赖（pdftotext）缺失时优雅降级：仍建文档、仅登记不解析正文（parsed=false）。
 func (l *ImportDocLogic) ImportDoc(in *doc_rpc.ImportDocReq) (*doc_rpc.ImportDocRes, error) {
 	space, err := loadSpace(l.svcCtx.DB, in.SpaceId)
@@ -99,7 +99,6 @@ func (l *ImportDocLogic) ImportDoc(in *doc_rpc.ImportDocReq) (*doc_rpc.ImportDoc
 		ContentJSON: skeletonContentJSON,
 		Version:     1,
 		OwnerUserID: trim(in.OperatorUserId),
-		RagEnabled:  true,
 		Status:      1,
 	}
 	doc.ContentDigest = sha256hex(doc.ContentText)
@@ -120,7 +119,7 @@ func (l *ImportDocLogic) ImportDoc(in *doc_rpc.ImportDocReq) (*doc_rpc.ImportDoc
 		return nil, err
 	}
 
-	// 解析成功则写入正文 + 生成版本 + 投影 RAG（复用 applyDocContent，失败不阻断导入结果返回）。
+	// 解析成功则写入正文 + 生成版本（复用 applyDocContent，失败不阻断导入结果返回）。
 	if parsed && text != "" {
 		contentJSON := textToContentJSON(text)
 		if _, aerr := applyDocContent(l.ctx, l.svcCtx, &doc, space, contentJSON, text, trim(in.OperatorUserId)); aerr != nil {

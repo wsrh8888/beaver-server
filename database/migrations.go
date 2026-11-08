@@ -31,11 +31,11 @@ import (
 	"beaver/app/file/file_models"
 	"beaver/app/friend/friend_models"
 	"beaver/app/group/group_models"
-	knowledge_models "beaver/app/knowledge/knowledge_models"
 	"beaver/app/moment/moment_models"
 	"beaver/app/notification/notification_models"
 	"beaver/app/open/open_models"
 	"beaver/app/platform/platform_models"
+	knowledge_models "beaver/app/platform/platform_models/knowledge"
 	org_models "beaver/app/platform/platform_models/org"
 	"beaver/app/user/user_models"
 	"beaver/core/coregorm"
@@ -184,6 +184,9 @@ func AllMigrations() []Migration {
 				&org_models.Staff{},
 				&org_models.DeptUser{},
 				&org_models.Admin{},
+				&knowledge_models.KnowledgeCollection{},
+				&knowledge_models.KnowledgeDocument{},
+				&knowledge_models.KnowledgeChunk{},
 			},
 			Init: platformseed.InitPlatform,
 		},
@@ -200,14 +203,6 @@ func AllMigrations() []Migration {
 		{
 			Name:   "beaver_datasync",
 			Models: []any{&datasync_models.DatasyncModel{}},
-		},
-		{
-			Name: "beaver_knowledge",
-			Models: []any{
-				&knowledge_models.KnowledgeCollection{},
-				&knowledge_models.KnowledgeDocument{},
-				&knowledge_models.KnowledgeChunk{},
-			},
 		},
 	}
 }

@@ -23,14 +23,21 @@ type (
 		DigitalID   string   `json:"digitalId"`
 		Name        string   `json:"name"`
 		Avatar      string   `json:"avatar,optional"`
+		WorkID      string   `json:"workId,optional"` // 工号，空=未申请
 		Description string   `json:"description"`
 		Runtime     string   `json:"runtime"`
 		Visibility  string   `json:"visibility"`
+		Status      int      `json:"status"` // 1已发布 0未发布
 		AppKey      string   `json:"appKey,optional"`
 		AppSecret   string   `json:"appSecret,optional"` // 掩码；external 才有
 		AdminIDs    []string `json:"adminIds,optional"`
 		ViewerIDs   []string `json:"viewerIds,optional"`
-		CreatedAt   int64    `json:"createdAt"`
+		// 编排配置里的引用数量，列表卡片直接展示，免去逐条拉配置
+		ToolCount      int   `json:"toolCount"`
+		KnowledgeCount int   `json:"knowledgeCount"`
+		McpCount       int   `json:"mcpCount"`
+		CreatedAt      int64 `json:"createdAt"`
+		UpdatedAt      int64 `json:"updatedAt"`
 	}
 )
 
@@ -61,11 +68,26 @@ type (
 		DigitalID   string `json:"digitalId"`
 		Name        string `json:"name,optional"`
 		Avatar      string `json:"avatar,optional"`
+		WorkID      string `json:"workId,optional"`     // 自定义工号，非空时校验唯一
+		ApplyWorkID bool   `json:"applyWorkId,optional"` // 申请平台分配一个工号（已有则忽略）
 		Description string `json:"description,optional"`
 		Visibility  string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
+		Runtime     string `json:"runtime,optional" validate:"omitempty,oneof=builtin external workflow"`
 		UserID      string `header:"Beaver-User-Id"`
 	}
-	UpdateDigitalRes {}
+	UpdateDigitalRes {
+		// 切换到长链接接入且此前没有凭据时，这里返回一次性明文，前端需提示用户保存
+		AppKey    string `json:"appKey,optional"`
+		AppSecret string `json:"appSecret,optional"`
+	}
+)
+
+type (
+	DeleteDigitalReq {
+		DigitalID string `json:"digitalId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	DeleteDigitalRes {}
 )
 
 type (
@@ -123,6 +145,175 @@ type (
 	SaveDigitalConfigRes {}
 )
 
+// ==================== 知识源（平台知识库）====================
+// 知识库是平台级资源（后台同一份数据），数字伙伴只是选择绑定其中哪些 ID。
+// 集合本身由 platform_rpc 维护，这里只做控制台侧的门面与归属校验。
+
+type (
+	DigitalKnowledgeItem {
+		CollectionID  string `json:"collectionId"`
+		Name          string `json:"name"`
+		Description   string `json:"description"`
+		Kind          string `json:"kind"`
+		Status        int    `json:"status"`        // 1启用 2停用
+		TopK          int    `json:"topK"`          // 检索条数（indexConfig.top_k，0 = 平台默认）
+		DocumentCount int64  `json:"documentCount"` // 文档数
+		Bound         bool   `json:"bound"`         // 是否已绑定本数字伙伴
+		IndexConfig   string `json:"indexConfig,optional"` // 原始 indexConfig JSON，设置页回显分段/检索参数
+	}
+	ListDigitalKnowledgeReq {
+		DigitalID string `form:"digitalId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	ListDigitalKnowledgeRes {
+		List  []DigitalKnowledgeItem `json:"list"`
+		Total int64                  `json:"total"`
+	}
+)
+
+type (
+	SaveDigitalKnowledgeReq {
+		DigitalID    string `json:"digitalId"`
+		CollectionID string `json:"collectionId,optional"` // 空=新建
+		Name         string `json:"name,optional"`         // 空=不改
+		Description  string `json:"description,optional"`
+		TopK         int    `json:"topK,optional"`        // 0=不改
+		IndexConfig  string `json:"indexConfig,optional"` // JSON，分段/清洗配置，空=不改
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	SaveDigitalKnowledgeRes {
+		CollectionID string `json:"collectionId"`
+	}
+)
+
+type (
+	DeleteDigitalKnowledgeReq {
+		DigitalID    string `json:"digitalId"`
+		CollectionID string `json:"collectionId"`
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	DeleteDigitalKnowledgeRes {}
+)
+
+type (
+	DigitalKnowledgeDoc {
+		DocumentID  string `json:"documentId"`
+		Title       string `json:"title"`
+		DocType     string `json:"docType"`
+		ByteSize    int64  `json:"byteSize"`
+		IndexStatus string `json:"indexStatus"` // pending|indexing|ready|failed
+		IndexError  string `json:"indexError,optional"`
+		IndexedAt   int64  `json:"indexedAt"`
+	}
+	ListDigitalKnowledgeDocReq {
+		DigitalID    string `form:"digitalId"`
+		CollectionID string `form:"collectionId"`
+		Keyword      string `form:"keyword,optional"`
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	ListDigitalKnowledgeDocRes {
+		List  []DigitalKnowledgeDoc `json:"list"`
+		Total int64                 `json:"total"`
+	}
+)
+
+type (
+	SaveDigitalKnowledgeDocReq {
+		DigitalID    string `json:"digitalId"`
+		CollectionID string `json:"collectionId,optional"` // 新建时必填
+		DocumentID   string `json:"documentId,optional"`   // 空=新建
+		Title        string `json:"title"`
+		ContentText  string `json:"contentText,optional"`
+		Reindex      bool   `json:"reindex,optional"` // 更新正文后是否重建索引
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	SaveDigitalKnowledgeDocRes {
+		DocumentID string `json:"documentId"`
+	}
+)
+
+type (
+	DeleteDigitalKnowledgeDocReq {
+		DigitalID  string `json:"digitalId"`
+		DocumentID string `json:"documentId"`
+		UserID     string `header:"Beaver-User-Id"`
+	}
+	DeleteDigitalKnowledgeDocRes {}
+)
+
+type (
+	RetrieveDigitalKnowledgeReq {
+		DigitalID    string `json:"digitalId"`
+		CollectionID string `json:"collectionId"`
+		Query        string `json:"query"`
+		TopK         int    `json:"topK,optional"`
+		UserID       string `header:"Beaver-User-Id"`
+	}
+	DigitalKnowledgeHit {
+		DocumentID string  `json:"documentId"`
+		Title      string  `json:"title"`
+		ChunkIndex int     `json:"chunkIndex"`
+		Content    string  `json:"content"`
+		Score      float64 `json:"score"`
+	}
+	RetrieveDigitalKnowledgeRes {
+		Hits   []DigitalKnowledgeHit `json:"hits"`
+		Notice string                `json:"notice,optional"` // 无结果原因，有命中时为空
+	}
+)
+
+// ==================== 工具与 MCP 目录 ====================
+
+type (
+	DigitalToolItem {
+		ToolID   string `json:"toolId"`
+		Name     string `json:"name"`
+		ToolType string `json:"toolType"` // builtin|mcp|api
+		Source   string `json:"source"`   // official|custom
+		Status   int    `json:"status"`
+		Config   string `json:"config,optional"`
+	}
+	DigitalMcpItem {
+		McpServerID string `json:"mcpServerId"`
+		Name        string `json:"name"`
+		ServerName  string `json:"serverName"`
+		Transport   string `json:"transport"` // stdio|sse|websocket
+		Source      string `json:"source"`
+		Status      int    `json:"status"`
+		Config      string `json:"config,optional"`
+		Tools       string `json:"tools,optional"` // 工具清单 JSON
+	}
+	ListDigitalCatalogReq {
+		UserID string `header:"Beaver-User-Id"`
+	}
+	ListDigitalCatalogRes {
+		Tools      []DigitalToolItem `json:"tools"`
+		McpServers []DigitalMcpItem  `json:"mcpServers"`
+	}
+)
+
+type (
+	SaveDigitalMcpReq {
+		DigitalID   string `json:"digitalId"`
+		McpServerID string `json:"mcpServerId,optional"` // 空=新建
+		Name        string `json:"name,optional"`
+		ServerName  string `json:"serverName,optional"`
+		Transport   string `json:"transport,optional"` // stdio|sse|websocket
+		Config      string `json:"config,optional"`    // 连接配置 JSON
+		Tools       string `json:"tools,optional"`     // 能力清单 JSON
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	SaveDigitalMcpRes {
+		McpServerID string `json:"mcpServerId"`
+	}
+	DeleteDigitalMcpReq {
+		DigitalID   string `json:"digitalId"`
+		McpServerID string `json:"mcpServerId"`
+		UserID      string `header:"Beaver-User-Id"`
+	}
+	DeleteDigitalMcpRes {}
+)
+
 @server (
 	group: digital
 	middleware: DeveloperAuthMiddleware, RequireDeveloperMiddleware
@@ -144,6 +335,10 @@ service open {
 	@handler UpdateDigital
 	post /api/open_portal/digital/v1/update (UpdateDigitalReq) returns (UpdateDigitalRes)
 
+	@doc "删除数字伙伴"
+	@handler DeleteDigital
+	post /api/open_portal/digital/v1/delete (DeleteDigitalReq) returns (DeleteDigitalRes)
+
 	@doc "重置外接凭据密钥"
 	@handler ResetDigitalSecret
 	post /api/open_portal/digital/v1/reset_secret (ResetDigitalSecretReq) returns (ResetDigitalSecretRes)
@@ -163,4 +358,44 @@ service open {
 	@doc "保存数字伙伴编排配置"
 	@handler SaveDigitalConfig
 	post /api/open_portal/digital/v1/config/save (SaveDigitalConfigReq) returns (SaveDigitalConfigRes)
+
+	@doc "知识源列表（平台知识库 + 绑定状态）"
+	@handler ListDigitalKnowledge
+	get /api/open_portal/digital/v1/knowledge/list (ListDigitalKnowledgeReq) returns (ListDigitalKnowledgeRes)
+
+	@doc "新建/更新知识库"
+	@handler SaveDigitalKnowledge
+	post /api/open_portal/digital/v1/knowledge/save (SaveDigitalKnowledgeReq) returns (SaveDigitalKnowledgeRes)
+
+	@doc "删除知识库"
+	@handler DeleteDigitalKnowledge
+	post /api/open_portal/digital/v1/knowledge/delete (DeleteDigitalKnowledgeReq) returns (DeleteDigitalKnowledgeRes)
+
+	@doc "知识库文档列表"
+	@handler ListDigitalKnowledgeDoc
+	get /api/open_portal/digital/v1/knowledge/docs (ListDigitalKnowledgeDocReq) returns (ListDigitalKnowledgeDocRes)
+
+	@doc "新增/更新知识文档"
+	@handler SaveDigitalKnowledgeDoc
+	post /api/open_portal/digital/v1/knowledge/doc/save (SaveDigitalKnowledgeDocReq) returns (SaveDigitalKnowledgeDocRes)
+
+	@doc "删除知识文档"
+	@handler DeleteDigitalKnowledgeDoc
+	post /api/open_portal/digital/v1/knowledge/doc/delete (DeleteDigitalKnowledgeDocReq) returns (DeleteDigitalKnowledgeDocRes)
+
+	@doc "召回测试"
+	@handler RetrieveDigitalKnowledge
+	post /api/open_portal/digital/v1/knowledge/retrieve (RetrieveDigitalKnowledgeReq) returns (RetrieveDigitalKnowledgeRes)
+
+	@doc "工具与 MCP 目录"
+	@handler ListDigitalCatalog
+	get /api/open_portal/digital/v1/tool/catalog (ListDigitalCatalogReq) returns (ListDigitalCatalogRes)
+
+	@doc "新建/更新 MCP 服务"
+	@handler SaveDigitalMcp
+	post /api/open_portal/digital/v1/tool/mcp/save (SaveDigitalMcpReq) returns (SaveDigitalMcpRes)
+
+	@doc "删除 MCP 服务"
+	@handler DeleteDigitalMcp
+	post /api/open_portal/digital/v1/tool/mcp/delete (DeleteDigitalMcpReq) returns (DeleteDigitalMcpRes)
 }

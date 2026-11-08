@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/backend/backend_admin/internal/svc"
 	"beaver/app/backend/backend_admin/internal/types"
-	"beaver/app/knowledge/knowledge_rpc/types/knowledge_rpc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewDeleteKnowledgeDocumentLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *DeleteKnowledgeDocumentLogic) DeleteKnowledgeDocument(req *types.DeleteKnowledgeDocumentReq) (resp *types.DeleteKnowledgeDocumentRes, err error) {
-	_, err = l.svcCtx.KnowledgeRpc.DeleteDocument(l.ctx, &knowledge_rpc.DeleteDocumentReq{
+	_, err = l.svcCtx.PlatformRpc.DeleteDocument(l.ctx, &platform_rpc.DeleteDocumentReq{
 		DocumentId: req.DocumentID,
 	})
 	if err != nil {

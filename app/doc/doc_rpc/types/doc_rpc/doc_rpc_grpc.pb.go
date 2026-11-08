@@ -43,8 +43,8 @@ const (
 	Doc_ListRevisions_FullMethodName     = "/doc_rpc.doc/ListRevisions"
 	Doc_GetRevision_FullMethodName       = "/doc_rpc.doc/GetRevision"
 	Doc_RollbackRevision_FullMethodName  = "/doc_rpc.doc/RollbackRevision"
-	Doc_ReindexDoc_FullMethodName        = "/doc_rpc.doc/ReindexDoc"
 	Doc_ImportDoc_FullMethodName         = "/doc_rpc.doc/ImportDoc"
+	Doc_GetDocContent_FullMethodName     = "/doc_rpc.doc/GetDocContent"
 )
 
 // DocClient is the client API for Doc service.
@@ -75,8 +75,8 @@ type DocClient interface {
 	ListRevisions(ctx context.Context, in *ListRevisionsReq, opts ...grpc.CallOption) (*ListRevisionsRes, error)
 	GetRevision(ctx context.Context, in *GetRevisionReq, opts ...grpc.CallOption) (*GetRevisionRes, error)
 	RollbackRevision(ctx context.Context, in *RollbackRevisionReq, opts ...grpc.CallOption) (*RollbackRevisionRes, error)
-	ReindexDoc(ctx context.Context, in *ReindexDocReq, opts ...grpc.CallOption) (*ReindexDocRes, error)
 	ImportDoc(ctx context.Context, in *ImportDocReq, opts ...grpc.CallOption) (*ImportDocRes, error)
+	GetDocContent(ctx context.Context, in *GetDocContentReq, opts ...grpc.CallOption) (*GetDocContentRes, error)
 }
 
 type docClient struct {
@@ -327,20 +327,20 @@ func (c *docClient) RollbackRevision(ctx context.Context, in *RollbackRevisionRe
 	return out, nil
 }
 
-func (c *docClient) ReindexDoc(ctx context.Context, in *ReindexDocReq, opts ...grpc.CallOption) (*ReindexDocRes, error) {
+func (c *docClient) ImportDoc(ctx context.Context, in *ImportDocReq, opts ...grpc.CallOption) (*ImportDocRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReindexDocRes)
-	err := c.cc.Invoke(ctx, Doc_ReindexDoc_FullMethodName, in, out, cOpts...)
+	out := new(ImportDocRes)
+	err := c.cc.Invoke(ctx, Doc_ImportDoc_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *docClient) ImportDoc(ctx context.Context, in *ImportDocReq, opts ...grpc.CallOption) (*ImportDocRes, error) {
+func (c *docClient) GetDocContent(ctx context.Context, in *GetDocContentReq, opts ...grpc.CallOption) (*GetDocContentRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ImportDocRes)
-	err := c.cc.Invoke(ctx, Doc_ImportDoc_FullMethodName, in, out, cOpts...)
+	out := new(GetDocContentRes)
+	err := c.cc.Invoke(ctx, Doc_GetDocContent_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -375,8 +375,8 @@ type DocServer interface {
 	ListRevisions(context.Context, *ListRevisionsReq) (*ListRevisionsRes, error)
 	GetRevision(context.Context, *GetRevisionReq) (*GetRevisionRes, error)
 	RollbackRevision(context.Context, *RollbackRevisionReq) (*RollbackRevisionRes, error)
-	ReindexDoc(context.Context, *ReindexDocReq) (*ReindexDocRes, error)
 	ImportDoc(context.Context, *ImportDocReq) (*ImportDocRes, error)
+	GetDocContent(context.Context, *GetDocContentReq) (*GetDocContentRes, error)
 	mustEmbedUnimplementedDocServer()
 }
 
@@ -459,11 +459,11 @@ func (UnimplementedDocServer) GetRevision(context.Context, *GetRevisionReq) (*Ge
 func (UnimplementedDocServer) RollbackRevision(context.Context, *RollbackRevisionReq) (*RollbackRevisionRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RollbackRevision not implemented")
 }
-func (UnimplementedDocServer) ReindexDoc(context.Context, *ReindexDocReq) (*ReindexDocRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReindexDoc not implemented")
-}
 func (UnimplementedDocServer) ImportDoc(context.Context, *ImportDocReq) (*ImportDocRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ImportDoc not implemented")
+}
+func (UnimplementedDocServer) GetDocContent(context.Context, *GetDocContentReq) (*GetDocContentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDocContent not implemented")
 }
 func (UnimplementedDocServer) mustEmbedUnimplementedDocServer() {}
 func (UnimplementedDocServer) testEmbeddedByValue()             {}
@@ -918,24 +918,6 @@ func _Doc_RollbackRevision_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Doc_ReindexDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReindexDocReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DocServer).ReindexDoc(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Doc_ReindexDoc_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocServer).ReindexDoc(ctx, req.(*ReindexDocReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Doc_ImportDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ImportDocReq)
 	if err := dec(in); err != nil {
@@ -950,6 +932,24 @@ func _Doc_ImportDoc_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DocServer).ImportDoc(ctx, req.(*ImportDocReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_GetDocContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDocContentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).GetDocContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_GetDocContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).GetDocContent(ctx, req.(*GetDocContentReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1058,12 +1058,12 @@ var Doc_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Doc_RollbackRevision_Handler,
 		},
 		{
-			MethodName: "ReindexDoc",
-			Handler:    _Doc_ReindexDoc_Handler,
-		},
-		{
 			MethodName: "ImportDoc",
 			Handler:    _Doc_ImportDoc_Handler,
+		},
+		{
+			MethodName: "GetDocContent",
+			Handler:    _Doc_GetDocContent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -17,7 +17,6 @@ type CreateDocReq struct {
 	NodeId      string `json:"nodeId,optional"`
 	Title       string `json:"title"`
 	ContentJson string `json:"contentJson,optional"`
-	RagEnabled  bool   `json:"ragEnabled,optional"`
 }
 
 type CreateDocRes struct {
@@ -97,7 +96,6 @@ type DocItem struct {
 	Version      int    `json:"version"`
 	OwnerUserId  string `json:"ownerUserId"`
 	LastEditedBy string `json:"lastEditedBy"`
-	RagEnabled   bool   `json:"ragEnabled"`
 	Status       int    `json:"status"`
 	UpdatedAt    string `json:"updatedAt"`
 	CreatedAt    string `json:"createdAt"`
@@ -222,16 +220,6 @@ type PermItem struct {
 	Role          string `json:"role"`
 }
 
-type ReindexDocReq struct {
-	UserId string `header:"Beaver-User-Id"`
-	DocId  string `json:"docId"`
-}
-
-type ReindexDocRes struct {
-	Ok             bool   `json:"ok"`
-	KnowledgeDocId string `json:"knowledgeDocId"`
-}
-
 type RevisionItem struct {
 	RevisionId string `json:"revisionId"`
 	DocId      string `json:"docId"`
@@ -289,11 +277,10 @@ type SpaceItem struct {
 }
 
 type UpdateDocMetaReq struct {
-	UserId     string `header:"Beaver-User-Id"`
-	DocId      string `json:"docId"`
-	Title      string `json:"title,optional"`
-	RagEnabled bool   `json:"ragEnabled"`
-	Status     int    `json:"status,optional"`
+	UserId string `header:"Beaver-User-Id"`
+	DocId  string `json:"docId"`
+	Title  string `json:"title,optional"`
+	Status int    `json:"status,optional"`
 }
 
 type UpdateDocMetaRes struct {
@@ -323,4 +310,15 @@ type UpdateSpaceReq struct {
 }
 
 type UpdateSpaceRes struct {
+}
+
+type WsReq struct {
+	DocID    string `form:"docId"`             // 文档ID，作为协同房间名
+	UserID   string `form:"userId"`            // 用户ID
+	Token    string `form:"token"`             // 用户 token（Beaver JWT），升级前校验
+	Platform string `form:"platform,optional"` // 平台类型，用于登录态槽位校验
+	DeviceID string `form:"deviceId,optional"` // 设备 GUID，设备指纹校验
+}
+
+type WsRes struct {
 }

@@ -9410,6 +9410,1906 @@ func (x *ListWorkspacesByUserRes) GetWorkspaces() []*GetLatestWorkspaceRes {
 	return nil
 }
 
+type KnowledgeCollectionItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                        // uint64 记录 ID
+	CollectionId  string                 `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string 集合业务ID
+	ParentId      string                 `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`             // string 父集合ID，空为根
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`                                     // string 集合名
+	Kind          string                 `protobuf:"bytes,5,opt,name=kind,proto3" json:"kind,omitempty"`                                     // string 类型 docs|faq|...
+	StorageRef    string                 `protobuf:"bytes,6,opt,name=storage_ref,json=storageRef,proto3" json:"storage_ref,omitempty"`       // string 对象存储引用
+	AclMode       string                 `protobuf:"bytes,7,opt,name=acl_mode,json=aclMode,proto3" json:"acl_mode,omitempty"`                // string user_scoped|internal
+	IndexConfig   string                 `protobuf:"bytes,8,opt,name=index_config,json=indexConfig,proto3" json:"index_config,omitempty"`    // string 分段/清洗/检索/嵌入模型配置 JSON
+	Description   string                 `protobuf:"bytes,9,opt,name=description,proto3" json:"description,omitempty"`                       // string 描述
+	OwnerUserId   string                 `protobuf:"bytes,10,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"` // string 归属用户
+	Status        int32                  `protobuf:"varint,11,opt,name=status,proto3" json:"status,omitempty"`                               // int32 1启用 2停用
+	Sort          int32                  `protobuf:"varint,12,opt,name=sort,proto3" json:"sort,omitempty"`                                   // int32 排序
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KnowledgeCollectionItem) Reset() {
+	*x = KnowledgeCollectionItem{}
+	mi := &file_platform_rpc_proto_msgTypes[142]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KnowledgeCollectionItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KnowledgeCollectionItem) ProtoMessage() {}
+
+func (x *KnowledgeCollectionItem) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[142]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KnowledgeCollectionItem.ProtoReflect.Descriptor instead.
+func (*KnowledgeCollectionItem) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{142}
+}
+
+func (x *KnowledgeCollectionItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *KnowledgeCollectionItem) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetParentId() string {
+	if x != nil {
+		return x.ParentId
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetStorageRef() string {
+	if x != nil {
+		return x.StorageRef
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetAclMode() string {
+	if x != nil {
+		return x.AclMode
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetIndexConfig() string {
+	if x != nil {
+		return x.IndexConfig
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetOwnerUserId() string {
+	if x != nil {
+		return x.OwnerUserId
+	}
+	return ""
+}
+
+func (x *KnowledgeCollectionItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *KnowledgeCollectionItem) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type CreateCollectionReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ParentId      string                 `protobuf:"bytes,1,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`          // string 父集合ID，空为根
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                  // string 集合名
+	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`                                  // string 类型
+	AclMode       string                 `protobuf:"bytes,4,opt,name=acl_mode,json=aclMode,proto3" json:"acl_mode,omitempty"`             // string user_scoped|internal
+	IndexConfig   string                 `protobuf:"bytes,5,opt,name=index_config,json=indexConfig,proto3" json:"index_config,omitempty"` // string JSON
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`                    // string 描述
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                             // int32 默认1
+	Sort          int32                  `protobuf:"varint,8,opt,name=sort,proto3" json:"sort,omitempty"`                                 // int32
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateCollectionReq) Reset() {
+	*x = CreateCollectionReq{}
+	mi := &file_platform_rpc_proto_msgTypes[143]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateCollectionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateCollectionReq) ProtoMessage() {}
+
+func (x *CreateCollectionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[143]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateCollectionReq.ProtoReflect.Descriptor instead.
+func (*CreateCollectionReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{143}
+}
+
+func (x *CreateCollectionReq) GetParentId() string {
+	if x != nil {
+		return x.ParentId
+	}
+	return ""
+}
+
+func (x *CreateCollectionReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateCollectionReq) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *CreateCollectionReq) GetAclMode() string {
+	if x != nil {
+		return x.AclMode
+	}
+	return ""
+}
+
+func (x *CreateCollectionReq) GetIndexConfig() string {
+	if x != nil {
+		return x.IndexConfig
+	}
+	return ""
+}
+
+func (x *CreateCollectionReq) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateCollectionReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *CreateCollectionReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type CreateCollectionRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateCollectionRes) Reset() {
+	*x = CreateCollectionRes{}
+	mi := &file_platform_rpc_proto_msgTypes[144]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateCollectionRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateCollectionRes) ProtoMessage() {}
+
+func (x *CreateCollectionRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[144]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateCollectionRes.ProtoReflect.Descriptor instead.
+func (*CreateCollectionRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{144}
+}
+
+func (x *CreateCollectionRes) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+type UpdateCollectionReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                     // string
+	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`                                     // string
+	AclMode       string                 `protobuf:"bytes,4,opt,name=acl_mode,json=aclMode,proto3" json:"acl_mode,omitempty"`                // string
+	IndexConfig   string                 `protobuf:"bytes,5,opt,name=index_config,json=indexConfig,proto3" json:"index_config,omitempty"`    // string JSON
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`                       // string
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                                // int32
+	Sort          int32                  `protobuf:"varint,8,opt,name=sort,proto3" json:"sort,omitempty"`                                    // int32
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCollectionReq) Reset() {
+	*x = UpdateCollectionReq{}
+	mi := &file_platform_rpc_proto_msgTypes[145]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCollectionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCollectionReq) ProtoMessage() {}
+
+func (x *UpdateCollectionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[145]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCollectionReq.ProtoReflect.Descriptor instead.
+func (*UpdateCollectionReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{145}
+}
+
+func (x *UpdateCollectionReq) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *UpdateCollectionReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateCollectionReq) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *UpdateCollectionReq) GetAclMode() string {
+	if x != nil {
+		return x.AclMode
+	}
+	return ""
+}
+
+func (x *UpdateCollectionReq) GetIndexConfig() string {
+	if x != nil {
+		return x.IndexConfig
+	}
+	return ""
+}
+
+func (x *UpdateCollectionReq) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateCollectionReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UpdateCollectionReq) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type UpdateCollectionRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCollectionRes) Reset() {
+	*x = UpdateCollectionRes{}
+	mi := &file_platform_rpc_proto_msgTypes[146]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCollectionRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCollectionRes) ProtoMessage() {}
+
+func (x *UpdateCollectionRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[146]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCollectionRes.ProtoReflect.Descriptor instead.
+func (*UpdateCollectionRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{146}
+}
+
+type DeleteCollectionReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string 级联软删其下文档并清索引
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCollectionReq) Reset() {
+	*x = DeleteCollectionReq{}
+	mi := &file_platform_rpc_proto_msgTypes[147]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCollectionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCollectionReq) ProtoMessage() {}
+
+func (x *DeleteCollectionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[147]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCollectionReq.ProtoReflect.Descriptor instead.
+func (*DeleteCollectionReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{147}
+}
+
+func (x *DeleteCollectionReq) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+type DeleteCollectionRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCollectionRes) Reset() {
+	*x = DeleteCollectionRes{}
+	mi := &file_platform_rpc_proto_msgTypes[148]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCollectionRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCollectionRes) ProtoMessage() {}
+
+func (x *DeleteCollectionRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[148]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCollectionRes.ProtoReflect.Descriptor instead.
+func (*DeleteCollectionRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{148}
+}
+
+type GetCollectionReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCollectionReq) Reset() {
+	*x = GetCollectionReq{}
+	mi := &file_platform_rpc_proto_msgTypes[149]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCollectionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCollectionReq) ProtoMessage() {}
+
+func (x *GetCollectionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[149]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCollectionReq.ProtoReflect.Descriptor instead.
+func (*GetCollectionReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{149}
+}
+
+func (x *GetCollectionReq) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+type GetCollectionRes struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Collection    *KnowledgeCollectionItem `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"` // 集合详情
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCollectionRes) Reset() {
+	*x = GetCollectionRes{}
+	mi := &file_platform_rpc_proto_msgTypes[150]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCollectionRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCollectionRes) ProtoMessage() {}
+
+func (x *GetCollectionRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[150]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCollectionRes.ProtoReflect.Descriptor instead.
+func (*GetCollectionRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{150}
+}
+
+func (x *GetCollectionRes) GetCollection() *KnowledgeCollectionItem {
+	if x != nil {
+		return x.Collection
+	}
+	return nil
+}
+
+type ListCollectionsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`                     // int32 0全部 1启用 2停用
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // int32
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // int32
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCollectionsReq) Reset() {
+	*x = ListCollectionsReq{}
+	mi := &file_platform_rpc_proto_msgTypes[151]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCollectionsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCollectionsReq) ProtoMessage() {}
+
+func (x *ListCollectionsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[151]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCollectionsReq.ProtoReflect.Descriptor instead.
+func (*ListCollectionsReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{151}
+}
+
+func (x *ListCollectionsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListCollectionsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListCollectionsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListCollectionsRes struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Total         int64                      `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`            // int64
+	Collections   []*KnowledgeCollectionItem `protobuf:"bytes,2,rep,name=collections,proto3" json:"collections,omitempty"` // array
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCollectionsRes) Reset() {
+	*x = ListCollectionsRes{}
+	mi := &file_platform_rpc_proto_msgTypes[152]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCollectionsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCollectionsRes) ProtoMessage() {}
+
+func (x *ListCollectionsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[152]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCollectionsRes.ProtoReflect.Descriptor instead.
+func (*ListCollectionsRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{152}
+}
+
+func (x *ListCollectionsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListCollectionsRes) GetCollections() []*KnowledgeCollectionItem {
+	if x != nil {
+		return x.Collections
+	}
+	return nil
+}
+
+type KnowledgeDocumentItem struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                                     // uint64 记录 ID
+	DocumentId      string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`                    // string 文档业务ID
+	CollectionId    string                 `protobuf:"bytes,3,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`              // string 所属集合
+	Title           string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`                                                // string 标题
+	MediaType       string                 `protobuf:"bytes,5,opt,name=media_type,json=mediaType,proto3" json:"media_type,omitempty"`                       // string MIME
+	DocType         string                 `protobuf:"bytes,6,opt,name=doc_type,json=docType,proto3" json:"doc_type,omitempty"`                             // string guide|policy|faq|product
+	ByteSize        int64                  `protobuf:"varint,7,opt,name=byte_size,json=byteSize,proto3" json:"byte_size,omitempty"`                         // int64 字节数
+	MetadataText    string                 `protobuf:"bytes,9,opt,name=metadata_text,json=metadataText,proto3" json:"metadata_text,omitempty"`              // string JSON
+	RagEnabled      bool                   `protobuf:"varint,10,opt,name=rag_enabled,json=ragEnabled,proto3" json:"rag_enabled,omitempty"`                  // bool 是否参与检索
+	IndexStatus     string                 `protobuf:"bytes,11,opt,name=index_status,json=indexStatus,proto3" json:"index_status,omitempty"`                // string pending|indexing|ready|failed
+	IndexRetryCount int32                  `protobuf:"varint,12,opt,name=index_retry_count,json=indexRetryCount,proto3" json:"index_retry_count,omitempty"` // int32 重试次数
+	IndexError      string                 `protobuf:"bytes,13,opt,name=index_error,json=indexError,proto3" json:"index_error,omitempty"`                   // string 最近失败原因
+	IndexedAt       string                 `protobuf:"bytes,14,opt,name=indexed_at,json=indexedAt,proto3" json:"indexed_at,omitempty"`                      // string 索引完成时间 RFC3339
+	Status          int32                  `protobuf:"varint,16,opt,name=status,proto3" json:"status,omitempty"`                                            // int32 1启用 2停用
+	SourceType      string                 `protobuf:"bytes,17,opt,name=source_type,json=sourceType,proto3" json:"source_type,omitempty"`                   // string doc平台在线文档|file上传文件
+	SourceDocId     string                 `protobuf:"bytes,18,opt,name=source_doc_id,json=sourceDocId,proto3" json:"source_doc_id,omitempty"`              // string 平台在线文档ID（doc 业务的 doc_id）
+	SourceRevision  string                 `protobuf:"bytes,19,opt,name=source_revision,json=sourceRevision,proto3" json:"source_revision,omitempty"`       // string 来源版本（doc version）
+	SyncMode        string                 `protobuf:"bytes,20,opt,name=sync_mode,json=syncMode,proto3" json:"sync_mode,omitempty"`                         // string import|direct
+	SyncInterval    int32                  `protobuf:"varint,21,opt,name=sync_interval,json=syncInterval,proto3" json:"sync_interval,omitempty"`            // int32 自动同步间隔秒
+	LastSyncedAt    string                 `protobuf:"bytes,22,opt,name=last_synced_at,json=lastSyncedAt,proto3" json:"last_synced_at,omitempty"`           // string 最近同步时间 RFC3339
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *KnowledgeDocumentItem) Reset() {
+	*x = KnowledgeDocumentItem{}
+	mi := &file_platform_rpc_proto_msgTypes[153]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KnowledgeDocumentItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KnowledgeDocumentItem) ProtoMessage() {}
+
+func (x *KnowledgeDocumentItem) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[153]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KnowledgeDocumentItem.ProtoReflect.Descriptor instead.
+func (*KnowledgeDocumentItem) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{153}
+}
+
+func (x *KnowledgeDocumentItem) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentItem) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetMediaType() string {
+	if x != nil {
+		return x.MediaType
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetDocType() string {
+	if x != nil {
+		return x.DocType
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetByteSize() int64 {
+	if x != nil {
+		return x.ByteSize
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentItem) GetMetadataText() string {
+	if x != nil {
+		return x.MetadataText
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetRagEnabled() bool {
+	if x != nil {
+		return x.RagEnabled
+	}
+	return false
+}
+
+func (x *KnowledgeDocumentItem) GetIndexStatus() string {
+	if x != nil {
+		return x.IndexStatus
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetIndexRetryCount() int32 {
+	if x != nil {
+		return x.IndexRetryCount
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentItem) GetIndexError() string {
+	if x != nil {
+		return x.IndexError
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetIndexedAt() string {
+	if x != nil {
+		return x.IndexedAt
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentItem) GetSourceType() string {
+	if x != nil {
+		return x.SourceType
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetSourceDocId() string {
+	if x != nil {
+		return x.SourceDocId
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetSourceRevision() string {
+	if x != nil {
+		return x.SourceRevision
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetSyncMode() string {
+	if x != nil {
+		return x.SyncMode
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentItem) GetSyncInterval() int32 {
+	if x != nil {
+		return x.SyncInterval
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentItem) GetLastSyncedAt() string {
+	if x != nil {
+		return x.LastSyncedAt
+	}
+	return ""
+}
+
+type CreateDocumentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`   // string 所属集合
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                                     // string 标题
+	MediaType     string                 `protobuf:"bytes,3,opt,name=media_type,json=mediaType,proto3" json:"media_type,omitempty"`            // string MIME
+	DocType       string                 `protobuf:"bytes,4,opt,name=doc_type,json=docType,proto3" json:"doc_type,omitempty"`                  // string
+	ContentText   string                 `protobuf:"bytes,6,opt,name=content_text,json=contentText,proto3" json:"content_text,omitempty"`      // string 正文（file 来源必填；doc 来源忽略，按 source_doc_id 读取）
+	MetadataText  string                 `protobuf:"bytes,7,opt,name=metadata_text,json=metadataText,proto3" json:"metadata_text,omitempty"`   // string JSON
+	RagEnabled    bool                   `protobuf:"varint,8,opt,name=rag_enabled,json=ragEnabled,proto3" json:"rag_enabled,omitempty"`        // bool 默认 true
+	SourceType    string                 `protobuf:"bytes,9,opt,name=source_type,json=sourceType,proto3" json:"source_type,omitempty"`         // string doc|file，空则按 source_doc_id 推断
+	SourceDocId   string                 `protobuf:"bytes,10,opt,name=source_doc_id,json=sourceDocId,proto3" json:"source_doc_id,omitempty"`   // string 平台在线文档ID（source_type=doc 时必填）
+	SyncMode      string                 `protobuf:"bytes,11,opt,name=sync_mode,json=syncMode,proto3" json:"sync_mode,omitempty"`              // string import|direct，默认 import
+	SyncInterval  int32                  `protobuf:"varint,12,opt,name=sync_interval,json=syncInterval,proto3" json:"sync_interval,omitempty"` // int32 自动同步间隔秒
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateDocumentReq) Reset() {
+	*x = CreateDocumentReq{}
+	mi := &file_platform_rpc_proto_msgTypes[154]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateDocumentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDocumentReq) ProtoMessage() {}
+
+func (x *CreateDocumentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[154]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDocumentReq.ProtoReflect.Descriptor instead.
+func (*CreateDocumentReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{154}
+}
+
+func (x *CreateDocumentReq) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetMediaType() string {
+	if x != nil {
+		return x.MediaType
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetDocType() string {
+	if x != nil {
+		return x.DocType
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetContentText() string {
+	if x != nil {
+		return x.ContentText
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetMetadataText() string {
+	if x != nil {
+		return x.MetadataText
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetRagEnabled() bool {
+	if x != nil {
+		return x.RagEnabled
+	}
+	return false
+}
+
+func (x *CreateDocumentReq) GetSourceType() string {
+	if x != nil {
+		return x.SourceType
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetSourceDocId() string {
+	if x != nil {
+		return x.SourceDocId
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetSyncMode() string {
+	if x != nil {
+		return x.SyncMode
+	}
+	return ""
+}
+
+func (x *CreateDocumentReq) GetSyncInterval() int32 {
+	if x != nil {
+		return x.SyncInterval
+	}
+	return 0
+}
+
+type CreateDocumentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"` // string
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateDocumentRes) Reset() {
+	*x = CreateDocumentRes{}
+	mi := &file_platform_rpc_proto_msgTypes[155]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateDocumentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDocumentRes) ProtoMessage() {}
+
+func (x *CreateDocumentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[155]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDocumentRes.ProtoReflect.Descriptor instead.
+func (*CreateDocumentRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{155}
+}
+
+func (x *CreateDocumentRes) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type UpdateDocumentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`         // string
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                                     // string
+	DocType       string                 `protobuf:"bytes,3,opt,name=doc_type,json=docType,proto3" json:"doc_type,omitempty"`                  // string
+	ContentText   string                 `protobuf:"bytes,4,opt,name=content_text,json=contentText,proto3" json:"content_text,omitempty"`      // string 变更则重新入队索引
+	MetadataText  string                 `protobuf:"bytes,5,opt,name=metadata_text,json=metadataText,proto3" json:"metadata_text,omitempty"`   // string JSON
+	RagEnabled    bool                   `protobuf:"varint,6,opt,name=rag_enabled,json=ragEnabled,proto3" json:"rag_enabled,omitempty"`        // bool
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                                  // int32
+	SourceDocId   string                 `protobuf:"bytes,9,opt,name=source_doc_id,json=sourceDocId,proto3" json:"source_doc_id,omitempty"`    // string 平台在线文档ID（变更则重新读取正文）
+	SyncMode      string                 `protobuf:"bytes,10,opt,name=sync_mode,json=syncMode,proto3" json:"sync_mode,omitempty"`              // string import|direct
+	SyncInterval  int32                  `protobuf:"varint,11,opt,name=sync_interval,json=syncInterval,proto3" json:"sync_interval,omitempty"` // int32 自动同步间隔秒
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDocumentReq) Reset() {
+	*x = UpdateDocumentReq{}
+	mi := &file_platform_rpc_proto_msgTypes[156]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDocumentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDocumentReq) ProtoMessage() {}
+
+func (x *UpdateDocumentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[156]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDocumentReq.ProtoReflect.Descriptor instead.
+func (*UpdateDocumentReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{156}
+}
+
+func (x *UpdateDocumentReq) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetDocType() string {
+	if x != nil {
+		return x.DocType
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetContentText() string {
+	if x != nil {
+		return x.ContentText
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetMetadataText() string {
+	if x != nil {
+		return x.MetadataText
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetRagEnabled() bool {
+	if x != nil {
+		return x.RagEnabled
+	}
+	return false
+}
+
+func (x *UpdateDocumentReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UpdateDocumentReq) GetSourceDocId() string {
+	if x != nil {
+		return x.SourceDocId
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetSyncMode() string {
+	if x != nil {
+		return x.SyncMode
+	}
+	return ""
+}
+
+func (x *UpdateDocumentReq) GetSyncInterval() int32 {
+	if x != nil {
+		return x.SyncInterval
+	}
+	return 0
+}
+
+type UpdateDocumentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDocumentRes) Reset() {
+	*x = UpdateDocumentRes{}
+	mi := &file_platform_rpc_proto_msgTypes[157]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDocumentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDocumentRes) ProtoMessage() {}
+
+func (x *UpdateDocumentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[157]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDocumentRes.ProtoReflect.Descriptor instead.
+func (*UpdateDocumentRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{157}
+}
+
+type DeleteDocumentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"` // string 软删并同步清 OpenSearch 索引
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentReq) Reset() {
+	*x = DeleteDocumentReq{}
+	mi := &file_platform_rpc_proto_msgTypes[158]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentReq) ProtoMessage() {}
+
+func (x *DeleteDocumentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[158]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentReq.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{158}
+}
+
+func (x *DeleteDocumentReq) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type DeleteDocumentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentRes) Reset() {
+	*x = DeleteDocumentRes{}
+	mi := &file_platform_rpc_proto_msgTypes[159]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentRes) ProtoMessage() {}
+
+func (x *DeleteDocumentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[159]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentRes.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{159}
+}
+
+type GetDocumentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"` // string
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDocumentReq) Reset() {
+	*x = GetDocumentReq{}
+	mi := &file_platform_rpc_proto_msgTypes[160]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDocumentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDocumentReq) ProtoMessage() {}
+
+func (x *GetDocumentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[160]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDocumentReq.ProtoReflect.Descriptor instead.
+func (*GetDocumentReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{160}
+}
+
+func (x *GetDocumentReq) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type GetDocumentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Document      *KnowledgeDocumentItem `protobuf:"bytes,1,opt,name=document,proto3" json:"document,omitempty"` // 文档详情
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDocumentRes) Reset() {
+	*x = GetDocumentRes{}
+	mi := &file_platform_rpc_proto_msgTypes[161]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDocumentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDocumentRes) ProtoMessage() {}
+
+func (x *GetDocumentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[161]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDocumentRes.ProtoReflect.Descriptor instead.
+func (*GetDocumentRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{161}
+}
+
+func (x *GetDocumentRes) GetDocument() *KnowledgeDocumentItem {
+	if x != nil {
+		return x.Document
+	}
+	return nil
+}
+
+type ListDocumentsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string 按集合过滤
+	IndexStatus   string                 `protobuf:"bytes,2,opt,name=index_status,json=indexStatus,proto3" json:"index_status,omitempty"`    // string 按索引状态过滤，可选
+	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`                                // int32 0全部
+	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`                                    // int32
+	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`            // int32
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDocumentsReq) Reset() {
+	*x = ListDocumentsReq{}
+	mi := &file_platform_rpc_proto_msgTypes[162]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDocumentsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDocumentsReq) ProtoMessage() {}
+
+func (x *ListDocumentsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[162]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDocumentsReq.ProtoReflect.Descriptor instead.
+func (*ListDocumentsReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{162}
+}
+
+func (x *ListDocumentsReq) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *ListDocumentsReq) GetIndexStatus() string {
+	if x != nil {
+		return x.IndexStatus
+	}
+	return ""
+}
+
+func (x *ListDocumentsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListDocumentsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListDocumentsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListDocumentsRes struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Total         int64                    `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`        // int64
+	Documents     []*KnowledgeDocumentItem `protobuf:"bytes,2,rep,name=documents,proto3" json:"documents,omitempty"` // array
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDocumentsRes) Reset() {
+	*x = ListDocumentsRes{}
+	mi := &file_platform_rpc_proto_msgTypes[163]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDocumentsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDocumentsRes) ProtoMessage() {}
+
+func (x *ListDocumentsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[163]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDocumentsRes.ProtoReflect.Descriptor instead.
+func (*ListDocumentsRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{163}
+}
+
+func (x *ListDocumentsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListDocumentsRes) GetDocuments() []*KnowledgeDocumentItem {
+	if x != nil {
+		return x.Documents
+	}
+	return nil
+}
+
+type ReindexDocumentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"` // string 重新入队索引
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReindexDocumentReq) Reset() {
+	*x = ReindexDocumentReq{}
+	mi := &file_platform_rpc_proto_msgTypes[164]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReindexDocumentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReindexDocumentReq) ProtoMessage() {}
+
+func (x *ReindexDocumentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[164]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReindexDocumentReq.ProtoReflect.Descriptor instead.
+func (*ReindexDocumentReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{164}
+}
+
+func (x *ReindexDocumentReq) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type ReindexDocumentRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReindexDocumentRes) Reset() {
+	*x = ReindexDocumentRes{}
+	mi := &file_platform_rpc_proto_msgTypes[165]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReindexDocumentRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReindexDocumentRes) ProtoMessage() {}
+
+func (x *ReindexDocumentRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[165]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReindexDocumentRes.ProtoReflect.Descriptor instead.
+func (*ReindexDocumentRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{165}
+}
+
+type SearchKnowledgeReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`    // string 应用ID：只认其绑定的 knowledge_ids，不接受调用方指定分区
+	Scene         string                 `protobuf:"bytes,2,opt,name=scene,proto3" json:"scene,omitempty"`                 // string 无 app_id 时按场景默认应用解析绑定
+	Query         string                 `protobuf:"bytes,3,opt,name=query,proto3" json:"query,omitempty"`                 // string 检索词
+	TopK          int32                  `protobuf:"varint,4,opt,name=top_k,json=topK,proto3" json:"top_k,omitempty"`      // int32 返回条数，<=0 用集合默认
+	UserId        string                 `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // string user_scoped 集合按此隔离
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchKnowledgeReq) Reset() {
+	*x = SearchKnowledgeReq{}
+	mi := &file_platform_rpc_proto_msgTypes[166]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchKnowledgeReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchKnowledgeReq) ProtoMessage() {}
+
+func (x *SearchKnowledgeReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[166]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchKnowledgeReq.ProtoReflect.Descriptor instead.
+func (*SearchKnowledgeReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{166}
+}
+
+func (x *SearchKnowledgeReq) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *SearchKnowledgeReq) GetScene() string {
+	if x != nil {
+		return x.Scene
+	}
+	return ""
+}
+
+func (x *SearchKnowledgeReq) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *SearchKnowledgeReq) GetTopK() int32 {
+	if x != nil {
+		return x.TopK
+	}
+	return 0
+}
+
+func (x *SearchKnowledgeReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type KnowledgeHit struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`       // string 命中文档
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`                                   // string 文档标题
+	ChunkIndex    int32                  `protobuf:"varint,3,opt,name=chunk_index,json=chunkIndex,proto3" json:"chunk_index,omitempty"`      // int32 段号（对齐原文可回溯）
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`                               // string 分段正文
+	Score         float64                `protobuf:"fixed64,5,opt,name=score,proto3" json:"score,omitempty"`                                 // double 相关度
+	CollectionId  string                 `protobuf:"bytes,6,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string 命中集合
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KnowledgeHit) Reset() {
+	*x = KnowledgeHit{}
+	mi := &file_platform_rpc_proto_msgTypes[167]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KnowledgeHit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KnowledgeHit) ProtoMessage() {}
+
+func (x *KnowledgeHit) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[167]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KnowledgeHit.ProtoReflect.Descriptor instead.
+func (*KnowledgeHit) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{167}
+}
+
+func (x *KnowledgeHit) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *KnowledgeHit) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *KnowledgeHit) GetChunkIndex() int32 {
+	if x != nil {
+		return x.ChunkIndex
+	}
+	return 0
+}
+
+func (x *KnowledgeHit) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *KnowledgeHit) GetScore() float64 {
+	if x != nil {
+		return x.Score
+	}
+	return 0
+}
+
+func (x *KnowledgeHit) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+type SearchKnowledgeRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hits          []*KnowledgeHit        `protobuf:"bytes,1,rep,name=hits,proto3" json:"hits,omitempty"` // array 无命中/停用/无绑定一律返回空，不报错
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchKnowledgeRes) Reset() {
+	*x = SearchKnowledgeRes{}
+	mi := &file_platform_rpc_proto_msgTypes[168]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchKnowledgeRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchKnowledgeRes) ProtoMessage() {}
+
+func (x *SearchKnowledgeRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[168]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchKnowledgeRes.ProtoReflect.Descriptor instead.
+func (*SearchKnowledgeRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{168}
+}
+
+func (x *SearchKnowledgeRes) GetHits() []*KnowledgeHit {
+	if x != nil {
+		return x.Hits
+	}
+	return nil
+}
+
+type RetrieveCollectionReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CollectionId  string                 `protobuf:"bytes,1,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"` // string 目标集合ID
+	Query         string                 `protobuf:"bytes,2,opt,name=query,proto3" json:"query,omitempty"`                                   // string 测试问题
+	TopK          int32                  `protobuf:"varint,3,opt,name=top_k,json=topK,proto3" json:"top_k,omitempty"`                        // int32 返回条数，<=0 默认 5
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetrieveCollectionReq) Reset() {
+	*x = RetrieveCollectionReq{}
+	mi := &file_platform_rpc_proto_msgTypes[169]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetrieveCollectionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetrieveCollectionReq) ProtoMessage() {}
+
+func (x *RetrieveCollectionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[169]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetrieveCollectionReq.ProtoReflect.Descriptor instead.
+func (*RetrieveCollectionReq) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{169}
+}
+
+func (x *RetrieveCollectionReq) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *RetrieveCollectionReq) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *RetrieveCollectionReq) GetTopK() int32 {
+	if x != nil {
+		return x.TopK
+	}
+	return 0
+}
+
+type RetrieveCollectionRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hits          []*KnowledgeHit        `protobuf:"bytes,1,rep,name=hits,proto3" json:"hits,omitempty"`     // array 命中分段，按相关度降序
+	Notice        string                 `protobuf:"bytes,2,opt,name=notice,proto3" json:"notice,omitempty"` // string 无结果原因（集合停用/未配置向量检索/无命中），有命中时为空
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetrieveCollectionRes) Reset() {
+	*x = RetrieveCollectionRes{}
+	mi := &file_platform_rpc_proto_msgTypes[170]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetrieveCollectionRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetrieveCollectionRes) ProtoMessage() {}
+
+func (x *RetrieveCollectionRes) ProtoReflect() protoreflect.Message {
+	mi := &file_platform_rpc_proto_msgTypes[170]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetrieveCollectionRes.ProtoReflect.Descriptor instead.
+func (*RetrieveCollectionRes) Descriptor() ([]byte, []int) {
+	return file_platform_rpc_proto_rawDescGZIP(), []int{170}
+}
+
+func (x *RetrieveCollectionRes) GetHits() []*KnowledgeHit {
+	if x != nil {
+		return x.Hits
+	}
+	return nil
+}
+
+func (x *RetrieveCollectionRes) GetNotice() string {
+	if x != nil {
+		return x.Notice
+	}
+	return ""
+}
+
 var File_platform_rpc_proto protoreflect.FileDescriptor
 
 const file_platform_rpc_proto_rawDesc = "" +
@@ -10181,7 +12081,167 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x17ListWorkspacesByUserRes\x12C\n" +
 	"\n" +
 	"workspaces\x18\x01 \x03(\v2#.platform_rpc.GetLatestWorkspaceResR\n" +
-	"workspaces2\xe8+\n" +
+	"workspaces\"\xe4\x02\n" +
+	"\x17KnowledgeCollectionItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12#\n" +
+	"\rcollection_id\x18\x02 \x01(\tR\fcollectionId\x12\x1b\n" +
+	"\tparent_id\x18\x03 \x01(\tR\bparentId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
+	"\x04kind\x18\x05 \x01(\tR\x04kind\x12\x1f\n" +
+	"\vstorage_ref\x18\x06 \x01(\tR\n" +
+	"storageRef\x12\x19\n" +
+	"\bacl_mode\x18\a \x01(\tR\aaclMode\x12!\n" +
+	"\findex_config\x18\b \x01(\tR\vindexConfig\x12 \n" +
+	"\vdescription\x18\t \x01(\tR\vdescription\x12\"\n" +
+	"\rowner_user_id\x18\n" +
+	" \x01(\tR\vownerUserId\x12\x16\n" +
+	"\x06status\x18\v \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\f \x01(\x05R\x04sort\"\xe6\x01\n" +
+	"\x13CreateCollectionReq\x12\x1b\n" +
+	"\tparent_id\x18\x01 \x01(\tR\bparentId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04kind\x18\x03 \x01(\tR\x04kind\x12\x19\n" +
+	"\bacl_mode\x18\x04 \x01(\tR\aaclMode\x12!\n" +
+	"\findex_config\x18\x05 \x01(\tR\vindexConfig\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\a \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\b \x01(\x05R\x04sort\":\n" +
+	"\x13CreateCollectionRes\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\"\xee\x01\n" +
+	"\x13UpdateCollectionReq\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04kind\x18\x03 \x01(\tR\x04kind\x12\x19\n" +
+	"\bacl_mode\x18\x04 \x01(\tR\aaclMode\x12!\n" +
+	"\findex_config\x18\x05 \x01(\tR\vindexConfig\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\a \x01(\x05R\x06status\x12\x12\n" +
+	"\x04sort\x18\b \x01(\x05R\x04sort\"\x15\n" +
+	"\x13UpdateCollectionRes\":\n" +
+	"\x13DeleteCollectionReq\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\"\x15\n" +
+	"\x13DeleteCollectionRes\"7\n" +
+	"\x10GetCollectionReq\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\"Y\n" +
+	"\x10GetCollectionRes\x12E\n" +
+	"\n" +
+	"collection\x18\x01 \x01(\v2%.platform_rpc.KnowledgeCollectionItemR\n" +
+	"collection\"]\n" +
+	"\x12ListCollectionsReq\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"s\n" +
+	"\x12ListCollectionsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12G\n" +
+	"\vcollections\x18\x02 \x03(\v2%.platform_rpc.KnowledgeCollectionItemR\vcollections\"\x9d\x05\n" +
+	"\x15KnowledgeDocumentItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x1f\n" +
+	"\vdocument_id\x18\x02 \x01(\tR\n" +
+	"documentId\x12#\n" +
+	"\rcollection_id\x18\x03 \x01(\tR\fcollectionId\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12\x1d\n" +
+	"\n" +
+	"media_type\x18\x05 \x01(\tR\tmediaType\x12\x19\n" +
+	"\bdoc_type\x18\x06 \x01(\tR\adocType\x12\x1b\n" +
+	"\tbyte_size\x18\a \x01(\x03R\bbyteSize\x12#\n" +
+	"\rmetadata_text\x18\t \x01(\tR\fmetadataText\x12\x1f\n" +
+	"\vrag_enabled\x18\n" +
+	" \x01(\bR\n" +
+	"ragEnabled\x12!\n" +
+	"\findex_status\x18\v \x01(\tR\vindexStatus\x12*\n" +
+	"\x11index_retry_count\x18\f \x01(\x05R\x0findexRetryCount\x12\x1f\n" +
+	"\vindex_error\x18\r \x01(\tR\n" +
+	"indexError\x12\x1d\n" +
+	"\n" +
+	"indexed_at\x18\x0e \x01(\tR\tindexedAt\x12\x16\n" +
+	"\x06status\x18\x10 \x01(\x05R\x06status\x12\x1f\n" +
+	"\vsource_type\x18\x11 \x01(\tR\n" +
+	"sourceType\x12\"\n" +
+	"\rsource_doc_id\x18\x12 \x01(\tR\vsourceDocId\x12'\n" +
+	"\x0fsource_revision\x18\x13 \x01(\tR\x0esourceRevision\x12\x1b\n" +
+	"\tsync_mode\x18\x14 \x01(\tR\bsyncMode\x12#\n" +
+	"\rsync_interval\x18\x15 \x01(\x05R\fsyncInterval\x12$\n" +
+	"\x0elast_synced_at\x18\x16 \x01(\tR\flastSyncedAt\"\xf8\x02\n" +
+	"\x11CreateDocumentReq\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1d\n" +
+	"\n" +
+	"media_type\x18\x03 \x01(\tR\tmediaType\x12\x19\n" +
+	"\bdoc_type\x18\x04 \x01(\tR\adocType\x12!\n" +
+	"\fcontent_text\x18\x06 \x01(\tR\vcontentText\x12#\n" +
+	"\rmetadata_text\x18\a \x01(\tR\fmetadataText\x12\x1f\n" +
+	"\vrag_enabled\x18\b \x01(\bR\n" +
+	"ragEnabled\x12\x1f\n" +
+	"\vsource_type\x18\t \x01(\tR\n" +
+	"sourceType\x12\"\n" +
+	"\rsource_doc_id\x18\n" +
+	" \x01(\tR\vsourceDocId\x12\x1b\n" +
+	"\tsync_mode\x18\v \x01(\tR\bsyncMode\x12#\n" +
+	"\rsync_interval\x18\f \x01(\x05R\fsyncInterval\"4\n" +
+	"\x11CreateDocumentRes\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"\xcc\x02\n" +
+	"\x11UpdateDocumentReq\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x19\n" +
+	"\bdoc_type\x18\x03 \x01(\tR\adocType\x12!\n" +
+	"\fcontent_text\x18\x04 \x01(\tR\vcontentText\x12#\n" +
+	"\rmetadata_text\x18\x05 \x01(\tR\fmetadataText\x12\x1f\n" +
+	"\vrag_enabled\x18\x06 \x01(\bR\n" +
+	"ragEnabled\x12\x16\n" +
+	"\x06status\x18\a \x01(\x05R\x06status\x12\"\n" +
+	"\rsource_doc_id\x18\t \x01(\tR\vsourceDocId\x12\x1b\n" +
+	"\tsync_mode\x18\n" +
+	" \x01(\tR\bsyncMode\x12#\n" +
+	"\rsync_interval\x18\v \x01(\x05R\fsyncInterval\"\x13\n" +
+	"\x11UpdateDocumentRes\"4\n" +
+	"\x11DeleteDocumentReq\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"\x13\n" +
+	"\x11DeleteDocumentRes\"1\n" +
+	"\x0eGetDocumentReq\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"Q\n" +
+	"\x0eGetDocumentRes\x12?\n" +
+	"\bdocument\x18\x01 \x01(\v2#.platform_rpc.KnowledgeDocumentItemR\bdocument\"\xa3\x01\n" +
+	"\x10ListDocumentsReq\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\x12!\n" +
+	"\findex_status\x18\x02 \x01(\tR\vindexStatus\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\x05R\x06status\x12\x12\n" +
+	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\"k\n" +
+	"\x10ListDocumentsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12A\n" +
+	"\tdocuments\x18\x02 \x03(\v2#.platform_rpc.KnowledgeDocumentItemR\tdocuments\"5\n" +
+	"\x12ReindexDocumentReq\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"\x14\n" +
+	"\x12ReindexDocumentRes\"\x85\x01\n" +
+	"\x12SearchKnowledgeReq\x12\x15\n" +
+	"\x06app_id\x18\x01 \x01(\tR\x05appId\x12\x14\n" +
+	"\x05scene\x18\x02 \x01(\tR\x05scene\x12\x14\n" +
+	"\x05query\x18\x03 \x01(\tR\x05query\x12\x13\n" +
+	"\x05top_k\x18\x04 \x01(\x05R\x04topK\x12\x17\n" +
+	"\auser_id\x18\x05 \x01(\tR\x06userId\"\xbb\x01\n" +
+	"\fKnowledgeHit\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1f\n" +
+	"\vchunk_index\x18\x03 \x01(\x05R\n" +
+	"chunkIndex\x12\x18\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x12\x14\n" +
+	"\x05score\x18\x05 \x01(\x01R\x05score\x12#\n" +
+	"\rcollection_id\x18\x06 \x01(\tR\fcollectionId\"D\n" +
+	"\x12SearchKnowledgeRes\x12.\n" +
+	"\x04hits\x18\x01 \x03(\v2\x1a.platform_rpc.KnowledgeHitR\x04hits\"g\n" +
+	"\x15RetrieveCollectionReq\x12#\n" +
+	"\rcollection_id\x18\x01 \x01(\tR\fcollectionId\x12\x14\n" +
+	"\x05query\x18\x02 \x01(\tR\x05query\x12\x13\n" +
+	"\x05top_k\x18\x03 \x01(\x05R\x04topK\"_\n" +
+	"\x15RetrieveCollectionRes\x12.\n" +
+	"\x04hits\x18\x01 \x03(\v2\x1a.platform_rpc.KnowledgeHitR\x04hits\x12\x16\n" +
+	"\x06notice\x18\x02 \x01(\tR\x06notice2\xc44\n" +
 	"\bplatform\x12R\n" +
 	"\x0eAdminQueryLogs\x12\x1f.platform_rpc.AdminQueryLogsReq\x1a\x1f.platform_rpc.AdminQueryLogsRes\x12C\n" +
 	"\tCreateApp\x12\x1a.platform_rpc.CreateAppReq\x1a\x1a.platform_rpc.CreateAppRes\x12@\n" +
@@ -10244,7 +12304,20 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x12GetLatestWorkspace\x12#.platform_rpc.GetLatestWorkspaceReq\x1a#.platform_rpc.GetLatestWorkspaceRes\x12[\n" +
 	"\x11SaveWorkspacePath\x12\".platform_rpc.SaveWorkspacePathReq\x1a\".platform_rpc.SaveWorkspacePathRes\x12U\n" +
 	"\x0fUpsertWorkspace\x12 .platform_rpc.UpsertWorkspaceReq\x1a .platform_rpc.UpsertWorkspaceRes\x12d\n" +
-	"\x14ListWorkspacesByUser\x12%.platform_rpc.ListWorkspacesByUserReq\x1a%.platform_rpc.ListWorkspacesByUserResB\x10Z\x0e./platform_rpcb\x06proto3"
+	"\x14ListWorkspacesByUser\x12%.platform_rpc.ListWorkspacesByUserReq\x1a%.platform_rpc.ListWorkspacesByUserRes\x12X\n" +
+	"\x10CreateCollection\x12!.platform_rpc.CreateCollectionReq\x1a!.platform_rpc.CreateCollectionRes\x12X\n" +
+	"\x10UpdateCollection\x12!.platform_rpc.UpdateCollectionReq\x1a!.platform_rpc.UpdateCollectionRes\x12X\n" +
+	"\x10DeleteCollection\x12!.platform_rpc.DeleteCollectionReq\x1a!.platform_rpc.DeleteCollectionRes\x12O\n" +
+	"\rGetCollection\x12\x1e.platform_rpc.GetCollectionReq\x1a\x1e.platform_rpc.GetCollectionRes\x12U\n" +
+	"\x0fListCollections\x12 .platform_rpc.ListCollectionsReq\x1a .platform_rpc.ListCollectionsRes\x12R\n" +
+	"\x0eCreateDocument\x12\x1f.platform_rpc.CreateDocumentReq\x1a\x1f.platform_rpc.CreateDocumentRes\x12R\n" +
+	"\x0eUpdateDocument\x12\x1f.platform_rpc.UpdateDocumentReq\x1a\x1f.platform_rpc.UpdateDocumentRes\x12R\n" +
+	"\x0eDeleteDocument\x12\x1f.platform_rpc.DeleteDocumentReq\x1a\x1f.platform_rpc.DeleteDocumentRes\x12I\n" +
+	"\vGetDocument\x12\x1c.platform_rpc.GetDocumentReq\x1a\x1c.platform_rpc.GetDocumentRes\x12O\n" +
+	"\rListDocuments\x12\x1e.platform_rpc.ListDocumentsReq\x1a\x1e.platform_rpc.ListDocumentsRes\x12U\n" +
+	"\x0fReindexDocument\x12 .platform_rpc.ReindexDocumentReq\x1a .platform_rpc.ReindexDocumentRes\x12U\n" +
+	"\x0fSearchKnowledge\x12 .platform_rpc.SearchKnowledgeReq\x1a .platform_rpc.SearchKnowledgeRes\x12^\n" +
+	"\x12RetrieveCollection\x12#.platform_rpc.RetrieveCollectionReq\x1a#.platform_rpc.RetrieveCollectionResB\x10Z\x0e./platform_rpcb\x06proto3"
 
 var (
 	file_platform_rpc_proto_rawDescOnce sync.Once
@@ -10258,7 +12331,7 @@ func file_platform_rpc_proto_rawDescGZIP() []byte {
 	return file_platform_rpc_proto_rawDescData
 }
 
-var file_platform_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 142)
+var file_platform_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 171)
 var file_platform_rpc_proto_goTypes = []any{
 	(*AdminQueryLogsReq)(nil),           // 0: platform_rpc.AdminQueryLogsReq
 	(*AdminLogItem)(nil),                // 1: platform_rpc.AdminLogItem
@@ -10402,6 +12475,35 @@ var file_platform_rpc_proto_goTypes = []any{
 	(*UpsertWorkspaceRes)(nil),          // 139: platform_rpc.UpsertWorkspaceRes
 	(*ListWorkspacesByUserReq)(nil),     // 140: platform_rpc.ListWorkspacesByUserReq
 	(*ListWorkspacesByUserRes)(nil),     // 141: platform_rpc.ListWorkspacesByUserRes
+	(*KnowledgeCollectionItem)(nil),     // 142: platform_rpc.KnowledgeCollectionItem
+	(*CreateCollectionReq)(nil),         // 143: platform_rpc.CreateCollectionReq
+	(*CreateCollectionRes)(nil),         // 144: platform_rpc.CreateCollectionRes
+	(*UpdateCollectionReq)(nil),         // 145: platform_rpc.UpdateCollectionReq
+	(*UpdateCollectionRes)(nil),         // 146: platform_rpc.UpdateCollectionRes
+	(*DeleteCollectionReq)(nil),         // 147: platform_rpc.DeleteCollectionReq
+	(*DeleteCollectionRes)(nil),         // 148: platform_rpc.DeleteCollectionRes
+	(*GetCollectionReq)(nil),            // 149: platform_rpc.GetCollectionReq
+	(*GetCollectionRes)(nil),            // 150: platform_rpc.GetCollectionRes
+	(*ListCollectionsReq)(nil),          // 151: platform_rpc.ListCollectionsReq
+	(*ListCollectionsRes)(nil),          // 152: platform_rpc.ListCollectionsRes
+	(*KnowledgeDocumentItem)(nil),       // 153: platform_rpc.KnowledgeDocumentItem
+	(*CreateDocumentReq)(nil),           // 154: platform_rpc.CreateDocumentReq
+	(*CreateDocumentRes)(nil),           // 155: platform_rpc.CreateDocumentRes
+	(*UpdateDocumentReq)(nil),           // 156: platform_rpc.UpdateDocumentReq
+	(*UpdateDocumentRes)(nil),           // 157: platform_rpc.UpdateDocumentRes
+	(*DeleteDocumentReq)(nil),           // 158: platform_rpc.DeleteDocumentReq
+	(*DeleteDocumentRes)(nil),           // 159: platform_rpc.DeleteDocumentRes
+	(*GetDocumentReq)(nil),              // 160: platform_rpc.GetDocumentReq
+	(*GetDocumentRes)(nil),              // 161: platform_rpc.GetDocumentRes
+	(*ListDocumentsReq)(nil),            // 162: platform_rpc.ListDocumentsReq
+	(*ListDocumentsRes)(nil),            // 163: platform_rpc.ListDocumentsRes
+	(*ReindexDocumentReq)(nil),          // 164: platform_rpc.ReindexDocumentReq
+	(*ReindexDocumentRes)(nil),          // 165: platform_rpc.ReindexDocumentRes
+	(*SearchKnowledgeReq)(nil),          // 166: platform_rpc.SearchKnowledgeReq
+	(*KnowledgeHit)(nil),                // 167: platform_rpc.KnowledgeHit
+	(*SearchKnowledgeRes)(nil),          // 168: platform_rpc.SearchKnowledgeRes
+	(*RetrieveCollectionReq)(nil),       // 169: platform_rpc.RetrieveCollectionReq
+	(*RetrieveCollectionRes)(nil),       // 170: platform_rpc.RetrieveCollectionRes
 }
 var file_platform_rpc_proto_depIdxs = []int32{
 	1,   // 0: platform_rpc.AdminQueryLogsRes.logs:type_name -> platform_rpc.AdminLogItem
@@ -10433,135 +12535,167 @@ var file_platform_rpc_proto_depIdxs = []int32{
 	118, // 26: platform_rpc.GetAgentMcpServerRes.server:type_name -> platform_rpc.AgentMcpServerItem
 	129, // 27: platform_rpc.GetAiAssistantRes.assistant:type_name -> platform_rpc.AiAssistantItem
 	135, // 28: platform_rpc.ListWorkspacesByUserRes.workspaces:type_name -> platform_rpc.GetLatestWorkspaceRes
-	0,   // 29: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
-	4,   // 30: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
-	6,   // 31: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
-	9,   // 32: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
-	11,  // 33: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
-	13,  // 34: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
-	16,  // 35: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
-	18,  // 36: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
-	20,  // 37: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
-	24,  // 38: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
-	27,  // 39: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
-	29,  // 40: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
-	32,  // 41: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
-	34,  // 42: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
-	36,  // 43: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
-	38,  // 44: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
-	40,  // 45: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
-	43,  // 46: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
-	45,  // 47: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
-	47,  // 48: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
-	49,  // 49: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
-	54,  // 50: platform_rpc.platform.CreateWorkbenchApp:input_type -> platform_rpc.CreateWorkbenchAppReq
-	56,  // 51: platform_rpc.platform.UpdateWorkbenchApp:input_type -> platform_rpc.UpdateWorkbenchAppReq
-	58,  // 52: platform_rpc.platform.DeleteWorkbenchApp:input_type -> platform_rpc.DeleteWorkbenchAppReq
-	60,  // 53: platform_rpc.platform.GetWorkbenchApp:input_type -> platform_rpc.GetWorkbenchAppReq
-	62,  // 54: platform_rpc.platform.ListWorkbenchApps:input_type -> platform_rpc.ListWorkbenchAppsReq
-	64,  // 55: platform_rpc.platform.ListEnabledWorkbenchApps:input_type -> platform_rpc.ListEnabledWorkbenchAppsReq
-	66,  // 56: platform_rpc.platform.CreateOrgDepartment:input_type -> platform_rpc.CreateOrgDepartmentReq
-	68,  // 57: platform_rpc.platform.UpdateOrgDepartment:input_type -> platform_rpc.UpdateOrgDepartmentReq
-	70,  // 58: platform_rpc.platform.DeleteOrgDepartment:input_type -> platform_rpc.DeleteOrgDepartmentReq
-	72,  // 59: platform_rpc.platform.AddOrgMember:input_type -> platform_rpc.AddOrgMemberReq
-	74,  // 60: platform_rpc.platform.RemoveOrgMember:input_type -> platform_rpc.RemoveOrgMemberReq
-	77,  // 61: platform_rpc.platform.GetAgentApp:input_type -> platform_rpc.GetAgentAppReq
-	79,  // 62: platform_rpc.platform.ListAgentApps:input_type -> platform_rpc.ListAgentAppsReq
-	81,  // 63: platform_rpc.platform.CreateAgentApp:input_type -> platform_rpc.CreateAgentAppReq
-	83,  // 64: platform_rpc.platform.UpdateAgentApp:input_type -> platform_rpc.UpdateAgentAppReq
-	85,  // 65: platform_rpc.platform.DeleteAgentApp:input_type -> platform_rpc.DeleteAgentAppReq
-	88,  // 66: platform_rpc.platform.GetAgentModel:input_type -> platform_rpc.GetAgentModelReq
-	90,  // 67: platform_rpc.platform.ListAgentModels:input_type -> platform_rpc.ListAgentModelsReq
-	92,  // 68: platform_rpc.platform.CreateAgentModel:input_type -> platform_rpc.CreateAgentModelReq
-	94,  // 69: platform_rpc.platform.UpdateAgentModel:input_type -> platform_rpc.UpdateAgentModelReq
-	96,  // 70: platform_rpc.platform.DeleteAgentModel:input_type -> platform_rpc.DeleteAgentModelReq
-	99,  // 71: platform_rpc.platform.ListAgentCredentials:input_type -> platform_rpc.ListAgentCredentialsReq
-	101, // 72: platform_rpc.platform.CreateAgentCredential:input_type -> platform_rpc.CreateAgentCredentialReq
-	103, // 73: platform_rpc.platform.UpdateAgentCredential:input_type -> platform_rpc.UpdateAgentCredentialReq
-	105, // 74: platform_rpc.platform.DeleteAgentCredential:input_type -> platform_rpc.DeleteAgentCredentialReq
-	110, // 75: platform_rpc.platform.GetAgentTool:input_type -> platform_rpc.GetAgentToolReq
-	108, // 76: platform_rpc.platform.ListAgentTools:input_type -> platform_rpc.ListAgentToolsReq
-	112, // 77: platform_rpc.platform.CreateAgentTool:input_type -> platform_rpc.CreateAgentToolReq
-	114, // 78: platform_rpc.platform.UpdateAgentTool:input_type -> platform_rpc.UpdateAgentToolReq
-	116, // 79: platform_rpc.platform.DeleteAgentTool:input_type -> platform_rpc.DeleteAgentToolReq
-	121, // 80: platform_rpc.platform.GetAgentMcpServer:input_type -> platform_rpc.GetAgentMcpServerReq
-	119, // 81: platform_rpc.platform.ListAgentMcpServers:input_type -> platform_rpc.ListAgentMcpServersReq
-	123, // 82: platform_rpc.platform.CreateAgentMcpServer:input_type -> platform_rpc.CreateAgentMcpServerReq
-	125, // 83: platform_rpc.platform.UpdateAgentMcpServer:input_type -> platform_rpc.UpdateAgentMcpServerReq
-	127, // 84: platform_rpc.platform.DeleteAgentMcpServer:input_type -> platform_rpc.DeleteAgentMcpServerReq
-	130, // 85: platform_rpc.platform.GetAiAssistant:input_type -> platform_rpc.GetAiAssistantReq
-	132, // 86: platform_rpc.platform.SaveAiAssistant:input_type -> platform_rpc.SaveAiAssistantReq
-	134, // 87: platform_rpc.platform.GetLatestWorkspace:input_type -> platform_rpc.GetLatestWorkspaceReq
-	136, // 88: platform_rpc.platform.SaveWorkspacePath:input_type -> platform_rpc.SaveWorkspacePathReq
-	138, // 89: platform_rpc.platform.UpsertWorkspace:input_type -> platform_rpc.UpsertWorkspaceReq
-	140, // 90: platform_rpc.platform.ListWorkspacesByUser:input_type -> platform_rpc.ListWorkspacesByUserReq
-	2,   // 91: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
-	5,   // 92: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
-	7,   // 93: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
-	10,  // 94: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
-	12,  // 95: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
-	14,  // 96: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
-	17,  // 97: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
-	19,  // 98: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
-	21,  // 99: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
-	25,  // 100: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
-	28,  // 101: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
-	30,  // 102: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
-	33,  // 103: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
-	35,  // 104: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
-	37,  // 105: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
-	39,  // 106: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
-	41,  // 107: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
-	44,  // 108: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
-	46,  // 109: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
-	48,  // 110: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
-	50,  // 111: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
-	55,  // 112: platform_rpc.platform.CreateWorkbenchApp:output_type -> platform_rpc.CreateWorkbenchAppRes
-	57,  // 113: platform_rpc.platform.UpdateWorkbenchApp:output_type -> platform_rpc.UpdateWorkbenchAppRes
-	59,  // 114: platform_rpc.platform.DeleteWorkbenchApp:output_type -> platform_rpc.DeleteWorkbenchAppRes
-	61,  // 115: platform_rpc.platform.GetWorkbenchApp:output_type -> platform_rpc.GetWorkbenchAppRes
-	63,  // 116: platform_rpc.platform.ListWorkbenchApps:output_type -> platform_rpc.ListWorkbenchAppsRes
-	65,  // 117: platform_rpc.platform.ListEnabledWorkbenchApps:output_type -> platform_rpc.ListEnabledWorkbenchAppsRes
-	67,  // 118: platform_rpc.platform.CreateOrgDepartment:output_type -> platform_rpc.CreateOrgDepartmentRes
-	69,  // 119: platform_rpc.platform.UpdateOrgDepartment:output_type -> platform_rpc.UpdateOrgDepartmentRes
-	71,  // 120: platform_rpc.platform.DeleteOrgDepartment:output_type -> platform_rpc.DeleteOrgDepartmentRes
-	73,  // 121: platform_rpc.platform.AddOrgMember:output_type -> platform_rpc.AddOrgMemberRes
-	75,  // 122: platform_rpc.platform.RemoveOrgMember:output_type -> platform_rpc.RemoveOrgMemberRes
-	78,  // 123: platform_rpc.platform.GetAgentApp:output_type -> platform_rpc.GetAgentAppRes
-	80,  // 124: platform_rpc.platform.ListAgentApps:output_type -> platform_rpc.ListAgentAppsRes
-	82,  // 125: platform_rpc.platform.CreateAgentApp:output_type -> platform_rpc.CreateAgentAppRes
-	84,  // 126: platform_rpc.platform.UpdateAgentApp:output_type -> platform_rpc.UpdateAgentAppRes
-	86,  // 127: platform_rpc.platform.DeleteAgentApp:output_type -> platform_rpc.DeleteAgentAppRes
-	89,  // 128: platform_rpc.platform.GetAgentModel:output_type -> platform_rpc.GetAgentModelRes
-	91,  // 129: platform_rpc.platform.ListAgentModels:output_type -> platform_rpc.ListAgentModelsRes
-	93,  // 130: platform_rpc.platform.CreateAgentModel:output_type -> platform_rpc.CreateAgentModelRes
-	95,  // 131: platform_rpc.platform.UpdateAgentModel:output_type -> platform_rpc.UpdateAgentModelRes
-	97,  // 132: platform_rpc.platform.DeleteAgentModel:output_type -> platform_rpc.DeleteAgentModelRes
-	100, // 133: platform_rpc.platform.ListAgentCredentials:output_type -> platform_rpc.ListAgentCredentialsRes
-	102, // 134: platform_rpc.platform.CreateAgentCredential:output_type -> platform_rpc.CreateAgentCredentialRes
-	104, // 135: platform_rpc.platform.UpdateAgentCredential:output_type -> platform_rpc.UpdateAgentCredentialRes
-	106, // 136: platform_rpc.platform.DeleteAgentCredential:output_type -> platform_rpc.DeleteAgentCredentialRes
-	111, // 137: platform_rpc.platform.GetAgentTool:output_type -> platform_rpc.GetAgentToolRes
-	109, // 138: platform_rpc.platform.ListAgentTools:output_type -> platform_rpc.ListAgentToolsRes
-	113, // 139: platform_rpc.platform.CreateAgentTool:output_type -> platform_rpc.CreateAgentToolRes
-	115, // 140: platform_rpc.platform.UpdateAgentTool:output_type -> platform_rpc.UpdateAgentToolRes
-	117, // 141: platform_rpc.platform.DeleteAgentTool:output_type -> platform_rpc.DeleteAgentToolRes
-	122, // 142: platform_rpc.platform.GetAgentMcpServer:output_type -> platform_rpc.GetAgentMcpServerRes
-	120, // 143: platform_rpc.platform.ListAgentMcpServers:output_type -> platform_rpc.ListAgentMcpServersRes
-	124, // 144: platform_rpc.platform.CreateAgentMcpServer:output_type -> platform_rpc.CreateAgentMcpServerRes
-	126, // 145: platform_rpc.platform.UpdateAgentMcpServer:output_type -> platform_rpc.UpdateAgentMcpServerRes
-	128, // 146: platform_rpc.platform.DeleteAgentMcpServer:output_type -> platform_rpc.DeleteAgentMcpServerRes
-	131, // 147: platform_rpc.platform.GetAiAssistant:output_type -> platform_rpc.GetAiAssistantRes
-	133, // 148: platform_rpc.platform.SaveAiAssistant:output_type -> platform_rpc.SaveAiAssistantRes
-	135, // 149: platform_rpc.platform.GetLatestWorkspace:output_type -> platform_rpc.GetLatestWorkspaceRes
-	137, // 150: platform_rpc.platform.SaveWorkspacePath:output_type -> platform_rpc.SaveWorkspacePathRes
-	139, // 151: platform_rpc.platform.UpsertWorkspace:output_type -> platform_rpc.UpsertWorkspaceRes
-	141, // 152: platform_rpc.platform.ListWorkspacesByUser:output_type -> platform_rpc.ListWorkspacesByUserRes
-	91,  // [91:153] is the sub-list for method output_type
-	29,  // [29:91] is the sub-list for method input_type
-	29,  // [29:29] is the sub-list for extension type_name
-	29,  // [29:29] is the sub-list for extension extendee
-	0,   // [0:29] is the sub-list for field type_name
+	142, // 29: platform_rpc.GetCollectionRes.collection:type_name -> platform_rpc.KnowledgeCollectionItem
+	142, // 30: platform_rpc.ListCollectionsRes.collections:type_name -> platform_rpc.KnowledgeCollectionItem
+	153, // 31: platform_rpc.GetDocumentRes.document:type_name -> platform_rpc.KnowledgeDocumentItem
+	153, // 32: platform_rpc.ListDocumentsRes.documents:type_name -> platform_rpc.KnowledgeDocumentItem
+	167, // 33: platform_rpc.SearchKnowledgeRes.hits:type_name -> platform_rpc.KnowledgeHit
+	167, // 34: platform_rpc.RetrieveCollectionRes.hits:type_name -> platform_rpc.KnowledgeHit
+	0,   // 35: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
+	4,   // 36: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
+	6,   // 37: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
+	9,   // 38: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
+	11,  // 39: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
+	13,  // 40: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
+	16,  // 41: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
+	18,  // 42: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
+	20,  // 43: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
+	24,  // 44: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
+	27,  // 45: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
+	29,  // 46: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
+	32,  // 47: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
+	34,  // 48: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
+	36,  // 49: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
+	38,  // 50: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
+	40,  // 51: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
+	43,  // 52: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
+	45,  // 53: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
+	47,  // 54: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
+	49,  // 55: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
+	54,  // 56: platform_rpc.platform.CreateWorkbenchApp:input_type -> platform_rpc.CreateWorkbenchAppReq
+	56,  // 57: platform_rpc.platform.UpdateWorkbenchApp:input_type -> platform_rpc.UpdateWorkbenchAppReq
+	58,  // 58: platform_rpc.platform.DeleteWorkbenchApp:input_type -> platform_rpc.DeleteWorkbenchAppReq
+	60,  // 59: platform_rpc.platform.GetWorkbenchApp:input_type -> platform_rpc.GetWorkbenchAppReq
+	62,  // 60: platform_rpc.platform.ListWorkbenchApps:input_type -> platform_rpc.ListWorkbenchAppsReq
+	64,  // 61: platform_rpc.platform.ListEnabledWorkbenchApps:input_type -> platform_rpc.ListEnabledWorkbenchAppsReq
+	66,  // 62: platform_rpc.platform.CreateOrgDepartment:input_type -> platform_rpc.CreateOrgDepartmentReq
+	68,  // 63: platform_rpc.platform.UpdateOrgDepartment:input_type -> platform_rpc.UpdateOrgDepartmentReq
+	70,  // 64: platform_rpc.platform.DeleteOrgDepartment:input_type -> platform_rpc.DeleteOrgDepartmentReq
+	72,  // 65: platform_rpc.platform.AddOrgMember:input_type -> platform_rpc.AddOrgMemberReq
+	74,  // 66: platform_rpc.platform.RemoveOrgMember:input_type -> platform_rpc.RemoveOrgMemberReq
+	77,  // 67: platform_rpc.platform.GetAgentApp:input_type -> platform_rpc.GetAgentAppReq
+	79,  // 68: platform_rpc.platform.ListAgentApps:input_type -> platform_rpc.ListAgentAppsReq
+	81,  // 69: platform_rpc.platform.CreateAgentApp:input_type -> platform_rpc.CreateAgentAppReq
+	83,  // 70: platform_rpc.platform.UpdateAgentApp:input_type -> platform_rpc.UpdateAgentAppReq
+	85,  // 71: platform_rpc.platform.DeleteAgentApp:input_type -> platform_rpc.DeleteAgentAppReq
+	88,  // 72: platform_rpc.platform.GetAgentModel:input_type -> platform_rpc.GetAgentModelReq
+	90,  // 73: platform_rpc.platform.ListAgentModels:input_type -> platform_rpc.ListAgentModelsReq
+	92,  // 74: platform_rpc.platform.CreateAgentModel:input_type -> platform_rpc.CreateAgentModelReq
+	94,  // 75: platform_rpc.platform.UpdateAgentModel:input_type -> platform_rpc.UpdateAgentModelReq
+	96,  // 76: platform_rpc.platform.DeleteAgentModel:input_type -> platform_rpc.DeleteAgentModelReq
+	99,  // 77: platform_rpc.platform.ListAgentCredentials:input_type -> platform_rpc.ListAgentCredentialsReq
+	101, // 78: platform_rpc.platform.CreateAgentCredential:input_type -> platform_rpc.CreateAgentCredentialReq
+	103, // 79: platform_rpc.platform.UpdateAgentCredential:input_type -> platform_rpc.UpdateAgentCredentialReq
+	105, // 80: platform_rpc.platform.DeleteAgentCredential:input_type -> platform_rpc.DeleteAgentCredentialReq
+	110, // 81: platform_rpc.platform.GetAgentTool:input_type -> platform_rpc.GetAgentToolReq
+	108, // 82: platform_rpc.platform.ListAgentTools:input_type -> platform_rpc.ListAgentToolsReq
+	112, // 83: platform_rpc.platform.CreateAgentTool:input_type -> platform_rpc.CreateAgentToolReq
+	114, // 84: platform_rpc.platform.UpdateAgentTool:input_type -> platform_rpc.UpdateAgentToolReq
+	116, // 85: platform_rpc.platform.DeleteAgentTool:input_type -> platform_rpc.DeleteAgentToolReq
+	121, // 86: platform_rpc.platform.GetAgentMcpServer:input_type -> platform_rpc.GetAgentMcpServerReq
+	119, // 87: platform_rpc.platform.ListAgentMcpServers:input_type -> platform_rpc.ListAgentMcpServersReq
+	123, // 88: platform_rpc.platform.CreateAgentMcpServer:input_type -> platform_rpc.CreateAgentMcpServerReq
+	125, // 89: platform_rpc.platform.UpdateAgentMcpServer:input_type -> platform_rpc.UpdateAgentMcpServerReq
+	127, // 90: platform_rpc.platform.DeleteAgentMcpServer:input_type -> platform_rpc.DeleteAgentMcpServerReq
+	130, // 91: platform_rpc.platform.GetAiAssistant:input_type -> platform_rpc.GetAiAssistantReq
+	132, // 92: platform_rpc.platform.SaveAiAssistant:input_type -> platform_rpc.SaveAiAssistantReq
+	134, // 93: platform_rpc.platform.GetLatestWorkspace:input_type -> platform_rpc.GetLatestWorkspaceReq
+	136, // 94: platform_rpc.platform.SaveWorkspacePath:input_type -> platform_rpc.SaveWorkspacePathReq
+	138, // 95: platform_rpc.platform.UpsertWorkspace:input_type -> platform_rpc.UpsertWorkspaceReq
+	140, // 96: platform_rpc.platform.ListWorkspacesByUser:input_type -> platform_rpc.ListWorkspacesByUserReq
+	143, // 97: platform_rpc.platform.CreateCollection:input_type -> platform_rpc.CreateCollectionReq
+	145, // 98: platform_rpc.platform.UpdateCollection:input_type -> platform_rpc.UpdateCollectionReq
+	147, // 99: platform_rpc.platform.DeleteCollection:input_type -> platform_rpc.DeleteCollectionReq
+	149, // 100: platform_rpc.platform.GetCollection:input_type -> platform_rpc.GetCollectionReq
+	151, // 101: platform_rpc.platform.ListCollections:input_type -> platform_rpc.ListCollectionsReq
+	154, // 102: platform_rpc.platform.CreateDocument:input_type -> platform_rpc.CreateDocumentReq
+	156, // 103: platform_rpc.platform.UpdateDocument:input_type -> platform_rpc.UpdateDocumentReq
+	158, // 104: platform_rpc.platform.DeleteDocument:input_type -> platform_rpc.DeleteDocumentReq
+	160, // 105: platform_rpc.platform.GetDocument:input_type -> platform_rpc.GetDocumentReq
+	162, // 106: platform_rpc.platform.ListDocuments:input_type -> platform_rpc.ListDocumentsReq
+	164, // 107: platform_rpc.platform.ReindexDocument:input_type -> platform_rpc.ReindexDocumentReq
+	166, // 108: platform_rpc.platform.SearchKnowledge:input_type -> platform_rpc.SearchKnowledgeReq
+	169, // 109: platform_rpc.platform.RetrieveCollection:input_type -> platform_rpc.RetrieveCollectionReq
+	2,   // 110: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
+	5,   // 111: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
+	7,   // 112: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
+	10,  // 113: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
+	12,  // 114: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
+	14,  // 115: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
+	17,  // 116: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
+	19,  // 117: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
+	21,  // 118: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
+	25,  // 119: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
+	28,  // 120: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
+	30,  // 121: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
+	33,  // 122: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
+	35,  // 123: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
+	37,  // 124: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
+	39,  // 125: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
+	41,  // 126: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
+	44,  // 127: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
+	46,  // 128: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
+	48,  // 129: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
+	50,  // 130: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
+	55,  // 131: platform_rpc.platform.CreateWorkbenchApp:output_type -> platform_rpc.CreateWorkbenchAppRes
+	57,  // 132: platform_rpc.platform.UpdateWorkbenchApp:output_type -> platform_rpc.UpdateWorkbenchAppRes
+	59,  // 133: platform_rpc.platform.DeleteWorkbenchApp:output_type -> platform_rpc.DeleteWorkbenchAppRes
+	61,  // 134: platform_rpc.platform.GetWorkbenchApp:output_type -> platform_rpc.GetWorkbenchAppRes
+	63,  // 135: platform_rpc.platform.ListWorkbenchApps:output_type -> platform_rpc.ListWorkbenchAppsRes
+	65,  // 136: platform_rpc.platform.ListEnabledWorkbenchApps:output_type -> platform_rpc.ListEnabledWorkbenchAppsRes
+	67,  // 137: platform_rpc.platform.CreateOrgDepartment:output_type -> platform_rpc.CreateOrgDepartmentRes
+	69,  // 138: platform_rpc.platform.UpdateOrgDepartment:output_type -> platform_rpc.UpdateOrgDepartmentRes
+	71,  // 139: platform_rpc.platform.DeleteOrgDepartment:output_type -> platform_rpc.DeleteOrgDepartmentRes
+	73,  // 140: platform_rpc.platform.AddOrgMember:output_type -> platform_rpc.AddOrgMemberRes
+	75,  // 141: platform_rpc.platform.RemoveOrgMember:output_type -> platform_rpc.RemoveOrgMemberRes
+	78,  // 142: platform_rpc.platform.GetAgentApp:output_type -> platform_rpc.GetAgentAppRes
+	80,  // 143: platform_rpc.platform.ListAgentApps:output_type -> platform_rpc.ListAgentAppsRes
+	82,  // 144: platform_rpc.platform.CreateAgentApp:output_type -> platform_rpc.CreateAgentAppRes
+	84,  // 145: platform_rpc.platform.UpdateAgentApp:output_type -> platform_rpc.UpdateAgentAppRes
+	86,  // 146: platform_rpc.platform.DeleteAgentApp:output_type -> platform_rpc.DeleteAgentAppRes
+	89,  // 147: platform_rpc.platform.GetAgentModel:output_type -> platform_rpc.GetAgentModelRes
+	91,  // 148: platform_rpc.platform.ListAgentModels:output_type -> platform_rpc.ListAgentModelsRes
+	93,  // 149: platform_rpc.platform.CreateAgentModel:output_type -> platform_rpc.CreateAgentModelRes
+	95,  // 150: platform_rpc.platform.UpdateAgentModel:output_type -> platform_rpc.UpdateAgentModelRes
+	97,  // 151: platform_rpc.platform.DeleteAgentModel:output_type -> platform_rpc.DeleteAgentModelRes
+	100, // 152: platform_rpc.platform.ListAgentCredentials:output_type -> platform_rpc.ListAgentCredentialsRes
+	102, // 153: platform_rpc.platform.CreateAgentCredential:output_type -> platform_rpc.CreateAgentCredentialRes
+	104, // 154: platform_rpc.platform.UpdateAgentCredential:output_type -> platform_rpc.UpdateAgentCredentialRes
+	106, // 155: platform_rpc.platform.DeleteAgentCredential:output_type -> platform_rpc.DeleteAgentCredentialRes
+	111, // 156: platform_rpc.platform.GetAgentTool:output_type -> platform_rpc.GetAgentToolRes
+	109, // 157: platform_rpc.platform.ListAgentTools:output_type -> platform_rpc.ListAgentToolsRes
+	113, // 158: platform_rpc.platform.CreateAgentTool:output_type -> platform_rpc.CreateAgentToolRes
+	115, // 159: platform_rpc.platform.UpdateAgentTool:output_type -> platform_rpc.UpdateAgentToolRes
+	117, // 160: platform_rpc.platform.DeleteAgentTool:output_type -> platform_rpc.DeleteAgentToolRes
+	122, // 161: platform_rpc.platform.GetAgentMcpServer:output_type -> platform_rpc.GetAgentMcpServerRes
+	120, // 162: platform_rpc.platform.ListAgentMcpServers:output_type -> platform_rpc.ListAgentMcpServersRes
+	124, // 163: platform_rpc.platform.CreateAgentMcpServer:output_type -> platform_rpc.CreateAgentMcpServerRes
+	126, // 164: platform_rpc.platform.UpdateAgentMcpServer:output_type -> platform_rpc.UpdateAgentMcpServerRes
+	128, // 165: platform_rpc.platform.DeleteAgentMcpServer:output_type -> platform_rpc.DeleteAgentMcpServerRes
+	131, // 166: platform_rpc.platform.GetAiAssistant:output_type -> platform_rpc.GetAiAssistantRes
+	133, // 167: platform_rpc.platform.SaveAiAssistant:output_type -> platform_rpc.SaveAiAssistantRes
+	135, // 168: platform_rpc.platform.GetLatestWorkspace:output_type -> platform_rpc.GetLatestWorkspaceRes
+	137, // 169: platform_rpc.platform.SaveWorkspacePath:output_type -> platform_rpc.SaveWorkspacePathRes
+	139, // 170: platform_rpc.platform.UpsertWorkspace:output_type -> platform_rpc.UpsertWorkspaceRes
+	141, // 171: platform_rpc.platform.ListWorkspacesByUser:output_type -> platform_rpc.ListWorkspacesByUserRes
+	144, // 172: platform_rpc.platform.CreateCollection:output_type -> platform_rpc.CreateCollectionRes
+	146, // 173: platform_rpc.platform.UpdateCollection:output_type -> platform_rpc.UpdateCollectionRes
+	148, // 174: platform_rpc.platform.DeleteCollection:output_type -> platform_rpc.DeleteCollectionRes
+	150, // 175: platform_rpc.platform.GetCollection:output_type -> platform_rpc.GetCollectionRes
+	152, // 176: platform_rpc.platform.ListCollections:output_type -> platform_rpc.ListCollectionsRes
+	155, // 177: platform_rpc.platform.CreateDocument:output_type -> platform_rpc.CreateDocumentRes
+	157, // 178: platform_rpc.platform.UpdateDocument:output_type -> platform_rpc.UpdateDocumentRes
+	159, // 179: platform_rpc.platform.DeleteDocument:output_type -> platform_rpc.DeleteDocumentRes
+	161, // 180: platform_rpc.platform.GetDocument:output_type -> platform_rpc.GetDocumentRes
+	163, // 181: platform_rpc.platform.ListDocuments:output_type -> platform_rpc.ListDocumentsRes
+	165, // 182: platform_rpc.platform.ReindexDocument:output_type -> platform_rpc.ReindexDocumentRes
+	168, // 183: platform_rpc.platform.SearchKnowledge:output_type -> platform_rpc.SearchKnowledgeRes
+	170, // 184: platform_rpc.platform.RetrieveCollection:output_type -> platform_rpc.RetrieveCollectionRes
+	110, // [110:185] is the sub-list for method output_type
+	35,  // [35:110] is the sub-list for method input_type
+	35,  // [35:35] is the sub-list for extension type_name
+	35,  // [35:35] is the sub-list for extension extendee
+	0,   // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_platform_rpc_proto_init() }
@@ -10581,7 +12715,7 @@ func file_platform_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_platform_rpc_proto_rawDesc), len(file_platform_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   142,
+			NumMessages:   171,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

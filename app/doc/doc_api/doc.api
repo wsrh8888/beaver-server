@@ -140,7 +140,6 @@ type (
 		NodeId      string `json:"nodeId,optional"`
 		Title       string `json:"title"`
 		ContentJson string `json:"contentJson,optional"`
-		RagEnabled  bool   `json:"ragEnabled,optional"`
 	}
 	CreateDocRes {
 		DocId string `json:"docId"`
@@ -156,7 +155,6 @@ type DocItem {
 	Version      int    `json:"version"`
 	OwnerUserId  string `json:"ownerUserId"`
 	LastEditedBy string `json:"lastEditedBy"`
-	RagEnabled   bool   `json:"ragEnabled"`
 	Status       int    `json:"status"`
 	UpdatedAt    string `json:"updatedAt"`
 	CreatedAt    string `json:"createdAt"`
@@ -177,7 +175,6 @@ type (
 		UserId     string `header:"Beaver-User-Id"`
 		DocId      string `json:"docId"`
 		Title      string `json:"title,optional"`
-		RagEnabled bool   `json:"ragEnabled"`
 		Status     int    `json:"status,optional"`
 	}
 	UpdateDocMetaRes  {}
@@ -315,18 +312,7 @@ type (
 	}
 )
 
-// ==================== RAG 重索引 / 文件导入 ====================
-type (
-	ReindexDocReq {
-		UserId string `header:"Beaver-User-Id"`
-		DocId  string `json:"docId"`
-	}
-	ReindexDocRes {
-		Ok             bool   `json:"ok"`
-		KnowledgeDocId string `json:"knowledgeDocId"`
-	}
-)
-
+// ==================== 文件导入 ====================
 type (
 	ImportDocReq {
 		UserId       string `header:"Beaver-User-Id"`
@@ -344,6 +330,18 @@ type (
 		Parsed      bool   `json:"parsed"`
 		Message     string `json:"message"`
 	}
+)
+
+// ==================== 实时协同 WebSocket ====================
+type (
+	WsReq {
+		DocID    string `form:"docId"`             // 文档ID，作为协同房间名
+		UserID   string `form:"userId"`            // 用户ID
+		Token    string `form:"token"`             // 用户 token（Beaver JWT），升级前校验
+		Platform string `form:"platform,optional"` // 平台类型，用于登录态槽位校验
+		DeviceID string `form:"deviceId,optional"` // 设备 GUID，设备指纹校验
+	}
+	WsRes {}
 )
 
 service doc {
@@ -435,13 +433,13 @@ service doc {
 	@handler RollbackRevision
 	post /api/doc/v1/revision/rollback (RollbackRevisionReq) returns (RollbackRevisionRes)
 
-	@doc "触发文档 RAG 重索引"
-	@handler ReindexDoc
-	post /api/doc/v1/doc/reindex (ReindexDocReq) returns (ReindexDocRes)
-
 	@doc "导入 docx/pdf 文件为文档"
 	@handler ImportDoc
 	post /api/doc/v1/doc/import (ImportDocReq) returns (ImportDocRes)
+
+	@doc "文档实时协同 WebSocket 网关（y-websocket sync + awareness）"
+	@handler DocSyncWebsocket
+	get /api/doc/v1/ws (WsReq) returns (WsRes)
 }
 
 // goctl api go -api doc.api -dir . --home ../../../template

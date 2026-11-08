@@ -81,6 +81,19 @@ const (
 	Platform_SaveWorkspacePath_FullMethodName        = "/platform_rpc.platform/SaveWorkspacePath"
 	Platform_UpsertWorkspace_FullMethodName          = "/platform_rpc.platform/UpsertWorkspace"
 	Platform_ListWorkspacesByUser_FullMethodName     = "/platform_rpc.platform/ListWorkspacesByUser"
+	Platform_CreateCollection_FullMethodName         = "/platform_rpc.platform/CreateCollection"
+	Platform_UpdateCollection_FullMethodName         = "/platform_rpc.platform/UpdateCollection"
+	Platform_DeleteCollection_FullMethodName         = "/platform_rpc.platform/DeleteCollection"
+	Platform_GetCollection_FullMethodName            = "/platform_rpc.platform/GetCollection"
+	Platform_ListCollections_FullMethodName          = "/platform_rpc.platform/ListCollections"
+	Platform_CreateDocument_FullMethodName           = "/platform_rpc.platform/CreateDocument"
+	Platform_UpdateDocument_FullMethodName           = "/platform_rpc.platform/UpdateDocument"
+	Platform_DeleteDocument_FullMethodName           = "/platform_rpc.platform/DeleteDocument"
+	Platform_GetDocument_FullMethodName              = "/platform_rpc.platform/GetDocument"
+	Platform_ListDocuments_FullMethodName            = "/platform_rpc.platform/ListDocuments"
+	Platform_ReindexDocument_FullMethodName          = "/platform_rpc.platform/ReindexDocument"
+	Platform_SearchKnowledge_FullMethodName          = "/platform_rpc.platform/SearchKnowledge"
+	Platform_RetrieveCollection_FullMethodName       = "/platform_rpc.platform/RetrieveCollection"
 )
 
 // PlatformClient is the client API for Platform service.
@@ -155,6 +168,20 @@ type PlatformClient interface {
 	SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error)
 	UpsertWorkspace(ctx context.Context, in *UpsertWorkspaceReq, opts ...grpc.CallOption) (*UpsertWorkspaceRes, error)
 	ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error)
+	CreateCollection(ctx context.Context, in *CreateCollectionReq, opts ...grpc.CallOption) (*CreateCollectionRes, error)
+	UpdateCollection(ctx context.Context, in *UpdateCollectionReq, opts ...grpc.CallOption) (*UpdateCollectionRes, error)
+	DeleteCollection(ctx context.Context, in *DeleteCollectionReq, opts ...grpc.CallOption) (*DeleteCollectionRes, error)
+	GetCollection(ctx context.Context, in *GetCollectionReq, opts ...grpc.CallOption) (*GetCollectionRes, error)
+	ListCollections(ctx context.Context, in *ListCollectionsReq, opts ...grpc.CallOption) (*ListCollectionsRes, error)
+	CreateDocument(ctx context.Context, in *CreateDocumentReq, opts ...grpc.CallOption) (*CreateDocumentRes, error)
+	UpdateDocument(ctx context.Context, in *UpdateDocumentReq, opts ...grpc.CallOption) (*UpdateDocumentRes, error)
+	DeleteDocument(ctx context.Context, in *DeleteDocumentReq, opts ...grpc.CallOption) (*DeleteDocumentRes, error)
+	GetDocument(ctx context.Context, in *GetDocumentReq, opts ...grpc.CallOption) (*GetDocumentRes, error)
+	ListDocuments(ctx context.Context, in *ListDocumentsReq, opts ...grpc.CallOption) (*ListDocumentsRes, error)
+	ReindexDocument(ctx context.Context, in *ReindexDocumentReq, opts ...grpc.CallOption) (*ReindexDocumentRes, error)
+	SearchKnowledge(ctx context.Context, in *SearchKnowledgeReq, opts ...grpc.CallOption) (*SearchKnowledgeRes, error)
+	// 管理端召回测试：按单个集合直接检索，仅用于控制台调试
+	RetrieveCollection(ctx context.Context, in *RetrieveCollectionReq, opts ...grpc.CallOption) (*RetrieveCollectionRes, error)
 }
 
 type platformClient struct {
@@ -785,6 +812,136 @@ func (c *platformClient) ListWorkspacesByUser(ctx context.Context, in *ListWorks
 	return out, nil
 }
 
+func (c *platformClient) CreateCollection(ctx context.Context, in *CreateCollectionReq, opts ...grpc.CallOption) (*CreateCollectionRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCollectionRes)
+	err := c.cc.Invoke(ctx, Platform_CreateCollection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateCollection(ctx context.Context, in *UpdateCollectionReq, opts ...grpc.CallOption) (*UpdateCollectionRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCollectionRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateCollection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteCollection(ctx context.Context, in *DeleteCollectionReq, opts ...grpc.CallOption) (*DeleteCollectionRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCollectionRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteCollection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetCollection(ctx context.Context, in *GetCollectionReq, opts ...grpc.CallOption) (*GetCollectionRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCollectionRes)
+	err := c.cc.Invoke(ctx, Platform_GetCollection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListCollections(ctx context.Context, in *ListCollectionsReq, opts ...grpc.CallOption) (*ListCollectionsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCollectionsRes)
+	err := c.cc.Invoke(ctx, Platform_ListCollections_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) CreateDocument(ctx context.Context, in *CreateDocumentReq, opts ...grpc.CallOption) (*CreateDocumentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDocumentRes)
+	err := c.cc.Invoke(ctx, Platform_CreateDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) UpdateDocument(ctx context.Context, in *UpdateDocumentReq, opts ...grpc.CallOption) (*UpdateDocumentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDocumentRes)
+	err := c.cc.Invoke(ctx, Platform_UpdateDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) DeleteDocument(ctx context.Context, in *DeleteDocumentReq, opts ...grpc.CallOption) (*DeleteDocumentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDocumentRes)
+	err := c.cc.Invoke(ctx, Platform_DeleteDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) GetDocument(ctx context.Context, in *GetDocumentReq, opts ...grpc.CallOption) (*GetDocumentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDocumentRes)
+	err := c.cc.Invoke(ctx, Platform_GetDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ListDocuments(ctx context.Context, in *ListDocumentsReq, opts ...grpc.CallOption) (*ListDocumentsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDocumentsRes)
+	err := c.cc.Invoke(ctx, Platform_ListDocuments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) ReindexDocument(ctx context.Context, in *ReindexDocumentReq, opts ...grpc.CallOption) (*ReindexDocumentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReindexDocumentRes)
+	err := c.cc.Invoke(ctx, Platform_ReindexDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) SearchKnowledge(ctx context.Context, in *SearchKnowledgeReq, opts ...grpc.CallOption) (*SearchKnowledgeRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchKnowledgeRes)
+	err := c.cc.Invoke(ctx, Platform_SearchKnowledge_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformClient) RetrieveCollection(ctx context.Context, in *RetrieveCollectionReq, opts ...grpc.CallOption) (*RetrieveCollectionRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RetrieveCollectionRes)
+	err := c.cc.Invoke(ctx, Platform_RetrieveCollection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServer is the server API for Platform service.
 // All implementations must embed UnimplementedPlatformServer
 // for forward compatibility.
@@ -857,6 +1014,20 @@ type PlatformServer interface {
 	SaveWorkspacePath(context.Context, *SaveWorkspacePathReq) (*SaveWorkspacePathRes, error)
 	UpsertWorkspace(context.Context, *UpsertWorkspaceReq) (*UpsertWorkspaceRes, error)
 	ListWorkspacesByUser(context.Context, *ListWorkspacesByUserReq) (*ListWorkspacesByUserRes, error)
+	CreateCollection(context.Context, *CreateCollectionReq) (*CreateCollectionRes, error)
+	UpdateCollection(context.Context, *UpdateCollectionReq) (*UpdateCollectionRes, error)
+	DeleteCollection(context.Context, *DeleteCollectionReq) (*DeleteCollectionRes, error)
+	GetCollection(context.Context, *GetCollectionReq) (*GetCollectionRes, error)
+	ListCollections(context.Context, *ListCollectionsReq) (*ListCollectionsRes, error)
+	CreateDocument(context.Context, *CreateDocumentReq) (*CreateDocumentRes, error)
+	UpdateDocument(context.Context, *UpdateDocumentReq) (*UpdateDocumentRes, error)
+	DeleteDocument(context.Context, *DeleteDocumentReq) (*DeleteDocumentRes, error)
+	GetDocument(context.Context, *GetDocumentReq) (*GetDocumentRes, error)
+	ListDocuments(context.Context, *ListDocumentsReq) (*ListDocumentsRes, error)
+	ReindexDocument(context.Context, *ReindexDocumentReq) (*ReindexDocumentRes, error)
+	SearchKnowledge(context.Context, *SearchKnowledgeReq) (*SearchKnowledgeRes, error)
+	// 管理端召回测试：按单个集合直接检索，仅用于控制台调试
+	RetrieveCollection(context.Context, *RetrieveCollectionReq) (*RetrieveCollectionRes, error)
 	mustEmbedUnimplementedPlatformServer()
 }
 
@@ -1052,6 +1223,45 @@ func (UnimplementedPlatformServer) UpsertWorkspace(context.Context, *UpsertWorks
 }
 func (UnimplementedPlatformServer) ListWorkspacesByUser(context.Context, *ListWorkspacesByUserReq) (*ListWorkspacesByUserRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListWorkspacesByUser not implemented")
+}
+func (UnimplementedPlatformServer) CreateCollection(context.Context, *CreateCollectionReq) (*CreateCollectionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCollection not implemented")
+}
+func (UnimplementedPlatformServer) UpdateCollection(context.Context, *UpdateCollectionReq) (*UpdateCollectionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCollection not implemented")
+}
+func (UnimplementedPlatformServer) DeleteCollection(context.Context, *DeleteCollectionReq) (*DeleteCollectionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCollection not implemented")
+}
+func (UnimplementedPlatformServer) GetCollection(context.Context, *GetCollectionReq) (*GetCollectionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCollection not implemented")
+}
+func (UnimplementedPlatformServer) ListCollections(context.Context, *ListCollectionsReq) (*ListCollectionsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCollections not implemented")
+}
+func (UnimplementedPlatformServer) CreateDocument(context.Context, *CreateDocumentReq) (*CreateDocumentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDocument not implemented")
+}
+func (UnimplementedPlatformServer) UpdateDocument(context.Context, *UpdateDocumentReq) (*UpdateDocumentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDocument not implemented")
+}
+func (UnimplementedPlatformServer) DeleteDocument(context.Context, *DeleteDocumentReq) (*DeleteDocumentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDocument not implemented")
+}
+func (UnimplementedPlatformServer) GetDocument(context.Context, *GetDocumentReq) (*GetDocumentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDocument not implemented")
+}
+func (UnimplementedPlatformServer) ListDocuments(context.Context, *ListDocumentsReq) (*ListDocumentsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDocuments not implemented")
+}
+func (UnimplementedPlatformServer) ReindexDocument(context.Context, *ReindexDocumentReq) (*ReindexDocumentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReindexDocument not implemented")
+}
+func (UnimplementedPlatformServer) SearchKnowledge(context.Context, *SearchKnowledgeReq) (*SearchKnowledgeRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchKnowledge not implemented")
+}
+func (UnimplementedPlatformServer) RetrieveCollection(context.Context, *RetrieveCollectionReq) (*RetrieveCollectionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RetrieveCollection not implemented")
 }
 func (UnimplementedPlatformServer) mustEmbedUnimplementedPlatformServer() {}
 func (UnimplementedPlatformServer) testEmbeddedByValue()                  {}
@@ -2190,6 +2400,240 @@ func _Platform_ListWorkspacesByUser_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Platform_CreateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCollectionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateCollection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateCollection(ctx, req.(*CreateCollectionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCollectionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateCollection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateCollection(ctx, req.(*UpdateCollectionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCollectionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteCollection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteCollection(ctx, req.(*DeleteCollectionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCollectionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetCollection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetCollection(ctx, req.(*GetCollectionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListCollections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCollectionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListCollections(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListCollections_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListCollections(ctx, req.(*ListCollectionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_CreateDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDocumentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).CreateDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_CreateDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).CreateDocument(ctx, req.(*CreateDocumentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_UpdateDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDocumentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).UpdateDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_UpdateDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).UpdateDocument(ctx, req.(*UpdateDocumentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_DeleteDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDocumentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).DeleteDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_DeleteDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).DeleteDocument(ctx, req.(*DeleteDocumentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_GetDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDocumentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).GetDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_GetDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).GetDocument(ctx, req.(*GetDocumentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ListDocuments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDocumentsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ListDocuments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ListDocuments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ListDocuments(ctx, req.(*ListDocumentsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_ReindexDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReindexDocumentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).ReindexDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_ReindexDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).ReindexDocument(ctx, req.(*ReindexDocumentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_SearchKnowledge_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchKnowledgeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).SearchKnowledge(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_SearchKnowledge_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).SearchKnowledge(ctx, req.(*SearchKnowledgeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Platform_RetrieveCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetrieveCollectionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServer).RetrieveCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Platform_RetrieveCollection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServer).RetrieveCollection(ctx, req.(*RetrieveCollectionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Platform_ServiceDesc is the grpc.ServiceDesc for Platform service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2444,6 +2888,58 @@ var Platform_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListWorkspacesByUser",
 			Handler:    _Platform_ListWorkspacesByUser_Handler,
+		},
+		{
+			MethodName: "CreateCollection",
+			Handler:    _Platform_CreateCollection_Handler,
+		},
+		{
+			MethodName: "UpdateCollection",
+			Handler:    _Platform_UpdateCollection_Handler,
+		},
+		{
+			MethodName: "DeleteCollection",
+			Handler:    _Platform_DeleteCollection_Handler,
+		},
+		{
+			MethodName: "GetCollection",
+			Handler:    _Platform_GetCollection_Handler,
+		},
+		{
+			MethodName: "ListCollections",
+			Handler:    _Platform_ListCollections_Handler,
+		},
+		{
+			MethodName: "CreateDocument",
+			Handler:    _Platform_CreateDocument_Handler,
+		},
+		{
+			MethodName: "UpdateDocument",
+			Handler:    _Platform_UpdateDocument_Handler,
+		},
+		{
+			MethodName: "DeleteDocument",
+			Handler:    _Platform_DeleteDocument_Handler,
+		},
+		{
+			MethodName: "GetDocument",
+			Handler:    _Platform_GetDocument_Handler,
+		},
+		{
+			MethodName: "ListDocuments",
+			Handler:    _Platform_ListDocuments_Handler,
+		},
+		{
+			MethodName: "ReindexDocument",
+			Handler:    _Platform_ReindexDocument_Handler,
+		},
+		{
+			MethodName: "SearchKnowledge",
+			Handler:    _Platform_SearchKnowledge_Handler,
+		},
+		{
+			MethodName: "RetrieveCollection",
+			Handler:    _Platform_RetrieveCollection_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

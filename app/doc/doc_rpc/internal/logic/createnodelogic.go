@@ -70,7 +70,6 @@ func (l *CreateNodeLogic) CreateNode(in *doc_rpc.CreateNodeReq) (*doc_rpc.Create
 			ContentJSON: skeletonContentJSON,
 			Version:     1,
 			OwnerUserID: trim(in.OperatorUserId),
-			RagEnabled:  true,
 			Status:      1,
 		}
 		doc.ContentDigest = sha256hex(doc.ContentText)
