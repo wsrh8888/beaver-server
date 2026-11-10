@@ -27,7 +27,7 @@ type (
 		Description string   `json:"description"`
 		Runtime     string   `json:"runtime"`
 		Visibility  string   `json:"visibility"`
-		Status      int      `json:"status"` // 1已发布 0未发布
+		Status      int      `json:"status"` // 1启用 0停用（OpenDigital.Status，建表默认 1；不是发布状态，服务端目前没有发布流程）
 		AppKey      string   `json:"appKey,optional"`
 		AppSecret   string   `json:"appSecret,optional"` // 掩码；external 才有
 		AdminIDs    []string `json:"adminIds,optional"`
@@ -145,9 +145,12 @@ type (
 	SaveDigitalConfigRes {}
 )
 
-// ==================== 知识源（平台知识库）====================
-// 知识库是平台级资源（后台同一份数据），数字伙伴只是选择绑定其中哪些 ID。
+// ==================== 平台知识库（本体） ====================
+// 知识库是平台级资源（platform 域的集合 / 文档 / 索引），归开发者所有，
 // 集合本身由 platform_rpc 维护，这里只做控制台侧的门面与归属校验。
+// digitalId 是可选上下文：传入时代表「智能体知识源」场景，会计算/校验引用关系；
+// 平台「知识库」板块不传，只按开发者身份操作平台集合，不触碰任何智能体引用。
+// 注意：知识源不是知识库，知识源是下面那组独立接口里的一等实体。
 
 type (
 	DigitalKnowledgeItem {
@@ -162,7 +165,7 @@ type (
 		IndexConfig   string `json:"indexConfig,optional"` // 原始 indexConfig JSON，设置页回显分段/检索参数
 	}
 	ListDigitalKnowledgeReq {
-		DigitalID string `form:"digitalId"`
+		DigitalID string `form:"digitalId,optional"`
 		UserID    string `header:"Beaver-User-Id"`
 	}
 	ListDigitalKnowledgeRes {
@@ -173,7 +176,7 @@ type (
 
 type (
 	SaveDigitalKnowledgeReq {
-		DigitalID    string `json:"digitalId"`
+		DigitalID    string `json:"digitalId,optional"`
 		CollectionID string `json:"collectionId,optional"` // 空=新建
 		Name         string `json:"name,optional"`         // 空=不改
 		Description  string `json:"description,optional"`
@@ -188,7 +191,7 @@ type (
 
 type (
 	DeleteDigitalKnowledgeReq {
-		DigitalID    string `json:"digitalId"`
+		DigitalID    string `json:"digitalId,optional"`
 		CollectionID string `json:"collectionId"`
 		UserID       string `header:"Beaver-User-Id"`
 	}
@@ -206,7 +209,7 @@ type (
 		IndexedAt   int64  `json:"indexedAt"`
 	}
 	ListDigitalKnowledgeDocReq {
-		DigitalID    string `form:"digitalId"`
+		DigitalID    string `form:"digitalId,optional"`
 		CollectionID string `form:"collectionId"`
 		Keyword      string `form:"keyword,optional"`
 		UserID       string `header:"Beaver-User-Id"`
@@ -219,7 +222,7 @@ type (
 
 type (
 	SaveDigitalKnowledgeDocReq {
-		DigitalID    string `json:"digitalId"`
+		DigitalID    string `json:"digitalId,optional"`
 		CollectionID string `json:"collectionId,optional"` // 新建时必填
 		DocumentID   string `json:"documentId,optional"`   // 空=新建
 		Title        string `json:"title"`
@@ -234,7 +237,7 @@ type (
 
 type (
 	DeleteDigitalKnowledgeDocReq {
-		DigitalID  string `json:"digitalId"`
+		DigitalID  string `json:"digitalId,optional"`
 		DocumentID string `json:"documentId"`
 		UserID     string `header:"Beaver-User-Id"`
 	}
@@ -243,7 +246,7 @@ type (
 
 type (
 	RetrieveDigitalKnowledgeReq {
-		DigitalID    string `json:"digitalId"`
+		DigitalID    string `json:"digitalId,optional"`
 		CollectionID string `json:"collectionId"`
 		Query        string `json:"query"`
 		TopK         int    `json:"topK,optional"`
@@ -259,6 +262,129 @@ type (
 	RetrieveDigitalKnowledgeRes {
 		Hits   []DigitalKnowledgeHit `json:"hits"`
 		Notice string                `json:"notice,optional"` // 无结果原因，有命中时为空
+	}
+)
+
+// ==================== 知识源（后端一等实体） ====================
+// 知识源归某个数字伙伴所有，落在 open 库 open_knowledge_source 表；
+// 知识库是 platform 域的集合 / 文档 / 索引本体，二者不是同一层实体。
+// 一个知识源可以引入 N 个知识库（只存 collectionId 引用，不复制内容），
+// 同一个知识库也可以被不同知识源引入。
+// 运行时仍只认 builtinConfig.knowledgeIds：知识源增删改后由后端把所有
+// knowledgeIds 合并去重回写，agent 侧不用感知分组。
+// 下面的接口全部要求 digitalId 且校验归属，不允许跨智能体读写知识源。
+
+type (
+	DigitalKnowledgeSourceItem {
+		KnowledgeSourceID string   `json:"knowledgeSourceId"`
+		Name              string   `json:"name"`
+		RetrievalTopK     int      `json:"retrievalTopK"`
+		IndexConfig       string   `json:"indexConfig,optional"` // 分段 / 清洗配置 JSON
+		KnowledgeIDs      []string `json:"knowledgeIds"`         // 引入的平台知识库 ID
+		DocumentCount     int64    `json:"documentCount"`        // 引入的所有知识库的文档总数
+		CreatedAt         int64    `json:"createdAt"`
+	}
+	ListDigitalKnowledgeSourceReq {
+		DigitalID string `form:"digitalId"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	ListDigitalKnowledgeSourceRes {
+		List  []DigitalKnowledgeSourceItem `json:"list"`
+		Total int64                        `json:"total"`
+	}
+)
+
+type (
+	SaveDigitalKnowledgeSourceReq {
+		DigitalID         string `json:"digitalId"`
+		KnowledgeSourceID string `json:"knowledgeSourceId,optional"` // 空 = 新建
+		Name              string `json:"name,optional"`              // 空 = 不改
+		RetrievalTopK     int    `json:"retrievalTopK,optional"`     // 0 = 不改
+		IndexConfig       string `json:"indexConfig,optional"`       // JSON，空 = 不改
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	SaveDigitalKnowledgeSourceRes {
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+	}
+)
+
+type (
+	DeleteDigitalKnowledgeSourceReq {
+		DigitalID         string `json:"digitalId"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	DeleteDigitalKnowledgeSourceRes {}
+)
+
+type (
+	BindDigitalKnowledgeSourceReq {
+		DigitalID         string   `json:"digitalId"`
+		KnowledgeSourceID string   `json:"knowledgeSourceId"`
+		KnowledgeIDs      []string `json:"knowledgeIds"` // 要引入的平台知识库 ID，可多选
+		UserID            string   `header:"Beaver-User-Id"`
+	}
+	BindDigitalKnowledgeSourceRes {
+		KnowledgeIDs []string `json:"knowledgeIds"` // 变更后该知识源的完整引用列表
+	}
+)
+
+type (
+	UnbindDigitalKnowledgeSourceReq {
+		DigitalID         string `json:"digitalId"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		CollectionID      string `json:"collectionId"`
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	UnbindDigitalKnowledgeSourceRes {
+		KnowledgeIDs []string `json:"knowledgeIds"`
+	}
+)
+
+type (
+	DigitalKnowledgeSourceDoc {
+		DocumentID     string `json:"documentId"`
+		Title          string `json:"title"`
+		DocType        string `json:"docType"`
+		ByteSize       int64  `json:"byteSize"`
+		IndexStatus    string `json:"indexStatus"` // pending|indexing|ready|failed
+		IndexError     string `json:"indexError,optional"`
+		IndexedAt      int64  `json:"indexedAt"`
+		CollectionID   string `json:"collectionId"`
+		CollectionName string `json:"collectionName"`
+	}
+	ListDigitalKnowledgeSourceDocReq {
+		DigitalID         string `form:"digitalId"`
+		KnowledgeSourceID string `form:"knowledgeSourceId"`
+		Keyword           string `form:"keyword,optional"`
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	ListDigitalKnowledgeSourceDocRes {
+		List  []DigitalKnowledgeSourceDoc `json:"list"`
+		Total int64                       `json:"total"`
+	}
+)
+
+type (
+	RetrieveDigitalKnowledgeSourceReq {
+		DigitalID         string `json:"digitalId"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		Query             string `json:"query"`
+		TopK              int    `json:"topK,optional"` // 0 = 用知识源自身的 retrievalTopK
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	DigitalKnowledgeSourceHit {
+		DocumentID     string  `json:"documentId"`
+		CollectionID   string  `json:"collectionId"`
+		CollectionName string  `json:"collectionName"`
+		Title          string  `json:"title"`
+		ChunkIndex     int     `json:"chunkIndex"`
+		Content        string  `json:"content"`
+		Score          float64 `json:"score"`
+	}
+	RetrieveDigitalKnowledgeSourceRes {
+		Hits   []DigitalKnowledgeSourceHit `json:"hits"`
+		Notice string                     `json:"notice,optional"` // 无结果原因
 	}
 )
 
@@ -359,7 +485,7 @@ service open {
 	@handler SaveDigitalConfig
 	post /api/open_portal/digital/v1/config/save (SaveDigitalConfigReq) returns (SaveDigitalConfigRes)
 
-	@doc "知识源列表（平台知识库 + 绑定状态）"
+	@doc "平台知识库列表（传 digitalId 时附带引用状态）"
 	@handler ListDigitalKnowledge
 	get /api/open_portal/digital/v1/knowledge/list (ListDigitalKnowledgeReq) returns (ListDigitalKnowledgeRes)
 
@@ -383,9 +509,37 @@ service open {
 	@handler DeleteDigitalKnowledgeDoc
 	post /api/open_portal/digital/v1/knowledge/doc/delete (DeleteDigitalKnowledgeDocReq) returns (DeleteDigitalKnowledgeDocRes)
 
-	@doc "召回测试"
+	@doc "知识库召回测试"
 	@handler RetrieveDigitalKnowledge
 	post /api/open_portal/digital/v1/knowledge/retrieve (RetrieveDigitalKnowledgeReq) returns (RetrieveDigitalKnowledgeRes)
+
+	@doc "知识源列表（后端实体）"
+	@handler ListDigitalKnowledgeSource
+	get /api/open_portal/digital/v1/knowledge/source/list (ListDigitalKnowledgeSourceReq) returns (ListDigitalKnowledgeSourceRes)
+
+	@doc "新建 / 更新知识源"
+	@handler SaveDigitalKnowledgeSource
+	post /api/open_portal/digital/v1/knowledge/source/save (SaveDigitalKnowledgeSourceReq) returns (SaveDigitalKnowledgeSourceRes)
+
+	@doc "删除知识源"
+	@handler DeleteDigitalKnowledgeSource
+	post /api/open_portal/digital/v1/knowledge/source/delete (DeleteDigitalKnowledgeSourceReq) returns (DeleteDigitalKnowledgeSourceRes)
+
+	@doc "知识源引入 N 个知识库"
+	@handler BindDigitalKnowledgeSource
+	post /api/open_portal/digital/v1/knowledge/source/bind (BindDigitalKnowledgeSourceReq) returns (BindDigitalKnowledgeSourceRes)
+
+	@doc "知识源移除某个知识库引用"
+	@handler UnbindDigitalKnowledgeSource
+	post /api/open_portal/digital/v1/knowledge/source/unbind (UnbindDigitalKnowledgeSourceReq) returns (UnbindDigitalKnowledgeSourceRes)
+
+	@doc "知识源引入的所有知识库里的文档"
+	@handler ListDigitalKnowledgeSourceDoc
+	get /api/open_portal/digital/v1/knowledge/source/docs (ListDigitalKnowledgeSourceDocReq) returns (ListDigitalKnowledgeSourceDocRes)
+
+	@doc "知识源跨库召回测试"
+	@handler RetrieveDigitalKnowledgeSource
+	post /api/open_portal/digital/v1/knowledge/source/retrieve (RetrieveDigitalKnowledgeSourceReq) returns (RetrieveDigitalKnowledgeSourceRes)
 
 	@doc "工具与 MCP 目录"
 	@handler ListDigitalCatalog

@@ -39,8 +39,10 @@ func (l *SaveDigitalKnowledgeDocLogic) SaveDigitalKnowledgeDoc(req *types.SaveDi
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 	title := strings.TrimSpace(req.Title)
 	if title == "" {

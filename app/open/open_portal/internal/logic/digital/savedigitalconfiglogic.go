@@ -79,6 +79,12 @@ func (l *SaveDigitalConfigLogic) SaveDigitalConfig(req *types.SaveDigitalConfigR
 		if err := json.Unmarshal([]byte(req.BuiltinConfig), &bc); err != nil {
 			return nil, errors.New("builtinConfig JSON 格式错误")
 		}
+		// 知识源已经是 open_knowledge_source 表里的独立实体，控制台不再提交
+		// knowledgeSources / knowledgeIds。但本接口会整列覆盖 builtin_config，
+		// 所以保存编排配置时必须按知识源表重算扁平列表回填，否则会把运行时
+		// 检索用的 knowledgeIds 清空。旧 JSON 分组在这里一并丢弃（迁移在列表接口做）。
+		bc.KnowledgeSources = nil
+		bc.KnowledgeIDs = loadKnowledgeSourceIDs(l.svcCtx.DB, req.DigitalID)
 		cfg.BuiltinConfig = &bc
 	case open_models.DigitalRuntimeExternal:
 		if req.ExternalConfig == "" {

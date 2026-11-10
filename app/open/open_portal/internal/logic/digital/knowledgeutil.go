@@ -21,9 +21,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// loadDigitalKnowledgeIDs 读数字伙伴已绑定的知识库 ID。
-// 绑定关系只存 builtin 配置里的 ID 列表（跨服务不复制知识库内容），
-// 知识库本体由 platform 域维护。
+// loadDigitalKnowledgeIDs 读数字伙伴运行时检索用的知识库 ID 扁平列表。
+// 知识库本体由 platform 域维护，open 侧只存 ID（跨服务不复制内容）。
+//
+// 这列 ID 的唯一来源是 open_knowledge_source 表：每个知识源可引入 N 个知识库，
+// 由 loadKnowledgeSourceIDs 合并去重后写入。agent 侧不关心知识源分组，只认这个列表。
 func loadDigitalKnowledgeIDs(db *gorm.DB, digitalID string) []string {
 	var cfg open_models.OpenDigitalConfig
 	if err := db.Where("digital_id = ?", digitalID).First(&cfg).Error; err != nil {

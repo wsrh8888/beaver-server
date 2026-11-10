@@ -35,8 +35,10 @@ func (l *DeleteDigitalKnowledgeDocLogic) DeleteDigitalKnowledgeDoc(req *types.De
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 	if req.DocumentID == "" {
 		return nil, errors.New("documentId 不能为空")

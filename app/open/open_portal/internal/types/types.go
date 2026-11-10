@@ -323,7 +323,7 @@ type DigitalKnowledgeItem struct {
 }
 
 type ListDigitalKnowledgeReq struct {
-	DigitalID string `form:"digitalId"`
+	DigitalID string `form:"digitalId,optional"`
 	UserID    string `header:"Beaver-User-Id"`
 }
 
@@ -333,7 +333,7 @@ type ListDigitalKnowledgeRes struct {
 }
 
 type SaveDigitalKnowledgeReq struct {
-	DigitalID    string `json:"digitalId"`
+	DigitalID    string `json:"digitalId,optional"`
 	CollectionID string `json:"collectionId,optional"`
 	Name         string `json:"name,optional"`
 	Description  string `json:"description,optional"`
@@ -347,7 +347,7 @@ type SaveDigitalKnowledgeRes struct {
 }
 
 type DeleteDigitalKnowledgeReq struct {
-	DigitalID    string `json:"digitalId"`
+	DigitalID    string `json:"digitalId,optional"`
 	CollectionID string `json:"collectionId"`
 	UserID       string `header:"Beaver-User-Id"`
 }
@@ -366,7 +366,7 @@ type DigitalKnowledgeDoc struct {
 }
 
 type ListDigitalKnowledgeDocReq struct {
-	DigitalID    string `form:"digitalId"`
+	DigitalID    string `form:"digitalId,optional"`
 	CollectionID string `form:"collectionId"`
 	Keyword      string `form:"keyword,optional"`
 	UserID       string `header:"Beaver-User-Id"`
@@ -378,7 +378,7 @@ type ListDigitalKnowledgeDocRes struct {
 }
 
 type SaveDigitalKnowledgeDocReq struct {
-	DigitalID    string `json:"digitalId"`
+	DigitalID    string `json:"digitalId,optional"`
 	CollectionID string `json:"collectionId,optional"`
 	DocumentID   string `json:"documentId,optional"`
 	Title        string `json:"title"`
@@ -392,7 +392,7 @@ type SaveDigitalKnowledgeDocRes struct {
 }
 
 type DeleteDigitalKnowledgeDocReq struct {
-	DigitalID  string `json:"digitalId"`
+	DigitalID  string `json:"digitalId,optional"`
 	DocumentID string `json:"documentId"`
 	UserID     string `header:"Beaver-User-Id"`
 }
@@ -401,7 +401,7 @@ type DeleteDigitalKnowledgeDocRes struct {
 }
 
 type RetrieveDigitalKnowledgeReq struct {
-	DigitalID    string `json:"digitalId"`
+	DigitalID    string `json:"digitalId,optional"`
 	CollectionID string `json:"collectionId"`
 	Query        string `json:"query"`
 	TopK         int    `json:"topK,optional"`
@@ -576,4 +576,120 @@ type UpdateOAuthConfigReq struct {
 }
 
 type UpdateOAuthConfigRes struct {
+}
+
+// ==================== 知识源（后端一等实体） ====================
+// 下列类型由 digital.api 的「知识源」段落生成，手工同步追加在这里，
+// 保留本文件原有的版权头与已有类型顺序，避免整体重排导致无关 diff。
+// 重新执行 goctl api go 时这些定义会被自动合并进去。
+
+type DigitalKnowledgeSourceItem struct {
+	KnowledgeSourceID string   `json:"knowledgeSourceId"`
+	Name              string   `json:"name"`
+	RetrievalTopK     int      `json:"retrievalTopK"`
+	IndexConfig       string   `json:"indexConfig,optional"` // 分段 / 清洗配置 JSON
+	KnowledgeIDs      []string `json:"knowledgeIds"`         // 引入的平台知识库 ID
+	DocumentCount     int64    `json:"documentCount"`        // 引入的所有知识库的文档总数
+	CreatedAt         int64    `json:"createdAt"`
+}
+
+type ListDigitalKnowledgeSourceReq struct {
+	DigitalID string `form:"digitalId"`
+	UserID    string `header:"Beaver-User-Id"`
+}
+
+type ListDigitalKnowledgeSourceRes struct {
+	List  []DigitalKnowledgeSourceItem `json:"list"`
+	Total int64                        `json:"total"`
+}
+
+type SaveDigitalKnowledgeSourceReq struct {
+	DigitalID         string `json:"digitalId"`
+	KnowledgeSourceID string `json:"knowledgeSourceId,optional"` // 空 = 新建
+	Name              string `json:"name,optional"`              // 空 = 不改
+	RetrievalTopK     int    `json:"retrievalTopK,optional"`     // 0 = 不改
+	IndexConfig       string `json:"indexConfig,optional"`       // JSON，空 = 不改
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type SaveDigitalKnowledgeSourceRes struct {
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+}
+
+type DeleteDigitalKnowledgeSourceReq struct {
+	DigitalID         string `json:"digitalId"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type DeleteDigitalKnowledgeSourceRes struct {
+}
+
+type BindDigitalKnowledgeSourceReq struct {
+	DigitalID         string   `json:"digitalId"`
+	KnowledgeSourceID string   `json:"knowledgeSourceId"`
+	KnowledgeIDs      []string `json:"knowledgeIds"` // 要引入的平台知识库 ID，可多选
+	UserID            string   `header:"Beaver-User-Id"`
+}
+
+type BindDigitalKnowledgeSourceRes struct {
+	KnowledgeIDs []string `json:"knowledgeIds"` // 变更后该知识源的完整引用列表
+}
+
+type UnbindDigitalKnowledgeSourceReq struct {
+	DigitalID         string `json:"digitalId"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	CollectionID      string `json:"collectionId"`
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type UnbindDigitalKnowledgeSourceRes struct {
+	KnowledgeIDs []string `json:"knowledgeIds"`
+}
+
+type DigitalKnowledgeSourceDoc struct {
+	DocumentID     string `json:"documentId"`
+	Title          string `json:"title"`
+	DocType        string `json:"docType"`
+	ByteSize       int64  `json:"byteSize"`
+	IndexStatus    string `json:"indexStatus"` // pending|indexing|ready|failed
+	IndexError     string `json:"indexError,optional"`
+	IndexedAt      int64  `json:"indexedAt"`
+	CollectionID   string `json:"collectionId"`
+	CollectionName string `json:"collectionName"`
+}
+
+type ListDigitalKnowledgeSourceDocReq struct {
+	DigitalID         string `form:"digitalId"`
+	KnowledgeSourceID string `form:"knowledgeSourceId"`
+	Keyword           string `form:"keyword,optional"`
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type ListDigitalKnowledgeSourceDocRes struct {
+	List  []DigitalKnowledgeSourceDoc `json:"list"`
+	Total int64                       `json:"total"`
+}
+
+type RetrieveDigitalKnowledgeSourceReq struct {
+	DigitalID         string `json:"digitalId"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	Query             string `json:"query"`
+	TopK              int    `json:"topK,optional"` // 0 = 用知识源自身的 retrievalTopK
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type DigitalKnowledgeSourceHit struct {
+	DocumentID     string  `json:"documentId"`
+	CollectionID   string  `json:"collectionId"`
+	CollectionName string  `json:"collectionName"`
+	Title          string  `json:"title"`
+	ChunkIndex     int     `json:"chunkIndex"`
+	Content        string  `json:"content"`
+	Score          float64 `json:"score"`
+}
+
+type RetrieveDigitalKnowledgeSourceRes struct {
+	Hits   []DigitalKnowledgeSourceHit `json:"hits"`
+	Notice string                      `json:"notice,optional"` // 无结果原因
 }

@@ -224,10 +224,52 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: digital.DeleteDigitalKnowledgeDocHandler(serverCtx),
 				},
 				{
-					// 召回测试
+					// 知识库召回测试
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/digital/v1/knowledge/retrieve",
 					Handler: digital.RetrieveDigitalKnowledgeHandler(serverCtx),
+				},
+				{
+					// 知识源列表（后端实体）
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/list",
+					Handler: digital.ListDigitalKnowledgeSourceHandler(serverCtx),
+				},
+				{
+					// 新建/更新知识源
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/save",
+					Handler: digital.SaveDigitalKnowledgeSourceHandler(serverCtx),
+				},
+				{
+					// 删除知识源
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/delete",
+					Handler: digital.DeleteDigitalKnowledgeSourceHandler(serverCtx),
+				},
+				{
+					// 知识源引入 N 个知识库
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/bind",
+					Handler: digital.BindDigitalKnowledgeSourceHandler(serverCtx),
+				},
+				{
+					// 知识源移除某个知识库引用
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/unbind",
+					Handler: digital.UnbindDigitalKnowledgeSourceHandler(serverCtx),
+				},
+				{
+					// 知识源引入的所有知识库里的文档
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/docs",
+					Handler: digital.ListDigitalKnowledgeSourceDocHandler(serverCtx),
+				},
+				{
+					// 知识源跨库召回测试
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/retrieve",
+					Handler: digital.RetrieveDigitalKnowledgeSourceHandler(serverCtx),
 				},
 				{
 					// 工具与 MCP 目录

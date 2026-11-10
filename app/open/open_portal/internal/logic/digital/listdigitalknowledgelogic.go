@@ -30,15 +30,16 @@ func NewListDigitalKnowledgeLogic(ctx context.Context, svcCtx *svc.ServiceContex
 	return &ListDigitalKnowledgeLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_digital_knowledge", ctx)}
 }
 
-// ListDigitalKnowledge 列出平台知识库，并标出哪些已绑定当前数字伙伴。
+// ListDigitalKnowledge 列出平台知识库；传入 digitalId 时额外标出哪些已绑定该数字伙伴。
 // 文档数由 platform 逐集合统计：集合表本身不存计数，跨库也读不到 knowledge_documents。
 func (l *ListDigitalKnowledgeLogic) ListDigitalKnowledge(req *types.ListDigitalKnowledgeReq) (resp *types.ListDigitalKnowledgeRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	partner, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID)
-	if err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 
 	res, err := l.svcCtx.PlatformRpc.ListCollections(l.ctx, &platform.ListCollectionsReq{Page: 1, PageSize: 200})
@@ -48,8 +49,10 @@ func (l *ListDigitalKnowledgeLogic) ListDigitalKnowledge(req *types.ListDigitalK
 	}
 
 	bound := map[string]bool{}
-	for _, id := range loadDigitalKnowledgeIDs(l.svcCtx.DB, partner.DigitalID) {
-		bound[id] = true
+	if req.DigitalID != "" {
+		for _, id := range loadDigitalKnowledgeIDs(l.svcCtx.DB, req.DigitalID) {
+			bound[id] = true
+		}
 	}
 
 	list := make([]types.DigitalKnowledgeItem, 0, len(res.Collections))

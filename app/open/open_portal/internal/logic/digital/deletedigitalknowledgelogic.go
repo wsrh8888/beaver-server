@@ -30,15 +30,16 @@ func NewDeleteDigitalKnowledgeLogic(ctx context.Context, svcCtx *svc.ServiceCont
 	return &DeleteDigitalKnowledgeLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_digital_knowledge", ctx)}
 }
 
-// DeleteDigitalKnowledge 删除知识库（连同其下文档与索引），并从本数字伙伴解绑。
+// DeleteDigitalKnowledge 删除知识库（连同其下文档与索引）；传入 digitalId 时顺带从该数字伙伴解绑。
 // 知识库是平台级资源，删掉后其它数字伙伴也会失去它——前端必须做二次确认。
 func (l *DeleteDigitalKnowledgeLogic) DeleteDigitalKnowledge(req *types.DeleteDigitalKnowledgeReq) (resp *types.DeleteDigitalKnowledgeRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	partner, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID)
-	if err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 	if req.CollectionID == "" {
 		return nil, errors.New("collectionId 不能为空")
@@ -51,14 +52,16 @@ func (l *DeleteDigitalKnowledgeLogic) DeleteDigitalKnowledge(req *types.DeleteDi
 		return nil, errors.New("删除知识库失败")
 	}
 
-	remain := make([]string, 0)
-	for _, id := range loadDigitalKnowledgeIDs(l.svcCtx.DB, partner.DigitalID) {
-		if id != req.CollectionID {
-			remain = append(remain, id)
+	if req.DigitalID != "" {
+		remain := make([]string, 0)
+		for _, id := range loadDigitalKnowledgeIDs(l.svcCtx.DB, req.DigitalID) {
+			if id != req.CollectionID {
+				remain = append(remain, id)
+			}
 		}
-	}
-	if err := writeDigitalKnowledgeIDs(l.svcCtx.DB, partner.DigitalID, remain); err != nil {
-		l.logger.Error(model.LogMsg{Text: "解绑已删除的知识库失败", Data: map[string]interface{}{"err": err.Error()}})
+		if err := writeDigitalKnowledgeIDs(l.svcCtx.DB, req.DigitalID, remain); err != nil {
+			l.logger.Error(model.LogMsg{Text: "解绑已删除的知识库失败", Data: map[string]interface{}{"err": err.Error()}})
+		}
 	}
 	return &types.DeleteDigitalKnowledgeRes{}, nil
 }

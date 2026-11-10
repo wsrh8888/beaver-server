@@ -32,15 +32,17 @@ func NewSaveDigitalKnowledgeLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 // SaveDigitalKnowledge 新建或更新知识库。
-// 新建时归属记在当前开发者名下（acl 内部共享），并顺手绑定到该数字伙伴，
-// 否则用户建完还得再点一次「绑定」，白填一趟。
+// 新建时归属记在当前开发者名下（acl 内部共享）。
+// 传入 digitalId（智能体知识源入口）时顺手绑定，省得建完再点一次；
+// 平台知识库入口不传 digitalId，新建后不绑定任何智能体。
 func (l *SaveDigitalKnowledgeLogic) SaveDigitalKnowledge(req *types.SaveDigitalKnowledgeReq) (resp *types.SaveDigitalKnowledgeRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	partner, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID)
-	if err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 
 	name := strings.TrimSpace(req.Name)
@@ -65,8 +67,10 @@ func (l *SaveDigitalKnowledgeLogic) SaveDigitalKnowledge(req *types.SaveDigitalK
 				return nil, err
 			}
 		}
-		if err := l.bindKnowledge(partner.DigitalID, collectionID); err != nil {
-			return nil, err
+		if req.DigitalID != "" {
+			if err := l.bindKnowledge(req.DigitalID, collectionID); err != nil {
+				return nil, err
+			}
 		}
 		return &types.SaveDigitalKnowledgeRes{CollectionID: collectionID}, nil
 	}

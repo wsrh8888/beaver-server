@@ -31,30 +31,34 @@ func NewRetrieveDigitalKnowledgeLogic(ctx context.Context, svcCtx *svc.ServiceCo
 	return &RetrieveDigitalKnowledgeLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("retrieve_digital_knowledge", ctx)}
 }
 
-// RetrieveDigitalKnowledge 召回测试：只查本数字伙伴已绑定的知识库，按集合单独检索。
+// RetrieveDigitalKnowledge 召回测试：按集合单独检索。
+// 传入 digitalId 时限定为「该数字伙伴已绑定」的知识库；平台知识库入口不传，可直接测任意集合。
 // 未命中 / 未配向量模型都返回 notice 说明，不报错——控制台要能解释「为什么没结果」。
 func (l *RetrieveDigitalKnowledgeLogic) RetrieveDigitalKnowledge(req *types.RetrieveDigitalKnowledgeReq) (resp *types.RetrieveDigitalKnowledgeRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	partner, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID)
-	if err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 	query := strings.TrimSpace(req.Query)
 	if query == "" {
 		return &types.RetrieveDigitalKnowledgeRes{Hits: []types.DigitalKnowledgeHit{}, Notice: "请输入测试问题"}, nil
 	}
 
-	bound := false
-	for _, id := range loadDigitalKnowledgeIDs(l.svcCtx.DB, partner.DigitalID) {
-		if id == req.CollectionID {
-			bound = true
-			break
+	if req.DigitalID != "" {
+		bound := false
+		for _, id := range loadDigitalKnowledgeIDs(l.svcCtx.DB, req.DigitalID) {
+			if id == req.CollectionID {
+				bound = true
+				break
+			}
 		}
-	}
-	if !bound {
-		return &types.RetrieveDigitalKnowledgeRes{Hits: []types.DigitalKnowledgeHit{}, Notice: "该知识库还没有绑定到当前数字伙伴"}, nil
+		if !bound {
+			return &types.RetrieveDigitalKnowledgeRes{Hits: []types.DigitalKnowledgeHit{}, Notice: "该知识库还没有绑定到当前数字伙伴"}, nil
+		}
 	}
 
 	res, err := l.svcCtx.PlatformRpc.RetrieveCollection(l.ctx, &platform.RetrieveCollectionReq{

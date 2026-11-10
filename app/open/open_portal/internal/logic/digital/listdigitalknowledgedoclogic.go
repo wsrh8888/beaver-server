@@ -37,8 +37,10 @@ func (l *ListDigitalKnowledgeDocLogic) ListDigitalKnowledgeDoc(req *types.ListDi
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
 	}
-	if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
-		return nil, err
+	if req.DigitalID != "" {
+		if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
+			return nil, err
+		}
 	}
 	if req.CollectionID == "" {
 		return nil, errors.New("collectionId 不能为空")

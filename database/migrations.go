@@ -164,6 +164,7 @@ func AllMigrations() []Migration {
 				&open_models.OpenDigitalMember{},
 				&open_models.OpenDigitalToken{},
 				&open_models.OpenDigitalConfig{},
+				&open_models.OpenKnowledgeSource{},
 			},
 			Init: openseed.InitQuickLoginApp,
 		},
