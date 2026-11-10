@@ -188,55 +188,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: digital.SaveDigitalConfigHandler(serverCtx),
 				},
 				{
-					// 知识源列表（平台知识库 + 绑定状态）
-					Method:  http.MethodGet,
-					Path:    "/api/open_portal/digital/v1/knowledge/list",
-					Handler: digital.ListDigitalKnowledgeHandler(serverCtx),
-				},
-				{
-					// 新建/更新知识库
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/save",
-					Handler: digital.SaveDigitalKnowledgeHandler(serverCtx),
-				},
-				{
-					// 删除知识库
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/delete",
-					Handler: digital.DeleteDigitalKnowledgeHandler(serverCtx),
-				},
-				{
-					// 知识库文档列表
-					Method:  http.MethodGet,
-					Path:    "/api/open_portal/digital/v1/knowledge/docs",
-					Handler: digital.ListDigitalKnowledgeDocHandler(serverCtx),
-				},
-				{
-					// 新增/更新知识文档
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/doc/save",
-					Handler: digital.SaveDigitalKnowledgeDocHandler(serverCtx),
-				},
-				{
-					// 删除知识文档
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/doc/delete",
-					Handler: digital.DeleteDigitalKnowledgeDocHandler(serverCtx),
-				},
-				{
-					// 知识库召回测试
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/retrieve",
-					Handler: digital.RetrieveDigitalKnowledgeHandler(serverCtx),
-				},
-				{
 					// 知识源列表（后端实体）
 					Method:  http.MethodGet,
 					Path:    "/api/open_portal/digital/v1/knowledge/source/list",
 					Handler: digital.ListDigitalKnowledgeSourceHandler(serverCtx),
 				},
 				{
-					// 新建/更新知识源
+					// 新建 / 更新知识源
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/digital/v1/knowledge/source/save",
 					Handler: digital.SaveDigitalKnowledgeSourceHandler(serverCtx),
@@ -248,25 +206,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: digital.DeleteDigitalKnowledgeSourceHandler(serverCtx),
 				},
 				{
-					// 知识源引入 N 个知识库
+					// 导入在线文档到知识源（粘贴海狸内部地址）
 					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/source/bind",
-					Handler: digital.BindDigitalKnowledgeSourceHandler(serverCtx),
+					Path:    "/api/open_portal/digital/v1/knowledge/source/doc/import",
+					Handler: digital.ImportDigitalKnowledgeSourceDocHandler(serverCtx),
 				},
 				{
-					// 知识源移除某个知识库引用
-					Method:  http.MethodPost,
-					Path:    "/api/open_portal/digital/v1/knowledge/source/unbind",
-					Handler: digital.UnbindDigitalKnowledgeSourceHandler(serverCtx),
-				},
-				{
-					// 知识源引入的所有知识库里的文档
+					// 知识源文档列表
 					Method:  http.MethodGet,
 					Path:    "/api/open_portal/digital/v1/knowledge/source/docs",
 					Handler: digital.ListDigitalKnowledgeSourceDocHandler(serverCtx),
 				},
 				{
-					// 知识源跨库召回测试
+					// 删除知识源里的在线文档引用
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/doc/delete",
+					Handler: digital.DeleteDigitalKnowledgeSourceDocHandler(serverCtx),
+				},
+				{
+					// 知识源召回测试
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/digital/v1/knowledge/source/retrieve",
 					Handler: digital.RetrieveDigitalKnowledgeSourceHandler(serverCtx),

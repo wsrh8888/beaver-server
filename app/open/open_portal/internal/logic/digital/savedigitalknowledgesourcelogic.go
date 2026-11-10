@@ -17,6 +17,7 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	"beaver/app/platform/platform_rpc/platform"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -31,8 +32,11 @@ func NewSaveDigitalKnowledgeSourceLogic(ctx context.Context, svcCtx *svc.Service
 	return &SaveDigitalKnowledgeSourceLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("save_digital_knowledge_source", ctx)}
 }
 
-// SaveDigitalKnowledgeSource 新建知识源，或改名 / 改检索设置。
+// SaveDigitalKnowledgeSource 新建知识源（自动建一个 platform 索引集合），或改名 / 改检索设置。
 // 只接受「部分字段」语义：空字符串与 0 都代表不改，避免其它分区的整份提交互相覆盖。
+//
+// 知识源 ≠ 文档本体：文档正文的权威源在 doc 域在线文档库（普通用户所有），新建时只建一个
+// platform 索引集合，用户后续粘贴的在线文档地址会作为引用挂在这个集合上。
 func (l *SaveDigitalKnowledgeSourceLogic) SaveDigitalKnowledgeSource(req *types.SaveDigitalKnowledgeSourceReq) (resp *types.SaveDigitalKnowledgeSourceRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
@@ -55,6 +59,17 @@ func (l *SaveDigitalKnowledgeSourceLogic) SaveDigitalKnowledgeSource(req *types.
 		if topK <= 0 {
 			topK = open_models.DefaultKnowledgeSourceTopK
 		}
+		// 新建知识源时同步建一个 platform 索引集合，文档引用（在线文档）都挂在这个集合上。
+		collRes, collErr := l.svcCtx.PlatformRpc.CreateCollection(l.ctx, &platform.CreateCollectionReq{
+			Name:        name,
+			Kind:        "open_knowledge_source",
+			AclMode:     "internal",
+			IndexConfig: strings.TrimSpace(req.IndexConfig),
+		})
+		if collErr != nil {
+			l.logger.Error(model.LogMsg{Text: "创建知识源索引集合失败", Data: map[string]interface{}{"err": collErr.Error()}})
+			return nil, errors.New("创建知识源失败")
+		}
 		row = open_models.OpenKnowledgeSource{
 			SourceID:      newKnowledgeSourceID(),
 			DigitalID:     req.DigitalID,
@@ -62,12 +77,12 @@ func (l *SaveDigitalKnowledgeSourceLogic) SaveDigitalKnowledgeSource(req *types.
 			Name:          name,
 			RetrievalTopK: topK,
 			IndexConfig:   strings.TrimSpace(req.IndexConfig),
-			KnowledgeIDs:  open_models.KnowledgeIDList{},
+			KnowledgeIDs:  open_models.KnowledgeIDList{collRes.CollectionId},
 		}
 	} else {
-		loaded, err := loadOwnedKnowledgeSource(l.svcCtx.DB, req.UserID, req.DigitalID, req.KnowledgeSourceID)
-		if err != nil {
-			return nil, err
+		loaded, loadErr := loadOwnedKnowledgeSource(l.svcCtx.DB, req.UserID, req.DigitalID, req.KnowledgeSourceID)
+		if loadErr != nil {
+			return nil, loadErr
 		}
 		row = *loaded
 		if name != "" {

@@ -40,6 +40,11 @@ PlatformRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: platformrpc.rpc
+DocRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: docrpc.rpc
 
 # OAuth 授权页（beaver-oauth H5，用于生成扫码 URL）
 OAuth:

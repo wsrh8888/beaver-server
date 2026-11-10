@@ -12,7 +12,6 @@ package digital
 import (
 	"context"
 	"errors"
-	"sort"
 	"strings"
 
 	"beaver/app/open/open_models"
@@ -33,9 +32,8 @@ func NewRetrieveDigitalKnowledgeSourceLogic(ctx context.Context, svcCtx *svc.Ser
 	return &RetrieveDigitalKnowledgeSourceLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("retrieve_digital_knowledge_source", ctx)}
 }
 
-// RetrieveDigitalKnowledgeSource 跨知识源引入的所有知识库做召回测试。
-// 每个库各自检索 topK，再按相关度统一排序截断，保证「一个知识源引入 N 个库」
-// 的检索结果与运行时按扁平 knowledgeIds 检索的口径一致。
+// RetrieveDigitalKnowledgeSource 对该知识源索引集合做一次召回测试。
+// 用户添加的在线文档引用都挂在这个集合上，检索口径与运行时一致。
 func (l *RetrieveDigitalKnowledgeSourceLogic) RetrieveDigitalKnowledgeSource(req *types.RetrieveDigitalKnowledgeSourceReq) (resp *types.RetrieveDigitalKnowledgeSourceRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
@@ -44,15 +42,14 @@ func (l *RetrieveDigitalKnowledgeSourceLogic) RetrieveDigitalKnowledgeSource(req
 	if err != nil {
 		return nil, err
 	}
+	collectionID := sourceCollectionID(row.KnowledgeIDs)
+	if collectionID == "" {
+		return &types.RetrieveDigitalKnowledgeSourceRes{Hits: []types.DigitalKnowledgeSourceHit{}, Notice: "请先为这个知识源添加在线文档"}, nil
+	}
 	query := strings.TrimSpace(req.Query)
 	if query == "" {
 		return &types.RetrieveDigitalKnowledgeSourceRes{Hits: []types.DigitalKnowledgeSourceHit{}, Notice: "请输入测试问题"}, nil
 	}
-	ids := uniqTrimmed(row.KnowledgeIDs)
-	if len(ids) == 0 {
-		return &types.RetrieveDigitalKnowledgeSourceRes{Hits: []types.DigitalKnowledgeSourceHit{}, Notice: "请先为这个知识源引入知识库"}, nil
-	}
-
 	topK := req.TopK
 	if topK <= 0 {
 		topK = row.RetrievalTopK
@@ -61,38 +58,26 @@ func (l *RetrieveDigitalKnowledgeSourceLogic) RetrieveDigitalKnowledgeSource(req
 		topK = open_models.DefaultKnowledgeSourceTopK
 	}
 
-	names := collectionNameMap(l.ctx, l.svcCtx)
-	hits := make([]types.DigitalKnowledgeSourceHit, 0)
-	notice := ""
-	for _, collectionID := range ids {
-		res, rpcErr := l.svcCtx.PlatformRpc.RetrieveCollection(l.ctx, &platform.RetrieveCollectionReq{
-			CollectionId: collectionID,
-			Query:        query,
-			TopK:         int32(topK),
+	res, rpcErr := l.svcCtx.PlatformRpc.RetrieveCollection(l.ctx, &platform.RetrieveCollectionReq{
+		CollectionId: collectionID,
+		Query:        query,
+		TopK:         int32(topK),
+	})
+	if rpcErr != nil {
+		l.logger.Error(model.LogMsg{Text: "知识源召回测试失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
+		return nil, errors.New("召回测试失败")
+	}
+	hits := make([]types.DigitalKnowledgeSourceHit, 0, len(res.Hits))
+	for _, hit := range res.Hits {
+		hits = append(hits, types.DigitalKnowledgeSourceHit{
+			DocumentID: hit.DocumentId,
+			Title:      hit.Title,
+			ChunkIndex: int(hit.ChunkIndex),
+			Content:    hit.Content,
+			Score:      hit.Score,
 		})
-		if rpcErr != nil {
-			l.logger.Error(model.LogMsg{Text: "知识源召回测试失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
-			continue
-		}
-		if notice == "" {
-			notice = res.Notice
-		}
-		for _, hit := range res.Hits {
-			hits = append(hits, types.DigitalKnowledgeSourceHit{
-				DocumentID:     hit.DocumentId,
-				CollectionID:   collectionID,
-				CollectionName: names[collectionID],
-				Title:          hit.Title,
-				ChunkIndex:     int(hit.ChunkIndex),
-				Content:        hit.Content,
-				Score:          hit.Score,
-			})
-		}
 	}
-	sort.SliceStable(hits, func(i, j int) bool { return hits[i].Score > hits[j].Score })
-	if len(hits) > topK {
-		hits = hits[:topK]
-	}
+	notice := res.Notice
 	if len(hits) == 0 && notice == "" {
 		notice = "未召回相关内容"
 	}

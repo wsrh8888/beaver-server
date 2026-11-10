@@ -16,6 +16,7 @@ import (
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
+	"beaver/app/platform/platform_rpc/platform"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -31,7 +32,7 @@ func NewListDigitalKnowledgeSourceLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 // ListDigitalKnowledgeSource 列出某个数字伙伴下的知识源实体。
-// 文档数是它引入的所有知识库的文档数之和：知识源本身不存文档，只是引用分组。
+// 文档数是该知识源索引集合下的文档数（集合由本服务在新建知识源时创建，在线文档引用挂在上面）。
 func (l *ListDigitalKnowledgeSourceLogic) ListDigitalKnowledgeSource(req *types.ListDigitalKnowledgeSourceReq) (resp *types.ListDigitalKnowledgeSourceRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
@@ -52,16 +53,31 @@ func (l *ListDigitalKnowledgeSourceLogic) ListDigitalKnowledgeSource(req *types.
 
 	list := make([]types.DigitalKnowledgeSourceItem, 0, len(rows))
 	for _, row := range rows {
-		ids := append([]string{}, row.KnowledgeIDs...)
 		list = append(list, types.DigitalKnowledgeSourceItem{
 			KnowledgeSourceID: row.SourceID,
 			Name:              row.Name,
 			RetrievalTopK:     row.RetrievalTopK,
 			IndexConfig:       row.IndexConfig,
-			KnowledgeIDs:      ids,
-			DocumentCount:     countCollectionDocuments(l.ctx, l.svcCtx, ids),
+			DocumentCount:     l.collectionDocCount(sourceCollectionID(row.KnowledgeIDs)),
 			CreatedAt:         row.CreatedAt.Unix(),
 		})
 	}
 	return &types.ListDigitalKnowledgeSourceRes{List: list, Total: int64(len(list))}, nil
+}
+
+// collectionDocCount 统计知识源索引集合下的文档数；集合为空时返回 0。
+func (l *ListDigitalKnowledgeSourceLogic) collectionDocCount(collectionID string) int64 {
+	if collectionID == "" {
+		return 0
+	}
+	res, rpcErr := l.svcCtx.PlatformRpc.ListDocuments(l.ctx, &platform.ListDocumentsReq{
+		CollectionId: collectionID,
+		Page:         1,
+		PageSize:     1,
+	})
+	if rpcErr != nil {
+		l.logger.Error(model.LogMsg{Text: "统计知识源文档数失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
+		return 0
+	}
+	return res.Total
 }

@@ -42,6 +42,8 @@ type Config struct {
 	OpenRpc  zrpc.RpcClientConf
 	// PlatformRpc 知识库与工具目录的唯一来源（open_portal 自己库里的只有引用 ID）
 	PlatformRpc zrpc.RpcClientConf
+	// DocRpc 在线文档库（普通用户所有）：导入在线文档时按用户鉴权文档可见性
+	DocRpc zrpc.RpcClientConf
 	OAuth    struct {
 		BaseUrl string // OAuth 授权页基础 URL（beaver-oauth H5）
 	}

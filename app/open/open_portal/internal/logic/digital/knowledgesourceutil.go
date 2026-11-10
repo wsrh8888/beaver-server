@@ -10,17 +10,15 @@
 package digital
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
 	"beaver/app/open/open_models"
-	"beaver/app/open/open_portal/internal/svc"
-	"beaver/app/platform/platform_rpc/platform"
 
 	"gorm.io/gorm"
 )
@@ -67,6 +65,66 @@ func loadKnowledgeSourceIDs(db *gorm.DB, digitalID string) []string {
 // syncDigitalKnowledgeIDs 知识源增删改后回写运行时扁平列表。
 func syncDigitalKnowledgeIDs(db *gorm.DB, digitalID string) error {
 	return writeDigitalKnowledgeIDs(db, digitalID, loadKnowledgeSourceIDs(db, digitalID))
+}
+
+// sourceCollectionID 取知识源持有的 platform 索引集合 ID。
+//
+// 新模型下每行 KnowledgeIDs 只放 1 个集合 ID（新建知识源时由本服务创建）；
+// 旧迁移数据可能直接引用既有集合。两种情况下取首个非空 ID 即可定位集合。
+// 调用方需自行处理「集合为空」的提示，不放这里以免掩盖业务含义。
+func sourceCollectionID(ids open_models.KnowledgeIDList) string {
+	for _, id := range ids {
+		if s := strings.TrimSpace(id); s != "" {
+			return s
+		}
+	}
+	return ""
+}
+
+// parseBeaverDocID 从用户粘贴的海狸内部在线文档地址中宽容解析出 doc_id。
+//
+// 兼容形态：
+//   - 裸 doc_id（如 doc_xxx）
+//   - 完整 URL（https://doc.beaver.im/d/doc_xxx、/doc/、/#/doc/ 等）
+//   - 带 query / hash 的地址
+//
+// 解析失败或为空返回 ""，由调用方计入失败列表。这里只负责「认出 doc_id」，
+// 真正的鉴权与正文读取交给 doc_rpc / platform_rpc。
+func parseBeaverDocID(raw string) string {
+	s := strings.TrimSpace(raw)
+	if s == "" {
+		return ""
+	}
+	// 先剥离 fragment（#/doc/xxx 这种 SPA 路由在 hash 里）
+	if i := strings.Index(s, "#"); i >= 0 {
+		s = s[i+1:]
+	}
+	// 有 scheme 的当成 URL，只保留 path + query
+	if u, err := url.Parse(s); err == nil && u.Scheme != "" {
+		s = u.Path
+		if u.RawQuery != "" {
+			s += "?" + u.RawQuery
+		}
+	}
+	// /d/ 或 /doc/ 之后那一段就是 doc_id
+	for _, prefix := range []string{"/d/", "/doc/"} {
+		if idx := strings.Index(s, prefix); idx >= 0 {
+			rest := s[idx+len(prefix):]
+			if q := strings.IndexAny(rest, "/?"); q >= 0 {
+				rest = rest[:q]
+			}
+			return strings.TrimSpace(rest)
+		}
+	}
+	// 兜底：取最后一段 path，再去掉 query
+	s = strings.TrimRight(s, "/")
+	if i := strings.LastIndex(s, "/"); i >= 0 {
+		s = s[i+1:]
+	}
+	if q := strings.Index(s, "?"); q >= 0 {
+		s = s[:q]
+	}
+	return strings.TrimSpace(s)
 }
 
 // migrateLegacyKnowledgeSources 兼容旧版把知识源分组塞在 builtinConfig JSON 里的数据。
@@ -155,33 +213,4 @@ func newKnowledgeSourceID() string {
 		return fmt.Sprintf("ks_%d", time.Now().UnixNano())
 	}
 	return "ks_" + hex.EncodeToString(buf)
-}
-
-// collectionNameMap 取平台知识库的 ID -> 名称，用于文档/召回结果标注来源。
-func collectionNameMap(ctx context.Context, svcCtx *svc.ServiceContext) map[string]string {
-	names := make(map[string]string)
-	res, err := svcCtx.PlatformRpc.ListCollections(ctx, &platform.ListCollectionsReq{Page: 1, PageSize: 200})
-	if err != nil {
-		return names
-	}
-	for _, item := range res.Collections {
-		names[item.CollectionId] = item.Name
-	}
-	return names
-}
-
-// countCollectionDocuments 累加若干知识库的文档数；单库查询失败时按 0 计，不影响整页。
-func countCollectionDocuments(ctx context.Context, svcCtx *svc.ServiceContext, ids []string) int64 {
-	var total int64
-	for _, id := range ids {
-		res, err := svcCtx.PlatformRpc.ListDocuments(ctx, &platform.ListDocumentsReq{
-			CollectionId: id,
-			Page:         1,
-			PageSize:     1,
-		})
-		if err == nil {
-			total += res.Total
-		}
-	}
-	return total
 }

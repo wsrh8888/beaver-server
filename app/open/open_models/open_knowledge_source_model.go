@@ -37,14 +37,15 @@ const MaxKnowledgeSourceTopK = 50
 
 // OpenKnowledgeSource 知识源：智能体侧的一等实体，归某个数字伙伴所有。
 //
-// 知识源 ≠ 知识库：
-//   - 知识库（platform 域 knowledge_collections / knowledge_documents / knowledge_chunks）
-//     是平台级资产，归开发者所有，存文档与索引本体，可被多个智能体复用；
-//   - 知识源是 open 库里的一行，只存「引入哪些知识库」的 ID 引用与检索参数，
-//     不复制任何文档内容。一个知识源可以引入 N 个知识库，同一个知识库也能被
-//     不同知识源引入。
+// 知识源只持有「引用」，不存任何文档正文：
+//   - 文档正文的权威源在 doc 域在线文档库（普通用户所有，按 user_id 鉴权）；
+//   - 新建知识源时由 portal 在 platform 域建一个专属索引集合（kind=open_knowledge_source），
+//     用户粘贴的在线文档地址经解析 + 鉴权后，作为「引用」挂在这个集合上，
+//     由 platform 的 ingest 自动拉取并索引源文档；
+//   - 删除知识源 / 移除引用都不会动在线文档本体（飞书/钉钉「引用云文档」语义）。
 //
-// 运行时不关心分组：BuiltinConfig.KnowledgeIDs 由本表所有行合并去重后派生，
+// KnowledgeIDs 在新模型下只放 1 个 platform 索引集合 ID；旧迁移数据可能直接引用
+// 既有集合。运行时不关心分组：BuiltinConfig.KnowledgeIDs 由本表所有行合并去重后派生，
 // 知识源发生任何增删改都由 portal logic 回写，agent 侧只认那个扁平列表。
 // 控制台的 config/save 会整列覆盖 builtin_config，因此也在那里按本表重算回填。
 type OpenKnowledgeSource struct {
@@ -55,7 +56,7 @@ type OpenKnowledgeSource struct {
 	Name          string          `gorm:"column:name;type:varchar(128);not null;comment:知识源名称"`
 	RetrievalTopK int             `gorm:"column:retrieval_top_k;type:int;not null;default:8;comment:召回条数"`
 	IndexConfig   string          `gorm:"column:index_config;type:text;comment:分段与清洗配置 JSON"`
-	KnowledgeIDs  KnowledgeIDList `gorm:"column:knowledge_ids;type:json;comment:引入的平台知识库ID列表"`
+	KnowledgeIDs  KnowledgeIDList `gorm:"column:knowledge_ids;type:json;comment:持有的 platform 索引集合 ID（新模型通常 1 个；旧迁移数据可能直接引用既有集合）"`
 }
 
 func (OpenKnowledgeSource) TableName() string { return "open_knowledge_source" }

@@ -308,119 +308,6 @@ type SaveDigitalConfigReq struct {
 type SaveDigitalConfigRes struct {
 }
 
-// ==================== 知识源（平台知识库门面）====================
-
-type DigitalKnowledgeItem struct {
-	CollectionID  string `json:"collectionId"`
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	Kind          string `json:"kind"`
-	Status        int    `json:"status"`
-	TopK          int    `json:"topK"`
-	DocumentCount int64  `json:"documentCount"`
-	Bound         bool   `json:"bound"`
-	IndexConfig   string `json:"indexConfig,optional"`
-}
-
-type ListDigitalKnowledgeReq struct {
-	DigitalID string `form:"digitalId,optional"`
-	UserID    string `header:"Beaver-User-Id"`
-}
-
-type ListDigitalKnowledgeRes struct {
-	List  []DigitalKnowledgeItem `json:"list"`
-	Total int64                  `json:"total"`
-}
-
-type SaveDigitalKnowledgeReq struct {
-	DigitalID    string `json:"digitalId,optional"`
-	CollectionID string `json:"collectionId,optional"`
-	Name         string `json:"name,optional"`
-	Description  string `json:"description,optional"`
-	TopK         int    `json:"topK,optional"`
-	IndexConfig  string `json:"indexConfig,optional"`
-	UserID       string `header:"Beaver-User-Id"`
-}
-
-type SaveDigitalKnowledgeRes struct {
-	CollectionID string `json:"collectionId"`
-}
-
-type DeleteDigitalKnowledgeReq struct {
-	DigitalID    string `json:"digitalId,optional"`
-	CollectionID string `json:"collectionId"`
-	UserID       string `header:"Beaver-User-Id"`
-}
-
-type DeleteDigitalKnowledgeRes struct {
-}
-
-type DigitalKnowledgeDoc struct {
-	DocumentID  string `json:"documentId"`
-	Title       string `json:"title"`
-	DocType     string `json:"docType"`
-	ByteSize    int64  `json:"byteSize"`
-	IndexStatus string `json:"indexStatus"`
-	IndexError  string `json:"indexError,optional"`
-	IndexedAt   int64  `json:"indexedAt"`
-}
-
-type ListDigitalKnowledgeDocReq struct {
-	DigitalID    string `form:"digitalId,optional"`
-	CollectionID string `form:"collectionId"`
-	Keyword      string `form:"keyword,optional"`
-	UserID       string `header:"Beaver-User-Id"`
-}
-
-type ListDigitalKnowledgeDocRes struct {
-	List  []DigitalKnowledgeDoc `json:"list"`
-	Total int64                 `json:"total"`
-}
-
-type SaveDigitalKnowledgeDocReq struct {
-	DigitalID    string `json:"digitalId,optional"`
-	CollectionID string `json:"collectionId,optional"`
-	DocumentID   string `json:"documentId,optional"`
-	Title        string `json:"title"`
-	ContentText  string `json:"contentText,optional"`
-	Reindex      bool   `json:"reindex,optional"`
-	UserID       string `header:"Beaver-User-Id"`
-}
-
-type SaveDigitalKnowledgeDocRes struct {
-	DocumentID string `json:"documentId"`
-}
-
-type DeleteDigitalKnowledgeDocReq struct {
-	DigitalID  string `json:"digitalId,optional"`
-	DocumentID string `json:"documentId"`
-	UserID     string `header:"Beaver-User-Id"`
-}
-
-type DeleteDigitalKnowledgeDocRes struct {
-}
-
-type RetrieveDigitalKnowledgeReq struct {
-	DigitalID    string `json:"digitalId,optional"`
-	CollectionID string `json:"collectionId"`
-	Query        string `json:"query"`
-	TopK         int    `json:"topK,optional"`
-	UserID       string `header:"Beaver-User-Id"`
-}
-
-type DigitalKnowledgeHit struct {
-	DocumentID string  `json:"documentId"`
-	Title      string  `json:"title"`
-	ChunkIndex int     `json:"chunkIndex"`
-	Content    string  `json:"content"`
-	Score      float64 `json:"score"`
-}
-
-type RetrieveDigitalKnowledgeRes struct {
-	Hits   []DigitalKnowledgeHit `json:"hits"`
-	Notice string                `json:"notice,optional"`
-}
-
 // ==================== 工具与 MCP 目录 ====================
 
 type DigitalToolItem struct {
@@ -584,13 +471,12 @@ type UpdateOAuthConfigRes struct {
 // 重新执行 goctl api go 时这些定义会被自动合并进去。
 
 type DigitalKnowledgeSourceItem struct {
-	KnowledgeSourceID string   `json:"knowledgeSourceId"`
-	Name              string   `json:"name"`
-	RetrievalTopK     int      `json:"retrievalTopK"`
-	IndexConfig       string   `json:"indexConfig,optional"` // 分段 / 清洗配置 JSON
-	KnowledgeIDs      []string `json:"knowledgeIds"`         // 引入的平台知识库 ID
-	DocumentCount     int64    `json:"documentCount"`        // 引入的所有知识库的文档总数
-	CreatedAt         int64    `json:"createdAt"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	Name              string `json:"name"`
+	RetrievalTopK     int    `json:"retrievalTopK"`
+	IndexConfig       string `json:"indexConfig,optional"` // 分段 / 清洗配置 JSON
+	DocumentCount     int64  `json:"documentCount"`        // 该知识源集合下的文档数
+	CreatedAt         int64  `json:"createdAt"`
 }
 
 type ListDigitalKnowledgeSourceReq struct {
@@ -625,38 +511,30 @@ type DeleteDigitalKnowledgeSourceReq struct {
 type DeleteDigitalKnowledgeSourceRes struct {
 }
 
-type BindDigitalKnowledgeSourceReq struct {
+type ImportDigitalKnowledgeSourceDocReq struct {
 	DigitalID         string   `json:"digitalId"`
 	KnowledgeSourceID string   `json:"knowledgeSourceId"`
-	KnowledgeIDs      []string `json:"knowledgeIds"` // 要引入的平台知识库 ID，可多选
+	DocURLs           []string `json:"docUrls"`             // 海狸内部在线文档地址（可多个）
 	UserID            string   `header:"Beaver-User-Id"`
 }
 
-type BindDigitalKnowledgeSourceRes struct {
-	KnowledgeIDs []string `json:"knowledgeIds"` // 变更后该知识源的完整引用列表
-}
-
-type UnbindDigitalKnowledgeSourceReq struct {
-	DigitalID         string `json:"digitalId"`
-	KnowledgeSourceID string `json:"knowledgeSourceId"`
-	CollectionID      string `json:"collectionId"`
-	UserID            string `header:"Beaver-User-Id"`
-}
-
-type UnbindDigitalKnowledgeSourceRes struct {
-	KnowledgeIDs []string `json:"knowledgeIds"`
+type ImportDigitalKnowledgeSourceDocRes struct {
+	Imported int      `json:"imported"`        // 成功建立的引用数
+	Failed   []string `json:"failed,optional"` // 解析或鉴权失败的地址
+	Notice   string   `json:"notice,optional"`
 }
 
 type DigitalKnowledgeSourceDoc struct {
-	DocumentID     string `json:"documentId"`
-	Title          string `json:"title"`
-	DocType        string `json:"docType"`
-	ByteSize       int64  `json:"byteSize"`
-	IndexStatus    string `json:"indexStatus"` // pending|indexing|ready|failed
-	IndexError     string `json:"indexError,optional"`
-	IndexedAt      int64  `json:"indexedAt"`
-	CollectionID   string `json:"collectionId"`
-	CollectionName string `json:"collectionName"`
+	DocumentID   string `json:"documentId"`
+	Title        string `json:"title"`
+	DocType      string `json:"docType"`
+	ByteSize     int64  `json:"byteSize"`
+	IndexStatus  string `json:"indexStatus"` // pending|indexing|ready|failed
+	IndexError   string `json:"indexError,optional"`
+	IndexedAt    int64  `json:"indexedAt"`
+	SourceDocID  string `json:"sourceDocId"`   // 引用的在线文档 doc_id
+	SyncMode     string `json:"syncMode"`      // direct|import
+	LastSyncedAt string `json:"lastSyncedAt,optional"`
 }
 
 type ListDigitalKnowledgeSourceDocReq struct {
@@ -671,6 +549,16 @@ type ListDigitalKnowledgeSourceDocRes struct {
 	Total int64                       `json:"total"`
 }
 
+type DeleteDigitalKnowledgeSourceDocReq struct {
+	DigitalID         string `json:"digitalId"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	DocumentID        string `json:"documentId"`
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type DeleteDigitalKnowledgeSourceDocRes struct {
+}
+
 type RetrieveDigitalKnowledgeSourceReq struct {
 	DigitalID         string `json:"digitalId"`
 	KnowledgeSourceID string `json:"knowledgeSourceId"`
@@ -680,16 +568,14 @@ type RetrieveDigitalKnowledgeSourceReq struct {
 }
 
 type DigitalKnowledgeSourceHit struct {
-	DocumentID     string  `json:"documentId"`
-	CollectionID   string  `json:"collectionId"`
-	CollectionName string  `json:"collectionName"`
-	Title          string  `json:"title"`
-	ChunkIndex     int     `json:"chunkIndex"`
-	Content        string  `json:"content"`
-	Score          float64 `json:"score"`
+	DocumentID string  `json:"documentId"`
+	Title      string  `json:"title"`
+	ChunkIndex int     `json:"chunkIndex"`
+	Content    string  `json:"content"`
+	Score      float64 `json:"score"`
 }
 
 type RetrieveDigitalKnowledgeSourceRes struct {
 	Hits   []DigitalKnowledgeSourceHit `json:"hits"`
-	Notice string                      `json:"notice,optional"` // 无结果原因
+	Notice string                      `json:"notice,optional"`
 }

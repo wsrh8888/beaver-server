@@ -30,7 +30,8 @@ func NewDeleteDigitalKnowledgeSourceLogic(ctx context.Context, svcCtx *svc.Servi
 }
 
 // DeleteDigitalKnowledgeSource 只删知识源这一行和它派生的运行时引用，
-// 被引用的平台知识库本体（集合 / 文档 / 索引）不受影响。
+// 知识源自己的索引集合本体（以及里面的在线文档引用）由平台侧保管，这里不级联删除，
+// 避免误删与其它引用共享的集合。
 func (l *DeleteDigitalKnowledgeSourceLogic) DeleteDigitalKnowledgeSource(req *types.DeleteDigitalKnowledgeSourceReq) (resp *types.DeleteDigitalKnowledgeSourceRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")

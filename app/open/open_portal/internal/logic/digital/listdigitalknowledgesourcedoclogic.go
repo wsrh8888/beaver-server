@@ -31,9 +31,8 @@ func NewListDigitalKnowledgeSourceDocLogic(ctx context.Context, svcCtx *svc.Serv
 	return &ListDigitalKnowledgeSourceDocLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_digital_knowledge_source_doc", ctx)}
 }
 
-// ListDigitalKnowledgeSourceDoc 聚合展示知识源引入的所有知识库里的文档。
-// 知识源本身不存文档：这里按引用逐个查 platform，再打上来源知识库标签。
-// 单个知识库查询失败时跳过它，不因为一个库挂掉让整个详情打不开。
+// ListDigitalKnowledgeSourceDoc 列出知识源索引集合下的文档（即用户粘贴的在线文档引用）。
+// 知识源本身不存文档内容：文档本体与索引在 platform 的集合里，这里只做分页 / 关键字过滤。
 func (l *ListDigitalKnowledgeSourceDocLogic) ListDigitalKnowledgeSourceDoc(req *types.ListDigitalKnowledgeSourceDocReq) (resp *types.ListDigitalKnowledgeSourceDocRes, err error) {
 	if req.UserID == "" {
 		return nil, errors.New("未登录")
@@ -42,36 +41,39 @@ func (l *ListDigitalKnowledgeSourceDocLogic) ListDigitalKnowledgeSourceDoc(req *
 	if err != nil {
 		return nil, err
 	}
+	collectionID := sourceCollectionID(row.KnowledgeIDs)
+	if collectionID == "" {
+		return &types.ListDigitalKnowledgeSourceDocRes{List: []types.DigitalKnowledgeSourceDoc{}, Total: 0}, nil
+	}
 
-	names := collectionNameMap(l.ctx, l.svcCtx)
-	keyword := strings.ToLower(strings.TrimSpace(req.Keyword))
-	list := make([]types.DigitalKnowledgeSourceDoc, 0)
-	for _, collectionID := range uniqTrimmed(row.KnowledgeIDs) {
-		res, rpcErr := l.svcCtx.PlatformRpc.ListDocuments(l.ctx, &platform.ListDocumentsReq{
-			CollectionId: collectionID,
-			Page:         1,
-			PageSize:     200,
-		})
-		if rpcErr != nil {
-			l.logger.Error(model.LogMsg{Text: "查询知识源文档失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
+	res, rpcErr := l.svcCtx.PlatformRpc.ListDocuments(l.ctx, &platform.ListDocumentsReq{
+		CollectionId: collectionID,
+		Page:         1,
+		PageSize:     200,
+	})
+	if rpcErr != nil {
+		l.logger.Error(model.LogMsg{Text: "查询知识源文档失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
+		return nil, errors.New("查询知识源文档失败")
+	}
+	keyword := strings.TrimSpace(req.Keyword)
+	list := make([]types.DigitalKnowledgeSourceDoc, 0, len(res.Documents))
+	for _, doc := range res.Documents {
+		// platform 的 ListDocuments 不支持关键字过滤，这里按标题做客户端过滤（文档量小，可接受）。
+		if keyword != "" && !strings.Contains(strings.ToLower(doc.Title), strings.ToLower(keyword)) {
 			continue
 		}
-		for _, doc := range res.Documents {
-			if keyword != "" && !strings.Contains(strings.ToLower(doc.Title), keyword) {
-				continue
-			}
-			list = append(list, types.DigitalKnowledgeSourceDoc{
-				DocumentID:     doc.DocumentId,
-				Title:          doc.Title,
-				DocType:        doc.DocType,
-				ByteSize:       doc.ByteSize,
-				IndexStatus:    doc.IndexStatus,
-				IndexError:     doc.IndexError,
-				IndexedAt:      parseRFC3339Unix(doc.IndexedAt),
-				CollectionID:   collectionID,
-				CollectionName: names[collectionID],
-			})
-		}
+		list = append(list, types.DigitalKnowledgeSourceDoc{
+			DocumentID:   doc.DocumentId,
+			Title:        doc.Title,
+			DocType:      doc.DocType,
+			ByteSize:     doc.ByteSize,
+			IndexStatus:  doc.IndexStatus,
+			IndexError:   doc.IndexError,
+			IndexedAt:    parseRFC3339Unix(doc.IndexedAt),
+			SourceDocID:  doc.SourceDocId,
+			SyncMode:     doc.SyncMode,
+			LastSyncedAt: doc.LastSyncedAt,
+		})
 	}
 	return &types.ListDigitalKnowledgeSourceDocRes{List: list, Total: int64(len(list))}, nil
 }
