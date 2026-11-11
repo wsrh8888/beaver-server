@@ -199,6 +199,7 @@ func AllMigrations() []Migration {
 				&backend_models.AdminSystemAuthorityMenu{},
 				&backend_models.AdminSystemAuthorityUser{},
 				&backend_models.AdminSystemMenu{},
+				&backend_models.AgentKnowledgeSource{},
 			},
 		},
 		{

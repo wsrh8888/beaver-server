@@ -15,6 +15,7 @@ import (
 	friend "beaver/app/backend/backend_admin/internal/handler/friend"
 	group "beaver/app/backend/backend_admin/internal/handler/group"
 	knowledge "beaver/app/backend/backend_admin/internal/handler/knowledge"
+	knowledge_source "beaver/app/backend/backend_admin/internal/handler/knowledge_source"
 	moderation "beaver/app/backend/backend_admin/internal/handler/moderation"
 	moment "beaver/app/backend/backend_admin/internal/handler/moment"
 	monitor "beaver/app/backend/backend_admin/internal/handler/monitor"
@@ -667,6 +668,61 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPut,
 				Path:    "/admin/backend/knowledge/v1/document_update",
 				Handler: knowledge.UpdateKnowledgeDocumentHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_delete",
+				Handler: knowledge_source.DeleteKnowledgeSourceHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/backend/knowledge/v1/source_detail",
+				Handler: knowledge_source.DetailKnowledgeSourceHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_doc_check",
+				Handler: knowledge_source.CheckKnowledgeSourceDocHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_doc_delete",
+				Handler: knowledge_source.DeleteKnowledgeSourceDocHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_doc_import",
+				Handler: knowledge_source.ImportKnowledgeSourceDocHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/backend/knowledge/v1/source_doc_list",
+				Handler: knowledge_source.ListKnowledgeSourceDocHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_doc_upload",
+				Handler: knowledge_source.UploadKnowledgeSourceDocHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/backend/knowledge/v1/source_list",
+				Handler: knowledge_source.ListKnowledgeSourceHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_retrieve",
+				Handler: knowledge_source.RetrieveKnowledgeSourceHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/knowledge/v1/source_save",
+				Handler: knowledge_source.SaveKnowledgeSourceHandler(serverCtx),
 			},
 		},
 	)

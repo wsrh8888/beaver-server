@@ -28,6 +28,7 @@ import (
 	"beaver/app/backend/backend_models"
 	chatcli "beaver/app/chat/chat_rpc/chat"
 	circlecli "beaver/app/circle/circle_rpc/circle"
+	doccli "beaver/app/doc/doc_rpc/doc"
 	emojicli "beaver/app/emoji/emoji_rpc/emoji"
 	"beaver/app/file/file_rpc/file"
 	"beaver/app/file/file_rpc/types/file_rpc"
@@ -65,6 +66,7 @@ type ServiceContext struct {
 	EmojiRpc    emojicli.Emoji
 	CircleRpc   circlecli.Circle
 	AgentRpc    agentcli.Agent
+	DocRpc      doccli.Doc
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -89,6 +91,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		EmojiRpc:     emojicli.NewEmoji(zrpc.MustNewClient(c.EmojiRpc, rpcOpt)),
 		CircleRpc:    circlecli.NewCircle(zrpc.MustNewClient(c.CircleRpc, rpcOpt)),
 		AgentRpc:     agentcli.NewAgent(zrpc.MustNewClient(c.AgentRpc, rpcOpt)),
+		DocRpc:       doccli.NewDoc(zrpc.MustNewClient(c.DocRpc, rpcOpt)),
 	}
 }
 

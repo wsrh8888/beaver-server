@@ -1,0 +1,183 @@
+// 场景知识源：场景智能体侧的一等实体，归平台固定场景（assistant|chat|moment|workbench）所有。
+//
+// 与 open_portal 的数字伙伴知识源同构，差别只在归属主体：
+//   - open 端归属 digital_id（开发者自己创建的应用）；
+//   - 这里归属 scene（平台内置场景，运营在后台配置）。
+//
+// 知识源只持有引用：新建时在 platform 域建一个专属索引集合，
+// 在线文档以 source_type=doc 挂引用、本地文件解析成正文以 source_type=file 入库，
+// 运行时只认 agent_apps.knowledge_ids（各知识源集合合并去重后回写）。
+
+type (
+	// KnowledgeSourceItem 知识源实体
+	KnowledgeSourceItem {
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		Name              string `json:"name"`
+		RetrievalTopK     int    `json:"retrievalTopK"`
+		IndexConfig       string `json:"indexConfig,optional"` // 分段 / 清洗配置 JSON
+		DocumentCount     int64  `json:"documentCount"`        // 该知识源集合下的文档数
+		CreatedAt         int64  `json:"createdAt"`
+	}
+
+	ListKnowledgeSourceReq {
+		Scene string `form:"scene"`
+	}
+	ListKnowledgeSourceRes {
+		List  []KnowledgeSourceItem `json:"list"`
+		Total int64                 `json:"total"`
+	}
+
+	DetailKnowledgeSourceReq {
+		Scene             string `form:"scene"`
+		KnowledgeSourceID string `form:"knowledgeSourceId"`
+	}
+	DetailKnowledgeSourceRes {
+		Source KnowledgeSourceItem `json:"source"`
+	}
+
+	SaveKnowledgeSourceReq {
+		Scene             string `json:"scene"`
+		KnowledgeSourceID string `json:"knowledgeSourceId,optional"` // 空 = 新建
+		Name              string `json:"name,optional"`              // 空 = 不改
+		RetrievalTopK     int    `json:"retrievalTopK,optional"`     // 0 = 不改
+		IndexConfig       string `json:"indexConfig,optional"`       // JSON，空 = 不改
+	}
+	SaveKnowledgeSourceRes {
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+	}
+
+	DeleteKnowledgeSourceReq {
+		Scene             string `json:"scene"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+	}
+	DeleteKnowledgeSourceRes {}
+)
+
+// 知识源里的文档：在线文档引用与本地文件都在 platform 集合里，这里只做分页与过滤。
+type (
+	KnowledgeSourceDoc {
+		DocumentID   string `json:"documentId"`
+		Title        string `json:"title"`
+		DocType      string `json:"docType"`
+		ByteSize     int64  `json:"byteSize"`
+		IndexStatus  string `json:"indexStatus"` // pending|indexing|ready|failed
+		IndexError   string `json:"indexError,optional"`
+		IndexedAt    int64  `json:"indexedAt"`
+		SourceDocID  string `json:"sourceDocId"` // 引用的在线文档 doc_id
+		SyncMode     string `json:"syncMode"`    // direct|import
+		LastSyncedAt string `json:"lastSyncedAt,optional"`
+	}
+
+	ListKnowledgeSourceDocReq {
+		Scene             string `form:"scene"`
+		KnowledgeSourceID string `form:"knowledgeSourceId"`
+		Keyword           string `form:"keyword,optional"`
+	}
+	ListKnowledgeSourceDocRes {
+		List  []KnowledgeSourceDoc `json:"list"`
+		Total int64                `json:"total"`
+	}
+
+	DeleteKnowledgeSourceDocReq {
+		Scene             string `json:"scene"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		DocumentID        string `json:"documentId"`
+	}
+	DeleteKnowledgeSourceDocRes {}
+
+	// 检查在线文档链接：只校验不建引用，检查通过才能确认导入
+	CheckKnowledgeSourceDocReq {
+		Scene  string `json:"scene"`
+		DocURL string `json:"docUrl"`
+	}
+	CheckKnowledgeSourceDocRes {
+		Valid bool   `json:"valid"`
+		DocID string `json:"docId,optional"`
+		Title string `json:"title,optional"`
+		Msg   string `json:"msg,optional"`
+	}
+
+	// 导入在线文档：粘贴海狸内部在线文档地址（URL 或裸 docId）
+	ImportKnowledgeSourceDocReq {
+		Scene             string   `json:"scene"`
+		KnowledgeSourceID string   `json:"knowledgeSourceId"`
+		DocURLs           []string `json:"docUrls"`
+		DocType           string   `json:"docType,optional"` // doc|faq，默认 doc
+	}
+	ImportKnowledgeSourceDocRes {
+		Imported int      `json:"imported"`        // 成功建立的引用数
+		Failed   []string `json:"failed,optional"` // 解析或读取失败的地址
+		Notice   string   `json:"notice,optional"`
+	}
+
+	// 本地文件上传：docx/xlsx 解析正文后以 source_type=file 建文档
+	UploadKnowledgeSourceDocReq {
+		Scene             string `json:"scene"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		FileName          string `json:"fileName"`
+		Data              string `json:"data"` // base64
+		DocType           string `json:"docType,optional"`
+	}
+	UploadKnowledgeSourceDocRes {
+		DocumentID string `json:"documentId,optional"`
+		Title      string `json:"title,optional"`
+		ByteSize   int64  `json:"byteSize"`
+		Msg        string `json:"msg,optional"`
+	}
+)
+
+// 召回测试
+type (
+	RetrieveKnowledgeSourceReq {
+		Scene             string `json:"scene"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		Query             string `json:"query"`
+		TopK              int    `json:"topK,optional"` // 0 = 用知识源自身的 retrievalTopK
+	}
+	KnowledgeSourceHit {
+		DocumentID string  `json:"documentId"`
+		Title      string  `json:"title"`
+		ChunkIndex int     `json:"chunkIndex"`
+		Content    string  `json:"content"`
+		Score      float64 `json:"score"`
+	}
+	RetrieveKnowledgeSourceRes {
+		Hits   []KnowledgeSourceHit `json:"hits"`
+		Notice string               `json:"notice,optional"`
+	}
+)
+
+@server (
+	group: knowledge_source
+)
+service backend {
+	@handler ListKnowledgeSource
+	get /admin/backend/knowledge/v1/source_list (ListKnowledgeSourceReq) returns (ListKnowledgeSourceRes)
+
+	@handler DetailKnowledgeSource
+	get /admin/backend/knowledge/v1/source_detail (DetailKnowledgeSourceReq) returns (DetailKnowledgeSourceRes)
+
+	@handler SaveKnowledgeSource
+	post /admin/backend/knowledge/v1/source_save (SaveKnowledgeSourceReq) returns (SaveKnowledgeSourceRes)
+
+	@handler DeleteKnowledgeSource
+	post /admin/backend/knowledge/v1/source_delete (DeleteKnowledgeSourceReq) returns (DeleteKnowledgeSourceRes)
+
+	@handler ListKnowledgeSourceDoc
+	get /admin/backend/knowledge/v1/source_doc_list (ListKnowledgeSourceDocReq) returns (ListKnowledgeSourceDocRes)
+
+	@handler CheckKnowledgeSourceDoc
+	post /admin/backend/knowledge/v1/source_doc_check (CheckKnowledgeSourceDocReq) returns (CheckKnowledgeSourceDocRes)
+
+	@handler ImportKnowledgeSourceDoc
+	post /admin/backend/knowledge/v1/source_doc_import (ImportKnowledgeSourceDocReq) returns (ImportKnowledgeSourceDocRes)
+
+	@handler UploadKnowledgeSourceDoc
+	post /admin/backend/knowledge/v1/source_doc_upload (UploadKnowledgeSourceDocReq) returns (UploadKnowledgeSourceDocRes)
+
+	@handler DeleteKnowledgeSourceDoc
+	post /admin/backend/knowledge/v1/source_doc_delete (DeleteKnowledgeSourceDocReq) returns (DeleteKnowledgeSourceDocRes)
+
+	@handler RetrieveKnowledgeSource
+	post /admin/backend/knowledge/v1/source_retrieve (RetrieveKnowledgeSourceReq) returns (RetrieveKnowledgeSourceRes)
+}

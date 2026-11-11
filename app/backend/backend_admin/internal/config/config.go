@@ -73,4 +73,6 @@ type Config struct {
 	EmojiRpc     zrpc.RpcClientConf
 	CircleRpc    zrpc.RpcClientConf
 	AgentRpc zrpc.RpcClientConf
+	// DocRpc 文档权威域 gRPC：场景知识源导入在线文档时按 doc_id 读取正文快照。
+	DocRpc zrpc.RpcClientConf
 }

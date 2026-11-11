@@ -250,6 +250,18 @@ type CaseContextUser struct {
 	Status   int    `json:"status"`
 }
 
+type CheckKnowledgeSourceDocReq struct {
+	Scene  string `json:"scene"`
+	DocURL string `json:"docUrl"`
+}
+
+type CheckKnowledgeSourceDocRes struct {
+	Valid bool   `json:"valid"`
+	DocID string `json:"docId,optional"`
+	Title string `json:"title,optional"`
+	Msg   string `json:"msg,optional"`
+}
+
 type ClearConversationReq struct {
 	ConversationID string `json:"conversationId"`
 }
@@ -665,6 +677,23 @@ type DeleteKnowledgeDocumentReq struct {
 type DeleteKnowledgeDocumentRes struct {
 }
 
+type DeleteKnowledgeSourceDocReq struct {
+	Scene             string `json:"scene"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	DocumentID        string `json:"documentId"`
+}
+
+type DeleteKnowledgeSourceDocRes struct {
+}
+
+type DeleteKnowledgeSourceReq struct {
+	Scene             string `json:"scene"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+}
+
+type DeleteKnowledgeSourceRes struct {
+}
+
 type DeleteMenuReq struct {
 	Id     uint   `json:"id"`
 	UserID string `header:"Beaver-User-Id"`
@@ -725,6 +754,15 @@ type DeleteWorkbenchAppReq struct {
 }
 
 type DeleteWorkbenchAppRes struct {
+}
+
+type DetailKnowledgeSourceReq struct {
+	Scene             string `form:"scene"`
+	KnowledgeSourceID string `form:"knowledgeSourceId"`
+}
+
+type DetailKnowledgeSourceRes struct {
+	Source KnowledgeSourceItem `json:"source"`
 }
 
 type DigitalAdminInfo struct {
@@ -2040,6 +2078,19 @@ type HandleModerationCaseReq struct {
 type HandleModerationCaseRes struct {
 }
 
+type ImportKnowledgeSourceDocReq struct {
+	Scene             string   `json:"scene"`
+	KnowledgeSourceID string   `json:"knowledgeSourceId"`
+	DocURLs           []string `json:"docUrls"`
+	DocType           string   `json:"docType,optional"` // doc|faq，默认 doc
+}
+
+type ImportKnowledgeSourceDocRes struct {
+	Imported int      `json:"imported"`        // 成功建立的引用数
+	Failed   []string `json:"failed,optional"` // 解析或读取失败的地址
+	Notice   string   `json:"notice,optional"`
+}
+
 type KnowledgeCollectionInfo struct {
 	Id           int64  `json:"id"`
 	CollectionID string `json:"collectionId"`
@@ -2075,6 +2126,56 @@ type KnowledgeDocumentInfo struct {
 	IndexError      string `json:"indexError"`
 	IndexedAt       string `json:"indexedAt"`
 	Status          int    `json:"status"`
+}
+
+type KnowledgeSourceDoc struct {
+	DocumentID   string `json:"documentId"`
+	Title        string `json:"title"`
+	DocType      string `json:"docType"`
+	ByteSize     int64  `json:"byteSize"`
+	IndexStatus  string `json:"indexStatus"` // pending|indexing|ready|failed
+	IndexError   string `json:"indexError,optional"`
+	IndexedAt    int64  `json:"indexedAt"`
+	SourceDocID  string `json:"sourceDocId"` // 引用的在线文档 doc_id
+	SyncMode     string `json:"syncMode"`    // direct|import
+	LastSyncedAt string `json:"lastSyncedAt,optional"`
+}
+
+type KnowledgeSourceHit struct {
+	DocumentID string  `json:"documentId"`
+	Title      string  `json:"title"`
+	ChunkIndex int     `json:"chunkIndex"`
+	Content    string  `json:"content"`
+	Score      float64 `json:"score"`
+}
+
+type KnowledgeSourceItem struct {
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	Name              string `json:"name"`
+	RetrievalTopK     int    `json:"retrievalTopK"`
+	IndexConfig       string `json:"indexConfig,optional"` // 分段 / 清洗配置 JSON
+	DocumentCount     int64  `json:"documentCount"`        // 该知识源集合下的文档数
+	CreatedAt         int64  `json:"createdAt"`
+}
+
+type ListKnowledgeSourceDocReq struct {
+	Scene             string `form:"scene"`
+	KnowledgeSourceID string `form:"knowledgeSourceId"`
+	Keyword           string `form:"keyword,optional"`
+}
+
+type ListKnowledgeSourceDocRes struct {
+	List  []KnowledgeSourceDoc `json:"list"`
+	Total int64                `json:"total"`
+}
+
+type ListKnowledgeSourceReq struct {
+	Scene string `form:"scene"`
+}
+
+type ListKnowledgeSourceRes struct {
+	List  []KnowledgeSourceItem `json:"list"`
+	Total int64                 `json:"total"`
 }
 
 type LoginReq struct {
@@ -2265,6 +2366,18 @@ type RestoreFriendReq struct {
 type RestoreFriendRes struct {
 }
 
+type RetrieveKnowledgeSourceReq struct {
+	Scene             string `json:"scene"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	Query             string `json:"query"`
+	TopK              int    `json:"topK,optional"` // 0 = 用知识源自身的 retrievalTopK
+}
+
+type RetrieveKnowledgeSourceRes struct {
+	Hits   []KnowledgeSourceHit `json:"hits"`
+	Notice string               `json:"notice,optional"`
+}
+
 type SaveAiAssistantReq struct {
 	Scene          string `json:"scene"`
 	Name           string `json:"name,optional"`
@@ -2292,6 +2405,18 @@ type SaveFileReq struct {
 
 type SaveFileRes struct {
 	FileKey string `json:"fileKey"`
+}
+
+type SaveKnowledgeSourceReq struct {
+	Scene             string `json:"scene"`
+	KnowledgeSourceID string `json:"knowledgeSourceId,optional"` // 空 = 新建
+	Name              string `json:"name,optional"`              // 空 = 不改
+	RetrievalTopK     int    `json:"retrievalTopK,optional"`     // 0 = 不改
+	IndexConfig       string `json:"indexConfig,optional"`       // JSON，空 = 不改
+}
+
+type SaveKnowledgeSourceRes struct {
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
 }
 
 type SearchConversationHit struct {
@@ -2610,6 +2735,21 @@ type UpdateWorkbenchAppReq struct {
 }
 
 type UpdateWorkbenchAppRes struct {
+}
+
+type UploadKnowledgeSourceDocReq struct {
+	Scene             string `json:"scene"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	FileName          string `json:"fileName"`
+	Data              string `json:"data"` // base64
+	DocType           string `json:"docType,optional"`
+}
+
+type UploadKnowledgeSourceDocRes struct {
+	DocumentID string `json:"documentId,optional"`
+	Title      string `json:"title,optional"`
+	ByteSize   int64  `json:"byteSize"`
+	Msg        string `json:"msg,optional"`
 }
 
 type UpsertReleasePolicyReq struct {
