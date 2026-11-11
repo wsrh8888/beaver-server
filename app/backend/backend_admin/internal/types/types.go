@@ -1828,18 +1828,31 @@ type GetOnlineUserListRes struct {
 	Total int64            `json:"total"`
 }
 
-type GetOpenAppListReq struct {
+type GetOpenBotListReq struct {
 	Page        int    `form:"page,default=1"`
 	PageSize    int    `form:"pageSize,default=10"`
-	Keyword     string `form:"keyword,optional"`
-	OwnerUserID string `form:"ownerUserId,optional"`
-	AppID       string `form:"appId,optional"`
-	Status      int    `form:"status,optional,default=-1"` // -1全部 0禁用 1启用
+	Keyword     string `form:"keyword,optional"`     // BotID 模糊
+	OwnerUserID string `form:"ownerUserId,optional"` // 创建者
+	Status      int    `form:"status,default=-1"`    // -1全部 0禁用 1启用
 }
 
-type GetOpenAppListRes struct {
+type GetOpenBotListRes struct {
 	Total int64         `json:"total"`
-	List  []OpenAppInfo `json:"list"`
+	List  []OpenBotInfo `json:"list"`
+}
+
+type GetOpenOAuthListReq struct {
+	Page        int    `form:"page,default=1"`
+	PageSize    int    `form:"pageSize,default=10"`
+	Keyword     string `form:"keyword,optional"`     // 应用名 / 描述
+	OwnerUserID string `form:"ownerUserId,optional"` // 所属用户
+	OAuthID     string `form:"oauthId,optional"`     // 精确匹配
+	Status      int    `form:"status,default=-1"`    // -1全部 0禁用 1启用
+}
+
+type GetOpenOAuthListRes struct {
+	Total int64           `json:"total"`
+	List  []OpenOAuthInfo `json:"list"`
 }
 
 type GetOperationLogListReq struct {
@@ -2241,15 +2254,25 @@ type OnlineUserSlotItem struct {
 	Slot       string `json:"slot"`       // string desktop | mobile
 }
 
-type OpenAppInfo struct {
-	AppID         string `json:"appId"`
+type OpenBotInfo struct {
+	BotID            string `json:"botId"`
+	BotName          string `json:"botName"`
+	OwnerID          string `json:"ownerId"`
+	OwnerUserName    string `json:"ownerUserName"`
+	Visibility       string `json:"visibility"` // private|partial|public
+	Status           int    `json:"status"`     // 0禁用 1启用
+	SignatureEnabled int    `json:"signatureEnabled"`
+	CreatedAt        int64  `json:"createdAt"`
+}
+
+type OpenOAuthInfo struct {
+	OAuthID       string `json:"oauthId"`
 	Name          string `json:"name"`
 	Description   string `json:"description"`
 	Icon          string `json:"icon"`
 	OwnerUserID   string `json:"ownerUserId"`
 	OwnerUserName string `json:"ownerUserName"`
-	Status        int    `json:"status"`
-	EnableOAuth   int    `json:"enableOAuth"`
+	Status        int    `json:"status"` // 0禁用 1启用
 	CreatedAt     int64  `json:"createdAt"`
 }
 
@@ -2711,13 +2734,23 @@ type UpdateMenuReq struct {
 type UpdateMenuRes struct {
 }
 
-type UpdateOpenAppStatusReq struct {
-	AppIDs []string `json:"appIds"`
-	Action int      `json:"action"` // 0禁用 1启用
-	UserID string   `header:"Beaver-User-Id"`
+type UpdateOpenBotStatusReq struct {
+	BotID  string `json:"botId"`
+	Status int    `json:"status"` // 0禁用 1启用
+	UserID string `header:"Beaver-User-Id"`
 }
 
-type UpdateOpenAppStatusRes struct {
+type UpdateOpenBotStatusRes struct {
+}
+
+type UpdateOpenOAuthStatusReq struct {
+	OAuthIDs []string `json:"oauthIds"`
+	Status   int      `json:"status"` // 0禁用 1启用
+	UserID   string   `header:"Beaver-User-Id"`
+}
+
+type UpdateOpenOAuthStatusRes struct {
+	AffectedCount int64 `json:"affectedCount"`
 }
 
 type UpdateSensitiveWordReq struct {

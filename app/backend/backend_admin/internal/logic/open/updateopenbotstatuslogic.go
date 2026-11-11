@@ -32,39 +32,37 @@ import (
 	"beaver/utils/beaverlog/model"
 )
 
-type UpdateOpenAppStatusLogic struct {
+type UpdateOpenBotStatusLogic struct {
 	logger *beaverlog.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewUpdateOpenAppStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateOpenAppStatusLogic {
-	return &UpdateOpenAppStatusLogic{logger: beaverlog.New("update_open_app_status", ctx), ctx: ctx, svcCtx: svcCtx}
+func NewUpdateOpenBotStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateOpenBotStatusLogic {
+	return &UpdateOpenBotStatusLogic{logger: beaverlog.New("update_open_bot_status", ctx), ctx: ctx, svcCtx: svcCtx}
 }
 
-func (l *UpdateOpenAppStatusLogic) UpdateOpenAppStatus(req *types.UpdateOpenAppStatusReq) (resp *types.UpdateOpenAppStatusRes, err error) {
-	if req.UserID == "" {
-		return nil, errors.New("未登录")
+func (l *UpdateOpenBotStatusLogic) UpdateOpenBotStatus(req *types.UpdateOpenBotStatusReq) (resp *types.UpdateOpenBotStatusRes, err error) {
+	if req.BotID == "" {
+		return nil, errors.New("botId 不能为空")
 	}
-	if len(req.AppIDs) == 0 {
-		return nil, errors.New("请选择应用")
-	}
-	if req.Action != 0 && req.Action != 1 {
-		return nil, errors.New("无效的操作类型")
+	if req.Status != 0 && req.Status != 1 {
+		return nil, errors.New("状态无效")
 	}
 
-	_, err = l.svcCtx.OpenRpc.UpdateOpenOAuth(l.ctx, &open_rpc.UpdateOpenOAuthReq{
-		OauthIds:   req.AppIDs,
-		Status:     int32(req.Action),
-		OperatorId: req.UserID,
+	// SignatureEnabled 传 -1：本次只改状态，不动签名开关。
+	_, err = l.svcCtx.OpenRpc.UpdateBot(l.ctx, &open_rpc.UpdateBotReq{
+		BotId:            req.BotID,
+		SignatureEnabled: -1,
+		Status:           int32(req.Status),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{
-			Text: "更新应用状态失败",
-			Data: map[string]interface{}{"err": err.Error()},
+			Text: "更新推送机器人状态失败",
+			Data: map[string]interface{}{"err": err.Error(), "botId": req.BotID},
 		})
 		return nil, err
 	}
 
-	return &types.UpdateOpenAppStatusRes{}, nil
+	return &types.UpdateOpenBotStatusRes{}, nil
 }

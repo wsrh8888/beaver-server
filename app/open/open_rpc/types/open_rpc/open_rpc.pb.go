@@ -991,6 +991,7 @@ type UpdateBotReq struct {
 	Visibility       string                 `protobuf:"bytes,2,opt,name=visibility,proto3" json:"visibility,omitempty"`
 	SignatureEnabled int32                  `protobuf:"varint,3,opt,name=signature_enabled,json=signatureEnabled,proto3" json:"signature_enabled,omitempty"` // -1 表示不改；0/1 设置
 	Security         *BotSecurity           `protobuf:"bytes,4,opt,name=security,proto3" json:"security,omitempty"`
+	Status           int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"` // -1 表示不改；0 禁用 1 启用
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -1053,6 +1054,13 @@ func (x *UpdateBotReq) GetSecurity() *BotSecurity {
 	return nil
 }
 
+func (x *UpdateBotReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
 type UpdateBotRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1089,6 +1097,226 @@ func (*UpdateBotRes) Descriptor() ([]byte, []int) {
 	return file_open_rpc_proto_rawDescGZIP(), []int{18}
 }
 
+type BotItem struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BotId            string                 `protobuf:"bytes,2,opt,name=bot_id,json=botId,proto3" json:"bot_id,omitempty"`
+	OwnerId          string                 `protobuf:"bytes,3,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Visibility       string                 `protobuf:"bytes,4,opt,name=visibility,proto3" json:"visibility,omitempty"`
+	Status           int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	SignatureEnabled int32                  `protobuf:"varint,6,opt,name=signature_enabled,json=signatureEnabled,proto3" json:"signature_enabled,omitempty"`
+	CreatedAt        int64                  `protobuf:"varint,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *BotItem) Reset() {
+	*x = BotItem{}
+	mi := &file_open_rpc_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BotItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BotItem) ProtoMessage() {}
+
+func (x *BotItem) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BotItem.ProtoReflect.Descriptor instead.
+func (*BotItem) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *BotItem) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *BotItem) GetBotId() string {
+	if x != nil {
+		return x.BotId
+	}
+	return ""
+}
+
+func (x *BotItem) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
+	}
+	return ""
+}
+
+func (x *BotItem) GetVisibility() string {
+	if x != nil {
+		return x.Visibility
+	}
+	return ""
+}
+
+func (x *BotItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *BotItem) GetSignatureEnabled() int32 {
+	if x != nil {
+		return x.SignatureEnabled
+	}
+	return 0
+}
+
+func (x *BotItem) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+type ListBotsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Keyword       string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"` // BotID 模糊匹配
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`  // -1 全部 0 禁用 1 启用
+	OwnerUserId   string                 `protobuf:"bytes,5,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBotsReq) Reset() {
+	*x = ListBotsReq{}
+	mi := &file_open_rpc_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBotsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBotsReq) ProtoMessage() {}
+
+func (x *ListBotsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBotsReq.ProtoReflect.Descriptor instead.
+func (*ListBotsReq) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListBotsReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListBotsReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListBotsReq) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+func (x *ListBotsReq) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ListBotsReq) GetOwnerUserId() string {
+	if x != nil {
+		return x.OwnerUserId
+	}
+	return ""
+}
+
+type ListBotsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	List          []*BotItem             `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBotsRes) Reset() {
+	*x = ListBotsRes{}
+	mi := &file_open_rpc_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBotsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBotsRes) ProtoMessage() {}
+
+func (x *ListBotsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_open_rpc_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBotsRes.ProtoReflect.Descriptor instead.
+func (*ListBotsRes) Descriptor() ([]byte, []int) {
+	return file_open_rpc_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListBotsRes) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListBotsRes) GetList() []*BotItem {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
 type GetDigitalByUserIDReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DigitalUserId string                 `protobuf:"bytes,1,opt,name=digital_user_id,json=digitalUserId,proto3" json:"digital_user_id,omitempty"`
@@ -1098,7 +1326,7 @@ type GetDigitalByUserIDReq struct {
 
 func (x *GetDigitalByUserIDReq) Reset() {
 	*x = GetDigitalByUserIDReq{}
-	mi := &file_open_rpc_proto_msgTypes[19]
+	mi := &file_open_rpc_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1110,7 +1338,7 @@ func (x *GetDigitalByUserIDReq) String() string {
 func (*GetDigitalByUserIDReq) ProtoMessage() {}
 
 func (x *GetDigitalByUserIDReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[19]
+	mi := &file_open_rpc_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1123,7 +1351,7 @@ func (x *GetDigitalByUserIDReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDigitalByUserIDReq.ProtoReflect.Descriptor instead.
 func (*GetDigitalByUserIDReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{19}
+	return file_open_rpc_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetDigitalByUserIDReq) GetDigitalUserId() string {
@@ -1145,7 +1373,7 @@ type GetDigitalByUserIDRes struct {
 
 func (x *GetDigitalByUserIDRes) Reset() {
 	*x = GetDigitalByUserIDRes{}
-	mi := &file_open_rpc_proto_msgTypes[20]
+	mi := &file_open_rpc_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1157,7 +1385,7 @@ func (x *GetDigitalByUserIDRes) String() string {
 func (*GetDigitalByUserIDRes) ProtoMessage() {}
 
 func (x *GetDigitalByUserIDRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[20]
+	mi := &file_open_rpc_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1170,7 +1398,7 @@ func (x *GetDigitalByUserIDRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDigitalByUserIDRes.ProtoReflect.Descriptor instead.
 func (*GetDigitalByUserIDRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{20}
+	return file_open_rpc_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetDigitalByUserIDRes) GetFound() bool {
@@ -1210,7 +1438,7 @@ type GetDigitalConfigReq struct {
 
 func (x *GetDigitalConfigReq) Reset() {
 	*x = GetDigitalConfigReq{}
-	mi := &file_open_rpc_proto_msgTypes[21]
+	mi := &file_open_rpc_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1222,7 +1450,7 @@ func (x *GetDigitalConfigReq) String() string {
 func (*GetDigitalConfigReq) ProtoMessage() {}
 
 func (x *GetDigitalConfigReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[21]
+	mi := &file_open_rpc_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1235,7 +1463,7 @@ func (x *GetDigitalConfigReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDigitalConfigReq.ProtoReflect.Descriptor instead.
 func (*GetDigitalConfigReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{21}
+	return file_open_rpc_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetDigitalConfigReq) GetDigitalId() string {
@@ -1259,7 +1487,7 @@ type GetDigitalConfigRes struct {
 
 func (x *GetDigitalConfigRes) Reset() {
 	*x = GetDigitalConfigRes{}
-	mi := &file_open_rpc_proto_msgTypes[22]
+	mi := &file_open_rpc_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1271,7 +1499,7 @@ func (x *GetDigitalConfigRes) String() string {
 func (*GetDigitalConfigRes) ProtoMessage() {}
 
 func (x *GetDigitalConfigRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[22]
+	mi := &file_open_rpc_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1284,7 +1512,7 @@ func (x *GetDigitalConfigRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDigitalConfigRes.ProtoReflect.Descriptor instead.
 func (*GetDigitalConfigRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{22}
+	return file_open_rpc_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetDigitalConfigRes) GetDigitalId() string {
@@ -1344,7 +1572,7 @@ type OpenOAuthItem struct {
 
 func (x *OpenOAuthItem) Reset() {
 	*x = OpenOAuthItem{}
-	mi := &file_open_rpc_proto_msgTypes[23]
+	mi := &file_open_rpc_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1356,7 +1584,7 @@ func (x *OpenOAuthItem) String() string {
 func (*OpenOAuthItem) ProtoMessage() {}
 
 func (x *OpenOAuthItem) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[23]
+	mi := &file_open_rpc_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1369,7 +1597,7 @@ func (x *OpenOAuthItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenOAuthItem.ProtoReflect.Descriptor instead.
 func (*OpenOAuthItem) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{23}
+	return file_open_rpc_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *OpenOAuthItem) GetOauthId() string {
@@ -1435,7 +1663,7 @@ type ListOpenOAuthReq struct {
 
 func (x *ListOpenOAuthReq) Reset() {
 	*x = ListOpenOAuthReq{}
-	mi := &file_open_rpc_proto_msgTypes[24]
+	mi := &file_open_rpc_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1447,7 +1675,7 @@ func (x *ListOpenOAuthReq) String() string {
 func (*ListOpenOAuthReq) ProtoMessage() {}
 
 func (x *ListOpenOAuthReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[24]
+	mi := &file_open_rpc_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1460,7 +1688,7 @@ func (x *ListOpenOAuthReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOpenOAuthReq.ProtoReflect.Descriptor instead.
 func (*ListOpenOAuthReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{24}
+	return file_open_rpc_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ListOpenOAuthReq) GetPage() int32 {
@@ -1515,7 +1743,7 @@ type ListOpenOAuthRes struct {
 
 func (x *ListOpenOAuthRes) Reset() {
 	*x = ListOpenOAuthRes{}
-	mi := &file_open_rpc_proto_msgTypes[25]
+	mi := &file_open_rpc_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1527,7 +1755,7 @@ func (x *ListOpenOAuthRes) String() string {
 func (*ListOpenOAuthRes) ProtoMessage() {}
 
 func (x *ListOpenOAuthRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[25]
+	mi := &file_open_rpc_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1540,7 +1768,7 @@ func (x *ListOpenOAuthRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOpenOAuthRes.ProtoReflect.Descriptor instead.
 func (*ListOpenOAuthRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{25}
+	return file_open_rpc_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ListOpenOAuthRes) GetTotal() int64 {
@@ -1568,7 +1796,7 @@ type UpdateOpenOAuthReq struct {
 
 func (x *UpdateOpenOAuthReq) Reset() {
 	*x = UpdateOpenOAuthReq{}
-	mi := &file_open_rpc_proto_msgTypes[26]
+	mi := &file_open_rpc_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1580,7 +1808,7 @@ func (x *UpdateOpenOAuthReq) String() string {
 func (*UpdateOpenOAuthReq) ProtoMessage() {}
 
 func (x *UpdateOpenOAuthReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[26]
+	mi := &file_open_rpc_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1593,7 +1821,7 @@ func (x *UpdateOpenOAuthReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateOpenOAuthReq.ProtoReflect.Descriptor instead.
 func (*UpdateOpenOAuthReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{26}
+	return file_open_rpc_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *UpdateOpenOAuthReq) GetOauthIds() []string {
@@ -1626,7 +1854,7 @@ type UpdateOpenOAuthRes struct {
 
 func (x *UpdateOpenOAuthRes) Reset() {
 	*x = UpdateOpenOAuthRes{}
-	mi := &file_open_rpc_proto_msgTypes[27]
+	mi := &file_open_rpc_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1638,7 +1866,7 @@ func (x *UpdateOpenOAuthRes) String() string {
 func (*UpdateOpenOAuthRes) ProtoMessage() {}
 
 func (x *UpdateOpenOAuthRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[27]
+	mi := &file_open_rpc_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1651,7 +1879,7 @@ func (x *UpdateOpenOAuthRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateOpenOAuthRes.ProtoReflect.Descriptor instead.
 func (*UpdateOpenOAuthRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{27}
+	return file_open_rpc_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *UpdateOpenOAuthRes) GetAffectedCount() int64 {
@@ -1684,7 +1912,7 @@ type DigitalItem struct {
 
 func (x *DigitalItem) Reset() {
 	*x = DigitalItem{}
-	mi := &file_open_rpc_proto_msgTypes[28]
+	mi := &file_open_rpc_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1696,7 +1924,7 @@ func (x *DigitalItem) String() string {
 func (*DigitalItem) ProtoMessage() {}
 
 func (x *DigitalItem) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[28]
+	mi := &file_open_rpc_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1709,7 +1937,7 @@ func (x *DigitalItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DigitalItem.ProtoReflect.Descriptor instead.
 func (*DigitalItem) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{28}
+	return file_open_rpc_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *DigitalItem) GetDigitalId() string {
@@ -1829,7 +2057,7 @@ type ListDigitalsReq struct {
 
 func (x *ListDigitalsReq) Reset() {
 	*x = ListDigitalsReq{}
-	mi := &file_open_rpc_proto_msgTypes[29]
+	mi := &file_open_rpc_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1841,7 +2069,7 @@ func (x *ListDigitalsReq) String() string {
 func (*ListDigitalsReq) ProtoMessage() {}
 
 func (x *ListDigitalsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[29]
+	mi := &file_open_rpc_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1854,7 +2082,7 @@ func (x *ListDigitalsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDigitalsReq.ProtoReflect.Descriptor instead.
 func (*ListDigitalsReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{29}
+	return file_open_rpc_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListDigitalsReq) GetSource() string {
@@ -1895,7 +2123,7 @@ type ListDigitalsRes struct {
 
 func (x *ListDigitalsRes) Reset() {
 	*x = ListDigitalsRes{}
-	mi := &file_open_rpc_proto_msgTypes[30]
+	mi := &file_open_rpc_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1907,7 +2135,7 @@ func (x *ListDigitalsRes) String() string {
 func (*ListDigitalsRes) ProtoMessage() {}
 
 func (x *ListDigitalsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[30]
+	mi := &file_open_rpc_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1920,7 +2148,7 @@ func (x *ListDigitalsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDigitalsRes.ProtoReflect.Descriptor instead.
 func (*ListDigitalsRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{30}
+	return file_open_rpc_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ListDigitalsRes) GetTotal() int64 {
@@ -1957,7 +2185,7 @@ type CreateDigitalReq struct {
 
 func (x *CreateDigitalReq) Reset() {
 	*x = CreateDigitalReq{}
-	mi := &file_open_rpc_proto_msgTypes[31]
+	mi := &file_open_rpc_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1969,7 +2197,7 @@ func (x *CreateDigitalReq) String() string {
 func (*CreateDigitalReq) ProtoMessage() {}
 
 func (x *CreateDigitalReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[31]
+	mi := &file_open_rpc_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1982,7 +2210,7 @@ func (x *CreateDigitalReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDigitalReq.ProtoReflect.Descriptor instead.
 func (*CreateDigitalReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{31}
+	return file_open_rpc_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *CreateDigitalReq) GetName() string {
@@ -2080,7 +2308,7 @@ type CreateDigitalRes struct {
 
 func (x *CreateDigitalRes) Reset() {
 	*x = CreateDigitalRes{}
-	mi := &file_open_rpc_proto_msgTypes[32]
+	mi := &file_open_rpc_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2092,7 +2320,7 @@ func (x *CreateDigitalRes) String() string {
 func (*CreateDigitalRes) ProtoMessage() {}
 
 func (x *CreateDigitalRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[32]
+	mi := &file_open_rpc_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2105,7 +2333,7 @@ func (x *CreateDigitalRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDigitalRes.ProtoReflect.Descriptor instead.
 func (*CreateDigitalRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{32}
+	return file_open_rpc_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *CreateDigitalRes) GetDigitalId() string {
@@ -2146,7 +2374,7 @@ type UpdateDigitalReq struct {
 
 func (x *UpdateDigitalReq) Reset() {
 	*x = UpdateDigitalReq{}
-	mi := &file_open_rpc_proto_msgTypes[33]
+	mi := &file_open_rpc_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2158,7 +2386,7 @@ func (x *UpdateDigitalReq) String() string {
 func (*UpdateDigitalReq) ProtoMessage() {}
 
 func (x *UpdateDigitalReq) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[33]
+	mi := &file_open_rpc_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2171,7 +2399,7 @@ func (x *UpdateDigitalReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDigitalReq.ProtoReflect.Descriptor instead.
 func (*UpdateDigitalReq) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{33}
+	return file_open_rpc_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UpdateDigitalReq) GetDigitalId() string {
@@ -2245,7 +2473,7 @@ type UpdateDigitalRes struct {
 
 func (x *UpdateDigitalRes) Reset() {
 	*x = UpdateDigitalRes{}
-	mi := &file_open_rpc_proto_msgTypes[34]
+	mi := &file_open_rpc_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2257,7 +2485,7 @@ func (x *UpdateDigitalRes) String() string {
 func (*UpdateDigitalRes) ProtoMessage() {}
 
 func (x *UpdateDigitalRes) ProtoReflect() protoreflect.Message {
-	mi := &file_open_rpc_proto_msgTypes[34]
+	mi := &file_open_rpc_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2270,7 +2498,7 @@ func (x *UpdateDigitalRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDigitalRes.ProtoReflect.Descriptor instead.
 func (*UpdateDigitalRes) Descriptor() ([]byte, []int) {
-	return file_open_rpc_proto_rawDescGZIP(), []int{34}
+	return file_open_rpc_proto_rawDescGZIP(), []int{37}
 }
 
 var File_open_rpc_proto protoreflect.FileDescriptor
@@ -2346,15 +2574,36 @@ const file_open_rpc_proto_rawDesc = "" +
 	"visibility\x18\x04 \x01(\tR\n" +
 	"visibility\x12+\n" +
 	"\x11signature_enabled\x18\x05 \x01(\x05R\x10signatureEnabled\x121\n" +
-	"\bsecurity\x18\x06 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"\xa5\x01\n" +
+	"\bsecurity\x18\x06 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"\xbd\x01\n" +
 	"\fUpdateBotReq\x12\x15\n" +
 	"\x06bot_id\x18\x01 \x01(\tR\x05botId\x12\x1e\n" +
 	"\n" +
 	"visibility\x18\x02 \x01(\tR\n" +
 	"visibility\x12+\n" +
 	"\x11signature_enabled\x18\x03 \x01(\x05R\x10signatureEnabled\x121\n" +
-	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\"\x0e\n" +
-	"\fUpdateBotRes\"?\n" +
+	"\bsecurity\x18\x04 \x01(\v2\x15.open_rpc.BotSecurityR\bsecurity\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\"\x0e\n" +
+	"\fUpdateBotRes\"\xcf\x01\n" +
+	"\aBotItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x15\n" +
+	"\x06bot_id\x18\x02 \x01(\tR\x05botId\x12\x19\n" +
+	"\bowner_id\x18\x03 \x01(\tR\aownerId\x12\x1e\n" +
+	"\n" +
+	"visibility\x18\x04 \x01(\tR\n" +
+	"visibility\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\x12+\n" +
+	"\x11signature_enabled\x18\x06 \x01(\x05R\x10signatureEnabled\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\x03R\tcreatedAt\"\x94\x01\n" +
+	"\vListBotsReq\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x18\n" +
+	"\akeyword\x18\x03 \x01(\tR\akeyword\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\x12\"\n" +
+	"\rowner_user_id\x18\x05 \x01(\tR\vownerUserId\"J\n" +
+	"\vListBotsRes\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12%\n" +
+	"\x04list\x18\x02 \x03(\v2\x11.open_rpc.BotItemR\x04list\"?\n" +
 	"\x15GetDigitalByUserIDReq\x12&\n" +
 	"\x0fdigital_user_id\x18\x01 \x01(\tR\rdigitalUserId\"\x88\x01\n" +
 	"\x15GetDigitalByUserIDRes\x12\x14\n" +
@@ -2466,7 +2715,7 @@ const file_open_rpc_proto_rawDesc = "" +
 	"llmModelId\x12\x14\n" +
 	"\x05tools\x18\b \x01(\tR\x05tools\x12$\n" +
 	"\x0emcp_server_ids\x18\t \x01(\tR\fmcpServerIds\"\x12\n" +
-	"\x10UpdateDigitalRes2\xfe\b\n" +
+	"\x10UpdateDigitalRes2\xb8\t\n" +
 	"\x04open\x12G\n" +
 	"\rExchangeToken\x12\x1a.open_rpc.ExchangeTokenReq\x1a\x1a.open_rpc.ExchangeTokenRes\x12A\n" +
 	"\vGetUserInfo\x12\x18.open_rpc.GetUserInfoReq\x1a\x18.open_rpc.GetUserInfoRes\x12G\n" +
@@ -2477,7 +2726,8 @@ const file_open_rpc_proto_rawDesc = "" +
 	"\x0eResetBotSecret\x12\x1b.open_rpc.ResetBotSecretReq\x1a\x1b.open_rpc.ResetBotSecretRes\x12>\n" +
 	"\n" +
 	"GetBotInfo\x12\x17.open_rpc.GetBotInfoReq\x1a\x17.open_rpc.GetBotInfoRes\x12;\n" +
-	"\tUpdateBot\x12\x16.open_rpc.UpdateBotReq\x1a\x16.open_rpc.UpdateBotRes\x12V\n" +
+	"\tUpdateBot\x12\x16.open_rpc.UpdateBotReq\x1a\x16.open_rpc.UpdateBotRes\x128\n" +
+	"\bListBots\x12\x15.open_rpc.ListBotsReq\x1a\x15.open_rpc.ListBotsRes\x12V\n" +
 	"\x12GetDigitalByUserID\x12\x1f.open_rpc.GetDigitalByUserIDReq\x1a\x1f.open_rpc.GetDigitalByUserIDRes\x12P\n" +
 	"\x10GetDigitalConfig\x12\x1d.open_rpc.GetDigitalConfigReq\x1a\x1d.open_rpc.GetDigitalConfigRes\x12G\n" +
 	"\rListOpenOAuth\x12\x1a.open_rpc.ListOpenOAuthReq\x1a\x1a.open_rpc.ListOpenOAuthRes\x12M\n" +
@@ -2499,7 +2749,7 @@ func file_open_rpc_proto_rawDescGZIP() []byte {
 	return file_open_rpc_proto_rawDescData
 }
 
-var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_open_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_open_rpc_proto_goTypes = []any{
 	(*ExchangeTokenReq)(nil),      // 0: open_rpc.ExchangeTokenReq
 	(*ExchangeTokenRes)(nil),      // 1: open_rpc.ExchangeTokenRes
@@ -2520,65 +2770,71 @@ var file_open_rpc_proto_goTypes = []any{
 	(*GetBotInfoRes)(nil),         // 16: open_rpc.GetBotInfoRes
 	(*UpdateBotReq)(nil),          // 17: open_rpc.UpdateBotReq
 	(*UpdateBotRes)(nil),          // 18: open_rpc.UpdateBotRes
-	(*GetDigitalByUserIDReq)(nil), // 19: open_rpc.GetDigitalByUserIDReq
-	(*GetDigitalByUserIDRes)(nil), // 20: open_rpc.GetDigitalByUserIDRes
-	(*GetDigitalConfigReq)(nil),   // 21: open_rpc.GetDigitalConfigReq
-	(*GetDigitalConfigRes)(nil),   // 22: open_rpc.GetDigitalConfigRes
-	(*OpenOAuthItem)(nil),         // 23: open_rpc.OpenOAuthItem
-	(*ListOpenOAuthReq)(nil),      // 24: open_rpc.ListOpenOAuthReq
-	(*ListOpenOAuthRes)(nil),      // 25: open_rpc.ListOpenOAuthRes
-	(*UpdateOpenOAuthReq)(nil),    // 26: open_rpc.UpdateOpenOAuthReq
-	(*UpdateOpenOAuthRes)(nil),    // 27: open_rpc.UpdateOpenOAuthRes
-	(*DigitalItem)(nil),           // 28: open_rpc.DigitalItem
-	(*ListDigitalsReq)(nil),       // 29: open_rpc.ListDigitalsReq
-	(*ListDigitalsRes)(nil),       // 30: open_rpc.ListDigitalsRes
-	(*CreateDigitalReq)(nil),      // 31: open_rpc.CreateDigitalReq
-	(*CreateDigitalRes)(nil),      // 32: open_rpc.CreateDigitalRes
-	(*UpdateDigitalReq)(nil),      // 33: open_rpc.UpdateDigitalReq
-	(*UpdateDigitalRes)(nil),      // 34: open_rpc.UpdateDigitalRes
+	(*BotItem)(nil),               // 19: open_rpc.BotItem
+	(*ListBotsReq)(nil),           // 20: open_rpc.ListBotsReq
+	(*ListBotsRes)(nil),           // 21: open_rpc.ListBotsRes
+	(*GetDigitalByUserIDReq)(nil), // 22: open_rpc.GetDigitalByUserIDReq
+	(*GetDigitalByUserIDRes)(nil), // 23: open_rpc.GetDigitalByUserIDRes
+	(*GetDigitalConfigReq)(nil),   // 24: open_rpc.GetDigitalConfigReq
+	(*GetDigitalConfigRes)(nil),   // 25: open_rpc.GetDigitalConfigRes
+	(*OpenOAuthItem)(nil),         // 26: open_rpc.OpenOAuthItem
+	(*ListOpenOAuthReq)(nil),      // 27: open_rpc.ListOpenOAuthReq
+	(*ListOpenOAuthRes)(nil),      // 28: open_rpc.ListOpenOAuthRes
+	(*UpdateOpenOAuthReq)(nil),    // 29: open_rpc.UpdateOpenOAuthReq
+	(*UpdateOpenOAuthRes)(nil),    // 30: open_rpc.UpdateOpenOAuthRes
+	(*DigitalItem)(nil),           // 31: open_rpc.DigitalItem
+	(*ListDigitalsReq)(nil),       // 32: open_rpc.ListDigitalsReq
+	(*ListDigitalsRes)(nil),       // 33: open_rpc.ListDigitalsRes
+	(*CreateDigitalReq)(nil),      // 34: open_rpc.CreateDigitalReq
+	(*CreateDigitalRes)(nil),      // 35: open_rpc.CreateDigitalRes
+	(*UpdateDigitalReq)(nil),      // 36: open_rpc.UpdateDigitalReq
+	(*UpdateDigitalRes)(nil),      // 37: open_rpc.UpdateDigitalRes
 }
 var file_open_rpc_proto_depIdxs = []int32{
 	15, // 0: open_rpc.GetBotInfoRes.security:type_name -> open_rpc.BotSecurity
 	15, // 1: open_rpc.UpdateBotReq.security:type_name -> open_rpc.BotSecurity
-	23, // 2: open_rpc.ListOpenOAuthRes.list:type_name -> open_rpc.OpenOAuthItem
-	28, // 3: open_rpc.ListDigitalsRes.list:type_name -> open_rpc.DigitalItem
-	0,  // 4: open_rpc.open.ExchangeToken:input_type -> open_rpc.ExchangeTokenReq
-	2,  // 5: open_rpc.open.GetUserInfo:input_type -> open_rpc.GetUserInfoReq
-	4,  // 6: open_rpc.open.ValidateToken:input_type -> open_rpc.ValidateTokenReq
-	6,  // 7: open_rpc.open.RefreshToken:input_type -> open_rpc.RefreshTokenReq
-	8,  // 8: open_rpc.open.CreateBot:input_type -> open_rpc.CreateBotReq
-	10, // 9: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
-	12, // 10: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
-	14, // 11: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
-	17, // 12: open_rpc.open.UpdateBot:input_type -> open_rpc.UpdateBotReq
-	19, // 13: open_rpc.open.GetDigitalByUserID:input_type -> open_rpc.GetDigitalByUserIDReq
-	21, // 14: open_rpc.open.GetDigitalConfig:input_type -> open_rpc.GetDigitalConfigReq
-	24, // 15: open_rpc.open.ListOpenOAuth:input_type -> open_rpc.ListOpenOAuthReq
-	26, // 16: open_rpc.open.UpdateOpenOAuth:input_type -> open_rpc.UpdateOpenOAuthReq
-	29, // 17: open_rpc.open.ListDigitals:input_type -> open_rpc.ListDigitalsReq
-	31, // 18: open_rpc.open.CreateDigital:input_type -> open_rpc.CreateDigitalReq
-	33, // 19: open_rpc.open.UpdateDigital:input_type -> open_rpc.UpdateDigitalReq
-	1,  // 20: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
-	3,  // 21: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
-	5,  // 22: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
-	7,  // 23: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
-	9,  // 24: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
-	11, // 25: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
-	13, // 26: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
-	16, // 27: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
-	18, // 28: open_rpc.open.UpdateBot:output_type -> open_rpc.UpdateBotRes
-	20, // 29: open_rpc.open.GetDigitalByUserID:output_type -> open_rpc.GetDigitalByUserIDRes
-	22, // 30: open_rpc.open.GetDigitalConfig:output_type -> open_rpc.GetDigitalConfigRes
-	25, // 31: open_rpc.open.ListOpenOAuth:output_type -> open_rpc.ListOpenOAuthRes
-	27, // 32: open_rpc.open.UpdateOpenOAuth:output_type -> open_rpc.UpdateOpenOAuthRes
-	30, // 33: open_rpc.open.ListDigitals:output_type -> open_rpc.ListDigitalsRes
-	32, // 34: open_rpc.open.CreateDigital:output_type -> open_rpc.CreateDigitalRes
-	34, // 35: open_rpc.open.UpdateDigital:output_type -> open_rpc.UpdateDigitalRes
-	20, // [20:36] is the sub-list for method output_type
-	4,  // [4:20] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	19, // 2: open_rpc.ListBotsRes.list:type_name -> open_rpc.BotItem
+	26, // 3: open_rpc.ListOpenOAuthRes.list:type_name -> open_rpc.OpenOAuthItem
+	31, // 4: open_rpc.ListDigitalsRes.list:type_name -> open_rpc.DigitalItem
+	0,  // 5: open_rpc.open.ExchangeToken:input_type -> open_rpc.ExchangeTokenReq
+	2,  // 6: open_rpc.open.GetUserInfo:input_type -> open_rpc.GetUserInfoReq
+	4,  // 7: open_rpc.open.ValidateToken:input_type -> open_rpc.ValidateTokenReq
+	6,  // 8: open_rpc.open.RefreshToken:input_type -> open_rpc.RefreshTokenReq
+	8,  // 9: open_rpc.open.CreateBot:input_type -> open_rpc.CreateBotReq
+	10, // 10: open_rpc.open.DeleteBot:input_type -> open_rpc.DeleteBotReq
+	12, // 11: open_rpc.open.ResetBotSecret:input_type -> open_rpc.ResetBotSecretReq
+	14, // 12: open_rpc.open.GetBotInfo:input_type -> open_rpc.GetBotInfoReq
+	17, // 13: open_rpc.open.UpdateBot:input_type -> open_rpc.UpdateBotReq
+	20, // 14: open_rpc.open.ListBots:input_type -> open_rpc.ListBotsReq
+	22, // 15: open_rpc.open.GetDigitalByUserID:input_type -> open_rpc.GetDigitalByUserIDReq
+	24, // 16: open_rpc.open.GetDigitalConfig:input_type -> open_rpc.GetDigitalConfigReq
+	27, // 17: open_rpc.open.ListOpenOAuth:input_type -> open_rpc.ListOpenOAuthReq
+	29, // 18: open_rpc.open.UpdateOpenOAuth:input_type -> open_rpc.UpdateOpenOAuthReq
+	32, // 19: open_rpc.open.ListDigitals:input_type -> open_rpc.ListDigitalsReq
+	34, // 20: open_rpc.open.CreateDigital:input_type -> open_rpc.CreateDigitalReq
+	36, // 21: open_rpc.open.UpdateDigital:input_type -> open_rpc.UpdateDigitalReq
+	1,  // 22: open_rpc.open.ExchangeToken:output_type -> open_rpc.ExchangeTokenRes
+	3,  // 23: open_rpc.open.GetUserInfo:output_type -> open_rpc.GetUserInfoRes
+	5,  // 24: open_rpc.open.ValidateToken:output_type -> open_rpc.ValidateTokenRes
+	7,  // 25: open_rpc.open.RefreshToken:output_type -> open_rpc.RefreshTokenRes
+	9,  // 26: open_rpc.open.CreateBot:output_type -> open_rpc.CreateBotRes
+	11, // 27: open_rpc.open.DeleteBot:output_type -> open_rpc.DeleteBotRes
+	13, // 28: open_rpc.open.ResetBotSecret:output_type -> open_rpc.ResetBotSecretRes
+	16, // 29: open_rpc.open.GetBotInfo:output_type -> open_rpc.GetBotInfoRes
+	18, // 30: open_rpc.open.UpdateBot:output_type -> open_rpc.UpdateBotRes
+	21, // 31: open_rpc.open.ListBots:output_type -> open_rpc.ListBotsRes
+	23, // 32: open_rpc.open.GetDigitalByUserID:output_type -> open_rpc.GetDigitalByUserIDRes
+	25, // 33: open_rpc.open.GetDigitalConfig:output_type -> open_rpc.GetDigitalConfigRes
+	28, // 34: open_rpc.open.ListOpenOAuth:output_type -> open_rpc.ListOpenOAuthRes
+	30, // 35: open_rpc.open.UpdateOpenOAuth:output_type -> open_rpc.UpdateOpenOAuthRes
+	33, // 36: open_rpc.open.ListDigitals:output_type -> open_rpc.ListDigitalsRes
+	35, // 37: open_rpc.open.CreateDigital:output_type -> open_rpc.CreateDigitalRes
+	37, // 38: open_rpc.open.UpdateDigital:output_type -> open_rpc.UpdateDigitalRes
+	22, // [22:39] is the sub-list for method output_type
+	5,  // [5:22] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_open_rpc_proto_init() }
@@ -2592,7 +2848,7 @@ func file_open_rpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_open_rpc_proto_rawDesc), len(file_open_rpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   35,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

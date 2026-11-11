@@ -1,42 +1,83 @@
+// OAuth 应用：开放平台第三方应用（open_oauth）。
+// 后台只做检索与启停，应用的创建、密钥、权限范围都在开发者控制台完成。
 type (
-	GetOpenAppListReq {
-		Page           int    `form:"page,default=1"`
-		PageSize       int    `form:"pageSize,default=10"`
-		Keyword        string `form:"keyword,optional"`
-		OwnerUserID    string `form:"ownerUserId,optional"`
-		AppID          string `form:"appId,optional"`
-		Status         int    `form:"status,optional,default=-1"` // -1全部 0禁用 1启用
+	GetOpenOAuthListReq {
+		Page        int    `form:"page,default=1"`
+		PageSize    int    `form:"pageSize,default=10"`
+		Keyword     string `form:"keyword,optional"`     // 应用名 / 描述
+		OwnerUserID string `form:"ownerUserId,optional"` // 所属用户
+		OAuthID     string `form:"oauthId,optional"`     // 精确匹配
+		Status      int    `form:"status,default=-1"`    // -1全部 0禁用 1启用
 	}
-	GetOpenAppListRes {
-		Total int64         `json:"total"`
-		List  []OpenAppInfo `json:"list"`
+	GetOpenOAuthListRes {
+		Total int64           `json:"total"`
+		List  []OpenOAuthInfo `json:"list"`
 	}
-	OpenAppInfo {
-		AppID         string `json:"appId"`
+	OpenOAuthInfo {
+		OAuthID       string `json:"oauthId"`
 		Name          string `json:"name"`
 		Description   string `json:"description"`
 		Icon          string `json:"icon"`
 		OwnerUserID   string `json:"ownerUserId"`
 		OwnerUserName string `json:"ownerUserName"`
-		Status        int    `json:"status"`
-		EnableOAuth   int    `json:"enableOAuth"`
+		Status        int    `json:"status"` // 0禁用 1启用
 		CreatedAt     int64  `json:"createdAt"`
 	}
-	UpdateOpenAppStatusReq {
-		AppIDs []string `json:"appIds"`
-		Action int      `json:"action"` // 0禁用 1启用
-		UserID string   `header:"Beaver-User-Id"`
+	UpdateOpenOAuthStatusReq {
+		OAuthIDs []string `json:"oauthIds"`
+		Status   int      `json:"status"` // 0禁用 1启用
+		UserID   string   `header:"Beaver-User-Id"`
 	}
-	UpdateOpenAppStatusRes {}
+	UpdateOpenOAuthStatusRes {
+		AffectedCount int64 `json:"affectedCount"`
+	}
+)
+
+// 推送机器人：群通知 Webhook 机器人（open_bot），单向推消息，不是数字伙伴。
+// 后台只做检索与启停；Token、签名密钥、入站安全配置由开发者在控制台维护。
+type (
+	GetOpenBotListReq {
+		Page        int    `form:"page,default=1"`
+		PageSize    int    `form:"pageSize,default=10"`
+		Keyword     string `form:"keyword,optional"`     // BotID 模糊
+		OwnerUserID string `form:"ownerUserId,optional"` // 创建者
+		Status      int    `form:"status,default=-1"`    // -1全部 0禁用 1启用
+	}
+	GetOpenBotListRes {
+		Total int64         `json:"total"`
+		List  []OpenBotInfo `json:"list"`
+	}
+	OpenBotInfo {
+		BotID            string `json:"botId"`
+		BotName          string `json:"botName"`
+		OwnerID          string `json:"ownerId"`
+		OwnerUserName    string `json:"ownerUserName"`
+		Visibility       string `json:"visibility"` // private|partial|public
+		Status           int    `json:"status"`     // 0禁用 1启用
+		SignatureEnabled int    `json:"signatureEnabled"`
+		CreatedAt        int64  `json:"createdAt"`
+	}
+	UpdateOpenBotStatusReq {
+		BotID  string `json:"botId"`
+		Status int    `json:"status"` // 0禁用 1启用
+		UserID string `header:"Beaver-User-Id"`
+	}
+	UpdateOpenBotStatusRes {}
 )
 
 @server (
 	group: open
 )
 service backend {
-	@handler GetOpenAppList
-	get /admin/backend/open/v1/app_list (GetOpenAppListReq) returns (GetOpenAppListRes)
+	@handler GetOpenOAuthList
+	get /admin/backend/open/v1/oauth_list (GetOpenOAuthListReq) returns (GetOpenOAuthListRes)
 
-	@handler UpdateOpenAppStatus
-	post /admin/backend/open/v1/app_update_status (UpdateOpenAppStatusReq) returns (UpdateOpenAppStatusRes)
+	@handler UpdateOpenOAuthStatus
+	post /admin/backend/open/v1/oauth_update_status (UpdateOpenOAuthStatusReq) returns (UpdateOpenOAuthStatusRes)
+
+	@handler GetOpenBotList
+	get /admin/backend/open/v1/bot_list (GetOpenBotListReq) returns (GetOpenBotListRes)
+
+	@handler UpdateOpenBotStatus
+	post /admin/backend/open/v1/bot_update_status (UpdateOpenBotStatusReq) returns (UpdateOpenBotStatusRes)
 }

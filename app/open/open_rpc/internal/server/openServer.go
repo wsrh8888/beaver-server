@@ -89,6 +89,11 @@ func (s *OpenServer) UpdateBot(ctx context.Context, in *open_rpc.UpdateBotReq) (
 	return l.UpdateBot(in)
 }
 
+func (s *OpenServer) ListBots(ctx context.Context, in *open_rpc.ListBotsReq) (*open_rpc.ListBotsRes, error) {
+	l := logic.NewListBotsLogic(ctx, s.svcCtx)
+	return l.ListBots(in)
+}
+
 func (s *OpenServer) GetDigitalByUserID(ctx context.Context, in *open_rpc.GetDigitalByUserIDReq) (*open_rpc.GetDigitalByUserIDRes, error) {
 	l := logic.NewGetDigitalByUserIDLogic(ctx, s.svcCtx)
 	return l.GetDigitalByUserID(in)

@@ -31,16 +31,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetOpenAppListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetOpenBotListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetOpenAppListReq
+		var req types.GetOpenBotListReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := openLogic.NewGetOpenAppListLogic(r.Context(), svcCtx)
-		resp, err := l.GetOpenAppList(&req)
+		l := openLogic.NewGetOpenBotListLogic(r.Context(), svcCtx)
+		resp, err := l.GetOpenBotList(&req)
 		response.Response(r, w, resp, err)
 	}
 }

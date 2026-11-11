@@ -31,16 +31,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func UpdateOpenAppStatusHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetOpenOAuthListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateOpenAppStatusReq
+		var req types.GetOpenOAuthListReq
 		if err := httpx.Parse(r, &req); err != nil {
 			response.Response(r, w, nil, err)
 			return
 		}
 
-		l := openLogic.NewUpdateOpenAppStatusLogic(r.Context(), svcCtx)
-		resp, err := l.UpdateOpenAppStatus(&req)
+		l := openLogic.NewGetOpenOAuthListLogic(r.Context(), svcCtx)
+		resp, err := l.GetOpenOAuthList(&req)
 		response.Response(r, w, resp, err)
 	}
 }

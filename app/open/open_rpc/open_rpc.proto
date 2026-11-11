@@ -106,9 +106,35 @@ message UpdateBotReq {
   string visibility = 2;
   int32 signature_enabled = 3; // -1 表示不改；0/1 设置
   BotSecurity security = 4;
+  int32 status = 5; // -1 表示不改；0 禁用 1 启用
 }
 
 message UpdateBotRes {}
+
+// ==================== 群通知机器人列表（后台）====================
+
+message BotItem {
+  uint32 id = 1;
+  string bot_id = 2;
+  string owner_id = 3;
+  string visibility = 4;
+  int32 status = 5;
+  int32 signature_enabled = 6;
+  int64 created_at = 7;
+}
+
+message ListBotsReq {
+  int32 page = 1;
+  int32 page_size = 2;
+  string keyword = 3; // BotID 模糊匹配
+  int32 status = 4;   // -1 全部 0 禁用 1 启用
+  string owner_user_id = 5;
+}
+
+message ListBotsRes {
+  int64 total = 1;
+  repeated BotItem list = 2;
+}
 
 // ==================== 数字伙伴 Digital ====================
 
@@ -251,6 +277,7 @@ service open {
   rpc ResetBotSecret(ResetBotSecretReq) returns (ResetBotSecretRes);
   rpc GetBotInfo(GetBotInfoReq) returns (GetBotInfoRes);
   rpc UpdateBot(UpdateBotReq) returns (UpdateBotRes);
+  rpc ListBots(ListBotsReq) returns (ListBotsRes);
   rpc GetDigitalByUserID(GetDigitalByUserIDReq) returns (GetDigitalByUserIDRes);
   rpc GetDigitalConfig(GetDigitalConfigReq) returns (GetDigitalConfigRes);
   rpc ListOpenOAuth(ListOpenOAuthReq) returns (ListOpenOAuthRes);

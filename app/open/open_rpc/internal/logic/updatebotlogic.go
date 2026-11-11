@@ -51,6 +51,9 @@ func (l *UpdateBotLogic) UpdateBot(in *open_rpc.UpdateBotReq) (*open_rpc.UpdateB
 	if in.SignatureEnabled == 0 || in.SignatureEnabled == 1 {
 		updates["signature_enabled"] = in.SignatureEnabled
 	}
+	if in.Status == 0 || in.Status == 1 {
+		updates["status"] = in.Status
+	}
 	if in.Security != nil {
 		security := open_models.OpenBotSecurity{
 			KeywordsEnabled:    in.Security.KeywordsEnabled,

@@ -35,6 +35,7 @@ import (
 )
 
 type (
+	BotItem               = open_rpc.BotItem
 	BotSecurity           = open_rpc.BotSecurity
 	CreateBotReq          = open_rpc.CreateBotReq
 	CreateBotRes          = open_rpc.CreateBotRes
@@ -53,6 +54,8 @@ type (
 	GetDigitalConfigRes   = open_rpc.GetDigitalConfigRes
 	GetUserInfoReq        = open_rpc.GetUserInfoReq
 	GetUserInfoRes        = open_rpc.GetUserInfoRes
+	ListBotsReq           = open_rpc.ListBotsReq
+	ListBotsRes           = open_rpc.ListBotsRes
 	ListDigitalsReq       = open_rpc.ListDigitalsReq
 	ListDigitalsRes       = open_rpc.ListDigitalsRes
 	ListOpenOAuthReq      = open_rpc.ListOpenOAuthReq
@@ -81,6 +84,7 @@ type (
 		ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 		GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 		UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
+		ListBots(ctx context.Context, in *ListBotsReq, opts ...grpc.CallOption) (*ListBotsRes, error)
 		GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error)
 		GetDigitalConfig(ctx context.Context, in *GetDigitalConfigReq, opts ...grpc.CallOption) (*GetDigitalConfigRes, error)
 		ListOpenOAuth(ctx context.Context, in *ListOpenOAuthReq, opts ...grpc.CallOption) (*ListOpenOAuthRes, error)
@@ -144,6 +148,11 @@ func (m *defaultOpen) GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ..
 func (m *defaultOpen) UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error) {
 	client := open_rpc.NewOpenClient(m.cli.Conn())
 	return client.UpdateBot(ctx, in, opts...)
+}
+
+func (m *defaultOpen) ListBots(ctx context.Context, in *ListBotsReq, opts ...grpc.CallOption) (*ListBotsRes, error) {
+	client := open_rpc.NewOpenClient(m.cli.Conn())
+	return client.ListBots(ctx, in, opts...)
 }
 
 func (m *defaultOpen) GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error) {

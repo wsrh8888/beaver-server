@@ -28,6 +28,7 @@ const (
 	Open_ResetBotSecret_FullMethodName     = "/open_rpc.open/ResetBotSecret"
 	Open_GetBotInfo_FullMethodName         = "/open_rpc.open/GetBotInfo"
 	Open_UpdateBot_FullMethodName          = "/open_rpc.open/UpdateBot"
+	Open_ListBots_FullMethodName           = "/open_rpc.open/ListBots"
 	Open_GetDigitalByUserID_FullMethodName = "/open_rpc.open/GetDigitalByUserID"
 	Open_GetDigitalConfig_FullMethodName   = "/open_rpc.open/GetDigitalConfig"
 	Open_ListOpenOAuth_FullMethodName      = "/open_rpc.open/ListOpenOAuth"
@@ -50,6 +51,7 @@ type OpenClient interface {
 	ResetBotSecret(ctx context.Context, in *ResetBotSecretReq, opts ...grpc.CallOption) (*ResetBotSecretRes, error)
 	GetBotInfo(ctx context.Context, in *GetBotInfoReq, opts ...grpc.CallOption) (*GetBotInfoRes, error)
 	UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...grpc.CallOption) (*UpdateBotRes, error)
+	ListBots(ctx context.Context, in *ListBotsReq, opts ...grpc.CallOption) (*ListBotsRes, error)
 	GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error)
 	GetDigitalConfig(ctx context.Context, in *GetDigitalConfigReq, opts ...grpc.CallOption) (*GetDigitalConfigRes, error)
 	ListOpenOAuth(ctx context.Context, in *ListOpenOAuthReq, opts ...grpc.CallOption) (*ListOpenOAuthRes, error)
@@ -157,6 +159,16 @@ func (c *openClient) UpdateBot(ctx context.Context, in *UpdateBotReq, opts ...gr
 	return out, nil
 }
 
+func (c *openClient) ListBots(ctx context.Context, in *ListBotsReq, opts ...grpc.CallOption) (*ListBotsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBotsRes)
+	err := c.cc.Invoke(ctx, Open_ListBots_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *openClient) GetDigitalByUserID(ctx context.Context, in *GetDigitalByUserIDReq, opts ...grpc.CallOption) (*GetDigitalByUserIDRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetDigitalByUserIDRes)
@@ -240,6 +252,7 @@ type OpenServer interface {
 	ResetBotSecret(context.Context, *ResetBotSecretReq) (*ResetBotSecretRes, error)
 	GetBotInfo(context.Context, *GetBotInfoReq) (*GetBotInfoRes, error)
 	UpdateBot(context.Context, *UpdateBotReq) (*UpdateBotRes, error)
+	ListBots(context.Context, *ListBotsReq) (*ListBotsRes, error)
 	GetDigitalByUserID(context.Context, *GetDigitalByUserIDReq) (*GetDigitalByUserIDRes, error)
 	GetDigitalConfig(context.Context, *GetDigitalConfigReq) (*GetDigitalConfigRes, error)
 	ListOpenOAuth(context.Context, *ListOpenOAuthReq) (*ListOpenOAuthRes, error)
@@ -283,6 +296,9 @@ func (UnimplementedOpenServer) GetBotInfo(context.Context, *GetBotInfoReq) (*Get
 }
 func (UnimplementedOpenServer) UpdateBot(context.Context, *UpdateBotReq) (*UpdateBotRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBot not implemented")
+}
+func (UnimplementedOpenServer) ListBots(context.Context, *ListBotsReq) (*ListBotsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBots not implemented")
 }
 func (UnimplementedOpenServer) GetDigitalByUserID(context.Context, *GetDigitalByUserIDReq) (*GetDigitalByUserIDRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDigitalByUserID not implemented")
@@ -488,6 +504,24 @@ func _Open_UpdateBot_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Open_ListBots_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBotsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OpenServer).ListBots(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Open_ListBots_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OpenServer).ListBots(ctx, req.(*ListBotsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Open_GetDigitalByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetDigitalByUserIDReq)
 	if err := dec(in); err != nil {
@@ -656,6 +690,10 @@ var Open_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateBot",
 			Handler:    _Open_UpdateBot_Handler,
+		},
+		{
+			MethodName: "ListBots",
+			Handler:    _Open_ListBots_Handler,
 		},
 		{
 			MethodName: "GetDigitalByUserID",

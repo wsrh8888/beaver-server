@@ -883,13 +883,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/admin/backend/open/v1/app_list",
-				Handler: open.GetOpenAppListHandler(serverCtx),
+				Path:    "/admin/backend/open/v1/bot_list",
+				Handler: open.GetOpenBotListHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/admin/backend/open/v1/app_update_status",
-				Handler: open.UpdateOpenAppStatusHandler(serverCtx),
+				Path:    "/admin/backend/open/v1/bot_update_status",
+				Handler: open.UpdateOpenBotStatusHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/backend/open/v1/oauth_list",
+				Handler: open.GetOpenOAuthListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/open/v1/oauth_update_status",
+				Handler: open.UpdateOpenOAuthStatusHandler(serverCtx),
 			},
 		},
 	)
