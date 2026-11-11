@@ -58,7 +58,7 @@ func (l *ListDigitalKnowledgeSourceLogic) ListDigitalKnowledgeSource(req *types.
 			Name:              row.Name,
 			RetrievalTopK:     row.RetrievalTopK,
 			IndexConfig:       row.IndexConfig,
-			DocumentCount:     l.collectionDocCount(sourceCollectionID(row.KnowledgeIDs)),
+			DocumentCount:     collectionDocCount(l.ctx, l.svcCtx, l.logger, sourceCollectionID(row.KnowledgeIDs)),
 			CreatedAt:         row.CreatedAt.Unix(),
 		})
 	}
@@ -66,17 +66,18 @@ func (l *ListDigitalKnowledgeSourceLogic) ListDigitalKnowledgeSource(req *types.
 }
 
 // collectionDocCount 统计知识源索引集合下的文档数；集合为空时返回 0。
-func (l *ListDigitalKnowledgeSourceLogic) collectionDocCount(collectionID string) int64 {
+// 提到包级，详情接口与列表接口共用同一套口径。
+func collectionDocCount(ctx context.Context, svcCtx *svc.ServiceContext, logger *beaverlog.Logger, collectionID string) int64 {
 	if collectionID == "" {
 		return 0
 	}
-	res, rpcErr := l.svcCtx.PlatformRpc.ListDocuments(l.ctx, &platform.ListDocumentsReq{
+	res, rpcErr := svcCtx.PlatformRpc.ListDocuments(ctx, &platform.ListDocumentsReq{
 		CollectionId: collectionID,
 		Page:         1,
 		PageSize:     1,
 	})
 	if rpcErr != nil {
-		l.logger.Error(model.LogMsg{Text: "统计知识源文档数失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
+		logger.Error(model.LogMsg{Text: "统计知识源文档数失败", Data: map[string]interface{}{"err": rpcErr.Error(), "collectionId": collectionID}})
 		return 0
 	}
 	return res.Total

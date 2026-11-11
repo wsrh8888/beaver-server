@@ -514,7 +514,8 @@ type DeleteDigitalKnowledgeSourceRes struct {
 type ImportDigitalKnowledgeSourceDocReq struct {
 	DigitalID         string   `json:"digitalId"`
 	KnowledgeSourceID string   `json:"knowledgeSourceId"`
-	DocURLs           []string `json:"docUrls"`             // 海狸内部在线文档地址（可多个）
+	DocURLs           []string `json:"docUrls"`          // 海狸内部在线文档地址（可多个）
+	DocType           string   `json:"docType,optional"` // doc|faq，默认 doc
 	UserID            string   `header:"Beaver-User-Id"`
 }
 
@@ -532,8 +533,8 @@ type DigitalKnowledgeSourceDoc struct {
 	IndexStatus  string `json:"indexStatus"` // pending|indexing|ready|failed
 	IndexError   string `json:"indexError,optional"`
 	IndexedAt    int64  `json:"indexedAt"`
-	SourceDocID  string `json:"sourceDocId"`   // 引用的在线文档 doc_id
-	SyncMode     string `json:"syncMode"`      // direct|import
+	SourceDocID  string `json:"sourceDocId"` // 引用的在线文档 doc_id
+	SyncMode     string `json:"syncMode"`    // direct|import
 	LastSyncedAt string `json:"lastSyncedAt,optional"`
 }
 
@@ -578,4 +579,48 @@ type DigitalKnowledgeSourceHit struct {
 type RetrieveDigitalKnowledgeSourceRes struct {
 	Hits   []DigitalKnowledgeSourceHit `json:"hits"`
 	Notice string                      `json:"notice,optional"`
+}
+
+// 单个知识源详情：子路由进入时按 id 取回实体，避免整表列表里翻找。
+type DetailDigitalKnowledgeSourceReq struct {
+	DigitalID         string `form:"digitalId"`
+	KnowledgeSourceID string `form:"knowledgeSourceId"`
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type DetailDigitalKnowledgeSourceRes struct {
+	Source DigitalKnowledgeSourceItem `json:"source"`
+}
+
+// 检查在线文档链接：解析 doc_id 并按当前用户鉴权，返回文档标题供前端预览。
+// 只校验、不建立引用，前端「检查通过后才能确认」靠这个接口。
+type CheckDigitalKnowledgeSourceDocReq struct {
+	DigitalID string `json:"digitalId"`
+	DocURL    string `json:"docUrl"`
+	UserID    string `header:"Beaver-User-Id"`
+}
+
+type CheckDigitalKnowledgeSourceDocRes struct {
+	Valid bool   `json:"valid"`          // 链接可解析且当前用户可见
+	DocID string `json:"docId,optional"` // 解析出的文档 ID
+	Title string `json:"title,optional"` // 文档标题，供确认前预览
+	Msg   string `json:"msg,optional"`   // 失败原因（不可解析 / 无权限）
+}
+
+// 本地文件上传：前端把 docx/xlsx 读成 base64 传上来，服务端解析正文后
+// 以 source_type=file 在知识源集合里建文档，由 platform 异步索引。
+type UploadDigitalKnowledgeSourceDocReq struct {
+	DigitalID         string `json:"digitalId"`
+	KnowledgeSourceID string `json:"knowledgeSourceId"`
+	FileName          string `json:"fileName"`
+	Data              string `json:"data"`             // base64 文件二进制
+	DocType           string `json:"docType,optional"` // doc|faq，默认 doc
+	UserID            string `header:"Beaver-User-Id"`
+}
+
+type UploadDigitalKnowledgeSourceDocRes struct {
+	DocumentID string `json:"documentId,optional"`
+	Title      string `json:"title,optional"`
+	ByteSize   int64  `json:"byteSize"` // 解析出的正文字节数
+	Msg        string `json:"msg,optional"`
 }

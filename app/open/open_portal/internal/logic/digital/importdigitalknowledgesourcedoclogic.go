@@ -12,6 +12,7 @@ package digital
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"beaver/app/doc/doc_rpc/doc"
 	"beaver/app/open/open_portal/internal/svc"
@@ -74,8 +75,13 @@ func (l *ImportDigitalKnowledgeSourceDocLogic) ImportDigitalKnowledgeSourceDoc(r
 		}
 		// 2) 建立引用：platform 侧 ingest 会按 doc_id 自动拉取并索引源文档。
 		//    direct 模式表示跟随源文档更新（引用云文档），正文与索引由平台侧异步完成。
+		docType := strings.ToLower(strings.TrimSpace(req.DocType))
+		if docType == "" {
+			docType = "doc"
+		}
 		if _, createErr := l.svcCtx.PlatformRpc.CreateDocument(l.ctx, &platform.CreateDocumentReq{
 			CollectionId: collectionID,
+			DocType:      docType,
 			SourceType:   "doc",
 			SourceDocId:  docID,
 			SyncMode:     "direct",

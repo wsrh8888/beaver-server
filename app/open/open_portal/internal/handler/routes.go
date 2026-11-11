@@ -194,6 +194,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: digital.ListDigitalKnowledgeSourceHandler(serverCtx),
 				},
 				{
+					// 单个知识源详情
+					Method:  http.MethodGet,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/detail",
+					Handler: digital.DetailDigitalKnowledgeSourceHandler(serverCtx),
+				},
+				{
 					// 新建 / 更新知识源
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/digital/v1/knowledge/source/save",
@@ -210,6 +216,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/open_portal/digital/v1/knowledge/source/doc/import",
 					Handler: digital.ImportDigitalKnowledgeSourceDocHandler(serverCtx),
+				},
+				{
+					// 检查在线文档链接：解析 doc_id + 鉴权，只校验不建引用
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/doc/check",
+					Handler: digital.CheckDigitalKnowledgeSourceDocHandler(serverCtx),
+				},
+				{
+					// 本地文件上传到知识源（docx/xlsx 解析正文后建 file 文档）
+					Method:  http.MethodPost,
+					Path:    "/api/open_portal/digital/v1/knowledge/source/doc/upload",
+					Handler: digital.UploadDigitalKnowledgeSourceDocHandler(serverCtx),
 				},
 				{
 					// 知识源文档列表

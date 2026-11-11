@@ -205,6 +205,7 @@ type (
 			DigitalID         string   `json:"digitalId"`
 			KnowledgeSourceID string   `json:"knowledgeSourceId"`
 			DocURLs           []string `json:"docUrls"`             // 海狸内部在线文档地址（可多个）
+			DocType           string   `json:"docType,optional"`    // doc|faq，默认 doc
 			UserID            string   `header:"Beaver-User-Id"`
 		}
 	ImportDigitalKnowledgeSourceDocRes {
@@ -267,6 +268,47 @@ type (
 	RetrieveDigitalKnowledgeSourceRes {
 		Hits   []DigitalKnowledgeSourceHit `json:"hits"`
 		Notice string                     `json:"notice,optional"`
+	}
+)
+
+type (
+	// 单个知识源详情：子路由进入时按 id 取回实体。
+	DetailDigitalKnowledgeSourceReq {
+		DigitalID         string `form:"digitalId"`
+		KnowledgeSourceID string `form:"knowledgeSourceId"`
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	DetailDigitalKnowledgeSourceRes {
+		Source DigitalKnowledgeSourceItem `json:"source"`
+	}
+
+	// 检查在线文档链接：解析 doc_id + 鉴权，只校验不建引用。
+	CheckDigitalKnowledgeSourceDocReq {
+		DigitalID string `json:"digitalId"`
+		DocURL    string `json:"docUrl"`
+		UserID    string `header:"Beaver-User-Id"`
+	}
+	CheckDigitalKnowledgeSourceDocRes {
+		Valid bool   `json:"valid"`
+		DocID string `json:"docId,optional"`
+		Title string `json:"title,optional"`
+		Msg   string `json:"msg,optional"`
+	}
+
+	// 本地文件上传：docx/xlsx 解析正文后以 source_type=file 建文档。
+	UploadDigitalKnowledgeSourceDocReq {
+		DigitalID         string `json:"digitalId"`
+		KnowledgeSourceID string `json:"knowledgeSourceId"`
+		FileName          string `json:"fileName"`
+		Data              string `json:"data"`
+		DocType           string `json:"docType,optional"`
+		UserID            string `header:"Beaver-User-Id"`
+	}
+	UploadDigitalKnowledgeSourceDocRes {
+		DocumentID string `json:"documentId,optional"`
+		Title      string `json:"title,optional"`
+		ByteSize   int64  `json:"byteSize"`
+		Msg        string `json:"msg,optional"`
 	}
 )
 
@@ -371,6 +413,10 @@ service open {
 	@handler ListDigitalKnowledgeSource
 	get /api/open_portal/digital/v1/knowledge/source/list (ListDigitalKnowledgeSourceReq) returns (ListDigitalKnowledgeSourceRes)
 
+	@doc "单个知识源详情"
+	@handler DetailDigitalKnowledgeSource
+	get /api/open_portal/digital/v1/knowledge/source/detail (DetailDigitalKnowledgeSourceReq) returns (DetailDigitalKnowledgeSourceRes)
+
 	@doc "新建 / 更新知识源"
 	@handler SaveDigitalKnowledgeSource
 	post /api/open_portal/digital/v1/knowledge/source/save (SaveDigitalKnowledgeSourceReq) returns (SaveDigitalKnowledgeSourceRes)
@@ -382,6 +428,14 @@ service open {
 	@doc "导入在线文档到知识源（粘贴海狸内部地址）"
 	@handler ImportDigitalKnowledgeSourceDoc
 	post /api/open_portal/digital/v1/knowledge/source/doc/import (ImportDigitalKnowledgeSourceDocReq) returns (ImportDigitalKnowledgeSourceDocRes)
+
+	@doc "检查在线文档链接：解析 + 鉴权，只校验不建引用"
+	@handler CheckDigitalKnowledgeSourceDoc
+	post /api/open_portal/digital/v1/knowledge/source/doc/check (CheckDigitalKnowledgeSourceDocReq) returns (CheckDigitalKnowledgeSourceDocRes)
+
+	@doc "本地文件上传到知识源（docx/xlsx 解析正文后建 file 文档）"
+	@handler UploadDigitalKnowledgeSourceDoc
+	post /api/open_portal/digital/v1/knowledge/source/doc/upload (UploadDigitalKnowledgeSourceDocReq) returns (UploadDigitalKnowledgeSourceDocRes)
 
 	@doc "知识源文档列表"
 	@handler ListDigitalKnowledgeSourceDoc
