@@ -50,6 +50,13 @@ func (l *SaveDigitalKnowledgeSourceLogic) SaveDigitalKnowledgeSource(req *types.
 	if topK < 0 || topK > open_models.MaxKnowledgeSourceTopK {
 		return nil, errors.New("检索条数超出范围")
 	}
+	// 前端创建知识源时只传名称，配置留空。这里统一落 {} 占位：
+	// platform 的 index_config 是 json 列（空串非法），本表是 text，
+	// 两处保持一致，详情接口回显给向导时也能直接当合法 JSON 解析。
+	indexConfig := strings.TrimSpace(req.IndexConfig)
+	if indexConfig == "" {
+		indexConfig = "{}"
+	}
 
 	var row open_models.OpenKnowledgeSource
 	if req.KnowledgeSourceID == "" {
@@ -64,7 +71,7 @@ func (l *SaveDigitalKnowledgeSourceLogic) SaveDigitalKnowledgeSource(req *types.
 			Name:        name,
 			Kind:        "open_knowledge_source",
 			AclMode:     "internal",
-			IndexConfig: strings.TrimSpace(req.IndexConfig),
+			IndexConfig: indexConfig,
 		})
 		if collErr != nil {
 			l.logger.Error(model.LogMsg{Text: "创建知识源索引集合失败", Data: map[string]interface{}{"err": collErr.Error()}})
@@ -76,7 +83,7 @@ func (l *SaveDigitalKnowledgeSourceLogic) SaveDigitalKnowledgeSource(req *types.
 			OwnerID:       req.UserID,
 			Name:          name,
 			RetrievalTopK: topK,
-			IndexConfig:   strings.TrimSpace(req.IndexConfig),
+			IndexConfig:   indexConfig,
 			KnowledgeIDs:  open_models.KnowledgeIDList{collRes.CollectionId},
 		}
 	} else {

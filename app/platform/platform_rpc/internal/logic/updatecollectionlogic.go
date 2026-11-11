@@ -23,6 +23,7 @@ package logic
 
 import (
 	"context"
+	"strings"
 
 	knowledge_models "beaver/app/platform/platform_models/knowledge"
 	"beaver/app/platform/platform_rpc/internal/svc"
@@ -42,17 +43,22 @@ func NewUpdateCollectionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *UpdateCollectionLogic) UpdateCollection(in *platform_rpc.UpdateCollectionReq) (*platform_rpc.UpdateCollectionRes, error) {
+	updates := map[string]any{
+		"name":        in.Name,
+		"kind":        in.Kind,
+		"acl_mode":    in.AclMode,
+		"description": in.Description,
+		"status":      in.Status,
+		"sort":        in.Sort,
+	}
+	// index_config 是 json 列：空串非法（Error 3140），且这里整列覆盖会把已有配置冲掉。
+	// 调用方只改名称等情况不传配置时，保持该列不动。
+	if cfg := strings.TrimSpace(in.IndexConfig); cfg != "" {
+		updates["index_config"] = cfg
+	}
 	res := l.svcCtx.DB.Model(&knowledge_models.KnowledgeCollection{}).
 		Where("collection_id = ?", in.CollectionId).
-		Updates(map[string]any{
-			"name":         in.Name,
-			"kind":         in.Kind,
-			"acl_mode":     in.AclMode,
-			"index_config": in.IndexConfig,
-			"description":  in.Description,
-			"status":       in.Status,
-			"sort":         in.Sort,
-		})
+		Updates(updates)
 	if res.Error != nil {
 		l.Errorf("更新知识集合失败 %s: %v", in.CollectionId, res.Error)
 		return nil, res.Error
