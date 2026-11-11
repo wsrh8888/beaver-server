@@ -39,15 +39,16 @@ func (l *UpdateBotLogic) UpdateBot(req *types.UpdateBotReq) (*types.UpdateBotRes
 		return nil, err
 	}
 
-	if req.Name != "" || req.Avatar != "" {
-		displayReq := &user_rpc.UserUpdateDisplayReq{UserId: row.BotID}
-		if req.Name != "" {
-			displayReq.NickName = req.Name
-		}
-		if req.Avatar != "" {
-			displayReq.Avatar = req.Avatar
-		}
-		if _, err := l.svcCtx.UserRpc.UserUpdateDisplay(l.ctx, displayReq); err != nil {
+	// 名称/头像/描述都存在 IM 用户资料里（BotID 即 UserModel.UserID），不复制到 open_bot：
+	// 复制一份就要双写两份、还得手动同步，绑定关系用 ID 表达即可。
+	// 用 UpdateUsers 而不是 UserUpdateDisplay，是因为后者不支持改简介，且这里要能区分「不传」和「传空串清空」。
+	if req.Name != nil || req.Avatar != nil || req.Description != nil {
+		if _, err := l.svcCtx.UserRpc.UpdateUsers(l.ctx, &user_rpc.UpdateUsersReq{
+			UserIds:       []string{row.BotID},
+			PatchNickName: req.Name,
+			PatchAvatar:   req.Avatar,
+			PatchAbstract: req.Description,
+		}); err != nil {
 			return nil, errors.New("更新机器人展示信息失败")
 		}
 	}

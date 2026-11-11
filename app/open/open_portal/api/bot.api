@@ -57,11 +57,13 @@ type (
 
 type (
 	UpdateBotReq {
-		BotID      string `json:"botId"`
-		Name       string `json:"name,optional"`
-		Avatar     string `json:"avatar,optional"`
-		Visibility string `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
-		UserID     string `header:"Beaver-User-Id"`
+		BotID string `json:"botId"`
+		// 展示信息（名称/头像/描述）存在 IM 用户资料里，传 null 表示不修改，传空串表示清空。
+		Name        *string `json:"name,optional"`
+		Avatar      *string `json:"avatar,optional"`
+		Description *string `json:"description,optional" validate:"omitempty,max=512"`
+		Visibility  string  `json:"visibility,optional" validate:"omitempty,oneof=private partial public"`
+		UserID      string  `header:"Beaver-User-Id"`
 	}
 	UpdateBotRes {}
 )
