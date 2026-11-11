@@ -40,10 +40,6 @@ func (l *ListDigitalKnowledgeSourceLogic) ListDigitalKnowledgeSource(req *types.
 	if _, err := loadOwnedDigital(l.svcCtx.DB, req.UserID, req.DigitalID); err != nil {
 		return nil, err
 	}
-	if err := migrateLegacyKnowledgeSources(l.svcCtx.DB, req.DigitalID, req.UserID); err != nil {
-		l.logger.Error(model.LogMsg{Text: "迁移旧知识源配置失败", Data: map[string]interface{}{"err": err.Error()}})
-		return nil, errors.New("读取知识源失败")
-	}
 
 	var rows []open_models.OpenKnowledgeSource
 	if err := l.svcCtx.DB.Where("digital_id = ?", req.DigitalID).Order("id asc").Find(&rows).Error; err != nil {

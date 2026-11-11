@@ -68,9 +68,7 @@ func syncDigitalKnowledgeIDs(db *gorm.DB, digitalID string) error {
 }
 
 // sourceCollectionID 取知识源持有的 platform 索引集合 ID。
-//
-// 新模型下每行 KnowledgeIDs 只放 1 个集合 ID（新建知识源时由本服务创建）；
-// 旧迁移数据可能直接引用既有集合。两种情况下取首个非空 ID 即可定位集合。
+// 每行只放 1 个集合 ID（新建知识源时由本服务创建），取首个非空值即可定位集合。
 // 调用方需自行处理「集合为空」的提示，不放这里以免掩盖业务含义。
 func sourceCollectionID(ids open_models.KnowledgeIDList) string {
 	for _, id := range ids {
@@ -125,86 +123,6 @@ func parseBeaverDocID(raw string) string {
 		s = s[:q]
 	}
 	return strings.TrimSpace(s)
-}
-
-// migrateLegacyKnowledgeSources 兼容旧版把知识源分组塞在 builtinConfig JSON 里的数据。
-// 只在「这个数字伙伴还没有任何知识源实体」时执行，迁移完立刻清掉旧分组，
-// 避免重复迁移出双份；只有扁平 knowledgeIds 的更老数据补一个默认知识源。
-func migrateLegacyKnowledgeSources(db *gorm.DB, digitalID, ownerID string) error {
-	var count int64
-	if err := db.Model(&open_models.OpenKnowledgeSource{}).
-		Where("digital_id = ?", digitalID).Count(&count).Error; err != nil {
-		return err
-	}
-	if count > 0 {
-		return nil
-	}
-
-	var cfg open_models.OpenDigitalConfig
-	if err := db.Where("digital_id = ?", digitalID).First(&cfg).Error; err != nil {
-		return nil
-	}
-	if cfg.BuiltinConfig == nil {
-		return nil
-	}
-	legacy := cfg.BuiltinConfig.KnowledgeSources
-	flatIDs := cfg.BuiltinConfig.KnowledgeIDs
-	if len(legacy) == 0 && len(flatIDs) == 0 {
-		return nil
-	}
-
-	rows := make([]open_models.OpenKnowledgeSource, 0, len(legacy)+1)
-	for _, item := range legacy {
-		id := strings.TrimSpace(item.ID)
-		if id == "" {
-			id = newKnowledgeSourceID()
-		}
-		name := strings.TrimSpace(item.Name)
-		if name == "" {
-			name = "默认知识源"
-		}
-		rows = append(rows, open_models.OpenKnowledgeSource{
-			SourceID:      id,
-			DigitalID:     digitalID,
-			OwnerID:       ownerID,
-			Name:          name,
-			RetrievalTopK: open_models.DefaultKnowledgeSourceTopK,
-			KnowledgeIDs:  open_models.KnowledgeIDList(uniqTrimmed(item.KnowledgeIDs)),
-		})
-	}
-	if len(legacy) == 0 && len(flatIDs) > 0 {
-		rows = append(rows, open_models.OpenKnowledgeSource{
-			SourceID:      newKnowledgeSourceID(),
-			DigitalID:     digitalID,
-			OwnerID:       ownerID,
-			Name:          "默认知识源",
-			RetrievalTopK: open_models.DefaultKnowledgeSourceTopK,
-			KnowledgeIDs:  open_models.KnowledgeIDList(uniqTrimmed(flatIDs)),
-		})
-	}
-	if len(rows) == 0 {
-		return nil
-	}
-	if err := db.Create(&rows).Error; err != nil {
-		return err
-	}
-	return withBuiltinConfig(db, digitalID, func(bc *open_models.BuiltinConfig) {
-		bc.KnowledgeSources = nil
-		bc.KnowledgeIDs = loadKnowledgeSourceIDs(db, digitalID)
-	})
-}
-
-func uniqTrimmed(ids []string) []string {
-	seen := make(map[string]bool)
-	out := make([]string, 0, len(ids))
-	for _, id := range ids {
-		id = strings.TrimSpace(id)
-		if id != "" && !seen[id] {
-			seen[id] = true
-			out = append(out, id)
-		}
-	}
-	return out
 }
 
 func newKnowledgeSourceID() string {

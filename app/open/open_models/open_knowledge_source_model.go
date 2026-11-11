@@ -44,8 +44,8 @@ const MaxKnowledgeSourceTopK = 50
 //     由 platform 的 ingest 自动拉取并索引源文档；
 //   - 删除知识源 / 移除引用都不会动在线文档本体（飞书/钉钉「引用云文档」语义）。
 //
-// KnowledgeIDs 在新模型下只放 1 个 platform 索引集合 ID；旧迁移数据可能直接引用
-// 既有集合。运行时不关心分组：BuiltinConfig.KnowledgeIDs 由本表所有行合并去重后派生，
+// KnowledgeIDs 只放 1 个 platform 索引集合 ID，不存任何文档正文。
+// 运行时不关心分组：BuiltinConfig.KnowledgeIDs 由本表所有行合并去重后派生，
 // 知识源发生任何增删改都由 portal logic 回写，agent 侧只认那个扁平列表。
 // 控制台的 config/save 会整列覆盖 builtin_config，因此也在那里按本表重算回填。
 type OpenKnowledgeSource struct {
@@ -56,7 +56,7 @@ type OpenKnowledgeSource struct {
 	Name          string          `gorm:"column:name;type:varchar(128);not null;comment:知识源名称"`
 	RetrievalTopK int             `gorm:"column:retrieval_top_k;type:int;not null;default:8;comment:召回条数"`
 	IndexConfig   string          `gorm:"column:index_config;type:text;comment:分段与清洗配置 JSON"`
-	KnowledgeIDs  KnowledgeIDList `gorm:"column:knowledge_ids;type:json;comment:持有的 platform 索引集合 ID（新模型通常 1 个；旧迁移数据可能直接引用既有集合）"`
+	KnowledgeIDs  KnowledgeIDList `gorm:"column:knowledge_ids;type:json;comment:持有的 platform 索引集合 ID（1 个）"`
 }
 
 func (OpenKnowledgeSource) TableName() string { return "open_knowledge_source" }

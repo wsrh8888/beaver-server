@@ -23,7 +23,6 @@ package logic
 
 import (
 	"context"
-	"strings"
 
 	knowledge_models "beaver/app/platform/platform_models/knowledge"
 	"beaver/app/platform/platform_rpc/internal/svc"
@@ -55,19 +54,13 @@ func (l *CreateCollectionLogic) CreateCollection(in *platform_rpc.CreateCollecti
 	if acl == "" {
 		acl = "internal"
 	}
-	// index_config 是 MySQL json 列，空串不是合法 JSON（Error 3140）。
-	// 建集合允许不传配置，统一落 {} 占位；检索侧 ParseIndexConfig 对缺项有 fallback。
-	indexConfig := strings.TrimSpace(in.IndexConfig)
-	if indexConfig == "" {
-		indexConfig = "{}"
-	}
 	row := knowledge_models.KnowledgeCollection{
 		CollectionID: "col_" + randHex(16),
 		ParentID:     in.ParentId,
 		Name:         in.Name,
 		Kind:         kind,
 		AclMode:      acl,
-		IndexConfig:  indexConfig,
+		IndexConfig:  in.IndexConfig,
 		Description:  in.Description,
 		Status:       status,
 		Sort:         int(in.Sort),

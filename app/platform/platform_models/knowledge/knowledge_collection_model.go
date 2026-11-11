@@ -34,7 +34,7 @@ type KnowledgeCollection struct {
 	Kind          string `gorm:"type:varchar(32);not null;default:'docs';comment:类型 docs文档库 faq问答对 ..." json:"kind"`
 	StorageRef    string `gorm:"column:storage_ref;type:varchar(255);not null;default:'';comment:对象存储前缀/桶引用" json:"storageRef"`
 	AclMode       string `gorm:"column:acl_mode;type:varchar(32);not null;default:'internal';comment:user_scoped按用户隔离 internal内部共享" json:"aclMode"`
-	IndexConfig   string `gorm:"column:index_config;type:json;comment:分段/清洗/检索配置 {embedding_model_id,chunk_size,overlap,top_k,...}" json:"indexConfig"`
+	IndexConfig   string `gorm:"column:index_config;type:text;not null;comment:分段/清洗/检索配置 JSON {embedding_model_id,chunk_size,overlap,top_k,...}；整块读整块写，不做 JSON 路径查询，故用 text" json:"indexConfig"`
 	Description   string `gorm:"type:varchar(512);not null;default:'';comment:描述" json:"description"`
 	OwnerUserID   string `gorm:"column:owner_user_id;type:varchar(64);not null;default:'';index;comment:归属用户，系统内置为空" json:"ownerUserId"`
 	Status        int    `gorm:"type:tinyint;not null;default:1;index;comment:1启用 2停用" json:"status"`

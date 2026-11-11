@@ -77,18 +77,6 @@ func (c *OverrideConfig) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, c)
 }
 
-// KnowledgeSourceConfig 旧版把知识源分组塞在配置 JSON 里的结构，仅用于读取并迁移
-// 到 OpenKnowledgeSource 表（见 migrateLegacyKnowledgeSources）。
-//
-// 知识源现在是后端一等实体（open_knowledge_source），不再写进这里：
-// 新接口一律读写表，迁移完成后 KnowledgeSources 会被清空，写入路径永远置 nil。
-// 保留字段只是为了旧数据能反序列化出来，不要在新代码里往这里写。
-type KnowledgeSourceConfig struct {
-	ID           string   `json:"id"`
-	Name         string   `json:"name"`
-	KnowledgeIDs []string `json:"knowledgeIds,omitempty"`
-}
-
 // BuiltinConfig 提示词模式配置（Runtime=builtin）。
 type BuiltinConfig struct {
 	SystemPrompt     string           `json:"systemPrompt"`               // 人设提示词
@@ -102,8 +90,6 @@ type BuiltinConfig struct {
 	// 运行时检索列表：由 open_knowledge_source 表所有行合并去重派生，控制台不直接提交。
 	// 见 loadKnowledgeSourceIDs / syncDigitalKnowledgeIDs / SaveDigitalConfigLogic。
 	KnowledgeIDs []string `json:"knowledgeIds,omitempty"`
-	// 已废弃：旧版 JSON 分组，仅保留读取以做一次性迁移，写入路径始终置 nil。
-	KnowledgeSources []KnowledgeSourceConfig `json:"knowledgeSources,omitempty"`
 }
 
 // ExternalConfig 长链接模式配置（Runtime=external）。
