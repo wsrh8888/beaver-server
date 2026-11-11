@@ -8,7 +8,8 @@ import "beaver/common/models"
 type DocYjsUpdate struct {
 	models.Model
 	DocID          string `gorm:"column:doc_id;type:varchar(64);not null;uniqueIndex:idx_doc_seq,priority:1;index;comment:所属文档" json:"docId"`
-	Seq            int64  `gorm:"column:seq;type:bigint;not null;uniqueIndex:idx_doc_seq,priority:2;comment:文档内递增序号" json:"seq"`
+	Epoch          int    `gorm:"column:epoch;type:int;not null;default:1;uniqueIndex:idx_doc_seq,priority:2;index;comment:协同纪元" json:"epoch"`
+	Seq            int64  `gorm:"column:seq;type:bigint;not null;uniqueIndex:idx_doc_seq,priority:3;comment:纪元内递增序号" json:"seq"`
 	Update         []byte `gorm:"column:update;type:blob;not null;comment:Yjs update 二进制"`
 	OriginUserID   string `gorm:"column:origin_user_id;type:varchar(64);not null;default:'';comment:产生该 update 的用户" json:"originUserId"`
 }
@@ -20,7 +21,8 @@ func (DocYjsUpdate) TableName() string { return "doc_yjs_updates" }
 // content_json/content_text 为解码派生的权威正文快照，与正文保存同源。
 type DocYjsSnapshot struct {
 	models.Model
-	DocID        string `gorm:"column:doc_id;type:varchar(64);uniqueIndex;not null;comment:所属文档" json:"docId"`
+	DocID        string `gorm:"column:doc_id;type:varchar(64);not null;uniqueIndex:idx_snap_doc_epoch,priority:1;comment:所属文档" json:"docId"`
+	Epoch        int    `gorm:"column:epoch;type:int;not null;default:1;uniqueIndex:idx_snap_doc_epoch,priority:2;comment:协同纪元" json:"epoch"`
 	State        []byte `gorm:"column:state;type:longblob;not null;comment:压实后的 Yjs 全量 state"`
 	UpdateSeqUpTo int64 `gorm:"column:update_seq_up_to;type:bigint;not null;default:0;comment:已并入快照的最大 update seq" json:"updateSeqUpTo"`
 	Version      int    `gorm:"type:int;not null;default:0;comment:快照对应文档版本" json:"version"`

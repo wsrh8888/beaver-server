@@ -13,6 +13,60 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 操作审计日志
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/audit/list",
+				Handler: ListAuditLogsHandler(serverCtx),
+			},
+			{
+				// 删除富媒体块
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/block/delete",
+				Handler: DeleteDocBlockHandler(serverCtx),
+			},
+			{
+				// 列出富媒体块
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/block/list",
+				Handler: ListDocBlocksHandler(serverCtx),
+			},
+			{
+				// 保存多维表格 / 画板块
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/block/save",
+				Handler: SaveDocBlockHandler(serverCtx),
+			},
+			{
+				// 协作者列表
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/collab/list",
+				Handler: ListCollaboratorsHandler(serverCtx),
+			},
+			{
+				// 创建评论或回复
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/comment/create",
+				Handler: CreateCommentHandler(serverCtx),
+			},
+			{
+				// 删除评论
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/comment/delete",
+				Handler: DeleteCommentHandler(serverCtx),
+			},
+			{
+				// 列出文档评论
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/comment/list",
+				Handler: ListCommentsHandler(serverCtx),
+			},
+			{
+				// 解决 / 重新打开评论
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/comment/resolve",
+				Handler: ResolveCommentHandler(serverCtx),
+			},
+			{
 				// 创建文档
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/doc/create",
@@ -23,6 +77,24 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/doc/delete",
 				Handler: DeleteDocHandler(serverCtx),
+			},
+			{
+				// 复制文档
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/duplicate",
+				Handler: DuplicateDocHandler(serverCtx),
+			},
+			{
+				// 导出文档
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/export",
+				Handler: ExportDocHandler(serverCtx),
+			},
+			{
+				// 收藏 / 取消收藏
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/favorite",
+				Handler: SetFavoriteHandler(serverCtx),
 			},
 			{
 				// 获取文档详情
@@ -37,10 +109,46 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ImportDocHandler(serverCtx),
 			},
 			{
+				// 开关知识库索引
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/knowledgeSync",
+				Handler: SetKnowledgeSyncHandler(serverCtx),
+			},
+			{
+				// 按空间列出文档
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/list",
+				Handler: ListDocsHandler(serverCtx),
+			},
+			{
+				// 收藏列表
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/listFavorites",
+				Handler: ListFavoritesHandler(serverCtx),
+			},
+			{
+				// 最近访问
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/listRecent",
+				Handler: ListRecentHandler(serverCtx),
+			},
+			{
+				// 重新入队知识库索引
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/reindex",
+				Handler: ReindexDocHandler(serverCtx),
+			},
+			{
 				// 保存文档正文
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/doc/saveContent",
 				Handler: SaveDocContentHandler(serverCtx),
+			},
+			{
+				// 全文搜索文档
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/search",
+				Handler: SearchDocsHandler(serverCtx),
 			},
 			{
 				// 拉取文档初始同步状态
@@ -53,6 +161,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/doc/updateMeta",
 				Handler: UpdateDocMetaHandler(serverCtx),
+			},
+			{
+				// 记录文档访问
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/doc/visit",
+				Handler: RecordVisitHandler(serverCtx),
 			},
 			{
 				// 创建节点
@@ -79,6 +193,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: UpdateNodeHandler(serverCtx),
 			},
 			{
+				// 通知列表
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/notification/list",
+				Handler: ListNotificationsHandler(serverCtx),
+			},
+			{
+				// 标记通知已读
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/notification/read",
+				Handler: MarkNotificationReadHandler(serverCtx),
+			},
+			{
 				// 检查有效权限
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/perm/check",
@@ -103,10 +229,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: SetPermissionHandler(serverCtx),
 			},
 			{
+				// 对比两个版本
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/revision/diff",
+				Handler: DiffRevisionsHandler(serverCtx),
+			},
+			{
 				// 获取版本详情
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/revision/get",
 				Handler: GetRevisionHandler(serverCtx),
+			},
+			{
+				// 命名版本
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/revision/label",
+				Handler: LabelRevisionHandler(serverCtx),
 			},
 			{
 				// 列出版本历史
@@ -119,6 +257,30 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/revision/rollback",
 				Handler: RollbackRevisionHandler(serverCtx),
+			},
+			{
+				// 查询分享链接
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/share/getLink",
+				Handler: GetShareLinkHandler(serverCtx),
+			},
+			{
+				// 解析分享链接（访问入口）
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/share/resolveLink",
+				Handler: ResolveShareLinkHandler(serverCtx),
+			},
+			{
+				// 撤销分享链接
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/share/revokeLink",
+				Handler: RevokeShareLinkHandler(serverCtx),
+			},
+			{
+				// 创建或更新分享链接
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/share/setLink",
+				Handler: SetShareLinkHandler(serverCtx),
 			},
 			{
 				// 创建文档空间
@@ -149,6 +311,54 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/doc/v1/space/update",
 				Handler: UpdateSpaceHandler(serverCtx),
+			},
+			{
+				// 创建模板
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/template/create",
+				Handler: CreateTemplateHandler(serverCtx),
+			},
+			{
+				// 删除模板
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/template/delete",
+				Handler: DeleteTemplateHandler(serverCtx),
+			},
+			{
+				// 从模板创建文档
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/template/instantiate",
+				Handler: InstantiateTemplateHandler(serverCtx),
+			},
+			{
+				// 模板列表
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/template/list",
+				Handler: ListTemplatesHandler(serverCtx),
+			},
+			{
+				// 清空回收站
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/trash/empty",
+				Handler: EmptyTrashHandler(serverCtx),
+			},
+			{
+				// 列出回收站
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/trash/list",
+				Handler: ListTrashHandler(serverCtx),
+			},
+			{
+				// 彻底删除单条
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/trash/purge",
+				Handler: PurgeTrashHandler(serverCtx),
+			},
+			{
+				// 从回收站恢复
+				Method:  http.MethodPost,
+				Path:    "/api/doc/v1/trash/restore",
+				Handler: RestoreTrashHandler(serverCtx),
 			},
 			{
 				// 文档实时协同 WebSocket 网关（y-websocket sync + awareness）

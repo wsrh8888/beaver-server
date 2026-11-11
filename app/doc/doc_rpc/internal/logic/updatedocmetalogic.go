@@ -9,6 +9,8 @@ import (
 
 	"beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+
+	"gorm.io/gorm"
 )
 
 type UpdateDocMetaLogic struct {
@@ -45,7 +47,34 @@ func (l *UpdateDocMetaLogic) UpdateDocMeta(in *doc_rpc.UpdateDocMetaReq) (*doc_r
 	if in.Status > 0 {
 		upd["status"] = int(in.Status)
 	}
-	if err := l.svcCtx.DB.Model(&doc_models.DocDocument{}).Where("doc_id = ?", doc.DocID).Updates(upd).Error; err != nil {
+	if icon := trim(in.Icon); icon != "" {
+		upd["icon"] = icon
+	}
+	if cover := trim(in.Cover); cover != "" {
+		upd["cover"] = cover
+	}
+	if dt := trim(in.DocType); dt != "" {
+		upd["doc_type"] = dt
+	}
+	// bool 的 false 与「未设置」无法区分，用 rag_enabled_set 显式表达意图。
+	if in.RagEnabledSet {
+		upd["rag_enabled"] = in.RagEnabled
+	}
+	if len(upd) == 0 {
+		return &doc_rpc.UpdateDocMetaRes{}, nil
+	}
+
+	if err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&doc_models.DocDocument{}).Where("doc_id = ?", doc.DocID).Updates(upd).Error; err != nil {
+			return err
+		}
+		// 首次打开知识库同步时补一条索引任务，让已有正文立刻可被检索。
+		if in.RagEnabledSet && in.RagEnabled && !doc.RagEnabled {
+			enqueueIndex(tx, doc.DocID, doc.Version, doc.ContentDigest)
+		}
+		auditJSON(tx, in.OperatorUserId, "doc.update_meta", "doc", doc.DocID, upd)
+		return nil
+	}); err != nil {
 		l.logger.Error(model.LogMsg{Text: "更新文档元信息失败", Data: err})
 		return nil, err
 	}
@@ -55,6 +84,9 @@ func (l *UpdateDocMetaLogic) UpdateDocMeta(in *doc_rpc.UpdateDocMetaReq) (*doc_r
 	}
 	if in.Status > 0 {
 		doc.Status = int(in.Status)
+	}
+	if in.RagEnabledSet {
+		doc.RagEnabled = in.RagEnabled
 	}
 
 	return &doc_rpc.UpdateDocMetaRes{}, nil

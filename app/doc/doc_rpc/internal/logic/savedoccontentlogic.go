@@ -40,7 +40,7 @@ func (l *SaveDocContentLogic) SaveDocContent(in *doc_rpc.SaveDocContentReq) (*do
 		return nil, errNoPermission
 	}
 
-	version, err := applyDocContent(l.ctx, l.svcCtx, doc, space, in.ContentJson, in.ContentText, in.OperatorUserId)
+	version, err := applyDocContent(l.ctx, l.svcCtx, doc, space, in.ContentJson, in.ContentText, in.OperatorUserId, "content.save")
 	if err != nil {
 		return nil, err
 	}

@@ -152,3 +152,193 @@ func (s *DocServer) GetDocContent(ctx context.Context, in *doc_rpc.GetDocContent
 	l := logic.NewGetDocContentLogic(ctx, s.svcCtx)
 	return l.GetDocContent(in)
 }
+
+func (s *DocServer) CreateComment(ctx context.Context, in *doc_rpc.CreateCommentReq) (*doc_rpc.CreateCommentRes, error) {
+	l := logic.NewCreateCommentLogic(ctx, s.svcCtx)
+	return l.CreateComment(in)
+}
+
+func (s *DocServer) ListComments(ctx context.Context, in *doc_rpc.ListCommentsReq) (*doc_rpc.ListCommentsRes, error) {
+	l := logic.NewListCommentsLogic(ctx, s.svcCtx)
+	return l.ListComments(in)
+}
+
+func (s *DocServer) ResolveComment(ctx context.Context, in *doc_rpc.ResolveCommentReq) (*doc_rpc.ResolveCommentRes, error) {
+	l := logic.NewResolveCommentLogic(ctx, s.svcCtx)
+	return l.ResolveComment(in)
+}
+
+func (s *DocServer) DeleteComment(ctx context.Context, in *doc_rpc.DeleteCommentReq) (*doc_rpc.DeleteCommentRes, error) {
+	l := logic.NewDeleteCommentLogic(ctx, s.svcCtx)
+	return l.DeleteComment(in)
+}
+
+func (s *DocServer) SetShareLink(ctx context.Context, in *doc_rpc.SetShareLinkReq) (*doc_rpc.SetShareLinkRes, error) {
+	l := logic.NewSetShareLinkLogic(ctx, s.svcCtx)
+	return l.SetShareLink(in)
+}
+
+func (s *DocServer) GetShareLink(ctx context.Context, in *doc_rpc.GetShareLinkReq) (*doc_rpc.GetShareLinkRes, error) {
+	l := logic.NewGetShareLinkLogic(ctx, s.svcCtx)
+	return l.GetShareLink(in)
+}
+
+func (s *DocServer) RevokeShareLink(ctx context.Context, in *doc_rpc.RevokeShareLinkReq) (*doc_rpc.RevokeShareLinkRes, error) {
+	l := logic.NewRevokeShareLinkLogic(ctx, s.svcCtx)
+	return l.RevokeShareLink(in)
+}
+
+func (s *DocServer) ResolveShareLink(ctx context.Context, in *doc_rpc.ResolveShareLinkReq) (*doc_rpc.ResolveShareLinkRes, error) {
+	l := logic.NewResolveShareLinkLogic(ctx, s.svcCtx)
+	return l.ResolveShareLink(in)
+}
+
+func (s *DocServer) ListTrash(ctx context.Context, in *doc_rpc.ListTrashReq) (*doc_rpc.ListTrashRes, error) {
+	l := logic.NewListTrashLogic(ctx, s.svcCtx)
+	return l.ListTrash(in)
+}
+
+func (s *DocServer) RestoreTrash(ctx context.Context, in *doc_rpc.RestoreTrashReq) (*doc_rpc.RestoreTrashRes, error) {
+	l := logic.NewRestoreTrashLogic(ctx, s.svcCtx)
+	return l.RestoreTrash(in)
+}
+
+func (s *DocServer) PurgeTrash(ctx context.Context, in *doc_rpc.PurgeTrashReq) (*doc_rpc.PurgeTrashRes, error) {
+	l := logic.NewPurgeTrashLogic(ctx, s.svcCtx)
+	return l.PurgeTrash(in)
+}
+
+func (s *DocServer) EmptyTrash(ctx context.Context, in *doc_rpc.EmptyTrashReq) (*doc_rpc.EmptyTrashRes, error) {
+	l := logic.NewEmptyTrashLogic(ctx, s.svcCtx)
+	return l.EmptyTrash(in)
+}
+
+func (s *DocServer) SearchDocs(ctx context.Context, in *doc_rpc.SearchDocsReq) (*doc_rpc.SearchDocsRes, error) {
+	l := logic.NewSearchDocsLogic(ctx, s.svcCtx)
+	return l.SearchDocs(in)
+}
+
+func (s *DocServer) ListDocs(ctx context.Context, in *doc_rpc.ListDocsReq) (*doc_rpc.ListDocsRes, error) {
+	l := logic.NewListDocsLogic(ctx, s.svcCtx)
+	return l.ListDocs(in)
+}
+
+func (s *DocServer) RecordVisit(ctx context.Context, in *doc_rpc.RecordVisitReq) (*doc_rpc.RecordVisitRes, error) {
+	l := logic.NewRecordVisitLogic(ctx, s.svcCtx)
+	return l.RecordVisit(in)
+}
+
+func (s *DocServer) ListRecent(ctx context.Context, in *doc_rpc.ListRecentReq) (*doc_rpc.ListRecentRes, error) {
+	l := logic.NewListRecentLogic(ctx, s.svcCtx)
+	return l.ListRecent(in)
+}
+
+func (s *DocServer) SetFavorite(ctx context.Context, in *doc_rpc.SetFavoriteReq) (*doc_rpc.SetFavoriteRes, error) {
+	l := logic.NewSetFavoriteLogic(ctx, s.svcCtx)
+	return l.SetFavorite(in)
+}
+
+func (s *DocServer) ListFavorites(ctx context.Context, in *doc_rpc.ListFavoritesReq) (*doc_rpc.ListFavoritesRes, error) {
+	l := logic.NewListFavoritesLogic(ctx, s.svcCtx)
+	return l.ListFavorites(in)
+}
+
+func (s *DocServer) ListTemplates(ctx context.Context, in *doc_rpc.ListTemplatesReq) (*doc_rpc.ListTemplatesRes, error) {
+	l := logic.NewListTemplatesLogic(ctx, s.svcCtx)
+	return l.ListTemplates(in)
+}
+
+func (s *DocServer) CreateTemplate(ctx context.Context, in *doc_rpc.CreateTemplateReq) (*doc_rpc.CreateTemplateRes, error) {
+	l := logic.NewCreateTemplateLogic(ctx, s.svcCtx)
+	return l.CreateTemplate(in)
+}
+
+func (s *DocServer) InstantiateTemplate(ctx context.Context, in *doc_rpc.InstantiateTemplateReq) (*doc_rpc.InstantiateTemplateRes, error) {
+	l := logic.NewInstantiateTemplateLogic(ctx, s.svcCtx)
+	return l.InstantiateTemplate(in)
+}
+
+func (s *DocServer) DeleteTemplate(ctx context.Context, in *doc_rpc.DeleteTemplateReq) (*doc_rpc.DeleteTemplateRes, error) {
+	l := logic.NewDeleteTemplateLogic(ctx, s.svcCtx)
+	return l.DeleteTemplate(in)
+}
+
+func (s *DocServer) ExportDoc(ctx context.Context, in *doc_rpc.ExportDocReq) (*doc_rpc.ExportDocRes, error) {
+	l := logic.NewExportDocLogic(ctx, s.svcCtx)
+	return l.ExportDoc(in)
+}
+
+func (s *DocServer) DuplicateDoc(ctx context.Context, in *doc_rpc.DuplicateDocReq) (*doc_rpc.DuplicateDocRes, error) {
+	l := logic.NewDuplicateDocLogic(ctx, s.svcCtx)
+	return l.DuplicateDoc(in)
+}
+
+func (s *DocServer) SaveDocBlock(ctx context.Context, in *doc_rpc.SaveDocBlockReq) (*doc_rpc.SaveDocBlockRes, error) {
+	l := logic.NewSaveDocBlockLogic(ctx, s.svcCtx)
+	return l.SaveDocBlock(in)
+}
+
+func (s *DocServer) ListDocBlocks(ctx context.Context, in *doc_rpc.ListDocBlocksReq) (*doc_rpc.ListDocBlocksRes, error) {
+	l := logic.NewListDocBlocksLogic(ctx, s.svcCtx)
+	return l.ListDocBlocks(in)
+}
+
+func (s *DocServer) DeleteDocBlock(ctx context.Context, in *doc_rpc.DeleteDocBlockReq) (*doc_rpc.DeleteDocBlockRes, error) {
+	l := logic.NewDeleteDocBlockLogic(ctx, s.svcCtx)
+	return l.DeleteDocBlock(in)
+}
+
+func (s *DocServer) LabelRevision(ctx context.Context, in *doc_rpc.LabelRevisionReq) (*doc_rpc.LabelRevisionRes, error) {
+	l := logic.NewLabelRevisionLogic(ctx, s.svcCtx)
+	return l.LabelRevision(in)
+}
+
+func (s *DocServer) DiffRevisions(ctx context.Context, in *doc_rpc.DiffRevisionsReq) (*doc_rpc.DiffRevisionsRes, error) {
+	l := logic.NewDiffRevisionsLogic(ctx, s.svcCtx)
+	return l.DiffRevisions(in)
+}
+
+func (s *DocServer) ListNotifications(ctx context.Context, in *doc_rpc.ListNotificationsReq) (*doc_rpc.ListNotificationsRes, error) {
+	l := logic.NewListNotificationsLogic(ctx, s.svcCtx)
+	return l.ListNotifications(in)
+}
+
+func (s *DocServer) MarkNotificationRead(ctx context.Context, in *doc_rpc.MarkNotificationReadReq) (*doc_rpc.MarkNotificationReadRes, error) {
+	l := logic.NewMarkNotificationReadLogic(ctx, s.svcCtx)
+	return l.MarkNotificationRead(in)
+}
+
+func (s *DocServer) ListAuditLogs(ctx context.Context, in *doc_rpc.ListAuditLogsReq) (*doc_rpc.ListAuditLogsRes, error) {
+	l := logic.NewListAuditLogsLogic(ctx, s.svcCtx)
+	return l.ListAuditLogs(in)
+}
+
+func (s *DocServer) SetKnowledgeSync(ctx context.Context, in *doc_rpc.SetKnowledgeSyncReq) (*doc_rpc.SetKnowledgeSyncRes, error) {
+	l := logic.NewSetKnowledgeSyncLogic(ctx, s.svcCtx)
+	return l.SetKnowledgeSync(in)
+}
+
+func (s *DocServer) ReindexDoc(ctx context.Context, in *doc_rpc.ReindexDocReq) (*doc_rpc.ReindexDocRes, error) {
+	l := logic.NewReindexDocLogic(ctx, s.svcCtx)
+	return l.ReindexDoc(in)
+}
+
+func (s *DocServer) ListIndexOutbox(ctx context.Context, in *doc_rpc.ListIndexOutboxReq) (*doc_rpc.ListIndexOutboxRes, error) {
+	l := logic.NewListIndexOutboxLogic(ctx, s.svcCtx)
+	return l.ListIndexOutbox(in)
+}
+
+func (s *DocServer) AckIndexOutbox(ctx context.Context, in *doc_rpc.AckIndexOutboxReq) (*doc_rpc.AckIndexOutboxRes, error) {
+	l := logic.NewAckIndexOutboxLogic(ctx, s.svcCtx)
+	return l.AckIndexOutbox(in)
+}
+
+func (s *DocServer) ListCollaborators(ctx context.Context, in *doc_rpc.ListCollaboratorsReq) (*doc_rpc.ListCollaboratorsRes, error) {
+	l := logic.NewListCollaboratorsLogic(ctx, s.svcCtx)
+	return l.ListCollaborators(in)
+}
+
+func (s *DocServer) ResolveRoomEpoch(ctx context.Context, in *doc_rpc.ResolveRoomEpochReq) (*doc_rpc.ResolveRoomEpochRes, error) {
+	l := logic.NewResolveRoomEpochLogic(ctx, s.svcCtx)
+	return l.ResolveRoomEpoch(in)
+}

@@ -49,14 +49,25 @@ func (l *DeleteNodeLogic) DeleteNode(in *doc_rpc.DeleteNodeReq) (*doc_rpc.Delete
 	nodeIDs, docIDs := collectSubtree(l.svcCtx.DB, node.NodeID)
 	now := time.Now()
 
-	if err := l.svcCtx.DB.Model(&doc_models.DocNode{}).Where("node_id IN ?", nodeIDs).Update("deleted_at", now).Error; err != nil {
+	if err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&doc_models.DocNode{}).Where("node_id IN ?", nodeIDs).
+			Update("deleted_at", now).Error; err != nil {
+			return err
+		}
+		if len(docIDs) > 0 {
+			if err := tx.Model(&doc_models.DocDocument{}).Where("doc_id IN ?", docIDs).
+				Update("deleted_at", now).Error; err != nil {
+				return err
+			}
+		}
+		addTrash(tx, "node", node.NodeID, node.Title, node.SpaceID, node.ParentID,
+			in.OperatorUserId, trashPayload(nodeIDs, docIDs))
+		auditJSON(tx, in.OperatorUserId, "node.delete", "node", node.NodeID,
+			map[string]any{"title": node.Title, "nodes": len(nodeIDs), "docs": len(docIDs)})
+		return nil
+	}); err != nil {
 		l.logger.Error(model.LogMsg{Text: "删除节点失败", Data: err})
 		return nil, err
-	}
-	if len(docIDs) > 0 {
-		if err := l.svcCtx.DB.Model(&doc_models.DocDocument{}).Where("doc_id IN ?", docIDs).Update("deleted_at", now).Error; err != nil {
-			l.logger.Error(model.LogMsg{Text: "删除节点文档失败", Data: err})
-		}
 	}
 
 	return &doc_rpc.DeleteNodeRes{}, nil

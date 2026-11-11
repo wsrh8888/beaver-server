@@ -19,32 +19,70 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Doc_CreateSpace_FullMethodName       = "/doc_rpc.doc/CreateSpace"
-	Doc_UpdateSpace_FullMethodName       = "/doc_rpc.doc/UpdateSpace"
-	Doc_DeleteSpace_FullMethodName       = "/doc_rpc.doc/DeleteSpace"
-	Doc_GetSpace_FullMethodName          = "/doc_rpc.doc/GetSpace"
-	Doc_ListSpaces_FullMethodName        = "/doc_rpc.doc/ListSpaces"
-	Doc_CreateNode_FullMethodName        = "/doc_rpc.doc/CreateNode"
-	Doc_UpdateNode_FullMethodName        = "/doc_rpc.doc/UpdateNode"
-	Doc_DeleteNode_FullMethodName        = "/doc_rpc.doc/DeleteNode"
-	Doc_ListNodes_FullMethodName         = "/doc_rpc.doc/ListNodes"
-	Doc_CreateDoc_FullMethodName         = "/doc_rpc.doc/CreateDoc"
-	Doc_GetDoc_FullMethodName            = "/doc_rpc.doc/GetDoc"
-	Doc_UpdateDocMeta_FullMethodName     = "/doc_rpc.doc/UpdateDocMeta"
-	Doc_DeleteDoc_FullMethodName         = "/doc_rpc.doc/DeleteDoc"
-	Doc_SaveDocContent_FullMethodName    = "/doc_rpc.doc/SaveDocContent"
-	Doc_GetDocSyncState_FullMethodName   = "/doc_rpc.doc/GetDocSyncState"
-	Doc_AppendDocUpdate_FullMethodName   = "/doc_rpc.doc/AppendDocUpdate"
-	Doc_CommitDocSnapshot_FullMethodName = "/doc_rpc.doc/CommitDocSnapshot"
-	Doc_SetPermission_FullMethodName     = "/doc_rpc.doc/SetPermission"
-	Doc_DeletePermission_FullMethodName  = "/doc_rpc.doc/DeletePermission"
-	Doc_ListPermissions_FullMethodName   = "/doc_rpc.doc/ListPermissions"
-	Doc_CheckPermission_FullMethodName   = "/doc_rpc.doc/CheckPermission"
-	Doc_ListRevisions_FullMethodName     = "/doc_rpc.doc/ListRevisions"
-	Doc_GetRevision_FullMethodName       = "/doc_rpc.doc/GetRevision"
-	Doc_RollbackRevision_FullMethodName  = "/doc_rpc.doc/RollbackRevision"
-	Doc_ImportDoc_FullMethodName         = "/doc_rpc.doc/ImportDoc"
-	Doc_GetDocContent_FullMethodName     = "/doc_rpc.doc/GetDocContent"
+	Doc_CreateSpace_FullMethodName          = "/doc_rpc.doc/CreateSpace"
+	Doc_UpdateSpace_FullMethodName          = "/doc_rpc.doc/UpdateSpace"
+	Doc_DeleteSpace_FullMethodName          = "/doc_rpc.doc/DeleteSpace"
+	Doc_GetSpace_FullMethodName             = "/doc_rpc.doc/GetSpace"
+	Doc_ListSpaces_FullMethodName           = "/doc_rpc.doc/ListSpaces"
+	Doc_CreateNode_FullMethodName           = "/doc_rpc.doc/CreateNode"
+	Doc_UpdateNode_FullMethodName           = "/doc_rpc.doc/UpdateNode"
+	Doc_DeleteNode_FullMethodName           = "/doc_rpc.doc/DeleteNode"
+	Doc_ListNodes_FullMethodName            = "/doc_rpc.doc/ListNodes"
+	Doc_CreateDoc_FullMethodName            = "/doc_rpc.doc/CreateDoc"
+	Doc_GetDoc_FullMethodName               = "/doc_rpc.doc/GetDoc"
+	Doc_UpdateDocMeta_FullMethodName        = "/doc_rpc.doc/UpdateDocMeta"
+	Doc_DeleteDoc_FullMethodName            = "/doc_rpc.doc/DeleteDoc"
+	Doc_SaveDocContent_FullMethodName       = "/doc_rpc.doc/SaveDocContent"
+	Doc_GetDocSyncState_FullMethodName      = "/doc_rpc.doc/GetDocSyncState"
+	Doc_AppendDocUpdate_FullMethodName      = "/doc_rpc.doc/AppendDocUpdate"
+	Doc_CommitDocSnapshot_FullMethodName    = "/doc_rpc.doc/CommitDocSnapshot"
+	Doc_SetPermission_FullMethodName        = "/doc_rpc.doc/SetPermission"
+	Doc_DeletePermission_FullMethodName     = "/doc_rpc.doc/DeletePermission"
+	Doc_ListPermissions_FullMethodName      = "/doc_rpc.doc/ListPermissions"
+	Doc_CheckPermission_FullMethodName      = "/doc_rpc.doc/CheckPermission"
+	Doc_ListRevisions_FullMethodName        = "/doc_rpc.doc/ListRevisions"
+	Doc_GetRevision_FullMethodName          = "/doc_rpc.doc/GetRevision"
+	Doc_RollbackRevision_FullMethodName     = "/doc_rpc.doc/RollbackRevision"
+	Doc_ImportDoc_FullMethodName            = "/doc_rpc.doc/ImportDoc"
+	Doc_GetDocContent_FullMethodName        = "/doc_rpc.doc/GetDocContent"
+	Doc_CreateComment_FullMethodName        = "/doc_rpc.doc/CreateComment"
+	Doc_ListComments_FullMethodName         = "/doc_rpc.doc/ListComments"
+	Doc_ResolveComment_FullMethodName       = "/doc_rpc.doc/ResolveComment"
+	Doc_DeleteComment_FullMethodName        = "/doc_rpc.doc/DeleteComment"
+	Doc_SetShareLink_FullMethodName         = "/doc_rpc.doc/SetShareLink"
+	Doc_GetShareLink_FullMethodName         = "/doc_rpc.doc/GetShareLink"
+	Doc_RevokeShareLink_FullMethodName      = "/doc_rpc.doc/RevokeShareLink"
+	Doc_ResolveShareLink_FullMethodName     = "/doc_rpc.doc/ResolveShareLink"
+	Doc_ListTrash_FullMethodName            = "/doc_rpc.doc/ListTrash"
+	Doc_RestoreTrash_FullMethodName         = "/doc_rpc.doc/RestoreTrash"
+	Doc_PurgeTrash_FullMethodName           = "/doc_rpc.doc/PurgeTrash"
+	Doc_EmptyTrash_FullMethodName           = "/doc_rpc.doc/EmptyTrash"
+	Doc_SearchDocs_FullMethodName           = "/doc_rpc.doc/SearchDocs"
+	Doc_ListDocs_FullMethodName             = "/doc_rpc.doc/ListDocs"
+	Doc_RecordVisit_FullMethodName          = "/doc_rpc.doc/RecordVisit"
+	Doc_ListRecent_FullMethodName           = "/doc_rpc.doc/ListRecent"
+	Doc_SetFavorite_FullMethodName          = "/doc_rpc.doc/SetFavorite"
+	Doc_ListFavorites_FullMethodName        = "/doc_rpc.doc/ListFavorites"
+	Doc_ListTemplates_FullMethodName        = "/doc_rpc.doc/ListTemplates"
+	Doc_CreateTemplate_FullMethodName       = "/doc_rpc.doc/CreateTemplate"
+	Doc_InstantiateTemplate_FullMethodName  = "/doc_rpc.doc/InstantiateTemplate"
+	Doc_DeleteTemplate_FullMethodName       = "/doc_rpc.doc/DeleteTemplate"
+	Doc_ExportDoc_FullMethodName            = "/doc_rpc.doc/ExportDoc"
+	Doc_DuplicateDoc_FullMethodName         = "/doc_rpc.doc/DuplicateDoc"
+	Doc_SaveDocBlock_FullMethodName         = "/doc_rpc.doc/SaveDocBlock"
+	Doc_ListDocBlocks_FullMethodName        = "/doc_rpc.doc/ListDocBlocks"
+	Doc_DeleteDocBlock_FullMethodName       = "/doc_rpc.doc/DeleteDocBlock"
+	Doc_LabelRevision_FullMethodName        = "/doc_rpc.doc/LabelRevision"
+	Doc_DiffRevisions_FullMethodName        = "/doc_rpc.doc/DiffRevisions"
+	Doc_ListNotifications_FullMethodName    = "/doc_rpc.doc/ListNotifications"
+	Doc_MarkNotificationRead_FullMethodName = "/doc_rpc.doc/MarkNotificationRead"
+	Doc_ListAuditLogs_FullMethodName        = "/doc_rpc.doc/ListAuditLogs"
+	Doc_SetKnowledgeSync_FullMethodName     = "/doc_rpc.doc/SetKnowledgeSync"
+	Doc_ReindexDoc_FullMethodName           = "/doc_rpc.doc/ReindexDoc"
+	Doc_ListIndexOutbox_FullMethodName      = "/doc_rpc.doc/ListIndexOutbox"
+	Doc_AckIndexOutbox_FullMethodName       = "/doc_rpc.doc/AckIndexOutbox"
+	Doc_ListCollaborators_FullMethodName    = "/doc_rpc.doc/ListCollaborators"
+	Doc_ResolveRoomEpoch_FullMethodName     = "/doc_rpc.doc/ResolveRoomEpoch"
 )
 
 // DocClient is the client API for Doc service.
@@ -77,6 +115,44 @@ type DocClient interface {
 	RollbackRevision(ctx context.Context, in *RollbackRevisionReq, opts ...grpc.CallOption) (*RollbackRevisionRes, error)
 	ImportDoc(ctx context.Context, in *ImportDocReq, opts ...grpc.CallOption) (*ImportDocRes, error)
 	GetDocContent(ctx context.Context, in *GetDocContentReq, opts ...grpc.CallOption) (*GetDocContentRes, error)
+	CreateComment(ctx context.Context, in *CreateCommentReq, opts ...grpc.CallOption) (*CreateCommentRes, error)
+	ListComments(ctx context.Context, in *ListCommentsReq, opts ...grpc.CallOption) (*ListCommentsRes, error)
+	ResolveComment(ctx context.Context, in *ResolveCommentReq, opts ...grpc.CallOption) (*ResolveCommentRes, error)
+	DeleteComment(ctx context.Context, in *DeleteCommentReq, opts ...grpc.CallOption) (*DeleteCommentRes, error)
+	SetShareLink(ctx context.Context, in *SetShareLinkReq, opts ...grpc.CallOption) (*SetShareLinkRes, error)
+	GetShareLink(ctx context.Context, in *GetShareLinkReq, opts ...grpc.CallOption) (*GetShareLinkRes, error)
+	RevokeShareLink(ctx context.Context, in *RevokeShareLinkReq, opts ...grpc.CallOption) (*RevokeShareLinkRes, error)
+	ResolveShareLink(ctx context.Context, in *ResolveShareLinkReq, opts ...grpc.CallOption) (*ResolveShareLinkRes, error)
+	ListTrash(ctx context.Context, in *ListTrashReq, opts ...grpc.CallOption) (*ListTrashRes, error)
+	RestoreTrash(ctx context.Context, in *RestoreTrashReq, opts ...grpc.CallOption) (*RestoreTrashRes, error)
+	PurgeTrash(ctx context.Context, in *PurgeTrashReq, opts ...grpc.CallOption) (*PurgeTrashRes, error)
+	EmptyTrash(ctx context.Context, in *EmptyTrashReq, opts ...grpc.CallOption) (*EmptyTrashRes, error)
+	SearchDocs(ctx context.Context, in *SearchDocsReq, opts ...grpc.CallOption) (*SearchDocsRes, error)
+	ListDocs(ctx context.Context, in *ListDocsReq, opts ...grpc.CallOption) (*ListDocsRes, error)
+	RecordVisit(ctx context.Context, in *RecordVisitReq, opts ...grpc.CallOption) (*RecordVisitRes, error)
+	ListRecent(ctx context.Context, in *ListRecentReq, opts ...grpc.CallOption) (*ListRecentRes, error)
+	SetFavorite(ctx context.Context, in *SetFavoriteReq, opts ...grpc.CallOption) (*SetFavoriteRes, error)
+	ListFavorites(ctx context.Context, in *ListFavoritesReq, opts ...grpc.CallOption) (*ListFavoritesRes, error)
+	ListTemplates(ctx context.Context, in *ListTemplatesReq, opts ...grpc.CallOption) (*ListTemplatesRes, error)
+	CreateTemplate(ctx context.Context, in *CreateTemplateReq, opts ...grpc.CallOption) (*CreateTemplateRes, error)
+	InstantiateTemplate(ctx context.Context, in *InstantiateTemplateReq, opts ...grpc.CallOption) (*InstantiateTemplateRes, error)
+	DeleteTemplate(ctx context.Context, in *DeleteTemplateReq, opts ...grpc.CallOption) (*DeleteTemplateRes, error)
+	ExportDoc(ctx context.Context, in *ExportDocReq, opts ...grpc.CallOption) (*ExportDocRes, error)
+	DuplicateDoc(ctx context.Context, in *DuplicateDocReq, opts ...grpc.CallOption) (*DuplicateDocRes, error)
+	SaveDocBlock(ctx context.Context, in *SaveDocBlockReq, opts ...grpc.CallOption) (*SaveDocBlockRes, error)
+	ListDocBlocks(ctx context.Context, in *ListDocBlocksReq, opts ...grpc.CallOption) (*ListDocBlocksRes, error)
+	DeleteDocBlock(ctx context.Context, in *DeleteDocBlockReq, opts ...grpc.CallOption) (*DeleteDocBlockRes, error)
+	LabelRevision(ctx context.Context, in *LabelRevisionReq, opts ...grpc.CallOption) (*LabelRevisionRes, error)
+	DiffRevisions(ctx context.Context, in *DiffRevisionsReq, opts ...grpc.CallOption) (*DiffRevisionsRes, error)
+	ListNotifications(ctx context.Context, in *ListNotificationsReq, opts ...grpc.CallOption) (*ListNotificationsRes, error)
+	MarkNotificationRead(ctx context.Context, in *MarkNotificationReadReq, opts ...grpc.CallOption) (*MarkNotificationReadRes, error)
+	ListAuditLogs(ctx context.Context, in *ListAuditLogsReq, opts ...grpc.CallOption) (*ListAuditLogsRes, error)
+	SetKnowledgeSync(ctx context.Context, in *SetKnowledgeSyncReq, opts ...grpc.CallOption) (*SetKnowledgeSyncRes, error)
+	ReindexDoc(ctx context.Context, in *ReindexDocReq, opts ...grpc.CallOption) (*ReindexDocRes, error)
+	ListIndexOutbox(ctx context.Context, in *ListIndexOutboxReq, opts ...grpc.CallOption) (*ListIndexOutboxRes, error)
+	AckIndexOutbox(ctx context.Context, in *AckIndexOutboxReq, opts ...grpc.CallOption) (*AckIndexOutboxRes, error)
+	ListCollaborators(ctx context.Context, in *ListCollaboratorsReq, opts ...grpc.CallOption) (*ListCollaboratorsRes, error)
+	ResolveRoomEpoch(ctx context.Context, in *ResolveRoomEpochReq, opts ...grpc.CallOption) (*ResolveRoomEpochRes, error)
 }
 
 type docClient struct {
@@ -347,6 +423,386 @@ func (c *docClient) GetDocContent(ctx context.Context, in *GetDocContentReq, opt
 	return out, nil
 }
 
+func (c *docClient) CreateComment(ctx context.Context, in *CreateCommentReq, opts ...grpc.CallOption) (*CreateCommentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCommentRes)
+	err := c.cc.Invoke(ctx, Doc_CreateComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListComments(ctx context.Context, in *ListCommentsReq, opts ...grpc.CallOption) (*ListCommentsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCommentsRes)
+	err := c.cc.Invoke(ctx, Doc_ListComments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ResolveComment(ctx context.Context, in *ResolveCommentReq, opts ...grpc.CallOption) (*ResolveCommentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolveCommentRes)
+	err := c.cc.Invoke(ctx, Doc_ResolveComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) DeleteComment(ctx context.Context, in *DeleteCommentReq, opts ...grpc.CallOption) (*DeleteCommentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCommentRes)
+	err := c.cc.Invoke(ctx, Doc_DeleteComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) SetShareLink(ctx context.Context, in *SetShareLinkReq, opts ...grpc.CallOption) (*SetShareLinkRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetShareLinkRes)
+	err := c.cc.Invoke(ctx, Doc_SetShareLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) GetShareLink(ctx context.Context, in *GetShareLinkReq, opts ...grpc.CallOption) (*GetShareLinkRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetShareLinkRes)
+	err := c.cc.Invoke(ctx, Doc_GetShareLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) RevokeShareLink(ctx context.Context, in *RevokeShareLinkReq, opts ...grpc.CallOption) (*RevokeShareLinkRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeShareLinkRes)
+	err := c.cc.Invoke(ctx, Doc_RevokeShareLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ResolveShareLink(ctx context.Context, in *ResolveShareLinkReq, opts ...grpc.CallOption) (*ResolveShareLinkRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolveShareLinkRes)
+	err := c.cc.Invoke(ctx, Doc_ResolveShareLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListTrash(ctx context.Context, in *ListTrashReq, opts ...grpc.CallOption) (*ListTrashRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTrashRes)
+	err := c.cc.Invoke(ctx, Doc_ListTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) RestoreTrash(ctx context.Context, in *RestoreTrashReq, opts ...grpc.CallOption) (*RestoreTrashRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RestoreTrashRes)
+	err := c.cc.Invoke(ctx, Doc_RestoreTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) PurgeTrash(ctx context.Context, in *PurgeTrashReq, opts ...grpc.CallOption) (*PurgeTrashRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PurgeTrashRes)
+	err := c.cc.Invoke(ctx, Doc_PurgeTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) EmptyTrash(ctx context.Context, in *EmptyTrashReq, opts ...grpc.CallOption) (*EmptyTrashRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyTrashRes)
+	err := c.cc.Invoke(ctx, Doc_EmptyTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) SearchDocs(ctx context.Context, in *SearchDocsReq, opts ...grpc.CallOption) (*SearchDocsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchDocsRes)
+	err := c.cc.Invoke(ctx, Doc_SearchDocs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListDocs(ctx context.Context, in *ListDocsReq, opts ...grpc.CallOption) (*ListDocsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDocsRes)
+	err := c.cc.Invoke(ctx, Doc_ListDocs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) RecordVisit(ctx context.Context, in *RecordVisitReq, opts ...grpc.CallOption) (*RecordVisitRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RecordVisitRes)
+	err := c.cc.Invoke(ctx, Doc_RecordVisit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListRecent(ctx context.Context, in *ListRecentReq, opts ...grpc.CallOption) (*ListRecentRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListRecentRes)
+	err := c.cc.Invoke(ctx, Doc_ListRecent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) SetFavorite(ctx context.Context, in *SetFavoriteReq, opts ...grpc.CallOption) (*SetFavoriteRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetFavoriteRes)
+	err := c.cc.Invoke(ctx, Doc_SetFavorite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListFavorites(ctx context.Context, in *ListFavoritesReq, opts ...grpc.CallOption) (*ListFavoritesRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListFavoritesRes)
+	err := c.cc.Invoke(ctx, Doc_ListFavorites_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListTemplates(ctx context.Context, in *ListTemplatesReq, opts ...grpc.CallOption) (*ListTemplatesRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTemplatesRes)
+	err := c.cc.Invoke(ctx, Doc_ListTemplates_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) CreateTemplate(ctx context.Context, in *CreateTemplateReq, opts ...grpc.CallOption) (*CreateTemplateRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateTemplateRes)
+	err := c.cc.Invoke(ctx, Doc_CreateTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) InstantiateTemplate(ctx context.Context, in *InstantiateTemplateReq, opts ...grpc.CallOption) (*InstantiateTemplateRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InstantiateTemplateRes)
+	err := c.cc.Invoke(ctx, Doc_InstantiateTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) DeleteTemplate(ctx context.Context, in *DeleteTemplateReq, opts ...grpc.CallOption) (*DeleteTemplateRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTemplateRes)
+	err := c.cc.Invoke(ctx, Doc_DeleteTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ExportDoc(ctx context.Context, in *ExportDocReq, opts ...grpc.CallOption) (*ExportDocRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExportDocRes)
+	err := c.cc.Invoke(ctx, Doc_ExportDoc_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) DuplicateDoc(ctx context.Context, in *DuplicateDocReq, opts ...grpc.CallOption) (*DuplicateDocRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DuplicateDocRes)
+	err := c.cc.Invoke(ctx, Doc_DuplicateDoc_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) SaveDocBlock(ctx context.Context, in *SaveDocBlockReq, opts ...grpc.CallOption) (*SaveDocBlockRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveDocBlockRes)
+	err := c.cc.Invoke(ctx, Doc_SaveDocBlock_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListDocBlocks(ctx context.Context, in *ListDocBlocksReq, opts ...grpc.CallOption) (*ListDocBlocksRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDocBlocksRes)
+	err := c.cc.Invoke(ctx, Doc_ListDocBlocks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) DeleteDocBlock(ctx context.Context, in *DeleteDocBlockReq, opts ...grpc.CallOption) (*DeleteDocBlockRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDocBlockRes)
+	err := c.cc.Invoke(ctx, Doc_DeleteDocBlock_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) LabelRevision(ctx context.Context, in *LabelRevisionReq, opts ...grpc.CallOption) (*LabelRevisionRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LabelRevisionRes)
+	err := c.cc.Invoke(ctx, Doc_LabelRevision_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) DiffRevisions(ctx context.Context, in *DiffRevisionsReq, opts ...grpc.CallOption) (*DiffRevisionsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DiffRevisionsRes)
+	err := c.cc.Invoke(ctx, Doc_DiffRevisions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListNotifications(ctx context.Context, in *ListNotificationsReq, opts ...grpc.CallOption) (*ListNotificationsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNotificationsRes)
+	err := c.cc.Invoke(ctx, Doc_ListNotifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) MarkNotificationRead(ctx context.Context, in *MarkNotificationReadReq, opts ...grpc.CallOption) (*MarkNotificationReadRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MarkNotificationReadRes)
+	err := c.cc.Invoke(ctx, Doc_MarkNotificationRead_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListAuditLogs(ctx context.Context, in *ListAuditLogsReq, opts ...grpc.CallOption) (*ListAuditLogsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAuditLogsRes)
+	err := c.cc.Invoke(ctx, Doc_ListAuditLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) SetKnowledgeSync(ctx context.Context, in *SetKnowledgeSyncReq, opts ...grpc.CallOption) (*SetKnowledgeSyncRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetKnowledgeSyncRes)
+	err := c.cc.Invoke(ctx, Doc_SetKnowledgeSync_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ReindexDoc(ctx context.Context, in *ReindexDocReq, opts ...grpc.CallOption) (*ReindexDocRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReindexDocRes)
+	err := c.cc.Invoke(ctx, Doc_ReindexDoc_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListIndexOutbox(ctx context.Context, in *ListIndexOutboxReq, opts ...grpc.CallOption) (*ListIndexOutboxRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListIndexOutboxRes)
+	err := c.cc.Invoke(ctx, Doc_ListIndexOutbox_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) AckIndexOutbox(ctx context.Context, in *AckIndexOutboxReq, opts ...grpc.CallOption) (*AckIndexOutboxRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AckIndexOutboxRes)
+	err := c.cc.Invoke(ctx, Doc_AckIndexOutbox_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ListCollaborators(ctx context.Context, in *ListCollaboratorsReq, opts ...grpc.CallOption) (*ListCollaboratorsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCollaboratorsRes)
+	err := c.cc.Invoke(ctx, Doc_ListCollaborators_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docClient) ResolveRoomEpoch(ctx context.Context, in *ResolveRoomEpochReq, opts ...grpc.CallOption) (*ResolveRoomEpochRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolveRoomEpochRes)
+	err := c.cc.Invoke(ctx, Doc_ResolveRoomEpoch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DocServer is the server API for Doc service.
 // All implementations must embed UnimplementedDocServer
 // for forward compatibility.
@@ -377,6 +833,44 @@ type DocServer interface {
 	RollbackRevision(context.Context, *RollbackRevisionReq) (*RollbackRevisionRes, error)
 	ImportDoc(context.Context, *ImportDocReq) (*ImportDocRes, error)
 	GetDocContent(context.Context, *GetDocContentReq) (*GetDocContentRes, error)
+	CreateComment(context.Context, *CreateCommentReq) (*CreateCommentRes, error)
+	ListComments(context.Context, *ListCommentsReq) (*ListCommentsRes, error)
+	ResolveComment(context.Context, *ResolveCommentReq) (*ResolveCommentRes, error)
+	DeleteComment(context.Context, *DeleteCommentReq) (*DeleteCommentRes, error)
+	SetShareLink(context.Context, *SetShareLinkReq) (*SetShareLinkRes, error)
+	GetShareLink(context.Context, *GetShareLinkReq) (*GetShareLinkRes, error)
+	RevokeShareLink(context.Context, *RevokeShareLinkReq) (*RevokeShareLinkRes, error)
+	ResolveShareLink(context.Context, *ResolveShareLinkReq) (*ResolveShareLinkRes, error)
+	ListTrash(context.Context, *ListTrashReq) (*ListTrashRes, error)
+	RestoreTrash(context.Context, *RestoreTrashReq) (*RestoreTrashRes, error)
+	PurgeTrash(context.Context, *PurgeTrashReq) (*PurgeTrashRes, error)
+	EmptyTrash(context.Context, *EmptyTrashReq) (*EmptyTrashRes, error)
+	SearchDocs(context.Context, *SearchDocsReq) (*SearchDocsRes, error)
+	ListDocs(context.Context, *ListDocsReq) (*ListDocsRes, error)
+	RecordVisit(context.Context, *RecordVisitReq) (*RecordVisitRes, error)
+	ListRecent(context.Context, *ListRecentReq) (*ListRecentRes, error)
+	SetFavorite(context.Context, *SetFavoriteReq) (*SetFavoriteRes, error)
+	ListFavorites(context.Context, *ListFavoritesReq) (*ListFavoritesRes, error)
+	ListTemplates(context.Context, *ListTemplatesReq) (*ListTemplatesRes, error)
+	CreateTemplate(context.Context, *CreateTemplateReq) (*CreateTemplateRes, error)
+	InstantiateTemplate(context.Context, *InstantiateTemplateReq) (*InstantiateTemplateRes, error)
+	DeleteTemplate(context.Context, *DeleteTemplateReq) (*DeleteTemplateRes, error)
+	ExportDoc(context.Context, *ExportDocReq) (*ExportDocRes, error)
+	DuplicateDoc(context.Context, *DuplicateDocReq) (*DuplicateDocRes, error)
+	SaveDocBlock(context.Context, *SaveDocBlockReq) (*SaveDocBlockRes, error)
+	ListDocBlocks(context.Context, *ListDocBlocksReq) (*ListDocBlocksRes, error)
+	DeleteDocBlock(context.Context, *DeleteDocBlockReq) (*DeleteDocBlockRes, error)
+	LabelRevision(context.Context, *LabelRevisionReq) (*LabelRevisionRes, error)
+	DiffRevisions(context.Context, *DiffRevisionsReq) (*DiffRevisionsRes, error)
+	ListNotifications(context.Context, *ListNotificationsReq) (*ListNotificationsRes, error)
+	MarkNotificationRead(context.Context, *MarkNotificationReadReq) (*MarkNotificationReadRes, error)
+	ListAuditLogs(context.Context, *ListAuditLogsReq) (*ListAuditLogsRes, error)
+	SetKnowledgeSync(context.Context, *SetKnowledgeSyncReq) (*SetKnowledgeSyncRes, error)
+	ReindexDoc(context.Context, *ReindexDocReq) (*ReindexDocRes, error)
+	ListIndexOutbox(context.Context, *ListIndexOutboxReq) (*ListIndexOutboxRes, error)
+	AckIndexOutbox(context.Context, *AckIndexOutboxReq) (*AckIndexOutboxRes, error)
+	ListCollaborators(context.Context, *ListCollaboratorsReq) (*ListCollaboratorsRes, error)
+	ResolveRoomEpoch(context.Context, *ResolveRoomEpochReq) (*ResolveRoomEpochRes, error)
 	mustEmbedUnimplementedDocServer()
 }
 
@@ -464,6 +958,120 @@ func (UnimplementedDocServer) ImportDoc(context.Context, *ImportDocReq) (*Import
 }
 func (UnimplementedDocServer) GetDocContent(context.Context, *GetDocContentReq) (*GetDocContentRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDocContent not implemented")
+}
+func (UnimplementedDocServer) CreateComment(context.Context, *CreateCommentReq) (*CreateCommentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateComment not implemented")
+}
+func (UnimplementedDocServer) ListComments(context.Context, *ListCommentsReq) (*ListCommentsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListComments not implemented")
+}
+func (UnimplementedDocServer) ResolveComment(context.Context, *ResolveCommentReq) (*ResolveCommentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResolveComment not implemented")
+}
+func (UnimplementedDocServer) DeleteComment(context.Context, *DeleteCommentReq) (*DeleteCommentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
+}
+func (UnimplementedDocServer) SetShareLink(context.Context, *SetShareLinkReq) (*SetShareLinkRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetShareLink not implemented")
+}
+func (UnimplementedDocServer) GetShareLink(context.Context, *GetShareLinkReq) (*GetShareLinkRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetShareLink not implemented")
+}
+func (UnimplementedDocServer) RevokeShareLink(context.Context, *RevokeShareLinkReq) (*RevokeShareLinkRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeShareLink not implemented")
+}
+func (UnimplementedDocServer) ResolveShareLink(context.Context, *ResolveShareLinkReq) (*ResolveShareLinkRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResolveShareLink not implemented")
+}
+func (UnimplementedDocServer) ListTrash(context.Context, *ListTrashReq) (*ListTrashRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTrash not implemented")
+}
+func (UnimplementedDocServer) RestoreTrash(context.Context, *RestoreTrashReq) (*RestoreTrashRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RestoreTrash not implemented")
+}
+func (UnimplementedDocServer) PurgeTrash(context.Context, *PurgeTrashReq) (*PurgeTrashRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PurgeTrash not implemented")
+}
+func (UnimplementedDocServer) EmptyTrash(context.Context, *EmptyTrashReq) (*EmptyTrashRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EmptyTrash not implemented")
+}
+func (UnimplementedDocServer) SearchDocs(context.Context, *SearchDocsReq) (*SearchDocsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchDocs not implemented")
+}
+func (UnimplementedDocServer) ListDocs(context.Context, *ListDocsReq) (*ListDocsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDocs not implemented")
+}
+func (UnimplementedDocServer) RecordVisit(context.Context, *RecordVisitReq) (*RecordVisitRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecordVisit not implemented")
+}
+func (UnimplementedDocServer) ListRecent(context.Context, *ListRecentReq) (*ListRecentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRecent not implemented")
+}
+func (UnimplementedDocServer) SetFavorite(context.Context, *SetFavoriteReq) (*SetFavoriteRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetFavorite not implemented")
+}
+func (UnimplementedDocServer) ListFavorites(context.Context, *ListFavoritesReq) (*ListFavoritesRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFavorites not implemented")
+}
+func (UnimplementedDocServer) ListTemplates(context.Context, *ListTemplatesReq) (*ListTemplatesRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTemplates not implemented")
+}
+func (UnimplementedDocServer) CreateTemplate(context.Context, *CreateTemplateReq) (*CreateTemplateRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTemplate not implemented")
+}
+func (UnimplementedDocServer) InstantiateTemplate(context.Context, *InstantiateTemplateReq) (*InstantiateTemplateRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InstantiateTemplate not implemented")
+}
+func (UnimplementedDocServer) DeleteTemplate(context.Context, *DeleteTemplateReq) (*DeleteTemplateRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTemplate not implemented")
+}
+func (UnimplementedDocServer) ExportDoc(context.Context, *ExportDocReq) (*ExportDocRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExportDoc not implemented")
+}
+func (UnimplementedDocServer) DuplicateDoc(context.Context, *DuplicateDocReq) (*DuplicateDocRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DuplicateDoc not implemented")
+}
+func (UnimplementedDocServer) SaveDocBlock(context.Context, *SaveDocBlockReq) (*SaveDocBlockRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveDocBlock not implemented")
+}
+func (UnimplementedDocServer) ListDocBlocks(context.Context, *ListDocBlocksReq) (*ListDocBlocksRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDocBlocks not implemented")
+}
+func (UnimplementedDocServer) DeleteDocBlock(context.Context, *DeleteDocBlockReq) (*DeleteDocBlockRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDocBlock not implemented")
+}
+func (UnimplementedDocServer) LabelRevision(context.Context, *LabelRevisionReq) (*LabelRevisionRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LabelRevision not implemented")
+}
+func (UnimplementedDocServer) DiffRevisions(context.Context, *DiffRevisionsReq) (*DiffRevisionsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DiffRevisions not implemented")
+}
+func (UnimplementedDocServer) ListNotifications(context.Context, *ListNotificationsReq) (*ListNotificationsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNotifications not implemented")
+}
+func (UnimplementedDocServer) MarkNotificationRead(context.Context, *MarkNotificationReadReq) (*MarkNotificationReadRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarkNotificationRead not implemented")
+}
+func (UnimplementedDocServer) ListAuditLogs(context.Context, *ListAuditLogsReq) (*ListAuditLogsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAuditLogs not implemented")
+}
+func (UnimplementedDocServer) SetKnowledgeSync(context.Context, *SetKnowledgeSyncReq) (*SetKnowledgeSyncRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetKnowledgeSync not implemented")
+}
+func (UnimplementedDocServer) ReindexDoc(context.Context, *ReindexDocReq) (*ReindexDocRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReindexDoc not implemented")
+}
+func (UnimplementedDocServer) ListIndexOutbox(context.Context, *ListIndexOutboxReq) (*ListIndexOutboxRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListIndexOutbox not implemented")
+}
+func (UnimplementedDocServer) AckIndexOutbox(context.Context, *AckIndexOutboxReq) (*AckIndexOutboxRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AckIndexOutbox not implemented")
+}
+func (UnimplementedDocServer) ListCollaborators(context.Context, *ListCollaboratorsReq) (*ListCollaboratorsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCollaborators not implemented")
+}
+func (UnimplementedDocServer) ResolveRoomEpoch(context.Context, *ResolveRoomEpochReq) (*ResolveRoomEpochRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResolveRoomEpoch not implemented")
 }
 func (UnimplementedDocServer) mustEmbedUnimplementedDocServer() {}
 func (UnimplementedDocServer) testEmbeddedByValue()             {}
@@ -954,6 +1562,690 @@ func _Doc_GetDocContent_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Doc_CreateComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCommentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).CreateComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_CreateComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).CreateComment(ctx, req.(*CreateCommentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCommentsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListComments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListComments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListComments(ctx, req.(*ListCommentsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ResolveComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolveCommentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ResolveComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ResolveComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ResolveComment(ctx, req.(*ResolveCommentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_DeleteComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCommentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).DeleteComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_DeleteComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).DeleteComment(ctx, req.(*DeleteCommentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_SetShareLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetShareLinkReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).SetShareLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_SetShareLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).SetShareLink(ctx, req.(*SetShareLinkReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_GetShareLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetShareLinkReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).GetShareLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_GetShareLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).GetShareLink(ctx, req.(*GetShareLinkReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_RevokeShareLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeShareLinkReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).RevokeShareLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_RevokeShareLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).RevokeShareLink(ctx, req.(*RevokeShareLinkReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ResolveShareLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolveShareLinkReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ResolveShareLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ResolveShareLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ResolveShareLink(ctx, req.(*ResolveShareLinkReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTrashReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListTrash(ctx, req.(*ListTrashReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_RestoreTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RestoreTrashReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).RestoreTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_RestoreTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).RestoreTrash(ctx, req.(*RestoreTrashReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_PurgeTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PurgeTrashReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).PurgeTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_PurgeTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).PurgeTrash(ctx, req.(*PurgeTrashReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_EmptyTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyTrashReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).EmptyTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_EmptyTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).EmptyTrash(ctx, req.(*EmptyTrashReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_SearchDocs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchDocsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).SearchDocs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_SearchDocs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).SearchDocs(ctx, req.(*SearchDocsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListDocs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDocsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListDocs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListDocs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListDocs(ctx, req.(*ListDocsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_RecordVisit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordVisitReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).RecordVisit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_RecordVisit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).RecordVisit(ctx, req.(*RecordVisitReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListRecent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRecentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListRecent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListRecent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListRecent(ctx, req.(*ListRecentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_SetFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetFavoriteReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).SetFavorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_SetFavorite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).SetFavorite(ctx, req.(*SetFavoriteReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListFavorites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFavoritesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListFavorites(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListFavorites_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListFavorites(ctx, req.(*ListFavoritesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListTemplates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTemplatesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListTemplates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListTemplates_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListTemplates(ctx, req.(*ListTemplatesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_CreateTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTemplateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).CreateTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_CreateTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).CreateTemplate(ctx, req.(*CreateTemplateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_InstantiateTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InstantiateTemplateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).InstantiateTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_InstantiateTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).InstantiateTemplate(ctx, req.(*InstantiateTemplateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_DeleteTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTemplateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).DeleteTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_DeleteTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).DeleteTemplate(ctx, req.(*DeleteTemplateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ExportDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportDocReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ExportDoc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ExportDoc_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ExportDoc(ctx, req.(*ExportDocReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_DuplicateDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DuplicateDocReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).DuplicateDoc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_DuplicateDoc_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).DuplicateDoc(ctx, req.(*DuplicateDocReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_SaveDocBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveDocBlockReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).SaveDocBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_SaveDocBlock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).SaveDocBlock(ctx, req.(*SaveDocBlockReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListDocBlocks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDocBlocksReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListDocBlocks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListDocBlocks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListDocBlocks(ctx, req.(*ListDocBlocksReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_DeleteDocBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDocBlockReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).DeleteDocBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_DeleteDocBlock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).DeleteDocBlock(ctx, req.(*DeleteDocBlockReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_LabelRevision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LabelRevisionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).LabelRevision(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_LabelRevision_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).LabelRevision(ctx, req.(*LabelRevisionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_DiffRevisions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DiffRevisionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).DiffRevisions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_DiffRevisions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).DiffRevisions(ctx, req.(*DiffRevisionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNotificationsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListNotifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListNotifications(ctx, req.(*ListNotificationsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_MarkNotificationRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkNotificationReadReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).MarkNotificationRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_MarkNotificationRead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).MarkNotificationRead(ctx, req.(*MarkNotificationReadReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListAuditLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAuditLogsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListAuditLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListAuditLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListAuditLogs(ctx, req.(*ListAuditLogsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_SetKnowledgeSync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetKnowledgeSyncReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).SetKnowledgeSync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_SetKnowledgeSync_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).SetKnowledgeSync(ctx, req.(*SetKnowledgeSyncReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ReindexDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReindexDocReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ReindexDoc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ReindexDoc_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ReindexDoc(ctx, req.(*ReindexDocReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListIndexOutbox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListIndexOutboxReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListIndexOutbox(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListIndexOutbox_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListIndexOutbox(ctx, req.(*ListIndexOutboxReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_AckIndexOutbox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AckIndexOutboxReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).AckIndexOutbox(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_AckIndexOutbox_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).AckIndexOutbox(ctx, req.(*AckIndexOutboxReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ListCollaborators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCollaboratorsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ListCollaborators(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ListCollaborators_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ListCollaborators(ctx, req.(*ListCollaboratorsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Doc_ResolveRoomEpoch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolveRoomEpochReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServer).ResolveRoomEpoch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Doc_ResolveRoomEpoch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServer).ResolveRoomEpoch(ctx, req.(*ResolveRoomEpochReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Doc_ServiceDesc is the grpc.ServiceDesc for Doc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1064,6 +2356,158 @@ var Doc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDocContent",
 			Handler:    _Doc_GetDocContent_Handler,
+		},
+		{
+			MethodName: "CreateComment",
+			Handler:    _Doc_CreateComment_Handler,
+		},
+		{
+			MethodName: "ListComments",
+			Handler:    _Doc_ListComments_Handler,
+		},
+		{
+			MethodName: "ResolveComment",
+			Handler:    _Doc_ResolveComment_Handler,
+		},
+		{
+			MethodName: "DeleteComment",
+			Handler:    _Doc_DeleteComment_Handler,
+		},
+		{
+			MethodName: "SetShareLink",
+			Handler:    _Doc_SetShareLink_Handler,
+		},
+		{
+			MethodName: "GetShareLink",
+			Handler:    _Doc_GetShareLink_Handler,
+		},
+		{
+			MethodName: "RevokeShareLink",
+			Handler:    _Doc_RevokeShareLink_Handler,
+		},
+		{
+			MethodName: "ResolveShareLink",
+			Handler:    _Doc_ResolveShareLink_Handler,
+		},
+		{
+			MethodName: "ListTrash",
+			Handler:    _Doc_ListTrash_Handler,
+		},
+		{
+			MethodName: "RestoreTrash",
+			Handler:    _Doc_RestoreTrash_Handler,
+		},
+		{
+			MethodName: "PurgeTrash",
+			Handler:    _Doc_PurgeTrash_Handler,
+		},
+		{
+			MethodName: "EmptyTrash",
+			Handler:    _Doc_EmptyTrash_Handler,
+		},
+		{
+			MethodName: "SearchDocs",
+			Handler:    _Doc_SearchDocs_Handler,
+		},
+		{
+			MethodName: "ListDocs",
+			Handler:    _Doc_ListDocs_Handler,
+		},
+		{
+			MethodName: "RecordVisit",
+			Handler:    _Doc_RecordVisit_Handler,
+		},
+		{
+			MethodName: "ListRecent",
+			Handler:    _Doc_ListRecent_Handler,
+		},
+		{
+			MethodName: "SetFavorite",
+			Handler:    _Doc_SetFavorite_Handler,
+		},
+		{
+			MethodName: "ListFavorites",
+			Handler:    _Doc_ListFavorites_Handler,
+		},
+		{
+			MethodName: "ListTemplates",
+			Handler:    _Doc_ListTemplates_Handler,
+		},
+		{
+			MethodName: "CreateTemplate",
+			Handler:    _Doc_CreateTemplate_Handler,
+		},
+		{
+			MethodName: "InstantiateTemplate",
+			Handler:    _Doc_InstantiateTemplate_Handler,
+		},
+		{
+			MethodName: "DeleteTemplate",
+			Handler:    _Doc_DeleteTemplate_Handler,
+		},
+		{
+			MethodName: "ExportDoc",
+			Handler:    _Doc_ExportDoc_Handler,
+		},
+		{
+			MethodName: "DuplicateDoc",
+			Handler:    _Doc_DuplicateDoc_Handler,
+		},
+		{
+			MethodName: "SaveDocBlock",
+			Handler:    _Doc_SaveDocBlock_Handler,
+		},
+		{
+			MethodName: "ListDocBlocks",
+			Handler:    _Doc_ListDocBlocks_Handler,
+		},
+		{
+			MethodName: "DeleteDocBlock",
+			Handler:    _Doc_DeleteDocBlock_Handler,
+		},
+		{
+			MethodName: "LabelRevision",
+			Handler:    _Doc_LabelRevision_Handler,
+		},
+		{
+			MethodName: "DiffRevisions",
+			Handler:    _Doc_DiffRevisions_Handler,
+		},
+		{
+			MethodName: "ListNotifications",
+			Handler:    _Doc_ListNotifications_Handler,
+		},
+		{
+			MethodName: "MarkNotificationRead",
+			Handler:    _Doc_MarkNotificationRead_Handler,
+		},
+		{
+			MethodName: "ListAuditLogs",
+			Handler:    _Doc_ListAuditLogs_Handler,
+		},
+		{
+			MethodName: "SetKnowledgeSync",
+			Handler:    _Doc_SetKnowledgeSync_Handler,
+		},
+		{
+			MethodName: "ReindexDoc",
+			Handler:    _Doc_ReindexDoc_Handler,
+		},
+		{
+			MethodName: "ListIndexOutbox",
+			Handler:    _Doc_ListIndexOutbox_Handler,
+		},
+		{
+			MethodName: "AckIndexOutbox",
+			Handler:    _Doc_AckIndexOutbox_Handler,
+		},
+		{
+			MethodName: "ListCollaborators",
+			Handler:    _Doc_ListCollaborators_Handler,
+		},
+		{
+			MethodName: "ResolveRoomEpoch",
+			Handler:    _Doc_ResolveRoomEpoch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

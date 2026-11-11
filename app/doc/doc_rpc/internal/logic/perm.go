@@ -40,8 +40,26 @@ func resolveSpaceRole(db *gorm.DB, space *doc_models.DocSpace, userID string) (s
 	return maxRole(role, exp), nil
 }
 
-// resolveDocRole 计算用户对文档的有效角色：文档显式授权 与 所属空间授权 取高者。
+// resolveDocRole 计算用户对文档的有效角色：
+// 文档归属人 / 空间归属人 / 文档显式授权 / 空间显式授权 四者取高者。
+// 归属人继承是必须的：创建者默认不写 doc_permissions 行，若不继承会出现「建完自己读不了」。
 func resolveDocRole(db *gorm.DB, spaceID, docID, userID string) (string, error) {
+	if trim(userID) == "" {
+		return "", nil
+	}
+	role := ""
+
+	var doc doc_models.DocDocument
+	if err := db.Select("owner_user_id").Where("doc_id = ?", docID).First(&doc).Error; err == nil &&
+		trim(doc.OwnerUserID) == trim(userID) {
+		role = roleOwner
+	}
+	var space doc_models.DocSpace
+	if err := db.Select("owner_user_id").Where("space_id = ?", spaceID).First(&space).Error; err == nil &&
+		trim(space.OwnerUserID) == trim(userID) {
+		role = maxRole(role, roleOwner)
+	}
+
 	docRole, err := explicitRole(db, "doc", docID, userID)
 	if err != nil {
 		return "", err
@@ -50,7 +68,7 @@ func resolveDocRole(db *gorm.DB, spaceID, docID, userID string) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	return maxRole(docRole, spaceRole), nil
+	return maxRole(maxRole(role, docRole), spaceRole), nil
 }
 
 // loadDoc 取未删文档行。

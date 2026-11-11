@@ -10,6 +10,8 @@ import (
 
 	"beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+
+	"gorm.io/gorm"
 )
 
 type DeleteDocLogic struct {
@@ -39,13 +41,26 @@ func (l *DeleteDocLogic) DeleteDoc(in *doc_rpc.DeleteDocReq) (*doc_rpc.DeleteDoc
 		return nil, errNoPermission
 	}
 
-	if err := l.svcCtx.DB.Model(&doc_models.DocDocument{}).Where("doc_id = ?", doc.DocID).Update("deleted_at", time.Now()).Error; err != nil {
+	now := time.Now()
+	if err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&doc_models.DocDocument{}).Where("doc_id = ?", doc.DocID).
+			Update("deleted_at", now).Error; err != nil {
+			return err
+		}
+		// 关联节点一并软删。
+		if doc.NodeID != "" {
+			if err := tx.Model(&doc_models.DocNode{}).Where("node_id = ?", doc.NodeID).
+				Update("deleted_at", now).Error; err != nil {
+				return err
+			}
+		}
+		addTrash(tx, "doc", doc.DocID, doc.Title, doc.SpaceID, doc.NodeID, in.OperatorUserId, "")
+		auditJSON(tx, in.OperatorUserId, "doc.delete", "doc", doc.DocID,
+			map[string]any{"title": doc.Title, "spaceId": doc.SpaceID})
+		return nil
+	}); err != nil {
 		l.logger.Error(model.LogMsg{Text: "删除文档失败", Data: err})
 		return nil, err
-	}
-	// 关联节点一并软删。
-	if doc.NodeID != "" {
-		_ = l.svcCtx.DB.Model(&doc_models.DocNode{}).Where("node_id = ?", doc.NodeID).Update("deleted_at", time.Now()).Error
 	}
 
 	return &doc_rpc.DeleteDocRes{}, nil

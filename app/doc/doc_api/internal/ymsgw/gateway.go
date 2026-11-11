@@ -58,7 +58,7 @@ func New(c config.Config, doc doccli.Doc, rdbV6 *redis.Client, rdbV9 *goredis.Cl
 }
 
 // ServeHTTP 处理 WebSocket 升级及后续 sync/awareness 帧。调用方需先把 r.URL.Path 置为
-// "/"+docId，使 ygo 以 docId 作为房间名。
+// "/"+(docId@epoch)，使 ygo 以带纪元的房间名加载/持久化对应版本的 CRDT 状态。
 func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.srv.ServeHTTP(w, r)
 }

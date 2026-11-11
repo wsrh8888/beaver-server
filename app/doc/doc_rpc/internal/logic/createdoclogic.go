@@ -9,6 +9,8 @@ import (
 
 	"beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+
+	"gorm.io/gorm"
 )
 
 type CreateDocLogic struct {
@@ -47,20 +49,43 @@ func (l *CreateDocLogic) CreateDoc(in *doc_rpc.CreateDocReq) (*doc_rpc.CreateDoc
 		contentJSON = skeletonContentJSON
 	}
 
+	docType := trim(in.DocType)
+	if docType == "" {
+		docType = "doc"
+	}
+	contentText := extractTextFromJSON(contentJSON)
+
 	docID := genID("doc")
 	row := doc_models.DocDocument{
-		DocID:       docID,
-		NodeID:      trim(in.NodeId),
-		SpaceID:     space.SpaceID,
-		Title:       title,
-		ContentJSON: contentJSON,
-		Version:     1,
-		OwnerUserID: trim(in.OwnerUserId),
-		Status:      1,
+		DocID:         docID,
+		NodeID:        trim(in.NodeId),
+		SpaceID:       space.SpaceID,
+		Title:         title,
+		ContentJSON:   contentJSON,
+		ContentText:   contentText,
+		ContentDigest: sha256hex(contentText),
+		Version:       1,
+		Epoch:         1,
+		DocType:       docType,
+		Icon:          trim(in.Icon),
+		Cover:         trim(in.Cover),
+		RagEnabled:    in.RagEnabled,
+		OwnerUserID:   trim(in.OwnerUserId),
+		Status:        1,
 	}
-	row.ContentDigest = sha256hex(row.ContentText)
 
-	if err := l.svcCtx.DB.Create(&row).Error; err != nil {
+	if err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&row).Error; err != nil {
+			return err
+		}
+		if row.RagEnabled {
+			enqueueIndex(tx, docID, row.Version, row.ContentDigest)
+		}
+		auditJSON(tx, in.OwnerUserId, "doc.create", "doc", docID, map[string]any{
+			"title": title, "docType": docType, "spaceId": space.SpaceID,
+		})
+		return nil
+	}); err != nil {
 		l.logger.Error(model.LogMsg{Text: "创建文档失败", Data: err})
 		return nil, err
 	}

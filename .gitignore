@@ -11,3 +11,8 @@ scripts/stress/accounts.json
 scripts/stress/friends.json
 scripts/stress/**/report.json
 scripts/stress/data/
+
+.gen_doc_api_new
+.gen_doc_rpc_new
+.gen_doc_api_tmp
+.gen_doc_tmp

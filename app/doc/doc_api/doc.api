@@ -140,6 +140,10 @@ type (
 		NodeId      string `json:"nodeId,optional"`
 		Title       string `json:"title"`
 		ContentJson string `json:"contentJson,optional"`
+		DocType     string `json:"docType,optional"`
+		Icon        string `json:"icon,optional"`
+		Cover       string `json:"cover,optional"`
+		RagEnabled  bool   `json:"ragEnabled,optional"`
 	}
 	CreateDocRes {
 		DocId string `json:"docId"`
@@ -152,7 +156,13 @@ type DocItem {
 	SpaceId      string `json:"spaceId"`
 	Title        string `json:"title"`
 	ContentJson  string `json:"contentJson"`
+	ContentText  string `json:"contentText"`
 	Version      int    `json:"version"`
+	Epoch        int    `json:"epoch"`
+	DocType      string `json:"docType"`
+	Icon         string `json:"icon"`
+	Cover        string `json:"cover"`
+	RagEnabled   bool   `json:"ragEnabled"`
 	OwnerUserId  string `json:"ownerUserId"`
 	LastEditedBy string `json:"lastEditedBy"`
 	Status       int    `json:"status"`
@@ -172,10 +182,15 @@ type (
 
 type (
 	UpdateDocMetaReq {
-		UserId     string `header:"Beaver-User-Id"`
-		DocId      string `json:"docId"`
-		Title      string `json:"title,optional"`
-		Status     int    `json:"status,optional"`
+		UserId        string `header:"Beaver-User-Id"`
+		DocId         string `json:"docId"`
+		Title         string `json:"title,optional"`
+		Status        int    `json:"status,optional"`
+		Icon          string `json:"icon,optional"`
+		Cover         string `json:"cover,optional"`
+		DocType       string `json:"docType,optional"`
+		RagEnabled    bool   `json:"ragEnabled,optional"`
+		RagEnabledSet bool   `json:"ragEnabledSet,optional"`
 	}
 	UpdateDocMetaRes  {}
 )
@@ -205,11 +220,13 @@ type (
 	GetDocSyncStateReq {
 		UserId string `header:"Beaver-User-Id"`
 		DocId  string `json:"docId"`
+		Epoch  int    `json:"epoch,optional"`
 	}
 	GetDocSyncStateRes {
 		Snapshot []byte   `json:"snapshot"`
 		Updates  [][]byte `json:"updates"`
 		Version  int      `json:"version"`
+		Epoch    int      `json:"epoch"`
 	}
 )
 
@@ -309,6 +326,7 @@ type (
 	}
 	RollbackRevisionRes {
 		Version int `json:"version"`
+		Epoch   int `json:"epoch"`
 	}
 )
 
@@ -340,8 +358,474 @@ type (
 		Token    string `form:"token"`             // 用户 token（Beaver JWT），升级前校验
 		Platform string `form:"platform,optional"` // 平台类型，用于登录态槽位校验
 		DeviceID string `form:"deviceId,optional"` // 设备 GUID，设备指纹校验
+		Epoch    int    `form:"epoch,optional"`    // 客户端缓存的协同纪元；服务端按 docId@epoch 校验，过期返回 409
+		Room     string `form:"room,optional"`     // y-websocket 拼在 URL 后的房间名（须与 docId 一致）
 	}
 	WsRes {}
+)
+
+// ==================== 评论 / 批注 / @提及 ====================
+type CommentItem {
+	CommentId  string        `json:"commentId"`
+	DocId      string        `json:"docId"`
+	Epoch      int           `json:"epoch"`
+	ParentId   string        `json:"parentId"`
+	AnchorId   string        `json:"anchorId"`
+	Quote      string        `json:"quote"`
+	Content    string        `json:"content"`
+	Mentions   string        `json:"mentions"`
+	CreatedBy  string        `json:"createdBy"`
+	Resolved   bool          `json:"resolved"`
+	ResolvedBy string        `json:"resolvedBy"`
+	ResolvedAt string        `json:"resolvedAt"`
+	CreatedAt  string        `json:"createdAt"`
+	Replies    []CommentItem `json:"replies"`
+}
+type (
+	CreateCommentReq {
+		UserId   string `header:"Beaver-User-Id"`
+		DocId    string `json:"docId"`
+		ParentId string `json:"parentId,optional"`
+		AnchorId string `json:"anchorId,optional"`
+		Quote    string `json:"quote,optional"`
+		Content  string `json:"content"`
+		Mentions string `json:"mentions,optional"`
+	}
+	CreateCommentRes {
+		Comment *CommentItem `json:"comment"`
+	}
+	ListCommentsReq {
+		UserId          string `header:"Beaver-User-Id"`
+		DocId           string `json:"docId"`
+		IncludeResolved bool   `json:"includeResolved,optional"`
+	}
+	ListCommentsRes {
+		Total    int64         `json:"total"`
+		Comments []CommentItem `json:"comments"`
+	}
+	ResolveCommentReq {
+		UserId     string `header:"Beaver-User-Id"`
+		CommentId  string `json:"commentId"`
+		Resolved   bool   `json:"resolved"`
+	}
+	ResolveCommentRes {}
+	DeleteCommentReq {
+		UserId    string `header:"Beaver-User-Id"`
+		CommentId string `json:"commentId"`
+	}
+	DeleteCommentRes {}
+)
+
+// ==================== 分享链接 ====================
+type ShareLinkItem {
+	LinkId        string `json:"linkId"`
+	Token         string `json:"token"`
+	ResourceType  string `json:"resourceType"`
+	ResourceId    string `json:"resourceId"`
+	Scope         string `json:"scope"`
+	Role          string `json:"role"`
+	HasPassword   bool   `json:"hasPassword"`
+	ExpiresAt     string `json:"expiresAt"`
+	AllowDownload bool   `json:"allowDownload"`
+	AllowCopy     bool   `json:"allowCopy"`
+	AllowComment  bool   `json:"allowComment"`
+	Watermark     bool   `json:"watermark"`
+	ViewCount     int64  `json:"viewCount"`
+	CreatedBy     string `json:"createdBy"`
+	Status        int    `json:"status"`
+	Url           string `json:"url"`
+}
+type (
+	SetShareLinkReq {
+		UserId        string `header:"Beaver-User-Id"`
+		ResourceType  string `json:"resourceType"`
+		ResourceId    string `json:"resourceId"`
+		Scope         string `json:"scope,optional"`
+		Role          string `json:"role,optional"`
+		Password      string `json:"password,optional"`
+		ExpiresAt     string `json:"expiresAt,optional"`
+		AllowDownload bool   `json:"allowDownload,optional"`
+		AllowCopy     bool   `json:"allowCopy,optional"`
+		AllowComment  bool   `json:"allowComment,optional"`
+		Watermark     bool   `json:"watermark,optional"`
+	}
+	SetShareLinkRes {
+		Link *ShareLinkItem `json:"link"`
+	}
+	GetShareLinkReq {
+		UserId       string `header:"Beaver-User-Id"`
+		ResourceType string `json:"resourceType"`
+		ResourceId   string `json:"resourceId"`
+	}
+	GetShareLinkRes {
+		Link *ShareLinkItem `json:"link"`
+	}
+	RevokeShareLinkReq {
+		UserId string `header:"Beaver-User-Id"`
+		LinkId string `json:"linkId"`
+	}
+	RevokeShareLinkRes {}
+	ResolveShareLinkReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Token    string `json:"token"`
+		Password string `json:"password,optional"`
+	}
+	ResolveShareLinkRes {
+		ResourceType  string `json:"resourceType"`
+		ResourceId    string `json:"resourceId"`
+		Role          string `json:"role"`
+		DocId         string `json:"docId"`
+		Title         string `json:"title"`
+		AllowDownload bool   `json:"allowDownload"`
+		AllowCopy     bool   `json:"allowCopy"`
+		AllowComment  bool   `json:"allowComment"`
+		Watermark     bool   `json:"watermark"`
+	}
+)
+
+// ==================== 回收站 ====================
+type TrashItem {
+	TrashId      string `json:"trashId"`
+	ResourceType string `json:"resourceType"`
+	ResourceId   string `json:"resourceId"`
+	Title        string `json:"title"`
+	SpaceId      string `json:"spaceId"`
+	ParentId     string `json:"parentId"`
+	DeletedBy    string `json:"deletedBy"`
+	DeletedAt    string `json:"deletedAt"`
+}
+type (
+	ListTrashReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	ListTrashRes {
+		Total int64       `json:"total"`
+		Items []TrashItem `json:"items"`
+	}
+	RestoreTrashReq {
+		UserId  string `header:"Beaver-User-Id"`
+		TrashId string `json:"trashId"`
+	}
+	RestoreTrashRes {
+		ResourceType string `json:"resourceType"`
+		ResourceId   string `json:"resourceId"`
+	}
+	PurgeTrashReq {
+		UserId  string `header:"Beaver-User-Id"`
+		TrashId string `json:"trashId"`
+	}
+	PurgeTrashRes {}
+	EmptyTrashReq {
+		UserId string `header:"Beaver-User-Id"`
+	}
+	EmptyTrashRes {
+		Purged int `json:"purged"`
+	}
+)
+
+// ==================== 检索 / 最近 / 收藏 / 列表 ====================
+type DocSearchItem {
+	Doc     *DocItem `json:"doc"`
+	Snippet string   `json:"snippet"`
+}
+type (
+	SearchDocsReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Query    string `json:"query"`
+		SpaceId  string `json:"spaceId,optional"`
+		DocType  string `json:"docType,optional"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	SearchDocsRes {
+		Total int64           `json:"total"`
+		Items []DocSearchItem `json:"items"`
+	}
+	ListDocsReq {
+		UserId   string `header:"Beaver-User-Id"`
+		SpaceId  string `json:"spaceId"`
+		DocType  string `json:"docType,optional"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	ListDocsRes {
+		Total int64     `json:"total"`
+		Docs  []DocItem `json:"docs"`
+	}
+	RecordVisitReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	RecordVisitRes {}
+	ListRecentReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	ListRecentRes {
+		Total int64     `json:"total"`
+		Docs  []DocItem `json:"docs"`
+	}
+	SetFavoriteReq {
+		UserId   string `header:"Beaver-User-Id"`
+		DocId    string `json:"docId"`
+		Favorite bool   `json:"favorite"`
+	}
+	SetFavoriteRes {
+		Favorite bool `json:"favorite"`
+	}
+	ListFavoritesReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	ListFavoritesRes {
+		Total int64     `json:"total"`
+		Docs  []DocItem `json:"docs"`
+	}
+)
+
+// ==================== 模板中心 ====================
+type TemplateItem {
+	TemplateId  string `json:"templateId"`
+	Name        string `json:"name"`
+	Category    string `json:"category"`
+	Description string `json:"description"`
+	Cover       string `json:"cover"`
+	ContentJson string `json:"contentJson"`
+	DocType     string `json:"docType"`
+	Scope       string `json:"scope"`
+	OwnerUserId string `json:"ownerUserId"`
+	UseCount    int    `json:"useCount"`
+	Status      int    `json:"status"`
+	CreatedAt   string `json:"createdAt"`
+}
+type (
+	ListTemplatesReq {
+		UserId   string `header:"Beaver-User-Id"`
+		Category string `json:"category,optional"`
+		Page     int    `json:"page,optional"`
+		PageSize int    `json:"pageSize,optional"`
+	}
+	ListTemplatesRes {
+		Total     int64          `json:"total"`
+		Templates []TemplateItem `json:"templates"`
+	}
+	CreateTemplateReq {
+		UserId      string `header:"Beaver-User-Id"`
+		Name        string `json:"name"`
+		Category    string `json:"category,optional"`
+		Description string `json:"description,optional"`
+		Cover       string `json:"cover,optional"`
+		ContentJson string `json:"contentJson,optional"`
+		DocType     string `json:"docType,optional"`
+		Scope       string `json:"scope,optional"`
+	}
+	CreateTemplateRes {
+		TemplateId string `json:"templateId"`
+	}
+	InstantiateTemplateReq {
+		UserId       string `header:"Beaver-User-Id"`
+		TemplateId   string `json:"templateId"`
+		SpaceId      string `json:"spaceId"`
+		ParentNodeId string `json:"parentNodeId,optional"`
+		Title        string `json:"title,optional"`
+	}
+	InstantiateTemplateRes {
+		DocId  string `json:"docId"`
+		NodeId string `json:"nodeId"`
+	}
+	DeleteTemplateReq {
+		UserId     string `header:"Beaver-User-Id"`
+		TemplateId string `json:"templateId"`
+	}
+	DeleteTemplateRes {}
+)
+
+// ==================== 导出 / 复制 ====================
+type (
+	ExportDocReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+		Format string `json:"format,optional"`
+	}
+	ExportDocRes {
+		FileName string `json:"fileName"`
+		MimeType string `json:"mimeType"`
+		Data     string `json:"data"`
+		Text     string `json:"text"`
+	}
+	DuplicateDocReq {
+		UserId       string `header:"Beaver-User-Id"`
+		DocId        string `json:"docId"`
+		SpaceId      string `json:"spaceId,optional"`
+		ParentNodeId string `json:"parentNodeId,optional"`
+		Title        string `json:"title,optional"`
+	}
+	DuplicateDocRes {
+		DocId  string `json:"docId"`
+		NodeId string `json:"nodeId"`
+	}
+)
+
+// ==================== 富媒体块 ====================
+type DocBlockItem {
+	BlockId     string `json:"blockId"`
+	DocId       string `json:"docId"`
+	Kind        string `json:"kind"`
+	Title       string `json:"title"`
+	PayloadJson string `json:"payloadJson"`
+	Version     int    `json:"version"`
+	UpdatedBy   string `json:"updatedBy"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+type (
+	SaveDocBlockReq {
+		UserId      string `header:"Beaver-User-Id"`
+		DocId       string `json:"docId"`
+		BlockId     string `json:"blockId,optional"`
+		Kind        string `json:"kind"`
+		Title       string `json:"title,optional"`
+		PayloadJson string `json:"payloadJson"`
+	}
+	SaveDocBlockRes {
+		Block *DocBlockItem `json:"block"`
+	}
+	ListDocBlocksReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	ListDocBlocksRes {
+		Blocks []DocBlockItem `json:"blocks"`
+	}
+	DeleteDocBlockReq {
+		UserId  string `header:"Beaver-User-Id"`
+		DocId   string `json:"docId"`
+		BlockId string `json:"blockId"`
+	}
+	DeleteDocBlockRes {}
+)
+
+// ==================== 版本增强 ====================
+type (
+	LabelRevisionReq {
+		UserId     string `header:"Beaver-User-Id"`
+		RevisionId string `json:"revisionId"`
+		Label      string `json:"label"`
+	}
+	LabelRevisionRes {}
+	DiffRevisionsReq {
+		UserId           string `header:"Beaver-User-Id"`
+		DocId            string `json:"docId"`
+		BaseRevisionId   string `json:"baseRevisionId"`
+		TargetRevisionId string `json:"targetRevisionId"`
+	}
+	DiffRevisionsRes {
+		BaseContentJson   string   `json:"baseContentJson"`
+		TargetContentJson string   `json:"targetContentJson"`
+		BaseText          string   `json:"baseText"`
+		TargetText        string   `json:"targetText"`
+		AddedLines        []string `json:"addedLines"`
+		RemovedLines      []string `json:"removedLines"`
+	}
+)
+
+// ==================== 通知中心 ====================
+type NotificationItem {
+	NotificationId string `json:"notificationId"`
+	UserId         string `json:"userId"`
+	DocId          string `json:"docId"`
+	Kind           string `json:"kind"`
+	ActorUserId    string `json:"actorUserId"`
+	Title          string `json:"title"`
+	Excerpt        string `json:"excerpt"`
+	IsRead         bool   `json:"isRead"`
+	CreatedAt      string `json:"createdAt"`
+}
+type (
+	ListNotificationsReq {
+		UserId     string `header:"Beaver-User-Id"`
+		UnreadOnly bool   `json:"unreadOnly,optional"`
+		Page       int    `json:"page,optional"`
+		PageSize   int    `json:"pageSize,optional"`
+	}
+	ListNotificationsRes {
+		Total  int64              `json:"total"`
+		Unread int64              `json:"unread"`
+		Items  []NotificationItem `json:"items"`
+	}
+	MarkNotificationReadReq {
+		UserId         string `header:"Beaver-User-Id"`
+		NotificationId string `json:"notificationId,optional"`
+		All            bool   `json:"all,optional"`
+	}
+	MarkNotificationReadRes {
+		Unread int64 `json:"unread"`
+	}
+)
+
+// ==================== 操作审计 ====================
+type AuditLogItem {
+	LogId        string `json:"logId"`
+	ActorUserId  string `json:"actorUserId"`
+	Action       string `json:"action"`
+	ResourceType string `json:"resourceType"`
+	ResourceId   string `json:"resourceId"`
+	Detail       string `json:"detail"`
+	CreatedAt    string `json:"createdAt"`
+}
+type (
+	ListAuditLogsReq {
+		UserId       string `header:"Beaver-User-Id"`
+		ActorUserId  string `json:"actorUserId,optional"`
+		Action       string `json:"action,optional"`
+		ResourceType string `json:"resourceType,optional"`
+		ResourceId   string `json:"resourceId,optional"`
+		Page         int    `json:"page,optional"`
+		PageSize     int    `json:"pageSize,optional"`
+	}
+	ListAuditLogsRes {
+		Total int64          `json:"total"`
+		Logs  []AuditLogItem `json:"logs"`
+	}
+)
+
+// ==================== 知识库同步 / 协作者 ====================
+type (
+	SetKnowledgeSyncReq {
+		UserId     string `header:"Beaver-User-Id"`
+		DocId      string `json:"docId"`
+		RagEnabled bool   `json:"ragEnabled"`
+	}
+	SetKnowledgeSyncRes {
+		RagEnabled bool `json:"ragEnabled"`
+	}
+	ReindexDocReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	ReindexDocRes {
+		Version int    `json:"version"`
+		Status  string `json:"status"`
+		Digest  string `json:"digest"`
+	}
+)
+type CollaboratorItem {
+	UserId        string `json:"userId"`
+	Role          string `json:"role"`
+	PrincipalType string `json:"principalType"`
+	Source        string `json:"source"`
+}
+type (
+	ListCollaboratorsReq {
+		UserId string `header:"Beaver-User-Id"`
+		DocId  string `json:"docId"`
+	}
+	ListCollaboratorsRes {
+		Collaborators []CollaboratorItem `json:"collaborators"`
+	}
 )
 
 service doc {
@@ -440,6 +924,146 @@ service doc {
 	@doc "文档实时协同 WebSocket 网关（y-websocket sync + awareness）"
 	@handler DocSyncWebsocket
 	get /api/doc/v1/ws (WsReq) returns (WsRes)
+
+	@doc "创建评论或回复"
+	@handler CreateComment
+	post /api/doc/v1/comment/create (CreateCommentReq) returns (CreateCommentRes)
+
+	@doc "列出文档评论"
+	@handler ListComments
+	post /api/doc/v1/comment/list (ListCommentsReq) returns (ListCommentsRes)
+
+	@doc "解决 / 重新打开评论"
+	@handler ResolveComment
+	post /api/doc/v1/comment/resolve (ResolveCommentReq) returns (ResolveCommentRes)
+
+	@doc "删除评论"
+	@handler DeleteComment
+	post /api/doc/v1/comment/delete (DeleteCommentReq) returns (DeleteCommentRes)
+
+	@doc "创建或更新分享链接"
+	@handler SetShareLink
+	post /api/doc/v1/share/setLink (SetShareLinkReq) returns (SetShareLinkRes)
+
+	@doc "查询分享链接"
+	@handler GetShareLink
+	post /api/doc/v1/share/getLink (GetShareLinkReq) returns (GetShareLinkRes)
+
+	@doc "撤销分享链接"
+	@handler RevokeShareLink
+	post /api/doc/v1/share/revokeLink (RevokeShareLinkReq) returns (RevokeShareLinkRes)
+
+	@doc "解析分享链接（访问入口）"
+	@handler ResolveShareLink
+	post /api/doc/v1/share/resolveLink (ResolveShareLinkReq) returns (ResolveShareLinkRes)
+
+	@doc "列出回收站"
+	@handler ListTrash
+	post /api/doc/v1/trash/list (ListTrashReq) returns (ListTrashRes)
+
+	@doc "从回收站恢复"
+	@handler RestoreTrash
+	post /api/doc/v1/trash/restore (RestoreTrashReq) returns (RestoreTrashRes)
+
+	@doc "彻底删除单条"
+	@handler PurgeTrash
+	post /api/doc/v1/trash/purge (PurgeTrashReq) returns (PurgeTrashRes)
+
+	@doc "清空回收站"
+	@handler EmptyTrash
+	post /api/doc/v1/trash/empty (EmptyTrashReq) returns (EmptyTrashRes)
+
+	@doc "全文搜索文档"
+	@handler SearchDocs
+	post /api/doc/v1/doc/search (SearchDocsReq) returns (SearchDocsRes)
+
+	@doc "按空间列出文档"
+	@handler ListDocs
+	post /api/doc/v1/doc/list (ListDocsReq) returns (ListDocsRes)
+
+	@doc "记录文档访问"
+	@handler RecordVisit
+	post /api/doc/v1/doc/visit (RecordVisitReq) returns (RecordVisitRes)
+
+	@doc "最近访问"
+	@handler ListRecent
+	post /api/doc/v1/doc/listRecent (ListRecentReq) returns (ListRecentRes)
+
+	@doc "收藏 / 取消收藏"
+	@handler SetFavorite
+	post /api/doc/v1/doc/favorite (SetFavoriteReq) returns (SetFavoriteRes)
+
+	@doc "收藏列表"
+	@handler ListFavorites
+	post /api/doc/v1/doc/listFavorites (ListFavoritesReq) returns (ListFavoritesRes)
+
+	@doc "模板列表"
+	@handler ListTemplates
+	post /api/doc/v1/template/list (ListTemplatesReq) returns (ListTemplatesRes)
+
+	@doc "创建模板"
+	@handler CreateTemplate
+	post /api/doc/v1/template/create (CreateTemplateReq) returns (CreateTemplateRes)
+
+	@doc "从模板创建文档"
+	@handler InstantiateTemplate
+	post /api/doc/v1/template/instantiate (InstantiateTemplateReq) returns (InstantiateTemplateRes)
+
+	@doc "删除模板"
+	@handler DeleteTemplate
+	post /api/doc/v1/template/delete (DeleteTemplateReq) returns (DeleteTemplateRes)
+
+	@doc "导出文档"
+	@handler ExportDoc
+	post /api/doc/v1/doc/export (ExportDocReq) returns (ExportDocRes)
+
+	@doc "复制文档"
+	@handler DuplicateDoc
+	post /api/doc/v1/doc/duplicate (DuplicateDocReq) returns (DuplicateDocRes)
+
+	@doc "保存多维表格 / 画板块"
+	@handler SaveDocBlock
+	post /api/doc/v1/block/save (SaveDocBlockReq) returns (SaveDocBlockRes)
+
+	@doc "列出富媒体块"
+	@handler ListDocBlocks
+	post /api/doc/v1/block/list (ListDocBlocksReq) returns (ListDocBlocksRes)
+
+	@doc "删除富媒体块"
+	@handler DeleteDocBlock
+	post /api/doc/v1/block/delete (DeleteDocBlockReq) returns (DeleteDocBlockRes)
+
+	@doc "命名版本"
+	@handler LabelRevision
+	post /api/doc/v1/revision/label (LabelRevisionReq) returns (LabelRevisionRes)
+
+	@doc "对比两个版本"
+	@handler DiffRevisions
+	post /api/doc/v1/revision/diff (DiffRevisionsReq) returns (DiffRevisionsRes)
+
+	@doc "通知列表"
+	@handler ListNotifications
+	post /api/doc/v1/notification/list (ListNotificationsReq) returns (ListNotificationsRes)
+
+	@doc "标记通知已读"
+	@handler MarkNotificationRead
+	post /api/doc/v1/notification/read (MarkNotificationReadReq) returns (MarkNotificationReadRes)
+
+	@doc "操作审计日志"
+	@handler ListAuditLogs
+	post /api/doc/v1/audit/list (ListAuditLogsReq) returns (ListAuditLogsRes)
+
+	@doc "开关知识库索引"
+	@handler SetKnowledgeSync
+	post /api/doc/v1/doc/knowledgeSync (SetKnowledgeSyncReq) returns (SetKnowledgeSyncRes)
+
+	@doc "重新入队知识库索引"
+	@handler ReindexDoc
+	post /api/doc/v1/doc/reindex (ReindexDocReq) returns (ReindexDocRes)
+
+	@doc "协作者列表"
+	@handler ListCollaborators
+	post /api/doc/v1/collab/list (ListCollaboratorsReq) returns (ListCollaboratorsRes)
 }
 
 // goctl api go -api doc.api -dir . --home ../../../template

@@ -18,9 +18,11 @@ var (
 	errInvalidArg   = errors.New("doc: 参数非法")
 )
 
-// applyDocContent 写入正文：更新 content/digest/version/last_edited_by，生成一条 revision。
-// 由 SaveDocContent / RollbackRevision / CommitDocSnapshot 复用，保证版本语义单一来源。
-func applyDocContent(ctx context.Context, svcCtx *svc.ServiceContext, doc *doc_models.DocDocument, space *doc_models.DocSpace, contentJSON, contentText, operator string) (int, error) {
+// applyDocContent 写入正文：更新 content/digest/version/last_edited_by，生成一条 revision，
+// 并在同一事务内登记知识库索引 outbox 与操作审计。
+// 由 SaveDocContent / RollbackRevision / CommitDocSnapshot 复用，保证版本语义与副作用单一来源。
+// action 由调用方给出，用于区分手动保存 / 网关压实 / 版本回滚。
+func applyDocContent(ctx context.Context, svcCtx *svc.ServiceContext, doc *doc_models.DocDocument, space *doc_models.DocSpace, contentJSON, contentText, operator, action string) (int, error) {
 	newVersion := doc.Version + 1
 	digest := sha256hex(contentText)
 
@@ -43,7 +45,19 @@ func applyDocContent(ctx context.Context, svcCtx *svc.ServiceContext, doc *doc_m
 			ContentJSON: contentJSON,
 			CreatedBy:   operator,
 		}
-		return tx.Create(&rev).Error
+		if err := tx.Create(&rev).Error; err != nil {
+			return err
+		}
+		// 仅开启知识库同步的文档进入索引队列；手动 ReindexDoc 可绕过此限制强制入队。
+		if doc.RagEnabled {
+			enqueueIndex(tx, doc.DocID, newVersion, digest)
+		}
+		auditJSON(tx, operator, action, "doc", doc.DocID, map[string]any{
+			"version": newVersion,
+			"digest":  digest,
+			"spaceId": doc.SpaceID,
+		})
+		return nil
 	})
 	if err != nil {
 		return 0, err

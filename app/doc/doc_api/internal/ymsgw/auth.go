@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
+	"strings"
 
 	doccli "beaver/app/doc/doc_rpc/doc"
 	"beaver/app/doc/doc_rpc/types/doc_rpc"
@@ -26,16 +28,47 @@ type wsAuth struct {
 // 校验失败返回 ok=false（ygo 会以 401 拒绝，不升级连接）；viewer/commenter 置只读。
 func (a *wsAuth) authorize(r *http.Request) (ygws.ConnectionConfig, bool) {
 	q := r.URL.Query()
-	docID := q.Get("docId")
-	userID := q.Get("userId")
 	token := q.Get("token")
-	platform := q.Get("platform")
-	if docID == "" || userID == "" || token == "" {
+	if token == "" {
 		return ygws.ConnectionConfig{}, false
 	}
-	if err := a.verifyToken(token, userID, platform); err != nil {
+	claims, err := a.verifyTokenClaims(token, q.Get("platform"))
+	if err != nil {
 		return ygws.ConnectionConfig{}, false
 	}
+
+	// 房间名由服务端按 docId@epoch 改写进 URL path；query.docId 是权威业务 ID。
+	// path.Base 兼容调用方未改写 path 的情况（可能仍带 /api/doc/v1/ws 前缀）。
+	roomDocID, roomEpoch := ParseRoom(path.Base(strings.TrimSuffix(r.URL.Path, "/")))
+	docID := q.Get("docId")
+	if docID == "" {
+		docID = roomDocID
+	}
+	if docID == "" || (roomDocID != "" && roomDocID != docID) {
+		return ygws.ConnectionConfig{}, false
+	}
+
+	// userId 允许从 JWT 兜底：旧客户端 WS query 未带 userId 时不至于必然 401，
+	// 但仍强制要求与 token 内的 userId 一致，不能冒用他人身份。
+	userID := q.Get("userId")
+	if userID == "" {
+		userID = claims.UserID
+	}
+	if userID == "" || claims.UserID != userID {
+		return ygws.ConnectionConfig{}, false
+	}
+
+	// 版本回滚会递增 epoch；旧房间一律拒绝，避免旧 CRDT 状态被重新写回。
+	if roomEpoch > 0 {
+		ep, eerr := a.doc.ResolveRoomEpoch(context.Background(), &doc_rpc.ResolveRoomEpochReq{
+			DocId: docID,
+			Epoch: roomEpoch,
+		})
+		if eerr != nil || !ep.GetValid() {
+			return ygws.ConnectionConfig{}, false
+		}
+	}
+
 	res, err := a.doc.CheckPermission(context.Background(), &doc_rpc.CheckPermissionReq{
 		ResourceType: "doc",
 		ResourceId:   docID,
@@ -53,24 +86,22 @@ func (a *wsAuth) authorize(r *http.Request) (ygws.ConnectionConfig, bool) {
 	return ygws.ConnectionConfig{ReadOnly: roleRank(role) < roleRank("editor")}, true
 }
 
-// verifyToken 复刻 ws_api 的 WS 鉴权：JWT 签名校验 + Redis 登录态比对 + 设备指纹一致性。
-func (a *wsAuth) verifyToken(token, userID, platform string) error {
+// verifyTokenClaims 复刻 ws_api 的 WS 鉴权：JWT 签名校验 + Redis 登录态比对 +
+// 设备指纹一致性。返回解析出的 claims，供上层把 userId 与 query 参数/token 对齐。
+func (a *wsAuth) verifyTokenClaims(token, platform string) (*jwts.CustomClaims, error) {
 	if token == "" {
-		return errors.New("token不能为空")
+		return nil, errors.New("token不能为空")
 	}
 	claims, err := jwts.ParseToken(token, a.secret)
 	if err != nil {
-		return errors.New("无效的token")
-	}
-	if claims.UserID != userID {
-		return errors.New("token与用户不匹配")
+		return nil, errors.New("无效的token")
 	}
 	platforms := []string{platform}
 	if platform == "" {
 		platforms = []string{"desktop", "mobile"}
 	}
 	for _, dt := range platforms {
-		key := fmt.Sprintf("user_authentication_session:%s:%s", userID, dt)
+		key := fmt.Sprintf("user_authentication_session:%s:%s", claims.UserID, dt)
 		val, err := a.rdb.Get(key).Result()
 		if err != nil || val == "" {
 			continue
@@ -82,11 +113,11 @@ func (a *wsAuth) verifyToken(token, userID, platform string) error {
 		if storedToken, _ := info["token"].(string); storedToken == token {
 			if claims.DeviceID != "" {
 				if storedDeviceID, ok := info["device_id"].(string); ok && storedDeviceID != claims.DeviceID {
-					return errors.New("设备标识符不匹配，疑似冒用")
+					return nil, errors.New("设备标识符不匹配，疑似冒用")
 				}
 			}
-			return nil
+			return claims, nil
 		}
 	}
-	return errors.New("登录已过期或在其他设备登录")
+	return nil, errors.New("登录已过期或在其他设备登录")
 }

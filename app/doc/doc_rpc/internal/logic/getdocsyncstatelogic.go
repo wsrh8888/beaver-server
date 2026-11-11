@@ -31,18 +31,27 @@ func (l *GetDocSyncStateLogic) GetDocSyncState(in *doc_rpc.GetDocSyncStateReq) (
 		return nil, errNotFound
 	}
 
-	res := &doc_rpc.GetDocSyncStateRes{Version: int32(doc.Version)}
+	// 始终返回文档当前纪元。请求携带旧纪元时不下发任何 CRDT 状态，
+	// 迫使旧房间客户端以空状态重建到新纪元，避免回滚后旧状态被写回。
+	res := &doc_rpc.GetDocSyncStateRes{
+		Version: int32(doc.Version),
+		Epoch:   int32(doc.Epoch),
+	}
+	if in.Epoch > 0 && int(in.Epoch) != doc.Epoch {
+		return res, nil
+	}
 
 	var snap doc_models.DocYjsSnapshot
 	upTo := int64(0)
-	if err := l.svcCtx.DB.Where("doc_id = ?", doc.DocID).First(&snap).Error; err == nil {
+	if err := l.svcCtx.DB.Where("doc_id = ? AND epoch = ?", doc.DocID, doc.Epoch).First(&snap).Error; err == nil {
 		res.Snapshot = snap.State
 		upTo = snap.UpdateSeqUpTo
 	}
 
-	// 快照之后的增量 update，按时序返回。
+	// 快照之后的增量 update，严格限定在当前纪元内，按时序返回。
 	var updates []doc_models.DocYjsUpdate
-	l.svcCtx.DB.Where("doc_id = ? AND seq > ?", doc.DocID, upTo).Order("seq asc").Find(&updates)
+	l.svcCtx.DB.Where("doc_id = ? AND epoch = ? AND seq > ?", doc.DocID, doc.Epoch, upTo).
+		Order("seq asc").Find(&updates)
 	for i := range updates {
 		res.Updates = append(res.Updates, updates[i].Update)
 	}

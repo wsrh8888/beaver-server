@@ -122,7 +122,7 @@ func (l *ImportDocLogic) ImportDoc(in *doc_rpc.ImportDocReq) (*doc_rpc.ImportDoc
 	// 解析成功则写入正文 + 生成版本（复用 applyDocContent，失败不阻断导入结果返回）。
 	if parsed && text != "" {
 		contentJSON := textToContentJSON(text)
-		if _, aerr := applyDocContent(l.ctx, l.svcCtx, &doc, space, contentJSON, text, trim(in.OperatorUserId)); aerr != nil {
+		if _, aerr := applyDocContent(l.ctx, l.svcCtx, &doc, space, contentJSON, text, trim(in.OperatorUserId), "content.import"); aerr != nil {
 			l.logger.Error(model.LogMsg{Text: "导入写入正文失败", Data: map[string]any{"docId": docID, "err": aerr.Error()}})
 		}
 	}

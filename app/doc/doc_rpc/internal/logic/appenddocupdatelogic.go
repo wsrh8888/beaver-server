@@ -26,12 +26,27 @@ func NewAppendDocUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *A
 }
 
 func (l *AppendDocUpdateLogic) AppendDocUpdate(in *doc_rpc.AppendDocUpdateReq) (*doc_rpc.AppendDocUpdateRes, error) {
-	// 内部可信调用（doc_api 协同网关）。文档内 seq 递增，作为增量日志重放顺序。
+	// 内部可信调用（doc_api 协同网关）。seq 在 (doc_id, epoch) 内递增，作为增量日志重放顺序。
+	doc, err := loadDoc(l.svcCtx.DB, in.DocId)
+	if err != nil {
+		return nil, errNotFound
+	}
+	epoch := doc.Epoch
+	if in.Epoch > 0 {
+		// 旧纪元（回滚前的房间）的增量必须丢弃，否则会把回滚掉的正文重新带回来。
+		if int(in.Epoch) != epoch {
+			return nil, errInvalidArg
+		}
+	}
+
 	var maxSeq int64
-	l.svcCtx.DB.Model(&doc_models.DocYjsUpdate{}).Where("doc_id = ?", in.DocId).Select("COALESCE(MAX(seq), 0)").Scan(&maxSeq)
+	l.svcCtx.DB.Model(&doc_models.DocYjsUpdate{}).
+		Where("doc_id = ? AND epoch = ?", in.DocId, epoch).
+		Select("COALESCE(MAX(seq), 0)").Scan(&maxSeq)
 
 	row := doc_models.DocYjsUpdate{
 		DocID:        in.DocId,
+		Epoch:        epoch,
 		Seq:          maxSeq + 1,
 		Update:       in.Update,
 		OriginUserID: trim(in.OriginUserId),

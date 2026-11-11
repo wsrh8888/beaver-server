@@ -10,7 +10,7 @@ import (
 	"beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
-	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CommitDocSnapshotLogic struct {
@@ -37,35 +37,33 @@ func (l *CommitDocSnapshotLogic) CommitDocSnapshot(in *doc_rpc.CommitDocSnapshot
 	if err != nil {
 		return nil, errNotFound
 	}
+	epoch := doc.Epoch
+	if in.Epoch > 0 {
+		// 旧纪元的压实结果不能覆盖新纪元状态。
+		if int(in.Epoch) != epoch {
+			return nil, errInvalidArg
+		}
+	}
 
 	var maxSeq int64
-	l.svcCtx.DB.Model(&doc_models.DocYjsUpdate{}).Where("doc_id = ?", doc.DocID).Select("COALESCE(MAX(seq), 0)").Scan(&maxSeq)
+	l.svcCtx.DB.Model(&doc_models.DocYjsUpdate{}).
+		Where("doc_id = ? AND epoch = ?", doc.DocID, epoch).
+		Select("COALESCE(MAX(seq), 0)").Scan(&maxSeq)
 
-	var snap doc_models.DocYjsSnapshot
-	err = l.svcCtx.DB.Where("doc_id = ?", doc.DocID).First(&snap).Error
-	if err == gorm.ErrRecordNotFound {
-		snap = doc_models.DocYjsSnapshot{DocID: doc.DocID}
-		err = nil
+	// 快照按 (doc_id, epoch) 唯一：不同纪元互不覆盖。
+	snap := doc_models.DocYjsSnapshot{
+		DocID:         doc.DocID,
+		Epoch:         epoch,
+		State:         in.Snapshot,
+		UpdateSeqUpTo: maxSeq,
+		Version:       doc.Version,
 	}
-	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "读取yjs快照失败", Data: err})
+	if err := l.svcCtx.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "doc_id"}, {Name: "epoch"}},
+		DoUpdates: clause.AssignmentColumns([]string{"state", "update_seq_up_to", "version"}),
+	}).Create(&snap).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "写入yjs快照失败", Data: err})
 		return nil, err
-	}
-	snap.State = in.Snapshot
-	snap.UpdateSeqUpTo = maxSeq
-	if snap.Id == 0 {
-		if cerr := l.svcCtx.DB.Create(&snap).Error; cerr != nil {
-			l.logger.Error(model.LogMsg{Text: "写入yjs快照失败", Data: cerr})
-			return nil, cerr
-		}
-	} else {
-		if uerr := l.svcCtx.DB.Model(&doc_models.DocYjsSnapshot{}).Where("doc_id = ?", doc.DocID).Updates(map[string]any{
-			"state":            snap.State,
-			"update_seq_up_to": snap.UpdateSeqUpTo,
-		}).Error; uerr != nil {
-			l.logger.Error(model.LogMsg{Text: "更新yjs快照失败", Data: uerr})
-			return nil, uerr
-		}
 	}
 
 	// content_json 为空表示纯快照压实：仅收敛增量日志/写快照，不改动权威正文与版本。
@@ -74,7 +72,7 @@ func (l *CommitDocSnapshotLogic) CommitDocSnapshot(in *doc_rpc.CommitDocSnapshot
 		return &doc_rpc.CommitDocSnapshotRes{Version: int32(doc.Version)}, nil
 	}
 
-	version, err := applyDocContent(l.ctx, l.svcCtx, doc, space, in.ContentJson, in.ContentText, in.OperatorUserId)
+	version, err := applyDocContent(l.ctx, l.svcCtx, doc, space, in.ContentJson, in.ContentText, in.OperatorUserId, "content.autosave")
 	if err != nil {
 		return nil, err
 	}

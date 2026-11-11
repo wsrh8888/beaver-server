@@ -10,6 +10,8 @@ import (
 
 	"beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+
+	"gorm.io/gorm"
 )
 
 type DeleteSpaceLogic struct {
@@ -40,20 +42,48 @@ func (l *DeleteSpaceLogic) DeleteSpace(in *doc_rpc.DeleteSpaceReq) (*doc_rpc.Del
 	}
 
 	now := time.Now()
-	if err := l.svcCtx.DB.Model(&doc_models.DocSpace{}).Where("space_id = ?", space.SpaceID).Update("deleted_at", now).Error; err != nil {
+	var nodeIDs, docIDs []string
+	if err := l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&doc_models.DocSpace{}).Where("space_id = ?", space.SpaceID).
+			Update("deleted_at", now).Error; err != nil {
+			return err
+		}
+		var nodes []doc_models.DocNode
+		if err := tx.Where("space_id = ? AND deleted_at = ?", space.SpaceID, zeroDeletedAt).
+			Find(&nodes).Error; err != nil {
+			return err
+		}
+		for i := range nodes {
+			nodeIDs = append(nodeIDs, nodes[i].NodeID)
+		}
+		if len(nodeIDs) > 0 {
+			if err := tx.Model(&doc_models.DocNode{}).Where("node_id IN ?", nodeIDs).
+				Update("deleted_at", now).Error; err != nil {
+				return err
+			}
+		}
+		var docs []doc_models.DocDocument
+		if err := tx.Where("space_id = ? AND deleted_at = ?", space.SpaceID, zeroDeletedAt).
+			Find(&docs).Error; err != nil {
+			return err
+		}
+		for i := range docs {
+			docIDs = append(docIDs, docs[i].DocID)
+		}
+		if len(docIDs) > 0 {
+			if err := tx.Model(&doc_models.DocDocument{}).Where("doc_id IN ?", docIDs).
+				Update("deleted_at", now).Error; err != nil {
+				return err
+			}
+		}
+		addTrash(tx, "space", space.SpaceID, space.Name, space.SpaceID, space.ParentID,
+			in.OperatorUserId, trashPayload(nodeIDs, docIDs))
+		auditJSON(tx, in.OperatorUserId, "space.delete", "space", space.SpaceID,
+			map[string]any{"name": space.Name, "nodes": len(nodeIDs), "docs": len(docIDs)})
+		return nil
+	}); err != nil {
 		l.logger.Error(model.LogMsg{Text: "删除空间失败", Data: err})
 		return nil, err
-	}
-	// 级联软删其下节点与文档。
-	if err := l.svcCtx.DB.Model(&doc_models.DocNode{}).Where("space_id = ? AND deleted_at = ?", space.SpaceID, "1970-01-01 00:00:00").Update("deleted_at", now).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "级联删除节点失败", Data: err})
-	}
-	var docs []doc_models.DocDocument
-	l.svcCtx.DB.Where("space_id = ? AND deleted_at = ?", space.SpaceID, "1970-01-01 00:00:00").Find(&docs)
-	for i := range docs {
-		if err := l.svcCtx.DB.Model(&doc_models.DocDocument{}).Where("doc_id = ?", docs[i].DocID).Update("deleted_at", now).Error; err != nil {
-			l.logger.Error(model.LogMsg{Text: "级联删除文档失败", Data: err})
-		}
 	}
 	return &doc_rpc.DeleteSpaceRes{}, nil
 }
