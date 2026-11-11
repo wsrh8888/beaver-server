@@ -12,6 +12,7 @@ package bot
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"beaver/app/open/open_portal/internal/svc"
 	"beaver/app/open/open_portal/internal/types"
@@ -43,6 +44,14 @@ func (l *UpdateBotLogic) UpdateBot(req *types.UpdateBotReq) (*types.UpdateBotRes
 	// 复制一份就要双写两份、还得手动同步，绑定关系用 ID 表达即可。
 	// 用 UpdateUsers 而不是 UserUpdateDisplay，是因为后者不支持改简介，且这里要能区分「不传」和「传空串清空」。
 	if req.Name != nil || req.Avatar != nil || req.Description != nil {
+		// 名称是 IM 用户昵称，清空会让机器人变成无名实体，服务端兜一道（不依赖前端校验）
+		if req.Name != nil {
+			name := strings.TrimSpace(*req.Name)
+			if len([]rune(name)) < 2 || len([]rune(name)) > 50 {
+				return nil, errors.New("名称需 2-50 个字符")
+			}
+			req.Name = &name
+		}
 		if _, err := l.svcCtx.UserRpc.UpdateUsers(l.ctx, &user_rpc.UpdateUsersReq{
 			UserIds:       []string{row.BotID},
 			PatchNickName: req.Name,
