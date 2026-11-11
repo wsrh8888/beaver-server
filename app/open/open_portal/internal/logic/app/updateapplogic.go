@@ -24,6 +24,7 @@ package app
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"beaver/app/open/open_models"
 	"beaver/app/open/open_portal/internal/svc"
@@ -55,16 +56,23 @@ func (l *UpdateAppLogic) UpdateApp(req *types.UpdateAppReq) (resp *types.UpdateA
 		return nil, errors.New("应用不存在或无权限")
 	}
 
-	// 3. 构建更新字段
+	// 3. 构建更新字段：指针为 nil 表示这次不改，非 nil 一律写入（空串即清空）
 	updates := make(map[string]interface{})
-	if req.Name != "" {
-		updates["name"] = req.Name
+	if req.Name != nil {
+		name := strings.TrimSpace(*req.Name)
+		if len([]rune(name)) < 2 || len([]rune(name)) > 50 {
+			return nil, errors.New("名称需 2-50 个字符")
+		}
+		updates["name"] = name
 	}
-	if req.Description != "" {
-		updates["description"] = req.Description
+	if req.Description != nil {
+		updates["description"] = *req.Description
 	}
-	if req.Icon != "" {
-		updates["icon"] = req.Icon
+	if req.Icon != nil {
+		updates["icon"] = *req.Icon
+	}
+	if req.Status != nil {
+		updates["status"] = *req.Status
 	}
 	// 4. 执行更新
 	if len(updates) == 0 {

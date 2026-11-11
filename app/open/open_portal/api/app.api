@@ -17,11 +17,13 @@ type (
 
 type (
 	UpdateAppReq {
-		OAuthID     string `json:"oauthId"`
-		Name        string `json:"name,optional"`
-		Description string `json:"description,optional"`
-		Icon        string `json:"icon,optional"`
-		UserID      string `header:"Beaver-User-Id"`
+		OAuthID string `json:"oauthId"`
+		// 传 null 表示不修改，传空串表示清空（名称除外，名称不允许清空）。
+		Name        *string `json:"name,optional" validate:"omitempty,min=2,max=50"`
+		Description *string `json:"description,optional" validate:"omitempty,max=200"`
+		Icon        *string `json:"icon,optional"`
+		Status      *int    `json:"status,optional" validate:"omitempty,oneof=0 1"`
+		UserID      string  `header:"Beaver-User-Id"`
 	}
 	UpdateAppRes {}
 )
