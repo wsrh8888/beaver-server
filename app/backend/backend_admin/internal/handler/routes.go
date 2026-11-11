@@ -161,6 +161,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: agent.GetAgentToolListHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/admin/backend/agent/v1/tool_parse",
+				Handler: agent.ParseAgentToolFileHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPut,
 				Path:    "/admin/backend/agent/v1/tool_update",
 				Handler: agent.UpdateAgentToolHandler(serverCtx),

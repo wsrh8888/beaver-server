@@ -54,12 +54,18 @@ func toAgentToolItem(row *agent_models.AgentTool) *platform_rpc.AgentToolItem {
 		return nil
 	}
 	return &platform_rpc.AgentToolItem{
-		Id:       uint64(row.Id),
-		ToolId:   row.ToolID,
-		Name:     row.Name,
-		ToolType: row.ToolType,
-		Config:   row.Config,
-		Status:   int32(row.Status),
-		Sort:     int32(row.Sort),
+		Id:          uint64(row.Id),
+		ToolId:      row.ToolID,
+		Name:        row.Name,
+		Description: row.Description,
+		Version:     row.Version,
+		SkillMd:     row.SkillMD,
+		FileName:    row.FileName,
+		ToolType:    row.ToolType,
+		Config:      row.Config,
+		Status:      int32(row.Status),
+		Sort:        int32(row.Sort),
+		Source:      row.Source,
+		UserId:      row.UserID,
 	}
 }

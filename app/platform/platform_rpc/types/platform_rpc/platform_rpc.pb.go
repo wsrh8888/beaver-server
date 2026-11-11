@@ -7346,12 +7346,16 @@ type AgentToolItem struct {
 	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	ToolId        string                 `protobuf:"bytes,2,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	ToolType      string                 `protobuf:"bytes,4,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"` // builtin|mcp|api
-	Config        string                 `protobuf:"bytes,5,opt,name=config,proto3" json:"config,omitempty"`                     // JSON
+	ToolType      string                 `protobuf:"bytes,4,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"` // skill
+	Config        string                 `protobuf:"bytes,5,opt,name=config,proto3" json:"config,omitempty"`                     // frontmatter 其余字段
 	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
 	Sort          int32                  `protobuf:"varint,7,opt,name=sort,proto3" json:"sort,omitempty"`
 	Source        string                 `protobuf:"bytes,8,opt,name=source,proto3" json:"source,omitempty"` // official|custom
 	UserId        string                 `protobuf:"bytes,9,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Description   string                 `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"` // 一句话描述
+	Version       string                 `protobuf:"bytes,11,opt,name=version,proto3" json:"version,omitempty"`
+	SkillMd       string                 `protobuf:"bytes,12,opt,name=skill_md,json=skillMd,proto3" json:"skill_md,omitempty"`    // 技能正文
+	FileName      string                 `protobuf:"bytes,13,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"` // 上传时的原始文件名
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7445,6 +7449,34 @@ func (x *AgentToolItem) GetSource() string {
 func (x *AgentToolItem) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetSkillMd() string {
+	if x != nil {
+		return x.SkillMd
+	}
+	return ""
+}
+
+func (x *AgentToolItem) GetFileName() string {
+	if x != nil {
+		return x.FileName
 	}
 	return ""
 }
@@ -7636,12 +7668,16 @@ func (x *GetAgentToolRes) GetTool() *AgentToolItem {
 type CreateAgentToolReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ToolType      string                 `protobuf:"bytes,2,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"` // builtin|mcp|api
-	Config        string                 `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`                     // JSON
+	ToolType      string                 `protobuf:"bytes,2,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"` // skill
+	Config        string                 `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`                     // frontmatter 其余字段
 	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
 	Sort          int32                  `protobuf:"varint,5,opt,name=sort,proto3" json:"sort,omitempty"`
 	Source        string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"` // 空则 official
 	UserId        string                 `protobuf:"bytes,7,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Description   string                 `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
+	Version       string                 `protobuf:"bytes,9,opt,name=version,proto3" json:"version,omitempty"`
+	SkillMd       string                 `protobuf:"bytes,10,opt,name=skill_md,json=skillMd,proto3" json:"skill_md,omitempty"`
+	FileName      string                 `protobuf:"bytes,11,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7725,6 +7761,34 @@ func (x *CreateAgentToolReq) GetUserId() string {
 	return ""
 }
 
+func (x *CreateAgentToolReq) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateAgentToolReq) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *CreateAgentToolReq) GetSkillMd() string {
+	if x != nil {
+		return x.SkillMd
+	}
+	return ""
+}
+
+func (x *CreateAgentToolReq) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
 type CreateAgentToolRes struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ToolId        string                 `protobuf:"bytes,1,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
@@ -7774,9 +7838,13 @@ type UpdateAgentToolReq struct {
 	ToolId        string                 `protobuf:"bytes,1,opt,name=tool_id,json=toolId,proto3" json:"tool_id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	ToolType      string                 `protobuf:"bytes,3,opt,name=tool_type,json=toolType,proto3" json:"tool_type,omitempty"`
-	Config        string                 `protobuf:"bytes,4,opt,name=config,proto3" json:"config,omitempty"` // JSON
+	Config        string                 `protobuf:"bytes,4,opt,name=config,proto3" json:"config,omitempty"`
 	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
 	Sort          int32                  `protobuf:"varint,6,opt,name=sort,proto3" json:"sort,omitempty"`
+	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	Version       string                 `protobuf:"bytes,8,opt,name=version,proto3" json:"version,omitempty"`
+	SkillMd       string                 `protobuf:"bytes,9,opt,name=skill_md,json=skillMd,proto3" json:"skill_md,omitempty"`
+	FileName      string                 `protobuf:"bytes,10,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7851,6 +7919,34 @@ func (x *UpdateAgentToolReq) GetSort() int32 {
 		return x.Sort
 	}
 	return 0
+}
+
+func (x *UpdateAgentToolReq) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetSkillMd() string {
+	if x != nil {
+		return x.SkillMd
+	}
+	return ""
+}
+
+func (x *UpdateAgentToolReq) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
 }
 
 type UpdateAgentToolRes struct {
@@ -11937,7 +12033,7 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x18UpdateAgentCredentialRes\"?\n" +
 	"\x18DeleteAgentCredentialReq\x12#\n" +
 	"\rcredential_id\x18\x01 \x01(\tR\fcredentialId\"\x1a\n" +
-	"\x18DeleteAgentCredentialRes\"\xde\x01\n" +
+	"\x18DeleteAgentCredentialRes\"\xd2\x02\n" +
 	"\rAgentToolItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x17\n" +
 	"\atool_id\x18\x02 \x01(\tR\x06toolId\x12\x12\n" +
@@ -11947,7 +12043,12 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x12\n" +
 	"\x04sort\x18\a \x01(\x05R\x04sort\x12\x16\n" +
 	"\x06source\x18\b \x01(\tR\x06source\x12\x17\n" +
-	"\auser_id\x18\t \x01(\tR\x06userId\"C\n" +
+	"\auser_id\x18\t \x01(\tR\x06userId\x12 \n" +
+	"\vdescription\x18\n" +
+	" \x01(\tR\vdescription\x12\x18\n" +
+	"\aversion\x18\v \x01(\tR\aversion\x12\x19\n" +
+	"\bskill_md\x18\f \x01(\tR\askillMd\x12\x1b\n" +
+	"\tfile_name\x18\r \x01(\tR\bfileName\"C\n" +
 	"\x11ListAgentToolsReq\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\x05R\x06status\x12\x16\n" +
 	"\x06source\x18\x02 \x01(\tR\x06source\"F\n" +
@@ -11956,7 +12057,7 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x0fGetAgentToolReq\x12\x17\n" +
 	"\atool_id\x18\x01 \x01(\tR\x06toolId\"B\n" +
 	"\x0fGetAgentToolRes\x12/\n" +
-	"\x04tool\x18\x01 \x01(\v2\x1b.platform_rpc.AgentToolItemR\x04tool\"\xba\x01\n" +
+	"\x04tool\x18\x01 \x01(\v2\x1b.platform_rpc.AgentToolItemR\x04tool\"\xae\x02\n" +
 	"\x12CreateAgentToolReq\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
 	"\ttool_type\x18\x02 \x01(\tR\btoolType\x12\x16\n" +
@@ -11964,16 +12065,26 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\x12\x12\n" +
 	"\x04sort\x18\x05 \x01(\x05R\x04sort\x12\x16\n" +
 	"\x06source\x18\x06 \x01(\tR\x06source\x12\x17\n" +
-	"\auser_id\x18\a \x01(\tR\x06userId\"-\n" +
+	"\auser_id\x18\a \x01(\tR\x06userId\x12 \n" +
+	"\vdescription\x18\b \x01(\tR\vdescription\x12\x18\n" +
+	"\aversion\x18\t \x01(\tR\aversion\x12\x19\n" +
+	"\bskill_md\x18\n" +
+	" \x01(\tR\askillMd\x12\x1b\n" +
+	"\tfile_name\x18\v \x01(\tR\bfileName\"-\n" +
 	"\x12CreateAgentToolRes\x12\x17\n" +
-	"\atool_id\x18\x01 \x01(\tR\x06toolId\"\xa2\x01\n" +
+	"\atool_id\x18\x01 \x01(\tR\x06toolId\"\x96\x02\n" +
 	"\x12UpdateAgentToolReq\x12\x17\n" +
 	"\atool_id\x18\x01 \x01(\tR\x06toolId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
 	"\ttool_type\x18\x03 \x01(\tR\btoolType\x12\x16\n" +
 	"\x06config\x18\x04 \x01(\tR\x06config\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x12\n" +
-	"\x04sort\x18\x06 \x01(\x05R\x04sort\"\x14\n" +
+	"\x04sort\x18\x06 \x01(\x05R\x04sort\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12\x18\n" +
+	"\aversion\x18\b \x01(\tR\aversion\x12\x19\n" +
+	"\bskill_md\x18\t \x01(\tR\askillMd\x12\x1b\n" +
+	"\tfile_name\x18\n" +
+	" \x01(\tR\bfileName\"\x14\n" +
 	"\x12UpdateAgentToolRes\"-\n" +
 	"\x12DeleteAgentToolReq\x12\x17\n" +
 	"\atool_id\x18\x01 \x01(\tR\x06toolId\"\x14\n" +

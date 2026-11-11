@@ -31,11 +31,15 @@ func NewCreateAgentToolLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 
 func (l *CreateAgentToolLogic) CreateAgentTool(req *types.CreateAgentToolReq) (resp *types.CreateAgentToolRes, err error) {
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateAgentTool(l.ctx, &platform_rpc.CreateAgentToolReq{
-		Name:     req.Name,
-		ToolType: req.ToolType,
-		Config:   req.Config,
-		Status:   int32(req.Status),
-		Sort:     int32(req.Sort),
+		Name:        req.Name,
+		Description: req.Description,
+		Version:     req.Version,
+		SkillMd:     req.SkillMD,
+		FileName:    req.FileName,
+		ToolType:    req.ToolType,
+		Config:      req.Config,
+		Status:      int32(req.Status),
+		Sort:        int32(req.Sort),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "创建工具失败", Data: map[string]any{"err": err.Error()}})

@@ -57,18 +57,8 @@ func (l *ListAgentToolsLogic) ListAgentTools(in *platform_rpc.ListAgentToolsReq)
 	var rows []agent_models.AgentTool
 	q.Order("sort ASC, id ASC").Find(&rows)
 	out := make([]*platform_rpc.AgentToolItem, 0, len(rows))
-	for _, row := range rows {
-		out = append(out, &platform_rpc.AgentToolItem{
-			Id:       uint64(row.Id),
-			ToolId:   row.ToolID,
-			Name:     row.Name,
-			ToolType: row.ToolType,
-			Config:   row.Config,
-			Status:   int32(row.Status),
-			Sort:     int32(row.Sort),
-			Source:   row.Source,
-			UserId:   row.UserID,
-		})
+	for i := range rows {
+		out = append(out, toAgentToolItem(&rows[i]))
 	}
 	return &platform_rpc.ListAgentToolsRes{Tools: out}, nil
 }

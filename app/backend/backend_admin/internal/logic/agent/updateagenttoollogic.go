@@ -31,12 +31,16 @@ func NewUpdateAgentToolLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 
 func (l *UpdateAgentToolLogic) UpdateAgentTool(req *types.UpdateAgentToolReq) (resp *types.UpdateAgentToolRes, err error) {
 	_, err = l.svcCtx.PlatformRpc.UpdateAgentTool(l.ctx, &platform_rpc.UpdateAgentToolReq{
-		ToolId:   req.ToolID,
-		Name:     req.Name,
-		ToolType: req.ToolType,
-		Config:   req.Config,
-		Status:   int32(req.Status),
-		Sort:     int32(req.Sort),
+		ToolId:      req.ToolID,
+		Name:        req.Name,
+		Description: req.Description,
+		Version:     req.Version,
+		SkillMd:     req.SkillMD,
+		FileName:    req.FileName,
+		ToolType:    req.ToolType,
+		Config:      req.Config,
+		Status:      int32(req.Status),
+		Sort:        int32(req.Sort),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "更新工具失败", Data: map[string]any{"toolId": req.ToolID, "err": err.Error()}})

@@ -38,12 +38,16 @@ func toAgentAppInfo(a *platform_rpc.AgentAppItem) types.AgentAppInfo {
 // toAgentToolInfo platform_rpc.AgentToolItem → 后台 types.AgentToolInfo
 func toAgentToolInfo(t *platform_rpc.AgentToolItem) types.AgentToolInfo {
 	return types.AgentToolInfo{
-		ToolID:   t.ToolId,
-		Name:     t.Name,
-		ToolType: t.ToolType,
-		Config:   t.Config,
-		Status:   int(t.Status),
-		Sort:     int(t.Sort),
+		ToolID:      t.ToolId,
+		Name:        t.Name,
+		Description: t.Description,
+		Version:     t.Version,
+		SkillMD:     t.SkillMd,
+		FileName:    t.FileName,
+		ToolType:    t.ToolType,
+		Config:      t.Config,
+		Status:      int(t.Status),
+		Sort:        int(t.Sort),
 	}
 }
 

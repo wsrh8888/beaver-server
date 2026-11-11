@@ -133,12 +133,16 @@ type AgentModelInfo struct {
 }
 
 type AgentToolInfo struct {
-	ToolID   string `json:"toolId"`
-	Name     string `json:"name"`
-	ToolType string `json:"toolType"` // builtin|mcp|api
-	Config   string `json:"config"`   // JSON
-	Status   int    `json:"status"`
-	Sort     int    `json:"sort"`
+	ToolID      string `json:"toolId"`
+	Name        string `json:"name"`
+	Description string `json:"description"` // 一句话描述，运行时据此判断是否调用
+	Version     string `json:"version"`
+	SkillMD     string `json:"skillMd"`  // 技能正文
+	FileName    string `json:"fileName"` // 上传时的原始文件名
+	ToolType    string `json:"toolType"`
+	Config      string `json:"config"` // frontmatter 其余字段
+	Status      int    `json:"status"`
+	Sort        int    `json:"sort"`
 }
 
 type AiAssistantInfo struct {
@@ -361,11 +365,15 @@ type CreateAgentModelRes struct {
 }
 
 type CreateAgentToolReq struct {
-	Name     string `json:"name"`
-	ToolType string `json:"toolType"`
-	Config   string `json:"config,optional"` // JSON
-	Status   int    `json:"status,optional,default=1"`
-	Sort     int    `json:"sort,optional"`
+	Name        string `json:"name"`
+	Description string `json:"description,optional"`
+	Version     string `json:"version,optional"`
+	SkillMD     string `json:"skillMd,optional"`
+	FileName    string `json:"fileName,optional"`
+	ToolType    string `json:"toolType,optional"`
+	Config      string `json:"config,optional"`
+	Status      int    `json:"status,optional,default=1"`
+	Sort        int    `json:"sort,optional"`
 }
 
 type CreateAgentToolRes struct {
@@ -2258,6 +2266,21 @@ type OperationLogInfo struct {
 	CreatedAt    string `json:"createdAt"`
 }
 
+type ParseAgentToolFileReq struct {
+	FileName string `json:"fileName"`
+	Data     string `json:"data"` // 文件内容的 base64
+}
+
+type ParseAgentToolFileRes struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Version     string `json:"version"`
+	SkillMD     string `json:"skillMd"`
+	FileName    string `json:"fileName"`
+	Config      string `json:"config"` // frontmatter 其余字段（JSON）
+	Msg         string `json:"msg"`
+}
+
 type PreviewReq struct {
 	FileName string `form:"fileName"`
 }
@@ -2539,12 +2562,16 @@ type UpdateAgentModelRes struct {
 }
 
 type UpdateAgentToolReq struct {
-	ToolID   string `json:"toolId"`
-	Name     string `json:"name,optional"`
-	ToolType string `json:"toolType,optional"`
-	Config   string `json:"config,optional"`
-	Status   int    `json:"status,optional"`
-	Sort     int    `json:"sort,optional"`
+	ToolID      string `json:"toolId"`
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+	Version     string `json:"version,optional"`
+	SkillMD     string `json:"skillMd,optional"`
+	FileName    string `json:"fileName,optional"`
+	ToolType    string `json:"toolType,optional"`
+	Config      string `json:"config,optional"`
+	Status      int    `json:"status,optional"`
+	Sort        int    `json:"sort,optional"`
 }
 
 type UpdateAgentToolRes struct {

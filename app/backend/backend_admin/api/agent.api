@@ -80,14 +80,18 @@ type (
 	}
 	DeleteAgentAppRes {}
 
-	// —— 工具目录（agent_tools）——
+	// —— 技能目录（agent_tools，一个技能 = 一份 SKILL.md）——
 	AgentToolInfo {
-		ToolID   string `json:"toolId"`
-		Name     string `json:"name"`
-		ToolType string `json:"toolType"` // builtin|mcp|api
-		Config   string `json:"config"`   // JSON
-		Status   int    `json:"status"`
-		Sort     int    `json:"sort"`
+		ToolID      string `json:"toolId"`
+		Name        string `json:"name"`
+		Description string `json:"description"` // 一句话描述，运行时据此判断是否调用
+		Version     string `json:"version"`
+		SkillMD     string `json:"skillMd"`  // 技能正文
+		FileName    string `json:"fileName"` // 上传时的原始文件名
+		ToolType    string `json:"toolType"`
+		Config      string `json:"config"` // frontmatter 其余字段
+		Status      int    `json:"status"`
+		Sort        int    `json:"sort"`
 	}
 	GetAgentToolListReq {
 		Status int    `form:"status,optional"` // 0全部 1启用 2停用
@@ -102,23 +106,45 @@ type (
 	GetAgentToolRes {
 		Tool AgentToolInfo `json:"tool"`
 	}
+	// 上传 SKILL.md 解析，不落库：前端先看解析结果，确认后调 tool_create
+	ParseAgentToolFileReq {
+		FileName string `json:"fileName"`
+		Data     string `json:"data"` // 文件内容的 base64
+	}
+	ParseAgentToolFileRes {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Version     string `json:"version"`
+		SkillMD     string `json:"skillMd"`
+		FileName    string `json:"fileName"`
+		Config      string `json:"config"` // frontmatter 其余字段（JSON）
+		Msg         string `json:"msg"`
+	}
 	CreateAgentToolReq {
-		Name     string `json:"name"`
-		ToolType string `json:"toolType"`
-		Config   string `json:"config,optional"` // JSON
-		Status   int    `json:"status,optional,default=1"`
-		Sort     int    `json:"sort,optional"`
+		Name        string `json:"name"`
+		Description string `json:"description,optional"`
+		Version     string `json:"version,optional"`
+		SkillMD     string `json:"skillMd,optional"`
+		FileName    string `json:"fileName,optional"`
+		ToolType    string `json:"toolType,optional"`
+		Config      string `json:"config,optional"`
+		Status      int    `json:"status,optional,default=1"`
+		Sort        int    `json:"sort,optional"`
 	}
 	CreateAgentToolRes {
 		ToolID string `json:"toolId"`
 	}
 	UpdateAgentToolReq {
-		ToolID   string `json:"toolId"`
-		Name     string `json:"name,optional"`
-		ToolType string `json:"toolType,optional"`
-		Config   string `json:"config,optional"`
-		Status   int    `json:"status,optional"`
-		Sort     int    `json:"sort,optional"`
+		ToolID      string `json:"toolId"`
+		Name        string `json:"name,optional"`
+		Description string `json:"description,optional"`
+		Version     string `json:"version,optional"`
+		SkillMD     string `json:"skillMd,optional"`
+		FileName    string `json:"fileName,optional"`
+		ToolType    string `json:"toolType,optional"`
+		Config      string `json:"config,optional"`
+		Status      int    `json:"status,optional"`
+		Sort        int    `json:"sort,optional"`
 	}
 	UpdateAgentToolRes {}
 	DeleteAgentToolReq {
@@ -354,6 +380,9 @@ service backend {
 
 	@handler GetAgentTool
 	get /admin/backend/agent/v1/tool_detail (GetAgentToolReq) returns (GetAgentToolRes)
+
+	@handler ParseAgentToolFile
+	post /admin/backend/agent/v1/tool_parse (ParseAgentToolFileReq) returns (ParseAgentToolFileRes)
 
 	@handler CreateAgentTool
 	post /admin/backend/agent/v1/tool_create (CreateAgentToolReq) returns (CreateAgentToolRes)

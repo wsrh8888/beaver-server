@@ -738,12 +738,16 @@ message AgentToolItem {
   uint64 id = 1;
   string tool_id = 2;
   string name = 3;
-  string tool_type = 4; // builtin|mcp|api
-  string config = 5; // JSON
+  string tool_type = 4; // skill
+  string config = 5; // frontmatter 其余字段
   int32 status = 6;
   int32 sort = 7;
   string source = 8; // official|custom
   string user_id = 9;
+  string description = 10; // 一句话描述
+  string version = 11;
+  string skill_md = 12; // 技能正文
+  string file_name = 13; // 上传时的原始文件名
 }
 message ListAgentToolsReq {
   int32 status = 1; // 0=全部
@@ -760,12 +764,16 @@ message GetAgentToolRes {
 }
 message CreateAgentToolReq {
   string name = 1;
-  string tool_type = 2; // builtin|mcp|api
-  string config = 3; // JSON
+  string tool_type = 2; // skill
+  string config = 3; // frontmatter 其余字段
   int32 status = 4;
   int32 sort = 5;
   string source = 6; // 空则 official
   string user_id = 7;
+  string description = 8;
+  string version = 9;
+  string skill_md = 10;
+  string file_name = 11;
 }
 message CreateAgentToolRes {
   string tool_id = 1;
@@ -774,9 +782,13 @@ message UpdateAgentToolReq {
   string tool_id = 1;
   string name = 2;
   string tool_type = 3;
-  string config = 4; // JSON
+  string config = 4;
   int32 status = 5;
   int32 sort = 6;
+  string description = 7;
+  string version = 8;
+  string skill_md = 9;
+  string file_name = 10;
 }
 message UpdateAgentToolRes {}
 message DeleteAgentToolReq {

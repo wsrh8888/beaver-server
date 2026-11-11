@@ -52,6 +52,18 @@ func (l *UpdateAgentToolLogic) UpdateAgentTool(in *platform_rpc.UpdateAgentToolR
 	if in.Config != "" {
 		updates["config"] = in.Config
 	}
+	if in.Description != "" {
+		updates["description"] = in.Description
+	}
+	if in.Version != "" {
+		updates["version"] = in.Version
+	}
+	if in.SkillMd != "" {
+		updates["skill_md"] = in.SkillMd
+	}
+	if in.FileName != "" {
+		updates["file_name"] = in.FileName
+	}
 	if in.Status != 0 {
 		updates["status"] = int(in.Status)
 	}

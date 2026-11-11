@@ -44,17 +44,21 @@ func NewCreateAgentToolLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 func (l *CreateAgentToolLogic) CreateAgentTool(in *platform_rpc.CreateAgentToolReq) (*platform_rpc.CreateAgentToolRes, error) {
 	toolID := "tool_" + randHex(16)
 	row := agent_models.AgentTool{
-		ToolID:   toolID,
-		Name:     in.Name,
-		ToolType: in.ToolType,
-		Config:   in.Config,
-		Status:   int(in.Status),
-		Sort:     int(in.Sort),
-		Source:   in.Source,
-		UserID:   in.UserId,
+		ToolID:      toolID,
+		Name:        in.Name,
+		Description: in.Description,
+		Version:     in.Version,
+		SkillMD:     in.SkillMd,
+		FileName:    in.FileName,
+		ToolType:    in.ToolType,
+		Config:      in.Config,
+		Status:      int(in.Status),
+		Sort:        int(in.Sort),
+		Source:      in.Source,
+		UserID:      in.UserId,
 	}
 	if row.ToolType == "" {
-		row.ToolType = "builtin"
+		row.ToolType = "skill"
 	}
 	if row.Source == "" {
 		row.Source = "official"
