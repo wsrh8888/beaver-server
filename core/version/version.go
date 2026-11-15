@@ -179,7 +179,7 @@ func (vg *VersionGenerator) getTableName(dataType string) string {
 	case "group_member_logs":
 		return "group_member_change_log_models"
 	case "chats":
-		return "chat_models"
+		return "message_models"
 	case "notification_events":
 		return "notification_events"
 	case "notification_inboxes":

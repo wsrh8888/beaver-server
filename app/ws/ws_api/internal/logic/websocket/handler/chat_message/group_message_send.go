@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/message/message_rpc/types/chat_rpc"
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"

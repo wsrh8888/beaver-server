@@ -27,7 +27,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	relationtypes "beaver/app/relation/relation_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -49,7 +49,7 @@ func NewGetSyncFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 
 func (l *GetSyncFriendsLogic) GetSyncFriends(req *types.GetSyncFriendsReq) (resp *types.GetSyncFriendsRes, err error) {
 	// 调用Friend RPC获取好友版本信息
-	friendResp, err := l.svcCtx.FriendRpc.GetFriendVersions(l.ctx, &friend_rpc.GetFriendVersionsReq{
+	friendResp, err := l.svcCtx.FriendRpc.GetFriendVersions(l.ctx, &relationtypes.GetFriendVersionsReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})

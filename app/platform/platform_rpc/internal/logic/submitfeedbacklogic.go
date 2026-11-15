@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/feedback"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -49,12 +49,12 @@ func (l *SubmitFeedbackLogic) SubmitFeedback(in *platform_rpc.SubmitFeedbackReq)
 		return nil, status.Error(codes.InvalidArgument, "用户ID和反馈内容不能为空")
 	}
 
-	feedback := platform_models.FeedbackModel{
+	feedback := feedback_models.FeedbackModel{
 		UserID:    in.UserId,
 		Content:   in.Content,
-		Type:      platform_models.FeedbackType(in.Type),
-		Status:    platform_models.FeedbackStatusPending,
-		FileNames: platform_models.FileNames(in.FileNames),
+		Type:      feedback_models.FeedbackType(in.Type),
+		Status:    feedback_models.FeedbackStatusPending,
+		FileNames: feedback_models.FileNames(in.FileNames),
 	}
 	if err := l.svcCtx.DB.Create(&feedback).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "提交反馈失败", Data: map[string]any{"userId": in.UserId, "err": err.Error()}})

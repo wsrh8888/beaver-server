@@ -1,0 +1,40 @@
+Name: message
+Host: 0.0.0.0
+Port: 20300
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_message?charset=utf8mb4&parseTime=True&loc=Local
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  DB: 0
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+Etcd: 127.0.0.1:2379
+UserRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: accountrpc.rpc
+ChatRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: messagerpc.rpc
+FriendRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: relationrpc.rpc
+GroupRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: relationrpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

@@ -1,0 +1,67 @@
+syntax = "v1"
+
+type FileReq {
+	UserID string `header:"Beaver-User-Id"`
+}
+
+type FileRes {
+	FileKey      string    `json:"fileKey"`
+	FileURL      string    `json:"fileUrl,optional"`
+	OriginalName string    `json:"originalName"`
+	FileInfo     *FileInfo `json:"fileInfo,optional"`
+}
+
+type FileInfo {
+	Type      string     `json:"type"`
+	ImageFile *ImageFile `json:"imageFile,optional"`
+	VideoFile *VideoFile `json:"videoFile,optional"`
+	AudioFile *AudioFile `json:"audioFile,optional"`
+}
+
+type ImageFile {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type VideoFile {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+type AudioFile {
+	Duration int `json:"duration"`
+}
+
+type PreviewReq {
+	FileKey string `path:"fileKey"`
+}
+
+type PreviewRes {}
+
+@server (
+	group: file
+)
+service asset {
+	@doc "文件预览"
+	@handler Preview
+	get /api/file/preview/:fileKey (PreviewReq) returns (PreviewRes)
+
+	@doc "文件上传七牛云"
+	@handler FileUploadQiniu
+	post /api/file/v1/uploadQiniu (FileReq) returns (FileRes)
+
+	@doc "文件上传本地"
+	@handler FileUploadLocal
+	post /api/file/v1/uploadLocal (FileReq) returns (FileRes)
+
+	@doc "文件上传MinIO"
+	@handler FileUploadMinio
+	post /api/file/v1/uploadMinio (FileReq) returns (FileRes)
+
+	@doc "文件通用上传(按yaml StorageType配置路由到local/qiniu/minio)"
+	@handler FileUpload
+	post /api/file/v1/upload (FileReq) returns (FileRes)
+}
+
+// goctl api go -api asset_api.api -dir . --home ../../../template

@@ -28,7 +28,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/group/group_rpc/types/group_rpc"
+	relationtypes "beaver/app/relation/relation_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -56,7 +56,7 @@ func (l *GetSyncGroupRequestsLogic) GetSyncGroupRequests(req *types.GetSyncGroup
 	}
 
 	// 获取用户群组申请版本信息
-	versionResp, err := l.svcCtx.GroupRpc.GetUserGroupRequestVersions(l.ctx, &group_rpc.GetUserGroupRequestVersionsReq{
+	versionResp, err := l.svcCtx.GroupRpc.GetUserGroupRequestVersions(l.ctx, &relationtypes.GetUserGroupRequestVersionsReq{
 		UserID: userId,
 		Since:  req.Since,
 	})

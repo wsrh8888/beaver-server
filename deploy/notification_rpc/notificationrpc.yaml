@@ -12,10 +12,11 @@ Log:
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
 UserRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: userrpc.rpc
+    Key: accountrpc.rpc
 RedisConf:
   Addr: 127.0.0.1:6379
   Password: '123456'

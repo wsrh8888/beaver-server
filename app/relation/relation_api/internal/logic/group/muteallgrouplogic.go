@@ -1,0 +1,96 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	group_models "beaver/app/relation/relation_models/group"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type MuteAllGroupLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+// 全员禁言/解禁
+func NewMuteAllGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteAllGroupLogic {
+	return &MuteAllGroupLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("mute_all_group", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *MuteAllGroupLogic) MuteAllGroup(req *types.MuteAllGroupReq) (resp *types.MuteAllGroupRes, err error) {
+	// 验证操作者权限（群主或管理员）
+	var operator group_models.GroupMemberModel
+	if err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", req.GroupID, req.UserID).
+		First(&operator).Error; err != nil {
+		return nil, errors.New("您不是该群成员")
+	}
+	if operator.Role != 1 && operator.Role != 2 {
+		return nil, errors.New("权限不足，仅群主或管理员可操作全员禁言")
+	}
+
+	// 获取新版本号
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+	if nextVersion == -1 {
+		return nil, errors.New("系统错误")
+	}
+
+	updates := map[string]any{
+		"is_mute_all": req.IsMuteAll,
+		"version":     nextVersion,
+	}
+	if req.IsMuteAll {
+		now := time.Now()
+		updates["mute_all_at"] = now
+	} else {
+		updates["mute_all_at"] = nil
+	}
+
+	if err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+		Where("group_id = ?", req.GroupID).
+		Updates(updates).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新全员禁言失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+		return nil, errors.New("操作失败")
+	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "群全员禁言状态更新成功",
+		Data: map[string]interface{}{
+			"groupId":   req.GroupID,
+			"userId":    req.UserID,
+			"isMuteAll": req.IsMuteAll,
+		},
+	})
+
+	return &types.MuteAllGroupRes{Version: nextVersion}, nil
+}

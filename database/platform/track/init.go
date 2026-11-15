@@ -22,7 +22,7 @@
 package track
 
 import (
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/track"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -30,7 +30,7 @@ import (
 
 // InitBuckets 幂等初始化默认 track_buckets（日志 + 埋点）
 func InitBuckets(db *gorm.DB) error {
-	buckets := []platform_models.TrackBucket{
+	buckets := []track_models.TrackBucket{
 		{
 			Name:        "海狸客户端-日志",
 			Description: "海狸 IM 客户端运行日志（log）",
@@ -59,9 +59,9 @@ func InitBuckets(db *gorm.DB) error {
 	return nil
 }
 
-func upsertBucket(db *gorm.DB, bucket platform_models.TrackBucket) error {
+func upsertBucket(db *gorm.DB, bucket track_models.TrackBucket) error {
 	var count int64
-	if err := db.Model(&platform_models.TrackBucket{}).Where("bucket_id = ?", bucket.BucketID).Count(&count).Error; err != nil {
+	if err := db.Model(&track_models.TrackBucket{}).Where("bucket_id = ?", bucket.BucketID).Count(&count).Error; err != nil {
 		return fmt.Errorf("检查 Track Bucket 失败: %w", err)
 	}
 	if count == 0 {
@@ -72,7 +72,7 @@ func upsertBucket(db *gorm.DB, bucket platform_models.TrackBucket) error {
 		return nil
 	}
 
-	if err := db.Model(&platform_models.TrackBucket{}).Where("bucket_id = ?", bucket.BucketID).Updates(map[string]any{
+	if err := db.Model(&track_models.TrackBucket{}).Where("bucket_id = ?", bucket.BucketID).Updates(map[string]any{
 		"name":        bucket.Name,
 		"description": bucket.Description,
 		"kind":        bucket.Kind,

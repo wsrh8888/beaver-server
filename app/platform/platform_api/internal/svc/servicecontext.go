@@ -24,8 +24,8 @@ package svc
 import (
 	"errors"
 
-	"beaver/app/file/file_rpc/file"
-	"beaver/app/file/file_rpc/types/file_rpc"
+	"beaver/app/asset/asset_rpc/client/file"
+	assettypes "beaver/app/asset/asset_rpc/types"
 	"beaver/app/platform/platform_api/internal/config"
 	platformcli "beaver/app/platform/platform_rpc/platform"
 	"beaver/common/zrpc_interceptor"
@@ -52,7 +52,7 @@ type ServiceContext struct {
 	Config      config.Config
 	DB          *gorm.DB
 	Redis       *redis.Client
-	FileRpc     file_rpc.FileClient
+	FileRpc     assettypes.FileClient
 	PlatformRpc platformcli.Platform
 	RocketMQ    *corerocketmq.Client
 	OpenSearch  *coreopensearch.Client

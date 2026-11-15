@@ -120,3 +120,13 @@ func FromIncomingMD(ctx context.Context) string {
 	}
 	return vals[0]
 }
+
+// SetOutgoingHeader 在出站 HTTP 请求头上写入 X-Request-Id：优先透传 ctx 中的服务端
+// traceId（保证跨服务链路连续），ctx 中无则新生成一个。供 utils/ajax 出站前调用。
+func SetOutgoingHeader(ctx context.Context, h http.Header) {
+	id := FromContext(ctx)
+	if id == "" {
+		id = New()
+	}
+	h.Set(HeaderRequestID, id)
+}

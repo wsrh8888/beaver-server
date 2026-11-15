@@ -1,0 +1,229 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+
+	"beaver/app/asset/asset_api/internal/svc"
+	"beaver/app/asset/asset_api/internal/types"
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type GetEmojiPackagesLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewGetEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackagesLogic {
+	return &GetEmojiPackagesLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_packages", ctx),
+	}
+}
+
+func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq) (*types.GetEmojiPackagesRes, error) {
+	// 1. 构建查询条件
+	query := l.svcCtx.DB.Model(&emoji_models.EmojiPackage{}).Where("status = ?", 1)
+
+	// 2. 按分类筛选
+	if req.CategoryID > 0 {
+		query = query.Where("category_id = ?", req.CategoryID)
+	}
+
+	// 3. 按类型筛选
+	if req.Type != "" {
+		query = query.Where("type = ?", req.Type)
+	}
+
+	// 4. 获取总数
+	var total int64
+	err := query.Count(&total).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包总数失败", Data: map[string]any{"categoryID": req.CategoryID, "type": req.Type, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取总数失败")
+	}
+
+	// 5. 获取列表
+	var packages []emoji_models.EmojiPackage
+	err = query.Offset((req.Page - 1) * req.Size).Limit(req.Size).Find(&packages).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包列表失败", Data: map[string]any{"page": req.Page, "size": req.Size, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取列表失败")
+	}
+
+	// 6. 获取收藏状态和收藏数
+	packageIDs := make([]string, len(packages))
+	for i, p := range packages {
+		packageIDs[i] = p.PackageID
+	}
+
+	// 获取收藏数
+	collectCounts := make(map[string]int64)
+	var collects []struct {
+		PackageID string
+		Count     int64
+	}
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
+		Select("package_id, count(*) as count").
+		Where("package_id IN ?", packageIDs).
+		Group("package_id").
+		Find(&collects).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包收藏数失败", Data: map[string]any{"err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取收藏数失败")
+	}
+	for _, c := range collects {
+		collectCounts[c.PackageID] = c.Count
+	}
+
+	// 获取表情数量
+	emojiCounts := make(map[string]int64)
+	var emojiCountsData []struct {
+		PackageID string
+		Count     int64
+	}
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageEmoji{}).
+		Select("package_id, count(*) as count").
+		Where("package_id IN ?", packageIDs).
+		Group("package_id").
+		Find(&emojiCountsData).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情包内表情数量失败", Data: map[string]any{"err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取表情数量失败")
+	}
+	for _, c := range emojiCountsData {
+		emojiCounts[c.PackageID] = c.Count
+	}
+
+	// 获取每个表情包的最近7个表情
+	recentEmojis := make(map[string][]types.GetEmojiPackagesSimpleItem)
+	if len(packageIDs) > 0 {
+		for _, packageID := range packageIDs {
+			var packageEmojis []emoji_models.EmojiPackageEmoji
+			err := l.svcCtx.DB.Where("package_id = ?", packageID).
+				Order("sort_order ASC").
+				Limit(7).
+				Find(&packageEmojis).Error
+			if err != nil {
+				continue
+			}
+
+			if len(packageEmojis) == 0 {
+				continue
+			}
+
+			// 获取表情ID列表
+			emojiIDs := make([]string, len(packageEmojis))
+			for i, pe := range packageEmojis {
+				emojiIDs[i] = pe.EmojiID
+			}
+
+			// 批量查询表情信息
+			var emojis []emoji_models.Emoji
+			err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", emojiIDs, 1).
+				Find(&emojis).Error
+			if err != nil {
+				continue
+			}
+
+			// 转换为map便于查找
+			emojiMap := make(map[string]emoji_models.Emoji)
+			for _, emoji := range emojis {
+				emojiMap[emoji.EmojiID] = emoji
+			}
+
+			recentItems := make([]types.GetEmojiPackagesSimpleItem, 0, len(packageEmojis))
+			for _, pe := range packageEmojis {
+				emoji, exists := emojiMap[pe.EmojiID]
+				if !exists {
+					continue
+				}
+
+				var emojiInfo types.GetEmojiPackagesInfo
+				emojiInfo.Width = 64  // 默认值
+				emojiInfo.Height = 64 // 默认值
+
+				if emoji.EmojiInfo.Width > 0 {
+					emojiInfo.Width = emoji.EmojiInfo.Width
+				}
+				if emoji.EmojiInfo.Height > 0 {
+					emojiInfo.Height = emoji.EmojiInfo.Height
+				}
+
+				recentItems = append(recentItems, types.GetEmojiPackagesSimpleItem{
+					EmojiID:   emoji.EmojiID,
+					FileKey:   emoji.FileKey,
+					Title:     emoji.Title,
+					Version:   emoji.Version,
+					Status:    emoji.Status,
+					EmojiInfo: emojiInfo,
+				})
+			}
+			recentEmojis[packageID] = recentItems
+		}
+	}
+
+	// 获取当前用户的收藏状态
+	userCollects := make(map[string]bool)
+	if len(packageIDs) > 0 {
+		var userCollectList []emoji_models.EmojiPackageCollect
+		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageIDs).
+			Find(&userCollectList).Error
+		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "获取用户收藏状态失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+			return nil, status.Error(codes.Internal, "获取收藏状态失败")
+		}
+		for _, c := range userCollectList {
+			userCollects[c.PackageID] = true
+		}
+	}
+
+	// 7. 构建返回数据
+	list := make([]types.EmojiPackageItem, len(packages))
+	for i, p := range packages {
+		list[i] = types.EmojiPackageItem{
+			PackageID:    p.PackageID,
+			Title:        p.Title,
+			CoverFile:    p.CoverFile,
+			Description:  p.Description,
+			Type:         p.Type,
+			CollectCount: int(collectCounts[p.PackageID]),
+			EmojiCount:   int(emojiCounts[p.PackageID]),
+			IsCollected:  userCollects[p.PackageID],
+			IsAuthor:     p.UserID == req.UserID,
+			RecentEmojis: recentEmojis[p.PackageID],
+		}
+	}
+
+	return &types.GetEmojiPackagesRes{
+		Count: total,
+		List:  list,
+	}, nil
+}

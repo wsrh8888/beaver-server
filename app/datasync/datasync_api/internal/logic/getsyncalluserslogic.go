@@ -28,9 +28,8 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/friend/friend_rpc/types/friend_rpc"
-	"beaver/app/group/group_rpc/types/group_rpc"
-	"beaver/app/user/user_rpc/types/user_rpc"
+	relationtypes "beaver/app/relation/relation_rpc/types"
+	accttypes "beaver/app/account/account_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -72,7 +71,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 	// 获取好友列表
 	if needFriends {
-		friendResp, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, &friend_rpc.GetFriendIdsRequest{
+		friendResp, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, &relationtypes.GetFriendIdsRequest{
 			UserID: userId,
 		})
 		if err != nil {
@@ -86,7 +85,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 	// 获取群成员列表
 	if needGroups {
-		groupResp, err := l.svcCtx.GroupRpc.GetUserGroupMembers(l.ctx, &group_rpc.GetUserGroupMembersReq{
+		groupResp, err := l.svcCtx.GroupRpc.GetUserGroupMembers(l.ctx, &relationtypes.GetUserGroupMembersReq{
 			UserID: userId,
 		})
 		if err != nil {
@@ -100,7 +99,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 	// 获取好友验证申请相关的用户（申请加我好友的人）
 	if needFriends {
-		verifyResp, err := l.svcCtx.FriendRpc.GetFriendVerifyVersions(l.ctx, &friend_rpc.GetFriendVerifyVersionsReq{
+		verifyResp, err := l.svcCtx.FriendRpc.GetFriendVerifyVersions(l.ctx, &relationtypes.GetFriendVerifyVersionsReq{
 			UserId: userId,
 			Since:  0, // 获取所有相关验证，不需要增量
 		})
@@ -116,7 +115,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 				verifyIds = append(verifyIds, verify.VerifyId)
 			}
 
-			verifyDetailResp, err := l.svcCtx.FriendRpc.GetFriendVerifiesListByIds(l.ctx, &friend_rpc.GetFriendVerifiesListByIdsReq{
+			verifyDetailResp, err := l.svcCtx.FriendRpc.GetFriendVerifiesListByIds(l.ctx, &relationtypes.GetFriendVerifiesListByIdsReq{
 				VerifyIds: verifyIds,
 			})
 			if err != nil {
@@ -136,7 +135,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 	// 获取群申请相关的用户（申请加入我管理的群的人）
 	if needGroups {
 		// 1. 获取用户管理的群组
-		groupIDsResp, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &group_rpc.GetUserGroupIDsReq{
+		groupIDsResp, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &relationtypes.GetUserGroupIDsReq{
 			UserID: userId,
 		})
 		if err != nil {
@@ -146,7 +145,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 
 		if len(groupIDsResp.GroupIDs) > 0 {
 			// 2. 获取这些群的加入申请
-			requestResp, err := l.svcCtx.GroupRpc.GetGroupJoinRequestsListByIds(l.ctx, &group_rpc.GetGroupJoinRequestsListByIdsReq{
+			requestResp, err := l.svcCtx.GroupRpc.GetGroupJoinRequestsListByIds(l.ctx, &relationtypes.GetGroupJoinRequestsListByIdsReq{
 				GroupIDs: groupIDsResp.GroupIDs,
 				Since:    0, // 获取所有申请，不需要增量
 			})
@@ -181,7 +180,7 @@ func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (r
 	}
 
 	// 调用user RPC获取用户信息，支持增量同步
-	userResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &user_rpc.UserListInfoReq{
+	userResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &accttypes.UserListInfoReq{
 		UserIdList:     relatedUserIds,
 		SinceTimestamp: req.Since, // 传递since参数进行增量过滤
 	})

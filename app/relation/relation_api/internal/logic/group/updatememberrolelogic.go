@@ -1,0 +1,193 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	group_models "beaver/app/relation/relation_models/group"
+	relationtypes "beaver/app/relation/relation_rpc/types"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type UpdateMemberRoleLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewUpdateMemberRoleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateMemberRoleLogic {
+	return &UpdateMemberRoleLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("update_member_role", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *UpdateMemberRoleLogic) UpdateMemberRole(req *types.UpdateMemberRoleReq) (resp *types.UpdateMemberRoleRes, err error) {
+	// 检查群组是否存在
+	var group group_models.GroupModel
+	err = l.svcCtx.DB.Where("group_id = ? AND status = ?", req.GroupID, 1).First(&group).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "群组不存在或已解散", Data: map[string]interface{}{"groupId": req.GroupID}})
+		return nil, err
+	}
+
+	// 检查操作者权限（群主）
+	var operatorMember group_models.GroupMemberModel
+	err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = ?",
+		req.GroupID, req.UserID, 1).First(&operatorMember).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "操作者不是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID}})
+		return nil, err
+	}
+
+	// 检查操作者角色（只有群主可以修改角色）
+	if operatorMember.Role != 1 {
+		l.logger.Error(model.LogMsg{Text: "只有群主可以修改成员角色", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "role": operatorMember.Role}})
+		return nil, err
+	}
+
+	// 检查目标成员是否存在
+	var targetMember group_models.GroupMemberModel
+	err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = ?",
+		req.GroupID, req.MemberID, 1).First(&targetMember).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "目标用户不是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "memberId": req.MemberID}})
+		return nil, err
+	}
+
+	// 不能修改自己的角色
+	if req.UserID == req.MemberID {
+		l.logger.Error(model.LogMsg{Text: "不能修改自己的角色", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID}})
+		return nil, err
+	}
+
+	// 开始事务
+	tx := l.svcCtx.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		tx.Rollback()
+		l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
+		return nil, errors.New("获取版本号失败")
+	}
+
+	// 更新成员角色
+	err = tx.Model(&targetMember).Update("role", req.Role).Error
+	if err != nil {
+		tx.Rollback()
+		l.logger.Error(model.LogMsg{Text: "更新成员角色失败", Data: map[string]interface{}{"groupId": req.GroupID, "memberId": req.MemberID, "role": req.Role, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 注意：群成员的版本号通过 GroupMemberModel 的 Version 字段管理，不需要更新 GroupModel
+
+	// 记录群成员变更日志
+	changeLog := group_models.GroupMemberChangeLogModel{
+		GroupID:    req.GroupID,
+		UserID:     req.MemberID,
+		ChangeType: "role_change",
+		OperatedBy: req.UserID,
+		ChangeTime: time.Now(),
+	}
+	err = tx.Create(&changeLog).Error
+	if err != nil {
+		tx.Rollback()
+		l.logger.Error(model.LogMsg{Text: "记录群成员变更日志失败", Data: map[string]interface{}{"groupId": req.GroupID, "memberId": req.MemberID, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 提交事务
+	err = tx.Commit().Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 异步通知群成员角色变更
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
+		// 获取群成员列表，用于推送通知
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &relationtypes.GetGroupMembersReq{
+			GroupID: req.GroupID,
+		})
+		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+			return
+		}
+
+		// 推送给所有群成员 - 群成员变动通知
+		for _, member := range response.Members {
+			if member.UserID != req.UserID { // 不通知操作者自己
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.GROUP_OPERATION,
+					"type":     wsTypeConst.GroupMemberReceive,
+					"senderId": req.UserID,
+					"targetId": member.UserID,
+					"body": map[string]interface{}{
+						"table": "group_members",
+						"data": []map[string]interface{}{
+							{
+								"version": memberVersion,
+								"groupId": req.GroupID,
+							},
+						},
+					},
+					"conversationId": "",
+				}
+				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
+			}
+		}
+	}()
+
+	resp = &types.UpdateMemberRoleRes{
+		Version: memberVersion,
+	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "群成员角色更新成功",
+		Data: map[string]interface{}{
+			"groupId":  req.GroupID,
+			"userId":   req.UserID,
+			"memberId": req.MemberID,
+			"role":     req.Role,
+		},
+	})
+	return resp, nil
+}

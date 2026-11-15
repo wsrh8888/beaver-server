@@ -1,0 +1,151 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	group_models "beaver/app/relation/relation_models/group"
+	relationtypes "beaver/app/relation/relation_rpc/types"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type UpdateGroupInfoLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateGroupInfoLogic {
+	return &UpdateGroupInfoLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("update_group_info", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoRes, err error) {
+	var newVersion int64 // 定义newVersion变量在更外层作用域
+
+	// 检查操作者权限
+	var member group_models.GroupMemberModel
+	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	if err != nil {
+		return nil, errors.New("操作者不是群组成员")
+	}
+	if !(member.Role == 1 || member.Role == 2) {
+		return nil, errors.New("没有权限更新群组信息")
+	}
+
+	// 构建更新字段
+	updateFields := make(map[string]interface{})
+	if req.Title != "" {
+		updateFields["title"] = req.Title
+	}
+	if req.Avatar != "" {
+		updateFields["avatar"] = req.Avatar
+	}
+	if req.Notice != "" {
+		updateFields["notice"] = req.Notice
+	}
+
+	// 执行更新
+	if len(updateFields) > 0 {
+		// 获取该群的新版本号（独立递增）
+		newVersion = l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+		if newVersion == -1 {
+			l.logger.Error(model.LogMsg{Text: "获取群组版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
+			return nil, errors.New("获取版本号失败")
+		}
+
+		// 添加版本号到更新字段
+		updateFields["version"] = newVersion
+
+		err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+			Where("group_id = ?", req.GroupID).
+			Updates(updateFields).Error
+		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "更新群组信息失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+			return nil, errors.New("更新群组信息失败")
+		}
+	}
+
+	// 异步通知群成员（只有在有更新的情况下才推送）
+	if newVersion > 0 {
+		go func() {
+			// 创建新的context，避免使用请求的context
+			ctx := context.Background()
+
+			// 获取群成员列表
+			response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &relationtypes.GetGroupMembersReq{
+				GroupID: req.GroupID,
+			})
+			if err != nil {
+				l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+				return
+			}
+
+			// 通过 RocketMQ 异步推送给自己和群成员 - 群组信息同步
+			allRecipients := append(response.Members, &relationtypes.GroupMemberInfo{UserID: req.UserID}) // 包含自己
+			for _, member := range allRecipients {
+				payload := map[string]interface{}{
+					"command":  wsCommandConst.GROUP_OPERATION,
+					"type":     wsTypeConst.GroupReceive,
+					"senderId": req.UserID,
+					"targetId": member.UserID,
+					"body": map[string]interface{}{
+						"table": "groups",
+						"data": []map[string]interface{}{
+							{
+								"version": newVersion,
+								"groupId": req.GroupID,
+							},
+						},
+					},
+					"conversationId": req.GroupID,
+				}
+				l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
+			}
+		}()
+	}
+
+	if newVersion > 0 {
+		l.logger.Info(model.LogMsg{
+			Text: "群信息更新成功",
+			Data: map[string]interface{}{
+				"groupId": req.GroupID,
+				"userId":  req.UserID,
+			},
+		})
+	}
+
+	return &types.UpdateGroupInfoRes{
+		Version: newVersion,
+	}, nil
+}

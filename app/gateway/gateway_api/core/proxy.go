@@ -293,7 +293,10 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	service := addrList[1]
-
+	// 服务合并映射：URL 前缀 → 实际 etcd 服务名（如 friend→relation），未命中走默认 {前缀}_api
+	if mapped, ok := p.Config.ServiceAlias[service]; ok {
+		service = mapped
+	}
 	// 增加重试机制
 	var addr string
 	for i := 0; i < 3; i++ {

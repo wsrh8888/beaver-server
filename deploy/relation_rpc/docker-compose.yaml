@@ -1,0 +1,10 @@
+services:
+  relation_rpc:
+    image: wsrh8888/relation_rpc:1.0.0
+    container_name: relation_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./relationrpc.yaml:/etc/relationrpc.yaml:ro
+    restart: "no"
+    pull_policy: always

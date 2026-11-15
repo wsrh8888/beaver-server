@@ -1,0 +1,121 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	friend_models "beaver/app/relation/relation_models/friend"
+	accttypes "beaver/app/account/account_rpc/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+	"beaver/utils/conversation"
+)
+
+type FriendInfoLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewFriendInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FriendInfoLogic {
+	return &FriendInfoLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("friend_info", ctx),
+	}
+}
+
+func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.FriendInfoRes, err error) {
+	// 参数验证
+	if req.FriendID == "" {
+		return nil, errors.New("好友ID不能为空")
+	}
+
+	// 不能查询自己的信息
+	if req.UserID == req.FriendID {
+		return nil, errors.New("不能查询自己的信息")
+	}
+
+	var friend friend_models.FriendModel
+
+	// 通过RPC获取用户信息
+	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &accttypes.UserInfoReq{
+		UserID: req.FriendID,
+	})
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取用户信息失败", Data: map[string]any{"friendId": req.FriendID, "err": err.Error()}})
+		return nil, errors.New("用户不存在")
+	}
+
+	friendUser := res.UserInfo
+
+	// 生成会话Id
+	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
+		return nil, fmt.Errorf("生成会话Id失败: %v", err)
+	}
+
+	// 检查是否为好友
+	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID)
+
+	// 获取好友备注和来源
+	var notice string
+	var source string
+	if isFriend {
+		var friendModel friend_models.FriendModel
+		err = l.svcCtx.DB.Take(&friendModel,
+			"(send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)",
+			req.UserID, req.FriendID, req.FriendID, req.UserID).Error
+		if err == nil {
+			// 根据好友关系的方向确定备注
+			if friendModel.SendUserID == req.UserID {
+				// 当前用户是发送方，使用发送方的备注
+				notice = friendModel.SendUserNotice
+			} else {
+				// 当前用户是接收方，使用接收方的备注
+				notice = friendModel.RevUserNotice
+			}
+			source = friendModel.Source
+		}
+	}
+
+	response := &types.FriendInfoRes{
+		ConversationID: conversationID,
+		UserID:         friendUser.UserId,
+		NickName:       friendUser.NickName,
+		Avatar:         friendUser.Avatar,
+		Abstract:       friendUser.Abstract,
+		Notice:         notice,
+		IsFriend:       isFriend,
+		Email:          friendUser.Email,
+		Source:         source,
+	}
+
+	l.logger.Info(model.LogMsg{Text: "获取好友信息成功", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "isFriend": isFriend, "source": source}})
+	return response, nil
+}

@@ -2,7 +2,7 @@ Name: ws
 Host: 0.0.0.0
 Port: 20400
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_chat?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_message?charset=utf8mb4&parseTime=True&loc=Local
 Redis:
   Addr: 127.0.0.1:6379
   Password: '123456'
@@ -16,15 +16,17 @@ Auth:
 InternalSecret: "6d92c761d23cb0e6bf44473052cbc1dcb368f25a25a170544afab0711a53b13474d7912df2da3e9b530336e28f2235be"
 Etcd: 127.0.0.1:2379
 GroupRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: grouprpc.rpc
+    Key: relationrpc.rpc
 ChatRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: chatrpc.rpc
+    Key: messagerpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
 # WebSocket配置

@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -54,7 +54,7 @@ func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsR
 		pageSize = 10
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.UpdateArchitecture{}).Where("is_active = ?", true)
+	db := l.svcCtx.DB.Model(&update_models.UpdateArchitecture{}).Where("is_active = ?", true)
 	if in.AppId != "" {
 		db = db.Where("app_id = ?", in.AppId)
 	}
@@ -65,7 +65,7 @@ func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsR
 		return nil, status.Error(codes.Internal, "获取架构总数失败")
 	}
 
-	var architectures []platform_models.UpdateArchitecture
+	var architectures []update_models.UpdateArchitecture
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&architectures).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询架构失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取架构列表失败")
@@ -73,7 +73,7 @@ func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsR
 
 	items := make([]*platform_rpc.AppVersionsArchItem, 0, len(architectures))
 	for _, arch := range architectures {
-		var versions []platform_models.UpdateVersion
+		var versions []update_models.UpdateVersion
 		if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").Find(&versions).Error; err != nil {
 			l.logger.Error(model.LogMsg{Text: "查询架构版本失败", Data: map[string]any{"archId": arch.Id, "err": err.Error()}})
 			continue

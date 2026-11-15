@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	friend_models "beaver/app/relation/relation_models/friend"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type UnblockUserLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+// 取消拉黑
+func NewUnblockUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UnblockUserLogic {
+	return &UnblockUserLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("unblock_user", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *UnblockUserLogic) UnblockUser(req *types.UnblockUserReq) (resp *types.UnblockUserRes, err error) {
+	result := l.svcCtx.DB.Where("user_id = ? AND blocked_user_id = ?", req.UserID, req.BlockedUserID).
+		Delete(&friend_models.FriendBlockModel{})
+	if result.Error != nil {
+		l.logger.Error(model.LogMsg{Text: "取消拉黑失败", Data: map[string]interface{}{"userId": req.UserID, "blockedUserId": req.BlockedUserID, "err": result.Error.Error()}})
+		return nil, errors.New("操作失败")
+	}
+	l.logger.Info(model.LogMsg{
+		Text: "取消拉黑成功",
+		Data: map[string]interface{}{
+			"userId":        req.UserID,
+			"blockedUserId": req.BlockedUserID,
+		},
+	})
+	return &types.UnblockUserRes{}, nil
+}

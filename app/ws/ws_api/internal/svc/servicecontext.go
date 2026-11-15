@@ -25,10 +25,10 @@ import (
 	"fmt"
 	"os"
 
-	"beaver/app/chat/chat_rpc/chat"
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
-	"beaver/app/group/group_rpc/group"
-	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/message/message_rpc/chat"
+	"beaver/app/message/message_rpc/types/chat_rpc"
+	"beaver/app/relation/relation_rpc/client/group"
+	"beaver/app/relation/relation_rpc/types"
 	"beaver/app/ws/ws_api/internal/config"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
@@ -45,7 +45,7 @@ type ServiceContext struct {
 	Config     config.Config
 	Redis      *redis.Client
 	DB         *gorm.DB
-	GroupRpc   group_rpc.GroupClient
+	GroupRpc   types.GroupClient
 	ChatRpc    chat_rpc.ChatClient
 	RocketMQ   *corerocketmq.Client
 	InstanceID string

@@ -25,11 +25,11 @@ import (
 	"strings"
 	"time"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/workbench"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 )
 
-func toProtoEntryConfig(cfg platform_models.WorkbenchEntryConfig) *platform_rpc.WorkbenchEntryConfig {
+func toProtoEntryConfig(cfg workbench_models.WorkbenchEntryConfig) *platform_rpc.WorkbenchEntryConfig {
 	return &platform_rpc.WorkbenchEntryConfig{
 		Type:   int32(cfg.Type),
 		Pc:     cfg.PC,
@@ -37,18 +37,18 @@ func toProtoEntryConfig(cfg platform_models.WorkbenchEntryConfig) *platform_rpc.
 	}
 }
 
-func fromProtoEntryConfig(cfg *platform_rpc.WorkbenchEntryConfig) platform_models.WorkbenchEntryConfig {
+func fromProtoEntryConfig(cfg *platform_rpc.WorkbenchEntryConfig) workbench_models.WorkbenchEntryConfig {
 	if cfg == nil {
-		return platform_models.WorkbenchEntryConfig{}
+		return workbench_models.WorkbenchEntryConfig{}
 	}
-	return platform_models.WorkbenchEntryConfig{
+	return workbench_models.WorkbenchEntryConfig{
 		Type:   int8(cfg.Type),
 		PC:     strings.TrimSpace(cfg.Pc),
 		Mobile: strings.TrimSpace(cfg.Mobile),
 	}
 }
 
-func toWorkbenchAppItem(app platform_models.WorkbenchApp) *platform_rpc.WorkbenchAppItem {
+func toWorkbenchAppItem(app workbench_models.WorkbenchApp) *platform_rpc.WorkbenchAppItem {
 	return &platform_rpc.WorkbenchAppItem{
 		Id:             uint64(app.Id),
 		WorkbenchAppId: app.WorkbenchAppID,
@@ -70,7 +70,7 @@ func toWorkbenchAppItem(app platform_models.WorkbenchApp) *platform_rpc.Workbenc
 	}
 }
 
-func toWorkbenchAppPublicItem(app platform_models.WorkbenchApp) *platform_rpc.WorkbenchAppPublicItem {
+func toWorkbenchAppPublicItem(app workbench_models.WorkbenchApp) *platform_rpc.WorkbenchAppPublicItem {
 	return &platform_rpc.WorkbenchAppPublicItem{
 		WorkbenchAppId: app.WorkbenchAppID,
 		Name:           app.Name,
@@ -85,7 +85,7 @@ func toWorkbenchAppPublicItem(app platform_models.WorkbenchApp) *platform_rpc.Wo
 	}
 }
 
-func validateEntryConfig(appType int8, cfg platform_models.WorkbenchEntryConfig) string {
+func validateEntryConfig(appType int8, cfg workbench_models.WorkbenchEntryConfig) string {
 	// type: 0 路由，1 URL；appType: 0 内部，1 第三方
 	if cfg.Type != 0 && cfg.Type != 1 {
 		return "入口类型不合法"

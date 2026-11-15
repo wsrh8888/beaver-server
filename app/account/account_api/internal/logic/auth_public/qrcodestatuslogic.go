@@ -1,0 +1,155 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"beaver/app/account/account_api/internal/svc"
+	"beaver/app/account/account_api/internal/types"
+	auth_models "beaver/app/account/account_models/auth"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/common/middleware/ua"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+	"beaver/utils/device"
+	"beaver/utils/jwts"
+
+	"github.com/go-redis/redis"
+)
+
+type QrcodeStatusLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewQrcodeStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QrcodeStatusLogic {
+	return &QrcodeStatusLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("qrcode_status", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.QrcodeStatusRes, error) {
+	key := fmt.Sprintf(QrcodeKeyFmt, req.Token)
+	sessionStr, err := l.svcCtx.Redis.Get(key).Result()
+	if err == redis.Nil {
+		return &types.QrcodeStatusRes{Status: QrcodeStatusExpired}, nil
+	}
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "二维码状态读取失败",
+			Data: map[string]any{"err": err.Error()},
+		})
+		return nil, fmt.Errorf("服务内部异常")
+	}
+
+	var session QrcodeSession
+	if err = json.Unmarshal([]byte(sessionStr), &session); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "二维码会话解析失败",
+			Data: map[string]any{"err": err.Error()},
+		})
+		return nil, fmt.Errorf("服务内部异常")
+	}
+	if session.Status == QrcodeStatusPending {
+		return &types.QrcodeStatusRes{Status: QrcodeStatusPending}, nil
+	}
+	if session.Status != QrcodeStatusConfirmed {
+		return &types.QrcodeStatusRes{Status: QrcodeStatusExpired}, nil
+	}
+
+	infoRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &accttypes.UserInfoReq{UserID: session.ScannedUserID})
+	if err != nil || infoRes.UserInfo == nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码用户查询失败",
+			Data: map[string]any{"userId": session.ScannedUserID},
+		})
+		return nil, fmt.Errorf("用户不存在")
+	}
+	user := infoRes.UserInfo
+
+	profile := ua.Profile(l.ctx)
+	preciseType := ua.DeviceType(l.ctx)
+	deviceGroup := ua.DeviceGroup(l.ctx)
+
+	jwtExpireHours := QrcodeTokenExpireHours
+	token, err := jwts.GenToken(jwts.JwtPayLoad{
+		NickName: user.NickName,
+		UserID:   user.UserId,
+		DeviceID: req.DeviceID,
+	}, l.svcCtx.Config.Auth.AccessSecret, jwtExpireHours)
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码登录签发令牌失败",
+			Data: map[string]any{"userId": user.UserId, "err": err.Error()},
+		})
+		return nil, fmt.Errorf("服务内部异常")
+	}
+
+	loginKey := fmt.Sprintf("user_authentication_session:%s:%s", user.UserId, deviceGroup)
+	loginInfo, _ := json.Marshal(map[string]any{
+		"token": token, "device_id": req.DeviceID, "device_type": preciseType,
+		"device_group": deviceGroup, "login_time": time.Now().Format("2006-01-02 15:04:05"),
+		"source": session.Source,
+	})
+	if err = l.svcCtx.Redis.Set(loginKey, string(loginInfo), time.Duration(jwtExpireHours)*time.Hour).Err(); err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "扫码登录写入会话失败",
+			Data: map[string]any{"userId": user.UserId, "err": err.Error()},
+		})
+		return nil, fmt.Errorf("服务内部异常")
+	}
+
+	var credential auth_models.AuthCredentialModel
+	if l.svcCtx.DB.Take(&credential, "user_id = ?", user.UserId).Error == nil {
+		now := time.Now()
+		credential.LastLoginAt = &now
+		credential.LoginCount++
+		_ = l.svcCtx.DB.Save(&credential).Error
+	}
+
+	_ = device.UpsertOnLogin(l.svcCtx.DB, user.UserId, req.DeviceID, profile, req.ClientIP)
+
+	l.svcCtx.Redis.Del(key)
+
+	l.logger.Info(model.LogMsg{
+		Text: "扫码登录成功",
+		Data: map[string]any{
+			"userId":      user.UserId,
+			"deviceGroup": deviceGroup,
+			"source":      session.Source,
+		},
+	})
+
+	return &types.QrcodeStatusRes{
+		Status: QrcodeStatusConfirmed,
+		Token:  token,
+		UserID: user.UserId,
+		Source: session.Source,
+	}, nil
+}

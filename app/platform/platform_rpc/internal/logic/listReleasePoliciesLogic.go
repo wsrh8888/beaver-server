@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -42,8 +42,8 @@ func NewListReleasePoliciesLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *ListReleasePoliciesLogic) ListReleasePolicies(in *platform_rpc.ListReleasePoliciesReq) (*platform_rpc.ListReleasePoliciesRes, error) {
-	var list []platform_models.UpdateReleasePolicy
-	db := l.svcCtx.DB.Model(&platform_models.UpdateReleasePolicy{})
+	var list []update_models.UpdateReleasePolicy
+	db := l.svcCtx.DB.Model(&update_models.UpdateReleasePolicy{})
 	if in.AppId != "" {
 		db = db.Where("app_id = ?", in.AppId)
 	}

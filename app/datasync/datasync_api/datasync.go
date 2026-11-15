@@ -29,6 +29,7 @@ import (
 	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
+	"net/http"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -48,6 +49,17 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	// S2S 内部编排面（供收费模块调用 A 主体核心能力）：换票端点不挂 Bearer 中间件，
+	// 业务端点挂 InternalToken 验签。
+	server.AddRoutes([]rest.Route{
+		{
+			Method:  http.MethodPost,
+			Path:    "/internal/token",
+			Handler: handler.TokenHandler(c),
+		},
+	})
+	handler.RegisterS2SHandlers(server, ctx)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 

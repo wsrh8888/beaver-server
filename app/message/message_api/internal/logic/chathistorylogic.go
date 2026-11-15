@@ -1,0 +1,211 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"encoding/json"
+
+	"beaver/app/message/message_api/internal/svc"
+	"beaver/app/message/message_api/internal/types"
+	"beaver/app/message/message_models"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/common/list_query"
+	"beaver/common/models"
+	"beaver/common/models/ctype"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type ChatHistoryLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewChatHistoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatHistoryLogic {
+	return &ChatHistoryLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("chat_history", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.ChatHistoryRes, err error) {
+	// 过滤掉当前用户主动删除的消息
+	subQuery := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).
+		Select("message_id").
+		Where("user_id = ?", req.UserID)
+
+	chatMessages, count, err := list_query.ListQuery(l.svcCtx.DB, message_models.ChatMessage{}, list_query.Option{
+		PageInfo: models.PageInfo{
+			Page:  req.Page,
+			Limit: req.Limit,
+			Sort:  "created_at desc",
+		},
+		Where: l.svcCtx.DB.Where("conversation_id = ? AND message_id NOT IN (?)", req.ConversationID, subQuery),
+		// 移除Preload，因为微服务架构中不使用跨服务外键
+	})
+
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "查询聊天历史失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"conversationId": req.ConversationID,
+				"err":            err.Error(),
+			},
+		})
+		return nil, err
+	}
+
+	// 收集需要查询用户信息的UserID列表（排除通知消息）
+	var userIds []string
+	userIdSet := make(map[string]bool)
+	for _, chat := range chatMessages {
+		if chat.SendUserID != nil && *chat.SendUserID != "" {
+			if !userIdSet[*chat.SendUserID] {
+				userIds = append(userIds, *chat.SendUserID)
+				userIdSet[*chat.SendUserID] = true
+			}
+		}
+	}
+
+	// 批量获取用户信息
+	userInfoMap := make(map[string]types.Sender)
+	if len(userIds) > 0 {
+		userListResp, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, &accttypes.UserListInfoReq{
+			UserIdList: userIds,
+		})
+		if err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "批量获取用户信息失败",
+				Data: map[string]any{
+					"userId":         req.UserID,
+					"conversationId": req.ConversationID,
+					"err":            err.Error(),
+				},
+			})
+			// 不返回错误，继续处理，为没有用户信息的消息设置默认值
+		} else {
+			// 转换用户信息
+			for userId, userInfo := range userListResp.UserInfo {
+				userInfoMap[userId] = types.Sender{
+					UserID:   userId,
+					NickName: userInfo.NickName,
+					Avatar:   userInfo.Avatar,
+					UserType: int8(userInfo.UserType),
+				}
+			}
+		}
+	}
+
+	// 构建消息历史
+	var chatHistory []types.Message
+	for _, chat := range chatMessages {
+		// 转换消息内容
+		var msg types.Msg
+		if chat.Msg != nil {
+			err := convertCtypeMsgToTypesMsg(*chat.Msg, &msg)
+			if err != nil {
+				l.logger.Error(model.LogMsg{
+					Text: "消息内容转换失败",
+					Data: map[string]any{
+						"userId":    req.UserID,
+						"messageId": chat.MessageID,
+						"err":       err.Error(),
+					},
+				})
+				return nil, err
+			}
+		}
+
+		// 处理发送者信息
+		var sender types.Sender
+		sendUserID := ""
+		if chat.SendUserID != nil {
+			sendUserID = *chat.SendUserID
+		}
+
+		if sendUserID != "" {
+			// 普通用户消息
+			if userInfo, exists := userInfoMap[sendUserID]; exists {
+				sender = userInfo
+			} else {
+				// 用户信息获取失败，使用默认值
+				sender = types.Sender{
+					UserID:   sendUserID,
+					NickName: "未知用户",
+					Avatar:   "",
+				}
+			}
+		} else {
+			// 通知消息：SendUserID为空
+			sender = types.Sender{
+				UserID:   "",
+				NickName: "通知消息",
+				Avatar:   "",
+			}
+		}
+
+		message := types.Message{
+			Id:               chat.Id,
+			MessageID:        chat.MessageID,
+			ConversationID:   chat.ConversationID,
+			ConversationType: chat.ConversationType,
+			Sender:           sender,
+			CreatedAt:        chat.CreatedAt.String(),
+			Msg:              msg,
+			Seq:              chat.Seq,
+		}
+		chatHistory = append(chatHistory, message)
+	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "查询聊天历史成功",
+		Data: map[string]any{
+			"userId":         req.UserID,
+			"conversationId": req.ConversationID,
+			"count":          count,
+			"listCount":      len(chatHistory),
+		},
+	})
+	return &types.ChatHistoryRes{
+		Count: count,
+		List:  chatHistory,
+	}, nil
+}
+
+// Convert ctype.Msg to types.MsgType
+func convertCtypeMsgToTypesMsg(ctypeMsg ctype.Msg, typesMsg *types.Msg) error {
+	// 先用JSON解码为一个通用结构体
+	encodedMsg, err := json.Marshal(ctypeMsg)
+	if err != nil {
+		return err
+	}
+	// 再将其解码为目标类型
+	err = json.Unmarshal(encodedMsg, typesMsg)
+	if err != nil {
+		return err
+	}
+	return nil
+}

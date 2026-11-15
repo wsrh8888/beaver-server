@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -51,7 +51,7 @@ func (l *ListAppsLogic) ListApps(in *platform_rpc.ListAppsReq) (*platform_rpc.Li
 		pageSize = 10
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.UpdateApp{})
+	db := l.svcCtx.DB.Model(&update_models.UpdateApp{})
 	if in.IsActive != nil && *in.IsActive {
 		db = db.Where("is_active = ?", true)
 	}
@@ -62,7 +62,7 @@ func (l *ListAppsLogic) ListApps(in *platform_rpc.ListAppsReq) (*platform_rpc.Li
 		return nil, err
 	}
 
-	var apps []platform_models.UpdateApp
+	var apps []update_models.UpdateApp
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&apps).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询应用列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err

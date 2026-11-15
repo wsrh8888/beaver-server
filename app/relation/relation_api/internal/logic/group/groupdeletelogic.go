@@ -1,0 +1,165 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/message/message_rpc/types/chat_rpc"
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	group_models "beaver/app/relation/relation_models/group"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type GroupDeleteLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewGroupDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupDeleteLogic {
+	return &GroupDeleteLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("group_delete", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.GroupDeleteRes, err error) {
+	var groupMember group_models.GroupMemberModel
+	err = l.svcCtx.DB.Take(&groupMember, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	if err != nil {
+		return nil, errors.New("用户不是群组成员")
+	}
+	if groupMember.Role != 1 {
+		return nil, errors.New("只有群主才可以删除群组")
+	}
+
+	// 获取该群的版本号（独立递增）
+	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", req.GroupID)
+	if groupVersion == -1 {
+		l.logger.Error(model.LogMsg{Text: "获取群组版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
+		return nil, errors.New("获取版本号失败")
+	}
+
+	// 获取群成员列表，用于推送通知
+	var memberList []group_models.GroupMemberModel
+	err = l.svcCtx.DB.Find(&memberList, "group_id = ? AND status = ?", req.GroupID, 1).Error
+	if err != nil {
+		return nil, errors.New("获取群成员失败")
+	}
+
+	// 获取群成员版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
+		return nil, errors.New("获取版本号失败")
+	}
+
+	// 将群组状态改为解散（逻辑删除），并更新版本号
+	err = l.svcCtx.DB.Model(&group_models.GroupModel{}).
+		Where("group_id = ?", req.GroupID).
+		Updates(map[string]interface{}{
+			"status":  3, // 3=解散
+			"version": groupVersion,
+		}).Error
+	if err != nil {
+		return nil, errors.New("解散群组失败")
+	}
+
+	// 全员成员关系失效（与退群一致：status=2 退出）
+	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
+		Where("group_id = ? AND status = ?", req.GroupID, 1).
+		Updates(map[string]interface{}{
+			"status":  2, // 2=退出
+			"version": memberVersion,
+		}).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+		return nil, errors.New("解散群组失败")
+	}
+
+	conversationId := "group_" + req.GroupID
+	if _, dissolveErr := l.svcCtx.ChatRpc.DissolveConversation(l.ctx, &chat_rpc.DissolveConversationReq{
+		ConversationId: conversationId,
+	}); dissolveErr != nil {
+		l.logger.Error(model.LogMsg{Text: "解散群会话失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": dissolveErr.Error()}})
+	}
+
+	// 异步通知所有成员：群资料解散 + 成员关系失效
+	go func() {
+		memberData := make([]map[string]interface{}, 0, len(memberList))
+		for _, member := range memberList {
+			memberData = append(memberData, map[string]interface{}{
+				"version": memberVersion,
+				"groupId": req.GroupID,
+				"userId":  member.UserID,
+			})
+		}
+
+		for _, member := range memberList {
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.UserID,
+				"targetId": member.UserID,
+				"body": map[string]interface{}{
+					"tables": []map[string]interface{}{
+						{
+							"table": "groups",
+							"data": []map[string]interface{}{
+								{
+									"version": groupVersion,
+									"groupId": req.GroupID,
+								},
+							},
+						},
+						{
+							"table": "group_members",
+							"data":  memberData,
+						},
+					},
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
+		}
+	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "群解散成功",
+		Data: map[string]interface{}{
+			"groupId": req.GroupID,
+			"userId":  req.UserID,
+		},
+	})
+
+	return &types.GroupDeleteRes{
+		Version: groupVersion,
+	}, nil
+}

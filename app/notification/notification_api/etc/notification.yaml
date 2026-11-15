@@ -13,24 +13,28 @@ Log:
   Stat: false
 Etcd: 127.0.0.1:2379
 UserRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: userrpc.rpc
+    Key: accountrpc.rpc
 AuthRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: authrpc.rpc
+    Key: accountrpc.rpc
 FriendRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: friendrpc.rpc
+    Key: relationrpc.rpc
 ChatRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: chatrpc.rpc
+    Key: messagerpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876

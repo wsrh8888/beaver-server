@@ -39,7 +39,7 @@
 
 ## 🏗️ 架构概览
 
-客户端（Flutter / Electron / 管理端）统一经 API 网关访问各业务服务；服务间通过 gRPC 协作，WebSocket 负责长连接推送。
+客户端（Flutter / Electron）统一经 API 网关访问各业务服务；后台管理端直连 `backend_admin`（自带 JWT 鉴权）。同一团队内服务间通过 etcd gRPC 协作，跨团队一律走对方网关的 S2S 接口（`/internal/<Module>.<Method>`），WebSocket 负责长连接推送。
 
 ```
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
@@ -50,43 +50,44 @@
                          │
               ┌──────────▼──────────┐
               │  gateway_api :20800  │
-              │  gateway_admin :40800│
               └──────────┬──────────┘
                          │
     ┌────────────────────┼────────────────────┐
     │                    │                    │
- user/auth/friend   chat/ws/group/file    platform/open/call
- moment/emoji/...   notification/datasync   backend :40000
+ account/relation   message/ws/asset    platform/notification
     │                    │                    │
     └────────────────────┼────────────────────┘
                          │
               ┌──────────▼──────────┐
               │ MySQL · Redis · ETCD │
               └─────────────────────┘
+
+  后台管理端 ──────────► backend_admin :40000（自带 JWT 鉴权 / CORS）
+  跨团队调用 ──────────► 对方网关 /internal/*（S2S，client_credentials 换票）
 ```
 
 ### 服务端口
 
-| 服务 | API 端口 | RPC 端口 | 说明 |
-|------|---------:|---------:|------|
-| user | 20000 | 30000 | 用户 |
-| auth | 20100 | 30100 | 认证 |
-| friend | 20200 | 30200 | 好友 |
-| chat | 20300 | 30300 | 聊天 |
-| ws | 20400 | - | WebSocket |
-| group | 20500 | 30500 | 群组 |
-| file | 20600 | 30600 | 文件 |
-| emoji | 20700 | 30700 | 表情 |
-| gateway_api | 20800 | - | 客户端 API 网关 |
-| moment | 20900 | 30800 | 朋友圈 |
-| notification | 21000 | 31000 | 通知 |
-| platform | 21600 | 31100 | 平台（字典 / 反馈 / 更新 / 日志等） |
-| datasync | 21700 | - | 数据同步 |
-| call | 21800 | 31800 | 通话 |
-| open_api | 21900 | 30900 | 开放平台 API |
-| open_portal | 22000 | - | 开放平台门户 |
-| backend | 40000 | - | 后台管理 |
-| gateway_admin | 40800 | - | 管理端网关 |
+| 服务 | API 端口 | RPC 端口 | 所属仓库 | 说明 |
+|------|---------:|---------:|------|------|
+| gateway_api | 20800 | - | beaver-server | 客户端 API 网关 |
+| account | 20100 | 30100 | beaver-server | 用户 + 认证（已合并） |
+| relation | 20200 | 30200 | beaver-server | 好友 + 群组（已合并） |
+| message | 20300 | 30300 | beaver-server | 聊天（chat 更名） |
+| ws | 20400 | - | beaver-server | WebSocket |
+| asset | 20600 | 30600 | beaver-server | 文件 + 表情（已合并） |
+| notification | 21000 | 31000 | beaver-server | 通知 |
+| platform | 21600 | 31100 | beaver-server | 平台（字典 / 反馈 / 更新 / 日志等） |
+| datasync | 21700 | - | beaver-server | 数据同步 |
+| moment | 20900 | 30800 | beaver-social | 圈子动态 |
+| call | 21800 | 31800 | beaver-call | 通话 |
+| open_api | 21900 | 30900 | beaver-open | 开放平台 API |
+| open_portal | 22000 | - | beaver-open | 开放平台门户 |
+| circle | 22100 | 32100 | beaver-social | 圈子 |
+| ai | 22200 | 32200 | beaver-ai | AI 服务 |
+| agent | 22300 | - | beaver-ai | 智能体（Python，静态 X-Internal-Token） |
+| doc | 22400 | 31300 | beaver-doc | 在线文档 |
+| backend_admin | 40000 | - | beaver-backend | 后台管理（自带 JWT 鉴权 / CORS） |
 
 > 完整端口表见 [`server.md`](server.md)；实际部署以各服务 `etc/*.yaml` 为准。
 

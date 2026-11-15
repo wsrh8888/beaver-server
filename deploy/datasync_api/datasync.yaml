@@ -1,4 +1,4 @@
-Name: datasync
+Name: datasync_api
 Host: 0.0.0.0
 Port: 21700
 Mysql:
@@ -12,58 +12,93 @@ Log:
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
 Etcd: 127.0.0.1:2379
+FileRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: assetrpc.rpc
+PlatformRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: platformrpc.rpc
+AuthRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: accountrpc.rpc
 FriendRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: friendrpc.rpc
+    Key: relationrpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
 GroupRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: grouprpc.rpc
-  Timeout: 10000 # 10秒超时，单位毫秒
-CircleRpc:
-  Etcd:
-    Hosts:
-    - 127.0.0.1:2379
-    Key: circlerpc.rpc
+    Key: relationrpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
 UserRpc:
+  NonBlock: true
   Etcd:
     Hosts:
-    - 127.0.0.1:2379
-    Key: userrpc.rpc
+      - 127.0.0.1:2379
+    Key: accountrpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
 ChatRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: chatrpc.rpc
-  Timeout: 10000 # 10秒超时，单位毫秒
-MomentRpc:
-  Etcd:
-    Hosts:
-    - 127.0.0.1:2379
-    Key: momentrpc.rpc
+    Key: messagerpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
 EmojiRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
-    Key: emojirpc.rpc
+    Key: assetrpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
 NotificationRpc:
+  NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: notificationrpc.rpc
   Timeout: 10000 # 10秒超时，单位毫秒
-AgentRpc:
-  Etcd:
-    Hosts:
-    - 127.0.0.1:2379
-    Key: agentrpc.rpc
-  Timeout: 10000 # 10秒超时，单位毫秒
-
+# Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 agent_api 网关（静态 X-Internal-Token）。
+Agent:
+  BaseURL: http://127.0.0.1:22300
+  InternalToken: ""
+# S2S 出站：圈子服务（beaver-server-social/app/circle），经 client_credentials 换票后调其 /internal/* 接口。
+# BaseURL 指向圈子服务的 S2S 网关，须与该服务自身的 S2S Secret/Clients 配置成对。
+Circle:
+  BaseURL: http://127.0.0.1:22100
+  ClientID: beaver-server
+  ClientSecret: s2s-dev-secret
+# S2S 入站凭据：收费模块（beaver-social）用 client_id/client_secret 换 Bearer 后调 /internal/* 能力。
+# dev 占位，生产用 ${VAR} 注入；Secret 与 Clients 任一缺失，datasync_api 启动即 panic（fail-closed）。
+S2S:
+  Secret: s2s-dev-secret
+  Clients:
+    beaver-social:
+      ClientID: beaver-social
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-call:
+      ClientID: beaver-call
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-backend:
+      ClientID: beaver-backend
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true

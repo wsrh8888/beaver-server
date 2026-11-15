@@ -26,7 +26,8 @@ import (
 	"errors"
 	"time"
 
-	"beaver/app/circle/circle_rpc/types/circle_rpc"
+	"beaver/remote/circle"
+	circletype "beaver/types/remote/circle"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	beaverlog "beaver/utils/beaverlog"
@@ -57,7 +58,7 @@ func (l *GetSyncCircleInfoLogic) GetSyncCircleInfo(req *types.GetSyncCircleInfoR
 
 	serverTimestamp := time.Now().UnixMilli()
 
-	circleResp, err := l.svcCtx.CircleRpc.GetCircleVersions(l.ctx, &circle_rpc.GetCircleVersionsReq{
+	circleResp, err := circle.GetCircleVersions(l.ctx, nil, &circletype.GetCircleVersionsReq{
 		UserId:  userId,
 		Version: req.Since,
 	})

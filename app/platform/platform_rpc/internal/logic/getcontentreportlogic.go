@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/report"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -47,7 +47,7 @@ func NewGetContentReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetContentReportLogic) GetContentReport(in *platform_rpc.GetContentReportReq) (*platform_rpc.GetContentReportRes, error) {
-	var report platform_models.ContentReportModel
+	var report report_models.ContentReportModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&report).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "举报不存在")

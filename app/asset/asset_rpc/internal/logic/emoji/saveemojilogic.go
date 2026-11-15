@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package emojilogic
+
+import (
+	"context"
+	"errors"
+
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	"beaver/app/asset/asset_rpc/internal/svc"
+	"beaver/app/asset/asset_rpc/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"github.com/google/uuid"
+
+	"gorm.io/gorm"
+)
+
+type SaveEmojiLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewSaveEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveEmojiLogic {
+	return &SaveEmojiLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("save_emoji", ctx)}
+}
+
+func (l *SaveEmojiLogic) SaveEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes, error) {
+	if in.Delete != nil && *in.Delete {
+		return l.deleteEmoji(in.EmojiId)
+	}
+	if in.EmojiId == "" {
+		return l.createEmoji(in)
+	}
+	return l.updateEmoji(in)
+}
+
+func (l *SaveEmojiLogic) createEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes, error) {
+	version := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+	if version == -1 {
+		return nil, errors.New("获取版本号失败")
+	}
+
+	info := emoji_models.EmojiInfo{}
+	if in.EmojiInfo != nil {
+		info.Width = int(in.EmojiInfo.Width)
+		info.Height = int(in.EmojiInfo.Height)
+	}
+
+	emoji := emoji_models.Emoji{
+		EmojiID:   uuid.New().String(),
+		FileKey:   in.FileKey,
+		Title:     in.Title,
+		EmojiInfo: info,
+		Status:    1,
+		Version:   version,
+	}
+	if err := l.svcCtx.DB.Create(&emoji).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建表情失败", Data: map[string]any{"title": in.Title, "err": err.Error()}})
+		return nil, err
+	}
+	l.logger.Info(model.LogMsg{Text: "创建表情成功", Data: map[string]interface{}{"emojiId": emoji.EmojiID, "title": in.Title}})
+	return &types.SaveEmojiRes{EmojiId: emoji.EmojiID}, nil
+}
+
+func (l *SaveEmojiLogic) updateEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes, error) {
+	var emoji emoji_models.Emoji
+	if err := l.svcCtx.DB.Where("emoji_id = ?", in.EmojiId).First(&emoji).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("表情不存在")
+		}
+		l.logger.Error(model.LogMsg{Text: "查询表情失败", Data: map[string]any{"emojiId": in.EmojiId, "err": err.Error()}})
+		return nil, err
+	}
+
+	updates := map[string]interface{}{}
+	if in.PatchFileKey != nil {
+		updates["file_key"] = *in.PatchFileKey
+	}
+	if in.PatchTitle != nil {
+		if *in.PatchTitle != emoji.Title {
+			var count int64
+			if err := l.svcCtx.DB.Model(&emoji_models.Emoji{}).
+				Where("title = ? AND emoji_id != ?", *in.PatchTitle, in.EmojiId).Count(&count).Error; err != nil {
+				l.logger.Error(model.LogMsg{Text: "校验表情名称唯一性失败", Data: map[string]any{"emojiId": in.EmojiId, "err": err.Error()}})
+				return nil, err
+			}
+			if count > 0 {
+				return nil, errors.New("已存在同名表情")
+			}
+		}
+		updates["title"] = *in.PatchTitle
+	}
+	if len(updates) == 0 {
+		return &types.SaveEmojiRes{EmojiId: in.EmojiId}, nil
+	}
+
+	version := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
+	if version == -1 {
+		return nil, errors.New("获取版本号失败")
+	}
+	updates["version"] = version
+
+	if err := l.svcCtx.DB.Model(&emoji).Updates(updates).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新表情失败", Data: map[string]any{"emojiId": in.EmojiId, "err": err.Error()}})
+		return nil, err
+	}
+	l.logger.Info(model.LogMsg{Text: "更新表情成功", Data: map[string]interface{}{"emojiId": in.EmojiId, "version": version}})
+	return &types.SaveEmojiRes{EmojiId: in.EmojiId}, nil
+}
+
+func (l *SaveEmojiLogic) deleteEmoji(emojiID string) (*types.SaveEmojiRes, error) {
+	var emoji emoji_models.Emoji
+	if err := l.svcCtx.DB.Where("emoji_id = ?", emojiID).First(&emoji).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("表情不存在")
+		}
+		l.logger.Error(model.LogMsg{Text: "查询表情失败", Data: map[string]any{"emojiId": emojiID, "err": err.Error()}})
+		return nil, err
+	}
+	if err := l.svcCtx.DB.Delete(&emoji).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "删除表情失败", Data: map[string]any{"emojiId": emojiID, "err": err.Error()}})
+		return nil, err
+	}
+	l.logger.Info(model.LogMsg{Text: "删除表情成功", Data: map[string]interface{}{"emojiId": emojiID}})
+	return &types.SaveEmojiRes{EmojiId: emojiID}, nil
+}

@@ -1,0 +1,21 @@
+syntax = "v1"
+
+// 推送 API：注册或更新离线推送 Token（FCM/APNs）
+
+type (
+	RegisterPushTokenReq {
+		UserID       string `header:"Beaver-User-Id"`
+		DeviceID     string `header:"deviceId"`
+		PushToken    string `json:"pushToken"`
+		PushPlatform string `json:"pushPlatform"`
+	}
+	RegisterPushTokenRes  {}
+)
+
+service notification {
+	@doc "注册或更新离线推送 Token（FCM/APNs）"
+	@handler registerPushToken
+	post /api/notification/v1/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
+}
+
+// goctl api go -api notification_api.api -dir . --home ../../../template

@@ -27,7 +27,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
+	assettypes "beaver/app/asset/asset_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -55,7 +55,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	emojiPackageContentVersions := make([]types.EmojiPackageContentVersionItem, 0)
 
 	// 1. 获取用户收藏的表情版本信息
-	emojiCollectResp, err := l.svcCtx.EmojiRpc.GetUserEmojiCollects(l.ctx, &emoji_rpc.GetUserEmojiCollectsReq{
+	emojiCollectResp, err := l.svcCtx.EmojiRpc.GetUserEmojiCollects(l.ctx, &assettypes.GetUserEmojiCollectsReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})
@@ -75,7 +75,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	}
 
 	// 2. 获取用户收藏的表情包版本信息
-	emojiPackageCollectResp, err := l.svcCtx.EmojiRpc.GetUserEmojiPackageCollects(l.ctx, &emoji_rpc.GetUserEmojiPackageCollectsReq{
+	emojiPackageCollectResp, err := l.svcCtx.EmojiRpc.GetUserEmojiPackageCollects(l.ctx, &assettypes.GetUserEmojiPackageCollectsReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})
@@ -95,7 +95,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	}
 
 	// 3. 获取表情包基础数据版本信息
-	emojiPackagesResp, err := l.svcCtx.EmojiRpc.GetEmojiPackages(l.ctx, &emoji_rpc.GetEmojiPackagesReq{
+	emojiPackagesResp, err := l.svcCtx.EmojiRpc.GetEmojiPackages(l.ctx, &assettypes.GetEmojiPackagesReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})
@@ -115,7 +115,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	}
 
 	// 4. 获取表情包内容版本信息
-	emojiPackageContentsResp, err := l.svcCtx.EmojiRpc.GetEmojiPackageContents(l.ctx, &emoji_rpc.GetEmojiPackageContentsReq{
+	emojiPackageContentsResp, err := l.svcCtx.EmojiRpc.GetEmojiPackageContents(l.ctx, &assettypes.GetEmojiPackageContentsReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})

@@ -27,7 +27,7 @@ import (
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -54,7 +54,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 		return &types.ReportVersionRes{}, nil
 	}
 
-	var app platform_models.UpdateApp
+	var app update_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND is_active = ?", req.AppID, true).First(&app).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("应用不存在或已停用")
@@ -63,7 +63,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 		return nil, fmt.Errorf("查询应用失败")
 	}
 
-	var architecture platform_models.UpdateArchitecture
+	var architecture update_models.UpdateArchitecture
 	if err := l.svcCtx.DB.Where("app_id = ? AND platform_id = ? AND arch_id = ? AND is_active = ?",
 		req.AppID, req.PlatformID, req.ArchID, true).First(&architecture).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -73,7 +73,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 		return nil, fmt.Errorf("查询架构失败")
 	}
 
-	var existingReport platform_models.UpdateReport
+	var existingReport update_models.UpdateReport
 	err := l.svcCtx.DB.Where("device_id = ? AND app_id = ? AND architecture_id = ?",
 		req.DeviceID, req.AppID, architecture.Id).First(&existingReport).Error
 
@@ -83,7 +83,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		report := platform_models.UpdateReport{
+		report := update_models.UpdateReport{
 			UserID:         req.UserID,
 			DeviceID:       req.DeviceID,
 			AppID:          req.AppID,

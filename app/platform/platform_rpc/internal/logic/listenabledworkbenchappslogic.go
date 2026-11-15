@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/workbench"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -42,7 +42,7 @@ func NewListEnabledWorkbenchAppsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *ListEnabledWorkbenchAppsLogic) ListEnabledWorkbenchApps(in *platform_rpc.ListEnabledWorkbenchAppsReq) (*platform_rpc.ListEnabledWorkbenchAppsRes, error) {
-	db := l.svcCtx.DB.Model(&platform_models.WorkbenchApp{}).Where("status = ?", 1)
+	db := l.svcCtx.DB.Model(&workbench_models.WorkbenchApp{}).Where("status = ?", 1)
 	if in.Category != nil {
 		db = db.Where("category = ?", *in.Category)
 	}
@@ -51,7 +51,7 @@ func (l *ListEnabledWorkbenchAppsLogic) ListEnabledWorkbenchApps(in *platform_rp
 		db = db.Where("client_scope IN ?", []int8{0, int8(in.ClientScope)})
 	}
 
-	var list []platform_models.WorkbenchApp
+	var list []workbench_models.WorkbenchApp
 	if err := db.Order("sort ASC, id DESC").Find(&list).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询上架工作台应用失败", Data: map[string]any{"clientScope": in.ClientScope, "err": err.Error()}})
 		return nil, err

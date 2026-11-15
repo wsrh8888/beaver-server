@@ -1,0 +1,172 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+
+	"beaver/app/asset/asset_api/internal/svc"
+	"beaver/app/asset/asset_api/internal/types"
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
+)
+
+type GetEmojiPackageDetailLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewGetEmojiPackageDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackageDetailLogic {
+	return &GetEmojiPackageDetailLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_package_detail", ctx),
+	}
+}
+
+func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPackageDetailReq) (*types.GetEmojiPackageDetailRes, error) {
+	// 1. 获取表情包信息
+	var emojiPackage emoji_models.EmojiPackage
+	err := l.svcCtx.DB.Where("package_id = ?", req.PackageID).First(&emojiPackage).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, status.Error(codes.NotFound, "表情包不存在")
+		}
+		l.logger.Error(model.LogMsg{Text: "获取表情包失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取表情包失败")
+	}
+
+	// 2. 检查表情包状态
+	if emojiPackage.Status != 1 {
+		return nil, status.Error(codes.PermissionDenied, "表情包已禁用")
+	}
+
+	// 3. 获取表情包中的表情列表
+	// 首先获取关联关系
+	var emojiPackageEmojis []emoji_models.EmojiPackageEmoji
+	err = l.svcCtx.DB.Where("package_id = ?", req.PackageID).
+		Order("sort_order").
+		Find(&emojiPackageEmojis).Error
+
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包与表情关联关系失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取表情关联失败")
+	}
+
+	// 没有找到表情，返回空列表
+	if len(emojiPackageEmojis) == 0 {
+		return &types.GetEmojiPackageDetailRes{
+			PackageID:    emojiPackage.PackageID,
+			Title:        emojiPackage.Title,
+			CoverFile:    emojiPackage.CoverFile,
+			Description:  emojiPackage.Description,
+			Type:         emojiPackage.Type,
+			CollectCount: 0,
+			EmojiCount:   0,
+			IsCollected:  false,
+			IsAuthor:     emojiPackage.UserID == req.UserID,
+			Emojis:       make([]types.GetEmojiPackageEmojiItem, 0),
+		}, nil
+	}
+
+	// 获取所有表情ID
+	emojiIDs := make([]string, len(emojiPackageEmojis))
+	for i, emojiPackageEmoji := range emojiPackageEmojis {
+		emojiIDs[i] = emojiPackageEmoji.EmojiID
+	}
+
+	// 查询表情详情
+	var emojis []emoji_models.Emoji
+	err = l.svcCtx.DB.Where("emoji_id IN ?", emojiIDs).Find(&emojis).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情详情失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取表情详情失败")
+	}
+
+	// 创建表情ID到表情的映射，方便后续使用
+	emojiMap := make(map[string]emoji_models.Emoji)
+	for _, emoji := range emojis {
+		emojiMap[emoji.EmojiID] = emoji
+	}
+
+	// 4. 获取收藏状态
+	var collectCount int64
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).Where("package_id = ?", req.PackageID).Count(&collectCount).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取收藏数失败", Data: map[string]any{"packageId": req.PackageID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取收藏数失败")
+	}
+
+	// 5. 检查当前用户是否已收藏
+	var isCollected bool
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
+		Where("user_id = ? AND package_id = ?", req.UserID, req.PackageID).
+		First(&emoji_models.EmojiPackageCollect{}).Error
+	if err == nil {
+		isCollected = true
+	}
+
+	// 6. 检查是否是作者
+	isAuthor := emojiPackage.UserID == req.UserID
+
+	// 7. 构建返回数据
+	emojiItems := make([]types.GetEmojiPackageEmojiItem, 0, len(emojiPackageEmojis))
+	packageID := emojiPackage.PackageID
+
+	// 按照关联表中的顺序构建响应
+	for _, emojiPackageEmoji := range emojiPackageEmojis {
+		emoji, exists := emojiMap[emojiPackageEmoji.EmojiID]
+		if !exists {
+			continue // 跳过不存在的表情
+		}
+
+		emojiItems = append(emojiItems, types.GetEmojiPackageEmojiItem{
+			EmojiID: emoji.EmojiID,
+			FileKey: emoji.FileKey, // 使用FileKey字段
+			Title:   emoji.Title,
+			EmojiInfo: &types.GetEmojiPackageInfo{
+				Width:  emoji.EmojiInfo.Width,
+				Height: emoji.EmojiInfo.Height,
+			},
+			PackageID: &packageID,
+		})
+	}
+
+	return &types.GetEmojiPackageDetailRes{
+		PackageID:    emojiPackage.PackageID,
+		Title:        emojiPackage.Title,
+		CoverFile:    emojiPackage.CoverFile,
+		Description:  emojiPackage.Description,
+		Type:         emojiPackage.Type,
+		CollectCount: int(collectCount),
+		EmojiCount:   len(emojiItems),
+		IsCollected:  isCollected,
+		IsAuthor:     isAuthor,
+		Emojis:       emojiItems,
+	}, nil
+}

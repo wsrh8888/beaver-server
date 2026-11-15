@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"beaver/app/auth/auth_rpc/types/auth_rpc"
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	"beaver/app/notification/notification_models"
@@ -64,7 +64,7 @@ func (l *RegisterPushTokenLogic) RegisterPushToken(req *types.RegisterPushTokenR
 		return nil, errors.New("pushPlatform 仅支持 fcm 或 apns")
 	}
 
-	res, err := l.svcCtx.AuthRpc.CheckDeviceActive(l.ctx, &auth_rpc.CheckDeviceActiveReq{
+	res, err := l.svcCtx.AuthRpc.CheckDeviceActive(l.ctx, &accttypes.CheckDeviceActiveReq{
 		UserId:   req.UserID,
 		DeviceId: req.DeviceID,
 	})

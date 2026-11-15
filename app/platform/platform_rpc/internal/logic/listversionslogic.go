@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -51,7 +51,7 @@ func (l *ListVersionsLogic) ListVersions(in *platform_rpc.ListVersionsReq) (*pla
 		pageSize = 10
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.UpdateVersion{})
+	db := l.svcCtx.DB.Model(&update_models.UpdateVersion{})
 	if in.ArchitectureId > 0 {
 		db = db.Where("architecture_id = ?", in.ArchitectureId)
 	}
@@ -62,7 +62,7 @@ func (l *ListVersionsLogic) ListVersions(in *platform_rpc.ListVersionsReq) (*pla
 		return nil, err
 	}
 
-	var list []platform_models.UpdateVersion
+	var list []update_models.UpdateVersion
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&list).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询版本列表失败", Data: map[string]any{"architectureId": in.ArchitectureId, "err": err.Error()}})
 		return nil, err

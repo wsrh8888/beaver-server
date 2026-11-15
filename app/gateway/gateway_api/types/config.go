@@ -27,6 +27,9 @@ type Config struct {
 	Name       string
 	Addr       string `json:",optional"`
 	Etcd       string
+	// ServiceAlias URL 前缀 → 实际服务名（服务合并后按旧前缀路由到合并服务，
+	// 如 friend→relation；未命中映射时按 {前缀}_api 默认规则）。
+	ServiceAlias    map[string]string `json:",optional"`
 	Log        logx.LogConf
 	Prometheus PrometheusConfig
 	Limit          LimitConfig

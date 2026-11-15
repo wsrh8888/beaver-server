@@ -1,6 +1,15 @@
 Name: gateway
 Addr: 0.0.0.0:20800
 etcd: 127.0.0.1:2379
+# 服务合并映射：URL 前缀 → 合并后的服务名（etcd 查 {值}_api）。
+ServiceAlias:
+  chat: message
+  friend: relation
+  group: relation
+  file: asset
+  emoji: asset
+  user: account
+  auth: account
 Log:
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05

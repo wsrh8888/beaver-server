@@ -25,7 +25,7 @@ import (
 	"context"
 	"strings"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/workbench"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -50,7 +50,7 @@ func (l *DeleteWorkbenchAppLogic) DeleteWorkbenchApp(in *platform_rpc.DeleteWork
 		return nil, status.Error(codes.InvalidArgument, "应用 ID 不能为空")
 	}
 
-	result := l.svcCtx.DB.Where("workbench_app_id = ?", in.WorkbenchAppId).Delete(&platform_models.WorkbenchApp{})
+	result := l.svcCtx.DB.Where("workbench_app_id = ?", in.WorkbenchAppId).Delete(&workbench_models.WorkbenchApp{})
 	if result.Error != nil {
 		l.logger.Error(model.LogMsg{Text: "删除工作台应用失败", Data: map[string]any{"workbenchAppId": in.WorkbenchAppId, "err": result.Error.Error()}})
 		return nil, status.Error(codes.Internal, "删除工作台应用失败")

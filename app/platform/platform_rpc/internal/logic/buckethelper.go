@@ -22,7 +22,7 @@
 package logic
 
 import (
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/track"
 
 	"gorm.io/gorm"
 )
@@ -49,7 +49,7 @@ func bucketNameMap(db *gorm.DB, bucketIDs []string) map[string]string {
 		return result
 	}
 
-	var buckets []platform_models.TrackBucket
+	var buckets []track_models.TrackBucket
 	db.Where("bucket_id IN ?", uniqueIDs).Find(&buckets)
 	for _, bucket := range buckets {
 		result[bucket.BucketID] = bucket.Name
@@ -61,7 +61,7 @@ func bucketNameByID(db *gorm.DB, bucketID string) string {
 	if bucketID == "" {
 		return ""
 	}
-	var bucket platform_models.TrackBucket
+	var bucket track_models.TrackBucket
 	if err := db.Where("bucket_id = ?", bucketID).Take(&bucket).Error; err != nil {
 		return ""
 	}

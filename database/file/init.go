@@ -22,7 +22,7 @@
 package fileseed
 
 import (
-	"beaver/app/file/file_models"
+	file_models "beaver/app/asset/asset_models/file"
 	"fmt"
 
 	"gorm.io/gorm"

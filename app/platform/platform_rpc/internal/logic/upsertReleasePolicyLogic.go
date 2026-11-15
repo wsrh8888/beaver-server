@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -69,10 +69,10 @@ func (l *UpsertReleasePolicyLogic) UpsertReleasePolicy(in *platform_rpc.UpsertRe
 		}
 	}
 
-	var policy platform_models.UpdateReleasePolicy
+	var policy update_models.UpdateReleasePolicy
 	err := l.svcCtx.DB.Where("architecture_id = ?", in.ArchitectureId).First(&policy).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		policy = platform_models.UpdateReleasePolicy{
+		policy = update_models.UpdateReleasePolicy{
 			AppID:           in.AppId,
 			ArchitectureID:  uint(in.ArchitectureId),
 			StableVersionID: uint(in.StableVersionId),
@@ -109,7 +109,7 @@ func (l *UpsertReleasePolicyLogic) UpsertReleasePolicy(in *platform_rpc.UpsertRe
 }
 
 func (l *UpsertReleasePolicyLogic) ensureVersionBelongs(architectureID, versionID uint64) error {
-	var version platform_models.UpdateVersion
+	var version update_models.UpdateVersion
 	if err := l.svcCtx.DB.First(&version, versionID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return status.Error(codes.NotFound, "版本不存在")
@@ -127,7 +127,7 @@ func versionLabel(db *gorm.DB, versionID uint) string {
 	if versionID == 0 {
 		return ""
 	}
-	var v platform_models.UpdateVersion
+	var v update_models.UpdateVersion
 	if err := db.First(&v, versionID).Error; err != nil {
 		return ""
 	}

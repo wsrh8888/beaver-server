@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -47,7 +47,7 @@ func NewUpdateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateArchitectureLogic) UpdateArchitecture(in *platform_rpc.UpdateArchitectureReq) (*platform_rpc.UpdateArchitectureRes, error) {
-	var arch platform_models.UpdateArchitecture
+	var arch update_models.UpdateArchitecture
 	if err := l.svcCtx.DB.First(&arch, in.Id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "架构不存在")

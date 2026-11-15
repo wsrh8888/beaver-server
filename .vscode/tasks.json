@@ -2,116 +2,49 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "user_rpc",
+      "label": "account_rpc",
       "type": "shell",
-      "command": "cd app/user/user_rpc;  go run userrpc.go",
+      "command": "cd app/account/account_rpc;  go run accountrpc.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "group_rpc",
+      "label": "asset_rpc",
       "type": "shell",
-      "command": "cd app/group/group_rpc;  go run grouprpc.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    
-    {
-      "label": "friend_rpc",
-      "type": "shell",
-      "command": "cd app/friend/friend_rpc;  go run friendrpc.go",
+      "command": "cd app/asset/asset_rpc;  go run assetrpc.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "chat_rpc",
+      "label": "relation_rpc",
       "type": "shell",
-      "command": "cd app/chat/chat_rpc;  go run chatrpc.go",
+      "command": "cd app/relation/relation_rpc;  go run relationrpc.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "file_rpc",
+      "label": "message_rpc",
       "type": "shell",
-      "command": "cd app/file/file_rpc;  go run filerpc.go",
+      "command": "cd app/message/message_rpc;  go run messagerpc.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "platform_api",
+      "label": "platform_rpc",
       "type": "shell",
-      "command": "cd app/platform/platform_api;  go run platform.go",
+      "command": "cd app/platform/platform_rpc;  go run platformrpc.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "emoji_api",
+      "label": "notification_rpc",
       "type": "shell",
-      "command": "cd app/emoji/emoji_api;  go run emoji.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "auth_api",
-      "type": "shell",
-      "command": "cd app/auth/auth_api;  go run auth.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "file_api",
-      "type": "shell",
-      "command": "cd app/file/file_api;  go run file.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "ws_api",
-      "type": "shell",
-      "command": "cd app/ws/ws_api;  go run ws.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "chat_api",
-      "type": "shell",
-      "command": "cd app/chat/chat_api;  go run chat.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    
-    {
-      "label": "user_api",
-      "type": "shell",
-      "command": "cd app/user/user_api;  go run user.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    {
-      "label": "moment_api",
-      "type": "shell",
-      "command": "cd app/moment/moment_api;  go run moment.go",
-      "problemMatcher": [
-        "$go"
-      ]
-    },
-    
-    {
-      "label": "file_api",
-      "type": "shell",
-      "command": "cd app/file/file_api;  go run file.go",
+      "command": "cd app/notification/notification_rpc;  go run notificationrpc.go",
       "problemMatcher": [
         "$go"
       ]
@@ -125,17 +58,49 @@
       ]
     },
     {
-      "label": "friend_api",
+      "label": "account_api",
       "type": "shell",
-      "command": "cd app/friend/friend_api;  go run friend.go",
+      "command": "cd app/account/account_api;  go run account.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
-      "label": "group_api",
+      "label": "asset_api",
       "type": "shell",
-      "command": "cd app/group/group_api;  go run group.go",
+      "command": "cd app/asset/asset_api;  go run asset.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "relation_api",
+      "type": "shell",
+      "command": "cd app/relation/relation_api;  go run relation.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "message_api",
+      "type": "shell",
+      "command": "cd app/message/message_api;  go run message.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "platform_api",
+      "type": "shell",
+      "command": "cd app/platform/platform_api;  go run platform.go",
+      "problemMatcher": [
+        "$go"
+      ]
+    },
+    {
+      "label": "notification_api",
+      "type": "shell",
+      "command": "cd app/notification/notification_api;  go run notification.go",
       "problemMatcher": [
         "$go"
       ]
@@ -149,35 +114,45 @@
       ]
     },
     {
-      "label": "backend_admin",
+      "label": "ws_api",
       "type": "shell",
-      "command": "cd app/backend/backend_admin;  go run backend_admin.go",
+      "command": "cd app/ws/ws_api;  go run ws.go",
       "problemMatcher": [
         "$go"
       ]
     },
     {
       "label": "启动RPC服务",
-      "type": "shell",
-      "command": "echo Running all services",
-      "dependsOn": ["user_rpc", "group_rpc", "friend_rpc", "chat_rpc", "file_rpc"],
-      "dependsOrder": "parallel",
-      "problemMatcher": []
+      "dependsOn": [
+        "account_rpc",
+        "asset_rpc",
+        "relation_rpc",
+        "message_rpc",
+        "platform_rpc",
+        "notification_rpc"
+      ],
+      "group": "build",
+      "problemMatcher": [
+        "$go"
+      ]
     },
     {
       "label": "启动Api全部任务",
-      "type": "shell",
-      "command": "echo Running all services",
-      "dependsOn": ["auth_api", "user_api", "file_api","friend_api", "chat_api","ws_api","group_api","gateway_api", "emoji_api", "moment_api", "platform_api"],
-      "dependsOrder": "parallel",
-      "problemMatcher": []
-    },
-    {
-      "label": "启动Admin全部任务",
-      "type": "shell",
-      "command": "cd app/backend/backend_admin;  go run backend_admin.go",
-      "dependsOn": ["backend_admin", "gateway_admin"],
-      "problemMatcher": []
+      "dependsOn": [
+        "gateway_api",
+        "account_api",
+        "asset_api",
+        "relation_api",
+        "message_api",
+        "platform_api",
+        "notification_api",
+        "datasync_api",
+        "ws_api"
+      ],
+      "group": "build",
+      "problemMatcher": [
+        "$go"
+      ]
     }
   ]
 }

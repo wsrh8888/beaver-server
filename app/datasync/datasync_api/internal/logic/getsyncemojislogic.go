@@ -27,7 +27,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/emoji/emoji_rpc/types/emoji_rpc"
+	assettypes "beaver/app/asset/asset_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -49,7 +49,7 @@ func NewGetSyncEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 func (l *GetSyncEmojisLogic) GetSyncEmojis(req *types.GetSyncEmojisReq) (resp *types.GetSyncEmojisRes, err error) {
 	// 调用Emoji RPC获取表情版本信息
-	emojiResp, err := l.svcCtx.EmojiRpc.GetEmojis(l.ctx, &emoji_rpc.GetEmojisReq{
+	emojiResp, err := l.svcCtx.EmojiRpc.GetEmojis(l.ctx, &assettypes.GetEmojisReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})

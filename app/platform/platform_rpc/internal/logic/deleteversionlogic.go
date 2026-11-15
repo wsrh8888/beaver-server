@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -51,7 +51,7 @@ func (l *DeleteVersionLogic) DeleteVersion(in *platform_rpc.DeleteVersionReq) (*
 		return nil, status.Error(codes.InvalidArgument, "版本ID不能为空")
 	}
 
-	var version platform_models.UpdateVersion
+	var version update_models.UpdateVersion
 	if err := l.svcCtx.DB.First(&version, in.VersionId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "版本不存在")
@@ -60,7 +60,7 @@ func (l *DeleteVersionLogic) DeleteVersion(in *platform_rpc.DeleteVersionReq) (*
 		return nil, err
 	}
 
-	var policies []platform_models.UpdateReleasePolicy
+	var policies []update_models.UpdateReleasePolicy
 	if err := l.svcCtx.DB.Find(&policies).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询发版策略失败", Data: map[string]any{"err": err.Error()}})
 		return nil, err

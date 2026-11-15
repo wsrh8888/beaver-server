@@ -1,0 +1,9 @@
+/**
+ * 消息服务对外 HTTP API（message_api）
+ * 主 .api：仅做 import 汇总，子域 api 放 api/ 目录（goctl multiple api 范式）。
+ */
+syntax = "v1"
+
+import "api/chat.api"
+
+// goctl api go -api message_api.api -dir . --home ../../../template

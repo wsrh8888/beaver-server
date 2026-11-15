@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"time"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/feedback"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -53,7 +53,7 @@ func (l *HandleFeedbackLogic) HandleFeedback(in *platform_rpc.HandleFeedbackReq)
 		return nil, status.Error(codes.InvalidArgument, "无效的状态值")
 	}
 
-	var feedback platform_models.FeedbackModel
+	var feedback feedback_models.FeedbackModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&feedback).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "反馈记录不存在")
@@ -65,7 +65,7 @@ func (l *HandleFeedbackLogic) HandleFeedback(in *platform_rpc.HandleFeedbackReq)
 	handlerID, _ := strconv.ParseInt(in.HandlerId, 10, 64)
 	now := time.Now()
 	if err := l.svcCtx.DB.Model(&feedback).Updates(map[string]interface{}{
-		"status":        platform_models.FeedbackStatus(in.Status),
+		"status":        feedback_models.FeedbackStatus(in.Status),
 		"handle_result": in.HandleResult,
 		"handler_id":    handlerID,
 		"handle_time":   &now,

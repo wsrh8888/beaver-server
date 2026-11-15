@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -50,7 +50,7 @@ func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*
 	if in.FileUrl == "" {
 		return nil, status.Error(codes.InvalidArgument, "fileUrl不能为空")
 	}
-	var arch platform_models.UpdateArchitecture
+	var arch update_models.UpdateArchitecture
 	if err := l.svcCtx.DB.First(&arch, in.ArchitectureId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "架构不存在")
@@ -59,7 +59,7 @@ func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*
 		return nil, err
 	}
 
-	version := platform_models.UpdateVersion{
+	version := update_models.UpdateVersion{
 		ArchitectureID: uint(in.ArchitectureId),
 		Version:        in.Version,
 		FileUrl:        in.FileUrl,

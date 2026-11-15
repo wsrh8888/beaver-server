@@ -19,55 +19,21 @@ type (
 	AdminLogItem                = platform_rpc.AdminLogItem
 	AdminQueryLogsReq           = platform_rpc.AdminQueryLogsReq
 	AdminQueryLogsRes           = platform_rpc.AdminQueryLogsRes
-	AgentAppItem                = platform_rpc.AgentAppItem
-	AgentCredentialItem         = platform_rpc.AgentCredentialItem
-	AgentMcpServerItem          = platform_rpc.AgentMcpServerItem
-	AgentModelItem              = platform_rpc.AgentModelItem
-	AgentToolItem               = platform_rpc.AgentToolItem
-	AiAssistantItem             = platform_rpc.AiAssistantItem
 	AppItem                     = platform_rpc.AppItem
 	AppVersionBrief             = platform_rpc.AppVersionBrief
 	AppVersionsArchItem         = platform_rpc.AppVersionsArchItem
 	ArchitectureItem            = platform_rpc.ArchitectureItem
 	ContentReportItem           = platform_rpc.ContentReportItem
-	CreateAgentAppReq           = platform_rpc.CreateAgentAppReq
-	CreateAgentAppRes           = platform_rpc.CreateAgentAppRes
-	CreateAgentCredentialReq    = platform_rpc.CreateAgentCredentialReq
-	CreateAgentCredentialRes    = platform_rpc.CreateAgentCredentialRes
-	CreateAgentMcpServerReq     = platform_rpc.CreateAgentMcpServerReq
-	CreateAgentMcpServerRes     = platform_rpc.CreateAgentMcpServerRes
-	CreateAgentModelReq         = platform_rpc.CreateAgentModelReq
-	CreateAgentModelRes         = platform_rpc.CreateAgentModelRes
-	CreateAgentToolReq          = platform_rpc.CreateAgentToolReq
-	CreateAgentToolRes          = platform_rpc.CreateAgentToolRes
 	CreateAppReq                = platform_rpc.CreateAppReq
 	CreateAppRes                = platform_rpc.CreateAppRes
 	CreateArchitectureReq       = platform_rpc.CreateArchitectureReq
 	CreateArchitectureRes       = platform_rpc.CreateArchitectureRes
-	CreateCollectionReq         = platform_rpc.CreateCollectionReq
-	CreateCollectionRes         = platform_rpc.CreateCollectionRes
-	CreateDocumentReq           = platform_rpc.CreateDocumentReq
-	CreateDocumentRes           = platform_rpc.CreateDocumentRes
 	CreateOrgDepartmentReq      = platform_rpc.CreateOrgDepartmentReq
 	CreateOrgDepartmentRes      = platform_rpc.CreateOrgDepartmentRes
 	CreateVersionReq            = platform_rpc.CreateVersionReq
 	CreateVersionRes            = platform_rpc.CreateVersionRes
 	CreateWorkbenchAppReq       = platform_rpc.CreateWorkbenchAppReq
 	CreateWorkbenchAppRes       = platform_rpc.CreateWorkbenchAppRes
-	DeleteAgentAppReq           = platform_rpc.DeleteAgentAppReq
-	DeleteAgentAppRes           = platform_rpc.DeleteAgentAppRes
-	DeleteAgentCredentialReq    = platform_rpc.DeleteAgentCredentialReq
-	DeleteAgentCredentialRes    = platform_rpc.DeleteAgentCredentialRes
-	DeleteAgentMcpServerReq     = platform_rpc.DeleteAgentMcpServerReq
-	DeleteAgentMcpServerRes     = platform_rpc.DeleteAgentMcpServerRes
-	DeleteAgentModelReq         = platform_rpc.DeleteAgentModelReq
-	DeleteAgentModelRes         = platform_rpc.DeleteAgentModelRes
-	DeleteAgentToolReq          = platform_rpc.DeleteAgentToolReq
-	DeleteAgentToolRes          = platform_rpc.DeleteAgentToolRes
-	DeleteCollectionReq         = platform_rpc.DeleteCollectionReq
-	DeleteCollectionRes         = platform_rpc.DeleteCollectionRes
-	DeleteDocumentReq           = platform_rpc.DeleteDocumentReq
-	DeleteDocumentRes           = platform_rpc.DeleteDocumentRes
 	DeleteFeedbackReq           = platform_rpc.DeleteFeedbackReq
 	DeleteFeedbackRes           = platform_rpc.DeleteFeedbackRes
 	DeleteOrgDepartmentReq      = platform_rpc.DeleteOrgDepartmentReq
@@ -77,55 +43,22 @@ type (
 	DeleteWorkbenchAppReq       = platform_rpc.DeleteWorkbenchAppReq
 	DeleteWorkbenchAppRes       = platform_rpc.DeleteWorkbenchAppRes
 	FeedbackItem                = platform_rpc.FeedbackItem
-	GetAgentAppReq              = platform_rpc.GetAgentAppReq
-	GetAgentAppRes              = platform_rpc.GetAgentAppRes
-	GetAgentMcpServerReq        = platform_rpc.GetAgentMcpServerReq
-	GetAgentMcpServerRes        = platform_rpc.GetAgentMcpServerRes
-	GetAgentModelReq            = platform_rpc.GetAgentModelReq
-	GetAgentModelRes            = platform_rpc.GetAgentModelRes
-	GetAgentToolReq             = platform_rpc.GetAgentToolReq
-	GetAgentToolRes             = platform_rpc.GetAgentToolRes
-	GetAiAssistantReq           = platform_rpc.GetAiAssistantReq
-	GetAiAssistantRes           = platform_rpc.GetAiAssistantRes
-	GetCollectionReq            = platform_rpc.GetCollectionReq
-	GetCollectionRes            = platform_rpc.GetCollectionRes
 	GetContentReportReq         = platform_rpc.GetContentReportReq
 	GetContentReportRes         = platform_rpc.GetContentReportRes
-	GetDocumentReq              = platform_rpc.GetDocumentReq
-	GetDocumentRes              = platform_rpc.GetDocumentRes
 	GetFeedbackReq              = platform_rpc.GetFeedbackReq
 	GetFeedbackRes              = platform_rpc.GetFeedbackRes
-	GetLatestWorkspaceReq       = platform_rpc.GetLatestWorkspaceReq
-	GetLatestWorkspaceRes       = platform_rpc.GetLatestWorkspaceRes
 	GetWorkbenchAppReq          = platform_rpc.GetWorkbenchAppReq
 	GetWorkbenchAppRes          = platform_rpc.GetWorkbenchAppRes
 	HandleFeedbackReq           = platform_rpc.HandleFeedbackReq
 	HandleFeedbackRes           = platform_rpc.HandleFeedbackRes
-	KnowledgeCollectionItem     = platform_rpc.KnowledgeCollectionItem
-	KnowledgeDocumentItem       = platform_rpc.KnowledgeDocumentItem
-	KnowledgeHit                = platform_rpc.KnowledgeHit
-	ListAgentAppsReq            = platform_rpc.ListAgentAppsReq
-	ListAgentAppsRes            = platform_rpc.ListAgentAppsRes
-	ListAgentCredentialsReq     = platform_rpc.ListAgentCredentialsReq
-	ListAgentCredentialsRes     = platform_rpc.ListAgentCredentialsRes
-	ListAgentMcpServersReq      = platform_rpc.ListAgentMcpServersReq
-	ListAgentMcpServersRes      = platform_rpc.ListAgentMcpServersRes
-	ListAgentModelsReq          = platform_rpc.ListAgentModelsReq
-	ListAgentModelsRes          = platform_rpc.ListAgentModelsRes
-	ListAgentToolsReq           = platform_rpc.ListAgentToolsReq
-	ListAgentToolsRes           = platform_rpc.ListAgentToolsRes
 	ListAppVersionsReq          = platform_rpc.ListAppVersionsReq
 	ListAppVersionsRes          = platform_rpc.ListAppVersionsRes
 	ListAppsReq                 = platform_rpc.ListAppsReq
 	ListAppsRes                 = platform_rpc.ListAppsRes
 	ListArchitecturesReq        = platform_rpc.ListArchitecturesReq
 	ListArchitecturesRes        = platform_rpc.ListArchitecturesRes
-	ListCollectionsReq          = platform_rpc.ListCollectionsReq
-	ListCollectionsRes          = platform_rpc.ListCollectionsRes
 	ListContentReportsReq       = platform_rpc.ListContentReportsReq
 	ListContentReportsRes       = platform_rpc.ListContentReportsRes
-	ListDocumentsReq            = platform_rpc.ListDocumentsReq
-	ListDocumentsRes            = platform_rpc.ListDocumentsRes
 	ListEnabledWorkbenchAppsReq = platform_rpc.ListEnabledWorkbenchAppsReq
 	ListEnabledWorkbenchAppsRes = platform_rpc.ListEnabledWorkbenchAppsRes
 	ListFeedbackReq             = platform_rpc.ListFeedbackReq
@@ -136,51 +69,23 @@ type (
 	ListVersionsRes             = platform_rpc.ListVersionsRes
 	ListWorkbenchAppsReq        = platform_rpc.ListWorkbenchAppsReq
 	ListWorkbenchAppsRes        = platform_rpc.ListWorkbenchAppsRes
-	ListWorkspacesByUserReq     = platform_rpc.ListWorkspacesByUserReq
-	ListWorkspacesByUserRes     = platform_rpc.ListWorkspacesByUserRes
-	ReindexDocumentReq          = platform_rpc.ReindexDocumentReq
-	ReindexDocumentRes          = platform_rpc.ReindexDocumentRes
 	ReleasePolicyItem           = platform_rpc.ReleasePolicyItem
 	RemoveOrgMemberReq          = platform_rpc.RemoveOrgMemberReq
 	RemoveOrgMemberRes          = platform_rpc.RemoveOrgMemberRes
-	RetrieveCollectionReq       = platform_rpc.RetrieveCollectionReq
-	RetrieveCollectionRes       = platform_rpc.RetrieveCollectionRes
-	SaveAiAssistantReq          = platform_rpc.SaveAiAssistantReq
-	SaveAiAssistantRes          = platform_rpc.SaveAiAssistantRes
-	SaveWorkspacePathReq        = platform_rpc.SaveWorkspacePathReq
-	SaveWorkspacePathRes        = platform_rpc.SaveWorkspacePathRes
-	SearchKnowledgeReq          = platform_rpc.SearchKnowledgeReq
-	SearchKnowledgeRes          = platform_rpc.SearchKnowledgeRes
 	SubmitContentReportReq      = platform_rpc.SubmitContentReportReq
 	SubmitContentReportRes      = platform_rpc.SubmitContentReportRes
 	SubmitFeedbackReq           = platform_rpc.SubmitFeedbackReq
 	SubmitFeedbackRes           = platform_rpc.SubmitFeedbackRes
-	UpdateAgentAppReq           = platform_rpc.UpdateAgentAppReq
-	UpdateAgentAppRes           = platform_rpc.UpdateAgentAppRes
-	UpdateAgentCredentialReq    = platform_rpc.UpdateAgentCredentialReq
-	UpdateAgentCredentialRes    = platform_rpc.UpdateAgentCredentialRes
-	UpdateAgentMcpServerReq     = platform_rpc.UpdateAgentMcpServerReq
-	UpdateAgentMcpServerRes     = platform_rpc.UpdateAgentMcpServerRes
-	UpdateAgentModelReq         = platform_rpc.UpdateAgentModelReq
-	UpdateAgentModelRes         = platform_rpc.UpdateAgentModelRes
-	UpdateAgentToolReq          = platform_rpc.UpdateAgentToolReq
-	UpdateAgentToolRes          = platform_rpc.UpdateAgentToolRes
 	UpdateArchitectureReq       = platform_rpc.UpdateArchitectureReq
 	UpdateArchitectureRes       = platform_rpc.UpdateArchitectureRes
-	UpdateCollectionReq         = platform_rpc.UpdateCollectionReq
-	UpdateCollectionRes         = platform_rpc.UpdateCollectionRes
 	UpdateContentReportsReq     = platform_rpc.UpdateContentReportsReq
 	UpdateContentReportsRes     = platform_rpc.UpdateContentReportsRes
-	UpdateDocumentReq           = platform_rpc.UpdateDocumentReq
-	UpdateDocumentRes           = platform_rpc.UpdateDocumentRes
 	UpdateOrgDepartmentReq      = platform_rpc.UpdateOrgDepartmentReq
 	UpdateOrgDepartmentRes      = platform_rpc.UpdateOrgDepartmentRes
 	UpdateWorkbenchAppReq       = platform_rpc.UpdateWorkbenchAppReq
 	UpdateWorkbenchAppRes       = platform_rpc.UpdateWorkbenchAppRes
 	UpsertReleasePolicyReq      = platform_rpc.UpsertReleasePolicyReq
 	UpsertReleasePolicyRes      = platform_rpc.UpsertReleasePolicyRes
-	UpsertWorkspaceReq          = platform_rpc.UpsertWorkspaceReq
-	UpsertWorkspaceRes          = platform_rpc.UpsertWorkspaceRes
 	VersionItem                 = platform_rpc.VersionItem
 	WorkbenchAppItem            = platform_rpc.WorkbenchAppItem
 	WorkbenchAppPublicItem      = platform_rpc.WorkbenchAppPublicItem
@@ -220,54 +125,11 @@ type (
 		AddOrgMember(ctx context.Context, in *AddOrgMemberReq, opts ...grpc.CallOption) (*AddOrgMemberRes, error)
 		RemoveOrgMember(ctx context.Context, in *RemoveOrgMemberReq, opts ...grpc.CallOption) (*RemoveOrgMemberRes, error)
 		// —— AI 应用（agent/ 通用，渠道无关）——
-		GetAgentApp(ctx context.Context, in *GetAgentAppReq, opts ...grpc.CallOption) (*GetAgentAppRes, error)
-		ListAgentApps(ctx context.Context, in *ListAgentAppsReq, opts ...grpc.CallOption) (*ListAgentAppsRes, error)
-		CreateAgentApp(ctx context.Context, in *CreateAgentAppReq, opts ...grpc.CallOption) (*CreateAgentAppRes, error)
-		UpdateAgentApp(ctx context.Context, in *UpdateAgentAppReq, opts ...grpc.CallOption) (*UpdateAgentAppRes, error)
-		DeleteAgentApp(ctx context.Context, in *DeleteAgentAppReq, opts ...grpc.CallOption) (*DeleteAgentAppRes, error)
 		// —— 模型目录（agent/ 通用）——
-		GetAgentModel(ctx context.Context, in *GetAgentModelReq, opts ...grpc.CallOption) (*GetAgentModelRes, error)
-		ListAgentModels(ctx context.Context, in *ListAgentModelsReq, opts ...grpc.CallOption) (*ListAgentModelsRes, error)
-		CreateAgentModel(ctx context.Context, in *CreateAgentModelReq, opts ...grpc.CallOption) (*CreateAgentModelRes, error)
-		UpdateAgentModel(ctx context.Context, in *UpdateAgentModelReq, opts ...grpc.CallOption) (*UpdateAgentModelRes, error)
-		DeleteAgentModel(ctx context.Context, in *DeleteAgentModelReq, opts ...grpc.CallOption) (*DeleteAgentModelRes, error)
 		// —— 模型接入通道（agent/ 通用，密钥只进不出）——
-		ListAgentCredentials(ctx context.Context, in *ListAgentCredentialsReq, opts ...grpc.CallOption) (*ListAgentCredentialsRes, error)
-		CreateAgentCredential(ctx context.Context, in *CreateAgentCredentialReq, opts ...grpc.CallOption) (*CreateAgentCredentialRes, error)
-		UpdateAgentCredential(ctx context.Context, in *UpdateAgentCredentialReq, opts ...grpc.CallOption) (*UpdateAgentCredentialRes, error)
-		DeleteAgentCredential(ctx context.Context, in *DeleteAgentCredentialReq, opts ...grpc.CallOption) (*DeleteAgentCredentialRes, error)
 		// —— 工具目录（agent/ 通用）——
-		GetAgentTool(ctx context.Context, in *GetAgentToolReq, opts ...grpc.CallOption) (*GetAgentToolRes, error)
-		ListAgentTools(ctx context.Context, in *ListAgentToolsReq, opts ...grpc.CallOption) (*ListAgentToolsRes, error)
-		CreateAgentTool(ctx context.Context, in *CreateAgentToolReq, opts ...grpc.CallOption) (*CreateAgentToolRes, error)
-		UpdateAgentTool(ctx context.Context, in *UpdateAgentToolReq, opts ...grpc.CallOption) (*UpdateAgentToolRes, error)
-		DeleteAgentTool(ctx context.Context, in *DeleteAgentToolReq, opts ...grpc.CallOption) (*DeleteAgentToolRes, error)
 		// —— MCP 服务目录（agent/ 通用）——
-		GetAgentMcpServer(ctx context.Context, in *GetAgentMcpServerReq, opts ...grpc.CallOption) (*GetAgentMcpServerRes, error)
-		ListAgentMcpServers(ctx context.Context, in *ListAgentMcpServersReq, opts ...grpc.CallOption) (*ListAgentMcpServersRes, error)
-		CreateAgentMcpServer(ctx context.Context, in *CreateAgentMcpServerReq, opts ...grpc.CallOption) (*CreateAgentMcpServerRes, error)
-		UpdateAgentMcpServer(ctx context.Context, in *UpdateAgentMcpServerReq, opts ...grpc.CallOption) (*UpdateAgentMcpServerRes, error)
-		DeleteAgentMcpServer(ctx context.Context, in *DeleteAgentMcpServerReq, opts ...grpc.CallOption) (*DeleteAgentMcpServerRes, error)
-		GetAiAssistant(ctx context.Context, in *GetAiAssistantReq, opts ...grpc.CallOption) (*GetAiAssistantRes, error)
-		SaveAiAssistant(ctx context.Context, in *SaveAiAssistantReq, opts ...grpc.CallOption) (*SaveAiAssistantRes, error)
 		// —— 工作空间/设备（ai/ AI助手桌面端特有）——
-		GetLatestWorkspace(ctx context.Context, in *GetLatestWorkspaceReq, opts ...grpc.CallOption) (*GetLatestWorkspaceRes, error)
-		SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error)
-		UpsertWorkspace(ctx context.Context, in *UpsertWorkspaceReq, opts ...grpc.CallOption) (*UpsertWorkspaceRes, error)
-		ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error)
-		CreateCollection(ctx context.Context, in *CreateCollectionReq, opts ...grpc.CallOption) (*CreateCollectionRes, error)
-		UpdateCollection(ctx context.Context, in *UpdateCollectionReq, opts ...grpc.CallOption) (*UpdateCollectionRes, error)
-		DeleteCollection(ctx context.Context, in *DeleteCollectionReq, opts ...grpc.CallOption) (*DeleteCollectionRes, error)
-		GetCollection(ctx context.Context, in *GetCollectionReq, opts ...grpc.CallOption) (*GetCollectionRes, error)
-		ListCollections(ctx context.Context, in *ListCollectionsReq, opts ...grpc.CallOption) (*ListCollectionsRes, error)
-		CreateDocument(ctx context.Context, in *CreateDocumentReq, opts ...grpc.CallOption) (*CreateDocumentRes, error)
-		UpdateDocument(ctx context.Context, in *UpdateDocumentReq, opts ...grpc.CallOption) (*UpdateDocumentRes, error)
-		DeleteDocument(ctx context.Context, in *DeleteDocumentReq, opts ...grpc.CallOption) (*DeleteDocumentRes, error)
-		GetDocument(ctx context.Context, in *GetDocumentReq, opts ...grpc.CallOption) (*GetDocumentRes, error)
-		ListDocuments(ctx context.Context, in *ListDocumentsReq, opts ...grpc.CallOption) (*ListDocumentsRes, error)
-		ReindexDocument(ctx context.Context, in *ReindexDocumentReq, opts ...grpc.CallOption) (*ReindexDocumentRes, error)
-		SearchKnowledge(ctx context.Context, in *SearchKnowledgeReq, opts ...grpc.CallOption) (*SearchKnowledgeRes, error)
-		RetrieveCollection(ctx context.Context, in *RetrieveCollectionReq, opts ...grpc.CallOption) (*RetrieveCollectionRes, error)
 	}
 
 	defaultPlatform struct {
@@ -442,222 +304,50 @@ func (m *defaultPlatform) RemoveOrgMember(ctx context.Context, in *RemoveOrgMemb
 }
 
 // —— AI 应用（agent/ 通用，渠道无关）——
-func (m *defaultPlatform) GetAgentApp(ctx context.Context, in *GetAgentAppReq, opts ...grpc.CallOption) (*GetAgentAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetAgentApp(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListAgentApps(ctx context.Context, in *ListAgentAppsReq, opts ...grpc.CallOption) (*ListAgentAppsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListAgentApps(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateAgentApp(ctx context.Context, in *CreateAgentAppReq, opts ...grpc.CallOption) (*CreateAgentAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateAgentApp(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateAgentApp(ctx context.Context, in *UpdateAgentAppReq, opts ...grpc.CallOption) (*UpdateAgentAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateAgentApp(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteAgentApp(ctx context.Context, in *DeleteAgentAppReq, opts ...grpc.CallOption) (*DeleteAgentAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteAgentApp(ctx, in, opts...)
-}
 
 // —— 模型目录（agent/ 通用）——
-func (m *defaultPlatform) GetAgentModel(ctx context.Context, in *GetAgentModelReq, opts ...grpc.CallOption) (*GetAgentModelRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetAgentModel(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListAgentModels(ctx context.Context, in *ListAgentModelsReq, opts ...grpc.CallOption) (*ListAgentModelsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListAgentModels(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateAgentModel(ctx context.Context, in *CreateAgentModelReq, opts ...grpc.CallOption) (*CreateAgentModelRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateAgentModel(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateAgentModel(ctx context.Context, in *UpdateAgentModelReq, opts ...grpc.CallOption) (*UpdateAgentModelRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateAgentModel(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteAgentModel(ctx context.Context, in *DeleteAgentModelReq, opts ...grpc.CallOption) (*DeleteAgentModelRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteAgentModel(ctx, in, opts...)
-}
 
 // —— 模型接入通道（agent/ 通用，密钥只进不出）——
-func (m *defaultPlatform) ListAgentCredentials(ctx context.Context, in *ListAgentCredentialsReq, opts ...grpc.CallOption) (*ListAgentCredentialsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListAgentCredentials(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateAgentCredential(ctx context.Context, in *CreateAgentCredentialReq, opts ...grpc.CallOption) (*CreateAgentCredentialRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateAgentCredential(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateAgentCredential(ctx context.Context, in *UpdateAgentCredentialReq, opts ...grpc.CallOption) (*UpdateAgentCredentialRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateAgentCredential(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteAgentCredential(ctx context.Context, in *DeleteAgentCredentialReq, opts ...grpc.CallOption) (*DeleteAgentCredentialRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteAgentCredential(ctx, in, opts...)
-}
 
 // —— 工具目录（agent/ 通用）——
-func (m *defaultPlatform) GetAgentTool(ctx context.Context, in *GetAgentToolReq, opts ...grpc.CallOption) (*GetAgentToolRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetAgentTool(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListAgentTools(ctx context.Context, in *ListAgentToolsReq, opts ...grpc.CallOption) (*ListAgentToolsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListAgentTools(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateAgentTool(ctx context.Context, in *CreateAgentToolReq, opts ...grpc.CallOption) (*CreateAgentToolRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateAgentTool(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateAgentTool(ctx context.Context, in *UpdateAgentToolReq, opts ...grpc.CallOption) (*UpdateAgentToolRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateAgentTool(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteAgentTool(ctx context.Context, in *DeleteAgentToolReq, opts ...grpc.CallOption) (*DeleteAgentToolRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteAgentTool(ctx, in, opts...)
-}
 
 // —— MCP 服务目录（agent/ 通用）——
-func (m *defaultPlatform) GetAgentMcpServer(ctx context.Context, in *GetAgentMcpServerReq, opts ...grpc.CallOption) (*GetAgentMcpServerRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetAgentMcpServer(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListAgentMcpServers(ctx context.Context, in *ListAgentMcpServersReq, opts ...grpc.CallOption) (*ListAgentMcpServersRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListAgentMcpServers(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateAgentMcpServer(ctx context.Context, in *CreateAgentMcpServerReq, opts ...grpc.CallOption) (*CreateAgentMcpServerRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateAgentMcpServer(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateAgentMcpServer(ctx context.Context, in *UpdateAgentMcpServerReq, opts ...grpc.CallOption) (*UpdateAgentMcpServerRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateAgentMcpServer(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteAgentMcpServer(ctx context.Context, in *DeleteAgentMcpServerReq, opts ...grpc.CallOption) (*DeleteAgentMcpServerRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteAgentMcpServer(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) GetAiAssistant(ctx context.Context, in *GetAiAssistantReq, opts ...grpc.CallOption) (*GetAiAssistantRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetAiAssistant(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) SaveAiAssistant(ctx context.Context, in *SaveAiAssistantReq, opts ...grpc.CallOption) (*SaveAiAssistantRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.SaveAiAssistant(ctx, in, opts...)
-}
 
 // —— 工作空间/设备（ai/ AI助手桌面端特有）——
-func (m *defaultPlatform) GetLatestWorkspace(ctx context.Context, in *GetLatestWorkspaceReq, opts ...grpc.CallOption) (*GetLatestWorkspaceRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetLatestWorkspace(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) SaveWorkspacePath(ctx context.Context, in *SaveWorkspacePathReq, opts ...grpc.CallOption) (*SaveWorkspacePathRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.SaveWorkspacePath(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpsertWorkspace(ctx context.Context, in *UpsertWorkspaceReq, opts ...grpc.CallOption) (*UpsertWorkspaceRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpsertWorkspace(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListWorkspacesByUser(ctx context.Context, in *ListWorkspacesByUserReq, opts ...grpc.CallOption) (*ListWorkspacesByUserRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListWorkspacesByUser(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateCollection(ctx context.Context, in *CreateCollectionReq, opts ...grpc.CallOption) (*CreateCollectionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateCollection(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateCollection(ctx context.Context, in *UpdateCollectionReq, opts ...grpc.CallOption) (*UpdateCollectionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateCollection(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteCollection(ctx context.Context, in *DeleteCollectionReq, opts ...grpc.CallOption) (*DeleteCollectionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteCollection(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) GetCollection(ctx context.Context, in *GetCollectionReq, opts ...grpc.CallOption) (*GetCollectionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetCollection(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListCollections(ctx context.Context, in *ListCollectionsReq, opts ...grpc.CallOption) (*ListCollectionsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListCollections(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) CreateDocument(ctx context.Context, in *CreateDocumentReq, opts ...grpc.CallOption) (*CreateDocumentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.CreateDocument(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) UpdateDocument(ctx context.Context, in *UpdateDocumentReq, opts ...grpc.CallOption) (*UpdateDocumentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.UpdateDocument(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) DeleteDocument(ctx context.Context, in *DeleteDocumentReq, opts ...grpc.CallOption) (*DeleteDocumentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.DeleteDocument(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) GetDocument(ctx context.Context, in *GetDocumentReq, opts ...grpc.CallOption) (*GetDocumentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.GetDocument(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ListDocuments(ctx context.Context, in *ListDocumentsReq, opts ...grpc.CallOption) (*ListDocumentsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ListDocuments(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) ReindexDocument(ctx context.Context, in *ReindexDocumentReq, opts ...grpc.CallOption) (*ReindexDocumentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.ReindexDocument(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) SearchKnowledge(ctx context.Context, in *SearchKnowledgeReq, opts ...grpc.CallOption) (*SearchKnowledgeRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.SearchKnowledge(ctx, in, opts...)
-}
 
-func (m *defaultPlatform) RetrieveCollection(ctx context.Context, in *RetrieveCollectionReq, opts ...grpc.CallOption) (*RetrieveCollectionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
-	return client.RetrieveCollection(ctx, in, opts...)
-}

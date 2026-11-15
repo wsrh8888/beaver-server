@@ -28,7 +28,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/group/group_rpc/types/group_rpc"
+	relationtypes "beaver/app/relation/relation_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -56,7 +56,7 @@ func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq)
 	}
 
 	// 1. 获取用户加入的群组ID列表
-	groupIDsResp, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &group_rpc.GetUserGroupIDsReq{
+	groupIDsResp, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, &relationtypes.GetUserGroupIDsReq{
 		UserID: userId,
 	})
 	if err != nil {
@@ -75,7 +75,7 @@ func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq)
 	// 2. 获取变更的群组资料
 	serverTimestamp := time.Now().UnixMilli()
 
-	groupResp, err := l.svcCtx.GroupRpc.GetGroupsListByIds(l.ctx, &group_rpc.GetGroupsListByIdsReq{
+	groupResp, err := l.svcCtx.GroupRpc.GetGroupsListByIds(l.ctx, &relationtypes.GetGroupsListByIdsReq{
 		GroupIDs: groupIDs,
 		Since:    req.Since,
 	})

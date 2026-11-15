@@ -22,10 +22,10 @@
 package svc
 
 import (
-	"beaver/app/auth/auth_rpc/auth"
+	"beaver/app/account/account_rpc/client/auth"
 	"beaver/app/notification/notification_api/internal/config"
-	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/app/user/user_rpc/user"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/client/user"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
@@ -43,7 +43,7 @@ type ServiceContext struct {
 	Config     config.Config
 	DB         *gorm.DB
 	Redis      *redis.Client
-	UserRpc    user_rpc.UserClient
+	UserRpc    accttypes.UserClient
 	AuthRpc    auth.Auth
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client

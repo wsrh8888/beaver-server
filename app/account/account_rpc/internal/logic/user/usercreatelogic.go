@@ -1,0 +1,257 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package userlogic
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strconv"
+	"time"
+
+	user_models "beaver/app/account/account_models/user"
+	"beaver/app/account/account_rpc/internal/svc"
+	"beaver/app/account/account_rpc/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+	utils "beaver/utils/rand"
+	uuidUtil "beaver/utils/uuid"
+)
+
+const (
+	userIDKey = "user_id_counter"
+	minUserID = 100000
+)
+
+type UserCreateLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewUserCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserCreateLogic {
+	return &UserCreateLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("user_create", ctx),
+	}
+}
+
+// generateUserID 生成递增用户ID
+func (l *UserCreateLogic) generateUserID() (string, error) {
+	// 首先确保Redis计数器已初始化
+	err := l.initializeRedisCounter()
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "初始化Redis计数器失败",
+			Data: map[string]any{"err": err.Error()},
+		})
+		return "", fmt.Errorf("初始化Redis计数器失败: %v", err)
+	}
+
+	// 使用Redis INCR原子性递增
+	result := l.svcCtx.Redis.Incr(userIDKey)
+	if result.Err() != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "生成用户ID失败",
+			Data: map[string]any{"err": result.Err().Error()},
+		})
+		return "", fmt.Errorf("生成用户ID失败: %v", result.Err())
+	}
+
+	id := result.Val()
+	return strconv.FormatInt(id, 10), nil
+}
+
+// initializeRedisCounter 初始化Redis计数器，确保与数据库同步
+func (l *UserCreateLogic) initializeRedisCounter() error {
+	// 检查Redis计数器是否存在
+	exists := l.svcCtx.Redis.Exists(userIDKey)
+	if exists.Err() != nil {
+		return fmt.Errorf("检查Redis计数器失败: %v", exists.Err())
+	}
+
+	// 如果计数器不存在，从数据库初始化
+	if exists.Val() == 0 {
+		var maxUser user_models.UserModel
+		err := l.svcCtx.DB.Select("user_id").Order("CAST(user_id AS UNSIGNED) DESC").First(&maxUser).Error
+		if err != nil && err.Error() != "record not found" {
+			return fmt.Errorf("查询数据库最大用户ID失败: %v", err)
+		}
+
+		var nextID int64 = minUserID
+		if maxUser.UserID != "" {
+			// 将字符串ID转换为数字
+			if currentMaxID, parseErr := strconv.ParseInt(maxUser.UserID, 10, 64); parseErr == nil {
+				nextID = currentMaxID + 1
+			}
+		}
+
+		// 设置Redis计数器
+		err = l.svcCtx.Redis.Set(userIDKey, nextID, 0).Err()
+		if err != nil {
+			return fmt.Errorf("设置Redis计数器失败: %v", err)
+		}
+
+		l.logger.Info(model.LogMsg{
+			Text: "Redis计数器初始化完成",
+			Data: map[string]interface{}{"nextId": nextID},
+		})
+	}
+
+	return nil
+}
+
+func (l *UserCreateLogic) UserCreate(in *types.UserCreateReq) (*types.UserCreateRes, error) {
+	// 验证必填字段（Bot / Digital 用户不需要联系方式）
+	isSystemUser := in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeDigital)
+	if !isSystemUser {
+		if in.Phone == "" && in.Email == "" {
+			return nil, errors.New("手机号或邮箱至少需要提供一个")
+		}
+	} else {
+		// 机器人用户：昵称必填
+		if in.NickName == "" {
+			return nil, errors.New("机器人用户必须提供昵称")
+		}
+	}
+
+	// 检查用户是否已存在（通过 phone/email 查询）
+	var user user_models.UserModel
+	var err error
+
+	if in.Phone != "" && in.Email != "" {
+		// 手机号和邮箱都提供，检查是否已存在
+		err = l.svcCtx.DB.Take(&user, "phone = ? OR email = ?", in.Phone, in.Email).Error
+	} else if in.Phone != "" {
+		// 只提供手机号
+		err = l.svcCtx.DB.Take(&user, "phone = ?", in.Phone).Error
+	} else if in.Email != "" {
+		// 只提供邮箱
+		err = l.svcCtx.DB.Take(&user, "email = ?", in.Email).Error
+	} else {
+		// 机器人用户：没有联系方式，跳过重复检查
+		err = errors.New("record not found")
+	}
+
+	if err == nil {
+		return nil, errors.New("用户已存在")
+	}
+
+	// 生成随机昵称
+	nickName := utils.GenerateRandomString(8)
+	if in.NickName != "" {
+		nickName = in.NickName
+	}
+
+	// 生成用户ID（普通用户用递增数字，Bot / Digital 用 UUID）
+	var userID string
+	if in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeDigital) {
+		// 机器人用户：生成 UUID 格式的 ID
+		userID = uuidUtil.NewV4().String()
+	} else {
+		// 普通用户：生成6位数字递增用户ID
+		var genErr error
+		userID, genErr = l.generateUserID()
+		if genErr != nil {
+			return nil, errors.New("生成用户ID失败")
+		}
+	}
+
+	// 获取新版本号（用户独立递增，从1开始）
+	version := l.svcCtx.VersionGen.GetNextVersion("users", "user_id", userID)
+	if version == -1 {
+		l.logger.Error(model.LogMsg{
+			Text: "获取用户版本号失败",
+			Data: map[string]any{"userId": userID},
+		})
+		return nil, errors.New("获取版本号失败")
+	}
+	l.logger.Info(model.LogMsg{
+		Text: "获取用户版本号",
+		Data: map[string]interface{}{"userId": userID, "version": version},
+	})
+
+	// 创建用户基础信息（不包含密码）
+	user = user_models.UserModel{
+		UserID:   userID,
+		Email:    in.Email,
+		Phone:    in.Phone,
+		Source:   in.Source,
+		NickName: nickName,
+		Abstract: in.Abstract,
+		UserType: int8(in.UserType),
+		Version:  version,
+	}
+	if user.UserType == 0 {
+		user.UserType = user_models.UserTypeNormal
+	}
+
+	err = l.svcCtx.DB.Create(&user).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "创建用户失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
+		return nil, errors.New("创建用户失败")
+	}
+
+	// TODO: 调用 auth 服务创建用户凭证（密码）
+	// 这里需要通过 RPC 调用 auth 服务的 CreateCredential 接口
+	// 暂时留空，等待 auth 服务实现后补充
+
+	// 记录用户创建的变更日志
+	l.recordUserCreateLog(user.UserID, version)
+
+	l.logger.Info(model.LogMsg{
+		Text: "用户创建成功",
+		Data: map[string]interface{}{"userId": user.UserID, "version": version},
+	})
+
+	return &types.UserCreateRes{
+		UserID: user.UserID,
+	}, nil
+}
+
+// recordUserCreateLog 记录用户创建日志
+func (l *UserCreateLogic) recordUserCreateLog(userID string, version int64) {
+	// 创建用户创建的变更日志
+	changeLog := user_models.UserChangeLogModel{
+		UserID:     userID,
+		ChangeType: "create",
+		NewValue:   "",
+		ChangeTime: time.Now().Unix(),
+		Version:    version,
+	}
+
+	if err := l.svcCtx.DB.Create(&changeLog).Error; err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "记录用户创建日志失败",
+			Data: map[string]any{"userId": userID, "err": err.Error()},
+		})
+	} else {
+		l.logger.Info(model.LogMsg{
+			Text: "用户创建日志记录成功",
+			Data: map[string]interface{}{"userId": userID, "version": version},
+		})
+	}
+}

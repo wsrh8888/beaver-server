@@ -184,222 +184,50 @@ func (s *PlatformServer) RemoveOrgMember(ctx context.Context, in *platform_rpc.R
 }
 
 // —— AI 应用（agent/ 通用，渠道无关）——
-func (s *PlatformServer) GetAgentApp(ctx context.Context, in *platform_rpc.GetAgentAppReq) (*platform_rpc.GetAgentAppRes, error) {
-	l := logic.NewGetAgentAppLogic(ctx, s.svcCtx)
-	return l.GetAgentApp(in)
-}
 
-func (s *PlatformServer) ListAgentApps(ctx context.Context, in *platform_rpc.ListAgentAppsReq) (*platform_rpc.ListAgentAppsRes, error) {
-	l := logic.NewListAgentAppsLogic(ctx, s.svcCtx)
-	return l.ListAgentApps(in)
-}
 
-func (s *PlatformServer) CreateAgentApp(ctx context.Context, in *platform_rpc.CreateAgentAppReq) (*platform_rpc.CreateAgentAppRes, error) {
-	l := logic.NewCreateAgentAppLogic(ctx, s.svcCtx)
-	return l.CreateAgentApp(in)
-}
 
-func (s *PlatformServer) UpdateAgentApp(ctx context.Context, in *platform_rpc.UpdateAgentAppReq) (*platform_rpc.UpdateAgentAppRes, error) {
-	l := logic.NewUpdateAgentAppLogic(ctx, s.svcCtx)
-	return l.UpdateAgentApp(in)
-}
 
-func (s *PlatformServer) DeleteAgentApp(ctx context.Context, in *platform_rpc.DeleteAgentAppReq) (*platform_rpc.DeleteAgentAppRes, error) {
-	l := logic.NewDeleteAgentAppLogic(ctx, s.svcCtx)
-	return l.DeleteAgentApp(in)
-}
 
 // —— 模型目录（agent/ 通用）——
-func (s *PlatformServer) GetAgentModel(ctx context.Context, in *platform_rpc.GetAgentModelReq) (*platform_rpc.GetAgentModelRes, error) {
-	l := logic.NewGetAgentModelLogic(ctx, s.svcCtx)
-	return l.GetAgentModel(in)
-}
 
-func (s *PlatformServer) ListAgentModels(ctx context.Context, in *platform_rpc.ListAgentModelsReq) (*platform_rpc.ListAgentModelsRes, error) {
-	l := logic.NewListAgentModelsLogic(ctx, s.svcCtx)
-	return l.ListAgentModels(in)
-}
 
-func (s *PlatformServer) CreateAgentModel(ctx context.Context, in *platform_rpc.CreateAgentModelReq) (*platform_rpc.CreateAgentModelRes, error) {
-	l := logic.NewCreateAgentModelLogic(ctx, s.svcCtx)
-	return l.CreateAgentModel(in)
-}
 
-func (s *PlatformServer) UpdateAgentModel(ctx context.Context, in *platform_rpc.UpdateAgentModelReq) (*platform_rpc.UpdateAgentModelRes, error) {
-	l := logic.NewUpdateAgentModelLogic(ctx, s.svcCtx)
-	return l.UpdateAgentModel(in)
-}
 
-func (s *PlatformServer) DeleteAgentModel(ctx context.Context, in *platform_rpc.DeleteAgentModelReq) (*platform_rpc.DeleteAgentModelRes, error) {
-	l := logic.NewDeleteAgentModelLogic(ctx, s.svcCtx)
-	return l.DeleteAgentModel(in)
-}
 
 // —— 模型接入通道（agent/ 通用，密钥只进不出）——
-func (s *PlatformServer) ListAgentCredentials(ctx context.Context, in *platform_rpc.ListAgentCredentialsReq) (*platform_rpc.ListAgentCredentialsRes, error) {
-	l := logic.NewListAgentCredentialsLogic(ctx, s.svcCtx)
-	return l.ListAgentCredentials(in)
-}
 
-func (s *PlatformServer) CreateAgentCredential(ctx context.Context, in *platform_rpc.CreateAgentCredentialReq) (*platform_rpc.CreateAgentCredentialRes, error) {
-	l := logic.NewCreateAgentCredentialLogic(ctx, s.svcCtx)
-	return l.CreateAgentCredential(in)
-}
 
-func (s *PlatformServer) UpdateAgentCredential(ctx context.Context, in *platform_rpc.UpdateAgentCredentialReq) (*platform_rpc.UpdateAgentCredentialRes, error) {
-	l := logic.NewUpdateAgentCredentialLogic(ctx, s.svcCtx)
-	return l.UpdateAgentCredential(in)
-}
 
-func (s *PlatformServer) DeleteAgentCredential(ctx context.Context, in *platform_rpc.DeleteAgentCredentialReq) (*platform_rpc.DeleteAgentCredentialRes, error) {
-	l := logic.NewDeleteAgentCredentialLogic(ctx, s.svcCtx)
-	return l.DeleteAgentCredential(in)
-}
 
 // —— 工具目录（agent/ 通用）——
-func (s *PlatformServer) GetAgentTool(ctx context.Context, in *platform_rpc.GetAgentToolReq) (*platform_rpc.GetAgentToolRes, error) {
-	l := logic.NewGetAgentToolLogic(ctx, s.svcCtx)
-	return l.GetAgentTool(in)
-}
 
-func (s *PlatformServer) ListAgentTools(ctx context.Context, in *platform_rpc.ListAgentToolsReq) (*platform_rpc.ListAgentToolsRes, error) {
-	l := logic.NewListAgentToolsLogic(ctx, s.svcCtx)
-	return l.ListAgentTools(in)
-}
 
-func (s *PlatformServer) CreateAgentTool(ctx context.Context, in *platform_rpc.CreateAgentToolReq) (*platform_rpc.CreateAgentToolRes, error) {
-	l := logic.NewCreateAgentToolLogic(ctx, s.svcCtx)
-	return l.CreateAgentTool(in)
-}
 
-func (s *PlatformServer) UpdateAgentTool(ctx context.Context, in *platform_rpc.UpdateAgentToolReq) (*platform_rpc.UpdateAgentToolRes, error) {
-	l := logic.NewUpdateAgentToolLogic(ctx, s.svcCtx)
-	return l.UpdateAgentTool(in)
-}
 
-func (s *PlatformServer) DeleteAgentTool(ctx context.Context, in *platform_rpc.DeleteAgentToolReq) (*platform_rpc.DeleteAgentToolRes, error) {
-	l := logic.NewDeleteAgentToolLogic(ctx, s.svcCtx)
-	return l.DeleteAgentTool(in)
-}
 
 // —— MCP 服务目录（agent/ 通用）——
-func (s *PlatformServer) GetAgentMcpServer(ctx context.Context, in *platform_rpc.GetAgentMcpServerReq) (*platform_rpc.GetAgentMcpServerRes, error) {
-	l := logic.NewGetAgentMcpServerLogic(ctx, s.svcCtx)
-	return l.GetAgentMcpServer(in)
-}
 
-func (s *PlatformServer) ListAgentMcpServers(ctx context.Context, in *platform_rpc.ListAgentMcpServersReq) (*platform_rpc.ListAgentMcpServersRes, error) {
-	l := logic.NewListAgentMcpServersLogic(ctx, s.svcCtx)
-	return l.ListAgentMcpServers(in)
-}
 
-func (s *PlatformServer) CreateAgentMcpServer(ctx context.Context, in *platform_rpc.CreateAgentMcpServerReq) (*platform_rpc.CreateAgentMcpServerRes, error) {
-	l := logic.NewCreateAgentMcpServerLogic(ctx, s.svcCtx)
-	return l.CreateAgentMcpServer(in)
-}
 
-func (s *PlatformServer) UpdateAgentMcpServer(ctx context.Context, in *platform_rpc.UpdateAgentMcpServerReq) (*platform_rpc.UpdateAgentMcpServerRes, error) {
-	l := logic.NewUpdateAgentMcpServerLogic(ctx, s.svcCtx)
-	return l.UpdateAgentMcpServer(in)
-}
 
-func (s *PlatformServer) DeleteAgentMcpServer(ctx context.Context, in *platform_rpc.DeleteAgentMcpServerReq) (*platform_rpc.DeleteAgentMcpServerRes, error) {
-	l := logic.NewDeleteAgentMcpServerLogic(ctx, s.svcCtx)
-	return l.DeleteAgentMcpServer(in)
-}
 
-func (s *PlatformServer) GetAiAssistant(ctx context.Context, in *platform_rpc.GetAiAssistantReq) (*platform_rpc.GetAiAssistantRes, error) {
-	l := logic.NewGetAiAssistantLogic(ctx, s.svcCtx)
-	return l.GetAiAssistant(in)
-}
 
-func (s *PlatformServer) SaveAiAssistant(ctx context.Context, in *platform_rpc.SaveAiAssistantReq) (*platform_rpc.SaveAiAssistantRes, error) {
-	l := logic.NewSaveAiAssistantLogic(ctx, s.svcCtx)
-	return l.SaveAiAssistant(in)
-}
 
 // —— 工作空间/设备（ai/ AI助手桌面端特有）——
-func (s *PlatformServer) GetLatestWorkspace(ctx context.Context, in *platform_rpc.GetLatestWorkspaceReq) (*platform_rpc.GetLatestWorkspaceRes, error) {
-	l := logic.NewGetLatestWorkspaceLogic(ctx, s.svcCtx)
-	return l.GetLatestWorkspace(in)
-}
 
-func (s *PlatformServer) SaveWorkspacePath(ctx context.Context, in *platform_rpc.SaveWorkspacePathReq) (*platform_rpc.SaveWorkspacePathRes, error) {
-	l := logic.NewSaveWorkspacePathLogic(ctx, s.svcCtx)
-	return l.SaveWorkspacePath(in)
-}
 
-func (s *PlatformServer) UpsertWorkspace(ctx context.Context, in *platform_rpc.UpsertWorkspaceReq) (*platform_rpc.UpsertWorkspaceRes, error) {
-	l := logic.NewUpsertWorkspaceLogic(ctx, s.svcCtx)
-	return l.UpsertWorkspace(in)
-}
 
-func (s *PlatformServer) ListWorkspacesByUser(ctx context.Context, in *platform_rpc.ListWorkspacesByUserReq) (*platform_rpc.ListWorkspacesByUserRes, error) {
-	l := logic.NewListWorkspacesByUserLogic(ctx, s.svcCtx)
-	return l.ListWorkspacesByUser(in)
-}
 
-func (s *PlatformServer) CreateCollection(ctx context.Context, in *platform_rpc.CreateCollectionReq) (*platform_rpc.CreateCollectionRes, error) {
-	l := logic.NewCreateCollectionLogic(ctx, s.svcCtx)
-	return l.CreateCollection(in)
-}
 
-func (s *PlatformServer) UpdateCollection(ctx context.Context, in *platform_rpc.UpdateCollectionReq) (*platform_rpc.UpdateCollectionRes, error) {
-	l := logic.NewUpdateCollectionLogic(ctx, s.svcCtx)
-	return l.UpdateCollection(in)
-}
 
-func (s *PlatformServer) DeleteCollection(ctx context.Context, in *platform_rpc.DeleteCollectionReq) (*platform_rpc.DeleteCollectionRes, error) {
-	l := logic.NewDeleteCollectionLogic(ctx, s.svcCtx)
-	return l.DeleteCollection(in)
-}
 
-func (s *PlatformServer) GetCollection(ctx context.Context, in *platform_rpc.GetCollectionReq) (*platform_rpc.GetCollectionRes, error) {
-	l := logic.NewGetCollectionLogic(ctx, s.svcCtx)
-	return l.GetCollection(in)
-}
 
-func (s *PlatformServer) ListCollections(ctx context.Context, in *platform_rpc.ListCollectionsReq) (*platform_rpc.ListCollectionsRes, error) {
-	l := logic.NewListCollectionsLogic(ctx, s.svcCtx)
-	return l.ListCollections(in)
-}
 
-func (s *PlatformServer) CreateDocument(ctx context.Context, in *platform_rpc.CreateDocumentReq) (*platform_rpc.CreateDocumentRes, error) {
-	l := logic.NewCreateDocumentLogic(ctx, s.svcCtx)
-	return l.CreateDocument(in)
-}
 
-func (s *PlatformServer) UpdateDocument(ctx context.Context, in *platform_rpc.UpdateDocumentReq) (*platform_rpc.UpdateDocumentRes, error) {
-	l := logic.NewUpdateDocumentLogic(ctx, s.svcCtx)
-	return l.UpdateDocument(in)
-}
 
-func (s *PlatformServer) DeleteDocument(ctx context.Context, in *platform_rpc.DeleteDocumentReq) (*platform_rpc.DeleteDocumentRes, error) {
-	l := logic.NewDeleteDocumentLogic(ctx, s.svcCtx)
-	return l.DeleteDocument(in)
-}
 
-func (s *PlatformServer) GetDocument(ctx context.Context, in *platform_rpc.GetDocumentReq) (*platform_rpc.GetDocumentRes, error) {
-	l := logic.NewGetDocumentLogic(ctx, s.svcCtx)
-	return l.GetDocument(in)
-}
 
-func (s *PlatformServer) ListDocuments(ctx context.Context, in *platform_rpc.ListDocumentsReq) (*platform_rpc.ListDocumentsRes, error) {
-	l := logic.NewListDocumentsLogic(ctx, s.svcCtx)
-	return l.ListDocuments(in)
-}
 
-func (s *PlatformServer) ReindexDocument(ctx context.Context, in *platform_rpc.ReindexDocumentReq) (*platform_rpc.ReindexDocumentRes, error) {
-	l := logic.NewReindexDocumentLogic(ctx, s.svcCtx)
-	return l.ReindexDocument(in)
-}
 
-func (s *PlatformServer) SearchKnowledge(ctx context.Context, in *platform_rpc.SearchKnowledgeReq) (*platform_rpc.SearchKnowledgeRes, error) {
-	l := logic.NewSearchKnowledgeLogic(ctx, s.svcCtx)
-	return l.SearchKnowledge(in)
-}
 
-func (s *PlatformServer) RetrieveCollection(ctx context.Context, in *platform_rpc.RetrieveCollectionReq) (*platform_rpc.RetrieveCollectionRes, error) {
-	l := logic.NewRetrieveCollectionLogic(ctx, s.svcCtx)
-	return l.RetrieveCollection(in)
-}

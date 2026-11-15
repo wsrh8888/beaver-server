@@ -1,0 +1,29 @@
+syntax = "v1"
+
+// 用户数据同步 API（两阶段同步：先取版本摘要，再按 ID 拉明细）
+
+// 同步用户数据（两阶段同步）
+type (
+	// 第一阶段：获取变更摘要
+	GetSyncAllUsersReq {
+		Type   string `json:"type,optional"` // 类型：friends/group/all，不传或为空则同步所有相关用户
+		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
+		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
+	}
+	GetSyncAllUsersRes {
+		UserVersions    []UserVersionItem `json:"userVersions"` // 变更的用户版本摘要
+		ServerTimestamp int64             `json:"serverTimestamp"` // 服务端处理时间戳
+	}
+	UserVersionItem {
+		UserID  string `json:"userId"` // 用户ID
+		Version int64  `json:"version"` // 最新版本号
+	}
+)
+
+service datasync {
+	@doc "获取所有需要更新的用户版本信息"
+	@handler getSyncAllUsers
+	post /api/datasync/v1/getSyncAllUsers (GetSyncAllUsersReq) returns (GetSyncAllUsersRes)
+}
+
+// goctl api go -api datasync_api.api -dir . --home ../../../template

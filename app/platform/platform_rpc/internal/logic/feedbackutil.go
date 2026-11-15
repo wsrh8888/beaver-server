@@ -24,11 +24,11 @@ package logic
 import (
 	"time"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/feedback"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 )
 
-func toFeedbackItem(f platform_models.FeedbackModel) *platform_rpc.FeedbackItem {
+func toFeedbackItem(f feedback_models.FeedbackModel) *platform_rpc.FeedbackItem {
 	handleTime := ""
 	if f.HandleTime != nil {
 		handleTime = f.HandleTime.Format(time.RFC3339)

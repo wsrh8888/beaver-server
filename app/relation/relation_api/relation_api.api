@@ -1,0 +1,4 @@
+import "api/friend.api"
+import "api/group.api"
+
+// goctl api go -api relation_api.api -dir . --home ../../../template

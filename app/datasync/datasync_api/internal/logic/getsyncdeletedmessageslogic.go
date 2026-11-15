@@ -26,7 +26,7 @@ import (
 	"errors"
 	"time"
 
-	"beaver/app/chat/chat_models"
+	"beaver/app/message/message_models"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	beaverlog "beaver/utils/beaverlog"
@@ -49,10 +49,10 @@ func NewGetSyncDeletedMessagesLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *GetSyncDeletedMessagesLogic) GetSyncDeletedMessages(req *types.GetSyncDeletedMessagesReq) (resp *types.GetSyncDeletedMessagesRes, err error) {
-	var deletes []chat_models.ChatUserDelete
+	var deletes []message_models.ChatUserDelete
 
 	// 1. 查询该用户在 Since 之后的删除记录
-	query := l.svcCtx.DB.Model(&chat_models.ChatUserDelete{}).Where("user_id = ?", req.UserID)
+	query := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).Where("user_id = ?", req.UserID)
 	if req.Since > 0 {
 		// 统一使用 Unix 时间戳进行同步比对
 		query = query.Where("UNIX_TIMESTAMP(created_at) > ?", req.Since)

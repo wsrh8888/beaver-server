@@ -22,25 +22,22 @@
 package database
 
 import (
-	"beaver/app/auth/auth_models"
-	"beaver/app/backend/backend_models"
-	"beaver/app/call/call_models"
-	"beaver/app/chat/chat_models"
+	auth_models "beaver/app/account/account_models/auth"
+	"beaver/app/message/message_models"
 	"beaver/app/datasync/datasync_models"
-	"beaver/app/emoji/emoji_models"
-	"beaver/app/file/file_models"
-	"beaver/app/friend/friend_models"
-	"beaver/app/group/group_models"
-	"beaver/app/moment/moment_models"
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	file_models "beaver/app/asset/asset_models/file"
+	"beaver/app/relation/relation_models/friend"
+	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/notification/notification_models"
-	"beaver/app/open/open_models"
-	"beaver/app/platform/platform_models"
-	knowledge_models "beaver/app/platform/platform_models/knowledge"
+	"beaver/app/platform/platform_models/feedback"
+	"beaver/app/platform/platform_models/track"
+	"beaver/app/platform/platform_models/update"
+	"beaver/app/platform/platform_models/workbench"
 	org_models "beaver/app/platform/platform_models/org"
-	"beaver/app/user/user_models"
+	user_models "beaver/app/account/account_models/user"
 	"beaver/core/coregorm"
 	fileseed "beaver/database/file"
-	openseed "beaver/database/open"
 	platformseed "beaver/database/platform"
 	"fmt"
 
@@ -71,30 +68,21 @@ func DSN(dbName string) string {
 func AllMigrations() []Migration {
 	return []Migration{
 		{
-			Name: "beaver_user",
+			Name: "beaver_account",
 			Models: []any{
 				&user_models.UserModel{},
 				&user_models.UserChangeLogModel{},
-			},
-		},
-		{
-			Name: "beaver_auth",
-			Models: []any{
+				&user_models.UserSettingModel{},
 				&auth_models.AuthCredentialModel{},
 				&auth_models.AuthDeviceModel{},
 			},
 		},
 		{
-			Name: "beaver_friend",
+			Name: "beaver_relation",
 			Models: []any{
 				&friend_models.FriendModel{},
 				&friend_models.FriendVerifyModel{},
 				&friend_models.FriendBlockModel{},
-			},
-		},
-		{
-			Name: "beaver_group",
-			Models: []any{
 				&group_models.GroupModel{},
 				&group_models.GroupMemberModel{},
 				&group_models.GroupJoinRequestModel{},
@@ -102,38 +90,27 @@ func AllMigrations() []Migration {
 			},
 		},
 		{
-			Name: "beaver_chat",
+			Name: "beaver_message",
 			Models: []any{
-				&chat_models.ChatMessage{},
-				&chat_models.ChatConversationMeta{},
-				&chat_models.ChatUserConversation{},
-				&chat_models.ChatUserDelete{},
-				&chat_models.ChatMessageMedia{},
-				&chat_models.ChatForward{},
+				&message_models.ChatMessage{},
+				&message_models.ChatConversationMeta{},
+				&message_models.ChatUserConversation{},
+				&message_models.ChatUserDelete{},
+				&message_models.ChatMessageMedia{},
+				&message_models.ChatForward{},
 			},
 		},
 		{
-			Name: "beaver_moment",
-			Models: []any{
-				&moment_models.MomentModel{},
-				&moment_models.MomentLikeModel{},
-				&moment_models.MomentCommentModel{},
-			},
-		},
-		{
-			Name: "beaver_emoji",
+			Name: "beaver_asset",
 			Models: []any{
 				&emoji_models.EmojiPackage{},
 				&emoji_models.Emoji{},
 				&emoji_models.EmojiPackageEmoji{},
 				&emoji_models.EmojiPackageCollect{},
 				&emoji_models.EmojiCollectEmoji{},
+				&file_models.FileModel{},
 			},
-		},
-		{
-			Name:   "beaver_file",
-			Models: []any{&file_models.FileModel{}},
-			Init:   fileseed.InitDefaultFiles,
+			Init: fileseed.InitDefaultFiles,
 		},
 		{
 			Name: "beaver_notification",
@@ -145,62 +122,24 @@ func AllMigrations() []Migration {
 			},
 		},
 		{
-			Name: "beaver_call",
-			Models: []any{
-				&call_models.CallSession{},
-				&call_models.CallParticipant{},
-			},
-		},
-		{
-			Name: "beaver_open",
-			Models: []any{
-				&open_models.OpenOAuth{},
-				&open_models.OpenOAuthToken{},
-				&open_models.OpenOAuthCode{},
-				&open_models.OpenOAuthQrCode{},
-				&open_models.OpenBot{},
-				&open_models.OpenBotMember{},
-				&open_models.OpenDigital{},
-				&open_models.OpenDigitalMember{},
-				&open_models.OpenDigitalToken{},
-				&open_models.OpenDigitalConfig{},
-				&open_models.OpenKnowledgeSource{},
-			},
-			Init: openseed.InitQuickLoginApp,
-		},
-		{
 			Name: "beaver_platform",
 			Models: []any{
-				&platform_models.TrackBucket{},
-				&platform_models.TrackLogger{},
-				&platform_models.FeedbackModel{},
-				&platform_models.UpdateApp{},
-				&platform_models.UpdateArchitecture{},
-				&platform_models.UpdateVersion{},
-				&platform_models.UpdateReleasePolicy{},
-				&platform_models.UpdateReport{},
-				&platform_models.WorkbenchApp{},
+				&track_models.TrackBucket{},
+				&track_models.TrackLogger{},
+				&feedback_models.FeedbackModel{},
+				&update_models.UpdateApp{},
+				&update_models.UpdateArchitecture{},
+				&update_models.UpdateVersion{},
+				&update_models.UpdateReleasePolicy{},
+				&update_models.UpdateReport{},
+				&workbench_models.WorkbenchApp{},
 				&org_models.Organization{},
 				&org_models.Department{},
 				&org_models.Staff{},
 				&org_models.DeptUser{},
 				&org_models.Admin{},
-				&knowledge_models.KnowledgeCollection{},
-				&knowledge_models.KnowledgeDocument{},
-				&knowledge_models.KnowledgeChunk{},
 			},
 			Init: platformseed.InitPlatform,
-		},
-		{
-			Name: "beaver_backend",
-			Models: []any{
-				&backend_models.AdminUser{},
-				&backend_models.AdminSystemAuthority{},
-				&backend_models.AdminSystemAuthorityMenu{},
-				&backend_models.AdminSystemAuthorityUser{},
-				&backend_models.AdminSystemMenu{},
-				&backend_models.AgentKnowledgeSource{},
-			},
 		},
 		{
 			Name:   "beaver_datasync",

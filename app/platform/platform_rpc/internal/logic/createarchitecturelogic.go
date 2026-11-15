@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -47,7 +47,7 @@ func NewCreateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArchitectureReq) (*platform_rpc.CreateArchitectureRes, error) {
-	var app platform_models.UpdateApp
+	var app update_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id = ?", in.AppId).First(&app).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "应用不存在")
@@ -56,7 +56,7 @@ func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArch
 		return nil, err
 	}
 
-	var existing platform_models.UpdateArchitecture
+	var existing update_models.UpdateArchitecture
 	if err := l.svcCtx.DB.Where("app_id = ? AND platform_id = ? AND arch_id = ?", in.AppId, in.PlatformId, in.ArchId).First(&existing).Error; err == nil {
 		return nil, status.Error(codes.AlreadyExists, "架构已存在")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -64,7 +64,7 @@ func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArch
 		return nil, err
 	}
 
-	arch := platform_models.UpdateArchitecture{
+	arch := update_models.UpdateArchitecture{
 		AppID:       in.AppId,
 		PlatformID:  uint(in.PlatformId),
 		ArchID:      uint(in.ArchId),

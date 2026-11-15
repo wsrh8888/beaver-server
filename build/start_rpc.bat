@@ -1,20 +1,12 @@
 @echo off
-REM 启动所有RPC服务（OAuth在open_rpc内）
+REM 启动所有 RPC 服务（user+auth->account，file+emoji->asset，chat->message，friend+group->relation）
 setlocal enabledelayedexpansion
 
 for %%i in ("%~dp0..") do set "ROOT_DIR=%%~fi"
 
-wt new-tab --title "User RPC" cmd /k "cd /d !ROOT_DIR!\app\user\user_rpc && go run userrpc.go" ^
-  ; new-tab --title "Auth RPC" cmd /k "cd /d !ROOT_DIR!\app\auth\auth_rpc && go run authrpc.go" ^
-  ; new-tab --title "Friend RPC" cmd /k "cd /d !ROOT_DIR!\app\friend\friend_rpc && go run friendrpc.go" ^
-  ; new-tab --title "Group RPC" cmd /k "cd /d !ROOT_DIR!\app\group\group_rpc && go run grouprpc.go" ^
-  ; new-tab --title "File RPC" cmd /k "cd /d !ROOT_DIR!\app\file\file_rpc && go run filerpc.go" ^
-  ; new-tab --title "Emoji RPC" cmd /k "cd /d !ROOT_DIR!\app\emoji\emoji_rpc && go run emojirpc.go" ^
-  ; new-tab --title "Moment RPC" cmd /k "cd /d !ROOT_DIR!\app\moment\moment_rpc && go run momentrpc.go" ^
-  ; new-tab --title "Notification RPC" cmd /k "cd /d !ROOT_DIR!\app\notification\notification_rpc && go run notificationrpc.go" ^
-  ; new-tab --title "Call RPC" cmd /k "cd /d !ROOT_DIR!\app\call\call_rpc && go run callrpc.go" ^
-  ; new-tab --title "Open RPC" cmd /k "cd /d !ROOT_DIR!\app\open\open_rpc && go run openRpc.go" ^
+wt new-tab --title "Account RPC" cmd /k "cd /d !ROOT_DIR!\app\account\account_rpc && go run accountrpc.go" ^
+  ; new-tab --title "Asset RPC" cmd /k "cd /d !ROOT_DIR!\app\asset\asset_rpc && go run assetrpc.go" ^
+  ; new-tab --title "Relation RPC" cmd /k "cd /d !ROOT_DIR!\app\relation\relation_rpc && go run relationrpc.go" ^
+  ; new-tab --title "Message RPC" cmd /k "cd /d !ROOT_DIR!\app\message\message_rpc && go run messagerpc.go" ^
   ; new-tab --title "Platform RPC" cmd /k "cd /d !ROOT_DIR!\app\platform\platform_rpc && go run platformrpc.go" ^
-  ; new-tab --title "Chat RPC" cmd /k "cd /d !ROOT_DIR!\app\chat\chat_rpc && go run chatrpc.go" ^
-  ; new-tab --title "Circle RPC" cmd /k "cd /d !ROOT_DIR!\app\circle\circle_rpc && go run circlerpc.go" ^
-  ; new-tab --title "Doc RPC" cmd /k "cd /d !ROOT_DIR!\app\doc\doc_rpc && go run docrpc.go"
+  ; new-tab --title "Notification RPC" cmd /k "cd /d !ROOT_DIR!\app\notification\notification_rpc && go run notificationrpc.go"

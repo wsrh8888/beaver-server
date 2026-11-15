@@ -1,0 +1,79 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package grouplogic
+
+import (
+	"context"
+	"strings"
+	"time"
+
+	group_models "beaver/app/relation/relation_models/group"
+	"beaver/app/relation/relation_rpc/internal/svc"
+	"beaver/app/relation/relation_rpc/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"gorm.io/gorm"
+)
+
+type CanSendGroupMessageLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewCanSendGroupMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CanSendGroupMessageLogic {
+	return &CanSendGroupMessageLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("can_send_group_message", ctx),
+	}
+}
+
+func (l *CanSendGroupMessageLogic) CanSendGroupMessage(in *types.CanSendGroupMessageReq) (*types.CanSendGroupMessageRes, error) {
+	var member group_models.GroupMemberModel
+	if err := l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", in.GroupId, in.UserId).
+		First(&member).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &types.CanSendGroupMessageRes{Allowed: false, Reason: "你不是该群成员"}, nil
+		}
+		l.logger.Error(model.LogMsg{Text: "查询群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
+		return nil, err
+	}
+
+	if member.Role == 1 || member.Role == 2 || strings.HasPrefix(in.UserId, "nbot_") {
+		return &types.CanSendGroupMessageRes{Allowed: true}, nil
+	}
+
+	var group group_models.GroupModel
+	if err := l.svcCtx.DB.Where("group_id = ?", in.GroupId).First(&group).Error; err == nil {
+		if group.IsMuteAll {
+			return &types.CanSendGroupMessageRes{Allowed: false, Reason: "当前群已开启全员禁言"}, nil
+		}
+	}
+
+	if member.MutedUntil != nil && member.MutedUntil.After(time.Now()) {
+		return &types.CanSendGroupMessageRes{Allowed: false, Reason: "你已被禁言"}, nil
+	}
+
+	return &types.CanSendGroupMessageRes{Allowed: true}, nil
+}

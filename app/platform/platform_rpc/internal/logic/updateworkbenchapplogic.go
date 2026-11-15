@@ -26,7 +26,7 @@ import (
 	"errors"
 	"strings"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/workbench"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -52,7 +52,7 @@ func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(in *platform_rpc.UpdateWork
 		return nil, status.Error(codes.InvalidArgument, "应用 ID 不能为空")
 	}
 
-	var app platform_models.WorkbenchApp
+	var app workbench_models.WorkbenchApp
 	if err := l.svcCtx.DB.Where("workbench_app_id = ?", in.WorkbenchAppId).First(&app).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "工作台应用不存在")

@@ -28,7 +28,7 @@ import (
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/core/coreupdate"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -55,7 +55,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		return &types.GetLatestVersionRes{HasUpdate: false}, nil
 	}
 
-	var app platform_models.UpdateApp
+	var app update_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id = ? AND is_active = ?", req.AppID, true).First(&app).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("应用不存在或已停用")
@@ -64,7 +64,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		return nil, fmt.Errorf("查询应用失败")
 	}
 
-	var architecture platform_models.UpdateArchitecture
+	var architecture update_models.UpdateArchitecture
 	if err := l.svcCtx.DB.Where("app_id = ? AND platform_id = ? AND arch_id = ? AND is_active = ?",
 		req.AppID, req.PlatformID, req.ArchID, true).First(&architecture).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -94,7 +94,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		return &types.GetLatestVersionRes{HasUpdate: false}, nil
 	}
 
-	var target platform_models.UpdateVersion
+	var target update_models.UpdateVersion
 	if err := l.svcCtx.DB.First(&target, resolved.TargetVersionID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &types.GetLatestVersionRes{HasUpdate: false}, nil
@@ -132,14 +132,14 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 	return resp, nil
 }
 
-func (l *GetLatestVersionLogic) loadPolicy(arch platform_models.UpdateArchitecture) (stableID, grayID, rollout uint, minVer string, forceFlag, active bool) {
-	var policy platform_models.UpdateReleasePolicy
+func (l *GetLatestVersionLogic) loadPolicy(arch update_models.UpdateArchitecture) (stableID, grayID, rollout uint, minVer string, forceFlag, active bool) {
+	var policy update_models.UpdateReleasePolicy
 	err := l.svcCtx.DB.Where("architecture_id = ? AND is_active = ?", arch.Id, true).First(&policy).Error
 	if err == nil {
 		return policy.StableVersionID, policy.GrayVersionID, policy.RolloutPercent, policy.MinVersion, policy.ForceUpdate, true
 	}
 
-	var latest platform_models.UpdateVersion
+	var latest update_models.UpdateVersion
 	if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").First(&latest).Error; err == nil {
 		return latest.Id, 0, 0, "", false, true
 	}

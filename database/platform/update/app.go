@@ -22,7 +22,7 @@
 package update
 
 import (
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -35,7 +35,7 @@ const DefaultUpdateAppID = "87c9dc499cc34f32896a4537e66cf65e"
 func InitUpdateApp(db *gorm.DB) error {
 	fmt.Println("=== 开始初始化升级应用表 ===")
 
-	defaultApp := platform_models.UpdateApp{
+	defaultApp := update_models.UpdateApp{
 		Name:        "海狸IM",
 		Description: "海狸IM",
 		AppID:       DefaultUpdateAppID,
@@ -44,7 +44,7 @@ func InitUpdateApp(db *gorm.DB) error {
 	}
 
 	var count int64
-	if err := db.Model(&platform_models.UpdateApp{}).Where("app_id = ?", defaultApp.AppID).Count(&count).Error; err != nil {
+	if err := db.Model(&update_models.UpdateApp{}).Where("app_id = ?", defaultApp.AppID).Count(&count).Error; err != nil {
 		return fmt.Errorf("检查应用数据失败: %w", err)
 	}
 

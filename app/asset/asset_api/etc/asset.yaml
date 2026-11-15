@@ -1,0 +1,76 @@
+Name: asset_api
+Host: 0.0.0.0
+Port: 20600
+Log:
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  Level: info
+  Stat: false
+Domain: "http://192.168.3.4:20800"
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_asset?charset=utf8mb4&parseTime=True&loc=Local
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  DB: 0
+Etcd: 127.0.0.1:2379
+RocketMQ:
+  Addr: 127.0.0.1:9876
+
+FileMaxSize:
+  image: 2
+  video: 10
+  audio: 2
+  archive: 2
+  document: 2
+  unknown: 10
+MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
+
+# 通用上传接口(/api/file/v1/upload)使用的默认存储后端：local|qiniu|minio
+StorageType: local
+
+# 本地存储配置
+Local:
+  UploadDir: ../../../static # 本地文件上传目录(相对路径，相对于程序运行目录)
+  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+
+# 七牛云配置
+Qiniu:
+  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+  AK: your_qiniu_access_key
+  SK: your_qiniu_secret_key
+  Bucket: your_qiniu_bucket_name
+  Domain: "your_qiniu_domain" # 七牛云文件访问域名（必填，用于拼接完整URL）
+  ExpireTime: 3600 # 签名URL有效期, 单位：秒
+
+# MinIO配置
+Minio:
+  Endpoint: 127.0.0.1:9000 # MinIO服务地址
+  AccessKey: minioadmin
+  SecretKey: minioadmin
+  Bucket: beaver # 存储桶名称
+  UseSSL: false # 是否启用SSL
+  ProjectName: beaver # 项目名称，用于文件路径前缀（为空则使用根目录）
+WhiteList:
+  - png
+  - jpg
+  - jpeg
+  - gif
+  - webp
+  - mp4
+  - mp3
+  - m4a
+  - aac
+  - pdf
+  - exe
+  - wav
+
+BlackList:
+  - sh
+  - bat
+UserRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: accountrpc.rpc

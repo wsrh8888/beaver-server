@@ -22,6 +22,8 @@
 package config
 
 import (
+	"beaver/commonconfig"
+	"beaver/middleware/jwt"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )
@@ -40,12 +42,22 @@ type Config struct {
 	}
 	FriendRpc       zrpc.RpcClientConf
 	GroupRpc        zrpc.RpcClientConf
-	CircleRpc       zrpc.RpcClientConf
 	UserRpc         zrpc.RpcClientConf
 	ChatRpc         zrpc.RpcClientConf
-	MomentRpc       zrpc.RpcClientConf
 	EmojiRpc        zrpc.RpcClientConf
 	DatasyncRpc     zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf
-	AgentRpc        zrpc.RpcClientConf
+	AuthRpc         zrpc.RpcClientConf
+	FileRpc         zrpc.RpcClientConf
+	PlatformRpc     zrpc.RpcClientConf
+	// Agent beaver-agent(py, beaver-ai 业务线) S2S 出站端点；跨仓禁 gRPC，静态 X-Internal-Token。
+	Agent commonconfig.AgentEndpoint
+	// Circle 圈子服务（beaver-server-social/app/circle）S2S 端点：client_credentials 换票 + Bearer。
+	Circle commonconfig.Endpoint
+	// S2S 入站凭据：收费模块（beaver-social 等）经此换票后调本面 /internal/* 能力
+	// （User/Chat/Notification/Friend 的内部编排端点）。机制同收费模块侧，fail-closed。
+	S2S struct {
+		Secret  string                     `json:",optional"`
+		Clients map[string]jwt.ClientEntry `json:",optional"`
+	}
 }

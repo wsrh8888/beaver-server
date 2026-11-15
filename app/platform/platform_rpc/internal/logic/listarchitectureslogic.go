@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -51,7 +51,7 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 		pageSize = 10
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.UpdateArchitecture{})
+	db := l.svcCtx.DB.Model(&update_models.UpdateArchitecture{})
 	if in.AppId != "" {
 		db = db.Where("app_id = ?", in.AppId)
 	}
@@ -65,7 +65,7 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 		return nil, err
 	}
 
-	var list []platform_models.UpdateArchitecture
+	var list []update_models.UpdateArchitecture
 	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&list).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询架构列表失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
 		return nil, err
@@ -91,7 +91,7 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 	return &platform_rpc.ListArchitecturesRes{Total: total, Architectures: items}, nil
 }
 
-func (l *ListArchitecturesLogic) loadAppNameMap(list []platform_models.UpdateArchitecture) map[string]string {
+func (l *ListArchitecturesLogic) loadAppNameMap(list []update_models.UpdateArchitecture) map[string]string {
 	appNameMap := make(map[string]string)
 	if len(list) == 0 {
 		return appNameMap
@@ -113,7 +113,7 @@ func (l *ListArchitecturesLogic) loadAppNameMap(list []platform_models.UpdateArc
 		return appNameMap
 	}
 
-	var apps []platform_models.UpdateApp
+	var apps []update_models.UpdateApp
 	if err := l.svcCtx.DB.Where("app_id IN ?", appIDs).Find(&apps).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询应用名称失败", Data: map[string]any{"appIds": appIDs, "err": err.Error()}})
 		return appNameMap

@@ -19,47 +19,26 @@ assert_version_not_published() {
 
 assert_version_not_published
 
-# 定义模块列表
+# 定义模块列表（与 deploy/ 目录一一对应，由 build/check.sh 校验一致性）
 modules=(
     # ==================== RPC 服务 ====================
-    "user_rpc"
-    "auth_rpc"
-    "group_rpc"
-    "circle_rpc"
-    "friend_rpc"
-    "chat_rpc"
-    "file_rpc"
-    "emoji_rpc"
-    "moment_rpc"
+    "account_rpc"
+    "asset_rpc"
+    "message_rpc"
     "notification_rpc"
     "platform_rpc"
-    "call_rpc"
-    "open_rpc"
-    "doc_rpc"
-    
+    "relation_rpc"
+
     # ==================== API 服务 ====================
-    "auth_api"
-    "chat_api"
+    "account_api"
+    "asset_api"
     "datasync_api"
-    "emoji_api"
-    "file_api"
-    "friend_api"
-    "group_api"
-    "circle_api"
-    "moment_api"
+    "gateway_api"
+    "message_api"
     "notification_api"
     "platform_api"
-    "user_api"
+    "relation_api"
     "ws_api"
-    "gateway_api"
-    "call_api"
-    "open_api"
-    "open_portal"
-    "doc_api"
-    
-    # ==================== ADMIN 服务 ====================
-    "backend_admin"
-    "gateway_admin"
 )
 
 # 在当前路径执行 docker build

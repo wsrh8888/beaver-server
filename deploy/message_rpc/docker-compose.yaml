@@ -1,0 +1,11 @@
+
+services:
+  message_rpc:
+    image: wsrh8888/message_rpc:1.0.0
+    container_name: message_rpc
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./messagerpc.yaml:/etc/messagerpc.yaml:ro
+    restart: "no"
+    pull_policy: always

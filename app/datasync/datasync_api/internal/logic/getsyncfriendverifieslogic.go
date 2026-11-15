@@ -27,7 +27,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/friend/friend_rpc/types/friend_rpc"
+	relationtypes "beaver/app/relation/relation_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -49,7 +49,7 @@ func NewGetSyncFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *GetSyncFriendVerifiesLogic) GetSyncFriendVerifies(req *types.GetSyncFriendVerifiesReq) (resp *types.GetSyncFriendVerifiesRes, err error) {
 	// 调用Friend RPC获取好友验证版本信息
-	verifyResp, err := l.svcCtx.FriendRpc.GetFriendVerifyVersions(l.ctx, &friend_rpc.GetFriendVerifyVersionsReq{
+	verifyResp, err := l.svcCtx.FriendRpc.GetFriendVerifyVersions(l.ctx, &relationtypes.GetFriendVerifyVersionsReq{
 		UserId: req.UserID,
 		Since:  req.Since,
 	})

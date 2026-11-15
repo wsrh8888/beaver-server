@@ -23,8 +23,8 @@ package svc
 
 import (
 	"beaver/app/notification/notification_rpc/internal/config"
-	"beaver/app/user/user_rpc/types/user_rpc"
-	"beaver/app/user/user_rpc/user"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/client/user"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
@@ -39,7 +39,7 @@ import (
 
 type ServiceContext struct {
 	Config  config.Config
-	UserRpc user_rpc.UserClient
+	UserRpc accttypes.UserClient
 	Redis   *redis.Client
 
 	DB         *gorm.DB

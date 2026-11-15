@@ -27,8 +27,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"beaver/app/chat/chat_models"
-	"beaver/app/group/group_rpc/types/group_rpc"
+	"beaver/app/message/message_models"
+	relationtypes "beaver/app/relation/relation_rpc/types"
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
@@ -100,7 +100,7 @@ func getTypingPeerIDs(ctx context.Context, svcCtx *svc.ServiceContext, currentUs
 	}
 
 	groupID := conversation.GetTargetIDByConversation(conversationID, currentUserID)
-	membersRes, err := svcCtx.GroupRpc.GetGroupMembers(ctx, &group_rpc.GetGroupMembersReq{
+	membersRes, err := svcCtx.GroupRpc.GetGroupMembers(ctx, &relationtypes.GetGroupMembersReq{
 		GroupID: groupID,
 	})
 	if err != nil {
@@ -114,7 +114,7 @@ func getTypingPeerIDs(ctx context.Context, svcCtx *svc.ServiceContext, currentUs
 		}
 	}
 	if len(peers) == 0 {
-		var userConversations []chat_models.ChatUserConversation
+		var userConversations []message_models.ChatUserConversation
 		if err := svcCtx.DB.Where("conversation_id = ? AND user_id <> ?", conversationID, currentUserID).
 			Find(&userConversations).Error; err != nil {
 			return nil, err

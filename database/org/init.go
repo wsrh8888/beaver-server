@@ -29,7 +29,7 @@ import (
 	"strings"
 
 	org_models "beaver/app/platform/platform_models/org"
-	"beaver/app/user/user_models"
+	user_models "beaver/app/account/account_models/user"
 
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"

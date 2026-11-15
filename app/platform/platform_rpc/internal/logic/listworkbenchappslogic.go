@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/workbench"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -54,7 +54,7 @@ func (l *ListWorkbenchAppsLogic) ListWorkbenchApps(in *platform_rpc.ListWorkbenc
 		pageSize = 100
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.WorkbenchApp{})
+	db := l.svcCtx.DB.Model(&workbench_models.WorkbenchApp{})
 	if in.Status > 0 {
 		db = db.Where("status = ?", in.Status)
 	}
@@ -72,7 +72,7 @@ func (l *ListWorkbenchAppsLogic) ListWorkbenchApps(in *platform_rpc.ListWorkbenc
 		return nil, err
 	}
 
-	var list []platform_models.WorkbenchApp
+	var list []workbench_models.WorkbenchApp
 	if err := db.Order("sort ASC, id DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询工作台应用列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err

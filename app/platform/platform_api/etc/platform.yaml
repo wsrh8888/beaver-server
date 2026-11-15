@@ -18,19 +18,22 @@ OpenSearch:
   Addr: http://127.0.0.1:9200
   ClientLogIndex: beaver-logs
 FileRpc:
+  NonBlock: true
   Etcd:
     Hosts:
       - 127.0.0.1:2379
-    Key: filerpc.rpc
+    Key: assetrpc.rpc
 PlatformRpc:
+  NonBlock: true
   Etcd:
     Hosts:
       - 127.0.0.1:2379
     Key: platformrpc.rpc
 UserRpc:
+  NonBlock: true
   Etcd:
     Hosts:
       - 127.0.0.1:2379
-    Key: userrpc.rpc
+    Key: accountrpc.rpc
 Deploy:
   OrgName: 海狸

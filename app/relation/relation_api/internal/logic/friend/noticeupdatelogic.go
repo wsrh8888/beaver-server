@@ -1,0 +1,163 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	friend_models "beaver/app/relation/relation_models/friend"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type NoticeUpdateLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewNoticeUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *NoticeUpdateLogic {
+	return &NoticeUpdateLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("notice_update", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *types.NoticeUpdateRes, err error) {
+	// 参数验证
+	if req.UserID == "" || req.FriendID == "" {
+		return nil, errors.New("用户ID和好友ID不能为空")
+	}
+
+	// 不能修改自己的备注
+	if req.UserID == req.FriendID {
+		return nil, errors.New("不能修改自己的备注")
+	}
+
+	var friend friend_models.FriendModel
+
+	// 检查是否为好友关系
+	if !friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
+		l.logger.Error(model.LogMsg{Text: "尝试修改非好友备注", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID}})
+		return nil, errors.New("不是好友关系")
+	}
+
+	// 查询好友关系详情
+	err = l.svcCtx.DB.Take(&friend,
+		"((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0",
+		req.UserID, req.FriendID, req.FriendID, req.UserID).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询好友关系失败", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
+		return nil, errors.New("查询好友关系失败")
+	}
+
+	// 获取下一个版本号
+	nextVersion := l.svcCtx.VersionGen.GetNextVersion("friends", "", "")
+	if nextVersion == -1 {
+		l.logger.Error(model.LogMsg{Text: "获取版本号失败", Data: map[string]interface{}{"table": "friends"}})
+		return nil, errors.New("系统错误")
+	}
+
+	// 根据用户角色更新对应的备注字段和版本号
+	if friend.SendUserID == req.UserID {
+		// 我是发起方，更新发起方备注
+		if friend.SendUserNotice == req.Notice {
+			// 备注没有变化，直接返回
+			return &types.NoticeUpdateRes{}, nil
+		}
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("friend_id = ?", friend.FriendID).Updates(map[string]interface{}{
+			"send_user_notice": req.Notice,
+			"version":          nextVersion,
+		}).Error
+	} else if friend.RevUserID == req.UserID {
+		// 我是接收方，更新接收方备注
+		if friend.RevUserNotice == req.Notice {
+			// 备注没有变化，直接返回
+			return &types.NoticeUpdateRes{}, nil
+		}
+		err = l.svcCtx.DB.Model(&friend_models.FriendModel{}).Where("friend_id = ?", friend.FriendID).Updates(map[string]interface{}{
+			"rev_user_notice": req.Notice,
+			"version":         nextVersion,
+		}).Error
+	} else {
+		// 这种情况理论上不应该发生
+		l.logger.Error(model.LogMsg{Text: "用户角色异常", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID}})
+		return nil, errors.New("用户角色异常")
+	}
+
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新好友备注失败", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
+		return nil, errors.New("更新好友备注失败")
+	}
+
+	// 异步发送WebSocket通知给自己（备注是个人设置）
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				l.logger.Error(model.LogMsg{Text: "异步发送WebSocket消息时发生panic", Data: map[string]interface{}{"panic": r}})
+			}
+		}()
+
+		// 构建好友表更新数据 - 包含版本号和ID，让前端知道具体同步哪些数据
+		friendUpdates := map[string]interface{}{
+			"table": "friends",
+			"data": []map[string]interface{}{
+				{
+					"version":  nextVersion,
+					"friendId": friend.FriendID,
+				},
+			},
+		}
+
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.FRIEND_OPERATION,
+			"type":     wsTypeConst.FriendReceive,
+			"senderId": req.UserID,
+			"targetId": req.UserID,
+			"body": map[string]interface{}{
+				"tableUpdates": []map[string]interface{}{friendUpdates},
+			},
+			"conversationId": "",
+		}
+		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
+
+		l.logger.Info(model.LogMsg{Text: "异步发送好友备注更新通知完成", Data: map[string]interface{}{"userId": req.UserID, "friendId": friend.FriendID, "version": nextVersion}})
+	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "好友备注更新成功",
+		Data: map[string]interface{}{
+			"userId":   req.UserID,
+			"friendId": req.FriendID,
+		},
+	})
+	return &types.NoticeUpdateRes{
+		Version: nextVersion,
+	}, nil
+}

@@ -1,0 +1,11 @@
+
+services:
+  message_api:
+    image: wsrh8888/message_api:1.0.0
+    container_name: message_api
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./message.yaml:/etc/message.yaml:ro
+    restart: "no"
+    pull_policy: always 

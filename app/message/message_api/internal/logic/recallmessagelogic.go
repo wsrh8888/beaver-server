@@ -1,0 +1,147 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"beaver/app/message/message_api/internal/svc"
+	"beaver/app/message/message_api/internal/types"
+	"beaver/app/message/message_models"
+	"beaver/app/message/message_rpc/types/chat_rpc"
+	"beaver/common/models/ctype"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"github.com/google/uuid"
+)
+
+type RecallMessageLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewRecallMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RecallMessageLogic {
+	return &RecallMessageLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("recall_msg", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *types.RecallMessageRes, err error) {
+	// 1. 获取原始消息
+	var msg message_models.ChatMessage
+	err = l.svcCtx.DB.Where("message_id = ?", req.MessageID).First(&msg).Error
+	if err != nil {
+		l.logger.Warn(model.LogMsg{
+			Text: "撤回消息不存在",
+			Data: map[string]any{
+				"userId":    req.UserID,
+				"messageId": req.MessageID,
+				"err":       err.Error(),
+			},
+		})
+		return nil, errors.New("消息不存在")
+	}
+
+	// 2. 权限校验
+	if msg.SendUserID == nil || *msg.SendUserID != req.UserID {
+		l.logger.Warn(model.LogMsg{
+			Text: "无权撤回他人消息",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"messageId":      req.MessageID,
+				"conversationId": msg.ConversationID,
+			},
+		})
+		return nil, errors.New("无权撤回他人消息")
+	}
+
+	// 3. 时效性校验（对标大厂：3分钟限制）
+	if time.Since(time.Time(msg.CreatedAt)) > 3*time.Minute {
+		l.logger.Warn(model.LogMsg{
+			Text: "撤回已超时",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"messageId":      req.MessageID,
+				"conversationId": msg.ConversationID,
+			},
+		})
+		return nil, errors.New("超过3分钟，无法撤回")
+	}
+
+	// 4. 不修改原始消息记录（只增不改原则）
+	// 撤回通过发送一条新的 WithdrawMsg 指令消息来表达
+	// 这条指令消息有自己的 Seq，会正常进入同步流，客户端通过 originMsgId 识别被撤回的消息
+
+	// 5. 产生一条"撤回指令"到同步流
+	// 这里调用 SendMsg 发送一条 WithdrawMsg 类型的消息，它会产生新的 Seq
+	_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
+		UserId:         req.UserID,
+		ConversationId: msg.ConversationID,
+		MessageId:      uuid.New().String(), // 指令消息本身的ID
+		Msg: &chat_rpc.Msg{
+			Type: uint32(ctype.WithdrawMsgType),
+			WithdrawMsg: &chat_rpc.WithdrawMsg{
+				OriginMsgId: req.MessageID,
+				// 将被撤回的消息快照带上，供展示或审计
+				OriginMsg: func() *chat_rpc.Msg {
+					res := &chat_rpc.Msg{Type: uint32(msg.MsgType)}
+					if msg.MsgType == ctype.TextMsgType && msg.Msg != nil && msg.Msg.TextMsg != nil {
+						res.TextMsg = &chat_rpc.TextMsg{Content: msg.Msg.TextMsg.Content}
+					}
+					return res
+				}(),
+			},
+		},
+	})
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "发送撤回指令失败",
+			Data: map[string]any{
+				"userId":         req.UserID,
+				"messageId":      req.MessageID,
+				"conversationId": msg.ConversationID,
+				"err":            err.Error(),
+			},
+		})
+		return nil, errors.New("撤回失败")
+	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "消息撤回成功",
+		Data: map[string]any{
+			"messageId":      req.MessageID,
+			"userId":         req.UserID,
+			"conversationId": msg.ConversationID,
+		},
+	})
+
+	return &types.RecallMessageRes{
+		MessageID:  req.MessageID,
+		RecallTime: time.Now().Format("2006-01-02 15:04:05"),
+	}, nil
+}

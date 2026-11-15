@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/feedback"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -54,7 +54,7 @@ func (l *ListFeedbackLogic) ListFeedback(in *platform_rpc.ListFeedbackReq) (*pla
 		pageSize = 100
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.FeedbackModel{})
+	db := l.svcCtx.DB.Model(&feedback_models.FeedbackModel{})
 	if in.Status > 0 {
 		db = db.Where("status = ?", in.Status)
 	}
@@ -74,7 +74,7 @@ func (l *ListFeedbackLogic) ListFeedback(in *platform_rpc.ListFeedbackReq) (*pla
 		return nil, err
 	}
 
-	var list []platform_models.FeedbackModel
+	var list []feedback_models.FeedbackModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询反馈列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err

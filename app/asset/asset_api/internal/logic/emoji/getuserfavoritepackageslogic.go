@@ -1,0 +1,168 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+
+	"beaver/app/asset/asset_api/internal/svc"
+	"beaver/app/asset/asset_api/internal/types"
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type GetUserFavoritePackagesLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewGetUserFavoritePackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserFavoritePackagesLogic {
+	return &GetUserFavoritePackagesLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("get_user_favorite_packages", ctx),
+	}
+}
+
+func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUserFavoritePackagesReq) (resp *types.GetUserFavoritePackagesRes, err error) {
+	// 1. 查询用户收藏的表情包ID列表
+	var packageCollects []emoji_models.EmojiPackageCollect
+	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).
+		Offset((req.Page - 1) * req.Size).
+		Limit(req.Size).
+		Find(&packageCollects).Error
+
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏的表情包失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "查询收藏的表情包失败")
+	}
+
+	// 2. 获取收藏总数
+	var total int64
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
+		Where("user_id = ?", req.UserID).
+		Count(&total).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取收藏总数失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取收藏总数失败")
+	}
+
+	// 如果没有收藏的表情包，直接返回空列表
+	if len(packageCollects) == 0 {
+		return &types.GetUserFavoritePackagesRes{
+			Count: 0,
+			List:  make([]types.EmojiPackageItem, 0),
+		}, nil
+	}
+
+	// 3. 获取所有收藏的表情包ID
+	packageIDs := make([]string, len(packageCollects))
+	for i, collect := range packageCollects {
+		packageIDs[i] = collect.PackageID
+	}
+
+	// 4. 查询表情包详情
+	var packages []emoji_models.EmojiPackage
+	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", packageIDs, 1).Find(&packages).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		return nil, status.Error(codes.Internal, "查询表情包详情失败")
+	}
+
+	// 创建表情包ID到对象的映射
+	packageMap := make(map[string]emoji_models.EmojiPackage)
+	for _, p := range packages {
+		packageMap[p.PackageID] = p
+	}
+
+	// 5. 获取每个表情包的表情数量
+	emojiCounts := make(map[string]int64)
+	var emojiCountsData []struct {
+		PackageID string
+		Count     int64
+	}
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageEmoji{}).
+		Select("package_id, count(*) as count").
+		Where("package_id IN ?", packageIDs).
+		Group("package_id").
+		Find(&emojiCountsData).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取表情数量失败", Data: map[string]any{"err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取表情数量失败")
+	}
+	for _, c := range emojiCountsData {
+		emojiCounts[c.PackageID] = c.Count
+	}
+
+	// 6. 获取每个表情包的收藏数
+	collectCounts := make(map[string]int64)
+	var collectCountsData []struct {
+		PackageID string
+		Count     int64
+	}
+	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
+		Select("package_id, count(*) as count").
+		Where("package_id IN ?", packageIDs).
+		Group("package_id").
+		Find(&collectCountsData).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取收藏数失败", Data: map[string]any{"err": err.Error()}})
+		return nil, status.Error(codes.Internal, "获取收藏数失败")
+	}
+	for _, c := range collectCountsData {
+		collectCounts[c.PackageID] = c.Count
+	}
+
+	// 7. 构建返回数据
+	packageItems := make([]types.EmojiPackageItem, 0, len(packageCollects))
+
+	// 按照收藏的顺序构建响应
+	for _, collect := range packageCollects {
+		packageID := collect.PackageID
+		package_, exists := packageMap[packageID]
+		if !exists {
+			continue // 跳过不存在或已禁用的表情包
+		}
+
+		packageItems = append(packageItems, types.EmojiPackageItem{
+			PackageID:    package_.PackageID,
+			Title:        package_.Title,
+			CoverFile:    package_.CoverFile,
+			Description:  package_.Description,
+			Type:         package_.Type,
+			CollectCount: int(collectCounts[packageID]),
+			EmojiCount:   int(emojiCounts[packageID]),
+			IsCollected:  true, // 这里一定是已收藏的
+			IsAuthor:     package_.UserID == req.UserID,
+		})
+	}
+
+	return &types.GetUserFavoritePackagesRes{
+		Count: total,
+		List:  packageItems,
+	}, nil
+}

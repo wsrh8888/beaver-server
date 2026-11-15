@@ -1,0 +1,36 @@
+syntax = "v1"
+
+// 通知同步 API：按 ID 拉取通知事件明细（NotificationEvent，数据库同步）
+
+// 表1：通知事件（NotificationEvent）
+type (
+	getEventsByIdsReq {
+		EventIDs []string `json:"eventIds"` // 必填
+	}
+	EventItem {
+		EventID    string `json:"eventId"`
+		EventType  string `json:"eventType"`
+		Category   string `json:"category"`
+		Version    int64  `json:"version"`
+		FromUserID string `json:"fromUserId,optional"`
+		TargetID   string `json:"targetId,optional"`
+		TargetType string `json:"targetType"`
+		Payload    string `json:"payload"` // JSON 字符串
+		Priority   int32  `json:"priority"`
+		Status     int32  `json:"status"`
+		DedupHash  string `json:"dedupHash"`
+		CreatedAt  int64  `json:"createdAt"` // ms
+		UpdatedAt  int64  `json:"updatedAt"` // ms
+	}
+	getEventsByIdsRes {
+		Events []EventItem `json:"events"`
+	}
+)
+
+service notification {
+	@doc "按ID拉取通知事件明细（数据库同步）"
+	@handler getEventsByIds
+	post /api/notification/v1/getEventsByIds (getEventsByIdsReq) returns (getEventsByIdsRes)
+}
+
+// goctl api go -api notification_api.api -dir . --home ../../../template

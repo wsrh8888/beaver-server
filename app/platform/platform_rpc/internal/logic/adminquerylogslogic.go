@@ -25,7 +25,7 @@ import (
 	"context"
 	"time"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/track"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -56,7 +56,7 @@ func (l *AdminQueryLogsLogic) AdminQueryLogs(in *platform_rpc.AdminQueryLogsReq)
 		pageSize = 20
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.TrackLogger{})
+	db := l.svcCtx.DB.Model(&track_models.TrackLogger{})
 	db = db.Where("bucket_id = ?", in.BucketId)
 	if in.Level != "" {
 		db = db.Where("level = ?", in.Level)
@@ -77,7 +77,7 @@ func (l *AdminQueryLogsLogic) AdminQueryLogs(in *platform_rpc.AdminQueryLogsReq)
 		return nil, err
 	}
 
-	var logs []platform_models.TrackLogger
+	var logs []track_models.TrackLogger
 	offset := (page - 1) * pageSize
 	if err := db.Offset(offset).Limit(pageSize).Order("timestamp DESC").Find(&logs).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询日志列表失败", Data: map[string]any{"bucketId": in.BucketId, "page": page, "pageSize": pageSize, "err": err.Error()}})

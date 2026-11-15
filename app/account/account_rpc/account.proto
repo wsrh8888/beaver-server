@@ -1,0 +1,266 @@
+syntax = "proto3"; //指定proto版本
+
+package account_rpc;
+
+option go_package = "./types";
+
+message UserCreateReq {
+  string phone = 1; // 手机号（与email二选一）
+  int32 source = 2; // 注册来源：1-手机号注册，2-邮箱注册
+  string email = 3; // 邮箱（与phone二选一）
+  string nick_name = 4; // 昵称（可选）
+  int32 user_type = 5; // 用户类型：1-普通用户，2-bot，3-digital（可选，默认1）
+  string abstract = 6; // 个性签名（可选）
+}
+
+message UserCreateRes {
+  string userID = 1;
+}
+
+message UserInfoReq {
+  string userID = 1;
+}
+
+message UserInfoRes {
+  UserInfo user_info = 1; // 用户信息
+}
+ 
+
+message UserInfo {
+  string user_id = 1; // 用户ID
+  string nick_name = 2;
+  string avatar = 3;
+  int64 version = 4; // 用户版本号，用于同步
+  string email = 5;
+  string abstract = 6;
+  string phone = 7;
+  int32 status = 8; // 状态 1正常 2禁用 3删除
+  int32 source = 9; // 注册来源
+  int32 user_type = 10; // 用户类型
+  string created_at = 11; // 创建时间
+  string updated_at = 12; // 更新时间
+}
+
+// ListUsers：用户查询（列表 + user_id 精确查详情）
+message ListUsersReq {
+  int32 page = 1; // int32 页码
+  int32 page_size = 2; // int32 每页条数
+  string email = 3; // string 邮箱模糊筛选，可选
+  int32 status = 4; // int32 状态筛选，0 表示全部
+  int32 source = 5; // int32 来源筛选，0 表示全部
+  string user_id = 6; // string 用户 ID 精确查，可选
+  string keyword = 7; // string 昵称/邮箱/手机号模糊搜索，可选
+  int32 user_type = 8; // int32 用户类型筛选，0 表示全部
+}
+
+message ListUsersRes {
+  int64 total = 1; // int64 总数
+  repeated UserInfo list = 2; // array 用户列表
+}
+
+// UpdateUsers：批量更新用户资料字段
+message UpdateUsersReq {
+  repeated string user_ids = 1; // array 用户 ID
+  optional string patch_nick_name = 2; // string 更新昵称，可选
+  optional string patch_email = 3; // string 更新邮箱，可选
+  optional string patch_avatar = 4; // string 更新头像，可选
+  optional string patch_abstract = 5; // string 更新个性签名，可选
+}
+
+message UpdateUsersRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// DeleteUsers：批量软删除用户
+message DeleteUsersReq {
+  repeated string user_ids = 1; // array 用户 ID
+}
+
+message DeleteUsersRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+// UpdateUsersStatus：批量更新用户状态
+message UpdateUsersStatusReq {
+  repeated string user_ids = 1; // array 用户 ID
+  int32 status = 2; // int32 状态 1正常 2禁用 3删除
+}
+
+message UpdateUsersStatusRes {
+  int64 affected_count = 1; // int64 影响条数
+}
+
+message UserVersionInfo {
+  string user_id = 1;
+  int64 version = 2;
+}
+
+message UserVersionsReq {
+  repeated string user_ids = 1;
+}
+
+message UserVersionsRes {
+  map<string, int64> user_versions = 1; // user_id -> version
+}
+
+message UserListInfoReq {
+  repeated string user_id_list = 1;
+  int64 since_timestamp = 2; // 可选：从这个时间戳之后查询更新的用户，不传则返回所有
+}
+
+message UserListInfoRes {
+  map<string, UserInfo> user_info = 1; //用户配置的json
+}
+
+message SearchUserReq {
+  string keyword = 1; // 搜索关键词（邮箱或用户ID）
+  string type = 2; // 搜索类型：email 或 userId
+}
+
+message SearchUserRes {
+  UserInfo user_info = 1; // 用户信息
+}
+
+// 更新用户展示信息（昵称/头像，供开放平台 Digital/Bot 等内部服务调用）
+message UserUpdateDisplayReq {
+  string user_id = 1; // string IM 用户 ID
+  string nick_name = 2; // string 新昵称，空表示不修改
+  string avatar = 3; // string 新头像 URL，空表示不修改
+}
+
+message UserUpdateDisplayRes {
+  int64 version = 1; // int64 更新后的用户资料版本号
+}
+
+
+// 创建用户凭证
+message CreateCredentialReq {
+  string user_id = 1; // 用户ID
+  string password = 2; // 密码（明文，服务端会加密）
+}
+
+message CreateCredentialRes {
+  bool success = 1; // 是否成功
+}
+
+// 验证密码
+message VerifyPasswordReq {
+  string user_id = 1; // 用户ID
+  string password = 2; // 密码（明文）
+}
+
+message VerifyPasswordRes {
+  bool valid = 1; // 密码是否正确
+}
+
+// 修改密码
+message UpdatePasswordReq {
+  string user_id = 1; // 用户ID
+  string old_password = 2; // 旧密码
+  string new_password = 3; // 新密码
+}
+
+message UpdatePasswordRes {
+  bool success = 1; // 是否成功
+}
+
+// 获取最后登录时间
+message GetLastLoginAtReq {
+  string user_id = 1; // 用户ID
+}
+
+message GetLastLoginAtRes {
+  int64 last_login_at = 1; // 最后登录时间戳（秒）
+}
+
+// 更新登录记录
+message UpdateLoginRecordReq {
+  string user_id = 1; // 用户ID
+}
+
+message UpdateLoginRecordRes {
+  bool success = 1; // 是否成功
+}
+
+// 重置密码（已通过验证码等校验，无需旧密码）
+message ResetPasswordReq {
+  string user_id = 1;
+  string new_password = 2;
+}
+
+message ResetPasswordRes {
+  bool success = 1;
+}
+
+// 登录登记设备（auth 库）
+message UpsertDeviceReq {
+  string user_id = 1;
+  string device_id = 2;
+  string device_type = 3;
+  string device_os = 4;
+  string device_name = 5;
+  string last_login_ip = 6;
+}
+
+message UpsertDeviceRes {
+  bool success = 1;
+}
+
+message CheckDeviceActiveReq {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+message CheckDeviceActiveRes {
+  bool active = 1;
+}
+
+// 查询用户登录设备列表（auth 库）
+message ListUserDevicesReq {
+  string user_id = 1; // 用户ID
+}
+
+message UserDeviceItem {
+  string device_id = 1; // 设备ID
+  string device_type = 2; // 槽位 desktop / mobile
+  string device_os = 3; // 系统
+  string device_model = 4; // 设备型号
+  string device_os_version = 5; // 系统版本
+  string device_name = 6; // 设备名称
+  string last_login_time = 7; // 最近登录时间
+  string last_login_ip = 8; // 最近登录 IP
+  bool is_online = 9; // 当前是否在线
+}
+
+message ListUserDevicesRes {
+  repeated UserDeviceItem list = 1; // 设备列表
+}
+
+
+service user {
+  rpc UserCreate(UserCreateReq) returns(UserCreateRes);
+  rpc UserInfo(UserInfoReq) returns(UserInfoRes);
+  rpc SearchUser(SearchUserReq) returns(SearchUserRes);
+  rpc UserListInfo(UserListInfoReq) returns(UserListInfoRes);
+  rpc UserVersions(UserVersionsReq) returns(UserVersionsRes);
+  rpc UserUpdateDisplay(UserUpdateDisplayReq) returns(UserUpdateDisplayRes);
+  // 管理类通用能力（admin / 其他服务均可复用，不与 HTTP 接口 1:1）
+  rpc ListUsers(ListUsersReq) returns(ListUsersRes); // 用户查询：列表、详情
+  rpc UpdateUsers(UpdateUsersReq) returns(UpdateUsersRes); // 更新用户资料
+  rpc DeleteUsers(DeleteUsersReq) returns(DeleteUsersRes); // 软删除用户
+  rpc UpdateUsersStatus(UpdateUsersStatusReq) returns(UpdateUsersStatusRes); // 批量更新用户状态
+}
+
+
+service auth {
+  rpc CreateCredential(CreateCredentialReq) returns(CreateCredentialRes);
+  rpc VerifyPassword(VerifyPasswordReq) returns(VerifyPasswordRes);
+  rpc UpdatePassword(UpdatePasswordReq) returns(UpdatePasswordRes);
+  rpc GetLastLoginAt(GetLastLoginAtReq) returns(GetLastLoginAtRes);
+  rpc UpdateLoginRecord(UpdateLoginRecordReq) returns(UpdateLoginRecordRes);
+  rpc ResetPassword(ResetPasswordReq) returns(ResetPasswordRes);
+  rpc UpsertDevice(UpsertDeviceReq) returns(UpsertDeviceRes);
+  rpc CheckDeviceActive(CheckDeviceActiveReq) returns(CheckDeviceActiveRes);
+  rpc ListUserDevices(ListUserDevicesReq) returns(ListUserDevicesRes);
+}
+

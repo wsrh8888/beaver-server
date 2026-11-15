@@ -24,7 +24,7 @@ package logic
 import (
 	"context"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/report"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -54,7 +54,7 @@ func (l *ListContentReportsLogic) ListContentReports(in *platform_rpc.ListConten
 		pageSize = 100
 	}
 
-	db := l.svcCtx.DB.Model(&platform_models.ContentReportModel{})
+	db := l.svcCtx.DB.Model(&report_models.ContentReportModel{})
 	if in.Status > 0 {
 		db = db.Where("status = ?", in.Status)
 	}
@@ -74,7 +74,7 @@ func (l *ListContentReportsLogic) ListContentReports(in *platform_rpc.ListConten
 		return nil, err
 	}
 
-	var list []platform_models.ContentReportModel
+	var list []report_models.ContentReportModel
 	if err := db.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&list).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询举报列表失败", Data: map[string]any{"page": page, "pageSize": pageSize, "err": err.Error()}})
 		return nil, err

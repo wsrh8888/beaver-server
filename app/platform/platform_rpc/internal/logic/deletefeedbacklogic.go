@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/feedback"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -47,7 +47,7 @@ func NewDeleteFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 }
 
 func (l *DeleteFeedbackLogic) DeleteFeedback(in *platform_rpc.DeleteFeedbackReq) (*platform_rpc.DeleteFeedbackRes, error) {
-	var feedback platform_models.FeedbackModel
+	var feedback feedback_models.FeedbackModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&feedback).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "反馈记录不存在")

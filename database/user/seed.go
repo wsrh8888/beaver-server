@@ -22,8 +22,8 @@
 package userseed
 
 import (
-	"beaver/app/auth/auth_models"
-	"beaver/app/user/user_models"
+	auth_models "beaver/app/account/account_models/auth"
+	user_models "beaver/app/account/account_models/user"
 	"beaver/utils/pwd"
 	"fmt"
 	"log"

@@ -26,7 +26,7 @@ import (
 	"errors"
 	"strings"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/update"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -50,7 +50,7 @@ func NewCreateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateA
 }
 
 func (l *CreateAppLogic) CreateApp(in *platform_rpc.CreateAppReq) (*platform_rpc.CreateAppRes, error) {
-	var existing platform_models.UpdateApp
+	var existing update_models.UpdateApp
 	if err := l.svcCtx.DB.Where("name = ?", in.Name).First(&existing).Error; err == nil {
 		return nil, status.Error(codes.AlreadyExists, "应用名称已存在")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -58,7 +58,7 @@ func (l *CreateAppLogic) CreateApp(in *platform_rpc.CreateAppReq) (*platform_rpc
 		return nil, err
 	}
 
-	app := platform_models.UpdateApp{
+	app := update_models.UpdateApp{
 		Name:        in.Name,
 		AppID:       strings.ReplaceAll(uuid.New().String(), "-", ""),
 		Description: in.Description,

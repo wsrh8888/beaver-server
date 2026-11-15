@@ -25,7 +25,7 @@ import (
 	"context"
 	"time"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/report"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -53,19 +53,19 @@ func (l *UpdateContentReportsLogic) UpdateContentReports(in *platform_rpc.Update
 	updates := map[string]interface{}{"handler_id": in.HandlerId, "handle_remark": in.HandleRemark}
 	switch in.Action {
 	case 1:
-		updates["status"] = platform_models.ReportStatusAccepted
+		updates["status"] = report_models.ReportStatusAccepted
 		if in.CaseId > 0 {
 			updates["case_id"] = in.CaseId
 		}
 	case 2:
-		updates["status"] = platform_models.ReportStatusRejected
+		updates["status"] = report_models.ReportStatusRejected
 	case 3:
-		updates["status"] = platform_models.ReportStatusResolved
+		updates["status"] = report_models.ReportStatusResolved
 	default:
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")
 	}
 
-	result := l.svcCtx.DB.Model(&platform_models.ContentReportModel{}).Where("id IN ?", in.Ids).Updates(updates)
+	result := l.svcCtx.DB.Model(&report_models.ContentReportModel{}).Where("id IN ?", in.Ids).Updates(updates)
 	if result.Error != nil {
 		l.logger.Error(model.LogMsg{Text: "更新举报失败", Data: map[string]any{"ids": in.Ids, "action": in.Action, "err": result.Error.Error()}})
 		return nil, status.Error(codes.Internal, "更新失败")

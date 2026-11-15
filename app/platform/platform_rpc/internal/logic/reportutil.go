@@ -24,11 +24,11 @@ package logic
 import (
 	"time"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/report"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 )
 
-func toContentReportItem(r platform_models.ContentReportModel) *platform_rpc.ContentReportItem {
+func toContentReportItem(r report_models.ContentReportModel) *platform_rpc.ContentReportItem {
 	return &platform_rpc.ContentReportItem{
 		Id:             uint64(r.Id),
 		ReporterUserId: r.ReporterUserID,

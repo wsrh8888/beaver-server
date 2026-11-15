@@ -1,0 +1,55 @@
+# S2S 出站：开放接口服务（beaver-open 独立仓），跨团队必须走 API，禁 etcd gRPC。
+Open:
+  BaseURL: http://127.0.0.1:21900
+  ClientID: beaver-server
+  ClientSecret: s2s-dev-secret
+Name: relation_api
+Host: 0.0.0.0
+Port: 20200
+Mysql:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/beaver_relation?charset=utf8mb4&parseTime=True&loc=Local
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: '123456'
+  DB: 0
+Log:
+  Mode: file
+  Path: logs/relation_api
+  Encoding: json
+  TimeFormat: 2006-01-02T15:04:05
+  KeepDays: 7
+  Stat: false
+# go-zero 自带：在独立端口暴露 /metrics（业务口 20200 + 7000）
+Prometheus:
+  Host: 0.0.0.0
+  Port: 27200
+  Path: /metrics
+Etcd: 127.0.0.1:2379
+Domain: http://192.168.3.4:20800
+UserRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: accountrpc.rpc
+# relation_rpc：friend + group 同进程（etcd relationrpc.rpc）
+RelationRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: relationrpc.rpc
+ChatRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: messagerpc.rpc
+NotificationRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: notificationrpc.rpc
+RocketMQ:
+  Addr: 127.0.0.1:9876

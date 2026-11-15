@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/chat/chat_rpc/types/chat_rpc"
+	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	beaverlog "beaver/utils/beaverlog"

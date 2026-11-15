@@ -1,0 +1,159 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/relation/relation_api/internal/svc"
+	"beaver/app/relation/relation_api/internal/types"
+	group_models "beaver/app/relation/relation_models/group"
+	relationtypes "beaver/app/relation/relation_rpc/types"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type TransferOwnerLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewTransferOwnerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TransferOwnerLogic {
+	return &TransferOwnerLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("transfer_owner", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *types.TransferOwnerRes, err error) {
+	// 检查当前用户是否为群主
+	var currentOwner group_models.GroupMemberModel
+	err = l.svcCtx.DB.Take(&currentOwner, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	if err != nil {
+		return nil, errors.New("用户不是群组成员")
+	}
+	if currentOwner.Role != 1 {
+		return nil, errors.New("只有群主可以转让群组")
+	}
+
+	// 检查新群主是否为群组成员
+	var newOwner group_models.GroupMemberModel
+	err = l.svcCtx.DB.Take(&newOwner, "group_id = ? and user_id = ?", req.GroupID, req.NewOwnerID).Error
+	if err != nil {
+		return nil, errors.New("新群主不是群组成员")
+	}
+
+	// 开始事务
+	tx := l.svcCtx.DB.Begin()
+	if tx.Error != nil {
+		l.logger.Error(model.LogMsg{Text: "开启事务失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": tx.Error.Error()}})
+		return nil, errors.New("转让群组失败")
+	}
+
+	// 更新原群主角色为普通成员
+	err = tx.Model(&group_models.GroupMemberModel{}).
+		Where("group_id = ? and user_id = ?", req.GroupID, req.UserID).
+		Update("role", 3).Error
+	if err != nil {
+		tx.Rollback()
+		l.logger.Error(model.LogMsg{Text: "更新原群主角色失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+		return nil, errors.New("转让群组失败")
+	}
+
+	// 更新新群主角色
+	err = tx.Model(&group_models.GroupMemberModel{}).
+		Where("group_id = ? and user_id = ?", req.GroupID, req.NewOwnerID).
+		Update("role", 1).Error
+	if err != nil {
+		tx.Rollback()
+		l.logger.Error(model.LogMsg{Text: "更新新群主角色失败", Data: map[string]interface{}{"groupId": req.GroupID, "newOwnerId": req.NewOwnerID, "err": err.Error()}})
+		return nil, errors.New("转让群组失败")
+	}
+
+	// 获取该群成员的版本号（按群独立递增）
+	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
+	if memberVersion == -1 {
+		l.logger.Error(model.LogMsg{Text: "获取群成员版本号失败", Data: map[string]interface{}{"groupId": req.GroupID}})
+		return nil, errors.New("获取版本号失败")
+	}
+
+	// 提交事务
+	if err = tx.Commit().Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+		return nil, errors.New("转让群组失败")
+	}
+
+	// 异步通知群成员
+	go func() {
+		// 创建新的context，避免使用请求的context
+		ctx := context.Background()
+
+		// 获取群成员列表
+		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &relationtypes.GetGroupMembersReq{
+			GroupID: req.GroupID,
+		})
+		if err != nil {
+			l.logger.Error(model.LogMsg{Text: "获取群成员列表失败", Data: map[string]interface{}{"groupId": req.GroupID, "err": err.Error()}})
+			return
+		}
+
+		// 通过ws推送给群成员 - 群成员变动通知
+		for _, member := range response.Members {
+			payload := map[string]interface{}{
+				"command":  wsCommandConst.GROUP_OPERATION,
+				"type":     wsTypeConst.GroupMemberReceive,
+				"senderId": req.GroupID,
+				"targetId": member.UserID,
+				"body": map[string]interface{}{
+					"table": "group_members",
+					"data": []map[string]interface{}{
+						{
+							"version": memberVersion,
+							"groupId": req.GroupID,
+						},
+					},
+				},
+				"conversationId": "",
+			}
+			l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, payload)
+		}
+	}()
+
+	l.logger.Info(model.LogMsg{
+		Text: "转让群主成功",
+		Data: map[string]interface{}{
+			"groupId":    req.GroupID,
+			"userId":     req.UserID,
+			"newOwnerId": req.NewOwnerID,
+		},
+	})
+
+	return &types.TransferOwnerRes{
+		Version: memberVersion,
+	}, nil
+}

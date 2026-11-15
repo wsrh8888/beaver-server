@@ -1,0 +1,92 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"time"
+
+	"beaver/app/asset/asset_api/internal/svc"
+	"beaver/app/asset/asset_api/internal/types"
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type GetEmojiPackagesByIdsLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+// 批量获取表情包详情（用于数据同步）
+func NewGetEmojiPackagesByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackagesByIdsLogic {
+	return &GetEmojiPackagesByIdsLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_packages_by_ids", ctx),
+	}
+}
+
+func (l *GetEmojiPackagesByIdsLogic) GetEmojiPackagesByIds(req *types.GetEmojiPackagesByIdsReq) (resp *types.GetEmojiPackagesByIdsRes, err error) {
+	if len(req.Ids) == 0 {
+		return &types.GetEmojiPackagesByIdsRes{
+			Packages: make([]types.EmojiPackageDetailItem, 0),
+		}, nil
+	}
+
+	// 根据ID列表查询表情包详情
+	var packages []emoji_models.EmojiPackage
+	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", req.Ids, 1).Find(&packages).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
+		return nil, err
+	}
+
+	l.logger.Info(model.LogMsg{Text: "批量查询表情包详情", Data: map[string]interface{}{"requestCount": len(req.Ids), "resultCount": len(packages)}})
+
+	// 计算每个表情包的收藏数（可以考虑缓存这个统计数据）
+	var packageItems []types.EmojiPackageDetailItem
+	for _, pkg := range packages {
+		// 查询收藏数
+		var collectCount int64
+		l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).Where("package_id = ?", pkg.PackageID).Count(&collectCount)
+
+		packageItems = append(packageItems, types.EmojiPackageDetailItem{
+			PackageID:    pkg.PackageID,
+			Title:        pkg.Title,
+			CoverFile:    pkg.CoverFile,
+			UserID:       pkg.UserID,
+			Description:  pkg.Description,
+			Type:         pkg.Type,
+			Status:       pkg.Status,
+			CollectCount: int(collectCount),
+			CreatedAt:    time.Time(pkg.CreatedAt).UnixMilli(),
+			UpdatedAt:    time.Time(pkg.UpdatedAt).UnixMilli(),
+			Version:      pkg.Version,
+		})
+	}
+
+	return &types.GetEmojiPackagesByIdsRes{
+		Packages: packageItems,
+	}, nil
+}

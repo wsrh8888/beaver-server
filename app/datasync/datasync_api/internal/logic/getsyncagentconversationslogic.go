@@ -27,7 +27,8 @@ import (
 	"errors"
 	"time"
 
-	"beaver/app/agent/agent_rpc/types/agent_rpc"
+	"beaver/remote/agent"
+	agenttype "beaver/types/remote/agent"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	beaverlog "beaver/utils/beaverlog"
@@ -80,7 +81,7 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 		ServerTimestamp:      serverTimestamp,
 	}
 
-	reply, err := l.svcCtx.AgentRpc.ListConversations(l.ctx, &agent_rpc.ListConversationsReq{
+	reply, err := agent.ListConversations(l.ctx, nil, &agenttype.ListConversationsReq{
 		UserId: userId,
 		Since:  req.Since,
 		Module: req.Module,

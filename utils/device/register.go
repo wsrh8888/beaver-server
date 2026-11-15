@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"time"
 
-	"beaver/app/auth/auth_models"
+	auth_models "beaver/app/account/account_models/auth"
 
 	"github.com/go-redis/redis"
 	"gorm.io/gorm"

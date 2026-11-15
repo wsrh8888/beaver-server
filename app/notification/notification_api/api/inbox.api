@@ -1,0 +1,50 @@
+syntax = "v1"
+
+// 收件箱 API：按 ID 拉取收件箱明细（NotificationInbox）、删除通知
+
+// 表2：收件箱（NotificationInbox）
+type (
+	getInboxByIdsReq {
+		UserID   string   `header:"Beaver-User-Id"` // 当前用户ID
+		EventIDs []string `json:"eventIds"` // 必填
+	}
+	InboxItem {
+		EventID   string `json:"eventId"`
+		EventType string `json:"eventType"`
+		Category  string `json:"category"`
+		Version   int64  `json:"version"`
+		IsRead    bool   `json:"isRead"`
+		ReadAt    int64  `json:"readAt"` // ms，未读为0
+		Status    int32  `json:"status"`
+		IsDeleted bool   `json:"isDeleted"` // 用户是否删除该通知
+		Silent    bool   `json:"silent"`
+		CreatedAt int64  `json:"createdAt"` // ms
+		UpdatedAt int64  `json:"updatedAt"` // ms
+	}
+	getInboxByIdsRes {
+		Inbox []InboxItem `json:"inbox"`
+	}
+)
+
+// 删除通知：按事件ID删除单个通知
+type (
+	deleteNotificationReq {
+		UserID  string `header:"Beaver-User-Id"` // 当前用户ID
+		EventID string `json:"eventId"` // 通知事件ID
+	}
+	deleteNotificationRes {
+		Success bool `json:"success"`
+	}
+)
+
+service notification {
+	@doc "按ID拉取收件箱明细（数据库同步）"
+	@handler getInboxByIds
+	post /api/notification/v1/getInboxByIds (getInboxByIdsReq) returns (getInboxByIdsRes)
+
+	@doc "按事件ID删除单个通知"
+	@handler deleteNotification
+	post /api/notification/v1/deleteNotification (deleteNotificationReq) returns (deleteNotificationRes)
+}
+
+// goctl api go -api notification_api.api -dir . --home ../../../template

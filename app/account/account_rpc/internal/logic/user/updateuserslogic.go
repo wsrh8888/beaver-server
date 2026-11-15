@@ -1,0 +1,154 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package userlogic
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+
+	user_models "beaver/app/account/account_models/user"
+	"beaver/app/account/account_rpc/internal/svc"
+	"beaver/app/account/account_rpc/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
+)
+
+type UpdateUsersLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewUpdateUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateUsersLogic {
+	return &UpdateUsersLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_users", ctx)}
+}
+
+func (l *UpdateUsersLogic) UpdateUsers(in *types.UpdateUsersReq) (*types.UpdateUsersRes, error) {
+	var affected int64
+	for _, uid := range in.UserIds {
+		var user user_models.UserModel
+		if err := l.svcCtx.DB.Where("user_id = ?", uid).First(&user).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
+			l.logger.Error(model.LogMsg{
+				Text: "查询用户失败",
+				Data: map[string]any{"userId": uid, "err": err.Error()},
+			})
+			return nil, err
+		}
+
+		if in.PatchEmail != nil && *in.PatchEmail != user.Email {
+			var exist user_models.UserModel
+			if err := l.svcCtx.DB.Where("email = ? AND user_id != ?", *in.PatchEmail, uid).First(&exist).Error; err == nil {
+				return nil, status.Error(codes.AlreadyExists, "邮箱已存在")
+			} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+				l.logger.Error(model.LogMsg{
+					Text: "校验邮箱唯一性失败",
+					Data: map[string]any{"userId": uid, "email": *in.PatchEmail, "err": err.Error()},
+				})
+				return nil, err
+			}
+		}
+
+		updates := map[string]interface{}{}
+		if in.PatchNickName != nil {
+			updates["nick_name"] = *in.PatchNickName
+		}
+		if in.PatchEmail != nil {
+			updates["email"] = *in.PatchEmail
+		}
+		if in.PatchAvatar != nil {
+			updates["avatar"] = *in.PatchAvatar
+		}
+		if in.PatchAbstract != nil {
+			updates["abstract"] = *in.PatchAbstract
+		}
+		if len(updates) == 0 {
+			affected++
+			continue
+		}
+
+		version := l.svcCtx.VersionGen.GetNextVersion("users", "user_id", uid)
+		if version == -1 {
+			return nil, errors.New("获取用户版本号失败")
+		}
+		updates["version"] = version
+
+		if err := l.svcCtx.DB.Model(&user).Updates(updates).Error; err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "更新用户失败",
+				Data: map[string]any{"userId": uid, "err": err.Error()},
+			})
+			return nil, err
+		}
+		l.recordUserChangeLog(uid, version, updates)
+		affected++
+	}
+	l.logger.Info(model.LogMsg{
+		Text: "更新用户成功",
+		Data: map[string]interface{}{"userIds": in.UserIds, "affected": affected},
+	})
+	return &types.UpdateUsersRes{AffectedCount: affected}, nil
+}
+
+func (l *UpdateUsersLogic) recordUserChangeLog(userID string, version int64, updateFields map[string]interface{}) {
+	changeLogs := make([]user_models.UserChangeLogModel, 0, len(updateFields))
+	now := time.Now().Unix()
+
+	for field, newValue := range updateFields {
+		if field == "version" {
+			continue
+		}
+		changeType := field
+		switch field {
+		case "nick_name":
+			changeType = "nickName"
+		case "avatar":
+			changeType = "avatar"
+		case "abstract":
+			changeType = "abstract"
+		}
+		changeLogs = append(changeLogs, user_models.UserChangeLogModel{
+			UserID:     userID,
+			ChangeType: changeType,
+			NewValue:   fmt.Sprintf("%v", newValue),
+			ChangeTime: now,
+			Version:    version,
+		})
+	}
+
+	if len(changeLogs) > 0 {
+		if err := l.svcCtx.DB.Create(&changeLogs).Error; err != nil {
+			l.logger.Error(model.LogMsg{
+				Text: "记录用户变更日志失败",
+				Data: map[string]any{"userId": userID, "err": err.Error()},
+			})
+		}
+	}
+}

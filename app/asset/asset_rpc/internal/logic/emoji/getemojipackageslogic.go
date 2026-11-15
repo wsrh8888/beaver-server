@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package emojilogic
+
+import (
+	"context"
+	"time"
+
+	emoji_models "beaver/app/asset/asset_models/emoji"
+	"beaver/app/asset/asset_rpc/internal/svc"
+	"beaver/app/asset/asset_rpc/types"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type GetEmojiPackagesLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewGetEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmojiPackagesLogic {
+	return &GetEmojiPackagesLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("get_emoji_packages", ctx),
+	}
+}
+
+func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *types.GetEmojiPackagesReq) (*types.GetEmojiPackagesRes, error) {
+	// 1. 先查询用户收藏的表情包ID列表
+	var collects []emoji_models.EmojiPackageCollect
+	collectQuery := l.svcCtx.DB.Where("user_id = ? AND is_deleted = ?",
+		in.UserId, false)
+
+	// 增量同步：只返回更新时间大于since的收藏记录
+	if in.Since > 0 {
+		sinceTime := time.UnixMilli(in.Since)
+		collectQuery = collectQuery.Where("updated_at > ?", sinceTime)
+	}
+
+	err := collectQuery.Find(&collects).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏表情包失败", Data: map[string]any{"userId": in.UserId, "since": in.Since, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 如果没有收藏记录，直接返回空结果
+	if len(collects) == 0 {
+		l.logger.Info(model.LogMsg{Text: "用户没有收藏的表情包", Data: map[string]any{"userId": in.UserId}})
+		return &types.GetEmojiPackagesRes{
+			EmojiPackageVersions: []*types.EmojiPackageVersionItem{},
+			ServerTimestamp:      time.Now().UnixMilli(),
+		}, nil
+	}
+
+	// 2. 提取收藏的表情包ID列表
+	var packageIDs []string
+	for _, collect := range collects {
+		packageIDs = append(packageIDs, collect.PackageID)
+	}
+
+	// 3. 查询这些表情包的详细信息
+	var packages []emoji_models.EmojiPackage
+	err = l.svcCtx.DB.Where("package_id IN (?) AND status = ?",
+		packageIDs, 1).Find(&packages).Error // 1=正常状态
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询表情包详细信息失败", Data: map[string]any{"userId": in.UserId, "packageIds": packageIDs, "err": err.Error()}})
+		return nil, err
+	}
+
+	l.logger.Info(model.LogMsg{Text: "查询用户收藏表情包版本变更", Data: map[string]interface{}{"userId": in.UserId, "count": len(packages)}})
+
+	// 转换为版本摘要格式
+	var packageVersions []*types.EmojiPackageVersionItem
+	for _, pkg := range packages {
+		packageVersions = append(packageVersions, &types.EmojiPackageVersionItem{
+			PackageId: pkg.PackageID,
+			Version:   pkg.Version,
+		})
+	}
+
+	return &types.GetEmojiPackagesRes{
+		EmojiPackageVersions: packageVersions,
+		ServerTimestamp:      time.Now().UnixMilli(),
+	}, nil
+}

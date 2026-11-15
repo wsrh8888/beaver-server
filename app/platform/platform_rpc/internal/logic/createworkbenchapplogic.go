@@ -25,7 +25,7 @@ import (
 	"context"
 	"strings"
 
-	"beaver/app/platform/platform_models"
+	"beaver/app/platform/platform_models/workbench"
 	"beaver/app/platform/platform_rpc/internal/svc"
 	"beaver/app/platform/platform_rpc/types/platform_rpc"
 	beaverlog "beaver/utils/beaverlog"
@@ -75,7 +75,7 @@ func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(in *platform_rpc.CreateWork
 		return nil, status.Error(codes.InvalidArgument, "打开方式不合法")
 	}
 
-	app := platform_models.WorkbenchApp{
+	app := workbench_models.WorkbenchApp{
 		WorkbenchAppID: strings.ReplaceAll(uuid.New().String(), "-", ""),
 		Name:           name,
 		Description:    strings.TrimSpace(in.Description),

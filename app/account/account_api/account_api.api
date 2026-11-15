@@ -1,0 +1,5 @@
+import "api/auth_public.api"
+import "api/auth.api"
+import "api/user.api"
+
+// goctl api go -api account_api.api -dir . --home ../../../template

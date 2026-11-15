@@ -1,0 +1,122 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package logic
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+
+	"beaver/app/account/account_api/internal/svc"
+	"beaver/app/account/account_api/internal/types"
+	"beaver/remote/open"
+	opentype "beaver/types/remote/open"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/common/middleware/ua"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+	"beaver/utils/device"
+	"beaver/utils/jwts"
+)
+
+type OAuthCodeLoginLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewOAuthCodeLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OAuthCodeLoginLogic {
+	return &OAuthCodeLoginLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("oauth_code_login", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*types.OAuthCodeLoginRes, error) {
+	if req.AppID == "" {
+		return nil, errors.New("appId 不能为空")
+	}
+	if req.Code == "" {
+		return nil, errors.New("授权码不能为空")
+	}
+
+	profile := ua.Profile(l.ctx)
+	preciseType := ua.DeviceType(l.ctx)
+	deviceGroup := ua.DeviceGroup(l.ctx)
+
+	rpcResp, err := open.ExchangeToken(l.ctx, nil, &opentype.ExchangeTokenReq{
+		OauthId: req.AppID,
+		Code:    req.Code,
+	})
+	if err != nil {
+		l.logger.Error(model.LogMsg{
+			Text: "OAuth换取令牌失败",
+			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+		})
+		return nil, errors.New("授权码无效或已过期")
+	}
+	if rpcResp.UserId == "" {
+		return nil, errors.New("授权码换取用户信息失败")
+	}
+
+	userRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &accttypes.UserInfoReq{
+		UserID: rpcResp.UserId,
+	})
+	if err != nil || userRes.UserInfo == nil {
+		return nil, errors.New("用户不存在")
+	}
+	userInfo := userRes.UserInfo
+
+	key := fmt.Sprintf("user_authentication_session:%s:%s", userInfo.UserId, deviceGroup)
+	token, err := jwts.GenToken(jwts.JwtPayLoad{
+		NickName: userInfo.NickName,
+		UserID:   userInfo.UserId,
+		DeviceID: req.DeviceID,
+	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
+	if err != nil {
+		return nil, errors.New("服务内部异常")
+	}
+
+	loginInfo, _ := json.Marshal(map[string]interface{}{
+		"token": token, "device_id": req.DeviceID, "device_type": preciseType,
+		"device_group": deviceGroup, "login_time": time.Now().Format("2006-01-02 15:04:05"),
+	})
+	if err = l.svcCtx.Redis.Set(key, string(loginInfo), time.Hour*time.Duration(l.svcCtx.Config.Auth.AccessExpire)).Err(); err != nil {
+		return nil, errors.New("服务内部异常")
+	}
+
+	_ = device.UpsertOnLogin(l.svcCtx.DB, userInfo.UserId, req.DeviceID, profile, req.ClientIP)
+
+	l.logger.Info(model.LogMsg{
+		Text: "OAuth授权码登录成功",
+		Data: map[string]interface{}{
+			"userId":      userInfo.UserId,
+			"appId":       req.AppID,
+			"deviceGroup": deviceGroup,
+		},
+	})
+
+	return &types.OAuthCodeLoginRes{Token: token, UserID: userInfo.UserId}, nil
+}
