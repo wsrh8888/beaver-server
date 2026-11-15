@@ -466,4 +466,158 @@ service relation {
 	post /api/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
 }
 
+// ==================== 队间（S2S）能力面 ====================
+// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分。
+// 路径刻意与 C 端错开（C 端已有 /members、/mine、/update 等），避免视图混用。
+
+type (
+	GroupListById {
+		GroupID     string `json:"groupID,optional"` // 群组ID
+		Name        string `json:"name,optional"` // 群组名称
+		Avatar      string `json:"avatar,optional"` // 群组头像
+		Description string `json:"description,optional"` // 群组描述
+		Version     int64  `json:"version,optional"` // 版本号
+		CreatedAt   int64  `json:"createdAt,optional"` // 创建时间
+		UpdatedAt   int64  `json:"updatedAt,optional"` // 更新时间
+	}
+	GroupItem {
+		Id        uint64 `json:"id,optional"` // 记录ID
+		GroupId   string `json:"group_id,optional"` // 群组ID
+		Type      int32  `json:"type,optional"` // 群类型
+		Title     string `json:"title,optional"` // 群名称
+		Avatar    string `json:"avatar,optional"` // 群头像
+		CreatorId string `json:"creator_id,optional"` // 创建者ID
+		Notice    string `json:"notice,optional"` // 群公告
+		Status    int32  `json:"status,optional"` // 群状态
+		MuteAll   bool   `json:"mute_all,optional"` // 是否全员禁言
+		CreatedAt string `json:"created_at,optional"` // 创建时间
+		UpdatedAt string `json:"updated_at,optional"` // 更新时间
+	}
+	GroupMemberItem {
+		Id                 uint64 `json:"id,optional"` // 记录ID
+		GroupId            string `json:"group_id,optional"` // 群组ID
+		UserId             string `json:"user_id,optional"` // 用户ID
+		Role               int32  `json:"role,optional"` // 成员角色
+		Status             int32  `json:"status,optional"` // 成员状态
+		ProhibitionMinutes int32  `json:"prohibition_minutes,optional"` // 禁言剩余分钟
+		CreatedAt          string `json:"created_at,optional"` // 创建时间
+		UpdatedAt          string `json:"updated_at,optional"` // 更新时间
+	}
+
+	GetUserGroupIDsReq {
+		UserID string `json:"userID,optional"` // 用户ID
+	}
+	GetUserGroupIDsRes {
+		GroupIDs []string `json:"groupIDs,optional"` // 用户加入的群组ID列表
+	}
+
+	GetGroupsListByIdsReq {
+		GroupIDs []string `json:"groupIDs,optional"` // 群组ID列表
+		Since    int64    `json:"since,optional"` // 时间戳，从此时间戳之后获取变更的记录
+	}
+	GetGroupsListByIdsRes {
+		Groups []GroupListById `json:"groups,optional"` // 群组列表
+	}
+
+	AddGroupMemberReq {
+		GroupId    string `json:"group_id,optional"` // 群组ID
+		UserId     string `json:"user_id,optional"` // 要加入的用户ID
+		OperatedBy string `json:"operated_by,optional"` // 操作者ID
+	}
+	AddGroupMemberRes {
+		Added         bool  `json:"added,optional"` // 是否新加入
+		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+	}
+
+	RemoveGroupMemberReq {
+		GroupId    string `json:"group_id,optional"` // 群组ID
+		UserId     string `json:"user_id,optional"` // 要移除的用户ID
+		OperatedBy string `json:"operated_by,optional"` // 操作者ID
+		Kick       bool   `json:"kick,optional"` // true=被踢，false=退出
+	}
+	RemoveGroupMemberRes {
+		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+	}
+
+	ListGroupsReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
+		Type     int32  `json:"type,optional"` // 类型筛选，0 表示全部
+		Keywords string `json:"keywords,optional"` // 群名关键词
+		Id       uint64 `json:"id,optional"` // 记录ID
+		GroupId  string `json:"group_id,optional"` // 业务群组ID
+	}
+	ListGroupsRes {
+		Total int64       `json:"total,optional"` // 总数
+		List  []GroupItem `json:"list,optional"` // 群组列表
+	}
+
+	ListGroupMembersReq {
+		GroupId  string `json:"group_id,optional"` // 群组ID
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Role     int32  `json:"role,optional"` // 角色筛选，0 表示全部
+		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
+	}
+	ListGroupMembersRes {
+		Total int64             `json:"total,optional"` // 总数
+		List  []GroupMemberItem `json:"list,optional"` // 成员列表
+	}
+
+	UpdateGroupMemberReq {
+		Id          uint64 `json:"id,optional"` // 成员记录ID
+		Role        *int32 `json:"role,optional"` // 角色
+		MuteMinutes *int32 `json:"mute_minutes,optional"` // 禁言分钟，0 解除
+	}
+	UpdateGroupMemberRes {}
+
+	UpdateGroupReq {
+		Id      uint64 `json:"id,optional"` // 记录ID
+		Title   string `json:"title,optional"` // 群名称，空表示不修改
+		Avatar  string `json:"avatar,optional"` // 群头像，空表示不修改
+		Notice  string `json:"notice,optional"` // 群公告，空表示不修改
+		Status  int32  `json:"status,optional"` // 群状态，0 表示不修改
+		MuteAll *bool  `json:"mute_all,optional"` // 全员禁言
+	}
+	UpdateGroupRes {}
+)
+
+@server (
+	group: group_machine
+)
+service relation {
+	@doc "队间：取用户加入的群组ID列表"
+	@handler userGroupIds
+	post /api/group/v1/ids (GetUserGroupIDsReq) returns (GetUserGroupIDsRes)
+
+	@doc "队间：按ID批量取群组（支持增量）"
+	@handler groupsListByIds
+	post /api/group/v1/list_by_ids (GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes)
+
+	@doc "队间：添加群成员"
+	@handler addGroupMember
+	post /api/group/v1/add_member (AddGroupMemberReq) returns (AddGroupMemberRes)
+
+	@doc "队间：移除群成员"
+	@handler removeGroupMember
+	post /api/group/v1/remove_member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
+
+	@doc "队间：分页查询群组"
+	@handler listGroups
+	post /api/group/v1/list (ListGroupsReq) returns (ListGroupsRes)
+
+	@doc "队间：分页查询群成员"
+	@handler listGroupMembers
+	post /api/group/v1/member_list (ListGroupMembersReq) returns (ListGroupMembersRes)
+
+	@doc "队间：更新群成员角色/禁言"
+	@handler updateGroupMember
+	post /api/group/v1/update_member (UpdateGroupMemberReq) returns (UpdateGroupMemberRes)
+
+	@doc "队间：更新群组信息"
+	@handler updateGroup
+	post /api/group/v1/modify (UpdateGroupReq) returns (UpdateGroupRes)
+}
+
 // goctl api go -api relation_api.api -dir . --home ../../../template

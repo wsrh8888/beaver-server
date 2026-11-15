@@ -25,10 +25,10 @@ import (
 	"context"
 	"encoding/json"
 
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	"beaver/app/message/message_models"
-	accttypes "beaver/app/account/account_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

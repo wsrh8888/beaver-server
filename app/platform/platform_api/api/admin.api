@@ -1,0 +1,479 @@
+// 平台后台管理 API（队间能力面）
+//
+// 这批端点原本只存在于 datasync 的 /internal/Module.Method 门面上，由后台管理仓
+// （beaver-backend）经 S2S 调用。现在收敛成正常的 .api 契约：后台管理仓直接打这里，
+// 身份由 authgate 中间件按机器票判定，不再经 datasync 多跳转发。
+//
+// 与 C 端的 /api/platform/v1/* 视图不重叠：这里是运维/运营视角，可以按记录维度读写。
+
+type (
+	AdminLogItem {
+		Id         uint64 `json:"id,optional"` // 日志记录ID
+		Level      string `json:"level,optional"` // 日志级别
+		Data       string `json:"data,optional"` // 日志数据JSON
+		BucketId   string `json:"bucket_id,optional"` // Bucket ID
+		BucketName string `json:"bucket_name,optional"` // Bucket名称
+		Timestamp  int64  `json:"timestamp,optional"` // 时间戳（毫秒）
+		CreatedAt  string `json:"created_at,optional"` // 创建时间
+	}
+
+	AdminQueryLogsReq {
+		BucketId   string `json:"bucket_id,optional"` // Bucket ID
+		Level      string `json:"level,optional"` // 日志级别
+		StartTime  int64  `json:"start_time,optional"` // 开始时间（毫秒）
+		EndTime    int64  `json:"end_time,optional"` // 结束时间（毫秒）
+		Keyword    string `json:"keyword,optional"` // 关键词
+		UserFilter string `json:"user_filter,optional"` // 用户筛选
+		Page       int32  `json:"page,optional"` // 页码
+		PageSize   int32  `json:"page_size,optional"` // 每页条数
+	}
+	AdminQueryLogsRes {
+		Total int64          `json:"total,optional"` // 总数
+		Logs  []AdminLogItem `json:"logs,optional"` // 日志列表
+	}
+
+	AppItem {
+		Id          uint64 `json:"id,optional"` // 记录ID
+		AppId       string `json:"app_id,optional"` // 应用ID
+		Name        string `json:"name,optional"` // 应用名称
+		Description string `json:"description,optional"` // 描述
+		IsActive    bool   `json:"is_active,optional"` // 是否启用
+		CreatedAt   string `json:"created_at,optional"` // 创建时间
+		UpdatedAt   string `json:"updated_at,optional"` // 更新时间
+	}
+
+	AppVersionBrief {
+		VersionId uint64 `json:"version_id,optional"` // 版本ID
+		Version   string `json:"version,optional"` // 版本号
+	}
+
+	AppVersionsArchItem {
+		ArchitectureId uint64            `json:"architecture_id,optional"` // 架构ID
+		ArchId         uint32            `json:"arch_id,optional"` // 架构类型
+		Description    string            `json:"description,optional"` // 架构描述
+		Versions       []AppVersionBrief `json:"versions,optional"` // 版本列表
+	}
+
+	ArchitectureItem {
+		Id          uint64 `json:"id,optional"` // 记录ID
+		AppId       string `json:"app_id,optional"` // 应用ID
+		AppName     string `json:"app_name,optional"` // 应用名称
+		PlatformId  uint32 `json:"platform_id,optional"` // 平台ID
+		ArchId      uint32 `json:"arch_id,optional"` // 架构类型
+		Description string `json:"description,optional"` // 架构描述
+		IsActive    bool   `json:"is_active,optional"` // 是否启用
+		CreatedAt   string `json:"created_at,optional"` // 创建时间
+		UpdatedAt   string `json:"updated_at,optional"` // 更新时间
+	}
+
+	ContentReportItem {
+		Id             uint64   `json:"id,optional"` // 举报ID
+		ReporterUserId string   `json:"reporter_user_id,optional"` // 举报人ID
+		TargetType     int32    `json:"target_type,optional"` // 对象类型 1用户 2消息 3动态 4群组
+		TargetId       string   `json:"target_id,optional"` // 对象ID
+		ReasonType     int32    `json:"reason_type,optional"` // 原因类型
+		Content        string   `json:"content,optional"` // 补充说明
+		FileNames      []string `json:"file_names,optional"` // 证据附件
+		Status         int32    `json:"status,optional"` // 状态
+		CaseId         uint64   `json:"case_id,optional"` // 关联工单ID
+		HandlerId      string   `json:"handler_id,optional"` // 处理人ID
+		HandleRemark   string   `json:"handle_remark,optional"` // 处理备注
+		CreatedAt      string   `json:"created_at,optional"` // 创建时间
+	}
+
+	FeedbackItem {
+		Id           uint64   `json:"id,optional"` // 反馈ID
+		UserId       string   `json:"user_id,optional"` // 用户ID
+		Content      string   `json:"content,optional"` // 反馈内容
+		Type         int32    `json:"type,optional"` // 反馈类型
+		Status       int32    `json:"status,optional"` // 状态
+		FileNames    []string `json:"file_names,optional"` // 附件
+		HandlerId    int64    `json:"handler_id,optional"` // 处理人ID
+		HandleTime   string   `json:"handle_time,optional"` // 处理时间
+		HandleResult string   `json:"handle_result,optional"` // 处理结果
+		CreatedAt    string   `json:"created_at,optional"` // 创建时间
+		UpdatedAt    string   `json:"updated_at,optional"` // 更新时间
+	}
+
+	ReleasePolicyItem {
+		Id              uint64 `json:"id,optional"` // 记录ID
+		AppId           string `json:"app_id,optional"` // 应用ID
+		ArchitectureId  uint64 `json:"architecture_id,optional"` // 架构ID
+		StableVersionId uint64 `json:"stable_version_id,optional"` // 稳定版版本ID
+		GrayVersionId   uint64 `json:"gray_version_id,optional"` // 灰度版版本ID
+		RolloutPercent  uint32 `json:"rollout_percent,optional"` // 灰度比例
+		MinVersion      string `json:"min_version,optional"` // 最低可用版本
+		ForceUpdate     bool   `json:"force_update,optional"` // 是否强制更新
+		IsActive        bool   `json:"is_active,optional"` // 是否启用
+		StableVersion   string `json:"stable_version,optional"` // 稳定版版本号
+		GrayVersion     string `json:"gray_version,optional"` // 灰度版版本号
+		CreatedAt       string `json:"created_at,optional"` // 创建时间
+		UpdatedAt       string `json:"updated_at,optional"` // 更新时间
+	}
+
+	VersionItem {
+		VersionId      uint64 `json:"version_id,optional"` // 版本ID
+		ArchitectureId uint64 `json:"architecture_id,optional"` // 架构ID
+		Version        string `json:"version,optional"` // 版本号
+		FileUrl        string `json:"file_url,optional"` // 安装包地址
+		Description    string `json:"description,optional"` // 描述
+		ReleaseNotes   string `json:"release_notes,optional"` // 发布说明
+		CreatedAt      string `json:"created_at,optional"` // 创建时间
+		UpdatedAt      string `json:"updated_at,optional"` // 更新时间
+	}
+
+	WorkbenchAppItem {
+		Id             uint64               `json:"id,optional"` // 记录ID
+		WorkbenchAppId string               `json:"workbench_app_id,optional"` // 工作台应用ID
+		Name           string               `json:"name,optional"` // 名称
+		Description    string               `json:"description,optional"` // 描述
+		Icon           string               `json:"icon,optional"` // 图标
+		AppType        int32                `json:"app_type,optional"` // 应用类型
+		ClientScope    int32                `json:"client_scope,optional"` // 端范围
+		EntryConfig    *WorkbenchEntryConfig `json:"entry_config,optional"` // 入口配置
+		Category       int32                `json:"category,optional"` // 分类
+		Sort           int32                `json:"sort,optional"` // 排序
+		Status         int32                `json:"status,optional"` // 状态
+		CreatedBy      string               `json:"created_by,optional"` // 创建人
+		LastModifiedBy string               `json:"last_modified_by,optional"` // 最后修改人
+		Remark         string               `json:"remark,optional"` // 备注
+		CreatedAt      string               `json:"created_at,optional"` // 创建时间
+		UpdatedAt      string               `json:"updated_at,optional"` // 更新时间
+		OpenMode       int32                `json:"open_mode,optional"` // 打开方式
+	}
+
+	// ---- 应用 ----
+	CreateAppReq {
+		Name        string `json:"name,optional"` // 应用名称
+		Description string `json:"description,optional"` // 描述
+	}
+	CreateAppRes {
+		Id    uint64 `json:"id,optional"` // 记录ID
+		AppId string `json:"app_id,optional"` // 应用ID
+	}
+
+	ListAppsReq {
+		Page     int32 `json:"page,optional"` // 页码
+		PageSize int32 `json:"page_size,optional"` // 每页条数
+		IsActive *bool `json:"is_active,optional"` // 启用状态筛选
+	}
+	ListAppsRes {
+		Total int64     `json:"total,optional"` // 总数
+		Apps  []AppItem `json:"apps,optional"` // 应用列表
+	}
+
+	// ---- 架构 ----
+	CreateArchitectureReq {
+		AppId       string `json:"app_id,optional"` // 应用ID
+		PlatformId  uint32 `json:"platform_id,optional"` // 平台ID
+		ArchId      uint32 `json:"arch_id,optional"` // 架构类型
+		Description string `json:"description,optional"` // 架构描述
+	}
+	CreateArchitectureRes {
+		Id uint64 `json:"id,optional"` // 记录ID
+	}
+
+	UpdateArchitectureReq {
+		Id          uint64 `json:"id,optional"` // 记录ID
+		Description string `json:"description,optional"` // 架构描述
+		IsActive    bool   `json:"is_active,optional"` // 是否启用
+	}
+	UpdateArchitectureRes {}
+
+	ListArchitecturesReq {
+		AppId    string `json:"app_id,optional"` // 应用ID
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		IsActive *bool  `json:"is_active,optional"` // 启用状态筛选
+	}
+	ListArchitecturesRes {
+		Total         int64              `json:"total,optional"` // 总数
+		Architectures []ArchitectureItem `json:"architectures,optional"` // 架构列表
+	}
+
+	// ---- 版本 ----
+	CreateVersionReq {
+		ArchitectureId uint64 `json:"architecture_id,optional"` // 架构ID
+		Version        string `json:"version,optional"` // 版本号
+		FileUrl        string `json:"file_url,optional"` // 安装包地址
+		Description    string `json:"description,optional"` // 描述
+		ReleaseNotes   string `json:"release_notes,optional"` // 发布说明
+	}
+	CreateVersionRes {
+		VersionId uint64 `json:"version_id,optional"` // 版本ID
+	}
+
+	DeleteVersionReq {
+		VersionId uint64 `json:"version_id,optional"` // 版本ID
+	}
+	DeleteVersionRes {}
+
+	ListVersionsReq {
+		ArchitectureId uint64 `json:"architecture_id,optional"` // 架构ID
+		Page           int32  `json:"page,optional"` // 页码
+		PageSize       int32  `json:"page_size,optional"` // 每页条数
+	}
+	ListVersionsRes {
+		Total    int64         `json:"total,optional"` // 总数
+		Versions []VersionItem `json:"versions,optional"` // 版本列表
+	}
+
+	ListAppVersionsReq {
+		AppId    string `json:"app_id,optional"` // 应用ID
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+	}
+	ListAppVersionsRes {
+		Total         int64                 `json:"total,optional"` // 总数
+		Architectures []AppVersionsArchItem `json:"architectures,optional"` // 按架构分组的版本
+	}
+
+	// ---- 发布策略 ----
+	UpsertReleasePolicyReq {
+		AppId           string `json:"app_id,optional"` // 应用ID
+		ArchitectureId  uint64 `json:"architecture_id,optional"` // 架构ID
+		StableVersionId uint64 `json:"stable_version_id,optional"` // 稳定版版本ID
+		GrayVersionId   uint64 `json:"gray_version_id,optional"` // 灰度版版本ID
+		RolloutPercent  uint32 `json:"rollout_percent,optional"` // 灰度比例
+		MinVersion      string `json:"min_version,optional"` // 最低可用版本
+		ForceUpdate     bool   `json:"force_update,optional"` // 是否强制更新
+		IsActive        bool   `json:"is_active,optional"` // 是否启用
+	}
+	UpsertReleasePolicyRes {
+		Id uint64 `json:"id,optional"` // 记录ID
+	}
+
+	ListReleasePoliciesReq {
+		AppId string `json:"app_id,optional"` // 应用ID
+	}
+	ListReleasePoliciesRes {
+		Policies []ReleasePolicyItem `json:"policies,optional"` // 策略列表
+	}
+
+	// ---- 用户反馈 ----
+	DeleteFeedbackReq {
+		Id uint64 `json:"id,optional"` // 反馈ID
+	}
+	DeleteFeedbackRes {}
+
+	GetFeedbackReq {
+		Id uint64 `json:"id,optional"` // 反馈ID
+	}
+	GetFeedbackRes {
+		Feedback *FeedbackItem `json:"feedback,optional"` // 反馈详情
+	}
+
+	HandleFeedbackReq {
+		Id           uint64 `json:"id,optional"` // 反馈ID
+		Status       int32  `json:"status,optional"` // 目标状态
+		HandleResult string `json:"handle_result,optional"` // 处理结果
+		HandlerId    string `json:"handler_id,optional"` // 处理人ID
+	}
+	HandleFeedbackRes {}
+
+	ListFeedbackReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Status   int32  `json:"status,optional"` // 状态筛选
+		Type     int32  `json:"type,optional"` // 类型筛选
+		UserId   string `json:"user_id,optional"` // 用户ID筛选
+		Keywords string `json:"keywords,optional"` // 关键词
+	}
+	ListFeedbackRes {
+		Total int64          `json:"total,optional"` // 总数
+		List  []FeedbackItem `json:"list,optional"` // 反馈列表
+	}
+
+	// ---- 内容举报 ----
+	GetContentReportReq {
+		Id uint64 `json:"id,optional"` // 举报ID
+	}
+	GetContentReportRes {
+		Report *ContentReportItem `json:"report,optional"` // 举报详情
+	}
+
+	ListContentReportsReq {
+		Page           int32  `json:"page,optional"` // 页码
+		PageSize       int32  `json:"page_size,optional"` // 每页条数
+		Status         int32  `json:"status,optional"` // 状态筛选
+		TargetType     int32  `json:"target_type,optional"` // 对象类型筛选
+		TargetId       string `json:"target_id,optional"` // 对象ID筛选
+		ReporterUserId string `json:"reporter_user_id,optional"` // 举报人筛选
+	}
+	ListContentReportsRes {
+		Total int64               `json:"total,optional"` // 总数
+		List  []ContentReportItem `json:"list,optional"` // 举报列表
+	}
+
+	UpdateContentReportsReq {
+		Ids          []uint64 `json:"ids,optional"` // 举报ID列表
+		Action       int32    `json:"action,optional"` // 批量操作
+		HandlerId    string   `json:"handler_id,optional"` // 处理人ID
+		HandleRemark string   `json:"handle_remark,optional"` // 处理备注
+		CaseId       uint64   `json:"case_id,optional"` // 关联工单ID
+	}
+	UpdateContentReportsRes {
+		AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	}
+
+	// ---- 工作台应用（运营视角）----
+	CreateWorkbenchAppReq {
+		Name        string                `json:"name,optional"` // 名称
+		Description string                `json:"description,optional"` // 描述
+		Icon        string                `json:"icon,optional"` // 图标
+		AppType     int32                 `json:"app_type,optional"` // 应用类型
+		ClientScope int32                 `json:"client_scope,optional"` // 端范围
+		EntryConfig *WorkbenchEntryConfig `json:"entry_config,optional"` // 入口配置
+		Category    int32                 `json:"category,optional"` // 分类
+		Sort        int32                 `json:"sort,optional"` // 排序
+		Status      int32                 `json:"status,optional"` // 状态
+		Remark      string                `json:"remark,optional"` // 备注
+		OperatorId  string                `json:"operator_id,optional"` // 操作人
+		OpenMode    int32                 `json:"open_mode,optional"` // 打开方式
+	}
+	CreateWorkbenchAppRes {
+		WorkbenchAppId string `json:"workbench_app_id,optional"` // 工作台应用ID
+	}
+
+	UpdateWorkbenchAppReq {
+		WorkbenchAppId string                `json:"workbench_app_id,optional"` // 工作台应用ID
+		Name           string                `json:"name,optional"` // 名称
+		Description    string                `json:"description,optional"` // 描述
+		Icon           string                `json:"icon,optional"` // 图标
+		AppType        *int32                `json:"app_type,optional"` // 应用类型
+		ClientScope    *int32                `json:"client_scope,optional"` // 端范围
+		EntryConfig    *WorkbenchEntryConfig `json:"entry_config,optional"` // 入口配置
+		Category       *int32                `json:"category,optional"` // 分类
+		Sort           *int32                `json:"sort,optional"` // 排序
+		Status         *int32                `json:"status,optional"` // 状态
+		Remark         string                `json:"remark,optional"` // 备注
+		OperatorId     string                `json:"operator_id,optional"` // 操作人
+		OpenMode       *int32                `json:"open_mode,optional"` // 打开方式
+	}
+	UpdateWorkbenchAppRes {}
+
+	DeleteWorkbenchAppReq {
+		WorkbenchAppId string `json:"workbench_app_id,optional"` // 工作台应用ID
+	}
+	DeleteWorkbenchAppRes {}
+
+	GetWorkbenchAppReq {
+		WorkbenchAppId string `json:"workbench_app_id,optional"` // 工作台应用ID
+	}
+	GetWorkbenchAppRes {
+		App *WorkbenchAppItem `json:"app,optional"` // 应用详情
+	}
+
+	AdminListWorkbenchAppsReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Status   int32  `json:"status,optional"` // 状态筛选
+		Category *int32 `json:"category,optional"` // 分类筛选
+		Keywords string `json:"keywords,optional"` // 关键词
+	}
+	AdminListWorkbenchAppsRes {
+		Total int64              `json:"total,optional"` // 总数
+		List  []WorkbenchAppItem `json:"list,optional"` // 应用列表
+	}
+)
+
+@server (
+	group: admin
+)
+service platform {
+	@doc "队间：查询后台操作日志"
+	@handler adminQueryLogs
+	post /api/platform/admin/v1/admin_query_logs (AdminQueryLogsReq) returns (AdminQueryLogsRes)
+
+	@doc "队间：创建应用"
+	@handler createApp
+	post /api/platform/admin/v1/create_app (CreateAppReq) returns (CreateAppRes)
+
+	@doc "队间：分页查询应用"
+	@handler listApps
+	post /api/platform/admin/v1/list_apps (ListAppsReq) returns (ListAppsRes)
+
+	@doc "队间：创建应用架构"
+	@handler createArchitecture
+	post /api/platform/admin/v1/create_architecture (CreateArchitectureReq) returns (CreateArchitectureRes)
+
+	@doc "队间：更新应用架构"
+	@handler updateArchitecture
+	post /api/platform/admin/v1/update_architecture (UpdateArchitectureReq) returns (UpdateArchitectureRes)
+
+	@doc "队间：分页查询应用架构"
+	@handler listArchitectures
+	post /api/platform/admin/v1/list_architectures (ListArchitecturesReq) returns (ListArchitecturesRes)
+
+	@doc "队间：创建版本"
+	@handler createVersion
+	post /api/platform/admin/v1/create_version (CreateVersionReq) returns (CreateVersionRes)
+
+	@doc "队间：删除版本"
+	@handler deleteVersion
+	post /api/platform/admin/v1/delete_version (DeleteVersionReq) returns (DeleteVersionRes)
+
+	@doc "队间：分页查询版本"
+	@handler listVersions
+	post /api/platform/admin/v1/list_versions (ListVersionsReq) returns (ListVersionsRes)
+
+	@doc "队间：按应用查询版本（按架构分组）"
+	@handler listAppVersions
+	post /api/platform/admin/v1/list_app_versions (ListAppVersionsReq) returns (ListAppVersionsRes)
+
+	@doc "队间：新增或更新发布策略"
+	@handler upsertReleasePolicy
+	post /api/platform/admin/v1/upsert_release_policy (UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes)
+
+	@doc "队间：查询发布策略"
+	@handler listReleasePolicies
+	post /api/platform/admin/v1/list_release_policies (ListReleasePoliciesReq) returns (ListReleasePoliciesRes)
+
+	@doc "队间：分页查询用户反馈"
+	@handler listFeedback
+	post /api/platform/admin/v1/list_feedback (ListFeedbackReq) returns (ListFeedbackRes)
+
+	@doc "队间：查询单条用户反馈"
+	@handler getFeedback
+	post /api/platform/admin/v1/get_feedback (GetFeedbackReq) returns (GetFeedbackRes)
+
+	@doc "队间：处理用户反馈"
+	@handler handleFeedback
+	post /api/platform/admin/v1/handle_feedback (HandleFeedbackReq) returns (HandleFeedbackRes)
+
+	@doc "队间：删除用户反馈"
+	@handler deleteFeedback
+	post /api/platform/admin/v1/delete_feedback (DeleteFeedbackReq) returns (DeleteFeedbackRes)
+
+	@doc "队间：分页查询内容举报"
+	@handler listContentReports
+	post /api/platform/admin/v1/list_content_reports (ListContentReportsReq) returns (ListContentReportsRes)
+
+	@doc "队间：查询单条内容举报"
+	@handler getContentReport
+	post /api/platform/admin/v1/get_content_report (GetContentReportReq) returns (GetContentReportRes)
+
+	@doc "队间：批量处理内容举报"
+	@handler updateContentReports
+	post /api/platform/admin/v1/update_content_reports (UpdateContentReportsReq) returns (UpdateContentReportsRes)
+
+	@doc "队间：创建工作台应用"
+	@handler createWorkbenchApp
+	post /api/platform/admin/v1/create_workbench_app (CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes)
+
+	@doc "队间：更新工作台应用"
+	@handler updateWorkbenchApp
+	post /api/platform/admin/v1/update_workbench_app (UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes)
+
+	@doc "队间：删除工作台应用"
+	@handler deleteWorkbenchApp
+	post /api/platform/admin/v1/delete_workbench_app (DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes)
+
+	@doc "队间：查询单条工作台应用"
+	@handler getWorkbenchApp
+	post /api/platform/admin/v1/get_workbench_app (GetWorkbenchAppReq) returns (GetWorkbenchAppRes)
+
+	@doc "队间：分页查询工作台应用"
+	@handler adminListWorkbenchApps
+	post /api/platform/admin/v1/list_workbench_apps (AdminListWorkbenchAppsReq) returns (AdminListWorkbenchAppsRes)
+}

@@ -22,24 +22,20 @@
 package svc
 
 import (
-	agentcli "beaver/remote/agent"
-	"beaver/app/account/account_rpc/client/auth"
-	assettypes "beaver/app/asset/asset_rpc/types"
-	platform_rpc "beaver/app/platform/platform_rpc/types/platform_rpc"
-	circle "beaver/remote/circle"
-	"beaver/app/message/message_rpc/types/chat_rpc"
-	"beaver/app/datasync/datasync_api/internal/config"
-	"beaver/app/relation/relation_rpc/types"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	accttypes "beaver/app/account/account_rpc/types"
-	"beaver/common/zrpc_interceptor"
+	assettypes "beaver/app/asset/asset_rpc/types"
+	"beaver/app/datasync/datasync_api/internal/config"
+	"beaver/app/message/message_rpc/types/chat_rpc"
+	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	"beaver/app/relation/relation_rpc/types"
+	"beaver/commonconfig"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
-	"beaver/middleware/jwt"
+	agentcli "beaver/remote/agent"
+	circle "beaver/remote/circle"
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -54,29 +50,17 @@ type ServiceContext struct {
 	ChatRpc         chat_rpc.ChatClient
 	EmojiRpc        assettypes.EmojiClient
 	NotificationRpc notification_rpc.NotificationClient
-	AuthRpc         auth.Auth
-	FileRpc         assettypes.FileClient
-	PlatformRpc     platform_rpc.PlatformClient
-	// InternalToken 内部编排面（/internal/*）的 S2S Bearer 验签闸门（受众 server:internal）。
-	InternalToken rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := coregorm.InitGorm(c.Mysql.DataSource)
 	client := coreredis.InitRedis(c.Redis.Addr, c.Redis.Password, c.Redis.Db)
 
-	// 构造期 fail-closed：S2S 密钥没配 / 注册表缺项，内部面整体不可用。
-	if c.S2S.Secret == "" {
-		panic("datasync_api S2S.Secret 未配置")
-	}
-	if len(c.S2S.Clients) == 0 {
-		panic("datasync_api S2S.Clients 未配置")
-	}
-
 	// 装配跨仓对端的 S2S 出站客户端：circle=圈子服务（client_credentials 换票），
 	// agent=beaver-agent(py，静态 X-Internal-Token)。域名与凭据来自本服务 yaml。
-	circle.Init(c.Circle.ClientID, c.Circle.ClientSecret, c.Circle.BaseURL)
-	agentcli.Init(c.Agent.BaseURL, c.Agent.InternalToken)
+	commonconfig.Load(c.RemoteProxy)
+	circle.Init(c.RemoteProxy.Circle.ClientID, c.RemoteProxy.Circle.ClientSecret)
+	agentcli.Init(c.RemoteProxy.Agent.InternalToken)
 
 	return &ServiceContext{
 		Config:          c,
@@ -88,9 +72,5 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ChatRpc:         chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:        assettypes.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
 		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
-		AuthRpc:         auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		FileRpc:         assettypes.NewFileClient(zrpc.MustNewClient(c.FileRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)).Conn()),
-		PlatformRpc:     platform_rpc.NewPlatformClient(zrpc.MustNewClient(c.PlatformRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)).Conn()),
-		InternalToken:   jwt.NewS2S(c.S2S.Secret, "server:internal"),
 	}
 }

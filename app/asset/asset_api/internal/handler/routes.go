@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	emoji "beaver/app/asset/asset_api/internal/handler/emoji"
+	emoji_machine "beaver/app/asset/asset_api/internal/handler/emoji_machine"
 	file "beaver/app/asset/asset_api/internal/handler/file"
+	file_machine "beaver/app/asset/asset_api/internal/handler/file_machine"
 	"beaver/app/asset/asset_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -104,6 +106,47 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 队间：分页查询用户收藏的表情
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/v1/list_collects",
+				Handler: emoji_machine.EmojiCollectListHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询表情
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/v1/list_emojis",
+				Handler: emoji_machine.EmojiListHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询表情包
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/v1/list_packages",
+				Handler: emoji_machine.EmojiPackageListHandler(serverCtx),
+			},
+			{
+				// 队间：新建/增量更新表情
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/v1/save",
+				Handler: emoji_machine.EmojiSaveHandler(serverCtx),
+			},
+			{
+				// 队间：新建/增量更新表情包
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/v1/save_package",
+				Handler: emoji_machine.EmojiPackageSaveHandler(serverCtx),
+			},
+			{
+				// 队间：增删表情包内容
+				Method:  http.MethodPost,
+				Path:    "/api/emoji/v1/update_package_content",
+				Handler: emoji_machine.EmojiPackageContentUpdateHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
 				// 文件预览
 				Method:  http.MethodGet,
 				Path:    "/api/file/preview/:fileKey",
@@ -132,6 +175,59 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/file/v1/uploadQiniu",
 				Handler: file.FileUploadQiniuHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 队间：批量删除文件记录
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/batch_delete",
+				Handler: file_machine.FileBatchDeleteHandler(serverCtx),
+			},
+			{
+				// 队间：按MD5取文件
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/by_md5",
+				Handler: file_machine.FileByMd5Handler(serverCtx),
+			},
+			{
+				// 队间：删除单个文件记录
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/delete",
+				Handler: file_machine.FileDeleteHandler(serverCtx),
+			},
+			{
+				// 队间：按记录ID取文件
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/detail",
+				Handler: file_machine.FileByIdHandler(serverCtx),
+			},
+			{
+				// 队间：按文件Key取详情
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/detail_by_key",
+				Handler: file_machine.FileDetailByKeyHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询文件记录
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/list",
+				Handler: file_machine.FileListHandler(serverCtx),
+			},
+			{
+				// 队间：签发七牛上传凭证
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/qiniu_token",
+				Handler: file_machine.QiniuUploadTokenHandler(serverCtx),
+			},
+			{
+				// 队间：登记文件记录
+				Method:  http.MethodPost,
+				Path:    "/api/file/v1/save",
+				Handler: file_machine.FileSaveHandler(serverCtx),
 			},
 		},
 	)

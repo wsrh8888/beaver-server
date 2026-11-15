@@ -29,9 +29,9 @@ import (
 	"beaver/app/message/message_api/internal/types"
 	"beaver/app/message/message_models"
 	relationtypes "beaver/app/relation/relation_rpc/types"
-	"beaver/utils/conversation"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+	"beaver/utils/conversation"
 )
 
 type RecentChatListLogic struct {

@@ -120,10 +120,10 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 	l.logger.Info(model.LogMsg{
 		Text: "检查更新",
 		Data: map[string]interface{}{
-			"appId":         req.AppID,
-			"archId":        architecture.Id,
+			"appId":          req.AppID,
+			"archId":         architecture.Id,
 			"currentVersion": req.Version,
-			"targetVersion": target.Version,
+			"targetVersion":  target.Version,
 			"inGrayRollout":  resolved.InGrayRollout,
 			"forceUpdate":    resolved.ForceUpdate,
 		},

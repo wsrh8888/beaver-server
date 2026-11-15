@@ -32,7 +32,6 @@ import (
 	"net/http"
 	"time"
 
-	"beaver/commonconfig"
 	"beaver/utils/ajax"
 )
 
@@ -44,8 +43,7 @@ var client *Client
 
 // Init 装配 beaver-agent 的静态 X-Internal-Token 与网关地址，并把域名写入 commonconfig.AgentUrl。
 // 只在该服务装配依赖时调用一次。
-func Init(baseURL, internalToken string) {
-	commonconfig.AgentUrl = baseURL
+func Init(internalToken string) {
 	client = &Client{
 		token: internalToken,
 		hc:    ajax.HTTPClient(agentTimeout),

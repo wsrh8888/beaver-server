@@ -34,6 +34,8 @@ type Config struct {
 	Prometheus PrometheusConfig
 	Limit          LimitConfig
 	Auth           AuthConfig
+	// S2S 队间机器票验签配置（与 account_api 签发密钥同源）。
+	S2S            S2SConfig
 	CompatibleVersion string   `json:",optional"` // 已停用，网关不再按客户端版本拦截
 	PublicList        []string `json:",optional"` // Gateway 不鉴权（含 *_public）
 	CustomAuthList    []string `json:",optional"` // 透传，由下游服务 middleware 鉴权
@@ -42,6 +44,15 @@ type Config struct {
 type AuthConfig struct {
 	AccessSecret string
 	AccessExpire int
+}
+
+// S2SConfig 网关验 S2S 机器票的密钥与受众。
+//
+// Secret 必须与 account_api 签发 /api/auth/token 的 S2S.Secret 一致；
+// Audience 留空时取 authgate.AudienceCore（core:api）。
+type S2SConfig struct {
+	Secret   string
+	Audience string `json:",optional"`
 }
 
 type PrometheusConfig struct {

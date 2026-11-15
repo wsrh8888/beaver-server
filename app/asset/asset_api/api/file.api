@@ -64,4 +64,132 @@ service asset {
 	post /api/file/v1/upload (FileReq) returns (FileRes)
 }
 
+// ==================== 队间（S2S）能力面 ====================
+// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分。
+// 这里是「按记录维度」的文件台账读写，C 端上传走 multipart，两者不重叠。
+
+type (
+	FileItem {
+		Id           uint64 `json:"id,optional"` // 记录ID
+		FileKey      string `json:"file_key,optional"` // 文件Key
+		OriginalName string `json:"original_name,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		Source       string `json:"source,optional"` // 来源 qiniu/local
+		CreatedAt    string `json:"created_at,optional"` // 创建时间
+		UpdatedAt    string `json:"updated_at,optional"` // 更新时间
+	}
+
+	SaveFileReq {
+		OriginalName string `json:"original_name,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		Source       string `json:"source,optional"` // 来源
+		FileInfoJson string `json:"file_info_json,optional"` // 文件附加信息 JSON
+	}
+	SaveFileRes {
+		FileKey string `json:"file_key,optional"` // 文件Key
+	}
+
+	ListFilesReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Type     string `json:"type,optional"` // 文件类型筛选
+		Keywords string `json:"keywords,optional"` // 关键词
+	}
+	ListFilesRes {
+		Total int64      `json:"total,optional"` // 总数
+		List  []FileItem `json:"list,optional"` // 文件列表
+	}
+
+	DeleteFileReq {
+		Id uint64 `json:"id,optional"` // 记录ID
+	}
+	DeleteFileRes {
+		Path string `json:"path,optional"` // 被删除的存储路径
+	}
+
+	BatchDeleteFilesReq {
+		Ids []uint64 `json:"ids,optional"` // 记录ID列表
+	}
+	BatchDeleteFilesRes {
+		Paths []string `json:"paths,optional"` // 被删除的存储路径列表
+	}
+
+	GetFileByIdReq {
+		Id uint64 `json:"id,optional"` // 记录ID
+	}
+	GetFileByIdRes {
+		File *FileItem `json:"file,optional"` // 文件详情
+	}
+
+	GetFileByMd5Req {
+		Md5 string `json:"md5,optional"` // MD5
+	}
+	GetFileByMd5Res {
+		File *FileItem `json:"file,optional"` // 文件详情
+	}
+
+	GetFileDetailReq {
+		FileKey string `json:"fileKey,optional"` // 文件Key
+	}
+	GetFileDetailRes {
+		FileKey      string `json:"fileKey,optional"` // 文件Key
+		OriginalName string `json:"originalName,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		CreatedAt    string `json:"createdAt,optional"` // 创建时间
+		UpdatedAt    string `json:"updatedAt,optional"` // 更新时间
+	}
+
+	GetQiniuUploadTokenReq {}
+	GetQiniuUploadTokenRes {
+		UploadToken string `json:"uploadToken,optional"` // 七牛上传凭证
+		ExpiresIn   int64  `json:"expiresIn,optional"` // 有效期（秒）
+	}
+)
+
+@server (
+	group: file_machine
+)
+service asset {
+	@doc "队间：登记文件记录"
+	@handler FileSave
+	post /api/file/v1/save (SaveFileReq) returns (SaveFileRes)
+
+	@doc "队间：分页查询文件记录"
+	@handler FileList
+	post /api/file/v1/list (ListFilesReq) returns (ListFilesRes)
+
+	@doc "队间：删除单个文件记录"
+	@handler FileDelete
+	post /api/file/v1/delete (DeleteFileReq) returns (DeleteFileRes)
+
+	@doc "队间：批量删除文件记录"
+	@handler FileBatchDelete
+	post /api/file/v1/batch_delete (BatchDeleteFilesReq) returns (BatchDeleteFilesRes)
+
+	@doc "队间：按记录ID取文件"
+	@handler FileById
+	post /api/file/v1/detail (GetFileByIdReq) returns (GetFileByIdRes)
+
+	@doc "队间：按MD5取文件"
+	@handler FileByMd5
+	post /api/file/v1/by_md5 (GetFileByMd5Req) returns (GetFileByMd5Res)
+
+	@doc "队间：按文件Key取详情"
+	@handler FileDetailByKey
+	post /api/file/v1/detail_by_key (GetFileDetailReq) returns (GetFileDetailRes)
+
+	@doc "队间：签发七牛上传凭证"
+	@handler QiniuUploadToken
+	post /api/file/v1/qiniu_token (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
+}
+
 // goctl api go -api asset_api.api -dir . --home ../../../template

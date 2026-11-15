@@ -70,8 +70,8 @@ func (l *MarkReadByEventLogic) MarkReadByEvent(req *types.MarkReadByEventReq) (r
 	l.logger.Info(model.LogMsg{
 		Text: "按事件标记通知已读成功",
 		Data: map[string]interface{}{
-			"userId":  userId,
-			"eventId": eventId,
+			"userId":   userId,
+			"eventId":  eventId,
 			"affected": result.RowsAffected,
 		},
 	})

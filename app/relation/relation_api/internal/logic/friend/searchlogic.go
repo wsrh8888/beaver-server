@@ -26,10 +26,10 @@ import (
 	"errors"
 	"fmt"
 
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	friend_models "beaver/app/relation/relation_models/friend"
-	accttypes "beaver/app/account/account_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"

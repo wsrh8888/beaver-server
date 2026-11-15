@@ -32,8 +32,6 @@ package open
 import (
 	"sync"
 	"time"
-
-	"beaver/commonconfig"
 )
 
 // client 本包唯一的出站客户端，Init 时装配。
@@ -41,8 +39,7 @@ var client *Client
 
 // Init 装配出站凭据（beaver-open 分配给本仓的 client_credentials），并把域名写入 commonconfig.OpenUrl。
 // 只在该服务装配依赖时调用一次。
-func Init(clientID, clientSecret, baseURL string) {
-	commonconfig.OpenUrl = baseURL
+func Init(clientID, clientSecret string) {
 	client = &Client{clientID: clientID, clientSecret: clientSecret}
 }
 

@@ -22,15 +22,15 @@
 package svc
 
 import (
-	"beaver/app/notification/notification_rpc/internal/config"
-	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/account/account_rpc/client/user"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/notification/notification_rpc/internal/config"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
-	"beaver/utils/beaverlog"
 	versionPkg "beaver/core/version"
+	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/zrpc"

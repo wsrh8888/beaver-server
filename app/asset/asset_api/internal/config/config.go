@@ -21,6 +21,8 @@
 package config
 
 import (
+	"beaver/middleware/jwt"
+
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )
@@ -36,7 +38,7 @@ type Config struct {
 		Password string
 		Db       int
 	}
-	RocketMQ    struct {
+	RocketMQ struct {
 		Addr string
 	}
 	Domain      string // 项目对外访问域名（用于生成本地文件完整URL）
@@ -44,6 +46,8 @@ type Config struct {
 	WhiteList   []string
 	BlackList   []string
 	UserRpc     zrpc.RpcClientConf
+	// AssetRpc：file + emoji 同进程（etcd assetrpc.rpc），队间能力面薄转发到它。
+	AssetRpc zrpc.RpcClientConf
 	// StorageType 通用上传接口(/api/file/v1/upload)使用的默认存储后端：local|qiniu|minio
 	StorageType string
 	Local       struct {
@@ -65,5 +69,16 @@ type Config struct {
 		Bucket      string // MinIO存储桶名称
 		UseSSL      bool   // 是否启用SSL
 		ProjectName string // 项目名称，用于文件路径前缀（为空则使用根目录）
+	}
+	// Auth 用户 JWT 签名密钥，与网关 Auth.AccessSecret 同值：
+	// 本服务独立验用户票，不信任任何外部直接塞进来的 Beaver-User-Id。
+	Auth struct {
+		AccessSecret string
+		AccessExpire int
+	}
+	// S2S 入站机器票：队间调用与本服务共用同一套路由，凭据受众统一 core:api。
+	S2S struct {
+		Secret  string                     `json:",optional"`
+		Clients map[string]jwt.ClientEntry `json:",optional"`
 	}
 }

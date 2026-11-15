@@ -21,19 +21,24 @@
 package svc
 
 import (
-	"beaver/app/asset/asset_api/internal/config"
-	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/account/account_rpc/client/user"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/asset/asset_api/internal/config"
+	"beaver/app/asset/asset_rpc/client/emoji"
+	"beaver/app/asset/asset_rpc/client/file"
+	assettypes "beaver/app/asset/asset_rpc/types"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
+	"beaver/middleware/authgate"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -41,11 +46,15 @@ import (
 type ServiceContext struct {
 	Config      config.Config
 	UserRpc     accttypes.UserClient
+	FileRpc     assettypes.FileClient
+	EmojiRpc    assettypes.EmojiClient
 	DB          *gorm.DB
 	Redis       *redis.Client
 	VersionGen  *versionPkg.VersionGenerator
 	RocketMQ    *corerocketmq.Client
 	MinioClient *minio.Client // MinIO客户端，仅在配置了Endpoint时初始化，供上传与预览预签名使用
+	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
+	AuthGate rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -55,6 +64,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
 
+	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
+	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
+	if err := gate.Validate(); err != nil {
+		panic("asset_api 身份闸门配置不完整: " + err.Error())
+	}
+
 	svc := &ServiceContext{
 		Config:     c,
 		DB:         mysqlDb,
@@ -62,6 +77,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		VersionGen: versionPkg.NewVersionGenerator(client, mysqlDb),
 		RocketMQ:   mqClient,
 		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		FileRpc:    file.NewFile(zrpc.MustNewClient(c.AssetRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		EmojiRpc:   emoji.NewEmoji(zrpc.MustNewClient(c.AssetRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		AuthGate:   authgate.New(gate),
 	}
 
 	// 初始化MinIO客户端（仅在配置了Endpoint时）

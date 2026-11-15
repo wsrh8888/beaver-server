@@ -22,6 +22,7 @@ package config
 
 import (
 	"beaver/commonconfig"
+	"beaver/middleware/jwt"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -46,6 +47,18 @@ type Config struct {
 	RelationRpc     zrpc.RpcClientConf // relation_rpc（friend+group 同进程，etcd relationrpc.rpc）
 	ChatRpc         zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf
-	// Open 开放接口服务（beaver-open 独立仓）S2S 端点：client_credentials 换票 + Bearer。
-	Open commonconfig.Endpoint
+	// RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
+	// 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
+	// Auth 用户 JWT 签名密钥，与网关 Auth.AccessSecret 同值：
+	// 本服务独立验用户票，不信任任何外部直接塞进来的 Beaver-User-Id。
+	Auth struct {
+		AccessSecret string
+		AccessExpire int
+	}
+	// S2S 入站机器票：队间调用与本服务共用同一套路由，凭据受众统一 core:api。
+	S2S struct {
+		Secret  string                     `json:",optional"`
+		Clients map[string]jwt.ClientEntry `json:",optional"`
+	}
 }

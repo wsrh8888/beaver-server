@@ -32,8 +32,6 @@ package ai
 import (
 	"sync"
 	"time"
-
-	"beaver/commonconfig"
 )
 
 // client 本包唯一的出站客户端，Init 时装配。
@@ -42,8 +40,7 @@ var client *Client
 // Init 装配出站凭据（beaver-ai 分配给本仓的 client_credentials），并把域名写入 commonconfig。
 // 只在该服务装配依赖时调用一次；域名来自 Init 的 baseURL（与 circle/doc/moment 一致，
 // 后续 Phase 4 统一收口到 commonconfig.Load，Init 去 baseURL）。
-func Init(clientID, clientSecret, baseURL string) {
-	commonconfig.AiUrl = baseURL
+func Init(clientID, clientSecret string) {
 	client = &Client{clientID: clientID, clientSecret: clientSecret}
 }
 

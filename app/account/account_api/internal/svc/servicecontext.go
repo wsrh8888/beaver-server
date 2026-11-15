@@ -22,21 +22,25 @@ package svc
 
 import (
 	"beaver/app/account/account_api/internal/config"
-	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/client/auth"
 	"beaver/app/account/account_rpc/client/user"
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/relation/relation_rpc/client/friend"
 	"beaver/app/relation/relation_rpc/client/group"
 	"beaver/app/relation/relation_rpc/types"
-	opencli "beaver/remote/open"
 	"beaver/common/zrpc_interceptor"
+	"beaver/commonconfig"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
-	"beaver/utils/beaverlog"
 	versionPkg "beaver/core/version"
+	"beaver/middleware/authgate"
+	opencli "beaver/remote/open"
+	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -46,11 +50,14 @@ type ServiceContext struct {
 	DB              *gorm.DB
 	Redis           *redis.Client
 	UserRpc         accttypes.UserClient
+	AuthRpc         auth.Auth
 	FriendRpc       types.FriendClient
 	GroupRpc        types.GroupClient
 	NotificationRpc notification.Notification
 	VersionGen      *versionPkg.VersionGenerator
 	RocketMQ        *corerocketmq.Client
+	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
+	AuthGate rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -63,17 +70,26 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	beaverlog.SetRocketMQ(mqClient)
 
 	// 装配开放接口服务（beaver-open 独立仓）S2S 出站客户端：域名与凭据来自本服务 yaml。
-	opencli.Init(c.Open.ClientID, c.Open.ClientSecret, c.Open.BaseURL)
+	commonconfig.Load(c.RemoteProxy)
+	opencli.Init(c.RemoteProxy.Open.ClientID, c.RemoteProxy.Open.ClientSecret)
+
+	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
+	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
+	if err := gate.Validate(); err != nil {
+		panic("account_api 身份闸门配置不完整: " + err.Error())
+	}
 
 	return &ServiceContext{
 		Config:          c,
 		Redis:           client,
 		DB:              mysqlDb,
 		UserRpc:         user.NewUser(zrpc.MustNewClient(c.AccountRpc, rpcOpt)),
+		AuthRpc:         auth.NewAuth(zrpc.MustNewClient(c.AccountRpc, rpcOpt)),
 		FriendRpc:       friend.NewFriend(zrpc.MustNewClient(c.RelationRpc, rpcOpt)),
 		GroupRpc:        group.NewGroup(zrpc.MustNewClient(c.RelationRpc, rpcOpt)),
 		NotificationRpc: notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, rpcOpt)),
 		VersionGen:      versionGen,
 		RocketMQ:        mqClient,
+		AuthGate:        authgate.New(gate),
 	}
 }

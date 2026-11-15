@@ -25,10 +25,10 @@ import (
 	"context"
 	"errors"
 
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	friend_models "beaver/app/relation/relation_models/friend"
-	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/common/list_query"
 	"beaver/common/models"
 	beaverlog "beaver/utils/beaverlog"

@@ -138,9 +138,9 @@ func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCatego
 	l.logger.Info(model.LogMsg{
 		Text: "按分类标记通知已读成功",
 		Data: map[string]interface{}{
-			"userId":         userId,
-			"category":        category,
-			"cursorVersion":   cursorVersion,
+			"userId":        userId,
+			"category":      category,
+			"cursorVersion": cursorVersion,
 		},
 	})
 

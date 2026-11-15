@@ -44,13 +44,7 @@ type Config struct {
 	UserRpc         zrpc.RpcClientConf
 	FriendRpc       zrpc.RpcClientConf
 	GroupRpc        zrpc.RpcClientConf
-	// Open 开放接口服务（beaver-open 独立仓）S2S 端点：client_credentials 换票 + Bearer。
-	Open commonconfig.Endpoint
-	// Ai AI 服务（beaver-ai 独立仓）S2S 端点。
-	Ai commonconfig.Endpoint
 	NotificationRpc zrpc.RpcClientConf
-	// Agent beaver-agent（py，beaver-ai 业务线）S2S 出站端点；跨仓禁 gRPC，静态 X-Internal-Token。
-	Agent commonconfig.AgentEndpoint
 	PlatformRpc     zrpc.RpcClientConf
 	Push        struct {
 		Enabled bool
@@ -68,4 +62,8 @@ type Config struct {
 			Production bool
 		}
 	}
+	// RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
+	// 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
+
 }

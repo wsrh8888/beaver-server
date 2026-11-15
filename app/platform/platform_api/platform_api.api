@@ -3,5 +3,7 @@ import "api/update_public.api"
 import "api/feedback.api"
 import "api/workbench.api"
 import "api/org.api"
+import "api/instance_public.api"
+import "api/admin.api"
 
 // goctl api go -api platform_api.api -dir . --home ../../../template

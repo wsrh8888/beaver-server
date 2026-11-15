@@ -1,8 +1,11 @@
-# S2S 出站：开放接口服务（beaver-open 独立仓），跨团队必须走 API，禁 etcd gRPC。
-Open:
-  BaseURL: http://127.0.0.1:21900
-  ClientID: beaver-server
-  ClientSecret: s2s-dev-secret
+# 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
+# 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+RemoteProxy:
+  Open:
+    BaseURL: http://127.0.0.1:21900
+    Auth: client_credentials
+    ClientID: beaver-server
+    ClientSecret: s2s-dev-secret
 Name: account
 Host: 0.0.0.0
 Port: 20100
@@ -66,3 +69,28 @@ NotificationRpc:
     Key: notificationrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
+
+S2S:
+  Secret: s2s-dev-secret
+  Clients:
+    beaver-backend:
+      ClientID: beaver-backend
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-open:
+      ClientID: beaver-open
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-social:
+      ClientID: beaver-social
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-call:
+      ClientID: beaver-call
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+

@@ -38,19 +38,24 @@ GroupRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: relationrpc.rpc
-# S2S 出站：跨仓对端（beaver-open / beaver-ai 独立仓），跨团队必须走 API，禁 etcd gRPC。
-Open:
-  BaseURL: http://127.0.0.1:21900
-  ClientID: beaver-server
-  ClientSecret: s2s-dev-secret
-Ai:
-  BaseURL: http://127.0.0.1:22200
-  ClientID: beaver-server
-  ClientSecret: s2s-dev-secret
-# Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 agent_api 网关。
-Agent:
-  BaseURL: http://127.0.0.1:22300
-  InternalToken: ""
+# 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
+# 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+RemoteProxy:
+  Open:
+    BaseURL: http://127.0.0.1:21900
+    Auth: client_credentials
+    ClientID: beaver-server
+    ClientSecret: s2s-dev-secret
+  Ai:
+    BaseURL: http://127.0.0.1:22200
+    Auth: client_credentials
+    ClientID: beaver-server
+    ClientSecret: s2s-dev-secret
+  # Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 agent_api 网关。
+  Agent:
+    BaseURL: http://127.0.0.1:22300
+    Auth: internal_token
+    InternalToken: ""
 NotificationRpc:
   NonBlock: true
   Etcd:

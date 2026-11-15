@@ -27,10 +27,10 @@ import (
 	"fmt"
 	"time"
 
-	relationtypes "beaver/app/relation/relation_rpc/types"
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	user_models "beaver/app/account/account_models/user"
+	relationtypes "beaver/app/relation/relation_rpc/types"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"

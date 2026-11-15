@@ -22,6 +22,7 @@ package config
 
 import (
 	"beaver/commonconfig"
+	"beaver/middleware/jwt"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -46,11 +47,18 @@ type Config struct {
 	AccountRpc      zrpc.RpcClientConf
 	RelationRpc     zrpc.RpcClientConf // relation_rpc（friend+group）
 	NotificationRpc zrpc.RpcClientConf
-	// Open 开放接口服务（beaver-open 独立仓）S2S 端点：client_credentials 换票 + Bearer。
-	Open commonconfig.Endpoint
+	// RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
+	// 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
 	Auth        struct {
 		AccessSecret string
 		AccessExpire int
+	}
+	// S2S 入站机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
+	// 换票端点在本服务的 POST /api/auth/token（client_credentials）。
+	S2S struct {
+		Secret  string                     `json:",optional"`
+		Clients map[string]jwt.ClientEntry `json:",optional"`
 	}
 	Email struct {
 		QQ struct {

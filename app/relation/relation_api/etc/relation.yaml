@@ -1,9 +1,12 @@
-# S2S 出站：开放接口服务（beaver-open 独立仓），跨团队必须走 API，禁 etcd gRPC。
-Open:
-  BaseURL: http://127.0.0.1:21900
-  ClientID: beaver-server
-  ClientSecret: s2s-dev-secret
-Name: relation_api
+# 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
+# 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+RemoteProxy:
+  Open:
+    BaseURL: http://127.0.0.1:21900
+    Auth: client_credentials
+    ClientID: beaver-server
+    ClientSecret: s2s-dev-secret
+Name: relation
 Host: 0.0.0.0
 Port: 20200
 Mysql:
@@ -53,3 +56,34 @@ NotificationRpc:
     Key: notificationrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
+
+# 用户 JWT 签名密钥：与网关 Auth.AccessSecret 同值，本服务独立验用户票（不信任外部塞的 Beaver-User-Id）。
+Auth:
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
+  AccessExpire: 3600
+# 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
+# 换票端点：POST /api/auth/token（client_credentials）。
+S2S:
+  Secret: s2s-dev-secret
+  Clients:
+    beaver-backend:
+      ClientID: beaver-backend
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-open:
+      ClientID: beaver-open
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-social:
+      ClientID: beaver-social
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-call:
+      ClientID: beaver-call
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+

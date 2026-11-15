@@ -43,6 +43,7 @@ import (
 
 	"beaver/core/corepush"
 
+	"beaver/commonconfig"
 	"beaver/core/coregorm"
 
 	"beaver/core/coreredis"
@@ -110,9 +111,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	// 装配各跨仓对端的 S2S 出站客户端（域名与凭据来自本服务 yaml）：
 	// open=beaver-open 独立仓，ai=beaver-ai 独立仓，agent=beaver-agent(py，静态 X-Internal-Token)。
-	opencli.Init(c.Open.ClientID, c.Open.ClientSecret, c.Open.BaseURL)
-	aicli.Init(c.Ai.ClientID, c.Ai.ClientSecret, c.Ai.BaseURL)
-	agentcli.Init(c.Agent.BaseURL, c.Agent.InternalToken)
+	commonconfig.Load(c.RemoteProxy)
+	opencli.Init(c.RemoteProxy.Open.ClientID, c.RemoteProxy.Open.ClientSecret)
+	aicli.Init(c.RemoteProxy.Ai.ClientID, c.RemoteProxy.Ai.ClientSecret)
+	agentcli.Init(c.RemoteProxy.Agent.InternalToken)
 
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 

@@ -25,6 +25,8 @@ import (
 	"beaver/app/gateway/gateway_api/types"
 	"beaver/common/etcd"
 	"beaver/common/traceid"
+	"beaver/middleware/authgate"
+	"beaver/middleware/jwt"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/jwts"
@@ -89,8 +91,43 @@ func (p Proxy) auth(req *http.Request) (ok bool, errMsg string) {
 		return true, ""
 	}
 
-	// 5. 统一 JWT 鉴权
+	// 5. 队间 S2S 机器票：Authorization: Bearer <client_credentials 换来的票>。
+	// 网关验过签名与受众后按票据里的 client_id 重建 X-Client-Id 并放行，
+	// 业务面 authgate 会再验一次（纵深）；外仓只经本网关进入，不直打业务端口。
+	if strings.HasPrefix(req.Header.Get("Authorization"), s2sBearerPrefix) {
+		return p.s2sAuth(req)
+	}
+
+	// 6. 统一用户 JWT 鉴权
 	return p.jwtAuth(req)
+}
+
+const s2sBearerPrefix = "Bearer "
+
+// s2sAuth 校验队间机器票（Authorization: Bearer <S2S JWT>）。
+//
+// 换票在 account_api 的 /api/auth/token（经网关 auth→account 转发），签发密钥与
+// 网关 S2S.Secret 同源。这里只判定「票是不是本团队签的、受众对不对」；验签通过后
+// 剥离外部传入的 X-Client-Id，按票据里的 client_id 重建，业务面 authgate 再验一次。
+func (p Proxy) s2sAuth(req *http.Request) (bool, string) {
+	if p.Config.S2S.Secret == "" {
+		apiGwLogger.Error(model.LogMsg{Text: "网关未配置 S2S 验签密钥"})
+		return false, "网关鉴权失败"
+	}
+	raw := strings.TrimSpace(strings.TrimPrefix(req.Header.Get("Authorization"), s2sBearerPrefix))
+	aud := p.Config.S2S.Audience
+	if aud == "" {
+		aud = authgate.AudienceCore
+	}
+	clientID, _, err := jwt.Verify(p.Config.S2S.Secret, aud, raw)
+	if err != nil {
+		apiGwLogger.Error(model.LogMsg{Text: "S2S 机器票验签失败", Data: map[string]interface{}{"err": err.Error()}})
+		return false, "网关鉴权失败"
+	}
+	req.Header.Del(jwt.HeaderClientID)
+	req.Header.Set(jwt.HeaderClientID, clientID)
+	apiGwLogger.Info(model.LogMsg{Text: "S2S 机器票验证成功", Data: map[string]interface{}{"clientId": clientID}})
+	return true, ""
 }
 
 func (p Proxy) oauthSecretAuth(req *http.Request) (bool, string) {

@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	friend "beaver/app/relation/relation_api/internal/handler/friend"
+	friend_machine "beaver/app/relation/relation_api/internal/handler/friend_machine"
 	group "beaver/app/relation/relation_api/internal/handler/group"
+	group_machine "beaver/app/relation/relation_api/internal/handler/group_machine"
 	"beaver/app/relation/relation_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -97,6 +99,53 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/friend/v1/valid_list",
 				Handler: friend.ValidListHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 队间：分页查询黑名单
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/blocks",
+				Handler: friend_machine.ListFriendBlocksHandler(serverCtx),
+			},
+			{
+				// 队间：取好友ID列表
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/ids",
+				Handler: friend_machine.FriendIdsHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询好友关系
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/list",
+				Handler: friend_machine.ListFriendsHandler(serverCtx),
+			},
+			{
+				// 队间：批量删除/恢复好友关系
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/update",
+				Handler: friend_machine.UpdateFriendsHandler(serverCtx),
+			},
+			{
+				// 队间：批量解除拉黑
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/update_block",
+				Handler: friend_machine.UpdateFriendBlocksHandler(serverCtx),
+			},
+			{
+				// 队间：批量删除好友验证记录
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/update_valid",
+				Handler: friend_machine.UpdateFriendVerifiesHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询好友验证记录
+				Method:  http.MethodPost,
+				Path:    "/api/friend/v1/verifies",
+				Handler: friend_machine.ListFriendVerifiesHandler(serverCtx),
 			},
 		},
 	)
@@ -234,6 +283,59 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/group/v1/update",
 				Handler: group.UpdateGroupInfoHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 队间：添加群成员
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/add_member",
+				Handler: group_machine.AddGroupMemberHandler(serverCtx),
+			},
+			{
+				// 队间：取用户加入的群组ID列表
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/ids",
+				Handler: group_machine.UserGroupIdsHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询群组
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/list",
+				Handler: group_machine.ListGroupsHandler(serverCtx),
+			},
+			{
+				// 队间：按ID批量取群组（支持增量）
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/list_by_ids",
+				Handler: group_machine.GroupsListByIdsHandler(serverCtx),
+			},
+			{
+				// 队间：分页查询群成员
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/member_list",
+				Handler: group_machine.ListGroupMembersHandler(serverCtx),
+			},
+			{
+				// 队间：更新群组信息
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/modify",
+				Handler: group_machine.UpdateGroupHandler(serverCtx),
+			},
+			{
+				// 队间：移除群成员
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/remove_member",
+				Handler: group_machine.RemoveGroupMemberHandler(serverCtx),
+			},
+			{
+				// 队间：更新群成员角色/禁言
+				Method:  http.MethodPost,
+				Path:    "/api/group/v1/update_member",
+				Handler: group_machine.UpdateGroupMemberHandler(serverCtx),
 			},
 		},
 	)

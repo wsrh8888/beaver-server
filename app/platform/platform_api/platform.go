@@ -48,6 +48,8 @@ func main() {
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
+	// 身份闸门：用户 JWT 与队间机器票共用同一套 /api 契约，差异只在这里判定。
+	server.Use(ctx.AuthGate)
 	handler.RegisterHandlers(server, ctx)
 
 	// 客户端日志 / 服务端 beaverlog：RocketMQ → OpenSearch（索引 beaver-logs）

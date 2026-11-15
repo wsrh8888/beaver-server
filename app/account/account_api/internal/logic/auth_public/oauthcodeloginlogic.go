@@ -30,10 +30,10 @@ import (
 
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
-	"beaver/remote/open"
-	opentype "beaver/types/remote/open"
 	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/common/middleware/ua"
+	"beaver/remote/open"
+	opentype "beaver/types/remote/open"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/device"

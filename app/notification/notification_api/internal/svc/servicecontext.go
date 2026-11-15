@@ -23,18 +23,21 @@ package svc
 
 import (
 	"beaver/app/account/account_rpc/client/auth"
-	"beaver/app/notification/notification_api/internal/config"
-	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/account/account_rpc/client/user"
+	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/notification/notification_api/internal/config"
+	"beaver/app/notification/notification_rpc/notification"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
 
 	"beaver/core/corerocketmq"
-	"beaver/utils/beaverlog"
 	versionPkg "beaver/core/version"
+	"beaver/middleware/authgate"
+	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -45,8 +48,11 @@ type ServiceContext struct {
 	Redis      *redis.Client
 	UserRpc    accttypes.UserClient
 	AuthRpc    auth.Auth
+	NotifyRpc  notification.Notification
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client
+	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
+	AuthGate rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -59,13 +65,21 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
 
+	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
+	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
+	if err := gate.Validate(); err != nil {
+		panic("notification_api 身份闸门配置不完整: " + err.Error())
+	}
+
 	return &ServiceContext{
 		Config:     c,
 		DB:         mysqlDb,
 		Redis:      client,
-		UserRpc: user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		AuthRpc: auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		AuthRpc:    auth.NewAuth(zrpc.MustNewClient(c.AuthRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
+		NotifyRpc:  notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
+		AuthGate:   authgate.New(gate),
 	}
 }

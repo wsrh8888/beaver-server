@@ -449,3 +449,286 @@ service chat {
 }
 
 // goctl api go -api message_api.api -dir . --home ../../../template
+
+// ==================== 队间机器视图：会话与消息 ====================
+// 与 C 端共用 /api/chat 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐，调用方零改动。
+// C 端是 camelCase 视图（面向客户端 SDK），这里是 snake_case 视图（面向同域 RPC 协议），
+// 两者都在本 .api 里，不存在第二套 HTTP 门面。
+type (
+	PeerTextMsg {
+		Content string `json:"content,optional"`
+	}
+	PeerImageMsg {
+		FileUrl string `json:"file_url,optional"`
+		Width   int32  `json:"width,optional"`
+		Height  int32  `json:"height,optional"`
+		Size    int64  `json:"size,optional"`
+	}
+	PeerVideoMsg {
+		FileUrl      string `json:"file_url,optional"`
+		Width        int32  `json:"width,optional"`
+		Height       int32  `json:"height,optional"`
+		Duration     int32  `json:"duration,optional"`
+		ThumbnailUrl string `json:"thumbnail_url,optional"`
+		Size         int64  `json:"size,optional"`
+	}
+	PeerFileMsg {
+		FileUrl   string `json:"file_url,optional"`
+		FileName  string `json:"file_name,optional"`
+		Size      int64  `json:"size,optional"`
+		MimeType  string `json:"mime_type,optional"`
+		Extension string `json:"extension,optional"`
+		OpenMode  int32  `json:"open_mode,optional"`
+	}
+	PeerVoiceMsg {
+		FileUrl  string `json:"file_url,optional"`
+		Duration int32  `json:"duration,optional"`
+		Size     int64  `json:"size,optional"`
+	}
+	PeerEmojiMsg {
+		FileUrl   string `json:"file_url,optional"`
+		EmojiId   string `json:"emoji_id,optional"`
+		PackageId string `json:"package_id,optional"`
+		Width     int64  `json:"width,optional"`
+		Height    int64  `json:"height,optional"`
+	}
+	PeerNotificationMsg {
+		Type   int32    `json:"type,optional"`
+		Actors []string `json:"actors,optional"`
+	}
+	PeerAudioFileMsg {
+		FileUrl  string `json:"file_url,optional"`
+		FileName string `json:"file_name,optional"`
+		Duration int32  `json:"duration,optional"`
+		Size     int64  `json:"size,optional"`
+	}
+	PeerCallMsg {
+		RoomId   string `json:"room_id,optional"`
+		CallType int32  `json:"call_type,optional"`
+		Status   int32  `json:"status,optional"`
+		Duration int64  `json:"duration,optional"`
+	}
+	PeerForwardMsg {
+		Title    string `json:"title,optional"`
+		RecordId string `json:"record_id,optional"`
+		Count    int32  `json:"count,optional"`
+	}
+	PeerMarkdownMsg {
+		Content string `json:"content,optional"`
+		Title   string `json:"title,optional"`
+	}
+	PeerLinkMsg {
+		Url      string `json:"url,optional"`
+		Title    string `json:"title,optional"`
+		Desc     string `json:"desc,optional"`
+		ImageUrl string `json:"image_url,optional"`
+	}
+	PeerCloudDocMsg {
+		DocId    string `json:"doc_id,optional"`
+		DocType  int32  `json:"doc_type,optional"`
+		Title    string `json:"title,optional"`
+		OwnerId  string `json:"owner_id,optional"`
+		Perm     int32  `json:"perm,optional"`
+		CoverUrl string `json:"cover_url,optional"`
+		Revision int64  `json:"revision,optional"`
+	}
+	PeerCardMsg {
+		CardType    int32  `json:"card_type,optional"`
+		Id          string `json:"id,optional"`
+		ExpireAt    int64  `json:"expire_at,optional"`
+		InviteToken string `json:"invite_token,optional"`
+	}
+	PeerMsg {
+		Type            uint32            `json:"type,optional"`
+		TargetMsgId     string            `json:"target_msg_id,optional"`
+		TextMsg         *PeerTextMsg      `json:"text_msg,optional"`
+		ImageMsg        *PeerImageMsg     `json:"image_msg,optional"`
+		VideoMsg        *PeerVideoMsg     `json:"video_msg,optional"`
+		FileMsg         *PeerFileMsg      `json:"file_msg,optional"`
+		VoiceMsg        *PeerVoiceMsg     `json:"voice_msg,optional"`
+		EmojiMsg        *PeerEmojiMsg     `json:"emoji_msg,optional"`
+		NotificationMsg *PeerNotificationMsg `json:"notification_msg,optional"`
+		AudioFileMsg    *PeerAudioFileMsg `json:"audio_file_msg,optional"`
+		CallMsg         *PeerCallMsg      `json:"call_msg,optional"`
+		WithdrawMsg     *PeerWithdrawMsg  `json:"withdraw_msg,optional"`
+		ReplyMsg        *PeerReplyMsg     `json:"reply_msg,optional"`
+		ForwardMsg      *PeerForwardMsg   `json:"forward_msg,optional"`
+		MarkdownMsg     *PeerMarkdownMsg  `json:"markdown_msg,optional"`
+		LinkMsg         *PeerLinkMsg      `json:"link_msg,optional"`
+		AtUserIds       []string          `json:"at_user_ids,optional"`
+		CloudDocMsg     *PeerCloudDocMsg  `json:"cloud_doc_msg,optional"`
+		CardMsg         *PeerCardMsg      `json:"card_msg,optional"`
+	}
+	PeerWithdrawMsg {
+		OriginMsgId string   `json:"origin_msg_id,optional"`
+		OriginMsg   *PeerMsg `json:"origin_msg,optional"`
+	}
+	PeerReplyMsg {
+		OriginMsgId string   `json:"origin_msg_id,optional"`
+		OriginMsg   *PeerMsg `json:"origin_msg,optional"`
+		ReplyMsg    *PeerMsg `json:"reply_msg,optional"`
+	}
+	PeerSender {
+		UserId   string `json:"user_id,optional"`
+		Avatar   string `json:"avatar,optional"`
+		NickName string `json:"nick_name,optional"`
+		UserType int32  `json:"user_type,optional"`
+	}
+	PeerChatMessageItem {
+		MessageId        string `json:"message_id,optional"`
+		ConversationId   string `json:"conversation_id,optional"`
+		ConversationType int32  `json:"conversation_type,optional"`
+		SendUserId       string `json:"send_user_id,optional"`
+		MsgType          int32  `json:"msg_type,optional"`
+		MsgPreview       string `json:"msg_preview,optional"`
+		MsgContent       string `json:"msg_content,optional"`
+		Status           int32  `json:"status,optional"`
+		CreatedAt        string `json:"created_at,optional"`
+		UpdatedAt        string `json:"updated_at,optional"`
+	}
+	PeerConversationDetailItem {
+		ConversationId  string   `json:"conversation_id,optional"`
+		Type            int32    `json:"type,optional"`
+		LastMessage     string   `json:"last_message,optional"`
+		LastMessageTime string   `json:"last_message_time,optional"`
+		MessageCount    int64    `json:"message_count,optional"`
+		ParticipantIds  []string `json:"participant_ids,optional"`
+	}
+)
+
+type (
+	PeerSendMsgReq {
+		UserId         string   `json:"user_id,optional"`
+		ConversationId string   `json:"conversation_id,optional"`
+		MessageId      string   `json:"message_id,optional"`
+		Msg            *PeerMsg `json:"msg,optional"`
+		DeviceId       string   `json:"device_id,optional"`
+	}
+	PeerSendMsgRes {
+		Id               uint32      `json:"id,optional"`
+		MessageId        string      `json:"message_id,optional"`
+		ConversationId   string      `json:"conversation_id,optional"`
+		Msg              *PeerMsg    `json:"msg,optional"`
+		Sender           *PeerSender `json:"sender,optional"`
+		CreatedAt        string      `json:"created_at,optional"`
+		MsgPreview       string      `json:"msg_preview,optional"`
+		Status           uint32      `json:"status,optional"`
+		Seq              int64       `json:"seq,optional"`
+		ConversationType uint32      `json:"conversation_type,optional"`
+	}
+)
+
+type (
+	PeerInitializeConversationReq {
+		ConversationId string   `json:"conversation_id,optional"`
+		Type           int32    `json:"type,optional"`
+		UserIds        []string `json:"user_ids,optional"`
+	}
+	PeerInitializeConversationRes {
+		ConversationId string `json:"conversation_id,optional"`
+	}
+)
+
+type (
+	PeerSendNotificationMessageReq {
+		ConversationId string   `json:"conversation_id,optional"`
+		MessageType    int32    `json:"message_type,optional"`
+		Content        string   `json:"content,optional"`
+		RelatedUserId  string   `json:"related_user_id,optional"`
+		ReadUserIds    []string `json:"read_user_ids,optional"`
+	}
+	PeerSendNotificationMessageRes {
+		MessageId string `json:"message_id,optional"`
+	}
+)
+
+type (
+	PeerGetChatMessageReq {
+		ConversationId string `json:"conversation_id,optional"`
+		MessageId      string `json:"message_id,optional"`
+	}
+	PeerGetChatMessageRes {
+		Found bool     `json:"found,optional"`
+		Msg   *PeerMsg `json:"msg,optional"`
+	}
+)
+
+type (
+	PeerListChatMessagesReq {
+		Page           int32  `json:"page,optional"`
+		PageSize       int32  `json:"page_size,optional"`
+		ConversationId string `json:"conversation_id,optional"`
+		SendUserId     string `json:"send_user_id,optional"`
+		MsgType        int32  `json:"msg_type,optional"`
+		StartTime      string `json:"start_time,optional"`
+		EndTime        string `json:"end_time,optional"`
+		MessageId      string `json:"message_id,optional"`
+		WithContent    bool   `json:"with_content,optional"`
+		Status         int32  `json:"status,optional"`
+		Order          int32  `json:"order,optional"`
+	}
+	PeerListChatMessagesRes {
+		Total int64                  `json:"total,optional"`
+		List  []PeerChatMessageItem `json:"list,optional"`
+	}
+)
+
+type (
+	PeerUpdateChatMessagesReq {
+		MessageIds     []string `json:"message_ids,optional"`
+		ConversationId string   `json:"conversation_id,optional"`
+		MsgType        int32    `json:"msg_type,optional"`
+		StartTime      string   `json:"start_time,optional"`
+		EndTime        string   `json:"end_time,optional"`
+		Status         int32    `json:"status,optional"`
+	}
+	PeerUpdateChatMessagesRes {
+		AffectedCount int64 `json:"affected_count,optional"`
+	}
+)
+
+type (
+	PeerListConversationsReq {
+		UserId           string `json:"user_id,optional"`
+		ConversationType int32  `json:"conversation_type,optional"`
+		Page             int32  `json:"page,optional"`
+		PageSize         int32  `json:"page_size,optional"`
+	}
+	PeerListConversationsRes {
+		Total int64                        `json:"total,optional"`
+		List  []PeerConversationDetailItem `json:"list,optional"`
+	}
+)
+
+@server (
+	group: chat_machine
+)
+service chat {
+	@doc "发送消息"
+	@handler peerSendMsg
+	post /api/chat/v1/send (PeerSendMsgReq) returns (PeerSendMsgRes)
+
+	@doc "初始化会话"
+	@handler peerInitializeConversation
+	post /api/chat/v1/initialize_conversation (PeerInitializeConversationReq) returns (PeerInitializeConversationRes)
+
+	@doc "发送系统通知消息"
+	@handler peerSendNotificationMessage
+	post /api/chat/v1/send_notification_message (PeerSendNotificationMessageReq) returns (PeerSendNotificationMessageRes)
+
+	@doc "按会话+消息 ID 取单条消息"
+	@handler peerGetChatMessage
+	post /api/chat/v1/get_message (PeerGetChatMessageReq) returns (PeerGetChatMessageRes)
+
+	@doc "分页查消息"
+	@handler peerListChatMessages
+	post /api/chat/v1/messages (PeerListChatMessagesReq) returns (PeerListChatMessagesRes)
+
+	@doc "批量更新消息状态"
+	@handler peerUpdateChatMessages
+	post /api/chat/v1/update_messages (PeerUpdateChatMessagesReq) returns (PeerUpdateChatMessagesRes)
+
+	@doc "分页查会话"
+	@handler peerListConversations
+	post /api/chat/v1/conversations (PeerListConversationsReq) returns (PeerListConversationsRes)
+}

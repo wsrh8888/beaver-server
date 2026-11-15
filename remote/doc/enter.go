@@ -6,7 +6,6 @@
 package doc
 
 import (
-	"beaver/commonconfig"
 	"sync"
 	"time"
 )
@@ -16,8 +15,7 @@ var client *Client
 
 // Init 装配出站凭据（beaver-doc 分配给调用方的 client_credentials）与域名。
 // 只在该服务装配依赖时调用一次；域名写入 commonconfig.DocUrl。
-func Init(clientID, clientSecret, baseURL string) {
-	commonconfig.DocUrl = baseURL
+func Init(clientID, clientSecret string) {
 	client = &Client{clientID: clientID, clientSecret: clientSecret}
 }
 

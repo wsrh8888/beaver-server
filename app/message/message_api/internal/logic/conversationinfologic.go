@@ -26,14 +26,14 @@ import (
 	"errors"
 	"strings"
 
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	"beaver/app/message/message_models"
 	relationtypes "beaver/app/relation/relation_rpc/types"
-	accttypes "beaver/app/account/account_rpc/types"
-	"beaver/utils/conversation"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+	"beaver/utils/conversation"
 
 	"gorm.io/gorm"
 )

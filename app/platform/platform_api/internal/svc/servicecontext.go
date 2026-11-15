@@ -34,10 +34,12 @@ import (
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	orgseed "beaver/database/org"
+	"beaver/middleware/authgate"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -57,6 +59,8 @@ type ServiceContext struct {
 	RocketMQ    *corerocketmq.Client
 	OpenSearch  *coreopensearch.Client
 	Instance    InstanceView
+	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
+	AuthGate rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -65,6 +69,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	rpcOpt := zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor)
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
+
+	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
+	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
+	if err := gate.Validate(); err != nil {
+		panic("platform_api 身份闸门配置不完整: " + err.Error())
+	}
 
 	return &ServiceContext{
 		Config:      c,
@@ -75,6 +85,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RocketMQ:    mqClient,
 		OpenSearch:  coreopensearch.New(c.OpenSearch.Addr),
 		Instance:    loadInstance(mysqlDb),
+		AuthGate:    authgate.New(gate),
 	}
 }
 

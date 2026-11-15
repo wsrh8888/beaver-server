@@ -38,3 +38,28 @@ GroupRpc:
     Key: relationrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
+
+S2S:
+  Secret: s2s-dev-secret
+  Clients:
+    beaver-backend:
+      ClientID: beaver-backend
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-open:
+      ClientID: beaver-open
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-social:
+      ClientID: beaver-social
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+    beaver-call:
+      ClientID: beaver-call
+      ClientSecret: s2s-dev-secret
+      Scopes: []
+      Enabled: true
+

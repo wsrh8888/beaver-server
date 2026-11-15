@@ -18,6 +18,12 @@ Auth:
   AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600
 CompatibleVersion: "2.1"
+# 队间 S2S 机器票验签：密钥与 account_api 签发 /api/auth/token 的同源。
+# 外仓只打本网关，机器票与用户 JWT 在这里分流，业务面 authgate 再验一次。
+S2S:
+  Secret: s2s-dev-secret
+  Audience: core:api
+
 Limit:
   Enable: true
   Rate: 100    # 每秒请求数
@@ -25,6 +31,7 @@ Limit:
 # 无需 Gateway 鉴权（公开接口）
 PublicList:
   - /api/auth/auth_public/.*
+  - ^/api/auth/token$
   - /api/platform/track_public/.*
   - /api/platform/update_public/.*
   - /api/open/.*_public/.*

@@ -80,3 +80,91 @@ service account {
 }
 
 // goctl api go -api auth_api.api -dir . --home ../../../template
+
+// ==================== 队间换票面（client_credentials → 受众 core:api 的机器票）====================
+type (
+	S2STokenReq {
+		GrantType    string `json:"grant_type,optional"`
+		ClientID     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+	}
+	S2STokenRes {
+		AccessToken string `json:"access_token"`
+		TokenType   string `json:"token_type"`
+		ExpiresIn   int64  `json:"expires_in"`
+	}
+)
+
+// 一个团队一套票：本团队全部业务面（account/message/relation/asset/notification/platform）
+// 共用同一受众，收费仓换一次票即可打所有面，省掉每服务各换一次的往返。
+// 该路由本身不走身份闸门（否则换不到票），靠 client_secret 常量时间比对鉴权。
+@server (
+	group: auth_token
+)
+service account {
+	@doc "S2S 机器票换发（client_credentials）"
+	@handler s2sToken
+	post /api/auth/token (S2STokenReq) returns (S2STokenRes)
+}
+
+// ==================== 队间机器视图：认证域凭据与设备维护 ====================
+// 与 C 端共用 /api/auth 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐。
+type (
+	VerifyPasswordReq {
+		UserId   string `json:"user_id,optional"`
+		Password string `json:"password,optional"`
+	}
+	VerifyPasswordRes {
+		Valid bool `json:"valid,optional"`
+	}
+)
+
+type (
+	CreateCredentialReq {
+		UserId   string `json:"user_id,optional"`
+		Password string `json:"password,optional"`
+	}
+	CreateCredentialRes {
+		Success bool `json:"success,optional"`
+	}
+)
+
+type (
+	ListUserDevicesReq {
+		UserId string `json:"user_id,optional"`
+	}
+	ListUserDevicesRes {
+		List []UserDeviceItem `json:"list,optional"`
+	}
+)
+
+type (
+	ResetUserPasswordReq {
+		UserId      string `json:"user_id,optional"`
+		NewPassword string `json:"new_password,optional"`
+	}
+	ResetUserPasswordRes {
+		Success bool `json:"success,optional"`
+	}
+)
+
+@server (
+	group: auth_machine
+)
+service account {
+	@doc "校验账号密码（开放平台 / 管理端代登录）"
+	@handler verifyPassword
+	post /api/auth/v1/verify_password (VerifyPasswordReq) returns (VerifyPasswordRes)
+
+	@doc "创建账号密码凭据"
+	@handler createCredential
+	post /api/auth/v1/create_credential (CreateCredentialReq) returns (CreateCredentialRes)
+
+	@doc "查指定用户的登录设备"
+	@handler listUserDevices
+	post /api/auth/v1/devices (ListUserDevicesReq) returns (ListUserDevicesRes)
+
+	@doc "重置指定用户密码（无需旧密码）"
+	@handler resetUserPassword
+	post /api/auth/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
+}

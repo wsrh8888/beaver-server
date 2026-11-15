@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024-2026 Beaver IM Team
  * SPDX-License-Identifier: MIT
  * Project: beaver-server

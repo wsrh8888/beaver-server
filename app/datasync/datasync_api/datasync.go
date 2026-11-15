@@ -29,7 +29,6 @@ import (
 	"beaver/utils/beaverlog"
 	"flag"
 	"fmt"
-	"net/http"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -50,17 +49,9 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	// S2S 内部编排面（供收费模块调用 A 主体核心能力）：换票端点不挂 Bearer 中间件，
-	// 业务端点挂 InternalToken 验签。
-	server.AddRoutes([]rest.Route{
-		{
-			Method:  http.MethodPost,
-			Path:    "/internal/token",
-			Handler: handler.TokenHandler(c),
-		},
-	})
-	handler.RegisterS2SHandlers(server, ctx)
-
+	// 本面只提供 /api/datasync/v1/getSync* 增量同步 API（RegisterHandlers 注册）。
+	// 业务能力一律是各业务面自己的 /api 契约，由 gateway_api 转发；
+	// 这里不再挂任何 /internal/<Module>.<Method> 业务门面，也不做换票端点。
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

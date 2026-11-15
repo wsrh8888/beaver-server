@@ -22,6 +22,8 @@
 package config
 
 import (
+	"beaver/middleware/jwt"
+
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )
@@ -42,4 +44,17 @@ type Config struct {
 	}
 	UserRpc zrpc.RpcClientConf
 	AuthRpc zrpc.RpcClientConf
+	// NotificationRpc：本业务线的 gRPC 服务（etcd notificationrpc.rpc），队间能力面薄转发到它。
+	NotificationRpc zrpc.RpcClientConf
+	// Auth 用户 JWT 签名密钥，与网关 Auth.AccessSecret 同值：
+	// 本服务独立验用户票，不信任任何外部直接塞进来的 Beaver-User-Id。
+	Auth struct {
+		AccessSecret string
+		AccessExpire int
+	}
+	// S2S 入站机器票：队间调用与本服务共用同一套路由，凭据受众统一 core:api。
+	S2S struct {
+		Secret  string                     `json:",optional"`
+		Clients map[string]jwt.ClientEntry `json:",optional"`
+	}
 }

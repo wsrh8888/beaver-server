@@ -274,4 +274,146 @@ service relation {
 	get /api/friend/v1/block_list (BlockListReq) returns (BlockListRes)
 }
 
+// ==================== 队间（S2S）能力面 ====================
+// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分：
+// 用户 JWT 只能看到自己的数据，机器票代表用户行事。路径刻意与 C 端错开，避免视图混用。
+
+type (
+	FriendItem {
+		FriendId       string `json:"friend_id,optional"` // 好友关系ID
+		SendUserId     string `json:"send_user_id,optional"` // 发起方用户ID
+		RevUserId      string `json:"rev_user_id,optional"` // 接收方用户ID
+		SendUserNotice string `json:"send_user_notice,optional"` // 发起方备注
+		RevUserNotice  string `json:"rev_user_notice,optional"` // 接收方备注
+		Source         string `json:"source,optional"` // 来源
+		IsDeleted      bool   `json:"is_deleted,optional"` // 是否已删除
+		CreatedAt      string `json:"created_at,optional"` // 创建时间
+		UpdatedAt      string `json:"updated_at,optional"` // 更新时间
+	}
+	FriendVerifyItem {
+		VerifyId   string `json:"verify_id,optional"` // 验证记录ID
+		SendUserId string `json:"send_user_id,optional"` // 发起方用户ID
+		RevUserId  string `json:"rev_user_id,optional"` // 接收方用户ID
+		SendStatus int32  `json:"send_status,optional"` // 发起方状态
+		RevStatus  int32  `json:"rev_status,optional"` // 接收方状态
+		Message    string `json:"message,optional"` // 附加消息
+		Source     string `json:"source,optional"` // 来源
+		CreatedAt  string `json:"created_at,optional"` // 创建时间
+		UpdatedAt  string `json:"updated_at,optional"` // 更新时间
+	}
+	FriendBlockItem {
+		BlockId       string `json:"block_id,optional"` // 黑名单记录ID
+		UserId        string `json:"user_id,optional"` // 执行拉黑的用户ID
+		BlockedUserId string `json:"blocked_user_id,optional"` // 被拉黑的用户ID
+		CreatedAt     string `json:"created_at,optional"` // 创建时间
+	}
+
+	GetFriendIdsReq {
+		UserID string `json:"UserID,optional"` // 用户ID
+	}
+	GetFriendIdsRes {
+		FriendIds []string `json:"friend_ids,optional"` // 好友用户ID列表
+	}
+
+	ListFriendsReq {
+		Page       int32  `json:"page,optional"` // 页码
+		PageSize   int32  `json:"page_size,optional"` // 每页条数
+		UserId     string `json:"user_id,optional"` // 参与方用户ID筛选
+		PeerUserId string `json:"peer_user_id,optional"` // 对方用户ID筛选
+		IsDeleted  *bool  `json:"is_deleted,optional"` // 删除状态筛选
+		StartTime  string `json:"start_time,optional"` // 开始时间
+		EndTime    string `json:"end_time,optional"` // 结束时间
+		RelationId string `json:"relation_id,optional"` // 好友关系记录ID精确查
+	}
+	ListFriendsRes {
+		Total int64        `json:"total,optional"` // 总数
+		List  []FriendItem `json:"list,optional"` // 好友列表
+	}
+
+	UpdateFriendsReq {
+		RelationIds []string `json:"relation_ids,optional"` // 好友关系记录ID
+		Action      int32    `json:"action,optional"` // 1=物理删除 2=恢复软删
+	}
+	UpdateFriendsRes {
+		AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	}
+
+	ListFriendVerifiesReq {
+		Page       int32  `json:"page,optional"` // 页码
+		PageSize   int32  `json:"page_size,optional"` // 每页条数
+		SendUserId string `json:"send_user_id,optional"` // 发起方筛选
+		RevUserId  string `json:"rev_user_id,optional"` // 接收方筛选
+		SendStatus int32  `json:"send_status,optional"` // 发起方状态，0 表示全部
+		RevStatus  int32  `json:"rev_status,optional"` // 接收方状态，0 表示全部
+		StartTime  string `json:"start_time,optional"` // 开始时间
+		EndTime    string `json:"end_time,optional"` // 结束时间
+		VerifyId   string `json:"verify_id,optional"` // 验证记录ID精确查
+	}
+	ListFriendVerifiesRes {
+		Total int64              `json:"total,optional"` // 总数
+		List  []FriendVerifyItem `json:"list,optional"` // 验证列表
+	}
+
+	UpdateFriendVerifiesReq {
+		VerifyIds []string `json:"verify_ids,optional"` // 验证记录ID
+		Action    int32    `json:"action,optional"` // 1=删除
+	}
+	UpdateFriendVerifiesRes {
+		AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	}
+
+	ListFriendBlocksReq {
+		Page          int32  `json:"page,optional"` // 页码
+		PageSize      int32  `json:"page_size,optional"` // 每页条数
+		UserId        string `json:"user_id,optional"` // 拉黑方用户ID筛选
+		BlockedUserId string `json:"blocked_user_id,optional"` // 被拉黑用户ID筛选
+		BlockId       string `json:"block_id,optional"` // 记录ID精确查
+	}
+	ListFriendBlocksRes {
+		Total int64             `json:"total,optional"` // 总数
+		List  []FriendBlockItem `json:"list,optional"` // 黑名单列表
+	}
+
+	UpdateFriendBlocksReq {
+		BlockIds []string `json:"block_ids,optional"` // 黑名单记录ID
+		Action   int32    `json:"action,optional"` // 1=解除拉黑
+	}
+	UpdateFriendBlocksRes {
+		AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	}
+)
+
+@server (
+	group: friend_machine
+)
+service relation {
+	@doc "队间：取好友ID列表"
+	@handler friendIds
+	post /api/friend/v1/ids (GetFriendIdsReq) returns (GetFriendIdsRes)
+
+	@doc "队间：分页查询好友关系"
+	@handler listFriends
+	post /api/friend/v1/list (ListFriendsReq) returns (ListFriendsRes)
+
+	@doc "队间：批量删除/恢复好友关系"
+	@handler updateFriends
+	post /api/friend/v1/update (UpdateFriendsReq) returns (UpdateFriendsRes)
+
+	@doc "队间：分页查询好友验证记录"
+	@handler listFriendVerifies
+	post /api/friend/v1/verifies (ListFriendVerifiesReq) returns (ListFriendVerifiesRes)
+
+	@doc "队间：批量删除好友验证记录"
+	@handler updateFriendVerifies
+	post /api/friend/v1/update_valid (UpdateFriendVerifiesReq) returns (UpdateFriendVerifiesRes)
+
+	@doc "队间：分页查询黑名单"
+	@handler listFriendBlocks
+	post /api/friend/v1/blocks (ListFriendBlocksReq) returns (ListFriendBlocksRes)
+
+	@doc "队间：批量解除拉黑"
+	@handler updateFriendBlocks
+	post /api/friend/v1/update_block (UpdateFriendBlocksReq) returns (UpdateFriendBlocksRes)
+}
+
 // goctl api go -api relation_api.api -dir . --home ../../../template
