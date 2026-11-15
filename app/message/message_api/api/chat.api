@@ -111,7 +111,6 @@ type (
 // 发送消息
 type (
 	SendMsgReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 		MessageID      string `json:"messageId"` //客户端消息ID
 		Msg            Msg    `json:"msg"`
@@ -131,7 +130,6 @@ type (
 // 获取会话信息
 type (
 	ConversationInfoReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 	}
 	ConversationInfoRes {
@@ -149,7 +147,6 @@ type (
 // 获取最近会话列表
 type (
 	RecentChatListReq {
-		UserID string `header:"Beaver-User-Id"`
 		Page   int    `form:"page,optional"`
 		Limit  int    `form:"limit,optional"`
 	}
@@ -162,7 +159,6 @@ type (
 // 获取聊天记录
 type (
 	ChatHistoryReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` // 会话Id
 		Page           int    `json:"page,optional"`
 		Limit          int    `json:"limit,optional"`
@@ -186,7 +182,6 @@ type (
 // 搜索消息
 type (
 	SearchMessagesReq {
-		UserID         string `header:"Beaver-User-Id"`
 		Keyword        string `json:"keyword"` // 搜索关键词
 		ConversationID string `json:"conversationId,optional"` // 可选，限定在某个会话内搜索
 		Page           int    `json:"page,optional"`
@@ -201,7 +196,6 @@ type (
 // 删除最近会话
 type (
 	DeleteRecentReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 	}
 	DeleteRecentRes  {}
@@ -210,7 +204,6 @@ type (
 // 置顶会话
 type (
 	PinnedChatReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 		IsPinned       bool   `json:"isPinned"` // true表示置顶 false表示不置顶
 	}
@@ -220,7 +213,6 @@ type (
 // 设置会话免打扰
 type (
 	MuteChatReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 		IsMuted        bool   `json:"isMuted"` // true表示免打扰 false表示取消免打扰
 	}
@@ -230,7 +222,6 @@ type (
 // 隐藏/显示会话
 type (
 	HideChatReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId"` //会话id
 		IsHidden       bool   `json:"isHidden"` // true表示隐藏 false表示显示
 	}
@@ -240,7 +231,6 @@ type (
 // 消息撤回
 type (
 	RecallMessageReq {
-		UserID    string `header:"Beaver-User-Id"`
 		MessageID string `json:"messageId"` // 客户端消息ID
 	}
 	RecallMessageRes {
@@ -252,7 +242,6 @@ type (
 // 批量删除消息
 type (
 	DeleteMessagesReq {
-		UserID     string   `header:"Beaver-User-Id"`
 		MessageIDs []string `json:"messageIds"` // 支持批量删除，最多100条
 	}
 	DeleteMessagesRes  {}
@@ -261,7 +250,6 @@ type (
 // 标记消息媒体状态（语音已听等）
 type (
 	MarkMessageMediaReq {
-		UserID     string   `header:"Beaver-User-Id"` // 用户ID
 		MessageIDs []string `json:"messageIds"` // 消息ID列表，最多100条
 	}
 	MarkMessageMediaRes  {}
@@ -270,7 +258,6 @@ type (
 // 消息转发
 type (
 	ForwardMessageReq {
-		UserID      string   `header:"Beaver-User-Id"`
 		MessageIDs  []string `json:"messageIds"` // 原始消息ID列表
 		TargetID    string   `json:"targetId"` // 目标会话ID
 		ForwardType int      `json:"forwardType"` // 1: 单聊 2: 群聊
@@ -284,7 +271,6 @@ type (
 // 获取合并转发详情
 type (
 	GetForwardDetailsReq {
-		UserID   string `header:"Beaver-User-Id"`
 		RecordID string `form:"recordId"`
 	}
 	GetForwardDetailsRes {
@@ -295,7 +281,6 @@ type (
 // 聊天数据同步
 type (
 	ChatSyncReq {
-		UserID         string `header:"Beaver-User-Id"`
 		ConversationID string `json:"conversationId,optional"` // 会话ID，可选，不传则同步所有会话
 		FromSeq        int64  `json:"fromSeq"` // 起始序列号
 		ToSeq          int64  `json:"toSeq"` // 结束序列号
@@ -323,7 +308,6 @@ type (
 // 批量获取会话数据
 type (
 	GetConversationsListByIdsReq {
-		UserID          string   `header:"Beaver-User-Id"` // 用户ID
 		ConversationIds []string `json:"conversationIds"` // 会话ID列表
 	}
 	GetConversationsListByIdsRes {
@@ -343,7 +327,6 @@ type (
 // 批量获取用户会话设置数据
 type (
 	GetUserConversationSettingsListByIdsReq {
-		UserID          string   `header:"Beaver-User-Id"` // 用户ID
 		ConversationIds []string `json:"conversationIds"` // 会话ID列表
 	}
 	GetUserConversationSettingsListByIdsRes {
@@ -365,7 +348,6 @@ type (
 // 更新会话已读序列号
 type (
 	UpdateReadSeqReq {
-		UserID         string `header:"Beaver-User-Id"` // 用户ID
 		ConversationID string `json:"conversationId"` // 会话ID
 		ReadSeq        int64  `json:"readSeq"` // 已读序列号（用户已读到的消息seq）
 	}
@@ -374,6 +356,9 @@ type (
 	}
 )
 
+@server (
+	jwt: Auth
+)
 service chat {
 	@doc "发送消息"
 	@handler SendMsg
@@ -702,6 +687,7 @@ type (
 
 @server (
 	group: chat_machine
+	middleware: AuthGate
 )
 service chat {
 	@doc "发送消息"

@@ -38,7 +38,12 @@ GroupRpc:
     Key: relationrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
-
+# 用户 JWT 签名密钥：与网关 Auth.AccessSecret 同值，本服务独立验用户票（不信任外部塞的 Beaver-User-Id）。
+Auth:
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
+  AccessExpire: 3600
+# 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
+# 换票端点：POST /api/auth/token（client_credentials）。
 S2S:
   Secret: s2s-dev-secret
   Clients:

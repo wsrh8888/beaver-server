@@ -24,6 +24,7 @@ import (
 	"beaver/app/account/account_rpc/client/user"
 	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/asset/asset_api/internal/config"
+	"beaver/app/asset/asset_api/internal/middleware"
 	"beaver/app/asset/asset_rpc/client/emoji"
 	"beaver/app/asset/asset_rpc/client/file"
 	assettypes "beaver/app/asset/asset_rpc/types"
@@ -32,7 +33,6 @@ import (
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
-	"beaver/middleware/authgate"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
@@ -53,7 +53,8 @@ type ServiceContext struct {
 	VersionGen  *versionPkg.VersionGenerator
 	RocketMQ    *corerocketmq.Client
 	MinioClient *minio.Client // MinIO客户端，仅在配置了Endpoint时初始化，供上传与预览预签名使用
-	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
+	// AuthGate 由 .api 的 `middleware: AuthGate` 声明接线，供 goctl 生成的
+	// rest.WithMiddlewares 注入；只挂在需要「用户或机器」的分组上。
 	AuthGate rest.Middleware
 }
 
@@ -64,12 +65,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
 
-	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
-	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
-	if err := gate.Validate(); err != nil {
-		panic("asset_api 身份闸门配置不完整: " + err.Error())
-	}
-
 	svc := &ServiceContext{
 		Config:     c,
 		DB:         mysqlDb,
@@ -79,7 +74,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		FileRpc:    file.NewFile(zrpc.MustNewClient(c.AssetRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		EmojiRpc:   emoji.NewEmoji(zrpc.MustNewClient(c.AssetRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		AuthGate:   authgate.New(gate),
+		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
 	}
 
 	// 初始化MinIO客户端（仅在配置了Endpoint时）

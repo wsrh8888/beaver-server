@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"fmt"
 
@@ -53,10 +54,10 @@ func NewMuteChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MuteChat
 func (l *MuteChatLogic) MuteChat(req *types.MuteChatReq) (resp *types.MuteChatRes, err error) {
 	resp = &types.MuteChatRes{}
 
-	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
+	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", identity.UserID(l.ctx))
 
 	err = l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
-		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
+		Where("user_id = ? AND conversation_id = ?", identity.UserID(l.ctx), req.ConversationID).
 		Updates(map[string]interface{}{
 			"is_muted": req.IsMuted,
 			"version":  version,
@@ -65,7 +66,7 @@ func (l *MuteChatLogic) MuteChat(req *types.MuteChatReq) (resp *types.MuteChatRe
 		l.logger.Error(model.LogMsg{
 			Text: "更新免打扰失败",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"isMuted":        req.IsMuted,
 				"err":            err.Error(),
@@ -77,7 +78,7 @@ func (l *MuteChatLogic) MuteChat(req *types.MuteChatReq) (resp *types.MuteChatRe
 	l.logger.Info(model.LogMsg{
 		Text: "免打扰设置成功",
 		Data: map[string]any{
-			"userId":         req.UserID,
+			"userId":         identity.UserID(l.ctx),
 			"conversationId": req.ConversationID,
 			"isMuted":        req.IsMuted,
 			"version":        version,
@@ -85,7 +86,7 @@ func (l *MuteChatLogic) MuteChat(req *types.MuteChatReq) (resp *types.MuteChatRe
 	})
 
 	go func() {
-		l.notifyMutedUpdate(req.ConversationID, req.UserID, version)
+		l.notifyMutedUpdate(req.ConversationID, identity.UserID(l.ctx), version)
 	}()
 
 	return resp, nil

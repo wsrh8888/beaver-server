@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -53,7 +54,7 @@ func NewFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Friend
 
 func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.FriendListRes, err error) {
 	// 参数验证
-	if req.UserID == "" {
+	if identity.UserID(l.ctx) == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -71,7 +72,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 			Page:  req.Page,
 			Limit: req.Limit,
 		},
-		Where: l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?", req.UserID, req.UserID, false),
+		Where: l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?", identity.UserID(l.ctx), identity.UserID(l.ctx), false),
 		// 移除Preload，微服务架构中通过RPC获取用户信息
 	})
 
@@ -96,7 +97,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 			UserIdList: userIds,
 		})
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 			// 不返回错误，继续处理，为没有用户信息的设置默认值
 		} else {
 			userInfoMap = userListResp.UserInfo
@@ -109,11 +110,11 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		var notice string
 
 		// 确定目标用户ID和备注信息
-		if friendUser.SendUserID == req.UserID {
+		if friendUser.SendUserID == identity.UserID(l.ctx) {
 			// 我是发起方，目标用户是接收方
 			targetUserID = friendUser.RevUserID
 			notice = friendUser.SendUserNotice
-		} else if friendUser.RevUserID == req.UserID {
+		} else if friendUser.RevUserID == identity.UserID(l.ctx) {
 			// 我是接收方，目标用户是发起方
 			targetUserID = friendUser.SendUserID
 			notice = friendUser.RevUserNotice
@@ -146,9 +147,9 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		}
 
 		// 生成会话Id
-		conversationID, err := conversation.GenerateConversation([]string{req.UserID, targetUserID})
+		conversationID, err := conversation.GenerateConversation([]string{identity.UserID(l.ctx), targetUserID})
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "targetId": targetUserID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "targetId": targetUserID, "err": err.Error()}})
 			return nil, fmt.Errorf("生成会话Id失败: %v", err)
 		}
 
@@ -166,7 +167,7 @@ func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.Frie
 		list = append(list, info)
 	}
 
-	l.logger.Info(model.LogMsg{Text: "获取好友列表成功", Data: map[string]interface{}{"userId": req.UserID, "count": len(list)}})
+	l.logger.Info(model.LogMsg{Text: "获取好友列表成功", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(list)}})
 	return &types.FriendListRes{
 		List: list,
 	}, nil

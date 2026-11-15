@@ -27,6 +27,7 @@ import (
 	"beaver/app/asset/asset_rpc/client/file"
 	assettypes "beaver/app/asset/asset_rpc/types"
 	"beaver/app/platform/platform_api/internal/config"
+	"beaver/app/platform/platform_api/internal/middleware"
 	platformcli "beaver/app/platform/platform_rpc/platform"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
@@ -34,7 +35,6 @@ import (
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	orgseed "beaver/database/org"
-	"beaver/middleware/authgate"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
@@ -70,12 +70,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
 
-	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
-	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
-	if err := gate.Validate(); err != nil {
-		panic("platform_api 身份闸门配置不完整: " + err.Error())
-	}
-
 	return &ServiceContext{
 		Config:      c,
 		DB:          mysqlDb,
@@ -85,7 +79,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RocketMQ:    mqClient,
 		OpenSearch:  coreopensearch.New(c.OpenSearch.Addr),
 		Instance:    loadInstance(mysqlDb),
-		AuthGate:    authgate.New(gate),
+		AuthGate:    middleware.NewAuthGateMiddleware(c).Handle,
 	}
 }
 

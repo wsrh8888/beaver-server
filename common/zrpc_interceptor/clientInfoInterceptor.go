@@ -24,24 +24,27 @@ package zrpc_interceptor
 import (
 	"context"
 
+	"beaver/common/identity"
 	"beaver/common/traceid"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
+// ClientInfoInterceptor 把 HTTP 面中间件验签得出的身份结论透传到 gRPC metadata。
+//
+// 身份只从 context 读（common/identity.From 同时兼容自定义 middleware 与 go-zero
+// 内置 `jwt: Auth` 的 claims），不再读任何请求头；rpc 侧由 IdentityServerInterceptor
+// 还原成同一份 Identity。rpc logic 因此不需要、也不应该再验用户 JWT。
 func ClientInfoInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	var clientIP, userID string
+	var clientIP string
 	if cl := ctx.Value("clientIP"); cl != nil {
 		if s, ok := cl.(string); ok {
 			clientIP = s
 		}
 	}
-	if uid := ctx.Value("userId"); uid != nil {
-		if s, ok := uid.(string); ok {
-			userID = s
-		}
-	}
+
+	id := identity.From(ctx)
 
 	md, ok := metadata.FromOutgoingContext(ctx)
 	if ok {
@@ -52,8 +55,20 @@ func ClientInfoInterceptor(ctx context.Context, method string, req, reply any, c
 	if clientIP != "" {
 		md.Set("clientIP", clientIP)
 	}
-	if userID != "" {
-		md.Set("userId", userID)
+	if id.UserID != "" {
+		md.Set("userId", id.UserID)
+	}
+	if id.ClientID != "" {
+		md.Set("clientId", id.ClientID)
+	}
+	switch id.Kind {
+	case identity.KindUser:
+		md.Set("kind", "user")
+	case identity.KindS2S:
+		md.Set("kind", "s2s")
+	}
+	if len(id.Scopes) > 0 {
+		md.Set("scopes", id.Scopes...)
 	}
 	if id := traceid.FromContext(ctx); id != "" {
 		md.Set(traceid.MetadataKey, id)

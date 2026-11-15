@@ -3,7 +3,6 @@ syntax = "v1"
 // 发送好友验证请求
 type (
 	AddFriendReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		FriendID string `json:"friendId"` // 要添加的好友用户ID
 		Verify   string `json:"verify,optional"` // 验证消息，可选
 		Source   string `json:"source"` // 添加好友来源：email(邮箱搜索)/qrcode(扫码)/userId(用户ID搜索)
@@ -17,7 +16,6 @@ type (
 // 获取好友列表
 type (
 	FriendListReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID
 		Page   int    `form:"page,optional"` // 页码，可选，默认1
 		Limit  int    `form:"limit,optional"` // 每页数量，可选，默认20
 	}
@@ -29,7 +27,6 @@ type (
 // 处理好友验证请求(同意/拒绝)
 type (
 	FriendValidStatusReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		VerifyID string `json:"verifyId"` // 验证记录ID
 		Status   int8   `json:"status"` // 处理状态：1(同意)/2(拒绝)
 	}
@@ -41,7 +38,6 @@ type (
 // 获取好友验证请求列表
 type (
 	ValidListReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID
 		Page   int    `json:"page,optional"` // 页码，可选，默认1
 		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
 	}
@@ -65,7 +61,6 @@ type (
 // 获取好友详细信息
 type (
 	FriendInfoReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		FriendID string `form:"friendId"` // 好友用户ID
 	}
 	FriendInfoRes {
@@ -84,7 +79,6 @@ type (
 // 修改好友备注
 type (
 	NoticeUpdateReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		FriendID string `json:"friendId"` // 好友用户ID
 		Notice   string `json:"notice"` // 新的备注内容
 	}
@@ -96,7 +90,6 @@ type (
 // 通过用户ID或邮箱搜索用户
 type (
 	SearchReq {
-		UserID  string `header:"Beaver-User-Id"` // 当前用户ID
 		Keyword string `form:"keyword"` // 搜索关键词（用户ID或邮箱）
 		Type    string `form:"type,optional"` // 搜索类型：userId(用户ID)/email(邮箱)，默认email
 	}
@@ -115,7 +108,6 @@ type (
 // 查询好友验证记录
 type (
 	SearchValidInfoReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		FriendID string `json:"friendId"` // 好友用户ID
 	}
 	SearchValidInfoRes {
@@ -170,7 +162,6 @@ type (
 // 删除好友
 type (
 	DeleteFriendReq {
-		UserID   string `header:"Beaver-User-Id"` // 当前用户ID
 		FriendID string `json:"friendId"` // 要删除的好友用户ID
 	}
 	DeleteFriendRes  {}
@@ -179,7 +170,6 @@ type (
 // 拉黑用户
 type (
 	BlockUserReq {
-		UserID        string `header:"Beaver-User-Id"` // 当前用户ID
 		BlockedUserID string `json:"blockedUserId"` // 被拉黑的用户ID
 	}
 	BlockUserRes  {}
@@ -188,7 +178,6 @@ type (
 // 取消拉黑
 type (
 	UnblockUserReq {
-		UserID        string `header:"Beaver-User-Id"` // 当前用户ID
 		BlockedUserID string `json:"blockedUserId"` // 要取消拉黑的用户ID
 	}
 	UnblockUserRes  {}
@@ -197,7 +186,6 @@ type (
 // 获取黑名单列表
 type (
 	BlockListReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID
 		Page   int    `form:"page,optional"` // 页码，可选，默认1
 		Limit  int    `form:"limit,optional"` // 每页数量，可选，默认20
 	}
@@ -215,6 +203,7 @@ type (
 
 @server (
 	group: friend
+	jwt: Auth
 )
 service relation {
 	@doc "发送好友验证请求"
@@ -385,6 +374,7 @@ type (
 
 @server (
 	group: friend_machine
+	middleware: AuthGate
 )
 service relation {
 	@doc "队间：取好友ID列表"

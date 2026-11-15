@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -53,7 +54,7 @@ func NewGroupMemberRemoveLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveReq) (resp *types.GroupMemberRemoveRes, err error) {
 	// 检查操作者权限
 	var operator group_models.GroupMemberModel
-	err = l.svcCtx.DB.Take(&operator, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&operator, "group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).Error
 	if err != nil {
 		return nil, errors.New("操作者不是群组成员")
 	}
@@ -158,7 +159,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
-				"senderId": req.UserID,
+				"senderId": identity.UserID(l.ctx),
 				"targetId": memberID,
 				"body": map[string]interface{}{
 					"tables": []map[string]interface{}{
@@ -178,7 +179,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		Text: "移除群成员成功",
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
-			"userId":  req.UserID,
+			"userId":  identity.UserID(l.ctx),
 			"count":   len(req.UserIds),
 		},
 	})

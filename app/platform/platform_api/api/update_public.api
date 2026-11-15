@@ -2,7 +2,6 @@ syntax = "v1"
 
 // ==================== 版本升级公开接口（无需认证，Gateway 白名单）====================
 type ReportVersionReq {
-	UserID     string `header:"Beaver-User-Id,optional"`
 	DeviceID   string `header:"deviceId"`
 	Version    string `header:"version"`
 	AppID      string `json:"appId"`
@@ -13,7 +12,6 @@ type ReportVersionReq {
 type ReportVersionRes {}
 
 type GetLatestVersionReq {
-	UserID     string `header:"Beaver-User-Id,optional"`
 	DeviceID   string `header:"deviceId"`
 	AppID      string `json:"appId"`
 	PlatformID uint   `json:"platformId"`

@@ -22,14 +22,15 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
 
-	"beaver/remote/circle"
-	circletype "beaver/types/remote/circle"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/remote/circle"
+	circletype "beaver/types/remote/circle"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -50,7 +51,7 @@ func NewGetSyncCircleInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetSyncCircleInfoLogic) GetSyncCircleInfo(req *types.GetSyncCircleInfoReq) (resp *types.GetSyncCircleInfoRes, err error) {
-	userId := req.UserID
+	userId := identity.UserID(l.ctx)
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

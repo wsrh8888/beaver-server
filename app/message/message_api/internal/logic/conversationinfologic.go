@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"strings"
@@ -54,7 +55,7 @@ func NewConversationInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq) (resp *types.ConversationInfoRes, err error) {
 	var userConversation message_models.ChatUserConversation
-	err = l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", req.ConversationID, req.UserID).First(&userConversation).Error
+	err = l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", req.ConversationID, identity.UserID(l.ctx)).First(&userConversation).Error
 
 	resp = &types.ConversationInfoRes{
 		ConversationID: req.ConversationID,
@@ -69,7 +70,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		l.logger.Error(model.LogMsg{
 			Text: "查询会话元数据失败",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"err":            metaErr.Error(),
 			},
@@ -86,7 +87,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		l.logger.Error(model.LogMsg{
 			Text: "查询会话关系失败",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"err":            err.Error(),
 			},
@@ -104,14 +105,14 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 		ids := strings.Split(req.ConversationID, "_")
 		opponentID := ""
 		if len(ids) >= 3 {
-			if ids[1] == req.UserID {
+			if ids[1] == identity.UserID(l.ctx) {
 				opponentID = ids[2]
 			} else {
 				opponentID = ids[1]
 			}
 		} else if len(ids) >= 2 {
 			opponentID = ids[0]
-			if ids[0] == req.UserID {
+			if ids[0] == identity.UserID(l.ctx) {
 				opponentID = ids[1]
 			}
 		}
@@ -122,7 +123,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			l.logger.Error(model.LogMsg{
 				Text: "获取对方用户信息失败",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"opponentId":     opponentID,
 					"err":            userErr.Error(),
@@ -134,7 +135,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			l.logger.Warn(model.LogMsg{
 				Text: "用户不存在",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"opponentId":     opponentID,
 				},
@@ -156,7 +157,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			l.logger.Error(model.LogMsg{
 				Text: "获取群组信息失败",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"groupId":        groupID,
 					"err":            groupErr.Error(),
@@ -168,7 +169,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 			l.logger.Warn(model.LogMsg{
 				Text: "群组不存在",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"groupId":        groupID,
 				},
@@ -184,7 +185,7 @@ func (l *ConversationInfoLogic) ConversationInfo(req *types.ConversationInfoReq)
 	l.logger.Info(model.LogMsg{
 		Text: "查询会话详情成功",
 		Data: map[string]any{
-			"userId":         req.UserID,
+			"userId":         identity.UserID(l.ctx),
 			"conversationId": req.ConversationID,
 			"chatType":       resp.ChatType,
 		},

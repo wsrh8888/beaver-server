@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -79,7 +80,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 	now := time.Now()
 	err = tx.Model(&request).Updates(map[string]interface{}{
 		"status":     req.Status,
-		"handled_by": req.UserID,
+		"handled_by": identity.UserID(l.ctx),
 		"handled_at": &now,
 	}).Error
 	if err != nil {
@@ -132,7 +133,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 			GroupID:    request.GroupID,
 			UserID:     request.ApplicantUserID,
 			ChangeType: "join",
-			OperatedBy: req.UserID,
+			OperatedBy: identity.UserID(l.ctx),
 			ChangeTime: now,
 		}
 		err = tx.Create(&changeLog).Error
@@ -178,11 +179,11 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 
 			// 推送给已存在的群成员 - 群成员变动通知
 			for _, member := range response.Members {
-				if member.UserID != req.UserID { // 不通知操作者自己
+				if member.UserID != identity.UserID(l.ctx) { // 不通知操作者自己
 					payload := map[string]interface{}{
 						"command":  wsCommandConst.GROUP_OPERATION,
 						"type":     wsTypeConst.GroupMemberReceive,
-						"senderId": req.UserID,
+						"senderId": identity.UserID(l.ctx),
 						"targetId": member.UserID,
 						"body": map[string]interface{}{
 							"table": "group_members",
@@ -203,7 +204,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
-				"senderId": req.UserID,
+				"senderId": identity.UserID(l.ctx),
 				"targetId": request.ApplicantUserID,
 				"body": map[string]interface{}{
 					"table": "group_members",
@@ -225,7 +226,7 @@ func (l *GroupJoinRequestHandleLogic) GroupJoinRequestHandle(req *types.GroupJoi
 		Data: map[string]interface{}{
 			"requestId": req.RequestID,
 			"groupId":   request.GroupID,
-			"userId":    req.UserID,
+			"userId":    identity.UserID(l.ctx),
 			"status":    req.Status,
 		},
 	})

@@ -43,7 +43,6 @@ type Msg struct {
 }
 
 type ProxySendMsgReq struct {
-	UserID         string                 `header:"Beaver-User-Id"`        // 发送者ID
 	Command        string                 `json:"command"`                 // 命令类型：send（发送）、recall（撤回）
 	TargetID       string                 `json:"targetId"`                // 目标ID（用户ID或群ID）
 	Type           string                 `json:"type"`                    // 消息类型
@@ -55,10 +54,9 @@ type ProxySendMsgRes struct {
 }
 
 type SendMsgReq struct {
-	UserID         string `header:"Beaver-User-Id"` // 发送者ID
-	ConversationID string `json:"conversationId"`   // 会话ID
-	MessageID      string `json:"messageId"`        // 客户端消息ID
-	Msg            string `json:"msg"`              // 消息内容
+	ConversationID string `json:"conversationId"` // 会话ID
+	MessageID      string `json:"messageId"`      // 客户端消息ID
+	Msg            string `json:"msg"`            // 消息内容
 }
 
 type SystemNotification struct {

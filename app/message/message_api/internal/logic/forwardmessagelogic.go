@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -59,7 +60,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 		l.logger.Error(model.LogMsg{
 			Text: "获取待转发消息失败",
 			Data: map[string]any{
-				"userId":   req.UserID,
+				"userId":   identity.UserID(l.ctx),
 				"targetId": req.TargetID,
 				"err":      err.Error(),
 			},
@@ -71,7 +72,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 		l.logger.Warn(model.LogMsg{
 			Text: "未找到可转发消息",
 			Data: map[string]any{
-				"userId":     req.UserID,
+				"userId":     identity.UserID(l.ctx),
 				"targetId":   req.TargetID,
 				"messageIds": req.MessageIDs,
 			},
@@ -88,7 +89,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 
 			// 调用 RPC 发送消息 (复用发送逻辑)
 			_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-				UserId:         req.UserID,
+				UserId:         identity.UserID(l.ctx),
 				ConversationId: req.TargetID,
 				MessageId:      newMsgID,
 				Msg:            l.convertModelToProtoMsg(m.Msg),
@@ -98,7 +99,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 				l.logger.Error(model.LogMsg{
 					Text: "逐条转发失败",
 					Data: map[string]any{
-						"userId":          req.UserID,
+						"userId":          identity.UserID(l.ctx),
 						"targetId":        req.TargetID,
 						"originMessageId": m.MessageID,
 						"err":             err.Error(),
@@ -111,7 +112,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			l.logger.Warn(model.LogMsg{
 				Text: "逐条转发部分失败",
 				Data: map[string]any{
-					"userId":       req.UserID,
+					"userId":       identity.UserID(l.ctx),
 					"targetId":     req.TargetID,
 					"messageCount": len(originMessages),
 					"failCount":    failCount,
@@ -131,7 +132,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			l.logger.Error(model.LogMsg{
 				Text: "创建合并转发详情失败",
 				Data: map[string]any{
-					"userId":   req.UserID,
+					"userId":   identity.UserID(l.ctx),
 					"targetId": req.TargetID,
 					"recordId": recordID,
 					"err":      err.Error(),
@@ -147,7 +148,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 		}
 
 		_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-			UserId:         req.UserID,
+			UserId:         identity.UserID(l.ctx),
 			ConversationId: req.TargetID,
 			MessageId:      uuid.New().String(),
 			Msg: &chat_rpc.Msg{
@@ -163,7 +164,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 			l.logger.Error(model.LogMsg{
 				Text: "发送合并转发卡片失败",
 				Data: map[string]any{
-					"userId":   req.UserID,
+					"userId":   identity.UserID(l.ctx),
 					"targetId": req.TargetID,
 					"recordId": recordID,
 					"err":      err.Error(),
@@ -176,7 +177,7 @@ func (l *ForwardMessageLogic) ForwardMessage(req *types.ForwardMessageReq) (resp
 	l.logger.Info(model.LogMsg{
 		Text: "消息转发成功",
 		Data: map[string]any{
-			"userId":       req.UserID,
+			"userId":       identity.UserID(l.ctx),
 			"targetId":     req.TargetID,
 			"forwardMode":  req.ForwardMode,
 			"messageCount": len(originMessages),

@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/relation/relation_api/internal/svc"
@@ -61,23 +62,23 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 	offset := (page - 1) * limit
 
 	// 查询用户加入的群组
-	err = l.svcCtx.DB.Where("user_id = ? AND status = ?", req.UserID, 1).
+	err = l.svcCtx.DB.Where("user_id = ? AND status = ?", identity.UserID(l.ctx), 1).
 		Order("join_time DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&groupMembers).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询用户群组失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询用户群组失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, err
 	}
 
 	// 获取总数
 	var total int64
 	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
-		Where("user_id = ? AND status = ?", req.UserID, 1).
+		Where("user_id = ? AND status = ?", identity.UserID(l.ctx), 1).
 		Count(&total).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取用户群组总数失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取用户群组总数失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, err
 	}
 
@@ -118,6 +119,6 @@ func (l *GroupMineLogic) GroupMine(req *types.GroupMineReq) (resp *types.GroupMi
 		Count: int(total),
 	}
 
-	l.logger.Info(model.LogMsg{Text: "获取用户群组列表完成", Data: map[string]interface{}{"userId": req.UserID, "count": len(groupItems)}})
+	l.logger.Info(model.LogMsg{Text: "获取用户群组列表完成", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(groupItems)}})
 	return resp, nil
 }

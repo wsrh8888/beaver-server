@@ -30,6 +30,7 @@ import (
 	"beaver/app/relation/relation_rpc/client/group"
 	"beaver/app/relation/relation_rpc/types"
 	"beaver/app/ws/ws_api/internal/config"
+	"beaver/app/ws/ws_api/internal/middleware"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
@@ -37,6 +38,7 @@ import (
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -49,6 +51,9 @@ type ServiceContext struct {
 	ChatRpc    chat_rpc.ChatClient
 	RocketMQ   *corerocketmq.Client
 	InstanceID string
+	// AuthGate 由 .api 的 `middleware: AuthGate` 声明接线，供 goctl 生成的
+	// rest.WithMiddlewares 注入。
+	AuthGate rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -65,6 +70,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ChatRpc:    chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		RocketMQ:   mqClient,
 		InstanceID: buildInstanceID(c.InstanceID),
+		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
 	}
 }
 

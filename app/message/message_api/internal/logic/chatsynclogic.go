@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"encoding/json"
 	"time"
@@ -54,7 +55,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 	// 过滤掉当前用户主动删除的消息
 	deleteSubQuery := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).
 		Select("message_id").
-		Where("user_id = ?", req.UserID)
+		Where("user_id = ?", identity.UserID(l.ctx))
 
 	// 构建基础查询条件 - 查询指定seq范围的消息（包含起始seq）
 	var query = l.svcCtx.DB.Where("seq >= ? AND seq <= ? AND message_id NOT IN (?)", req.FromSeq, req.ToSeq, deleteSubQuery)
@@ -67,7 +68,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 		// 通过子查询获取用户参与的所有会话ID（包括已删除的）
 		subQuery := l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
 			Select("conversation_id").
-			Where("user_id = ?", req.UserID)
+			Where("user_id = ?", identity.UserID(l.ctx))
 
 		query = query.Where("conversation_id IN (?)", subQuery)
 	}
@@ -84,7 +85,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 		l.logger.Error(model.LogMsg{
 			Text: "查询聊天同步数据失败",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"fromSeq":        req.FromSeq,
 				"toSeq":          req.ToSeq,
@@ -114,7 +115,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 				l.logger.Error(model.LogMsg{
 					Text: "消息内容序列化失败",
 					Data: map[string]any{
-						"userId":    req.UserID,
+						"userId":    identity.UserID(l.ctx),
 						"messageId": chat.MessageID,
 						"err":       err.Error(),
 					},
@@ -167,7 +168,7 @@ func (l *ChatSyncLogic) ChatSync(req *types.ChatSyncReq) (resp *types.ChatSyncRe
 	l.logger.Info(model.LogMsg{
 		Text: "聊天同步完成",
 		Data: map[string]any{
-			"userId":         req.UserID,
+			"userId":         identity.UserID(l.ctx),
 			"conversationId": req.ConversationID,
 			"count":          len(messages),
 			"hasMore":        hasMore,

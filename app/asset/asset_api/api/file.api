@@ -1,7 +1,6 @@
 syntax = "v1"
 
 type FileReq {
-	UserID string `header:"Beaver-User-Id"`
 }
 
 type FileRes {
@@ -46,7 +45,13 @@ service asset {
 	@doc "文件预览"
 	@handler Preview
 	get /api/file/preview/:fileKey (PreviewReq) returns (PreviewRes)
+}
 
+@server (
+	group: file
+	jwt: Auth
+)
+service asset {
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
 	post /api/file/v1/uploadQiniu (FileReq) returns (FileRes)
@@ -157,6 +162,7 @@ type (
 
 @server (
 	group: file_machine
+	middleware: AuthGate
 )
 service asset {
 	@doc "队间：登记文件记录"

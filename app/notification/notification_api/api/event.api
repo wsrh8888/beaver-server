@@ -27,6 +27,9 @@ type (
 	}
 )
 
+@server (
+	jwt: Auth
+)
 service notification {
 	@doc "按ID拉取通知事件明细（数据库同步）"
 	@handler getEventsByIds

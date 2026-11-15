@@ -5,7 +5,6 @@ syntax = "v1"
 // 同步 Agent 会话（消息游标摘要；since=0 全量，>0 增量）
 type (
 	GetSyncAgentConversationsReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Since  int64  `json:"since,optional"` // 会话 version 游标，只返回 version > since；不传或 0 则全量
 		Module string `json:"module,optional"` // 入口模块：workspace/chat/circle/moment，不传则不过滤
 		Limit  int32  `json:"limit,optional"` // 分页大小，默认 100，最大 200
@@ -27,6 +26,9 @@ type (
 	}
 )
 
+@server (
+	jwt: Auth
+)
 service datasync {
 	@doc "获取 Agent 会话版本摘要（增量/全量游标）"
 	@handler getSyncAgentConversations

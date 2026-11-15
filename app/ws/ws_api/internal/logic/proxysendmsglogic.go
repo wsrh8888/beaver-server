@@ -24,11 +24,13 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
 	type_struct "beaver/app/ws/ws_api/types"
+	"beaver/common/identity"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	beaverlog "beaver/utils/beaverlog"
@@ -50,6 +52,10 @@ func NewProxySendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Prox
 }
 
 func (l *ProxySendMsgLogic) ProxySendMsg(req *types.ProxySendMsgReq) (resp *types.ProxySendMsgRes, err error) {
+	if !identity.RequireMachine(l.ctx) {
+		return nil, errors.New("仅允许队间机器调用")
+	}
+
 	bodyBytes, err := json.Marshal(req.Body)
 	if err != nil {
 		l.logger.Error(model.LogMsg{

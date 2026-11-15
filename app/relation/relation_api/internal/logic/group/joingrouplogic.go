@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"encoding/json"
 	"errors"
@@ -98,11 +99,11 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 
 	// 检查用户是否已经是群成员
 	var existingMember group_models.GroupMemberModel
-	err = l.svcCtx.DB.Where("group_id = ? AND user_id = ?", req.GroupID, req.UserID).First(&existingMember).Error
+	err = l.svcCtx.DB.Where("group_id = ? AND user_id = ?", req.GroupID, identity.UserID(l.ctx)).First(&existingMember).Error
 	if err == nil {
 		// 用户已经是群成员
 		if existingMember.Status == 1 {
-			l.logger.Error(model.LogMsg{Text: "用户已经是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID}})
+			l.logger.Error(model.LogMsg{Text: "用户已经是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx)}})
 			return nil, err
 		} else {
 			// 用户之前被踢出，现在重新加入
@@ -117,7 +118,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				"version":   memberVersion,
 			}).Error
 			if err != nil {
-				l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+				l.logger.Error(model.LogMsg{Text: "更新群成员状态失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 				return nil, err
 			}
 
@@ -136,14 +137,14 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 
 			joinRequest := group_models.GroupJoinRequestModel{
 				GroupID:         req.GroupID,
-				ApplicantUserID: req.UserID,
+				ApplicantUserID: identity.UserID(l.ctx),
 				Message:         req.Message,
 				Status:          0, // 待审核
 				Version:         requestVersion,
 			}
 			err = l.svcCtx.DB.Create(&joinRequest).Error
 			if err != nil {
-				l.logger.Error(model.LogMsg{Text: "创建入群申请失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+				l.logger.Error(model.LogMsg{Text: "创建入群申请失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 				return nil, err
 			}
 
@@ -157,7 +158,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				Text: "入群申请提交成功",
 				Data: map[string]interface{}{
 					"groupId": req.GroupID,
-					"userId":  req.UserID,
+					"userId":  identity.UserID(l.ctx),
 				},
 			})
 
@@ -182,13 +183,13 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 				payload, _ := json.Marshal(map[string]interface{}{
 					"requestId": requestVersion,
 					"groupId":   req.GroupID,
-					"userId":    req.UserID,
+					"userId":    identity.UserID(l.ctx),
 					"message":   req.Message,
 				})
 				_, err = l.svcCtx.NotifyRpc.PushEvent(ctx, &notification_rpc.PushEventReq{
 					EventType:   notification_models.EventTypeGroupJoinRequest,
 					Category:    notification_models.CategoryGroup,
-					FromUserId:  req.UserID,
+					FromUserId:  identity.UserID(l.ctx),
 					TargetId:    req.GroupID,
 					TargetType:  notification_models.TargetTypeGroup,
 					PayloadJson: string(payload),
@@ -212,7 +213,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			// 直接加入
 			member := group_models.GroupMemberModel{
 				GroupID:  req.GroupID,
-				UserID:   req.UserID,
+				UserID:   identity.UserID(l.ctx),
 				Role:     3, // 普通成员
 				Status:   1, // 正常状态
 				JoinTime: time.Now(),
@@ -220,7 +221,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			}
 			err = l.svcCtx.DB.Create(&member).Error
 			if err != nil {
-				l.logger.Error(model.LogMsg{Text: "添加群成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+				l.logger.Error(model.LogMsg{Text: "添加群成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 				return nil, err
 			}
 
@@ -229,14 +230,14 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			// 记录群成员变更日志
 			changeLog := group_models.GroupMemberChangeLogModel{
 				GroupID:    req.GroupID,
-				UserID:     req.UserID,
+				UserID:     identity.UserID(l.ctx),
 				ChangeType: "join",
-				OperatedBy: req.UserID,
+				OperatedBy: identity.UserID(l.ctx),
 				ChangeTime: time.Now(),
 			}
 			err = l.svcCtx.DB.Create(&changeLog).Error
 			if err != nil {
-				l.logger.Error(model.LogMsg{Text: "记录群成员变更日志失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+				l.logger.Error(model.LogMsg{Text: "记录群成员变更日志失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 				return nil, err
 			}
 		}
@@ -253,12 +254,12 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 
 	// 更新新成员的会话记录（对标 groupmemberadd）
 	_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
-		UserIds:        []string{req.UserID},
+		UserIds:        []string{identity.UserID(l.ctx)},
 		ConversationId: "group_" + req.GroupID,
 		LastMessage:    "",
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "更新新成员会话记录失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "更新新成员会话记录失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 	}
 
 	// 异步通知群成员
@@ -270,10 +271,10 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		if _, err := l.svcCtx.ChatRpc.SendNotificationMessage(ctx, &chat_rpc.SendNotificationMessageReq{
 			ConversationId: conversationID,
 			MessageType:    3,
-			Content:        fmt.Sprintf("%s 加入了群聊", req.UserID),
-			RelatedUserId:  req.UserID,
+			Content:        fmt.Sprintf("%s 加入了群聊", identity.UserID(l.ctx)),
+			RelatedUserId:  identity.UserID(l.ctx),
 		}); err != nil {
-			l.logger.Error(model.LogMsg{Text: "发送入群通知消息失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "发送入群通知消息失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 		}
 
 		response, err := l.svcCtx.GroupRpc.GetGroupMembers(ctx, &relationtypes.GetGroupMembersReq{
@@ -293,17 +294,17 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 			{
 				"version": memberVersion,
 				"groupId": req.GroupID,
-				"userId":  req.UserID,
+				"userId":  identity.UserID(l.ctx),
 			},
 		}
 
 		// 1. 通知已在群的成员：group_members 变化
 		for _, member := range response.Members {
-			if member.UserID != req.UserID {
+			if member.UserID != identity.UserID(l.ctx) {
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.GROUP_OPERATION,
 					"type":     wsTypeConst.GroupMemberReceive,
-					"senderId": req.UserID,
+					"senderId": identity.UserID(l.ctx),
 					"targetId": member.UserID,
 					"body": map[string]interface{}{
 						"tables": []map[string]interface{}{
@@ -342,8 +343,8 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		joinerPayload := map[string]interface{}{
 			"command":  wsCommandConst.GROUP_OPERATION,
 			"type":     wsTypeConst.GroupMemberReceive,
-			"senderId": req.UserID,
-			"targetId": req.UserID,
+			"senderId": identity.UserID(l.ctx),
+			"targetId": identity.UserID(l.ctx),
 			"body": map[string]interface{}{
 				"tables": joinerTables,
 			},
@@ -352,7 +353,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		l.svcCtx.RocketMQ.SendMessage(ctx, mqwsconst.MqTopicWs, joinerPayload)
 
 		// 3. 触发开放平台 Webhook 事件(群成员变更)
-		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, []string{req.UserID}, "added")
+		l.triggerOpenPlatformWebhook(req.GroupID, identity.UserID(l.ctx), []string{identity.UserID(l.ctx)}, "added")
 	}()
 
 	resp = &types.GroupJoinRes{
@@ -367,7 +368,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 		Text: "加入群组成功",
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
-			"userId":  req.UserID,
+			"userId":  identity.UserID(l.ctx),
 		},
 	})
 	return resp, nil

@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -50,17 +51,17 @@ func NewGetSyncFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 func (l *GetSyncFriendsLogic) GetSyncFriends(req *types.GetSyncFriendsReq) (resp *types.GetSyncFriendsRes, err error) {
 	// 调用Friend RPC获取好友版本信息
 	friendResp, err := l.svcCtx.FriendRpc.GetFriendVersions(l.ctx, &relationtypes.GetFriendVersionsReq{
-		UserId: req.UserID,
+		UserId: identity.UserID(l.ctx),
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取好友版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取好友版本信息失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "查询好友版本信息完成",
-		Data: map[string]interface{}{"userId": req.UserID, "count": len(friendResp.FriendVersions)},
+		Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(friendResp.FriendVersions)},
 	})
 
 	// 转换为响应格式，确保返回空数组而不是null

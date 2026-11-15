@@ -22,14 +22,15 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
 
+	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/types"
-	accttypes "beaver/app/account/account_rpc/types"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -50,7 +51,7 @@ func NewGetSyncAllUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 }
 
 func (l *GetSyncAllUsersLogic) GetSyncAllUsers(req *types.GetSyncAllUsersReq) (resp *types.GetSyncAllUsersRes, err error) {
-	userId := req.UserID
+	userId := identity.UserID(l.ctx)
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

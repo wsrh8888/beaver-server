@@ -29,8 +29,8 @@ type AgentConversationVersionItem struct {
 	Title          string `json:"title"`          // 会话标题
 	UpdatedAt      int64  `json:"updatedAt"`      // 更新时间毫秒
 	Preview        string `json:"preview"`        // 最新消息预览
-	Module         string `json:"module"`      // 入口模块
-	WorkspaceId    string `json:"workspaceId"` // 本机空间 id；空=云端轻会话
+	Module         string `json:"module"`         // 入口模块
+	WorkspaceId    string `json:"workspaceId"`    // 本机空间 id；空=云端轻会话
 }
 
 type ChatConversationVersionItem struct {
@@ -89,10 +89,9 @@ type FriendVersionItem struct {
 }
 
 type GetSyncAgentConversationsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 会话 version 游标，只返回 version > since；不传或 0 则全量
-	Module string `json:"module,optional"`  // 入口模块：workspace/chat/circle/moment，不传则不过滤
-	Limit  int32  `json:"limit,optional"`   // 分页大小，默认 100，最大 200
+	Since  int64  `json:"since,optional"`  // 会话 version 游标，只返回 version > since；不传或 0 则全量
+	Module string `json:"module,optional"` // 入口模块：workspace/chat/circle/moment，不传则不过滤
+	Limit  int32  `json:"limit,optional"`  // 分页大小，默认 100，最大 200
 }
 
 type GetSyncAgentConversationsRes struct {
@@ -102,9 +101,8 @@ type GetSyncAgentConversationsRes struct {
 }
 
 type GetSyncAllUsersReq struct {
-	Type   string `json:"type,optional"`    // 类型：friends/group/all，不传或为空则同步所有相关用户
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+	Type  string `json:"type,optional"`  // 类型：friends/group/all，不传或为空则同步所有相关用户
+	Since int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 }
 
 type GetSyncAllUsersRes struct {
@@ -113,8 +111,7 @@ type GetSyncAllUsersRes struct {
 }
 
 type GetSyncChatConversationsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncChatConversationsRes struct {
@@ -123,8 +120,7 @@ type GetSyncChatConversationsRes struct {
 }
 
 type GetSyncChatMessagesReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个序列号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个序列号之后开始同步，不传则同步所有
 }
 
 type GetSyncChatMessagesRes struct {
@@ -133,8 +129,7 @@ type GetSyncChatMessagesRes struct {
 }
 
 type GetSyncChatUserConversationsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncChatUserConversationsRes struct {
@@ -143,8 +138,7 @@ type GetSyncChatUserConversationsRes struct {
 }
 
 type GetSyncCircleInfoReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncCircleInfoRes struct {
@@ -153,8 +147,7 @@ type GetSyncCircleInfoRes struct {
 }
 
 type GetSyncDeletedMessagesReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步
+	Since int64 `json:"since,optional"` // 从这个时间戳之后开始同步
 }
 
 type GetSyncDeletedMessagesRes struct {
@@ -163,8 +156,7 @@ type GetSyncDeletedMessagesRes struct {
 }
 
 type GetSyncEmojiCollectsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 }
 
 type GetSyncEmojiCollectsRes struct {
@@ -176,8 +168,7 @@ type GetSyncEmojiCollectsRes struct {
 }
 
 type GetSyncEmojisReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 }
 
 type GetSyncEmojisRes struct {
@@ -186,8 +177,7 @@ type GetSyncEmojisRes struct {
 }
 
 type GetSyncFriendVerifiesReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncFriendVerifiesRes struct {
@@ -196,8 +186,7 @@ type GetSyncFriendVerifiesRes struct {
 }
 
 type GetSyncFriendsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncFriendsRes struct {
@@ -206,8 +195,7 @@ type GetSyncFriendsRes struct {
 }
 
 type GetSyncGroupInfoReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncGroupInfoRes struct {
@@ -216,8 +204,7 @@ type GetSyncGroupInfoRes struct {
 }
 
 type GetSyncGroupMembersReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncGroupMembersRes struct {
@@ -226,8 +213,7 @@ type GetSyncGroupMembersRes struct {
 }
 
 type GetSyncGroupRequestsReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个版本号之后开始同步，不传则同步所有
+	Since int64 `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 }
 
 type GetSyncGroupRequestsRes struct {
@@ -236,8 +222,7 @@ type GetSyncGroupRequestsRes struct {
 }
 
 type GetSyncMessageMediasReq struct {
-	UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
-	Since  int64  `json:"since,optional"`   // 从这个时间戳之后开始同步
+	Since int64 `json:"since,optional"` // 从这个时间戳之后开始同步
 }
 
 type GetSyncMessageMediasRes struct {
@@ -257,9 +242,8 @@ type GetSyncNotificationEventsRes struct {
 }
 
 type GetSyncNotificationInboxesReq struct {
-	UserID       string `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
-	SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
-	Limit        int32  `json:"limit,optional"`        // 可选分页大小
+	SinceVersion int64 `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
+	Limit        int32 `json:"limit,optional"`        // 可选分页大小
 }
 
 type GetSyncNotificationInboxesRes struct {
@@ -269,8 +253,7 @@ type GetSyncNotificationInboxesRes struct {
 }
 
 type GetSyncNotificationReadCursorsReq struct {
-	UserID       string `header:"Beaver-User-Id"`      // 用户ID，从请求头获取
-	SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
+	SinceVersion int64 `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
 }
 
 type GetSyncNotificationReadCursorsRes struct {

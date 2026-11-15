@@ -22,6 +22,7 @@
 package workbench
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"sort"
@@ -63,7 +64,7 @@ func workbenchCategoryName(category int) string {
 }
 
 func (l *ListWorkbenchAppsLogic) ListWorkbenchApps(req *types.ListWorkbenchAppsReq) (*types.ListWorkbenchAppsRes, error) {
-	if req.UserID == "" {
+	if identity.UserID(l.ctx) == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -71,7 +72,7 @@ func (l *ListWorkbenchAppsLogic) ListWorkbenchApps(req *types.ListWorkbenchAppsR
 		ClientScope: int32(req.ClientScope),
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取工作台应用列表失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取工作台应用列表失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, errors.New("获取工作台应用列表失败")
 	}
 

@@ -21,12 +21,13 @@
 package main
 
 import (
+	"beaver/common/zrpc_interceptor"
 	"flag"
 	"fmt"
 
 	"beaver/app/asset/asset_rpc/internal/config"
-	fileServer "beaver/app/asset/asset_rpc/internal/server/file"
 	emojiServer "beaver/app/asset/asset_rpc/internal/server/emoji"
+	fileServer "beaver/app/asset/asset_rpc/internal/server/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
 	"beaver/app/asset/asset_rpc/types"
 
@@ -57,6 +58,9 @@ func main() {
 		}
 	})
 	defer s.Stop()
+
+	// 还原 HTTP 面验签后的身份结论，rpc logic 只从 context 取。
+	s.AddUnaryInterceptors(zrpc_interceptor.IdentityServerInterceptor)
 
 	fmt.Printf("Starting rpc server at %s...", c.ListenOn)
 	s.Start()

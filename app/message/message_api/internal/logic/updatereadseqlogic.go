@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -58,7 +59,7 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 	if req.ConversationID == "" {
 		l.logger.Warn(model.LogMsg{
 			Text: "会话ID为空",
-			Data: map[string]any{"userId": req.UserID},
+			Data: map[string]any{"userId": identity.UserID(l.ctx)},
 		})
 		return nil, errors.New("ConversationID不能为空")
 	}
@@ -66,7 +67,7 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 		l.logger.Warn(model.LogMsg{
 			Text: "已读序列号非法",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"readSeq":        req.ReadSeq,
 			},
@@ -75,13 +76,13 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 	}
 
 	var userConvo message_models.ChatUserConversation
-	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", req.ConversationID, req.UserID).First(&userConvo).Error
+	err := l.svcCtx.DB.Where("conversation_id = ? AND user_id = ?", req.ConversationID, identity.UserID(l.ctx)).First(&userConvo).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
+			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", identity.UserID(l.ctx))
 			userConvo = message_models.ChatUserConversation{
-				UserID:         req.UserID,
+				UserID:         identity.UserID(l.ctx),
 				ConversationID: req.ConversationID,
 				IsHidden:       false,
 				IsPinned:       false,
@@ -93,7 +94,7 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 				l.logger.Error(model.LogMsg{
 					Text: "创建用户会话关系失败",
 					Data: map[string]any{
-						"userId":         req.UserID,
+						"userId":         identity.UserID(l.ctx),
 						"conversationId": req.ConversationID,
 						"err":            err.Error(),
 					},
@@ -103,18 +104,18 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 			l.logger.Info(model.LogMsg{
 				Text: "创建用户会话关系并设置已读序列号",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"readSeq":        req.ReadSeq,
 				},
 			})
-			go l.notifyReadSeqUpdate(req.UserID, req.ConversationID, version)
-			go l.notifyPeerReadSeq(req.UserID, req.ConversationID, req.ReadSeq)
+			go l.notifyReadSeqUpdate(identity.UserID(l.ctx), req.ConversationID, version)
+			go l.notifyPeerReadSeq(identity.UserID(l.ctx), req.ConversationID, req.ReadSeq)
 		} else {
 			l.logger.Error(model.LogMsg{
 				Text: "查询用户会话关系失败",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"err":            err.Error(),
 				},
@@ -123,7 +124,7 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 		}
 	} else {
 		if req.ReadSeq > userConvo.UserReadSeq {
-			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
+			version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", identity.UserID(l.ctx))
 			err = l.svcCtx.DB.Model(&userConvo).
 				Updates(map[string]interface{}{
 					"user_read_seq": req.ReadSeq,
@@ -134,7 +135,7 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 				l.logger.Error(model.LogMsg{
 					Text: "更新已读序列号失败",
 					Data: map[string]any{
-						"userId":         req.UserID,
+						"userId":         identity.UserID(l.ctx),
 						"conversationId": req.ConversationID,
 						"readSeq":        req.ReadSeq,
 						"err":            err.Error(),
@@ -145,20 +146,20 @@ func (l *UpdateReadSeqLogic) UpdateReadSeq(req *types.UpdateReadSeqReq) (*types.
 			l.logger.Info(model.LogMsg{
 				Text: "更新已读序列号成功",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"readSeq":        req.ReadSeq,
 					"oldReadSeq":     userConvo.UserReadSeq,
 				},
 			})
 
-			go l.notifyReadSeqUpdate(req.UserID, req.ConversationID, version)
-			go l.notifyPeerReadSeq(req.UserID, req.ConversationID, req.ReadSeq)
+			go l.notifyReadSeqUpdate(identity.UserID(l.ctx), req.ConversationID, version)
+			go l.notifyPeerReadSeq(identity.UserID(l.ctx), req.ConversationID, req.ReadSeq)
 		} else {
 			l.logger.Info(model.LogMsg{
 				Text: "已读序列号无需更新",
 				Data: map[string]any{
-					"userId":         req.UserID,
+					"userId":         identity.UserID(l.ctx),
 					"conversationId": req.ConversationID,
 					"currentReadSeq": userConvo.UserReadSeq,
 					"requestReadSeq": req.ReadSeq,

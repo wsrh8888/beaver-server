@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -52,7 +53,7 @@ func NewMarkReadByCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *MarkReadByCategoryLogic) MarkReadByCategory(req *types.MarkReadByCategoryReq) (resp *types.MarkReadByCategoryRes, err error) {
-	userId := req.UserID
+	userId := identity.UserID(l.ctx)
 	category := req.Category
 
 	now := time.Now()

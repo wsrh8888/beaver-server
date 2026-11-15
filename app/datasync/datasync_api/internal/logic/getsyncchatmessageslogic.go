@@ -22,13 +22,14 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
 
-	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/app/message/message_rpc/types/chat_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -49,7 +50,7 @@ func NewGetSyncChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *GetSyncChatMessagesLogic) GetSyncChatMessages(req *types.GetSyncChatMessagesReq) (resp *types.GetSyncChatMessagesRes, err error) {
-	userId := req.UserID
+	userId := identity.UserID(l.ctx)
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

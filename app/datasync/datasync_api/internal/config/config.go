@@ -49,4 +49,8 @@ type Config struct {
 	// RemoteProxy 出站 S2S 端点注册表：只登记其它团队（social / agent）的入口。
 	// 本面只做增量同步，不承接 A 主体业务能力，也不对外提供业务门面。
 	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
+	Auth        struct {
+		AccessSecret string
+		AccessExpire int
+	}
 }

@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -78,7 +79,7 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 	}
 
 	var member group_models.GroupMemberModel
-	if l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", req.GroupID, req.UserID).First(&member).Error == nil {
+	if l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", req.GroupID, identity.UserID(l.ctx)).First(&member).Error == nil {
 		var invite group_models.GroupInviteLinkModel
 		if e := l.svcCtx.DB.Where("group_id = ? AND status = 1", group.GroupID).Order("id asc").First(&invite).Error; e == nil {
 			domain := strings.TrimRight(strings.TrimSpace(l.svcCtx.Config.Domain), "/")

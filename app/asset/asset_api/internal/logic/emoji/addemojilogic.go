@@ -23,6 +23,7 @@ package logic
 
 import (
 	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -85,16 +86,16 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 	}
 
 	// 生成收藏版本号（按用户ID分区）
-	collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
+	collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", identity.UserID(l.ctx))
 	if collectVersion == -1 {
-		l.logger.Error(model.LogMsg{Text: "生成收藏版本号失败", Data: map[string]interface{}{"userId": req.UserID}})
+		l.logger.Error(model.LogMsg{Text: "生成收藏版本号失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx)}})
 		return nil, errors.New("生成版本号失败")
 	}
 
 	// 添加表情并收藏
 	favoriteEmoji := emoji_models.EmojiCollectEmoji{
 		EmojiCollectID: uuid.New().String(),
-		UserID:         req.UserID,
+		UserID:         identity.UserID(l.ctx),
 		EmojiID:        emoji.EmojiID,
 		Version:        collectVersion,
 		PackageID:      req.PackageID,
@@ -102,13 +103,13 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 
 	// 去重：同一用户对同一 emoji 已收藏则跳过创建
 	var existFavorite emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", req.UserID, emoji.EmojiID).First(&existFavorite).Error
+	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", identity.UserID(l.ctx), emoji.EmojiID).First(&existFavorite).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		if err := l.svcCtx.DB.Create(&favoriteEmoji).Error; err != nil {
-			l.logger.Error(model.LogMsg{Text: "收藏表情失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": emoji.EmojiID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "收藏表情失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": emoji.EmojiID, "err": err.Error()}})
 			return nil, err
 		}
 
@@ -153,13 +154,13 @@ func (l *AddEmojiLogic) AddEmoji(req *types.AddEmojiReq) (resp *types.AddEmojiRe
 				"conversationId": "",
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
-		}(l.svcCtx.Config.Etcd, req.UserID, favoriteEmoji.EmojiCollectID, collectVersion, emoji.Version)
+		}(l.svcCtx.Config.Etcd, identity.UserID(l.ctx), favoriteEmoji.EmojiCollectID, collectVersion, emoji.Version)
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "表情收藏成功",
 		Data: map[string]interface{}{
-			"userId":  req.UserID,
+			"userId":  identity.UserID(l.ctx),
 			"emojiId": emoji.EmojiID,
 		},
 	})

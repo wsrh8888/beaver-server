@@ -168,6 +168,10 @@ func (p Proxy) jwtAuth(req *http.Request) (ok bool, errMsg string) {
 		return false, "网关鉴权失败"
 	}
 
+	// 归一成标准 Authorization: Bearer：业务面 go-zero 内置 `jwt: Auth`
+	// 只从该头取令牌，网关侧统一完成载体转换。
+	req.Header.Set("Authorization", "Bearer "+token)
+
 	claims, err := jwts.ParseToken(token, p.Config.Auth.AccessSecret)
 	if err != nil {
 		apiGwLogger.Error(model.LogMsg{Text: "JWT解析失败", Data: map[string]interface{}{"err": err.Error()}})
@@ -310,8 +314,11 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	token := getToken(req)
-	req.Header.Set("Token", token)
+	// 入站先无条件清掉外部可能伪造的身份头；身份只由网关验签后重建，
+	// 业务面 .api 中间件再验一次并写入 context（纵深双验，算法同源）。
+	req.Header.Del("Beaver-User-Id")
+	req.Header.Del(jwt.HeaderClientID)
+
 	ok, authErrMsg := p.auth(req)
 	if !ok {
 		writeErrorResponse(rec, authErrMsg, http.StatusUnauthorized, serverTrace)

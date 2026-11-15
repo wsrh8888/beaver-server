@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/account/account_api/internal/svc"
@@ -48,12 +49,12 @@ func NewUpdateUserSettingsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateUserSettingsLogic) UpdateUserSettings(req *types.UpdateUserSettingsReq) (*types.UpdateUserSettingsRes, error) {
-	setting, err := l.getOrCreateUserSetting(req.UserID)
+	setting, err := l.getOrCreateUserSetting(identity.UserID(l.ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	defaults := user_models.DefaultUserSetting(req.UserID).SettingInfo
+	defaults := user_models.DefaultUserSetting(identity.UserID(l.ctx)).SettingInfo
 	if setting.SettingInfo == nil {
 		setting.SettingInfo = defaults
 	}
@@ -112,7 +113,7 @@ func (l *UpdateUserSettingsLogic) UpdateUserSettings(req *types.UpdateUserSettin
 
 	l.logger.Info(model.LogMsg{
 		Text: "用户设置更新成功",
-		Data: map[string]interface{}{"userId": req.UserID},
+		Data: map[string]interface{}{"userId": identity.UserID(l.ctx)},
 	})
 	return &types.UpdateUserSettingsRes{}, nil
 }

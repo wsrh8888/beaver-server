@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -56,7 +57,7 @@ func NewGroupMemberAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gr
 func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp *types.GroupMemberAddRes, err error) {
 	// 群成员邀请好友，isInvite 为true
 	var member group_models.GroupMemberModel
-	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).Error
 
 	if err != nil {
 		return nil, errors.New("用户不是群组成员")
@@ -219,7 +220,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.GROUP_OPERATION,
 					"type":     wsTypeConst.GroupMemberReceive,
-					"senderId": req.UserID,
+					"senderId": identity.UserID(l.ctx),
 					"targetId": member.UserID,
 					"body": map[string]interface{}{
 						"tables": []map[string]interface{}{
@@ -240,7 +241,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
-				"senderId": req.UserID,
+				"senderId": identity.UserID(l.ctx),
 				"targetId": newMemberID,
 				"body": map[string]interface{}{
 					"tables": []map[string]interface{}{
@@ -265,7 +266,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		}
 
 		// 3. 触发开放平台 Webhook 事件(群成员变更)
-		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, req.UserIds, "added")
+		l.triggerOpenPlatformWebhook(req.GroupID, identity.UserID(l.ctx), req.UserIds, "added")
 	}()
 
 	// 创建并返回响应
@@ -277,7 +278,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		Text: "添加群成员成功",
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
-			"userId":  req.UserID,
+			"userId":  identity.UserID(l.ctx),
 			"count":   len(req.UserIds),
 		},
 	})

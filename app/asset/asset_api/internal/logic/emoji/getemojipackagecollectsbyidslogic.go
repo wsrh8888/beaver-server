@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -56,7 +57,7 @@ func (l *GetEmojiPackageCollectsByIdsLogic) GetEmojiPackageCollectsByIds(req *ty
 
 	// 根据ID列表查询收藏记录详情
 	var collects []emoji_models.EmojiPackageCollect
-	err = l.svcCtx.DB.Where("package_collect_id IN ? AND user_id = ?", req.Ids, req.UserID).Find(&collects).Error
+	err = l.svcCtx.DB.Where("package_collect_id IN ? AND user_id = ?", req.Ids, identity.UserID(l.ctx)).Find(&collects).Error
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询表情包收藏记录详情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
 		return nil, err

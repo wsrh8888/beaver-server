@@ -22,12 +22,13 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
-	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/app/message/message_rpc/types/chat_rpc"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,16 +48,16 @@ func NewGetSyncMessageMediasLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *GetSyncMessageMediasLogic) GetSyncMessageMedias(req *types.GetSyncMessageMediasReq) (*types.GetSyncMessageMediasRes, error) {
-	if req.UserID == "" {
+	if identity.UserID(l.ctx) == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
 	rpcResp, err := l.svcCtx.ChatRpc.GetSyncMessageMedias(l.ctx, &chat_rpc.GetSyncMessageMediasReq{
-		UserId: req.UserID,
+		UserId: identity.UserID(l.ctx),
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "同步消息媒体状态失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "同步消息媒体状态失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, errors.New("同步失败")
 	}
 

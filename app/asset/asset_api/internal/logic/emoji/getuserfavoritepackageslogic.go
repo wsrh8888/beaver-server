@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/asset/asset_api/internal/svc"
@@ -51,23 +52,23 @@ func NewGetUserFavoritePackagesLogic(ctx context.Context, svcCtx *svc.ServiceCon
 func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUserFavoritePackagesReq) (resp *types.GetUserFavoritePackagesRes, err error) {
 	// 1. 查询用户收藏的表情包ID列表
 	var packageCollects []emoji_models.EmojiPackageCollect
-	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).
+	err = l.svcCtx.DB.Where("user_id = ?", identity.UserID(l.ctx)).
 		Offset((req.Page - 1) * req.Size).
 		Limit(req.Size).
 		Find(&packageCollects).Error
 
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询用户收藏的表情包失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询用户收藏的表情包失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "查询收藏的表情包失败")
 	}
 
 	// 2. 获取收藏总数
 	var total int64
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
-		Where("user_id = ?", req.UserID).
+		Where("user_id = ?", identity.UserID(l.ctx)).
 		Count(&total).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取收藏总数失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取收藏总数失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "获取收藏总数失败")
 	}
 
@@ -89,7 +90,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 	var packages []emoji_models.EmojiPackage
 	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", packageIDs, 1).Find(&packages).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "查询表情包详情失败")
 	}
 
@@ -157,7 +158,7 @@ func (l *GetUserFavoritePackagesLogic) GetUserFavoritePackages(req *types.GetUse
 			CollectCount: int(collectCounts[packageID]),
 			EmojiCount:   int(emojiCounts[packageID]),
 			IsCollected:  true, // 这里一定是已收藏的
-			IsAuthor:     package_.UserID == req.UserID,
+			IsAuthor:     package_.UserID == identity.UserID(l.ctx),
 		})
 	}
 

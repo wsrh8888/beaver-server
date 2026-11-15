@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/message/message_api/internal/svc"
@@ -48,13 +49,13 @@ func NewDeleteRecentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 func (l *DeleteRecentLogic) DeleteRecent(req *types.DeleteRecentReq) (resp *types.DeleteRecentRes, err error) {
 	// 假删除操作
 	result := l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
-		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
+		Where("user_id = ? AND conversation_id = ?", identity.UserID(l.ctx), req.ConversationID).
 		Updates(map[string]interface{}{"is_delete": true, "is_pinned": false})
 	if result.Error != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "删除会话失败",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"err":            result.Error.Error(),
 			},
@@ -65,7 +66,7 @@ func (l *DeleteRecentLogic) DeleteRecent(req *types.DeleteRecentReq) (resp *type
 		l.logger.Warn(model.LogMsg{
 			Text: "会话不存在或无权删除",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 			},
 		})
@@ -75,7 +76,7 @@ func (l *DeleteRecentLogic) DeleteRecent(req *types.DeleteRecentReq) (resp *type
 	l.logger.Info(model.LogMsg{
 		Text: "删除会话成功",
 		Data: map[string]any{
-			"userId":         req.UserID,
+			"userId":         identity.UserID(l.ctx),
 			"conversationId": req.ConversationID,
 		},
 	})

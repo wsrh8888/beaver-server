@@ -5,7 +5,6 @@ syntax = "v1"
 // 同步群组信息
 type (
 	GetSyncGroupInfoReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
 	GetSyncGroupInfoRes {
@@ -21,7 +20,6 @@ type (
 // 同步群成员信息
 type (
 	GetSyncGroupMembersReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
 	GetSyncGroupMembersRes {
@@ -37,7 +35,6 @@ type (
 // 同步入群申请信息
 type (
 	GetSyncGroupRequestsReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
 	GetSyncGroupRequestsRes {
@@ -50,6 +47,9 @@ type (
 	}
 )
 
+@server (
+	jwt: Auth
+)
 service datasync {
 	@doc "获取所有需要更新的群组信息版本"
 	@handler getSyncGroupInfo

@@ -25,6 +25,7 @@ import (
 	"beaver/app/account/account_rpc/client/user"
 	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/message/message_api/internal/config"
+	"beaver/app/message/message_api/internal/middleware"
 	"beaver/app/message/message_rpc/chat"
 	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/relation/relation_rpc/client/friend"
@@ -35,7 +36,6 @@ import (
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
-	"beaver/middleware/authgate"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
@@ -68,12 +68,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
 
-	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
-	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
-	if err := gate.Validate(); err != nil {
-		panic("message_api 身份闸门配置不完整: " + err.Error())
-	}
-
 	return &ServiceContext{
 		DB:         mysqlDb,
 		Redis:      client,
@@ -84,6 +78,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		GroupRpc:   group.NewGroup(zrpc.MustNewClient(c.GroupRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
-		AuthGate:   authgate.New(gate),
+		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
 	}
 }

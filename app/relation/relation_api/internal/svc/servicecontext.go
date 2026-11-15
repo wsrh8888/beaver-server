@@ -27,6 +27,7 @@ import (
 	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/relation/relation_api/internal/config"
+	"beaver/app/relation/relation_api/internal/middleware"
 	"beaver/app/relation/relation_rpc/client/friend"
 	"beaver/app/relation/relation_rpc/client/group"
 	"beaver/app/relation/relation_rpc/types"
@@ -36,7 +37,6 @@ import (
 	"beaver/core/coreredis"
 	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
-	"beaver/middleware/authgate"
 	opencli "beaver/remote/open"
 	"beaver/utils/beaverlog"
 
@@ -57,7 +57,8 @@ type ServiceContext struct {
 	NotifyRpc  notification.Notification
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client
-	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
+	// AuthGate 由 .api 的 `middleware: AuthGate` 声明接线，供 goctl 生成的
+	// rest.WithMiddlewares 注入；只挂在需要「用户或机器」的分组上。
 	AuthGate rest.Middleware
 }
 
@@ -74,12 +75,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	commonconfig.Load(c.RemoteProxy)
 	opencli.Init(c.RemoteProxy.Open.ClientID, c.RemoteProxy.Open.ClientSecret)
 
-	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
-	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
-	if err := gate.Validate(); err != nil {
-		panic("relation_api 身份闸门配置不完整: " + err.Error())
-	}
-
 	return &ServiceContext{
 		Config:     c,
 		DB:         mysqlDb,
@@ -91,6 +86,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		NotifyRpc:  notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
-		AuthGate:   authgate.New(gate),
+		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
 	}
 }

@@ -4,7 +4,6 @@ syntax = "v1"
 
 type (
 	RegisterPushTokenReq {
-		UserID       string `header:"Beaver-User-Id"`
 		DeviceID     string `header:"deviceId"`
 		PushToken    string `json:"pushToken"`
 		PushPlatform string `json:"pushPlatform"`
@@ -12,6 +11,9 @@ type (
 	RegisterPushTokenRes  {}
 )
 
+@server (
+	jwt: Auth
+)
 service notification {
 	@doc "注册或更新离线推送 Token（FCM/APNs）"
 	@handler registerPushToken
@@ -41,6 +43,7 @@ type (
 
 @server (
 	group: push_machine
+	middleware: AuthGate
 )
 service notification {
 	@doc "队间：投递通知事件"

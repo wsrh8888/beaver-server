@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -55,7 +56,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 
 	// 检查操作者权限
 	var member group_models.GroupMemberModel
-	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).Error
 	if err != nil {
 		return nil, errors.New("操作者不是群组成员")
 	}
@@ -112,12 +113,12 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 			}
 
 			// 通过 RocketMQ 异步推送给自己和群成员 - 群组信息同步
-			allRecipients := append(response.Members, &relationtypes.GroupMemberInfo{UserID: req.UserID}) // 包含自己
+			allRecipients := append(response.Members, &relationtypes.GroupMemberInfo{UserID: identity.UserID(l.ctx)}) // 包含自己
 			for _, member := range allRecipients {
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.GROUP_OPERATION,
 					"type":     wsTypeConst.GroupReceive,
-					"senderId": req.UserID,
+					"senderId": identity.UserID(l.ctx),
 					"targetId": member.UserID,
 					"body": map[string]interface{}{
 						"table": "groups",
@@ -140,7 +141,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 			Text: "群信息更新成功",
 			Data: map[string]interface{}{
 				"groupId": req.GroupID,
-				"userId":  req.UserID,
+				"userId":  identity.UserID(l.ctx),
 			},
 		})
 	}

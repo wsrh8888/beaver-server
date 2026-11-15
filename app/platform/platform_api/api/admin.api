@@ -379,6 +379,7 @@ type (
 
 @server (
 	group: admin
+	middleware: AuthGate
 )
 service platform {
 	@doc "队间：查询后台操作日志"

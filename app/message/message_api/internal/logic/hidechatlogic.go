@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"fmt"
 
@@ -53,10 +54,10 @@ func NewHideChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HideChat
 func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRes, err error) {
 	resp = &types.HideChatRes{}
 
-	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
+	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", identity.UserID(l.ctx))
 
 	err = l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
-		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
+		Where("user_id = ? AND conversation_id = ?", identity.UserID(l.ctx), req.ConversationID).
 		Updates(map[string]interface{}{
 			"is_hidden": req.IsHidden,
 			"version":   version,
@@ -65,7 +66,7 @@ func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRe
 		l.logger.Error(model.LogMsg{
 			Text: "更新隐藏状态失败",
 			Data: map[string]any{
-				"userId":         req.UserID,
+				"userId":         identity.UserID(l.ctx),
 				"conversationId": req.ConversationID,
 				"isHidden":       req.IsHidden,
 				"err":            err.Error(),
@@ -77,7 +78,7 @@ func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRe
 	l.logger.Info(model.LogMsg{
 		Text: "隐藏会话成功",
 		Data: map[string]any{
-			"userId":         req.UserID,
+			"userId":         identity.UserID(l.ctx),
 			"conversationId": req.ConversationID,
 			"isHidden":       req.IsHidden,
 			"version":        version,
@@ -85,7 +86,7 @@ func (l *HideChatLogic) HideChat(req *types.HideChatReq) (resp *types.HideChatRe
 	})
 
 	go func() {
-		l.notifyHiddenUpdate(req.ConversationID, req.UserID, version)
+		l.notifyHiddenUpdate(req.ConversationID, identity.UserID(l.ctx), version)
 	}()
 
 	return resp, nil

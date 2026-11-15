@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -53,27 +54,27 @@ func NewKickDeviceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *KickDe
 
 func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDeviceRes, error) {
 	var device auth_models.AuthDeviceModel
-	if err := l.svcCtx.DB.Where("user_id = ? AND device_id = ?", req.UserID, req.DeviceID).
+	if err := l.svcCtx.DB.Where("user_id = ? AND device_id = ?", identity.UserID(l.ctx), req.DeviceID).
 		First(&device).Error; err != nil {
 		l.logger.Warn(model.LogMsg{
 			Text: "踢出设备不存在",
-			Data: map[string]any{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "deviceId": req.DeviceID, "err": err.Error()},
 		})
 		return nil, errors.New("设备不存在")
 	}
 
-	redisKey := fmt.Sprintf("user_authentication_session:%s:%s", req.UserID, device.DeviceType)
+	redisKey := fmt.Sprintf("user_authentication_session:%s:%s", identity.UserID(l.ctx), device.DeviceType)
 	l.svcCtx.Redis.Del(redisKey)
 
 	l.svcCtx.DB.Model(&device).Update("is_active", false)
 
 	if _, err := l.svcCtx.NotificationRpc.DisablePushToken(l.ctx, &notification_rpc.DisablePushTokenReq{
-		UserId:   req.UserID,
+		UserId:   identity.UserID(l.ctx),
 		DeviceId: req.DeviceID,
 	}); err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "禁用推送令牌失败",
-			Data: map[string]any{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "deviceId": req.DeviceID, "err": err.Error()},
 		})
 	}
 
@@ -81,8 +82,8 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDevic
 		payload := map[string]interface{}{
 			"command":  wsCommandConst.USER_PROFILE,
 			"type":     wsTypeConst.UserKickReceive,
-			"senderId": req.UserID,
-			"targetId": req.UserID,
+			"senderId": identity.UserID(l.ctx),
+			"targetId": identity.UserID(l.ctx),
 			"body": map[string]interface{}{
 				"deviceId": req.DeviceID,
 				"reason":   "kicked_by_user",
@@ -95,7 +96,7 @@ func (l *KickDeviceLogic) KickDevice(req *types.KickDeviceReq) (*types.KickDevic
 	l.logger.Info(model.LogMsg{
 		Text: "用户踢出设备成功",
 		Data: map[string]interface{}{
-			"userId":   req.UserID,
+			"userId":   identity.UserID(l.ctx),
 			"deviceId": req.DeviceID,
 		},
 	})

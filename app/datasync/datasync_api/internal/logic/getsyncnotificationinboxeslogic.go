@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -49,17 +50,17 @@ func NewGetSyncNotificationInboxesLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *GetSyncNotificationInboxesLogic) GetSyncNotificationInboxes(req *types.GetSyncNotificationInboxesReq) (resp *types.GetSyncNotificationInboxesRes, err error) {
-	if req.UserID == "" {
+	if identity.UserID(l.ctx) == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
 	rpcResp, err := l.svcCtx.NotificationRpc.GetInboxVersions(l.ctx, &notification_rpc.GetInboxVersionsReq{
-		UserId:       req.UserID,
+		UserId:       identity.UserID(l.ctx),
 		SinceVersion: req.SinceVersion,
 		Limit:        req.Limit,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取通知收件箱版本摘要失败", Data: map[string]any{"userId": req.UserID, "sinceVersion": req.SinceVersion, "limit": req.Limit, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取通知收件箱版本摘要失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "sinceVersion": req.SinceVersion, "limit": req.Limit, "err": err.Error()}})
 		return nil, err
 	}
 

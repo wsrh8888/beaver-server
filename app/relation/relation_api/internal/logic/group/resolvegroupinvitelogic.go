@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -76,7 +77,7 @@ func (l *ResolveGroupInviteLogic) ResolveGroupInvite(req *types.ResolveGroupInvi
 
 	alreadyJoined := false
 	var member group_models.GroupMemberModel
-	if l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", invite.GroupID, req.UserID).First(&member).Error == nil {
+	if l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", invite.GroupID, identity.UserID(l.ctx)).First(&member).Error == nil {
 		alreadyJoined = true
 	}
 

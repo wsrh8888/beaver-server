@@ -4,7 +4,6 @@ syntax = "v1"
 
 type (
 	SubmitFeedbackReq {
-		UserID    string   `header:"Beaver-User-Id"`
 		Content   string   `json:"content"`
 		Type      int      `json:"type"`
 		FileNames []string `json:"fileNames,optional"`
@@ -14,6 +13,7 @@ type (
 
 @server (
 	group: feedback
+	jwt: Auth
 )
 service platform {
 	@doc "提交用户反馈"

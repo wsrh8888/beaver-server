@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -51,29 +52,29 @@ func NewNoticeUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Noti
 
 func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *types.NoticeUpdateRes, err error) {
 	// 参数验证
-	if req.UserID == "" || req.FriendID == "" {
+	if identity.UserID(l.ctx) == "" || req.FriendID == "" {
 		return nil, errors.New("用户ID和好友ID不能为空")
 	}
 
 	// 不能修改自己的备注
-	if req.UserID == req.FriendID {
+	if identity.UserID(l.ctx) == req.FriendID {
 		return nil, errors.New("不能修改自己的备注")
 	}
 
 	var friend friend_models.FriendModel
 
 	// 检查是否为好友关系
-	if !friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID) {
-		l.logger.Error(model.LogMsg{Text: "尝试修改非好友备注", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID}})
+	if !friend.IsFriend(l.svcCtx.DB, identity.UserID(l.ctx), req.FriendID) {
+		l.logger.Error(model.LogMsg{Text: "尝试修改非好友备注", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": req.FriendID}})
 		return nil, errors.New("不是好友关系")
 	}
 
 	// 查询好友关系详情
 	err = l.svcCtx.DB.Take(&friend,
 		"((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = 0",
-		req.UserID, req.FriendID, req.FriendID, req.UserID).Error
+		identity.UserID(l.ctx), req.FriendID, req.FriendID, identity.UserID(l.ctx)).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询好友关系失败", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询好友关系失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": req.FriendID, "err": err.Error()}})
 		return nil, errors.New("查询好友关系失败")
 	}
 
@@ -85,7 +86,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 	}
 
 	// 根据用户角色更新对应的备注字段和版本号
-	if friend.SendUserID == req.UserID {
+	if friend.SendUserID == identity.UserID(l.ctx) {
 		// 我是发起方，更新发起方备注
 		if friend.SendUserNotice == req.Notice {
 			// 备注没有变化，直接返回
@@ -95,7 +96,7 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 			"send_user_notice": req.Notice,
 			"version":          nextVersion,
 		}).Error
-	} else if friend.RevUserID == req.UserID {
+	} else if friend.RevUserID == identity.UserID(l.ctx) {
 		// 我是接收方，更新接收方备注
 		if friend.RevUserNotice == req.Notice {
 			// 备注没有变化，直接返回
@@ -107,12 +108,12 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		}).Error
 	} else {
 		// 这种情况理论上不应该发生
-		l.logger.Error(model.LogMsg{Text: "用户角色异常", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID}})
+		l.logger.Error(model.LogMsg{Text: "用户角色异常", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": req.FriendID}})
 		return nil, errors.New("用户角色异常")
 	}
 
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "更新好友备注失败", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "更新好友备注失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": req.FriendID, "err": err.Error()}})
 		return nil, errors.New("更新好友备注失败")
 	}
 
@@ -138,8 +139,8 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		payload := map[string]interface{}{
 			"command":  wsCommandConst.FRIEND_OPERATION,
 			"type":     wsTypeConst.FriendReceive,
-			"senderId": req.UserID,
-			"targetId": req.UserID,
+			"senderId": identity.UserID(l.ctx),
+			"targetId": identity.UserID(l.ctx),
 			"body": map[string]interface{}{
 				"tableUpdates": []map[string]interface{}{friendUpdates},
 			},
@@ -147,13 +148,13 @@ func (l *NoticeUpdateLogic) NoticeUpdate(req *types.NoticeUpdateReq) (resp *type
 		}
 		l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
 
-		l.logger.Info(model.LogMsg{Text: "异步发送好友备注更新通知完成", Data: map[string]interface{}{"userId": req.UserID, "friendId": friend.FriendID, "version": nextVersion}})
+		l.logger.Info(model.LogMsg{Text: "异步发送好友备注更新通知完成", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": friend.FriendID, "version": nextVersion}})
 	}()
 
 	l.logger.Info(model.LogMsg{
 		Text: "好友备注更新成功",
 		Data: map[string]interface{}{
-			"userId":   req.UserID,
+			"userId":   identity.UserID(l.ctx),
 			"friendId": req.FriendID,
 		},
 	})

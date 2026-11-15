@@ -22,6 +22,7 @@
 package main
 
 import (
+	"beaver/common/zrpc_interceptor"
 	"flag"
 	"fmt"
 
@@ -58,6 +59,9 @@ func main() {
 		}
 	})
 	defer s.Stop()
+
+	// 还原 HTTP 面验签后的身份结论，rpc logic 只从 context 取。
+	s.AddUnaryInterceptors(zrpc_interceptor.IdentityServerInterceptor)
 
 	fmt.Printf("Starting rpc server at %s...", c.ListenOn)
 	s.Start()

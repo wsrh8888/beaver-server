@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"fmt"
 
@@ -51,7 +52,7 @@ func NewUpdateEmailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.UpdateEmailRes, err error) {
 	// 获取要更新的用户信息
 	var user user_models.UserModel
-	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error; err != nil {
+	if err := l.svcCtx.DB.Where("user_id = ?", identity.UserID(l.ctx)).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
@@ -70,7 +71,7 @@ func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.U
 
 	// 检查新邮箱是否已被其他用户使用
 	var existingUser user_models.UserModel
-	if err := l.svcCtx.DB.Where("email = ? AND user_id != ?", req.Email, req.UserID).First(&existingUser).Error; err == nil {
+	if err := l.svcCtx.DB.Where("email = ? AND user_id != ?", req.Email, identity.UserID(l.ctx)).First(&existingUser).Error; err == nil {
 		return nil, fmt.Errorf("email already exists")
 	} else if err != gorm.ErrRecordNotFound {
 		return nil, err
@@ -84,7 +85,7 @@ func (l *UpdateEmailLogic) UpdateEmail(req *types.UpdateEmailReq) (resp *types.U
 
 	l.logger.Info(model.LogMsg{
 		Text: "用户修改邮箱成功",
-		Data: map[string]interface{}{"userId": req.UserID},
+		Data: map[string]interface{}{"userId": identity.UserID(l.ctx)},
 	})
 	return &types.UpdateEmailRes{}, nil
 }

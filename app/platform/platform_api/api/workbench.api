@@ -12,7 +12,6 @@ type (
 
 type (
 	ListWorkbenchAppsReq {
-		UserID      string `header:"Beaver-User-Id"` // string 当前用户 ID
 		ClientScope int    `form:"clientScope,optional"` // int 端筛选 0全部 1PC 2移动，可选
 	}
 	ListWorkbenchAppsItem {
@@ -39,6 +38,7 @@ type (
 
 @server (
 	group: workbench
+	jwt: Auth
 )
 service platform {
 	@doc "获取工作台应用列表（仅上架，按分类分组）"

@@ -5,7 +5,6 @@ syntax = "v1"
 // 同步表情相关数据（用户收藏的表情和表情包）
 type (
 	GetSyncEmojiCollectsReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 	}
 	GetSyncEmojiCollectsRes {
@@ -36,7 +35,6 @@ type (
 // 同步表情基础数据
 type (
 	GetSyncEmojisReq {
-		UserID string `header:"Beaver-User-Id"` // 用户ID，从请求头获取
 		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 	}
 	GetSyncEmojisRes {
@@ -49,6 +47,9 @@ type (
 	}
 )
 
+@server (
+	jwt: Auth
+)
 service datasync {
 	@doc "获取用户表情收藏的版本信息"
 	@handler getSyncEmojiCollects

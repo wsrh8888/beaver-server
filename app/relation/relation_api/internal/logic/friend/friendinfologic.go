@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -56,7 +57,7 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 	}
 
 	// 不能查询自己的信息
-	if req.UserID == req.FriendID {
+	if identity.UserID(l.ctx) == req.FriendID {
 		return nil, errors.New("不能查询自己的信息")
 	}
 
@@ -74,14 +75,14 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 	friendUser := res.UserInfo
 
 	// 生成会话Id
-	conversationID, err := conversation.GenerateConversation([]string{req.UserID, req.FriendID})
+	conversationID, err := conversation.GenerateConversation([]string{identity.UserID(l.ctx), req.FriendID})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "friendId": req.FriendID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "friendId": req.FriendID, "err": err.Error()}})
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
 	// 检查是否为好友
-	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserID, req.FriendID)
+	isFriend := friend.IsFriend(l.svcCtx.DB, identity.UserID(l.ctx), req.FriendID)
 
 	// 获取好友备注和来源
 	var notice string
@@ -90,10 +91,10 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		var friendModel friend_models.FriendModel
 		err = l.svcCtx.DB.Take(&friendModel,
 			"(send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)",
-			req.UserID, req.FriendID, req.FriendID, req.UserID).Error
+			identity.UserID(l.ctx), req.FriendID, req.FriendID, identity.UserID(l.ctx)).Error
 		if err == nil {
 			// 根据好友关系的方向确定备注
-			if friendModel.SendUserID == req.UserID {
+			if friendModel.SendUserID == identity.UserID(l.ctx) {
 				// 当前用户是发送方，使用发送方的备注
 				notice = friendModel.SendUserNotice
 			} else {
@@ -116,6 +117,6 @@ func (l *FriendInfoLogic) FriendInfo(req *types.FriendInfoReq) (resp *types.Frie
 		Source:         source,
 	}
 
-	l.logger.Info(model.LogMsg{Text: "获取好友信息成功", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "isFriend": isFriend, "source": source}})
+	l.logger.Info(model.LogMsg{Text: "获取好友信息成功", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": req.FriendID, "isFriend": isFriend, "source": source}})
 	return response, nil
 }

@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -53,7 +54,7 @@ func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinReq
 	}
 
 	if len(req.Groups) == 0 {
-		l.logger.Info(model.LogMsg{Text: "入群申请同步无需群组", Data: map[string]any{"userId": req.UserID}})
+		l.logger.Info(model.LogMsg{Text: "入群申请同步无需群组", Data: map[string]any{"userId": identity.UserID(l.ctx)}})
 		return resp, nil
 	}
 
@@ -87,6 +88,6 @@ func (l *GroupJoinRequestSyncLogic) GroupJoinRequestSync(req *types.GroupJoinReq
 		}
 	}
 
-	l.logger.Info(model.LogMsg{Text: "入群申请同步完成", Data: map[string]interface{}{"userId": req.UserID, "count": len(resp.GroupJoinRequests)}})
+	l.logger.Info(model.LogMsg{Text: "入群申请同步完成", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(resp.GroupJoinRequests)}})
 	return resp, nil
 }

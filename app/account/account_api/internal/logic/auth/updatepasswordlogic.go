@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -48,7 +49,7 @@ func NewUpdatePasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Up
 }
 
 func (l *UpdatePasswordLogic) UpdatePassword(req *types.UpdatePasswordReq) (*types.UpdatePasswordRes, error) {
-	if req.UserID == "" {
+	if identity.UserID(l.ctx) == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 	if req.OldPassword == "" || req.NewPassword == "" {
@@ -59,10 +60,10 @@ func (l *UpdatePasswordLogic) UpdatePassword(req *types.UpdatePasswordReq) (*typ
 	}
 
 	var credential auth_models.AuthCredentialModel
-	if err := l.svcCtx.DB.Take(&credential, "user_id = ?", req.UserID).Error; err != nil {
+	if err := l.svcCtx.DB.Take(&credential, "user_id = ?", identity.UserID(l.ctx)).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询用户凭证失败",
-			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 		})
 		return nil, errors.New("用户凭证不存在")
 	}
@@ -70,7 +71,7 @@ func (l *UpdatePasswordLogic) UpdatePassword(req *types.UpdatePasswordReq) (*typ
 	if !pwd.CheckPad(credential.Password, req.OldPassword) {
 		l.logger.Warn(model.LogMsg{
 			Text: "旧密码错误",
-			Data: map[string]any{"userId": req.UserID},
+			Data: map[string]any{"userId": identity.UserID(l.ctx)},
 		})
 		return nil, errors.New("旧密码错误")
 	}
@@ -79,14 +80,14 @@ func (l *UpdatePasswordLogic) UpdatePassword(req *types.UpdatePasswordReq) (*typ
 	if err := l.svcCtx.DB.Save(&credential).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "更新密码失败",
-			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 		})
 		return nil, errors.New("更新密码失败")
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "密码修改成功",
-		Data: map[string]interface{}{"userId": req.UserID},
+		Data: map[string]interface{}{"userId": identity.UserID(l.ctx)},
 	})
 	return &types.UpdatePasswordRes{}, nil
 }

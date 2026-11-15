@@ -22,13 +22,14 @@
 package update_public
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
-	"beaver/app/platform/platform_models/update"
+	update_models "beaver/app/platform/platform_models/update"
 	"beaver/core/coreupdate"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -80,7 +81,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		AppID:           req.AppID,
 		ArchitectureID:  architecture.Id,
 		DeviceID:        req.DeviceID,
-		UserID:          req.UserID,
+		UserID:          identity.UserID(l.ctx),
 		CurrentVersion:  req.Version,
 		StableVersionID: stableID,
 		GrayVersionID:   grayID,

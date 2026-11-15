@@ -32,19 +32,30 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// HTTP API发送消息
-				Method:  http.MethodPost,
-				Path:    "/api/ws/v1/proxySendMsg",
-				Handler: proxySendMsgHandler(serverCtx),
-			},
-			{
-				// WebSocket连接入口
-				Method:  http.MethodGet,
-				Path:    "/api/ws/v1/ws",
-				Handler: chatWebsocketHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Route{
+				{
+					// WebSocket连接入口
+					Method:  http.MethodGet,
+					Path:    "/api/ws/v1/ws",
+					Handler: chatWebsocketHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Route{
+				{
+					// HTTP API发送消息
+					Method:  http.MethodPost,
+					Path:    "/api/ws/v1/proxySendMsg",
+					Handler: proxySendMsgHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 }

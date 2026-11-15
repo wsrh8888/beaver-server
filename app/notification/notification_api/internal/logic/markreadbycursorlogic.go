@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -51,7 +52,7 @@ func NewMarkReadByCursorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *MarkReadByCursorLogic) MarkReadByCursor(req *types.MarkReadByCursorReq) (resp *types.MarkReadByCursorRes, err error) {
 	resp = &types.MarkReadByCursorRes{Affected: 0}
 
-	if req.UserID == "" || req.Category == "" {
+	if identity.UserID(l.ctx) == "" || req.Category == "" {
 		return resp, errors.New("userId 和 category 不能为空")
 	}
 	if req.ToVersion <= 0 && req.ToEventID == "" {
@@ -62,7 +63,7 @@ func (l *MarkReadByCursorLogic) MarkReadByCursor(req *types.MarkReadByCursorReq)
 
 	// 直接更新通知为已读
 	query := l.svcCtx.DB.WithContext(l.ctx).Model(&notification_models.NotificationInbox{}).
-		Where("user_id = ? AND category = ?", req.UserID, req.Category)
+		Where("user_id = ? AND category = ?", identity.UserID(l.ctx), req.Category)
 
 	if req.ToVersion > 0 {
 		query = query.Where("version <= ?", req.ToVersion)
@@ -79,7 +80,7 @@ func (l *MarkReadByCursorLogic) MarkReadByCursor(req *types.MarkReadByCursorReq)
 	if result.Error != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "按游标标记通知已读失败",
-			Data: map[string]any{"userId": req.UserID, "category": req.Category, "err": result.Error.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "category": req.Category, "err": result.Error.Error()},
 		})
 		return nil, result.Error
 	}
@@ -88,7 +89,7 @@ func (l *MarkReadByCursorLogic) MarkReadByCursor(req *types.MarkReadByCursorReq)
 	l.logger.Info(model.LogMsg{
 		Text: "按游标标记通知已读成功",
 		Data: map[string]interface{}{
-			"userId":   req.UserID,
+			"userId":   identity.UserID(l.ctx),
 			"category": req.Category,
 			"affected": resp.Affected,
 		},

@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"strings"
 
@@ -53,13 +54,13 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	var conversationMetas []message_models.ChatConversationMeta
 
 	// 获取该用户的所有未隐藏会话
-	err = l.svcCtx.DB.Where("user_id = ? AND is_hidden = ?", req.UserID, false).
+	err = l.svcCtx.DB.Where("user_id = ? AND is_hidden = ?", identity.UserID(l.ctx), false).
 		Order("is_pinned DESC, updated_at DESC").
 		Find(&userConversations).Error
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询最近会话失败",
-			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 		})
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 		if err != nil {
 			l.logger.Error(model.LogMsg{
 				Text: "查询会话元数据失败",
-				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+				Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 			})
 			return nil, err
 		}
@@ -103,7 +104,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	for _, chatID := range privateChatIds {
 		_, userIds := conversation.ParseConversationWithType(chatID)
 		for _, userId := range userIds {
-			if userId != req.UserID {
+			if userId != identity.UserID(l.ctx) {
 				userIdMap[userId] = struct{}{}
 			}
 		}
@@ -119,13 +120,13 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	var friendDetails []*relationtypes.FriendDetailItem
 	if len(userIds) > 0 {
 		friendDetailRes, err := l.svcCtx.FriendRpc.GetFriendDetail(l.ctx, &relationtypes.GetFriendDetailReq{
-			UserId:    req.UserID,
+			UserId:    identity.UserID(l.ctx),
 			FriendIds: userIds,
 		})
 		if err != nil {
 			l.logger.Error(model.LogMsg{
 				Text: "获取好友详情失败",
-				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+				Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 			})
 			return nil, err
 		}
@@ -151,7 +152,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			if err != nil {
 				l.logger.Error(model.LogMsg{
 					Text: "获取群组详情失败",
-					Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+					Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 				})
 				return nil, err
 			}
@@ -197,7 +198,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 			ids := strings.Split(convo.ConversationID, "_")
 			// ids格式: ["private", "A", "B"]
 			var opponentID string
-			if ids[1] == req.UserID {
+			if ids[1] == identity.UserID(l.ctx) {
 				opponentID = ids[2]
 			} else {
 				opponentID = ids[1]
@@ -238,7 +239,7 @@ func (l *RecentChatListLogic) RecentChatList(req *types.RecentChatListReq) (resp
 	l.logger.Info(model.LogMsg{
 		Text: "拉取最近会话成功",
 		Data: map[string]any{
-			"userId": req.UserID,
+			"userId": identity.UserID(l.ctx),
 			"count":  len(respList),
 		},
 	})

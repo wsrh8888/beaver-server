@@ -42,10 +42,6 @@ func SendMsgHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		// 验证必填参数
-		if req.UserID == "" {
-			response.Response(r, w, nil, errors.New("用户ID不能为空"))
-			return
-		}
 		if req.ConversationID == "" {
 			response.Response(r, w, nil, errors.New("会话ID不能为空"))
 			return

@@ -22,6 +22,7 @@
 package main
 
 import (
+	"beaver/common/zrpc_interceptor"
 	"flag"
 	"fmt"
 
@@ -61,7 +62,7 @@ func main() {
 	defer s.Stop()
 
 	// 添加拦截器
-	s.AddUnaryInterceptors(grpcMiddleware.RequestLogInterceptor)
+	s.AddUnaryInterceptors(grpcMiddleware.RequestLogInterceptor, zrpc_interceptor.IdentityServerInterceptor)
 
 	// 启动 RocketMQ Consumer（agent_task 编排层 + agent_done 终稿落库）
 	if ctx.RocketMQ != nil {

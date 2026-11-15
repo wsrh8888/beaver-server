@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"encoding/json"
 	"errors"
@@ -62,7 +63,7 @@ func NewUserValidStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 
 func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) (resp *types.FriendValidStatusRes, err error) {
 	// 参数验证
-	if req.UserID == "" || req.VerifyID == "" {
+	if identity.UserID(l.ctx) == "" || req.VerifyID == "" {
 		return nil, errors.New("用户ID和验证ID不能为空")
 	}
 
@@ -78,9 +79,9 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 	var decisionStatus int32
 
 	// 查询好友验证记录，确保当前用户是接收方
-	err = l.svcCtx.DB.Take(&friendVerify, "verify_id = ? and rev_user_id = ?", req.VerifyID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&friendVerify, "verify_id = ? and rev_user_id = ?", req.VerifyID, identity.UserID(l.ctx)).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "好友验证记录不存在", Data: map[string]interface{}{"verifyId": req.VerifyID, "userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "好友验证记录不存在", Data: map[string]interface{}{"verifyId": req.VerifyID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, errors.New("好友验证不存在")
 	}
 
@@ -204,7 +205,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 			Text: "好友验证记录删除成功",
 			Data: map[string]interface{}{
 				"verifyId": req.VerifyID,
-				"userId":   req.UserID,
+				"userId":   identity.UserID(l.ctx),
 			},
 		})
 		return &types.FriendValidStatusRes{}, nil
@@ -292,7 +293,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		Text: "好友验证处理成功",
 		Data: map[string]interface{}{
 			"verifyId": req.VerifyID,
-			"userId":   req.UserID,
+			"userId":   identity.UserID(l.ctx),
 			"status":   req.Status,
 			"source":   friendVerify.Source,
 		},

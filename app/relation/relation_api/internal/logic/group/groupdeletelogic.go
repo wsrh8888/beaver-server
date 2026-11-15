@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -52,7 +53,7 @@ func NewGroupDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Group
 
 func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.GroupDeleteRes, err error) {
 	var groupMember group_models.GroupMemberModel
-	err = l.svcCtx.DB.Take(&groupMember, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
+	err = l.svcCtx.DB.Take(&groupMember, "group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).Error
 	if err != nil {
 		return nil, errors.New("用户不是群组成员")
 	}
@@ -126,7 +127,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
-				"senderId": req.UserID,
+				"senderId": identity.UserID(l.ctx),
 				"targetId": member.UserID,
 				"body": map[string]interface{}{
 					"tables": []map[string]interface{}{
@@ -155,7 +156,7 @@ func (l *GroupDeleteLogic) GroupDelete(req *types.GroupDeleteReq) (resp *types.G
 		Text: "群解散成功",
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
-			"userId":  req.UserID,
+			"userId":  identity.UserID(l.ctx),
 		},
 	})
 

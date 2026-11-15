@@ -26,6 +26,7 @@ import (
 	"beaver/app/account/account_rpc/client/user"
 	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/notification/notification_api/internal/config"
+	"beaver/app/notification/notification_api/internal/middleware"
 	"beaver/app/notification/notification_rpc/notification"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
@@ -33,7 +34,6 @@ import (
 
 	"beaver/core/corerocketmq"
 	versionPkg "beaver/core/version"
-	"beaver/middleware/authgate"
 	"beaver/utils/beaverlog"
 
 	"github.com/go-redis/redis"
@@ -65,12 +65,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 	beaverlog.SetRocketMQ(mqClient)
 
-	// 入站身份闸门：用户 JWT + 队间机器票。任一密钥没配直接拒绝启动，不做降级。
-	gate := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore, authgate.DefaultWhiteList)
-	if err := gate.Validate(); err != nil {
-		panic("notification_api 身份闸门配置不完整: " + err.Error())
-	}
-
 	return &ServiceContext{
 		Config:     c,
 		DB:         mysqlDb,
@@ -80,6 +74,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		NotifyRpc:  notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		VersionGen: versionGen,
 		RocketMQ:   mqClient,
-		AuthGate:   authgate.New(gate),
+		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
 	}
 }

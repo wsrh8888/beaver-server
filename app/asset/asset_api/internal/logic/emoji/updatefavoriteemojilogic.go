@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -62,33 +63,33 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 
 	// 检查是否已收藏
 	var favoriteEmoji emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", req.UserID, req.EmojiID).First(&favoriteEmoji).Error
+	err = l.svcCtx.DB.Where("user_id = ? AND emoji_id = ?", identity.UserID(l.ctx), req.EmojiID).First(&favoriteEmoji).Error
 
 	switch req.Type {
 	case "favorite":
 		if err == nil {
 			// 已经收藏过了
-			l.logger.Error(model.LogMsg{Text: "表情已收藏", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
+			l.logger.Error(model.LogMsg{Text: "表情已收藏", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": req.EmojiID}})
 			return nil, errors.New("表情已收藏")
 		}
 
 		// 生成收藏版本号（按用户ID分区）
-		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
+		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", identity.UserID(l.ctx))
 		if collectVersion == -1 {
-			l.logger.Error(model.LogMsg{Text: "生成收藏版本号失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
+			l.logger.Error(model.LogMsg{Text: "生成收藏版本号失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": req.EmojiID}})
 			return nil, errors.New("生成版本号失败")
 		}
 
 		// 添加收藏
 		newFavoriteEmoji := emoji_models.EmojiCollectEmoji{
 			EmojiCollectID: uuid.New().String(),
-			UserID:         req.UserID,
+			UserID:         identity.UserID(l.ctx),
 			EmojiID:        req.EmojiID,
 			Version:        collectVersion,
 		}
 		err = l.svcCtx.DB.Create(&newFavoriteEmoji).Error
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "收藏表情失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "收藏表情失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": req.EmojiID, "err": err.Error()}})
 			return nil, errors.New("收藏表情失败")
 		}
 
@@ -122,26 +123,26 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 				"conversationId": "",
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
-		}(l.svcCtx.Config.Etcd, req.UserID, newFavoriteEmoji.EmojiCollectID, collectVersion)
+		}(l.svcCtx.Config.Etcd, identity.UserID(l.ctx), newFavoriteEmoji.EmojiCollectID, collectVersion)
 
 	case "unfavorite":
 		if err != nil {
 			// 没有收藏过
-			l.logger.Error(model.LogMsg{Text: "表情未收藏", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
+			l.logger.Error(model.LogMsg{Text: "表情未收藏", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": req.EmojiID}})
 			return nil, errors.New("表情未收藏")
 		}
 
 		// 软删除：设置IsDeleted为true并更新版本号（按用户ID分区）
 		favoriteEmoji.IsDeleted = true
-		favoriteEmoji.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", req.UserID)
+		favoriteEmoji.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_collect", "user_id", identity.UserID(l.ctx))
 		if favoriteEmoji.Version == -1 {
-			l.logger.Error(model.LogMsg{Text: "生成版本号失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID}})
+			l.logger.Error(model.LogMsg{Text: "生成版本号失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": req.EmojiID}})
 			return nil, errors.New("生成版本号失败")
 		}
 
 		err = l.svcCtx.DB.Save(&favoriteEmoji).Error
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "软删除收藏失败", Data: map[string]interface{}{"userId": req.UserID, "emojiId": req.EmojiID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "软删除收藏失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "emojiId": req.EmojiID, "err": err.Error()}})
 			return nil, errors.New("软删除收藏失败")
 		}
 
@@ -175,7 +176,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 				"conversationId": "",
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
-		}(l.svcCtx.Config.Etcd, req.UserID, favoriteEmoji.EmojiCollectID, favoriteEmoji.Version)
+		}(l.svcCtx.Config.Etcd, identity.UserID(l.ctx), favoriteEmoji.EmojiCollectID, favoriteEmoji.Version)
 
 	default:
 		l.logger.Error(model.LogMsg{Text: "无效的操作类型", Data: map[string]interface{}{"type": req.Type}})
@@ -186,7 +187,7 @@ func (l *UpdateFavoriteEmojiLogic) UpdateFavoriteEmoji(req *types.UpdateFavorite
 	l.logger.Info(model.LogMsg{
 		Text: "表情收藏状态更新成功",
 		Data: map[string]interface{}{
-			"userId":  req.UserID,
+			"userId":  identity.UserID(l.ctx),
 			"emojiId": req.EmojiID,
 			"type":    req.Type,
 		},

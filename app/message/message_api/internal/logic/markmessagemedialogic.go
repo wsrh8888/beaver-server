@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"fmt"
 
@@ -60,7 +61,7 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 		}
 
 		var existing message_models.ChatMessageMedia
-		err := l.svcCtx.DB.Where("user_id = ? AND message_id = ?", req.UserID, messageID).First(&existing).Error
+		err := l.svcCtx.DB.Where("user_id = ? AND message_id = ?", identity.UserID(l.ctx), messageID).First(&existing).Error
 		if err == nil {
 			continue
 		}
@@ -68,7 +69,7 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 			l.logger.Error(model.LogMsg{
 				Text: "查询消息媒体状态失败",
 				Data: map[string]any{
-					"userId":    req.UserID,
+					"userId":    identity.UserID(l.ctx),
 					"messageId": messageID,
 					"err":       err.Error(),
 				},
@@ -76,9 +77,9 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 			return nil, err
 		}
 
-		version := l.svcCtx.VersionGen.GetNextVersion("chat_message_medias", "user_id", req.UserID)
+		version := l.svcCtx.VersionGen.GetNextVersion("chat_message_medias", "user_id", identity.UserID(l.ctx))
 		record := message_models.ChatMessageMedia{
-			UserID:    req.UserID,
+			UserID:    identity.UserID(l.ctx),
 			MessageID: messageID,
 			Version:   version,
 		}
@@ -86,7 +87,7 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 			l.logger.Error(model.LogMsg{
 				Text: "记录消息媒体状态失败",
 				Data: map[string]any{
-					"userId":    req.UserID,
+					"userId":    identity.UserID(l.ctx),
 					"messageId": messageID,
 					"err":       err.Error(),
 				},
@@ -97,13 +98,13 @@ func (l *MarkMessageMediaLogic) MarkMessageMedia(req *types.MarkMessageMediaReq)
 	}
 
 	if len(newMessageIDs) > 0 {
-		go l.notifyMessageMedia(req.UserID, newMessageIDs)
+		go l.notifyMessageMedia(identity.UserID(l.ctx), newMessageIDs)
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "标记消息媒体状态成功",
 		Data: map[string]any{
-			"userId": req.UserID,
+			"userId": identity.UserID(l.ctx),
 			"count":  len(newMessageIDs),
 		},
 	})

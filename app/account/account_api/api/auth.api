@@ -3,7 +3,6 @@ syntax = "v1"
 // ==================== 认证接口（需 Gateway JWT，注入 Beaver-User-Id 或 Header Token）====================
 type (
 	LogoutReq {
-		UserID   string `header:"Beaver-User-Id"`
 		DeviceID string `header:"deviceId"`
 	}
 	LogoutRes  {}
@@ -19,7 +18,6 @@ type (
 
 type (
 	GetDevicesReq {
-		UserID string `header:"Beaver-User-Id"`
 	}
 	GetDevicesRes {
 		Devices []DeviceInfo `json:"devices"`
@@ -39,7 +37,6 @@ type (
 
 type (
 	KickDeviceReq {
-		UserID   string `header:"Beaver-User-Id"`
 		DeviceID string `json:"deviceId"`
 	}
 	KickDeviceRes  {}
@@ -47,7 +44,6 @@ type (
 
 type (
 	UpdatePasswordReq {
-		UserID      string `header:"Beaver-User-Id"`
 		OldPassword string `json:"oldPassword"`
 		NewPassword string `json:"newPassword"`
 	}
@@ -56,6 +52,7 @@ type (
 
 @server (
 	group: auth
+	jwt: Auth
 )
 service account {
 	@doc "用户登出"
@@ -150,6 +147,7 @@ type (
 
 @server (
 	group: auth_machine
+	middleware: AuthGate
 )
 service account {
 	@doc "校验账号密码（开放平台 / 管理端代登录）"

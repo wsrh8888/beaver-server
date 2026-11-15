@@ -22,12 +22,13 @@
 package update_public
 
 import (
+	"beaver/common/identity"
 	"context"
 	"fmt"
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
-	"beaver/app/platform/platform_models/update"
+	update_models "beaver/app/platform/platform_models/update"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -84,7 +85,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 
 	if err == gorm.ErrRecordNotFound {
 		report := update_models.UpdateReport{
-			UserID:         req.UserID,
+			UserID:         identity.UserID(l.ctx),
 			DeviceID:       req.DeviceID,
 			AppID:          req.AppID,
 			ArchitectureID: architecture.Id,
@@ -96,7 +97,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 		}
 	} else {
 		updates := map[string]interface{}{
-			"user_id": req.UserID,
+			"user_id": identity.UserID(l.ctx),
 			"version": req.Version,
 		}
 		if err := l.svcCtx.DB.Model(&existingReport).Updates(updates).Error; err != nil {

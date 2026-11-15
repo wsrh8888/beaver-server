@@ -22,15 +22,16 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 	"encoding/json"
 	"errors"
 	"time"
 
-	"beaver/remote/agent"
-	agenttype "beaver/types/remote/agent"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
+	"beaver/remote/agent"
+	agenttype "beaver/types/remote/agent"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -68,7 +69,7 @@ type agentConversationItem struct {
 }
 
 func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.GetSyncAgentConversationsReq) (resp *types.GetSyncAgentConversationsRes, err error) {
-	userId := req.UserID
+	userId := identity.UserID(l.ctx)
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

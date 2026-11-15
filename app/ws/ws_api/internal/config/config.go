@@ -39,6 +39,10 @@ type Config struct {
 	Auth struct {
 		AccessSecret string
 	}
+	// S2S 入站机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
+	S2S struct {
+		Secret string
+	}
 	Etcd     string
 	GroupRpc zrpc.RpcClientConf
 	ChatRpc  zrpc.RpcClientConf

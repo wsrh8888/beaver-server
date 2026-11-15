@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/account/account_api/internal/svc"
@@ -51,27 +52,27 @@ func NewGetDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetDev
 
 func (l *GetDevicesLogic) GetDevices(req *types.GetDevicesReq) (*types.GetDevicesRes, error) {
 	var devices []auth_models.AuthDeviceModel
-	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).Order("last_login_time DESC").Find(&devices).Error; err != nil {
+	if err := l.svcCtx.DB.Where("user_id = ?", identity.UserID(l.ctx)).Order("last_login_time DESC").Find(&devices).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询设备失败",
-			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
+			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
 		})
 		return nil, err
 	}
 
 	onlineDeviceIDs := make(map[string]bool)
 	for _, slot := range []string{"desktop", "mobile"} {
-		if !coreonline.IsSlotOnline(l.svcCtx.Redis, req.UserID, slot) {
+		if !coreonline.IsSlotOnline(l.svcCtx.Redis, identity.UserID(l.ctx), slot) {
 			continue
 		}
-		deviceID, err := device.SessionDeviceID(l.svcCtx.Redis, req.UserID, slot)
+		deviceID, err := device.SessionDeviceID(l.svcCtx.Redis, identity.UserID(l.ctx), slot)
 		if err == redis.Nil {
 			continue
 		}
 		if err != nil {
 			l.logger.Error(model.LogMsg{
 				Text: "读取会话设备失败",
-				Data: map[string]any{"userId": req.UserID, "slot": slot, "err": err.Error()},
+				Data: map[string]any{"userId": identity.UserID(l.ctx), "slot": slot, "err": err.Error()},
 			})
 			return nil, err
 		}

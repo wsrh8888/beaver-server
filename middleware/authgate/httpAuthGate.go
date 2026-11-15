@@ -37,7 +37,9 @@ type unauthorizedBody struct {
 
 // New 把闸门接成 go-zero 的 rest.Middleware。
 //
-// 用法（各业务 api 的 main）：server.Use(authgate.New(gate))，与 Trace / UA 中间件同一层。
+// 用法：由 .api 的 `@server middleware: AuthGate` 声明，goctl 生成
+// `rest.WithMiddlewares([]rest.Middleware{serverCtx.AuthGate}, ...)`；
+// 各服务 ServiceContext 用本函数装配同名字段。禁止再用 main 的 server.Use 全局挂载。
 func New(g *Gate) rest.Middleware {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {

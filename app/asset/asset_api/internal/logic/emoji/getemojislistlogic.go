@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/asset/asset_api/internal/svc"
@@ -48,9 +49,9 @@ func NewGetEmojisListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *types.GetEmojisListRes, err error) {
 	// 获取用户收藏的表情ID列表
 	var favoriteEmojis []emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("user_id = ?", req.UserID).Find(&favoriteEmojis).Error
+	err = l.svcCtx.DB.Where("user_id = ?", identity.UserID(l.ctx)).Find(&favoriteEmojis).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取用户收藏的表情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取用户收藏的表情失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, err
 	}
 
@@ -68,7 +69,7 @@ func (l *GetEmojisListLogic) GetEmojisList(req *types.GetEmojisListReq) (resp *t
 	var emojis []emoji_models.Emoji
 	err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", emojiIDs, 1).Find(&emojis).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取表情详情失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取表情详情失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 		return nil, err
 	}
 

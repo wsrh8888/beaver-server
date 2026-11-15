@@ -52,8 +52,8 @@ func main() {
 	server.Use(uaMiddleware.Middleware)
 
 	ctx := svc.NewServiceContext(c)
-	// 身份闸门：用户 JWT 与队间机器票共用同一套 /api 契约，差异只在这里判定。
-	server.Use(ctx.AuthGate)
+	// 身份鉴权由 .api 的 @server jwt:/middleware: 声明，经 goctl 生成的
+	// rest.WithJwt / rest.WithMiddlewares 按分组挂载；此处只保留 trace / ua 等横切中间件。
 	handler.RegisterHandlers(server, ctx)
 
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))

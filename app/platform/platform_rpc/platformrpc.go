@@ -22,6 +22,7 @@
 package main
 
 import (
+	"beaver/common/zrpc_interceptor"
 	"flag"
 	"fmt"
 
@@ -48,7 +49,6 @@ func main() {
 	beaverlog.InitFromConf(c.RpcServerConf.ServiceConf)
 	ctx := svc.NewServiceContext(c)
 
-
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		platform_rpc.RegisterPlatformServer(grpcServer, server.NewPlatformServer(ctx))
 
@@ -57,6 +57,9 @@ func main() {
 		}
 	})
 	defer s.Stop()
+
+	// 还原 HTTP 面验签后的身份结论，rpc logic 只从 context 取。
+	s.AddUnaryInterceptors(zrpc_interceptor.IdentityServerInterceptor)
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

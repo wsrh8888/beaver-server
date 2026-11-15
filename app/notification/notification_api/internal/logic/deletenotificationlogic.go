@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/notification/notification_api/internal/svc"
@@ -47,7 +48,7 @@ func NewDeleteNotificationLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *DeleteNotificationLogic) DeleteNotification(req *types.DeleteNotificationReq) (resp *types.DeleteNotificationRes, err error) {
-	userId := req.UserID
+	userId := identity.UserID(l.ctx)
 	eventId := req.EventID
 
 	// 将指定用户的指定通知标记为已删除

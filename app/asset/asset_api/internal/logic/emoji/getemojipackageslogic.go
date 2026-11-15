@@ -22,6 +22,7 @@
 package logic
 
 import (
+	"beaver/common/identity"
 	"context"
 
 	"beaver/app/asset/asset_api/internal/svc"
@@ -194,10 +195,10 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 	userCollects := make(map[string]bool)
 	if len(packageIDs) > 0 {
 		var userCollectList []emoji_models.EmojiPackageCollect
-		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", req.UserID, packageIDs).
+		err = l.svcCtx.DB.Where("user_id = ? AND package_id IN ?", identity.UserID(l.ctx), packageIDs).
 			Find(&userCollectList).Error
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "获取用户收藏状态失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "获取用户收藏状态失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
 			return nil, status.Error(codes.Internal, "获取收藏状态失败")
 		}
 		for _, c := range userCollectList {
@@ -217,7 +218,7 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(req *types.GetEmojiPackagesReq)
 			CollectCount: int(collectCounts[p.PackageID]),
 			EmojiCount:   int(emojiCounts[p.PackageID]),
 			IsCollected:  userCollects[p.PackageID],
-			IsAuthor:     p.UserID == req.UserID,
+			IsAuthor:     p.UserID == identity.UserID(l.ctx),
 			RecentEmojis: recentEmojis[p.PackageID],
 		}
 	}
