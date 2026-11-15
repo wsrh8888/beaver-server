@@ -1,4 +1,4 @@
-// Package doc A 主体（开源核心）→ 在线文档服务（beaver-doc 独立仓）的 S2S 接口代理。
+// Package doc A 主体（开源核心）→ 在线文档服务（beaver-server-online 独立仓）的 S2S 接口代理。
 //
 // 跨仓不允许 etcd gRPC 直连（团队铁律），统一走对方网关 /internal/Doc.*（client_credentials 换票 + Bearer）。
 // 结构对齐 remote/{open,ai,circle,moment}：enter.go 灌域名与凭据、remote.go 持有换票与发包 plumbing、
@@ -13,7 +13,7 @@ import (
 // client 本包唯一的出站客户端，Init 时装配。
 var client *Client
 
-// Init 装配出站凭据（beaver-doc 分配给调用方的 client_credentials）与域名。
+// Init 装配出站凭据（beaver-server-online 分配给调用方的 client_credentials）与域名。
 // 只在该服务装配依赖时调用一次；域名写入 commonconfig.DocUrl。
 func Init(clientID, clientSecret string) {
 	client = &Client{clientID: clientID, clientSecret: clientSecret}

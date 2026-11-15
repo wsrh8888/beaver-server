@@ -19,7 +19,7 @@
  * beaver-server-header-v1
  */
 
-// beaver-doc S2S 出入参类型
+// beaver-server-online S2S 出入参类型
 //
 // 手写 JSON DTO：字段名与 json tag 与对端 proto 的 JSON 编码逐字段一致，
 // 不依赖 protobuf 运行时（无 protoimpl / protoreflect / state）。

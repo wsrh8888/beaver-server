@@ -75,7 +75,7 @@ type RemoteProxy struct {
 	Open Endpoint `json:",optional"`
 	// Social 社交服务（beaver-social）：圈子与动态同属一个产品整体，只有一个入口。
 	Social Endpoint `json:",optional"`
-	// Doc 在线文档服务（beaver-doc）。
+	// Doc 在线文档服务（beaver-server-online）。
 	Doc Endpoint `json:",optional"`
 	// Agent 智能体 py 服务（beaver-ai），静态 X-Internal-Token。
 	Agent AgentEndpoint `json:",optional"`

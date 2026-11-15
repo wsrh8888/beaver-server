@@ -15,7 +15,7 @@
 | circle          | 22100    | 32100    | beaver-social | 圈子 |
 | ai              | 22200    | 32200    | beaver-ai | AI 服务 |
 | agent           | 22300    | -        | beaver-ai | 智能体（Python，静态 X-Internal-Token） |
-| doc             | 22400    | 31300    | beaver-doc | 在线文档 |
+| doc             | 22400    | 31300    | beaver-online | 在线文档 |
 
 <!-- 其他 -->
 | open_portal     | 22000    | -        | beaver-open | 开放平台门户 |

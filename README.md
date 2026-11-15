@@ -86,7 +86,7 @@
 | circle | 22100 | 32100 | beaver-social | 圈子 |
 | ai | 22200 | 32200 | beaver-ai | AI 服务 |
 | agent | 22300 | - | beaver-ai | 智能体（Python，静态 X-Internal-Token） |
-| doc | 22400 | 31300 | beaver-doc | 在线文档 |
+| doc | 22400 | 31300 | beaver-online | 在线文档 |
 | backend_admin | 40000 | - | beaver-backend | 后台管理（自带 JWT 鉴权 / CORS） |
 
 > 完整端口表见 [`server.md`](server.md)；实际部署以各服务 `etc/*.yaml` 为准。
