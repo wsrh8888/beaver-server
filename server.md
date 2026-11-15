@@ -18,5 +18,4 @@
 | doc             | 22400    | 31300    | beaver-online | 在线文档 |
 
 <!-- 其他 -->
-| open_portal     | 22000    | -        | beaver-open | 开放平台门户 |
 | backend_admin   | 40000    | -        | beaver-backend | 后台管理（自带 JWT 鉴权 / CORS） |

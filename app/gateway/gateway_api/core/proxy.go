@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024-2026 Beaver IM Team
  * SPDX-License-Identifier: MIT
  * Project: beaver-server
@@ -25,12 +25,8 @@ import (
 	"beaver/app/gateway/gateway_api/types"
 	"beaver/common/etcd"
 	"beaver/common/traceid"
-	"beaver/middleware/authgate"
-	"beaver/middleware/jwt"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
-	"beaver/utils/jwts"
-	utils "beaver/utils/list"
 	"bufio"
 	"bytes"
 	"encoding/json"
@@ -64,136 +60,10 @@ func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uui
 
 }
 
+// Proxy 只做服务发现与反向代理：鉴权由业务服务在 .api 中声明式接线，
+// 网关不解析票据、不清理或注入任何身份头，Token/Authorization 原样透传。
 type Proxy struct {
 	Config types.Config
-}
-
-func (p Proxy) auth(req *http.Request) (ok bool, errMsg string) {
-	path := req.URL.Path
-
-	// 1. 公开接口，无需鉴权
-	if utils.InListByRegex(p.Config.PublicList, path) {
-		return true, ""
-	}
-
-	// 2. 自定义鉴权，透传到下游服务 middleware 处理
-	if utils.InListByRegex(p.Config.CustomAuthList, path) {
-		return true, ""
-	}
-
-	// 3. open oauth_secret：Gateway 校验 App-Id / App-Secret 请求头
-	if strings.HasPrefix(path, "/api/open/oauth_secret/") {
-		return p.oauthSecretAuth(req)
-	}
-
-	// 4. open_api：Gateway 默认不鉴权，各接口 logic 自行校验；仅 Beaver JWT 路由例外
-	if isOpenApiPassThrough(path) {
-		return true, ""
-	}
-
-	// 5. 队间 S2S 机器票：Authorization: Bearer <client_credentials 换来的票>。
-	// 网关验过签名与受众后按票据里的 client_id 重建 X-Client-Id 并放行，
-	// 业务面 authgate 会再验一次（纵深）；外仓只经本网关进入，不直打业务端口。
-	if strings.HasPrefix(req.Header.Get("Authorization"), s2sBearerPrefix) {
-		return p.s2sAuth(req)
-	}
-
-	// 6. 统一用户 JWT 鉴权
-	return p.jwtAuth(req)
-}
-
-const s2sBearerPrefix = "Bearer "
-
-// s2sAuth 校验队间机器票（Authorization: Bearer <S2S JWT>）。
-//
-// 换票在 account_api 的 /api/auth/token（经网关 auth→account 转发），签发密钥与
-// 网关 S2S.Secret 同源。这里只判定「票是不是本团队签的、受众对不对」；验签通过后
-// 剥离外部传入的 X-Client-Id，按票据里的 client_id 重建，业务面 authgate 再验一次。
-func (p Proxy) s2sAuth(req *http.Request) (bool, string) {
-	if p.Config.S2S.Secret == "" {
-		apiGwLogger.Error(model.LogMsg{Text: "网关未配置 S2S 验签密钥"})
-		return false, "网关鉴权失败"
-	}
-	raw := strings.TrimSpace(strings.TrimPrefix(req.Header.Get("Authorization"), s2sBearerPrefix))
-	aud := p.Config.S2S.Audience
-	if aud == "" {
-		aud = authgate.AudienceCore
-	}
-	clientID, _, err := jwt.Verify(p.Config.S2S.Secret, aud, raw)
-	if err != nil {
-		apiGwLogger.Error(model.LogMsg{Text: "S2S 机器票验签失败", Data: map[string]interface{}{"err": err.Error()}})
-		return false, "网关鉴权失败"
-	}
-	req.Header.Del(jwt.HeaderClientID)
-	req.Header.Set(jwt.HeaderClientID, clientID)
-	apiGwLogger.Info(model.LogMsg{Text: "S2S 机器票验证成功", Data: map[string]interface{}{"clientId": clientID}})
-	return true, ""
-}
-
-func (p Proxy) oauthSecretAuth(req *http.Request) (bool, string) {
-	appID := req.Header.Get("App-Id")
-	if appID == "" {
-		return false, "缺少 App-Id 请求头"
-	}
-
-	appSecret := req.Header.Get("App-Secret")
-	if appSecret == "" {
-		return false, "缺少 App-Secret 请求头"
-	}
-	return true, ""
-}
-
-var openApiJwtRoutes = []string{
-	`/api/open/oauth/v1/h5_authcode`,
-	`/api/open/oauth/v1/qrcode_scan`,
-	`/api/open/oauth/v1/qrcode_confirm`,
-	`/api/open/oauth/v1/qrcode_cancel`,
-}
-
-func isOpenApiPassThrough(path string) bool {
-	if !strings.HasPrefix(path, "/api/open/") {
-		return false
-	}
-	if utils.InListByRegex(openApiJwtRoutes, path) {
-		return false
-	}
-	return true
-}
-
-// jwtAuth JWT认证（普通用户）。客户端版本头只透传，不在网关拦截。
-func (p Proxy) jwtAuth(req *http.Request) (ok bool, errMsg string) {
-	token := getToken(req)
-	if token == "" {
-		apiGwLogger.Error(model.LogMsg{Text: "token为空"})
-		return false, "网关鉴权失败"
-	}
-
-	// 归一成标准 Authorization: Bearer：业务面 go-zero 内置 `jwt: Auth`
-	// 只从该头取令牌，网关侧统一完成载体转换。
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	claims, err := jwts.ParseToken(token, p.Config.Auth.AccessSecret)
-	if err != nil {
-		apiGwLogger.Error(model.LogMsg{Text: "JWT解析失败", Data: map[string]interface{}{"err": err.Error()}})
-		return false, "网关鉴权失败"
-	}
-
-	req.Header.Set("Beaver-User-Id", claims.UserID)
-
-	deviceId := req.Header.Get("deviceId")
-	if deviceId != "" {
-		req.Header.Set("Beaver-Device-Id", deviceId)
-	}
-	version := req.Header.Get("version")
-	if version == "" {
-		version = req.Header.Get("Version")
-	}
-	if version != "" {
-		req.Header.Set("Version", version)
-	}
-
-	apiGwLogger.Info(model.LogMsg{Text: "JWT验证成功", Data: map[string]interface{}{"userId": claims.UserID, "deviceId": deviceId}})
-	return true, ""
 }
 
 type statusRecorder struct {
@@ -314,18 +184,6 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// 入站先无条件清掉外部可能伪造的身份头；身份只由网关验签后重建，
-	// 业务面 .api 中间件再验一次并写入 context（纵深双验，算法同源）。
-	req.Header.Del("Beaver-User-Id")
-	req.Header.Del(jwt.HeaderClientID)
-
-	ok, authErrMsg := p.auth(req)
-	if !ok {
-		writeErrorResponse(rec, authErrMsg, http.StatusUnauthorized, serverTrace)
-		finish("网关鉴权失败", "warn", map[string]any{"msg": authErrMsg})
-		return
-	}
-
 	// 匹配路由
 	regex, _ := regexp.Compile(`/api/(.*?)/`)
 
@@ -388,14 +246,6 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		rec.status = http.StatusSwitchingProtocols
 	}
 	finish("网关请求完成", "info", map[string]any{"service": service + "_api"})
-}
-
-func getToken(req *http.Request) string {
-	token := req.Header.Get("Token")
-	if token == "" {
-		token = req.URL.Query().Get("token")
-	}
-	return token
 }
 
 // ensureServerTraceId Gateway 入口始终生成服务端 trace，与客户端 Uuid 无关。

@@ -1,6 +1,7 @@
 Name: gateway
 Addr: 0.0.0.0:20800
 etcd: 127.0.0.1:2379
+# 服务合并映射：URL 前缀 → 合并后的服务名（etcd 查 {值}_api）。
 ServiceAlias:
   chat: message
   friend: relation
@@ -11,37 +12,14 @@ ServiceAlias:
   auth: account
   circle: social
   moment: social
-  open_portal: open
-
+  developer: open
 Log:
   Encoding: json
   TimeFormat: 2006-01-02T15:04:05
   Stat: false
-Auth:
-  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
-  AccessExpire: 3600
-CompatibleVersion: "2.1"
-# 队间 S2S 机器票验签：密钥与 account_api 签发 /api/auth/token 的同源。
-# 外仓只打本网关，机器票与用户 JWT 在这里分流，业务面 authgate 再验一次。
-S2S:
-  Secret: s2s-dev-secret
-  Audience: core:api
-
 Limit:
   Enable: true
   Rate: 100    # 每秒请求数
   Burst: 200   # 峰值容忍
-# 无需 Gateway 鉴权（公开接口）
-PublicList:
-  - /api/auth/auth_public/.*
-  - ^/api/auth/token$
-  - /api/platform/track_public/.*
-  - /api/platform/update_public/.*
-  - /api/open/.*_public/.*
-  - /api/file/preview/.*
-  - /api/platform/v1/instance
-  - /api/call/v1/webhook
-# 下游服务自带鉴权中间件（open_api 控制台 group 的 DeveloperAuthMiddleware）
-CustomAuthList:
-  - /api/open_portal/.*
-# /api/open/oauth_secret/* Gateway 校验 App-Id/App-Secret 请求头；其余 /api/open/* 默认放行（logic 校验）
+# 网关不验签、不注入身份头；Token / Authorization 原样转发。
+# 鉴权全部由下游业务服务在 .api 中声明式声明并由其中间件执行。

@@ -82,7 +82,6 @@
 | moment | 20900 | 30800 | beaver-social | 圈子动态 |
 | call | 21800 | 31800 | beaver-call | 通话 |
 | open_api | 21900 | 30900 | beaver-open | 开放平台 API |
-| open_portal | 22000 | - | beaver-open | 开放平台门户 |
 | circle | 22100 | 32100 | beaver-social | 圈子 |
 | ai | 22200 | 32200 | beaver-ai | AI 服务 |
 | agent | 22300 | - | beaver-ai | 智能体（Python，静态 X-Internal-Token） |

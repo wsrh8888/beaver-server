@@ -23,41 +23,17 @@ package types
 
 import "github.com/zeromicro/go-zero/core/logx"
 
+// Config 网关只负责服务发现与转发；鉴权由下游业务服务声明式接线，
+// 因此这里不持有任何密钥、票据或路径白名单配置。
 type Config struct {
-	Name       string
-	Addr       string `json:",optional"`
-	Etcd       string
+	Name string
+	Addr string `json:",optional"`
+	Etcd string
 	// ServiceAlias URL 前缀 → 实际服务名（服务合并后按旧前缀路由到合并服务，
 	// 如 friend→relation；未命中映射时按 {前缀}_api 默认规则）。
-	ServiceAlias    map[string]string `json:",optional"`
-	Log        logx.LogConf
-	Prometheus PrometheusConfig
-	Limit          LimitConfig
-	Auth           AuthConfig
-	// S2S 队间机器票验签配置（与 account_api 签发密钥同源）。
-	S2S            S2SConfig
-	CompatibleVersion string   `json:",optional"` // 已停用，网关不再按客户端版本拦截
-	PublicList        []string `json:",optional"` // Gateway 不鉴权（含 *_public）
-	CustomAuthList    []string `json:",optional"` // 透传，由下游服务 middleware 鉴权
-}
-
-type AuthConfig struct {
-	AccessSecret string
-	AccessExpire int
-}
-
-// S2SConfig 网关验 S2S 机器票的密钥与受众。
-//
-// Secret 必须与 account_api 签发 /api/auth/token 的 S2S.Secret 一致；
-// Audience 留空时取 authgate.AudienceCore（core:api）。
-type S2SConfig struct {
-	Secret   string
-	Audience string `json:",optional"`
-}
-
-type PrometheusConfig struct {
-	Enable bool   `json:",default=false"`
-	Path   string `json:",default=/metrics"`
+	ServiceAlias map[string]string `json:",optional"`
+	Log          logx.LogConf
+	Limit        LimitConfig
 }
 
 type LimitConfig struct {
