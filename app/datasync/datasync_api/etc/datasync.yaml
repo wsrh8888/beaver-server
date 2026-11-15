@@ -61,9 +61,9 @@ RemoteProxy:
     BaseURL: http://127.0.0.1:22300
     Auth: internal_token
     InternalToken: ""
-  # S2S 出站：圈子服务（beaver-social/app/circle），client_credentials 换票后调其同步接口。
-  # BaseURL 指向圈子服务的 S2S 网关，须与该服务自身的 S2S Secret/Clients 配置成对。
-  Circle:
+  # S2S 出站：社交服务（beaver-social），client_credentials 换票后调其同步接口。
+  # BaseURL 指向社交服务的 S2S 网关，须与该服务自身的 S2S Secret/Clients 配置成对。
+  Social:
     BaseURL: http://127.0.0.1:22100
     Auth: client_credentials
     ClientID: beaver-server

@@ -1,4 +1,4 @@
-// Package moment A 主体（开源核心）→ 圈子动态服务（beaver-server-social/app/moment）的 S2S 接口代理。
+// Package moment A 主体（开源核心）→ 圈子动态服务（beaver-server-social/app/social）的 S2S 接口代理。
 //
 // 跨仓不允许 etcd gRPC 直连（团队铁律），统一走对方网关 /internal/Moment.*（client_credentials 换票 + Bearer）。
 // 结构对齐 remote/{open,ai,circle,doc}：enter.go 灌域名与凭据、remote.go 持有换票与发包 plumbing、
@@ -14,7 +14,7 @@ import (
 var client *Client
 
 // Init 装配出站凭据（收费模块动态服务分配给 A 主体的 client_credentials）与域名。
-// 只在该服务装配依赖时调用一次；域名写入 commonconfig.MomentUrl。
+// 只在该服务装配依赖时调用一次；域名写入 commonconfig.SocialUrl。
 func Init(clientID, clientSecret string) {
 	client = &Client{clientID: clientID, clientSecret: clientSecret}
 }

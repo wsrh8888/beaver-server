@@ -47,8 +47,9 @@ type Config struct {
 	AccountRpc      zrpc.RpcClientConf
 	RelationRpc     zrpc.RpcClientConf // relation_rpc（friend+group）
 	NotificationRpc zrpc.RpcClientConf
-	// RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
-	// 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
+	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
+	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
+	// 本仓若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
 	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
 	Auth        struct {
 		AccessSecret string

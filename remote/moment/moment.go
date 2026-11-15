@@ -31,20 +31,20 @@ import (
 
 // ListMoments 列圈子动态（管理后台 / 运营概览）。
 func ListMoments(ctx context.Context, header http.Header, body *momenttype.ListMomentsReq) (*momenttype.ListMomentsRes, error) {
-	return Post[momenttype.ListMomentsRes](ctx, commonconfig.MomentUrl+"/internal/Moment.ListMoments", header, body)
+	return Post[momenttype.ListMomentsRes](ctx, commonconfig.SocialUrl+"/internal/Moment.ListMoments", header, body)
 }
 
 // UpdateMoment 更新圈子动态（状态 / 内容变更）。
 func UpdateMoment(ctx context.Context, header http.Header, body *momenttype.UpdateMomentReq) (*momenttype.UpdateMomentRes, error) {
-	return Post[momenttype.UpdateMomentRes](ctx, commonconfig.MomentUrl+"/internal/Moment.UpdateMoment", header, body)
+	return Post[momenttype.UpdateMomentRes](ctx, commonconfig.SocialUrl+"/internal/Moment.UpdateMoment", header, body)
 }
 
 // ListMomentComments 列动态下的评论。
 func ListMomentComments(ctx context.Context, header http.Header, body *momenttype.ListMomentCommentsReq) (*momenttype.ListMomentCommentsRes, error) {
-	return Post[momenttype.ListMomentCommentsRes](ctx, commonconfig.MomentUrl+"/internal/Moment.ListMomentComments", header, body)
+	return Post[momenttype.ListMomentCommentsRes](ctx, commonconfig.SocialUrl+"/internal/Moment.ListMomentComments", header, body)
 }
 
 // DeleteMomentComments 批量删除动态下的评论。
 func DeleteMomentComments(ctx context.Context, header http.Header, body *momenttype.DeleteMomentCommentsReq) (*momenttype.DeleteMomentCommentsRes, error) {
-	return Post[momenttype.DeleteMomentCommentsRes](ctx, commonconfig.MomentUrl+"/internal/Moment.DeleteMomentComments", header, body)
+	return Post[momenttype.DeleteMomentCommentsRes](ctx, commonconfig.SocialUrl+"/internal/Moment.DeleteMomentComments", header, body)
 }

@@ -1,3 +1,22 @@
+# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
+# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
+# 本服务若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+RemoteProxy:
+  Open:
+    BaseURL: http://127.0.0.1:21900
+    Auth: client_credentials
+    ClientID: beaver-server
+    ClientSecret: s2s-dev-secret
+  Ai:
+    BaseURL: http://127.0.0.1:22200
+    Auth: client_credentials
+    ClientID: beaver-server
+    ClientSecret: s2s-dev-secret
+  # Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 agent_api 网关。
+  Agent:
+    BaseURL: http://127.0.0.1:22300
+    Auth: internal_token
+    InternalToken: ""
 Name: message_rpc
 ListenOn: 0.0.0.0:30300
 Etcd:
@@ -38,30 +57,18 @@ GroupRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: relationrpc.rpc
-# 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与鉴权方式。
-# 跨团队一律走对方网关的 /internal/<Module>.<Method>，禁止 etcd gRPC 直连、禁止引用对方代码。
-RemoteProxy:
-  Open:
-    BaseURL: http://127.0.0.1:21900
-    Auth: client_credentials
-    ClientID: beaver-server
-    ClientSecret: s2s-dev-secret
-  Ai:
-    BaseURL: http://127.0.0.1:22200
-    Auth: client_credentials
-    ClientID: beaver-server
-    ClientSecret: s2s-dev-secret
-  # Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 agent_api 网关。
-  Agent:
-    BaseURL: http://127.0.0.1:22300
-    Auth: internal_token
-    InternalToken: ""
 NotificationRpc:
   NonBlock: true
   Etcd:
     Hosts:
     - 127.0.0.1:2379
     Key: notificationrpc.rpc
+PlatformRpc:
+  NonBlock: true
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: platformrpc.rpc
 RocketMQ:
   Addr: 127.0.0.1:9876
 Push:

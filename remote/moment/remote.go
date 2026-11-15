@@ -14,7 +14,7 @@ import (
 // 各业务线的对端、凭据、路径各不相同，所以这份 plumbing 每个业务线各存一份，不抽公共包。
 //
 // 换票请求在 token.go 的 GetToken，域名由业务方法在自己的调用行写全
-// commonconfig.MomentUrl + 路径。
+// commonconfig.SocialUrl + 路径。
 
 const (
 	// tokenTTL 对端没给 expires_in 时的兜底有效期。

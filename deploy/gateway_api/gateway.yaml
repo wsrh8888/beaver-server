@@ -9,6 +9,9 @@ ServiceAlias:
   emoji: asset
   user: account
   auth: account
+  circle: social
+  moment: social
+  open_portal: open
 
 Log:
   Encoding: json
@@ -37,7 +40,7 @@ PublicList:
   - /api/open/.*_public/.*
   - /api/file/preview/.*
   - /api/call/v1/webhook
-# 下游服务自带鉴权中间件（如 open_portal DeveloperAuthMiddleware）
+# 下游服务自带鉴权中间件（open_api 控制台 group 的 DeveloperAuthMiddleware）
 CustomAuthList:
   - /api/open_portal/.*
 # /api/open/oauth_secret/* Gateway 校验 App-Id/App-Secret 请求头；其余 /api/open/* 默认放行（logic 校验）

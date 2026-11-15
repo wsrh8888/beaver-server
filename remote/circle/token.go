@@ -20,7 +20,7 @@ func GetToken(ctx context.Context, clientID, clientSecret string) (string, int, 
 	form.Set("client_id", clientID)
 	form.Set("client_secret", clientSecret)
 
-	out, err := ajax.PostForm[remotetype.TokenResponse](ctx, commonconfig.CircleUrl+"/internal/token", nil, form)
+	out, err := ajax.PostForm[remotetype.TokenResponse](ctx, commonconfig.SocialUrl+"/internal/token", nil, form)
 	if err != nil {
 		return "", 0, fmt.Errorf("换票失败: %w", err)
 	}

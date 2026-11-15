@@ -22,11 +22,16 @@
 // Package commonconfig 出站 S2S 端点注册表（仓级共享，五个仓内容完全一致）。
 //
 // 团队之间不互通：本仓不对外提供 rpc，也不直连别人的 etcd；要用其它团队的能力，
-// 一律走对方服务既有的 HTTP 契约 + 机器票 Bearer，不经任何业务门面中转。
+// 一律走各自网关既有的 HTTP 契约 + 机器票 Bearer，不跨仓 gRPC 直连、不经业务门面中转。
 //
-// 两条轨合成一条：yaml 的 RemoteProxy 段是部署事实，各服务 config 直接内嵌本包的
-// RemoteProxy 类型（不再各写一份字段表），启动时 Load 一次把域名灌进包级变量；
-// remote/<对端>.Init 只收凭据，域名一律从这里读。业务侧不碰本包，只调 remote 的包函数。
+// 出站分两类：外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约；
+// 本仓出站到其它团队按上述方式。本仓的 /internal/* 若存在只是入站面，与 Beaver 出站无关。
+//
+// 两条轨合成一条：yaml 的 RemoteProxy 段是部署事实（唯一出站注册表），各服务 config
+// 直接内嵌本包的 RemoteProxy 类型（不再各写一份字段表），启动时 Load 一次把域名灌进
+// 包级变量；remote/<对端>.Init 只收凭据，域名一律从这里读。业务侧不碰本包，只调 remote
+// 的包函数。Beaver 是 A 主体整体的 peer（唯一入口 gateway_api）；本仓自身不出站调自己，
+// 这一项只在五仓之间保持类型对称，yaml 留空即可，禁止按业务域拆成多个 BaseURL。
 //
 // 只存原值：不去空白、不削末尾斜杠，拼地址的规则由调用方自己保证（多一个斜杠就是 404）。
 package commonconfig
@@ -61,14 +66,15 @@ type AgentEndpoint struct {
 // 一个进程只跑一个服务，用不到的对端在 yaml 里留空即可（全部 optional），
 // 所以五个仓共用同一份类型，不会出现「A 仓有这个字段、B 仓没有」的漂移。
 type RemoteProxy struct {
+	// Beaver A 主体 beaver-server 整体：唯一入口 gateway_api。
+	// 本仓自用时留空（optional）；禁止把 account/message/relation/... 拆成多个 BaseURL。
+	Beaver Endpoint `json:",optional"`
 	// Ai AI 服务（beaver-ai）。
 	Ai Endpoint `json:",optional"`
 	// Open 开放平台（beaver-open）。
 	Open Endpoint `json:",optional"`
-	// Moment 动态服务（beaver-social）。
-	Moment Endpoint `json:",optional"`
-	// Circle 圈子服务（beaver-social）。
-	Circle Endpoint `json:",optional"`
+	// Social 社交服务（beaver-social）：圈子与动态同属一个产品整体，只有一个入口。
+	Social Endpoint `json:",optional"`
 	// Doc 在线文档服务（beaver-doc）。
 	Doc Endpoint `json:",optional"`
 	// Agent 智能体 py 服务（beaver-ai），静态 X-Internal-Token。
@@ -77,10 +83,12 @@ type RemoteProxy struct {
 
 // 各对端网关域名，由 Load 从服务自己的 yaml 灌入；该服务用不到的对端保持空。
 var (
+	// BeaverUrl A 主体 gateway_api 唯一入口；本仓不出站调自己，保持五仓命名对称。
+	BeaverUrl string
+
 	AiUrl     string
 	OpenUrl   string
-	MomentUrl string
-	CircleUrl string
+	SocialUrl string
 	DocUrl    string
 	AgentUrl  string
 )
@@ -88,10 +96,11 @@ var (
 // Load 由各服务 NewServiceContext 在装配依赖前调一次，把 yaml 里配的域名存进本包。
 // 一个进程只跑一个服务，不存在多份 Load 交叉覆盖。
 func Load(p RemoteProxy) {
+	BeaverUrl = p.Beaver.BaseURL
+
 	AiUrl = p.Ai.BaseURL
 	OpenUrl = p.Open.BaseURL
-	MomentUrl = p.Moment.BaseURL
-	CircleUrl = p.Circle.BaseURL
+	SocialUrl = p.Social.BaseURL
 	DocUrl = p.Doc.BaseURL
 	AgentUrl = p.Agent.BaseURL
 }
