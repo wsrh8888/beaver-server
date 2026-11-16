@@ -45,13 +45,13 @@ type (
 service platform {
 	@doc "查询当前组织"
 	@handler GetOrganization
-	get /api/org/v1/organization (GetOrganizationReq) returns (GetOrganizationRes)
+	get /beaver/api/org/org/v1/organization (GetOrganizationReq) returns (GetOrganizationRes)
 
 	@doc "部门树，节点带直属成员人数"
 	@handler DepartmentTree
-	get /api/org/v1/department/tree (DepartmentTreeReq) returns (DepartmentTreeRes)
+	get /beaver/api/org/org/v1/department_tree (DepartmentTreeReq) returns (DepartmentTreeRes)
 
 	@doc "成员列表，可按部门过滤"
 	@handler ListMember
-	get /api/org/v1/member/list (ListMemberReq) returns (ListMemberRes)
+	get /beaver/api/org/org/v1/member_list (ListMemberReq) returns (ListMemberRes)
 }

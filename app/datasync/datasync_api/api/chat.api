@@ -71,27 +71,28 @@ type (
 
 @server (
 	jwt: Auth
+	group: sync
 )
 service datasync {
 	@doc "获取所有需要更新的聊天消息版本"
 	@handler getSyncChatMessages
-	post /api/datasync/v1/getSyncChatMessages (GetSyncChatMessagesReq) returns (GetSyncChatMessagesRes)
+	post /beaver/api/datasync/sync/v1/getSyncChatMessages (GetSyncChatMessagesReq) returns (GetSyncChatMessagesRes)
 
 	@doc "获取所有需要更新的已删除消息ID列表"
 	@handler getSyncDeletedMessages
-	post /api/datasync/v1/getSyncDeletedMessages (GetSyncDeletedMessagesReq) returns (GetSyncDeletedMessagesRes)
+	post /beaver/api/datasync/sync/v1/getSyncDeletedMessages (GetSyncDeletedMessagesReq) returns (GetSyncDeletedMessagesRes)
 
 	@doc "获取所有需要同步的消息媒体状态"
 	@handler getSyncMessageMedias
-	post /api/datasync/v1/getSyncMessageMedias (GetSyncMessageMediasReq) returns (GetSyncMessageMediasRes)
+	post /beaver/api/datasync/sync/v1/getSyncMessageMedias (GetSyncMessageMediasReq) returns (GetSyncMessageMediasRes)
 
 	@doc "获取所有需要更新的会话元信息版本"
 	@handler getSyncChatConversations
-	post /api/datasync/v1/getSyncChatConversations (GetSyncChatConversationsReq) returns (GetSyncChatConversationsRes)
+	post /beaver/api/datasync/sync/v1/getSyncChatConversations (GetSyncChatConversationsReq) returns (GetSyncChatConversationsRes)
 
 	@doc "获取所有需要更新的用户会话设置版本"
 	@handler getSyncChatUserConversations
-	post /api/datasync/v1/getSyncChatUserConversations (GetSyncChatUserConversationsReq) returns (GetSyncChatUserConversationsRes)
+	post /beaver/api/datasync/sync/v1/getSyncChatUserConversations (GetSyncChatUserConversationsReq) returns (GetSyncChatUserConversationsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

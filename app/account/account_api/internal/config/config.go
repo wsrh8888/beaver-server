@@ -47,16 +47,16 @@ type Config struct {
 	AccountRpc      zrpc.RpcClientConf
 	RelationRpc     zrpc.RpcClientConf // relation_rpc（friend+group）
 	NotificationRpc zrpc.RpcClientConf
-	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
-	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
-	// 本仓若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自标准 HTTP 契约 + 机器票 Bearer；
+	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约，业务能力只有这一套 HTTP 契约；
+	// 本仓出站不使用任何 /internal/* 私有端点，只走对端标准 .api 路径。
 	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
 	Auth        struct {
 		AccessSecret string
 		AccessExpire int
 	}
 	// S2S 入站机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
-	// 换票端点在本服务的 POST /api/auth/token（client_credentials）。
+	// 换票端点在本服务的 POST /beaver/api/auth/token/v1/issue（client_credentials）。
 	S2S struct {
 		Secret  string                     `json:",optional"`
 		Clients map[string]jwt.ClientEntry `json:",optional"`

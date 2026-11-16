@@ -47,11 +47,11 @@ type Config struct {
 	RelationRpc     zrpc.RpcClientConf // relation_rpc（friend+group 同进程，etcd relationrpc.rpc）
 	ChatRpc         zrpc.RpcClientConf
 	NotificationRpc zrpc.RpcClientConf
-	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
-	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
-	// 本仓若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自标准 HTTP 契约 + 机器票 Bearer；
+	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约，业务能力只有这一套 HTTP 契约；
+	// 本仓出站不使用任何 /internal/* 私有端点，只走对端标准 .api 路径。
 	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
-	// Auth 用户 JWT 签名密钥，与网关 Auth.AccessSecret 同值：
+	// Auth 用户 JWT 签名密钥，本服务独立签发并校验用户票：
 	// 本服务独立验用户票，不信任任何外部直接塞进来的 Beaver-User-Id。
 	Auth struct {
 		AccessSecret string

@@ -78,13 +78,15 @@ goctl rpc protoc xxx.proto --go_out=. --go-grpc_out=. -m --zrpc_out=.
 - client 构造：`NewUser` / `NewAuth` / `NewFriend` / `NewGroup` / `NewFile` / `NewEmoji`。
 - gateway `ServiceAlias`（URL 前缀→合并服务名，7 条）：friend/group→relation、file/emoji→asset、user/auth→account、chat→message。deploy yaml 的 `Name` 不带 `_api` 后缀（代码注册 `c.Name+"_api"`）。根 Dockerfile = 9 服务 16 二进制，改名后同步。
 
-## 鉴权（双通道）
+## 鉴权（声明式，业务自持）
 
-同一套 `/api` 路由同时服务用户 JWT 与 S2S 机器票，差异只在 `middleware/authgate/`。机器票单受众 `core:api`，换票端点 `POST /api/auth/token`（account_api，client_credentials）。鉴权失败返回真实 401（非 200+code=1，否则 S2S 客户端无法清票重换）。
+网关只按路径第 3 段 service 转发，**不鉴权、不注入身份头**；鉴权全部由下游业务服务在 `.api` 中声明：`@server (jwt: Auth)` 挂用户 JWT，`@server (middleware: InternalToken)` 挂 S2S 机器票，换票端点单独成组不挂中间件（靠 client_secret）。机器票受众按服务区分（`core:api` / `open:internal` / `doc:internal` / `ai:internal`），换票端点如 `POST /beaver/api/auth/token/v1/issue`（account_api，client_credentials）。鉴权失败返回真实 401（非 200+code=1，否则 S2S 客户端无法清票重换）。
 
-新服务接入：config 加 `Auth` + `S2S`、svc 构造 `authgate.NewGate(...)` 并 `Validate()`、main 里 `server.Use(ctx.AuthGate)`。**不要另造转发层或第二套门面。**
+新服务接入：在 `.api` 里按面声明 `jwt` 或 `middleware`，svc 构造对应中间件（如 `jwt.NewS2S(...)`）注入，main 只调 goctl 生成的 `RegisterHandlers`。**不要另造转发层、全局 AuthGate 或第二套门面。**
 
-特例：agent_api 用静态 `X-Internal-Token`（非 OAuth），与调用方 yaml `InternalToken` 同值。
+对外路径统一六段：`/{team}/{surface}/{service}/{group}/v1/{action}`，team ∈ `beaver`（主仓）/ `beaver-social|beaver-open|beaver-doc|beaver-call|beaver-ai|beaver-backend`（独立产品仓）。跨仓调用一律走对方标准机器视图六段路径，禁止 `/internal/X.Method` 双轨。
+
+特例：agent_api（Python）机器面用 Bearer JWT 或静态 `X-Internal-Token`（与调用方 yaml `InternalToken` 同值），由 AuthMiddleware 按机器面路径前缀分支处理。
 
 ## go.mod replace（本地联调）
 

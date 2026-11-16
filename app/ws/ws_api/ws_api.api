@@ -57,20 +57,22 @@ type SystemNotification {
 
 @server (
 	middleware: AuthGate
+	group:      socket
 )
 service ws {
 	@doc "WebSocket连接入口"
 	@handler chatWebsocket
-	get /api/ws/v1/ws (wsReq) returns (wsRes)
+	get /beaver/api/ws/socket/v1/ws (wsReq) returns (wsRes)
 }
 
 @server (
 	middleware: AuthGate
+	group:      proxy
 )
 service ws {
 	@doc "HTTP API发送消息"
 	@handler proxySendMsgHandler
-	post /api/ws/v1/proxySendMsg (ProxySendMsgReq) returns (ProxySendMsgRes)
+	post /beaver/api/ws/proxy/v1/send_msg (ProxySendMsgReq) returns (ProxySendMsgRes)
 }
 
 // goctl api go -api ws_api.api -dir . --home ../../../template

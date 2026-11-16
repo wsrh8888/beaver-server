@@ -294,63 +294,63 @@ type (
 service asset {
 	@doc "添加表情，并且自动收藏"
 	@handler AddEmoji
-	post /api/emoji/v1/add (AddEmojiReq) returns (AddEmojiRes)
+	post /beaver/api/emoji/emoji/v1/add (AddEmojiReq) returns (AddEmojiRes)
 
 	@doc "收藏或者取消收藏表情"
 	@handler UpdateFavoriteEmoji
-	post /api/emoji/v1/favoriteEmoji (UpdateFavoriteEmojiReq) returns (UpdateFavoriteEmojiRes)
+	post /beaver/api/emoji/emoji/v1/favoriteEmoji (UpdateFavoriteEmojiReq) returns (UpdateFavoriteEmojiRes)
 
 	@doc "获取用户收藏的表情列表"
 	@handler GetEmojisList
-	post /api/emoji/v1/favoriteList (GetEmojisListReq) returns (GetEmojisListRes)
+	post /beaver/api/emoji/emoji/v1/favoriteList (GetEmojisListReq) returns (GetEmojisListRes)
 
 	@doc "获取表情包列表"
 	@handler GetEmojiPackages
-	post /api/emoji/v1/packageList (GetEmojiPackagesReq) returns (GetEmojiPackagesRes)
+	post /beaver/api/emoji/emoji/v1/packageList (GetEmojiPackagesReq) returns (GetEmojiPackagesRes)
 
 	@doc "获取表情包详情"
 	@handler GetEmojiPackageDetail
-	post /api/emoji/v1/packageInfo (GetEmojiPackageDetailReq) returns (GetEmojiPackageDetailRes)
+	post /beaver/api/emoji/emoji/v1/packageInfo (GetEmojiPackageDetailReq) returns (GetEmojiPackageDetailRes)
 
 	@doc "收藏或取消收藏表情包"
 	@handler UpdateFavoriteEmojiPackage
-	post /api/emoji/v1/packageFavorite (UpdateFavoriteEmojiPackageReq) returns (UpdateFavoriteEmojiPackageRes)
+	post /beaver/api/emoji/emoji/v1/packageFavorite (UpdateFavoriteEmojiPackageReq) returns (UpdateFavoriteEmojiPackageRes)
 
 	@doc "获取用户收藏的表情包列表"
 	@handler GetUserFavoritePackages
-	post /api/emoji/v1/favoritePackageList (GetUserFavoritePackagesReq) returns (GetUserFavoritePackagesRes)
+	post /beaver/api/emoji/emoji/v1/favoritePackageList (GetUserFavoritePackagesReq) returns (GetUserFavoritePackagesRes)
 
 	@doc "批量获取表情详情（数据库同步）"
 	@handler GetEmojisByIds
-	post /api/emoji/v1/emojis-by-ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
+	post /beaver/api/emoji/emoji/v1/emojis-by-ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
 
 	@doc "按ID批量查询表情基础信息（数据库同步）"
 	@handler GetEmojisByUuids
-	post /api/emoji/v1/getEmojisByUuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
+	post /beaver/api/emoji/emoji/v1/getEmojisByUuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
 
 	@doc "批量获取表情包详情（数据库同步）"
 	@handler GetEmojiPackagesByIds
-	post /api/emoji/v1/packages-by-ids (GetEmojiPackagesByIdsReq) returns (GetEmojiPackagesByIdsRes)
+	post /beaver/api/emoji/emoji/v1/packages-by-ids (GetEmojiPackagesByIdsReq) returns (GetEmojiPackagesByIdsRes)
 
 	@doc "批量获取用户收藏的表情记录详情（数据库同步）"
 	@handler GetEmojiCollectsByIds
-	post /api/emoji/v1/collects-by-ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
+	post /beaver/api/emoji/emoji/v1/collects-by-ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
 
 	@doc "批量获取用户收藏的表情包记录详情（数据库同步）"
 	@handler GetEmojiPackageCollectsByIds
-	post /api/emoji/v1/package-collects-by-ids (GetEmojiPackageCollectsByIdsReq) returns (GetEmojiPackageCollectsByIdsRes)
+	post /beaver/api/emoji/emoji/v1/package-collects-by-ids (GetEmojiPackageCollectsByIdsReq) returns (GetEmojiPackageCollectsByIdsRes)
 
 	@doc "批量获取表情包内容详情（数据库同步）"
 	@handler GetEmojiPackageContentsByPackageIds
-	post /api/emoji/v1/package-contents-by-package-ids (GetEmojiPackageContentsByPackageIdsReq) returns (GetEmojiPackageContentsByPackageIdsRes)
+	post /beaver/api/emoji/emoji/v1/package-contents-by-package-ids (GetEmojiPackageContentsByPackageIdsReq) returns (GetEmojiPackageContentsByPackageIdsRes)
 
 	@doc "批量获取表情包内容详情（通过relationIds，数据库同步）"
 	@handler GetEmojiPackageContentsByRelationIds
-	post /api/emoji/v1/package-contents-by-relation-ids (GetEmojiPackageContentsByRelationIdsReq) returns (GetEmojiPackageContentsByRelationIdsRes)
+	post /beaver/api/emoji/emoji/v1/package-contents-by-relation-ids (GetEmojiPackageContentsByRelationIdsReq) returns (GetEmojiPackageContentsByRelationIdsRes)
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分。
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分。
 // C 端按「当前用户」取表情，队间按「记录维度」分页与写入，路径刻意错开。
 
 type (
@@ -483,27 +483,27 @@ type (
 service asset {
 	@doc "队间：分页查询表情"
 	@handler EmojiList
-	post /api/emoji/v1/list_emojis (ListEmojisReq) returns (ListEmojisRes)
+	post /beaver/api/emoji/machine/v1/list_emojis (ListEmojisReq) returns (ListEmojisRes)
 
 	@doc "队间：分页查询表情包"
 	@handler EmojiPackageList
-	post /api/emoji/v1/list_packages (ListEmojiPackagesReq) returns (ListEmojiPackagesRes)
+	post /beaver/api/emoji/machine/v1/list_packages (ListEmojiPackagesReq) returns (ListEmojiPackagesRes)
 
 	@doc "队间：分页查询用户收藏的表情"
 	@handler EmojiCollectList
-	post /api/emoji/v1/list_collects (ListEmojiCollectsReq) returns (ListEmojiCollectsRes)
+	post /beaver/api/emoji/machine/v1/list_collects (ListEmojiCollectsReq) returns (ListEmojiCollectsRes)
 
 	@doc "队间：新建/增量更新表情"
 	@handler EmojiSave
-	post /api/emoji/v1/save (SaveEmojiReq) returns (SaveEmojiRes)
+	post /beaver/api/emoji/machine/v1/save (SaveEmojiReq) returns (SaveEmojiRes)
 
 	@doc "队间：新建/增量更新表情包"
 	@handler EmojiPackageSave
-	post /api/emoji/v1/save_package (SaveEmojiPackageReq) returns (SaveEmojiPackageRes)
+	post /beaver/api/emoji/machine/v1/save_package (SaveEmojiPackageReq) returns (SaveEmojiPackageRes)
 
 	@doc "队间：增删表情包内容"
 	@handler EmojiPackageContentUpdate
-	post /api/emoji/v1/update_package_content (UpdateEmojiPackageContentReq) returns (UpdateEmojiPackageContentRes)
+	post /beaver/api/emoji/machine/v1/update_package_content (UpdateEmojiPackageContentReq) returns (UpdateEmojiPackageContentRes)
 }
 
 // goctl api go -api asset_api.api -dir . --home ../../../template

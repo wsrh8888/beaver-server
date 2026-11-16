@@ -31,10 +31,10 @@ import (
 
 // GetDigitalByUserID 按用户 ID 取数字身份。
 func GetDigitalByUserID(ctx context.Context, header http.Header, body *opentype.GetDigitalByUserIDReq) (*opentype.GetDigitalByUserIDRes, error) {
-	return Post[opentype.GetDigitalByUserIDRes](ctx, commonconfig.OpenUrl+"/internal/Open.GetDigitalByUserID", header, body)
+	return Post[opentype.GetDigitalByUserIDRes](ctx, commonconfig.OpenUrl+"/beaver-open/api/open/machine/v1/get_digital_by_user_id", header, body)
 }
 
 // GetDigitalConfig 取数字人配置（含 Runtime / BuiltinConfig / AppId 等编排信息）。
 func GetDigitalConfig(ctx context.Context, header http.Header, body *opentype.GetDigitalConfigReq) (*opentype.GetDigitalConfigRes, error) {
-	return Post[opentype.GetDigitalConfigRes](ctx, commonconfig.OpenUrl+"/internal/Open.GetDigitalConfig", header, body)
+	return Post[opentype.GetDigitalConfigRes](ctx, commonconfig.OpenUrl+"/beaver-open/api/open/machine/v1/get_digital_config", header, body)
 }

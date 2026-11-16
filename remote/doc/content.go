@@ -31,10 +31,10 @@ import (
 
 // GetDoc 读取在线文档元信息（标题 / 类型 / 同步状态等）。
 func GetDoc(ctx context.Context, header http.Header, body *doctype.GetDocReq) (*doctype.GetDocRes, error) {
-	return Post[doctype.GetDocRes](ctx, commonconfig.DocUrl+"/internal/Doc.GetDoc", header, body)
+	return Post[doctype.GetDocRes](ctx, commonconfig.DocUrl+"/beaver-doc/api/doc/machine/v1/get_doc", header, body)
 }
 
 // GetDocContent 读取在线文档正文（知识导入 / 文档源校验）。
 func GetDocContent(ctx context.Context, header http.Header, body *doctype.GetDocContentReq) (*doctype.GetDocContentRes, error) {
-	return Post[doctype.GetDocContentRes](ctx, commonconfig.DocUrl+"/internal/Doc.GetDocContent", header, body)
+	return Post[doctype.GetDocContentRes](ctx, commonconfig.DocUrl+"/beaver-doc/api/doc/machine/v1/get_doc_content", header, body)
 }

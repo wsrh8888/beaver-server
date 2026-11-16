@@ -208,63 +208,63 @@ type (
 service relation {
 	@doc "发送好友验证请求"
 	@handler addFriend
-	post /api/friend/v1/add_friend (AddFriendReq) returns (AddFriendRes)
+	post /beaver/api/friend/friend/v1/add_friend (AddFriendReq) returns (AddFriendRes)
 
 	@doc "处理好友验证请求(同意/拒绝)"
 	@handler userValidStatus
-	post /api/friend/v1/valid (FriendValidStatusReq) returns (FriendValidStatusRes)
+	post /beaver/api/friend/friend/v1/valid (FriendValidStatusReq) returns (FriendValidStatusRes)
 
 	@doc "获取好友列表"
 	@handler friendList
-	get /api/friend/v1/friend_list (FriendListReq) returns (FriendListRes)
+	get /beaver/api/friend/friend/v1/friend_list (FriendListReq) returns (FriendListRes)
 
 	@doc "获取好友验证请求列表"
 	@handler validList
-	post /api/friend/v1/valid_list (ValidListReq) returns (ValidListRes)
+	post /beaver/api/friend/friend/v1/valid_list (ValidListReq) returns (ValidListRes)
 
 	@doc "获取好友详细信息"
 	@handler friendInfo
-	get /api/friend/v1/friend_info (FriendInfoReq) returns (FriendInfoRes)
+	get /beaver/api/friend/friend/v1/friend_info (FriendInfoReq) returns (FriendInfoRes)
 
 	@doc "修改好友备注"
 	@handler noticeUpdate
-	post /api/friend/v1/update_notice (NoticeUpdateReq) returns (NoticeUpdateRes)
+	post /beaver/api/friend/friend/v1/update_notice (NoticeUpdateReq) returns (NoticeUpdateRes)
 
 	@doc "通过用户ID或邮箱搜索用户"
 	@handler search
-	get /api/friend/v1/search (SearchReq) returns (SearchRes)
+	get /beaver/api/friend/friend/v1/search (SearchReq) returns (SearchRes)
 
 	@doc "查询好友验证记录"
 	@handler searchValidInfo
-	post /api/friend/v1/searchValidInfo (SearchValidInfoReq) returns (SearchValidInfoRes)
+	post /beaver/api/friend/friend/v1/searchValidInfo (SearchValidInfoReq) returns (SearchValidInfoRes)
 
 	@doc "批量获取好友数据（通过ID）"
 	@handler getFriendsListByUuids
-	post /api/friend/v1/getFriendsListByIds (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
+	post /beaver/api/friend/friend/v1/getFriendsListByIds (GetFriendsListByUuidsReq) returns (GetFriendsListByUuidsRes)
 
 	@doc "批量获取好友验证数据（通过ID）"
 	@handler getFriendVerifiesListByIds
-	post /api/friend/v1/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
+	post /beaver/api/friend/friend/v1/getFriendVerifiesListByIds (GetFriendVerifiesListByIdsReq) returns (GetFriendVerifiesListByIdsRes)
 
 	@doc "删除好友"
 	@handler deleteFriend
-	delete /api/friend/v1/friend (DeleteFriendReq) returns (DeleteFriendRes)
+	delete /beaver/api/friend/friend/v1/friend (DeleteFriendReq) returns (DeleteFriendRes)
 
 	@doc "拉黑用户"
 	@handler blockUser
-	post /api/friend/v1/block (BlockUserReq) returns (BlockUserRes)
+	post /beaver/api/friend/friend/v1/block (BlockUserReq) returns (BlockUserRes)
 
 	@doc "取消拉黑"
 	@handler unblockUser
-	delete /api/friend/v1/block (UnblockUserReq) returns (UnblockUserRes)
+	delete /beaver/api/friend/friend/v1/block (UnblockUserReq) returns (UnblockUserRes)
 
 	@doc "获取黑名单列表"
 	@handler blockList
-	get /api/friend/v1/block_list (BlockListReq) returns (BlockListRes)
+	get /beaver/api/friend/friend/v1/block_list (BlockListReq) returns (BlockListRes)
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分：
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分：
 // 用户 JWT 只能看到自己的数据，机器票代表用户行事。路径刻意与 C 端错开，避免视图混用。
 
 type (
@@ -379,31 +379,31 @@ type (
 service relation {
 	@doc "队间：取好友ID列表"
 	@handler friendIds
-	post /api/friend/v1/ids (GetFriendIdsReq) returns (GetFriendIdsRes)
+	post /beaver/api/friend/machine/v1/ids (GetFriendIdsReq) returns (GetFriendIdsRes)
 
 	@doc "队间：分页查询好友关系"
 	@handler listFriends
-	post /api/friend/v1/list (ListFriendsReq) returns (ListFriendsRes)
+	post /beaver/api/friend/machine/v1/list (ListFriendsReq) returns (ListFriendsRes)
 
 	@doc "队间：批量删除/恢复好友关系"
 	@handler updateFriends
-	post /api/friend/v1/update (UpdateFriendsReq) returns (UpdateFriendsRes)
+	post /beaver/api/friend/machine/v1/update (UpdateFriendsReq) returns (UpdateFriendsRes)
 
 	@doc "队间：分页查询好友验证记录"
 	@handler listFriendVerifies
-	post /api/friend/v1/verifies (ListFriendVerifiesReq) returns (ListFriendVerifiesRes)
+	post /beaver/api/friend/machine/v1/verifies (ListFriendVerifiesReq) returns (ListFriendVerifiesRes)
 
 	@doc "队间：批量删除好友验证记录"
 	@handler updateFriendVerifies
-	post /api/friend/v1/update_valid (UpdateFriendVerifiesReq) returns (UpdateFriendVerifiesRes)
+	post /beaver/api/friend/machine/v1/update_valid (UpdateFriendVerifiesReq) returns (UpdateFriendVerifiesRes)
 
 	@doc "队间：分页查询黑名单"
 	@handler listFriendBlocks
-	post /api/friend/v1/blocks (ListFriendBlocksReq) returns (ListFriendBlocksRes)
+	post /beaver/api/friend/machine/v1/blocks (ListFriendBlocksReq) returns (ListFriendBlocksRes)
 
 	@doc "队间：批量解除拉黑"
 	@handler updateFriendBlocks
-	post /api/friend/v1/update_block (UpdateFriendBlocksReq) returns (UpdateFriendBlocksRes)
+	post /beaver/api/friend/machine/v1/update_block (UpdateFriendBlocksReq) returns (UpdateFriendBlocksRes)
 }
 
 // goctl api go -api relation_api.api -dir . --home ../../../template

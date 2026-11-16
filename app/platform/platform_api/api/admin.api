@@ -1,10 +1,8 @@
 // 平台后台管理 API（队间能力面）
 //
-// 这批端点原本只存在于 datasync 的 /internal/Module.Method 门面上，由后台管理仓
-// （beaver-backend）经 S2S 调用。现在收敛成正常的 .api 契约：后台管理仓直接打这里，
-// 身份由 authgate 中间件按机器票判定，不再经 datasync 多跳转发。
+// 后台管理仓（beaver-backend）直接调用本组标准机器视图，身份由 AuthGate 中间件按机器票判定。
 //
-// 与 C 端的 /api/platform/v1/* 视图不重叠：这里是运维/运营视角，可以按记录维度读写。
+// 与 C 端的 /beaver/api/platform/* 视图不重叠：这里是运维/运营视角，可以按记录维度读写。
 
 type (
 	AdminLogItem {
@@ -384,97 +382,97 @@ type (
 service platform {
 	@doc "队间：查询后台操作日志"
 	@handler adminQueryLogs
-	post /api/platform/admin/v1/admin_query_logs (AdminQueryLogsReq) returns (AdminQueryLogsRes)
+	post /beaver/api/platform/admin/v1/admin_query_logs (AdminQueryLogsReq) returns (AdminQueryLogsRes)
 
 	@doc "队间：创建应用"
 	@handler createApp
-	post /api/platform/admin/v1/create_app (CreateAppReq) returns (CreateAppRes)
+	post /beaver/api/platform/admin/v1/create_app (CreateAppReq) returns (CreateAppRes)
 
 	@doc "队间：分页查询应用"
 	@handler listApps
-	post /api/platform/admin/v1/list_apps (ListAppsReq) returns (ListAppsRes)
+	post /beaver/api/platform/admin/v1/list_apps (ListAppsReq) returns (ListAppsRes)
 
 	@doc "队间：创建应用架构"
 	@handler createArchitecture
-	post /api/platform/admin/v1/create_architecture (CreateArchitectureReq) returns (CreateArchitectureRes)
+	post /beaver/api/platform/admin/v1/create_architecture (CreateArchitectureReq) returns (CreateArchitectureRes)
 
 	@doc "队间：更新应用架构"
 	@handler updateArchitecture
-	post /api/platform/admin/v1/update_architecture (UpdateArchitectureReq) returns (UpdateArchitectureRes)
+	post /beaver/api/platform/admin/v1/update_architecture (UpdateArchitectureReq) returns (UpdateArchitectureRes)
 
 	@doc "队间：分页查询应用架构"
 	@handler listArchitectures
-	post /api/platform/admin/v1/list_architectures (ListArchitecturesReq) returns (ListArchitecturesRes)
+	post /beaver/api/platform/admin/v1/list_architectures (ListArchitecturesReq) returns (ListArchitecturesRes)
 
 	@doc "队间：创建版本"
 	@handler createVersion
-	post /api/platform/admin/v1/create_version (CreateVersionReq) returns (CreateVersionRes)
+	post /beaver/api/platform/admin/v1/create_version (CreateVersionReq) returns (CreateVersionRes)
 
 	@doc "队间：删除版本"
 	@handler deleteVersion
-	post /api/platform/admin/v1/delete_version (DeleteVersionReq) returns (DeleteVersionRes)
+	post /beaver/api/platform/admin/v1/delete_version (DeleteVersionReq) returns (DeleteVersionRes)
 
 	@doc "队间：分页查询版本"
 	@handler listVersions
-	post /api/platform/admin/v1/list_versions (ListVersionsReq) returns (ListVersionsRes)
+	post /beaver/api/platform/admin/v1/list_versions (ListVersionsReq) returns (ListVersionsRes)
 
 	@doc "队间：按应用查询版本（按架构分组）"
 	@handler listAppVersions
-	post /api/platform/admin/v1/list_app_versions (ListAppVersionsReq) returns (ListAppVersionsRes)
+	post /beaver/api/platform/admin/v1/list_app_versions (ListAppVersionsReq) returns (ListAppVersionsRes)
 
 	@doc "队间：新增或更新发布策略"
 	@handler upsertReleasePolicy
-	post /api/platform/admin/v1/upsert_release_policy (UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes)
+	post /beaver/api/platform/admin/v1/upsert_release_policy (UpsertReleasePolicyReq) returns (UpsertReleasePolicyRes)
 
 	@doc "队间：查询发布策略"
 	@handler listReleasePolicies
-	post /api/platform/admin/v1/list_release_policies (ListReleasePoliciesReq) returns (ListReleasePoliciesRes)
+	post /beaver/api/platform/admin/v1/list_release_policies (ListReleasePoliciesReq) returns (ListReleasePoliciesRes)
 
 	@doc "队间：分页查询用户反馈"
 	@handler listFeedback
-	post /api/platform/admin/v1/list_feedback (ListFeedbackReq) returns (ListFeedbackRes)
+	post /beaver/api/platform/admin/v1/list_feedback (ListFeedbackReq) returns (ListFeedbackRes)
 
 	@doc "队间：查询单条用户反馈"
 	@handler getFeedback
-	post /api/platform/admin/v1/get_feedback (GetFeedbackReq) returns (GetFeedbackRes)
+	post /beaver/api/platform/admin/v1/get_feedback (GetFeedbackReq) returns (GetFeedbackRes)
 
 	@doc "队间：处理用户反馈"
 	@handler handleFeedback
-	post /api/platform/admin/v1/handle_feedback (HandleFeedbackReq) returns (HandleFeedbackRes)
+	post /beaver/api/platform/admin/v1/handle_feedback (HandleFeedbackReq) returns (HandleFeedbackRes)
 
 	@doc "队间：删除用户反馈"
 	@handler deleteFeedback
-	post /api/platform/admin/v1/delete_feedback (DeleteFeedbackReq) returns (DeleteFeedbackRes)
+	post /beaver/api/platform/admin/v1/delete_feedback (DeleteFeedbackReq) returns (DeleteFeedbackRes)
 
 	@doc "队间：分页查询内容举报"
 	@handler listContentReports
-	post /api/platform/admin/v1/list_content_reports (ListContentReportsReq) returns (ListContentReportsRes)
+	post /beaver/api/platform/admin/v1/list_content_reports (ListContentReportsReq) returns (ListContentReportsRes)
 
 	@doc "队间：查询单条内容举报"
 	@handler getContentReport
-	post /api/platform/admin/v1/get_content_report (GetContentReportReq) returns (GetContentReportRes)
+	post /beaver/api/platform/admin/v1/get_content_report (GetContentReportReq) returns (GetContentReportRes)
 
 	@doc "队间：批量处理内容举报"
 	@handler updateContentReports
-	post /api/platform/admin/v1/update_content_reports (UpdateContentReportsReq) returns (UpdateContentReportsRes)
+	post /beaver/api/platform/admin/v1/update_content_reports (UpdateContentReportsReq) returns (UpdateContentReportsRes)
 
 	@doc "队间：创建工作台应用"
 	@handler createWorkbenchApp
-	post /api/platform/admin/v1/create_workbench_app (CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes)
+	post /beaver/api/platform/admin/v1/create_workbench_app (CreateWorkbenchAppReq) returns (CreateWorkbenchAppRes)
 
 	@doc "队间：更新工作台应用"
 	@handler updateWorkbenchApp
-	post /api/platform/admin/v1/update_workbench_app (UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes)
+	post /beaver/api/platform/admin/v1/update_workbench_app (UpdateWorkbenchAppReq) returns (UpdateWorkbenchAppRes)
 
 	@doc "队间：删除工作台应用"
 	@handler deleteWorkbenchApp
-	post /api/platform/admin/v1/delete_workbench_app (DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes)
+	post /beaver/api/platform/admin/v1/delete_workbench_app (DeleteWorkbenchAppReq) returns (DeleteWorkbenchAppRes)
 
 	@doc "队间：查询单条工作台应用"
 	@handler getWorkbenchApp
-	post /api/platform/admin/v1/get_workbench_app (GetWorkbenchAppReq) returns (GetWorkbenchAppRes)
+	post /beaver/api/platform/admin/v1/get_workbench_app (GetWorkbenchAppReq) returns (GetWorkbenchAppRes)
 
 	@doc "队间：分页查询工作台应用"
 	@handler adminListWorkbenchApps
-	post /api/platform/admin/v1/list_workbench_apps (AdminListWorkbenchAppsReq) returns (AdminListWorkbenchAppsRes)
+	post /beaver/api/platform/admin/v1/list_workbench_apps (AdminListWorkbenchAppsReq) returns (AdminListWorkbenchAppsRes)
 }

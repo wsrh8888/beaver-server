@@ -1,6 +1,6 @@
-# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
-# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
-# 本服务若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自标准 HTTP 契约 + 机器票 Bearer；
+# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约，业务能力只有这一套 HTTP 契约；
+# 本仓出站不使用任何 /internal/* 私有端点，只走对端标准 .api 路径。
 RemoteProxy:
   Open:
     BaseURL: http://127.0.0.1:21900
@@ -33,10 +33,8 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /api/auth/auth_public/.*
-  - /api/settings/open_login_info
-  - /api/file/preview
-  - /api/update/report
+  - /beaver/api/auth/auth_public/.*
+  - /beaver/api/file/preview/v1/get
 Email:
   QQ:
     Host: smtp.qq.com
@@ -72,7 +70,7 @@ RocketMQ:
   Addr: 127.0.0.1:9876
 
 # 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
-# 换票端点在本服务：POST /api/auth/token（client_credentials）。
+# 换票端点在本服务：POST /beaver/api/auth/token/v1/issue（client_credentials）。
 S2S:
   Secret: s2s-dev-secret
   Clients:

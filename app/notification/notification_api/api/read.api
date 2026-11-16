@@ -63,27 +63,28 @@ type (
 
 @server (
 	jwt: Auth
+	group: read
 )
 service notification {
 	@doc "按分类拉取通知已读游标（数据库同步）"
 	@handler getReadCursors
-	post /api/notification/v1/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
+	post /beaver/api/notification/read/v1/getReadCursors (getReadCursorsReq) returns (getReadCursorsRes)
 
 	@doc "按事件ID标记单个通知已读"
 	@handler markReadByEvent
-	post /api/notification/v1/markReadByEvent (markReadByEventReq) returns (markReadByEventRes)
+	post /beaver/api/notification/read/v1/markReadByEvent (markReadByEventReq) returns (markReadByEventRes)
 
 	@doc "按分类标记所有通知为已读"
 	@handler markReadByCategory
-	post /api/notification/v1/markReadByCategory (markReadByCategoryReq) returns (markReadByCategoryRes)
+	post /beaver/api/notification/read/v1/markReadByCategory (markReadByCategoryReq) returns (markReadByCategoryRes)
 
 	@doc "按分类游标标记已读（高效批量，高级用法）"
 	@handler markReadByCursor
-	post /api/notification/v1/markReadByCursor (markReadByCursorReq) returns (markReadByCursorRes)
+	post /beaver/api/notification/read/v1/markReadByCursor (markReadByCursorReq) returns (markReadByCursorRes)
 
 	@doc "获取未读汇总（红点）"
 	@handler getUnreadSummary
-	post /api/notification/v1/getUnreadSummary (getUnreadSummaryReq) returns (getUnreadSummaryRes)
+	post /beaver/api/notification/read/v1/getUnreadSummary (getUnreadSummaryReq) returns (getUnreadSummaryRes)
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template

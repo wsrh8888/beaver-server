@@ -40,85 +40,85 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 添加表情，并且自动收藏
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/add",
+				Path:    "/beaver/api/emoji/emoji/v1/add",
 				Handler: emoji.AddEmojiHandler(serverCtx),
 			},
 			{
 				// 批量获取用户收藏的表情记录详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/collects-by-ids",
+				Path:    "/beaver/api/emoji/emoji/v1/collects-by-ids",
 				Handler: emoji.GetEmojiCollectsByIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取表情详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/emojis-by-ids",
+				Path:    "/beaver/api/emoji/emoji/v1/emojis-by-ids",
 				Handler: emoji.GetEmojisByIdsHandler(serverCtx),
 			},
 			{
 				// 收藏或者取消收藏表情
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/favoriteEmoji",
+				Path:    "/beaver/api/emoji/emoji/v1/favoriteEmoji",
 				Handler: emoji.UpdateFavoriteEmojiHandler(serverCtx),
 			},
 			{
 				// 获取用户收藏的表情列表
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/favoriteList",
+				Path:    "/beaver/api/emoji/emoji/v1/favoriteList",
 				Handler: emoji.GetEmojisListHandler(serverCtx),
 			},
 			{
 				// 获取用户收藏的表情包列表
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/favoritePackageList",
+				Path:    "/beaver/api/emoji/emoji/v1/favoritePackageList",
 				Handler: emoji.GetUserFavoritePackagesHandler(serverCtx),
 			},
 			{
 				// 按ID批量查询表情基础信息（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/getEmojisByUuids",
+				Path:    "/beaver/api/emoji/emoji/v1/getEmojisByUuids",
 				Handler: emoji.GetEmojisByUuidsHandler(serverCtx),
 			},
 			{
 				// 批量获取用户收藏的表情包记录详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/package-collects-by-ids",
+				Path:    "/beaver/api/emoji/emoji/v1/package-collects-by-ids",
 				Handler: emoji.GetEmojiPackageCollectsByIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取表情包内容详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/package-contents-by-package-ids",
+				Path:    "/beaver/api/emoji/emoji/v1/package-contents-by-package-ids",
 				Handler: emoji.GetEmojiPackageContentsByPackageIdsHandler(serverCtx),
 			},
 			{
 				// 批量获取表情包内容详情（通过relationIds，数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/package-contents-by-relation-ids",
+				Path:    "/beaver/api/emoji/emoji/v1/package-contents-by-relation-ids",
 				Handler: emoji.GetEmojiPackageContentsByRelationIdsHandler(serverCtx),
 			},
 			{
 				// 收藏或取消收藏表情包
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/packageFavorite",
+				Path:    "/beaver/api/emoji/emoji/v1/packageFavorite",
 				Handler: emoji.UpdateFavoriteEmojiPackageHandler(serverCtx),
 			},
 			{
 				// 获取表情包详情
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/packageInfo",
+				Path:    "/beaver/api/emoji/emoji/v1/packageInfo",
 				Handler: emoji.GetEmojiPackageDetailHandler(serverCtx),
 			},
 			{
 				// 获取表情包列表
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/packageList",
+				Path:    "/beaver/api/emoji/emoji/v1/packageList",
 				Handler: emoji.GetEmojiPackagesHandler(serverCtx),
 			},
 			{
 				// 批量获取表情包详情（数据库同步）
 				Method:  http.MethodPost,
-				Path:    "/api/emoji/v1/packages-by-ids",
+				Path:    "/beaver/api/emoji/emoji/v1/packages-by-ids",
 				Handler: emoji.GetEmojiPackagesByIdsHandler(serverCtx),
 			},
 		},
@@ -132,37 +132,37 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 队间：分页查询用户收藏的表情
 					Method:  http.MethodPost,
-					Path:    "/api/emoji/v1/list_collects",
+					Path:    "/beaver/api/emoji/machine/v1/list_collects",
 					Handler: emoji_machine.EmojiCollectListHandler(serverCtx),
 				},
 				{
 					// 队间：分页查询表情
 					Method:  http.MethodPost,
-					Path:    "/api/emoji/v1/list_emojis",
+					Path:    "/beaver/api/emoji/machine/v1/list_emojis",
 					Handler: emoji_machine.EmojiListHandler(serverCtx),
 				},
 				{
 					// 队间：分页查询表情包
 					Method:  http.MethodPost,
-					Path:    "/api/emoji/v1/list_packages",
+					Path:    "/beaver/api/emoji/machine/v1/list_packages",
 					Handler: emoji_machine.EmojiPackageListHandler(serverCtx),
 				},
 				{
 					// 队间：新建/增量更新表情
 					Method:  http.MethodPost,
-					Path:    "/api/emoji/v1/save",
+					Path:    "/beaver/api/emoji/machine/v1/save",
 					Handler: emoji_machine.EmojiSaveHandler(serverCtx),
 				},
 				{
 					// 队间：新建/增量更新表情包
 					Method:  http.MethodPost,
-					Path:    "/api/emoji/v1/save_package",
+					Path:    "/beaver/api/emoji/machine/v1/save_package",
 					Handler: emoji_machine.EmojiPackageSaveHandler(serverCtx),
 				},
 				{
 					// 队间：增删表情包内容
 					Method:  http.MethodPost,
-					Path:    "/api/emoji/v1/update_package_content",
+					Path:    "/beaver/api/emoji/machine/v1/update_package_content",
 					Handler: emoji_machine.EmojiPackageContentUpdateHandler(serverCtx),
 				},
 			}...,
@@ -174,7 +174,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 文件预览
 				Method:  http.MethodGet,
-				Path:    "/api/file/preview/:fileKey",
+				Path:    "/beaver/api/file/preview/v1/get",
 				Handler: file.PreviewHandler(serverCtx),
 			},
 		},
@@ -185,25 +185,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 文件通用上传(按yaml StorageType配置路由到local/qiniu/minio)
 				Method:  http.MethodPost,
-				Path:    "/api/file/v1/upload",
+				Path:    "/beaver/api/file/file/v1/upload",
 				Handler: file.FileUploadHandler(serverCtx),
 			},
 			{
 				// 文件上传本地
 				Method:  http.MethodPost,
-				Path:    "/api/file/v1/uploadLocal",
+				Path:    "/beaver/api/file/file/v1/uploadLocal",
 				Handler: file.FileUploadLocalHandler(serverCtx),
 			},
 			{
 				// 文件上传MinIO
 				Method:  http.MethodPost,
-				Path:    "/api/file/v1/uploadMinio",
+				Path:    "/beaver/api/file/file/v1/uploadMinio",
 				Handler: file.FileUploadMinioHandler(serverCtx),
 			},
 			{
 				// 文件上传七牛云
 				Method:  http.MethodPost,
-				Path:    "/api/file/v1/uploadQiniu",
+				Path:    "/beaver/api/file/file/v1/uploadQiniu",
 				Handler: file.FileUploadQiniuHandler(serverCtx),
 			},
 		},
@@ -217,49 +217,49 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 队间：批量删除文件记录
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/batch_delete",
+					Path:    "/beaver/api/file/machine/v1/batch_delete",
 					Handler: file_machine.FileBatchDeleteHandler(serverCtx),
 				},
 				{
 					// 队间：按MD5取文件
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/by_md5",
+					Path:    "/beaver/api/file/machine/v1/by_md5",
 					Handler: file_machine.FileByMd5Handler(serverCtx),
 				},
 				{
 					// 队间：删除单个文件记录
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/delete",
+					Path:    "/beaver/api/file/machine/v1/delete",
 					Handler: file_machine.FileDeleteHandler(serverCtx),
 				},
 				{
 					// 队间：按记录ID取文件
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/detail",
+					Path:    "/beaver/api/file/machine/v1/detail",
 					Handler: file_machine.FileByIdHandler(serverCtx),
 				},
 				{
 					// 队间：按文件Key取详情
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/detail_by_key",
+					Path:    "/beaver/api/file/machine/v1/detail_by_key",
 					Handler: file_machine.FileDetailByKeyHandler(serverCtx),
 				},
 				{
 					// 队间：分页查询文件记录
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/list",
+					Path:    "/beaver/api/file/machine/v1/list",
 					Handler: file_machine.FileListHandler(serverCtx),
 				},
 				{
 					// 队间：签发七牛上传凭证
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/qiniu_token",
+					Path:    "/beaver/api/file/machine/v1/qiniu_token",
 					Handler: file_machine.QiniuUploadTokenHandler(serverCtx),
 				},
 				{
 					// 队间：登记文件记录
 					Method:  http.MethodPost,
-					Path:    "/api/file/v1/save",
+					Path:    "/beaver/api/file/machine/v1/save",
 					Handler: file_machine.FileSaveHandler(serverCtx),
 				},
 			}...,

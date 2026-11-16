@@ -10,9 +10,9 @@
 
 | 步骤 | 接口 | 服务 | 读写 | 说明 |
 |------|------|------|------|------|
-| 1 | `GET /api/friend/v1/friend_list` | friend_api | 读 | 看自己有哪些好友 |
-| 2 | `POST /api/chat/v1/sendMsg` | chat_api | 写 | 给好友发一条文本消息 |
-| 3 | `GET /api/chat/v1/getRecentChatList` | chat_api | 读 | 看最近会话列表（发消息后会刷新） |
+| 1 | `GET /beaver/api/friend/friend/v1/friend_list` | friend_api | 读 | 看自己有哪些好友 |
+| 2 | `POST /beaver/api/chat/chat/v1/sendMsg` | chat_api | 写 | 给好友发一条文本消息 |
+| 3 | `GET /beaver/api/chat/chat/v1/getRecentChatList` | chat_api | 读 | 看最近会话列表（发消息后会刷新） |
 
 跨服务：friend_api + chat_api。登录在 setup 阶段已拿过 token，链路里不重复登录。
 

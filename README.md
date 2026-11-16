@@ -39,7 +39,7 @@
 
 ## 🏗️ 架构概览
 
-客户端（Flutter / Electron）统一经 API 网关访问各业务服务；后台管理端直连 `backend_admin`（自带 JWT 鉴权）。同一团队内服务间通过 etcd gRPC 协作，跨团队一律走对方网关的 S2S 接口（`/internal/<Module>.<Method>`），WebSocket 负责长连接推送。
+客户端（Flutter / Electron）统一经 API 网关访问各业务服务；后台管理端直连 `backend_admin`（自带 JWT 鉴权）。同一团队内服务间通过 etcd gRPC 协作，跨团队一律走对方标准机器视图（如 `/beaver-social/api/circle/machine/v1/*`，client_credentials 换票），WebSocket 负责长连接推送。
 
 ```
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
@@ -63,7 +63,7 @@
               └─────────────────────┘
 
   后台管理端 ──────────► backend_admin :40000（自带 JWT 鉴权 / CORS）
-  跨团队调用 ──────────► 对方网关 /internal/*（S2S，client_credentials 换票）
+  跨团队调用 ──────────► 对方标准机器视图 /{team}/api/.../machine/v1/*（client_credentials 换票）
 ```
 
 ### 服务端口

@@ -49,7 +49,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	// 本面只提供 /api/datasync/v1/getSync* 增量同步 API（RegisterHandlers 注册）。
+	// 本面只提供 /beaver/api/datasync/sync/v1/getSync* 增量同步 API（RegisterHandlers 注册）。
 	// 业务能力一律是各业务面自己的 /api 契约，由 gateway_api 转发；
 	// 这里只挂同步 API；A 主体业务能力统一由 gateway_api 转发到各业务面，本面不做换票端点。
 	etcd.DeliveryAddress(c.Etcd, c.Name+"_api", fmt.Sprintf("%s:%d", c.Host, c.Port))

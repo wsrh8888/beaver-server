@@ -49,15 +49,16 @@ type (
 
 @server (
 	jwt: Auth
+	group: sync
 )
 service datasync {
 	@doc "获取用户表情收藏的版本信息"
 	@handler getSyncEmojiCollects
-	post /api/datasync/v1/getSyncEmojiCollects (GetSyncEmojiCollectsReq) returns (GetSyncEmojiCollectsRes)
+	post /beaver/api/datasync/sync/v1/getSyncEmojiCollects (GetSyncEmojiCollectsReq) returns (GetSyncEmojiCollectsRes)
 
 	@doc "获取表情基础数据版本信息"
 	@handler getSyncEmojis
-	post /api/datasync/v1/getSyncEmojis (GetSyncEmojisReq) returns (GetSyncEmojisRes)
+	post /beaver/api/datasync/sync/v1/getSyncEmojis (GetSyncEmojisReq) returns (GetSyncEmojisRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

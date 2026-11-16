@@ -22,10 +22,10 @@
 // Package commonconfig 出站 S2S 端点注册表（仓级共享，五个仓内容完全一致）。
 //
 // 团队之间不互通：本仓不对外提供 rpc，也不直连别人的 etcd；要用其它团队的能力，
-// 一律走各自网关既有的 HTTP 契约 + 机器票 Bearer，不跨仓 gRPC 直连、不经业务门面中转。
+// 一律走各自标准 HTTP 契约 + 机器票 Bearer，不跨仓 gRPC 直连、不经业务门面中转。
 //
-// 出站分两类：外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约；
-// 本仓出站到其它团队按上述方式。本仓的 /internal/* 若存在只是入站面，与 Beaver 出站无关。
+// 出站分两类：外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约；
+// 本仓出站到其它团队按上述方式。本仓出站不使用任何 /internal/* 私有端点。
 //
 // 两条轨合成一条：yaml 的 RemoteProxy 段是部署事实（唯一出站注册表），各服务 config
 // 直接内嵌本包的 RemoteProxy 类型（不再各写一份字段表），启动时 Load 一次把域名灌进
@@ -61,7 +61,7 @@ type AgentEndpoint struct {
 	InternalToken string `json:",optional"`
 }
 
-// RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方网关地址与凭据。
+// RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方标准 .api 服务地址与凭据。
 //
 // 一个进程只跑一个服务，用不到的对端在 yaml 里留空即可（全部 optional），
 // 所以五个仓共用同一份类型，不会出现「A 仓有这个字段、B 仓没有」的漂移。
@@ -81,7 +81,7 @@ type RemoteProxy struct {
 	Agent AgentEndpoint `json:",optional"`
 }
 
-// 各对端网关域名，由 Load 从服务自己的 yaml 灌入；该服务用不到的对端保持空。
+// 各对端服务域名，由 Load 从服务自己的 yaml 灌入；该服务用不到的对端保持空。
 var (
 	// BeaverUrl A 主体 gateway_api 唯一入口；本仓不出站调自己，保持五仓命名对称。
 	BeaverUrl string

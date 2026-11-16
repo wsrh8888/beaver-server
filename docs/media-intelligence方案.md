@@ -373,7 +373,7 @@ Realtime 控制帧示例：`start` / `audio` / `stop` / `cancel` / `barge_in`。
 
 | 项 | 说明 |
 |----|------|
-| `POST /api/datasync/v1/getSyncMediaArtifacts` | `since=version` 增量 |
+| `POST /beaver/api/datasync/sync/v1/getSyncMediaArtifacts` | `since=version` 增量 |
 | WS 推送 | artifact 就绪（转写贴到语音消息、纪要贴到通话） |
 
 ---

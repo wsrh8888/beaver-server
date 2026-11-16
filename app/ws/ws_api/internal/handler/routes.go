@@ -25,6 +25,8 @@ package handler
 import (
 	"net/http"
 
+	proxy "beaver/app/ws/ws_api/internal/handler/proxy"
+	socket "beaver/app/ws/ws_api/internal/handler/socket"
 	"beaver/app/ws/ws_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -36,10 +38,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthGate},
 			[]rest.Route{
 				{
-					// WebSocket连接入口
-					Method:  http.MethodGet,
-					Path:    "/api/ws/v1/ws",
-					Handler: chatWebsocketHandler(serverCtx),
+					// HTTP API发送消息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/ws/proxy/v1/send_msg",
+					Handler: proxy.ProxySendMsgHandler(serverCtx),
 				},
 			}...,
 		),
@@ -50,10 +52,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthGate},
 			[]rest.Route{
 				{
-					// HTTP API发送消息
-					Method:  http.MethodPost,
-					Path:    "/api/ws/v1/proxySendMsg",
-					Handler: proxySendMsgHandler(serverCtx),
+					// WebSocket连接入口
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/ws/socket/v1/ws",
+					Handler: socket.ChatWebsocketHandler(serverCtx),
 				},
 			}...,
 		),

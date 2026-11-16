@@ -54,19 +54,20 @@ type (
 
 @server (
 	jwt: Auth
+	group: sync
 )
 service datasync {
 	@doc "获取通知事件版本摘要"
 	@handler getSyncNotificationEvents
-	post /api/datasync/v1/getSyncNotificationEvents (GetSyncNotificationEventsReq) returns (GetSyncNotificationEventsRes)
+	post /beaver/api/datasync/sync/v1/getSyncNotificationEvents (GetSyncNotificationEventsReq) returns (GetSyncNotificationEventsRes)
 
 	@doc "获取通知收件箱版本摘要"
 	@handler getSyncNotificationInboxes
-	post /api/datasync/v1/getSyncNotificationInboxes (GetSyncNotificationInboxesReq) returns (GetSyncNotificationInboxesRes)
+	post /beaver/api/datasync/sync/v1/getSyncNotificationInboxes (GetSyncNotificationInboxesReq) returns (GetSyncNotificationInboxesRes)
 
 	@doc "获取通知已读游标版本摘要"
 	@handler getSyncNotificationReadCursors
-	post /api/datasync/v1/getSyncNotificationReadCursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
+	post /beaver/api/datasync/sync/v1/getSyncNotificationReadCursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

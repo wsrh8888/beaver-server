@@ -1,6 +1,6 @@
 syntax = "v1"
 
-// ==================== 当前组织（无需认证，Gateway 白名单）====================
+// ==================== 当前组织（无需认证，公开访问）====================
 // 这里不区分陌生人还是办公内网，默认就是这一套安装的组织。
 
 type (
@@ -16,5 +16,5 @@ type (
 service platform {
 	@doc "查询当前组织"
 	@handler GetInstance
-	get /api/platform/v1/instance returns (GetInstanceRes)
+	get /beaver/api/platform/instance_public/v1/instance returns (GetInstanceRes)
 }

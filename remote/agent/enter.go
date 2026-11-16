@@ -22,10 +22,10 @@
 // Package agent beaver-agent（py，beaver-ai 业务线）的 S2S 出站客户端。
 //
 // beaver-agent 与本仓是跨团队边界：禁止 etcd gRPC 直连（团队铁律），统一走对方
-// 网关 agent_api（FastAPI :22300）的 /internal/agent.<Method> 端点，静态
-// X-Internal-Token 鉴权（与 agent_api etc/agent.yaml 的 internal_token 同值）。
+// 标准机器视图 /beaver-ai/api/agent/chat/v1/* 端点，静态 X-Internal-Token 鉴权
+// （与 agent_api etc/agent.yaml 的 internal_token 同值）。
 // 结构对齐 remote/{open,ai,circle}：Init 灌入令牌并把域名写入 commonconfig.AgentUrl；
-// 业务侧直接调包函数 agent.SendMessage(...) / agent.ListConversations(...)。
+// 业务侧直接调包函数 SendMessage(...) / ListConversations(...)。
 package agent
 
 import (
@@ -41,7 +41,7 @@ const agentTimeout = 10 * time.Second
 // client 本包唯一的出站客户端，Init 时装配。
 var client *Client
 
-// Init 装配 beaver-agent 的静态 X-Internal-Token 与网关地址，并把域名写入 commonconfig.AgentUrl。
+// Init 装配 beaver-agent 的静态 X-Internal-Token 与服务地址，并把域名写入 commonconfig.AgentUrl。
 // 只在该服务装配依赖时调用一次。
 func Init(internalToken string) {
 	client = &Client{

@@ -471,7 +471,7 @@ type MachineEmojiPackageItem struct {
 }
 
 type PreviewReq struct {
-	FileKey string `path:"fileKey"`
+	FileKey string `form:"fileKey"`
 }
 
 type PreviewRes struct {

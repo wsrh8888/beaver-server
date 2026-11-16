@@ -13,5 +13,5 @@ type (
 service platform {
 	@doc "记录客户端日志"
 	@handler Track
-	post /api/platform/track_public/v1/track (TrackReq) returns (TrackRes)
+	post /beaver/api/platform/track_public/v1/track (TrackReq) returns (TrackRes)
 }

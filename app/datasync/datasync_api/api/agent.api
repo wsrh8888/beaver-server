@@ -28,11 +28,12 @@ type (
 
 @server (
 	jwt: Auth
+	group: sync
 )
 service datasync {
 	@doc "获取 Agent 会话版本摘要（增量/全量游标）"
 	@handler getSyncAgentConversations
-	post /api/datasync/v1/getSyncAgentConversations (GetSyncAgentConversationsReq) returns (GetSyncAgentConversationsRes)
+	post /beaver/api/datasync/sync/v1/getSyncAgentConversations (GetSyncAgentConversationsReq) returns (GetSyncAgentConversationsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

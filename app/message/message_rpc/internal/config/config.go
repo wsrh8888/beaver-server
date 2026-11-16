@@ -62,9 +62,9 @@ type Config struct {
 			Production bool
 		}
 	}
-	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
-	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
-	// 本仓若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+	// RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自标准 HTTP 契约 + 机器票 Bearer；
+	// 外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约，业务能力只有这一套 HTTP 契约；
+	// 本仓出站不使用任何 /internal/* 私有端点，只走对端标准 .api 路径。
 	RemoteProxy commonconfig.RemoteProxy `json:",optional"`
 
 }

@@ -13,15 +13,16 @@ type (
 
 @server (
 	jwt: Auth
+	group: push
 )
 service notification {
 	@doc "注册或更新离线推送 Token（FCM/APNs）"
 	@handler registerPushToken
-	post /api/notification/v1/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
+	post /beaver/api/notification/push/v1/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分。
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分。
 // 通知事件由服务端发起（社交、群组等业务线），不属于任何终端用户，故走机器票。
 
 type (
@@ -48,7 +49,7 @@ type (
 service notification {
 	@doc "队间：投递通知事件"
 	@handler pushEvent
-	post /api/notification/v1/push_event (PushEventReq) returns (PushEventRes)
+	post /beaver/api/notification/machine/v1/push_event (PushEventReq) returns (PushEventRes)
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template

@@ -48,7 +48,7 @@ type Config struct {
 	UserRpc     zrpc.RpcClientConf
 	// AssetRpc：file + emoji 同进程（etcd assetrpc.rpc），队间能力面薄转发到它。
 	AssetRpc zrpc.RpcClientConf
-	// StorageType 通用上传接口(/api/file/v1/upload)使用的默认存储后端：local|qiniu|minio
+	// StorageType 通用上传接口(/beaver/api/file/file/v1/upload)使用的默认存储后端：local|qiniu|minio
 	StorageType string
 	Local       struct {
 		UploadDir   string // 本地文件上传目录
@@ -70,7 +70,7 @@ type Config struct {
 		UseSSL      bool   // 是否启用SSL
 		ProjectName string // 项目名称，用于文件路径前缀（为空则使用根目录）
 	}
-	// Auth 用户 JWT 签名密钥，与网关 Auth.AccessSecret 同值：
+	// Auth 用户 JWT 签名密钥，本服务独立签发并校验用户票：
 	// 本服务独立验用户票，不信任任何外部直接塞进来的 Beaver-User-Id。
 	Auth struct {
 		AccessSecret string

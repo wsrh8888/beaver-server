@@ -30,7 +30,7 @@ import (
 )
 
 // GetAgentApp 取 AI 应用配置（数字伙伴 builtin 人设回退用）。
-// 直连进程的全路径，不经网关。
+// 走对方标准机器视图路径，不经网关。
 func GetAgentApp(ctx context.Context, header http.Header, body *aitype.GetAgentAppReq) (*aitype.GetAgentAppRes, error) {
-	return Post[aitype.GetAgentAppRes](ctx, commonconfig.AiUrl+"/internal/Ai.GetAgentApp", header, body)
+	return Post[aitype.GetAgentAppRes](ctx, commonconfig.AiUrl+"/beaver-ai/api/ai/aiconfig/v1/get_agent_app", header, body)
 }

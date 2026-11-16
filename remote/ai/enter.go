@@ -22,11 +22,11 @@
 // Package ai AI 服务（beaver-ai 独立仓）的 S2S 出站客户端。
 //
 // AI 服务已从本仓拆出（platform_rpc 的 AI 面随 beaver-ai 独立部署）；跨仓不允许 etcd gRPC
-// 直连，本包经 beaver-ai 网关 /internal/Ai.* 换票调用。Req/Res 放到 types/remote/ai，
+// 直连，本包经 beaver-ai 标准机器视图 /beaver-ai/api/ai/*/v1/* 换票调用。Req/Res 放到 types/remote/ai，
 // 本仓不依赖 beaver-ai 模块。
 //
 // 结构对齐 remote/circle（enter/remote/token + 业务方法文件）：Init 灌入凭据并把域名写入
-// commonconfig.AiUrl；业务侧直接调包函数 ai.GetAgentApp(...)，不在调用行里重复写地址与换票。
+// commonconfig.AiUrl；业务侧直接调包函数 GetAgentApp(...)，不在调用行里重复写地址与换票。
 package ai
 
 import (

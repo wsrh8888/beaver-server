@@ -46,7 +46,7 @@ type Config struct {
 	AuthRpc zrpc.RpcClientConf
 	// NotificationRpc：本业务线的 gRPC 服务（etcd notificationrpc.rpc），队间能力面薄转发到它。
 	NotificationRpc zrpc.RpcClientConf
-	// Auth 用户 JWT 签名密钥，与网关 Auth.AccessSecret 同值：
+	// Auth 用户 JWT 签名密钥，本服务独立签发并校验用户票：
 	// 本服务独立验用户票，不信任任何外部直接塞进来的 Beaver-User-Id。
 	Auth struct {
 		AccessSecret string

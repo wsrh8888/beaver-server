@@ -34,15 +34,16 @@ type (
 
 @server (
 	jwt: Auth
+	group: sync
 )
 service datasync {
 	@doc "获取所有需要更新的好友版本"
 	@handler getSyncFriends
-	post /api/datasync/v1/getSyncFriends (GetSyncFriendsReq) returns (GetSyncFriendsRes)
+	post /beaver/api/datasync/sync/v1/getSyncFriends (GetSyncFriendsReq) returns (GetSyncFriendsRes)
 
 	@doc "获取所有需要更新的好友验证版本"
 	@handler getSyncFriendVerifies
-	post /api/datasync/v1/getSyncFriendVerifies (GetSyncFriendVerifiesReq) returns (GetSyncFriendVerifiesRes)
+	post /beaver/api/datasync/sync/v1/getSyncFriendVerifies (GetSyncFriendVerifiesReq) returns (GetSyncFriendVerifiesRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

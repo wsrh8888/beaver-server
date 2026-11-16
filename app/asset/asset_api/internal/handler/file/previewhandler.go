@@ -24,7 +24,6 @@ package handler
 import (
 	"beaver/app/asset/asset_api/internal/handler/common"
 	"beaver/app/asset/asset_api/internal/svc"
-	"beaver/app/asset/asset_api/internal/types"
 	file_models "beaver/app/asset/asset_models/file"
 	"fmt"
 	"net/http"
@@ -34,15 +33,13 @@ import (
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.PreviewReq
-		if err := httpx.Parse(r, &req); err != nil {
-			fmt.Println("err:", err)
-			http.Error(w, "请求参数错误", http.StatusBadRequest)
+		fileKey := r.URL.Query().Get("fileKey")
+		if fileKey == "" {
+			http.Error(w, "缺少 fileKey 参数", http.StatusBadRequest)
 			return
 		}
 
@@ -51,7 +48,7 @@ func PreviewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// response.Response(r, w, resp, err)
 
 		var fileModel file_models.FileModel
-		err := svcCtx.DB.Take(&fileModel, "file_key = ?", req.FileKey).Error
+		err := svcCtx.DB.Take(&fileModel, "file_key = ?", fileKey).Error
 		if err != nil {
 			// 文件记录不存在，返回404
 			http.NotFound(w, r)

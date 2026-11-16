@@ -7,12 +7,12 @@ import (
 
 const bearerPrefix = "Bearer "
 
-// NewS2S 本团队 /internal/* 入站面的唯一 S2S 验签闸门。
+// NewS2S 机器票验签闸门（OAuth2 client_credentials + Bearer JWT）。
 //
 // 口径（OAuth2 client_credentials + Bearer JWT）：
-//   - 调用方先经网关的 /api/auth/token 用 client_id + client_secret 换 Bearer；
+//   - 调用方先经 /beaver/api/auth/token/v1/issue 用 clientId + clientSecret 换 Bearer；
 //   - 本中间件只认 `Authorization: Bearer <token>`，用 S2S.Secret 验 HS256 签名 + 受众
-//   - 过期；不进网关、不对外、不接受终端用户票。
+//   - 过期；不接受终端用户票。
 //   - 验过才剥离外部传入的 X-Client-Id，按验签结论重建，把 Principal 注入 context。
 //
 // fail-closed：密钥没配一律 401（服务 main 在启动期已先行退出）；令牌缺失 / 过期 /

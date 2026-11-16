@@ -26,7 +26,7 @@ FileMaxSize:
   unknown: 10
 MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 
-# 通用上传接口(/api/file/v1/upload)使用的默认存储后端：local|qiniu|minio
+# 通用上传接口(/beaver/api/file/file/v1/upload)使用的默认存储后端：local|qiniu|minio
 StorageType: local
 
 # 本地存储配置
@@ -82,12 +82,12 @@ AssetRpc:
     - 127.0.0.1:2379
     Key: assetrpc.rpc
 
-# 用户 JWT 签名密钥：与网关 Auth.AccessSecret 同值，本服务独立验用户票（不信任外部塞的 Beaver-User-Id）。
+# 用户 JWT 签名密钥：本服务独立签发并校验用户票，不信任外部塞的 Beaver-User-Id。
 Auth:
   AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600
 # 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
-# 换票端点：POST /api/auth/token（client_credentials）。
+# 换票端点：POST /beaver/api/auth/token/v1/issue（client_credentials）。
 S2S:
   Secret: s2s-dev-secret
   Clients:

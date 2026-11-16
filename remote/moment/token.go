@@ -4,28 +4,25 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
 
 	"beaver/commonconfig"
 	remotetype "beaver/types/remote"
 	"beaver/utils/ajax"
 )
 
-// GetToken 用 client_credentials 换一次出站令牌，返回 access_token 与有效期（秒，0 表示对端没给）。
+// GetToken 用 client_credentials 换一次出站令牌，返回 accessToken 与有效期（秒，0 表示对端没给）。
 //
-// 换票是收费模块动态服务的一个独立接口，地址和表单都在这里，调用方只管拿票。
+// 换票是 beaver-social / social 的独立机器视图接口，地址与请求体都在这里，调用方只管拿票。
 func GetToken(ctx context.Context, clientID, clientSecret string) (string, int, error) {
-	form := url.Values{}
-	form.Set("grant_type", "client_credentials")
-	form.Set("client_id", clientID)
-	form.Set("client_secret", clientSecret)
-
-	out, err := ajax.PostForm[remotetype.TokenResponse](ctx, commonconfig.SocialUrl+"/internal/token", nil, form)
+	out, err := ajax.Post[remotetype.TokenResponse](ctx, commonconfig.SocialUrl, "/beaver-social/api/social/machine/v1/token", nil, remotetype.TokenRequest{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+	})
 	if err != nil {
 		return "", 0, fmt.Errorf("换票失败: %w", err)
 	}
 	if out.AccessToken == "" {
-		return "", 0, errors.New("换票响应缺少 access_token")
+		return "", 0, errors.New("换票响应缺少 accessToken")
 	}
 	return out.AccessToken, out.ExpiresIn, nil
 }

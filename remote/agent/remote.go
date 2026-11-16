@@ -35,24 +35,24 @@ import (
 
 // SendMessage 发一句话给 Agent（fire-and-forget：只取 code，不等终稿）。
 func SendMessage(ctx context.Context, header http.Header, body *agenttype.SendMessageReq) (*agenttype.Reply, error) {
-	return post(ctx, "agent.SendMessage", body)
+	return post(ctx, "/beaver-ai/api/agent/chat/v1/send_message", body)
 }
 
 // ListConversations 桌面 datasync：增量列会话（since = 本地游标 version）。
 func ListConversations(ctx context.Context, header http.Header, body *agenttype.ListConversationsReq) (*agenttype.Reply, error) {
-	return post(ctx, "agent.ListConversations", body)
+	return post(ctx, "/beaver-ai/api/agent/chat/v1/list_conversations", body)
 }
 
-// post 发一次 POST 到 agent_api 网关；静态 X-Internal-Token 鉴权，响应透传 Reply{code,msg,resultJson}。
+// post 发一次 POST 到 agent 标准机器视图；静态 X-Internal-Token 鉴权，响应透传 Reply{code,msg,resultJson}。
 // agent 不用 go-zero 信封，故不走 ajax.Post（它按 {code,msg,result} 解包），这里自管传输与解码。
-func post(ctx context.Context, method string, req any) (*agenttype.Reply, error) {
+func post(ctx context.Context, path string, req any) (*agenttype.Reply, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
-		return nil, fmt.Errorf("agentapi %s: marshal req: %w", method, err)
+		return nil, fmt.Errorf("agentapi %s: marshal req: %w", path, err)
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, commonconfig.AgentUrl+"/internal/"+method, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, commonconfig.AgentUrl+path, bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("agentapi %s: build request: %w", method, err)
+		return nil, fmt.Errorf("agentapi %s: build request: %w", path, err)
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	if client != nil && client.token != "" {
@@ -60,19 +60,19 @@ func post(ctx context.Context, method string, req any) (*agenttype.Reply, error)
 	}
 	resp, err := client.hc.Do(httpReq)
 	if err != nil {
-		return nil, fmt.Errorf("agentapi %s: %w", method, err)
+		return nil, fmt.Errorf("agentapi %s: %w", path, err)
 	}
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("agentapi %s: read body: %w", method, err)
+		return nil, fmt.Errorf("agentapi %s: read body: %w", path, err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("agentapi %s: http %d: %s", method, resp.StatusCode, truncate(data))
+		return nil, fmt.Errorf("agentapi %s: http %d: %s", path, resp.StatusCode, truncate(data))
 	}
 	var reply agenttype.Reply
 	if err := json.Unmarshal(data, &reply); err != nil {
-		return nil, fmt.Errorf("agentapi %s: decode reply: %w", method, err)
+		return nil, fmt.Errorf("agentapi %s: decode reply: %w", path, err)
 	}
 	return &reply, nil
 }

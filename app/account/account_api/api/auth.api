@@ -1,6 +1,6 @@
 syntax = "v1"
 
-// ==================== 认证接口（需 Gateway JWT，注入 Beaver-User-Id 或 Header Token）====================
+// ==================== 认证接口（jwt: Auth 由本服务直接校验，身份由中间件注入上下文）====================
 type (
 	LogoutReq {
 		DeviceID string `header:"deviceId"`
@@ -57,23 +57,23 @@ type (
 service account {
 	@doc "用户登出"
 	@handler logout
-	post /api/auth/auth/v1/logout (LogoutReq) returns (LogoutRes)
+	post /beaver/api/auth/auth/v1/logout (LogoutReq) returns (LogoutRes)
 
 	@doc "扫码登录-确认扫码（移动端，Header Token）"
 	@handler qrcodeScan
-	post /api/auth/auth/v1/qrcode/scan (QrcodeScanReq) returns (QrcodeScanRes)
+	post /beaver/api/auth/auth/v1/qrcode_scan (QrcodeScanReq) returns (QrcodeScanRes)
 
 	@doc "获取登录设备列表"
 	@handler getDevices
-	get /api/auth/auth/v1/devices (GetDevicesReq) returns (GetDevicesRes)
+	get /beaver/api/auth/auth/v1/devices (GetDevicesReq) returns (GetDevicesRes)
 
 	@doc "强制下线指定设备"
 	@handler kickDevice
-	post /api/auth/auth/v1/kick_device (KickDeviceReq) returns (KickDeviceRes)
+	post /beaver/api/auth/auth/v1/kick_device (KickDeviceReq) returns (KickDeviceRes)
 
 	@doc "修改密码（需验证旧密码）"
 	@handler updatePassword
-	post /api/auth/auth/v1/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
+	post /beaver/api/auth/auth/v1/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
 }
 
 // goctl api go -api auth_api.api -dir . --home ../../../template
@@ -101,11 +101,11 @@ type (
 service account {
 	@doc "S2S 机器票换发（client_credentials）"
 	@handler s2sToken
-	post /api/auth/token (S2STokenReq) returns (S2STokenRes)
+	post /beaver/api/auth/token/v1/issue (S2STokenReq) returns (S2STokenRes)
 }
 
 // ==================== 队间机器视图：认证域凭据与设备维护 ====================
-// 与 C 端共用 /api/auth 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐。
+// 与 C 端共用 /beaver/api/auth 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐。
 type (
 	VerifyPasswordReq {
 		UserId   string `json:"user_id,optional"`
@@ -152,17 +152,17 @@ type (
 service account {
 	@doc "校验账号密码（开放平台 / 管理端代登录）"
 	@handler verifyPassword
-	post /api/auth/v1/verify_password (VerifyPasswordReq) returns (VerifyPasswordRes)
+	post /beaver/api/auth/machine/v1/verify_password (VerifyPasswordReq) returns (VerifyPasswordRes)
 
 	@doc "创建账号密码凭据"
 	@handler createCredential
-	post /api/auth/v1/create_credential (CreateCredentialReq) returns (CreateCredentialRes)
+	post /beaver/api/auth/machine/v1/create_credential (CreateCredentialReq) returns (CreateCredentialRes)
 
 	@doc "查指定用户的登录设备"
 	@handler listUserDevices
-	post /api/auth/v1/devices (ListUserDevicesReq) returns (ListUserDevicesRes)
+	post /beaver/api/auth/machine/v1/devices (ListUserDevicesReq) returns (ListUserDevicesRes)
 
 	@doc "重置指定用户密码（无需旧密码）"
 	@handler resetUserPassword
-	post /api/auth/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
+	post /beaver/api/auth/machine/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
 }

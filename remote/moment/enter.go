@@ -1,6 +1,6 @@
 // Package moment A 主体（开源核心）→ 圈子动态服务（beaver-server-social/app/social）的 S2S 接口代理。
 //
-// 跨仓不允许 etcd gRPC 直连（团队铁律），统一走对方网关 /internal/Moment.*（client_credentials 换票 + Bearer）。
+// 跨仓不允许 etcd gRPC 直连（团队铁律），统一走对方标准路径 /beaver-social/api/moment/machine/v1/*（client_credentials 换票 + Bearer）。
 // 结构对齐 remote/{open,ai,circle,doc}：enter.go 灌域名与凭据、remote.go 持有换票与发包 plumbing、
 // 业务方法在 moment.go。Req/Res 放到 types/remote/moment。
 package moment

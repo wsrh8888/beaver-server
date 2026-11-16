@@ -1,6 +1,6 @@
-# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
-# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
-# 本服务若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自标准 HTTP 契约 + 机器票 Bearer；
+# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约，业务能力只有这一套 HTTP 契约；
+# 本仓出站不使用任何 /internal/* 私有端点，只走对端标准 .api 路径。
 RemoteProxy:
   Open:
     BaseURL: http://127.0.0.1:21900
@@ -58,7 +58,7 @@ NotificationRpc:
 RocketMQ:
   Addr: 127.0.0.1:9876
 
-# 用户 JWT 签名密钥：与网关 Auth.AccessSecret 同值，本服务独立验用户票（不信任外部塞的 Beaver-User-Id）。
+# 用户 JWT 签名密钥：本服务独立签发并校验用户票，不信任外部塞的 Beaver-User-Id。
 Auth:
   AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
   AccessExpire: 3600

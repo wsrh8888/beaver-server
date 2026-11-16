@@ -358,85 +358,86 @@ type (
 
 @server (
 	jwt: Auth
+	group: chat
 )
-service chat {
+service message {
 	@doc "发送消息"
 	@handler SendMsg
-	post /api/chat/v1/sendMsg (SendMsgReq) returns (SendMsgRes)
+	post /beaver/api/chat/chat/v1/sendMsg (SendMsgReq) returns (SendMsgRes)
 
 	@doc "获取会话id"
 	@handler ConversationInfo
-	post /api/chat/v1/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes)
+	post /beaver/api/chat/chat/v1/getConversationInfo (ConversationInfoReq) returns (ConversationInfoRes)
 
 	@doc "获取最近会话列表"
 	@handler recentChatList
-	get /api/chat/v1/getRecentChatList (RecentChatListReq) returns (RecentChatListRes)
+	get /beaver/api/chat/chat/v1/getRecentChatList (RecentChatListReq) returns (RecentChatListRes)
 
 	@doc "获取聊天记录"
 	@handler chatHistory
-	post /api/chat/v1/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes)
+	post /beaver/api/chat/chat/v1/getChatHistory (ChatHistoryReq) returns (ChatHistoryRes)
 
 	@doc "搜索消息"
 	@handler searchMessages
-	post /api/chat/v1/searchMessages (SearchMessagesReq) returns (SearchMessagesRes)
+	post /beaver/api/chat/chat/v1/searchMessages (SearchMessagesReq) returns (SearchMessagesRes)
 
 	@doc "删除某个最近会话"
 	@handler deleteRecent
-	post /api/chat/v1/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes)
+	post /beaver/api/chat/chat/v1/deleteRecentChat (DeleteRecentReq) returns (DeleteRecentRes)
 
 	@doc "置顶某个会话"
 	@handler pinnedChat
-	post /api/chat/v1/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
+	post /beaver/api/chat/chat/v1/pinnedChat (PinnedChatReq) returns (PinnedChatRes)
 
 	@doc "设置会话免打扰"
 	@handler muteChat
-	post /api/chat/v1/muteChat (MuteChatReq) returns (MuteChatRes)
+	post /beaver/api/chat/chat/v1/muteChat (MuteChatReq) returns (MuteChatRes)
 
 	@doc "隐藏/显示会话"
 	@handler hideChat
-	post /api/chat/v1/hideChat (HideChatReq) returns (HideChatRes)
+	post /beaver/api/chat/chat/v1/hideChat (HideChatReq) returns (HideChatRes)
 
 	@doc "撤回消息"
 	@handler recallMessage
-	post /api/chat/v1/recall (RecallMessageReq) returns (RecallMessageRes)
+	post /beaver/api/chat/chat/v1/recall (RecallMessageReq) returns (RecallMessageRes)
 
 	@doc "批量删除消息(仅自己不可见)"
 	@handler deleteMessages
-	post /api/chat/v1/deleteMessages (DeleteMessagesReq) returns (DeleteMessagesRes)
+	post /beaver/api/chat/chat/v1/deleteMessages (DeleteMessagesReq) returns (DeleteMessagesRes)
 
 	@doc "标记消息媒体状态（语音已听等）"
 	@handler markMessageMedia
-	post /api/chat/v1/markMessageMedia (MarkMessageMediaReq) returns (MarkMessageMediaRes)
+	post /beaver/api/chat/chat/v1/markMessageMedia (MarkMessageMediaReq) returns (MarkMessageMediaRes)
 
 	@doc "转发消息"
 	@handler forwardMessage
-	post /api/chat/v1/forward (ForwardMessageReq) returns (ForwardMessageRes)
+	post /beaver/api/chat/chat/v1/forward (ForwardMessageReq) returns (ForwardMessageRes)
 
 	@doc "聊天数据同步"
 	@handler chatSync
-	post /api/chat/v1/sync (ChatSyncReq) returns (ChatSyncRes)
+	post /beaver/api/chat/chat/v1/sync (ChatSyncReq) returns (ChatSyncRes)
 
 	@doc "批量获取会话数据"
 	@handler getConversationsListByIds
-	post /api/chat/v1/getConversationsListByIds (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
+	post /beaver/api/chat/chat/v1/getConversationsListByIds (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
 
 	@doc "批量获取用户会话设置数据"
 	@handler getUserConversationSettingsListByIds
-	post /api/chat/v1/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
+	post /beaver/api/chat/chat/v1/getUserConversationSettingsListByIds (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
 
 	@doc "更新会话已读序列号"
 	@handler updateReadSeq
-	post /api/chat/v1/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
+	post /beaver/api/chat/chat/v1/updateReadSeq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
 
 	@doc "获取合并转发详情"
 	@handler getForwardDetails
-	get /api/chat/v1/getForwardDetails (GetForwardDetailsReq) returns (GetForwardDetailsRes)
+	get /beaver/api/chat/chat/v1/getForwardDetails (GetForwardDetailsReq) returns (GetForwardDetailsRes)
 }
 
 // goctl api go -api message_api.api -dir . --home ../../../template
 
 // ==================== 队间机器视图：会话与消息 ====================
-// 与 C 端共用 /api/chat 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐，调用方零改动。
+// 与 C 端共用 /beaver/api/chat 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐，调用方零改动。
 // C 端是 camelCase 视图（面向客户端 SDK），这里是 snake_case 视图（面向同域 RPC 协议），
 // 两者都在本 .api 里，不存在第二套 HTTP 门面。
 type (
@@ -689,32 +690,32 @@ type (
 	group: chat_machine
 	middleware: AuthGate
 )
-service chat {
+service message {
 	@doc "发送消息"
 	@handler peerSendMsg
-	post /api/chat/v1/send (PeerSendMsgReq) returns (PeerSendMsgRes)
+	post /beaver/api/chat/machine/v1/send (PeerSendMsgReq) returns (PeerSendMsgRes)
 
 	@doc "初始化会话"
 	@handler peerInitializeConversation
-	post /api/chat/v1/initialize_conversation (PeerInitializeConversationReq) returns (PeerInitializeConversationRes)
+	post /beaver/api/chat/machine/v1/initialize_conversation (PeerInitializeConversationReq) returns (PeerInitializeConversationRes)
 
 	@doc "发送系统通知消息"
 	@handler peerSendNotificationMessage
-	post /api/chat/v1/send_notification_message (PeerSendNotificationMessageReq) returns (PeerSendNotificationMessageRes)
+	post /beaver/api/chat/machine/v1/send_notification_message (PeerSendNotificationMessageReq) returns (PeerSendNotificationMessageRes)
 
 	@doc "按会话+消息 ID 取单条消息"
 	@handler peerGetChatMessage
-	post /api/chat/v1/get_message (PeerGetChatMessageReq) returns (PeerGetChatMessageRes)
+	post /beaver/api/chat/machine/v1/get_message (PeerGetChatMessageReq) returns (PeerGetChatMessageRes)
 
 	@doc "分页查消息"
 	@handler peerListChatMessages
-	post /api/chat/v1/messages (PeerListChatMessagesReq) returns (PeerListChatMessagesRes)
+	post /beaver/api/chat/machine/v1/messages (PeerListChatMessagesReq) returns (PeerListChatMessagesRes)
 
 	@doc "批量更新消息状态"
 	@handler peerUpdateChatMessages
-	post /api/chat/v1/update_messages (PeerUpdateChatMessagesReq) returns (PeerUpdateChatMessagesRes)
+	post /beaver/api/chat/machine/v1/update_messages (PeerUpdateChatMessagesReq) returns (PeerUpdateChatMessagesRes)
 
 	@doc "分页查会话"
 	@handler peerListConversations
-	post /api/chat/v1/conversations (PeerListConversationsReq) returns (PeerListConversationsRes)
+	post /beaver/api/chat/machine/v1/conversations (PeerListConversationsReq) returns (PeerListConversationsRes)
 }

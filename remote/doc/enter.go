@@ -1,6 +1,6 @@
 // Package doc A 主体（开源核心）→ 在线文档服务（beaver-server-online 独立仓）的 S2S 接口代理。
 //
-// 跨仓不允许 etcd gRPC 直连（团队铁律），统一走对方网关 /internal/Doc.*（client_credentials 换票 + Bearer）。
+// 跨仓不允许 etcd gRPC 直连（团队铁律），统一走对方标准路径 /beaver-doc/api/doc/machine/v1/*（client_credentials 换票 + Bearer）。
 // 结构对齐 remote/{open,ai,circle,moment}：enter.go 灌域名与凭据、remote.go 持有换票与发包 plumbing、
 // 业务方法在 content.go。Req/Res 放到 types/remote/doc。
 package doc

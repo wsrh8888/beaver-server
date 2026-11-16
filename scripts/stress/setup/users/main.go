@@ -157,7 +157,7 @@ func registerOne(rdb *redis.Client, authAPIBase, email, deviceID string) (types.
 	}
 
 	body, status, err := httputil.PostJSON(
-		authAPIBase+"/api/auth/auth_public/v1/email_register",
+		authAPIBase+"/beaver/api/auth/auth_public/v1/email_register",
 		map[string]string{"email": email, "password": types.TestPassword, "code": code},
 		map[string]string{"deviceId": deviceID, "User-Agent": "BeaverDesktop/1.0 (Windows)"},
 	)

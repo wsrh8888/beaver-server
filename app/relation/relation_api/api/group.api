@@ -358,95 +358,95 @@ type (
 service relation {
 	@doc "创建群组"
 	@handler groupCreate
-	post /api/group/v1/create (GroupCreateReq) returns (GroupCreateRes)
+	post /beaver/api/group/group/v1/create (GroupCreateReq) returns (GroupCreateRes)
 
 	@doc "解散群组"
 	@handler groupDelete
-	post /api/group/v1/delete (GroupDeleteReq) returns (GroupDeleteRes)
+	post /beaver/api/group/group/v1/delete (GroupDeleteReq) returns (GroupDeleteRes)
 
 	@doc "移除群成员"
 	@handler groupMemberRemove
-	post /api/group/v1/member_remove (GroupMemberRemoveReq) returns (GroupMemberRemoveRes)
+	post /beaver/api/group/group/v1/member_remove (GroupMemberRemoveReq) returns (GroupMemberRemoveRes)
 
 	@doc "添加群成员"
 	@handler groupMemberAdd
-	post /api/group/v1/member_add (GroupMemberAddReq) returns (GroupMemberAddRes)
+	post /beaver/api/group/group/v1/member_add (GroupMemberAddReq) returns (GroupMemberAddRes)
 
 	@doc "退出群组"
 	@handler quitGroup
-	post /api/group/v1/quit (GroupQuitReq) returns (GroupQuitRes)
+	post /beaver/api/group/group/v1/quit (GroupQuitReq) returns (GroupQuitRes)
 
 	@doc "更新群组信息"
 	@handler updateGroupInfo
-	post /api/group/v1/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
+	post /beaver/api/group/group/v1/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
 
 	@doc "获取群信息"
 	@handler groupInfo
-	post /api/group/v1/info (GroupInfoReq) returns (GroupInfoRes)
+	post /beaver/api/group/group/v1/info (GroupInfoReq) returns (GroupInfoRes)
 
 	@doc "获取我加入的群组列表"
 	@handler groupMine
-	post /api/group/v1/mine (GroupMineReq) returns (GroupMineRes)
+	post /beaver/api/group/group/v1/mine (GroupMineReq) returns (GroupMineRes)
 
 	@doc "获取群成员列表"
 	@handler getGroupMembers
-	post /api/group/v1/members (GroupMemberListReq) returns (GroupMemberListRes)
+	post /beaver/api/group/group/v1/members (GroupMemberListReq) returns (GroupMemberListRes)
 
 	@doc "更新群成员角色"
 	@handler updateMemberRole
-	post /api/group/v1/member_role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
+	post /beaver/api/group/group/v1/member_role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
 
 	@doc "申请加入群组"
 	@handler joinGroup
-	post /api/group/v1/join (GroupJoinReq) returns (GroupJoinRes)
+	post /beaver/api/group/group/v1/join (GroupJoinReq) returns (GroupJoinRes)
 
 	@doc "转让群主"
 	@handler transferOwner
-	post /api/group/v1/transfer (TransferOwnerReq) returns (TransferOwnerRes)
+	post /beaver/api/group/group/v1/transfer (TransferOwnerReq) returns (TransferOwnerRes)
 
 	@doc "获取用户管理的群组申请列表"
 	@handler groupJoinRequestList
-	post /api/group/v1/join_request_list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
+	post /beaver/api/group/group/v1/join_request_list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
 
 	@doc "处理群组申请"
 	@handler groupJoinRequestHandle
-	post /api/group/v1/join_request_handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
+	post /beaver/api/group/group/v1/join_request_handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
 
 	@doc "邀请用户加入群组"
 	@handler groupInvite
-	post /api/group/v1/invite (GroupInviteReq) returns (GroupInviteRes)
+	post /beaver/api/group/group/v1/invite (GroupInviteReq) returns (GroupInviteRes)
 
 	@doc "解析群邀请链接"
 	@handler resolveGroupInvite
-	get /api/group/v1/invite_code (ResolveGroupInviteReq) returns (ResolveGroupInviteRes)
+	get /beaver/api/group/group/v1/invite_code (ResolveGroupInviteReq) returns (ResolveGroupInviteRes)
 
 	@doc "群资料同步"
 	@handler groupSync
-	post /api/group/v1/sync (GroupSyncReq) returns (GroupSyncRes)
+	post /beaver/api/group/group/v1/sync (GroupSyncReq) returns (GroupSyncRes)
 
 	@doc "群成员同步"
 	@handler groupMemberSync
-	post /api/group/v1/member_sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
+	post /beaver/api/group/group/v1/member_sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
 
 	@doc "入群申请同步"
 	@handler groupJoinRequestSync
-	post /api/group/v1/join_request_sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
+	post /beaver/api/group/group/v1/join_request_sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
 
 	@doc "搜索群组"
 	@handler searchGroups
-	get /api/group/v1/search (GroupSearchReq) returns (GroupSearchRes)
+	get /beaver/api/group/group/v1/search (GroupSearchReq) returns (GroupSearchRes)
 
 	@doc "禁言/解禁群成员"
 	@handler muteGroupMember
-	post /api/group/v1/member_mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
+	post /beaver/api/group/group/v1/member_mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
 
 	@doc "全员禁言/解禁"
 	@handler muteAllGroup
-	post /api/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
+	post /beaver/api/group/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /api 契约，身份由 authgate 中间件区分。
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分。
 // 路径刻意与 C 端错开（C 端已有 /members、/mine、/update 等），避免视图混用。
 
 type (
@@ -569,35 +569,35 @@ type (
 service relation {
 	@doc "队间：取用户加入的群组ID列表"
 	@handler userGroupIds
-	post /api/group/v1/ids (GetUserGroupIDsReq) returns (GetUserGroupIDsRes)
+	post /beaver/api/group/machine/v1/ids (GetUserGroupIDsReq) returns (GetUserGroupIDsRes)
 
 	@doc "队间：按ID批量取群组（支持增量）"
 	@handler groupsListByIds
-	post /api/group/v1/list_by_ids (GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes)
+	post /beaver/api/group/machine/v1/list_by_ids (GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes)
 
 	@doc "队间：添加群成员"
 	@handler addGroupMember
-	post /api/group/v1/add_member (AddGroupMemberReq) returns (AddGroupMemberRes)
+	post /beaver/api/group/machine/v1/add_member (AddGroupMemberReq) returns (AddGroupMemberRes)
 
 	@doc "队间：移除群成员"
 	@handler removeGroupMember
-	post /api/group/v1/remove_member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
+	post /beaver/api/group/machine/v1/remove_member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
 
 	@doc "队间：分页查询群组"
 	@handler listGroups
-	post /api/group/v1/list (ListGroupsReq) returns (ListGroupsRes)
+	post /beaver/api/group/machine/v1/list (ListGroupsReq) returns (ListGroupsRes)
 
 	@doc "队间：分页查询群成员"
 	@handler listGroupMembers
-	post /api/group/v1/member_list (ListGroupMembersReq) returns (ListGroupMembersRes)
+	post /beaver/api/group/machine/v1/member_list (ListGroupMembersReq) returns (ListGroupMembersRes)
 
 	@doc "队间：更新群成员角色/禁言"
 	@handler updateGroupMember
-	post /api/group/v1/update_member (UpdateGroupMemberReq) returns (UpdateGroupMemberRes)
+	post /beaver/api/group/machine/v1/update_member (UpdateGroupMemberReq) returns (UpdateGroupMemberRes)
 
 	@doc "队间：更新群组信息"
 	@handler updateGroup
-	post /api/group/v1/modify (UpdateGroupReq) returns (UpdateGroupRes)
+	post /beaver/api/group/machine/v1/modify (UpdateGroupReq) returns (UpdateGroupRes)
 }
 
 // goctl api go -api relation_api.api -dir . --home ../../../template

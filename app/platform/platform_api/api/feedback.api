@@ -1,6 +1,6 @@
 syntax = "v1"
 
-// ==================== 用户反馈（需登录，由 Gateway 鉴权并注入 Beaver-User-Id）====================
+// ==================== 用户反馈（需登录，jwt: Auth 由本服务校验）====================
 
 type (
 	SubmitFeedbackReq {
@@ -18,5 +18,5 @@ type (
 service platform {
 	@doc "提交用户反馈"
 	@handler SubmitFeedback
-	post /api/platform/feedback/v1/submit_feedback (SubmitFeedbackReq) returns (SubmitFeedbackRes)
+	post /beaver/api/platform/feedback/v1/submit_feedback (SubmitFeedbackReq) returns (SubmitFeedbackRes)
 }

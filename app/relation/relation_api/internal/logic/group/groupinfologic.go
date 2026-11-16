@@ -84,7 +84,7 @@ func (l *GroupInfoLogic) GroupInfo(req *types.GroupInfoReq) (resp *types.GroupIn
 		if e := l.svcCtx.DB.Where("group_id = ? AND status = 1", group.GroupID).Order("id asc").First(&invite).Error; e == nil {
 			domain := strings.TrimRight(strings.TrimSpace(l.svcCtx.Config.Domain), "/")
 			if domain != "" && invite.Token != "" {
-				resp.InviteUrl = fmt.Sprintf("%s/api/group/v1/invite_code?code=%s", domain, invite.Token)
+				resp.InviteUrl = fmt.Sprintf("%s/beaver/api/group/group/v1/invite_code?code=%s", domain, invite.Token)
 			}
 		}
 	}

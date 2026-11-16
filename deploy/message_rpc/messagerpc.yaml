@@ -1,6 +1,6 @@
-# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自网关既有 HTTP 契约 + 机器票 Bearer；
-# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /api/... 正常契约，业务能力只有这一套 HTTP 契约；
-# 本服务若对外提供 /internal/* 入站端点，那是其它团队的入站面，与 Beaver 出站是两条独立链路。
+# RemoteProxy 唯一出站注册表：本仓出站到其它团队走各自标准 HTTP 契约 + 机器票 Bearer；
+# 外仓打 A 主体（Beaver）统一走 gateway_api 的 /beaver/api/... 标准契约，业务能力只有这一套 HTTP 契约；
+# 本仓出站不使用任何 /internal/* 私有端点，只走对端标准 .api 路径。
 RemoteProxy:
   Open:
     BaseURL: http://127.0.0.1:21900
@@ -12,7 +12,7 @@ RemoteProxy:
     Auth: client_credentials
     ClientID: beaver-server
     ClientSecret: s2s-dev-secret
-  # Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 agent_api 网关。
+  # Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 /beaver-ai/api/agent/chat/v1/* 标准机器视图。
   Agent:
     BaseURL: http://127.0.0.1:22300
     Auth: internal_token

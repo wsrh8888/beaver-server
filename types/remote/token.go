@@ -1,8 +1,15 @@
 // Package remote 对端接口的公共类型。
 package remote
 
-// TokenResponse 换票端点的回包（OAuth2 裸 JSON，不是 go-zero 信封）。
+// TokenRequest 换票端点的请求体（client_credentials）。
+type TokenRequest struct {
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+}
+
+// TokenResponse 换票端点的回包（标准 .api 信封 result）。
 type TokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
+	AccessToken string `json:"accessToken"`
+	TokenType   string `json:"tokenType"`
+	ExpiresIn   int    `json:"expiresIn"`
 }

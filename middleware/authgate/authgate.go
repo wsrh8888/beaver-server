@@ -46,7 +46,7 @@ const (
 	HeaderUserID = "Beaver-User-Id"
 	// HeaderClientID 已验签的调用方标识头。
 	HeaderClientID = jwt.HeaderClientID
-	// HeaderToken 网关归一化前的用户令牌头名（网关负责转成 Authorization: Bearer）。
+	// HeaderToken 历史用户令牌头名；本服务直接校验其 JWT，等价于 Authorization: Bearer。
 	HeaderToken = "Token"
 	// AudienceCore 本团队（A 主体）全部业务面共用的机器票受众。
 	AudienceCore = "core:api"

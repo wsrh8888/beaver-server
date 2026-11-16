@@ -184,8 +184,9 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// 匹配路由
-	regex, _ := regexp.Compile(`/api/(.*?)/`)
+	// 匹配路由：标准路径为 /{team}/{surface}/{service}/{group}/v1/{action}，
+	// 取第 3 段 service；surface 只接受 api / admin。
+	regex := regexp.MustCompile(`^/[^/]+/(?:api|admin)/([^/]+)/`)
 
 	addrList := regex.FindStringSubmatch(req.URL.Path)
 	if len(addrList) != 2 {
@@ -195,25 +196,27 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	service := addrList[1]
-	// 服务合并映射：URL 前缀 → 实际 etcd 服务名（如 friend→relation），未命中走默认 {前缀}_api
+	// 服务映射：service 段 → 完整 etcd 服务名（如 user→account_api），未命中默认 {service}_api。
 	if mapped, ok := p.Config.ServiceAlias[service]; ok {
 		service = mapped
+	} else {
+		service += "_api"
 	}
 	// 增加重试机制
 	var addr string
 	for i := 0; i < 3; i++ {
-		addr = etcd.GetServiceAddr(p.Config.Etcd, service+"_api")
+		addr = etcd.GetServiceAddr(p.Config.Etcd, service)
 		if addr != "" {
 			break
 		}
-		lg.Error(model.LogMsg{Text: "获取服务地址失败", Data: map[string]interface{}{"attempt": i + 1, "service": service + "_api"}})
+		lg.Error(model.LogMsg{Text: "获取服务地址失败", Data: map[string]interface{}{"attempt": i + 1, "service": service}})
 		time.Sleep(100 * time.Millisecond)
 	}
 
 	if addr == "" {
 		writeErrorResponse(rec, "服务暂时不可用", http.StatusServiceUnavailable, serverTrace)
-		finish("服务不可用", "error", map[string]any{"service": service + "_api"})
-		lg.Error(model.LogMsg{Text: "未匹配到服务", Data: map[string]interface{}{"service": service + "_api"}})
+		finish("服务不可用", "error", map[string]any{"service": service})
+		lg.Error(model.LogMsg{Text: "未匹配到服务", Data: map[string]interface{}{"service": service}})
 		return
 	}
 
@@ -245,7 +248,7 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if isWebSocketRequest(req) && rec.status == http.StatusOK {
 		rec.status = http.StatusSwitchingProtocols
 	}
-	finish("网关请求完成", "info", map[string]any{"service": service + "_api"})
+	finish("网关请求完成", "info", map[string]any{"service": service})
 }
 
 // ensureServerTraceId Gateway 入口始终生成服务端 trace，与客户端 Uuid 无关。
