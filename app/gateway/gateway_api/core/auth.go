@@ -27,8 +27,8 @@ import (
 	"net/http"
 	"strings"
 
-	"beaver/middleware/jwt"
 	"beaver/utils/jwts"
+	"beaver/utils/s2s"
 )
 
 // 全仓统一身份头名。验票前一律剥离客户端自带值，验票后由网关按结论重建。
@@ -175,7 +175,7 @@ func (p Proxy) verifyMachineTicket(r *http.Request) bool {
 	if raw == "" {
 		return false
 	}
-	_, _, err := jwt.Verify(secret, p.machineAudience(r.URL.Path), raw)
+	_, _, err := s2s.Verify(secret, p.machineAudience(r.URL.Path), raw)
 	return err == nil
 }
 
@@ -199,13 +199,13 @@ func (p Proxy) injectMachineTicket(r *http.Request) error {
 	if strings.TrimSpace(m.Secret) == "" {
 		return nil
 	}
-	token, err := jwt.Issue(m.Secret, m.Issuer, m.ClientID, p.machineAudience(r.URL.Path), nil, jwt.S2STTL)
+	token, err := s2s.Issue(m.Secret, m.Issuer, m.ClientID, p.machineAudience(r.URL.Path), nil, s2s.S2STTL)
 	if err != nil {
 		return err
 	}
 	r.Header.Set("Authorization", bearerPrefix+token)
-	r.Header.Del(jwt.HeaderClientID)
-	r.Header.Set(jwt.HeaderClientID, m.ClientID)
+	r.Header.Del(s2s.HeaderClientID)
+	r.Header.Set(s2s.HeaderClientID, m.ClientID)
 	return nil
 }
 

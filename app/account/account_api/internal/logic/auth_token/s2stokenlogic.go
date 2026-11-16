@@ -28,7 +28,7 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	"beaver/commonconfig"
-	"beaver/middleware/jwt"
+	"beaver/utils/s2s"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -55,25 +55,25 @@ func NewS2sTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S2sToken
 // S2sToken 校验调用方凭据并签发机器票。
 //
 // fail-closed：注册表里没有该 client、Enabled 为假、口令不一致，一律拒绝；
-// 口令比对走 jwt.AuthenticateClient 的常量时间实现，不做长度/前缀短路。
+// 口令比对走 s2s.AuthenticateClient 的常量时间实现，不做长度/前缀短路。
 func (l *S2sTokenLogic) S2sToken(req *types.S2STokenReq) (resp *types.S2STokenRes, err error) {
 	if req.GrantType != "" && req.GrantType != commonconfig.AuthClientCredentials {
 		return nil, errors.New("不支持的授权方式")
 	}
 
-	scopes, ok := jwt.AuthenticateClient(l.svcCtx.Config.S2S.Clients, req.ClientID, req.ClientSecret)
+	scopes, ok := s2s.AuthenticateClient(l.svcCtx.Config.S2S.Clients, req.ClientID, req.ClientSecret)
 	if !ok {
 		l.Errorf("换票被拒：client_id=%s", req.ClientID)
 		return nil, errors.New("invalid_client")
 	}
 
-	signed, err := jwt.Issue(
+	signed, err := s2s.Issue(
 		l.svcCtx.Config.S2S.Secret,
 		l.svcCtx.Config.Name,
 		req.ClientID,
-		jwt.AudienceCore,
+		s2s.AudienceCore,
 		scopes,
-		jwt.S2STTL,
+		s2s.S2STTL,
 	)
 	if err != nil {
 		l.Errorf("签发机器票失败：client_id=%s err=%v", req.ClientID, err)
@@ -83,6 +83,6 @@ func (l *S2sTokenLogic) S2sToken(req *types.S2STokenReq) (resp *types.S2STokenRe
 	return &types.S2STokenRes{
 		AccessToken: signed,
 		TokenType:   "Bearer",
-		ExpiresIn:   int64(jwt.S2STTL.Seconds()),
+		ExpiresIn:   int64(s2s.S2STTL.Seconds()),
 	}, nil
 }

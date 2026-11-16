@@ -22,7 +22,7 @@ package config
 
 import (
 	"beaver/commonconfig"
-	"beaver/middleware/jwt"
+	"beaver/utils/s2s"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -59,7 +59,7 @@ type Config struct {
 	// 换票端点在本服务的 POST /beaver/api/auth/token/v1/issue（client_credentials）。
 	S2S struct {
 		Secret  string                     `json:",optional"`
-		Clients map[string]jwt.ClientEntry `json:",optional"`
+		Clients map[string]s2s.ClientEntry `json:",optional"`
 	}
 	Email struct {
 		QQ struct {

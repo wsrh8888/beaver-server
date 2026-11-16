@@ -1,6 +1,6 @@
-// 机器票（OAuth2 client_credentials，HS256）的签发与验签，纯密码学，不依赖 http.Handler。
-// 中间件接线在同目录 jwtS2s.go（包注释见那里）。
-package jwt
+// Package s2s 机器票（OAuth2 client_credentials，HS256）的纯逻辑：签发 / 验签 / 调用方凭据校验 / Principal context。
+// 不依赖 http.Handler；HTTP 中间件接线在 middleware/jwt/jwtS2s.go。
+package s2s
 
 import (
 	"context"

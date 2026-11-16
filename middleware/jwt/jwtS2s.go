@@ -1,8 +1,7 @@
-// Package jwt 服务间（S2S）机器票的验签与签发，一个目录装齐「判定 + 接线」。
+// Package jwt 服务间（S2S）机器票的 HTTP 中间件入口，全仓唯一验票闸门。
 //
-// 目录按「一件事」建，文件按层次分：
-//   - jwtS2s.go   唯一入口：go-zero rest.Middleware，读 Authorization 头、写 401、重建 X-Client-Id；
-//   - ticket.go   纯密码学：机器票的签发 / 验签 / 调用方凭据校验，不依赖 http.Handler。
+// 纯逻辑（签发 / 验签 / 调用方凭据校验 / Principal context）在 utils/s2s，
+// 本包只负责 HTTP 接线：读 Authorization 头、写 401、重建 X-Client-Id。
 //
 // 网关签出的终端用户身份断言（ES256）本包当前不实现：本仓各面只校验机器票，
 // 没有接线。将来哪个面要验断言，在本目录加 assertion.go（按 cloud 侧同名的签发格式反解），
@@ -21,6 +20,7 @@ import (
 	"net/http"
 	"strings"
 
+	"beaver/utils/s2s"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -34,7 +34,7 @@ const bearerPrefix = "Bearer "
 //     不接受终端用户票。
 //   - 验过才剥离外部传入的 X-Client-Id，按验签结论重建，把 Principal 注入 context。
 //
-// audience 由各服务空壳按自身口径传入（主仓业务面统一用 AudienceCore）。
+// audience 由各服务空壳按自身口径传入（主仓业务面统一用 s2s.AudienceCore）。
 // fail-closed：密钥没配一律 401（服务 main 在启动期已先行退出）；令牌缺失 / 过期 /
 // 受众不符同样 401。
 func NewJwtS2s(secret, audience string) rest.Middleware {
@@ -43,7 +43,7 @@ func NewJwtS2s(secret, audience string) rest.Middleware {
 	}
 }
 
-// s2sGate 中间件本体，只依赖 http.HandlerFunc，供 NewJwtS2s 装配。
+// s2sGate 中间件本体，只依赖 http.HandlerFunc，验签走 utils/s2s.Verify。
 func s2sGate(secret, aud string) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -56,16 +56,16 @@ func s2sGate(secret, aud string) func(http.HandlerFunc) http.HandlerFunc {
 				http.Error(w, "缺少 Bearer 令牌", http.StatusUnauthorized)
 				return
 			}
-			clientID, _, err := Verify(secret, aud, strings.TrimPrefix(raw, bearerPrefix))
+			clientID, _, err := s2s.Verify(secret, aud, strings.TrimPrefix(raw, bearerPrefix))
 			if err != nil {
 				http.Error(w, "调用方令牌校验失败: "+err.Error(), http.StatusUnauthorized)
 				return
 			}
 			// 重建不可伪造的调用方标识：剥离外部传入的同名头，按验签结论写入。
-			r.Header.Del(HeaderClientID)
-			r.Header.Set(HeaderClientID, clientID)
+			r.Header.Del(s2s.HeaderClientID)
+			r.Header.Set(s2s.HeaderClientID, clientID)
 			// 票据里的 Scopes 来自签发时的注册表，验签通过后才可信；注入 context 供按域授权读取。
-			next(w, r.WithContext(WithPrincipal(r.Context(), clientID)))
+			next(w, r.WithContext(s2s.WithPrincipal(r.Context(), clientID)))
 		}
 	}
 }

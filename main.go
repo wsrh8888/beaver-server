@@ -148,10 +148,6 @@ func main() {
 			},
 		},
 		{
-		},
-		{
-		},
-		{
 			name: "beaver_platform",
 			dsn:  "root:123456@tcp(127.0.0.1:3306)/beaver_platform?charset=utf8mb4&parseTime=True&loc=Local",
 			run: func(db *gorm.DB) error {
