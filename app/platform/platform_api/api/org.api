@@ -5,12 +5,14 @@ syntax = "v1"
 
 type (
 	GetOrganizationReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
 	GetOrganizationRes {
 		OrgID string `json:"orgId"` // string 组织 ID
 		Name  string `json:"name"` // string 组织名
 	}
 	DepartmentTreeReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
 	DepartmentNode {
 		DeptID      string           `json:"deptId"` // string 部门 ID
@@ -24,6 +26,7 @@ type (
 		List []DepartmentNode `json:"list"` // array 部门树，根在最外层
 	}
 	ListMemberReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		DeptID string `form:"deptId,optional"` // string 按部门过滤，不传则全部
 	}
 	MemberItem {
@@ -40,7 +43,7 @@ type (
 
 @server (
 	group: org
-	jwt: Auth
+	middleware: JwtS2s
 )
 service platform {
 	@doc "查询当前组织"

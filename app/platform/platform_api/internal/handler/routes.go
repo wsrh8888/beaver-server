@@ -40,7 +40,7 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// 队间：查询后台操作日志
@@ -191,15 +191,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 提交用户反馈
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/platform/feedback/v1/submit_feedback",
-				Handler: feedback.SubmitFeedbackHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 提交用户反馈
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/platform/feedback/v1/submit_feedback",
+					Handler: feedback.SubmitFeedbackHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
@@ -214,27 +216,29 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 部门树，节点带直属成员人数
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/org/org/v1/department_tree",
-				Handler: org.DepartmentTreeHandler(serverCtx),
-			},
-			{
-				// 成员列表，可按部门过滤
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/org/org/v1/member_list",
-				Handler: org.ListMemberHandler(serverCtx),
-			},
-			{
-				// 查询当前组织
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/org/org/v1/organization",
-				Handler: org.GetOrganizationHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 部门树，节点带直属成员人数
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/org/org/v1/department_tree",
+					Handler: org.DepartmentTreeHandler(serverCtx),
+				},
+				{
+					// 成员列表，可按部门过滤
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/org/org/v1/member_list",
+					Handler: org.ListMemberHandler(serverCtx),
+				},
+				{
+					// 查询当前组织
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/org/org/v1/organization",
+					Handler: org.GetOrganizationHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
@@ -266,14 +270,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取工作台应用列表（仅上架，按分类分组）
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/platform/workbench/v1/list_workbench",
-				Handler: workbench.ListWorkbenchAppsHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 获取工作台应用列表（仅上架，按分类分组）
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/platform/workbench/v1/list_workbench",
+					Handler: workbench.ListWorkbenchAppsHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 }

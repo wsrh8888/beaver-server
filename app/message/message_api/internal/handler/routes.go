@@ -34,122 +34,124 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 批量删除消息(仅自己不可见)
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/deleteMessages",
-				Handler: chat.DeleteMessagesHandler(serverCtx),
-			},
-			{
-				// 删除某个最近会话
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/deleteRecentChat",
-				Handler: chat.DeleteRecentHandler(serverCtx),
-			},
-			{
-				// 转发消息
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/forward",
-				Handler: chat.ForwardMessageHandler(serverCtx),
-			},
-			{
-				// 获取聊天记录
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/getChatHistory",
-				Handler: chat.ChatHistoryHandler(serverCtx),
-			},
-			{
-				// 获取会话id
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/getConversationInfo",
-				Handler: chat.ConversationInfoHandler(serverCtx),
-			},
-			{
-				// 批量获取会话数据
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/getConversationsListByIds",
-				Handler: chat.GetConversationsListByIdsHandler(serverCtx),
-			},
-			{
-				// 获取合并转发详情
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/chat/chat/v1/getForwardDetails",
-				Handler: chat.GetForwardDetailsHandler(serverCtx),
-			},
-			{
-				// 获取最近会话列表
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/chat/chat/v1/getRecentChatList",
-				Handler: chat.RecentChatListHandler(serverCtx),
-			},
-			{
-				// 批量获取用户会话设置数据
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/getUserConversationSettingsListByIds",
-				Handler: chat.GetUserConversationSettingsListByIdsHandler(serverCtx),
-			},
-			{
-				// 隐藏/显示会话
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/hideChat",
-				Handler: chat.HideChatHandler(serverCtx),
-			},
-			{
-				// 标记消息媒体状态（语音已听等）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/markMessageMedia",
-				Handler: chat.MarkMessageMediaHandler(serverCtx),
-			},
-			{
-				// 设置会话免打扰
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/muteChat",
-				Handler: chat.MuteChatHandler(serverCtx),
-			},
-			{
-				// 置顶某个会话
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/pinnedChat",
-				Handler: chat.PinnedChatHandler(serverCtx),
-			},
-			{
-				// 撤回消息
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/recall",
-				Handler: chat.RecallMessageHandler(serverCtx),
-			},
-			{
-				// 搜索消息
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/searchMessages",
-				Handler: chat.SearchMessagesHandler(serverCtx),
-			},
-			{
-				// 发送消息
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/sendMsg",
-				Handler: chat.SendMsgHandler(serverCtx),
-			},
-			{
-				// 聊天数据同步
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/sync",
-				Handler: chat.ChatSyncHandler(serverCtx),
-			},
-			{
-				// 更新会话已读序列号
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/chat/chat/v1/updateReadSeq",
-				Handler: chat.UpdateReadSeqHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 批量删除消息(仅自己不可见)
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/deleteMessages",
+					Handler: chat.DeleteMessagesHandler(serverCtx),
+				},
+				{
+					// 删除某个最近会话
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/deleteRecentChat",
+					Handler: chat.DeleteRecentHandler(serverCtx),
+				},
+				{
+					// 转发消息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/forward",
+					Handler: chat.ForwardMessageHandler(serverCtx),
+				},
+				{
+					// 获取聊天记录
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/getChatHistory",
+					Handler: chat.ChatHistoryHandler(serverCtx),
+				},
+				{
+					// 获取会话id
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/getConversationInfo",
+					Handler: chat.ConversationInfoHandler(serverCtx),
+				},
+				{
+					// 批量获取会话数据
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/getConversationsListByIds",
+					Handler: chat.GetConversationsListByIdsHandler(serverCtx),
+				},
+				{
+					// 获取合并转发详情
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/chat/chat/v1/getForwardDetails",
+					Handler: chat.GetForwardDetailsHandler(serverCtx),
+				},
+				{
+					// 获取最近会话列表
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/chat/chat/v1/getRecentChatList",
+					Handler: chat.RecentChatListHandler(serverCtx),
+				},
+				{
+					// 批量获取用户会话设置数据
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/getUserConversationSettingsListByIds",
+					Handler: chat.GetUserConversationSettingsListByIdsHandler(serverCtx),
+				},
+				{
+					// 隐藏/显示会话
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/hideChat",
+					Handler: chat.HideChatHandler(serverCtx),
+				},
+				{
+					// 标记消息媒体状态（语音已听等）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/markMessageMedia",
+					Handler: chat.MarkMessageMediaHandler(serverCtx),
+				},
+				{
+					// 设置会话免打扰
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/muteChat",
+					Handler: chat.MuteChatHandler(serverCtx),
+				},
+				{
+					// 置顶某个会话
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/pinnedChat",
+					Handler: chat.PinnedChatHandler(serverCtx),
+				},
+				{
+					// 撤回消息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/recall",
+					Handler: chat.RecallMessageHandler(serverCtx),
+				},
+				{
+					// 搜索消息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/searchMessages",
+					Handler: chat.SearchMessagesHandler(serverCtx),
+				},
+				{
+					// 发送消息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/sendMsg",
+					Handler: chat.SendMsgHandler(serverCtx),
+				},
+				{
+					// 聊天数据同步
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/sync",
+					Handler: chat.ChatSyncHandler(serverCtx),
+				},
+				{
+					// 更新会话已读序列号
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/chat/v1/updateReadSeq",
+					Handler: chat.UpdateReadSeqHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// 分页查会话

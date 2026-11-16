@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"encoding/json"
 	"errors"
@@ -69,7 +68,7 @@ type agentConversationItem struct {
 }
 
 func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.GetSyncAgentConversationsReq) (resp *types.GetSyncAgentConversationsRes, err error) {
-	userId := identity.UserID(l.ctx)
+	userId := req.UserID
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

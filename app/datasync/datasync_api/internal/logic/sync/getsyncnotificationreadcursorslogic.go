@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -50,16 +49,16 @@ func NewGetSyncNotificationReadCursorsLogic(ctx context.Context, svcCtx *svc.Ser
 }
 
 func (l *GetSyncNotificationReadCursorsLogic) GetSyncNotificationReadCursors(req *types.GetSyncNotificationReadCursorsReq) (resp *types.GetSyncNotificationReadCursorsRes, err error) {
-	if identity.UserID(l.ctx) == "" {
+	if req.UserID == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
 	rpcResp, err := l.svcCtx.NotificationRpc.GetReadCursorVersions(l.ctx, &notification_rpc.GetReadCursorVersionsReq{
-		UserId:       identity.UserID(l.ctx),
+		UserId:       req.UserID,
 		SinceVersion: req.SinceVersion,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取通知已读游标版本摘要失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "sinceVersion": req.SinceVersion, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取通知已读游标版本摘要失败", Data: map[string]any{"userId": req.UserID, "sinceVersion": req.SinceVersion, "err": err.Error()}})
 		return nil, err
 	}
 

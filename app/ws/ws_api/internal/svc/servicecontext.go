@@ -50,9 +50,8 @@ type ServiceContext struct {
 	ChatRpc    chat.Chat
 	RocketMQ   *corerocketmq.Client
 	InstanceID string
-	// AuthGate 由 .api 的 `middleware: AuthGate` 声明接线，供 goctl 生成的
-	// rest.WithMiddlewares 注入。
-	AuthGate rest.Middleware
+	// JwtS2s 由 .api 的 @server 声明接线，goctl 生成 WithMiddlewares 注入。
+	JwtS2s    rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -69,7 +68,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ChatRpc:    chat.NewChat(zrpc.MustNewClient(c.ChatRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		RocketMQ:   mqClient,
 		InstanceID: buildInstanceID(c.InstanceID),
-		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
+		JwtS2s:    middleware.NewJwtS2sMiddleware(c).Handle,
 	}
 }
 

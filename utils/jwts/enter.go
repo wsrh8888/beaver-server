@@ -27,6 +27,14 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// 外部票受众。C 端用户、开放平台开发者、后台管理员三票同密钥同源，
+// 只有 Audience 能区分平面；网关按路由组校验，杜绝拿普通用户票打后台接口。
+const (
+	AudienceUser      = "beaver:user"
+	AudienceDeveloper = "beaver:developer"
+	AudienceAdmin     = "beaver:admin"
+)
+
 type JwtPayLoad struct {
 	NickName string `json:"nickName"`
 	UserID   string `json:"userId"`
@@ -38,11 +46,14 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenToken(payload JwtPayLoad, accessSecret string, expires int) (string, error) {
+// GenToken 签发外部票。audience 取 AudienceUser / AudienceDeveloper / AudienceAdmin，
+// 由签发票面所属平面决定，签错平面等于发错权限。
+func GenToken(payload JwtPayLoad, accessSecret string, expires int, audience string) (string, error) {
 	claims := CustomClaims{
 		JwtPayLoad: payload,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expires))),
+			Audience:  jwt.ClaimStrings{audience},
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

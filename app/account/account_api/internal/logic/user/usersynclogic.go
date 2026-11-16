@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"strings"
 	"time"
@@ -53,7 +52,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	if len(req.UserVersions) == 0 {
 		l.logger.Info(model.LogMsg{
 			Text: "未指定同步用户数据",
-			Data: map[string]any{"userId": identity.UserID(l.ctx)},
+			Data: map[string]any{"userId": req.UserID},
 		})
 		return &types.UserSyncRes{Users: []types.UserSyncItem{}}, nil
 	}
@@ -73,7 +72,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 		Order("version ASC").Find(&users).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询相关用户数据失败",
-			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
 		})
 		return nil, err
 	}
@@ -100,7 +99,7 @@ func (l *UserSyncLogic) UserSync(req *types.UserSyncReq) (resp *types.UserSyncRe
 	l.logger.Info(model.LogMsg{
 		Text: "用户数据同步完成",
 		Data: map[string]interface{}{
-			"userId":       identity.UserID(l.ctx),
+			"userId":       req.UserID,
 			"requestCount": len(req.UserVersions),
 			"resultCount":  len(userItems),
 		},

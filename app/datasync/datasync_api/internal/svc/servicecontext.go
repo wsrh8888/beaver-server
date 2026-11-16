@@ -25,6 +25,7 @@ import (
 	accttypes "beaver/app/account/account_rpc/types"
 	assettypes "beaver/app/asset/asset_rpc/types"
 	"beaver/app/datasync/datasync_api/internal/config"
+	"beaver/app/datasync/datasync_api/internal/middleware"
 	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/notification/notification_rpc/types/notification_rpc"
 	"beaver/app/relation/relation_rpc/types"
@@ -36,6 +37,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/gorm"
 )
@@ -51,6 +53,8 @@ type ServiceContext struct {
 	MessageRpc      chat_rpc.MessageClient
 	EmojiRpc        assettypes.EmojiClient
 	NotificationRpc notification_rpc.NotificationClient
+	// JwtS2s 由 .api 的 @server 声明接线，goctl 生成 WithMiddlewares 注入。
+	JwtS2s rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -74,5 +78,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		MessageRpc:      chat_rpc.NewMessageClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:        assettypes.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
 		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
+		JwtS2s:          middleware.NewJwtS2sMiddleware(c).Handle,
 	}
 }

@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/asset/asset_api/internal/svc"
@@ -90,7 +89,7 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 			CollectCount: 0,
 			EmojiCount:   0,
 			IsCollected:  false,
-			IsAuthor:     emojiPackage.UserID == identity.UserID(l.ctx),
+			IsAuthor:     emojiPackage.UserID == req.UserID,
 			Emojis:       make([]types.GetEmojiPackageEmojiItem, 0),
 		}, nil
 	}
@@ -126,14 +125,14 @@ func (l *GetEmojiPackageDetailLogic) GetEmojiPackageDetail(req *types.GetEmojiPa
 	// 5. 检查当前用户是否已收藏
 	var isCollected bool
 	err = l.svcCtx.DB.Model(&emoji_models.EmojiPackageCollect{}).
-		Where("user_id = ? AND package_id = ?", identity.UserID(l.ctx), req.PackageID).
+		Where("user_id = ? AND package_id = ?", req.UserID, req.PackageID).
 		First(&emoji_models.EmojiPackageCollect{}).Error
 	if err == nil {
 		isCollected = true
 	}
 
 	// 6. 检查是否是作者
-	isAuthor := emojiPackage.UserID == identity.UserID(l.ctx)
+	isAuthor := emojiPackage.UserID == req.UserID
 
 	// 7. 构建返回数据
 	emojiItems := make([]types.GetEmojiPackageEmojiItem, 0, len(emojiPackageEmojis))

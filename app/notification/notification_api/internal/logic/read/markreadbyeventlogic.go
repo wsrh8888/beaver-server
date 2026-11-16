@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -49,7 +48,7 @@ func NewMarkReadByEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *M
 }
 
 func (l *MarkReadByEventLogic) MarkReadByEvent(req *types.MarkReadByEventReq) (resp *types.MarkReadByEventRes, err error) {
-	userId := identity.UserID(l.ctx)
+	userId := req.UserID
 	eventId := req.EventID
 
 	// 更新指定通知为已读

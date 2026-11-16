@@ -5,6 +5,7 @@ syntax = "v1"
 // 同步聊天消息
 type (
 	GetSyncChatMessagesReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Since  int64  `json:"since,optional"` // 从这个序列号之后开始同步，不传则同步所有
 	}
 	GetSyncChatMessagesRes {
@@ -20,6 +21,7 @@ type (
 // 同步被删除的消息 ID 列表（仅自己可见的删除动作同步）
 type (
 	GetSyncDeletedMessagesReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步
 	}
 	GetSyncDeletedMessagesRes {
@@ -31,6 +33,7 @@ type (
 // 同步消息媒体状态（语音已听等）
 type (
 	GetSyncMessageMediasReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步
 	}
 	GetSyncMessageMediasRes {
@@ -42,6 +45,7 @@ type (
 // 同步会话元信息
 type (
 	GetSyncChatConversationsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
 	GetSyncChatConversationsRes {
@@ -57,6 +61,7 @@ type (
 // 同步用户会话设置
 type (
 	GetSyncChatUserConversationsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
 	GetSyncChatUserConversationsRes {
@@ -70,7 +75,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: sync
 )
 service datasync {

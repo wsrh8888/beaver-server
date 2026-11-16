@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/notification/notification_api/internal/svc"
@@ -52,13 +51,13 @@ func NewGetReadCursorsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 func (l *GetReadCursorsLogic) GetReadCursors(req *types.GetReadCursorsReq) (resp *types.GetReadCursorsRes, err error) {
 	resp = &types.GetReadCursorsRes{Cursors: []types.ReadCursorItem{}}
 
-	if identity.UserID(l.ctx) == "" {
+	if req.UserID == "" {
 		return resp, nil
 	}
 
 	var rows []notification_models.NotificationRead
 	query := l.svcCtx.DB.WithContext(l.ctx).
-		Where("user_id = ?", identity.UserID(l.ctx))
+		Where("user_id = ?", req.UserID)
 
 	if len(req.Categories) > 0 {
 		query = query.Where("category IN ?", req.Categories)
@@ -67,7 +66,7 @@ func (l *GetReadCursorsLogic) GetReadCursors(req *types.GetReadCursorsReq) (resp
 	if err = query.Find(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
 		l.logger.Error(model.LogMsg{
 			Text: "查询通知已读游标失败",
-			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
 		})
 		return nil, err
 	}

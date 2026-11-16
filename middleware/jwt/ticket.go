@@ -1,19 +1,5 @@
-// Package jwt 服务间（S2S）机器票的鉴权，一个目录装齐「判定 + 接线」。
-//
-// 目录按「一件事」建，文件按层次分（与 middleware/track 的 httpTrack/rpcTrack 同一约定）：
-//   - s2s.go         机器票（OAuth2 client_credentials，HS256）的签发 / 验签，纯密码学；
-//   - httpS2S.go     机器票的 HTTP 闸门（读 Authorization 头、写 401、重建 X-Client-Id）。
-//
-// 网关签出的终端用户身份断言（ES256）本包当前不实现：本仓各面只校验机器票，
-// 没有接线。将来哪个面要验断言，在本目录加 assertion.go（按 cloud 侧同名的签发格式反解），
-// 需要 HTTP 接线再加 httpAssertion.go，不必另开顶层目录。
-//
-// 也不提供任何「网关跳令牌」闸门：网关只做转发，不往上游注入任何凭证，
-// 因此没有可校验的「这一跳从网关来」。各面的身份只由业务凭证（app 钥匙 / 短票 / 回调 token）
-// 或机器票决定。
-//
-// 出站换票（拿 client_id/secret 去对端 /token 换 Bearer 并缓存）不在本包，
-// 在 remote 包 —— 它是调用方的连接状态，不是鉴权判定。
+// 机器票（OAuth2 client_credentials，HS256）的签发与验签，纯密码学，不依赖 http.Handler。
+// 中间件接线在同目录 jwtS2s.go（包注释见那里）。
 package jwt
 
 import (
@@ -33,6 +19,8 @@ const (
 	S2STTL = 30 * time.Minute
 	// HeaderClientID 验签通过后重建的、不可伪造的调用方标识头（写入下游 context 前剥离外部传入的同名头）。
 	HeaderClientID = "X-Client-Id"
+	// AudienceCore 本团队（A 主体）全部业务面共用的机器票受众。
+	AudienceCore = "core:api"
 )
 
 // S2SClaims 是 S2S access token 的载荷。

@@ -44,7 +44,8 @@ type CardMsg struct {
 }
 
 type ChatHistoryReq struct {
-	ConversationID string `json:"conversationId"` // 会话Id
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   // 会话Id
 	Page           int    `json:"page,optional"`
 	Limit          int    `json:"limit,optional"`
 }
@@ -68,6 +69,7 @@ type ChatSyncMessage struct {
 }
 
 type ChatSyncReq struct {
+	UserID         string `header:"Beaver-User-Id"`        // 当前用户ID（网关注入的可信身份头）
 	ConversationID string `json:"conversationId,optional"` // 会话ID，可选，不传则同步所有会话
 	FromSeq        int64  `json:"fromSeq"`                 // 起始序列号
 	ToSeq          int64  `json:"toSeq"`                   // 结束序列号
@@ -101,7 +103,8 @@ type ConversationById struct {
 }
 
 type ConversationInfoReq struct {
-	ConversationID string `json:"conversationId"` //会话id
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   //会话id
 }
 
 type ConversationInfoRes struct {
@@ -116,14 +119,16 @@ type ConversationInfoRes struct {
 }
 
 type DeleteMessagesReq struct {
-	MessageIDs []string `json:"messageIds"` // 支持批量删除，最多100条
+	UserID     string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	MessageIDs []string `json:"messageIds"`       // 支持批量删除，最多100条
 }
 
 type DeleteMessagesRes struct {
 }
 
 type DeleteRecentReq struct {
-	ConversationID string `json:"conversationId"` //会话id
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   //会话id
 }
 
 type DeleteRecentRes struct {
@@ -145,10 +150,11 @@ type FileMsg struct {
 }
 
 type ForwardMessageReq struct {
-	MessageIDs  []string `json:"messageIds"`  // 原始消息ID列表
-	TargetID    string   `json:"targetId"`    // 目标会话ID
-	ForwardType int      `json:"forwardType"` // 1: 单聊 2: 群聊
-	ForwardMode int      `json:"forwardMode"` // 1: 逐条转发 2: 合并转发
+	UserID      string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	MessageIDs  []string `json:"messageIds"`       // 原始消息ID列表
+	TargetID    string   `json:"targetId"`         // 目标会话ID
+	ForwardType int      `json:"forwardType"`      // 1: 单聊 2: 群聊
+	ForwardMode int      `json:"forwardMode"`      // 1: 逐条转发 2: 合并转发
 }
 
 type ForwardMessageRes struct {
@@ -162,7 +168,8 @@ type ForwardMsg struct {
 }
 
 type GetConversationsListByIdsReq struct {
-	ConversationIds []string `json:"conversationIds"` // 会话ID列表
+	UserID          string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationIds []string `json:"conversationIds"`  // 会话ID列表
 }
 
 type GetConversationsListByIdsRes struct {
@@ -170,6 +177,7 @@ type GetConversationsListByIdsRes struct {
 }
 
 type GetForwardDetailsReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	RecordID string `form:"recordId"`
 }
 
@@ -178,7 +186,8 @@ type GetForwardDetailsRes struct {
 }
 
 type GetUserConversationSettingsListByIdsReq struct {
-	ConversationIds []string `json:"conversationIds"` // 会话ID列表
+	UserID          string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationIds []string `json:"conversationIds"`  // 会话ID列表
 }
 
 type GetUserConversationSettingsListByIdsRes struct {
@@ -186,8 +195,9 @@ type GetUserConversationSettingsListByIdsRes struct {
 }
 
 type HideChatReq struct {
-	ConversationID string `json:"conversationId"` //会话id
-	IsHidden       bool   `json:"isHidden"`       // true表示隐藏 false表示显示
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   //会话id
+	IsHidden       bool   `json:"isHidden"`         // true表示隐藏 false表示显示
 }
 
 type HideChatRes struct {
@@ -201,7 +211,8 @@ type ImageMsg struct {
 }
 
 type MarkMessageMediaReq struct {
-	MessageIDs []string `json:"messageIds"` // 消息ID列表，最多100条
+	UserID     string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	MessageIDs []string `json:"messageIds"`       // 消息ID列表，最多100条
 }
 
 type MarkMessageMediaRes struct {
@@ -238,8 +249,9 @@ type Msg struct {
 }
 
 type MuteChatReq struct {
-	ConversationID string `json:"conversationId"` //会话id
-	IsMuted        bool   `json:"isMuted"`        // true表示免打扰 false表示取消免打扰
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   //会话id
+	IsMuted        bool   `json:"isMuted"`          // true表示免打扰 false表示取消免打扰
 }
 
 type MuteChatRes struct {
@@ -507,15 +519,17 @@ type PeerWithdrawMsg struct {
 }
 
 type PinnedChatReq struct {
-	ConversationID string `json:"conversationId"` //会话id
-	IsPinned       bool   `json:"isPinned"`       // true表示置顶 false表示不置顶
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   //会话id
+	IsPinned       bool   `json:"isPinned"`         // true表示置顶 false表示不置顶
 }
 
 type PinnedChatRes struct {
 }
 
 type RecallMessageReq struct {
-	MessageID string `json:"messageId"` // 客户端消息ID
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	MessageID string `json:"messageId"`        // 客户端消息ID
 }
 
 type RecallMessageRes struct {
@@ -524,8 +538,9 @@ type RecallMessageRes struct {
 }
 
 type RecentChatListReq struct {
-	Page  int `form:"page,optional"`
-	Limit int `form:"limit,optional"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `form:"page,optional"`
+	Limit  int    `form:"limit,optional"`
 }
 
 type RecentChatListRes struct {
@@ -540,6 +555,7 @@ type ReplyMsg struct {
 }
 
 type SearchMessagesReq struct {
+	UserID         string `header:"Beaver-User-Id"`        // 当前用户ID（网关注入的可信身份头）
 	Keyword        string `json:"keyword"`                 // 搜索关键词
 	ConversationID string `json:"conversationId,optional"` // 可选，限定在某个会话内搜索
 	Page           int    `json:"page,optional"`
@@ -552,8 +568,9 @@ type SearchMessagesRes struct {
 }
 
 type SendMsgReq struct {
-	ConversationID string `json:"conversationId"` //会话id
-	MessageID      string `json:"messageId"`      //客户端消息ID
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   //会话id
+	MessageID      string `json:"messageId"`        //客户端消息ID
 	Msg            Msg    `json:"msg"`
 }
 
@@ -580,8 +597,9 @@ type TextMsg struct {
 }
 
 type UpdateReadSeqReq struct {
-	ConversationID string `json:"conversationId"` // 会话ID
-	ReadSeq        int64  `json:"readSeq"`        // 已读序列号（用户已读到的消息seq）
+	UserID         string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	ConversationID string `json:"conversationId"`   // 会话ID
+	ReadSeq        int64  `json:"readSeq"`          // 已读序列号（用户已读到的消息seq）
 }
 
 type UpdateReadSeqRes struct {

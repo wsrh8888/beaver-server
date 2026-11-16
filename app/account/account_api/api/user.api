@@ -3,6 +3,7 @@ syntax = "v1"
 // 用户信息
 type (
 	UserInfoReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
 	UserInfoRes {
 		UserID   string `json:"userId"` // 用户唯一标识
@@ -19,6 +20,7 @@ type (
 // 更新用户信息
 type (
 	UpdateInfoReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		NickName *string `json:"nickName,optional"` // 新昵称（可选）
 		Avatar   *string `json:"avatar,optional"` // 新头像URL（可选）
 		Abstract *string `json:"abstract,optional"` // 新个性签名（可选）
@@ -30,6 +32,7 @@ type (
 // 修改邮箱
 type (
 	UpdateEmailReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Email  string `json:"email"` // 新邮箱地址
 		Code   string `json:"code"` // 验证码
 	}
@@ -43,6 +46,7 @@ type (
 		Version int64  `json:"version"` // 该用户的最后同步版本号
 	}
 	UserSyncReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		UserVersions []UserVersion `json:"userVersions"` // 用户版本号数组
 	}
 	UserSyncRes {
@@ -67,6 +71,7 @@ type (
 // 获取用户设置
 type (
 	GetUserSettingsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
 	GetUserSettingsPrivacyItem {
 		AllowFriendRequest bool `json:"allowFriendRequest"` // 是否允许添加好友
@@ -110,6 +115,7 @@ type (
 		SendMessage  *string `json:"sendMessage,optional"` // 发送消息
 	}
 	UpdateUserSettingsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Privacy      *UpdateUserSettingsPrivacyItem      `json:"privacy,optional"` // 隐私设置（可选，局部更新）
 		Notification *UpdateUserSettingsNotificationItem `json:"notification,optional"` // 通知策略（可选，局部更新）
 		Keyboard     *UpdateUserSettingsKeyboardItem     `json:"keyboard,optional"` // 快捷键（可选，局部更新）
@@ -120,7 +126,7 @@ type (
 // 用户服务
 @server (
 	group: user
-	jwt: Auth
+	middleware: JwtS2s
 )
 service account {
 	@doc "获取用户基础信息"
@@ -296,7 +302,7 @@ type (
 
 @server (
 	group: user_machine
-	middleware: AuthGate
+	middleware: JwtS2s
 )
 service account {
 	@doc "按 user_id 查用户信息（含管理字段）"

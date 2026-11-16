@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -63,10 +62,10 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 	// 先获取用户管理的群组ID列表（作为群主或管理员）
 	var managedGroupIDs []string
 	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
-		Where("user_id = ? AND role IN (1, 2)", identity.UserID(l.ctx)).
+		Where("user_id = ? AND role IN (1, 2)", req.UserID).
 		Pluck("group_id", &managedGroupIDs).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取用户管理的群组失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取用户管理的群组失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -87,7 +86,7 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 		Limit(limit).
 		Find(&requests).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询群组申请列表失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询群组申请列表失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -97,7 +96,7 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 		Where("group_id IN (?)", managedGroupIDs).
 		Count(&total).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取群组申请总数失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取群组申请总数失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, err
 	}
 
@@ -125,6 +124,6 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 		Count: total,
 	}
 
-	l.logger.Info(model.LogMsg{Text: "获取群组申请列表完成", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(requestItems)}})
+	l.logger.Info(model.LogMsg{Text: "获取群组申请列表完成", Data: map[string]interface{}{"userId": req.UserID, "count": len(requestItems)}})
 	return resp, nil
 }

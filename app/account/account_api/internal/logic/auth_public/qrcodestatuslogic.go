@@ -102,7 +102,7 @@ func (l *QrcodeStatusLogic) QrcodeStatus(req *types.QrcodeStatusReq) (*types.Qrc
 		NickName: user.NickName,
 		UserID:   user.UserId,
 		DeviceID: req.DeviceID,
-	}, l.svcCtx.Config.Auth.AccessSecret, jwtExpireHours)
+	}, l.svcCtx.Config.Auth.AccessSecret, jwtExpireHours, jwts.AudienceUser)
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "扫码登录签发令牌失败",

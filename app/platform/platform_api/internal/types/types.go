@@ -193,6 +193,7 @@ type DepartmentNode struct {
 }
 
 type DepartmentTreeReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 }
 
 type DepartmentTreeRes struct {
@@ -255,6 +256,7 @@ type GetLatestVersionRes struct {
 }
 
 type GetOrganizationReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 }
 
 type GetOrganizationRes struct {
@@ -343,7 +345,8 @@ type ListFeedbackRes struct {
 }
 
 type ListMemberReq struct {
-	DeptID string `form:"deptId,optional"` // string 按部门过滤，不传则全部
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	DeptID string `form:"deptId,optional"`  // string 按部门过滤，不传则全部
 }
 
 type ListMemberRes struct {
@@ -389,7 +392,8 @@ type ListWorkbenchAppsItem struct {
 }
 
 type ListWorkbenchAppsReq struct {
-	ClientScope int `form:"clientScope,optional"` // int 端筛选 0全部 1PC 2移动，可选
+	UserID      string `header:"Beaver-User-Id"`     // 当前用户ID（网关注入的可信身份头）
+	ClientScope int    `form:"clientScope,optional"` // int 端筛选 0全部 1PC 2移动，可选
 }
 
 type ListWorkbenchAppsRes struct {
@@ -432,6 +436,7 @@ type ReportVersionRes struct {
 }
 
 type SubmitFeedbackReq struct {
+	UserID    string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	Content   string   `json:"content"`
 	Type      int      `json:"type"`
 	FileNames []string `json:"fileNames,optional"`

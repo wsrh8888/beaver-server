@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -51,7 +50,7 @@ func NewGetSyncCircleInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetSyncCircleInfoLogic) GetSyncCircleInfo(req *types.GetSyncCircleInfoReq) (resp *types.GetSyncCircleInfoRes, err error) {
-	userId := identity.UserID(l.ctx)
+	userId := req.UserID
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

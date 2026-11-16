@@ -53,9 +53,8 @@ type ServiceContext struct {
 	VersionGen  *versionPkg.VersionGenerator
 	RocketMQ    *corerocketmq.Client
 	MinioClient *minio.Client // MinIO客户端，仅在配置了Endpoint时初始化，供上传与预览预签名使用
-	// AuthGate 由 .api 的 `middleware: AuthGate` 声明接线，供 goctl 生成的
-	// rest.WithMiddlewares 注入；只挂在需要「用户或机器」的分组上。
-	AuthGate rest.Middleware
+	// JwtS2s 由 .api 的 @server 声明接线，goctl 生成 WithMiddlewares 注入。
+	JwtS2s    rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -74,7 +73,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:    user.NewUser(zrpc.MustNewClient(c.UserRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		FileRpc:    file.NewFile(zrpc.MustNewClient(c.AssetRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
 		EmojiRpc:   emoji.NewEmoji(zrpc.MustNewClient(c.AssetRpc, zrpc.WithUnaryClientInterceptor(zrpc_interceptor.ClientInfoInterceptor))),
-		AuthGate:   middleware.NewAuthGateMiddleware(c).Handle,
+		JwtS2s:    middleware.NewJwtS2sMiddleware(c).Handle,
 	}
 
 	// 初始化MinIO客户端（仅在配置了Endpoint时）

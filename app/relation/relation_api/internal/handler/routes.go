@@ -36,98 +36,100 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 发送好友验证请求
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/add_friend",
-				Handler: friend.AddFriendHandler(serverCtx),
-			},
-			{
-				// 拉黑用户
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/block",
-				Handler: friend.BlockUserHandler(serverCtx),
-			},
-			{
-				// 取消拉黑
-				Method:  http.MethodDelete,
-				Path:    "/beaver/api/friend/friend/v1/block",
-				Handler: friend.UnblockUserHandler(serverCtx),
-			},
-			{
-				// 获取黑名单列表
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/friend/friend/v1/block_list",
-				Handler: friend.BlockListHandler(serverCtx),
-			},
-			{
-				// 删除好友
-				Method:  http.MethodDelete,
-				Path:    "/beaver/api/friend/friend/v1/friend",
-				Handler: friend.DeleteFriendHandler(serverCtx),
-			},
-			{
-				// 获取好友详细信息
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/friend/friend/v1/friend_info",
-				Handler: friend.FriendInfoHandler(serverCtx),
-			},
-			{
-				// 获取好友列表
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/friend/friend/v1/friend_list",
-				Handler: friend.FriendListHandler(serverCtx),
-			},
-			{
-				// 批量获取好友验证数据（通过ID）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/getFriendVerifiesListByIds",
-				Handler: friend.GetFriendVerifiesListByIdsHandler(serverCtx),
-			},
-			{
-				// 批量获取好友数据（通过ID）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/getFriendsListByIds",
-				Handler: friend.GetFriendsListByUuidsHandler(serverCtx),
-			},
-			{
-				// 通过用户ID或邮箱搜索用户
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/friend/friend/v1/search",
-				Handler: friend.SearchHandler(serverCtx),
-			},
-			{
-				// 查询好友验证记录
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/searchValidInfo",
-				Handler: friend.SearchValidInfoHandler(serverCtx),
-			},
-			{
-				// 修改好友备注
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/update_notice",
-				Handler: friend.NoticeUpdateHandler(serverCtx),
-			},
-			{
-				// 处理好友验证请求(同意/拒绝)
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/valid",
-				Handler: friend.UserValidStatusHandler(serverCtx),
-			},
-			{
-				// 获取好友验证请求列表
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/friend/friend/v1/valid_list",
-				Handler: friend.ValidListHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 发送好友验证请求
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/add_friend",
+					Handler: friend.AddFriendHandler(serverCtx),
+				},
+				{
+					// 拉黑用户
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/block",
+					Handler: friend.BlockUserHandler(serverCtx),
+				},
+				{
+					// 取消拉黑
+					Method:  http.MethodDelete,
+					Path:    "/beaver/api/friend/friend/v1/block",
+					Handler: friend.UnblockUserHandler(serverCtx),
+				},
+				{
+					// 获取黑名单列表
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/friend/friend/v1/block_list",
+					Handler: friend.BlockListHandler(serverCtx),
+				},
+				{
+					// 删除好友
+					Method:  http.MethodDelete,
+					Path:    "/beaver/api/friend/friend/v1/friend",
+					Handler: friend.DeleteFriendHandler(serverCtx),
+				},
+				{
+					// 获取好友详细信息
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/friend/friend/v1/friend_info",
+					Handler: friend.FriendInfoHandler(serverCtx),
+				},
+				{
+					// 获取好友列表
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/friend/friend/v1/friend_list",
+					Handler: friend.FriendListHandler(serverCtx),
+				},
+				{
+					// 批量获取好友验证数据（通过ID）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/getFriendVerifiesListByIds",
+					Handler: friend.GetFriendVerifiesListByIdsHandler(serverCtx),
+				},
+				{
+					// 批量获取好友数据（通过ID）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/getFriendsListByIds",
+					Handler: friend.GetFriendsListByUuidsHandler(serverCtx),
+				},
+				{
+					// 通过用户ID或邮箱搜索用户
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/friend/friend/v1/search",
+					Handler: friend.SearchHandler(serverCtx),
+				},
+				{
+					// 查询好友验证记录
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/searchValidInfo",
+					Handler: friend.SearchValidInfoHandler(serverCtx),
+				},
+				{
+					// 修改好友备注
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/update_notice",
+					Handler: friend.NoticeUpdateHandler(serverCtx),
+				},
+				{
+					// 处理好友验证请求(同意/拒绝)
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/valid",
+					Handler: friend.UserValidStatusHandler(serverCtx),
+				},
+				{
+					// 获取好友验证请求列表
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/friend/friend/v1/valid_list",
+					Handler: friend.ValidListHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// 队间：分页查询黑名单
@@ -176,146 +178,148 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 创建群组
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/create",
-				Handler: group.GroupCreateHandler(serverCtx),
-			},
-			{
-				// 解散群组
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/delete",
-				Handler: group.GroupDeleteHandler(serverCtx),
-			},
-			{
-				// 获取群信息
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/info",
-				Handler: group.GroupInfoHandler(serverCtx),
-			},
-			{
-				// 邀请用户加入群组
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/invite",
-				Handler: group.GroupInviteHandler(serverCtx),
-			},
-			{
-				// 解析群邀请链接
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/group/group/v1/invite_code",
-				Handler: group.ResolveGroupInviteHandler(serverCtx),
-			},
-			{
-				// 申请加入群组
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/join",
-				Handler: group.JoinGroupHandler(serverCtx),
-			},
-			{
-				// 处理群组申请
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/join_request_handle",
-				Handler: group.GroupJoinRequestHandleHandler(serverCtx),
-			},
-			{
-				// 获取用户管理的群组申请列表
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/join_request_list",
-				Handler: group.GroupJoinRequestListHandler(serverCtx),
-			},
-			{
-				// 入群申请同步
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/join_request_sync",
-				Handler: group.GroupJoinRequestSyncHandler(serverCtx),
-			},
-			{
-				// 添加群成员
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/member_add",
-				Handler: group.GroupMemberAddHandler(serverCtx),
-			},
-			{
-				// 禁言/解禁群成员
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/member_mute",
-				Handler: group.MuteGroupMemberHandler(serverCtx),
-			},
-			{
-				// 移除群成员
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/member_remove",
-				Handler: group.GroupMemberRemoveHandler(serverCtx),
-			},
-			{
-				// 更新群成员角色
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/member_role",
-				Handler: group.UpdateMemberRoleHandler(serverCtx),
-			},
-			{
-				// 群成员同步
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/member_sync",
-				Handler: group.GroupMemberSyncHandler(serverCtx),
-			},
-			{
-				// 获取群成员列表
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/members",
-				Handler: group.GetGroupMembersHandler(serverCtx),
-			},
-			{
-				// 获取我加入的群组列表
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/mine",
-				Handler: group.GroupMineHandler(serverCtx),
-			},
-			{
-				// 全员禁言/解禁
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/mute_all",
-				Handler: group.MuteAllGroupHandler(serverCtx),
-			},
-			{
-				// 退出群组
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/quit",
-				Handler: group.QuitGroupHandler(serverCtx),
-			},
-			{
-				// 搜索群组
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/group/group/v1/search",
-				Handler: group.SearchGroupsHandler(serverCtx),
-			},
-			{
-				// 群资料同步
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/sync",
-				Handler: group.GroupSyncHandler(serverCtx),
-			},
-			{
-				// 转让群主
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/transfer",
-				Handler: group.TransferOwnerHandler(serverCtx),
-			},
-			{
-				// 更新群组信息
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/group/group/v1/update",
-				Handler: group.UpdateGroupInfoHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 创建群组
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/create",
+					Handler: group.GroupCreateHandler(serverCtx),
+				},
+				{
+					// 解散群组
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/delete",
+					Handler: group.GroupDeleteHandler(serverCtx),
+				},
+				{
+					// 获取群信息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/info",
+					Handler: group.GroupInfoHandler(serverCtx),
+				},
+				{
+					// 邀请用户加入群组
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/invite",
+					Handler: group.GroupInviteHandler(serverCtx),
+				},
+				{
+					// 解析群邀请链接
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/group/group/v1/invite_code",
+					Handler: group.ResolveGroupInviteHandler(serverCtx),
+				},
+				{
+					// 申请加入群组
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/join",
+					Handler: group.JoinGroupHandler(serverCtx),
+				},
+				{
+					// 处理群组申请
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/join_request_handle",
+					Handler: group.GroupJoinRequestHandleHandler(serverCtx),
+				},
+				{
+					// 获取用户管理的群组申请列表
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/join_request_list",
+					Handler: group.GroupJoinRequestListHandler(serverCtx),
+				},
+				{
+					// 入群申请同步
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/join_request_sync",
+					Handler: group.GroupJoinRequestSyncHandler(serverCtx),
+				},
+				{
+					// 添加群成员
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/member_add",
+					Handler: group.GroupMemberAddHandler(serverCtx),
+				},
+				{
+					// 禁言/解禁群成员
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/member_mute",
+					Handler: group.MuteGroupMemberHandler(serverCtx),
+				},
+				{
+					// 移除群成员
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/member_remove",
+					Handler: group.GroupMemberRemoveHandler(serverCtx),
+				},
+				{
+					// 更新群成员角色
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/member_role",
+					Handler: group.UpdateMemberRoleHandler(serverCtx),
+				},
+				{
+					// 群成员同步
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/member_sync",
+					Handler: group.GroupMemberSyncHandler(serverCtx),
+				},
+				{
+					// 获取群成员列表
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/members",
+					Handler: group.GetGroupMembersHandler(serverCtx),
+				},
+				{
+					// 获取我加入的群组列表
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/mine",
+					Handler: group.GroupMineHandler(serverCtx),
+				},
+				{
+					// 全员禁言/解禁
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/mute_all",
+					Handler: group.MuteAllGroupHandler(serverCtx),
+				},
+				{
+					// 退出群组
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/quit",
+					Handler: group.QuitGroupHandler(serverCtx),
+				},
+				{
+					// 搜索群组
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/group/group/v1/search",
+					Handler: group.SearchGroupsHandler(serverCtx),
+				},
+				{
+					// 群资料同步
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/sync",
+					Handler: group.GroupSyncHandler(serverCtx),
+				},
+				{
+					// 转让群主
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/transfer",
+					Handler: group.TransferOwnerHandler(serverCtx),
+				},
+				{
+					// 更新群组信息
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/group/group/v1/update",
+					Handler: group.UpdateGroupInfoHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// 队间：添加群成员

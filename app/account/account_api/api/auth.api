@@ -1,8 +1,9 @@
 syntax = "v1"
 
-// ==================== 认证接口（jwt: Auth 由本服务直接校验，身份由中间件注入上下文）====================
+// ==================== 认证接口（middleware: JwtS2s 由本服务直接校验，身份由中间件注入上下文）====================
 type (
 	LogoutReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		DeviceID string `header:"deviceId"`
 	}
 	LogoutRes  {}
@@ -10,6 +11,7 @@ type (
 
 type (
 	QrcodeScanReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Token     string `json:"token"`
 		AuthToken string `header:"Token"`
 	}
@@ -18,6 +20,7 @@ type (
 
 type (
 	GetDevicesReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
 	GetDevicesRes {
 		Devices []DeviceInfo `json:"devices"`
@@ -37,6 +40,7 @@ type (
 
 type (
 	KickDeviceReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		DeviceID string `json:"deviceId"`
 	}
 	KickDeviceRes  {}
@@ -44,6 +48,7 @@ type (
 
 type (
 	UpdatePasswordReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		OldPassword string `json:"oldPassword"`
 		NewPassword string `json:"newPassword"`
 	}
@@ -52,7 +57,7 @@ type (
 
 @server (
 	group: auth
-	jwt: Auth
+	middleware: JwtS2s
 )
 service account {
 	@doc "用户登出"
@@ -147,7 +152,7 @@ type (
 
 @server (
 	group: auth_machine
-	middleware: AuthGate
+	middleware: JwtS2s
 )
 service account {
 	@doc "校验账号密码（开放平台 / 管理端代登录）"

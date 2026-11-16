@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -54,7 +53,7 @@ func NewTransferOwnerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Tra
 func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *types.TransferOwnerRes, err error) {
 	// 检查当前用户是否为群主
 	var currentOwner group_models.GroupMemberModel
-	err = l.svcCtx.DB.Take(&currentOwner, "group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).Error
+	err = l.svcCtx.DB.Take(&currentOwner, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
 	if err != nil {
 		return nil, errors.New("用户不是群组成员")
 	}
@@ -78,11 +77,11 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 
 	// 更新原群主角色为普通成员
 	err = tx.Model(&group_models.GroupMemberModel{}).
-		Where("group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).
+		Where("group_id = ? and user_id = ?", req.GroupID, req.UserID).
 		Update("role", 3).Error
 	if err != nil {
 		tx.Rollback()
-		l.logger.Error(model.LogMsg{Text: "更新原群主角色失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "更新原群主角色失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("转让群组失败")
 	}
 
@@ -149,7 +148,7 @@ func (l *TransferOwnerLogic) TransferOwner(req *types.TransferOwnerReq) (resp *t
 		Text: "转让群主成功",
 		Data: map[string]interface{}{
 			"groupId":    req.GroupID,
-			"userId":     identity.UserID(l.ctx),
+			"userId":     req.UserID,
 			"newOwnerId": req.NewOwnerID,
 		},
 	})

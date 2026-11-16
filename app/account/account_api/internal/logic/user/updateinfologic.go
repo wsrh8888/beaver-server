@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -58,7 +57,7 @@ func NewUpdateInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.UpdateInfoRes, err error) {
 	// 获取要更新的用户信息
 	var user user_models.UserModel
-	if err := l.svcCtx.DB.Where("user_id = ?", identity.UserID(l.ctx)).First(&user).Error; err != nil {
+	if err := l.svcCtx.DB.Where("user_id = ?", req.UserID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
@@ -85,9 +84,9 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 	// 执行更新操作
 	if len(updateFields) > 0 {
 		// 获取新版本号（用户独立递增）
-		version = l.svcCtx.VersionGen.GetNextVersion("users", "user_id", identity.UserID(l.ctx))
+		version = l.svcCtx.VersionGen.GetNextVersion("users", "user_id", req.UserID)
 		if version == -1 {
-			l.logger.Error(model.LogMsg{Text: "获取版本号失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx)}})
+			l.logger.Error(model.LogMsg{Text: "获取版本号失败", Data: map[string]interface{}{"userId": req.UserID}})
 			return nil, errors.New("获取版本号失败")
 		}
 
@@ -102,13 +101,13 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 		l.logger.Info(model.LogMsg{
 			Text: "用户信息更新成功",
 			Data: map[string]interface{}{
-				"userId":  identity.UserID(l.ctx),
+				"userId":  req.UserID,
 				"version": version,
 			},
 		})
 
 		// 记录用户变更日志
-		l.recordUserChangeLog(identity.UserID(l.ctx), version, updateFields)
+		l.recordUserChangeLog(req.UserID, version, updateFields)
 	}
 
 	// 异步获取所有相关用户并推送通知（只有在有更新的情况下才推送）
@@ -118,25 +117,25 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 			ctx := context.Background()
 
 			// 获取所有需要推送的用户ID
-			allRecipients, err := l.getAllRelatedUserIds(ctx, identity.UserID(l.ctx))
+			allRecipients, err := l.getAllRelatedUserIds(ctx, req.UserID)
 			if err != nil {
-				l.logger.Error(model.LogMsg{Text: "获取相关用户ID失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+				l.logger.Error(model.LogMsg{Text: "获取相关用户ID失败", Data: map[string]interface{}{"userId": req.UserID, "err": err.Error()}})
 				return
 			}
 
-			l.logger.Info(model.LogMsg{Text: "推送用户信息变更", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(allRecipients), "recipients": allRecipients}})
+			l.logger.Info(model.LogMsg{Text: "推送用户信息变更", Data: map[string]interface{}{"userId": req.UserID, "count": len(allRecipients), "recipients": allRecipients}})
 
 			// 通过 RocketMQ 异步推送给所有相关用户
 			for _, recipientID := range allRecipients {
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.USER_PROFILE,
 					"type":     wsTypeConst.UserReceive,
-					"senderId": identity.UserID(l.ctx),
+					"senderId": req.UserID,
 					"targetId": recipientID,
 					"body": map[string]interface{}{
 						"table":    "users",                // 涉及的数据库表
 						"version":  int32(version),         // 最新版本号（转换为int32类型）
-						"targetId": identity.UserID(l.ctx), // 变更的记录ID
+						"targetId": req.UserID, // 变更的记录ID
 					},
 					"conversationId": "",
 				}

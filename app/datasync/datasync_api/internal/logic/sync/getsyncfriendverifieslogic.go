@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -51,17 +50,17 @@ func NewGetSyncFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceConte
 func (l *GetSyncFriendVerifiesLogic) GetSyncFriendVerifies(req *types.GetSyncFriendVerifiesReq) (resp *types.GetSyncFriendVerifiesRes, err error) {
 	// 调用Friend RPC获取好友验证版本信息
 	verifyResp, err := l.svcCtx.FriendRpc.GetFriendVerifyVersions(l.ctx, &relationtypes.GetFriendVerifyVersionsReq{
-		UserId: identity.UserID(l.ctx),
+		UserId: req.UserID,
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取好友验证版本信息失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "since": req.Since, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取好友验证版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "查询好友验证版本信息完成",
-		Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(verifyResp.FriendVerifyVersions)},
+		Data: map[string]interface{}{"userId": req.UserID, "count": len(verifyResp.FriendVerifyVersions)},
 	})
 
 	// 转换为响应格式，确保返回空数组而不是null

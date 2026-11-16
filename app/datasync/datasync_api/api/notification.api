@@ -5,6 +5,7 @@ syntax = "v1"
 // 同步通知事件版本（NotificationEvent）
 type (
 	GetSyncNotificationEventsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		SinceVersion int64 `json:"sinceVersion,optional"` // 事件表的版本游标，>sinceVersion
 		Limit        int32 `json:"limit,optional"` // 可选分页大小
 	}
@@ -22,6 +23,7 @@ type (
 // 同步通知收件箱版本（NotificationInbox，按用户）
 type (
 	GetSyncNotificationInboxesReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		SinceVersion int64  `json:"sinceVersion,optional"` // 收件箱表的版本游标，>sinceVersion
 		Limit        int32  `json:"limit,optional"` // 可选分页大小
 	}
@@ -39,6 +41,7 @@ type (
 // 同步通知已读游标版本（NotificationRead，按用户+分类）
 type (
 	GetSyncNotificationReadCursorsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		SinceVersion int64  `json:"sinceVersion,optional"` // 已读游标表的版本游标，>sinceVersion
 	}
 	GetSyncNotificationReadCursorsRes {
@@ -53,7 +56,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: sync
 )
 service datasync {

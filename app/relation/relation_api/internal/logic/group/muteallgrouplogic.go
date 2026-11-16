@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -52,7 +51,7 @@ func NewMuteAllGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Mute
 func (l *MuteAllGroupLogic) MuteAllGroup(req *types.MuteAllGroupReq) (resp *types.MuteAllGroupRes, err error) {
 	// 验证操作者权限（群主或管理员）
 	var operator group_models.GroupMemberModel
-	if err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", req.GroupID, identity.UserID(l.ctx)).
+	if err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", req.GroupID, req.UserID).
 		First(&operator).Error; err != nil {
 		return nil, errors.New("您不是该群成员")
 	}
@@ -88,7 +87,7 @@ func (l *MuteAllGroupLogic) MuteAllGroup(req *types.MuteAllGroupReq) (resp *type
 		Text: "群全员禁言状态更新成功",
 		Data: map[string]interface{}{
 			"groupId":   req.GroupID,
-			"userId":    identity.UserID(l.ctx),
+			"userId":    req.UserID,
 			"isMuteAll": req.IsMuteAll,
 		},
 	})

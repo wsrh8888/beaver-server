@@ -35,7 +35,7 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// HTTP API发送消息
@@ -49,7 +49,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// WebSocket连接入口

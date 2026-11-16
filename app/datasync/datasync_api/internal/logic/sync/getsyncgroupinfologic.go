@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -50,7 +49,7 @@ func NewGetSyncGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetSyncGroupInfoLogic) GetSyncGroupInfo(req *types.GetSyncGroupInfoReq) (resp *types.GetSyncGroupInfoRes, err error) {
-	userId := identity.UserID(l.ctx)
+	userId := req.UserID
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -59,7 +58,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	var friendModel friend_models.FriendModel
 	if err := l.svcCtx.DB.Where(
 		"((send_user_id = ? AND rev_user_id = ?) OR (send_user_id = ? AND rev_user_id = ?)) AND is_deleted = false",
-		identity.UserID(l.ctx), req.FriendID, req.FriendID, identity.UserID(l.ctx),
+		req.UserID, req.FriendID, req.FriendID, req.UserID,
 	).First(&friendModel).Error; err != nil {
 		return nil, errors.New("好友关系不存在")
 	}
@@ -90,7 +89,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 		payload1 := map[string]interface{}{
 			"command":        wsCommandConst.FRIEND_OPERATION,
 			"type":           wsTypeConst.FriendReceive,
-			"senderId":       identity.UserID(l.ctx),
+			"senderId":       req.UserID,
 			"targetId":       req.FriendID,
 			"body":           map[string]interface{}{"tableUpdates": tableUpdates},
 			"conversationId": "",
@@ -101,7 +100,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 			"command":        wsCommandConst.FRIEND_OPERATION,
 			"type":           wsTypeConst.FriendReceive,
 			"senderId":       req.FriendID,
-			"targetId":       identity.UserID(l.ctx),
+			"targetId":       req.UserID,
 			"body":           map[string]interface{}{"tableUpdates": tableUpdates},
 			"conversationId": "",
 		}
@@ -120,19 +119,19 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.FriendID,
 				openevent.EventIMDigitalUnfollowed, "", map[string]interface{}{
 					"digital_id": req.FriendID,
-					"user_id":    identity.UserID(l.ctx),
+					"user_id":    req.UserID,
 				}); pushErr != nil {
 				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递失败", Data: map[string]interface{}{"digitalId": req.FriendID, "err": pushErr.Error()}})
 			}
 		}
-		res, err = open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: identity.UserID(l.ctx)})
+		res, err = open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: req.UserID})
 		if err == nil && res != nil && res.Found {
-			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, identity.UserID(l.ctx),
+			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.UserID,
 				openevent.EventIMDigitalUnfollowed, "", map[string]interface{}{
-					"digital_id": identity.UserID(l.ctx),
+					"digital_id": req.UserID,
 					"user_id":    req.FriendID,
 				}); pushErr != nil {
-				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递失败", Data: map[string]interface{}{"digitalId": identity.UserID(l.ctx), "err": pushErr.Error()}})
+				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递失败", Data: map[string]interface{}{"digitalId": req.UserID, "err": pushErr.Error()}})
 			}
 		}
 	}()
@@ -140,7 +139,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	l.logger.Info(model.LogMsg{
 		Text: "删除好友成功",
 		Data: map[string]interface{}{
-			"userId":   identity.UserID(l.ctx),
+			"userId":   req.UserID,
 			"friendId": req.FriendID,
 		},
 	})

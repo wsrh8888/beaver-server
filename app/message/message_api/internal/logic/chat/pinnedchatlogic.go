@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"fmt"
 
@@ -53,10 +52,10 @@ func NewPinnedChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pinned
 func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.PinnedChatRes, err error) {
 	resp = &types.PinnedChatRes{}
 
-	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", identity.UserID(l.ctx))
+	version := l.svcCtx.VersionGen.GetNextVersion("chat_user_conversations", "user_id", req.UserID)
 
 	err = l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
-		Where("user_id = ? AND conversation_id = ?", identity.UserID(l.ctx), req.ConversationID).
+		Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 		Updates(map[string]interface{}{
 			"is_pinned": req.IsPinned,
 			"version":   version,
@@ -65,7 +64,7 @@ func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.Pinn
 		l.logger.Error(model.LogMsg{
 			Text: "更新置顶状态失败",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"conversationId": req.ConversationID,
 				"isPinned":       req.IsPinned,
 				"err":            err.Error(),
@@ -77,7 +76,7 @@ func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.Pinn
 	l.logger.Info(model.LogMsg{
 		Text: "置顶状态更新成功",
 		Data: map[string]any{
-			"userId":         identity.UserID(l.ctx),
+			"userId":         req.UserID,
 			"conversationId": req.ConversationID,
 			"isPinned":       req.IsPinned,
 			"version":        version,
@@ -85,7 +84,7 @@ func (l *PinnedChatLogic) PinnedChat(req *types.PinnedChatReq) (resp *types.Pinn
 	})
 
 	go func() {
-		l.notifyPinnedUpdate(req.ConversationID, identity.UserID(l.ctx), version)
+		l.notifyPinnedUpdate(req.ConversationID, req.UserID, version)
 	}()
 
 	return resp, nil

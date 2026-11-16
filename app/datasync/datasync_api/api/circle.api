@@ -5,6 +5,7 @@ syntax = "v1"
 // 同步圈子信息
 type (
 	GetSyncCircleInfoReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Since  int64  `json:"since,optional"` // 从这个版本号之后开始同步，不传则同步所有
 	}
 	GetSyncCircleInfoRes {
@@ -18,7 +19,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: sync
 )
 service datasync {

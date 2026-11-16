@@ -60,8 +60,8 @@ func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uui
 
 }
 
-// Proxy 只做服务发现与反向代理：鉴权由业务服务在 .api 中声明式接线，
-// 网关不解析票据、不清理或注入任何身份头，Token/Authorization 原样透传。
+// Proxy 做外部票验签 + 身份头规范化 + 机器票注入 + 服务发现反向代理。
+// 业务服务默认只验 S2S，身份由网关写入的 Beaver-User-Id 头传递。
 type Proxy struct {
 	Config types.Config
 }
@@ -180,6 +180,23 @@ func (p Proxy) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		if !p.rateLimitCheck(clientIP) {
 			writeErrorResponse(rec, "请求频率过高", http.StatusTooManyRequests, serverTrace)
 			finish("请求频率过高", "warn", nil)
+			return
+		}
+	}
+
+	// 鉴权流水线：剥客户端身份头 → 机器票优先 → 外部票按路由组验 → 写身份头 → 注入网关机器票。
+	// 鉴权失败直接 401，不进入服务发现与转发。
+	isMachine, err := p.authenticate(req)
+	if err != nil {
+		writeAuthError(rec, err.Error())
+		finish("网关鉴权失败", "warn", map[string]any{"reason": err.Error()})
+		return
+	}
+	// 已带合法机器票的请求保留原票（调用方身份不能被我方覆盖）；其余换成网关票。
+	if !isMachine {
+		if err := p.injectMachineTicket(req); err != nil {
+			writeErrorResponse(rec, "机器票注入失败", http.StatusInternalServerError, serverTrace)
+			finish("机器票注入失败", "error", map[string]any{"reason": err.Error()})
 			return
 		}
 	}

@@ -86,6 +86,7 @@ type EmailRegisterRes struct {
 }
 
 type GetDevicesReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 }
 
 type GetDevicesRes struct {
@@ -128,6 +129,7 @@ type GetUserSettingsPrivacyItem struct {
 }
 
 type GetUserSettingsReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 }
 
 type GetUserSettingsRes struct {
@@ -137,6 +139,7 @@ type GetUserSettingsRes struct {
 }
 
 type KickDeviceReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	DeviceID string `json:"deviceId"`
 }
 
@@ -152,6 +155,7 @@ type ListUserDevicesRes struct {
 }
 
 type LogoutReq struct {
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	DeviceID string `header:"deviceId"`
 }
 
@@ -203,6 +207,7 @@ type QrcodeGenerateRes struct {
 }
 
 type QrcodeScanReq struct {
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	Token     string `json:"token"`
 	AuthToken string `header:"Token"`
 }
@@ -254,14 +259,16 @@ type S2STokenRes struct {
 }
 
 type UpdateEmailReq struct {
-	Email string `json:"email"` // 新邮箱地址
-	Code  string `json:"code"`  // 验证码
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Email  string `json:"email"`            // 新邮箱地址
+	Code   string `json:"code"`             // 验证码
 }
 
 type UpdateEmailRes struct {
 }
 
 type UpdateInfoReq struct {
+	UserID   string  `header:"Beaver-User-Id"`  // 当前用户ID（网关注入的可信身份头）
 	NickName *string `json:"nickName,optional"` // 新昵称（可选）
 	Avatar   *string `json:"avatar,optional"`   // 新头像URL（可选）
 	Abstract *string `json:"abstract,optional"` // 新个性签名（可选）
@@ -272,6 +279,7 @@ type UpdateInfoRes struct {
 }
 
 type UpdatePasswordReq struct {
+	UserID      string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
 }
@@ -299,6 +307,7 @@ type UpdateUserSettingsPrivacyItem struct {
 }
 
 type UpdateUserSettingsReq struct {
+	UserID       string                              `header:"Beaver-User-Id"`      // 当前用户ID（网关注入的可信身份头）
 	Privacy      *UpdateUserSettingsPrivacyItem      `json:"privacy,optional"`      // 隐私设置（可选，局部更新）
 	Notification *UpdateUserSettingsNotificationItem `json:"notification,optional"` // 通知策略（可选，局部更新）
 	Keyboard     *UpdateUserSettingsKeyboardItem     `json:"keyboard,optional"`     // 快捷键（可选，局部更新）
@@ -341,6 +350,7 @@ type UserDeviceItem struct {
 }
 
 type UserInfoReq struct {
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 }
 
 type UserInfoRes struct {
@@ -427,7 +437,8 @@ type UserSyncItem struct {
 }
 
 type UserSyncReq struct {
-	UserVersions []UserVersion `json:"userVersions"` // 用户版本号数组
+	UserID       string        `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	UserVersions []UserVersion `json:"userVersions"`     // 用户版本号数组
 }
 
 type UserSyncRes struct {

@@ -22,7 +22,6 @@
 package feedback
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -48,7 +47,7 @@ func NewSubmitFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Su
 }
 
 func (l *SubmitFeedbackLogic) SubmitFeedback(req *types.SubmitFeedbackReq) (*types.SubmitFeedbackRes, error) {
-	if identity.UserID(l.ctx) == "" {
+	if req.UserID == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 	if req.Content == "" {
@@ -59,17 +58,17 @@ func (l *SubmitFeedbackLogic) SubmitFeedback(req *types.SubmitFeedbackReq) (*typ
 	}
 
 	_, err := l.svcCtx.PlatformRpc.SubmitFeedback(l.ctx, &platform_rpc.SubmitFeedbackReq{
-		UserId:    identity.UserID(l.ctx),
+		UserId:    req.UserID,
 		Content:   req.Content,
 		Type:      int32(req.Type),
 		FileNames: req.FileNames,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "提交反馈失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "提交反馈失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("提交反馈失败")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "提交反馈成功", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "type": req.Type}})
+	l.logger.Info(model.LogMsg{Text: "提交反馈成功", Data: map[string]interface{}{"userId": req.UserID, "type": req.Type}})
 
 	return &types.SubmitFeedbackRes{}, nil
 }

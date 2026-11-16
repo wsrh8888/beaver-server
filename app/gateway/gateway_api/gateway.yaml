@@ -12,7 +12,6 @@ ServiceAlias:
   emoji: asset_api
   circle: social_api
   moment: social_api
-  developer: open_api
   org: platform_api
   workbench: platform_api
   ai: agent_api
@@ -27,5 +26,63 @@ Limit:
   Enable: true
   Rate: 100    # 每秒请求数
   Burst: 200   # 峰值容忍
-# 网关不验签、不注入身份头；Token / Authorization 原样转发。
-# 鉴权全部由下游业务服务在 .api 中声明式声明并由其中间件执行。
+# 网关统一验外部票 → 写可信身份头（admin 平面 Beaver-Admin-Id，其余 Beaver-User-Id）
+# → 注入机器票 → 转发。业务服务默认只挂 JwtS2s；外部票只在此处验。
+# 三类票各占一段配置：现阶段密钥同值（都取自签发方 Auth.AccessSecret），
+# 但形状分开，将来任一平面独立轮换不必动其余两段。票据平面另由 claims.Audience 判定。
+AuthBeaver:
+  # 主站 C 端用户票，签发方 app/account 的 auth_public。
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
+AuthOpen:
+  # 开放平台开发者票，签发方 beaver-open 的 developer 登录。
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
+AuthAdmin:
+  # 后台管理员票，签发方 beaver-backend 的 auth_public 登录。
+  AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
+# 网关注入到下游的机器票。Secret 全团队共享，Audience 各团队各自固定，必须与下游 S2S 配置一致。
+Machine:
+  Secret: s2s-dev-secret
+  DefaultAudience: core:api
+  # 各 team 业务空壳写死的 S2S audience，网关注入机器票必须按 team 选对，否则 401。
+  Audiences:
+    beaver: core:api
+    beaver-open: open:internal
+    beaver-social: social:internal
+    beaver-doc: doc:internal
+    beaver-call: call:internal
+    beaver-ai: ai:internal
+    beaver/admin: admin:internal
+  ClientID: gateway
+  Issuer: beaver-gateway
+# 公开端点：不验外部票（登录/换票/文件预览/ws 握手/公开查询等）。精确到 action。
+PublicPaths:
+  - /beaver/api/auth/auth_public/v1/
+  - /beaver/api/auth/token/v1/issue
+  - /beaver/api/file/preview/v1/get
+  - /beaver/api/platform/update_public/v1/
+  - /beaver/api/platform/track_public/v1/
+  - /beaver/api/platform/instance_public/v1/
+  - /beaver-open/api/open/auth_public/v1/
+  - /beaver-open/api/open/bot_public/v1/
+  - /beaver-open/api/open/developer/v1/auth_login
+  - /beaver-open/api/open/developer/v1/auth_oauth_login
+  - /beaver-open/api/open/developer/v1/file_preview
+  - /beaver-open/api/open/ws/v1/connect
+  - /beaver-open/api/open/oauth_public/v1/
+  # 应用级凭据（App-Id / App-Secret）面：第三方服务端直连，不携带外部票，由本地 AppSecretAuth 校验。
+  - /beaver-open/api/open/oauth_secret/v1/
+  - /beaver-open/api/open/machine/v1/token
+  - /beaver-social/api/social/machine/v1/token
+  - /beaver-doc/api/doc/machine/v1/token
+  - /beaver-ai/api/ai/machine/v1/token
+  # LiveKit 服务器回调（webhook.api 为裸 service，无中间件）
+  - /beaver-call/api/call/webhook/v1/callback
+  - /beaver/admin/backend/auth_public/v1/
+# 鉴权分组：未列前缀默认 beaver（主站用户票）。
+# beaver-open 门户面用 Open 票，后台管理面用 Admin 票。
+AuthGroups:
+  # IM 客户端自用的 oauth 面（生成 authCode / 扫码登录）走用户票，不是开发者票，
+  # 用更长前缀压过 /beaver-open/ 的 open 组。
+  /beaver-open/api/open/oauth/v1/: beaver
+  /beaver-open/: open
+  /beaver/admin/: admin

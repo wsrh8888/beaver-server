@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -65,15 +64,15 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 	// 检查邀请者权限（群主或管理员）
 	var inviterMember group_models.GroupMemberModel
 	err = l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = ?",
-		req.GroupID, identity.UserID(l.ctx), 1).First(&inviterMember).Error
+		req.GroupID, req.UserID, 1).First(&inviterMember).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "邀请者不是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx)}})
+		l.logger.Error(model.LogMsg{Text: "邀请者不是群成员", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID}})
 		return nil, err
 	}
 
 	// 检查邀请者角色（群主或管理员）
 	if inviterMember.Role != 1 && inviterMember.Role != 2 {
-		l.logger.Error(model.LogMsg{Text: "邀请者权限不足", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "role": inviterMember.Role}})
+		l.logger.Error(model.LogMsg{Text: "邀请者权限不足", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "role": inviterMember.Role}})
 		return nil, err
 	}
 
@@ -125,7 +124,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 			GroupID:    req.GroupID,
 			UserID:     userId,
 			ChangeType: "invite",
-			OperatedBy: identity.UserID(l.ctx),
+			OperatedBy: req.UserID,
 			ChangeTime: now,
 			Version:    time.Now().Unix(),
 		}
@@ -171,11 +170,11 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 
 		// 推送给已存在的群成员 - 群成员变动通知
 		for _, member := range response.Members {
-			if member.UserID != identity.UserID(l.ctx) { // 不通知操作者自己
+			if member.UserID != req.UserID { // 不通知操作者自己
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.GROUP_OPERATION,
 					"type":     wsTypeConst.GroupMemberReceive,
-					"senderId": identity.UserID(l.ctx),
+					"senderId": req.UserID,
 					"targetId": member.UserID,
 					"body": map[string]interface{}{
 						"table": "group_members",
@@ -197,7 +196,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
-				"senderId": identity.UserID(l.ctx),
+				"senderId": req.UserID,
 				"targetId": inviteeId,
 				"body": map[string]interface{}{
 					"table": "group_members",
@@ -218,7 +217,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 		Text: "群邀请成功",
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
-			"userId":  identity.UserID(l.ctx),
+			"userId":  req.UserID,
 			"count":   len(req.UserIds),
 		},
 	})

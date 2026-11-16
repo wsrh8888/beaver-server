@@ -38,44 +38,46 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取登录设备列表
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/auth/auth/v1/devices",
-				Handler: auth.GetDevicesHandler(serverCtx),
-			},
-			{
-				// 强制下线指定设备
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth/v1/kick_device",
-				Handler: auth.KickDeviceHandler(serverCtx),
-			},
-			{
-				// 用户登出
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth/v1/logout",
-				Handler: auth.LogoutHandler(serverCtx),
-			},
-			{
-				// 扫码登录-确认扫码（移动端，Header Token）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth/v1/qrcode_scan",
-				Handler: auth.QrcodeScanHandler(serverCtx),
-			},
-			{
-				// 修改密码（需验证旧密码）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth/v1/update_password",
-				Handler: auth.UpdatePasswordHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 获取登录设备列表
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/auth/auth/v1/devices",
+					Handler: auth.GetDevicesHandler(serverCtx),
+				},
+				{
+					// 强制下线指定设备
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/auth/auth/v1/kick_device",
+					Handler: auth.KickDeviceHandler(serverCtx),
+				},
+				{
+					// 用户登出
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/auth/auth/v1/logout",
+					Handler: auth.LogoutHandler(serverCtx),
+				},
+				{
+					// 扫码登录-确认扫码（移动端，Header Token）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/auth/auth/v1/qrcode_scan",
+					Handler: auth.QrcodeScanHandler(serverCtx),
+				},
+				{
+					// 修改密码（需验证旧密码）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/auth/auth/v1/update_password",
+					Handler: auth.UpdatePasswordHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// 创建账号密码凭据
@@ -194,50 +196,52 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 获取用户设置（隐私、通知策略、快捷键）
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/user/profile/v1/settings",
-				Handler: user.GetUserSettingsHandler(serverCtx),
-			},
-			{
-				// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/user/profile/v1/sync",
-				Handler: user.UserSyncHandler(serverCtx),
-			},
-			{
-				// 修改用户邮箱（需要验证码）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/user/profile/v1/update_email",
-				Handler: user.UpdateEmailHandler(serverCtx),
-			},
-			{
-				// 更新用户基础信息（昵称、头像、个性签名、性别）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/user/profile/v1/update_info",
-				Handler: user.UpdateInfoHandler(serverCtx),
-			},
-			{
-				// 更新用户设置（隐私、通知策略、快捷键，支持局部更新）
-				Method:  http.MethodPost,
-				Path:    "/beaver/api/user/profile/v1/update_settings",
-				Handler: user.UpdateUserSettingsHandler(serverCtx),
-			},
-			{
-				// 获取用户基础信息
-				Method:  http.MethodGet,
-				Path:    "/beaver/api/user/profile/v1/user_info",
-				Handler: user.UserInfoHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JwtS2s},
+			[]rest.Route{
+				{
+					// 获取用户设置（隐私、通知策略、快捷键）
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/user/profile/v1/settings",
+					Handler: user.GetUserSettingsHandler(serverCtx),
+				},
+				{
+					// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/user/profile/v1/sync",
+					Handler: user.UserSyncHandler(serverCtx),
+				},
+				{
+					// 修改用户邮箱（需要验证码）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/user/profile/v1/update_email",
+					Handler: user.UpdateEmailHandler(serverCtx),
+				},
+				{
+					// 更新用户基础信息（昵称、头像、个性签名、性别）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/user/profile/v1/update_info",
+					Handler: user.UpdateInfoHandler(serverCtx),
+				},
+				{
+					// 更新用户设置（隐私、通知策略、快捷键，支持局部更新）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/user/profile/v1/update_settings",
+					Handler: user.UpdateUserSettingsHandler(serverCtx),
+				},
+				{
+					// 获取用户基础信息
+					Method:  http.MethodGet,
+					Path:    "/beaver/api/user/profile/v1/user_info",
+					Handler: user.UserInfoHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthGate},
+			[]rest.Middleware{serverCtx.JwtS2s},
 			[]rest.Route{
 				{
 					// 创建用户

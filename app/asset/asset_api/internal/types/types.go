@@ -28,6 +28,7 @@ type AddEmojiInfo struct {
 }
 
 type AddEmojiReq struct {
+	UserID    string       `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	FileKey   string       `json:"fileKey"`
 	Title     string       `json:"title"`
 	PackageID string       `json:"packageId,optional"`
@@ -197,7 +198,8 @@ type GetEmojiByUuidsInfo struct {
 }
 
 type GetEmojiCollectsByIdsReq struct {
-	Ids []string `json:"ids"` // 收藏记录ID列表
+	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Ids    []string `json:"ids"`              // 收藏记录ID列表
 }
 
 type GetEmojiCollectsByIdsRes struct {
@@ -218,7 +220,8 @@ type GetEmojiInfo struct {
 }
 
 type GetEmojiPackageCollectsByIdsReq struct {
-	Ids []string `json:"ids"` // 收藏记录ID列表
+	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Ids    []string `json:"ids"`              // 收藏记录ID列表
 }
 
 type GetEmojiPackageCollectsByIdsRes struct {
@@ -226,7 +229,8 @@ type GetEmojiPackageCollectsByIdsRes struct {
 }
 
 type GetEmojiPackageContentsByPackageIdsReq struct {
-	PackageIds []string `json:"packageIds"` // 表情包ID列表
+	UserID     string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	PackageIds []string `json:"packageIds"`       // 表情包ID列表
 }
 
 type GetEmojiPackageContentsByPackageIdsRes struct {
@@ -234,7 +238,8 @@ type GetEmojiPackageContentsByPackageIdsRes struct {
 }
 
 type GetEmojiPackageContentsByRelationIdsReq struct {
-	RelationIds []string `json:"relationIds"` // 关联ID列表
+	UserID      string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	RelationIds []string `json:"relationIds"`      // 关联ID列表
 }
 
 type GetEmojiPackageContentsByRelationIdsRes struct {
@@ -242,6 +247,7 @@ type GetEmojiPackageContentsByRelationIdsRes struct {
 }
 
 type GetEmojiPackageDetailReq struct {
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	PackageID string `json:"packageId"`
 }
 
@@ -272,7 +278,8 @@ type GetEmojiPackageInfo struct {
 }
 
 type GetEmojiPackagesByIdsReq struct {
-	Ids []string `json:"ids"` // 表情包ID列表
+	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Ids    []string `json:"ids"`              // 表情包ID列表
 }
 
 type GetEmojiPackagesByIdsRes struct {
@@ -285,6 +292,7 @@ type GetEmojiPackagesInfo struct {
 }
 
 type GetEmojiPackagesReq struct {
+	UserID     string `header:"Beaver-User-Id"`    // 当前用户ID（网关注入的可信身份头）
 	CategoryID uint   `json:"categoryId,optional"` // 可选，按分类筛选
 	Type       string `json:"type,optional"`       // 可选，按类型筛选：official-官方，user-用户自定义
 	Page       int    `json:"page"`
@@ -306,7 +314,8 @@ type GetEmojiPackagesSimpleItem struct {
 }
 
 type GetEmojisByIdsReq struct {
-	Ids []string `json:"ids"` // 表情ID列表
+	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Ids    []string `json:"ids"`              // 表情ID列表
 }
 
 type GetEmojisByIdsRes struct {
@@ -314,7 +323,8 @@ type GetEmojisByIdsRes struct {
 }
 
 type GetEmojisByUuidsReq struct {
-	Ids []string `json:"ids"` // 表情ID列表
+	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Ids    []string `json:"ids"`              // 表情ID列表
 }
 
 type GetEmojisByUuidsRes struct {
@@ -322,8 +332,9 @@ type GetEmojisByUuidsRes struct {
 }
 
 type GetEmojisListReq struct {
-	Page int `json:"page"`
-	Size int `json:"size"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `json:"page"`
+	Size   int    `json:"size"`
 }
 
 type GetEmojisListRes struct {
@@ -371,8 +382,9 @@ type GetQiniuUploadTokenRes struct {
 }
 
 type GetUserFavoritePackagesReq struct {
-	Page int `json:"page"`
-	Size int `json:"size"`
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `json:"page"`
+	Size   int    `json:"size"`
 }
 
 type GetUserFavoritePackagesRes struct {
@@ -539,6 +551,7 @@ type UpdateEmojiPackageContentRes struct {
 }
 
 type UpdateFavoriteEmojiPackageReq struct {
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	PackageID string `json:"packageId"`
 	Type      string `json:"type"` // "favorite" or "unfavorite"
 }
@@ -547,6 +560,7 @@ type UpdateFavoriteEmojiPackageRes struct {
 }
 
 type UpdateFavoriteEmojiReq struct {
+	UserID    string  `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	EmojiID   string  `json:"emojiId"`
 	PackageID *string `json:"packageId,optional"` // 可选，表情所属的表情包ID，用于扩展功能
 	Type      string  `json:"type"`               // "favorite" or "unfavorite"

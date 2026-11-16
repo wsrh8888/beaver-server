@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -62,13 +61,13 @@ func (l *BlockListLogic) BlockList(req *types.BlockListReq) (resp *types.BlockLi
 
 	var blocks []friend_models.FriendBlockModel
 	var count int64
-	query := l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).Where("user_id = ?", identity.UserID(l.ctx))
+	query := l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).Where("user_id = ?", req.UserID)
 	if err = query.Count(&count).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "统计黑名单失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "统计黑名单失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("查询失败")
 	}
 	if err = query.Offset(offset).Limit(limit).Find(&blocks).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询黑名单列表失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "page": page, "limit": limit, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询黑名单列表失败", Data: map[string]any{"userId": req.UserID, "page": page, "limit": limit, "err": err.Error()}})
 		return nil, errors.New("查询失败")
 	}
 

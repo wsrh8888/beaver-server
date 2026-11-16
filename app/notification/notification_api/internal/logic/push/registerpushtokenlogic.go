@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"strings"
@@ -66,11 +65,11 @@ func (l *RegisterPushTokenLogic) RegisterPushToken(req *types.RegisterPushTokenR
 	}
 
 	res, err := l.svcCtx.AuthRpc.CheckDeviceActive(l.ctx, &accttypes.CheckDeviceActiveReq{
-		UserId:   identity.UserID(l.ctx),
+		UserId:   req.UserID,
 		DeviceId: req.DeviceID,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "校验设备状态失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "deviceId": req.DeviceID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "校验设备状态失败", Data: map[string]interface{}{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()}})
 		return nil, errors.New("校验设备状态失败")
 	}
 	if res == nil || !res.Active {
@@ -78,10 +77,10 @@ func (l *RegisterPushTokenLogic) RegisterPushToken(req *types.RegisterPushTokenR
 	}
 
 	var row notification_models.PushRegistrationModel
-	err = l.svcCtx.DB.Where("user_id = ? AND device_id = ?", identity.UserID(l.ctx), req.DeviceID).First(&row).Error
+	err = l.svcCtx.DB.Where("user_id = ? AND device_id = ?", req.UserID, req.DeviceID).First(&row).Error
 	if err == gorm.ErrRecordNotFound {
 		err = l.svcCtx.DB.Create(&notification_models.PushRegistrationModel{
-			UserID:       identity.UserID(l.ctx),
+			UserID:       req.UserID,
 			DeviceID:     req.DeviceID,
 			PushToken:    req.PushToken,
 			PushPlatform: platform,
@@ -96,14 +95,14 @@ func (l *RegisterPushTokenLogic) RegisterPushToken(req *types.RegisterPushTokenR
 		}).Error
 	}
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "注册 Push Token 失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "deviceId": req.DeviceID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "注册 Push Token 失败", Data: map[string]interface{}{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()}})
 		return nil, errors.New("注册 Push Token 失败")
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "PushToken注册成功",
 		Data: map[string]interface{}{
-			"userId":   identity.UserID(l.ctx),
+			"userId":   req.UserID,
 			"deviceId": req.DeviceID,
 			"platform": platform,
 		},

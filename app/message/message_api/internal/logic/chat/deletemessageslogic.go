@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/message/message_api/internal/svc"
@@ -53,9 +52,9 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 	deleteRecords := make([]message_models.ChatUserDelete, 0)
 	for _, msgID := range req.MessageIDs {
 		// 生成版本号 (对标大厂：每条操作都有独立版本，确保多端增量同步的原子性)
-		version := l.svcCtx.VersionGen.GetNextVersion("chat_user_deletes", "user_id", identity.UserID(l.ctx))
+		version := l.svcCtx.VersionGen.GetNextVersion("chat_user_deletes", "user_id", req.UserID)
 		deleteRecords = append(deleteRecords, message_models.ChatUserDelete{
-			UserID:    identity.UserID(l.ctx),
+			UserID:    req.UserID,
 			MessageID: msgID,
 			Version:   version,
 		})
@@ -64,7 +63,7 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 	if len(deleteRecords) == 0 {
 		l.logger.Warn(model.LogMsg{
 			Text: "删除消息列表为空",
-			Data: map[string]any{"userId": identity.UserID(l.ctx)},
+			Data: map[string]any{"userId": req.UserID},
 		})
 		return &types.DeleteMessagesRes{}, nil
 	}
@@ -75,7 +74,7 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 		l.logger.Error(model.LogMsg{
 			Text: "批量删除消息失败",
 			Data: map[string]any{
-				"userId": identity.UserID(l.ctx),
+				"userId": req.UserID,
 				"count":  len(req.MessageIDs),
 				"err":    err.Error(),
 			},
@@ -86,7 +85,7 @@ func (l *DeleteMessagesLogic) DeleteMessages(req *types.DeleteMessagesReq) (resp
 	l.logger.Info(model.LogMsg{
 		Text: "批量删除消息成功",
 		Data: map[string]any{
-			"userId": identity.UserID(l.ctx),
+			"userId": req.UserID,
 			"count":  len(req.MessageIDs),
 		},
 	})

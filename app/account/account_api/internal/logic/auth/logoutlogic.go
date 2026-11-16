@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"fmt"
 
@@ -49,21 +48,21 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 
 func (l *LogoutLogic) Logout(req *types.LogoutReq) (*types.LogoutRes, error) {
 	for _, group := range []string{"desktop", "mobile"} {
-		key := fmt.Sprintf("user_authentication_session:%s:%s", identity.UserID(l.ctx), group)
+		key := fmt.Sprintf("user_authentication_session:%s:%s", req.UserID, group)
 		l.svcCtx.Redis.Del(key)
 	}
 
-	if err := device.Deactivate(l.svcCtx.DB, identity.UserID(l.ctx), req.DeviceID); err != nil {
+	if err := device.Deactivate(l.svcCtx.DB, req.UserID, req.DeviceID); err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "登出禁用设备失败",
-			Data: map[string]any{"userId": identity.UserID(l.ctx), "deviceId": req.DeviceID, "err": err.Error()},
+			Data: map[string]any{"userId": req.UserID, "deviceId": req.DeviceID, "err": err.Error()},
 		})
 		return nil, err
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "用户登出成功",
-		Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "deviceId": req.DeviceID},
+		Data: map[string]interface{}{"userId": req.UserID, "deviceId": req.DeviceID},
 	})
 	return &types.LogoutRes{}, nil
 }

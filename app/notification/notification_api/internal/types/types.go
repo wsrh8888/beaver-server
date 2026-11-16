@@ -80,6 +80,7 @@ type ReadCursorItem struct {
 }
 
 type RegisterPushTokenReq struct {
+	UserID       string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	DeviceID     string `header:"deviceId"`
 	PushToken    string `json:"pushToken"`
 	PushPlatform string `json:"pushPlatform"`
@@ -89,7 +90,8 @@ type RegisterPushTokenRes struct {
 }
 
 type DeleteNotificationReq struct {
-	EventID string `json:"eventId"` // 通知事件ID
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	EventID string `json:"eventId"`          // 通知事件ID
 }
 
 type DeleteNotificationRes struct {
@@ -97,7 +99,8 @@ type DeleteNotificationRes struct {
 }
 
 type GetEventsByIdsReq struct {
-	EventIDs []string `json:"eventIds"` // 必填
+	UserID   string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	EventIDs []string `json:"eventIds"`         // 必填
 }
 
 type GetEventsByIdsRes struct {
@@ -105,7 +108,8 @@ type GetEventsByIdsRes struct {
 }
 
 type GetInboxByIdsReq struct {
-	EventIDs []string `json:"eventIds"` // 必填
+	UserID   string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	EventIDs []string `json:"eventIds"`         // 必填
 }
 
 type GetInboxByIdsRes struct {
@@ -113,6 +117,7 @@ type GetInboxByIdsRes struct {
 }
 
 type GetReadCursorsReq struct {
+	UserID     string   `header:"Beaver-User-Id"`    // 当前用户ID（网关注入的可信身份头）
 	Categories []string `json:"categories,optional"` // 可选过滤分类，不传则返回该用户全部
 }
 
@@ -121,6 +126,7 @@ type GetReadCursorsRes struct {
 }
 
 type GetUnreadSummaryReq struct {
+	UserID     string   `header:"Beaver-User-Id"`    // 当前用户ID（网关注入的可信身份头）
 	Categories []string `json:"categories,optional"` // 可选分类过滤
 	Scenes     []string `json:"scenes,optional"`     // 可选场景过滤（如消息/系统/群公告等）
 }
@@ -131,16 +137,18 @@ type GetUnreadSummaryRes struct {
 }
 
 type MarkReadByCategoryReq struct {
-	Category string `json:"category"` // 分类，会话级/业务分类
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Category string `json:"category"`         // 分类，会话级/业务分类
 }
 
 type MarkReadByCategoryRes struct {
 }
 
 type MarkReadByCursorReq struct {
-	Category  string `json:"category"`  // 分类，会话级/业务分类
-	ToEventID string `json:"toEventId"` // 读到此事件ID
-	ToVersion int64  `json:"toVersion"` // 读到此版本
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Category  string `json:"category"`         // 分类，会话级/业务分类
+	ToEventID string `json:"toEventId"`        // 读到此事件ID
+	ToVersion int64  `json:"toVersion"`        // 读到此版本
 }
 
 type MarkReadByCursorRes struct {
@@ -148,7 +156,8 @@ type MarkReadByCursorRes struct {
 }
 
 type MarkReadByEventReq struct {
-	EventID string `json:"eventId"` // 通知事件ID
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	EventID string `json:"eventId"`          // 通知事件ID
 }
 
 type MarkReadByEventRes struct {

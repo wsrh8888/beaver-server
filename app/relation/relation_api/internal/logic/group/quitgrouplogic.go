@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"encoding/json"
 	"errors"
@@ -58,7 +57,7 @@ func NewQuitGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QuitGro
 func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQuitRes, err error) {
 	// 检查用户是否为群组成员
 	var member group_models.GroupMemberModel
-	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, identity.UserID(l.ctx)).Error
+	err = l.svcCtx.DB.Take(&member, "group_id = ? and user_id = ?", req.GroupID, req.UserID).Error
 	if err != nil {
 		return nil, errors.New("用户不是群组成员")
 	}
@@ -83,7 +82,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 			"version": memberVersion,
 		}).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "退出群组失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "退出群组失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("退出群组失败")
 	}
 
@@ -103,7 +102,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 
 		// 通过ws推送给群成员 - 群成员变动通知
 		for _, member := range response.Members {
-			if member.UserID != identity.UserID(l.ctx) { // 不通知操作者自己
+			if member.UserID != req.UserID { // 不通知操作者自己
 				payload := map[string]interface{}{
 					"command":  wsCommandConst.GROUP_OPERATION,
 					"type":     wsTypeConst.GroupMemberReceive,
@@ -117,7 +116,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 									{
 										"version": memberVersion,
 										"groupId": req.GroupID,
-										"userId":  identity.UserID(l.ctx),
+										"userId":  req.UserID,
 									},
 								},
 							},
@@ -144,20 +143,20 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		if len(toUsers) > 0 {
 			payload, _ := json.Marshal(map[string]interface{}{
 				"groupId": req.GroupID,
-				"userId":  identity.UserID(l.ctx),
+				"userId":  req.UserID,
 			})
 			_, err = l.svcCtx.NotifyRpc.PushEvent(ctx, &notification_rpc.PushEventReq{
 				EventType:   notification_models.EventTypeGroupLeft,
 				Category:    notification_models.CategoryGroup,
-				FromUserId:  identity.UserID(l.ctx),
+				FromUserId:  req.UserID,
 				TargetId:    req.GroupID,
 				TargetType:  notification_models.TargetTypeGroup,
 				PayloadJson: string(payload),
 				ToUserIds:   toUsers,
-				DedupHash:   fmt.Sprintf("%s_left_%s", req.GroupID, identity.UserID(l.ctx)),
+				DedupHash:   fmt.Sprintf("%s_left_%s", req.GroupID, req.UserID),
 			})
 			if err != nil {
-				l.logger.Error(model.LogMsg{Text: "投递退出群通知失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": identity.UserID(l.ctx), "err": err.Error()}})
+				l.logger.Error(model.LogMsg{Text: "投递退出群通知失败", Data: map[string]interface{}{"groupId": req.GroupID, "userId": req.UserID, "err": err.Error()}})
 			}
 		}
 	}()
@@ -166,7 +165,7 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 		Text: "退群成功",
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
-			"userId":  identity.UserID(l.ctx),
+			"userId":  req.UserID,
 		},
 	})
 

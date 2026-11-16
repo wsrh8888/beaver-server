@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -51,17 +50,17 @@ func NewGetSyncEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 func (l *GetSyncEmojisLogic) GetSyncEmojis(req *types.GetSyncEmojisReq) (resp *types.GetSyncEmojisRes, err error) {
 	// 调用Emoji RPC获取表情版本信息
 	emojiResp, err := l.svcCtx.EmojiRpc.GetEmojis(l.ctx, &assettypes.GetEmojisReq{
-		UserId: identity.UserID(l.ctx),
+		UserId: req.UserID,
 		Since:  req.Since,
 	})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "获取表情版本信息失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "since": req.Since, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "获取表情版本信息失败", Data: map[string]any{"userId": req.UserID, "since": req.Since, "err": err.Error()}})
 		return nil, err
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "查询表情版本信息完成",
-		Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(emojiResp.EmojiVersions)},
+		Data: map[string]interface{}{"userId": req.UserID, "count": len(emojiResp.EmojiVersions)},
 	})
 
 	// 转换为响应格式，确保返回空数组而不是null

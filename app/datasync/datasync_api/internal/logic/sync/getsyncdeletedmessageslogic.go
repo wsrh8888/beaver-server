@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -53,7 +52,7 @@ func (l *GetSyncDeletedMessagesLogic) GetSyncDeletedMessages(req *types.GetSyncD
 	var deletes []message_models.ChatUserDelete
 
 	// 1. 查询该用户在 Since 之后的删除记录
-	query := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).Where("user_id = ?", identity.UserID(l.ctx))
+	query := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).Where("user_id = ?", req.UserID)
 	if req.Since > 0 {
 		// 统一使用 Unix 时间戳进行同步比对
 		query = query.Where("UNIX_TIMESTAMP(created_at) > ?", req.Since)
@@ -61,7 +60,7 @@ func (l *GetSyncDeletedMessagesLogic) GetSyncDeletedMessages(req *types.GetSyncD
 
 	err = query.Find(&deletes).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "同步已删除消息失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "同步已删除消息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("同步失败")
 	}
 

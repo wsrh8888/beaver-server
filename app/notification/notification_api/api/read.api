@@ -5,6 +5,7 @@ syntax = "v1"
 // 表3：已读游标（NotificationRead）
 type (
 	getReadCursorsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Categories []string `json:"categories,optional"` // 可选过滤分类，不传则返回该用户全部
 	}
 	ReadCursorItem {
@@ -20,6 +21,7 @@ type (
 // 用户已读：按事件ID标记单个通知已读
 type (
 	markReadByEventReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		EventID string `json:"eventId"` // 通知事件ID
 	}
 	markReadByEventRes  {}
@@ -28,6 +30,7 @@ type (
 // 用户已读：按分类标记所有通知为已读
 type (
 	markReadByCategoryReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Category string `json:"category"` // 分类，会话级/业务分类
 	}
 	markReadByCategoryRes  {}
@@ -36,6 +39,7 @@ type (
 // 用户已读：按事件ID或按分类游标批量已读（高级用法）
 type (
 	markReadByCursorReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Category  string `json:"category"` // 分类，会话级/业务分类
 		ToEventID string `json:"toEventId"` // 读到此事件ID
 		ToVersion int64  `json:"toVersion"` // 读到此版本
@@ -48,6 +52,7 @@ type (
 // 未读汇总：各分类红点 + 总未读
 type (
 	getUnreadSummaryReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Categories []string `json:"categories,optional"` // 可选分类过滤
 		Scenes     []string `json:"scenes,optional"` // 可选场景过滤（如消息/系统/群公告等）
 	}
@@ -62,7 +67,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: read
 )
 service notification {

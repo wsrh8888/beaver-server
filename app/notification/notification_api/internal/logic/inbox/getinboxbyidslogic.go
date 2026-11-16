@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"time"
 
@@ -51,17 +50,17 @@ func NewGetInboxByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 func (l *GetInboxByIdsLogic) GetInboxByIds(req *types.GetInboxByIdsReq) (resp *types.GetInboxByIdsRes, err error) {
 	resp = &types.GetInboxByIdsRes{Inbox: []types.InboxItem{}}
 
-	if len(req.EventIDs) == 0 || identity.UserID(l.ctx) == "" {
+	if len(req.EventIDs) == 0 || req.UserID == "" {
 		return resp, nil
 	}
 
 	var rows []notification_models.NotificationInbox
 	if err = l.svcCtx.DB.WithContext(l.ctx).
-		Where("user_id = ? AND event_id IN ?", identity.UserID(l.ctx), req.EventIDs).
+		Where("user_id = ? AND event_id IN ?", req.UserID, req.EventIDs).
 		Find(&rows).Error; err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询通知收件箱列表失败",
-			Data: map[string]any{"userId": identity.UserID(l.ctx), "eventIds": req.EventIDs, "err": err.Error()},
+			Data: map[string]any{"userId": req.UserID, "eventIds": req.EventIDs, "err": err.Error()},
 		})
 		return nil, err
 	}

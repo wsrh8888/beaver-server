@@ -3,6 +3,7 @@ syntax = "v1"
 // 添加表情
 type (
 	AddEmojiReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		FileKey   string       `json:"fileKey"`
 		Title     string       `json:"title"`
 		PackageID string       `json:"packageId,optional"`
@@ -18,6 +19,7 @@ type (
 // 更新表情收藏状态
 type (
 	UpdateFavoriteEmojiReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		EmojiID   string  `json:"emojiId"`
 		PackageID *string `json:"packageId,optional"` // 可选，表情所属的表情包ID，用于扩展功能
 		Type      string  `json:"type"` // "favorite" or "unfavorite"
@@ -28,6 +30,7 @@ type (
 // 获取用户收藏的表情列表
 type (
 	GetEmojisListReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Page   int    `json:"page"`
 		Size   int    `json:"size"`
 	}
@@ -51,6 +54,7 @@ type (
 // 获取表情包列表
 type (
 	GetEmojiPackagesReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		CategoryID uint   `json:"categoryId,optional"` // 可选，按分类筛选
 		Type       string `json:"type,optional"` // 可选，按类型筛选：official-官方，user-用户自定义
 		Page       int    `json:"page"`
@@ -89,6 +93,7 @@ type (
 // 获取表情包详情
 type (
 	GetEmojiPackageDetailReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		PackageID string `json:"packageId"`
 	}
 	GetEmojiPackageEmojiItem {
@@ -119,6 +124,7 @@ type (
 // 更新表情包收藏状态
 type (
 	UpdateFavoriteEmojiPackageReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		PackageID string `json:"packageId"`
 		Type      string `json:"type"` // "favorite" or "unfavorite"
 	}
@@ -128,6 +134,7 @@ type (
 // 获取用户收藏的表情包列表
 type (
 	GetUserFavoritePackagesReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Page   int    `json:"page"`
 		Size   int    `json:"size"`
 	}
@@ -140,6 +147,7 @@ type (
 // 批量获取表情详情
 type (
 	GetEmojisByIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 表情ID列表
 	}
 	GetEmojisByIdsRes {
@@ -165,6 +173,7 @@ type (
 // 按ID批量获取表情基础信息
 type (
 	GetEmojisByUuidsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids []string `json:"ids"` // 表情ID列表
 	}
 	GetEmojiByUuidsInfo {
@@ -187,6 +196,7 @@ type (
 // 批量获取表情包详情
 type (
 	GetEmojiPackagesByIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 表情包ID列表
 	}
 	GetEmojiPackagesByIdsRes {
@@ -210,6 +220,7 @@ type (
 // 批量获取用户收藏的表情记录详情（同步用）
 type (
 	GetEmojiCollectsByIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 收藏记录ID列表
 	}
 	GetEmojiCollectsByIdsRes {
@@ -242,6 +253,7 @@ type (
 // 批量获取用户收藏的表情包记录详情（同步用）
 type (
 	GetEmojiPackageCollectsByIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 收藏记录ID列表
 	}
 	GetEmojiPackageCollectsByIdsRes {
@@ -261,6 +273,7 @@ type (
 // 批量获取表情包内容详情（同步用）
 type (
 	GetEmojiPackageContentsByPackageIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		PackageIds []string `json:"packageIds"` // 表情包ID列表
 	}
 	GetEmojiPackageContentsByPackageIdsRes {
@@ -280,6 +293,7 @@ type (
 // 批量获取表情包内容详情（通过relationIds，同步用）
 type (
 	GetEmojiPackageContentsByRelationIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		RelationIds []string `json:"relationIds"` // 关联ID列表
 	}
 	GetEmojiPackageContentsByRelationIdsRes {
@@ -289,7 +303,7 @@ type (
 
 @server (
 	group: emoji
-	jwt: Auth
+	middleware: JwtS2s
 )
 service asset {
 	@doc "添加表情，并且自动收藏"
@@ -350,7 +364,7 @@ service asset {
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分。
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
 // C 端按「当前用户」取表情，队间按「记录维度」分页与写入，路径刻意错开。
 
 type (
@@ -478,7 +492,7 @@ type (
 
 @server (
 	group: emoji_machine
-	middleware: AuthGate
+	middleware: JwtS2s
 )
 service asset {
 	@doc "队间：分页查询表情"

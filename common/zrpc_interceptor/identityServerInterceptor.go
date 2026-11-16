@@ -33,7 +33,7 @@ import (
 // IdentityServerInterceptor 把入站 metadata 里的身份结论还原成 context 里的 Identity，
 // 供 rpc logic 用 common/identity.From 读取。
 //
-// 只做透传还原，不做验签：验签发生在 HTTP 面的 .api 中间件与边缘网关。
+// 只做透传还原，不做验签：验签发生在边缘网关（外部票）与业务 JwtS2s（机器票）。
 // metadata 里没有身份信息（例如纯内部 rpc→rpc 调用）时保持原 ctx，不覆盖上层结论。
 func IdentityServerInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 	md, ok := metadata.FromIncomingContext(ctx)

@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -51,12 +50,12 @@ func NewSearchValidInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S
 
 func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (resp *types.SearchValidInfoRes, err error) {
 	// 参数验证
-	if identity.UserID(l.ctx) == "" || req.FriendID == "" {
+	if req.UserID == "" || req.FriendID == "" {
 		return nil, errors.New("用户ID和好友ID不能为空")
 	}
 
 	// 不能查询自己
-	if identity.UserID(l.ctx) == req.FriendID {
+	if req.UserID == req.FriendID {
 		return nil, errors.New("不能查询自己")
 	}
 
@@ -65,12 +64,12 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 	// 查询好友验证记录
 	err = l.svcCtx.DB.Where(
 		"(rev_user_id = ? and send_user_id = ?) or (rev_user_id = ? and send_user_id = ?)",
-		identity.UserID(l.ctx), req.FriendID, req.FriendID, identity.UserID(l.ctx),
+		req.UserID, req.FriendID, req.FriendID, req.UserID,
 	).First(&friendVerify).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			l.logger.Info(model.LogMsg{Text: "好友验证记录不存在", Data: map[string]any{"userId": identity.UserID(l.ctx), "friendId": req.FriendID}})
+			l.logger.Info(model.LogMsg{Text: "好友验证记录不存在", Data: map[string]any{"userId": req.UserID, "friendId": req.FriendID}})
 			return nil, errors.New("好友验证不存在")
 		}
 		l.logger.Error(model.LogMsg{Text: "查询好友验证记录失败", Data: map[string]any{"err": err.Error()}})
@@ -88,6 +87,6 @@ func (l *SearchValidInfoLogic) SearchValidInfo(req *types.SearchValidInfoReq) (r
 		ValidID: friendVerify.VerifyID, // 返回验证记录ID
 	}
 
-	l.logger.Info(model.LogMsg{Text: "查询好友验证信息成功", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "friendId": req.FriendID, "validId": friendVerify.VerifyID}})
+	l.logger.Info(model.LogMsg{Text: "查询好友验证信息成功", Data: map[string]interface{}{"userId": req.UserID, "friendId": req.FriendID, "validId": friendVerify.VerifyID}})
 	return resp, nil
 }

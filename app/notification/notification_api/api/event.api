@@ -5,6 +5,7 @@ syntax = "v1"
 // 表1：通知事件（NotificationEvent）
 type (
 	getEventsByIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		EventIDs []string `json:"eventIds"` // 必填
 	}
 	EventItem {
@@ -28,7 +29,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: event
 )
 service notification {

@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -50,7 +49,7 @@ func NewGetSyncChatConversationsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetSyncChatConversationsReq) (resp *types.GetSyncChatConversationsRes, err error) {
-	userId := identity.UserID(l.ctx)
+	userId := req.UserID
 	if userId == "" {
 		l.logger.Error(model.LogMsg{Text: "用户ID为空"})
 		return nil, errors.New("用户ID不能为空")

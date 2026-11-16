@@ -19,7 +19,7 @@
  * beaver-server-header-v1
  */
 
-package logic
+package consumer
 
 import (
 	aicli "beaver/remote/ai"

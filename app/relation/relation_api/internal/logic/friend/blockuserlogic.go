@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -51,31 +50,31 @@ func NewBlockUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BlockUs
 }
 
 func (l *BlockUserLogic) BlockUser(req *types.BlockUserReq) (resp *types.BlockUserRes, err error) {
-	if identity.UserID(l.ctx) == req.BlockedUserID {
+	if req.UserID == req.BlockedUserID {
 		return nil, errors.New("不能拉黑自己")
 	}
 
 	// 检查是否已拉黑
 	var existing friend_models.FriendBlockModel
-	result := l.svcCtx.DB.Where("user_id = ? AND blocked_user_id = ?", identity.UserID(l.ctx), req.BlockedUserID).First(&existing)
+	result := l.svcCtx.DB.Where("user_id = ? AND blocked_user_id = ?", req.UserID, req.BlockedUserID).First(&existing)
 	if result.Error == nil {
 		return &types.BlockUserRes{}, nil // 已拉黑，幂等处理
 	}
 
 	block := friend_models.FriendBlockModel{
 		BlockID:       uuid.New().String(),
-		UserID:        identity.UserID(l.ctx),
+		UserID:        req.UserID,
 		BlockedUserID: req.BlockedUserID,
 	}
 	if err = l.svcCtx.DB.Create(&block).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "拉黑用户失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "blockedUserId": req.BlockedUserID, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "拉黑用户失败", Data: map[string]interface{}{"userId": req.UserID, "blockedUserId": req.BlockedUserID, "err": err.Error()}})
 		return nil, errors.New("操作失败")
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "拉黑用户成功",
 		Data: map[string]interface{}{
-			"userId":        identity.UserID(l.ctx),
+			"userId":        req.UserID,
 			"blockedUserId": req.BlockedUserID,
 		},
 	})

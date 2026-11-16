@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/asset/asset_api/internal/svc"
@@ -73,7 +72,7 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 
 	// 3. 检查是否已收藏
 	var collectRecord emoji_models.EmojiPackageCollect
-	err = l.svcCtx.DB.Where("user_id = ? AND package_id = ?", identity.UserID(l.ctx), req.PackageID).
+	err = l.svcCtx.DB.Where("user_id = ? AND package_id = ?", req.UserID, req.PackageID).
 		First(&collectRecord).Error
 
 	// 4. 根据操作类型处理
@@ -83,15 +82,15 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 			return nil, status.Error(codes.AlreadyExists, "已经收藏过了")
 		}
 		// 生成收藏版本号（按用户ID分区）
-		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", identity.UserID(l.ctx))
+		collectVersion := l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", req.UserID)
 		if collectVersion == -1 {
-			l.logger.Error(model.LogMsg{Text: "生成表情包收藏版本号失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "packageId": req.PackageID}})
+			l.logger.Error(model.LogMsg{Text: "生成表情包收藏版本号失败", Data: map[string]interface{}{"userId": req.UserID, "packageId": req.PackageID}})
 			return nil, status.Error(codes.Internal, "生成版本号失败")
 		}
 
 		collectRecord = emoji_models.EmojiPackageCollect{
 			PackageCollectID: uuid.New().String(),
-			UserID:           identity.UserID(l.ctx),
+			UserID:           req.UserID,
 			PackageID:        req.PackageID,
 			Version:          collectVersion,
 		}
@@ -201,12 +200,12 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 				"conversationId": "",
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
-		}(l.svcCtx.Config.Etcd, identity.UserID(l.ctx), collectRecord.PackageCollectID, collectVersion, req.PackageID, emojiPackage.Version)
+		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectVersion, req.PackageID, emojiPackage.Version)
 
 		l.logger.Info(model.LogMsg{
 			Text: "收藏表情包成功",
 			Data: map[string]interface{}{
-				"userId":    identity.UserID(l.ctx),
+				"userId":    req.UserID,
 				"packageId": req.PackageID,
 			},
 		})
@@ -218,15 +217,15 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 
 		// 软删除：设置IsDeleted为true并更新版本号（按用户ID分区）
 		collectRecord.IsDeleted = true
-		collectRecord.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", identity.UserID(l.ctx))
+		collectRecord.Version = l.svcCtx.VersionGen.GetNextVersion("emoji_package_collect", "user_id", req.UserID)
 		if collectRecord.Version == -1 {
-			l.logger.Error(model.LogMsg{Text: "生成版本号失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "packageId": req.PackageID}})
+			l.logger.Error(model.LogMsg{Text: "生成版本号失败", Data: map[string]interface{}{"userId": req.UserID, "packageId": req.PackageID}})
 			return nil, status.Error(codes.Internal, "生成版本号失败")
 		}
 
 		err = l.svcCtx.DB.Save(&collectRecord).Error
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "软删除收藏失败", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "packageId": req.PackageID, "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "软删除收藏失败", Data: map[string]interface{}{"userId": req.UserID, "packageId": req.PackageID, "err": err.Error()}})
 			return nil, status.Error(codes.Internal, "软删除收藏失败")
 		}
 
@@ -298,12 +297,12 @@ func (l *UpdateFavoriteEmojiPackageLogic) UpdateFavoriteEmojiPackage(req *types.
 				"conversationId": "",
 			}
 			l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload)
-		}(l.svcCtx.Config.Etcd, identity.UserID(l.ctx), collectRecord.PackageCollectID, collectRecord.Version, req.PackageID, emojiPackage.Version)
+		}(l.svcCtx.Config.Etcd, req.UserID, collectRecord.PackageCollectID, collectRecord.Version, req.PackageID, emojiPackage.Version)
 
 		l.logger.Info(model.LogMsg{
 			Text: "取消收藏表情包成功",
 			Data: map[string]interface{}{
-				"userId":    identity.UserID(l.ctx),
+				"userId":    req.UserID,
 				"packageId": req.PackageID,
 			},
 		})

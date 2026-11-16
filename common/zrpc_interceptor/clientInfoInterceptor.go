@@ -31,11 +31,12 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// ClientInfoInterceptor 把 HTTP 面中间件验签得出的身份结论透传到 gRPC metadata。
+// ClientInfoInterceptor 把 HTTP 面的调用信息（客户端 IP、已确认的身份结论）透传到 gRPC metadata。
 //
-// 身份只从 context 读（common/identity.From 同时兼容自定义 middleware 与 go-zero
-// 内置 `jwt: Auth` 的 claims），不再读任何请求头；rpc 侧由 IdentityServerInterceptor
-// 还原成同一份 Identity。rpc logic 因此不需要、也不应该再验用户 JWT。
+// 身份不由这里生成：HTTP 面只挂 JwtS2s 验机器票，用户身份采信网关写入的 Beaver-User-Id /
+// Beaver-Admin-Id 头，由 .api 的 Req 字段（header tag）直接绑定，logic 之间以显式参数传递。
+// 因此 identity.From 通常为空；若上游确实用 identity.With 写过结论，这里原样透传，
+// rpc 侧由 IdentityServerInterceptor 还原成同一份 Identity。
 func ClientInfoInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	var clientIP string
 	if cl := ctx.Value("clientIP"); cl != nil {

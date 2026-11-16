@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -69,7 +68,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	}
 
 	var groupModel = group_models.GroupModel{
-		CreatorID: identity.UserID(l.ctx),
+		CreatorID: req.UserID,
 		GroupID:   groupID,
 		Version:   groupVersion, // 该群的独立版本
 	}
@@ -77,7 +76,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		return nil, errors.New("请选择用户")
 	}
 
-	var groupUserList = []string{identity.UserID(l.ctx)}
+	var groupUserList = []string{req.UserID}
 	groupUserList = append(groupUserList, req.UserIdList...)
 
 	groupModel.Title = req.Title
@@ -115,7 +114,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 	if err = l.svcCtx.DB.Create(&group_models.GroupInviteLinkModel{
 		Token:     inviteCode,
 		GroupID:   groupID,
-		CreatorID: identity.UserID(l.ctx),
+		CreatorID: req.UserID,
 		ExpireAt:  0,
 		MaxUses:   0,
 		Status:    1,
@@ -138,7 +137,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			GroupID:    member.GroupID,
 			UserID:     member.UserID,
 			ChangeType: "join",
-			OperatedBy: identity.UserID(l.ctx), // 创建者操作
+			OperatedBy: req.UserID, // 创建者操作
 			ChangeTime: member.JoinTime,
 			Version:    logVersion,
 		}
@@ -165,7 +164,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		}
 
 		// 初始化群聊会话（创建chat_conversation_meta和chat_user_conversations）
-		allUserIDs := append([]string{identity.UserID(l.ctx)}, req.UserIdList...)
+		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
 		_, err = l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
 			ConversationId: "group_" + groupModel.GroupID,
 			Type:           2, // 群聊类型
@@ -188,8 +187,8 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			_, err := l.svcCtx.ChatRpc.SendNotificationMessage(context.Background(), &chat_rpc.SendNotificationMessageReq{
 				ConversationId: "group_" + groupModel.GroupID,
 				MessageType:    2,                                               // 群创建成功消息
-				Content:        fmt.Sprintf("%s 创建了群聊", identity.UserID(l.ctx)), // 这里应该用实际的用户名，但简化处理
-				RelatedUserId:  identity.UserID(l.ctx),                          // 创建者ID
+				Content:        fmt.Sprintf("%s 创建了群聊", req.UserID), // 这里应该用实际的用户名，但简化处理
+				RelatedUserId:  req.UserID,                          // 创建者ID
 			})
 			if err != nil {
 				l.logger.Error(model.LogMsg{Text: "异步发送群创建消息失败", Data: map[string]interface{}{"groupId": groupModel.GroupID, "err": err.Error()}})
@@ -223,7 +222,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupReceive,
-				"senderId": identity.UserID(l.ctx),
+				"senderId": req.UserID,
 				"targetId": member.UserID,
 				"body": map[string]interface{}{
 					"tables": []map[string]interface{}{
@@ -252,7 +251,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		Text: "群创建成功",
 		Data: map[string]interface{}{
 			"groupId": groupModel.GroupID,
-			"userId":  identity.UserID(l.ctx),
+			"userId":  req.UserID,
 			"count":   len(groupUserList),
 		},
 	})

@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"time"
@@ -60,7 +59,7 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 		l.logger.Warn(model.LogMsg{
 			Text: "撤回消息不存在",
 			Data: map[string]any{
-				"userId":    identity.UserID(l.ctx),
+				"userId":    req.UserID,
 				"messageId": req.MessageID,
 				"err":       err.Error(),
 			},
@@ -69,11 +68,11 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 	}
 
 	// 2. 权限校验
-	if msg.SendUserID == nil || *msg.SendUserID != identity.UserID(l.ctx) {
+	if msg.SendUserID == nil || *msg.SendUserID != req.UserID {
 		l.logger.Warn(model.LogMsg{
 			Text: "无权撤回他人消息",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"messageId":      req.MessageID,
 				"conversationId": msg.ConversationID,
 			},
@@ -86,7 +85,7 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 		l.logger.Warn(model.LogMsg{
 			Text: "撤回已超时",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"messageId":      req.MessageID,
 				"conversationId": msg.ConversationID,
 			},
@@ -101,7 +100,7 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 	// 5. 产生一条"撤回指令"到同步流
 	// 这里调用 SendMsg 发送一条 WithdrawMsg 类型的消息，它会产生新的 Seq
 	_, err = l.svcCtx.ChatRpc.SendMsg(l.ctx, &chat_rpc.SendMsgReq{
-		UserId:         identity.UserID(l.ctx),
+		UserId:         req.UserID,
 		ConversationId: msg.ConversationID,
 		MessageId:      uuid.New().String(), // 指令消息本身的ID
 		Msg: &chat_rpc.Msg{
@@ -123,7 +122,7 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 		l.logger.Error(model.LogMsg{
 			Text: "发送撤回指令失败",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"messageId":      req.MessageID,
 				"conversationId": msg.ConversationID,
 				"err":            err.Error(),
@@ -136,7 +135,7 @@ func (l *RecallMessageLogic) RecallMessage(req *types.RecallMessageReq) (resp *t
 		Text: "消息撤回成功",
 		Data: map[string]any{
 			"messageId":      req.MessageID,
-			"userId":         identity.UserID(l.ctx),
+			"userId":         req.UserID,
 			"conversationId": msg.ConversationID,
 		},
 	})

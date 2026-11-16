@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -55,7 +54,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 	if req.Keyword == "" {
 		l.logger.Warn(model.LogMsg{
 			Text: "搜索关键词为空",
-			Data: map[string]any{"userId": identity.UserID(l.ctx)},
+			Data: map[string]any{"userId": req.UserID},
 		})
 		return nil, errors.New("keyword不能为空")
 	}
@@ -64,11 +63,11 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 
 	deleteSubQuery := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).
 		Select("message_id").
-		Where("user_id = ?", identity.UserID(l.ctx))
+		Where("user_id = ?", req.UserID)
 
 	conversationSubQuery := l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
 		Select("conversation_id").
-		Where("user_id = ?", identity.UserID(l.ctx))
+		Where("user_id = ?", req.UserID)
 
 	query := l.svcCtx.DB.Where(
 		"msg_preview LIKE ? AND message_id NOT IN (?) AND conversation_id IN (?)",
@@ -78,13 +77,13 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 	if req.ConversationID != "" {
 		var count int64
 		l.svcCtx.DB.Model(&message_models.ChatUserConversation{}).
-			Where("user_id = ? AND conversation_id = ?", identity.UserID(l.ctx), req.ConversationID).
+			Where("user_id = ? AND conversation_id = ?", req.UserID, req.ConversationID).
 			Count(&count)
 		if count == 0 {
 			l.logger.Warn(model.LogMsg{
 				Text: "无权搜索该会话",
 				Data: map[string]any{
-					"userId":         identity.UserID(l.ctx),
+					"userId":         req.UserID,
 					"conversationId": req.ConversationID,
 				},
 			})
@@ -113,7 +112,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 		l.logger.Error(model.LogMsg{
 			Text: "搜索消息失败",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"conversationId": req.ConversationID,
 				"err":            err.Error(),
 			},
@@ -138,7 +137,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 		if err != nil {
 			l.logger.Error(model.LogMsg{
 				Text: "批量获取用户信息失败",
-				Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
+				Data: map[string]any{"userId": req.UserID, "err": err.Error()},
 			})
 		} else {
 			for userId, userInfo := range userListResp.UserInfo {
@@ -160,7 +159,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 				l.logger.Error(model.LogMsg{
 					Text: "消息内容转换失败",
 					Data: map[string]any{
-						"userId":    identity.UserID(l.ctx),
+						"userId":    req.UserID,
 						"messageId": chat.MessageID,
 						"err":       err.Error(),
 					},
@@ -196,7 +195,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 	l.logger.Info(model.LogMsg{
 		Text: "搜索消息成功",
 		Data: map[string]any{
-			"userId":         identity.UserID(l.ctx),
+			"userId":         req.UserID,
 			"conversationId": req.ConversationID,
 			"count":          total,
 			"listCount":      len(list),

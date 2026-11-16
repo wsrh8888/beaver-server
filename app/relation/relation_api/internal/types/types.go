@@ -23,9 +23,10 @@
 package types
 
 type AddFriendReq struct {
-	FriendID string `json:"friendId"`        // 要添加的好友用户ID
-	Verify   string `json:"verify,optional"` // 验证消息，可选
-	Source   string `json:"source"`          // 添加好友来源：email(邮箱搜索)/qrcode(扫码)/userId(用户ID搜索)
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	FriendID string `json:"friendId"`         // 要添加的好友用户ID
+	Verify   string `json:"verify,optional"`  // 验证消息，可选
+	Source   string `json:"source"`           // 添加好友来源：email(邮箱搜索)/qrcode(扫码)/userId(用户ID搜索)
 }
 
 type AddFriendRes struct {
@@ -45,8 +46,9 @@ type AddGroupMemberRes struct {
 }
 
 type BlockListReq struct {
-	Page  int `form:"page,optional"`  // 页码，可选，默认1
-	Limit int `form:"limit,optional"` // 每页数量，可选，默认20
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `form:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `form:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type BlockListRes struct {
@@ -62,14 +64,16 @@ type BlockUserInfo struct {
 }
 
 type BlockUserReq struct {
-	BlockedUserID string `json:"blockedUserId"` // 被拉黑的用户ID
+	UserID        string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	BlockedUserID string `json:"blockedUserId"`    // 被拉黑的用户ID
 }
 
 type BlockUserRes struct {
 }
 
 type DeleteFriendReq struct {
-	FriendID string `json:"friendId"` // 要删除的好友用户ID
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	FriendID string `json:"friendId"`         // 要删除的好友用户ID
 }
 
 type DeleteFriendRes struct {
@@ -96,7 +100,8 @@ type FriendByUuid struct {
 }
 
 type FriendInfoReq struct {
-	FriendID string `form:"friendId"` // 好友用户ID
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	FriendID string `form:"friendId"`         // 好友用户ID
 }
 
 type FriendInfoRes struct {
@@ -124,8 +129,9 @@ type FriendItem struct {
 }
 
 type FriendListReq struct {
-	Page  int `form:"page,optional"`  // 页码，可选，默认1
-	Limit int `form:"limit,optional"` // 每页数量，可选，默认20
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `form:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `form:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type FriendListRes struct {
@@ -145,8 +151,9 @@ type FriendValidInfo struct {
 }
 
 type FriendValidStatusReq struct {
-	VerifyID string `json:"verifyId"` // 验证记录ID
-	Status   int8   `json:"status"`   // 处理状态：1(同意)/2(拒绝)
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	VerifyID string `json:"verifyId"`         // 验证记录ID
+	Status   int8   `json:"status"`           // 处理状态：1(同意)/2(拒绝)
 }
 
 type FriendValidStatusRes struct {
@@ -220,6 +227,7 @@ type GetUserGroupIDsRes struct {
 }
 
 type GroupCreateReq struct {
+	UserID     string   `header:"Beaver-User-Id"`    // 当前用户ID（网关注入的可信身份头）
 	Title      string   `json:"title,optional"`      // 群组名称，可选
 	UserIdList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
 }
@@ -230,7 +238,8 @@ type GroupCreateRes struct {
 }
 
 type GroupDeleteReq struct {
-	GroupID string `json:"groupId"` // 要删除的群组ID
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID string `json:"groupId"`          // 要删除的群组ID
 }
 
 type GroupDeleteRes struct {
@@ -238,7 +247,8 @@ type GroupDeleteRes struct {
 }
 
 type GroupInfoReq struct {
-	GroupID string `json:"groupId"` // 群组ID
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID string `json:"groupId"`          // 群组ID
 }
 
 type GroupInfoRes struct {
@@ -258,6 +268,7 @@ type GroupInfoRes struct {
 }
 
 type GroupInviteReq struct {
+	UserID  string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	GroupID string   `json:"groupId"`          // 群组ID
 	UserIds []string `json:"userIds"`          // 被邀请的用户ID列表
 	Message string   `json:"message,optional"` // 邀请消息，可选
@@ -282,14 +293,16 @@ type GroupItem struct {
 }
 
 type GroupJoinReq struct {
+	UserID     string `header:"Beaver-User-Id"`    // 当前用户ID（网关注入的可信身份头）
 	GroupID    string `json:"groupId,optional"`    // 目标群组ID（有 inviteCode 时可空）
 	Message    string `json:"message,optional"`    // 申请消息，可选
 	InviteCode string `json:"inviteCode,optional"` // 邀请短码（从 inviteUrl 解析）
 }
 
 type GroupJoinRequestHandleReq struct {
-	RequestID uint `json:"requestId"` // 申请ID
-	Status    int8 `json:"status"`    // 处理状态：1同意 2拒绝
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	RequestID uint   `json:"requestId"`        // 申请ID
+	Status    int8   `json:"status"`           // 处理状态：1同意 2拒绝
 }
 
 type GroupJoinRequestHandleRes struct {
@@ -309,8 +322,9 @@ type GroupJoinRequestItem struct {
 }
 
 type GroupJoinRequestListReq struct {
-	Page  int `json:"page,optional"`  // 页码，可选，默认1
-	Limit int `json:"limit,optional"` // 每页数量，可选，默认20
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `json:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `json:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type GroupJoinRequestListRes struct {
@@ -331,7 +345,8 @@ type GroupJoinRequestSyncDataItem struct {
 }
 
 type GroupJoinRequestSyncReq struct {
-	Groups []GroupJoinRequestSyncVersionItem `json:"groups"` // 要同步的群组版本信息
+	UserID string                            `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Groups []GroupJoinRequestSyncVersionItem `json:"groups"`           // 要同步的群组版本信息
 }
 
 type GroupJoinRequestSyncRes struct {
@@ -360,8 +375,9 @@ type GroupListById struct {
 }
 
 type GroupMemberAddReq struct {
-	GroupID string   `json:"groupId"` // 群组ID
-	UserIds []string `json:"userIds"` // 要添加的成员ID列表
+	UserID  string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID string   `json:"groupId"`          // 群组ID
+	UserIds []string `json:"userIds"`          // 要添加的成员ID列表
 }
 
 type GroupMemberAddRes struct {
@@ -390,9 +406,10 @@ type GroupMemberListItem struct {
 }
 
 type GroupMemberListReq struct {
-	GroupID string `json:"groupId"`        // 群组ID
-	Page    int    `json:"page,optional"`  // 页码，可选，默认1
-	Limit   int    `json:"limit,optional"` // 每页数量，可选，默认20
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID string `json:"groupId"`          // 群组ID
+	Page    int    `json:"page,optional"`    // 页码，可选，默认1
+	Limit   int    `json:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type GroupMemberListRes struct {
@@ -401,8 +418,9 @@ type GroupMemberListRes struct {
 }
 
 type GroupMemberRemoveReq struct {
-	GroupID string   `json:"groupId"` // 群组ID
-	UserIds []string `json:"userIds"` // 要移除的成员ID列表
+	UserID  string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID string   `json:"groupId"`          // 群组ID
+	UserIds []string `json:"userIds"`          // 要移除的成员ID列表
 }
 
 type GroupMemberRemoveRes struct {
@@ -421,7 +439,8 @@ type GroupMemberSyncDataItem struct {
 }
 
 type GroupMemberSyncReq struct {
-	Groups []GroupMemberSyncVersionItem `json:"groups"` // 要同步的群组版本信息
+	UserID string                       `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Groups []GroupMemberSyncVersionItem `json:"groups"`           // 要同步的群组版本信息
 }
 
 type GroupMemberSyncRes struct {
@@ -443,8 +462,9 @@ type GroupMineItem struct {
 }
 
 type GroupMineReq struct {
-	Page  int `json:"page,optional"`  // 页码，可选，默认1
-	Limit int `json:"limit,optional"` // 每页数量，可选，默认20
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `json:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `json:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type GroupMineRes struct {
@@ -453,7 +473,8 @@ type GroupMineRes struct {
 }
 
 type GroupQuitReq struct {
-	GroupID string `json:"groupId"` // 群组ID
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID string `json:"groupId"`          // 群组ID
 }
 
 type GroupQuitRes struct {
@@ -495,7 +516,8 @@ type GroupSyncDataItem struct {
 }
 
 type GroupSyncReq struct {
-	Groups []GroupSyncVersionItem `json:"groups"` // 要同步的群组版本信息
+	UserID string                 `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Groups []GroupSyncVersionItem `json:"groups"`           // 要同步的群组版本信息
 }
 
 type GroupSyncRes struct {
@@ -582,8 +604,9 @@ type ListGroupsRes struct {
 }
 
 type MuteAllGroupReq struct {
-	GroupID   string `json:"groupId"`   // 群ID
-	IsMuteAll bool   `json:"isMuteAll"` // true=开启全员禁言，false=关闭
+	UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID   string `json:"groupId"`          // 群ID
+	IsMuteAll bool   `json:"isMuteAll"`        // true=开启全员禁言，false=关闭
 }
 
 type MuteAllGroupRes struct {
@@ -591,17 +614,19 @@ type MuteAllGroupRes struct {
 }
 
 type MuteGroupMemberReq struct {
-	GroupID  string `json:"groupId"`  // 群ID
-	MemberID string `json:"memberId"` // 被操作的成员ID
-	Duration int64  `json:"duration"` // 禁言时长（分钟），0=解禁
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID  string `json:"groupId"`          // 群ID
+	MemberID string `json:"memberId"`         // 被操作的成员ID
+	Duration int64  `json:"duration"`         // 禁言时长（分钟），0=解禁
 }
 
 type MuteGroupMemberRes struct {
 }
 
 type NoticeUpdateReq struct {
-	FriendID string `json:"friendId"` // 好友用户ID
-	Notice   string `json:"notice"`   // 新的备注内容
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	FriendID string `json:"friendId"`         // 好友用户ID
+	Notice   string `json:"notice"`           // 新的备注内容
 }
 
 type NoticeUpdateRes struct {
@@ -620,7 +645,8 @@ type RemoveGroupMemberRes struct {
 }
 
 type ResolveGroupInviteReq struct {
-	Code string `form:"code"` // 邀请短码
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Code   string `form:"code"`             // 邀请短码
 }
 
 type ResolveGroupInviteRes struct {
@@ -636,8 +662,9 @@ type ResolveGroupInviteRes struct {
 }
 
 type SearchReq struct {
-	Keyword string `form:"keyword"`       // 搜索关键词（用户ID或邮箱）
-	Type    string `form:"type,optional"` // 搜索类型：userId(用户ID)/email(邮箱)，默认email
+	UserID  string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Keyword string `form:"keyword"`          // 搜索关键词（用户ID或邮箱）
+	Type    string `form:"type,optional"`    // 搜索类型：userId(用户ID)/email(邮箱)，默认email
 }
 
 type SearchRes struct {
@@ -652,7 +679,8 @@ type SearchRes struct {
 }
 
 type SearchValidInfoReq struct {
-	FriendID string `json:"friendId"` // 好友用户ID
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	FriendID string `json:"friendId"`         // 好友用户ID
 }
 
 type SearchValidInfoRes struct {
@@ -660,8 +688,9 @@ type SearchValidInfoRes struct {
 }
 
 type TransferOwnerReq struct {
-	GroupID    string `json:"groupId"`    // 群组ID
-	NewOwnerID string `json:"newOwnerId"` // 新群主ID
+	UserID     string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID    string `json:"groupId"`          // 群组ID
+	NewOwnerID string `json:"newOwnerId"`       // 新群主ID
 }
 
 type TransferOwnerRes struct {
@@ -669,7 +698,8 @@ type TransferOwnerRes struct {
 }
 
 type UnblockUserReq struct {
-	BlockedUserID string `json:"blockedUserId"` // 要取消拉黑的用户ID
+	UserID        string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	BlockedUserID string `json:"blockedUserId"`    // 要取消拉黑的用户ID
 }
 
 type UnblockUserRes struct {
@@ -703,6 +733,7 @@ type UpdateFriendsRes struct {
 }
 
 type UpdateGroupInfoReq struct {
+	UserID   string `header:"Beaver-User-Id"`  // 当前用户ID（网关注入的可信身份头）
 	GroupID  string `json:"groupId"`           // 群组ID
 	Title    string `json:"title,optional"`    // 新群名称，可选
 	Avatar   string `json:"avatar,optional"`   // 新群头像URL，可选
@@ -736,9 +767,10 @@ type UpdateGroupRes struct {
 }
 
 type UpdateMemberRoleReq struct {
-	GroupID  string `json:"groupId"`  // 群组ID
-	MemberID string `json:"memberId"` // 目标成员ID
-	Role     int8   `json:"role"`     // 新角色：2管理员 3普通成员
+	UserID   string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	GroupID  string `json:"groupId"`          // 群组ID
+	MemberID string `json:"memberId"`         // 目标成员ID
+	Role     int8   `json:"role"`             // 新角色：2管理员 3普通成员
 }
 
 type UpdateMemberRoleRes struct {
@@ -746,8 +778,9 @@ type UpdateMemberRoleRes struct {
 }
 
 type ValidListReq struct {
-	Page  int `json:"page,optional"`  // 页码，可选，默认1
-	Limit int `json:"limit,optional"` // 每页数量，可选，默认20
+	UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+	Page   int    `json:"page,optional"`    // 页码，可选，默认1
+	Limit  int    `json:"limit,optional"`   // 每页数量，可选，默认20
 }
 
 type ValidListRes struct {

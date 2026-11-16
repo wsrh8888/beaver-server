@@ -19,31 +19,17 @@
  * beaver-server-header-v1
  */
 
-package middleware
+package core
 
 import (
 	"net/http"
 
-	"beaver/app/account/account_api/internal/config"
-	"beaver/middleware/authgate"
-
-	"github.com/zeromicro/go-zero/rest"
+	"beaver/utils/jwts"
 )
 
-// AuthGateMiddleware 由 .api 的 `@server middleware: AuthGate` 声明接线。
-// 实现共享在 beaver/middleware/authgate，这里只负责用本服务配置装配凭据。
-type AuthGateMiddleware struct {
-	gate rest.Middleware
-}
-
-func NewAuthGateMiddleware(c config.Config) *AuthGateMiddleware {
-	g := authgate.NewGate(c.Auth.AccessSecret, c.S2S.Secret, authgate.AudienceCore)
-	if err := g.Validate(); err != nil {
-		panic("account_api 身份闸门配置不完整: " + err.Error())
-	}
-	return &AuthGateMiddleware{gate: authgate.New(g)}
-}
-
-func (m *AuthGateMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
-	return m.gate(next)
+// verifyOpenTicket 验开放平台开发者票：密钥取 AuthOpen.AccessSecret，
+// 受众必须是 beaver:developer，签发行是 beaver-open 的 developer 登录。
+// 该票只能进门户面（/beaver-open/...）。
+func (p Proxy) verifyOpenTicket(r *http.Request) (*jwts.CustomClaims, error) {
+	return verifyTicket(r, p.Config.AuthOpen.AccessSecret, jwts.AudienceDeveloper, "网关未配置开放平台票密钥")
 }

@@ -59,8 +59,8 @@ type ServiceContext struct {
 	RocketMQ    *corerocketmq.Client
 	OpenSearch  *coreopensearch.Client
 	Instance    InstanceView
-	// AuthGate 业务面的统一身份闸门：用户 JWT 与队间机器票共用同一套路由。
-	AuthGate rest.Middleware
+	// JwtS2s 由 .api 的 @server 声明接线（用户票 / 机器票分开挂）。
+	JwtS2s    rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -79,7 +79,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RocketMQ:    mqClient,
 		OpenSearch:  coreopensearch.New(c.OpenSearch.Addr),
 		Instance:    loadInstance(mysqlDb),
-		AuthGate:    middleware.NewAuthGateMiddleware(c).Handle,
+		JwtS2s:    middleware.NewJwtS2sMiddleware(c).Handle,
 	}
 }
 

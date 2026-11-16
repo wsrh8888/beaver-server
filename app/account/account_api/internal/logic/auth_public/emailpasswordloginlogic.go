@@ -96,7 +96,7 @@ func (l *EmailPasswordLoginLogic) EmailPasswordLogin(req *types.EmailPasswordLog
 		NickName: userInfo.NickName,
 		UserID:   userInfo.UserId,
 		DeviceID: req.DeviceID,
-	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire)
+	}, l.svcCtx.Config.Auth.AccessSecret, l.svcCtx.Config.Auth.AccessExpire, jwts.AudienceUser)
 	if err != nil {
 		return nil, errors.New("服务内部异常")
 	}

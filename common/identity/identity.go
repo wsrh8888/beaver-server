@@ -60,10 +60,9 @@ func With(ctx context.Context, id Identity) context.Context {
 
 // From 读取本次请求的身份结论。
 //
-// 优先取本包 With 注入的结构化结论（自定义 middleware，如 AuthGate / DeveloperAuth）；
-// 其次兼容 go-zero 内置 `jwt: Auth`——rest.WithJwt 会把 JWT claims 逐项平铺进 context
-// 的字符串 key，本项目用户票的 claim 为 userId（见 utils/jwts/enter.go）。
-// 两条来源归一成同一个 Identity，logic 无需感知路由挂的是哪一种鉴权声明。
+// 取本包 With 注入的结构化结论；其次兼容 rest.WithJwt 平铺进 context 的字符串 key
+// （本项目用户票 claim 为 userId，见 utils/jwts/enter.go），供仍走该模式的调用方读取。
+// 两条来源归一成同一个 Identity。
 func From(ctx context.Context) Identity {
 	if ctx == nil {
 		return Identity{}

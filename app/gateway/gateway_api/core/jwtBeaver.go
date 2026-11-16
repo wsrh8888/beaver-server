@@ -19,13 +19,17 @@
  * beaver-server-header-v1
  */
 
-package authgate
+package core
 
-import "errors"
+import (
+	"net/http"
 
-// 启动期自检错误：任一密钥缺失即拒绝启动，不做降级。
-var (
-	errMissingUserSecret = errors.New("authgate: 用户 JWT 密钥（Auth.AccessSecret）未配置")
-	errMissingS2SSecret  = errors.New("authgate: S2S 机器票密钥（S2S.Secret）未配置")
-	errMissingS2SAud     = errors.New("authgate: S2S 机器票受众未配置")
+	"beaver/utils/jwts"
 )
+
+// verifyBeaverTicket 验主站 C 端用户票：密钥取 AuthBeaver.AccessSecret，
+// 受众必须是 beaver:user，签发行是 app/account 的 auth_public 登录。
+// 该票只能进主站 C 端面（/beaver/api/...），拿去打门户或后台会被受众判定拒绝。
+func (p Proxy) verifyBeaverTicket(r *http.Request) (*jwts.CustomClaims, error) {
+	return verifyTicket(r, p.Config.AuthBeaver.AccessSecret, jwts.AudienceUser, "网关未配置主站用户票密钥")
+}

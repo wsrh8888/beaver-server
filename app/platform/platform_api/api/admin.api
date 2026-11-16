@@ -1,6 +1,6 @@
 // 平台后台管理 API（队间能力面）
 //
-// 后台管理仓（beaver-backend）直接调用本组标准机器视图，身份由 AuthGate 中间件按机器票判定。
+// 后台管理仓（beaver-backend）直接调用本组标准机器视图，身份由 JwtS2s 中间件按机器票判定。
 //
 // 与 C 端的 /beaver/api/platform/* 视图不重叠：这里是运维/运营视角，可以按记录维度读写。
 
@@ -377,7 +377,7 @@ type (
 
 @server (
 	group: admin
-	middleware: AuthGate
+	middleware: JwtS2s
 )
 service platform {
 	@doc "队间：查询后台操作日志"

@@ -28,7 +28,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	"beaver/commonconfig"
-	"beaver/middleware/authgate"
 	"beaver/middleware/jwt"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -72,7 +71,7 @@ func (l *S2sTokenLogic) S2sToken(req *types.S2STokenReq) (resp *types.S2STokenRe
 		l.svcCtx.Config.S2S.Secret,
 		l.svcCtx.Config.Name,
 		req.ClientID,
-		authgate.AudienceCore,
+		jwt.AudienceCore,
 		scopes,
 		jwt.S2STTL,
 	)

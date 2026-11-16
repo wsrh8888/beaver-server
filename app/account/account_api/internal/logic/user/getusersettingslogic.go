@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/account/account_api/internal/svc"
@@ -49,12 +48,12 @@ func NewGetUserSettingsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 }
 
 func (l *GetUserSettingsLogic) GetUserSettings(req *types.GetUserSettingsReq) (*types.GetUserSettingsRes, error) {
-	setting, err := l.getOrCreateUserSetting(identity.UserID(l.ctx))
+	setting, err := l.getOrCreateUserSetting(req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	defaults := user_models.DefaultUserSetting(identity.UserID(l.ctx)).SettingInfo
+	defaults := user_models.DefaultUserSetting(req.UserID).SettingInfo
 	info := setting.SettingInfo
 	if info == nil {
 		info = defaults

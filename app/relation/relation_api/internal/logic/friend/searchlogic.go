@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 	"fmt"
@@ -123,18 +122,18 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 	userDetail := userInfoResp.UserInfo
 
 	// 不能搜索自己
-	if identity.UserID(l.ctx) == userInfo.UserId {
+	if req.UserID == userInfo.UserId {
 		return nil, errors.New("不能搜索自己")
 	}
 
 	// 获取好友关系
 	var friend friend_models.FriendModel
-	isFriend := friend.IsFriend(l.svcCtx.DB, identity.UserID(l.ctx), userInfo.UserId)
+	isFriend := friend.IsFriend(l.svcCtx.DB, req.UserID, userInfo.UserId)
 
 	// 生成会话Id
-	conversationID, err := conversation.GenerateConversation([]string{identity.UserID(l.ctx), userInfo.UserId})
+	conversationID, err := conversation.GenerateConversation([]string{req.UserID, userInfo.UserId})
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "targetId": userInfo.UserId, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "生成会话Id失败", Data: map[string]any{"userId": req.UserID, "targetId": userInfo.UserId, "err": err.Error()}})
 		return nil, fmt.Errorf("生成会话Id失败: %v", err)
 	}
 
@@ -149,6 +148,6 @@ func (l *SearchLogic) Search(req *types.SearchReq) (resp *types.SearchRes, err e
 		Email:          userDetail.Email,
 	}
 
-	l.logger.Info(model.LogMsg{Text: "搜索用户成功", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "keyword": req.Keyword, "type": req.Type, "isFriend": isFriend}})
+	l.logger.Info(model.LogMsg{Text: "搜索用户成功", Data: map[string]interface{}{"userId": req.UserID, "keyword": req.Keyword, "type": req.Type, "isFriend": isFriend}})
 	return resp, nil
 }

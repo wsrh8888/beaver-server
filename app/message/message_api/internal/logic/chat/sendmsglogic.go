@@ -24,7 +24,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -185,7 +184,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	rpcMsg := l.BuildMsgToRpc(&req.Msg)
 
 	rpcReq := &chat_rpc.SendMsgReq{
-		UserId:         identity.UserID(l.ctx),
+		UserId:         req.UserID,
 		MessageId:      req.MessageID,
 		ConversationId: req.ConversationID,
 		Msg:            rpcMsg,
@@ -197,7 +196,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 		l.logger.Error(model.LogMsg{
 			Text: "发送消息失败",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"conversationId": req.ConversationID,
 				"messageId":      req.MessageID,
 				"messageType":    req.Msg.Type,
@@ -227,7 +226,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 	l.logger.Info(model.LogMsg{
 		Text: "发送消息成功",
 		Data: map[string]any{
-			"userId":         identity.UserID(l.ctx),
+			"userId":         req.UserID,
 			"conversationId": req.ConversationID,
 			"messageId":      rpcResp.MessageId,
 			"messageType":    req.Msg.Type,

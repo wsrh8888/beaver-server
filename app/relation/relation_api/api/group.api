@@ -3,6 +3,7 @@ syntax = "v1"
 // 创建群组
 type (
 	GroupCreateReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Title      string   `json:"title,optional"` // 群组名称，可选
 		UserIdList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
 	}
@@ -15,6 +16,7 @@ type (
 // 删除群组
 type (
 	GroupDeleteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string `json:"groupId"` // 要删除的群组ID
 	}
 	GroupDeleteRes {
@@ -25,6 +27,7 @@ type (
 // 移除群成员
 type (
 	GroupMemberRemoveReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
 		UserIds []string `json:"userIds"` // 要移除的成员ID列表
 	}
@@ -36,6 +39,7 @@ type (
 // 添加群成员
 type (
 	GroupMemberAddReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
 		UserIds []string `json:"userIds"` // 要添加的成员ID列表
 	}
@@ -47,6 +51,7 @@ type (
 // 我加入的群组
 type (
 	GroupMineReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Page   int    `json:"page,optional"` // 页码，可选，默认1
 		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
 	}
@@ -67,6 +72,7 @@ type (
 // 更新群组信息
 type (
 	UpdateGroupInfoReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID  string `json:"groupId"` // 群组ID
 		Title    string `json:"title,optional"` // 新群名称，可选
 		Avatar   string `json:"avatar,optional"` // 新群头像URL，可选
@@ -81,6 +87,7 @@ type (
 // 获取群成员列表
 type (
 	GroupMemberListReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string `json:"groupId"` // 群组ID
 		Page    int    `json:"page,optional"` // 页码，可选，默认1
 		Limit   int    `json:"limit,optional"` // 每页数量，可选，默认20
@@ -103,6 +110,7 @@ type (
 // 更新群成员角色
 type (
 	UpdateMemberRoleReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID  string `json:"groupId"` // 群组ID
 		MemberID string `json:"memberId"` // 目标成员ID
 		Role     int8   `json:"role"` // 新角色：2管理员 3普通成员
@@ -115,6 +123,7 @@ type (
 // 申请加入群组
 type (
 	GroupJoinReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID    string `json:"groupId,optional"` // 目标群组ID（有 inviteCode 时可空）
 		Message    string `json:"message,optional"` // 申请消息，可选
 		InviteCode string `json:"inviteCode,optional"` // 邀请短码（从 inviteUrl 解析）
@@ -129,6 +138,7 @@ type (
 // 退出群组
 type (
 	GroupQuitReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string `json:"groupId"` // 群组ID
 	}
 	GroupQuitRes {
@@ -139,6 +149,7 @@ type (
 // 转让群主
 type (
 	TransferOwnerReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID    string `json:"groupId"` // 群组ID
 		NewOwnerID string `json:"newOwnerId"` // 新群主ID
 	}
@@ -150,6 +161,7 @@ type (
 // 群信息
 type (
 	GroupInfoReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string `json:"groupId"` // 群组ID
 	}
 	GroupInfoRes {
@@ -176,6 +188,7 @@ type (
 		Version int64  `json:"version"` // 本地版本号
 	}
 	GroupSyncReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Groups []GroupSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
 	GroupSyncDataItem {
@@ -202,6 +215,7 @@ type (
 		Version int64  `json:"version"` // 本地版本号
 	}
 	GroupMemberSyncReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Groups []GroupMemberSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
 	GroupMemberSyncDataItem {
@@ -226,6 +240,7 @@ type (
 		Version int64  `json:"version"` // 本地版本号
 	}
 	GroupJoinRequestSyncReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Groups []GroupJoinRequestSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
 	GroupJoinRequestSyncDataItem {
@@ -269,6 +284,7 @@ type (
 // 群组申请管理
 type (
 	GroupJoinRequestListReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Page   int    `json:"page,optional"` // 页码，可选，默认1
 		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
 	}
@@ -292,6 +308,7 @@ type (
 // 处理群组申请
 type (
 	GroupJoinRequestHandleReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		RequestID uint   `json:"requestId"` // 申请ID
 		Status    int8   `json:"status"` // 处理状态：1同意 2拒绝
 	}
@@ -303,6 +320,7 @@ type (
 // 禁言/解禁群成员（duration=0 解禁，正值=禁言分钟数）
 type (
 	MuteGroupMemberReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID  string `json:"groupId"` // 群ID
 		MemberID string `json:"memberId"` // 被操作的成员ID
 		Duration int64  `json:"duration"` // 禁言时长（分钟），0=解禁
@@ -313,6 +331,7 @@ type (
 // 全员禁言/解禁
 type (
 	MuteAllGroupReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID   string `json:"groupId"` // 群ID
 		IsMuteAll bool   `json:"isMuteAll"` // true=开启全员禁言，false=关闭
 	}
@@ -324,6 +343,7 @@ type (
 // 邀请用户加入群组
 type (
 	GroupInviteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
 		UserIds []string `json:"userIds"` // 被邀请的用户ID列表
 		Message string   `json:"message,optional"` // 邀请消息，可选
@@ -336,6 +356,7 @@ type (
 // 解析群邀请链接
 type (
 	ResolveGroupInviteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Code   string `form:"code"` // 邀请短码
 	}
 	ResolveGroupInviteRes {
@@ -353,7 +374,7 @@ type (
 
 @server (
 	group: group
-	jwt: Auth
+	middleware: JwtS2s
 )
 service relation {
 	@doc "创建群组"
@@ -446,7 +467,7 @@ service relation {
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分。
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
 // 路径刻意与 C 端错开（C 端已有 /members、/mine、/update 等），避免视图混用。
 
 type (
@@ -564,7 +585,7 @@ type (
 
 @server (
 	group: group_machine
-	middleware: AuthGate
+	middleware: JwtS2s
 )
 service relation {
 	@doc "队间：取用户加入的群组ID列表"

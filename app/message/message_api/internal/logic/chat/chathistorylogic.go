@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"encoding/json"
 
@@ -55,7 +54,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 	// 过滤掉当前用户主动删除的消息
 	subQuery := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).
 		Select("message_id").
-		Where("user_id = ?", identity.UserID(l.ctx))
+		Where("user_id = ?", req.UserID)
 
 	chatMessages, count, err := list_query.ListQuery(l.svcCtx.DB, message_models.ChatMessage{}, list_query.Option{
 		PageInfo: models.PageInfo{
@@ -71,7 +70,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		l.logger.Error(model.LogMsg{
 			Text: "查询聊天历史失败",
 			Data: map[string]any{
-				"userId":         identity.UserID(l.ctx),
+				"userId":         req.UserID,
 				"conversationId": req.ConversationID,
 				"err":            err.Error(),
 			},
@@ -101,7 +100,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 			l.logger.Error(model.LogMsg{
 				Text: "批量获取用户信息失败",
 				Data: map[string]any{
-					"userId":         identity.UserID(l.ctx),
+					"userId":         req.UserID,
 					"conversationId": req.ConversationID,
 					"err":            err.Error(),
 				},
@@ -131,7 +130,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 				l.logger.Error(model.LogMsg{
 					Text: "消息内容转换失败",
 					Data: map[string]any{
-						"userId":    identity.UserID(l.ctx),
+						"userId":    req.UserID,
 						"messageId": chat.MessageID,
 						"err":       err.Error(),
 					},
@@ -184,7 +183,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 	l.logger.Info(model.LogMsg{
 		Text: "查询聊天历史成功",
 		Data: map[string]any{
-			"userId":         identity.UserID(l.ctx),
+			"userId":         req.UserID,
 			"conversationId": req.ConversationID,
 			"count":          count,
 			"listCount":      len(chatHistory),

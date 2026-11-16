@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/account/account_api/internal/svc"
@@ -49,16 +48,16 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRes, err error) {
 	l.logger.Info(model.LogMsg{
 		Text: "获取用户基础信息",
-		Data: map[string]any{"userId": identity.UserID(l.ctx)},
+		Data: map[string]any{"userId": req.UserID},
 	})
 
 	// 直接从数据库查询，避免RPC调用自身服务
 	var user user_models.UserModel
-	err = l.svcCtx.DB.Take(&user, "user_id = ?", identity.UserID(l.ctx)).Error
+	err = l.svcCtx.DB.Take(&user, "user_id = ?", req.UserID).Error
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询用户失败",
-			Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()},
+			Data: map[string]any{"userId": req.UserID, "err": err.Error()},
 		})
 		return nil, err
 	}

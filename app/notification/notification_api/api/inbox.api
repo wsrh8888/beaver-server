@@ -5,6 +5,7 @@ syntax = "v1"
 // 表2：收件箱（NotificationInbox）
 type (
 	getInboxByIdsReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		EventIDs []string `json:"eventIds"` // 必填
 	}
 	InboxItem {
@@ -28,6 +29,7 @@ type (
 // 删除通知：按事件ID删除单个通知
 type (
 	deleteNotificationReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		EventID string `json:"eventId"` // 通知事件ID
 	}
 	deleteNotificationRes {
@@ -36,7 +38,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: inbox
 )
 service notification {

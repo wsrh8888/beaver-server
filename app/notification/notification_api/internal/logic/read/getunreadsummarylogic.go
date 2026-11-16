@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 
 	"beaver/app/notification/notification_api/internal/svc"
@@ -52,7 +51,7 @@ func NewGetUnreadSummaryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq) (resp *types.GetUnreadSummaryRes, err error) {
 	resp = &types.GetUnreadSummaryRes{Total: 0, ByCat: []types.CategoryUnreadItem{}}
 
-	if identity.UserID(l.ctx) == "" {
+	if req.UserID == "" {
 		return resp, nil
 	}
 
@@ -72,7 +71,7 @@ func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq)
 		// 获取该分类的游标时间
 		var cursor notification_models.NotificationRead
 		err := l.svcCtx.DB.WithContext(l.ctx).
-			Where("user_id = ? AND category = ?", identity.UserID(l.ctx), category).
+			Where("user_id = ? AND category = ?", req.UserID, category).
 			First(&cursor).Error
 
 		var lastReadAt int64
@@ -85,7 +84,7 @@ func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq)
 		query := l.svcCtx.DB.WithContext(l.ctx).
 			Model(&notification_models.NotificationInbox{}).
 			Where("user_id = ? AND category = ? AND is_read = ? AND is_deleted = ?",
-				identity.UserID(l.ctx), category, false, false)
+				req.UserID, category, false, false)
 
 		// 如果有游标时间，只统计游标时间之后的未读通知
 		if lastReadAt > 0 {
@@ -95,7 +94,7 @@ func (l *GetUnreadSummaryLogic) GetUnreadSummary(req *types.GetUnreadSummaryReq)
 		if err = query.Count(&unreadCount).Error; err != nil && err != gorm.ErrRecordNotFound {
 			l.logger.Error(model.LogMsg{
 				Text: "统计通知未读数失败",
-				Data: map[string]any{"userId": identity.UserID(l.ctx), "category": category, "err": err.Error()},
+				Data: map[string]any{"userId": req.UserID, "category": category, "err": err.Error()},
 			})
 			return nil, err
 		}

@@ -27,7 +27,7 @@ import (
 	"fmt"
 
 	"beaver/app/message/message_rpc/internal/config"
-	"beaver/app/message/message_rpc/internal/logic"
+	"beaver/app/message/message_rpc/internal/logic/consumer"
 	conversationServer "beaver/app/message/message_rpc/internal/server/conversation"
 	messageServer "beaver/app/message/message_rpc/internal/server/message"
 	"beaver/app/message/message_rpc/internal/svc"
@@ -68,13 +68,13 @@ func main() {
 
 	// 启动 RocketMQ Consumer（agent_task 编排层 + agent_done 终稿落库）
 	if ctx.RocketMQ != nil {
-		agentTaskConsumer := logic.NewAgentTaskConsumerLogic(ctx)
+		agentTaskConsumer := consumer.NewAgentTaskConsumerLogic(ctx)
 		go func() {
 			if err := agentTaskConsumer.StartConsumer(); err != nil {
 				fmt.Printf("agent_task Consumer 启动失败: %v\n", err)
 			}
 		}()
-		agentDoneConsumer := logic.NewAgentDoneConsumerLogic(ctx)
+		agentDoneConsumer := consumer.NewAgentDoneConsumerLogic(ctx)
 		go func() {
 			if err := agentDoneConsumer.StartConsumer(); err != nil {
 				fmt.Printf("agent_done Consumer 启动失败: %v\n", err)

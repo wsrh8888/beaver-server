@@ -49,7 +49,7 @@ service asset {
 
 @server (
 	group: file
-	jwt: Auth
+	middleware: JwtS2s
 )
 service asset {
 	@doc "文件上传七牛云"
@@ -70,7 +70,7 @@ service asset {
 }
 
 // ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由 AuthGate 中间件区分。
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
 // 这里是「按记录维度」的文件台账读写，C 端上传走 multipart，两者不重叠。
 
 type (
@@ -162,7 +162,7 @@ type (
 
 @server (
 	group: file_machine
-	middleware: AuthGate
+	middleware: JwtS2s
 )
 service asset {
 	@doc "队间：登记文件记录"

@@ -22,7 +22,6 @@
 package logic
 
 import (
-	"beaver/common/identity"
 	"context"
 	"errors"
 
@@ -52,7 +51,7 @@ func NewValidListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ValidLi
 
 func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidListRes, err error) {
 	// 参数验证
-	if identity.UserID(l.ctx) == "" {
+	if req.UserID == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
 
@@ -71,7 +70,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			Limit: req.Limit,
 			Sort:  "created_at desc",
 		},
-		Where: l.svcCtx.DB.Where("send_user_id = ? or rev_user_id = ?", identity.UserID(l.ctx), identity.UserID(l.ctx)),
+		Where: l.svcCtx.DB.Where("send_user_id = ? or rev_user_id = ?", req.UserID, req.UserID),
 		// 移除Preload，微服务架构中通过RPC获取用户信息
 	})
 
@@ -96,7 +95,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			UserIdList: userIds,
 		})
 		if err != nil {
-			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": identity.UserID(l.ctx), "err": err.Error()}})
+			l.logger.Error(model.LogMsg{Text: "批量获取用户信息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 			// 不返回错误，继续处理，为没有用户信息的设置默认值
 		} else {
 			userInfoMap = userListResp.UserInfo
@@ -112,7 +111,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			CreatedAt: fv.CreatedAt.String(),
 		}
 
-		if fv.SendUserID == identity.UserID(l.ctx) {
+		if fv.SendUserID == req.UserID {
 			// 我是发起方
 			info.UserID = fv.RevUserID
 			if userInfo, exists := userInfoMap[fv.RevUserID]; exists && userInfo != nil {
@@ -124,7 +123,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 			}
 			info.Flag = "send"
 			info.Status = fv.RevStatus
-		} else if fv.RevUserID == identity.UserID(l.ctx) {
+		} else if fv.RevUserID == req.UserID {
 			// 我是接收方
 			info.UserID = fv.SendUserID
 			if userInfo, exists := userInfoMap[fv.SendUserID]; exists && userInfo != nil {
@@ -144,7 +143,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 		list = append(list, info)
 	}
 
-	l.logger.Info(model.LogMsg{Text: "获取好友验证列表成功", Data: map[string]interface{}{"userId": identity.UserID(l.ctx), "count": len(list)}})
+	l.logger.Info(model.LogMsg{Text: "获取好友验证列表成功", Data: map[string]interface{}{"userId": req.UserID, "count": len(list)}})
 	return &types.ValidListRes{
 		Count: count,
 		List:  list,

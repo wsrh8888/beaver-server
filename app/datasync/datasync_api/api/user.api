@@ -6,6 +6,7 @@ syntax = "v1"
 type (
 	// 第一阶段：获取变更摘要
 	GetSyncAllUsersReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Type   string `json:"type,optional"` // 类型：friends/group/all，不传或为空则同步所有相关用户
 		Since  int64  `json:"since,optional"` // 从这个时间戳之后开始同步，不传则同步所有
 	}
@@ -20,7 +21,7 @@ type (
 )
 
 @server (
-	jwt: Auth
+	middleware: JwtS2s
 	group: sync
 )
 service datasync {
