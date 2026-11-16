@@ -19,11 +19,18 @@
  * beaver-server-header-v1
  */
 
-// Package usertypeconst 存放 UserType 公共枚举，避免各域 import account_models。
+// Package usertypeconst 存放 UserType / Source 公共枚举，避免各域 import account_models。
 package usertypeconst
 
 const (
 	UserTypeNormal  int8 = 1 // 普通用户
 	UserTypeBot     int8 = 2 // 推送机器人（通知机器人）
 	UserTypeDigital int8 = 3 // 外接数字伙伴（智能体）
+)
+
+// 用户注册来源（account 域 user.source 的取值）
+const (
+	SourcePhone int32 = 1 // 手机号注册
+	SourceEmail int32 = 2 // 邮箱注册
+	SourceGroup int32 = 3 // 群内创建（机器人）
 )

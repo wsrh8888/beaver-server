@@ -417,6 +417,15 @@ PeerListConversationsRes {
 		Total int64                        `json:"total,optional"`
 		List  []PeerConversationDetailItem `json:"list,optional"`
 	}
+
+PeerGetConversationMemberIdsReq {
+		ConversationId string `json:"conversation_id,optional"`
+		ExcludeUserId  string `json:"exclude_user_id,optional"`
+	}
+
+PeerGetConversationMemberIdsRes {
+		UserIds []string `json:"user_ids,optional"`
+	}
 )
 
 type (
@@ -819,4 +828,8 @@ service message {
 	@doc "分页查会话"
 	@handler peerListConversations
 	post /beaver/api/chat/machine/v1/conversations (PeerListConversationsReq) returns (PeerListConversationsRes)
+
+	@doc "查会话成员 ID 列表"
+	@handler peerGetConversationMemberIds
+	post /beaver/api/chat/machine/v1/conversation_members (PeerGetConversationMemberIdsReq) returns (PeerGetConversationMemberIdsRes)
 }

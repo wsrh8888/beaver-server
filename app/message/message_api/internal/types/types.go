@@ -403,6 +403,15 @@ type PeerListConversationsRes struct {
 	List  []PeerConversationDetailItem `json:"list,optional"`
 }
 
+type PeerGetConversationMemberIdsReq struct {
+	ConversationId string `json:"conversation_id,optional"`
+	ExcludeUserId  string `json:"exclude_user_id,optional"`
+}
+
+type PeerGetConversationMemberIdsRes struct {
+	UserIds []string `json:"user_ids,optional"`
+}
+
 type PeerMarkdownMsg struct {
 	Content string `json:"content,optional"`
 	Title   string `json:"title,optional"`

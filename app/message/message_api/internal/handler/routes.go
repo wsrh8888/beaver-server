@@ -160,6 +160,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: chat_machine.PeerListConversationsHandler(serverCtx),
 				},
 				{
+					// 查会话成员 ID 列表
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/chat/machine/v1/conversation_members",
+					Handler: chat_machine.PeerGetConversationMemberIdsHandler(serverCtx),
+				},
+				{
 					// 按会话+消息 ID 取单条消息
 					Method:  http.MethodPost,
 					Path:    "/beaver/api/chat/machine/v1/get_message",
