@@ -27,6 +27,56 @@
 | 本仓 → 独立产品仓 | `remote/<x>`（S2S） |
 | 独立仓 → 本仓 | S2S 打本仓业务 API |
 
+### Remote / S2S（强制，对齐仓根 `remote/`）
+
+跨仓出站 **只叫 remote / S2S，不叫 rpc**。结构以本仓 `beaver-server/remote` + `types/remote` 为范本；各独立仓（open/backend/…）同样落仓根 `remote/`、`types/remote/`、`commonconfig`。
+
+```text
+remote/
+  <peer>/                 # 一个对端产品一个包：ai / open / doc / moment / …
+    enter.go              # Init(clientID, clientSecret)；装配本 peer Client
+    remote.go             # Post/Get/Delete + 换票缓存（plumbing）
+    token.go              # GetTokenApi：打对端 /machine/v1/token
+    <biz>.go              # 业务出站方法（每能力一函数）
+types/remote/
+  token.go                # 换票共用 TokenRequest / TokenResponse
+  <peer>/
+    *.go                  # 该 peer 的 Req/Res（本仓自持，不 import 对端模块）
+commonconfig/             # XxxUrl / RemoteProxy：出站域名与凭据注册表
+```
+
+硬性：
+
+1. 只打对方正常六段业务路径或 `machine` 面；禁止 `/internal/*` 门面；禁止跨仓 etcd gRPC。
+2. Req/Res 只放 `types/remote/<peer>`；禁止依赖对端业务包类型。
+3. 每个 peer 自带 `remote.go` plumbing，**不**抽全仓统一 RemoteClient 缠死各线路。
+4. `Init` 只装配本 peer 凭据；业务侧直接 `ai.GetAgentApi(...)`，调用行不散落换票。
+5. 出站鉴权：`Authorization: Bearer`（client_credentials）；静态 InternalToken 仅对仍声明该方式的对端。
+6. remote **不重试、不聚合、不缓存业务结果**；只缓存换票（含过期 skew）。
+7. **logic 调 remote**；handler 不直接调 remote。
+
+#### 出站方法命名（强制 `Api` 后缀）
+
+remote 包对外业务函数名必须以 **`Api` 结尾**，与本仓 logic / rpc / DB 方法区分：
+
+| 正确 | 错误 |
+|---|---|
+| `GetDocApi` | `GetDoc` |
+| `GetDocContentApi` | `FetchDocContent` |
+| `GetAgentApi` | `GetAgent` |
+| `GetTokenApi` | `GetToken` / `Exchange` |
+
+- 通道工具（`Post` / `Get` / `Delete` / `authHeader`）不加 `Api`。
+- 业务方法只做：`commonconfig.XxxUrl + 完整路径` + 调 Post/Get/Delete；路径写全，调用方不拼 URL。
+- 新建一律 `XxxApi`；改存量 remote 时同步改名（含所有调用方）。
+
+```go
+// remote/doc/content.go
+func GetDocApi(ctx context.Context, header http.Header, body *doctype.GetDocReq) (*doctype.GetDocRes, error) {
+	return Post[doctype.GetDocRes](ctx, commonconfig.DocUrl+"/beaver-doc/api/doc/machine/v1/get_doc", header, body)
+}
+```
+
 ### 领域目录（强制）
 
 每个业务域目录下**只允许**这三类（命名 `xx_api` / `xx_models` / `xx_rpc`）：
