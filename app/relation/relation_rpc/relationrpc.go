@@ -30,7 +30,7 @@ import (
 	friendServer "beaver/app/relation/relation_rpc/internal/server/friend"
 	groupServer "beaver/app/relation/relation_rpc/internal/server/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -51,8 +51,8 @@ func main() {
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		// goctl multiple 模式：一个 proto（relation.proto）、一个进程、一个 etcd 注册，
 		// 同一个 grpc server 挂载 friend + group 两套 service（server/logic/client 按子域分目录）。
-		types.RegisterFriendServer(grpcServer, friendServer.NewFriendServer(ctx))
-		types.RegisterGroupServer(grpcServer, groupServer.NewGroupServer(ctx))
+		pb.RegisterFriendServer(grpcServer, friendServer.NewFriendServer(ctx))
+		pb.RegisterGroupServer(grpcServer, groupServer.NewGroupServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

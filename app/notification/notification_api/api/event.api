@@ -35,7 +35,7 @@ type (
 service notification {
 	@doc "按ID拉取通知事件明细（数据库同步）"
 	@handler getEventsByIds
-	post /beaver/api/notification/event/v1/getEventsByIds (getEventsByIdsReq) returns (getEventsByIdsRes)
+	post /beaver/api/notification/event/v1/get_events_by_ids (getEventsByIdsReq) returns (getEventsByIdsRes)
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template

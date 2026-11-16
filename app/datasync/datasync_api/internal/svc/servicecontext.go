@@ -22,13 +22,13 @@
 package svc
 
 import (
-	accttypes "beaver/app/account/account_rpc/types"
-	assettypes "beaver/app/asset/asset_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
+	assettypes "beaver/app/asset/asset_rpc/pb"
 	"beaver/app/datasync/datasync_api/internal/config"
 	"beaver/app/datasync/datasync_api/internal/middleware"
-	"beaver/app/message/message_rpc/types/chat_rpc"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
-	"beaver/app/relation/relation_rpc/types"
+	chat_rpc "beaver/app/message/message_rpc/pb"
+	"beaver/app/notification/notification_rpc/notification"
+	"beaver/app/relation/relation_rpc/pb"
 	"beaver/commonconfig"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"
@@ -46,13 +46,13 @@ type ServiceContext struct {
 	Config          config.Config
 	DB              *gorm.DB
 	Redis           *redis.Client
-	FriendRpc       types.FriendClient
-	GroupRpc        types.GroupClient
+	FriendRpc       pb.FriendClient
+	GroupRpc        pb.GroupClient
 	UserRpc         accttypes.UserClient
 	ConversationRpc chat_rpc.ConversationClient
 	MessageRpc      chat_rpc.MessageClient
 	EmojiRpc        assettypes.EmojiClient
-	NotificationRpc notification_rpc.NotificationClient
+	NotificationRpc notification.Notification
 	// JwtS2s 由 .api 的 @server 声明接线，goctl 生成 WithMiddlewares 注入。
 	JwtS2s rest.Middleware
 }
@@ -71,13 +71,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:          c,
 		DB:              mysqlDb,
 		Redis:           client,
-		FriendRpc:       types.NewFriendClient(zrpc.MustNewClient(c.FriendRpc, zrpc.WithTimeout(time.Duration(c.FriendRpc.Timeout)*time.Millisecond)).Conn()),
-		GroupRpc:        types.NewGroupClient(zrpc.MustNewClient(c.GroupRpc, zrpc.WithTimeout(time.Duration(c.GroupRpc.Timeout)*time.Millisecond)).Conn()),
+		FriendRpc:       pb.NewFriendClient(zrpc.MustNewClient(c.FriendRpc, zrpc.WithTimeout(time.Duration(c.FriendRpc.Timeout)*time.Millisecond)).Conn()),
+		GroupRpc:        pb.NewGroupClient(zrpc.MustNewClient(c.GroupRpc, zrpc.WithTimeout(time.Duration(c.GroupRpc.Timeout)*time.Millisecond)).Conn()),
 		UserRpc:         accttypes.NewUserClient(zrpc.MustNewClient(c.UserRpc, zrpc.WithTimeout(time.Duration(c.UserRpc.Timeout)*time.Millisecond)).Conn()),
 		ConversationRpc: chat_rpc.NewConversationClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		MessageRpc:      chat_rpc.NewMessageClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:        assettypes.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
-		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
+		NotificationRpc: notification.NewNotification(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond))),
 		JwtS2s:          middleware.NewJwtS2sMiddleware(c).Handle,
 	}
 }

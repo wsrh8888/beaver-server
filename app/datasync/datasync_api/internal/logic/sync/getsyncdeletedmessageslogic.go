@@ -24,11 +24,10 @@ package logic
 import (
 	"context"
 	"errors"
-	"time"
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/message/message_models"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -49,29 +48,18 @@ func NewGetSyncDeletedMessagesLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *GetSyncDeletedMessagesLogic) GetSyncDeletedMessages(req *types.GetSyncDeletedMessagesReq) (resp *types.GetSyncDeletedMessagesRes, err error) {
-	var deletes []message_models.ChatUserDelete
-
-	// 1. 查询该用户在 Since 之后的删除记录
-	query := l.svcCtx.DB.Model(&message_models.ChatUserDelete{}).Where("user_id = ?", req.UserID)
-	if req.Since > 0 {
-		// 统一使用 Unix 时间戳进行同步比对
-		query = query.Where("UNIX_TIMESTAMP(created_at) > ?", req.Since)
-	}
-
-	err = query.Find(&deletes).Error
+	// 删除记录属 message 库，统一走 message_rpc，不再直连其表
+	rpcResp, err := l.svcCtx.MessageRpc.GetSyncDeletedMessages(l.ctx, &chat_rpc.GetSyncDeletedMessagesReq{
+		UserId: req.UserID,
+		Since:  req.Since,
+	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "同步已删除消息失败", Data: map[string]any{"userId": req.UserID, "err": err.Error()}})
 		return nil, errors.New("同步失败")
 	}
 
-	// 2. 提取消息ID列表
-	msgIDs := make([]string, 0, len(deletes))
-	for _, d := range deletes {
-		msgIDs = append(msgIDs, d.MessageID)
-	}
-
 	return &types.GetSyncDeletedMessagesRes{
-		MessageIDs:      msgIDs,
-		ServerTimestamp: time.Now().Unix(),
+		MessageIDs:      rpcResp.MessageIds,
+		ServerTimestamp: rpcResp.ServerTimestamp,
 	}, nil
 }

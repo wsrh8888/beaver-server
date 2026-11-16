@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	friend_models "beaver/app/relation/relation_models/friend"

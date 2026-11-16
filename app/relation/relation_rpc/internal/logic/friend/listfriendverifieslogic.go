@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -44,19 +44,19 @@ func NewListFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	return &ListFriendVerifiesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_friend_verifies", ctx)}
 }
 
-func (l *ListFriendVerifiesLogic) ListFriendVerifies(in *types.ListFriendVerifiesReq) (*types.ListFriendVerifiesRes, error) {
+func (l *ListFriendVerifiesLogic) ListFriendVerifies(in *pb.ListFriendVerifiesReq) (*pb.ListFriendVerifiesRes, error) {
 	if in.VerifyId != "" {
 		v, err := findFriendVerify(l.svcCtx.DB, in.VerifyId)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &types.ListFriendVerifiesRes{}, nil
+			return &pb.ListFriendVerifiesRes{}, nil
 		}
 		if err != nil {
 			l.logger.Error(model.LogMsg{Text: "查询好友验证记录失败", Data: map[string]any{"verifyId": in.VerifyId, "err": err.Error()}})
 			return nil, err
 		}
-		return &types.ListFriendVerifiesRes{
+		return &pb.ListFriendVerifiesRes{
 			Total: 1,
-			List:  []*types.FriendVerifyItem{toFriendVerifyItem(*v)},
+			List:  []*pb.FriendVerifyItem{toFriendVerifyItem(*v)},
 		}, nil
 	}
 
@@ -104,9 +104,9 @@ func (l *ListFriendVerifiesLogic) ListFriendVerifies(in *types.ListFriendVerifie
 		return nil, err
 	}
 
-	items := make([]*types.FriendVerifyItem, 0, len(list))
+	items := make([]*pb.FriendVerifyItem, 0, len(list))
 	for _, v := range list {
 		items = append(items, toFriendVerifyItem(v))
 	}
-	return &types.ListFriendVerifiesRes{Total: total, List: items}, nil
+	return &pb.ListFriendVerifiesRes{Total: total, List: items}, nil
 }

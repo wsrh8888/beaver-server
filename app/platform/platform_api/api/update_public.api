@@ -1,7 +1,9 @@
 syntax = "v1"
 
 // ==================== 版本升级公开接口（无需认证，公开访问）====================
-type ReportVersionReq {
+
+type (
+ReportVersionReq {
 	DeviceID   string `header:"deviceId"`
 	Version    string `header:"version"`
 	AppID      string `json:"appId"`
@@ -9,9 +11,11 @@ type ReportVersionReq {
 	ArchID     uint   `json:"archId"`
 }
 
-type ReportVersionRes {}
+ReportVersionRes {}
+)
 
-type GetLatestVersionReq {
+type (
+GetLatestVersionReq {
 	DeviceID   string `header:"deviceId"`
 	AppID      string `json:"appId"`
 	PlatformID uint   `json:"platformId"`
@@ -19,7 +23,7 @@ type GetLatestVersionReq {
 	Version    string `header:"version"`
 }
 
-type GetLatestVersionRes {
+GetLatestVersionRes {
 	HasUpdate      bool   `json:"hasUpdate"`
 	ForceUpdate    bool   `json:"forceUpdate"`
 	ArchitectureID uint   `json:"architectureId,omitempty"`
@@ -30,6 +34,7 @@ type GetLatestVersionRes {
 	Description    string `json:"description,omitempty"`
 	ReleaseNotes   string `json:"releaseNotes,omitempty"`
 }
+)
 
 @server (
 	group: update_public

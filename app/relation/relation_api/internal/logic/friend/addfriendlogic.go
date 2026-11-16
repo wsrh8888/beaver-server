@@ -28,11 +28,11 @@ import (
 	"fmt"
 	"sort"
 
-	user_models "beaver/app/account/account_models/user"
-	accttypes "beaver/app/account/account_rpc/types"
-	"beaver/app/message/message_rpc/types/chat_rpc"
-	"beaver/app/notification/notification_models"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	usertypeconst "beaver/common/const/usertypeconst"
+	accttypes "beaver/app/account/account_rpc/pb"
+	chat_rpc "beaver/app/message/message_rpc/pb"
+	notifyconst "beaver/common/const/notifyconst"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	friend_models "beaver/app/relation/relation_models/friend"
@@ -99,7 +99,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errors.New("用户不存在")
 	}
 	// 数字伙伴没有人点同意，搜索到了就直接成为好友，并建好私聊。
-	if friendInfo.UserInfo.UserType == int32(user_models.UserTypeDigital) {
+	if friendInfo.UserInfo.UserType == int32(usertypeconst.UserTypeDigital) {
 		return l.addDigitalFriend(req)
 	}
 
@@ -151,11 +151,11 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 			"source":   verifyModel.Source,
 		})
 		_, err := l.svcCtx.NotifyRpc.PushEvent(context.Background(), &notification_rpc.PushEventReq{
-			EventType:   notification_models.EventTypeFriendRequest,
-			Category:    notification_models.CategorySocial,
+			EventType:   notifyconst.EventTypeFriendRequest,
+			Category:    notifyconst.CategorySocial,
 			FromUserId:  req.UserID,
 			TargetId:    verifyModel.VerifyID,
-			TargetType:  notification_models.TargetTypeUser,
+			TargetType:  notifyconst.TargetTypeUser,
 			PayloadJson: string(payload),
 			ToUserIds:   []string{req.FriendID},
 			DedupHash:   verifyModel.VerifyID,

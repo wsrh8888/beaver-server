@@ -27,7 +27,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -48,12 +48,12 @@ func NewUserUpdateDisplayLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *UserUpdateDisplayLogic) UserUpdateDisplay(in *types.UserUpdateDisplayReq) (*types.UserUpdateDisplayRes, error) {
+func (l *UserUpdateDisplayLogic) UserUpdateDisplay(in *pb.UserUpdateDisplayReq) (*pb.UserUpdateDisplayRes, error) {
 	if in.UserId == "" {
 		return nil, errors.New("userId 不能为空")
 	}
 	if in.NickName == "" && in.Avatar == "" {
-		return &types.UserUpdateDisplayRes{}, nil
+		return &pb.UserUpdateDisplayRes{}, nil
 	}
 
 	var user user_models.UserModel
@@ -95,5 +95,5 @@ func (l *UserUpdateDisplayLogic) UserUpdateDisplay(in *types.UserUpdateDisplayRe
 		Data: map[string]interface{}{"userId": in.UserId, "version": version},
 	})
 
-	return &types.UserUpdateDisplayRes{Version: version}, nil
+	return &pb.UserUpdateDisplayRes{Version: version}, nil
 }

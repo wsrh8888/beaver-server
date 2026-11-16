@@ -163,7 +163,7 @@ type LogoutRes struct {
 }
 
 type OAuthCodeLoginReq struct {
-	AppID    string `json:"appId"`
+	OauthId  string `json:"oauthId"`
 	Code     string `json:"code"`
 	DeviceID string `header:"deviceId"`
 	ClientIP string `header:"clientIp,optional"`

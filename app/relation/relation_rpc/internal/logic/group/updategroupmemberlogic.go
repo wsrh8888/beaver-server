@@ -28,7 +28,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewUpdateGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *UpdateGroupMemberLogic) UpdateGroupMember(in *types.UpdateGroupMemberReq) (*types.UpdateGroupMemberRes, error) {
+func (l *UpdateGroupMemberLogic) UpdateGroupMember(in *pb.UpdateGroupMemberReq) (*pb.UpdateGroupMemberRes, error) {
 	var member group_models.GroupMemberModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&member).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -72,7 +72,7 @@ func (l *UpdateGroupMemberLogic) UpdateGroupMember(in *types.UpdateGroupMemberRe
 		updates["muted_until"] = mutedUntil
 	}
 	if len(updates) == 0 {
-		return &types.UpdateGroupMemberRes{}, nil
+		return &pb.UpdateGroupMemberRes{}, nil
 	}
 
 	memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", member.GroupID)
@@ -101,5 +101,5 @@ func (l *UpdateGroupMemberLogic) UpdateGroupMember(in *types.UpdateGroupMemberRe
 
 	l.logger.Info(model.LogMsg{Text: "更新群成员成功", Data: map[string]interface{}{"id": in.Id, "groupId": member.GroupID, "changeType": changeType, "memberVersion": memberVersion}})
 
-	return &types.UpdateGroupMemberRes{}, nil
+	return &pb.UpdateGroupMemberRes{}, nil
 }

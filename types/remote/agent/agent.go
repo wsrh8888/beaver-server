@@ -64,8 +64,9 @@ type SendMessageReq struct {
 	TargetDeviceId string `json:"targetDeviceId"`
 	SystemPrompt   string `json:"systemPrompt"`
 	DigitalId      string `json:"digitalId"`
-	Module         string `json:"module"`
-	AppId          string `json:"appId"`
+	// 数字伙伴绑定的 Agent；非空时 AI 侧按 agentId 取人设/模型/工具，SystemPrompt 传空。
+	AgentId string `json:"agentId"`
+	Module  string `json:"module"`
 }
 
 // ListConversationsReq 对齐 agent_rpc.proto 的 ListConversationsReq（since: version 游标）。

@@ -26,10 +26,10 @@ import (
 	"errors"
 	"fmt"
 
-	"beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	"beaver/app/message/message_rpc/internal/svc"
 	chatrpcutils "beaver/app/message/message_rpc/internal/utils"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"

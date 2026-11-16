@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewUpdateFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 	return &UpdateFriendsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_friends", ctx)}
 }
 
-func (l *UpdateFriendsLogic) UpdateFriends(in *types.UpdateFriendsReq) (*types.UpdateFriendsRes, error) {
+func (l *UpdateFriendsLogic) UpdateFriends(in *pb.UpdateFriendsReq) (*pb.UpdateFriendsRes, error) {
 	switch in.Action {
 	case friendActionHardDelete:
 		return l.hardDelete(in.RelationIds)
@@ -60,7 +60,7 @@ func (l *UpdateFriendsLogic) UpdateFriends(in *types.UpdateFriendsReq) (*types.U
 	}
 }
 
-func (l *UpdateFriendsLogic) hardDelete(relationIDs []string) (*types.UpdateFriendsRes, error) {
+func (l *UpdateFriendsLogic) hardDelete(relationIDs []string) (*pb.UpdateFriendsRes, error) {
 	var ids []uint
 	for _, rid := range relationIDs {
 		f, err := findFriend(l.svcCtx.DB, rid)
@@ -70,17 +70,17 @@ func (l *UpdateFriendsLogic) hardDelete(relationIDs []string) (*types.UpdateFrie
 		ids = append(ids, f.Id)
 	}
 	if len(ids) == 0 {
-		return &types.UpdateFriendsRes{}, nil
+		return &pb.UpdateFriendsRes{}, nil
 	}
 	if err := l.svcCtx.DB.Unscoped().Where("id IN ?", ids).Delete(&friend_models.FriendModel{}).Error; err != nil {
 		l.logger.Error(model.LogMsg{Text: "删除好友失败", Data: map[string]any{"ids": ids, "err": err.Error()}})
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "删除好友成功", Data: map[string]interface{}{"count": len(ids)}})
-	return &types.UpdateFriendsRes{AffectedCount: int64(len(ids))}, nil
+	return &pb.UpdateFriendsRes{AffectedCount: int64(len(ids))}, nil
 }
 
-func (l *UpdateFriendsLogic) restore(relationIDs []string) (*types.UpdateFriendsRes, error) {
+func (l *UpdateFriendsLogic) restore(relationIDs []string) (*pb.UpdateFriendsRes, error) {
 	var affected int64
 	for _, rid := range relationIDs {
 		f, err := findFriend(l.svcCtx.DB, rid)
@@ -102,5 +102,5 @@ func (l *UpdateFriendsLogic) restore(relationIDs []string) (*types.UpdateFriends
 		affected++
 	}
 	l.logger.Info(model.LogMsg{Text: "恢复好友成功", Data: map[string]interface{}{"affected": affected}})
-	return &types.UpdateFriendsRes{AffectedCount: affected}, nil
+	return &pb.UpdateFriendsRes{AffectedCount: affected}, nil
 }

@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"beaver/app/platform/platform_models/workbench"
-	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	platform_rpc "beaver/app/platform/platform_rpc/pb"
 )
 
 func toProtoEntryConfig(cfg workbench_models.WorkbenchEntryConfig) *platform_rpc.WorkbenchEntryConfig {

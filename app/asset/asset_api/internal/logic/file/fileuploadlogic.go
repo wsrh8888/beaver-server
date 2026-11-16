@@ -46,7 +46,7 @@ func NewFileUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUp
 	}
 }
 
-func (l *FileUploadLogic) FileUpload(req *types.FileReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileRes, error) {
+func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileUploadRes, error) {
 	// 按配置选择默认存储后端
 	store, source, err := common.DefaultStorage(l.svcCtx)
 	if err != nil {

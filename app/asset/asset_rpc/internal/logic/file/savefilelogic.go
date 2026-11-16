@@ -29,7 +29,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -48,10 +48,10 @@ func NewSaveFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveFile
 	return &SaveFileLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("save_file", ctx)}
 }
 
-func (l *SaveFileLogic) SaveFile(in *types.SaveFileReq) (*types.SaveFileRes, error) {
+func (l *SaveFileLogic) SaveFile(in *pb.SaveFileReq) (*pb.SaveFileRes, error) {
 	var existing file_models.FileModel
 	if err := l.svcCtx.DB.Take(&existing, "md5 = ?", in.Md5).Error; err == nil {
-		return &types.SaveFileRes{FileKey: existing.FileKey}, nil
+		return &pb.SaveFileRes{FileKey: existing.FileKey}, nil
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		l.logger.Error(model.LogMsg{
 			Text: "按md5查重文件失败",
@@ -111,5 +111,5 @@ func (l *SaveFileLogic) SaveFile(in *types.SaveFileReq) (*types.SaveFileRes, err
 		},
 	})
 
-	return &types.SaveFileRes{FileKey: fileKey}, nil
+	return &pb.SaveFileRes{FileKey: fileKey}, nil
 }

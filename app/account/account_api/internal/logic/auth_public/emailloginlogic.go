@@ -32,7 +32,7 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	auth_models "beaver/app/account/account_models/auth"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/common/middleware/ua"
 	"beaver/utils/authlock"
 	beaverlog "beaver/utils/beaverlog"

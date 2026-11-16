@@ -1,7 +1,7 @@
 syntax = "proto3"; //指定proto版本
 package chat_rpc;
 
-option go_package = "./chat_rpc";
+option go_package = "./pb";
 
 
 // 定义TextMsg消息
@@ -431,6 +431,27 @@ message GetSyncMessageMediasRes {
   int64 server_timestamp = 2; // int64 服务端同步时间戳（秒）
 }
 
+// 同步：用户主动删除的消息ID列表（原 datasync 直连 message 库，改为走本 rpc）
+message GetSyncDeletedMessagesReq {
+  string user_id = 1; // 用户ID
+  int64 since = 2; // 从这个 Unix 秒时间戳之后开始同步
+}
+
+message GetSyncDeletedMessagesRes {
+  repeated string message_ids = 1; // 已删除的消息ID列表
+  int64 server_timestamp = 2; // 服务端同步时间戳（秒）
+}
+
+// 会话成员查询（原 ws 兜底直连 message 库，改为走本 rpc）
+message GetConversationMemberIDsReq {
+  string conversation_id = 1; // 会话ID
+  string exclude_user_id = 2; // 排除的用户ID（通常是当前用户）
+}
+
+message GetConversationMemberIDsRes {
+  repeated string user_ids = 1; // 会话成员用户ID列表
+}
+
 // 定义chat_rpc服务
 // 会话域：会话生命周期、成员、版本、通知
 service conversation {
@@ -446,6 +467,7 @@ service conversation {
     rpc DissolveConversation(DissolveConversationReq) returns (DissolveConversationRes); //解散会话
     rpc SendNotificationMessage(SendNotificationMessageReq) returns (SendNotificationMessageRes); //发送通知消息（会话内的通知，如：xxx加入了群聊、xxx创建了群等）
     rpc ListConversations(ListConversationsReq) returns (ListConversationsRes); // 会话查询：按用户列出会话及摘要
+    rpc GetConversationMemberIDs(GetConversationMemberIDsReq) returns (GetConversationMemberIDsRes); // 查询会话成员ID列表（可排除指定用户）
 }
 
 // 消息域：消息收发、查询、媒体同步
@@ -455,6 +477,7 @@ service message {
     rpc GetSyncMessageMedias(GetSyncMessageMediasReq) returns (GetSyncMessageMediasRes); //同步消息媒体状态（语音已听等）
     rpc ListChatMessages(ListChatMessagesReq) returns (ListChatMessagesRes);
     rpc UpdateChatMessages(UpdateChatMessagesReq) returns (UpdateChatMessagesRes);
+    rpc GetSyncDeletedMessages(GetSyncDeletedMessagesReq) returns (GetSyncDeletedMessagesRes); // 同步用户删除的消息ID
 }
 
-// goctl rpc protoc chat_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. -m
+// goctl rpc protoc chat_rpc.proto --go_out=. --go-grpc_out=. --zrpc_out=. -m

@@ -25,10 +25,10 @@ import (
 	"context"
 	"errors"
 
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	"beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	"beaver/common/list_query"
 	"beaver/common/models"
 	"beaver/common/models/ctype"

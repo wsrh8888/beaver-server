@@ -27,8 +27,8 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	"beaver/app/message/message_models"
-	relationtypes "beaver/app/relation/relation_rpc/types"
+	message_models "beaver/app/message/message_models/chat"
+	relationtypes "beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"

@@ -28,7 +28,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

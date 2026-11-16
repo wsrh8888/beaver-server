@@ -48,79 +48,79 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 批量获取用户收藏的表情记录详情（数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/collects-by-ids",
+					Path:    "/beaver/api/emoji/emoji/v1/collects_by_ids",
 					Handler: emoji.GetEmojiCollectsByIdsHandler(serverCtx),
 				},
 				{
 					// 批量获取表情详情（数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/emojis-by-ids",
+					Path:    "/beaver/api/emoji/emoji/v1/emojis_by_ids",
 					Handler: emoji.GetEmojisByIdsHandler(serverCtx),
 				},
 				{
 					// 收藏或者取消收藏表情
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/favoriteEmoji",
+					Path:    "/beaver/api/emoji/emoji/v1/favorite_emoji",
 					Handler: emoji.UpdateFavoriteEmojiHandler(serverCtx),
 				},
 				{
 					// 获取用户收藏的表情列表
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/favoriteList",
+					Path:    "/beaver/api/emoji/emoji/v1/favorite_list",
 					Handler: emoji.GetEmojisListHandler(serverCtx),
 				},
 				{
 					// 获取用户收藏的表情包列表
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/favoritePackageList",
+					Path:    "/beaver/api/emoji/emoji/v1/favorite_package_list",
 					Handler: emoji.GetUserFavoritePackagesHandler(serverCtx),
 				},
 				{
 					// 按ID批量查询表情基础信息（数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/getEmojisByUuids",
+					Path:    "/beaver/api/emoji/emoji/v1/get_emojis_by_uuids",
 					Handler: emoji.GetEmojisByUuidsHandler(serverCtx),
 				},
 				{
 					// 批量获取用户收藏的表情包记录详情（数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/package-collects-by-ids",
+					Path:    "/beaver/api/emoji/emoji/v1/package_collects_by_ids",
 					Handler: emoji.GetEmojiPackageCollectsByIdsHandler(serverCtx),
 				},
 				{
 					// 批量获取表情包内容详情（数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/package-contents-by-package-ids",
+					Path:    "/beaver/api/emoji/emoji/v1/package_contents_by_package_ids",
 					Handler: emoji.GetEmojiPackageContentsByPackageIdsHandler(serverCtx),
 				},
 				{
 					// 批量获取表情包内容详情（通过relationIds，数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/package-contents-by-relation-ids",
+					Path:    "/beaver/api/emoji/emoji/v1/package_contents_by_relation_ids",
 					Handler: emoji.GetEmojiPackageContentsByRelationIdsHandler(serverCtx),
 				},
 				{
 					// 收藏或取消收藏表情包
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/packageFavorite",
+					Path:    "/beaver/api/emoji/emoji/v1/package_favorite",
 					Handler: emoji.UpdateFavoriteEmojiPackageHandler(serverCtx),
 				},
 				{
 					// 获取表情包详情
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/packageInfo",
+					Path:    "/beaver/api/emoji/emoji/v1/package_info",
 					Handler: emoji.GetEmojiPackageDetailHandler(serverCtx),
 				},
 				{
 					// 获取表情包列表
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/packageList",
+					Path:    "/beaver/api/emoji/emoji/v1/package_list",
 					Handler: emoji.GetEmojiPackagesHandler(serverCtx),
 				},
 				{
 					// 批量获取表情包详情（数据库同步）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/emoji/emoji/v1/packages-by-ids",
+					Path:    "/beaver/api/emoji/emoji/v1/packages_by_ids",
 					Handler: emoji.GetEmojiPackagesByIdsHandler(serverCtx),
 				},
 			}...,
@@ -195,19 +195,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 文件上传本地
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/file/file/v1/uploadLocal",
+					Path:    "/beaver/api/file/file/v1/upload_local",
 					Handler: file.FileUploadLocalHandler(serverCtx),
 				},
 				{
 					// 文件上传MinIO
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/file/file/v1/uploadMinio",
+					Path:    "/beaver/api/file/file/v1/upload_minio",
 					Handler: file.FileUploadMinioHandler(serverCtx),
 				},
 				{
 					// 文件上传七牛云
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/file/file/v1/uploadQiniu",
+					Path:    "/beaver/api/file/file/v1/upload_qiniu",
 					Handler: file.FileUploadQiniuHandler(serverCtx),
 				},
 			}...,

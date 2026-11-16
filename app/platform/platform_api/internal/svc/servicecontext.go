@@ -25,7 +25,7 @@ import (
 	"errors"
 
 	"beaver/app/asset/asset_rpc/client/file"
-	assettypes "beaver/app/asset/asset_rpc/types"
+	assettypes "beaver/app/asset/asset_rpc/pb"
 	"beaver/app/platform/platform_api/internal/config"
 	"beaver/app/platform/platform_api/internal/middleware"
 	platformcli "beaver/app/platform/platform_rpc/platform"

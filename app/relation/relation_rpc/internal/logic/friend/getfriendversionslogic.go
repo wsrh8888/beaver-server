@@ -26,7 +26,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,7 +45,7 @@ func NewGetFriendVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *GetFriendVersionsLogic) GetFriendVersions(in *types.GetFriendVersionsReq) (*types.GetFriendVersionsRes, error) {
+func (l *GetFriendVersionsLogic) GetFriendVersions(in *pb.GetFriendVersionsReq) (*pb.GetFriendVersionsRes, error) {
 	// 查询用户相关的所有好友关系（作为发送者或接收者，且未删除）
 	var friends []friend_models.FriendModel
 	query := l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = ?",
@@ -65,13 +65,13 @@ func (l *GetFriendVersionsLogic) GetFriendVersions(in *types.GetFriendVersionsRe
 	l.logger.Info(model.LogMsg{Text: "查询用户好友版本信息", Data: map[string]interface{}{"userId": in.UserId, "count": len(friends)}})
 
 	// 转换为响应格式
-	var friendVersions []*types.GetFriendVersionsRes_FriendVersion
+	var friendVersions []*pb.GetFriendVersionsRes_FriendVersion
 	for _, friend := range friends {
-		friendVersions = append(friendVersions, &types.GetFriendVersionsRes_FriendVersion{
+		friendVersions = append(friendVersions, &pb.GetFriendVersionsRes_FriendVersion{
 			FriendId: friend.FriendID, // 使用数据库记录的ID作为唯一标识符
 			Version:  friend.Version,
 		})
 	}
 
-	return &types.GetFriendVersionsRes{FriendVersions: friendVersions}, nil
+	return &pb.GetFriendVersionsRes{FriendVersions: friendVersions}, nil
 }

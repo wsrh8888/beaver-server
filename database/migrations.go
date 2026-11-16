@@ -23,13 +23,13 @@ package database
 
 import (
 	auth_models "beaver/app/account/account_models/auth"
-	"beaver/app/message/message_models"
-	"beaver/app/datasync/datasync_models"
+	message_models "beaver/app/message/message_models/chat"
+	datasync_models "beaver/app/datasync/datasync_models/datasync"
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/relation/relation_models/friend"
 	group_models "beaver/app/relation/relation_models/group"
-	"beaver/app/notification/notification_models"
+	notification_models "beaver/app/notification/notification_models/notification"
 	"beaver/app/platform/platform_models/feedback"
 	"beaver/app/platform/platform_models/track"
 	"beaver/app/platform/platform_models/update"

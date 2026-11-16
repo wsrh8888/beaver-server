@@ -28,7 +28,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,9 +47,9 @@ func NewGetGroupJoinRequestsListByIdsLogic(ctx context.Context, svcCtx *svc.Serv
 	}
 }
 
-func (l *GetGroupJoinRequestsListByIdsLogic) GetGroupJoinRequestsListByIds(in *types.GetGroupJoinRequestsListByIdsReq) (*types.GetGroupJoinRequestsListByIdsRes, error) {
+func (l *GetGroupJoinRequestsListByIdsLogic) GetGroupJoinRequestsListByIds(in *pb.GetGroupJoinRequestsListByIdsReq) (*pb.GetGroupJoinRequestsListByIdsRes, error) {
 	if len(in.GroupIDs) == 0 {
-		return &types.GetGroupJoinRequestsListByIdsRes{Requests: []*types.GroupJoinRequestListById{}}, nil
+		return &pb.GetGroupJoinRequestsListByIdsRes{Requests: []*pb.GroupJoinRequestListById{}}, nil
 	}
 
 	// 查询指定群组ID列表中的入群申请
@@ -70,9 +70,9 @@ func (l *GetGroupJoinRequestsListByIdsLogic) GetGroupJoinRequestsListByIds(in *t
 	l.logger.Info(model.LogMsg{Text: "批量查询入群申请", Data: map[string]interface{}{"count": len(requestsData)}})
 
 	// 转换为响应格式
-	var requests []*types.GroupJoinRequestListById
+	var requests []*pb.GroupJoinRequestListById
 	for _, request := range requestsData {
-		requests = append(requests, &types.GroupJoinRequestListById{
+		requests = append(requests, &pb.GroupJoinRequestListById{
 			RequestID: fmt.Sprintf("%d", request.Id), // 使用主键Id作为RequestID
 			GroupID:   request.GroupID,
 			UserID:    request.ApplicantUserID,
@@ -83,5 +83,5 @@ func (l *GetGroupJoinRequestsListByIdsLogic) GetGroupJoinRequestsListByIds(in *t
 		})
 	}
 
-	return &types.GetGroupJoinRequestsListByIdsRes{Requests: requests}, nil
+	return &pb.GetGroupJoinRequestsListByIdsRes{Requests: requests}, nil
 }

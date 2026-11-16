@@ -26,7 +26,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	"beaver/core/coreonline"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -49,7 +49,7 @@ func NewListUserDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 	}
 }
 
-func (l *ListUserDevicesLogic) ListUserDevices(in *types.ListUserDevicesReq) (*types.ListUserDevicesRes, error) {
+func (l *ListUserDevicesLogic) ListUserDevices(in *pb.ListUserDevicesReq) (*pb.ListUserDevicesRes, error) {
 	var devices []auth_models.AuthDeviceModel
 	if err := l.svcCtx.DB.Where("user_id = ? AND is_active = ?", in.UserId, true).
 		Order("last_login_time DESC").
@@ -84,9 +84,9 @@ func (l *ListUserDevicesLogic) ListUserDevices(in *types.ListUserDevicesReq) (*t
 		onlineDeviceIDs[deviceID] = true
 	}
 
-	list := make([]*types.UserDeviceItem, 0, len(devices))
+	list := make([]*pb.UserDeviceItem, 0, len(devices))
 	for _, d := range devices {
-		list = append(list, &types.UserDeviceItem{
+		list = append(list, &pb.UserDeviceItem{
 			DeviceId:        d.DeviceID,
 			DeviceType:      d.DeviceType,
 			DeviceOs:        d.DeviceOS,
@@ -107,5 +107,5 @@ func (l *ListUserDevicesLogic) ListUserDevices(in *types.ListUserDevicesReq) (*t
 			"onlineCount": len(onlineDeviceIDs),
 		},
 	})
-	return &types.ListUserDevicesRes{List: list}, nil
+	return &pb.ListUserDevicesRes{List: list}, nil
 }

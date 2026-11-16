@@ -25,7 +25,7 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	chat_rpc "beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/common/convert"
 
 	"github.com/zeromicro/go-zero/core/logx"

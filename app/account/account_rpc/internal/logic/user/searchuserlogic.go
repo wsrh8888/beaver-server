@@ -28,7 +28,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewSearchUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Search
 	}
 }
 
-func (l *SearchUserLogic) SearchUser(in *types.SearchUserReq) (*types.SearchUserRes, error) {
+func (l *SearchUserLogic) SearchUser(in *pb.SearchUserReq) (*pb.SearchUserRes, error) {
 	var user user_models.UserModel
 
 	var err error
@@ -70,7 +70,7 @@ func (l *SearchUserLogic) SearchUser(in *types.SearchUserReq) (*types.SearchUser
 		return nil, errors.New("用户不存在")
 	}
 
-	return &types.SearchUserRes{UserInfo: &types.UserInfo{
+	return &pb.SearchUserRes{UserInfo: &pb.UserInfo{
 		UserId:    user.UserID,
 		NickName:  user.NickName,
 		Avatar:    user.Avatar,

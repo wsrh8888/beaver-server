@@ -1,42 +1,259 @@
 syntax = "v1"
 
-type FileReq {
+type (
+PreviewReq {
+	FileKey string `form:"fileKey"`
 }
 
-type FileRes {
-	FileKey      string    `json:"fileKey"`
-	FileURL      string    `json:"fileUrl,optional"`
-	OriginalName string    `json:"originalName"`
-	FileInfo     *FileInfo `json:"fileInfo,optional"`
+PreviewRes {}
+)
+
+type (
+FileUploadQiniuReq {
 }
 
-type FileInfo {
-	Type      string     `json:"type"`
-	ImageFile *ImageFile `json:"imageFile,optional"`
-	VideoFile *VideoFile `json:"videoFile,optional"`
-	AudioFile *AudioFile `json:"audioFile,optional"`
+FileUploadQiniuRes {
+	FileKey      string          `json:"fileKey"`
+	FileURL      string          `json:"fileUrl,optional"`
+	OriginalName string          `json:"originalName"`
+	FileInfo     *FileUploadQiniuFileInfo `json:"fileInfo,optional"`
+}
+)
+
+type (
+FileUploadLocalReq {
 }
 
-type ImageFile {
+FileUploadLocalRes {
+	FileKey      string          `json:"fileKey"`
+	FileURL      string          `json:"fileUrl,optional"`
+	OriginalName string          `json:"originalName"`
+	FileInfo     *FileUploadLocalFileInfo `json:"fileInfo,optional"`
+}
+)
+
+type (
+FileUploadMinioReq {
+}
+
+FileUploadMinioRes {
+	FileKey      string          `json:"fileKey"`
+	FileURL      string          `json:"fileUrl,optional"`
+	OriginalName string          `json:"originalName"`
+	FileInfo     *FileUploadMinioFileInfo `json:"fileInfo,optional"`
+}
+)
+
+type (
+FileUploadReq {
+}
+
+FileUploadRes {
+	FileKey      string          `json:"fileKey"`
+	FileURL      string          `json:"fileUrl,optional"`
+	OriginalName string          `json:"originalName"`
+	FileInfo     *FileUploadFileInfo `json:"fileInfo,optional"`
+}
+)
+
+type (
+SaveFileReq {
+		OriginalName string `json:"original_name,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		Source       string `json:"source,optional"` // 来源
+		FileInfoJson string `json:"file_info_json,optional"` // 文件附加信息 JSON
+	}
+
+SaveFileRes {
+		FileKey string `json:"file_key,optional"` // 文件Key
+	}
+)
+
+type (
+FileItem {
+		Id           uint64 `json:"id,optional"` // 记录ID
+		FileKey      string `json:"file_key,optional"` // 文件Key
+		OriginalName string `json:"original_name,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		Source       string `json:"source,optional"` // 来源 qiniu/local
+		CreatedAt    string `json:"created_at,optional"` // 创建时间
+		UpdatedAt    string `json:"updated_at,optional"` // 更新时间
+	}
+
+ListFilesReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Type     string `json:"type,optional"` // 文件类型筛选
+		Keywords string `json:"keywords,optional"` // 关键词
+	}
+
+ListFilesRes {
+		Total int64      `json:"total,optional"` // 总数
+		List  []FileItem `json:"list,optional"` // 文件列表
+	}
+)
+
+type (
+DeleteFileReq {
+		Id uint64 `json:"id,optional"` // 记录ID
+	}
+
+DeleteFileRes {
+		Path string `json:"path,optional"` // 被删除的存储路径
+	}
+)
+
+type (
+BatchDeleteFilesReq {
+		Ids []uint64 `json:"ids,optional"` // 记录ID列表
+	}
+
+BatchDeleteFilesRes {
+		Paths []string `json:"paths,optional"` // 被删除的存储路径列表
+	}
+)
+
+type (
+GetFileByIdReq {
+		Id uint64 `json:"id,optional"` // 记录ID
+	}
+
+GetFileByIdRes {
+		File *FileItem `json:"file,optional"` // 文件详情
+	}
+)
+
+type (
+GetFileByMd5Req {
+		Md5 string `json:"md5,optional"` // MD5
+	}
+
+GetFileByMd5Res {
+		File *FileItem `json:"file,optional"` // 文件详情
+	}
+)
+
+type (
+GetFileDetailReq {
+		FileKey string `json:"fileKey,optional"` // 文件Key
+	}
+
+GetFileDetailRes {
+		FileKey      string `json:"fileKey,optional"` // 文件Key
+		OriginalName string `json:"originalName,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		CreatedAt    string `json:"createdAt,optional"` // 创建时间
+		UpdatedAt    string `json:"updatedAt,optional"` // 更新时间
+	}
+)
+
+type (
+GetQiniuUploadTokenReq {}
+
+GetQiniuUploadTokenRes {
+		UploadToken string `json:"uploadToken,optional"` // 七牛上传凭证
+		ExpiresIn   int64  `json:"expiresIn,optional"` // 有效期（秒）
+	}
+)
+
+type (
+FileUploadQiniuFileInfo {
+	Type      string              `json:"type"`
+	ImageFile *FileUploadQiniuImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadQiniuVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadQiniuAudioFile `json:"audioFile,optional"`
+}
+
+FileUploadQiniuImageFile {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
 
-type VideoFile {
+FileUploadQiniuVideoFile {
 	Width    int `json:"width"`
 	Height   int `json:"height"`
 	Duration int `json:"duration"`
 }
 
-type AudioFile {
+FileUploadQiniuAudioFile {
 	Duration int `json:"duration"`
 }
 
-type PreviewReq {
-	FileKey string `form:"fileKey"`
+FileUploadLocalFileInfo {
+	Type      string              `json:"type"`
+	ImageFile *FileUploadLocalImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadLocalVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadLocalAudioFile `json:"audioFile,optional"`
 }
 
-type PreviewRes {}
+FileUploadLocalImageFile {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+FileUploadLocalVideoFile {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+FileUploadLocalAudioFile {
+	Duration int `json:"duration"`
+}
+
+FileUploadMinioFileInfo {
+	Type      string              `json:"type"`
+	ImageFile *FileUploadMinioImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadMinioVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadMinioAudioFile `json:"audioFile,optional"`
+}
+
+FileUploadMinioImageFile {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+FileUploadMinioVideoFile {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+FileUploadMinioAudioFile {
+	Duration int `json:"duration"`
+}
+
+FileUploadFileInfo {
+	Type      string              `json:"type"`
+	ImageFile *FileUploadImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadAudioFile `json:"audioFile,optional"`
+}
+
+FileUploadImageFile {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+FileUploadVideoFile {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+FileUploadAudioFile {
+	Duration int `json:"duration"`
+}
+)
 
 @server (
 	group: file
@@ -54,111 +271,24 @@ service asset {
 service asset {
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
-	post /beaver/api/file/file/v1/uploadQiniu (FileReq) returns (FileRes)
+	post /beaver/api/file/file/v1/upload_qiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
 
 	@doc "文件上传本地"
 	@handler FileUploadLocal
-	post /beaver/api/file/file/v1/uploadLocal (FileReq) returns (FileRes)
+	post /beaver/api/file/file/v1/upload_local (FileUploadLocalReq) returns (FileUploadLocalRes)
 
 	@doc "文件上传MinIO"
 	@handler FileUploadMinio
-	post /beaver/api/file/file/v1/uploadMinio (FileReq) returns (FileRes)
+	post /beaver/api/file/file/v1/upload_minio (FileUploadMinioReq) returns (FileUploadMinioRes)
 
 	@doc "文件通用上传(按yaml StorageType配置路由到local/qiniu/minio)"
 	@handler FileUpload
-	post /beaver/api/file/file/v1/upload (FileReq) returns (FileRes)
+	post /beaver/api/file/file/v1/upload (FileUploadReq) returns (FileUploadRes)
 }
 
 // ==================== 队间（S2S）能力面 ====================
 // 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
 // 这里是「按记录维度」的文件台账读写，C 端上传走 multipart，两者不重叠。
-
-type (
-	FileItem {
-		Id           uint64 `json:"id,optional"` // 记录ID
-		FileKey      string `json:"file_key,optional"` // 文件Key
-		OriginalName string `json:"original_name,optional"` // 原始文件名
-		Size         int64  `json:"size,optional"` // 文件大小
-		Path         string `json:"path,optional"` // 存储路径
-		Md5          string `json:"md5,optional"` // MD5
-		Type         string `json:"type,optional"` // 文件类型
-		Source       string `json:"source,optional"` // 来源 qiniu/local
-		CreatedAt    string `json:"created_at,optional"` // 创建时间
-		UpdatedAt    string `json:"updated_at,optional"` // 更新时间
-	}
-
-	SaveFileReq {
-		OriginalName string `json:"original_name,optional"` // 原始文件名
-		Size         int64  `json:"size,optional"` // 文件大小
-		Path         string `json:"path,optional"` // 存储路径
-		Md5          string `json:"md5,optional"` // MD5
-		Type         string `json:"type,optional"` // 文件类型
-		Source       string `json:"source,optional"` // 来源
-		FileInfoJson string `json:"file_info_json,optional"` // 文件附加信息 JSON
-	}
-	SaveFileRes {
-		FileKey string `json:"file_key,optional"` // 文件Key
-	}
-
-	ListFilesReq {
-		Page     int32  `json:"page,optional"` // 页码
-		PageSize int32  `json:"page_size,optional"` // 每页条数
-		Type     string `json:"type,optional"` // 文件类型筛选
-		Keywords string `json:"keywords,optional"` // 关键词
-	}
-	ListFilesRes {
-		Total int64      `json:"total,optional"` // 总数
-		List  []FileItem `json:"list,optional"` // 文件列表
-	}
-
-	DeleteFileReq {
-		Id uint64 `json:"id,optional"` // 记录ID
-	}
-	DeleteFileRes {
-		Path string `json:"path,optional"` // 被删除的存储路径
-	}
-
-	BatchDeleteFilesReq {
-		Ids []uint64 `json:"ids,optional"` // 记录ID列表
-	}
-	BatchDeleteFilesRes {
-		Paths []string `json:"paths,optional"` // 被删除的存储路径列表
-	}
-
-	GetFileByIdReq {
-		Id uint64 `json:"id,optional"` // 记录ID
-	}
-	GetFileByIdRes {
-		File *FileItem `json:"file,optional"` // 文件详情
-	}
-
-	GetFileByMd5Req {
-		Md5 string `json:"md5,optional"` // MD5
-	}
-	GetFileByMd5Res {
-		File *FileItem `json:"file,optional"` // 文件详情
-	}
-
-	GetFileDetailReq {
-		FileKey string `json:"fileKey,optional"` // 文件Key
-	}
-	GetFileDetailRes {
-		FileKey      string `json:"fileKey,optional"` // 文件Key
-		OriginalName string `json:"originalName,optional"` // 原始文件名
-		Size         int64  `json:"size,optional"` // 文件大小
-		Path         string `json:"path,optional"` // 存储路径
-		Md5          string `json:"md5,optional"` // MD5
-		Type         string `json:"type,optional"` // 文件类型
-		CreatedAt    string `json:"createdAt,optional"` // 创建时间
-		UpdatedAt    string `json:"updatedAt,optional"` // 更新时间
-	}
-
-	GetQiniuUploadTokenReq {}
-	GetQiniuUploadTokenRes {
-		UploadToken string `json:"uploadToken,optional"` // 七牛上传凭证
-		ExpiresIn   int64  `json:"expiresIn,optional"` // 有效期（秒）
-	}
-)
 
 @server (
 	group: file_machine

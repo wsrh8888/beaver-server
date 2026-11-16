@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
-	assettypes "beaver/app/asset/asset_rpc/types"
+	assettypes "beaver/app/asset/asset_rpc/pb"
 	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )

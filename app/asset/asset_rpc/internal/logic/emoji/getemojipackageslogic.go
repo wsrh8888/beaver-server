@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewGetEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *types.GetEmojiPackagesReq) (*types.GetEmojiPackagesRes, error) {
+func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *pb.GetEmojiPackagesReq) (*pb.GetEmojiPackagesRes, error) {
 	// 1. 先查询用户收藏的表情包ID列表
 	var collects []emoji_models.EmojiPackageCollect
 	collectQuery := l.svcCtx.DB.Where("user_id = ? AND is_deleted = ?",
@@ -67,8 +67,8 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *types.GetEmojiPackagesReq) 
 	// 如果没有收藏记录，直接返回空结果
 	if len(collects) == 0 {
 		l.logger.Info(model.LogMsg{Text: "用户没有收藏的表情包", Data: map[string]any{"userId": in.UserId}})
-		return &types.GetEmojiPackagesRes{
-			EmojiPackageVersions: []*types.EmojiPackageVersionItem{},
+		return &pb.GetEmojiPackagesRes{
+			EmojiPackageVersions: []*pb.EmojiPackageVersionItem{},
 			ServerTimestamp:      time.Now().UnixMilli(),
 		}, nil
 	}
@@ -91,15 +91,15 @@ func (l *GetEmojiPackagesLogic) GetEmojiPackages(in *types.GetEmojiPackagesReq) 
 	l.logger.Info(model.LogMsg{Text: "查询用户收藏表情包版本变更", Data: map[string]interface{}{"userId": in.UserId, "count": len(packages)}})
 
 	// 转换为版本摘要格式
-	var packageVersions []*types.EmojiPackageVersionItem
+	var packageVersions []*pb.EmojiPackageVersionItem
 	for _, pkg := range packages {
-		packageVersions = append(packageVersions, &types.EmojiPackageVersionItem{
+		packageVersions = append(packageVersions, &pb.EmojiPackageVersionItem{
 			PackageId: pkg.PackageID,
 			Version:   pkg.Version,
 		})
 	}
 
-	return &types.GetEmojiPackagesRes{
+	return &pb.GetEmojiPackagesRes{
 		EmojiPackageVersions: packageVersions,
 		ServerTimestamp:      time.Now().UnixMilli(),
 	}, nil

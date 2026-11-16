@@ -22,14 +22,14 @@ package svc
 
 import (
 	"beaver/app/account/account_rpc/client/user"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/message/message_rpc/chat"
 	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/relation/relation_api/internal/config"
 	"beaver/app/relation/relation_api/internal/middleware"
 	"beaver/app/relation/relation_rpc/client/friend"
 	"beaver/app/relation/relation_rpc/client/group"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	"beaver/common/zrpc_interceptor"
 	"beaver/commonconfig"
 	"beaver/core/coregorm"
@@ -50,8 +50,8 @@ type ServiceContext struct {
 	DB         *gorm.DB
 	Redis      *redis.Client
 	UserRpc    accttypes.UserClient
-	FriendRpc  types.FriendClient
-	GroupRpc   types.GroupClient
+	FriendRpc  pb.FriendClient
+	GroupRpc   pb.GroupClient
 	ChatRpc    chat.Chat
 	NotifyRpc  notification.Notification
 	VersionGen *versionPkg.VersionGenerator

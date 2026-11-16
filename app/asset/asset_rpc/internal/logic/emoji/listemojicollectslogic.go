@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewListEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	return &ListEmojiCollectsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_emoji_collects", ctx)}
 }
 
-func (l *ListEmojiCollectsLogic) ListEmojiCollects(in *types.ListEmojiCollectsReq) (*types.ListEmojiCollectsRes, error) {
+func (l *ListEmojiCollectsLogic) ListEmojiCollects(in *pb.ListEmojiCollectsReq) (*pb.ListEmojiCollectsRes, error) {
 	page := int(in.Page)
 	if page <= 0 {
 		page = 1
@@ -99,13 +99,13 @@ func (l *ListEmojiCollectsLogic) ListEmojiCollects(in *types.ListEmojiCollectsRe
 		}
 	}
 
-	items := make([]*types.EmojiCollectItem, 0, len(collects))
+	items := make([]*pb.EmojiCollectItem, 0, len(collects))
 	for _, c := range collects {
 		title, fileKey := "", ""
 		if e, ok := emojiMap[c.EmojiID]; ok {
 			title, fileKey = e.Title, e.FileKey
 		}
-		items = append(items, &types.EmojiCollectItem{
+		items = append(items, &pb.EmojiCollectItem{
 			CollectId:    c.EmojiCollectID,
 			UserId:       c.UserID,
 			EmojiId:      c.EmojiID,
@@ -115,5 +115,5 @@ func (l *ListEmojiCollectsLogic) ListEmojiCollects(in *types.ListEmojiCollectsRe
 			UpdatedAt:    time.Time(c.UpdatedAt).Format(time.RFC3339),
 		})
 	}
-	return &types.ListEmojiCollectsRes{Total: total, List: items}, nil
+	return &pb.ListEmojiCollectsRes{Total: total, List: items}, nil
 }

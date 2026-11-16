@@ -27,7 +27,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
@@ -47,7 +47,7 @@ func NewResetPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Res
 	}
 }
 
-func (l *ResetPasswordLogic) ResetPassword(in *types.ResetPasswordReq) (*types.ResetPasswordRes, error) {
+func (l *ResetPasswordLogic) ResetPassword(in *pb.ResetPasswordReq) (*pb.ResetPasswordRes, error) {
 	if in.UserId == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -77,5 +77,5 @@ func (l *ResetPasswordLogic) ResetPassword(in *types.ResetPasswordReq) (*types.R
 		Text: "密码重置成功",
 		Data: map[string]any{"userId": in.UserId},
 	})
-	return &types.ResetPasswordRes{Success: true}, nil
+	return &pb.ResetPasswordRes{Success: true}, nil
 }

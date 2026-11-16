@@ -40,13 +40,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 批量删除消息(仅自己不可见)
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/deleteMessages",
+					Path:    "/beaver/api/chat/chat/v1/delete_messages",
 					Handler: chat.DeleteMessagesHandler(serverCtx),
 				},
 				{
 					// 删除某个最近会话
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/deleteRecentChat",
+					Path:    "/beaver/api/chat/chat/v1/delete_recent_chat",
 					Handler: chat.DeleteRecentHandler(serverCtx),
 				},
 				{
@@ -58,61 +58,61 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 获取聊天记录
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/getChatHistory",
+					Path:    "/beaver/api/chat/chat/v1/get_chat_history",
 					Handler: chat.ChatHistoryHandler(serverCtx),
 				},
 				{
 					// 获取会话id
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/getConversationInfo",
+					Path:    "/beaver/api/chat/chat/v1/get_conversation_info",
 					Handler: chat.ConversationInfoHandler(serverCtx),
 				},
 				{
 					// 批量获取会话数据
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/getConversationsListByIds",
+					Path:    "/beaver/api/chat/chat/v1/get_conversations_list_by_ids",
 					Handler: chat.GetConversationsListByIdsHandler(serverCtx),
 				},
 				{
 					// 获取合并转发详情
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/chat/chat/v1/getForwardDetails",
+					Path:    "/beaver/api/chat/chat/v1/get_forward_details",
 					Handler: chat.GetForwardDetailsHandler(serverCtx),
 				},
 				{
 					// 获取最近会话列表
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/chat/chat/v1/getRecentChatList",
+					Path:    "/beaver/api/chat/chat/v1/get_recent_chat_list",
 					Handler: chat.RecentChatListHandler(serverCtx),
 				},
 				{
 					// 批量获取用户会话设置数据
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/getUserConversationSettingsListByIds",
+					Path:    "/beaver/api/chat/chat/v1/get_user_conversation_settings_list_by_ids",
 					Handler: chat.GetUserConversationSettingsListByIdsHandler(serverCtx),
 				},
 				{
 					// 隐藏/显示会话
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/hideChat",
+					Path:    "/beaver/api/chat/chat/v1/hide_chat",
 					Handler: chat.HideChatHandler(serverCtx),
 				},
 				{
 					// 标记消息媒体状态（语音已听等）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/markMessageMedia",
+					Path:    "/beaver/api/chat/chat/v1/mark_message_media",
 					Handler: chat.MarkMessageMediaHandler(serverCtx),
 				},
 				{
 					// 设置会话免打扰
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/muteChat",
+					Path:    "/beaver/api/chat/chat/v1/mute_chat",
 					Handler: chat.MuteChatHandler(serverCtx),
 				},
 				{
 					// 置顶某个会话
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/pinnedChat",
+					Path:    "/beaver/api/chat/chat/v1/pinned_chat",
 					Handler: chat.PinnedChatHandler(serverCtx),
 				},
 				{
@@ -124,13 +124,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 搜索消息
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/searchMessages",
+					Path:    "/beaver/api/chat/chat/v1/search_messages",
 					Handler: chat.SearchMessagesHandler(serverCtx),
 				},
 				{
 					// 发送消息
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/sendMsg",
+					Path:    "/beaver/api/chat/chat/v1/send_msg",
 					Handler: chat.SendMsgHandler(serverCtx),
 				},
 				{
@@ -142,7 +142,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 更新会话已读序列号
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/chat/chat/v1/updateReadSeq",
+					Path:    "/beaver/api/chat/chat/v1/update_read_seq",
 					Handler: chat.UpdateReadSeqHandler(serverCtx),
 				},
 			}...,

@@ -27,7 +27,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -50,7 +50,7 @@ func NewGetFileByMd5Logic(ctx context.Context, svcCtx *svc.ServiceContext) *GetF
 	}
 }
 
-func (l *GetFileByMd5Logic) GetFileByMd5(in *types.GetFileByMd5Req) (*types.GetFileByMd5Res, error) {
+func (l *GetFileByMd5Logic) GetFileByMd5(in *pb.GetFileByMd5Req) (*pb.GetFileByMd5Res, error) {
 	if in.Md5 == "" {
 		return nil, status.Error(codes.InvalidArgument, "md5不能为空")
 	}
@@ -59,7 +59,7 @@ func (l *GetFileByMd5Logic) GetFileByMd5(in *types.GetFileByMd5Req) (*types.GetF
 	if err := l.svcCtx.DB.Take(&file, "md5 = ?", in.Md5).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 未命中时不返回 gRPC 错误，避免客户端拦截器把正常查重记成 fail
-			return &types.GetFileByMd5Res{}, nil
+			return &pb.GetFileByMd5Res{}, nil
 		}
 		l.logger.Error(model.LogMsg{
 			Text: "按md5查询文件失败",
@@ -68,5 +68,5 @@ func (l *GetFileByMd5Logic) GetFileByMd5(in *types.GetFileByMd5Req) (*types.GetF
 		return nil, err
 	}
 
-	return &types.GetFileByMd5Res{File: toFileItem(file)}, nil
+	return &pb.GetFileByMd5Res{File: toFileItem(file)}, nil
 }

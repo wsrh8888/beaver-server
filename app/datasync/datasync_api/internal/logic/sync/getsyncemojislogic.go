@@ -25,7 +25,7 @@ import (
 	"context"
 	"time"
 
-	assettypes "beaver/app/asset/asset_rpc/types"
+	assettypes "beaver/app/asset/asset_rpc/pb"
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
 	beaverlog "beaver/utils/beaverlog"

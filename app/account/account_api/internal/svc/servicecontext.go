@@ -25,11 +25,11 @@ import (
 	"beaver/app/account/account_api/internal/middleware"
 	"beaver/app/account/account_rpc/client/auth"
 	"beaver/app/account/account_rpc/client/user"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/relation/relation_rpc/client/friend"
 	"beaver/app/relation/relation_rpc/client/group"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	"beaver/common/zrpc_interceptor"
 	"beaver/commonconfig"
 	"beaver/core/coregorm"
@@ -51,8 +51,8 @@ type ServiceContext struct {
 	Redis           *redis.Client
 	UserRpc         accttypes.UserClient
 	AuthRpc         auth.Auth
-	FriendRpc       types.FriendClient
-	GroupRpc        types.GroupClient
+	FriendRpc       pb.FriendClient
+	GroupRpc        pb.GroupClient
 	NotificationRpc notification.Notification
 	VersionGen      *versionPkg.VersionGenerator
 	RocketMQ        *corerocketmq.Client

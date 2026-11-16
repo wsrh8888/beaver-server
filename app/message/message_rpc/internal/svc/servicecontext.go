@@ -146,7 +146,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 			corewebhook.Config{Timeout: 10, RetryCount: 3},
 
-			newOpenRpcWebhookLogWriter(),
+			newOpenWebhookLogWriter(),
 		),
 
 		PushSender: corepush.NewPushSender(corepush.Config{

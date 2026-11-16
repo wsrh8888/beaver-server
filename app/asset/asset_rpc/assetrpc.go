@@ -29,7 +29,7 @@ import (
 	emojiServer "beaver/app/asset/asset_rpc/internal/server/emoji"
 	fileServer "beaver/app/asset/asset_rpc/internal/server/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -50,8 +50,8 @@ func main() {
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		// goctl multiple 模式：一个 proto（asset.proto）、一个进程、一个 etcd 注册，
 		// 同一个 grpc server 挂载 file + emoji 两套 service（server/logic/client 按子域分目录）。
-		types.RegisterFileServer(grpcServer, fileServer.NewFileServer(ctx))
-		types.RegisterEmojiServer(grpcServer, emojiServer.NewEmojiServer(ctx))
+		pb.RegisterFileServer(grpcServer, fileServer.NewFileServer(ctx))
+		pb.RegisterEmojiServer(grpcServer, emojiServer.NewEmojiServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

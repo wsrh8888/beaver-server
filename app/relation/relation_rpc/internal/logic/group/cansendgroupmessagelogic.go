@@ -28,7 +28,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,31 +49,31 @@ func NewCanSendGroupMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
-func (l *CanSendGroupMessageLogic) CanSendGroupMessage(in *types.CanSendGroupMessageReq) (*types.CanSendGroupMessageRes, error) {
+func (l *CanSendGroupMessageLogic) CanSendGroupMessage(in *pb.CanSendGroupMessageReq) (*pb.CanSendGroupMessageRes, error) {
 	var member group_models.GroupMemberModel
 	if err := l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = 1", in.GroupId, in.UserId).
 		First(&member).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return &types.CanSendGroupMessageRes{Allowed: false, Reason: "你不是该群成员"}, nil
+			return &pb.CanSendGroupMessageRes{Allowed: false, Reason: "你不是该群成员"}, nil
 		}
 		l.logger.Error(model.LogMsg{Text: "查询群成员失败", Data: map[string]any{"groupId": in.GroupId, "userId": in.UserId, "err": err.Error()}})
 		return nil, err
 	}
 
 	if member.Role == 1 || member.Role == 2 || strings.HasPrefix(in.UserId, "nbot_") {
-		return &types.CanSendGroupMessageRes{Allowed: true}, nil
+		return &pb.CanSendGroupMessageRes{Allowed: true}, nil
 	}
 
 	var group group_models.GroupModel
 	if err := l.svcCtx.DB.Where("group_id = ?", in.GroupId).First(&group).Error; err == nil {
 		if group.IsMuteAll {
-			return &types.CanSendGroupMessageRes{Allowed: false, Reason: "当前群已开启全员禁言"}, nil
+			return &pb.CanSendGroupMessageRes{Allowed: false, Reason: "当前群已开启全员禁言"}, nil
 		}
 	}
 
 	if member.MutedUntil != nil && member.MutedUntil.After(time.Now()) {
-		return &types.CanSendGroupMessageRes{Allowed: false, Reason: "你已被禁言"}, nil
+		return &pb.CanSendGroupMessageRes{Allowed: false, Reason: "你已被禁言"}, nil
 	}
 
-	return &types.CanSendGroupMessageRes{Allowed: true}, nil
+	return &pb.CanSendGroupMessageRes{Allowed: true}, nil
 }

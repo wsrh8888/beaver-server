@@ -27,7 +27,7 @@ import (
 
 	"beaver/app/datasync/datasync_api/internal/svc"
 	"beaver/app/datasync/datasync_api/internal/types"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

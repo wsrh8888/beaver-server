@@ -57,15 +57,15 @@ type (
 service datasync {
 	@doc "获取所有需要更新的群组信息版本"
 	@handler getSyncGroupInfo
-	post /beaver/api/datasync/sync/v1/getSyncGroupInfo (GetSyncGroupInfoReq) returns (GetSyncGroupInfoRes)
+	post /beaver/api/datasync/sync/v1/get_sync_group_info (GetSyncGroupInfoReq) returns (GetSyncGroupInfoRes)
 
 	@doc "获取所有需要更新的群成员版本"
 	@handler getSyncGroupMembers
-	post /beaver/api/datasync/sync/v1/getSyncGroupMembers (GetSyncGroupMembersReq) returns (GetSyncGroupMembersRes)
+	post /beaver/api/datasync/sync/v1/get_sync_group_members (GetSyncGroupMembersReq) returns (GetSyncGroupMembersRes)
 
 	@doc "获取所有需要更新的入群申请版本"
 	@handler getSyncGroupRequests
-	post /beaver/api/datasync/sync/v1/getSyncGroupRequests (GetSyncGroupRequestsReq) returns (GetSyncGroupRequestsRes)
+	post /beaver/api/datasync/sync/v1/get_sync_group_requests (GetSyncGroupRequestsReq) returns (GetSyncGroupRequestsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

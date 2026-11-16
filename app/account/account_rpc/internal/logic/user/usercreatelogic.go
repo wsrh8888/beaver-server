@@ -30,7 +30,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	utils "beaver/utils/rand"
@@ -121,7 +121,7 @@ func (l *UserCreateLogic) initializeRedisCounter() error {
 	return nil
 }
 
-func (l *UserCreateLogic) UserCreate(in *types.UserCreateReq) (*types.UserCreateRes, error) {
+func (l *UserCreateLogic) UserCreate(in *pb.UserCreateReq) (*pb.UserCreateRes, error) {
 	// 验证必填字段（Bot / Digital 用户不需要联系方式）
 	isSystemUser := in.UserType == int32(user_models.UserTypeBot) || in.UserType == int32(user_models.UserTypeDigital)
 	if !isSystemUser {
@@ -227,7 +227,7 @@ func (l *UserCreateLogic) UserCreate(in *types.UserCreateReq) (*types.UserCreate
 		Data: map[string]interface{}{"userId": user.UserID, "version": version},
 	})
 
-	return &types.UserCreateRes{
+	return &pb.UserCreateRes{
 		UserID: user.UserID,
 	}, nil
 }

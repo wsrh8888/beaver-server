@@ -26,7 +26,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -44,8 +44,8 @@ func NewIsFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsFriend
 	}
 }
 
-func (l *IsFriendLogic) IsFriend(in *types.IsFriendReq) (*types.IsFriendRes, error) {
+func (l *IsFriendLogic) IsFriend(in *pb.IsFriendReq) (*pb.IsFriendRes, error) {
 	var friend friend_models.FriendModel
 	isFriend := friend.IsFriend(l.svcCtx.DB, in.UserA, in.UserB)
-	return &types.IsFriendRes{IsFriend: isFriend}, nil
+	return &pb.IsFriendRes{IsFriend: isFriend}, nil
 }

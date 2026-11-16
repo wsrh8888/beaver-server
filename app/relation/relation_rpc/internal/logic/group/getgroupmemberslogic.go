@@ -26,8 +26,8 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
-	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
+	accttypes "beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 	}
 }
 
-func (l *GetGroupMembersLogic) GetGroupMembers(in *types.GetGroupMembersReq) (*types.GetGroupMembersRes, error) {
+func (l *GetGroupMembersLogic) GetGroupMembers(in *pb.GetGroupMembersReq) (*pb.GetGroupMembersRes, error) {
 	// 1. 查询群组成员
 	var groupMembers []group_models.GroupMemberModel
 	err := l.svcCtx.DB.Where("group_id = ?", in.GroupID).Find(&groupMembers).Error
@@ -57,8 +57,8 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *types.GetGroupMembersReq) (*t
 
 	// 如果没有成员，返回空列表
 	if len(groupMembers) == 0 {
-		return &types.GetGroupMembersRes{
-			Members: []*types.GroupMemberInfo{},
+		return &pb.GetGroupMembersRes{
+			Members: []*pb.GroupMemberInfo{},
 		}, nil
 	}
 
@@ -78,10 +78,10 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *types.GetGroupMembersReq) (*t
 	}
 
 	// 4. 构建返回结果
-	var members []*types.GroupMemberInfo
+	var members []*pb.GroupMemberInfo
 	for _, member := range groupMembers {
 		if user, ok := userResp.UserInfo[member.UserID]; ok && user != nil {
-			members = append(members, &types.GroupMemberInfo{
+			members = append(members, &pb.GroupMemberInfo{
 				UserID:   user.UserId,
 				Username: user.NickName,
 				Avatar:   user.Avatar,
@@ -89,7 +89,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(in *types.GetGroupMembersReq) (*t
 		}
 	}
 
-	return &types.GetGroupMembersRes{
+	return &pb.GetGroupMembersRes{
 		Members: members,
 	}, nil
 }

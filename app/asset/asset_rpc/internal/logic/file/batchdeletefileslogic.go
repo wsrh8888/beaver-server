@@ -27,7 +27,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -45,7 +45,7 @@ func NewBatchDeleteFilesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	return &BatchDeleteFilesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("batch_delete_files", ctx)}
 }
 
-func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *types.BatchDeleteFilesReq) (*types.BatchDeleteFilesRes, error) {
+func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *pb.BatchDeleteFilesReq) (*pb.BatchDeleteFilesRes, error) {
 	if len(in.Ids) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "ids不能为空")
 	}
@@ -89,5 +89,5 @@ func (l *BatchDeleteFilesLogic) BatchDeleteFiles(in *types.BatchDeleteFilesReq) 
 		Data: map[string]interface{}{"ids": in.Ids, "paths": paths},
 	})
 
-	return &types.BatchDeleteFilesRes{Paths: paths}, nil
+	return &pb.BatchDeleteFilesRes{Paths: paths}, nil
 }

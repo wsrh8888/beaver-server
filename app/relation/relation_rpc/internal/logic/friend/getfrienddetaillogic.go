@@ -27,8 +27,8 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
-	accttypes "beaver/app/account/account_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
+	accttypes "beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewGetFriendDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 	}
 }
 
-func (l *GetFriendDetailLogic) GetFriendDetail(in *types.GetFriendDetailReq) (*types.GetFriendDetailRes, error) {
+func (l *GetFriendDetailLogic) GetFriendDetail(in *pb.GetFriendDetailReq) (*pb.GetFriendDetailRes, error) {
 	// 查询当前用户与指定好友的好友关系
 	var friends []friend_models.FriendModel
 	err := l.svcCtx.DB.Where("((send_user_id = ? AND rev_user_id IN (?)) OR (rev_user_id = ? AND send_user_id IN (?))) AND is_deleted = ?",
@@ -93,7 +93,7 @@ func (l *GetFriendDetailLogic) GetFriendDetail(in *types.GetFriendDetailReq) (*t
 	}
 
 	// 构建响应
-	var friendDetails []*types.FriendDetailItem
+	var friendDetails []*pb.FriendDetailItem
 	for _, friendId := range friendIds {
 		userInfo, userExists := userInfoMap[friendId]
 		friend, friendExists := friendMap[friendId]
@@ -115,7 +115,7 @@ func (l *GetFriendDetailLogic) GetFriendDetail(in *types.GetFriendDetailReq) (*t
 		// 获取成为好友的时间（取最早的创建时间）
 		friendAt := time.Time(friend.CreatedAt).Unix()
 
-		friendDetails = append(friendDetails, &types.FriendDetailItem{
+		friendDetails = append(friendDetails, &pb.FriendDetailItem{
 			UserId:   friendId, // userInfoMap的key就是用户ID
 			NickName: userInfo.NickName,
 			Avatar:   userInfo.Avatar,
@@ -124,7 +124,7 @@ func (l *GetFriendDetailLogic) GetFriendDetail(in *types.GetFriendDetailReq) (*t
 		})
 	}
 
-	return &types.GetFriendDetailRes{
+	return &pb.GetFriendDetailRes{
 		Friends: friendDetails,
 	}, nil
 }

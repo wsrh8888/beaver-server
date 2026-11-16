@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewListEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListEm
 	return &ListEmojisLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_emojis", ctx)}
 }
 
-func (l *ListEmojisLogic) ListEmojis(in *types.ListEmojisReq) (*types.ListEmojisRes, error) {
+func (l *ListEmojisLogic) ListEmojis(in *pb.ListEmojisReq) (*pb.ListEmojisRes, error) {
 	page := int(in.Page)
 	if page <= 0 {
 		page = 1
@@ -90,14 +90,14 @@ func (l *ListEmojisLogic) ListEmojis(in *types.ListEmojisReq) (*types.ListEmojis
 		return nil, err
 	}
 
-	items := make([]*types.EmojiItem, 0, len(list))
+	items := make([]*pb.EmojiItem, 0, len(list))
 	for _, e := range list {
 		items = append(items, toEmojiItem(e))
 	}
-	return &types.ListEmojisRes{Total: total, List: items}, nil
+	return &pb.ListEmojisRes{Total: total, List: items}, nil
 }
 
-func (l *ListEmojisLogic) listPackageEmojis(packageID string, page, pageSize int) (*types.ListEmojisRes, error) {
+func (l *ListEmojisLogic) listPackageEmojis(packageID string, page, pageSize int) (*pb.ListEmojisRes, error) {
 	var relations []emoji_models.EmojiPackageEmoji
 	if err := l.svcCtx.DB.Where("package_id = ?", packageID).
 		Order("sort_order asc").Find(&relations).Error; err != nil {
@@ -105,7 +105,7 @@ func (l *ListEmojisLogic) listPackageEmojis(packageID string, page, pageSize int
 		return nil, err
 	}
 	if len(relations) == 0 {
-		return &types.ListEmojisRes{}, nil
+		return &pb.ListEmojisRes{}, nil
 	}
 
 	emojiIDs := make([]string, len(relations))
@@ -133,26 +133,26 @@ func (l *ListEmojisLogic) listPackageEmojis(packageID string, page, pageSize int
 	total := int64(len(ordered))
 	start := (page - 1) * pageSize
 	if start >= len(ordered) {
-		return &types.ListEmojisRes{Total: total}, nil
+		return &pb.ListEmojisRes{Total: total}, nil
 	}
 	end := start + pageSize
 	if end > len(ordered) {
 		end = len(ordered)
 	}
 
-	items := make([]*types.EmojiItem, 0, end-start)
+	items := make([]*pb.EmojiItem, 0, end-start)
 	for _, e := range ordered[start:end] {
 		items = append(items, toEmojiItem(e))
 	}
-	return &types.ListEmojisRes{Total: total, List: items}, nil
+	return &pb.ListEmojisRes{Total: total, List: items}, nil
 }
 
-func toEmojiItem(e emoji_models.Emoji) *types.EmojiItem {
-	return &types.EmojiItem{
+func toEmojiItem(e emoji_models.Emoji) *pb.EmojiItem {
+	return &pb.EmojiItem{
 		EmojiId:   e.EmojiID,
 		FileKey:   e.FileKey,
 		Title:     e.Title,
-		EmojiInfo: &types.EmojiInfoMsg{Width: int32(e.EmojiInfo.Width), Height: int32(e.EmojiInfo.Height)},
+		EmojiInfo: &pb.EmojiInfoMsg{Width: int32(e.EmojiInfo.Width), Height: int32(e.EmojiInfo.Height)},
 		Status:    int32(e.Status),
 		CreatedAt: time.Time(e.CreatedAt).Format(time.RFC3339),
 		UpdatedAt: time.Time(e.UpdatedAt).Format(time.RFC3339),

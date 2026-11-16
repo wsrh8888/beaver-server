@@ -22,12 +22,12 @@ package svc
 
 import (
 	"beaver/app/account/account_rpc/client/user"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/asset/asset_api/internal/config"
 	"beaver/app/asset/asset_api/internal/middleware"
 	"beaver/app/asset/asset_rpc/client/emoji"
 	"beaver/app/asset/asset_rpc/client/file"
-	assettypes "beaver/app/asset/asset_rpc/types"
+	assettypes "beaver/app/asset/asset_rpc/pb"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"
 	"beaver/core/coreredis"

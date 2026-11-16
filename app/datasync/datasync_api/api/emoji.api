@@ -56,11 +56,11 @@ type (
 service datasync {
 	@doc "获取用户表情收藏的版本信息"
 	@handler getSyncEmojiCollects
-	post /beaver/api/datasync/sync/v1/getSyncEmojiCollects (GetSyncEmojiCollectsReq) returns (GetSyncEmojiCollectsRes)
+	post /beaver/api/datasync/sync/v1/get_sync_emoji_collects (GetSyncEmojiCollectsReq) returns (GetSyncEmojiCollectsRes)
 
 	@doc "获取表情基础数据版本信息"
 	@handler getSyncEmojis
-	post /beaver/api/datasync/sync/v1/getSyncEmojis (GetSyncEmojisReq) returns (GetSyncEmojisRes)
+	post /beaver/api/datasync/sync/v1/get_sync_emojis (GetSyncEmojisReq) returns (GetSyncEmojisRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

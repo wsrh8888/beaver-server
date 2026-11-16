@@ -26,7 +26,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,7 +45,7 @@ func NewGetFriendIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetF
 	}
 }
 
-func (l *GetFriendIdsLogic) GetFriendIds(in *types.GetFriendIdsRequest) (*types.GetFriendIdsResponse, error) {
+func (l *GetFriendIdsLogic) GetFriendIds(in *pb.GetFriendIdsRequest) (*pb.GetFriendIdsResponse, error) {
 	var friends []friend_models.FriendModel
 	err := l.svcCtx.DB.Where("(send_user_id = ? OR rev_user_id = ?) AND is_deleted = false", in.UserID, in.UserID).Find(&friends).Error
 	if err != nil {
@@ -62,7 +62,7 @@ func (l *GetFriendIdsLogic) GetFriendIds(in *types.GetFriendIdsRequest) (*types.
 		}
 	}
 
-	return &types.GetFriendIdsResponse{
+	return &pb.GetFriendIdsResponse{
 		FriendIds: friendIds,
 	}, nil
 }

@@ -48,11 +48,17 @@ func NewFileUploadMinioLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 	}
 }
 
-func (l *FileUploadMinioLogic) FileUploadMinio(req *types.FileReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileRes, error) {
+func (l *FileUploadMinioLogic) FileUploadMinio(req *types.FileUploadMinioReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileUploadMinioRes, error) {
 	if l.svcCtx.MinioClient == nil {
 		return nil, errors.New("MinIO未配置")
 	}
 	// MinIO存储后端
 	store := common.NewMinioStorage(l.svcCtx.MinioClient, l.svcCtx.Config.Minio.Bucket)
-	return common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.MinioSource)
+	base, err := common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.MinioSource)
+	if err != nil {
+		return nil, err
+	}
+	resp := &types.FileUploadMinioRes{}
+	common.ConvertUploadRes(base, resp)
+	return resp, nil
 }

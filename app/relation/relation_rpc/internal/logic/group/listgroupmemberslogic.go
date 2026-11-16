@@ -27,7 +27,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewListGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *ListGroupMembersLogic) ListGroupMembers(in *types.ListGroupMembersReq) (*types.ListGroupMembersRes, error) {
+func (l *ListGroupMembersLogic) ListGroupMembers(in *pb.ListGroupMembersReq) (*pb.ListGroupMembersRes, error) {
 	page := int(in.Page)
 	if page <= 0 {
 		page = 1
@@ -82,9 +82,9 @@ func (l *ListGroupMembersLogic) ListGroupMembers(in *types.ListGroupMembersReq) 
 		return nil, err
 	}
 
-	items := make([]*types.GroupMemberItem, 0, len(list))
+	items := make([]*pb.GroupMemberItem, 0, len(list))
 	for _, m := range list {
-		items = append(items, &types.GroupMemberItem{
+		items = append(items, &pb.GroupMemberItem{
 			Id:                 uint64(m.Id),
 			GroupId:            m.GroupID,
 			UserId:             m.UserID,
@@ -95,7 +95,7 @@ func (l *ListGroupMembersLogic) ListGroupMembers(in *types.ListGroupMembersReq) 
 			UpdatedAt:          time.Time(m.UpdatedAt).Format(time.RFC3339),
 		})
 	}
-	return &types.ListGroupMembersRes{Total: total, List: items}, nil
+	return &pb.ListGroupMembersRes{Total: total, List: items}, nil
 }
 
 func remainingMuteMinutes(mutedUntil *time.Time) int32 {

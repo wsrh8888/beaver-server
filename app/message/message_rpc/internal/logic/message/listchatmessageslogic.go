@@ -26,9 +26,9 @@ import (
 	"encoding/json"
 	"time"
 
-	message_models "beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	"beaver/app/message/message_rpc/internal/svc"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

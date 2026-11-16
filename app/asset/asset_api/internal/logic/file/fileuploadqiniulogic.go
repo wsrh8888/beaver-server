@@ -46,8 +46,14 @@ func NewFileUploadQiniuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 	}
 }
 
-func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileRes, error) {
+func (l *FileUploadQiniuLogic) FileUploadQiniu(req *types.FileUploadQiniuReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileUploadQiniuRes, error) {
 	// 七牛云存储后端
 	store := common.NewQiniuStorage(l.svcCtx.Config.Qiniu.AK, l.svcCtx.Config.Qiniu.SK, l.svcCtx.Config.Qiniu.Bucket)
-	return common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.QiniuSource)
+	base, err := common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.QiniuSource)
+	if err != nil {
+		return nil, err
+	}
+	resp := &types.FileUploadQiniuRes{}
+	common.ConvertUploadRes(base, resp)
+	return resp, nil
 }

@@ -28,7 +28,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewRemoveGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *RemoveGroupMemberLogic) RemoveGroupMember(in *types.RemoveGroupMemberReq) (*types.RemoveGroupMemberRes, error) {
+func (l *RemoveGroupMemberLogic) RemoveGroupMember(in *pb.RemoveGroupMemberReq) (*pb.RemoveGroupMemberRes, error) {
 	var member group_models.GroupMemberModel
 	if err := l.svcCtx.DB.Where("group_id = ? AND user_id = ? AND status = ?", in.GroupId, in.UserId, 1).
 		First(&member).Error; err != nil {
@@ -95,5 +95,5 @@ func (l *RemoveGroupMemberLogic) RemoveGroupMember(in *types.RemoveGroupMemberRe
 
 	l.logger.Info(model.LogMsg{Text: "移除群成员成功", Data: map[string]interface{}{"groupId": in.GroupId, "userId": in.UserId, "kick": in.Kick, "memberVersion": memberVersion}})
 
-	return &types.RemoveGroupMemberRes{MemberVersion: memberVersion}, nil
+	return &pb.RemoveGroupMemberRes{MemberVersion: memberVersion}, nil
 }

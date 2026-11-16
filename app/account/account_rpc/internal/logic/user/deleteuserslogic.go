@@ -26,7 +26,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,9 +45,9 @@ func NewDeleteUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 	}
 }
 
-func (l *DeleteUsersLogic) DeleteUsers(in *types.DeleteUsersReq) (*types.DeleteUsersRes, error) {
+func (l *DeleteUsersLogic) DeleteUsers(in *pb.DeleteUsersReq) (*pb.DeleteUsersRes, error) {
 	if len(in.UserIds) == 0 {
-		return &types.DeleteUsersRes{}, nil
+		return &pb.DeleteUsersRes{}, nil
 	}
 	result := l.svcCtx.DB.Model(&user_models.UserModel{}).
 		Where("user_id IN ?", in.UserIds).
@@ -63,5 +63,5 @@ func (l *DeleteUsersLogic) DeleteUsers(in *types.DeleteUsersReq) (*types.DeleteU
 		Text: "删除用户成功",
 		Data: map[string]interface{}{"userIds": in.UserIds, "affected": result.RowsAffected},
 	})
-	return &types.DeleteUsersRes{AffectedCount: result.RowsAffected}, nil
+	return &pb.DeleteUsersRes{AffectedCount: result.RowsAffected}, nil
 }

@@ -30,7 +30,7 @@ import (
 
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/common/middleware/ua"
 	"beaver/remote/open"
 	opentype "beaver/types/remote/open"
@@ -55,8 +55,8 @@ func NewOAuthCodeLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OA
 }
 
 func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*types.OAuthCodeLoginRes, error) {
-	if req.AppID == "" {
-		return nil, errors.New("appId 不能为空")
+	if req.OauthId == "" {
+		return nil, errors.New("oauthId 不能为空")
 	}
 	if req.Code == "" {
 		return nil, errors.New("授权码不能为空")
@@ -67,13 +67,13 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 	deviceGroup := ua.DeviceGroup(l.ctx)
 
 	rpcResp, err := open.ExchangeToken(l.ctx, nil, &opentype.ExchangeTokenReq{
-		OauthId: req.AppID,
+		OauthId: req.OauthId,
 		Code:    req.Code,
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "OAuth换取令牌失败",
-			Data: map[string]any{"appId": req.AppID, "err": err.Error()},
+			Data: map[string]any{"oauthId": req.OauthId, "err": err.Error()},
 		})
 		return nil, errors.New("授权码无效或已过期")
 	}
@@ -113,7 +113,7 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 		Text: "OAuth授权码登录成功",
 		Data: map[string]interface{}{
 			"userId":      userInfo.UserId,
-			"appId":       req.AppID,
+			"oauthId":     req.OauthId,
 			"deviceGroup": deviceGroup,
 		},
 	})

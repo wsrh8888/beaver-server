@@ -27,7 +27,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,9 +46,9 @@ func NewGetGroupsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	}
 }
 
-func (l *GetGroupsListByIdsLogic) GetGroupsListByIds(in *types.GetGroupsListByIdsReq) (*types.GetGroupsListByIdsRes, error) {
+func (l *GetGroupsListByIdsLogic) GetGroupsListByIds(in *pb.GetGroupsListByIdsReq) (*pb.GetGroupsListByIdsRes, error) {
 	if len(in.GroupIDs) == 0 {
-		return &types.GetGroupsListByIdsRes{Groups: []*types.GroupListById{}}, nil
+		return &pb.GetGroupsListByIdsRes{Groups: []*pb.GroupListById{}}, nil
 	}
 	// 查询指定群组ID列表中的群组资料 - 只查询需要的字段
 	var groupsData []group_models.GroupModel
@@ -72,9 +72,9 @@ func (l *GetGroupsListByIdsLogic) GetGroupsListByIds(in *types.GetGroupsListById
 	l.logger.Info(model.LogMsg{Text: "批量查询群组资料", Data: map[string]interface{}{"count": len(groupsData)}})
 
 	// 转换为响应格式
-	var groups []*types.GroupListById
+	var groups []*pb.GroupListById
 	for _, group := range groupsData {
-		groups = append(groups, &types.GroupListById{
+		groups = append(groups, &pb.GroupListById{
 			GroupID:     group.GroupID,
 			Name:        group.Title,
 			Avatar:      group.Avatar,
@@ -85,5 +85,5 @@ func (l *GetGroupsListByIdsLogic) GetGroupsListByIds(in *types.GetGroupsListById
 		})
 	}
 
-	return &types.GetGroupsListByIdsRes{Groups: groups}, nil
+	return &pb.GetGroupsListByIdsRes{Groups: groups}, nil
 }

@@ -27,7 +27,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,12 +46,12 @@ func NewUpdateUsersStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *UpdateUsersStatusLogic) UpdateUsersStatus(in *types.UpdateUsersStatusReq) (*types.UpdateUsersStatusRes, error) {
+func (l *UpdateUsersStatusLogic) UpdateUsersStatus(in *pb.UpdateUsersStatusReq) (*pb.UpdateUsersStatusRes, error) {
 	if in.Status < 1 || in.Status > 3 {
 		return nil, errors.New("无效的状态值")
 	}
 	if len(in.UserIds) == 0 {
-		return &types.UpdateUsersStatusRes{}, nil
+		return &pb.UpdateUsersStatusRes{}, nil
 	}
 	result := l.svcCtx.DB.Model(&user_models.UserModel{}).
 		Where("user_id IN ?", in.UserIds).
@@ -67,5 +67,5 @@ func (l *UpdateUsersStatusLogic) UpdateUsersStatus(in *types.UpdateUsersStatusRe
 		Text: "批量更新用户状态成功",
 		Data: map[string]interface{}{"userIds": in.UserIds, "status": in.Status, "affected": result.RowsAffected},
 	})
-	return &types.UpdateUsersStatusRes{AffectedCount: result.RowsAffected}, nil
+	return &pb.UpdateUsersStatusRes{AffectedCount: result.RowsAffected}, nil
 }

@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/common/convert"
 
 	"github.com/zeromicro/go-zero/core/logx"

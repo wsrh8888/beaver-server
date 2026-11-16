@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
-	notification_rpc "beaver/app/notification/notification_rpc/types/notification_rpc"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )

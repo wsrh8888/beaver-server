@@ -26,7 +26,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,9 +45,9 @@ func NewGetGroupMembersListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 	}
 }
 
-func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *types.GetGroupMembersListByIdsReq) (*types.GetGroupMembersListByIdsRes, error) {
+func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *pb.GetGroupMembersListByIdsReq) (*pb.GetGroupMembersListByIdsRes, error) {
 	if len(in.GroupIDs) == 0 {
-		return &types.GetGroupMembersListByIdsRes{Members: []*types.GroupMemberListById{}}, nil
+		return &pb.GetGroupMembersListByIdsRes{Members: []*pb.GroupMemberListById{}}, nil
 	}
 
 	// 查询指定群组ID列表中的群成员
@@ -68,9 +68,9 @@ func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *types.GetGr
 	l.logger.Info(model.LogMsg{Text: "批量查询群成员", Data: map[string]interface{}{"count": len(membersData)}})
 
 	// 转换为响应格式
-	var members []*types.GroupMemberListById
+	var members []*pb.GroupMemberListById
 	for _, member := range membersData {
-		members = append(members, &types.GroupMemberListById{
+		members = append(members, &pb.GroupMemberListById{
 			GroupID:  member.GroupID,
 			UserID:   member.UserID,
 			Role:     int32(member.Role),
@@ -79,5 +79,5 @@ func (l *GetGroupMembersListByIdsLogic) GetGroupMembersListByIds(in *types.GetGr
 		})
 	}
 
-	return &types.GetGroupMembersListByIdsRes{Members: members}, nil
+	return &pb.GetGroupMembersListByIdsRes{Members: members}, nil
 }

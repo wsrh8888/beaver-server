@@ -34,7 +34,7 @@ import (
 	workbenchServer "beaver/app/platform/platform_rpc/internal/server/workbench"
 	orgServer "beaver/app/platform/platform_rpc/internal/server/org"
 	"beaver/app/platform/platform_rpc/internal/svc"
-	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	platform_rpc "beaver/app/platform/platform_rpc/pb"
 	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"

@@ -217,24 +217,24 @@ func GetContentType(fileType string) string {
 }
 
 // ConvertFileInfoToAPI 转换FileInfo为API响应格式
-func ConvertFileInfoToAPI(fileInfo *file_models.FileInfo) *types.FileInfo {
+func ConvertFileInfoToAPI(fileInfo *file_models.FileInfo) *types.FileUploadFileInfo {
 	if fileInfo == nil {
 		return nil
 	}
 
-	result := &types.FileInfo{
+	result := &types.FileUploadFileInfo{
 		Type: string(fileInfo.Type),
 	}
 
 	if fileInfo.ImageFile != nil {
-		result.ImageFile = &types.ImageFile{
+		result.ImageFile = &types.FileUploadImageFile{
 			Width:  fileInfo.ImageFile.Width,
 			Height: fileInfo.ImageFile.Height,
 		}
 	}
 
 	if fileInfo.VideoFile != nil {
-		result.VideoFile = &types.VideoFile{
+		result.VideoFile = &types.FileUploadVideoFile{
 			Width:    fileInfo.VideoFile.Width,
 			Height:   fileInfo.VideoFile.Height,
 			Duration: fileInfo.VideoFile.Duration,
@@ -242,7 +242,7 @@ func ConvertFileInfoToAPI(fileInfo *file_models.FileInfo) *types.FileInfo {
 	}
 
 	if fileInfo.AudioFile != nil {
-		result.AudioFile = &types.AudioFile{
+		result.AudioFile = &types.FileUploadAudioFile{
 			Duration: fileInfo.AudioFile.Duration,
 		}
 	}
@@ -251,7 +251,7 @@ func ConvertFileInfoToAPI(fileInfo *file_models.FileInfo) *types.FileInfo {
 }
 
 // ConvertAPIFileInfoToModel 转换API FileInfo为数据库模型格式
-func ConvertAPIFileInfoToModel(apiFileInfo *types.FileInfo) *file_models.FileInfo {
+func ConvertAPIFileInfoToModel(apiFileInfo *types.FileUploadFileInfo) *file_models.FileInfo {
 	if apiFileInfo == nil {
 		return nil
 	}
@@ -476,7 +476,7 @@ func projectNameFor(source file_models.FileSource, svcCtx *svc.ServiceContext) s
 // UploadFile 共享上传流程：校验 -> MD5去重 -> 存储 -> 建DB记录 -> 拼URL
 // handler 负责从 *http.Request 解析 multipart.File/fileHeader/fileInfoStr，
 // logic 层调用本函数完成业务编排，避免 logic 直接依赖 *http.Request
-func UploadFile(ctx context.Context, svcCtx *svc.ServiceContext, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string, store Storage, source file_models.FileSource) (*types.FileRes, error) {
+func UploadFile(ctx context.Context, svcCtx *svc.ServiceContext, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string, store Storage, source file_models.FileSource) (*types.FileUploadRes, error) {
 	// 校验并处理文件
 	fileReq, err := ValidateAndProcessFile(file, fileHead, svcCtx)
 	if err != nil {
@@ -486,7 +486,7 @@ func UploadFile(ctx context.Context, svcCtx *svc.ServiceContext, file multipart.
 	// MD5去重：命中则直接返回已存记录
 	existingFile, err := CheckFileExists(fileReq.FileMd5, svcCtx)
 	if err == nil {
-		resp := &types.FileRes{
+		resp := &types.FileUploadRes{
 			FileKey:      existingFile.FileKey,
 			OriginalName: existingFile.OriginalName,
 			FileURL:      buildFileURL(svcCtx, source, existingFile),
@@ -515,7 +515,7 @@ func UploadFile(ctx context.Context, svcCtx *svc.ServiceContext, file multipart.
 	// 解析FormData中的fileInfo字段
 	var fileInfo *file_models.FileInfo
 	if fileInfoStr != "" {
-		var apiFileInfo types.FileInfo
+		var apiFileInfo types.FileUploadFileInfo
 		if json.Unmarshal([]byte(fileInfoStr), &apiFileInfo) == nil {
 			fileInfo = ConvertAPIFileInfoToModel(&apiFileInfo)
 		}
@@ -525,7 +525,7 @@ func UploadFile(ctx context.Context, svcCtx *svc.ServiceContext, file multipart.
 		svcCtx.DB.Save(newFileModel)
 	}
 
-	resp := &types.FileRes{
+	resp := &types.FileUploadRes{
 		FileKey:      newFileModel.FileKey,
 		OriginalName: newFileModel.OriginalName,
 		FileURL:      buildFileURL(svcCtx, source, newFileModel),
@@ -545,4 +545,53 @@ func PresignMinioURL(ctx context.Context, client *minio.Client, bucket, objectKe
 		return "", fmt.Errorf("生成MinIO预签名URL失败: %v", err)
 	}
 	return u.String(), nil
+}
+
+// ConvertUploadRes 把公共上传结果转换成各上传接口各自的 Res 类型。
+// 契约规范要求每个 handler 独立 Req/Res，这里集中做字段映射，避免 logic 里重复。
+func ConvertUploadRes(base *types.FileUploadRes, target any) {
+	switch r := target.(type) {
+	case *types.FileUploadQiniuRes:
+		r.FileKey, r.FileURL, r.OriginalName = base.FileKey, base.FileURL, base.OriginalName
+		if base.FileInfo != nil {
+			r.FileInfo = &types.FileUploadQiniuFileInfo{Type: base.FileInfo.Type}
+			if base.FileInfo.ImageFile != nil {
+				r.FileInfo.ImageFile = &types.FileUploadQiniuImageFile{Width: base.FileInfo.ImageFile.Width, Height: base.FileInfo.ImageFile.Height}
+			}
+			if base.FileInfo.VideoFile != nil {
+				r.FileInfo.VideoFile = &types.FileUploadQiniuVideoFile{Width: base.FileInfo.VideoFile.Width, Height: base.FileInfo.VideoFile.Height, Duration: base.FileInfo.VideoFile.Duration}
+			}
+			if base.FileInfo.AudioFile != nil {
+				r.FileInfo.AudioFile = &types.FileUploadQiniuAudioFile{Duration: base.FileInfo.AudioFile.Duration}
+			}
+		}
+	case *types.FileUploadLocalRes:
+		r.FileKey, r.FileURL, r.OriginalName = base.FileKey, base.FileURL, base.OriginalName
+		if base.FileInfo != nil {
+			r.FileInfo = &types.FileUploadLocalFileInfo{Type: base.FileInfo.Type}
+			if base.FileInfo.ImageFile != nil {
+				r.FileInfo.ImageFile = &types.FileUploadLocalImageFile{Width: base.FileInfo.ImageFile.Width, Height: base.FileInfo.ImageFile.Height}
+			}
+			if base.FileInfo.VideoFile != nil {
+				r.FileInfo.VideoFile = &types.FileUploadLocalVideoFile{Width: base.FileInfo.VideoFile.Width, Height: base.FileInfo.VideoFile.Height, Duration: base.FileInfo.VideoFile.Duration}
+			}
+			if base.FileInfo.AudioFile != nil {
+				r.FileInfo.AudioFile = &types.FileUploadLocalAudioFile{Duration: base.FileInfo.AudioFile.Duration}
+			}
+		}
+	case *types.FileUploadMinioRes:
+		r.FileKey, r.FileURL, r.OriginalName = base.FileKey, base.FileURL, base.OriginalName
+		if base.FileInfo != nil {
+			r.FileInfo = &types.FileUploadMinioFileInfo{Type: base.FileInfo.Type}
+			if base.FileInfo.ImageFile != nil {
+				r.FileInfo.ImageFile = &types.FileUploadMinioImageFile{Width: base.FileInfo.ImageFile.Width, Height: base.FileInfo.ImageFile.Height}
+			}
+			if base.FileInfo.VideoFile != nil {
+				r.FileInfo.VideoFile = &types.FileUploadMinioVideoFile{Width: base.FileInfo.VideoFile.Width, Height: base.FileInfo.VideoFile.Height, Duration: base.FileInfo.VideoFile.Duration}
+			}
+			if base.FileInfo.AudioFile != nil {
+				r.FileInfo.AudioFile = &types.FileUploadMinioAudioFile{Duration: base.FileInfo.AudioFile.Duration}
+			}
+		}
+	}
 }

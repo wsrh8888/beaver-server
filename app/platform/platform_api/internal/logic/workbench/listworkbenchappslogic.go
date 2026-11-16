@@ -28,7 +28,7 @@ import (
 
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
-	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	platform_rpc "beaver/app/platform/platform_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

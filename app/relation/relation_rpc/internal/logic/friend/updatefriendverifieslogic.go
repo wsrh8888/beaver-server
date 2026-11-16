@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -44,7 +44,7 @@ func NewUpdateFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 	return &UpdateFriendVerifiesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_friend_verifies", ctx)}
 }
 
-func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *types.UpdateFriendVerifiesReq) (*types.UpdateFriendVerifiesRes, error) {
+func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *pb.UpdateFriendVerifiesReq) (*pb.UpdateFriendVerifiesRes, error) {
 	if in.Action != friendVerifyActionDelete {
 		return nil, errors.New("不支持的操作类型")
 	}
@@ -58,7 +58,7 @@ func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *types.UpdateFriendV
 		ids = append(ids, v.Id)
 	}
 	if len(ids) == 0 {
-		return &types.UpdateFriendVerifiesRes{}, nil
+		return &pb.UpdateFriendVerifiesRes{}, nil
 	}
 
 	if err := l.svcCtx.DB.Where("id IN ?", ids).Delete(&friend_models.FriendVerifyModel{}).Error; err != nil {
@@ -66,5 +66,5 @@ func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *types.UpdateFriendV
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "删除好友验证成功", Data: map[string]interface{}{"count": len(ids)}})
-	return &types.UpdateFriendVerifiesRes{AffectedCount: int64(len(ids))}, nil
+	return &pb.UpdateFriendVerifiesRes{AffectedCount: int64(len(ids))}, nil
 }

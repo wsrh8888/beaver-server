@@ -27,7 +27,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewGetFileDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 }
 
 // 通过fileName查询文件详情
-func (l *GetFileDetailLogic) GetFileDetail(in *types.GetFileDetailReq) (*types.GetFileDetailRes, error) {
+func (l *GetFileDetailLogic) GetFileDetail(in *pb.GetFileDetailReq) (*pb.GetFileDetailRes, error) {
 	var file file_models.FileModel
 
 	// 通过fileName查询文件信息
@@ -61,7 +61,7 @@ func (l *GetFileDetailLogic) GetFileDetail(in *types.GetFileDetailReq) (*types.G
 	}
 
 	// 返回文件详情
-	return &types.GetFileDetailRes{
+	return &pb.GetFileDetailRes{
 		FileKey:      file.FileKey,
 		OriginalName: file.OriginalName,
 		Size:         file.Size,

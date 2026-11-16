@@ -27,7 +27,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
@@ -47,7 +47,7 @@ func NewUpdatePasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Up
 	}
 }
 
-func (l *UpdatePasswordLogic) UpdatePassword(in *types.UpdatePasswordReq) (*types.UpdatePasswordRes, error) {
+func (l *UpdatePasswordLogic) UpdatePassword(in *pb.UpdatePasswordReq) (*pb.UpdatePasswordRes, error) {
 	if in.UserId == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -88,5 +88,5 @@ func (l *UpdatePasswordLogic) UpdatePassword(in *types.UpdatePasswordReq) (*type
 		Data: map[string]any{"userId": in.UserId},
 	})
 
-	return &types.UpdatePasswordRes{Success: true}, nil
+	return &pb.UpdatePasswordRes{Success: true}, nil
 }

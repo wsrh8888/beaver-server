@@ -34,7 +34,7 @@ type (
 service datasync {
 	@doc "获取 Agent 会话版本摘要（增量/全量游标）"
 	@handler getSyncAgentConversations
-	post /beaver/api/datasync/sync/v1/getSyncAgentConversations (GetSyncAgentConversationsReq) returns (GetSyncAgentConversationsRes)
+	post /beaver/api/datasync/sync/v1/get_sync_agent_conversations (GetSyncAgentConversationsReq) returns (GetSyncAgentConversationsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

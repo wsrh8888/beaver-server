@@ -44,11 +44,11 @@ type (
 service notification {
 	@doc "按ID拉取收件箱明细（数据库同步）"
 	@handler getInboxByIds
-	post /beaver/api/notification/inbox/v1/getInboxByIds (getInboxByIdsReq) returns (getInboxByIdsRes)
+	post /beaver/api/notification/inbox/v1/get_inbox_by_ids (getInboxByIdsReq) returns (getInboxByIdsRes)
 
 	@doc "按事件ID删除单个通知"
 	@handler deleteNotification
-	post /beaver/api/notification/inbox/v1/deleteNotification (deleteNotificationReq) returns (deleteNotificationRes)
+	post /beaver/api/notification/inbox/v1/delete_notification (deleteNotificationReq) returns (deleteNotificationRes)
 }
 
 // goctl api go -api notification_api.api -dir . --home ../../../template

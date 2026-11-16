@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewGetEmojiPackageContentsLogic(ctx context.Context, svcCtx *svc.ServiceCon
 	}
 }
 
-func (l *GetEmojiPackageContentsLogic) GetEmojiPackageContents(in *types.GetEmojiPackageContentsReq) (*types.GetEmojiPackageContentsRes, error) {
+func (l *GetEmojiPackageContentsLogic) GetEmojiPackageContents(in *pb.GetEmojiPackageContentsReq) (*pb.GetEmojiPackageContentsRes, error) {
 	var packageContents []emoji_models.EmojiPackageEmoji
 
 	// 查询所有表情包内容（去掉时间戳过滤，确保同步所有数据）
@@ -59,15 +59,15 @@ func (l *GetEmojiPackageContentsLogic) GetEmojiPackageContents(in *types.GetEmoj
 	l.logger.Info(model.LogMsg{Text: "查询表情包内容版本变更", Data: map[string]interface{}{"count": len(packageContents)}})
 
 	// 转换为版本摘要格式
-	var contentVersions []*types.EmojiPackageContentVersionItem
+	var contentVersions []*pb.EmojiPackageContentVersionItem
 	for _, content := range packageContents {
-		contentVersions = append(contentVersions, &types.EmojiPackageContentVersionItem{
+		contentVersions = append(contentVersions, &pb.EmojiPackageContentVersionItem{
 			PackageId: content.PackageID,
 			Version:   content.Version,
 		})
 	}
 
-	return &types.GetEmojiPackageContentsRes{
+	return &pb.GetEmojiPackageContentsRes{
 		EmojiPackageContentVersions: contentVersions,
 		ServerTimestamp:             time.Now().UnixMilli(),
 	}, nil

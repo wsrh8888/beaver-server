@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewGetEmojisLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetEmoj
 }
 
 // ========== 用户相关表情基础数据同步 ==========
-func (l *GetEmojisLogic) GetEmojis(in *types.GetEmojisReq) (*types.GetEmojisRes, error) {
+func (l *GetEmojisLogic) GetEmojis(in *pb.GetEmojisReq) (*pb.GetEmojisRes, error) {
 	// 获取用户相关的表情ID列表：
 	// 1. 用户直接收藏的表情
 	// 2. 用户收藏的表情包中包含的表情
@@ -112,8 +112,8 @@ func (l *GetEmojisLogic) GetEmojis(in *types.GetEmojisReq) (*types.GetEmojisRes,
 	}
 
 	if len(emojiIDMap) == 0 {
-		return &types.GetEmojisRes{
-			EmojiVersions:   []*types.EmojiVersionItem{},
+		return &pb.GetEmojisRes{
+			EmojiVersions:   []*pb.EmojiVersionItem{},
 			ServerTimestamp: time.Now().UnixMilli(),
 		}, nil
 	}
@@ -149,15 +149,15 @@ func (l *GetEmojisLogic) GetEmojis(in *types.GetEmojisReq) (*types.GetEmojisRes,
 	})
 
 	// 转换为版本摘要格式
-	var emojiVersions []*types.EmojiVersionItem
+	var emojiVersions []*pb.EmojiVersionItem
 	for _, emoji := range emojis {
-		emojiVersions = append(emojiVersions, &types.EmojiVersionItem{
+		emojiVersions = append(emojiVersions, &pb.EmojiVersionItem{
 			EmojiId: emoji.EmojiID,
 			Version: emoji.Version,
 		})
 	}
 
-	return &types.GetEmojisRes{
+	return &pb.GetEmojisRes{
 		EmojiVersions:   emojiVersions,
 		ServerTimestamp: time.Now().UnixMilli(),
 	}, nil

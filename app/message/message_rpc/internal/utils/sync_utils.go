@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	core "beaver/core/version"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"

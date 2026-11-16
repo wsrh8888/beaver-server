@@ -1,122 +1,223 @@
 # go-zero 服务端（beaver-server）
 
-> 合并自原 `beaver-server-dev` skill 的 api-conventions / architecture / gotchas 三份，并内嵌 `.cursor/rules/beaver-server.mdc`。
+## 公共（全仓）
 
-## 三条红线（违反必被否决）
+### 三条红线
 
-1. 本仓 rpc 只在本仓服务间用，**绝不出仓**；仓内服务互调用 rpc，不要改成 S2S。
-2. `beaver-server-package/` 下 6 个团队仓（ai/backend/call/doc/open/social）各自 rpc 不出业务线。
-3. 跨仓一律走 **S2S**：打对方正常业务 API + Bearer 机器票。不造 `/internal/*` 门面，不加转发层。跨仓客户端叫 remote / S2S，不叫 rpc。
+1. 本仓 rpc 只在本仓服务间用，**绝不出仓**；仓内互调走 rpc，不要改成 S2S。
+2. `beaver-server-package/` 下各团队仓（ai/backend/call/doc/open/social）各自 rpc 不出业务线。
+3. 跨仓一律 **S2S**：打对方业务 API + Bearer 机器票。不造 `/internal/*` 门面。跨仓客户端叫 remote / S2S，**不叫 rpc**。
 
-历史上曾把 `friend_api` 调用误改成 S2S、曾建 datasync 全量门面，均被要求回滚。
+### 通用硬性
 
-## 代码生成（必须遵守）
-
-- 只改 `.api` / `.proto` / `logic`，用 goctl 生成 handler、routes、types。
-- 禁止手改 `routes.go` / handler 等生成文件；禁止删除已有 handler / logic 文件。
-- 禁止跨服务直接访问其他模块数据库（微服务隔离）。
+- 禁止跨服务直接访问其他模块数据库。
 - 禁止 `go build` / 启动服务 / 打包——除非用户明确要求。
-- 改行为请改 `template/` 后重新生成，不要手改生成文件。
-- Res 不含 `code`/`msg`，中间件包裹为 `{ code, msg, result }`。
+- 禁止删除已有 handler / logic 文件；废弃接口先停声明再谈。
+- 只改契约与业务实现：`.api` / `.proto` / `logic`（及确需的 `svc` / `config` / `template`）；生成物用 goctl，**禁止手改** `routes.go` / handler / pb 生成文件等。
+- 改公共生成行为：改 `template/` 后重新生成。
+- 新 Go 文件保留完整 `beaver-server-header`；生成文件也要补。
+- 命名：`.api` 驼峰；`.proto` / 表名 snake_case。
+- handler：入参校验；logic：业务（DB / rpc / remote）。
 
-## .api 文件与路由
-
-- 每个 `@handler` 独立 `type()` 块（入参 + 出参 + 专用子类型），接口之间不共享请求/响应类型；字段注释写清含义与类型。
-- 有 `@server group`、由主 `.api` import 子 `.api` 的服务用 **5 段**：`/{prefix}/{service}/{group}/v1/{action}`，如 `/api/open/auth_public/v1/token`、`/admin/backend/user/v1/list`。
-- 无分组单模块用 **4 段**：`/{prefix}/{module}/v1/{action}`，如 `/api/friend/v1/update_notice`。
-- `v1` 紧挨动作；`service` 是 service 名、`group` 是 `@server group`；管理后台固定 `/admin/backend/{group}/v1/{action}`。
-- 必须含 `v1`；ID 用 `form` / `query`，禁止 `:id` 路径参数；**禁止 6 段及以上**。
-
-### 消灭 6 段
-
-6 段一律违规，"资源 + 操作"把资源并入动作名（snake_case）：
-```
-/api/auth/auth_public/v1/qrcode/status   → /api/auth/auth_public/v1/qrcode_status
-/api/auth/auth/v1/qrcode/scan            → /api/auth/auth/v1/qrcode_scan
-```
-历史 3 条 qrcode 6 段路由、2 条 org 路由 v1 位置偏后（`/api/org/v1/department/tree` → `department_tree`）是现状偏差，不要照抄；改 URL 属破坏性变更须同步调用方并与用户确认。
-
-## handler / logic 分工与命名
-
-- handler：入参校验（非空、格式、范围），失败直接返回。
-- logic：业务逻辑（DB、RPC、Redis）。
-- 命名：`.api` 驼峰；`.rpc` / 表名 snake_case。
-
-## 架构与调用方向
+### 调用方向
 
 | 场景 | 方式 |
 |---|---|
-| 本仓服务 A → B | etcd gRPC，走 `client/<子域>` 窄接口包 |
-| 本仓 → 收费仓（circle/doc/moment/open/ai） | `remote/<x>` 出站客户端（S2S） |
-| 收费仓 → 本仓核心能力 | S2S 打本仓业务 API（account/message/relation/asset/platform/notification） |
-| 收费仓 → 本仓同步能力 | datasync 仅 `getSync*` |
+| 本仓服务 A → B | etcd gRPC（rpc） |
+| 本仓 → 独立产品仓 | `remote/<x>`（S2S） |
+| 独立仓 → 本仓 | S2S 打本仓业务 API |
 
-### 服务速查（合并后 9 个）
+### 领域目录（强制）
 
-| 服务 | 合并前 | api/rpc 端口 | etcd key | 库 |
-|---|---|---|---|---|
-| account | user+auth | 20100/30100 | accountrpc.rpc | beaver_account |
-| relation | friend+group | 20200/30200 | relationrpc.rpc | beaver_relation |
-| message | chat | 20300/30300 | messagerpc.rpc | beaver_message |
-| asset | file+emoji | 20600/30600 | assetrpc.rpc | beaver_asset |
-| notification | — | 21000 | notificationrpc.rpc | — |
-| platform | — | 21600 | platformrpc.rpc | — |
-| datasync | — | 21700 | datasyncrpc.rpc | — |
-| ws / gateway | — | 20400 / — | — | — |
+每个业务域目录下**只允许**这三类（命名 `xx_api` / `xx_models` / `xx_rpc`）：
 
-库名合并映射（表名不变）：friend/group→relation、file/emoji→asset、user/auth→account、chat→message。
-
-### 合并范式（goctl multiple）
-
-单一 proto（package `xxx_rpc`，go_package `./types`），生成：
-```bash
-goctl rpc protoc xxx.proto --go_out=. --go-grpc_out=. -m --zrpc_out=.
+```text
+app/<domain>/
+  <domain>_api/       # HTTP
+  <domain>_models/    # 本域库表模型
+  <domain>_rpc/       # 仓内 gRPC（可按域裁剪，但不得另起杂目录替代 models）
 ```
-产物：`types/` 单 pb 包、`client/<子域>/`、`internal/{logic,server}/{子域}/`；单 etcd 注册；已存在的 etc/svc/config/main 不被覆盖。
 
-- 调用方 pb 别名：account→`accttypes.`、asset→`assettypes.`、relation→`types.`（冲突 alias `relationtypes`）、message→`chat_rpc.`。
-- client 构造：`NewUser` / `NewAuth` / `NewFriend` / `NewGroup` / `NewFile` / `NewEmoji`。
-- gateway `ServiceAlias`（URL 前缀→合并服务名，7 条）：friend/group→relation、file/emoji→asset、user/auth→account、chat→message。deploy yaml 的 `Name` 不带 `_api` 后缀（代码注册 `c.Name+"_api"`）。根 Dockerfile = 9 服务 16 二进制，改名后同步。
+示例：`account_api` + `account_models` + `account_rpc`；`open_api` + `open_models` + `open_rpc`。  
+禁止在域下再塞 `app/`、`common_models/`、随意 `models/` 等第三套表目录。
 
-## 鉴权（声明式，业务自持）
+---
 
-网关只按路径第 3 段 service 转发，**不鉴权、不注入身份头**；鉴权全部由下游业务服务在 `.api` 中声明：`@server (jwt: Auth)` 挂用户 JWT，`@server (middleware: InternalToken)` 挂 S2S 机器票，换票端点单独成组不挂中间件（靠 client_secret）。机器票受众按服务区分（`core:api` / `open:internal` / `doc:internal` / `ai:internal`），换票端点如 `POST /beaver/api/auth/token/v1/issue`（account_api，client_credentials）。鉴权失败返回真实 401（非 200+code=1，否则 S2S 客户端无法清票重换）。
+## Models（数据库表）规范
 
-新服务接入：在 `.api` 里按面声明 `jwt` 或 `middleware`，svc 构造对应中间件（如 `jwt.NewS2S(...)`）注入，main 只调 goctl 生成的 `RegisterHandlers`。**不要另造转发层、全局 AuthGate 或第二套门面。**
+目录按**业务**分子包，**一文件一表**：
 
-对外路径统一六段：`/{team}/{surface}/{service}/{group}/v1/{action}`，team ∈ `beaver`（主仓）/ `beaver-social|beaver-open|beaver-doc|beaver-call|beaver-ai|beaver-backend`（独立产品仓）。跨仓调用一律走对方标准机器视图六段路径，禁止 `/internal/X.Method` 双轨。
+```text
+xx_models/
+  user/
+    user_model.go              # 仅 user 表
+    user_setting_model.go      # 仅 user_setting 表
+  auth/
+    auth_credential_model.go
+    auth_device_model.go
+  oauth/
+    open_oauth_model.go        # 仅 open_oauth 表
+    open_oauth_token_model.go
+```
 
-特例：agent_api（Python）机器面用 Bearer JWT 或静态 `X-Internal-Token`（与调用方 yaml `InternalToken` 同值），由 AuthMiddleware 按机器面路径前缀分支处理。
+硬性：
 
-## go.mod replace（本地联调）
+- 表模型必须落在本域 `xx_models`，禁止写进 `_api` / `_rpc` 的 internal。
+- **按业务分子目录**（`user` / `auth` / `oauth` / `bot` / `digital`…），目录名用业务语义，**禁止**含糊的 `app` 之类大杂烩包。
+- **一个 `.go` 文件只对应一张表**（一个 `TableName()` / 一个主 model struct）。禁止 1 个文件里定义多张表。
+- 该表 JSON 列的 `Scan`/`Value` 辅助类型可放同文件，且**只服务这一张表**；不能顺手配别的表。
+- 文件名：`xxx_model.go`（或现有 `*_model.go` 风格），表名 snake_case。
 
-- `beaver-ai/server`：`replace beaver => ../../../beaver-server`
-- `beaver-backend` / `beaver-open`：`replace beaver-ai => ../beaver-ai/server`
+反例（不合法）：
 
-模块名注意：`beaver-social` 的 module 是 `github.com/wsrh8888/beaver-server-social`；跨仓复制代码时按目标仓 go.mod 实际 module 改 import 前缀。
+- `open_models/app/open_oauth_model.go`：业务目录叫 `app` 不合法；OAuth 表应在 `open_models/oauth/`，且该文件不得再夹其它表。
+- 一个 `xxx_models.go` 里堆 `User`、`Order`、`Token` 多张表。
 
-## 踩坑清单
+---
 
-### CRLF / 批量编辑
+## API 服务规范
 
-- 仓库文件多为 **CRLF**：python/sed 的 `\n` 匹配会静默失败。用 `splitlines(keepends=True)` 行过滤、正则配 `\r?\n`、跳过块终止条件用 `line.rstrip() == "}"`。
-- bash 传 `python -c` 时 `\n` 被损坏成字面 `/n`：换行用 `chr(10)` 或写文件。sed 替换侧 `&` 需转义 `\&`。
-- MSYS 路径 `/f/...` Windows Python 打不开，用 `F:/...`；`python /dev/stdin` 不可用。
-- 收费仓在 `F:/code/mine/github/beaver-server-package/` 下；本仓 import 是短名 `beaver/...`，grep 别用全 module 名（假阴性）。
+目录形态（强制）：
 
-### goctl
+```text
+xxx_api/
+  xxx_api.api          # 主入口：只 import，不写业务 type/handler
+  api/                 # 必须有；按 group 拆子 .api
+    auth_public.api
+    user.api
+    ...
+  internal/
+    handler/           # goctl 生成
+    logic/             # 业务手写
+    types/             # goctl 生成
+    ...
+  xxx.go               # main
+```
 
-- api 生成：`goctl api go -api xxx.api -dir . --home ../../../template`（本仓自带模板，response 信封由模板 + 中间件统一包裹，不手改 handler）。
-- `.api` 不接受 C 风格块注释 `/** */`（用 `//`）；同文件 service 名唯一；新增 service 名可能误建额外 main 文件（删本次误生成的，不删已有）。
-- `duplicate type expression` 的根因是接口间共享类型——按规范每个 `@handler` 独立 `type()` 块。
-- rpc 生成后检查 pb 落盘目录（由 `go_package` 决定）。
+主文件只做引入，例如：
 
-### pb 类型映射
+```api
+import "api/auth_public.api"
+import "api/auth.api"
+import "api/user.api"
 
-`.api` types 与 proto types 是两套 Go 类型，用 `common/convert.To[T]`（JSON 往返）转换，字段名 / json tag 需逐字一致；转换失败当业务错误抛出，不要静默返回零值。
+// goctl api go -api xxx_api.api -dir . --home ../../../template
+```
 
-常见名不一致：`.api` `UserLookup/UserList/UserUpdate/UserDelete/UserUpdateStatus/UserSearch/ResetUserPassword` → proto `UserInfo/ListUsers/UpdateUsers/DeleteUsers/UpdateUsersStatus/SearchUser/ResetPassword`。新增 DTO 先对照 `beaver-backend/types/remote/server/*.go` 的 json tag。
+### 路由（六段）
 
-### 版权头
+```text
+/{team}/{surface}/{service}/{group}/v1/{action}
+```
 
-所有 Go 文件保留完整 `beaver-server-header` 版权头，生成的新文件也要补。
+| 段 | 含义 |
+|---|---|
+| team | `beaver` 或 `beaver-open` 等独立仓 |
+| surface | `api` / `admin` / 机器面（如 `machine`） |
+| service | 服务名，如 `auth`、`open` |
+| group | 与 `@server group`、子 `.api` 一致 |
+| v1 | 固定，紧挨 action |
+| action | snake_case；资源+操作并进动作名 |
+
+示例：`/beaver/api/auth/auth_public/v1/phone_login`  
+禁止：`:id` 路径参数；禁止 `/v1/qrcode/status` 再拆段（写成 `qrcode_status`）。
+
+网关只转发、不鉴权；鉴权在下游 `@server` 声明（`jwt` / `middleware`）；公开组不挂身份中间件。鉴权失败真实 **401**。
+
+### `.api` 契约
+
+- **每一个** `@handler` = 一个接口 = **一组**独立 `type ( ... )`。
+- 该 `type` 块内必须有本接口的 `XxxReq` + `XxxRes`（Res 可空：`XxxRes {}`），以及**仅本接口**用的子类型。
+- **不允许接口间共享任何 type**（含 Req、Res、嵌套子结构）。每个接口契约独立；共享会导致改 A 连带改坏 B。字段看起来一样也要各自拷一份、各自命名（如 `PhoneLoginUser` / `EmailLoginUser`），禁止共用 `User` / `CommonReq` 之类。
+- 有 N 个 `@handler` 就有且仅有 N 个业务 `type` 块。
+- Res **不含** `code` / `msg`；中间件包成 `{ code, msg, result }`。
+- 只用 `//` 注释；同文件 `service` 名唯一；字段注释写清含义。
+
+```api
+type (
+	PhoneLoginReq {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+	}
+	PhoneLoginRes {
+		Token  string `json:"token"`
+		UserID string `json:"userId"`
+	}
+)
+
+@server (
+	group: auth_public
+)
+service account {
+	@handler phoneLogin
+	post /beaver/api/auth/auth_public/v1/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
+}
+```
+
+### API 代码生成
+
+```bash
+goctl api go -api xxx_api.api -dir . --home ../../../template
+```
+
+只改 `api/*.api`（及主 import）和 `internal/logic`；生成 handler / routes / types，不手改。
+
+---
+
+## RPC 服务规范
+
+目录形态（强制，**multiple / `-m`**）：
+
+```text
+xxx_rpc/
+  xxx.proto            # 单 proto，多个 service
+  client/<子域>/       # goctl -m 生成窄客户端
+  internal/
+    logic/<子域>/
+    server/<子域>/
+    ...
+  pb/                  # protobuf 生成物（go-zero 官方习惯名）
+  xxx.go
+```
+
+### proto
+
+- 一个进程一个 proto 包（如 `package account_rpc`）。
+- **pb 落点（强制）**：`option go_package = "./pb";` → 生成到本服务根下 `pb/*.pb.go`（不要进 `internal/types`，也不要用旧的 `types/`）。
+- **必须多个 `service`** 按子域拆（如 `service user`、`service auth`），编译加 **`-m`**；禁止单 service 把所有 RPC 糊成一团。
+- 字段注释写清；命名 snake_case。
+
+### RPC 代码生成
+
+与 go-zero 官方一致，`go_package` / 生成目录都叫 `pb`：
+
+```bash
+goctl rpc protoc xxx.proto --go_out=. --go-grpc_out=. -m --zrpc_out=. --home ../../../template
+```
+
+- `option go_package = "./pb";`：goctl/protoc 会按包名自动建 `pb/` 子目录，所以 out 参数用 `.`（不是 `./pb`），产物恰好落在 `xxx_rpc/pb/*.pb.go`。实测当前 goctl 版本即如此；若写 `--go_out=./pb` 反而会套娃成 `pb/pb/`。
+- `-m` 必带：产出 `client/<子域>`、`internal/{logic,server}/<子域>`。
+- 只改 `.proto` 与对应 `logic`；`pb/` 下生成物、server、client 不手改。
+- rpc **仅仓内**互调；外仓禁止直连本仓 etcd rpc。
+
+### 与 API 类型
+
+两套目录、两套类型，勿混：
+
+| 来源 | 目录 |
+|---|---|
+| `.api` → goctl api | `xxx_api/internal/types/` |
+| `.proto` → protoc | `xxx_rpc/pb/` |
+
+跨层用 `common/convert.To[T]`，json tag 必须一致，失败当业务错误，不要静默零值。
+
+---
+
+## 踩坑
+
+- 仓库多为 CRLF；路径用 `F:/...`。
+- 发现两个接口引用同一 type，或 goctl 报 `duplicate type expression`：立刻拆开，禁止共享；原因是改 A 会影响 B。
+- models 出现 `app/` 杂包或一文件多 `TableName`：按 Models 节拆到业务子目录，一文件一表。
+- 新增 service 名可能误建额外 main：只删本次误生成的。
+- 本仓 import 短名 `beaver/...`；独立仓按各自 go.mod module。
+- rpc 生成物目录统一 `pb/` + `go_package = "./pb"`；改落点时 import 路径、无别名文件的 `types.` 限定符、生成文件 `package` 名必须一起迁移，不要半改半留。

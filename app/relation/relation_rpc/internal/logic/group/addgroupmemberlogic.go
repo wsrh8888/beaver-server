@@ -28,7 +28,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewAddGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 	}
 }
 
-func (l *AddGroupMemberLogic) AddGroupMember(in *types.AddGroupMemberReq) (*types.AddGroupMemberRes, error) {
+func (l *AddGroupMemberLogic) AddGroupMember(in *pb.AddGroupMemberReq) (*pb.AddGroupMemberRes, error) {
 	if in.GroupId == "" || in.UserId == "" {
 		return nil, errors.New("group_id 和 user_id 不能为空")
 	}
@@ -71,7 +71,7 @@ func (l *AddGroupMemberLogic) AddGroupMember(in *types.AddGroupMemberReq) (*type
 	err := l.svcCtx.DB.Where("group_id = ? AND user_id = ?", in.GroupId, in.UserId).First(&existing).Error
 	if err == nil {
 		if existing.Status == 1 {
-			return &types.AddGroupMemberRes{
+			return &pb.AddGroupMemberRes{
 				Added:         false,
 				MemberVersion: existing.Version,
 			}, nil
@@ -122,7 +122,7 @@ func (l *AddGroupMemberLogic) AddGroupMember(in *types.AddGroupMemberReq) (*type
 
 	l.logger.Info(model.LogMsg{Text: "添加群成员成功", Data: map[string]interface{}{"groupId": in.GroupId, "userId": in.UserId, "added": added, "memberVersion": memberVersion}})
 
-	return &types.AddGroupMemberRes{
+	return &pb.AddGroupMemberRes{
 		Added:         added,
 		MemberVersion: memberVersion,
 	}, nil

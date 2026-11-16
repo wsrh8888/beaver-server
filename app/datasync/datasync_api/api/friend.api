@@ -41,11 +41,11 @@ type (
 service datasync {
 	@doc "获取所有需要更新的好友版本"
 	@handler getSyncFriends
-	post /beaver/api/datasync/sync/v1/getSyncFriends (GetSyncFriendsReq) returns (GetSyncFriendsRes)
+	post /beaver/api/datasync/sync/v1/get_sync_friends (GetSyncFriendsReq) returns (GetSyncFriendsRes)
 
 	@doc "获取所有需要更新的好友验证版本"
 	@handler getSyncFriendVerifies
-	post /beaver/api/datasync/sync/v1/getSyncFriendVerifies (GetSyncFriendVerifiesReq) returns (GetSyncFriendVerifiesRes)
+	post /beaver/api/datasync/sync/v1/get_sync_friend_verifies (GetSyncFriendVerifiesReq) returns (GetSyncFriendVerifiesRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

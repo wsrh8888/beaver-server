@@ -1,7 +1,7 @@
 syntax = "proto3";
 package notification_rpc;
 
-option go_package = "./notification_rpc";
+option go_package = "./pb";
 
 // 仅用于同步（datasync 调用）：三张表的 uuid/version 摘要
 
@@ -95,14 +95,20 @@ message DisablePushTokenRes {
   bool success = 1;
 }
 
-service notification {
+service event {
   rpc PushEvent(PushEventReq) returns (PushEventRes);
   rpc GetEventVersions(GetEventVersionsReq) returns (GetEventVersionsRes);
+}
+
+service inbox {
   rpc GetInboxVersions(GetInboxVersionsReq) returns (GetInboxVersionsRes);
   rpc GetReadCursorVersions(GetReadCursorVersionsReq) returns (GetReadCursorVersionsRes);
+}
+
+service push {
   rpc ListPushTokens(ListPushTokensReq) returns (ListPushTokensRes);
   rpc DisablePushToken(DisablePushTokenReq) returns (DisablePushTokenRes);
 }
 
-// goctl rpc protoc notification_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template
+// goctl rpc protoc notification_rpc.proto --go_out=. --go-grpc_out=. --zrpc_out=. --home ../../../template
 

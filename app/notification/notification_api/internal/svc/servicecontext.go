@@ -24,7 +24,7 @@ package svc
 import (
 	"beaver/app/account/account_rpc/client/auth"
 	"beaver/app/account/account_rpc/client/user"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/notification/notification_api/internal/config"
 	"beaver/app/notification/notification_api/internal/middleware"
 	"beaver/app/notification/notification_rpc/notification"

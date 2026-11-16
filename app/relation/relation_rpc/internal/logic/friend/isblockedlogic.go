@@ -26,7 +26,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -44,11 +44,11 @@ func NewIsBlockedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsBlock
 	}
 }
 
-func (l *IsBlockedLogic) IsBlocked(in *types.IsBlockedReq) (*types.IsBlockedRes, error) {
+func (l *IsBlockedLogic) IsBlocked(in *pb.IsBlockedReq) (*pb.IsBlockedRes, error) {
 	var blockCount int64
 	l.svcCtx.DB.Model(&friend_models.FriendBlockModel{}).
 		Where("(user_id = ? AND blocked_user_id = ?) OR (user_id = ? AND blocked_user_id = ?)",
 			in.UserA, in.UserB, in.UserB, in.UserA).
 		Count(&blockCount)
-	return &types.IsBlockedRes{IsBlocked: blockCount > 0}, nil
+	return &pb.IsBlockedRes{IsBlocked: blockCount > 0}, nil
 }

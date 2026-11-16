@@ -31,7 +31,7 @@ import (
 	conversationServer "beaver/app/message/message_rpc/internal/server/conversation"
 	messageServer "beaver/app/message/message_rpc/internal/server/message"
 	"beaver/app/message/message_rpc/internal/svc"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	grpcMiddleware "beaver/common/middleware/grpc"
 	"beaver/utils/beaverlog"
 

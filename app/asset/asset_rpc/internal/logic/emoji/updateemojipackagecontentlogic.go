@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -51,7 +51,7 @@ func NewUpdateEmojiPackageContentLogic(ctx context.Context, svcCtx *svc.ServiceC
 	return &UpdateEmojiPackageContentLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_emoji_package_content", ctx)}
 }
 
-func (l *UpdateEmojiPackageContentLogic) UpdateEmojiPackageContent(in *types.UpdateEmojiPackageContentReq) (*types.UpdateEmojiPackageContentRes, error) {
+func (l *UpdateEmojiPackageContentLogic) UpdateEmojiPackageContent(in *pb.UpdateEmojiPackageContentReq) (*pb.UpdateEmojiPackageContentRes, error) {
 	switch in.Action {
 	case packageContentActionAdd:
 		return l.addEmoji(in)
@@ -62,7 +62,7 @@ func (l *UpdateEmojiPackageContentLogic) UpdateEmojiPackageContent(in *types.Upd
 	}
 }
 
-func (l *UpdateEmojiPackageContentLogic) addEmoji(in *types.UpdateEmojiPackageContentReq) (*types.UpdateEmojiPackageContentRes, error) {
+func (l *UpdateEmojiPackageContentLogic) addEmoji(in *pb.UpdateEmojiPackageContentReq) (*pb.UpdateEmojiPackageContentRes, error) {
 	var pkg emoji_models.EmojiPackage
 	if err := l.svcCtx.DB.Where("package_id = ?", in.PackageId).First(&pkg).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -124,13 +124,13 @@ func (l *UpdateEmojiPackageContentLogic) addEmoji(in *types.UpdateEmojiPackageCo
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "添加表情到表情包成功", Data: map[string]interface{}{"packageId": pkg.PackageID, "emojiId": emoji.EmojiID, "relationId": relation.RelationID}})
-	return &types.UpdateEmojiPackageContentRes{
+	return &pb.UpdateEmojiPackageContentRes{
 		RelationId: relation.RelationID,
 		EmojiId:    emoji.EmojiID,
 	}, nil
 }
 
-func (l *UpdateEmojiPackageContentLogic) removeEmoji(in *types.UpdateEmojiPackageContentReq) (*types.UpdateEmojiPackageContentRes, error) {
+func (l *UpdateEmojiPackageContentLogic) removeEmoji(in *pb.UpdateEmojiPackageContentReq) (*pb.UpdateEmojiPackageContentRes, error) {
 	var relation emoji_models.EmojiPackageEmoji
 	if err := l.svcCtx.DB.Where("package_id = ? AND emoji_id = ?", in.PackageId, in.EmojiId).
 		First(&relation).Error; err != nil {
@@ -146,5 +146,5 @@ func (l *UpdateEmojiPackageContentLogic) removeEmoji(in *types.UpdateEmojiPackag
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "从表情包移除表情成功", Data: map[string]interface{}{"packageId": in.PackageId, "emojiId": in.EmojiId}})
-	return &types.UpdateEmojiPackageContentRes{EmojiId: in.EmojiId}, nil
+	return &pb.UpdateEmojiPackageContentRes{EmojiId: in.EmojiId}, nil
 }

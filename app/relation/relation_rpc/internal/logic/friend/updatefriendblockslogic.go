@@ -26,7 +26,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -44,12 +44,12 @@ func NewUpdateFriendBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	return &UpdateFriendBlocksLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_friend_blocks", ctx)}
 }
 
-func (l *UpdateFriendBlocksLogic) UpdateFriendBlocks(in *types.UpdateFriendBlocksReq) (*types.UpdateFriendBlocksRes, error) {
+func (l *UpdateFriendBlocksLogic) UpdateFriendBlocks(in *pb.UpdateFriendBlocksReq) (*pb.UpdateFriendBlocksRes, error) {
 	if in.Action != 1 {
 		return nil, status.Error(codes.InvalidArgument, "无效的操作类型")
 	}
 	if len(in.BlockIds) == 0 {
-		return &types.UpdateFriendBlocksRes{}, nil
+		return &pb.UpdateFriendBlocksRes{}, nil
 	}
 
 	result := l.svcCtx.DB.Where("block_id IN ?", in.BlockIds).Delete(&friend_models.FriendBlockModel{})
@@ -67,5 +67,5 @@ func (l *UpdateFriendBlocksLogic) UpdateFriendBlocks(in *types.UpdateFriendBlock
 
 	l.logger.Info(model.LogMsg{Text: "解除黑名单成功", Data: map[string]interface{}{"blockIds": in.BlockIds, "affected": result.RowsAffected}})
 
-	return &types.UpdateFriendBlocksRes{AffectedCount: result.RowsAffected}, nil
+	return &pb.UpdateFriendBlocksRes{AffectedCount: result.RowsAffected}, nil
 }

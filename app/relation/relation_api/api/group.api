@@ -1,77 +1,110 @@
 syntax = "v1"
 
 // 创建群组
+
+// 删除群组
+
+// 移除群成员
+
+// 添加群成员
+
+// 我加入的群组
+
+// 更新群组信息
+
+// 获取群成员列表
+
+// 更新群成员角色
+
+// 申请加入群组
+
+// 退出群组
+
+// 转让群主
+
+// 群信息
+
+// 群资料同步（基于群组版本对象）
+
+// 群成员同步（基于群组版本对象）
+
+// 入群申请同步（基于群组版本对象）
+
+// 搜索群组
+
+// 群组申请管理
+
+// 处理群组申请
+
+// 禁言/解禁群成员（duration=0 解禁，正值=禁言分钟数）
+
+// 全员禁言/解禁
+
+// 邀请用户加入群组
+
+// 解析群邀请链接
+
 type (
-	GroupCreateReq {
+GroupCreateReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Title      string   `json:"title,optional"` // 群组名称，可选
 		UserIdList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
 	}
-	GroupCreateRes {
+
+GroupCreateRes {
 		GroupID string `json:"groupId"` // 创建的群组ID
 		Version int64  `json:"version"` // 群组初始版本号
 	}
 )
 
-// 删除群组
 type (
-	GroupDeleteReq {
+GroupDeleteReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string `json:"groupId"` // 要删除的群组ID
 	}
-	GroupDeleteRes {
+
+GroupDeleteRes {
 		Version int64 `json:"version"` // 群组新版本号
 	}
 )
 
-// 移除群成员
 type (
-	GroupMemberRemoveReq {
+GroupMemberRemoveReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
 		UserIds []string `json:"userIds"` // 要移除的成员ID列表
 	}
-	GroupMemberRemoveRes {
+
+GroupMemberRemoveRes {
 		Version int64 `json:"version"` // 群成员新版本号
 	}
 )
 
-// 添加群成员
 type (
-	GroupMemberAddReq {
+GroupMemberAddReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
 		UserIds []string `json:"userIds"` // 要添加的成员ID列表
 	}
-	GroupMemberAddRes {
+
+GroupMemberAddRes {
 		Version int64 `json:"version"` // 群成员新版本号
 	}
 )
 
-// 我加入的群组
 type (
-	GroupMineReq {
+GroupQuitReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		Page   int    `json:"page,optional"` // 页码，可选，默认1
-		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
+		GroupID string `json:"groupId"` // 群组ID
 	}
-	GroupMineItem {
-		GroupID        string `json:"groupId"` // 群组ID
-		Title          string `json:"title"` // 群组名称
-		Avatar         string `json:"avatar"` // 群组头像URL
-		MemberCount    int    `json:"memberCount"` // 成员数量
-		ConversationID string `json:"conversationId"` // 会话ID
-		Version        int64  `json:"version"` // 数据版本号
-	}
-	GroupMineRes {
-		List  []GroupMineItem `json:"list"` // 群组列表
-		Count int             `json:"count"` // 总数
+
+GroupQuitRes {
+		Version int64 `json:"version"` // 群成员新版本号
 	}
 )
 
-// 更新群组信息
 type (
-	UpdateGroupInfoReq {
+UpdateGroupInfoReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID  string `json:"groupId"` // 群组ID
 		Title    string `json:"title,optional"` // 新群名称，可选
@@ -79,92 +112,19 @@ type (
 		Notice   string `json:"notice,optional"` // 新群公告，可选
 		JoinType int8   `json:"joinType,optional"` // 加入方式：0自由加入 1需审批 2不允许加入
 	}
-	UpdateGroupInfoRes {
+
+UpdateGroupInfoRes {
 		Version int64 `json:"version"` // 群资料新版本号
 	}
 )
 
-// 获取群成员列表
 type (
-	GroupMemberListReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		GroupID string `json:"groupId"` // 群组ID
-		Page    int    `json:"page,optional"` // 页码，可选，默认1
-		Limit   int    `json:"limit,optional"` // 每页数量，可选，默认20
-	}
-	GroupMemberListItem {
-		UserID   string `json:"userId"` // 成员用户ID
-		NickName string `json:"nickName"` // 成员昵称
-		Avatar   string `json:"avatar"` // 成员头像URL
-		Role     int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
-		Status   int8   `json:"status"` // 成员状态：1正常 2退出 3被踢
-		JoinTime string `json:"joinTime"` // 加入时间戳
-		Version  int64  `json:"version"` // 数据版本号
-	}
-	GroupMemberListRes {
-		List  []GroupMemberListItem `json:"list"` // 成员列表
-		Count int64                 `json:"count"` // 总数
-	}
-)
-
-// 更新群成员角色
-type (
-	UpdateMemberRoleReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		GroupID  string `json:"groupId"` // 群组ID
-		MemberID string `json:"memberId"` // 目标成员ID
-		Role     int8   `json:"role"` // 新角色：2管理员 3普通成员
-	}
-	UpdateMemberRoleRes {
-		Version int64 `json:"version"` // 群成员新版本号
-	}
-)
-
-// 申请加入群组
-type (
-	GroupJoinReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		GroupID    string `json:"groupId,optional"` // 目标群组ID（有 inviteCode 时可空）
-		Message    string `json:"message,optional"` // 申请消息，可选
-		InviteCode string `json:"inviteCode,optional"` // 邀请短码（从 inviteUrl 解析）
-	}
-	GroupJoinRes {
-		Version int64  `json:"version"` // 入群申请或成员版本号
-		Status  int8   `json:"status"` // 1=已加入 0=申请待审批
-		GroupID string `json:"groupId,optional"` // 群组ID
-	}
-)
-
-// 退出群组
-type (
-	GroupQuitReq {
+GroupInfoReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string `json:"groupId"` // 群组ID
 	}
-	GroupQuitRes {
-		Version int64 `json:"version"` // 群成员新版本号
-	}
-)
 
-// 转让群主
-type (
-	TransferOwnerReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		GroupID    string `json:"groupId"` // 群组ID
-		NewOwnerID string `json:"newOwnerId"` // 新群主ID
-	}
-	TransferOwnerRes {
-		Version int64 `json:"version"` // 群成员新版本号
-	}
-)
-
-// 群信息
-type (
-	GroupInfoReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		GroupID string `json:"groupId"` // 群组ID
-	}
-	GroupInfoRes {
+GroupInfoRes {
 		GroupID        string `json:"groupId"` // 群组ID
 		Title          string `json:"title"` // 群组名称
 		Avatar         string `json:"avatar"` // 群组头像URL
@@ -181,17 +141,173 @@ type (
 	}
 )
 
-// 群资料同步（基于群组版本对象）
 type (
-	GroupSyncVersionItem {
+GroupMineReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		Page   int    `json:"page,optional"` // 页码，可选，默认1
+		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
+	}
+
+GroupMineItem {
+		GroupID        string `json:"groupId"` // 群组ID
+		Title          string `json:"title"` // 群组名称
+		Avatar         string `json:"avatar"` // 群组头像URL
+		MemberCount    int    `json:"memberCount"` // 成员数量
+		ConversationID string `json:"conversationId"` // 会话ID
+		Version        int64  `json:"version"` // 数据版本号
+	}
+
+GroupMineRes {
+		List  []GroupMineItem `json:"list"` // 群组列表
+		Count int             `json:"count"` // 总数
+	}
+)
+
+type (
+GroupMemberListReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		GroupID string `json:"groupId"` // 群组ID
+		Page    int    `json:"page,optional"` // 页码，可选，默认1
+		Limit   int    `json:"limit,optional"` // 每页数量，可选，默认20
+	}
+
+GroupMemberListItem {
+		UserID   string `json:"userId"` // 成员用户ID
+		NickName string `json:"nickName"` // 成员昵称
+		Avatar   string `json:"avatar"` // 成员头像URL
+		Role     int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
+		Status   int8   `json:"status"` // 成员状态：1正常 2退出 3被踢
+		JoinTime string `json:"joinTime"` // 加入时间戳
+		Version  int64  `json:"version"` // 数据版本号
+	}
+
+GroupMemberListRes {
+		List  []GroupMemberListItem `json:"list"` // 成员列表
+		Count int64                 `json:"count"` // 总数
+	}
+)
+
+type (
+UpdateMemberRoleReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		GroupID  string `json:"groupId"` // 群组ID
+		MemberID string `json:"memberId"` // 目标成员ID
+		Role     int8   `json:"role"` // 新角色：2管理员 3普通成员
+	}
+
+UpdateMemberRoleRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
+)
+
+type (
+GroupJoinReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		GroupID    string `json:"groupId,optional"` // 目标群组ID（有 inviteCode 时可空）
+		Message    string `json:"message,optional"` // 申请消息，可选
+		InviteCode string `json:"inviteCode,optional"` // 邀请短码（从 inviteUrl 解析）
+	}
+
+GroupJoinRes {
+		Version int64  `json:"version"` // 入群申请或成员版本号
+		Status  int8   `json:"status"` // 1=已加入 0=申请待审批
+		GroupID string `json:"groupId,optional"` // 群组ID
+	}
+)
+
+type (
+TransferOwnerReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		GroupID    string `json:"groupId"` // 群组ID
+		NewOwnerID string `json:"newOwnerId"` // 新群主ID
+	}
+
+TransferOwnerRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
+)
+
+type (
+GroupJoinRequestListReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		Page   int    `json:"page,optional"` // 页码，可选，默认1
+		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
+	}
+
+GroupJoinRequestItem {
+		RequestID       uint   `json:"requestId"` // 申请ID
+		GroupID         string `json:"groupId"` // 群组ID
+		ApplicantID     string `json:"applicantId"` // 申请者用户ID
+		ApplicantName   string `json:"applicantName"` // 申请者昵称
+		ApplicantAvatar string `json:"applicantAvatar"` // 申请者头像
+		Message         string `json:"message"` // 申请消息
+		Status          int8   `json:"status"` // 状态：0待审 1同意 2拒绝
+		CreatedAt       int64  `json:"createdAt"` // 申请时间戳
+		Version         int64  `json:"version"` // 数据版本号
+	}
+
+GroupJoinRequestListRes {
+		List  []GroupJoinRequestItem `json:"list"` // 申请列表
+		Count int64                  `json:"count"` // 总数
+	}
+)
+
+type (
+GroupJoinRequestHandleReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		RequestID uint   `json:"requestId"` // 申请ID
+		Status    int8   `json:"status"` // 处理状态：1同意 2拒绝
+	}
+
+GroupJoinRequestHandleRes {
+		Version int64 `json:"version"` // 入群申请新版本号
+	}
+)
+
+type (
+GroupInviteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		GroupID string   `json:"groupId"` // 群组ID
+		UserIds []string `json:"userIds"` // 被邀请的用户ID列表
+		Message string   `json:"message,optional"` // 邀请消息，可选
+	}
+
+GroupInviteRes {
+		Version int64 `json:"version"` // 群成员新版本号
+	}
+)
+
+type (
+ResolveGroupInviteReq {
+		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		Code   string `form:"code"` // 邀请短码
+	}
+
+ResolveGroupInviteRes {
+		Code          string `json:"code"` // 邀请短码
+		GroupID       string `json:"groupId"` // 群组ID
+		Title         string `json:"title"` // 群名称
+		Avatar        string `json:"avatar"` // 头像
+		Notice        string `json:"notice"` // 公告
+		MemberCount   int64  `json:"memberCount"` // 成员数
+		JoinType      int8   `json:"joinType"` // 加入方式
+		Valid         bool   `json:"valid"` // 是否有效
+		AlreadyJoined bool   `json:"alreadyJoined"` // 是否已加入
+	}
+)
+
+type (
+GroupSyncVersionItem {
 		GroupID string `json:"groupId"` // 群组ID
 		Version int64  `json:"version"` // 本地版本号
 	}
-	GroupSyncReq {
+
+GroupSyncReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Groups []GroupSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
-	GroupSyncDataItem {
+
+GroupSyncDataItem {
 		GroupID   string `json:"groupId"` // 群组ID
 		Title     string `json:"title"` // 群组名称
 		Avatar    string `json:"avatar"` // 群组头像
@@ -203,22 +319,24 @@ type (
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
-	GroupSyncRes {
+
+GroupSyncRes {
 		Groups []GroupSyncDataItem `json:"groups"` // 群组资料变化
 	}
 )
 
-// 群成员同步（基于群组版本对象）
 type (
-	GroupMemberSyncVersionItem {
+GroupMemberSyncVersionItem {
 		GroupID string `json:"groupId"` // 群组ID
 		Version int64  `json:"version"` // 本地版本号
 	}
-	GroupMemberSyncReq {
+
+GroupMemberSyncReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Groups []GroupMemberSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
-	GroupMemberSyncDataItem {
+
+GroupMemberSyncDataItem {
 		GroupID   string `json:"groupId"` // 群组ID
 		UserID    string `json:"userId"` // 用户ID
 		Role      int8   `json:"role"` // 成员角色：1群主 2管理员 3普通成员
@@ -228,22 +346,24 @@ type (
 		CreatedAt int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt int64  `json:"updatedAt"` // 更新时间戳
 	}
-	GroupMemberSyncRes {
+
+GroupMemberSyncRes {
 		GroupMembers []GroupMemberSyncDataItem `json:"groupMembers"` // 群成员变化
 	}
 )
 
-// 入群申请同步（基于群组版本对象）
 type (
-	GroupJoinRequestSyncVersionItem {
+GroupJoinRequestSyncVersionItem {
 		GroupID string `json:"groupId"` // 群组ID
 		Version int64  `json:"version"` // 本地版本号
 	}
-	GroupJoinRequestSyncReq {
+
+GroupJoinRequestSyncReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Groups []GroupJoinRequestSyncVersionItem `json:"groups"` // 要同步的群组版本信息
 	}
-	GroupJoinRequestSyncDataItem {
+
+GroupJoinRequestSyncDataItem {
 		GroupID         string `json:"groupId"` // 群组ID
 		ApplicantUserID string `json:"applicantUserId"` // 申请者用户ID
 		Message         string `json:"message"` // 申请消息
@@ -254,20 +374,21 @@ type (
 		CreatedAt       int64  `json:"createdAt"` // 创建时间戳
 		UpdatedAt       int64  `json:"updatedAt"` // 更新时间戳
 	}
-	GroupJoinRequestSyncRes {
+
+GroupJoinRequestSyncRes {
 		GroupJoinRequests []GroupJoinRequestSyncDataItem `json:"groupJoinRequests"` // 入群申请变化
 	}
 )
 
-// 搜索群组
 type (
-	GroupSearchReq {
+GroupSearchReq {
 		Keyword string `form:"keyword"` // 搜索关键词（用户ID或邮箱）
 		Type    string `form:"type,optional"` // 搜索类型：userId(用户ID)/email(邮箱)，默认email
 		Page    int    `form:"page,optional"` // 页码，可选，默认1
 		Limit   int    `form:"limit,optional"` // 每页数量，可选，默认20
 	}
-	GroupSearchItem {
+
+GroupSearchItem {
 		GroupID     string `json:"groupId"` // 群组ID
 		Title       string `json:"title"` // 群组名称
 		Avatar      string `json:"avatar"` // 群组头像URL
@@ -275,101 +396,171 @@ type (
 		JoinType    int8   `json:"joinType"` // 加入方式：0自由加入 1需审批 2不允许加入
 		CreatorID   string `json:"creatorId"` // 创建者ID
 	}
-	GroupSearchRes {
+
+GroupSearchRes {
 		List  []GroupSearchItem `json:"list"` // 群组列表
 		Count int64             `json:"count"` // 总数
 	}
 )
 
-// 群组申请管理
 type (
-	GroupJoinRequestListReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		Page   int    `json:"page,optional"` // 页码，可选，默认1
-		Limit  int    `json:"limit,optional"` // 每页数量，可选，默认20
-	}
-	GroupJoinRequestItem {
-		RequestID       uint   `json:"requestId"` // 申请ID
-		GroupID         string `json:"groupId"` // 群组ID
-		ApplicantID     string `json:"applicantId"` // 申请者用户ID
-		ApplicantName   string `json:"applicantName"` // 申请者昵称
-		ApplicantAvatar string `json:"applicantAvatar"` // 申请者头像
-		Message         string `json:"message"` // 申请消息
-		Status          int8   `json:"status"` // 状态：0待审 1同意 2拒绝
-		CreatedAt       int64  `json:"createdAt"` // 申请时间戳
-		Version         int64  `json:"version"` // 数据版本号
-	}
-	GroupJoinRequestListRes {
-		List  []GroupJoinRequestItem `json:"list"` // 申请列表
-		Count int64                  `json:"count"` // 总数
-	}
-)
-
-// 处理群组申请
-type (
-	GroupJoinRequestHandleReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		RequestID uint   `json:"requestId"` // 申请ID
-		Status    int8   `json:"status"` // 处理状态：1同意 2拒绝
-	}
-	GroupJoinRequestHandleRes {
-		Version int64 `json:"version"` // 入群申请新版本号
-	}
-)
-
-// 禁言/解禁群成员（duration=0 解禁，正值=禁言分钟数）
-type (
-	MuteGroupMemberReq {
+MuteGroupMemberReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID  string `json:"groupId"` // 群ID
 		MemberID string `json:"memberId"` // 被操作的成员ID
 		Duration int64  `json:"duration"` // 禁言时长（分钟），0=解禁
 	}
-	MuteGroupMemberRes  {}
+
+MuteGroupMemberRes  {}
 )
 
-// 全员禁言/解禁
 type (
-	MuteAllGroupReq {
+MuteAllGroupReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID   string `json:"groupId"` // 群ID
 		IsMuteAll bool   `json:"isMuteAll"` // true=开启全员禁言，false=关闭
 	}
-	MuteAllGroupRes {
+
+MuteAllGroupRes {
 		Version int64 `json:"version"` // 群组新版本号
 	}
 )
 
-// 邀请用户加入群组
 type (
-	GroupInviteReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		GroupID string   `json:"groupId"` // 群组ID
-		UserIds []string `json:"userIds"` // 被邀请的用户ID列表
-		Message string   `json:"message,optional"` // 邀请消息，可选
+GetUserGroupIDsReq {
+		UserID string `json:"userID,optional"` // 用户ID
 	}
-	GroupInviteRes {
-		Version int64 `json:"version"` // 群成员新版本号
+
+GetUserGroupIDsRes {
+		GroupIDs []string `json:"groupIDs,optional"` // 用户加入的群组ID列表
 	}
 )
 
-// 解析群邀请链接
 type (
-	ResolveGroupInviteReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		Code   string `form:"code"` // 邀请短码
+GroupListById {
+		GroupID     string `json:"groupID,optional"` // 群组ID
+		Name        string `json:"name,optional"` // 群组名称
+		Avatar      string `json:"avatar,optional"` // 群组头像
+		Description string `json:"description,optional"` // 群组描述
+		Version     int64  `json:"version,optional"` // 版本号
+		CreatedAt   int64  `json:"createdAt,optional"` // 创建时间
+		UpdatedAt   int64  `json:"updatedAt,optional"` // 更新时间
 	}
-	ResolveGroupInviteRes {
-		Code          string `json:"code"` // 邀请短码
-		GroupID       string `json:"groupId"` // 群组ID
-		Title         string `json:"title"` // 群名称
-		Avatar        string `json:"avatar"` // 头像
-		Notice        string `json:"notice"` // 公告
-		MemberCount   int64  `json:"memberCount"` // 成员数
-		JoinType      int8   `json:"joinType"` // 加入方式
-		Valid         bool   `json:"valid"` // 是否有效
-		AlreadyJoined bool   `json:"alreadyJoined"` // 是否已加入
+
+GetGroupsListByIdsReq {
+		GroupIDs []string `json:"groupIDs,optional"` // 群组ID列表
+		Since    int64    `json:"since,optional"` // 时间戳，从此时间戳之后获取变更的记录
 	}
+
+GetGroupsListByIdsRes {
+		Groups []GroupListById `json:"groups,optional"` // 群组列表
+	}
+)
+
+type (
+AddGroupMemberReq {
+		GroupId    string `json:"group_id,optional"` // 群组ID
+		UserId     string `json:"user_id,optional"` // 要加入的用户ID
+		OperatedBy string `json:"operated_by,optional"` // 操作者ID
+	}
+
+AddGroupMemberRes {
+		Added         bool  `json:"added,optional"` // 是否新加入
+		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+	}
+)
+
+type (
+RemoveGroupMemberReq {
+		GroupId    string `json:"group_id,optional"` // 群组ID
+		UserId     string `json:"user_id,optional"` // 要移除的用户ID
+		OperatedBy string `json:"operated_by,optional"` // 操作者ID
+		Kick       bool   `json:"kick,optional"` // true=被踢，false=退出
+	}
+
+RemoveGroupMemberRes {
+		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+	}
+)
+
+type (
+GroupItem {
+		Id        uint64 `json:"id,optional"` // 记录ID
+		GroupId   string `json:"group_id,optional"` // 群组ID
+		Type      int32  `json:"type,optional"` // 群类型
+		Title     string `json:"title,optional"` // 群名称
+		Avatar    string `json:"avatar,optional"` // 群头像
+		CreatorId string `json:"creator_id,optional"` // 创建者ID
+		Notice    string `json:"notice,optional"` // 群公告
+		Status    int32  `json:"status,optional"` // 群状态
+		MuteAll   bool   `json:"mute_all,optional"` // 是否全员禁言
+		CreatedAt string `json:"created_at,optional"` // 创建时间
+		UpdatedAt string `json:"updated_at,optional"` // 更新时间
+	}
+
+ListGroupsReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
+		Type     int32  `json:"type,optional"` // 类型筛选，0 表示全部
+		Keywords string `json:"keywords,optional"` // 群名关键词
+		Id       uint64 `json:"id,optional"` // 记录ID
+		GroupId  string `json:"group_id,optional"` // 业务群组ID
+	}
+
+ListGroupsRes {
+		Total int64       `json:"total,optional"` // 总数
+		List  []GroupItem `json:"list,optional"` // 群组列表
+	}
+)
+
+type (
+GroupMemberItem {
+		Id                 uint64 `json:"id,optional"` // 记录ID
+		GroupId            string `json:"group_id,optional"` // 群组ID
+		UserId             string `json:"user_id,optional"` // 用户ID
+		Role               int32  `json:"role,optional"` // 成员角色
+		Status             int32  `json:"status,optional"` // 成员状态
+		ProhibitionMinutes int32  `json:"prohibition_minutes,optional"` // 禁言剩余分钟
+		CreatedAt          string `json:"created_at,optional"` // 创建时间
+		UpdatedAt          string `json:"updated_at,optional"` // 更新时间
+	}
+
+ListGroupMembersReq {
+		GroupId  string `json:"group_id,optional"` // 群组ID
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"page_size,optional"` // 每页条数
+		Role     int32  `json:"role,optional"` // 角色筛选，0 表示全部
+		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
+	}
+
+ListGroupMembersRes {
+		Total int64             `json:"total,optional"` // 总数
+		List  []GroupMemberItem `json:"list,optional"` // 成员列表
+	}
+)
+
+type (
+UpdateGroupMemberReq {
+		Id          uint64 `json:"id,optional"` // 成员记录ID
+		Role        *int32 `json:"role,optional"` // 角色
+		MuteMinutes *int32 `json:"mute_minutes,optional"` // 禁言分钟，0 解除
+	}
+
+UpdateGroupMemberRes {}
+)
+
+type (
+UpdateGroupReq {
+		Id      uint64 `json:"id,optional"` // 记录ID
+		Title   string `json:"title,optional"` // 群名称，空表示不修改
+		Avatar  string `json:"avatar,optional"` // 群头像，空表示不修改
+		Notice  string `json:"notice,optional"` // 群公告，空表示不修改
+		Status  int32  `json:"status,optional"` // 群状态，0 表示不修改
+		MuteAll *bool  `json:"mute_all,optional"` // 全员禁言
+	}
+
+UpdateGroupRes {}
 )
 
 @server (
@@ -469,119 +660,6 @@ service relation {
 // ==================== 队间（S2S）能力面 ====================
 // 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
 // 路径刻意与 C 端错开（C 端已有 /members、/mine、/update 等），避免视图混用。
-
-type (
-	GroupListById {
-		GroupID     string `json:"groupID,optional"` // 群组ID
-		Name        string `json:"name,optional"` // 群组名称
-		Avatar      string `json:"avatar,optional"` // 群组头像
-		Description string `json:"description,optional"` // 群组描述
-		Version     int64  `json:"version,optional"` // 版本号
-		CreatedAt   int64  `json:"createdAt,optional"` // 创建时间
-		UpdatedAt   int64  `json:"updatedAt,optional"` // 更新时间
-	}
-	GroupItem {
-		Id        uint64 `json:"id,optional"` // 记录ID
-		GroupId   string `json:"group_id,optional"` // 群组ID
-		Type      int32  `json:"type,optional"` // 群类型
-		Title     string `json:"title,optional"` // 群名称
-		Avatar    string `json:"avatar,optional"` // 群头像
-		CreatorId string `json:"creator_id,optional"` // 创建者ID
-		Notice    string `json:"notice,optional"` // 群公告
-		Status    int32  `json:"status,optional"` // 群状态
-		MuteAll   bool   `json:"mute_all,optional"` // 是否全员禁言
-		CreatedAt string `json:"created_at,optional"` // 创建时间
-		UpdatedAt string `json:"updated_at,optional"` // 更新时间
-	}
-	GroupMemberItem {
-		Id                 uint64 `json:"id,optional"` // 记录ID
-		GroupId            string `json:"group_id,optional"` // 群组ID
-		UserId             string `json:"user_id,optional"` // 用户ID
-		Role               int32  `json:"role,optional"` // 成员角色
-		Status             int32  `json:"status,optional"` // 成员状态
-		ProhibitionMinutes int32  `json:"prohibition_minutes,optional"` // 禁言剩余分钟
-		CreatedAt          string `json:"created_at,optional"` // 创建时间
-		UpdatedAt          string `json:"updated_at,optional"` // 更新时间
-	}
-
-	GetUserGroupIDsReq {
-		UserID string `json:"userID,optional"` // 用户ID
-	}
-	GetUserGroupIDsRes {
-		GroupIDs []string `json:"groupIDs,optional"` // 用户加入的群组ID列表
-	}
-
-	GetGroupsListByIdsReq {
-		GroupIDs []string `json:"groupIDs,optional"` // 群组ID列表
-		Since    int64    `json:"since,optional"` // 时间戳，从此时间戳之后获取变更的记录
-	}
-	GetGroupsListByIdsRes {
-		Groups []GroupListById `json:"groups,optional"` // 群组列表
-	}
-
-	AddGroupMemberReq {
-		GroupId    string `json:"group_id,optional"` // 群组ID
-		UserId     string `json:"user_id,optional"` // 要加入的用户ID
-		OperatedBy string `json:"operated_by,optional"` // 操作者ID
-	}
-	AddGroupMemberRes {
-		Added         bool  `json:"added,optional"` // 是否新加入
-		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
-	}
-
-	RemoveGroupMemberReq {
-		GroupId    string `json:"group_id,optional"` // 群组ID
-		UserId     string `json:"user_id,optional"` // 要移除的用户ID
-		OperatedBy string `json:"operated_by,optional"` // 操作者ID
-		Kick       bool   `json:"kick,optional"` // true=被踢，false=退出
-	}
-	RemoveGroupMemberRes {
-		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
-	}
-
-	ListGroupsReq {
-		Page     int32  `json:"page,optional"` // 页码
-		PageSize int32  `json:"page_size,optional"` // 每页条数
-		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
-		Type     int32  `json:"type,optional"` // 类型筛选，0 表示全部
-		Keywords string `json:"keywords,optional"` // 群名关键词
-		Id       uint64 `json:"id,optional"` // 记录ID
-		GroupId  string `json:"group_id,optional"` // 业务群组ID
-	}
-	ListGroupsRes {
-		Total int64       `json:"total,optional"` // 总数
-		List  []GroupItem `json:"list,optional"` // 群组列表
-	}
-
-	ListGroupMembersReq {
-		GroupId  string `json:"group_id,optional"` // 群组ID
-		Page     int32  `json:"page,optional"` // 页码
-		PageSize int32  `json:"page_size,optional"` // 每页条数
-		Role     int32  `json:"role,optional"` // 角色筛选，0 表示全部
-		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
-	}
-	ListGroupMembersRes {
-		Total int64             `json:"total,optional"` // 总数
-		List  []GroupMemberItem `json:"list,optional"` // 成员列表
-	}
-
-	UpdateGroupMemberReq {
-		Id          uint64 `json:"id,optional"` // 成员记录ID
-		Role        *int32 `json:"role,optional"` // 角色
-		MuteMinutes *int32 `json:"mute_minutes,optional"` // 禁言分钟，0 解除
-	}
-	UpdateGroupMemberRes {}
-
-	UpdateGroupReq {
-		Id      uint64 `json:"id,optional"` // 记录ID
-		Title   string `json:"title,optional"` // 群名称，空表示不修改
-		Avatar  string `json:"avatar,optional"` // 群头像，空表示不修改
-		Notice  string `json:"notice,optional"` // 群公告，空表示不修改
-		Status  int32  `json:"status,optional"` // 群状态，0 表示不修改
-		MuteAll *bool  `json:"mute_all,optional"` // 全员禁言
-	}
-	UpdateGroupRes {}
-)
 
 @server (
 	group: group_machine

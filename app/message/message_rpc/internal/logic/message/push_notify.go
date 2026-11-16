@@ -25,8 +25,8 @@ import (
 	"context"
 	"strconv"
 
-	"beaver/app/message/message_models"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	message_models "beaver/app/message/message_models/chat"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/core/coreonline"
 	"beaver/core/corepush"
 	"beaver/utils/beaverlog/model"

@@ -29,7 +29,7 @@ import (
 	authServer "beaver/app/account/account_rpc/internal/server/auth"
 	userServer "beaver/app/account/account_rpc/internal/server/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -50,8 +50,8 @@ func main() {
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		// goctl multiple 模式：一个 proto（account.proto）、一个进程、一个 etcd 注册，
 		// 同一个 grpc server 挂载 user + auth 两套 service（server/logic/client 按子域分目录）。
-		types.RegisterUserServer(grpcServer, userServer.NewUserServer(ctx))
-		types.RegisterAuthServer(grpcServer, authServer.NewAuthServer(ctx))
+		pb.RegisterUserServer(grpcServer, userServer.NewUserServer(ctx))
+		pb.RegisterAuthServer(grpcServer, authServer.NewAuthServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

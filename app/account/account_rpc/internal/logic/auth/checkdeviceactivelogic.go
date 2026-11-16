@@ -27,7 +27,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -48,7 +48,7 @@ func NewCheckDeviceActiveLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *CheckDeviceActiveLogic) CheckDeviceActive(in *types.CheckDeviceActiveReq) (*types.CheckDeviceActiveRes, error) {
+func (l *CheckDeviceActiveLogic) CheckDeviceActive(in *pb.CheckDeviceActiveReq) (*pb.CheckDeviceActiveRes, error) {
 	if in.UserId == "" || in.DeviceId == "" {
 		return nil, errors.New("userId 和 deviceId 不能为空")
 	}
@@ -64,7 +64,7 @@ func (l *CheckDeviceActiveLogic) CheckDeviceActive(in *types.CheckDeviceActiveRe
 				"deviceId": in.DeviceId,
 			},
 		})
-		return &types.CheckDeviceActiveRes{Active: false}, nil
+		return &pb.CheckDeviceActiveRes{Active: false}, nil
 	}
 	if err != nil {
 		l.logger.Error(model.LogMsg{
@@ -85,5 +85,5 @@ func (l *CheckDeviceActiveLogic) CheckDeviceActive(in *types.CheckDeviceActiveRe
 			"deviceId": in.DeviceId,
 		},
 	})
-	return &types.CheckDeviceActiveRes{Active: true}, nil
+	return &pb.CheckDeviceActiveRes{Active: true}, nil
 }

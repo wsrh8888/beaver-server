@@ -29,7 +29,7 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/common/models/ctype"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"

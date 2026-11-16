@@ -28,7 +28,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewUpdateLoginRecordLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *UpdateLoginRecordLogic) UpdateLoginRecord(in *types.UpdateLoginRecordReq) (*types.UpdateLoginRecordRes, error) {
+func (l *UpdateLoginRecordLogic) UpdateLoginRecord(in *pb.UpdateLoginRecordReq) (*pb.UpdateLoginRecordRes, error) {
 	if in.UserId == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -83,5 +83,5 @@ func (l *UpdateLoginRecordLogic) UpdateLoginRecord(in *types.UpdateLoginRecordRe
 		},
 	})
 
-	return &types.UpdateLoginRecordRes{Success: true}, nil
+	return &pb.UpdateLoginRecordRes{Success: true}, nil
 }

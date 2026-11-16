@@ -26,7 +26,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,7 +45,7 @@ func NewGetFriendVerifyVersionsLogic(ctx context.Context, svcCtx *svc.ServiceCon
 	}
 }
 
-func (l *GetFriendVerifyVersionsLogic) GetFriendVerifyVersions(in *types.GetFriendVerifyVersionsReq) (*types.GetFriendVerifyVersionsRes, error) {
+func (l *GetFriendVerifyVersionsLogic) GetFriendVerifyVersions(in *pb.GetFriendVerifyVersionsReq) (*pb.GetFriendVerifyVersionsRes, error) {
 	// 查询用户相关的所有好友验证记录（作为发送者或接收者）
 	var friendVerifies []friend_models.FriendVerifyModel
 	query := l.svcCtx.DB.Where("send_user_id = ? OR rev_user_id = ?", in.UserId, in.UserId)
@@ -64,13 +64,13 @@ func (l *GetFriendVerifyVersionsLogic) GetFriendVerifyVersions(in *types.GetFrie
 	l.logger.Info(model.LogMsg{Text: "查询用户好友验证版本信息", Data: map[string]interface{}{"userId": in.UserId, "count": len(friendVerifies)}})
 
 	// 转换为响应格式
-	var friendVerifyVersions []*types.GetFriendVerifyVersionsRes_FriendVerifyVersion
+	var friendVerifyVersions []*pb.GetFriendVerifyVersionsRes_FriendVerifyVersion
 	for _, verify := range friendVerifies {
-		friendVerifyVersions = append(friendVerifyVersions, &types.GetFriendVerifyVersionsRes_FriendVerifyVersion{
+		friendVerifyVersions = append(friendVerifyVersions, &pb.GetFriendVerifyVersionsRes_FriendVerifyVersion{
 			VerifyId: verify.VerifyID,
 			Version:  verify.Version,
 		})
 	}
 
-	return &types.GetFriendVerifyVersionsRes{FriendVerifyVersions: friendVerifyVersions}, nil
+	return &pb.GetFriendVerifyVersionsRes{FriendVerifyVersions: friendVerifyVersions}, nil
 }

@@ -28,7 +28,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -45,12 +45,12 @@ func NewListUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListUse
 	return &ListUsersLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_users", ctx)}
 }
 
-func (l *ListUsersLogic) ListUsers(in *types.ListUsersReq) (*types.ListUsersRes, error) {
+func (l *ListUsersLogic) ListUsers(in *pb.ListUsersReq) (*pb.ListUsersRes, error) {
 	if in.UserId != "" {
 		var user user_models.UserModel
 		if err := l.svcCtx.DB.Where("user_id = ?", in.UserId).First(&user).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return &types.ListUsersRes{}, nil
+				return &pb.ListUsersRes{}, nil
 			}
 			l.logger.Error(model.LogMsg{
 				Text: "按ID查询用户失败",
@@ -58,9 +58,9 @@ func (l *ListUsersLogic) ListUsers(in *types.ListUsersReq) (*types.ListUsersRes,
 			})
 			return nil, err
 		}
-		return &types.ListUsersRes{
+		return &pb.ListUsersRes{
 			Total: 1,
-			List:  []*types.UserInfo{userInfoFromModel(user)},
+			List:  []*pb.UserInfo{userInfoFromModel(user)},
 		}, nil
 	}
 
@@ -112,15 +112,15 @@ func (l *ListUsersLogic) ListUsers(in *types.ListUsersReq) (*types.ListUsersRes,
 		return nil, err
 	}
 
-	list := make([]*types.UserInfo, 0, len(users))
+	list := make([]*pb.UserInfo, 0, len(users))
 	for _, user := range users {
 		list = append(list, userInfoFromModel(user))
 	}
-	return &types.ListUsersRes{Total: total, List: list}, nil
+	return &pb.ListUsersRes{Total: total, List: list}, nil
 }
 
-func userInfoFromModel(user user_models.UserModel) *types.UserInfo {
-	return &types.UserInfo{
+func userInfoFromModel(user user_models.UserModel) *pb.UserInfo {
+	return &pb.UserInfo{
 		UserId:    user.UserID,
 		NickName:  user.NickName,
 		Avatar:    user.Avatar,

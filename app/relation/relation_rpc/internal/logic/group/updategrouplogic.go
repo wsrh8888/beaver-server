@@ -28,7 +28,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewUpdateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 	}
 }
 
-func (l *UpdateGroupLogic) UpdateGroup(in *types.UpdateGroupReq) (*types.UpdateGroupRes, error) {
+func (l *UpdateGroupLogic) UpdateGroup(in *pb.UpdateGroupReq) (*pb.UpdateGroupRes, error) {
 	var group group_models.GroupModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&group).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -85,7 +85,7 @@ func (l *UpdateGroupLogic) UpdateGroup(in *types.UpdateGroupReq) (*types.UpdateG
 		}
 	}
 	if len(updates) == 0 {
-		return &types.UpdateGroupRes{}, nil
+		return &pb.UpdateGroupRes{}, nil
 	}
 
 	groupVersion := l.svcCtx.VersionGen.GetNextVersion("groups", "group_id", group.GroupID)
@@ -101,5 +101,5 @@ func (l *UpdateGroupLogic) UpdateGroup(in *types.UpdateGroupReq) (*types.UpdateG
 
 	l.logger.Info(model.LogMsg{Text: "更新群组成功", Data: map[string]interface{}{"id": in.Id, "groupId": group.GroupID, "version": groupVersion}})
 
-	return &types.UpdateGroupRes{}, nil
+	return &pb.UpdateGroupRes{}, nil
 }

@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -44,19 +44,19 @@ func NewListFriendBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	return &ListFriendBlocksLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_friend_blocks", ctx)}
 }
 
-func (l *ListFriendBlocksLogic) ListFriendBlocks(in *types.ListFriendBlocksReq) (*types.ListFriendBlocksRes, error) {
+func (l *ListFriendBlocksLogic) ListFriendBlocks(in *pb.ListFriendBlocksReq) (*pb.ListFriendBlocksRes, error) {
 	if in.BlockId != "" {
 		b, err := findFriendBlock(l.svcCtx.DB, in.BlockId)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &types.ListFriendBlocksRes{}, nil
+			return &pb.ListFriendBlocksRes{}, nil
 		}
 		if err != nil {
 			l.logger.Error(model.LogMsg{Text: "查询黑名单记录失败", Data: map[string]any{"blockId": in.BlockId, "err": err.Error()}})
 			return nil, err
 		}
-		return &types.ListFriendBlocksRes{
+		return &pb.ListFriendBlocksRes{
 			Total: 1,
-			List:  []*types.FriendBlockItem{toFriendBlockItem(*b)},
+			List:  []*pb.FriendBlockItem{toFriendBlockItem(*b)},
 		}, nil
 	}
 
@@ -92,9 +92,9 @@ func (l *ListFriendBlocksLogic) ListFriendBlocks(in *types.ListFriendBlocksReq) 
 		return nil, err
 	}
 
-	items := make([]*types.FriendBlockItem, 0, len(list))
+	items := make([]*pb.FriendBlockItem, 0, len(list))
 	for _, b := range list {
 		items = append(items, toFriendBlockItem(b))
 	}
-	return &types.ListFriendBlocksRes{Total: total, List: items}, nil
+	return &pb.ListFriendBlocksRes{Total: total, List: items}, nil
 }

@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewGetUserEmojiPackageCollectsLogic(ctx context.Context, svcCtx *svc.Servic
 	}
 }
 
-func (l *GetUserEmojiPackageCollectsLogic) GetUserEmojiPackageCollects(in *types.GetUserEmojiPackageCollectsReq) (*types.GetUserEmojiPackageCollectsRes, error) {
+func (l *GetUserEmojiPackageCollectsLogic) GetUserEmojiPackageCollects(in *pb.GetUserEmojiPackageCollectsReq) (*pb.GetUserEmojiPackageCollectsRes, error) {
 	var packageCollects []emoji_models.EmojiPackageCollect
 	query := l.svcCtx.DB.Where("user_id = ?", in.UserId)
 
@@ -65,15 +65,15 @@ func (l *GetUserEmojiPackageCollectsLogic) GetUserEmojiPackageCollects(in *types
 	l.logger.Info(model.LogMsg{Text: "查询用户收藏表情包版本变更", Data: map[string]interface{}{"userId": in.UserId, "count": len(packageCollects)}})
 
 	// 转换为版本摘要格式
-	var packageCollectVersions []*types.EmojiPackageCollectVersionItem
+	var packageCollectVersions []*pb.EmojiPackageCollectVersionItem
 	for _, pkgCollect := range packageCollects {
-		packageCollectVersions = append(packageCollectVersions, &types.EmojiPackageCollectVersionItem{
+		packageCollectVersions = append(packageCollectVersions, &pb.EmojiPackageCollectVersionItem{
 			PackageCollectId: pkgCollect.PackageCollectID,
 			Version:          pkgCollect.Version,
 		})
 	}
 
-	return &types.GetUserEmojiPackageCollectsRes{
+	return &pb.GetUserEmojiPackageCollectsRes{
 		EmojiPackageCollectVersions: packageCollectVersions,
 		ServerTimestamp:             time.Now().UnixMilli(),
 	}, nil

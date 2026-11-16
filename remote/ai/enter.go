@@ -26,7 +26,7 @@
 // 本仓不依赖 beaver-ai 模块。
 //
 // 结构对齐 remote/circle（enter/remote/token + 业务方法文件）：Init 灌入凭据并把域名写入
-// commonconfig.AiUrl；业务侧直接调包函数 GetAgentApp(...)，不在调用行里重复写地址与换票。
+// commonconfig.AiUrl；业务侧直接调包函数 GetAgent(...)，不在调用行里重复写地址与换票。
 package ai
 
 import (

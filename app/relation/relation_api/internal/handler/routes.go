@@ -84,13 +84,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 批量获取好友验证数据（通过ID）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/friend/friend/v1/getFriendVerifiesListByIds",
+					Path:    "/beaver/api/friend/friend/v1/get_friend_verifies_list_by_ids",
 					Handler: friend.GetFriendVerifiesListByIdsHandler(serverCtx),
 				},
 				{
 					// 批量获取好友数据（通过ID）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/friend/friend/v1/getFriendsListByIds",
+					Path:    "/beaver/api/friend/friend/v1/get_friends_list_by_ids",
 					Handler: friend.GetFriendsListByUuidsHandler(serverCtx),
 				},
 				{
@@ -102,7 +102,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 查询好友验证记录
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/friend/friend/v1/searchValidInfo",
+					Path:    "/beaver/api/friend/friend/v1/search_valid_info",
 					Handler: friend.SearchValidInfoHandler(serverCtx),
 				},
 				{

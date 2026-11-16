@@ -27,12 +27,12 @@ import (
 	"errors"
 	"fmt"
 
-	"beaver/app/notification/notification_models"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	notifyconst "beaver/common/const/notifyconst"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	group_models "beaver/app/relation/relation_models/group"
-	relationtypes "beaver/app/relation/relation_rpc/types"
+	relationtypes "beaver/app/relation/relation_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -146,11 +146,11 @@ func (l *QuitGroupLogic) QuitGroup(req *types.GroupQuitReq) (resp *types.GroupQu
 				"userId":  req.UserID,
 			})
 			_, err = l.svcCtx.NotifyRpc.PushEvent(ctx, &notification_rpc.PushEventReq{
-				EventType:   notification_models.EventTypeGroupLeft,
-				Category:    notification_models.CategoryGroup,
+				EventType:   notifyconst.EventTypeGroupLeft,
+				Category:    notifyconst.CategoryGroup,
 				FromUserId:  req.UserID,
 				TargetId:    req.GroupID,
-				TargetType:  notification_models.TargetTypeGroup,
+				TargetType:  notifyconst.TargetTypeGroup,
 				PayloadJson: string(payload),
 				ToUserIds:   toUsers,
 				DedupHash:   fmt.Sprintf("%s_left_%s", req.GroupID, req.UserID),

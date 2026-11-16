@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package asset_rpc;
 
-option go_package = "./types";
+option go_package = "./pb";
 
 // 文件详情请求
 message GetFileDetailReq {

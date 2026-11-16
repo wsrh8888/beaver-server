@@ -27,8 +27,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"beaver/app/message/message_models"
-	relationtypes "beaver/app/relation/relation_rpc/types"
+	chattypes "beaver/app/message/message_rpc/pb"
+	relationtypes "beaver/app/relation/relation_rpc/pb"
 	ws_conn "beaver/app/ws/ws_api/internal/logic/websocket/conn"
 	"beaver/app/ws/ws_api/internal/svc"
 	"beaver/app/ws/ws_api/internal/types"
@@ -114,14 +114,15 @@ func getTypingPeerIDs(ctx context.Context, svcCtx *svc.ServiceContext, currentUs
 		}
 	}
 	if len(peers) == 0 {
-		var userConversations []message_models.ChatUserConversation
-		if err := svcCtx.DB.Where("conversation_id = ? AND user_id <> ?", conversationID, currentUserID).
-			Find(&userConversations).Error; err != nil {
+		// 群成员为空时的兜底：会话成员属 message 库，走 message_rpc，不再直连
+		memberRes, err := svcCtx.ChatRpc.GetConversationMemberIDs(ctx, &chattypes.GetConversationMemberIDsReq{
+			ConversationId: conversationID,
+			ExcludeUserId:  currentUserID,
+		})
+		if err != nil {
 			return nil, err
 		}
-		for _, uc := range userConversations {
-			peers = append(peers, uc.UserID)
-		}
+		peers = append(peers, memberRes.UserIds...)
 	}
 	return peers, nil
 }

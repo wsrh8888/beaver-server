@@ -47,8 +47,14 @@ func NewFileUploadLocalLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 	}
 }
 
-func (l *FileUploadLocalLogic) FileUploadLocal(req *types.FileReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileRes, error) {
+func (l *FileUploadLocalLogic) FileUploadLocal(req *types.FileUploadLocalReq, file multipart.File, fileHead *multipart.FileHeader, fileInfoStr string) (*types.FileUploadLocalRes, error) {
 	// 本地存储后端
 	store := common.NewLocalStorage(l.svcCtx.Config.Local.UploadDir)
-	return common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.LocalSource)
+	base, err := common.UploadFile(l.ctx, l.svcCtx, file, fileHead, fileInfoStr, store, file_models.LocalSource)
+	if err != nil {
+		return nil, err
+	}
+	resp := &types.FileUploadLocalRes{}
+	common.ConvertUploadRes(base, resp)
+	return resp, nil
 }

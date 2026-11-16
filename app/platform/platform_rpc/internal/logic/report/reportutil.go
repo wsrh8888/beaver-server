@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"beaver/app/platform/platform_models/report"
-	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	platform_rpc "beaver/app/platform/platform_rpc/pb"
 )
 
 func toContentReportItem(r report_models.ContentReportModel) *platform_rpc.ContentReportItem {

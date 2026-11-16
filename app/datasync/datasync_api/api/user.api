@@ -27,7 +27,7 @@ type (
 service datasync {
 	@doc "获取所有需要更新的用户版本信息"
 	@handler getSyncAllUsers
-	post /beaver/api/datasync/sync/v1/getSyncAllUsers (GetSyncAllUsersReq) returns (GetSyncAllUsersRes)
+	post /beaver/api/datasync/sync/v1/get_sync_all_users (GetSyncAllUsersReq) returns (GetSyncAllUsersRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

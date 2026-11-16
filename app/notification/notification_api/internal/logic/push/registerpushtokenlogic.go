@@ -27,10 +27,10 @@ import (
 	"strings"
 	"time"
 
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
-	"beaver/app/notification/notification_models"
+	notification_models "beaver/app/notification/notification_models/notification"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 

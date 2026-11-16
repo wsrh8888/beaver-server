@@ -28,7 +28,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 	}
 }
 
-func (l *UserInfoLogic) UserInfo(in *types.UserInfoReq) (*types.UserInfoRes, error) {
+func (l *UserInfoLogic) UserInfo(in *pb.UserInfoReq) (*pb.UserInfoRes, error) {
 	l.logger.Info(model.LogMsg{
 		Text: "rpc UserInfo",
 		Data: map[string]any{"userId": in.UserID},
@@ -63,7 +63,7 @@ func (l *UserInfoLogic) UserInfo(in *types.UserInfoReq) (*types.UserInfoRes, err
 		return nil, errors.New("用户不存在")
 	}
 
-	return &types.UserInfoRes{UserInfo: &types.UserInfo{
+	return &pb.UserInfoRes{UserInfo: &pb.UserInfo{
 		UserId:    user.UserID,
 		NickName:  user.NickName,
 		Avatar:    user.Avatar,

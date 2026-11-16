@@ -23,7 +23,7 @@ package svc
 
 import (
 	"beaver/app/account/account_rpc/client/user"
-	accttypes "beaver/app/account/account_rpc/types"
+	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/app/notification/notification_rpc/internal/config"
 	"beaver/common/zrpc_interceptor"
 	"beaver/core/coregorm"

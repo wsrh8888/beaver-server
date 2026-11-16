@@ -4,17 +4,22 @@ syntax = "v1"
 // 只提供查询。部门、成员的新增、修改、删除在 platform_rpc，由后台调整。
 
 type (
-	GetOrganizationReq {
+GetOrganizationReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
-	GetOrganizationRes {
+
+GetOrganizationRes {
 		OrgID string `json:"orgId"` // string 组织 ID
 		Name  string `json:"name"` // string 组织名
 	}
-	DepartmentTreeReq {
+)
+
+type (
+DepartmentTreeReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	}
-	DepartmentNode {
+
+DepartmentNode {
 		DeptID      string           `json:"deptId"` // string 部门 ID
 		ParentID    string           `json:"parentId"` // string 父部门 ID，空字符串表示根
 		Name        string           `json:"name"` // string 部门名
@@ -22,21 +27,27 @@ type (
 		MemberCount int              `json:"memberCount"` // int 直属成员人数，不含子部门
 		Children    []DepartmentNode `json:"children"` // array 子部门
 	}
-	DepartmentTreeRes {
+
+DepartmentTreeRes {
 		List []DepartmentNode `json:"list"` // array 部门树，根在最外层
 	}
-	ListMemberReq {
+)
+
+type (
+ListMemberReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		DeptID string `form:"deptId,optional"` // string 按部门过滤，不传则全部
 	}
-	MemberItem {
+
+MemberItem {
 		UserID   string `json:"userId"` // string 用户 ID
 		NickName string `json:"nickName"` // string 昵称
 		Avatar   string `json:"avatar"` // string 头像
 		DeptID   string `json:"deptId"` // string 所属部门
 		Role     int    `json:"role"` // int 1拥有者 2管理员 3成员
 	}
-	ListMemberRes {
+
+ListMemberRes {
 		List []MemberItem `json:"list"` // array 成员
 	}
 )

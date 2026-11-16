@@ -26,7 +26,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,10 +45,10 @@ func NewUserVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 	}
 }
 
-func (l *UserVersionsLogic) UserVersions(in *types.UserVersionsReq) (*types.UserVersionsRes, error) {
+func (l *UserVersionsLogic) UserVersions(in *pb.UserVersionsReq) (*pb.UserVersionsRes, error) {
 	// 对空数组进行处理
 	if len(in.UserIds) == 0 {
-		return &types.UserVersionsRes{
+		return &pb.UserVersionsRes{
 			UserVersions: make(map[string]int64),
 		}, nil
 	}
@@ -66,7 +66,7 @@ func (l *UserVersionsLogic) UserVersions(in *types.UserVersionsReq) (*types.User
 	}
 
 	// 构造响应
-	resp := &types.UserVersionsRes{
+	resp := &pb.UserVersionsRes{
 		UserVersions: make(map[string]int64, len(userList)),
 	}
 

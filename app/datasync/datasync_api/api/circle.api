@@ -25,7 +25,7 @@ type (
 service datasync {
 	@doc "获取所有需要更新的圈子信息版本"
 	@handler getSyncCircleInfo
-	post /beaver/api/datasync/sync/v1/getSyncCircleInfo (GetSyncCircleInfoReq) returns (GetSyncCircleInfoRes)
+	post /beaver/api/datasync/sync/v1/get_sync_circle_info (GetSyncCircleInfoReq) returns (GetSyncCircleInfoRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

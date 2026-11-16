@@ -27,7 +27,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewListGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListGr
 	}
 }
 
-func (l *ListGroupsLogic) ListGroups(in *types.ListGroupsReq) (*types.ListGroupsRes, error) {
+func (l *ListGroupsLogic) ListGroups(in *pb.ListGroupsReq) (*pb.ListGroupsRes, error) {
 	page := int(in.Page)
 	if page <= 0 {
 		page = 1
@@ -88,9 +88,9 @@ func (l *ListGroupsLogic) ListGroups(in *types.ListGroupsReq) (*types.ListGroups
 		return nil, err
 	}
 
-	items := make([]*types.GroupItem, 0, len(list))
+	items := make([]*pb.GroupItem, 0, len(list))
 	for _, g := range list {
-		items = append(items, &types.GroupItem{
+		items = append(items, &pb.GroupItem{
 			Id:        uint64(g.Id),
 			GroupId:   g.GroupID,
 			Type:      int32(g.Type),
@@ -104,5 +104,5 @@ func (l *ListGroupsLogic) ListGroups(in *types.ListGroupsReq) (*types.ListGroups
 			UpdatedAt: time.Time(g.UpdatedAt).Format(time.RFC3339),
 		})
 	}
-	return &types.ListGroupsRes{Total: total, List: items}, nil
+	return &pb.ListGroupsRes{Total: total, List: items}, nil
 }

@@ -27,7 +27,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,11 +46,11 @@ func NewUserListInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 	}
 }
 
-func (l *UserListInfoLogic) UserListInfo(in *types.UserListInfoReq) (*types.UserListInfoRes, error) {
+func (l *UserListInfoLogic) UserListInfo(in *pb.UserListInfoReq) (*pb.UserListInfoRes, error) {
 	// 对空数组进行处理
 	if len(in.UserIdList) == 0 {
-		return &types.UserListInfoRes{
-			UserInfo: make(map[string]*types.UserInfo),
+		return &pb.UserListInfoRes{
+			UserInfo: make(map[string]*pb.UserInfo),
 		}, nil
 	}
 
@@ -73,12 +73,12 @@ func (l *UserListInfoLogic) UserListInfo(in *types.UserListInfoReq) (*types.User
 		return nil, err
 	}
 
-	resp := &types.UserListInfoRes{
-		UserInfo: make(map[string]*types.UserInfo, len(userList)),
+	resp := &pb.UserListInfoRes{
+		UserInfo: make(map[string]*pb.UserInfo, len(userList)),
 	}
 
 	for _, user := range userList {
-		resp.UserInfo[user.UserID] = &types.UserInfo{
+		resp.UserInfo[user.UserID] = &pb.UserInfo{
 			UserId:    user.UserID,
 			NickName:  user.NickName,
 			Avatar:    user.Avatar,

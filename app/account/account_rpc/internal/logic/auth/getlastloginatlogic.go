@@ -27,7 +27,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,7 +46,7 @@ func NewGetLastLoginAtLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 	}
 }
 
-func (l *GetLastLoginAtLogic) GetLastLoginAt(in *types.GetLastLoginAtReq) (*types.GetLastLoginAtRes, error) {
+func (l *GetLastLoginAtLogic) GetLastLoginAt(in *pb.GetLastLoginAtReq) (*pb.GetLastLoginAtRes, error) {
 	if in.UserId == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -58,7 +58,7 @@ func (l *GetLastLoginAtLogic) GetLastLoginAt(in *types.GetLastLoginAtReq) (*type
 			Text: "查询用户凭证失败",
 			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
 		})
-		return &types.GetLastLoginAtRes{LastLoginAt: 0}, nil
+		return &pb.GetLastLoginAtRes{LastLoginAt: 0}, nil
 	}
 
 	var lastLoginAt int64
@@ -73,5 +73,5 @@ func (l *GetLastLoginAtLogic) GetLastLoginAt(in *types.GetLastLoginAtReq) (*type
 			"lastLoginAt": lastLoginAt,
 		},
 	})
-	return &types.GetLastLoginAtRes{LastLoginAt: lastLoginAt}, nil
+	return &pb.GetLastLoginAtRes{LastLoginAt: lastLoginAt}, nil
 }

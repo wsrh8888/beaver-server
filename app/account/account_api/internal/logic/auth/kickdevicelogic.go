@@ -29,7 +29,7 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	auth_models "beaver/app/account/account_models/auth"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"

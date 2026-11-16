@@ -26,7 +26,7 @@ import (
 
 	messagelogic "beaver/app/message/message_rpc/internal/logic/message"
 	"beaver/app/message/message_rpc/internal/svc"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/core/corerocketmq"

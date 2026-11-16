@@ -1,113 +1,109 @@
 syntax = "v1"
 
 // 添加表情
+
+// 更新表情收藏状态
+
+// 获取用户收藏的表情列表
+
+// 获取表情包列表
+
+// 获取表情包详情
+
+// 更新表情包收藏状态
+
+// 获取用户收藏的表情包列表
+
+// 批量获取表情详情
+
+// 按ID批量获取表情基础信息
+
+// 批量获取表情包详情
+
+// 批量获取用户收藏的表情记录详情（同步用）
+
+// 按收藏ID批量获取表情收藏记录（同步补齐）
+
+// 批量获取用户收藏的表情包记录详情（同步用）
+
+// 批量获取表情包内容详情（同步用）
+
+// 批量获取表情包内容详情（通过relationIds，同步用）
+
 type (
-	AddEmojiReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+AddEmojiReq {
+		UserID    string       `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		FileKey   string       `json:"fileKey"`
 		Title     string       `json:"title"`
 		PackageID string       `json:"packageId,optional"`
 		EmojiInfo AddEmojiInfo `json:"emojiInfo"`
 	}
-	AddEmojiInfo {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}
-	AddEmojiRes  {}
+
+AddEmojiRes  {}
 )
 
-// 更新表情收藏状态
 type (
-	UpdateFavoriteEmojiReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+UpdateFavoriteEmojiReq {
+		UserID    string  `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		EmojiID   string  `json:"emojiId"`
 		PackageID *string `json:"packageId,optional"` // 可选，表情所属的表情包ID，用于扩展功能
 		Type      string  `json:"type"` // "favorite" or "unfavorite"
 	}
-	UpdateFavoriteEmojiRes  {}
+
+UpdateFavoriteEmojiRes  {}
 )
 
-// 获取用户收藏的表情列表
 type (
-	GetEmojisListReq {
+GetEmojisListReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Page   int    `json:"page"`
 		Size   int    `json:"size"`
 	}
-	EmojiItem {
+
+EmojiItem {
 		EmojiID   string        `json:"emojiId"`
 		FileKey   string        `json:"fileKey"`
 		Title     string        `json:"title"`
 		EmojiInfo *GetEmojiInfo `json:"emojiInfo"`
 		PackageID *string       `json:"packageId"`
 	}
-	GetEmojiInfo {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}
-	GetEmojisListRes {
+
+GetEmojisListRes {
 		Count int64       `json:"count"`
 		List  []EmojiItem `json:"list"`
 	}
 )
 
-// 获取表情包列表
 type (
-	GetEmojiPackagesReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiPackagesReq {
+		UserID     string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		CategoryID uint   `json:"categoryId,optional"` // 可选，按分类筛选
 		Type       string `json:"type,optional"` // 可选，按类型筛选：official-官方，user-用户自定义
 		Page       int    `json:"page"`
 		Size       int    `json:"size"`
 	}
-	GetEmojiPackagesSimpleItem {
-		EmojiID   string               `json:"emojiId"`
-		FileKey   string               `json:"fileKey"`
-		Title     string               `json:"title"`
-		Version   int64                `json:"version"`
-		Status    int8                 `json:"status"`
-		EmojiInfo GetEmojiPackagesInfo `json:"emojiInfo"`
-	}
-	GetEmojiPackagesInfo {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}
-	EmojiPackageItem {
-		PackageID    string                       `json:"packageId"`
-		Title        string                       `json:"title"`
-		CoverFile    string                       `json:"coverFile"`
-		Description  string                       `json:"description"`
-		Type         string                       `json:"type"` // 类型：official-官方，user-用户自定义
-		CollectCount int                          `json:"collectCount"`
-		EmojiCount   int                          `json:"emojiCount"`
-		IsCollected  bool                         `json:"isCollected"` // 当前用户是否已收藏
-		IsAuthor     bool                         `json:"isAuthor"` // 当前用户是否是作者
-		RecentEmojis []GetEmojiPackagesSimpleItem `json:"recentEmojis"` // 最近6个表情
-	}
-	GetEmojiPackagesRes {
+
+GetEmojiPackagesRes {
 		Count int64              `json:"count"`
 		List  []EmojiPackageItem `json:"list"`
 	}
 )
 
-// 获取表情包详情
 type (
-	GetEmojiPackageDetailReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiPackageDetailReq {
+		UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		PackageID string `json:"packageId"`
 	}
-	GetEmojiPackageEmojiItem {
+
+GetEmojiPackageEmojiItem {
 		EmojiID   string               `json:"emojiId"`
 		FileKey   string               `json:"fileKey"`
 		Title     string               `json:"title"`
 		EmojiInfo *GetEmojiPackageInfo `json:"emojiInfo"`
 		PackageID *string              `json:"packageId"`
 	}
-	GetEmojiPackageInfo {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}
-	GetEmojiPackageDetailRes {
+
+GetEmojiPackageDetailRes {
 		PackageID    string                     `json:"packageId"`
 		Title        string                     `json:"title"`
 		CoverFile    string                     `json:"coverFile"`
@@ -121,43 +117,40 @@ type (
 	}
 )
 
-// 更新表情包收藏状态
 type (
-	UpdateFavoriteEmojiPackageReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+UpdateFavoriteEmojiPackageReq {
+		UserID    string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		PackageID string `json:"packageId"`
 		Type      string `json:"type"` // "favorite" or "unfavorite"
 	}
-	UpdateFavoriteEmojiPackageRes  {}
+
+UpdateFavoriteEmojiPackageRes  {}
 )
 
-// 获取用户收藏的表情包列表
 type (
-	GetUserFavoritePackagesReq {
+GetUserFavoritePackagesReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Page   int    `json:"page"`
 		Size   int    `json:"size"`
 	}
-	GetUserFavoritePackagesRes {
+
+GetUserFavoritePackagesRes {
 		Count int64              `json:"count"`
 		List  []EmojiPackageItem `json:"list"`
 	}
 )
 
-// 批量获取表情详情
 type (
-	GetEmojisByIdsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojisByIdsReq {
+		UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 表情ID列表
 	}
-	GetEmojisByIdsRes {
+
+GetEmojisByIdsRes {
 		Emojis []EmojiDetailItem `json:"emojis"`
 	}
-	GetEmojiByIdsInfo {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}
-	EmojiDetailItem {
+
+EmojiDetailItem {
 		EmojiID   string            `json:"emojiId"`
 		FileKey   string            `json:"fileKey"`
 		Title     string            `json:"title"`
@@ -170,17 +163,13 @@ type (
 	}
 )
 
-// 按ID批量获取表情基础信息
 type (
-	GetEmojisByUuidsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		Ids []string `json:"ids"` // 表情ID列表
+GetEmojisByUuidsReq {
+		UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+		Ids    []string `json:"ids"` // 表情ID列表
 	}
-	GetEmojiByUuidsInfo {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}
-	EmojiSimpleItem {
+
+EmojiSimpleItem {
 		EmojiID   string              `json:"emojiId"`
 		FileKey   string              `json:"fileKey"`
 		Title     string              `json:"title"`
@@ -188,21 +177,23 @@ type (
 		Status    int8                `json:"status"`
 		EmojiInfo GetEmojiByUuidsInfo `json:"emojiInfo"`
 	}
-	GetEmojisByUuidsRes {
+
+GetEmojisByUuidsRes {
 		Emojis []EmojiSimpleItem `json:"emojis"`
 	}
 )
 
-// 批量获取表情包详情
 type (
-	GetEmojiPackagesByIdsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiPackagesByIdsReq {
+		UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 表情包ID列表
 	}
-	GetEmojiPackagesByIdsRes {
+
+GetEmojiPackagesByIdsRes {
 		Packages []EmojiPackageDetailItem `json:"packages"`
 	}
-	EmojiPackageDetailItem {
+
+EmojiPackageDetailItem {
 		PackageID    string `json:"packageId"`
 		Title        string `json:"title"`
 		CoverFile    string `json:"coverFile"`
@@ -217,16 +208,17 @@ type (
 	}
 )
 
-// 批量获取用户收藏的表情记录详情（同步用）
 type (
-	GetEmojiCollectsByIdsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiCollectsByIdsReq {
+		UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 收藏记录ID列表
 	}
-	GetEmojiCollectsByIdsRes {
+
+GetEmojiCollectsByIdsRes {
 		Collects []EmojiCollectDetailItem `json:"collects"`
 	}
-	EmojiCollectDetailItem {
+
+EmojiCollectDetailItem {
 		EmojiCollectID string  `json:"emojiCollectId"`
 		UserID         string  `json:"userId"`
 		EmojiID        string  `json:"emojiId"`
@@ -240,26 +232,17 @@ type (
 	}
 )
 
-// 按收藏ID批量获取表情收藏记录（同步补齐）
 type (
-	GetEmojiCollectsByUuidsReq {
-		Ids []string `json:"ids"` // 收藏记录ID列表
-	}
-	GetEmojiCollectsByUuidsRes {
-		Collects []EmojiCollectDetailItem `json:"collects"`
-	}
-)
-
-// 批量获取用户收藏的表情包记录详情（同步用）
-type (
-	GetEmojiPackageCollectsByIdsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiPackageCollectsByIdsReq {
+		UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Ids    []string `json:"ids"` // 收藏记录ID列表
 	}
-	GetEmojiPackageCollectsByIdsRes {
+
+GetEmojiPackageCollectsByIdsRes {
 		Collects []EmojiPackageCollectDetailItem `json:"collects"`
 	}
-	EmojiPackageCollectDetailItem {
+
+EmojiPackageCollectDetailItem {
 		PackageCollectID string `json:"packageCollectId"`
 		UserID           string `json:"userId"`
 		PackageID        string `json:"packageId"`
@@ -270,109 +253,30 @@ type (
 	}
 )
 
-// 批量获取表情包内容详情（同步用）
 type (
-	GetEmojiPackageContentsByPackageIdsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiPackageContentsByPackageIdsReq {
+		UserID     string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		PackageIds []string `json:"packageIds"` // 表情包ID列表
 	}
-	GetEmojiPackageContentsByPackageIdsRes {
+
+GetEmojiPackageContentsByPackageIdsRes {
 		Contents []EmojiPackageContentDetailItem `json:"contents"`
-	}
-	EmojiPackageContentDetailItem {
-		RelationID string `json:"relationId"`
-		PackageID  string `json:"packageId"`
-		EmojiID    string `json:"emojiId"`
-		SortOrder  int    `json:"sortOrder"`
-		Version    int64  `json:"version"`
-		CreatedAt  int64  `json:"createdAt"`
-		UpdatedAt  int64  `json:"updatedAt"`
 	}
 )
 
-// 批量获取表情包内容详情（通过relationIds，同步用）
 type (
-	GetEmojiPackageContentsByRelationIdsReq {
-		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
+GetEmojiPackageContentsByRelationIdsReq {
+		UserID      string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		RelationIds []string `json:"relationIds"` // 关联ID列表
 	}
-	GetEmojiPackageContentsByRelationIdsRes {
+
+GetEmojiPackageContentsByRelationIdsRes {
 		Contents []EmojiPackageContentDetailItem `json:"contents"`
 	}
 )
 
-@server (
-	group: emoji
-	middleware: JwtS2s
-)
-service asset {
-	@doc "添加表情，并且自动收藏"
-	@handler AddEmoji
-	post /beaver/api/emoji/emoji/v1/add (AddEmojiReq) returns (AddEmojiRes)
-
-	@doc "收藏或者取消收藏表情"
-	@handler UpdateFavoriteEmoji
-	post /beaver/api/emoji/emoji/v1/favoriteEmoji (UpdateFavoriteEmojiReq) returns (UpdateFavoriteEmojiRes)
-
-	@doc "获取用户收藏的表情列表"
-	@handler GetEmojisList
-	post /beaver/api/emoji/emoji/v1/favoriteList (GetEmojisListReq) returns (GetEmojisListRes)
-
-	@doc "获取表情包列表"
-	@handler GetEmojiPackages
-	post /beaver/api/emoji/emoji/v1/packageList (GetEmojiPackagesReq) returns (GetEmojiPackagesRes)
-
-	@doc "获取表情包详情"
-	@handler GetEmojiPackageDetail
-	post /beaver/api/emoji/emoji/v1/packageInfo (GetEmojiPackageDetailReq) returns (GetEmojiPackageDetailRes)
-
-	@doc "收藏或取消收藏表情包"
-	@handler UpdateFavoriteEmojiPackage
-	post /beaver/api/emoji/emoji/v1/packageFavorite (UpdateFavoriteEmojiPackageReq) returns (UpdateFavoriteEmojiPackageRes)
-
-	@doc "获取用户收藏的表情包列表"
-	@handler GetUserFavoritePackages
-	post /beaver/api/emoji/emoji/v1/favoritePackageList (GetUserFavoritePackagesReq) returns (GetUserFavoritePackagesRes)
-
-	@doc "批量获取表情详情（数据库同步）"
-	@handler GetEmojisByIds
-	post /beaver/api/emoji/emoji/v1/emojis-by-ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
-
-	@doc "按ID批量查询表情基础信息（数据库同步）"
-	@handler GetEmojisByUuids
-	post /beaver/api/emoji/emoji/v1/getEmojisByUuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
-
-	@doc "批量获取表情包详情（数据库同步）"
-	@handler GetEmojiPackagesByIds
-	post /beaver/api/emoji/emoji/v1/packages-by-ids (GetEmojiPackagesByIdsReq) returns (GetEmojiPackagesByIdsRes)
-
-	@doc "批量获取用户收藏的表情记录详情（数据库同步）"
-	@handler GetEmojiCollectsByIds
-	post /beaver/api/emoji/emoji/v1/collects-by-ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
-
-	@doc "批量获取用户收藏的表情包记录详情（数据库同步）"
-	@handler GetEmojiPackageCollectsByIds
-	post /beaver/api/emoji/emoji/v1/package-collects-by-ids (GetEmojiPackageCollectsByIdsReq) returns (GetEmojiPackageCollectsByIdsRes)
-
-	@doc "批量获取表情包内容详情（数据库同步）"
-	@handler GetEmojiPackageContentsByPackageIds
-	post /beaver/api/emoji/emoji/v1/package-contents-by-package-ids (GetEmojiPackageContentsByPackageIdsReq) returns (GetEmojiPackageContentsByPackageIdsRes)
-
-	@doc "批量获取表情包内容详情（通过relationIds，数据库同步）"
-	@handler GetEmojiPackageContentsByRelationIds
-	post /beaver/api/emoji/emoji/v1/package-contents-by-relation-ids (GetEmojiPackageContentsByRelationIdsReq) returns (GetEmojiPackageContentsByRelationIdsRes)
-}
-
-// ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
-// C 端按「当前用户」取表情，队间按「记录维度」分页与写入，路径刻意错开。
-
 type (
-	MachineEmojiInfo {
-		Width  int32 `json:"width,optional"` // 宽
-		Height int32 `json:"height,optional"` // 高
-	}
-	MachineEmojiItem {
+MachineEmojiItem {
 		EmojiId   string            `json:"emoji_id,optional"` // 表情ID
 		FileKey   string            `json:"file_key,optional"` // 文件Key
 		Title     string            `json:"title,optional"` // 表情名称
@@ -381,7 +285,25 @@ type (
 		CreatedAt string            `json:"created_at,optional"` // 创建时间
 		UpdatedAt string            `json:"updated_at,optional"` // 更新时间
 	}
-	MachineEmojiPackageItem {
+
+ListEmojisReq {
+		Page      int32  `json:"page,optional"` // 页码
+		PageSize  int32  `json:"page_size,optional"` // 每页条数
+		Title     string `json:"title,optional"` // 表情名称筛选
+		StartTime string `json:"start_time,optional"` // 开始时间
+		EndTime   string `json:"end_time,optional"` // 结束时间
+		EmojiId   string `json:"emoji_id,optional"` // 表情ID精确查
+		PackageId string `json:"package_id,optional"` // 表情包ID筛选
+	}
+
+ListEmojisRes {
+		Total int64              `json:"total,optional"` // 总数
+		List  []MachineEmojiItem `json:"list,optional"` // 表情列表
+	}
+)
+
+type (
+MachineEmojiPackageItem {
 		PackageId   string `json:"package_id,optional"` // 表情包ID
 		Title       string `json:"title,optional"` // 名称
 		CoverFile   string `json:"cover_file,optional"` // 封面文件Key
@@ -392,31 +314,8 @@ type (
 		CreatedAt   string `json:"created_at,optional"` // 创建时间
 		UpdatedAt   string `json:"updated_at,optional"` // 更新时间
 	}
-	EmojiCollectItem {
-		CollectId    string `json:"collect_id,optional"` // 收藏记录ID
-		UserId       string `json:"user_id,optional"` // 用户ID
-		EmojiId      string `json:"emoji_id,optional"` // 表情ID
-		EmojiTitle   string `json:"emoji_title,optional"` // 表情名称
-		EmojiFileKey string `json:"emoji_file_key,optional"` // 表情文件Key
-		CreatedAt    string `json:"created_at,optional"` // 创建时间
-		UpdatedAt    string `json:"updated_at,optional"` // 更新时间
-	}
 
-	ListEmojisReq {
-		Page      int32  `json:"page,optional"` // 页码
-		PageSize  int32  `json:"page_size,optional"` // 每页条数
-		Title     string `json:"title,optional"` // 表情名称筛选
-		StartTime string `json:"start_time,optional"` // 开始时间
-		EndTime   string `json:"end_time,optional"` // 结束时间
-		EmojiId   string `json:"emoji_id,optional"` // 表情ID精确查
-		PackageId string `json:"package_id,optional"` // 表情包ID筛选
-	}
-	ListEmojisRes {
-		Total int64              `json:"total,optional"` // 总数
-		List  []MachineEmojiItem `json:"list,optional"` // 表情列表
-	}
-
-	ListEmojiPackagesReq {
+ListEmojiPackagesReq {
 		Page      int32  `json:"page,optional"` // 页码
 		PageSize  int32  `json:"page_size,optional"` // 每页条数
 		UserId    string `json:"user_id,optional"` // 所属用户筛选
@@ -427,12 +326,25 @@ type (
 		EndTime   string `json:"end_time,optional"` // 结束时间
 		PackageId string `json:"package_id,optional"` // 表情包ID精确查
 	}
-	ListEmojiPackagesRes {
+
+ListEmojiPackagesRes {
 		Total int64                     `json:"total,optional"` // 总数
 		List  []MachineEmojiPackageItem `json:"list,optional"` // 表情包列表
 	}
+)
 
-	ListEmojiCollectsReq {
+type (
+EmojiCollectItem {
+		CollectId    string `json:"collect_id,optional"` // 收藏记录ID
+		UserId       string `json:"user_id,optional"` // 用户ID
+		EmojiId      string `json:"emoji_id,optional"` // 表情ID
+		EmojiTitle   string `json:"emoji_title,optional"` // 表情名称
+		EmojiFileKey string `json:"emoji_file_key,optional"` // 表情文件Key
+		CreatedAt    string `json:"created_at,optional"` // 创建时间
+		UpdatedAt    string `json:"updated_at,optional"` // 更新时间
+	}
+
+ListEmojiCollectsReq {
 		Page      int32  `json:"page,optional"` // 页码
 		PageSize  int32  `json:"page_size,optional"` // 每页条数
 		UserId    string `json:"user_id,optional"` // 用户ID筛选
@@ -440,12 +352,15 @@ type (
 		StartTime string `json:"start_time,optional"` // 开始时间
 		EndTime   string `json:"end_time,optional"` // 结束时间
 	}
-	ListEmojiCollectsRes {
-		Total int64               `json:"total,optional"` // 总数
-		List  []EmojiCollectItem  `json:"list,optional"` // 收藏列表
-	}
 
-	SaveEmojiReq {
+ListEmojiCollectsRes {
+		Total int64              `json:"total,optional"` // 总数
+		List  []EmojiCollectItem `json:"list,optional"` // 收藏列表
+	}
+)
+
+type (
+SaveEmojiReq {
 		EmojiId      string            `json:"emoji_id,optional"` // 表情ID，空表示新建
 		FileKey      string            `json:"file_key,optional"` // 文件Key
 		Title        string            `json:"title,optional"` // 表情名称
@@ -454,11 +369,14 @@ type (
 		PatchTitle   *string           `json:"patch_title,optional"` // 增量改名称
 		Delete       *bool             `json:"delete,optional"` // 删除标记
 	}
-	SaveEmojiRes {
+
+SaveEmojiRes {
 		EmojiId string `json:"emoji_id,optional"` // 表情ID
 	}
+)
 
-	SaveEmojiPackageReq {
+type (
+SaveEmojiPackageReq {
 		PackageId        string  `json:"package_id,optional"` // 表情包ID，空表示新建
 		Title            string  `json:"title,optional"` // 名称
 		CoverFile        string  `json:"cover_file,optional"` // 封面文件Key
@@ -472,11 +390,14 @@ type (
 		PatchStatus      *int32  `json:"patch_status,optional"` // 增量改状态
 		Delete           *bool   `json:"delete,optional"` // 删除标记
 	}
-	SaveEmojiPackageRes {
+
+SaveEmojiPackageRes {
 		PackageId string `json:"package_id,optional"` // 表情包ID
 	}
+)
 
-	UpdateEmojiPackageContentReq {
+type (
+UpdateEmojiPackageContentReq {
 		PackageId string            `json:"package_id,optional"` // 表情包ID
 		Action    int32             `json:"action,optional"` // 操作类型
 		EmojiId   string            `json:"emoji_id,optional"` // 表情ID
@@ -484,14 +405,160 @@ type (
 		Title     string            `json:"title,optional"` // 表情名称
 		EmojiInfo *MachineEmojiInfo `json:"emoji_info,optional"` // 尺寸信息
 	}
-	UpdateEmojiPackageContentRes {
+
+UpdateEmojiPackageContentRes {
 		RelationId string `json:"relation_id,optional"` // 关联记录ID
 		EmojiId    string `json:"emoji_id,optional"` // 表情ID
 	}
 )
 
+type (
+GetEmojiPackagesSimpleItem {
+		EmojiID   string               `json:"emojiId"`
+		FileKey   string               `json:"fileKey"`
+		Title     string               `json:"title"`
+		Version   int64                `json:"version"`
+		Status    int8                 `json:"status"`
+		EmojiInfo GetEmojiPackagesInfo `json:"emojiInfo"`
+	}
+
+EmojiPackageItem {
+		PackageID    string                       `json:"packageId"`
+		Title        string                       `json:"title"`
+		CoverFile    string                       `json:"coverFile"`
+		Description  string                       `json:"description"`
+		Type         string                       `json:"type"` // 类型：official-官方，user-用户自定义
+		CollectCount int                          `json:"collectCount"`
+		EmojiCount   int                          `json:"emojiCount"`
+		IsCollected  bool                         `json:"isCollected"` // 当前用户是否已收藏
+		IsAuthor     bool                         `json:"isAuthor"` // 当前用户是否是作者
+		RecentEmojis []GetEmojiPackagesSimpleItem `json:"recentEmojis"` // 最近6个表情
+	}
+
+EmojiPackageContentDetailItem {
+		RelationID string `json:"relationId"`
+		PackageID  string `json:"packageId"`
+		EmojiID    string `json:"emojiId"`
+		SortOrder  int    `json:"sortOrder"`
+		Version    int64  `json:"version"`
+		CreatedAt  int64  `json:"createdAt"`
+		UpdatedAt  int64  `json:"updatedAt"`
+	}
+)
+
+type (
+AddEmojiInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
+
+GetEmojiInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
+
+GetEmojiPackagesInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
+
+GetEmojiPackageInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
+
+GetEmojiByIdsInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
+
+GetEmojiByUuidsInfo {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}
+
+GetEmojiCollectsByUuidsReq {
+		Ids []string `json:"ids"` // 收藏记录ID列表
+	}
+
+GetEmojiCollectsByUuidsRes {
+		Collects []EmojiCollectDetailItem `json:"collects"`
+	}
+
+MachineEmojiInfo {
+		Width  int32 `json:"width,optional"` // 宽
+		Height int32 `json:"height,optional"` // 高
+	}
+)
+
 @server (
-	group: emoji_machine
+	group:      emoji
+	middleware: JwtS2s
+)
+service asset {
+	@doc "添加表情，并且自动收藏"
+	@handler AddEmoji
+	post /beaver/api/emoji/emoji/v1/add (AddEmojiReq) returns (AddEmojiRes)
+
+	@doc "收藏或者取消收藏表情"
+	@handler UpdateFavoriteEmoji
+	post /beaver/api/emoji/emoji/v1/favorite_emoji (UpdateFavoriteEmojiReq) returns (UpdateFavoriteEmojiRes)
+
+	@doc "获取用户收藏的表情列表"
+	@handler GetEmojisList
+	post /beaver/api/emoji/emoji/v1/favorite_list (GetEmojisListReq) returns (GetEmojisListRes)
+
+	@doc "获取表情包列表"
+	@handler GetEmojiPackages
+	post /beaver/api/emoji/emoji/v1/package_list (GetEmojiPackagesReq) returns (GetEmojiPackagesRes)
+
+	@doc "获取表情包详情"
+	@handler GetEmojiPackageDetail
+	post /beaver/api/emoji/emoji/v1/package_info (GetEmojiPackageDetailReq) returns (GetEmojiPackageDetailRes)
+
+	@doc "收藏或取消收藏表情包"
+	@handler UpdateFavoriteEmojiPackage
+	post /beaver/api/emoji/emoji/v1/package_favorite (UpdateFavoriteEmojiPackageReq) returns (UpdateFavoriteEmojiPackageRes)
+
+	@doc "获取用户收藏的表情包列表"
+	@handler GetUserFavoritePackages
+	post /beaver/api/emoji/emoji/v1/favorite_package_list (GetUserFavoritePackagesReq) returns (GetUserFavoritePackagesRes)
+
+	@doc "批量获取表情详情（数据库同步）"
+	@handler GetEmojisByIds
+	post /beaver/api/emoji/emoji/v1/emojis_by_ids (GetEmojisByIdsReq) returns (GetEmojisByIdsRes)
+
+	@doc "按ID批量查询表情基础信息（数据库同步）"
+	@handler GetEmojisByUuids
+	post /beaver/api/emoji/emoji/v1/get_emojis_by_uuids (GetEmojisByUuidsReq) returns (GetEmojisByUuidsRes)
+
+	@doc "批量获取表情包详情（数据库同步）"
+	@handler GetEmojiPackagesByIds
+	post /beaver/api/emoji/emoji/v1/packages_by_ids (GetEmojiPackagesByIdsReq) returns (GetEmojiPackagesByIdsRes)
+
+	@doc "批量获取用户收藏的表情记录详情（数据库同步）"
+	@handler GetEmojiCollectsByIds
+	post /beaver/api/emoji/emoji/v1/collects_by_ids (GetEmojiCollectsByIdsReq) returns (GetEmojiCollectsByIdsRes)
+
+	@doc "批量获取用户收藏的表情包记录详情（数据库同步）"
+	@handler GetEmojiPackageCollectsByIds
+	post /beaver/api/emoji/emoji/v1/package_collects_by_ids (GetEmojiPackageCollectsByIdsReq) returns (GetEmojiPackageCollectsByIdsRes)
+
+	@doc "批量获取表情包内容详情（数据库同步）"
+	@handler GetEmojiPackageContentsByPackageIds
+	post /beaver/api/emoji/emoji/v1/package_contents_by_package_ids (GetEmojiPackageContentsByPackageIdsReq) returns (GetEmojiPackageContentsByPackageIdsRes)
+
+	@doc "批量获取表情包内容详情（通过relationIds，数据库同步）"
+	@handler GetEmojiPackageContentsByRelationIds
+	post /beaver/api/emoji/emoji/v1/package_contents_by_relation_ids (GetEmojiPackageContentsByRelationIdsReq) returns (GetEmojiPackageContentsByRelationIdsRes)
+}
+
+// ==================== 队间（S2S）能力面 ====================
+// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
+// C 端按「当前用户」取表情，队间按「记录维度」分页与写入，路径刻意错开。
+
+@server (
+	group:      emoji_machine
 	middleware: JwtS2s
 )
 service asset {

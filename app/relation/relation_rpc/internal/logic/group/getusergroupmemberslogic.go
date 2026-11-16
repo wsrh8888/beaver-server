@@ -26,7 +26,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,7 +45,7 @@ func NewGetUserGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
-func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *types.GetUserGroupMembersReq) (*types.GetUserGroupMembersRes, error) {
+func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *pb.GetUserGroupMembersReq) (*pb.GetUserGroupMembersRes, error) {
 	// 获取用户加入的所有群组
 	var userMembers []group_models.GroupMemberModel
 
@@ -66,7 +66,7 @@ func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *types.GetUserGroupMem
 
 	if len(groupIDs) == 0 {
 		l.logger.Info(model.LogMsg{Text: "用户未加入任何群组", Data: map[string]any{"userId": in.UserID}})
-		return &types.GetUserGroupMembersRes{
+		return &pb.GetUserGroupMembersRes{
 			MemberIDs: []string{},
 		}, nil
 	}
@@ -95,7 +95,7 @@ func (l *GetUserGroupMembersLogic) GetUserGroupMembers(in *types.GetUserGroupMem
 
 	l.logger.Info(model.LogMsg{Text: "获取用户群成员成功", Data: map[string]interface{}{"userId": in.UserID, "count": len(allMemberIDs)}})
 
-	return &types.GetUserGroupMembersRes{
+	return &pb.GetUserGroupMembersRes{
 		MemberIDs: allMemberIDs,
 	}, nil
 }

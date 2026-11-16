@@ -69,7 +69,7 @@ PublicPaths:
   - /beaver-open/api/open/developer/v1/file_preview
   - /beaver-open/api/open/ws/v1/connect
   - /beaver-open/api/open/oauth_public/v1/
-  # 应用级凭据（App-Id / App-Secret）面：第三方服务端直连，不携带外部票，由本地 AppSecretAuth 校验。
+  # 应用级凭据（Oauth-Id / Oauth-Secret）面：第三方服务端直连，不携带外部票，由本地 OauthSecretAuth 校验。
   - /beaver-open/api/open/oauth_secret/v1/
   - /beaver-open/api/open/machine/v1/token
   - /beaver-social/api/social/machine/v1/token

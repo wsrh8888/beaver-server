@@ -62,15 +62,15 @@ type (
 service datasync {
 	@doc "获取通知事件版本摘要"
 	@handler getSyncNotificationEvents
-	post /beaver/api/datasync/sync/v1/getSyncNotificationEvents (GetSyncNotificationEventsReq) returns (GetSyncNotificationEventsRes)
+	post /beaver/api/datasync/sync/v1/get_sync_notification_events (GetSyncNotificationEventsReq) returns (GetSyncNotificationEventsRes)
 
 	@doc "获取通知收件箱版本摘要"
 	@handler getSyncNotificationInboxes
-	post /beaver/api/datasync/sync/v1/getSyncNotificationInboxes (GetSyncNotificationInboxesReq) returns (GetSyncNotificationInboxesRes)
+	post /beaver/api/datasync/sync/v1/get_sync_notification_inboxes (GetSyncNotificationInboxesReq) returns (GetSyncNotificationInboxesRes)
 
 	@doc "获取通知已读游标版本摘要"
 	@handler getSyncNotificationReadCursors
-	post /beaver/api/datasync/sync/v1/getSyncNotificationReadCursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
+	post /beaver/api/datasync/sync/v1/get_sync_notification_read_cursors (GetSyncNotificationReadCursorsReq) returns (GetSyncNotificationReadCursorsRes)
 }
 
 // goctl api go -api datasync_api.api -dir . --home ../../../template

@@ -22,14 +22,12 @@
 package consumer
 
 import (
-	aicli "beaver/remote/ai"
-	aitype "beaver/types/remote/ai"
 	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 
-	message_models "beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	"beaver/app/message/message_rpc/internal/svc"
 	"beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
@@ -44,7 +42,8 @@ import (
 
 // AgentTaskConsumerLogic 消费 agent_task topic：builtin 数字伙伴消息编排层。
 // 从 digital_event_push 投递的 agent_task 信封中取出 payload，校验 Runtime=builtin，
-// 取 BuiltinConfig，拉最近聊天记录拼上下文，最后经 agent_api S2S 调 Python agent SendMessage（fire-and-forget）。
+// 取 open 侧绑定的 agentId，拉最近聊天记录拼上下文，最后经 agent_api S2S 调 Python agent
+// SendMessage（fire-and-forget）；人设 / 模型 / 工具由 AI 侧按 agentId 解析。
 type AgentTaskConsumerLogic struct {
 	svcCtx *svc.ServiceContext
 	logger *beaverlog.Logger
@@ -96,16 +95,12 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 			return nil
 		}
 
-		// 人设优先用数字伙伴自己的 BuiltinConfig。没有再回退到引用的 AI 应用。
-		// 模型不在这里指定，空 model_id 由 agent 按 auto 选。
-		systemPrompt := builtinSystemPrompt(cfgRes.BuiltinConfig)
-		if systemPrompt == "" && cfgRes.AppId != "" {
-			appRes, appErr := aicli.GetAgentApp(ctx, nil, &aitype.GetAgentAppReq{AppId: cfgRes.AppId})
-			if appErr != nil || appRes == nil || appRes.App == nil {
-				l.logger.Error(model.LogMsg{Text: "GetAgentApp 失败", Data: map[string]any{"digitalId": digitalID, "appId": cfgRes.AppId, "err": fmt.Sprintf("%v", appErr)}})
-			} else {
-				systemPrompt = appRes.App.SystemPrompt
-			}
+		// 编排配置的唯一真相源是 agents 表：这里只透传 agentId，
+		// 人设 / 模型 / 工具由 AI 侧按 agentId 取，IM 不再持有并透传 prompt。
+		agentID := cfgRes.AgentId
+		if agentID == "" {
+			l.logger.Error(model.LogMsg{Text: "builtin 数字伙伴未绑定 Agent", Data: map[string]any{"digitalId": digitalID}})
+			return nil
 		}
 
 		// 拼最近聊天记录上下文。
@@ -124,16 +119,13 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 		}
 
 		// 经 agent_api S2S 调 Python agent SendMessage（fire-and-forget：只取 code，不等终稿）。
-		// AppId：数字伙伴引用的 AgentApp，透传给 agent 驱动"配置即执行"——
-		// agent 据此回查 AgentApp 的 tools/mcp/knowledge/model 绑定；未引用则空，agent 回落旧默认。
 		reply, err := agent.SendMessage(ctx, nil, &agenttype.SendMessageReq{
 			UserId:         userID,
 			ConversationId: conversationID,
 			ModelId:        "",
 			PartsJson:      string(partsJSON),
-			SystemPrompt:   systemPrompt,
+			AgentId:        agentID,
 			DigitalId:      digitalID,
-			AppId:          cfgRes.AppId,
 			ClientMsgId:    messageID,
 		})
 		if err != nil {
@@ -210,19 +202,6 @@ func extractHistoryText(msg *ctype.Msg) string {
 		}
 	}
 	return ""
-}
-
-func builtinSystemPrompt(raw string) string {
-	if raw == "" {
-		return ""
-	}
-	var cfg struct {
-		SystemPrompt string `json:"systemPrompt"`
-	}
-	if err := json.Unmarshal([]byte(raw), &cfg); err != nil {
-		return ""
-	}
-	return strings.TrimSpace(cfg.SystemPrompt)
 }
 
 // extractPayload 从信封里取出业务字段。

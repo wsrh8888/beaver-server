@@ -48,7 +48,6 @@ type CreateDigitalReq struct {
 	Avatar       string `json:"avatar,omitempty"`
 	Runtime      string `json:"runtime,omitempty"`
 	Visibility   string `json:"visibility,omitempty"`
-	AppId        string `json:"app_id,omitempty"`
 	Source       string `json:"source,omitempty"`
 	OwnerId      string `json:"owner_id,omitempty"`
 	SystemPrompt string `json:"system_prompt,omitempty"`
@@ -58,9 +57,9 @@ type CreateDigitalReq struct {
 }
 
 type CreateDigitalRes struct {
-	DigitalId string `json:"digital_id,omitempty"`
-	AppKey    string `json:"app_key,omitempty"`
-	AppSecret string `json:"app_secret,omitempty"`
+	DigitalId     string `json:"digital_id,omitempty"`
+	DigitalKey    string `json:"digitalKey,omitempty"`
+	DigitalSecret string `json:"digitalSecret,omitempty"`
 }
 
 type DigitalItem struct {
@@ -73,7 +72,6 @@ type DigitalItem struct {
 	Visibility   string `json:"visibility,omitempty"`
 	Status       int32  `json:"status,omitempty"`
 	Source       string `json:"source,omitempty"`
-	AppId        string `json:"app_id,omitempty"`
 	CreatedAt    int64  `json:"created_at,omitempty"`
 	SystemPrompt string `json:"system_prompt,omitempty"`
 	LlmModelId   string `json:"llm_model_id,omitempty"`
@@ -100,22 +98,22 @@ type GetDigitalByUserIDReq struct {
 
 type GetDigitalByUserIDRes struct {
 	Found         bool   `json:"found,omitempty"`
-	AppKey        string `json:"app_key,omitempty"`
+	DigitalKey    string `json:"digitalKey,omitempty"`
 	DigitalUserId string `json:"digital_user_id,omitempty"`
 	Runtime       string `json:"runtime,omitempty"`
 }
 
 type GetDigitalConfigReq struct {
-	DigitalId string `json:"digital_id,omitempty"`
+	DigitalId string `json:"digitalId"`
 }
 
 type GetDigitalConfigRes struct {
-	DigitalId      string `json:"digital_id,omitempty"`
-	Runtime        string `json:"runtime,omitempty"`
-	BuiltinConfig  string `json:"builtin_config,omitempty"`
-	ExternalConfig string `json:"external_config,omitempty"`
-	WorkflowConfig string `json:"workflow_config,omitempty"`
-	AppId          string `json:"app_id,omitempty"`
+	DigitalId string `json:"digitalId"`
+	Runtime   string `json:"runtime"`
+	// AgentId 数字伙伴绑定的 Agent；runtime=builtin/workflow 时非空，external 时为空。
+	// 编排配置（人设/模型/工具/知识）只在 agents 表，open 侧不再下发编排 JSON。
+	AgentId        string `json:"agentId"`
+	ExternalConfig string `json:"externalConfig"`
 }
 
 type ListBotsReq struct {
@@ -182,7 +180,6 @@ type UpdateDigitalReq struct {
 	Name         string `json:"name,omitempty"`
 	Visibility   string `json:"visibility,omitempty"`
 	Status       int32  `json:"status,omitempty"`
-	AppId        string `json:"app_id,omitempty"`
 	SystemPrompt string `json:"system_prompt,omitempty"`
 	LlmModelId   string `json:"llm_model_id,omitempty"`
 	Tools        string `json:"tools,omitempty"`

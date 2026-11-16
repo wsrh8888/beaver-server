@@ -96,7 +96,7 @@ func (s *WebhookSender) Send(eventType string, payload map[string]interface{}, c
 // WebhookTargetConfig 目标配置（从业务层传入，解耦核心库与特定的 OpenWebhookConfig 模型）
 type WebhookTargetConfig struct {
 	ID         uint
-	AppID      string
+	OAuthID    string
 	TargetURL  string
 	Secret     string
 	RetryCount int
@@ -180,5 +180,5 @@ func (s *WebhookSender) saveLog(config WebhookTargetConfig, data CallbackPayload
 	if s.logWriter == nil {
 		return
 	}
-	s.logWriter.SaveWebhookLog(context.Background(), fmt.Sprintf("%d", config.ID), config.AppID, data.EventType, success)
+	s.logWriter.SaveWebhookLog(context.Background(), fmt.Sprintf("%d", config.ID), config.OAuthID, data.EventType, success)
 }

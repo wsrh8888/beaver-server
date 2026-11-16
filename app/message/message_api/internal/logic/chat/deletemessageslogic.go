@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	"beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

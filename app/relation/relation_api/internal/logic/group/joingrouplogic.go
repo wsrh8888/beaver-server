@@ -28,13 +28,13 @@ import (
 	"fmt"
 	"time"
 
-	"beaver/app/message/message_rpc/types/chat_rpc"
-	"beaver/app/notification/notification_models"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
+	notifyconst "beaver/common/const/notifyconst"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	group_models "beaver/app/relation/relation_models/group"
-	relationtypes "beaver/app/relation/relation_rpc/types"
+	relationtypes "beaver/app/relation/relation_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
@@ -186,11 +186,11 @@ func (l *JoinGroupLogic) JoinGroup(req *types.GroupJoinReq) (resp *types.GroupJo
 					"message":   req.Message,
 				})
 				_, err = l.svcCtx.NotifyRpc.PushEvent(ctx, &notification_rpc.PushEventReq{
-					EventType:   notification_models.EventTypeGroupJoinRequest,
-					Category:    notification_models.CategoryGroup,
+					EventType:   notifyconst.EventTypeGroupJoinRequest,
+					Category:    notifyconst.CategoryGroup,
 					FromUserId:  req.UserID,
 					TargetId:    req.GroupID,
-					TargetType:  notification_models.TargetTypeGroup,
+					TargetType:  notifyconst.TargetTypeGroup,
 					PayloadJson: string(payload),
 					ToUserIds:   toUsers,
 					DedupHash:   fmt.Sprintf("%s_%d", req.GroupID, requestVersion),

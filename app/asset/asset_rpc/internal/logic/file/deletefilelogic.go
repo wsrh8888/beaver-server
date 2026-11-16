@@ -28,7 +28,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -47,7 +47,7 @@ func NewDeleteFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 	return &DeleteFileLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("delete_file", ctx)}
 }
 
-func (l *DeleteFileLogic) DeleteFile(in *types.DeleteFileReq) (*types.DeleteFileRes, error) {
+func (l *DeleteFileLogic) DeleteFile(in *pb.DeleteFileReq) (*pb.DeleteFileRes, error) {
 	var file file_models.FileModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&file).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -82,5 +82,5 @@ func (l *DeleteFileLogic) DeleteFile(in *types.DeleteFileReq) (*types.DeleteFile
 		Data: map[string]interface{}{"id": in.Id, "path": file.Path},
 	})
 
-	return &types.DeleteFileRes{Path: file.Path}, nil
+	return &pb.DeleteFileRes{Path: file.Path}, nil
 }

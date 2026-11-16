@@ -27,9 +27,11 @@ import (
 	"fmt"
 
 	"beaver/app/notification/notification_rpc/internal/config"
-	"beaver/app/notification/notification_rpc/internal/server"
+	eventserver "beaver/app/notification/notification_rpc/internal/server/event"
+	inboxserver "beaver/app/notification/notification_rpc/internal/server/inbox"
+	pushserver "beaver/app/notification/notification_rpc/internal/server/push"
 	"beaver/app/notification/notification_rpc/internal/svc"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	"beaver/app/notification/notification_rpc/pb"
 	"beaver/utils/beaverlog"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -50,7 +52,9 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		notification_rpc.RegisterNotificationServer(grpcServer, server.NewNotificationServer(ctx))
+		pb.RegisterEventServer(grpcServer, eventserver.NewEventServer(ctx))
+		pb.RegisterInboxServer(grpcServer, inboxserver.NewInboxServer(ctx))
+		pb.RegisterPushServer(grpcServer, pushserver.NewPushServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -46,7 +46,7 @@ func NewSaveEmojiLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SaveEmo
 	return &SaveEmojiLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("save_emoji", ctx)}
 }
 
-func (l *SaveEmojiLogic) SaveEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes, error) {
+func (l *SaveEmojiLogic) SaveEmoji(in *pb.SaveEmojiReq) (*pb.SaveEmojiRes, error) {
 	if in.Delete != nil && *in.Delete {
 		return l.deleteEmoji(in.EmojiId)
 	}
@@ -56,7 +56,7 @@ func (l *SaveEmojiLogic) SaveEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes,
 	return l.updateEmoji(in)
 }
 
-func (l *SaveEmojiLogic) createEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes, error) {
+func (l *SaveEmojiLogic) createEmoji(in *pb.SaveEmojiReq) (*pb.SaveEmojiRes, error) {
 	version := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
 	if version == -1 {
 		return nil, errors.New("获取版本号失败")
@@ -81,10 +81,10 @@ func (l *SaveEmojiLogic) createEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRe
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "创建表情成功", Data: map[string]interface{}{"emojiId": emoji.EmojiID, "title": in.Title}})
-	return &types.SaveEmojiRes{EmojiId: emoji.EmojiID}, nil
+	return &pb.SaveEmojiRes{EmojiId: emoji.EmojiID}, nil
 }
 
-func (l *SaveEmojiLogic) updateEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRes, error) {
+func (l *SaveEmojiLogic) updateEmoji(in *pb.SaveEmojiReq) (*pb.SaveEmojiRes, error) {
 	var emoji emoji_models.Emoji
 	if err := l.svcCtx.DB.Where("emoji_id = ?", in.EmojiId).First(&emoji).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -113,7 +113,7 @@ func (l *SaveEmojiLogic) updateEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRe
 		updates["title"] = *in.PatchTitle
 	}
 	if len(updates) == 0 {
-		return &types.SaveEmojiRes{EmojiId: in.EmojiId}, nil
+		return &pb.SaveEmojiRes{EmojiId: in.EmojiId}, nil
 	}
 
 	version := l.svcCtx.VersionGen.GetNextVersion("emoji", "", "")
@@ -127,10 +127,10 @@ func (l *SaveEmojiLogic) updateEmoji(in *types.SaveEmojiReq) (*types.SaveEmojiRe
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "更新表情成功", Data: map[string]interface{}{"emojiId": in.EmojiId, "version": version}})
-	return &types.SaveEmojiRes{EmojiId: in.EmojiId}, nil
+	return &pb.SaveEmojiRes{EmojiId: in.EmojiId}, nil
 }
 
-func (l *SaveEmojiLogic) deleteEmoji(emojiID string) (*types.SaveEmojiRes, error) {
+func (l *SaveEmojiLogic) deleteEmoji(emojiID string) (*pb.SaveEmojiRes, error) {
 	var emoji emoji_models.Emoji
 	if err := l.svcCtx.DB.Where("emoji_id = ?", emojiID).First(&emoji).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -144,5 +144,5 @@ func (l *SaveEmojiLogic) deleteEmoji(emojiID string) (*types.SaveEmojiRes, error
 		return nil, err
 	}
 	l.logger.Info(model.LogMsg{Text: "删除表情成功", Data: map[string]interface{}{"emojiId": emojiID}})
-	return &types.SaveEmojiRes{EmojiId: emojiID}, nil
+	return &pb.SaveEmojiRes{EmojiId: emojiID}, nil
 }

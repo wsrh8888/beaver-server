@@ -28,7 +28,7 @@ import (
 
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
-	"beaver/app/notification/notification_models"
+	notification_models "beaver/app/notification/notification_models/notification"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"

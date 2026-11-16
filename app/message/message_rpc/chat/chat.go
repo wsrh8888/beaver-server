@@ -28,7 +28,7 @@ package chat
 import (
 	"context"
 
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -56,6 +56,8 @@ type (
 	GetChatMessageRes                       = chat_rpc.GetChatMessageRes
 	GetConversationsListByIdsReq            = chat_rpc.GetConversationsListByIdsReq
 	GetConversationsListByIdsRes            = chat_rpc.GetConversationsListByIdsRes
+	GetConversationMemberIDsReq             = chat_rpc.GetConversationMemberIDsReq
+	GetConversationMemberIDsRes             = chat_rpc.GetConversationMemberIDsRes
 	GetSyncMessageMediasReq                 = chat_rpc.GetSyncMessageMediasReq
 	GetSyncMessageMediasRes                 = chat_rpc.GetSyncMessageMediasRes
 	GetUserConversationSettingsListByIdsReq = chat_rpc.GetUserConversationSettingsListByIdsReq
@@ -112,6 +114,7 @@ type (
 		ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error)
 		UpdateChatMessages(ctx context.Context, in *UpdateChatMessagesReq, opts ...grpc.CallOption) (*UpdateChatMessagesRes, error)
 		ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error)
+		GetConversationMemberIDs(ctx context.Context, in *GetConversationMemberIDsReq, opts ...grpc.CallOption) (*GetConversationMemberIDsRes, error)
 	}
 
 	defaultChat struct {
@@ -208,4 +211,9 @@ func (m *defaultChat) UpdateChatMessages(ctx context.Context, in *UpdateChatMess
 func (m *defaultChat) ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error) {
 	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.ListConversations(ctx, in, opts...)
+}
+
+func (m *defaultChat) GetConversationMemberIDs(ctx context.Context, in *GetConversationMemberIDsReq, opts ...grpc.CallOption) (*GetConversationMemberIDsRes, error) {
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
+	return client.GetConversationMemberIDs(ctx, in, opts...)
 }

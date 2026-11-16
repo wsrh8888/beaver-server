@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"beaver/app/platform/platform_models/feedback"
-	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	platform_rpc "beaver/app/platform/platform_rpc/pb"
 )
 
 func toFeedbackItem(f feedback_models.FeedbackModel) *platform_rpc.FeedbackItem {

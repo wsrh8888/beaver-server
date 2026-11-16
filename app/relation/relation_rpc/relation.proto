@@ -2,7 +2,7 @@ syntax = "proto3"; //指定proto版本
 
 package relation_rpc;
 
-option go_package = "./types";
+option go_package = "./pb";
 
 message GetFriendIdsRequest {
   string UserID = 1;
@@ -357,7 +357,7 @@ message CanSendGroupMessageRes {
 message AddGroupMemberReq {
   string group_id = 1; // string 群组 ID
   string user_id = 2; // string 要加入的用户 ID
-  string operated_by = 3; // string 操作者 ID（如 app_id），可为空
+  string operated_by = 3; // string 操作者 ID（如 oauth_id），可为空
 }
 
 message AddGroupMemberRes {
@@ -369,7 +369,7 @@ message AddGroupMemberRes {
 message RemoveGroupMemberReq {
   string group_id = 1; // string 群组 ID
   string user_id = 2; // string 要移除的用户 ID
-  string operated_by = 3; // string 操作者 ID（如 app_id），可为空
+  string operated_by = 3; // string 操作者 ID（如 oauth_id），可为空
   bool kick = 4; // bool true=被踢(status=3)，false=退出(status=2)
 }
 

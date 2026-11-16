@@ -28,9 +28,9 @@ import (
 	"fmt"
 	"sort"
 
-	"beaver/app/message/message_rpc/types/chat_rpc"
-	"beaver/app/notification/notification_models"
-	"beaver/app/notification/notification_rpc/types/notification_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
+	notifyconst "beaver/common/const/notifyconst"
+	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	friend_models "beaver/app/relation/relation_models/friend"
@@ -306,9 +306,9 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 		eventType := ""
 		switch decisionStatus {
 		case 1:
-			eventType = notification_models.EventTypeFriendRequestAccept
+			eventType = notifyconst.EventTypeFriendRequestAccept
 		case 2:
-			eventType = notification_models.EventTypeFriendRequestReject
+			eventType = notifyconst.EventTypeFriendRequestReject
 		default:
 			return
 		}
@@ -320,10 +320,10 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 
 		_, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, &notification_rpc.PushEventReq{
 			EventType:   eventType,
-			Category:    notification_models.CategorySocial,
+			Category:    notifyconst.CategorySocial,
 			FromUserId:  friendVerify.RevUserID, // 审核人
 			TargetId:    req.VerifyID,
-			TargetType:  notification_models.TargetTypeUser,
+			TargetType:  notifyconst.TargetTypeUser,
 			PayloadJson: string(payload),
 			ToUserIds:   []string{friendVerify.SendUserID}, // 申请人
 			DedupHash:   fmt.Sprintf("%s_%d", req.VerifyID, decisionStatus),

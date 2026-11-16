@@ -27,7 +27,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewGetUserGroupRequestVersionsLogic(ctx context.Context, svcCtx *svc.Servic
 }
 
 // 获取用户群组申请版本信息
-func (l *GetUserGroupRequestVersionsLogic) GetUserGroupRequestVersions(in *types.GetUserGroupRequestVersionsReq) (*types.GetUserGroupRequestVersionsRes, error) {
+func (l *GetUserGroupRequestVersionsLogic) GetUserGroupRequestVersions(in *pb.GetUserGroupRequestVersionsReq) (*pb.GetUserGroupRequestVersionsRes, error) {
 	userID := in.UserID
 
 	// 获取用户相关的所有群组申请版本
@@ -57,13 +57,13 @@ func (l *GetUserGroupRequestVersionsLogic) GetUserGroupRequestVersions(in *types
 		return nil, err
 	}
 
-	return &types.GetUserGroupRequestVersionsRes{
+	return &pb.GetUserGroupRequestVersionsRes{
 		Versions: versions,
 	}, nil
 }
 
 // 获取用户相关的群组申请版本（包括我发出的和我管理的群）
-func (l *GetUserGroupRequestVersionsLogic) getUserGroupRequestVersions(userID string, since int64) ([]*types.GroupRequestVersionItem, error) {
+func (l *GetUserGroupRequestVersionsLogic) getUserGroupRequestVersions(userID string, since int64) ([]*pb.GroupRequestVersionItem, error) {
 	// 1. 获取我申请加入的群的申请版本
 	sentVersions, err := l.getSentRequestVersions(userID, since)
 	if err != nil {
@@ -94,9 +94,9 @@ func (l *GetUserGroupRequestVersionsLogic) getUserGroupRequestVersions(userID st
 	}
 
 	// 转换为响应格式
-	var result []*types.GroupRequestVersionItem
+	var result []*pb.GroupRequestVersionItem
 	for groupID, version := range versionMap {
-		result = append(result, &types.GroupRequestVersionItem{
+		result = append(result, &pb.GroupRequestVersionItem{
 			GroupID: groupID,
 			Version: version,
 		})
@@ -106,7 +106,7 @@ func (l *GetUserGroupRequestVersionsLogic) getUserGroupRequestVersions(userID st
 }
 
 // 获取用户作为申请者发出的申请版本 - 优化查询性能
-func (l *GetUserGroupRequestVersionsLogic) getSentRequestVersions(userID string, since int64) ([]*types.GroupRequestVersionItem, error) {
+func (l *GetUserGroupRequestVersionsLogic) getSentRequestVersions(userID string, since int64) ([]*pb.GroupRequestVersionItem, error) {
 	var results []struct {
 		GroupID string
 		Version int64
@@ -130,9 +130,9 @@ func (l *GetUserGroupRequestVersionsLogic) getSentRequestVersions(userID string,
 	}
 
 	// 转换为响应格式
-	var response []*types.GroupRequestVersionItem
+	var response []*pb.GroupRequestVersionItem
 	for _, item := range results {
-		response = append(response, &types.GroupRequestVersionItem{
+		response = append(response, &pb.GroupRequestVersionItem{
 			GroupID: item.GroupID,
 			Version: item.Version,
 		})
@@ -142,7 +142,7 @@ func (l *GetUserGroupRequestVersionsLogic) getSentRequestVersions(userID string,
 }
 
 // 获取用户作为管理者收到的申请版本 - 优化查询性能
-func (l *GetUserGroupRequestVersionsLogic) getManagedRequestVersions(userID string, since int64) ([]*types.GroupRequestVersionItem, error) {
+func (l *GetUserGroupRequestVersionsLogic) getManagedRequestVersions(userID string, since int64) ([]*pb.GroupRequestVersionItem, error) {
 	var results []struct {
 		GroupID string
 		Version int64
@@ -168,9 +168,9 @@ func (l *GetUserGroupRequestVersionsLogic) getManagedRequestVersions(userID stri
 	}
 
 	// 转换为响应格式
-	var response []*types.GroupRequestVersionItem
+	var response []*pb.GroupRequestVersionItem
 	for _, item := range results {
-		response = append(response, &types.GroupRequestVersionItem{
+		response = append(response, &pb.GroupRequestVersionItem{
 			GroupID: item.GroupID,
 			Version: item.Version,
 		})

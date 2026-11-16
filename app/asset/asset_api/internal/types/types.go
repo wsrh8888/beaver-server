@@ -38,10 +38,6 @@ type AddEmojiReq struct {
 type AddEmojiRes struct {
 }
 
-type AudioFile struct {
-	Duration int `json:"duration"`
-}
-
 type BatchDeleteFilesReq struct {
 	Ids []uint64 `json:"ids,optional"` // 记录ID列表
 }
@@ -157,13 +153,6 @@ type EmojiSimpleItem struct {
 	EmojiInfo GetEmojiByUuidsInfo `json:"emojiInfo"`
 }
 
-type FileInfo struct {
-	Type      string     `json:"type"`
-	ImageFile *ImageFile `json:"imageFile,optional"`
-	VideoFile *VideoFile `json:"videoFile,optional"`
-	AudioFile *AudioFile `json:"audioFile,optional"`
-}
-
 type FileItem struct {
 	Id           uint64 `json:"id,optional"`            // 记录ID
 	FileKey      string `json:"file_key,optional"`      // 文件Key
@@ -177,14 +166,132 @@ type FileItem struct {
 	UpdatedAt    string `json:"updated_at,optional"`    // 更新时间
 }
 
-type FileReq struct {
+type FileUploadAudioFile struct {
+	Duration int `json:"duration"`
 }
 
-type FileRes struct {
-	FileKey      string    `json:"fileKey"`
-	FileURL      string    `json:"fileUrl,optional"`
-	OriginalName string    `json:"originalName"`
-	FileInfo     *FileInfo `json:"fileInfo,optional"`
+type FileUploadFileInfo struct {
+	Type      string               `json:"type"`
+	ImageFile *FileUploadImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadAudioFile `json:"audioFile,optional"`
+}
+
+type FileUploadImageFile struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type FileUploadLocalAudioFile struct {
+	Duration int `json:"duration"`
+}
+
+type FileUploadLocalFileInfo struct {
+	Type      string                    `json:"type"`
+	ImageFile *FileUploadLocalImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadLocalVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadLocalAudioFile `json:"audioFile,optional"`
+}
+
+type FileUploadLocalImageFile struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type FileUploadLocalReq struct {
+}
+
+type FileUploadLocalRes struct {
+	FileKey      string                   `json:"fileKey"`
+	FileURL      string                   `json:"fileUrl,optional"`
+	OriginalName string                   `json:"originalName"`
+	FileInfo     *FileUploadLocalFileInfo `json:"fileInfo,optional"`
+}
+
+type FileUploadLocalVideoFile struct {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+type FileUploadMinioAudioFile struct {
+	Duration int `json:"duration"`
+}
+
+type FileUploadMinioFileInfo struct {
+	Type      string                    `json:"type"`
+	ImageFile *FileUploadMinioImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadMinioVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadMinioAudioFile `json:"audioFile,optional"`
+}
+
+type FileUploadMinioImageFile struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type FileUploadMinioReq struct {
+}
+
+type FileUploadMinioRes struct {
+	FileKey      string                   `json:"fileKey"`
+	FileURL      string                   `json:"fileUrl,optional"`
+	OriginalName string                   `json:"originalName"`
+	FileInfo     *FileUploadMinioFileInfo `json:"fileInfo,optional"`
+}
+
+type FileUploadMinioVideoFile struct {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+type FileUploadQiniuAudioFile struct {
+	Duration int `json:"duration"`
+}
+
+type FileUploadQiniuFileInfo struct {
+	Type      string                    `json:"type"`
+	ImageFile *FileUploadQiniuImageFile `json:"imageFile,optional"`
+	VideoFile *FileUploadQiniuVideoFile `json:"videoFile,optional"`
+	AudioFile *FileUploadQiniuAudioFile `json:"audioFile,optional"`
+}
+
+type FileUploadQiniuImageFile struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type FileUploadQiniuReq struct {
+}
+
+type FileUploadQiniuRes struct {
+	FileKey      string                   `json:"fileKey"`
+	FileURL      string                   `json:"fileUrl,optional"`
+	OriginalName string                   `json:"originalName"`
+	FileInfo     *FileUploadQiniuFileInfo `json:"fileInfo,optional"`
+}
+
+type FileUploadQiniuVideoFile struct {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
+}
+
+type FileUploadReq struct {
+}
+
+type FileUploadRes struct {
+	FileKey      string              `json:"fileKey"`
+	FileURL      string              `json:"fileUrl,optional"`
+	OriginalName string              `json:"originalName"`
+	FileInfo     *FileUploadFileInfo `json:"fileInfo,optional"`
+}
+
+type FileUploadVideoFile struct {
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Duration int `json:"duration"`
 }
 
 type GetEmojiByIdsInfo struct {
@@ -392,11 +499,6 @@ type GetUserFavoritePackagesRes struct {
 	List  []EmojiPackageItem `json:"list"`
 }
 
-type ImageFile struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
 type ListEmojiCollectsReq struct {
 	Page      int32  `json:"page,optional"`       // 页码
 	PageSize  int32  `json:"page_size,optional"`  // 每页条数
@@ -567,10 +669,4 @@ type UpdateFavoriteEmojiReq struct {
 }
 
 type UpdateFavoriteEmojiRes struct {
-}
-
-type VideoFile struct {
-	Width    int `json:"width"`
-	Height   int `json:"height"`
-	Duration int `json:"duration"`
 }

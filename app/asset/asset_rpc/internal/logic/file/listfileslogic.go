@@ -26,7 +26,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -41,7 +41,7 @@ func NewListFilesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFil
 	return &ListFilesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_files", ctx)}
 }
 
-func (l *ListFilesLogic) ListFiles(in *types.ListFilesReq) (*types.ListFilesRes, error) {
+func (l *ListFilesLogic) ListFiles(in *pb.ListFilesReq) (*pb.ListFilesRes, error) {
 	page := int(in.Page)
 	if page <= 0 {
 		page = 1
@@ -80,10 +80,10 @@ func (l *ListFilesLogic) ListFiles(in *types.ListFilesReq) (*types.ListFilesRes,
 		return nil, err
 	}
 
-	items := make([]*types.FileItem, 0, len(list))
+	items := make([]*pb.FileItem, 0, len(list))
 	for _, f := range list {
 		items = append(items, toFileItem(f))
 	}
 
-	return &types.ListFilesRes{Total: total, List: items}, nil
+	return &pb.ListFilesRes{Total: total, List: items}, nil
 }

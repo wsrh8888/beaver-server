@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package platform_rpc;
 
-option go_package = "./platform_rpc";
+option go_package = "./pb";
 
 // ==================== 管理后台：客户端日志 ====================
 
@@ -548,4 +548,4 @@ service org {
   rpc AddOrgMember(AddOrgMemberReq) returns (AddOrgMemberRes);
   rpc RemoveOrgMember(RemoveOrgMemberReq) returns (RemoveOrgMemberRes);
 }
-// goctl rpc protoc platform_rpc.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. --home ../../../template
+// goctl rpc protoc platform_rpc.proto --go_out=. --go-grpc_out=. --zrpc_out=. --home ../../../template

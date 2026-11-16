@@ -28,7 +28,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewUpsertDeviceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upse
 	}
 }
 
-func (l *UpsertDeviceLogic) UpsertDevice(in *types.UpsertDeviceReq) (*types.UpsertDeviceRes, error) {
+func (l *UpsertDeviceLogic) UpsertDevice(in *pb.UpsertDeviceReq) (*pb.UpsertDeviceRes, error) {
 	if in.UserId == "" || in.DeviceId == "" {
 		return nil, errors.New("userId 和 deviceId 不能为空")
 	}
@@ -107,5 +107,5 @@ func (l *UpsertDeviceLogic) UpsertDevice(in *types.UpsertDeviceReq) (*types.Upse
 			"deviceId": in.DeviceId,
 		},
 	})
-	return &types.UpsertDeviceRes{Success: true}, nil
+	return &pb.UpsertDeviceRes{Success: true}, nil
 }

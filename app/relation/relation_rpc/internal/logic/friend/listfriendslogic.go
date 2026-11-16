@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -44,19 +44,19 @@ func NewListFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListF
 	return &ListFriendsLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_friends", ctx)}
 }
 
-func (l *ListFriendsLogic) ListFriends(in *types.ListFriendsReq) (*types.ListFriendsRes, error) {
+func (l *ListFriendsLogic) ListFriends(in *pb.ListFriendsReq) (*pb.ListFriendsRes, error) {
 	if in.RelationId != "" {
 		f, err := findFriend(l.svcCtx.DB, in.RelationId)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &types.ListFriendsRes{}, nil
+			return &pb.ListFriendsRes{}, nil
 		}
 		if err != nil {
 			l.logger.Error(model.LogMsg{Text: "查询好友关系记录失败", Data: map[string]any{"relationId": in.RelationId, "err": err.Error()}})
 			return nil, err
 		}
-		return &types.ListFriendsRes{
+		return &pb.ListFriendsRes{
 			Total: 1,
-			List:  []*types.FriendItem{toFriendItem(*f)},
+			List:  []*pb.FriendItem{toFriendItem(*f)},
 		}, nil
 	}
 
@@ -103,9 +103,9 @@ func (l *ListFriendsLogic) ListFriends(in *types.ListFriendsReq) (*types.ListFri
 		return nil, err
 	}
 
-	items := make([]*types.FriendItem, 0, len(list))
+	items := make([]*pb.FriendItem, 0, len(list))
 	for _, f := range list {
 		items = append(items, toFriendItem(f))
 	}
-	return &types.ListFriendsRes{Total: total, List: items}, nil
+	return &pb.ListFriendsRes{Total: total, List: items}, nil
 }

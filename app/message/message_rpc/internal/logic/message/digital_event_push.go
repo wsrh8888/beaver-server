@@ -27,7 +27,7 @@ import (
 	"strings"
 
 	"beaver/app/message/message_rpc/internal/svc"
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/remote/open"
 	opentype "beaver/types/remote/open"
 	"beaver/openevent"

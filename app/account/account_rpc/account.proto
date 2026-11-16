@@ -2,7 +2,7 @@ syntax = "proto3"; //指定proto版本
 
 package account_rpc;
 
-option go_package = "./types";
+option go_package = "./pb";
 
 message UserCreateReq {
   string phone = 1; // 手机号（与email二选一）

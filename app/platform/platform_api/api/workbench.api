@@ -3,19 +3,12 @@ syntax = "v1"
 // ==================== 工作台（客户端，需登录）====================
 
 type (
-	WorkbenchEntryConfig {
-		Type   int    `json:"type"` // int 入口类型 0路由key 1H5地址
-		PC     string `json:"pc,optional"` // string PC 入口，可选
-		Mobile string `json:"mobile,optional"` // string 移动端入口，可选
-	}
-)
-
-type (
-	ListWorkbenchAppsReq {
+ListWorkbenchAppsReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		ClientScope int    `form:"clientScope,optional"` // int 端筛选 0全部 1PC 2移动，可选
 	}
-	ListWorkbenchAppsItem {
+
+ListWorkbenchAppsItem {
 		WorkbenchAppID string               `json:"workbenchAppId"` // string 应用业务 ID
 		Name           string               `json:"name"` // string 应用名称
 		Description    string               `json:"description"` // string 应用描述
@@ -27,13 +20,23 @@ type (
 		Sort           int                  `json:"sort"` // int 排序
 		OpenMode       int                  `json:"openMode"` // int 打开方式 0内嵌 1系统浏览器
 	}
-	ListWorkbenchAppsGroup {
+
+ListWorkbenchAppsGroup {
 		Category     int                     `json:"category"` // int 分类
 		CategoryName string                  `json:"categoryName"` // string 分类名称
 		List         []ListWorkbenchAppsItem `json:"list"` // array 该分类下应用
 	}
-	ListWorkbenchAppsRes {
+
+ListWorkbenchAppsRes {
 		Groups []ListWorkbenchAppsGroup `json:"groups"` // array 按分类分组的应用列表
+	}
+)
+
+type (
+WorkbenchEntryConfig {
+		Type   int    `json:"type"` // int 入口类型 0路由key 1H5地址
+		PC     string `json:"pc,optional"` // string PC 入口，可选
+		Mobile string `json:"mobile,optional"` // string 移动端入口，可选
 	}
 )
 

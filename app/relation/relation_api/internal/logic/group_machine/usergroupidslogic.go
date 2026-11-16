@@ -26,7 +26,7 @@ import (
 
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
-	relationtypes "beaver/app/relation/relation_rpc/types"
+	relationtypes "beaver/app/relation/relation_rpc/pb"
 	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )

@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,9 +46,9 @@ func NewGetFriendsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
-func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *types.GetFriendsListByIdsReq) (*types.GetFriendsListByIdsRes, error) {
+func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *pb.GetFriendsListByIdsReq) (*pb.GetFriendsListByIdsRes, error) {
 	if len(in.Ids) == 0 {
-		return &types.GetFriendsListByIdsRes{Friends: []*types.FriendListById{}}, nil
+		return &pb.GetFriendsListByIdsRes{Friends: []*pb.FriendListById{}}, nil
 	}
 
 	// 查询指定ID列表中的好友信息
@@ -69,9 +69,9 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *types.GetFriendsListB
 	l.logger.Info(model.LogMsg{Text: "批量查询好友信息", Data: map[string]interface{}{"count": len(friends)}})
 
 	// 转换为响应格式
-	var friendsList []*types.FriendListById
+	var friendsList []*pb.FriendListById
 	for _, friend := range friends {
-		friendsList = append(friendsList, &types.FriendListById{
+		friendsList = append(friendsList, &pb.FriendListById{
 			Id:             friend.FriendID,
 			SendUserId:     friend.SendUserID,
 			RevUserId:      friend.RevUserID,
@@ -85,5 +85,5 @@ func (l *GetFriendsListByIdsLogic) GetFriendsListByIds(in *types.GetFriendsListB
 		})
 	}
 
-	return &types.GetFriendsListByIdsRes{Friends: friendsList}, nil
+	return &pb.GetFriendsListByIdsRes{Friends: friendsList}, nil
 }

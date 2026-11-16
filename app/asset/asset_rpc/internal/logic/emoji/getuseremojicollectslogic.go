@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -47,7 +47,7 @@ func NewGetUserEmojiCollectsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 // 获取用户收藏的表情版本摘要（用于datasync增量同步）
-func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *types.GetUserEmojiCollectsReq) (*types.GetUserEmojiCollectsRes, error) {
+func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *pb.GetUserEmojiCollectsReq) (*pb.GetUserEmojiCollectsRes, error) {
 	// 获取用户收藏的表情记录（返回收藏记录自身的版本，而不是表情版本）
 	var collectRecords []emoji_models.EmojiCollectEmoji
 	collectQuery := l.svcCtx.DB.Where("user_id = ?", in.UserId)
@@ -65,22 +65,22 @@ func (l *GetUserEmojiCollectsLogic) GetUserEmojiCollects(in *types.GetUserEmojiC
 	}
 
 	if len(collectRecords) == 0 {
-		return &types.GetUserEmojiCollectsRes{
-			EmojiCollectVersions: []*types.EmojiCollectVersionItem{},
+		return &pb.GetUserEmojiCollectsRes{
+			EmojiCollectVersions: []*pb.EmojiCollectVersionItem{},
 			ServerTimestamp:      time.Now().UnixMilli(),
 		}, nil
 	}
 
 	// 转换为收藏记录的版本摘要（使用收藏记录ID + 版本号）
-	var emojiCollectVersions []*types.EmojiCollectVersionItem
+	var emojiCollectVersions []*pb.EmojiCollectVersionItem
 	for _, collect := range collectRecords {
-		emojiCollectVersions = append(emojiCollectVersions, &types.EmojiCollectVersionItem{
+		emojiCollectVersions = append(emojiCollectVersions, &pb.EmojiCollectVersionItem{
 			EmojiCollectId: collect.EmojiCollectID,
 			Version:        collect.Version,
 		})
 	}
 
-	return &types.GetUserEmojiCollectsRes{
+	return &pb.GetUserEmojiCollectsRes{
 		EmojiCollectVersions: emojiCollectVersions,
 		ServerTimestamp:      time.Now().UnixMilli(),
 	}, nil

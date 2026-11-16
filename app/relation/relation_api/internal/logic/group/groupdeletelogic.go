@@ -25,7 +25,7 @@ import (
 	"context"
 	"errors"
 
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	group_models "beaver/app/relation/relation_models/group"

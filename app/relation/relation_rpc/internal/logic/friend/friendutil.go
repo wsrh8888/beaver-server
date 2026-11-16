@@ -27,7 +27,7 @@ import (
 	"time"
 
 	friend_models "beaver/app/relation/relation_models/friend"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 
 	"gorm.io/gorm"
 )
@@ -39,8 +39,8 @@ func friendKey(f friend_models.FriendModel) string {
 	return fmt.Sprintf("%d", f.Id)
 }
 
-func toFriendItem(f friend_models.FriendModel) *types.FriendItem {
-	return &types.FriendItem{
+func toFriendItem(f friend_models.FriendModel) *pb.FriendItem {
+	return &pb.FriendItem{
 		FriendId:       friendKey(f),
 		SendUserId:     f.SendUserID,
 		RevUserId:      f.RevUserID,
@@ -53,12 +53,12 @@ func toFriendItem(f friend_models.FriendModel) *types.FriendItem {
 	}
 }
 
-func toFriendVerifyItem(v friend_models.FriendVerifyModel) *types.FriendVerifyItem {
+func toFriendVerifyItem(v friend_models.FriendVerifyModel) *pb.FriendVerifyItem {
 	key := v.VerifyID
 	if key == "" {
 		key = fmt.Sprintf("%d", v.Id)
 	}
-	return &types.FriendVerifyItem{
+	return &pb.FriendVerifyItem{
 		VerifyId:   key,
 		SendUserId: v.SendUserID,
 		RevUserId:  v.RevUserID,
@@ -91,8 +91,8 @@ func blockKey(b friend_models.FriendBlockModel) string {
 	return fmt.Sprintf("%d", b.Id)
 }
 
-func toFriendBlockItem(b friend_models.FriendBlockModel) *types.FriendBlockItem {
-	return &types.FriendBlockItem{
+func toFriendBlockItem(b friend_models.FriendBlockModel) *pb.FriendBlockItem {
+	return &pb.FriendBlockItem{
 		BlockId:       blockKey(b),
 		UserId:        b.UserID,
 		BlockedUserId: b.BlockedUserID,

@@ -28,22 +28,21 @@ import (
 	"beaver/utils/beaverlog/model"
 )
 
-// openRpcWebhookLogWriter 记录 webhook 投递结果到本地日志。
-type openRpcWebhookLogWriter struct{}
+// openWebhookLogWriter 记录 webhook 投递结果到本地日志。
+type openWebhookLogWriter struct{}
 
-func newOpenRpcWebhookLogWriter() corewebhook.LogWriter {
-	return &openRpcWebhookLogWriter{}
+func newOpenWebhookLogWriter() corewebhook.LogWriter {
+	return &openWebhookLogWriter{}
 }
 
-func (w *openRpcWebhookLogWriter) SaveWebhookLog(ctx context.Context, configID, appID, eventType string, success bool) {
-	// NOTE: open_rpc 在「开放平台 Digital/Bot 模型与门户能力重构」中移除了 SaveWebhookLog RPC，
-	// 此处暂以本地日志替代，待 open 侧补回日志接口后再恢复 RPC 调用。
+func (w *openWebhookLogWriter) SaveWebhookLog(ctx context.Context, configID, oauthID, eventType string, success bool) {
+	// NOTE: 开放平台未提供 webhook 投递日志接口，此处以本地日志记录，configID 即 OAuthID。
 	status := "fail"
 	if success {
 		status = "ok"
 	}
 	beaverlog.New("open_webhook_log", ctx).Info(model.LogMsg{
-		Text: "webhook 日志（open_rpc 暂无 SaveWebhookLog 接口，本地记录）",
-		Data: map[string]interface{}{"configId": configID, "appId": appID, "eventType": eventType, "status": status},
+		Text: "webhook 投递日志（本地记录）",
+		Data: map[string]interface{}{"configId": configID, "oauthId": oauthID, "eventType": eventType, "status": status},
 	})
 }

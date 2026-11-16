@@ -26,12 +26,12 @@ import (
 	"errors"
 	"strings"
 
-	message_models "beaver/app/message/message_models"
+	message_models "beaver/app/message/message_models/chat"
 	"beaver/app/message/message_rpc/internal/svc"
 	chatrpcutils "beaver/app/message/message_rpc/internal/utils"
-	"beaver/app/message/message_rpc/types/chat_rpc"
-	"beaver/app/relation/relation_rpc/types"
-	accttypes "beaver/app/account/account_rpc/types"
+	chat_rpc "beaver/app/message/message_rpc/pb"
+	"beaver/app/relation/relation_rpc/pb"
+	accttypes "beaver/app/account/account_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"
@@ -338,7 +338,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		}
 
 		if !skipFriendCheck {
-			friendRes, err := l.svcCtx.FriendRpc.IsFriend(l.ctx, &types.IsFriendReq{
+			friendRes, err := l.svcCtx.FriendRpc.IsFriend(l.ctx, &pb.IsFriendReq{
 				UserA: userIds[0],
 				UserB: userIds[1],
 			})
@@ -347,7 +347,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 				return nil, errors.New("不是好友关系")
 			}
 
-			blockRes, err := l.svcCtx.FriendRpc.IsBlocked(l.ctx, &types.IsBlockedReq{
+			blockRes, err := l.svcCtx.FriendRpc.IsBlocked(l.ctx, &pb.IsBlockedReq{
 				UserA: userIds[0],
 				UserB: userIds[1],
 			})
@@ -357,7 +357,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		}
 	} else if conversationType == 2 {
 		groupID := conversation.GetTargetIDByConversation(in.ConversationId, in.UserId)
-		canSend, err := l.svcCtx.GroupRpc.CanSendGroupMessage(l.ctx, &types.CanSendGroupMessageReq{
+		canSend, err := l.svcCtx.GroupRpc.CanSendGroupMessage(l.ctx, &pb.CanSendGroupMessageReq{
 			GroupId: groupID,
 			UserId:  in.UserId,
 		})

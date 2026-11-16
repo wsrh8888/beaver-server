@@ -27,7 +27,7 @@ import (
 
 	file_models "beaver/app/asset/asset_models/file"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -46,7 +46,7 @@ func NewGetFileByIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFi
 	return &GetFileByIdLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("get_file_by_id", ctx)}
 }
 
-func (l *GetFileByIdLogic) GetFileById(in *types.GetFileByIdReq) (*types.GetFileByIdRes, error) {
+func (l *GetFileByIdLogic) GetFileById(in *pb.GetFileByIdReq) (*pb.GetFileByIdRes, error) {
 	var file file_models.FileModel
 	if err := l.svcCtx.DB.Where("id = ?", in.Id).First(&file).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -58,5 +58,5 @@ func (l *GetFileByIdLogic) GetFileById(in *types.GetFileByIdReq) (*types.GetFile
 		})
 		return nil, err
 	}
-	return &types.GetFileByIdRes{File: toFileItem(file)}, nil
+	return &pb.GetFileByIdRes{File: toFileItem(file)}, nil
 }

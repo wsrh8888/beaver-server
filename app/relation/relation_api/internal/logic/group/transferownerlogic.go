@@ -28,7 +28,7 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	group_models "beaver/app/relation/relation_models/group"
-	relationtypes "beaver/app/relation/relation_rpc/types"
+	relationtypes "beaver/app/relation/relation_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"

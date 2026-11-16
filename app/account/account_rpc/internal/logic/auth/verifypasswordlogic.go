@@ -27,7 +27,7 @@ import (
 
 	auth_models "beaver/app/account/account_models/auth"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/pwd"
@@ -47,7 +47,7 @@ func NewVerifyPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ve
 	}
 }
 
-func (l *VerifyPasswordLogic) VerifyPassword(in *types.VerifyPasswordReq) (*types.VerifyPasswordRes, error) {
+func (l *VerifyPasswordLogic) VerifyPassword(in *pb.VerifyPasswordReq) (*pb.VerifyPasswordRes, error) {
 	if in.UserId == "" {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -62,7 +62,7 @@ func (l *VerifyPasswordLogic) VerifyPassword(in *types.VerifyPasswordReq) (*type
 			Text: "查询用户凭证失败",
 			Data: map[string]any{"userId": in.UserId, "err": err.Error()},
 		})
-		return &types.VerifyPasswordRes{Valid: false}, nil
+		return &pb.VerifyPasswordRes{Valid: false}, nil
 	}
 
 	valid := pwd.CheckPad(credential.Password, in.Password)
@@ -71,12 +71,12 @@ func (l *VerifyPasswordLogic) VerifyPassword(in *types.VerifyPasswordReq) (*type
 			Text: "密码校验失败",
 			Data: map[string]any{"userId": in.UserId},
 		})
-		return &types.VerifyPasswordRes{Valid: false}, nil
+		return &pb.VerifyPasswordRes{Valid: false}, nil
 	}
 
 	l.logger.Info(model.LogMsg{
 		Text: "密码校验通过",
 		Data: map[string]any{"userId": in.UserId},
 	})
-	return &types.VerifyPasswordRes{Valid: true}, nil
+	return &pb.VerifyPasswordRes{Valid: true}, nil
 }

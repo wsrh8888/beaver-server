@@ -29,7 +29,7 @@ import (
 
 	user_models "beaver/app/account/account_models/user"
 	"beaver/app/account/account_rpc/internal/svc"
-	"beaver/app/account/account_rpc/types"
+	"beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -48,7 +48,7 @@ func NewUpdateUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 	return &UpdateUsersLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("update_users", ctx)}
 }
 
-func (l *UpdateUsersLogic) UpdateUsers(in *types.UpdateUsersReq) (*types.UpdateUsersRes, error) {
+func (l *UpdateUsersLogic) UpdateUsers(in *pb.UpdateUsersReq) (*pb.UpdateUsersRes, error) {
 	var affected int64
 	for _, uid := range in.UserIds {
 		var user user_models.UserModel
@@ -114,7 +114,7 @@ func (l *UpdateUsersLogic) UpdateUsers(in *types.UpdateUsersReq) (*types.UpdateU
 		Text: "更新用户成功",
 		Data: map[string]interface{}{"userIds": in.UserIds, "affected": affected},
 	})
-	return &types.UpdateUsersRes{AffectedCount: affected}, nil
+	return &pb.UpdateUsersRes{AffectedCount: affected}, nil
 }
 
 func (l *UpdateUsersLogic) recordUserChangeLog(userID string, version int64, updateFields map[string]interface{}) {

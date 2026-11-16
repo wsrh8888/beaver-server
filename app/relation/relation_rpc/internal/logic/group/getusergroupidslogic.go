@@ -26,7 +26,7 @@ import (
 
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -45,7 +45,7 @@ func NewGetUserGroupIDsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 	}
 }
 
-func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *types.GetUserGroupIDsReq) (*types.GetUserGroupIDsRes, error) {
+func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *pb.GetUserGroupIDsReq) (*pb.GetUserGroupIDsRes, error) {
 	// 获取用户加入的所有群组ID
 	var members []group_models.GroupMemberModel
 
@@ -66,7 +66,7 @@ func (l *GetUserGroupIDsLogic) GetUserGroupIDs(in *types.GetUserGroupIDsReq) (*t
 
 	l.logger.Info(model.LogMsg{Text: "获取用户群组ID成功", Data: map[string]interface{}{"userId": in.UserID, "count": len(groupIDs)}})
 
-	return &types.GetUserGroupIDsRes{
+	return &pb.GetUserGroupIDsRes{
 		GroupIDs: groupIDs,
 	}, nil
 }

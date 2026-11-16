@@ -22,7 +22,7 @@
 package chat_message
 
 import (
-	"beaver/app/message/message_rpc/types/chat_rpc"
+	chat_rpc "beaver/app/message/message_rpc/pb"
 	"encoding/json"
 )
 

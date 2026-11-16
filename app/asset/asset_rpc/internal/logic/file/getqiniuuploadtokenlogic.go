@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 
@@ -49,7 +49,7 @@ func NewGetQiniuUploadTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 // 获取七牛云上传token
-func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(in *types.GetQiniuUploadTokenReq) (*types.GetQiniuUploadTokenRes, error) {
+func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(in *pb.GetQiniuUploadTokenReq) (*pb.GetQiniuUploadTokenRes, error) {
 	// 创建七牛云认证对象
 	mac := qbox.NewMac(l.svcCtx.Config.Qiniu.AK, l.svcCtx.Config.Qiniu.SK)
 
@@ -70,7 +70,7 @@ func (l *GetQiniuUploadTokenLogic) GetQiniuUploadToken(in *types.GetQiniuUploadT
 		Data: map[string]interface{}{"expiresIn": expiresIn},
 	})
 
-	return &types.GetQiniuUploadTokenRes{
+	return &pb.GetQiniuUploadTokenRes{
 		UploadToken: uploadToken,
 		ExpiresIn:   expiresIn,
 	}, nil

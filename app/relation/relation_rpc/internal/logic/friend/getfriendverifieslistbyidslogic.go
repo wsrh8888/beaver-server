@@ -27,7 +27,7 @@ import (
 
 	friend_models "beaver/app/relation/relation_models/friend"
 	"beaver/app/relation/relation_rpc/internal/svc"
-	"beaver/app/relation/relation_rpc/types"
+	"beaver/app/relation/relation_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -46,9 +46,9 @@ func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.Service
 	}
 }
 
-func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *types.GetFriendVerifiesListByIdsReq) (*types.GetFriendVerifiesListByIdsRes, error) {
+func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *pb.GetFriendVerifiesListByIdsReq) (*pb.GetFriendVerifiesListByIdsRes, error) {
 	if len(in.VerifyIds) == 0 {
-		return &types.GetFriendVerifiesListByIdsRes{FriendVerifies: []*types.FriendVerifyListById{}}, nil
+		return &pb.GetFriendVerifiesListByIdsRes{FriendVerifies: []*pb.FriendVerifyListById{}}, nil
 	}
 
 	// 查询指定ID列表中的好友验证信息
@@ -69,9 +69,9 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *types.G
 	l.logger.Info(model.LogMsg{Text: "批量查询好友验证信息", Data: map[string]interface{}{"count": len(friendVerifies)}})
 
 	// 转换为响应格式
-	var friendVerifiesList []*types.FriendVerifyListById
+	var friendVerifiesList []*pb.FriendVerifyListById
 	for _, verify := range friendVerifies {
-		friendVerifiesList = append(friendVerifiesList, &types.FriendVerifyListById{
+		friendVerifiesList = append(friendVerifiesList, &pb.FriendVerifyListById{
 			VerifyId:   verify.VerifyID,
 			SendUserId: verify.SendUserID,
 			RevUserId:  verify.RevUserID,
@@ -85,5 +85,5 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(in *types.G
 		})
 	}
 
-	return &types.GetFriendVerifiesListByIdsRes{FriendVerifies: friendVerifiesList}, nil
+	return &pb.GetFriendVerifiesListByIdsRes{FriendVerifies: friendVerifiesList}, nil
 }

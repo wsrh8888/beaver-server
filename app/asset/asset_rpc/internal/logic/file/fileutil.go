@@ -25,11 +25,11 @@ import (
 	"time"
 
 	file_models "beaver/app/asset/asset_models/file"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 )
 
-func toFileItem(f file_models.FileModel) *types.FileItem {
-	return &types.FileItem{
+func toFileItem(f file_models.FileModel) *pb.FileItem {
+	return &pb.FileItem{
 		Id:           uint64(f.Id),
 		FileKey:      f.FileKey,
 		OriginalName: f.OriginalName,

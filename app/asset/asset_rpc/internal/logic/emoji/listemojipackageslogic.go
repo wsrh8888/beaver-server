@@ -27,7 +27,7 @@ import (
 
 	emoji_models "beaver/app/asset/asset_models/emoji"
 	"beaver/app/asset/asset_rpc/internal/svc"
-	"beaver/app/asset/asset_rpc/types"
+	"beaver/app/asset/asset_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )
@@ -42,7 +42,7 @@ func NewListEmojiPackagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	return &ListEmojiPackagesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_emoji_packages", ctx)}
 }
 
-func (l *ListEmojiPackagesLogic) ListEmojiPackages(in *types.ListEmojiPackagesReq) (*types.ListEmojiPackagesRes, error) {
+func (l *ListEmojiPackagesLogic) ListEmojiPackages(in *pb.ListEmojiPackagesReq) (*pb.ListEmojiPackagesRes, error) {
 	page := int(in.Page)
 	if page <= 0 {
 		page = 1
@@ -94,9 +94,9 @@ func (l *ListEmojiPackagesLogic) ListEmojiPackages(in *types.ListEmojiPackagesRe
 		return nil, err
 	}
 
-	items := make([]*types.EmojiPackageItem, 0, len(list))
+	items := make([]*pb.EmojiPackageItem, 0, len(list))
 	for _, p := range list {
-		items = append(items, &types.EmojiPackageItem{
+		items = append(items, &pb.EmojiPackageItem{
 			PackageId:   p.PackageID,
 			Title:       p.Title,
 			CoverFile:   p.CoverFile,
@@ -108,5 +108,5 @@ func (l *ListEmojiPackagesLogic) ListEmojiPackages(in *types.ListEmojiPackagesRe
 			UpdatedAt:   time.Time(p.UpdatedAt).Format(time.RFC3339),
 		})
 	}
-	return &types.ListEmojiPackagesRes{Total: total, List: items}, nil
+	return &pb.ListEmojiPackagesRes{Total: total, List: items}, nil
 }
