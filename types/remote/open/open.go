@@ -21,25 +21,26 @@
 
 // beaver-open S2S 出入参类型
 //
-// 手写 JSON DTO：字段名与 json tag 与对端 proto 的 JSON 编码逐字段一致，
-// 不依赖 protobuf 运行时（无 protoimpl / protoreflect / state）。
+// 手写 JSON DTO：字段名与 json tag 与对端 beaver-open 的 .api 定义（go-zero httpx.Parse）逐字段一致。
+// 对端 .api 一律用 lowerCamelCase，故本包 tag 全部驼峰——写成下划线会导致对端 httpx.Parse
+// 认为必填字段未设置（field "xxx" is not set），或响应解析出零值。
 package open
 
 type BotItem struct {
 	Id               uint32 `json:"id,omitempty"`
-	BotId            string `json:"bot_id,omitempty"`
-	OwnerId          string `json:"owner_id,omitempty"`
+	BotId            string `json:"botId,omitempty"`
+	OwnerId          string `json:"ownerId,omitempty"`
 	Visibility       string `json:"visibility,omitempty"`
 	Status           int32  `json:"status,omitempty"`
-	SignatureEnabled int32  `json:"signature_enabled,omitempty"`
-	CreatedAt        int64  `json:"created_at,omitempty"`
+	SignatureEnabled int32  `json:"signatureEnabled,omitempty"`
+	CreatedAt        int64  `json:"createdAt,omitempty"`
 }
 
 type BotSecurity struct {
-	KeywordsEnabled    bool     `json:"keywords_enabled,omitempty"`
+	KeywordsEnabled    bool     `json:"keywordsEnabled,omitempty"`
 	Keywords           []string `json:"keywords,omitempty"`
-	IpWhitelistEnabled bool     `json:"ip_whitelist_enabled,omitempty"`
-	IpWhitelist        []string `json:"ip_whitelist,omitempty"`
+	IpWhitelistEnabled bool     `json:"ipWhitelistEnabled,omitempty"`
+	IpWhitelist        []string `json:"ipWhitelist,omitempty"`
 }
 
 type CreateDigitalReq struct {
@@ -49,57 +50,57 @@ type CreateDigitalReq struct {
 	Runtime      string `json:"runtime,omitempty"`
 	Visibility   string `json:"visibility,omitempty"`
 	Source       string `json:"source,omitempty"`
-	OwnerId      string `json:"owner_id,omitempty"`
-	SystemPrompt string `json:"system_prompt,omitempty"`
-	LlmModelId   string `json:"llm_model_id,omitempty"`
+	OwnerId      string `json:"ownerId,omitempty"`
+	SystemPrompt string `json:"systemPrompt,omitempty"`
+	LlmModelId   string `json:"llmModelId,omitempty"`
 	Tools        string `json:"tools,omitempty"`
-	McpServerIds string `json:"mcp_server_ids,omitempty"`
+	McpServerIds string `json:"mcpServerIds,omitempty"`
 }
 
 type CreateDigitalRes struct {
-	DigitalId     string `json:"digital_id,omitempty"`
+	DigitalId     string `json:"digitalId,omitempty"`
 	DigitalKey    string `json:"digitalKey,omitempty"`
 	DigitalSecret string `json:"digitalSecret,omitempty"`
 }
 
 type DigitalItem struct {
-	DigitalId    string `json:"digital_id,omitempty"`
+	DigitalId    string `json:"digitalId,omitempty"`
 	Name         string `json:"name,omitempty"`
 	Description  string `json:"description,omitempty"`
 	Avatar       string `json:"avatar,omitempty"`
-	OwnerId      string `json:"owner_id,omitempty"`
+	OwnerId      string `json:"ownerId,omitempty"`
 	Runtime      string `json:"runtime,omitempty"`
 	Visibility   string `json:"visibility,omitempty"`
 	Status       int32  `json:"status,omitempty"`
 	Source       string `json:"source,omitempty"`
-	CreatedAt    int64  `json:"created_at,omitempty"`
-	SystemPrompt string `json:"system_prompt,omitempty"`
-	LlmModelId   string `json:"llm_model_id,omitempty"`
+	CreatedAt    int64  `json:"createdAt,omitempty"`
+	SystemPrompt string `json:"systemPrompt,omitempty"`
+	LlmModelId   string `json:"llmModelId,omitempty"`
 	Tools        string `json:"tools,omitempty"`
-	McpServerIds string `json:"mcp_server_ids,omitempty"`
+	McpServerIds string `json:"mcpServerIds,omitempty"`
 }
 
 type ExchangeTokenReq struct {
-	OauthId string `json:"oauth_id,omitempty"`
+	OauthId string `json:"oauthId,omitempty"`
 	Code    string `json:"code,omitempty"`
 }
 
 type ExchangeTokenRes struct {
-	AccessToken  string `json:"access_token,omitempty"`
-	RefreshToken string `json:"refresh_token,omitempty"`
-	ExpiresIn    int64  `json:"expires_in,omitempty"`
-	TokenType    string `json:"token_type,omitempty"`
-	UserId       string `json:"user_id,omitempty"`
+	AccessToken  string `json:"accessToken,omitempty"`
+	RefreshToken string `json:"refreshToken,omitempty"`
+	ExpiresIn    int64  `json:"expiresIn,omitempty"`
+	TokenType    string `json:"tokenType,omitempty"`
+	UserId       string `json:"userId,omitempty"`
 }
 
 type GetDigitalByUserIDReq struct {
-	DigitalUserId string `json:"digital_user_id,omitempty"`
+	DigitalUserId string `json:"digitalUserId,omitempty"`
 }
 
 type GetDigitalByUserIDRes struct {
 	Found         bool   `json:"found,omitempty"`
 	DigitalKey    string `json:"digitalKey,omitempty"`
-	DigitalUserId string `json:"digital_user_id,omitempty"`
+	DigitalUserId string `json:"digitalUserId,omitempty"`
 	Runtime       string `json:"runtime,omitempty"`
 }
 
@@ -118,10 +119,10 @@ type GetDigitalConfigRes struct {
 
 type ListBotsReq struct {
 	Page        int32  `json:"page,omitempty"`
-	PageSize    int32  `json:"page_size,omitempty"`
+	PageSize    int32  `json:"pageSize,omitempty"`
 	Keyword     string `json:"keyword,omitempty"`
 	Status      int32  `json:"status,omitempty"`
-	OwnerUserId string `json:"owner_user_id,omitempty"`
+	OwnerUserId string `json:"ownerUserId,omitempty"`
 }
 
 type ListBotsRes struct {
@@ -133,7 +134,7 @@ type ListDigitalsReq struct {
 	Source   string `json:"source,omitempty"`
 	Status   int32  `json:"status,omitempty"`
 	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
+	PageSize int32  `json:"pageSize,omitempty"`
 }
 
 type ListDigitalsRes struct {
@@ -143,11 +144,11 @@ type ListDigitalsRes struct {
 
 type ListOpenOAuthReq struct {
 	Page        int32  `json:"page,omitempty"`
-	PageSize    int32  `json:"page_size,omitempty"`
+	PageSize    int32  `json:"pageSize,omitempty"`
 	Keyword     string `json:"keyword,omitempty"`
-	OwnerUserId string `json:"owner_user_id,omitempty"`
+	OwnerUserId string `json:"ownerUserId,omitempty"`
 	Status      int32  `json:"status,omitempty"`
-	OauthId     string `json:"oauth_id,omitempty"`
+	OauthId     string `json:"oauthId,omitempty"`
 }
 
 type ListOpenOAuthRes struct {
@@ -156,19 +157,19 @@ type ListOpenOAuthRes struct {
 }
 
 type OpenOAuthItem struct {
-	OauthId     string `json:"oauth_id,omitempty"`
+	OauthId     string `json:"oauthId,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Icon        string `json:"icon,omitempty"`
-	OwnerUserId string `json:"owner_user_id,omitempty"`
+	OwnerUserId string `json:"ownerUserId,omitempty"`
 	Status      int32  `json:"status,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty"`
+	CreatedAt   int64  `json:"createdAt,omitempty"`
 }
 
 type UpdateBotReq struct {
-	BotId            string       `json:"bot_id,omitempty"`
+	BotId            string       `json:"botId,omitempty"`
 	Visibility       string       `json:"visibility,omitempty"`
-	SignatureEnabled int32        `json:"signature_enabled,omitempty"`
+	SignatureEnabled int32        `json:"signatureEnabled,omitempty"`
 	Security         *BotSecurity `json:"security,omitempty"`
 	Status           int32        `json:"status,omitempty"`
 }
@@ -176,24 +177,24 @@ type UpdateBotReq struct {
 type UpdateBotRes struct{}
 
 type UpdateDigitalReq struct {
-	DigitalId    string `json:"digital_id,omitempty"`
+	DigitalId    string `json:"digitalId,omitempty"`
 	Name         string `json:"name,omitempty"`
 	Visibility   string `json:"visibility,omitempty"`
 	Status       int32  `json:"status,omitempty"`
-	SystemPrompt string `json:"system_prompt,omitempty"`
-	LlmModelId   string `json:"llm_model_id,omitempty"`
+	SystemPrompt string `json:"systemPrompt,omitempty"`
+	LlmModelId   string `json:"llmModelId,omitempty"`
 	Tools        string `json:"tools,omitempty"`
-	McpServerIds string `json:"mcp_server_ids,omitempty"`
+	McpServerIds string `json:"mcpServerIds,omitempty"`
 }
 
 type UpdateDigitalRes struct{}
 
 type UpdateOpenOAuthReq struct {
-	OauthIds   []string `json:"oauth_ids,omitempty"`
+	OauthIds   []string `json:"oauthIds,omitempty"`
 	Status     int32    `json:"status,omitempty"`
-	OperatorId string   `json:"operator_id,omitempty"`
+	OperatorId string   `json:"operatorId,omitempty"`
 }
 
 type UpdateOpenOAuthRes struct {
-	AffectedCount int64 `json:"affected_count,omitempty"`
+	AffectedCount int64 `json:"affectedCount,omitempty"`
 }
