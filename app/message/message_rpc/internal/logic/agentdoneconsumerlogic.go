@@ -24,6 +24,7 @@ package logic
 import (
 	"context"
 
+	messagelogic "beaver/app/message/message_rpc/internal/logic/message"
 	"beaver/app/message/message_rpc/internal/svc"
 	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/common/const/mqwsconst"
@@ -77,7 +78,7 @@ func (l *AgentDoneConsumerLogic) StartConsumer() error {
 		ctx := context.Background()
 
 		// 以数字伙伴身份落一条文本消息；DeviceId=open_digital 让 sendmsglogic 跳过好友校验。
-		sendLogic := NewSendMsgLogic(ctx, l.svcCtx)
+		sendLogic := messagelogic.NewSendMsgLogic(ctx, l.svcCtx)
 		_, err = sendLogic.SendMsg(&chat_rpc.SendMsgReq{
 			UserId:         digitalID,
 			ConversationId: conversationID,

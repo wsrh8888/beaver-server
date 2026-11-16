@@ -1,0 +1,761 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package messagelogic
+
+import (
+	"context"
+	"errors"
+	"strings"
+
+	message_models "beaver/app/message/message_models"
+	"beaver/app/message/message_rpc/internal/svc"
+	chatrpcutils "beaver/app/message/message_rpc/internal/utils"
+	"beaver/app/message/message_rpc/types/chat_rpc"
+	"beaver/app/relation/relation_rpc/types"
+	accttypes "beaver/app/account/account_rpc/types"
+	mqwsconst "beaver/common/const/mqwsconst"
+	"beaver/common/models/ctype"
+	"beaver/common/wsEnum/wsCommandConst"
+	"beaver/common/wsEnum/wsTypeConst"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+	"beaver/utils/conversation"
+)
+
+type SendMsgLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SendMsgLogic {
+	return &SendMsgLogic{
+		ctx:    ctx,
+		logger: beaverlog.New("send_msg", ctx),
+		svcCtx: svcCtx,
+	}
+}
+
+// BuildMsgFromProto 将 Proto 的消息结构转换/映射为 ctype.Msg 逻辑（支持回复模式递归）
+func (l *SendMsgLogic) BuildMsgFromProto(protoMsg *chat_rpc.Msg) *ctype.Msg {
+	if protoMsg == nil {
+		return nil
+	}
+
+	msgType := ctype.MsgType(protoMsg.Type)
+	var msg ctype.Msg
+
+	switch msgType {
+	case ctype.TextMsgType:
+		if protoMsg.TextMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.TextMsgType,
+				TextMsg: &ctype.TextMsg{
+					Content: protoMsg.TextMsg.Content,
+				},
+			}
+		}
+	case ctype.ImageMsgType:
+		if protoMsg.ImageMsg != nil {
+			imageMsg := &ctype.ImageMsg{
+				FileUrl: protoMsg.ImageMsg.FileUrl,
+			}
+			if protoMsg.ImageMsg.Width > 0 {
+				imageMsg.Width = int(protoMsg.ImageMsg.Width)
+			}
+			if protoMsg.ImageMsg.Height > 0 {
+				imageMsg.Height = int(protoMsg.ImageMsg.Height)
+			}
+			if protoMsg.ImageMsg.Size > 0 {
+				imageMsg.Size = protoMsg.ImageMsg.Size
+			}
+			msg = ctype.Msg{
+				Type:     ctype.ImageMsgType,
+				ImageMsg: imageMsg,
+			}
+		}
+	case ctype.VideoMsgType:
+		if protoMsg.VideoMsg != nil {
+			videoMsg := &ctype.VideoMsg{
+				FileUrl:      protoMsg.VideoMsg.FileUrl,
+				ThumbnailUrl: protoMsg.VideoMsg.ThumbnailUrl,
+			}
+			if protoMsg.VideoMsg.Width > 0 {
+				videoMsg.Width = int(protoMsg.VideoMsg.Width)
+			}
+			if protoMsg.VideoMsg.Height > 0 {
+				videoMsg.Height = int(protoMsg.VideoMsg.Height)
+			}
+			if protoMsg.VideoMsg.Duration > 0 {
+				videoMsg.Duration = int(protoMsg.VideoMsg.Duration)
+			}
+			if protoMsg.VideoMsg.Size > 0 {
+				videoMsg.Size = protoMsg.VideoMsg.Size
+			}
+			msg = ctype.Msg{
+				Type:     ctype.VideoMsgType,
+				VideoMsg: videoMsg,
+			}
+		}
+	case ctype.FileMsgType:
+		if protoMsg.FileMsg != nil {
+			fileMsg := &ctype.FileMsg{
+				FileUrl: protoMsg.FileMsg.FileUrl,
+			}
+			if protoMsg.FileMsg.FileName != "" {
+				fileMsg.FileName = protoMsg.FileMsg.FileName
+			}
+			if protoMsg.FileMsg.Size > 0 {
+				fileMsg.Size = protoMsg.FileMsg.Size
+			}
+			if protoMsg.FileMsg.MimeType != "" {
+				fileMsg.MimeType = protoMsg.FileMsg.MimeType
+			}
+			if protoMsg.FileMsg.Extension != "" {
+				fileMsg.Extension = protoMsg.FileMsg.Extension
+			}
+			if protoMsg.FileMsg.OpenMode > 0 {
+				fileMsg.OpenMode = int(protoMsg.FileMsg.OpenMode)
+			}
+			msg = ctype.Msg{
+				Type:    ctype.FileMsgType,
+				FileMsg: fileMsg,
+			}
+		}
+	case ctype.VoiceMsgType:
+		if protoMsg.VoiceMsg != nil {
+			voiceMsg := &ctype.VoiceMsg{
+				FileUrl: protoMsg.VoiceMsg.FileUrl,
+			}
+			if protoMsg.VoiceMsg.Duration > 0 {
+				voiceMsg.Duration = int(protoMsg.VoiceMsg.Duration)
+			}
+			if protoMsg.VoiceMsg.Size > 0 {
+				voiceMsg.Size = protoMsg.VoiceMsg.Size
+			}
+			msg = ctype.Msg{
+				Type:     ctype.VoiceMsgType,
+				VoiceMsg: voiceMsg,
+			}
+		}
+	case ctype.EmojiMsgType:
+		if protoMsg.EmojiMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.EmojiMsgType,
+				EmojiMsg: &ctype.EmojiMsg{
+					FileUrl:   protoMsg.EmojiMsg.FileUrl,
+					EmojiID:   protoMsg.EmojiMsg.EmojiId,
+					PackageID: protoMsg.EmojiMsg.PackageId,
+					Width:     protoMsg.EmojiMsg.Width,
+					Height:    protoMsg.EmojiMsg.Height,
+				},
+			}
+		}
+	case ctype.NotificationMsgType:
+		if protoMsg.NotificationMsg != nil {
+			notificationMsg := &ctype.NotificationMsg{
+				Type:   int(protoMsg.NotificationMsg.Type),
+				Actors: protoMsg.NotificationMsg.Actors,
+			}
+			msg = ctype.Msg{
+				Type:            ctype.NotificationMsgType,
+				NotificationMsg: notificationMsg,
+			}
+		}
+	case ctype.AudioFileMsgType:
+		if protoMsg.AudioFileMsg != nil {
+			audioFileMsg := &ctype.AudioFileMsg{
+				FileUrl: protoMsg.AudioFileMsg.FileUrl,
+			}
+			if protoMsg.AudioFileMsg.FileName != "" {
+				audioFileMsg.FileName = protoMsg.AudioFileMsg.FileName
+			}
+			if protoMsg.AudioFileMsg.Duration > 0 {
+				audioFileMsg.Duration = int(protoMsg.AudioFileMsg.Duration)
+			}
+			if protoMsg.AudioFileMsg.Size > 0 {
+				audioFileMsg.Size = protoMsg.AudioFileMsg.Size
+			}
+			msg = ctype.Msg{
+				Type:         ctype.AudioFileMsgType,
+				AudioFileMsg: audioFileMsg,
+			}
+		}
+	case ctype.CallMsgType:
+		if protoMsg.CallMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.CallMsgType,
+				CallMsg: &ctype.CallMsg{
+					RoomID:   protoMsg.CallMsg.RoomId,
+					CallType: int(protoMsg.CallMsg.CallType),
+					Status:   int(protoMsg.CallMsg.Status),
+					Duration: protoMsg.CallMsg.Duration,
+				},
+			}
+		}
+	case ctype.WithdrawMsgType:
+		if protoMsg.WithdrawMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.WithdrawMsgType,
+				WithdrawMsg: &ctype.WithdrawMsg{
+					OriginMsgID: protoMsg.WithdrawMsg.OriginMsgId,
+					OriginMsg:   l.BuildMsgFromProto(protoMsg.WithdrawMsg.OriginMsg), // 支持快照递归
+				},
+			}
+		}
+	case ctype.ReplyMsgType:
+		if protoMsg.ReplyMsg != nil {
+			// 这里递归转换被回复的消息 (引用部分)
+			var originMsg *ctype.Msg
+			if protoMsg.ReplyMsg.OriginMsg != nil {
+				originMsg = l.BuildMsgFromProto(protoMsg.ReplyMsg.OriginMsg)
+			}
+
+			// 这里递归转换回复的具体内容 (回复内容部分)
+			var replyMsg *ctype.Msg
+			if protoMsg.ReplyMsg.ReplyMsg != nil {
+				replyMsg = l.BuildMsgFromProto(protoMsg.ReplyMsg.ReplyMsg)
+			}
+
+			msg = ctype.Msg{
+				Type: ctype.ReplyMsgType,
+				ReplyMsg: &ctype.ReplyMsg{
+					OriginMsgID: protoMsg.ReplyMsg.OriginMsgId,
+					OriginMsg:   originMsg,
+					ReplyMsg:    replyMsg,
+				},
+			}
+		}
+	case ctype.ForwardMsgType:
+		if protoMsg.ForwardMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.ForwardMsgType,
+				ForwardMsg: &ctype.ForwardMsg{
+					Title:    protoMsg.ForwardMsg.Title,
+					RecordID: protoMsg.ForwardMsg.RecordId,
+					Count:    int(protoMsg.ForwardMsg.Count),
+				},
+			}
+		}
+	case ctype.MarkdownMsgType:
+		if protoMsg.MarkdownMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.MarkdownMsgType,
+				MarkdownMsg: &ctype.MarkdownMsg{
+					Content: protoMsg.MarkdownMsg.Content,
+					Title:   protoMsg.MarkdownMsg.Title,
+				},
+			}
+		}
+	case ctype.LinkMsgType:
+		if protoMsg.LinkMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.LinkMsgType,
+				LinkMsg: &ctype.LinkMsg{
+					URL:      protoMsg.LinkMsg.Url,
+					Title:    protoMsg.LinkMsg.Title,
+					Desc:     protoMsg.LinkMsg.Desc,
+					ImageURL: protoMsg.LinkMsg.ImageUrl,
+				},
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if protoMsg.CloudDocMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.CloudDocMsgType,
+				CloudDocMsg: &ctype.CloudDocMsg{
+					DocID:    protoMsg.CloudDocMsg.DocId,
+					DocType:  int(protoMsg.CloudDocMsg.DocType),
+					Title:    protoMsg.CloudDocMsg.Title,
+					OwnerID:  protoMsg.CloudDocMsg.OwnerId,
+					Perm:     int(protoMsg.CloudDocMsg.Perm),
+					CoverURL: protoMsg.CloudDocMsg.CoverUrl,
+					Revision: protoMsg.CloudDocMsg.Revision,
+				},
+			}
+		}
+	case ctype.CardMsgType:
+		if protoMsg.CardMsg != nil {
+			msg = ctype.Msg{
+				Type: ctype.CardMsgType,
+				CardMsg: &ctype.CardMsg{
+					CardType:    int(protoMsg.CardMsg.CardType),
+					ID:          protoMsg.CardMsg.Id,
+					ExpireAt:    protoMsg.CardMsg.ExpireAt,
+					InviteToken: protoMsg.CardMsg.InviteToken,
+				},
+			}
+		}
+	}
+	if len(protoMsg.AtUserIds) > 0 {
+		msg.AtUserIDs = protoMsg.AtUserIds
+	}
+	return &msg
+}
+
+func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, error) {
+	conversationType, userIds := conversation.ParseConversationWithType(in.ConversationId)
+
+	if conversationType == 1 {
+		// 私聊需要验证好友关系（与 Digital 对话时跳过）
+		if !strings.Contains(in.ConversationId, in.UserId) {
+			l.logger.Error(model.LogMsg{Text: "用户id不匹配", Data: map[string]interface{}{"userId": in.UserId, "conversationId": in.ConversationId}})
+			return nil, errors.New("异常操作")
+		}
+
+		if len(userIds) != 2 {
+			l.logger.Error(model.LogMsg{Text: "私聊会话ID解析失败，期望2个用户ID", Data: map[string]interface{}{"userIds": userIds}})
+			return nil, errors.New("无效的私聊会话ID")
+		}
+
+		skipFriendCheck := isOpenDigitalSender(in.DeviceId)
+		if !skipFriendCheck {
+			for _, uid := range userIds {
+				if uid != in.UserId && isDigitalPeer(l.ctx, uid) {
+					skipFriendCheck = true
+					break
+				}
+			}
+		}
+
+		if !skipFriendCheck {
+			friendRes, err := l.svcCtx.FriendRpc.IsFriend(l.ctx, &types.IsFriendReq{
+				UserA: userIds[0],
+				UserB: userIds[1],
+			})
+			if err != nil || !friendRes.IsFriend {
+				l.logger.Error(model.LogMsg{Text: "不是好友关系", Data: map[string]interface{}{"userIds": userIds}})
+				return nil, errors.New("不是好友关系")
+			}
+
+			blockRes, err := l.svcCtx.FriendRpc.IsBlocked(l.ctx, &types.IsBlockedReq{
+				UserA: userIds[0],
+				UserB: userIds[1],
+			})
+			if err == nil && blockRes.IsBlocked {
+				return nil, errors.New("无法发送消息")
+			}
+		}
+	} else if conversationType == 2 {
+		groupID := conversation.GetTargetIDByConversation(in.ConversationId, in.UserId)
+		canSend, err := l.svcCtx.GroupRpc.CanSendGroupMessage(l.ctx, &types.CanSendGroupMessageReq{
+			GroupId: groupID,
+			UserId:  in.UserId,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if !canSend.Allowed {
+			reason := canSend.Reason
+			if reason == "" {
+				reason = "无法发送消息"
+			}
+			return nil, errors.New(reason)
+		}
+	}
+
+	// 调用抽离好的递归转换函数
+	msg := l.BuildMsgFromProto(in.Msg)
+	if err := message_models.ValidateMsgLength(msg); err != nil {
+		return nil, err
+	}
+	msgType := msg.Type
+
+	// 获取下一个消息序列号（消息表内部序列号）
+	var maxSeq int64
+	err := l.svcCtx.DB.Model(&message_models.ChatMessage{}).
+		Where("conversation_id = ?", in.ConversationId).
+		Select("COALESCE(MAX(seq), 0)").
+		Scan(&maxSeq).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取消息序列号失败", Data: map[string]interface{}{"conversationId": in.ConversationId, "err": err.Error()}})
+		return nil, err
+	}
+
+	nextSeq := maxSeq + 1
+
+	chatModel := message_models.ChatMessage{
+		SendUserID:       &in.UserId,
+		MessageID:        in.MessageId,
+		ConversationID:   in.ConversationId,
+		ConversationType: conversationType,
+		Seq:              nextSeq, // 设置正确的序列号
+		MsgType:          msgType,
+		Msg:              msg,
+	}
+
+	// 1. 创建消息记录并设置预览
+	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
+	err = l.svcCtx.DB.Create(&chatModel).Error
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "创建消息记录失败", Data: map[string]interface{}{"conversationId": in.ConversationId, "userId": in.UserId, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 1.1 构建 Messages 表更新数据
+	messagesUpdate := map[string]interface{}{
+		"table":          "messages",
+		"conversationId": in.ConversationId,
+		"data": []map[string]interface{}{
+			{
+				"seq": chatModel.Seq,
+			},
+		},
+	}
+
+	// 2. 更新会话级别的信息
+	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversationType, chatModel.Seq, chatModel.MsgPreview)
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "更新会话信息失败", Data: map[string]interface{}{"conversationId": in.ConversationId, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 2.1 构建 Conversations 表更新数据
+	conversationsUpdate := map[string]interface{}{
+		"table":          "conversations",
+		"conversationId": in.ConversationId,
+		"data": []map[string]interface{}{
+			{
+				"version": int32(conversationVersion),
+			},
+		},
+	}
+
+	// 3. 批量更新该会话所有用户的会话关系（包括发送者：恢复隐藏状态，更新版本号，更新已读序列号）
+	allUserConversationUpdates, err := chatrpcutils.UpdateAllUserConversationsInChat(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, in.UserId, chatModel.Seq)
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "批量更新用户会话关系失败", Data: map[string]interface{}{"conversationId": in.ConversationId, "err": err.Error()}})
+		// 不影响消息发送成功，只记录错误
+		allUserConversationUpdates = []chatrpcutils.UserConversationUpdate{}
+	}
+
+	// 转换消息格式
+	convertedMsg, err := l.convertCtypeMsgToGrpcMsg(*msg)
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "转换消息格式失败", Data: map[string]interface{}{"conversationId": in.ConversationId, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 获取发送者信息
+	sender, err := l.getSenderInfo(chatModel)
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取发送者信息失败", Data: map[string]interface{}{"messageId": in.MessageId, "err": err.Error()}})
+		return nil, err
+	}
+
+	// 5. 异步推送消息更新给会话成员（按表分组，一次推送包含所有相关更新）
+	go func() {
+		l.notifyMessageUpdateGrouped(in.ConversationId, in.UserId, conversationType, messagesUpdate, conversationsUpdate, allUserConversationUpdates)
+		l.sendOfflinePushIfNeeded(in.ConversationId, in.UserId, chatModel, recipientIdsFromUpdates(allUserConversationUpdates, in.ConversationId))
+	}()
+
+	// 6. 异步推送机器人事件（投 MQ，由 open_api 的长连接消费者下发）
+	go newDigitalEventPusher(context.Background(), l.svcCtx).tryPush(in, msg)
+
+	l.logger.Info(model.LogMsg{
+		Text: "消息发送成功",
+		Data: map[string]interface{}{
+			"conversationId":   in.ConversationId,
+			"messageId":        chatModel.MessageID,
+			"userId":           in.UserId,
+			"conversationType": conversationType,
+			"msgType":          int(msgType),
+			"seq":              chatModel.Seq,
+		},
+	})
+
+	return &chat_rpc.SendMsgRes{
+		Id:               uint32(chatModel.Id),
+		MessageId:        chatModel.MessageID,
+		ConversationId:   chatModel.ConversationID,
+		Msg:              convertedMsg,
+		MsgPreview:       chatModel.MsgPreview,
+		Sender:           sender,
+		CreatedAt:        chatModel.CreatedAt.String(),
+		Status:           1,
+		ConversationType: uint32(chatModel.ConversationType),
+		Seq:              chatModel.Seq,
+	}, nil
+}
+
+// notifyMessageUpdateGrouped 按会话分组推送消息更新（给该会话的所有用户推送）
+func (l *SendMsgLogic) notifyMessageUpdateGrouped(conversationId, senderId string, conversationType int, messagesUpdate, conversationsUpdate map[string]interface{}, allUserConversationUpdates []chatrpcutils.UserConversationUpdate) {
+	defer func() {
+		if r := recover(); r != nil {
+			l.logger.Error(model.LogMsg{Text: "推送消息更新时发生panic", Data: map[string]interface{}{"conversationId": conversationId, "panic": r}})
+		}
+	}()
+
+	var recipientIds []string
+	for _, update := range allUserConversationUpdates {
+		if update.ConversationID == conversationId {
+			recipientIds = append(recipientIds, update.UserID)
+		}
+	}
+
+	// 构建 userId -> user_conversations 更新的快速查找 map
+	userConvUpdateMap := make(map[string]map[string]interface{}, len(allUserConversationUpdates))
+	for _, update := range allUserConversationUpdates {
+		userConvUpdateMap[update.UserID] = map[string]interface{}{
+			"table":          "user_conversations",
+			"userId":         update.UserID,
+			"conversationId": update.ConversationID,
+			"data": []map[string]interface{}{
+				{
+					"version": int32(update.Version),
+				},
+			},
+		}
+	}
+
+	// 为每个接收者推送：只携带自己的 user_conversations，不携带其他成员的
+	messageType := wsTypeConst.ChatConversationMessageReceive
+
+	for _, recipientId := range recipientIds {
+		tableUpdates := []map[string]interface{}{
+			messagesUpdate,
+			conversationsUpdate,
+		}
+		if uc, ok := userConvUpdateMap[recipientId]; ok {
+			tableUpdates = append(tableUpdates, uc)
+		}
+
+		payload := map[string]interface{}{
+			"command":  wsCommandConst.CHAT_MESSAGE,
+			"type":     messageType,
+			"senderId": senderId,
+			"targetId": recipientId,
+			"body": map[string]interface{}{
+				"tableUpdates": tableUpdates,
+			},
+			"conversationId": conversationId,
+		}
+		if err := l.svcCtx.RocketMQ.SendMessage(context.Background(), mqwsconst.MqTopicWs, payload); err != nil {
+			l.logger.Error(model.LogMsg{Text: "MQ 推送失败", Data: map[string]interface{}{"recipientId": recipientId, "conversationId": conversationId, "err": err.Error()}})
+		}
+	}
+}
+
+func recipientIdsFromUpdates(updates []chatrpcutils.UserConversationUpdate, conversationID string) []string {
+	var ids []string
+	for _, update := range updates {
+		if update.ConversationID == conversationID {
+			ids = append(ids, update.UserID)
+		}
+	}
+	return ids
+}
+
+// getSenderInfo 获取发送者信息
+func (l *SendMsgLogic) getSenderInfo(chatModel message_models.ChatMessage) (*chat_rpc.Sender, error) {
+	sendUserID := ""
+	if chatModel.SendUserID != nil {
+		sendUserID = *chatModel.SendUserID
+	}
+
+	if sendUserID == "" {
+		// 通知消息：SendUserID为空
+		return &chat_rpc.Sender{
+			UserId:   "",
+			NickName: "通知消息",
+			Avatar:   "",
+		}, nil
+	}
+
+	// 调用UserRpc获取用户信息
+	userInfoResp, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &accttypes.UserInfoReq{
+		UserID: sendUserID,
+	})
+	if err != nil {
+		l.logger.Error(model.LogMsg{Text: "获取用户信息失败", Data: map[string]interface{}{"userId": sendUserID, "err": err.Error()}})
+		return &chat_rpc.Sender{
+			UserId:   sendUserID,
+			NickName: "未知用户",
+			Avatar:   "",
+		}, nil
+	}
+
+	userInfo := userInfoResp.UserInfo
+	return &chat_rpc.Sender{
+		UserId:   sendUserID,
+		NickName: userInfo.NickName,
+		Avatar:   userInfo.Avatar,
+		UserType: userInfo.UserType,
+	}, nil
+}
+
+func (l *SendMsgLogic) convertCtypeMsgToGrpcMsg(m ctype.Msg) (*chat_rpc.Msg, error) {
+	rpcMsg := &chat_rpc.Msg{
+		Type: uint32(m.Type),
+	}
+
+	switch m.Type {
+	case ctype.TextMsgType:
+		if m.TextMsg != nil {
+			rpcMsg.TextMsg = &chat_rpc.TextMsg{Content: m.TextMsg.Content}
+		}
+	case ctype.ImageMsgType:
+		if m.ImageMsg != nil {
+			rpcMsg.ImageMsg = &chat_rpc.ImageMsg{
+				FileUrl: m.ImageMsg.FileUrl,
+				Width:   int32(m.ImageMsg.Width),
+				Height:  int32(m.ImageMsg.Height),
+				Size:    m.ImageMsg.Size,
+			}
+		}
+	case ctype.VideoMsgType:
+		if m.VideoMsg != nil {
+			rpcMsg.VideoMsg = &chat_rpc.VideoMsg{
+				FileUrl:      m.VideoMsg.FileUrl,
+				Width:        int32(m.VideoMsg.Width),
+				Height:       int32(m.VideoMsg.Height),
+				Duration:     int32(m.VideoMsg.Duration),
+				ThumbnailUrl: m.VideoMsg.ThumbnailUrl,
+				Size:         m.VideoMsg.Size,
+			}
+		}
+	case ctype.FileMsgType:
+		if m.FileMsg != nil {
+			rpcMsg.FileMsg = &chat_rpc.FileMsg{
+				FileUrl:   m.FileMsg.FileUrl,
+				FileName:  m.FileMsg.FileName,
+				Size:      m.FileMsg.Size,
+				MimeType:  m.FileMsg.MimeType,
+				Extension: m.FileMsg.Extension,
+				OpenMode:  int32(m.FileMsg.OpenMode),
+			}
+		}
+	case ctype.VoiceMsgType:
+		if m.VoiceMsg != nil {
+			rpcMsg.VoiceMsg = &chat_rpc.VoiceMsg{
+				FileUrl:  m.VoiceMsg.FileUrl,
+				Duration: int32(m.VoiceMsg.Duration),
+				Size:     m.VoiceMsg.Size,
+			}
+		}
+	case ctype.EmojiMsgType:
+		if m.EmojiMsg != nil {
+			rpcMsg.EmojiMsg = &chat_rpc.EmojiMsg{
+				FileUrl:   m.EmojiMsg.FileUrl,
+				EmojiId:   m.EmojiMsg.EmojiID,
+				PackageId: m.EmojiMsg.PackageID,
+				Width:     m.EmojiMsg.Width,
+				Height:    m.EmojiMsg.Height,
+			}
+		}
+	case ctype.NotificationMsgType:
+		if m.NotificationMsg != nil {
+			rpcMsg.NotificationMsg = &chat_rpc.NotificationMsg{
+				Type:   int32(m.NotificationMsg.Type),
+				Actors: m.NotificationMsg.Actors,
+			}
+		}
+	case ctype.AudioFileMsgType:
+		if m.AudioFileMsg != nil {
+			rpcMsg.AudioFileMsg = &chat_rpc.AudioFileMsg{
+				FileUrl:  m.AudioFileMsg.FileUrl,
+				FileName: m.AudioFileMsg.FileName,
+				Duration: int32(m.AudioFileMsg.Duration),
+				Size:     m.AudioFileMsg.Size,
+			}
+		}
+	case ctype.CallMsgType:
+		if m.CallMsg != nil {
+			rpcMsg.CallMsg = &chat_rpc.CallMsg{
+				RoomId:   m.CallMsg.RoomID,
+				CallType: int32(m.CallMsg.CallType),
+				Status:   int32(m.CallMsg.Status),
+				Duration: m.CallMsg.Duration,
+			}
+		}
+	case ctype.WithdrawMsgType:
+		if m.WithdrawMsg != nil {
+			convertedOrigin, _ := l.convertCtypeMsgToGrpcMsg(*m.WithdrawMsg.OriginMsg)
+			rpcMsg.WithdrawMsg = &chat_rpc.WithdrawMsg{
+				OriginMsgId: m.WithdrawMsg.OriginMsgID,
+				OriginMsg:   convertedOrigin,
+			}
+		}
+	case ctype.ReplyMsgType:
+		if m.ReplyMsg != nil {
+			var convertedOrigin *chat_rpc.Msg
+			if m.ReplyMsg.OriginMsg != nil {
+				convertedOrigin, _ = l.convertCtypeMsgToGrpcMsg(*m.ReplyMsg.OriginMsg)
+			}
+			var convertedReply *chat_rpc.Msg
+			if m.ReplyMsg.ReplyMsg != nil {
+				convertedReply, _ = l.convertCtypeMsgToGrpcMsg(*m.ReplyMsg.ReplyMsg)
+			}
+			rpcMsg.ReplyMsg = &chat_rpc.ReplyMsg{
+				OriginMsgId: m.ReplyMsg.OriginMsgID,
+				OriginMsg:   convertedOrigin,
+				ReplyMsg:    convertedReply,
+			}
+		}
+	case ctype.ForwardMsgType:
+		if m.ForwardMsg != nil {
+			rpcMsg.ForwardMsg = &chat_rpc.ForwardMsg{
+				Title:    m.ForwardMsg.Title,
+				RecordId: m.ForwardMsg.RecordID,
+				Count:    int32(m.ForwardMsg.Count),
+			}
+		}
+	case ctype.MarkdownMsgType:
+		if m.MarkdownMsg != nil {
+			rpcMsg.MarkdownMsg = &chat_rpc.MarkdownMsg{
+				Content: m.MarkdownMsg.Content,
+				Title:   m.MarkdownMsg.Title,
+			}
+		}
+	case ctype.LinkMsgType:
+		if m.LinkMsg != nil {
+			rpcMsg.LinkMsg = &chat_rpc.LinkMsg{
+				Url:      m.LinkMsg.URL,
+				Title:    m.LinkMsg.Title,
+				Desc:     m.LinkMsg.Desc,
+				ImageUrl: m.LinkMsg.ImageURL,
+			}
+		}
+	case ctype.CloudDocMsgType:
+		if m.CloudDocMsg != nil {
+			rpcMsg.CloudDocMsg = &chat_rpc.CloudDocMsg{
+				DocId:    m.CloudDocMsg.DocID,
+				DocType:  int32(m.CloudDocMsg.DocType),
+				Title:    m.CloudDocMsg.Title,
+				OwnerId:  m.CloudDocMsg.OwnerID,
+				Perm:     int32(m.CloudDocMsg.Perm),
+				CoverUrl: m.CloudDocMsg.CoverURL,
+				Revision: m.CloudDocMsg.Revision,
+			}
+		}
+	case ctype.CardMsgType:
+		if m.CardMsg != nil {
+			rpcMsg.CardMsg = &chat_rpc.CardMsg{
+				CardType:    int32(m.CardMsg.CardType),
+				Id:          m.CardMsg.ID,
+				ExpireAt:    m.CardMsg.ExpireAt,
+				InviteToken: m.CardMsg.InviteToken,
+			}
+		}
+	}
+	return rpcMsg, nil
+}

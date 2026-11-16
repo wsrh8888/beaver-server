@@ -24,7 +24,6 @@ import (
 	"beaver/app/account/account_rpc/client/user"
 	accttypes "beaver/app/account/account_rpc/types"
 	"beaver/app/message/message_rpc/chat"
-	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/notification/notification_rpc/notification"
 	"beaver/app/relation/relation_api/internal/config"
 	"beaver/app/relation/relation_api/internal/middleware"
@@ -53,7 +52,7 @@ type ServiceContext struct {
 	UserRpc    accttypes.UserClient
 	FriendRpc  types.FriendClient
 	GroupRpc   types.GroupClient
-	ChatRpc    chat_rpc.ChatClient
+	ChatRpc    chat.Chat
 	NotifyRpc  notification.Notification
 	VersionGen *versionPkg.VersionGenerator
 	RocketMQ   *corerocketmq.Client

@@ -1,0 +1,104 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package conversationlogic
+
+import (
+	"context"
+	"errors"
+
+	"beaver/app/message/message_models"
+	"beaver/app/message/message_rpc/internal/svc"
+	"beaver/app/message/message_rpc/types/chat_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type RemoveConversationMembersLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewRemoveConversationMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RemoveConversationMembersLogic {
+	return &RemoveConversationMembersLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		logger: beaverlog.New("remove_conversation_members", ctx),
+	}
+}
+
+func (l *RemoveConversationMembersLogic) RemoveConversationMembers(in *chat_rpc.RemoveConversationMembersReq) (*chat_rpc.RemoveConversationMembersRes, error) {
+	if in.ConversationId == "" {
+		return nil, errors.New("会话ID不能为空")
+	}
+
+	if len(in.UserIds) == 0 {
+		return nil, errors.New("用户列表不能为空")
+	}
+
+	// 检查会话是否存在
+	var conversation message_models.ChatConversationMeta
+	if err := l.svcCtx.DB.Where("conversation_id = ?", in.ConversationId).First(&conversation).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "会话不存在", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
+		return nil, errors.New("会话不存在")
+	}
+
+	// 开启事务
+	tx := l.svcCtx.DB.Begin()
+	if tx.Error != nil {
+		l.logger.Error(model.LogMsg{Text: "开启事务失败", Data: map[string]any{"err": tx.Error.Error()}})
+		return nil, tx.Error
+	}
+
+	// 确保在函数返回时处理事务
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// 删除用户的会话关系记录（软删除或标记为隐藏）
+	for _, userId := range in.UserIds {
+		if err := tx.Model(&message_models.ChatUserConversation{}).
+			Where("conversation_id = ? AND user_id = ?", in.ConversationId, userId).
+			Update("is_hidden", true).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "移除用户会话关系失败", Data: map[string]any{"userId": userId, "conversationId": in.ConversationId, "err": err.Error()}})
+			tx.Rollback()
+			return nil, errors.New("移除用户会话关系失败")
+		}
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "提交事务失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
+		return nil, err
+	}
+
+	l.logger.Info(model.LogMsg{
+		Text: "移除会话成员成功",
+		Data: map[string]interface{}{"conversationId": in.ConversationId, "userIds": in.UserIds},
+	})
+
+	return &chat_rpc.RemoveConversationMembersRes{
+		Success: true,
+	}, nil
+}

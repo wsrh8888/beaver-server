@@ -47,7 +47,8 @@ type ServiceContext struct {
 	FriendRpc       types.FriendClient
 	GroupRpc        types.GroupClient
 	UserRpc         accttypes.UserClient
-	ChatRpc         chat_rpc.ChatClient
+	ConversationRpc chat_rpc.ConversationClient
+	MessageRpc      chat_rpc.MessageClient
 	EmojiRpc        assettypes.EmojiClient
 	NotificationRpc notification_rpc.NotificationClient
 }
@@ -69,7 +70,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		FriendRpc:       types.NewFriendClient(zrpc.MustNewClient(c.FriendRpc, zrpc.WithTimeout(time.Duration(c.FriendRpc.Timeout)*time.Millisecond)).Conn()),
 		GroupRpc:        types.NewGroupClient(zrpc.MustNewClient(c.GroupRpc, zrpc.WithTimeout(time.Duration(c.GroupRpc.Timeout)*time.Millisecond)).Conn()),
 		UserRpc:         accttypes.NewUserClient(zrpc.MustNewClient(c.UserRpc, zrpc.WithTimeout(time.Duration(c.UserRpc.Timeout)*time.Millisecond)).Conn()),
-		ChatRpc:         chat_rpc.NewChatClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
+		ConversationRpc: chat_rpc.NewConversationClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
+		MessageRpc:      chat_rpc.NewMessageClient(zrpc.MustNewClient(c.ChatRpc, zrpc.WithTimeout(time.Duration(c.ChatRpc.Timeout)*time.Millisecond)).Conn()),
 		EmojiRpc:        assettypes.NewEmojiClient(zrpc.MustNewClient(c.EmojiRpc, zrpc.WithTimeout(time.Duration(c.EmojiRpc.Timeout)*time.Millisecond)).Conn()),
 		NotificationRpc: notification_rpc.NewNotificationClient(zrpc.MustNewClient(c.NotificationRpc, zrpc.WithTimeout(time.Duration(c.NotificationRpc.Timeout)*time.Millisecond)).Conn()),
 	}

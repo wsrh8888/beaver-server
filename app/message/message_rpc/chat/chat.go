@@ -126,86 +126,86 @@ func NewChat(cli zrpc.Client) Chat {
 }
 
 func (m *defaultChat) SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewMessageClient(m.cli.Conn())
 	return client.SendMsg(ctx, in, opts...)
 }
 
 func (m *defaultChat) UpdateConversation(ctx context.Context, in *UpdateConversationReq, opts ...grpc.CallOption) (*UpdateConversationRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.UpdateConversation(ctx, in, opts...)
 }
 
 func (m *defaultChat) BatchUpdateConversation(ctx context.Context, in *BatchUpdateConversationReq, opts ...grpc.CallOption) (*BatchUpdateConversationRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.BatchUpdateConversation(ctx, in, opts...)
 }
 
 func (m *defaultChat) GetUserConversations(ctx context.Context, in *GetUserConversationsReq, opts ...grpc.CallOption) (*GetUserConversationsRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.GetUserConversations(ctx, in, opts...)
 }
 
 func (m *defaultChat) GetConversationsListByIds(ctx context.Context, in *GetConversationsListByIdsReq, opts ...grpc.CallOption) (*GetConversationsListByIdsRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.GetConversationsListByIds(ctx, in, opts...)
 }
 
 func (m *defaultChat) GetUserConversationSettingsListByIds(ctx context.Context, in *GetUserConversationSettingsListByIdsReq, opts ...grpc.CallOption) (*GetUserConversationSettingsListByIdsRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.GetUserConversationSettingsListByIds(ctx, in, opts...)
 }
 
 func (m *defaultChat) GetUserConversationVersions(ctx context.Context, in *GetUserConversationVersionsReq, opts ...grpc.CallOption) (*GetUserConversationVersionsRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.GetUserConversationVersions(ctx, in, opts...)
 }
 
 func (m *defaultChat) InitializeConversation(ctx context.Context, in *InitializeConversationReq, opts ...grpc.CallOption) (*InitializeConversationRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.InitializeConversation(ctx, in, opts...)
 }
 
 func (m *defaultChat) AddConversationMembers(ctx context.Context, in *AddConversationMembersReq, opts ...grpc.CallOption) (*AddConversationMembersRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.AddConversationMembers(ctx, in, opts...)
 }
 
 func (m *defaultChat) RemoveConversationMembers(ctx context.Context, in *RemoveConversationMembersReq, opts ...grpc.CallOption) (*RemoveConversationMembersRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.RemoveConversationMembers(ctx, in, opts...)
 }
 
 func (m *defaultChat) DissolveConversation(ctx context.Context, in *DissolveConversationReq, opts ...grpc.CallOption) (*DissolveConversationRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.DissolveConversation(ctx, in, opts...)
 }
 
 func (m *defaultChat) SendNotificationMessage(ctx context.Context, in *SendNotificationMessageReq, opts ...grpc.CallOption) (*SendNotificationMessageRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.SendNotificationMessage(ctx, in, opts...)
 }
 
 func (m *defaultChat) GetChatMessage(ctx context.Context, in *GetChatMessageReq, opts ...grpc.CallOption) (*GetChatMessageRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewMessageClient(m.cli.Conn())
 	return client.GetChatMessage(ctx, in, opts...)
 }
 
 func (m *defaultChat) GetSyncMessageMedias(ctx context.Context, in *GetSyncMessageMediasReq, opts ...grpc.CallOption) (*GetSyncMessageMediasRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewMessageClient(m.cli.Conn())
 	return client.GetSyncMessageMedias(ctx, in, opts...)
 }
 
 func (m *defaultChat) ListChatMessages(ctx context.Context, in *ListChatMessagesReq, opts ...grpc.CallOption) (*ListChatMessagesRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewMessageClient(m.cli.Conn())
 	return client.ListChatMessages(ctx, in, opts...)
 }
 
 func (m *defaultChat) UpdateChatMessages(ctx context.Context, in *UpdateChatMessagesReq, opts ...grpc.CallOption) (*UpdateChatMessagesRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewMessageClient(m.cli.Conn())
 	return client.UpdateChatMessages(ctx, in, opts...)
 }
 
 func (m *defaultChat) ListConversations(ctx context.Context, in *ListConversationsReq, opts ...grpc.CallOption) (*ListConversationsRes, error) {
-	client := chat_rpc.NewChatClient(m.cli.Conn())
+	client := chat_rpc.NewConversationClient(m.cli.Conn())
 	return client.ListConversations(ctx, in, opts...)
 }

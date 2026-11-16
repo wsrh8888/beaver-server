@@ -28,7 +28,8 @@ import (
 
 	"beaver/app/message/message_rpc/internal/config"
 	"beaver/app/message/message_rpc/internal/logic"
-	"beaver/app/message/message_rpc/internal/server"
+	conversationServer "beaver/app/message/message_rpc/internal/server/conversation"
+	messageServer "beaver/app/message/message_rpc/internal/server/message"
 	"beaver/app/message/message_rpc/internal/svc"
 	"beaver/app/message/message_rpc/types/chat_rpc"
 	grpcMiddleware "beaver/common/middleware/grpc"
@@ -53,7 +54,8 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		chat_rpc.RegisterChatServer(grpcServer, server.NewChatServer(ctx))
+		chat_rpc.RegisterConversationServer(grpcServer, conversationServer.NewConversationServer(ctx))
+		chat_rpc.RegisterMessageServer(grpcServer, messageServer.NewMessageServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

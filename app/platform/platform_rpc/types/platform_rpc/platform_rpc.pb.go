@@ -5217,9 +5217,10 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\x0fAddOrgMemberRes\"-\n" +
 	"\x12RemoveOrgMemberReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x14\n" +
-	"\x12RemoveOrgMemberRes2\xbb\x16\n" +
-	"\bplatform\x12R\n" +
-	"\x0eAdminQueryLogs\x12\x1f.platform_rpc.AdminQueryLogsReq\x1a\x1f.platform_rpc.AdminQueryLogsRes\x12C\n" +
+	"\x12RemoveOrgMemberRes2[\n" +
+	"\x05admin\x12R\n" +
+	"\x0eAdminQueryLogs\x12\x1f.platform_rpc.AdminQueryLogsReq\x1a\x1f.platform_rpc.AdminQueryLogsRes2\xb6\a\n" +
+	"\x03app\x12C\n" +
 	"\tCreateApp\x12\x1a.platform_rpc.CreateAppReq\x1a\x1a.platform_rpc.CreateAppRes\x12@\n" +
 	"\bListApps\x12\x19.platform_rpc.ListAppsReq\x1a\x19.platform_rpc.ListAppsRes\x12^\n" +
 	"\x12CreateArchitecture\x12#.platform_rpc.CreateArchitectureReq\x1a#.platform_rpc.CreateArchitectureRes\x12^\n" +
@@ -5230,22 +5231,26 @@ const file_platform_rpc_proto_rawDesc = "" +
 	"\fListVersions\x12\x1d.platform_rpc.ListVersionsReq\x1a\x1d.platform_rpc.ListVersionsRes\x12U\n" +
 	"\x0fListAppVersions\x12 .platform_rpc.ListAppVersionsReq\x1a .platform_rpc.ListAppVersionsRes\x12a\n" +
 	"\x13UpsertReleasePolicy\x12$.platform_rpc.UpsertReleasePolicyReq\x1a$.platform_rpc.UpsertReleasePolicyRes\x12a\n" +
-	"\x13ListReleasePolicies\x12$.platform_rpc.ListReleasePoliciesReq\x1a$.platform_rpc.ListReleasePoliciesRes\x12R\n" +
+	"\x13ListReleasePolicies\x12$.platform_rpc.ListReleasePoliciesReq\x1a$.platform_rpc.ListReleasePoliciesRes2\x9f\x03\n" +
+	"\bfeedback\x12R\n" +
 	"\x0eSubmitFeedback\x12\x1f.platform_rpc.SubmitFeedbackReq\x1a\x1f.platform_rpc.SubmitFeedbackRes\x12L\n" +
 	"\fListFeedback\x12\x1d.platform_rpc.ListFeedbackReq\x1a\x1d.platform_rpc.ListFeedbackRes\x12I\n" +
 	"\vGetFeedback\x12\x1c.platform_rpc.GetFeedbackReq\x1a\x1c.platform_rpc.GetFeedbackRes\x12R\n" +
 	"\x0eHandleFeedback\x12\x1f.platform_rpc.HandleFeedbackReq\x1a\x1f.platform_rpc.HandleFeedbackRes\x12R\n" +
-	"\x0eDeleteFeedback\x12\x1f.platform_rpc.DeleteFeedbackReq\x1a\x1f.platform_rpc.DeleteFeedbackRes\x12a\n" +
+	"\x0eDeleteFeedback\x12\x1f.platform_rpc.DeleteFeedbackReq\x1a\x1f.platform_rpc.DeleteFeedbackRes2\x8b\x03\n" +
+	"\x06report\x12a\n" +
 	"\x13SubmitContentReport\x12$.platform_rpc.SubmitContentReportReq\x1a$.platform_rpc.SubmitContentReportRes\x12^\n" +
 	"\x12ListContentReports\x12#.platform_rpc.ListContentReportsReq\x1a#.platform_rpc.ListContentReportsRes\x12X\n" +
 	"\x10GetContentReport\x12!.platform_rpc.GetContentReportReq\x1a!.platform_rpc.GetContentReportRes\x12d\n" +
-	"\x14UpdateContentReports\x12%.platform_rpc.UpdateContentReportsReq\x1a%.platform_rpc.UpdateContentReportsRes\x12^\n" +
+	"\x14UpdateContentReports\x12%.platform_rpc.UpdateContentReportsReq\x1a%.platform_rpc.UpdateContentReportsRes2\xd1\x04\n" +
+	"\tworkbench\x12^\n" +
 	"\x12CreateWorkbenchApp\x12#.platform_rpc.CreateWorkbenchAppReq\x1a#.platform_rpc.CreateWorkbenchAppRes\x12^\n" +
 	"\x12UpdateWorkbenchApp\x12#.platform_rpc.UpdateWorkbenchAppReq\x1a#.platform_rpc.UpdateWorkbenchAppRes\x12^\n" +
 	"\x12DeleteWorkbenchApp\x12#.platform_rpc.DeleteWorkbenchAppReq\x1a#.platform_rpc.DeleteWorkbenchAppRes\x12U\n" +
 	"\x0fGetWorkbenchApp\x12 .platform_rpc.GetWorkbenchAppReq\x1a .platform_rpc.GetWorkbenchAppRes\x12[\n" +
 	"\x11ListWorkbenchApps\x12\".platform_rpc.ListWorkbenchAppsReq\x1a\".platform_rpc.ListWorkbenchAppsRes\x12p\n" +
-	"\x18ListEnabledWorkbenchApps\x12).platform_rpc.ListEnabledWorkbenchAppsReq\x1a).platform_rpc.ListEnabledWorkbenchAppsRes\x12a\n" +
+	"\x18ListEnabledWorkbenchApps\x12).platform_rpc.ListEnabledWorkbenchAppsReq\x1a).platform_rpc.ListEnabledWorkbenchAppsRes2\xd3\x03\n" +
+	"\x03org\x12a\n" +
 	"\x13CreateOrgDepartment\x12$.platform_rpc.CreateOrgDepartmentReq\x1a$.platform_rpc.CreateOrgDepartmentRes\x12a\n" +
 	"\x13UpdateOrgDepartment\x12$.platform_rpc.UpdateOrgDepartmentReq\x1a$.platform_rpc.UpdateOrgDepartmentRes\x12a\n" +
 	"\x13DeleteOrgDepartment\x12$.platform_rpc.DeleteOrgDepartmentReq\x1a$.platform_rpc.DeleteOrgDepartmentRes\x12L\n" +
@@ -5362,70 +5367,70 @@ var file_platform_rpc_proto_depIdxs = []int32{
 	52, // 15: platform_rpc.GetWorkbenchAppRes.app:type_name -> platform_rpc.WorkbenchAppItem
 	52, // 16: platform_rpc.ListWorkbenchAppsRes.list:type_name -> platform_rpc.WorkbenchAppItem
 	53, // 17: platform_rpc.ListEnabledWorkbenchAppsRes.list:type_name -> platform_rpc.WorkbenchAppPublicItem
-	0,  // 18: platform_rpc.platform.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
-	4,  // 19: platform_rpc.platform.CreateApp:input_type -> platform_rpc.CreateAppReq
-	6,  // 20: platform_rpc.platform.ListApps:input_type -> platform_rpc.ListAppsReq
-	9,  // 21: platform_rpc.platform.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
-	11, // 22: platform_rpc.platform.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
-	13, // 23: platform_rpc.platform.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
-	16, // 24: platform_rpc.platform.CreateVersion:input_type -> platform_rpc.CreateVersionReq
-	18, // 25: platform_rpc.platform.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
-	20, // 26: platform_rpc.platform.ListVersions:input_type -> platform_rpc.ListVersionsReq
-	24, // 27: platform_rpc.platform.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
-	27, // 28: platform_rpc.platform.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
-	29, // 29: platform_rpc.platform.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
-	32, // 30: platform_rpc.platform.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
-	34, // 31: platform_rpc.platform.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
-	36, // 32: platform_rpc.platform.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
-	38, // 33: platform_rpc.platform.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
-	40, // 34: platform_rpc.platform.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
-	43, // 35: platform_rpc.platform.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
-	45, // 36: platform_rpc.platform.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
-	47, // 37: platform_rpc.platform.GetContentReport:input_type -> platform_rpc.GetContentReportReq
-	49, // 38: platform_rpc.platform.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
-	54, // 39: platform_rpc.platform.CreateWorkbenchApp:input_type -> platform_rpc.CreateWorkbenchAppReq
-	56, // 40: platform_rpc.platform.UpdateWorkbenchApp:input_type -> platform_rpc.UpdateWorkbenchAppReq
-	58, // 41: platform_rpc.platform.DeleteWorkbenchApp:input_type -> platform_rpc.DeleteWorkbenchAppReq
-	60, // 42: platform_rpc.platform.GetWorkbenchApp:input_type -> platform_rpc.GetWorkbenchAppReq
-	62, // 43: platform_rpc.platform.ListWorkbenchApps:input_type -> platform_rpc.ListWorkbenchAppsReq
-	64, // 44: platform_rpc.platform.ListEnabledWorkbenchApps:input_type -> platform_rpc.ListEnabledWorkbenchAppsReq
-	66, // 45: platform_rpc.platform.CreateOrgDepartment:input_type -> platform_rpc.CreateOrgDepartmentReq
-	68, // 46: platform_rpc.platform.UpdateOrgDepartment:input_type -> platform_rpc.UpdateOrgDepartmentReq
-	70, // 47: platform_rpc.platform.DeleteOrgDepartment:input_type -> platform_rpc.DeleteOrgDepartmentReq
-	72, // 48: platform_rpc.platform.AddOrgMember:input_type -> platform_rpc.AddOrgMemberReq
-	74, // 49: platform_rpc.platform.RemoveOrgMember:input_type -> platform_rpc.RemoveOrgMemberReq
-	2,  // 50: platform_rpc.platform.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
-	5,  // 51: platform_rpc.platform.CreateApp:output_type -> platform_rpc.CreateAppRes
-	7,  // 52: platform_rpc.platform.ListApps:output_type -> platform_rpc.ListAppsRes
-	10, // 53: platform_rpc.platform.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
-	12, // 54: platform_rpc.platform.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
-	14, // 55: platform_rpc.platform.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
-	17, // 56: platform_rpc.platform.CreateVersion:output_type -> platform_rpc.CreateVersionRes
-	19, // 57: platform_rpc.platform.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
-	21, // 58: platform_rpc.platform.ListVersions:output_type -> platform_rpc.ListVersionsRes
-	25, // 59: platform_rpc.platform.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
-	28, // 60: platform_rpc.platform.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
-	30, // 61: platform_rpc.platform.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
-	33, // 62: platform_rpc.platform.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
-	35, // 63: platform_rpc.platform.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
-	37, // 64: platform_rpc.platform.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
-	39, // 65: platform_rpc.platform.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
-	41, // 66: platform_rpc.platform.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
-	44, // 67: platform_rpc.platform.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
-	46, // 68: platform_rpc.platform.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
-	48, // 69: platform_rpc.platform.GetContentReport:output_type -> platform_rpc.GetContentReportRes
-	50, // 70: platform_rpc.platform.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
-	55, // 71: platform_rpc.platform.CreateWorkbenchApp:output_type -> platform_rpc.CreateWorkbenchAppRes
-	57, // 72: platform_rpc.platform.UpdateWorkbenchApp:output_type -> platform_rpc.UpdateWorkbenchAppRes
-	59, // 73: platform_rpc.platform.DeleteWorkbenchApp:output_type -> platform_rpc.DeleteWorkbenchAppRes
-	61, // 74: platform_rpc.platform.GetWorkbenchApp:output_type -> platform_rpc.GetWorkbenchAppRes
-	63, // 75: platform_rpc.platform.ListWorkbenchApps:output_type -> platform_rpc.ListWorkbenchAppsRes
-	65, // 76: platform_rpc.platform.ListEnabledWorkbenchApps:output_type -> platform_rpc.ListEnabledWorkbenchAppsRes
-	67, // 77: platform_rpc.platform.CreateOrgDepartment:output_type -> platform_rpc.CreateOrgDepartmentRes
-	69, // 78: platform_rpc.platform.UpdateOrgDepartment:output_type -> platform_rpc.UpdateOrgDepartmentRes
-	71, // 79: platform_rpc.platform.DeleteOrgDepartment:output_type -> platform_rpc.DeleteOrgDepartmentRes
-	73, // 80: platform_rpc.platform.AddOrgMember:output_type -> platform_rpc.AddOrgMemberRes
-	75, // 81: platform_rpc.platform.RemoveOrgMember:output_type -> platform_rpc.RemoveOrgMemberRes
+	0,  // 18: platform_rpc.admin.AdminQueryLogs:input_type -> platform_rpc.AdminQueryLogsReq
+	4,  // 19: platform_rpc.app.CreateApp:input_type -> platform_rpc.CreateAppReq
+	6,  // 20: platform_rpc.app.ListApps:input_type -> platform_rpc.ListAppsReq
+	9,  // 21: platform_rpc.app.CreateArchitecture:input_type -> platform_rpc.CreateArchitectureReq
+	11, // 22: platform_rpc.app.UpdateArchitecture:input_type -> platform_rpc.UpdateArchitectureReq
+	13, // 23: platform_rpc.app.ListArchitectures:input_type -> platform_rpc.ListArchitecturesReq
+	16, // 24: platform_rpc.app.CreateVersion:input_type -> platform_rpc.CreateVersionReq
+	18, // 25: platform_rpc.app.DeleteVersion:input_type -> platform_rpc.DeleteVersionReq
+	20, // 26: platform_rpc.app.ListVersions:input_type -> platform_rpc.ListVersionsReq
+	24, // 27: platform_rpc.app.ListAppVersions:input_type -> platform_rpc.ListAppVersionsReq
+	27, // 28: platform_rpc.app.UpsertReleasePolicy:input_type -> platform_rpc.UpsertReleasePolicyReq
+	29, // 29: platform_rpc.app.ListReleasePolicies:input_type -> platform_rpc.ListReleasePoliciesReq
+	32, // 30: platform_rpc.feedback.SubmitFeedback:input_type -> platform_rpc.SubmitFeedbackReq
+	34, // 31: platform_rpc.feedback.ListFeedback:input_type -> platform_rpc.ListFeedbackReq
+	36, // 32: platform_rpc.feedback.GetFeedback:input_type -> platform_rpc.GetFeedbackReq
+	38, // 33: platform_rpc.feedback.HandleFeedback:input_type -> platform_rpc.HandleFeedbackReq
+	40, // 34: platform_rpc.feedback.DeleteFeedback:input_type -> platform_rpc.DeleteFeedbackReq
+	43, // 35: platform_rpc.report.SubmitContentReport:input_type -> platform_rpc.SubmitContentReportReq
+	45, // 36: platform_rpc.report.ListContentReports:input_type -> platform_rpc.ListContentReportsReq
+	47, // 37: platform_rpc.report.GetContentReport:input_type -> platform_rpc.GetContentReportReq
+	49, // 38: platform_rpc.report.UpdateContentReports:input_type -> platform_rpc.UpdateContentReportsReq
+	54, // 39: platform_rpc.workbench.CreateWorkbenchApp:input_type -> platform_rpc.CreateWorkbenchAppReq
+	56, // 40: platform_rpc.workbench.UpdateWorkbenchApp:input_type -> platform_rpc.UpdateWorkbenchAppReq
+	58, // 41: platform_rpc.workbench.DeleteWorkbenchApp:input_type -> platform_rpc.DeleteWorkbenchAppReq
+	60, // 42: platform_rpc.workbench.GetWorkbenchApp:input_type -> platform_rpc.GetWorkbenchAppReq
+	62, // 43: platform_rpc.workbench.ListWorkbenchApps:input_type -> platform_rpc.ListWorkbenchAppsReq
+	64, // 44: platform_rpc.workbench.ListEnabledWorkbenchApps:input_type -> platform_rpc.ListEnabledWorkbenchAppsReq
+	66, // 45: platform_rpc.org.CreateOrgDepartment:input_type -> platform_rpc.CreateOrgDepartmentReq
+	68, // 46: platform_rpc.org.UpdateOrgDepartment:input_type -> platform_rpc.UpdateOrgDepartmentReq
+	70, // 47: platform_rpc.org.DeleteOrgDepartment:input_type -> platform_rpc.DeleteOrgDepartmentReq
+	72, // 48: platform_rpc.org.AddOrgMember:input_type -> platform_rpc.AddOrgMemberReq
+	74, // 49: platform_rpc.org.RemoveOrgMember:input_type -> platform_rpc.RemoveOrgMemberReq
+	2,  // 50: platform_rpc.admin.AdminQueryLogs:output_type -> platform_rpc.AdminQueryLogsRes
+	5,  // 51: platform_rpc.app.CreateApp:output_type -> platform_rpc.CreateAppRes
+	7,  // 52: platform_rpc.app.ListApps:output_type -> platform_rpc.ListAppsRes
+	10, // 53: platform_rpc.app.CreateArchitecture:output_type -> platform_rpc.CreateArchitectureRes
+	12, // 54: platform_rpc.app.UpdateArchitecture:output_type -> platform_rpc.UpdateArchitectureRes
+	14, // 55: platform_rpc.app.ListArchitectures:output_type -> platform_rpc.ListArchitecturesRes
+	17, // 56: platform_rpc.app.CreateVersion:output_type -> platform_rpc.CreateVersionRes
+	19, // 57: platform_rpc.app.DeleteVersion:output_type -> platform_rpc.DeleteVersionRes
+	21, // 58: platform_rpc.app.ListVersions:output_type -> platform_rpc.ListVersionsRes
+	25, // 59: platform_rpc.app.ListAppVersions:output_type -> platform_rpc.ListAppVersionsRes
+	28, // 60: platform_rpc.app.UpsertReleasePolicy:output_type -> platform_rpc.UpsertReleasePolicyRes
+	30, // 61: platform_rpc.app.ListReleasePolicies:output_type -> platform_rpc.ListReleasePoliciesRes
+	33, // 62: platform_rpc.feedback.SubmitFeedback:output_type -> platform_rpc.SubmitFeedbackRes
+	35, // 63: platform_rpc.feedback.ListFeedback:output_type -> platform_rpc.ListFeedbackRes
+	37, // 64: platform_rpc.feedback.GetFeedback:output_type -> platform_rpc.GetFeedbackRes
+	39, // 65: platform_rpc.feedback.HandleFeedback:output_type -> platform_rpc.HandleFeedbackRes
+	41, // 66: platform_rpc.feedback.DeleteFeedback:output_type -> platform_rpc.DeleteFeedbackRes
+	44, // 67: platform_rpc.report.SubmitContentReport:output_type -> platform_rpc.SubmitContentReportRes
+	46, // 68: platform_rpc.report.ListContentReports:output_type -> platform_rpc.ListContentReportsRes
+	48, // 69: platform_rpc.report.GetContentReport:output_type -> platform_rpc.GetContentReportRes
+	50, // 70: platform_rpc.report.UpdateContentReports:output_type -> platform_rpc.UpdateContentReportsRes
+	55, // 71: platform_rpc.workbench.CreateWorkbenchApp:output_type -> platform_rpc.CreateWorkbenchAppRes
+	57, // 72: platform_rpc.workbench.UpdateWorkbenchApp:output_type -> platform_rpc.UpdateWorkbenchAppRes
+	59, // 73: platform_rpc.workbench.DeleteWorkbenchApp:output_type -> platform_rpc.DeleteWorkbenchAppRes
+	61, // 74: platform_rpc.workbench.GetWorkbenchApp:output_type -> platform_rpc.GetWorkbenchAppRes
+	63, // 75: platform_rpc.workbench.ListWorkbenchApps:output_type -> platform_rpc.ListWorkbenchAppsRes
+	65, // 76: platform_rpc.workbench.ListEnabledWorkbenchApps:output_type -> platform_rpc.ListEnabledWorkbenchAppsRes
+	67, // 77: platform_rpc.org.CreateOrgDepartment:output_type -> platform_rpc.CreateOrgDepartmentRes
+	69, // 78: platform_rpc.org.UpdateOrgDepartment:output_type -> platform_rpc.UpdateOrgDepartmentRes
+	71, // 79: platform_rpc.org.DeleteOrgDepartment:output_type -> platform_rpc.DeleteOrgDepartmentRes
+	73, // 80: platform_rpc.org.AddOrgMember:output_type -> platform_rpc.AddOrgMemberRes
+	75, // 81: platform_rpc.org.RemoveOrgMember:output_type -> platform_rpc.RemoveOrgMemberRes
 	50, // [50:82] is the sub-list for method output_type
 	18, // [18:50] is the sub-list for method input_type
 	18, // [18:18] is the sub-list for extension type_name
@@ -5452,7 +5457,7 @@ func file_platform_rpc_proto_init() {
 			NumEnums:      0,
 			NumMessages:   76,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   6,
 		},
 		GoTypes:           file_platform_rpc_proto_goTypes,
 		DependencyIndexes: file_platform_rpc_proto_depIdxs,

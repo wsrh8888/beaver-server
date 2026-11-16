@@ -144,162 +144,162 @@ func NewPlatform(cli zrpc.Client) Platform {
 }
 
 func (m *defaultPlatform) AdminQueryLogs(ctx context.Context, in *AdminQueryLogsReq, opts ...grpc.CallOption) (*AdminQueryLogsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAdminClient(m.cli.Conn())
 	return client.AdminQueryLogs(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) CreateApp(ctx context.Context, in *CreateAppReq, opts ...grpc.CallOption) (*CreateAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.CreateApp(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListApps(ctx context.Context, in *ListAppsReq, opts ...grpc.CallOption) (*ListAppsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.ListApps(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) CreateArchitecture(ctx context.Context, in *CreateArchitectureReq, opts ...grpc.CallOption) (*CreateArchitectureRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.CreateArchitecture(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) UpdateArchitecture(ctx context.Context, in *UpdateArchitectureReq, opts ...grpc.CallOption) (*UpdateArchitectureRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.UpdateArchitecture(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListArchitectures(ctx context.Context, in *ListArchitecturesReq, opts ...grpc.CallOption) (*ListArchitecturesRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.ListArchitectures(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) CreateVersion(ctx context.Context, in *CreateVersionReq, opts ...grpc.CallOption) (*CreateVersionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.CreateVersion(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) DeleteVersion(ctx context.Context, in *DeleteVersionReq, opts ...grpc.CallOption) (*DeleteVersionRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.DeleteVersion(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListVersions(ctx context.Context, in *ListVersionsReq, opts ...grpc.CallOption) (*ListVersionsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.ListVersions(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListAppVersions(ctx context.Context, in *ListAppVersionsReq, opts ...grpc.CallOption) (*ListAppVersionsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.ListAppVersions(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) UpsertReleasePolicy(ctx context.Context, in *UpsertReleasePolicyReq, opts ...grpc.CallOption) (*UpsertReleasePolicyRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.UpsertReleasePolicy(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListReleasePolicies(ctx context.Context, in *ListReleasePoliciesReq, opts ...grpc.CallOption) (*ListReleasePoliciesRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewAppClient(m.cli.Conn())
 	return client.ListReleasePolicies(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) SubmitFeedback(ctx context.Context, in *SubmitFeedbackReq, opts ...grpc.CallOption) (*SubmitFeedbackRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewFeedbackClient(m.cli.Conn())
 	return client.SubmitFeedback(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListFeedback(ctx context.Context, in *ListFeedbackReq, opts ...grpc.CallOption) (*ListFeedbackRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewFeedbackClient(m.cli.Conn())
 	return client.ListFeedback(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) GetFeedback(ctx context.Context, in *GetFeedbackReq, opts ...grpc.CallOption) (*GetFeedbackRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewFeedbackClient(m.cli.Conn())
 	return client.GetFeedback(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) HandleFeedback(ctx context.Context, in *HandleFeedbackReq, opts ...grpc.CallOption) (*HandleFeedbackRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewFeedbackClient(m.cli.Conn())
 	return client.HandleFeedback(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) DeleteFeedback(ctx context.Context, in *DeleteFeedbackReq, opts ...grpc.CallOption) (*DeleteFeedbackRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewFeedbackClient(m.cli.Conn())
 	return client.DeleteFeedback(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) SubmitContentReport(ctx context.Context, in *SubmitContentReportReq, opts ...grpc.CallOption) (*SubmitContentReportRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewReportClient(m.cli.Conn())
 	return client.SubmitContentReport(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListContentReports(ctx context.Context, in *ListContentReportsReq, opts ...grpc.CallOption) (*ListContentReportsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewReportClient(m.cli.Conn())
 	return client.ListContentReports(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) GetContentReport(ctx context.Context, in *GetContentReportReq, opts ...grpc.CallOption) (*GetContentReportRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewReportClient(m.cli.Conn())
 	return client.GetContentReport(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) UpdateContentReports(ctx context.Context, in *UpdateContentReportsReq, opts ...grpc.CallOption) (*UpdateContentReportsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewReportClient(m.cli.Conn())
 	return client.UpdateContentReports(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) CreateWorkbenchApp(ctx context.Context, in *CreateWorkbenchAppReq, opts ...grpc.CallOption) (*CreateWorkbenchAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewWorkbenchClient(m.cli.Conn())
 	return client.CreateWorkbenchApp(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) UpdateWorkbenchApp(ctx context.Context, in *UpdateWorkbenchAppReq, opts ...grpc.CallOption) (*UpdateWorkbenchAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewWorkbenchClient(m.cli.Conn())
 	return client.UpdateWorkbenchApp(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) DeleteWorkbenchApp(ctx context.Context, in *DeleteWorkbenchAppReq, opts ...grpc.CallOption) (*DeleteWorkbenchAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewWorkbenchClient(m.cli.Conn())
 	return client.DeleteWorkbenchApp(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) GetWorkbenchApp(ctx context.Context, in *GetWorkbenchAppReq, opts ...grpc.CallOption) (*GetWorkbenchAppRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewWorkbenchClient(m.cli.Conn())
 	return client.GetWorkbenchApp(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListWorkbenchApps(ctx context.Context, in *ListWorkbenchAppsReq, opts ...grpc.CallOption) (*ListWorkbenchAppsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewWorkbenchClient(m.cli.Conn())
 	return client.ListWorkbenchApps(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) ListEnabledWorkbenchApps(ctx context.Context, in *ListEnabledWorkbenchAppsReq, opts ...grpc.CallOption) (*ListEnabledWorkbenchAppsRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewWorkbenchClient(m.cli.Conn())
 	return client.ListEnabledWorkbenchApps(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) CreateOrgDepartment(ctx context.Context, in *CreateOrgDepartmentReq, opts ...grpc.CallOption) (*CreateOrgDepartmentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewOrgClient(m.cli.Conn())
 	return client.CreateOrgDepartment(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) UpdateOrgDepartment(ctx context.Context, in *UpdateOrgDepartmentReq, opts ...grpc.CallOption) (*UpdateOrgDepartmentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewOrgClient(m.cli.Conn())
 	return client.UpdateOrgDepartment(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) DeleteOrgDepartment(ctx context.Context, in *DeleteOrgDepartmentReq, opts ...grpc.CallOption) (*DeleteOrgDepartmentRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewOrgClient(m.cli.Conn())
 	return client.DeleteOrgDepartment(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) AddOrgMember(ctx context.Context, in *AddOrgMemberReq, opts ...grpc.CallOption) (*AddOrgMemberRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewOrgClient(m.cli.Conn())
 	return client.AddOrgMember(ctx, in, opts...)
 }
 
 func (m *defaultPlatform) RemoveOrgMember(ctx context.Context, in *RemoveOrgMemberReq, opts ...grpc.CallOption) (*RemoveOrgMemberRes, error) {
-	client := platform_rpc.NewPlatformClient(m.cli.Conn())
+	client := platform_rpc.NewOrgClient(m.cli.Conn())
 	return client.RemoveOrgMember(ctx, in, opts...)
 }
 

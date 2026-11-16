@@ -57,7 +57,7 @@ func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetS
 	}
 
 	// 获取用户参与的会话列表
-	conversationsResp, err := l.svcCtx.ChatRpc.GetUserConversations(l.ctx, &chat_rpc.GetUserConversationsReq{
+	conversationsResp, err := l.svcCtx.ConversationRpc.GetUserConversations(l.ctx, &chat_rpc.GetUserConversationsReq{
 		UserId: userId,
 	})
 	if err != nil {
@@ -80,7 +80,7 @@ func (l *GetSyncChatConversationsLogic) GetSyncChatConversations(req *types.GetS
 	// 获取变更的会话元信息版本
 	serverTimestamp := time.Now().UnixMilli()
 
-	convResp, err := l.svcCtx.ChatRpc.GetConversationsListByIds(l.ctx, &chat_rpc.GetConversationsListByIdsReq{
+	convResp, err := l.svcCtx.ConversationRpc.GetConversationsListByIds(l.ctx, &chat_rpc.GetConversationsListByIdsReq{
 		ConversationIds: conversationIDs,
 		Since:           req.Since,
 	})

@@ -1,0 +1,56 @@
+syntax = "v1"
+
+type wsReq {
+	UserID   string `form:"userId"` // 用户ID
+	Token    string `form:"token"` // 用户token（JWT）
+	Platform string `form:"platform"` // 平台类型：windows/macos/linux/ios/android（后端通过 User-Agent 二次校验）
+	DeviceID string `form:"deviceId"` // 设备唯一标识 (GUID)，用于设备指纹校验
+}
+
+type IBodySendMsg {
+	ConversationID string `json:"conversationId"`
+	MessageID      string `json:"messageId"` // 客户端消息ID
+	Msg            string `json:"msg"`
+}
+
+// WebSocket 消息发送请求
+type SendMsgReq {
+	ConversationID string `json:"conversationId"` // 会话ID
+	MessageID      string `json:"messageId"` // 客户端消息ID
+	Msg            string `json:"msg"` // 消息内容
+}
+
+type Msg {
+	Type    uint   `json:"type"` //消息类型 1:文本 2:图片 3:视频 4:文件 5、语音 6：语音通话 7：视频通话 8撤回消息 9：回复消息 10：引用消息
+	TextMsg string `json:"textMsg,optional"` //文本消息
+	ImgMsg  string `json:"imgMsg,optional"` //图片消息
+}
+
+type wsRes {}
+
+// 代理发送消息请求（仅限内部服务调用）
+type ProxySendMsgReq {
+	Command        string                 `json:"command"` // 命令类型：send（发送）、recall（撤回）
+	TargetID       string                 `json:"targetId"` // 目标ID（用户ID或群ID）
+	Type           string                 `json:"type"` // 消息类型
+	ConversationId string                 `json:"conversationId,optional"` // 会话ID
+	Body           map[string]interface{} `json:"body"` // 消息内容，需要包含 messageId
+}
+
+type ProxySendMsgRes {}
+
+// 朋友圈通知消息体
+type MomentNotification {
+	Type      uint   `json:"type"` // 通知类型：1点赞 2评论
+	MomentID  uint   `json:"momentId"` // 朋友圈ID
+	UserID    string `json:"userId"` // 触发者ID
+	Content   string `json:"content"` // 通知内容
+	Timestamp int64  `json:"timestamp"` // 通知时间
+}
+
+// 系统通知消息体
+type SystemNotification {
+	Type      uint   `json:"type"` // 通知类型：1好友请求 2系统通知
+	Content   string `json:"content"` // 通知内容
+	Timestamp int64  `json:"timestamp"` // 通知时间
+}

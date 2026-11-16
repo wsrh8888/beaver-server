@@ -1,0 +1,11 @@
+syntax = "v1"
+
+@server (
+	middleware: AuthGate
+	group:      socket
+)
+service ws {
+	@doc "WebSocket连接入口"
+	@handler chatWebsocket
+	get /beaver/api/ws/socket/v1/ws (wsReq) returns (wsRes)
+}

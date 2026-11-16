@@ -27,7 +27,6 @@ import (
 	"beaver/app/message/message_api/internal/config"
 	"beaver/app/message/message_api/internal/middleware"
 	"beaver/app/message/message_rpc/chat"
-	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/relation/relation_rpc/client/friend"
 	"beaver/app/relation/relation_rpc/client/group"
 	"beaver/app/relation/relation_rpc/types"
@@ -48,7 +47,7 @@ type ServiceContext struct {
 	Config     config.Config
 	Redis      *redis.Client
 	UserRpc    accttypes.UserClient
-	ChatRpc    chat_rpc.ChatClient
+	ChatRpc    chat.Chat
 	FriendRpc  types.FriendClient
 	GroupRpc   types.GroupClient
 	DB         *gorm.DB

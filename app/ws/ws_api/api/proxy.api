@@ -1,0 +1,11 @@
+syntax = "v1"
+
+@server (
+	middleware: AuthGate
+	group:      proxy
+)
+service ws {
+	@doc "HTTP API发送消息"
+	@handler proxySendMsgHandler
+	post /beaver/api/ws/proxy/v1/send_msg (ProxySendMsgReq) returns (ProxySendMsgRes)
+}

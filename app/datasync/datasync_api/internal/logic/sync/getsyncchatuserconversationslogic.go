@@ -59,7 +59,7 @@ func (l *GetSyncChatUserConversationsLogic) GetSyncChatUserConversations(req *ty
 	// 直接获取用户的所有会话设置版本（一个RPC调用搞定）
 	serverTimestamp := time.Now().UnixMilli()
 
-	userConvResp, err := l.svcCtx.ChatRpc.GetUserConversationVersions(l.ctx, &chat_rpc.GetUserConversationVersionsReq{
+	userConvResp, err := l.svcCtx.ConversationRpc.GetUserConversationVersions(l.ctx, &chat_rpc.GetUserConversationVersionsReq{
 		UserId: userId,
 		Since:  req.Since,
 	})

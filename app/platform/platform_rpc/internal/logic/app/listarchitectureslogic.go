@@ -1,0 +1,125 @@
+/*
+ * Copyright (c) 2024-2026 Beaver IM Team
+ * SPDX-License-Identifier: MIT
+ * Project: beaver-server
+ * https://github.com/wsrh8888/beaver-server
+ *
+ * 中文：
+ * 本文件为海狸 IM（Beaver IM）开源项目源代码。
+ * 版权所有 © 2024-2026 Beaver IM Team，基于 MIT 协议授权。
+ * 禁止删除、篡改或替换本文件头部版权与许可声明。
+ * 使用与商业授权说明：https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * English:
+ * This file is part of the Beaver IM open-source project.
+ * Copyright (c) 2024-2026 Beaver IM Team. Licensed under the MIT License.
+ * Do not remove, alter, or replace this copyright and license header.
+ * Usage & commercial licensing: https://wsrh8888.github.io/beaver-docs/community/license.html
+ *
+ * beaver-server-header-v1
+ */
+
+package applogic
+
+import (
+	"context"
+
+	"beaver/app/platform/platform_models/update"
+	"beaver/app/platform/platform_rpc/internal/svc"
+	"beaver/app/platform/platform_rpc/types/platform_rpc"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+)
+
+type ListArchitecturesLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
+}
+
+func NewListArchitecturesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListArchitecturesLogic {
+	return &ListArchitecturesLogic{ctx: ctx, svcCtx: svcCtx, logger: beaverlog.New("list_architectures", ctx)}
+}
+
+func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitecturesReq) (*platform_rpc.ListArchitecturesRes, error) {
+	page := int(in.Page)
+	if page <= 0 {
+		page = 1
+	}
+	pageSize := int(in.PageSize)
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+
+	db := l.svcCtx.DB.Model(&update_models.UpdateArchitecture{})
+	if in.AppId != "" {
+		db = db.Where("app_id = ?", in.AppId)
+	}
+	if in.IsActive != nil && *in.IsActive {
+		db = db.Where("is_active = ?", true)
+	}
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "统计架构失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
+		return nil, err
+	}
+
+	var list []update_models.UpdateArchitecture
+	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&list).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询架构列表失败", Data: map[string]any{"appId": in.AppId, "err": err.Error()}})
+		return nil, err
+	}
+
+	appNameMap := l.loadAppNameMap(list)
+
+	items := make([]*platform_rpc.ArchitectureItem, 0, len(list))
+	for _, arch := range list {
+		items = append(items, &platform_rpc.ArchitectureItem{
+			Id:          uint64(arch.Id),
+			AppId:       arch.AppID,
+			AppName:     appNameMap[arch.AppID],
+			PlatformId:  uint32(arch.PlatformID),
+			ArchId:      uint32(arch.ArchID),
+			Description: arch.Description,
+			IsActive:    arch.IsActive,
+			CreatedAt:   arch.CreatedAt.String(),
+			UpdatedAt:   arch.UpdatedAt.String(),
+		})
+	}
+
+	return &platform_rpc.ListArchitecturesRes{Total: total, Architectures: items}, nil
+}
+
+func (l *ListArchitecturesLogic) loadAppNameMap(list []update_models.UpdateArchitecture) map[string]string {
+	appNameMap := make(map[string]string)
+	if len(list) == 0 {
+		return appNameMap
+	}
+
+	appIDs := make([]string, 0, len(list))
+	seen := make(map[string]struct{}, len(list))
+	for _, arch := range list {
+		if arch.AppID == "" {
+			continue
+		}
+		if _, ok := seen[arch.AppID]; ok {
+			continue
+		}
+		seen[arch.AppID] = struct{}{}
+		appIDs = append(appIDs, arch.AppID)
+	}
+	if len(appIDs) == 0 {
+		return appNameMap
+	}
+
+	var apps []update_models.UpdateApp
+	if err := l.svcCtx.DB.Where("app_id IN ?", appIDs).Find(&apps).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "查询应用名称失败", Data: map[string]any{"appIds": appIDs, "err": err.Error()}})
+		return appNameMap
+	}
+	for _, app := range apps {
+		appNameMap[app.AppID] = app.Name
+	}
+	return appNameMap
+}

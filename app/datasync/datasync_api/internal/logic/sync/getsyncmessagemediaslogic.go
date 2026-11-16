@@ -52,7 +52,7 @@ func (l *GetSyncMessageMediasLogic) GetSyncMessageMedias(req *types.GetSyncMessa
 		return nil, errors.New("用户ID不能为空")
 	}
 
-	rpcResp, err := l.svcCtx.ChatRpc.GetSyncMessageMedias(l.ctx, &chat_rpc.GetSyncMessageMediasReq{
+	rpcResp, err := l.svcCtx.MessageRpc.GetSyncMessageMedias(l.ctx, &chat_rpc.GetSyncMessageMediasReq{
 		UserId: identity.UserID(l.ctx),
 		Since:  req.Since,
 	})

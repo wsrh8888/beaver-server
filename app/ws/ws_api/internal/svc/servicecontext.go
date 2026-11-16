@@ -26,7 +26,6 @@ import (
 	"os"
 
 	"beaver/app/message/message_rpc/chat"
-	"beaver/app/message/message_rpc/types/chat_rpc"
 	"beaver/app/relation/relation_rpc/client/group"
 	"beaver/app/relation/relation_rpc/types"
 	"beaver/app/ws/ws_api/internal/config"
@@ -48,7 +47,7 @@ type ServiceContext struct {
 	Redis      *redis.Client
 	DB         *gorm.DB
 	GroupRpc   types.GroupClient
-	ChatRpc    chat_rpc.ChatClient
+	ChatRpc    chat.Chat
 	RocketMQ   *corerocketmq.Client
 	InstanceID string
 	// AuthGate 由 .api 的 `middleware: AuthGate` 声明接线，供 goctl 生成的
