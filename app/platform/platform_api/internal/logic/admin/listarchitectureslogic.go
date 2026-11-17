@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListArchitecturesLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 // ListArchitectures 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *ListArchitecturesLogic) ListArchitectures(req *types.ListArchitecturesReq) (resp *types.ListArchitecturesRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListArchitecturesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListArchitecturesReq{AppId: req.AppID, Page: req.Page, PageSize: req.PageSize, IsActive: req.IsActive}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListArchitectures(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListArchitecturesRes](rpcRes)
+	tmp2 := make([]types.ArchitectureItem, 0, len(rpcRes.Architectures))
+	for _, it1 := range rpcRes.Architectures {
+		tmp2 = append(tmp2, types.ArchitectureItem{ID: it1.Id, AppID: it1.AppId, AppName: it1.AppName, PlatformID: it1.PlatformId, ArchID: it1.ArchId, Description: it1.Description, IsActive: it1.IsActive, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListArchitecturesRes{Total: rpcRes.Total, Architectures: tmp2}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/notification/notification_api/internal/svc"
 	"beaver/app/notification/notification_api/internal/types"
 	notification_rpc "beaver/app/notification/notification_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewPushEventLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PushEve
 
 // PushEvent 只做协议转换，业务规则全部留在 notification_rpc。
 func (l *PushEventLogic) PushEvent(req *types.PushEventReq) (resp *types.PushEventRes, err error) {
-	rpcReq, err := convert.To[notification_rpc.PushEventReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &notification_rpc.PushEventReq{EventType: req.EventType, Category: req.Category, FromUserId: req.FromUserID, TargetId: req.TargetID, TargetType: req.TargetType, PayloadJson: req.PayloadJSON, ToUserIds: req.ToUserIDs, DedupHash: req.DedupHash}
 	rpcRes, err := l.svcCtx.NotifyRpc.PushEvent(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PushEventRes](rpcRes)
+	return &types.PushEventRes{EventID: rpcRes.EventId, Version: rpcRes.Version}, nil
 }

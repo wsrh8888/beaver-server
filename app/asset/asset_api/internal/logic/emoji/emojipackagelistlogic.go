@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewEmojiPackageListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // EmojiPackageList 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *EmojiPackageListLogic) EmojiPackageList(req *types.ListEmojiPackagesReq) (resp *types.ListEmojiPackagesRes, err error) {
-	rpcReq, err := convert.To[assettypes.ListEmojiPackagesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.ListEmojiPackagesReq{Page: req.Page, PageSize: req.PageSize, UserId: req.UserID, Type: req.Type, Status: req.Status, Title: req.Title, StartTime: req.StartTime, EndTime: req.EndTime, PackageId: req.PackageID}
 	rpcRes, err := l.svcCtx.EmojiRpc.ListEmojiPackages(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListEmojiPackagesRes](rpcRes)
+	tmp2 := make([]types.MachineEmojiPackageItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.MachineEmojiPackageItem{PackageID: it1.PackageId, Title: it1.Title, CoverFile: it1.CoverFile, UserID: it1.UserId, Description: it1.Description, Type: it1.Type, Status: it1.Status, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListEmojiPackagesRes{Total: rpcRes.Total, List: tmp2}, nil
 }

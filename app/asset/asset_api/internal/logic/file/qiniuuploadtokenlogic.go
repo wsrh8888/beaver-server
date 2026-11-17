@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewQiniuUploadTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // QiniuUploadToken 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *QiniuUploadTokenLogic) QiniuUploadToken(req *types.GetQiniuUploadTokenReq) (resp *types.GetQiniuUploadTokenRes, err error) {
-	rpcReq, err := convert.To[assettypes.GetQiniuUploadTokenReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.GetQiniuUploadTokenReq{}
 	rpcRes, err := l.svcCtx.FileRpc.GetQiniuUploadToken(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetQiniuUploadTokenRes](rpcRes)
+	return &types.GetQiniuUploadTokenRes{UploadToken: rpcRes.UploadToken, ExpiresIn: rpcRes.ExpiresIn}, nil
 }

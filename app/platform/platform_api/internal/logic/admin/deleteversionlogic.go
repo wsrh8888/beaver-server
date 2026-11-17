@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewDeleteVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 
 // DeleteVersion 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *DeleteVersionLogic) DeleteVersion(req *types.DeleteVersionReq) (resp *types.DeleteVersionRes, err error) {
-	rpcReq, err := convert.To[platformcli.DeleteVersionReq](req)
+	rpcReq := &platformcli.DeleteVersionReq{VersionId: req.VersionID}
+	_, err = l.svcCtx.PlatformRpc.DeleteVersion(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.PlatformRpc.DeleteVersion(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.DeleteVersionRes](rpcRes)
+	return &types.DeleteVersionRes{}, nil
 }

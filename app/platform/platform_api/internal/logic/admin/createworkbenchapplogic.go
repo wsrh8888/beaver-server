@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewCreateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // CreateWorkbenchApp 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *CreateWorkbenchAppLogic) CreateWorkbenchApp(req *types.CreateWorkbenchAppReq) (resp *types.CreateWorkbenchAppRes, err error) {
-	rpcReq, err := convert.To[platformcli.CreateWorkbenchAppReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.CreateWorkbenchAppReq{Name: req.Name, Description: req.Description, Icon: req.Icon, AppType: req.AppType, ClientScope: req.ClientScope, EntryConfig: &platformcli.WorkbenchEntryConfig{Type: int32(req.EntryConfig.Type), Pc: req.EntryConfig.PC, Mobile: req.EntryConfig.Mobile}, Category: req.Category, Sort: req.Sort, Status: req.Status, Remark: req.Remark, OperatorId: req.OperatorID, OpenMode: req.OpenMode}
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateWorkbenchApp(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.CreateWorkbenchAppRes](rpcRes)
+	return &types.CreateWorkbenchAppRes{WorkbenchAppID: rpcRes.WorkbenchAppId}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpdateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // UpdateArchitecture 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *UpdateArchitectureLogic) UpdateArchitecture(req *types.UpdateArchitectureReq) (resp *types.UpdateArchitectureRes, err error) {
-	rpcReq, err := convert.To[platformcli.UpdateArchitectureReq](req)
+	rpcReq := &platformcli.UpdateArchitectureReq{Id: req.ID, Description: req.Description, IsActive: req.IsActive}
+	_, err = l.svcCtx.PlatformRpc.UpdateArchitecture(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.PlatformRpc.UpdateArchitecture(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.UpdateArchitectureRes](rpcRes)
+	return &types.UpdateArchitectureRes{}, nil
 }

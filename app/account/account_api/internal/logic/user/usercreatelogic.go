@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserCreateLogic 创建用户
@@ -49,13 +48,10 @@ func NewUserCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserCr
 
 // UserCreate 创建用户
 func (l *UserCreateLogic) UserCreate(req *types.UserCreateReq) (*types.UserCreateRes, error) {
-	rpcReq, err := convert.To[accttypes.UserCreateReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.UserCreateReq{Phone: req.Phone, Source: req.Source, Email: req.Email, NickName: req.NickName, UserType: req.UserType, Abstract: req.Abstract}
 	rpcRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserCreateRes](rpcRes)
+	return &types.UserCreateRes{UserID: rpcRes.UserID}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewCreateVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 
 // CreateVersion 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *CreateVersionLogic) CreateVersion(req *types.CreateVersionReq) (resp *types.CreateVersionRes, err error) {
-	rpcReq, err := convert.To[platformcli.CreateVersionReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.CreateVersionReq{ArchitectureId: req.ArchitectureID, Version: req.Version, FileUrl: req.FileUrl, Description: req.Description, ReleaseNotes: req.ReleaseNotes}
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateVersion(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.CreateVersionRes](rpcRes)
+	return &types.CreateVersionRes{VersionID: rpcRes.VersionId}, nil
 }

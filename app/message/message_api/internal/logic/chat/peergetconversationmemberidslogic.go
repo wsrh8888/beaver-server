@@ -27,7 +27,6 @@ import (
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
 )
 
 // PeerGetConversationMemberIdsLogic 查会话成员 ID 列表
@@ -49,13 +48,10 @@ func NewPeerGetConversationMemberIdsLogic(ctx context.Context, svcCtx *svc.Servi
 
 // PeerGetConversationMemberIds 查会话成员 ID 列表
 func (l *PeerGetConversationMemberIdsLogic) PeerGetConversationMemberIds(req *types.PeerGetConversationMemberIdsReq) (*types.PeerGetConversationMemberIdsRes, error) {
-	rpcReq, err := convert.To[chat_rpc.GetConversationMemberIDsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &chat_rpc.GetConversationMemberIDsReq{ConversationId: req.ConversationID, ExcludeUserId: req.ExcludeUserID}
 	rpcRes, err := l.svcCtx.ChatRpc.GetConversationMemberIDs(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerGetConversationMemberIdsRes](rpcRes)
+	return &types.PeerGetConversationMemberIdsRes{UserIDs: rpcRes.UserIds}, nil
 }

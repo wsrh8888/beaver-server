@@ -25,9 +25,7 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
-)
+	chat_rpc "beaver/app/message/message_rpc/pb")
 
 // PeerSendMsgLogic 发送消息
 //
@@ -48,13 +46,18 @@ func NewPeerSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PeerS
 
 // PeerSendMsg 发送消息
 func (l *PeerSendMsgLogic) PeerSendMsg(req *types.PeerSendMsgReq) (*types.PeerSendMsgRes, error) {
-	rpcReq, err := convert.To[chat_rpc.SendMsgReq](req)
-	if err != nil {
-		return nil, err
+	rpcReq := &chat_rpc.SendMsgReq{
+		UserId: req.UserID, ConversationId: req.ConversationID, MessageId: req.MessageID,
+		Msg: peerMsgToPbMsg(req.Msg), DeviceId: req.DeviceID,
 	}
 	rpcRes, err := l.svcCtx.ChatRpc.SendMsg(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerSendMsgRes](rpcRes)
+	return &types.PeerSendMsgRes{
+		ID: rpcRes.Id, MessageID: rpcRes.MessageId, ConversationID: rpcRes.ConversationId,
+		Msg: pbMsgToPeerMsg(rpcRes.Msg), Sender: pbSenderToPeerSender(rpcRes.Sender),
+		CreatedAt: rpcRes.CreatedAt, MsgPreview: rpcRes.MsgPreview, Status: rpcRes.Status,
+		Seq: rpcRes.Seq, ConversationType: rpcRes.ConversationType,
+	}, nil
 }

@@ -16,3 +16,4 @@ scripts/stress/data/
 .gen_doc_rpc_new
 .gen_doc_api_tmp
 .gen_doc_tmp
+.tmpgen

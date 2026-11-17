@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListAppsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListApps
 
 // ListApps 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *ListAppsLogic) ListApps(req *types.ListAppsReq) (resp *types.ListAppsRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListAppsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListAppsReq{Page: req.Page, PageSize: req.PageSize, IsActive: req.IsActive}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListApps(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListAppsRes](rpcRes)
+	tmp2 := make([]types.AppItem, 0, len(rpcRes.Apps))
+	for _, it1 := range rpcRes.Apps {
+		tmp2 = append(tmp2, types.AppItem{ID: it1.Id, AppID: it1.AppId, Name: it1.Name, Description: it1.Description, IsActive: it1.IsActive, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListAppsRes{Total: rpcRes.Total, Apps: tmp2}, nil
 }

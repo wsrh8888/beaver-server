@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpdateFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 // UpdateFriendVerifies 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(req *types.UpdateFriendVerifiesReq) (resp *types.UpdateFriendVerifiesRes, err error) {
-	rpcReq, err := convert.To[relationtypes.UpdateFriendVerifiesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.UpdateFriendVerifiesReq{VerifyIds: req.VerifyIDs, Action: req.Action}
 	rpcRes, err := l.svcCtx.FriendRpc.UpdateFriendVerifies(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UpdateFriendVerifiesRes](rpcRes)
+	return &types.UpdateFriendVerifiesRes{AffectedCount: rpcRes.AffectedCount}, nil
 }

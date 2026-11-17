@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListFriendBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // ListFriendBlocks 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *ListFriendBlocksLogic) ListFriendBlocks(req *types.ListFriendBlocksReq) (resp *types.ListFriendBlocksRes, err error) {
-	rpcReq, err := convert.To[relationtypes.ListFriendBlocksReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.ListFriendBlocksReq{Page: req.Page, PageSize: req.PageSize, UserId: req.UserID, BlockedUserId: req.BlockedUserID, BlockId: req.BlockID}
 	rpcRes, err := l.svcCtx.FriendRpc.ListFriendBlocks(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListFriendBlocksRes](rpcRes)
+	tmp2 := make([]types.FriendBlockItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.FriendBlockItem{BlockID: it1.BlockId, UserID: it1.UserId, BlockedUserID: it1.BlockedUserId, CreatedAt: it1.CreatedAt})
+	}
+	return &types.ListFriendBlocksRes{Total: rpcRes.Total, List: tmp2}, nil
 }

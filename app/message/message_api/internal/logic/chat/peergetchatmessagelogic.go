@@ -25,9 +25,7 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
-)
+	chat_rpc "beaver/app/message/message_rpc/pb")
 
 // PeerGetChatMessageLogic 按会话+消息 ID 取单条消息
 //
@@ -48,13 +46,10 @@ func NewPeerGetChatMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // PeerGetChatMessage 按会话+消息 ID 取单条消息
 func (l *PeerGetChatMessageLogic) PeerGetChatMessage(req *types.PeerGetChatMessageReq) (*types.PeerGetChatMessageRes, error) {
-	rpcReq, err := convert.To[chat_rpc.GetChatMessageReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &chat_rpc.GetChatMessageReq{ConversationId: req.ConversationID, MessageId: req.MessageID}
 	rpcRes, err := l.svcCtx.ChatRpc.GetChatMessage(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerGetChatMessageRes](rpcRes)
+	return &types.PeerGetChatMessageRes{Found: rpcRes.Found, Msg: pbMsgToPeerMsg(rpcRes.Msg)}, nil
 }

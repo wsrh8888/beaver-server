@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserUpdateDisplayLogic 更新用户展示信息
@@ -49,13 +48,10 @@ func NewUserUpdateDisplayLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 // UserUpdateDisplay 更新用户展示信息
 func (l *UserUpdateDisplayLogic) UserUpdateDisplay(req *types.UserUpdateDisplayReq) (*types.UserUpdateDisplayRes, error) {
-	rpcReq, err := convert.To[accttypes.UserUpdateDisplayReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.UserUpdateDisplayReq{UserId: req.UserID, NickName: req.NickName, Avatar: req.Avatar}
 	rpcRes, err := l.svcCtx.UserRpc.UserUpdateDisplay(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserUpdateDisplayRes](rpcRes)
+	return &types.UserUpdateDisplayRes{Version: rpcRes.Version}, nil
 }

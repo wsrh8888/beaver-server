@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewFileByIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileById
 
 // FileById 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *FileByIdLogic) FileById(req *types.GetFileByIdReq) (resp *types.GetFileByIdRes, err error) {
-	rpcReq, err := convert.To[assettypes.GetFileByIdReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.GetFileByIdReq{Id: req.ID}
 	rpcRes, err := l.svcCtx.FileRpc.GetFileById(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetFileByIdRes](rpcRes)
+	return &types.GetFileByIdRes{File: &types.FileItem{ID: rpcRes.File.Id, FileKey: rpcRes.File.FileKey, OriginalName: rpcRes.File.OriginalName, Size: rpcRes.File.Size, Path: rpcRes.File.Path, Md5: rpcRes.File.Md5, Type: rpcRes.File.Type, Source: rpcRes.File.Source, CreatedAt: rpcRes.File.CreatedAt, UpdatedAt: rpcRes.File.UpdatedAt}}, nil
 }

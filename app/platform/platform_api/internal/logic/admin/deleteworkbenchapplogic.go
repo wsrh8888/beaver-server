@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewDeleteWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // DeleteWorkbenchApp 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *DeleteWorkbenchAppLogic) DeleteWorkbenchApp(req *types.DeleteWorkbenchAppReq) (resp *types.DeleteWorkbenchAppRes, err error) {
-	rpcReq, err := convert.To[platformcli.DeleteWorkbenchAppReq](req)
+	rpcReq := &platformcli.DeleteWorkbenchAppReq{WorkbenchAppId: req.WorkbenchAppID}
+	_, err = l.svcCtx.PlatformRpc.DeleteWorkbenchApp(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.PlatformRpc.DeleteWorkbenchApp(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.DeleteWorkbenchAppRes](rpcRes)
+	return &types.DeleteWorkbenchAppRes{}, nil
 }

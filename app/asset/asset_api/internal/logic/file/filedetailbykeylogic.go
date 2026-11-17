@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewFileDetailByKeyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 
 // FileDetailByKey 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *FileDetailByKeyLogic) FileDetailByKey(req *types.GetFileDetailReq) (resp *types.GetFileDetailRes, err error) {
-	rpcReq, err := convert.To[assettypes.GetFileDetailReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.GetFileDetailReq{FileKey: req.FileKey}
 	rpcRes, err := l.svcCtx.FileRpc.GetFileDetail(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetFileDetailRes](rpcRes)
+	return &types.GetFileDetailRes{FileKey: rpcRes.FileKey, OriginalName: rpcRes.OriginalName, Size: rpcRes.Size, Path: rpcRes.Path, Md5: rpcRes.Md5, Type: rpcRes.Type, CreatedAt: rpcRes.CreatedAt, UpdatedAt: rpcRes.UpdatedAt}, nil
 }

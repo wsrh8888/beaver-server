@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewFileListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileList
 
 // FileList 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *FileListLogic) FileList(req *types.ListFilesReq) (resp *types.ListFilesRes, err error) {
-	rpcReq, err := convert.To[assettypes.ListFilesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.ListFilesReq{Page: req.Page, PageSize: req.PageSize, Type: req.Type, Keywords: req.Keywords}
 	rpcRes, err := l.svcCtx.FileRpc.ListFiles(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListFilesRes](rpcRes)
+	tmp2 := make([]types.FileItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.FileItem{ID: it1.Id, FileKey: it1.FileKey, OriginalName: it1.OriginalName, Size: it1.Size, Path: it1.Path, Md5: it1.Md5, Type: it1.Type, Source: it1.Source, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListFilesRes{Total: rpcRes.Total, List: tmp2}, nil
 }

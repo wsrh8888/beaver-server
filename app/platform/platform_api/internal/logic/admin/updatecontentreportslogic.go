@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpdateContentReportsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 // UpdateContentReports 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *UpdateContentReportsLogic) UpdateContentReports(req *types.UpdateContentReportsReq) (resp *types.UpdateContentReportsRes, err error) {
-	rpcReq, err := convert.To[platformcli.UpdateContentReportsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.UpdateContentReportsReq{Ids: req.IDs, Action: req.Action, HandlerId: req.HandlerID, HandleRemark: req.HandleRemark, CaseId: req.CaseID}
 	rpcRes, err := l.svcCtx.PlatformRpc.UpdateContentReports(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UpdateContentReportsRes](rpcRes)
+	return &types.UpdateContentReportsRes{AffectedCount: rpcRes.AffectedCount}, nil
 }

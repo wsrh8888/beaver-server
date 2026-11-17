@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserListInfoLogic 批量查用户信息
@@ -49,13 +48,14 @@ func NewUserListInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 
 // UserListInfo 批量查用户信息
 func (l *UserListInfoLogic) UserListInfo(req *types.UserListInfoReq) (*types.UserListInfoRes, error) {
-	rpcReq, err := convert.To[accttypes.UserListInfoReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.UserListInfoReq{UserIdList: req.UserIDList, SinceTimestamp: req.SinceTimestamp}
 	rpcRes, err := l.svcCtx.UserRpc.UserListInfo(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserListInfoRes](rpcRes)
+	tmp3 := make(map[string]types.UserLookupInfo, len(rpcRes.UserInfo))
+	for k1, v2 := range rpcRes.UserInfo {
+		tmp3[k1] = types.UserLookupInfo{UserID: v2.UserId, NickName: v2.NickName, Avatar: v2.Avatar, Version: v2.Version, Email: v2.Email, Abstract: v2.Abstract, Phone: v2.Phone, Status: v2.Status, Source: v2.Source, UserType: v2.UserType, CreatedAt: v2.CreatedAt, UpdatedAt: v2.UpdatedAt}
+	}
+	return &types.UserListInfoRes{UserInfo: tmp3}, nil
 }

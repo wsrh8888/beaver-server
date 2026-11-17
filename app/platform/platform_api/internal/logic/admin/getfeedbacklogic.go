@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewGetFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFe
 
 // GetFeedback 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *GetFeedbackLogic) GetFeedback(req *types.GetFeedbackReq) (resp *types.GetFeedbackRes, err error) {
-	rpcReq, err := convert.To[platformcli.GetFeedbackReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.GetFeedbackReq{Id: req.ID}
 	rpcRes, err := l.svcCtx.PlatformRpc.GetFeedback(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetFeedbackRes](rpcRes)
+	return &types.GetFeedbackRes{Feedback: &types.FeedbackItem{ID: rpcRes.Feedback.Id, UserID: rpcRes.Feedback.UserId, Content: rpcRes.Feedback.Content, Type: rpcRes.Feedback.Type, Status: rpcRes.Feedback.Status, FileNames: rpcRes.Feedback.FileNames, HandlerID: rpcRes.Feedback.HandlerId, HandleTime: rpcRes.Feedback.HandleTime, HandleResult: rpcRes.Feedback.HandleResult, CreatedAt: rpcRes.Feedback.CreatedAt, UpdatedAt: rpcRes.Feedback.UpdatedAt}}, nil
 }

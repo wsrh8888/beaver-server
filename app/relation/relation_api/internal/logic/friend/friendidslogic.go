@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewFriendIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FriendI
 
 // FriendIds 只做协议转换，业务规则全部留在 relation_rpc，不在这里复制一份。
 func (l *FriendIdsLogic) FriendIds(req *types.GetFriendIdsReq) (resp *types.GetFriendIdsRes, err error) {
-	rpcReq, err := convert.To[relationtypes.GetFriendIdsRequest](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.GetFriendIdsRequest{UserID: req.UserID}
 	rpcRes, err := l.svcCtx.FriendRpc.GetFriendIds(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetFriendIdsRes](rpcRes)
+	return &types.GetFriendIdsRes{FriendIDs: rpcRes.FriendIds}, nil
 }

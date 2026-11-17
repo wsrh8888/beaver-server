@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -49,13 +48,14 @@ func NewAdminListWorkbenchAppsLogic(ctx context.Context, svcCtx *svc.ServiceCont
 // AdminListWorkbenchApps 只做协议转换，业务规则全部留在 platform_rpc。
 // 对端 RPC 方法名是 ListWorkbenchApps（运营视角与 C 端共用同一实现，只是入参不同）。
 func (l *AdminListWorkbenchAppsLogic) AdminListWorkbenchApps(req *types.AdminListWorkbenchAppsReq) (resp *types.AdminListWorkbenchAppsRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListWorkbenchAppsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListWorkbenchAppsReq{Page: req.Page, PageSize: req.PageSize, Status: req.Status, Category: req.Category, Keywords: req.Keywords}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListWorkbenchApps(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.AdminListWorkbenchAppsRes](rpcRes)
+	tmp2 := make([]types.WorkbenchAppItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.WorkbenchAppItem{ID: it1.Id, WorkbenchAppID: it1.WorkbenchAppId, Name: it1.Name, Description: it1.Description, Icon: it1.Icon, AppType: it1.AppType, ClientScope: it1.ClientScope, EntryConfig: &types.WorkbenchEntryConfig{Type: int(it1.EntryConfig.Type), PC: it1.EntryConfig.Pc, Mobile: it1.EntryConfig.Mobile}, Category: it1.Category, Sort: it1.Sort, Status: it1.Status, CreatedBy: it1.CreatedBy, LastModifiedBy: it1.LastModifiedBy, Remark: it1.Remark, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt, OpenMode: it1.OpenMode})
+	}
+	return &types.AdminListWorkbenchAppsRes{Total: rpcRes.Total, List: tmp2}, nil
 }

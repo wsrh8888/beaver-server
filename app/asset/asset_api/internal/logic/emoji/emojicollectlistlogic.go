@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewEmojiCollectListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // EmojiCollectList 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *EmojiCollectListLogic) EmojiCollectList(req *types.ListEmojiCollectsReq) (resp *types.ListEmojiCollectsRes, err error) {
-	rpcReq, err := convert.To[assettypes.ListEmojiCollectsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.ListEmojiCollectsReq{Page: req.Page, PageSize: req.PageSize, UserId: req.UserID, EmojiId: req.EmojiID, StartTime: req.StartTime, EndTime: req.EndTime}
 	rpcRes, err := l.svcCtx.EmojiRpc.ListEmojiCollects(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListEmojiCollectsRes](rpcRes)
+	tmp2 := make([]types.EmojiCollectItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.EmojiCollectItem{CollectID: it1.CollectId, UserID: it1.UserId, EmojiID: it1.EmojiId, EmojiTitle: it1.EmojiTitle, EmojiFileKey: it1.EmojiFileKey, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListEmojiCollectsRes{Total: rpcRes.Total, List: tmp2}, nil
 }

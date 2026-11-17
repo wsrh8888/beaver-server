@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpdateWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // UpdateWorkbenchApp 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *UpdateWorkbenchAppLogic) UpdateWorkbenchApp(req *types.UpdateWorkbenchAppReq) (resp *types.UpdateWorkbenchAppRes, err error) {
-	rpcReq, err := convert.To[platformcli.UpdateWorkbenchAppReq](req)
+	rpcReq := &platformcli.UpdateWorkbenchAppReq{WorkbenchAppId: req.WorkbenchAppID, Name: req.Name, Description: req.Description, Icon: req.Icon, AppType: req.AppType, ClientScope: req.ClientScope, EntryConfig: &platformcli.WorkbenchEntryConfig{Type: int32(req.EntryConfig.Type), Pc: req.EntryConfig.PC, Mobile: req.EntryConfig.Mobile}, Category: req.Category, Sort: req.Sort, Status: req.Status, Remark: req.Remark, OperatorId: req.OperatorID, OpenMode: req.OpenMode}
+	_, err = l.svcCtx.PlatformRpc.UpdateWorkbenchApp(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.PlatformRpc.UpdateWorkbenchApp(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.UpdateWorkbenchAppRes](rpcRes)
+	return &types.UpdateWorkbenchAppRes{}, nil
 }

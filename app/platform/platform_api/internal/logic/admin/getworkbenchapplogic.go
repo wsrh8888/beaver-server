@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewGetWorkbenchAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 // GetWorkbenchApp 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *GetWorkbenchAppLogic) GetWorkbenchApp(req *types.GetWorkbenchAppReq) (resp *types.GetWorkbenchAppRes, err error) {
-	rpcReq, err := convert.To[platformcli.GetWorkbenchAppReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.GetWorkbenchAppReq{WorkbenchAppId: req.WorkbenchAppID}
 	rpcRes, err := l.svcCtx.PlatformRpc.GetWorkbenchApp(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetWorkbenchAppRes](rpcRes)
+	return &types.GetWorkbenchAppRes{App: &types.WorkbenchAppItem{ID: rpcRes.App.Id, WorkbenchAppID: rpcRes.App.WorkbenchAppId, Name: rpcRes.App.Name, Description: rpcRes.App.Description, Icon: rpcRes.App.Icon, AppType: rpcRes.App.AppType, ClientScope: rpcRes.App.ClientScope, EntryConfig: &types.WorkbenchEntryConfig{Type: int(rpcRes.App.EntryConfig.Type), PC: rpcRes.App.EntryConfig.Pc, Mobile: rpcRes.App.EntryConfig.Mobile}, Category: rpcRes.App.Category, Sort: rpcRes.App.Sort, Status: rpcRes.App.Status, CreatedBy: rpcRes.App.CreatedBy, LastModifiedBy: rpcRes.App.LastModifiedBy, Remark: rpcRes.App.Remark, CreatedAt: rpcRes.App.CreatedAt, UpdatedAt: rpcRes.App.UpdatedAt, OpenMode: rpcRes.App.OpenMode}}, nil
 }

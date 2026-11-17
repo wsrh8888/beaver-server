@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserDeleteLogic 批量删除用户
@@ -49,13 +48,10 @@ func NewUserDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserDe
 
 // UserDelete 批量删除用户
 func (l *UserDeleteLogic) UserDelete(req *types.UserDeleteReq) (*types.UserDeleteRes, error) {
-	rpcReq, err := convert.To[accttypes.DeleteUsersReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.DeleteUsersReq{UserIds: req.UserIDs}
 	rpcRes, err := l.svcCtx.UserRpc.DeleteUsers(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserDeleteRes](rpcRes)
+	return &types.UserDeleteRes{AffectedCount: rpcRes.AffectedCount}, nil
 }

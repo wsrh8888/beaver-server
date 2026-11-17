@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListFriendsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListF
 
 // ListFriends 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *ListFriendsLogic) ListFriends(req *types.ListFriendsReq) (resp *types.ListFriendsRes, err error) {
-	rpcReq, err := convert.To[relationtypes.ListFriendsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.ListFriendsReq{Page: req.Page, PageSize: req.PageSize, UserId: req.UserID, PeerUserId: req.PeerUserID, IsDeleted: req.IsDeleted, StartTime: req.StartTime, EndTime: req.EndTime, RelationId: req.RelationID}
 	rpcRes, err := l.svcCtx.FriendRpc.ListFriends(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListFriendsRes](rpcRes)
+	tmp2 := make([]types.FriendItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.FriendItem{FriendID: it1.FriendId, SendUserID: it1.SendUserId, RevUserID: it1.RevUserId, SendUserNotice: it1.SendUserNotice, RevUserNotice: it1.RevUserNotice, Source: it1.Source, IsDeleted: it1.IsDeleted, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListFriendsRes{Total: rpcRes.Total, List: tmp2}, nil
 }

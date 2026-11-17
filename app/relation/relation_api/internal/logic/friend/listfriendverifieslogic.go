@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListFriendVerifiesLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // ListFriendVerifies 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *ListFriendVerifiesLogic) ListFriendVerifies(req *types.ListFriendVerifiesReq) (resp *types.ListFriendVerifiesRes, err error) {
-	rpcReq, err := convert.To[relationtypes.ListFriendVerifiesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.ListFriendVerifiesReq{Page: req.Page, PageSize: req.PageSize, SendUserId: req.SendUserID, RevUserId: req.RevUserID, SendStatus: req.SendStatus, RevStatus: req.RevStatus, StartTime: req.StartTime, EndTime: req.EndTime, VerifyId: req.VerifyID}
 	rpcRes, err := l.svcCtx.FriendRpc.ListFriendVerifies(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListFriendVerifiesRes](rpcRes)
+	tmp2 := make([]types.FriendVerifyItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.FriendVerifyItem{VerifyID: it1.VerifyId, SendUserID: it1.SendUserId, RevUserID: it1.RevUserId, SendStatus: it1.SendStatus, RevStatus: it1.RevStatus, Message: it1.Message, Source: it1.Source, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListFriendVerifiesRes{Total: rpcRes.Total, List: tmp2}, nil
 }

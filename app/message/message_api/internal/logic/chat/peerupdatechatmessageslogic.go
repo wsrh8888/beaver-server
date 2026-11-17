@@ -26,7 +26,6 @@ import (
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
 )
 
 // PeerUpdateChatMessagesLogic 批量更新消息状态
@@ -48,13 +47,10 @@ func NewPeerUpdateChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceCont
 
 // PeerUpdateChatMessages 批量更新消息状态
 func (l *PeerUpdateChatMessagesLogic) PeerUpdateChatMessages(req *types.PeerUpdateChatMessagesReq) (*types.PeerUpdateChatMessagesRes, error) {
-	rpcReq, err := convert.To[chat_rpc.UpdateChatMessagesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &chat_rpc.UpdateChatMessagesReq{MessageIds: req.MessageIDs, ConversationId: req.ConversationID, MsgType: req.MsgType, StartTime: req.StartTime, EndTime: req.EndTime, Status: req.Status}
 	rpcRes, err := l.svcCtx.ChatRpc.UpdateChatMessages(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerUpdateChatMessagesRes](rpcRes)
+	return &types.PeerUpdateChatMessagesRes{AffectedCount: rpcRes.AffectedCount}, nil
 }

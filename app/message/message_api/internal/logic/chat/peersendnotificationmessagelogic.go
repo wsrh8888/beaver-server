@@ -26,7 +26,6 @@ import (
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
 )
 
 // PeerSendNotificationMessageLogic 发送系统通知消息
@@ -48,13 +47,10 @@ func NewPeerSendNotificationMessageLogic(ctx context.Context, svcCtx *svc.Servic
 
 // PeerSendNotificationMessage 发送系统通知消息
 func (l *PeerSendNotificationMessageLogic) PeerSendNotificationMessage(req *types.PeerSendNotificationMessageReq) (*types.PeerSendNotificationMessageRes, error) {
-	rpcReq, err := convert.To[chat_rpc.SendNotificationMessageReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &chat_rpc.SendNotificationMessageReq{ConversationId: req.ConversationID, MessageType: req.MessageType, Content: req.Content, RelatedUserId: req.RelatedUserID, ReadUserIds: req.ReadUserIDs}
 	rpcRes, err := l.svcCtx.ChatRpc.SendNotificationMessage(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerSendNotificationMessageRes](rpcRes)
+	return &types.PeerSendNotificationMessageRes{MessageID: rpcRes.MessageId}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewGetContentReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // GetContentReport 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *GetContentReportLogic) GetContentReport(req *types.GetContentReportReq) (resp *types.GetContentReportRes, err error) {
-	rpcReq, err := convert.To[platformcli.GetContentReportReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.GetContentReportReq{Id: req.ID}
 	rpcRes, err := l.svcCtx.PlatformRpc.GetContentReport(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetContentReportRes](rpcRes)
+	return &types.GetContentReportRes{Report: &types.ContentReportItem{ID: rpcRes.Report.Id, ReporterUserID: rpcRes.Report.ReporterUserId, TargetType: rpcRes.Report.TargetType, TargetID: rpcRes.Report.TargetId, ReasonType: rpcRes.Report.ReasonType, Content: rpcRes.Report.Content, FileNames: rpcRes.Report.FileNames, Status: rpcRes.Report.Status, CaseID: rpcRes.Report.CaseId, HandlerID: rpcRes.Report.HandlerId, HandleRemark: rpcRes.Report.HandleRemark, CreatedAt: rpcRes.Report.CreatedAt}}, nil
 }

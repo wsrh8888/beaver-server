@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewHandleFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ha
 
 // HandleFeedback 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *HandleFeedbackLogic) HandleFeedback(req *types.HandleFeedbackReq) (resp *types.HandleFeedbackRes, err error) {
-	rpcReq, err := convert.To[platformcli.HandleFeedbackReq](req)
+	rpcReq := &platformcli.HandleFeedbackReq{Id: req.ID, Status: req.Status, HandleResult: req.HandleResult, HandlerId: req.HandlerID}
+	_, err = l.svcCtx.PlatformRpc.HandleFeedback(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.PlatformRpc.HandleFeedback(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.HandleFeedbackRes](rpcRes)
+	return &types.HandleFeedbackRes{}, nil
 }

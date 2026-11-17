@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewRemoveGroupMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 // RemoveGroupMember 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *RemoveGroupMemberLogic) RemoveGroupMember(req *types.RemoveGroupMemberReq) (resp *types.RemoveGroupMemberRes, err error) {
-	rpcReq, err := convert.To[relationtypes.RemoveGroupMemberReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.RemoveGroupMemberReq{GroupId: req.GroupID, UserId: req.UserID, OperatedBy: req.OperatedBy, Kick: req.Kick}
 	rpcRes, err := l.svcCtx.GroupRpc.RemoveGroupMember(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.RemoveGroupMemberRes](rpcRes)
+	return &types.RemoveGroupMemberRes{MemberVersion: rpcRes.MemberVersion}, nil
 }

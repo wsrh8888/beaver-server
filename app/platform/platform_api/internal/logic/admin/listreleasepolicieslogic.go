@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListReleasePoliciesLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 // ListReleasePolicies 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *ListReleasePoliciesLogic) ListReleasePolicies(req *types.ListReleasePoliciesReq) (resp *types.ListReleasePoliciesRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListReleasePoliciesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListReleasePoliciesReq{AppId: req.AppID}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListReleasePolicies(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListReleasePoliciesRes](rpcRes)
+	tmp2 := make([]types.ReleasePolicyItem, 0, len(rpcRes.Policies))
+	for _, it1 := range rpcRes.Policies {
+		tmp2 = append(tmp2, types.ReleasePolicyItem{ID: it1.Id, AppID: it1.AppId, ArchitectureID: it1.ArchitectureId, StableVersionID: it1.StableVersionId, GrayVersionID: it1.GrayVersionId, RolloutPercent: it1.RolloutPercent, MinVersion: it1.MinVersion, ForceUpdate: it1.ForceUpdate, IsActive: it1.IsActive, StableVersion: it1.StableVersion, GrayVersion: it1.GrayVersion, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListReleasePoliciesRes{Policies: tmp2}, nil
 }

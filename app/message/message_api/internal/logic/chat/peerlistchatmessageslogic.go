@@ -25,9 +25,7 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
-)
+	chat_rpc "beaver/app/message/message_rpc/pb")
 
 // PeerListChatMessagesLogic 分页查消息
 //
@@ -48,13 +46,24 @@ func NewPeerListChatMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 // PeerListChatMessages 分页查消息
 func (l *PeerListChatMessagesLogic) PeerListChatMessages(req *types.PeerListChatMessagesReq) (*types.PeerListChatMessagesRes, error) {
-	rpcReq, err := convert.To[chat_rpc.ListChatMessagesReq](req)
-	if err != nil {
-		return nil, err
+	rpcReq := &chat_rpc.ListChatMessagesReq{
+		Page: req.Page, PageSize: req.PageSize, ConversationId: req.ConversationID,
+		SendUserId: req.SendUserID, MsgType: req.MsgType, StartTime: req.StartTime,
+		EndTime: req.EndTime, MessageId: req.MessageID, WithContent: req.WithContent,
+		Status: req.Status, Order: req.Order,
 	}
 	rpcRes, err := l.svcCtx.ChatRpc.ListChatMessages(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerListChatMessagesRes](rpcRes)
+	res := &types.PeerListChatMessagesRes{Total: rpcRes.Total}
+	for _, it := range rpcRes.GetList() {
+		res.List = append(res.List, types.PeerChatMessageItem{
+			MessageID: it.MessageId, ConversationID: it.ConversationId,
+			ConversationType: it.ConversationType, SendUserID: it.SendUserId,
+			MsgType: it.MsgType, MsgPreview: it.MsgPreview, MsgContent: it.MsgContent,
+			Status: it.Status, CreatedAt: it.CreatedAt, UpdatedAt: it.UpdatedAt,
+		})
+	}
+	return res, nil
 }

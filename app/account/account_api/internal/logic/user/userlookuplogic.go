@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserLookupLogic 按 user_id 查用户信息（含管理字段）
@@ -49,13 +48,10 @@ func NewUserLookupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserLo
 
 // UserLookup 按 user_id 查用户信息（含管理字段）
 func (l *UserLookupLogic) UserLookup(req *types.UserLookupReq) (*types.UserLookupRes, error) {
-	rpcReq, err := convert.To[accttypes.UserInfoReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.UserInfoReq{UserID: req.UserID}
 	rpcRes, err := l.svcCtx.UserRpc.UserInfo(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserLookupRes](rpcRes)
+	return &types.UserLookupRes{UserInfo: types.UserLookupInfo{UserID: rpcRes.UserInfo.UserId, NickName: rpcRes.UserInfo.NickName, Avatar: rpcRes.UserInfo.Avatar, Version: rpcRes.UserInfo.Version, Email: rpcRes.UserInfo.Email, Abstract: rpcRes.UserInfo.Abstract, Phone: rpcRes.UserInfo.Phone, Status: rpcRes.UserInfo.Status, Source: rpcRes.UserInfo.Source, UserType: rpcRes.UserInfo.UserType, CreatedAt: rpcRes.UserInfo.CreatedAt, UpdatedAt: rpcRes.UserInfo.UpdatedAt}}, nil
 }

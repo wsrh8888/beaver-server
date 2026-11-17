@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUserGroupIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 
 // UserGroupIds 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *UserGroupIdsLogic) UserGroupIds(req *types.GetUserGroupIDsReq) (resp *types.GetUserGroupIDsRes, err error) {
-	rpcReq, err := convert.To[relationtypes.GetUserGroupIDsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.GetUserGroupIDsReq{UserID: req.UserID}
 	rpcRes, err := l.svcCtx.GroupRpc.GetUserGroupIDs(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetUserGroupIDsRes](rpcRes)
+	return &types.GetUserGroupIDsRes{GroupIDs: rpcRes.GroupIDs}, nil
 }

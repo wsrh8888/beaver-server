@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserSearchLogic 搜索用户
@@ -49,13 +48,10 @@ func NewUserSearchLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserSe
 
 // UserSearch 搜索用户
 func (l *UserSearchLogic) UserSearch(req *types.UserSearchReq) (*types.UserSearchRes, error) {
-	rpcReq, err := convert.To[accttypes.SearchUserReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.SearchUserReq{Keyword: req.Keyword, Type: req.Type}
 	rpcRes, err := l.svcCtx.UserRpc.SearchUser(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserSearchRes](rpcRes)
+	return &types.UserSearchRes{UserInfo: types.UserLookupInfo{UserID: rpcRes.UserInfo.UserId, NickName: rpcRes.UserInfo.NickName, Avatar: rpcRes.UserInfo.Avatar, Version: rpcRes.UserInfo.Version, Email: rpcRes.UserInfo.Email, Abstract: rpcRes.UserInfo.Abstract, Phone: rpcRes.UserInfo.Phone, Status: rpcRes.UserInfo.Status, Source: rpcRes.UserInfo.Source, UserType: rpcRes.UserInfo.UserType, CreatedAt: rpcRes.UserInfo.CreatedAt, UpdatedAt: rpcRes.UserInfo.UpdatedAt}}, nil
 }

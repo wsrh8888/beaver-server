@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewFileDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileDe
 
 // FileDelete 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *FileDeleteLogic) FileDelete(req *types.DeleteFileReq) (resp *types.DeleteFileRes, err error) {
-	rpcReq, err := convert.To[assettypes.DeleteFileReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.DeleteFileReq{Id: req.ID}
 	rpcRes, err := l.svcCtx.FileRpc.DeleteFile(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.DeleteFileRes](rpcRes)
+	return &types.DeleteFileRes{Path: rpcRes.Path}, nil
 }

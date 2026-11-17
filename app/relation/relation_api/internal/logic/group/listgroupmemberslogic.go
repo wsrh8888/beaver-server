@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // ListGroupMembers 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *ListGroupMembersLogic) ListGroupMembers(req *types.ListGroupMembersReq) (resp *types.ListGroupMembersRes, err error) {
-	rpcReq, err := convert.To[relationtypes.ListGroupMembersReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.ListGroupMembersReq{GroupId: req.GroupID, Page: req.Page, PageSize: req.PageSize, Role: req.Role, Status: req.Status}
 	rpcRes, err := l.svcCtx.GroupRpc.ListGroupMembers(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListGroupMembersRes](rpcRes)
+	tmp2 := make([]types.GroupMemberItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.GroupMemberItem{ID: it1.Id, GroupID: it1.GroupId, UserID: it1.UserId, Role: it1.Role, Status: it1.Status, ProhibitionMinutes: it1.ProhibitionMinutes, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListGroupMembersRes{Total: rpcRes.Total, List: tmp2}, nil
 }

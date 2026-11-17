@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewAdminQueryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 
 // AdminQueryLogs 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *AdminQueryLogsLogic) AdminQueryLogs(req *types.AdminQueryLogsReq) (resp *types.AdminQueryLogsRes, err error) {
-	rpcReq, err := convert.To[platformcli.AdminQueryLogsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.AdminQueryLogsReq{BucketId: req.BucketID, Level: req.Level, StartTime: req.StartTime, EndTime: req.EndTime, Keyword: req.Keyword, UserFilter: req.UserFilter, Page: req.Page, PageSize: req.PageSize}
 	rpcRes, err := l.svcCtx.PlatformRpc.AdminQueryLogs(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.AdminQueryLogsRes](rpcRes)
+	tmp2 := make([]types.AdminLogItem, 0, len(rpcRes.Logs))
+	for _, it1 := range rpcRes.Logs {
+		tmp2 = append(tmp2, types.AdminLogItem{ID: it1.Id, Level: it1.Level, Data: it1.Data, BucketID: it1.BucketId, BucketName: it1.BucketName, Timestamp: it1.Timestamp, CreatedAt: it1.CreatedAt})
+	}
+	return &types.AdminQueryLogsRes{Total: rpcRes.Total, Logs: tmp2}, nil
 }

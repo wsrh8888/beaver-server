@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,34 @@ func NewListGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListGr
 
 // ListGroups 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *ListGroupsLogic) ListGroups(req *types.ListGroupsReq) (resp *types.ListGroupsRes, err error) {
-	rpcReq, err := convert.To[relationtypes.ListGroupsReq](req)
-	if err != nil {
-		return nil, err
+	rpcReq := &relationtypes.ListGroupsReq{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		Status:   req.Status,
+		Type:     req.Type,
+		Keywords: req.Keywords,
+		Id:       req.ID,
+		GroupId:  req.GroupID,
 	}
 	rpcRes, err := l.svcCtx.GroupRpc.ListGroups(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListGroupsRes](rpcRes)
+	res := &types.ListGroupsRes{Total: rpcRes.Total}
+	for _, item := range rpcRes.GetList() {
+		res.List = append(res.List, types.GroupItem{
+			ID:        item.GetId(),
+			GroupID:   item.GetGroupId(),
+			Type:      item.GetType(),
+			Title:     item.GetTitle(),
+			Avatar:    item.GetAvatar(),
+			CreatorID: item.GetCreatorId(),
+			Notice:    item.GetNotice(),
+			Status:    item.GetStatus(),
+			MuteAll:   item.GetMuteAll(),
+			CreatedAt: item.GetCreatedAt(),
+			UpdatedAt: item.GetUpdatedAt(),
+		})
+	}
+	return res, nil
 }

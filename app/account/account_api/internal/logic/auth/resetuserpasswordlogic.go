@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // ResetUserPasswordLogic 重置指定用户密码（无需旧密码）
@@ -49,13 +48,10 @@ func NewResetUserPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 // ResetUserPassword 重置指定用户密码（无需旧密码）
 func (l *ResetUserPasswordLogic) ResetUserPassword(req *types.ResetUserPasswordReq) (*types.ResetUserPasswordRes, error) {
-	rpcReq, err := convert.To[accttypes.ResetPasswordReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.ResetPasswordReq{UserId: req.UserID, NewPassword: req.NewPassword}
 	rpcRes, err := l.svcCtx.AuthRpc.ResetPassword(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ResetUserPasswordRes](rpcRes)
+	return &types.ResetUserPasswordRes{Success: rpcRes.Success}, nil
 }

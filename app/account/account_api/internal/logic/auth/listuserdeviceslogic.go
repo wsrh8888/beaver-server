@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // ListUserDevicesLogic 查指定用户的登录设备
@@ -49,13 +48,14 @@ func NewListUserDevicesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 
 // ListUserDevices 查指定用户的登录设备
 func (l *ListUserDevicesLogic) ListUserDevices(req *types.ListUserDevicesReq) (*types.ListUserDevicesRes, error) {
-	rpcReq, err := convert.To[accttypes.ListUserDevicesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.ListUserDevicesReq{UserId: req.UserID}
 	rpcRes, err := l.svcCtx.AuthRpc.ListUserDevices(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListUserDevicesRes](rpcRes)
+	tmp2 := make([]types.UserDeviceItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.UserDeviceItem{DeviceID: it1.DeviceId, DeviceType: it1.DeviceType, DeviceOS: it1.DeviceOs, DeviceModel: it1.DeviceModel, DeviceOSVersion: it1.DeviceOsVersion, DeviceName: it1.DeviceName, LastLoginTime: it1.LastLoginTime, LastLoginIP: it1.LastLoginIp, IsOnline: it1.IsOnline})
+	}
+	return &types.ListUserDevicesRes{List: tmp2}, nil
 }

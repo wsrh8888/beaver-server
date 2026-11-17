@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewGroupsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 // GroupsListByIds 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *GroupsListByIdsLogic) GroupsListByIds(req *types.GetGroupsListByIdsReq) (resp *types.GetGroupsListByIdsRes, err error) {
-	rpcReq, err := convert.To[relationtypes.GetGroupsListByIdsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.GetGroupsListByIdsReq{GroupIDs: req.GroupIDs, Since: req.Since}
 	rpcRes, err := l.svcCtx.GroupRpc.GetGroupsListByIds(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.GetGroupsListByIdsRes](rpcRes)
+	tmp2 := make([]types.GroupListById, 0, len(rpcRes.Groups))
+	for _, it1 := range rpcRes.Groups {
+		tmp2 = append(tmp2, types.GroupListById{GroupID: it1.GroupID, Name: it1.Name, Avatar: it1.Avatar, Description: it1.Description, Version: it1.Version, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.GetGroupsListByIdsRes{Groups: tmp2}, nil
 }

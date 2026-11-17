@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // CreateCredentialLogic 创建账号密码凭据
@@ -49,13 +48,10 @@ func NewCreateCredentialLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // CreateCredential 创建账号密码凭据
 func (l *CreateCredentialLogic) CreateCredential(req *types.CreateCredentialReq) (*types.CreateCredentialRes, error) {
-	rpcReq, err := convert.To[accttypes.CreateCredentialReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.CreateCredentialReq{UserId: req.UserID, Password: req.Password}
 	rpcRes, err := l.svcCtx.AuthRpc.CreateCredential(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.CreateCredentialRes](rpcRes)
+	return &types.CreateCredentialRes{Success: rpcRes.Success}, nil
 }

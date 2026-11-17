@@ -26,7 +26,6 @@ import (
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
 )
 
 // PeerListConversationsLogic 分页查会话
@@ -48,13 +47,14 @@ func NewPeerListConversationsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 // PeerListConversations 分页查会话
 func (l *PeerListConversationsLogic) PeerListConversations(req *types.PeerListConversationsReq) (*types.PeerListConversationsRes, error) {
-	rpcReq, err := convert.To[chat_rpc.ListConversationsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &chat_rpc.ListConversationsReq{UserId: req.UserID, ConversationType: req.ConversationType, Page: req.Page, PageSize: req.PageSize}
 	rpcRes, err := l.svcCtx.ChatRpc.ListConversations(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerListConversationsRes](rpcRes)
+	tmp2 := make([]types.PeerConversationDetailItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.PeerConversationDetailItem{ConversationID: it1.ConversationId, Type: it1.Type, LastMessage: it1.LastMessage, LastMessageTime: it1.LastMessageTime, MessageCount: it1.MessageCount, ParticipantIDs: it1.ParticipantIds})
+	}
+	return &types.PeerListConversationsRes{Total: rpcRes.Total, List: tmp2}, nil
 }

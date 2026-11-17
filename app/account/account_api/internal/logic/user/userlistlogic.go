@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserListLogic 管理端用户分页列表
@@ -49,13 +48,14 @@ func NewUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserList
 
 // UserList 管理端用户分页列表
 func (l *UserListLogic) UserList(req *types.UserListReq) (*types.UserListRes, error) {
-	rpcReq, err := convert.To[accttypes.ListUsersReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.ListUsersReq{Page: req.Page, PageSize: req.PageSize, Email: req.Email, Status: req.Status, Source: req.Source, UserId: req.UserID, Keyword: req.Keyword, UserType: req.UserType}
 	rpcRes, err := l.svcCtx.UserRpc.ListUsers(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserListRes](rpcRes)
+	tmp2 := make([]types.UserLookupInfo, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.UserLookupInfo{UserID: it1.UserId, NickName: it1.NickName, Avatar: it1.Avatar, Version: it1.Version, Email: it1.Email, Abstract: it1.Abstract, Phone: it1.Phone, Status: it1.Status, Source: it1.Source, UserType: it1.UserType, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.UserListRes{Total: rpcRes.Total, List: tmp2}, nil
 }

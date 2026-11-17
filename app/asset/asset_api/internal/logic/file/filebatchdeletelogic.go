@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewFileBatchDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 
 // FileBatchDelete 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *FileBatchDeleteLogic) FileBatchDelete(req *types.BatchDeleteFilesReq) (resp *types.BatchDeleteFilesRes, err error) {
-	rpcReq, err := convert.To[assettypes.BatchDeleteFilesReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.BatchDeleteFilesReq{Ids: req.IDs}
 	rpcRes, err := l.svcCtx.FileRpc.BatchDeleteFiles(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.BatchDeleteFilesRes](rpcRes)
+	return &types.BatchDeleteFilesRes{Paths: rpcRes.Paths}, nil
 }

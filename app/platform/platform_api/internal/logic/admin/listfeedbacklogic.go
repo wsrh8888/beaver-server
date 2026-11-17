@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 
 // ListFeedback 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *ListFeedbackLogic) ListFeedback(req *types.ListFeedbackReq) (resp *types.ListFeedbackRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListFeedbackReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListFeedbackReq{Page: req.Page, PageSize: req.PageSize, Status: req.Status, Type: req.Type, UserId: req.UserID, Keywords: req.Keywords}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListFeedback(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListFeedbackRes](rpcRes)
+	tmp2 := make([]types.FeedbackItem, 0, len(rpcRes.List))
+	for _, it1 := range rpcRes.List {
+		tmp2 = append(tmp2, types.FeedbackItem{ID: it1.Id, UserID: it1.UserId, Content: it1.Content, Type: it1.Type, Status: it1.Status, FileNames: it1.FileNames, HandlerID: it1.HandlerId, HandleTime: it1.HandleTime, HandleResult: it1.HandleResult, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListFeedbackRes{Total: rpcRes.Total, List: tmp2}, nil
 }

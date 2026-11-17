@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewFileSaveLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileSave
 
 // FileSave 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *FileSaveLogic) FileSave(req *types.SaveFileReq) (resp *types.SaveFileRes, err error) {
-	rpcReq, err := convert.To[assettypes.SaveFileReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.SaveFileReq{OriginalName: req.OriginalName, Size: req.Size, Path: req.Path, Md5: req.Md5, Type: req.Type, Source: req.Source, FileInfoJson: req.FileInfoJson}
 	rpcRes, err := l.svcCtx.FileRpc.SaveFile(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.SaveFileRes](rpcRes)
+	return &types.SaveFileRes{FileKey: rpcRes.FileKey}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewEmojiPackageContentUpdateLogic(ctx context.Context, svcCtx *svc.ServiceC
 
 // EmojiPackageContentUpdate 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *EmojiPackageContentUpdateLogic) EmojiPackageContentUpdate(req *types.UpdateEmojiPackageContentReq) (resp *types.UpdateEmojiPackageContentRes, err error) {
-	rpcReq, err := convert.To[assettypes.UpdateEmojiPackageContentReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.UpdateEmojiPackageContentReq{PackageId: req.PackageID, Action: req.Action, EmojiId: req.EmojiID, FileKey: req.FileKey, Title: req.Title, EmojiInfo: &assettypes.EmojiInfoMsg{Width: req.EmojiInfo.Width, Height: req.EmojiInfo.Height}}
 	rpcRes, err := l.svcCtx.EmojiRpc.UpdateEmojiPackageContent(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UpdateEmojiPackageContentRes](rpcRes)
+	return &types.UpdateEmojiPackageContentRes{RelationID: rpcRes.RelationId, EmojiID: rpcRes.EmojiId}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // UserUpdateStatusLogic 批量修改用户状态
@@ -49,13 +48,10 @@ func NewUserUpdateStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 // UserUpdateStatus 批量修改用户状态
 func (l *UserUpdateStatusLogic) UserUpdateStatus(req *types.UserUpdateStatusReq) (*types.UserUpdateStatusRes, error) {
-	rpcReq, err := convert.To[accttypes.UpdateUsersStatusReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.UpdateUsersStatusReq{UserIds: req.UserIDs, Status: req.Status}
 	rpcRes, err := l.svcCtx.UserRpc.UpdateUsersStatus(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UserUpdateStatusRes](rpcRes)
+	return &types.UserUpdateStatusRes{AffectedCount: rpcRes.AffectedCount}, nil
 }

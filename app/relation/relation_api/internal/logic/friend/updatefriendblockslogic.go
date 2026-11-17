@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpdateFriendBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // UpdateFriendBlocks 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *UpdateFriendBlocksLogic) UpdateFriendBlocks(req *types.UpdateFriendBlocksReq) (resp *types.UpdateFriendBlocksRes, err error) {
-	rpcReq, err := convert.To[relationtypes.UpdateFriendBlocksReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &relationtypes.UpdateFriendBlocksReq{BlockIds: req.BlockIDs, Action: req.Action}
 	rpcRes, err := l.svcCtx.FriendRpc.UpdateFriendBlocks(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UpdateFriendBlocksRes](rpcRes)
+	return &types.UpdateFriendBlocksRes{AffectedCount: rpcRes.AffectedCount}, nil
 }

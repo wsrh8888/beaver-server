@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewCreateAppLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateA
 
 // CreateApp 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *CreateAppLogic) CreateApp(req *types.CreateAppReq) (resp *types.CreateAppRes, err error) {
-	rpcReq, err := convert.To[platformcli.CreateAppReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.CreateAppReq{Name: req.Name, Description: req.Description}
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateApp(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.CreateAppRes](rpcRes)
+	return &types.CreateAppRes{ID: rpcRes.Id, AppID: rpcRes.AppId}, nil
 }

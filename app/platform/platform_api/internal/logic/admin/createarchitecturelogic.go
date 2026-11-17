@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewCreateArchitectureLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // CreateArchitecture 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *CreateArchitectureLogic) CreateArchitecture(req *types.CreateArchitectureReq) (resp *types.CreateArchitectureRes, err error) {
-	rpcReq, err := convert.To[platformcli.CreateArchitectureReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.CreateArchitectureReq{AppId: req.AppID, PlatformId: req.PlatformID, ArchId: req.ArchID, Description: req.Description}
 	rpcRes, err := l.svcCtx.PlatformRpc.CreateArchitecture(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.CreateArchitectureRes](rpcRes)
+	return &types.CreateArchitectureRes{ID: rpcRes.Id}, nil
 }

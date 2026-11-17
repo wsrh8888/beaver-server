@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpsertReleasePolicyLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 // UpsertReleasePolicy 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *UpsertReleasePolicyLogic) UpsertReleasePolicy(req *types.UpsertReleasePolicyReq) (resp *types.UpsertReleasePolicyRes, err error) {
-	rpcReq, err := convert.To[platformcli.UpsertReleasePolicyReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.UpsertReleasePolicyReq{AppId: req.AppID, ArchitectureId: req.ArchitectureID, StableVersionId: req.StableVersionID, GrayVersionId: req.GrayVersionID, RolloutPercent: req.RolloutPercent, MinVersion: req.MinVersion, ForceUpdate: req.ForceUpdate, IsActive: req.IsActive}
 	rpcRes, err := l.svcCtx.PlatformRpc.UpsertReleasePolicy(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.UpsertReleasePolicyRes](rpcRes)
+	return &types.UpsertReleasePolicyRes{ID: rpcRes.Id}, nil
 }

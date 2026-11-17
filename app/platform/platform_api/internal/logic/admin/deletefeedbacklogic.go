@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewDeleteFeedbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 
 // DeleteFeedback 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *DeleteFeedbackLogic) DeleteFeedback(req *types.DeleteFeedbackReq) (resp *types.DeleteFeedbackRes, err error) {
-	rpcReq, err := convert.To[platformcli.DeleteFeedbackReq](req)
+	rpcReq := &platformcli.DeleteFeedbackReq{Id: req.ID}
+	_, err = l.svcCtx.PlatformRpc.DeleteFeedback(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.PlatformRpc.DeleteFeedback(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.DeleteFeedbackRes](rpcRes)
+	return &types.DeleteFeedbackRes{}, nil
 }

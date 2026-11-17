@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,14 @@ func NewListVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 
 // ListVersions 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *ListVersionsLogic) ListVersions(req *types.ListVersionsReq) (resp *types.ListVersionsRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListVersionsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListVersionsReq{ArchitectureId: req.ArchitectureID, Page: req.Page, PageSize: req.PageSize}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListVersions(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListVersionsRes](rpcRes)
+	tmp2 := make([]types.VersionItem, 0, len(rpcRes.Versions))
+	for _, it1 := range rpcRes.Versions {
+		tmp2 = append(tmp2, types.VersionItem{VersionID: it1.VersionId, ArchitectureID: it1.ArchitectureId, Version: it1.Version, FileUrl: it1.FileUrl, Description: it1.Description, ReleaseNotes: it1.ReleaseNotes, CreatedAt: it1.CreatedAt, UpdatedAt: it1.UpdatedAt})
+	}
+	return &types.ListVersionsRes{Total: rpcRes.Total, Versions: tmp2}, nil
 }

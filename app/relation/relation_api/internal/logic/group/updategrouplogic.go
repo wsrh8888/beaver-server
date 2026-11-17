@@ -27,7 +27,6 @@ import (
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	relationtypes "beaver/app/relation/relation_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewUpdateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Updat
 
 // UpdateGroup 只做协议转换，业务规则全部留在 relation_rpc。
 func (l *UpdateGroupLogic) UpdateGroup(req *types.UpdateGroupReq) (resp *types.UpdateGroupRes, err error) {
-	rpcReq, err := convert.To[relationtypes.UpdateGroupReq](req)
+	rpcReq := &relationtypes.UpdateGroupReq{Id: req.ID, Title: req.Title, Avatar: req.Avatar, Notice: req.Notice, Status: req.Status, MuteAll: req.MuteAll}
+	_, err = l.svcCtx.GroupRpc.UpdateGroup(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	rpcRes, err := l.svcCtx.GroupRpc.UpdateGroup(l.ctx, rpcReq)
-	if err != nil {
-		return nil, err
-	}
-	return convert.To[types.UpdateGroupRes](rpcRes)
+	return &types.UpdateGroupRes{}, nil
 }

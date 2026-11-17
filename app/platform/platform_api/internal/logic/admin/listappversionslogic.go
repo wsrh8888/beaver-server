@@ -27,7 +27,6 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 	platformcli "beaver/app/platform/platform_rpc/platform"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,18 @@ func NewListAppVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 
 // ListAppVersions 只做协议转换，业务规则全部留在 platform_rpc。
 func (l *ListAppVersionsLogic) ListAppVersions(req *types.ListAppVersionsReq) (resp *types.ListAppVersionsRes, err error) {
-	rpcReq, err := convert.To[platformcli.ListAppVersionsReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &platformcli.ListAppVersionsReq{AppId: req.AppID, Page: req.Page, PageSize: req.PageSize}
 	rpcRes, err := l.svcCtx.PlatformRpc.ListAppVersions(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.ListAppVersionsRes](rpcRes)
+	tmp4 := make([]types.AppVersionBrief, 0, len(it1.Versions))
+	for _, it3 := range it1.Versions {
+		tmp4 = append(tmp4, types.AppVersionBrief{VersionID: it3.VersionId, Version: it3.Version})
+	}
+	tmp2 := make([]types.AppVersionsArchItem, 0, len(rpcRes.Architectures))
+	for _, it1 := range rpcRes.Architectures {
+		tmp2 = append(tmp2, types.AppVersionsArchItem{ArchitectureID: it1.ArchitectureId, ArchID: it1.ArchId, Description: it1.Description, Versions: tmp4})
+	}
+	return &types.ListAppVersionsRes{Total: rpcRes.Total, Architectures: tmp2}, nil
 }

@@ -27,7 +27,6 @@ import (
 	"beaver/app/asset/asset_api/internal/svc"
 	"beaver/app/asset/asset_api/internal/types"
 	assettypes "beaver/app/asset/asset_rpc/pb"
-	"beaver/common/convert"
 	beaverlog "beaver/utils/beaverlog"
 )
 
@@ -48,13 +47,10 @@ func NewEmojiSaveLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EmojiSa
 
 // EmojiSave 只做协议转换，业务规则全部留在 asset_rpc。
 func (l *EmojiSaveLogic) EmojiSave(req *types.SaveEmojiReq) (resp *types.SaveEmojiRes, err error) {
-	rpcReq, err := convert.To[assettypes.SaveEmojiReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &assettypes.SaveEmojiReq{EmojiId: req.EmojiID, FileKey: req.FileKey, Title: req.Title, EmojiInfo: &assettypes.EmojiInfoMsg{Width: req.EmojiInfo.Width, Height: req.EmojiInfo.Height}, PatchFileKey: req.PatchFileKey, PatchTitle: req.PatchTitle, Delete: req.Delete}
 	rpcRes, err := l.svcCtx.EmojiRpc.SaveEmoji(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.SaveEmojiRes](rpcRes)
+	return &types.SaveEmojiRes{EmojiID: rpcRes.EmojiId}, nil
 }

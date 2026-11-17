@@ -27,7 +27,6 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
-	"beaver/common/convert"
 )
 
 // VerifyPasswordLogic 校验账号密码
@@ -49,13 +48,10 @@ func NewVerifyPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ve
 
 // VerifyPassword 校验账号密码
 func (l *VerifyPasswordLogic) VerifyPassword(req *types.VerifyPasswordReq) (*types.VerifyPasswordRes, error) {
-	rpcReq, err := convert.To[accttypes.VerifyPasswordReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &accttypes.VerifyPasswordReq{UserId: req.UserID, Password: req.Password}
 	rpcRes, err := l.svcCtx.AuthRpc.VerifyPassword(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.VerifyPasswordRes](rpcRes)
+	return &types.VerifyPasswordRes{Valid: rpcRes.Valid}, nil
 }

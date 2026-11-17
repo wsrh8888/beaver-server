@@ -26,7 +26,6 @@ import (
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/common/convert"
 )
 
 // PeerInitializeConversationLogic 初始化会话
@@ -48,13 +47,10 @@ func NewPeerInitializeConversationLogic(ctx context.Context, svcCtx *svc.Service
 
 // PeerInitializeConversation 初始化会话
 func (l *PeerInitializeConversationLogic) PeerInitializeConversation(req *types.PeerInitializeConversationReq) (*types.PeerInitializeConversationRes, error) {
-	rpcReq, err := convert.To[chat_rpc.InitializeConversationReq](req)
-	if err != nil {
-		return nil, err
-	}
+	rpcReq := &chat_rpc.InitializeConversationReq{ConversationId: req.ConversationID, Type: req.Type, UserIds: req.UserIDs}
 	rpcRes, err := l.svcCtx.ChatRpc.InitializeConversation(l.ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
-	return convert.To[types.PeerInitializeConversationRes](rpcRes)
+	return &types.PeerInitializeConversationRes{ConversationID: rpcRes.ConversationId}, nil
 }
