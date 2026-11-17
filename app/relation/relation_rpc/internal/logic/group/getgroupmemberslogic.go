@@ -24,10 +24,10 @@ package grouplogic
 import (
 	"context"
 
+	accttypes "beaver/app/account/account_rpc/pb"
 	group_models "beaver/app/relation/relation_models/group"
 	"beaver/app/relation/relation_rpc/internal/svc"
 	"beaver/app/relation/relation_rpc/pb"
-	accttypes "beaver/app/account/account_rpc/pb"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 )

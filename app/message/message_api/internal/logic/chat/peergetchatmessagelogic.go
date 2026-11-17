@@ -25,7 +25,8 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	chat_rpc "beaver/app/message/message_rpc/pb")
+	chat_rpc "beaver/app/message/message_rpc/pb"
+)
 
 // PeerGetChatMessageLogic 按会话+消息 ID 取单条消息
 //

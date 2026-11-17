@@ -57,17 +57,17 @@ func (l *ListReleasePoliciesLogic) ListReleasePolicies(in *platform_rpc.ListRele
 		items = append(items, &platform_rpc.ReleasePolicyItem{
 			Id:              uint64(p.ID),
 			AppId:           p.AppID,
-			ArchitectureId:    uint64(p.ArchitectureID),
+			ArchitectureId:  uint64(p.ArchitectureID),
 			StableVersionId: uint64(p.StableVersionID),
 			GrayVersionId:   uint64(p.GrayVersionID),
-			RolloutPercent:    uint32(p.RolloutPercent),
-			MinVersion:        p.MinVersion,
-			ForceUpdate:       p.ForceUpdate,
-			IsActive:          p.IsActive,
-			StableVersion:     versionLabel(l.svcCtx.DB, p.StableVersionID),
-			GrayVersion:       versionLabel(l.svcCtx.DB, p.GrayVersionID),
-			CreatedAt:         p.CreatedAt.String(),
-			UpdatedAt:         p.UpdatedAt.String(),
+			RolloutPercent:  uint32(p.RolloutPercent),
+			MinVersion:      p.MinVersion,
+			ForceUpdate:     p.ForceUpdate,
+			IsActive:        p.IsActive,
+			StableVersion:   versionLabel(l.svcCtx.DB, p.StableVersionID),
+			GrayVersion:     versionLabel(l.svcCtx.DB, p.GrayVersionID),
+			CreatedAt:       p.CreatedAt.String(),
+			UpdatedAt:       p.UpdatedAt.String(),
 		})
 	}
 	return &platform_rpc.ListReleasePoliciesRes{Policies: items}, nil

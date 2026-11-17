@@ -26,9 +26,9 @@ import (
 	"errors"
 	"fmt"
 
-	"beaver/utils/jwts"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
+	"beaver/utils/jwts"
 
 	"github.com/go-redis/redis"
 )

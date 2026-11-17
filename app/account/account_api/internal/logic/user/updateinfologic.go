@@ -133,9 +133,9 @@ func (l *UpdateInfoLogic) UpdateInfo(req *types.UpdateInfoReq) (resp *types.Upda
 					"senderId": req.UserID,
 					"targetId": recipientID,
 					"body": map[string]interface{}{
-						"table":    "users",                // 涉及的数据库表
-						"version":  int32(version),         // 最新版本号（转换为int32类型）
-						"targetId": req.UserID, // 变更的记录ID
+						"table":    "users",        // 涉及的数据库表
+						"version":  int32(version), // 最新版本号（转换为int32类型）
+						"targetId": req.UserID,     // 变更的记录ID
 					},
 					"conversationId": "",
 				}

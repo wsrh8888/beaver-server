@@ -52,13 +52,13 @@ func (l *ListAppVersionsLogic) ListAppVersions(req *types.ListAppVersionsReq) (r
 	if err != nil {
 		return nil, err
 	}
-	tmp4 := make([]types.AppVersionBrief, 0, len(it1.Versions))
-	for _, it3 := range it1.Versions {
-		tmp4 = append(tmp4, types.AppVersionBrief{VersionID: it3.VersionId, Version: it3.Version})
-	}
 	tmp2 := make([]types.AppVersionsArchItem, 0, len(rpcRes.Architectures))
 	for _, it1 := range rpcRes.Architectures {
-		tmp2 = append(tmp2, types.AppVersionsArchItem{ArchitectureID: it1.ArchitectureId, ArchID: it1.ArchId, Description: it1.Description, Versions: tmp4})
+		versions := make([]types.AppVersionBrief, 0, len(it1.Versions))
+		for _, v := range it1.Versions {
+			versions = append(versions, types.AppVersionBrief{VersionID: v.VersionId, Version: v.Version})
+		}
+		tmp2 = append(tmp2, types.AppVersionsArchItem{ArchitectureID: it1.ArchitectureId, ArchID: it1.ArchId, Description: it1.Description, Versions: versions})
 	}
 	return &types.ListAppVersionsRes{Total: rpcRes.Total, Architectures: tmp2}, nil
 }

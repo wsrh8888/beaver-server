@@ -25,7 +25,8 @@ import (
 
 	"beaver/app/message/message_api/internal/svc"
 	"beaver/app/message/message_api/internal/types"
-	chat_rpc "beaver/app/message/message_rpc/pb")
+	chat_rpc "beaver/app/message/message_rpc/pb"
+)
 
 // PeerListChatMessagesLogic 分页查消息
 //

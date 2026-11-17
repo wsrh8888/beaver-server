@@ -26,12 +26,12 @@ import (
 	"errors"
 	"strings"
 
+	accttypes "beaver/app/account/account_rpc/pb"
 	message_models "beaver/app/message/message_models/chat"
 	"beaver/app/message/message_rpc/internal/svc"
 	chatrpcutils "beaver/app/message/message_rpc/internal/utils"
 	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/app/relation/relation_rpc/pb"
-	accttypes "beaver/app/account/account_rpc/pb"
 	mqwsconst "beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
 	"beaver/common/wsEnum/wsCommandConst"

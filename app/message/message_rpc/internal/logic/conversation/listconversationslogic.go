@@ -96,12 +96,12 @@ func (l *ListConversationsLogic) ListConversations(in *chat_rpc.ListConversation
 		}
 
 		items = append(items, &chat_rpc.ConversationDetailItem{
-			ConversationId:   uc.ConversationID,
-			Type:             int32(meta.Type),
-			LastMessage:      meta.LastMessage,
-			LastMessageTime:  lastTime,
-			MessageCount:     msgCount,
-			ParticipantIds:   participantIDs,
+			ConversationId:  uc.ConversationID,
+			Type:            int32(meta.Type),
+			LastMessage:     meta.LastMessage,
+			LastMessageTime: lastTime,
+			MessageCount:    msgCount,
+			ParticipantIds:  participantIDs,
 		})
 	}
 
