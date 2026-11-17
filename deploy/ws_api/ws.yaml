@@ -16,7 +16,7 @@ Auth:
 InternalSecret: "6d92c761d23cb0e6bf44473052cbc1dcb368f25a25a170544afab0711a53b13474d7912df2da3e9b530336e28f2235be"
 # 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
 S2S:
-  Secret: s2s-dev-secret
+  Secret: beaver-s2s-01-core
 Etcd: 127.0.0.1:2379
 GroupRpc:
   NonBlock: true

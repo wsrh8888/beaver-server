@@ -6,7 +6,7 @@ RemoteProxy:
     BaseURL: http://127.0.0.1:21900
     Auth: client_credentials
     ClientID: beaver-server
-    ClientSecret: s2s-dev-secret
+    ClientSecret: beaver-s2s-02-open-server
 Name: account
 Host: 0.0.0.0
 Port: 20100
@@ -70,26 +70,26 @@ RocketMQ:
   Addr: 127.0.0.1:9876
 
 S2S:
-  Secret: s2s-dev-secret
+  Secret: beaver-s2s-01-core
   Clients:
     beaver-backend:
       ClientID: beaver-backend
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-backend
       Scopes: []
       Enabled: true
     beaver-open:
       ClientID: beaver-open
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-open
       Scopes: []
       Enabled: true
     beaver-social:
       ClientID: beaver-social
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-social
       Scopes: []
       Enabled: true
     beaver-call:
       ClientID: beaver-call
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-call
       Scopes: []
       Enabled: true
 

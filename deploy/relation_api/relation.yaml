@@ -6,7 +6,7 @@ RemoteProxy:
     BaseURL: http://127.0.0.1:21900
     Auth: client_credentials
     ClientID: beaver-server
-    ClientSecret: s2s-dev-secret
+    ClientSecret: beaver-s2s-02-open-server
 Name: relation
 Host: 0.0.0.0
 Port: 20200
@@ -64,26 +64,26 @@ Auth:
   AccessExpire: 3600
 # 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
 S2S:
-  Secret: s2s-dev-secret
+  Secret: beaver-s2s-01-core
   Clients:
     beaver-backend:
       ClientID: beaver-backend
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-backend
       Scopes: []
       Enabled: true
     beaver-open:
       ClientID: beaver-open
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-open
       Scopes: []
       Enabled: true
     beaver-social:
       ClientID: beaver-social
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-social
       Scopes: []
       Enabled: true
     beaver-call:
       ClientID: beaver-call
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-call
       Scopes: []
       Enabled: true
 

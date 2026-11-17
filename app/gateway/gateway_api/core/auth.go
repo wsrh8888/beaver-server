@@ -164,10 +164,11 @@ func verifyTicket(r *http.Request, secret, audience, missingSecretMsg string) (*
 	return claims, nil
 }
 
-// verifyMachineTicket 校验服务间 S2S 机器票。只认 Authorization: Bearer，
-// 受众取目标团队（与网关注入机器票时同一套映射），验过即视为内部调用。
+// verifyMachineTicket 校验服务间 S2S 机器票。只认 Authorization: Bearer。
+// 密钥与受众都按目标团队选（与网关注入机器票时同一套映射）：一把密钥对应一个团队，
+// 网关签发给 team-X 的票只能用 team-X 的密钥验过，验过即视为内部调用。
 func (p Proxy) verifyMachineTicket(r *http.Request) bool {
-	secret := strings.TrimSpace(p.Config.Machine.Secret)
+	secret := strings.TrimSpace(p.machineSecret(r.URL.Path))
 	if secret == "" {
 		return false
 	}
@@ -196,10 +197,11 @@ func (p Proxy) injectMachineTicket(r *http.Request) error {
 		return nil
 	}
 	m := p.Config.Machine
-	if strings.TrimSpace(m.Secret) == "" {
+	secret := p.machineSecret(r.URL.Path)
+	if strings.TrimSpace(secret) == "" {
 		return nil
 	}
-	token, err := s2s.Issue(m.Secret, m.Issuer, m.ClientID, p.machineAudience(r.URL.Path), nil, s2s.S2STTL)
+	token, err := s2s.Issue(secret, m.Issuer, m.ClientID, p.machineAudience(r.URL.Path), nil, s2s.S2STTL)
 	if err != nil {
 		return err
 	}
@@ -222,6 +224,24 @@ func (p Proxy) machineAudience(path string) string {
 		aud = configured
 	}
 	return aud
+}
+
+// machineSecret 按 team/surface 选机器票密钥，查表口径与 machineAudience 完全一致：
+// 先查 team/surface 精确键，再回退 team，最后回退 DefaultSecret / 旧 Secret。
+// 密钥与受众用同一套路径映射，保证「发给 team-X 的票」只用 team-X 的密钥签发与校验。
+func (p Proxy) machineSecret(path string) string {
+	m := p.Config.Machine
+	team, surface := teamAndSurface(path)
+	if configured, ok := m.Secrets[team+"/"+surface]; ok {
+		return configured
+	}
+	if configured, ok := m.Secrets[team]; ok {
+		return configured
+	}
+	if strings.TrimSpace(m.DefaultSecret) != "" {
+		return m.DefaultSecret
+	}
+	return m.Secret
 }
 
 // teamAndSurface 取六段路径的前两段（team/surface），用于选择机器票受众。

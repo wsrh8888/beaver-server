@@ -39,26 +39,26 @@ Deploy:
   OrgName: 海狸
 
 S2S:
-  Secret: s2s-dev-secret
+  Secret: beaver-s2s-01-core
   Clients:
     beaver-backend:
       ClientID: beaver-backend
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-backend
       Scopes: []
       Enabled: true
     beaver-open:
       ClientID: beaver-open
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-open
       Scopes: []
       Enabled: true
     beaver-social:
       ClientID: beaver-social
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-social
       Scopes: []
       Enabled: true
     beaver-call:
       ClientID: beaver-call
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-call
       Scopes: []
       Enabled: true
 

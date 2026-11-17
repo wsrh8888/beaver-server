@@ -52,26 +52,26 @@ Auth:
 # 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
 # 换票端点：POST /beaver/api/account/auth_token/v1/issue（client_credentials）。
 S2S:
-  Secret: s2s-dev-secret
+  Secret: beaver-s2s-01-core
   Clients:
     beaver-backend:
       ClientID: beaver-backend
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-backend
       Scopes: []
       Enabled: true
     beaver-open:
       ClientID: beaver-open
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-open
       Scopes: []
       Enabled: true
     beaver-social:
       ClientID: beaver-social
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-social
       Scopes: []
       Enabled: true
     beaver-call:
       ClientID: beaver-call
-      ClientSecret: s2s-dev-secret
+      ClientSecret: beaver-s2s-01-core-call
       Scopes: []
       Enabled: true
 

@@ -57,10 +57,14 @@ type AuthConfig struct {
 }
 
 // MachineConfig 网关注入到下游业务的机器票（S2S）配置。
-// Secret 全仓统一；Audiences 按路径 team 段选受众（各 team 业务空壳写死自己的 audience），
-// 未命中时回退 DefaultAudience。票据受众不匹配会被业务 S2S 中间件判 401。
+// 密钥按目标团队拆分：一把密钥对应一个受众/团队，签发方与验签方必须用同一把。
+// 网关按请求路径的目标团队选 Secrets[team] 签发，下游服务用该团队自己的 S2S.Secret 验签。
+// 查表顺序：Secrets[team/surface] → Secrets[team] → DefaultSecret → Secret（最后一项兼容旧配置）。
+// Audiences 同理按 team/surface → team → DefaultAudience 选票据受众。
 type MachineConfig struct {
-	Secret          string            `json:",optional"`
+	Secrets         map[string]string `json:",optional"`
+	DefaultSecret   string            `json:",optional"`
+	Secret          string            `json:",optional"` // 旧配置兜底，新配置用 Secrets/DefaultSecret
 	DefaultAudience string            `json:",optional"`
 	Audiences       map[string]string `json:",optional"`
 	ClientID        string            `json:",optional"`

@@ -44,9 +44,19 @@ AuthOpen:
 AuthAdmin:
   # 后台管理员票，签发方 beaver-backend 的 auth_public 登录。
   AccessSecret: f81d1b2d8f69a503d848a2ad0b9908186bc435d36cf5a885c33491b51613240f38ff672700d60ffdf19466cc9a687620
-# 网关注入到下游的机器票。Secret 全团队共享，Audience 各团队各自固定，必须与下游 S2S 配置一致。
+# 网关注入到下游的机器票。一把密钥 = 一个目标团队，网关按路径 team 选密钥签发，
+# 下游用本团队的 S2S.Secret 验签；调用方拿 client_credentials 去目标换票也用目标那把。
+# 查表键与下方 Audiences 完全一致（team/surface 精确键 → team → Default）。
 Machine:
-  Secret: s2s-dev-secret
+  Secrets:
+    beaver: beaver-s2s-01-core
+    beaver/admin: beaver-s2s-07-admin
+    beaver-open: beaver-s2s-02-open
+    beaver-social: beaver-s2s-03-social
+    beaver-doc: beaver-s2s-04-doc
+    beaver-call: beaver-s2s-05-call
+    beaver-ai: beaver-s2s-06-ai
+  DefaultSecret: beaver-s2s-01-core
   DefaultAudience: core:api
   # 各 team 业务空壳写死的 S2S audience，网关注入机器票必须按 team 选对，否则 401。
   Audiences:
