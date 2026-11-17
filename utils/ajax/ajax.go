@@ -1,19 +1,6 @@
-// Package ajax 出站 HTTP 的统一封装（内网服务间 / 外部系统调用）。
-//
-// 对应前端的 utils/request：只管「怎么把请求发出去、怎么判成败」，不管「发到哪个
-// 路径、字段是什么意思」——后者在 remote/<模块> 的调用封装里按接口分开写。
-//
-// 统一三件事，都是被真实故障逼出来的（对齐 cloud-server/utils/ajax）：
-//   - 禁代理：etcd 注册的是内网 IP（192.168.x / 10.x），Go 的 loopback 跳过规则不生效，
-//     默认 Transport 会把内网请求塞进宿主 HTTP_PROXY，表现为「上游明明活着却 503」；
-//   - 共享连接池：每个客户端各建一个 Transport，高频路径上会反复建连（TIME_WAIT 打满端口）；
-//   - 信封判定：go-zero 的 {code,msg,result}，HTTP 200 + code!=0 也是失败，
-//     判定成败必须看 code，不能只看状态码。
-//
-// 这里不管凭据：请求头由调用方给全，本包不换 token、不认 client_id/secret。跨团队
-// 换票属于对端契约，落在 remote/<模块> 的调用封装里（那边换来 Bearer 再交给这里）。
-//
-// 不做重试：每个下游的幂等语义不同，重试归属调用方。
+// Package ajax 出站 HTTP 统一封装：禁代理（内网直连）、共享连接池、按 {code,msg,result} 信封判成败。
+// 只管「怎么发、怎么判成败」；路径与字段含义在 remote/<模块> 里按接口写。
+// 凭据由调用方给全（header），重试归调用方（下游幂等语义各异）。
 package ajax
 
 import (
@@ -62,32 +49,22 @@ func HTTPClient(timeout time.Duration) *http.Client {
 	}
 }
 
-// StatusError 下游返回了非成功响应：HTTP 非 2xx，或 HTTP 200 + code!=0。
-//
-// 调用方用 errors.As 取 Status 自行判定（如 401 = 凭据不被对端认可）。
+// envelope 统一响应信封：成功 {code,msg,result}（code=0），失败 {code,msg}（result 缺失）。
+type envelope struct {
+	Code   int             `json:"code"`
+	Msg    string          `json:"msg"`
+	Result json.RawMessage `json:"result"`
+}
+
+// StatusError 下游返回失败：HTTP 非 2xx，或 HTTP 200 + code!=0。
 type StatusError struct {
-	Name    string // 下游标识（取自请求路径）
-	Status  int    // HTTP 状态码
-	Code    int    // 信封业务码（未解析出信封时为 0）
-	Msg     string // 信封 msg（下游没给原因时为空）
-	NonJSON bool   // 响应体不是信封 JSON（文件下载、裸 401 页等）
+	Status int    // HTTP 状态码
+	Code   int    // 信封业务码
+	Msg    string // 信封 msg
 }
 
 func (e *StatusError) Error() string {
-	switch {
-	case e.Status == http.StatusUnauthorized:
-		return e.Name + "：下游调用方凭据校验失败（401），检查对端配置的 client_id / 公钥与本侧签发凭据是否成对"
-	case e.Status < 200 || e.Status >= 300:
-		if e.Msg != "" {
-			return fmt.Sprintf("%s：下游接口返回 %d：%s", e.Name, e.Status, e.Msg)
-		}
-		if e.NonJSON {
-			return fmt.Sprintf("%s：下游接口返回 %d（响应非信封 JSON）", e.Name, e.Status)
-		}
-		return fmt.Sprintf("%s：下游接口返回 %d", e.Name, e.Status)
-	default:
-		return fmt.Sprintf("%s：下游返回失败：%s", e.Name, FailReason(e.Msg))
-	}
+	return fmt.Sprintf("下游返回失败：status=%d code=%d msg=%s", e.Status, e.Code, e.Msg)
 }
 
 // Post 发一次 POST 的 JSON 请求，返回值是信封 result 解成的 Res。
@@ -150,28 +127,16 @@ func Get[Res any](ctx context.Context, baseURL, path string, header http.Header)
 	return decode[Res](path, raw, status)
 }
 
-// decode 按 go-zero 信封 {code,msg,result} 判成败并解出 result。Post / Get 共用。
+// decode 按 {code,msg,result} 信封判成败并解出 result。Post / Get / Delete 共用。
 func decode[Res any](path string, raw []byte, status int) (*Res, error) {
-	var env struct {
-		Code   int             `json:"code"`
-		Msg    string          `json:"msg"`
-		Result json.RawMessage `json:"result"`
+	var env envelope
+	if err := json.Unmarshal(raw, &env); err != nil {
+		return nil, fmt.Errorf("%s：解析下游响应失败: %w", path, err)
 	}
-	parsed := json.Unmarshal(raw, &env) == nil
+	if status < 200 || status >= 300 || env.Code != 0 {
+		return nil, &StatusError{Status: status, Code: env.Code, Msg: env.Msg}
+	}
 
-	if status < 200 || status >= 300 {
-		se := &StatusError{Name: path, Status: status, NonJSON: !parsed}
-		if parsed {
-			se.Code, se.Msg = env.Code, env.Msg
-		}
-		return nil, se
-	}
-	if !parsed {
-		return nil, fmt.Errorf("%s：解析下游响应失败（非信封 JSON）", path)
-	}
-	if env.Code != 0 {
-		return nil, &StatusError{Name: path, Status: status, Code: env.Code, Msg: env.Msg}
-	}
 	out := new(Res)
 	if len(env.Result) > 0 && string(env.Result) != "null" {
 		if err := json.Unmarshal(env.Result, out); err != nil {
@@ -232,12 +197,12 @@ func PostForm[Res any](ctx context.Context, url string, header http.Header, form
 			Error            string `json:"error"`
 			ErrorDescription string `json:"error_description"`
 		}
-		se := &StatusError{Name: url, Status: status, NonJSON: json.Unmarshal(raw, &oauthErr) != nil}
-		se.Msg = oauthErr.ErrorDescription
-		if se.Msg == "" {
-			se.Msg = oauthErr.Error
+		_ = json.Unmarshal(raw, &oauthErr)
+		msg := oauthErr.ErrorDescription
+		if msg == "" {
+			msg = oauthErr.Error
 		}
-		return nil, se
+		return nil, &StatusError{Status: status, Msg: msg}
 	}
 	out := new(Res)
 	if err := json.Unmarshal(raw, out); err != nil {
@@ -269,12 +234,4 @@ func NewJSONRequest(ctx context.Context, method, url string, body []byte) (*http
 	req.Header.Set("Content-Type", "application/json")
 	traceid.SetOutgoingHeader(ctx, req.Header)
 	return req, nil
-}
-
-// FailReason 下游没给文案时给个兜底，绝不把空 message 透给客户。
-func FailReason(msg string) string {
-	if strings.TrimSpace(msg) == "" {
-		return "下游未返回原因，请稍后重试或联系运营"
-	}
-	return msg
 }
