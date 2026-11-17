@@ -91,7 +91,7 @@ func (l *ListGroupsLogic) ListGroups(in *pb.ListGroupsReq) (*pb.ListGroupsRes, e
 	items := make([]*pb.GroupItem, 0, len(list))
 	for _, g := range list {
 		items = append(items, &pb.GroupItem{
-			Id:        uint64(g.Id),
+			Id:        uint64(g.ID),
 			GroupId:   g.GroupID,
 			Type:      int32(g.Type),
 			Title:     g.Title,

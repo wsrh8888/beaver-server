@@ -1,5 +1,0 @@
-syntax = "v1"
-
-// 发送好友验证请求
-type (
-	AddFriendReq {

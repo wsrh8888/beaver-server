@@ -23,11 +23,11 @@
 package types
 
 type AdminListWorkbenchAppsReq struct {
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
-	Status   int32  `json:"status,optional"`    // 状态筛选
-	Category *int32 `json:"category,optional"`  // 分类筛选
-	Keywords string `json:"keywords,optional"`  // 关键词
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
+	Status   int32  `json:"status,optional"`   // 状态筛选
+	Category *int32 `json:"category,optional"` // 分类筛选
+	Keywords string `json:"keywords,optional"` // 关键词
 }
 
 type AdminListWorkbenchAppsRes struct {
@@ -36,24 +36,24 @@ type AdminListWorkbenchAppsRes struct {
 }
 
 type AdminLogItem struct {
-	Id         uint64 `json:"id,optional"`          // 日志记录ID
-	Level      string `json:"level,optional"`       // 日志级别
-	Data       string `json:"data,optional"`        // 日志数据JSON
-	BucketId   string `json:"bucket_id,optional"`   // Bucket ID
-	BucketName string `json:"bucket_name,optional"` // Bucket名称
-	Timestamp  int64  `json:"timestamp,optional"`   // 时间戳（毫秒）
-	CreatedAt  string `json:"created_at,optional"`  // 创建时间
+	ID         uint64 `json:"id,optional"`         // 日志记录ID
+	Level      string `json:"level,optional"`      // 日志级别
+	Data       string `json:"data,optional"`       // 日志数据JSON
+	BucketID   string `json:"bucketId,optional"`   // Bucket ID
+	BucketName string `json:"bucketName,optional"` // Bucket名称
+	Timestamp  int64  `json:"timestamp,optional"`  // 时间戳（毫秒）
+	CreatedAt  string `json:"createdAt,optional"`  // 创建时间
 }
 
 type AdminQueryLogsReq struct {
-	BucketId   string `json:"bucket_id,optional"`   // Bucket ID
-	Level      string `json:"level,optional"`       // 日志级别
-	StartTime  int64  `json:"start_time,optional"`  // 开始时间（毫秒）
-	EndTime    int64  `json:"end_time,optional"`    // 结束时间（毫秒）
-	Keyword    string `json:"keyword,optional"`     // 关键词
-	UserFilter string `json:"user_filter,optional"` // 用户筛选
-	Page       int32  `json:"page,optional"`        // 页码
-	PageSize   int32  `json:"page_size,optional"`   // 每页条数
+	BucketID   string `json:"bucketId,optional"`   // Bucket ID
+	Level      string `json:"level,optional"`      // 日志级别
+	StartTime  int64  `json:"startTime,optional"`  // 开始时间（毫秒）
+	EndTime    int64  `json:"endTime,optional"`    // 结束时间（毫秒）
+	Keyword    string `json:"keyword,optional"`    // 关键词
+	UserFilter string `json:"userFilter,optional"` // 用户筛选
+	Page       int32  `json:"page,optional"`       // 页码
+	PageSize   int32  `json:"pageSize,optional"`   // 每页条数
 }
 
 type AdminQueryLogsRes struct {
@@ -62,52 +62,52 @@ type AdminQueryLogsRes struct {
 }
 
 type AppItem struct {
-	Id          uint64 `json:"id,optional"`          // 记录ID
-	AppId       string `json:"app_id,optional"`      // 应用ID
+	ID          uint64 `json:"id,optional"`          // 记录ID
+	AppID       string `json:"appId,optional"`       // 应用ID
 	Name        string `json:"name,optional"`        // 应用名称
 	Description string `json:"description,optional"` // 描述
-	IsActive    bool   `json:"is_active,optional"`   // 是否启用
-	CreatedAt   string `json:"created_at,optional"`  // 创建时间
-	UpdatedAt   string `json:"updated_at,optional"`  // 更新时间
+	IsActive    bool   `json:"isActive,optional"`    // 是否启用
+	CreatedAt   string `json:"createdAt,optional"`   // 创建时间
+	UpdatedAt   string `json:"updatedAt,optional"`   // 更新时间
 }
 
 type AppVersionBrief struct {
-	VersionId uint64 `json:"version_id,optional"` // 版本ID
-	Version   string `json:"version,optional"`    // 版本号
+	VersionID uint64 `json:"versionId,optional"` // 版本ID
+	Version   string `json:"version,optional"`   // 版本号
 }
 
 type AppVersionsArchItem struct {
-	ArchitectureId uint64            `json:"architecture_id,optional"` // 架构ID
-	ArchId         uint32            `json:"arch_id,optional"`         // 架构类型
-	Description    string            `json:"description,optional"`     // 架构描述
-	Versions       []AppVersionBrief `json:"versions,optional"`        // 版本列表
+	ArchitectureID uint64            `json:"architectureId,optional"` // 架构ID
+	ArchID         uint32            `json:"archId,optional"`         // 架构类型
+	Description    string            `json:"description,optional"`    // 架构描述
+	Versions       []AppVersionBrief `json:"versions,optional"`       // 版本列表
 }
 
 type ArchitectureItem struct {
-	Id          uint64 `json:"id,optional"`          // 记录ID
-	AppId       string `json:"app_id,optional"`      // 应用ID
-	AppName     string `json:"app_name,optional"`    // 应用名称
-	PlatformId  uint32 `json:"platform_id,optional"` // 平台ID
-	ArchId      uint32 `json:"arch_id,optional"`     // 架构类型
+	ID          uint64 `json:"id,optional"`          // 记录ID
+	AppID       string `json:"appId,optional"`       // 应用ID
+	AppName     string `json:"appName,optional"`     // 应用名称
+	PlatformID  uint32 `json:"platformId,optional"`  // 平台ID
+	ArchID      uint32 `json:"archId,optional"`      // 架构类型
 	Description string `json:"description,optional"` // 架构描述
-	IsActive    bool   `json:"is_active,optional"`   // 是否启用
-	CreatedAt   string `json:"created_at,optional"`  // 创建时间
-	UpdatedAt   string `json:"updated_at,optional"`  // 更新时间
+	IsActive    bool   `json:"isActive,optional"`    // 是否启用
+	CreatedAt   string `json:"createdAt,optional"`   // 创建时间
+	UpdatedAt   string `json:"updatedAt,optional"`   // 更新时间
 }
 
 type ContentReportItem struct {
-	Id             uint64   `json:"id,optional"`               // 举报ID
-	ReporterUserId string   `json:"reporter_user_id,optional"` // 举报人ID
-	TargetType     int32    `json:"target_type,optional"`      // 对象类型 1用户 2消息 3动态 4群组
-	TargetId       string   `json:"target_id,optional"`        // 对象ID
-	ReasonType     int32    `json:"reason_type,optional"`      // 原因类型
-	Content        string   `json:"content,optional"`          // 补充说明
-	FileNames      []string `json:"file_names,optional"`       // 证据附件
-	Status         int32    `json:"status,optional"`           // 状态
-	CaseId         uint64   `json:"case_id,optional"`          // 关联工单ID
-	HandlerId      string   `json:"handler_id,optional"`       // 处理人ID
-	HandleRemark   string   `json:"handle_remark,optional"`    // 处理备注
-	CreatedAt      string   `json:"created_at,optional"`       // 创建时间
+	ID             uint64   `json:"id,optional"`             // 举报ID
+	ReporterUserID string   `json:"reporterUserId,optional"` // 举报人ID
+	TargetType     int32    `json:"targetType,optional"`     // 对象类型 1用户 2消息 3动态 4群组
+	TargetID       string   `json:"targetId,optional"`       // 对象ID
+	ReasonType     int32    `json:"reasonType,optional"`     // 原因类型
+	Content        string   `json:"content,optional"`        // 补充说明
+	FileNames      []string `json:"fileNames,optional"`      // 证据附件
+	Status         int32    `json:"status,optional"`         // 状态
+	CaseID         uint64   `json:"caseId,optional"`         // 关联工单ID
+	HandlerID      string   `json:"handlerId,optional"`      // 处理人ID
+	HandleRemark   string   `json:"handleRemark,optional"`   // 处理备注
+	CreatedAt      string   `json:"createdAt,optional"`      // 创建时间
 }
 
 type CreateAppReq struct {
@@ -116,68 +116,68 @@ type CreateAppReq struct {
 }
 
 type CreateAppRes struct {
-	Id    uint64 `json:"id,optional"`     // 记录ID
-	AppId string `json:"app_id,optional"` // 应用ID
+	ID    uint64 `json:"id,optional"`    // 记录ID
+	AppID string `json:"appId,optional"` // 应用ID
 }
 
 type CreateArchitectureReq struct {
-	AppId       string `json:"app_id,optional"`      // 应用ID
-	PlatformId  uint32 `json:"platform_id,optional"` // 平台ID
-	ArchId      uint32 `json:"arch_id,optional"`     // 架构类型
+	AppID       string `json:"appId,optional"`       // 应用ID
+	PlatformID  uint32 `json:"platformId,optional"`  // 平台ID
+	ArchID      uint32 `json:"archId,optional"`      // 架构类型
 	Description string `json:"description,optional"` // 架构描述
 }
 
 type CreateArchitectureRes struct {
-	Id uint64 `json:"id,optional"` // 记录ID
+	ID uint64 `json:"id,optional"` // 记录ID
 }
 
 type CreateVersionReq struct {
-	ArchitectureId uint64 `json:"architecture_id,optional"` // 架构ID
-	Version        string `json:"version,optional"`         // 版本号
-	FileUrl        string `json:"file_url,optional"`        // 安装包地址
-	Description    string `json:"description,optional"`     // 描述
-	ReleaseNotes   string `json:"release_notes,optional"`   // 发布说明
+	ArchitectureID uint64 `json:"architectureId,optional"` // 架构ID
+	Version        string `json:"version,optional"`        // 版本号
+	FileUrl        string `json:"fileUrl,optional"`        // 安装包地址
+	Description    string `json:"description,optional"`    // 描述
+	ReleaseNotes   string `json:"releaseNotes,optional"`   // 发布说明
 }
 
 type CreateVersionRes struct {
-	VersionId uint64 `json:"version_id,optional"` // 版本ID
+	VersionID uint64 `json:"versionId,optional"` // 版本ID
 }
 
 type CreateWorkbenchAppReq struct {
-	Name        string                `json:"name,optional"`         // 名称
-	Description string                `json:"description,optional"`  // 描述
-	Icon        string                `json:"icon,optional"`         // 图标
-	AppType     int32                 `json:"app_type,optional"`     // 应用类型
-	ClientScope int32                 `json:"client_scope,optional"` // 端范围
-	EntryConfig *WorkbenchEntryConfig `json:"entry_config,optional"` // 入口配置
-	Category    int32                 `json:"category,optional"`     // 分类
-	Sort        int32                 `json:"sort,optional"`         // 排序
-	Status      int32                 `json:"status,optional"`       // 状态
-	Remark      string                `json:"remark,optional"`       // 备注
-	OperatorId  string                `json:"operator_id,optional"`  // 操作人
-	OpenMode    int32                 `json:"open_mode,optional"`    // 打开方式
+	Name        string                `json:"name,optional"`        // 名称
+	Description string                `json:"description,optional"` // 描述
+	Icon        string                `json:"icon,optional"`        // 图标
+	AppType     int32                 `json:"appType,optional"`     // 应用类型
+	ClientScope int32                 `json:"clientScope,optional"` // 端范围
+	EntryConfig *WorkbenchEntryConfig `json:"entryConfig,optional"` // 入口配置
+	Category    int32                 `json:"category,optional"`    // 分类
+	Sort        int32                 `json:"sort,optional"`        // 排序
+	Status      int32                 `json:"status,optional"`      // 状态
+	Remark      string                `json:"remark,optional"`      // 备注
+	OperatorID  string                `json:"operatorId,optional"`  // 操作人
+	OpenMode    int32                 `json:"openMode,optional"`    // 打开方式
 }
 
 type CreateWorkbenchAppRes struct {
-	WorkbenchAppId string `json:"workbench_app_id,optional"` // 工作台应用ID
+	WorkbenchAppID string `json:"workbenchAppId,optional"` // 工作台应用ID
 }
 
 type DeleteFeedbackReq struct {
-	Id uint64 `json:"id,optional"` // 反馈ID
+	ID uint64 `json:"id,optional"` // 反馈ID
 }
 
 type DeleteFeedbackRes struct {
 }
 
 type DeleteVersionReq struct {
-	VersionId uint64 `json:"version_id,optional"` // 版本ID
+	VersionID uint64 `json:"versionId,optional"` // 版本ID
 }
 
 type DeleteVersionRes struct {
 }
 
 type DeleteWorkbenchAppReq struct {
-	WorkbenchAppId string `json:"workbench_app_id,optional"` // 工作台应用ID
+	WorkbenchAppID string `json:"workbenchAppId,optional"` // 工作台应用ID
 }
 
 type DeleteWorkbenchAppRes struct {
@@ -201,21 +201,21 @@ type DepartmentTreeRes struct {
 }
 
 type FeedbackItem struct {
-	Id           uint64   `json:"id,optional"`            // 反馈ID
-	UserId       string   `json:"user_id,optional"`       // 用户ID
-	Content      string   `json:"content,optional"`       // 反馈内容
-	Type         int32    `json:"type,optional"`          // 反馈类型
-	Status       int32    `json:"status,optional"`        // 状态
-	FileNames    []string `json:"file_names,optional"`    // 附件
-	HandlerId    int64    `json:"handler_id,optional"`    // 处理人ID
-	HandleTime   string   `json:"handle_time,optional"`   // 处理时间
-	HandleResult string   `json:"handle_result,optional"` // 处理结果
-	CreatedAt    string   `json:"created_at,optional"`    // 创建时间
-	UpdatedAt    string   `json:"updated_at,optional"`    // 更新时间
+	ID           uint64   `json:"id,optional"`           // 反馈ID
+	UserID       string   `json:"userId,optional"`       // 用户ID
+	Content      string   `json:"content,optional"`      // 反馈内容
+	Type         int32    `json:"type,optional"`         // 反馈类型
+	Status       int32    `json:"status,optional"`       // 状态
+	FileNames    []string `json:"fileNames,optional"`    // 附件
+	HandlerID    int64    `json:"handlerId,optional"`    // 处理人ID
+	HandleTime   string   `json:"handleTime,optional"`   // 处理时间
+	HandleResult string   `json:"handleResult,optional"` // 处理结果
+	CreatedAt    string   `json:"createdAt,optional"`    // 创建时间
+	UpdatedAt    string   `json:"updatedAt,optional"`    // 更新时间
 }
 
 type GetContentReportReq struct {
-	Id uint64 `json:"id,optional"` // 举报ID
+	ID uint64 `json:"id,optional"` // 举报ID
 }
 
 type GetContentReportRes struct {
@@ -223,7 +223,7 @@ type GetContentReportRes struct {
 }
 
 type GetFeedbackReq struct {
-	Id uint64 `json:"id,optional"` // 反馈ID
+	ID uint64 `json:"id,optional"` // 反馈ID
 }
 
 type GetFeedbackRes struct {
@@ -265,7 +265,7 @@ type GetOrganizationRes struct {
 }
 
 type GetWorkbenchAppReq struct {
-	WorkbenchAppId string `json:"workbench_app_id,optional"` // 工作台应用ID
+	WorkbenchAppID string `json:"workbenchAppId,optional"` // 工作台应用ID
 }
 
 type GetWorkbenchAppRes struct {
@@ -273,19 +273,19 @@ type GetWorkbenchAppRes struct {
 }
 
 type HandleFeedbackReq struct {
-	Id           uint64 `json:"id,optional"`            // 反馈ID
-	Status       int32  `json:"status,optional"`        // 目标状态
-	HandleResult string `json:"handle_result,optional"` // 处理结果
-	HandlerId    string `json:"handler_id,optional"`    // 处理人ID
+	ID           uint64 `json:"id,optional"`           // 反馈ID
+	Status       int32  `json:"status,optional"`       // 目标状态
+	HandleResult string `json:"handleResult,optional"` // 处理结果
+	HandlerID    string `json:"handlerId,optional"`    // 处理人ID
 }
 
 type HandleFeedbackRes struct {
 }
 
 type ListAppVersionsReq struct {
-	AppId    string `json:"app_id,optional"`    // 应用ID
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
+	AppID    string `json:"appId,optional"`    // 应用ID
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
 }
 
 type ListAppVersionsRes struct {
@@ -294,9 +294,9 @@ type ListAppVersionsRes struct {
 }
 
 type ListAppsReq struct {
-	Page     int32 `json:"page,optional"`      // 页码
-	PageSize int32 `json:"page_size,optional"` // 每页条数
-	IsActive *bool `json:"is_active,optional"` // 启用状态筛选
+	Page     int32 `json:"page,optional"`     // 页码
+	PageSize int32 `json:"pageSize,optional"` // 每页条数
+	IsActive *bool `json:"isActive,optional"` // 启用状态筛选
 }
 
 type ListAppsRes struct {
@@ -305,10 +305,10 @@ type ListAppsRes struct {
 }
 
 type ListArchitecturesReq struct {
-	AppId    string `json:"app_id,optional"`    // 应用ID
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
-	IsActive *bool  `json:"is_active,optional"` // 启用状态筛选
+	AppID    string `json:"appId,optional"`    // 应用ID
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
+	IsActive *bool  `json:"isActive,optional"` // 启用状态筛选
 }
 
 type ListArchitecturesRes struct {
@@ -317,12 +317,12 @@ type ListArchitecturesRes struct {
 }
 
 type ListContentReportsReq struct {
-	Page           int32  `json:"page,optional"`             // 页码
-	PageSize       int32  `json:"page_size,optional"`        // 每页条数
-	Status         int32  `json:"status,optional"`           // 状态筛选
-	TargetType     int32  `json:"target_type,optional"`      // 对象类型筛选
-	TargetId       string `json:"target_id,optional"`        // 对象ID筛选
-	ReporterUserId string `json:"reporter_user_id,optional"` // 举报人筛选
+	Page           int32  `json:"page,optional"`           // 页码
+	PageSize       int32  `json:"pageSize,optional"`       // 每页条数
+	Status         int32  `json:"status,optional"`         // 状态筛选
+	TargetType     int32  `json:"targetType,optional"`     // 对象类型筛选
+	TargetID       string `json:"targetId,optional"`       // 对象ID筛选
+	ReporterUserID string `json:"reporterUserId,optional"` // 举报人筛选
 }
 
 type ListContentReportsRes struct {
@@ -331,12 +331,12 @@ type ListContentReportsRes struct {
 }
 
 type ListFeedbackReq struct {
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
-	Status   int32  `json:"status,optional"`    // 状态筛选
-	Type     int32  `json:"type,optional"`      // 类型筛选
-	UserId   string `json:"user_id,optional"`   // 用户ID筛选
-	Keywords string `json:"keywords,optional"`  // 关键词
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
+	Status   int32  `json:"status,optional"`   // 状态筛选
+	Type     int32  `json:"type,optional"`     // 类型筛选
+	UserID   string `json:"userId,optional"`   // 用户ID筛选
+	Keywords string `json:"keywords,optional"` // 关键词
 }
 
 type ListFeedbackRes struct {
@@ -354,7 +354,7 @@ type ListMemberRes struct {
 }
 
 type ListReleasePoliciesReq struct {
-	AppId string `json:"app_id,optional"` // 应用ID
+	AppID string `json:"appId,optional"` // 应用ID
 }
 
 type ListReleasePoliciesRes struct {
@@ -362,9 +362,9 @@ type ListReleasePoliciesRes struct {
 }
 
 type ListVersionsReq struct {
-	ArchitectureId uint64 `json:"architecture_id,optional"` // 架构ID
-	Page           int32  `json:"page,optional"`            // 页码
-	PageSize       int32  `json:"page_size,optional"`       // 每页条数
+	ArchitectureID uint64 `json:"architectureId,optional"` // 架构ID
+	Page           int32  `json:"page,optional"`           // 页码
+	PageSize       int32  `json:"pageSize,optional"`       // 每页条数
 }
 
 type ListVersionsRes struct {
@@ -409,19 +409,19 @@ type MemberItem struct {
 }
 
 type ReleasePolicyItem struct {
-	Id              uint64 `json:"id,optional"`                // 记录ID
-	AppId           string `json:"app_id,optional"`            // 应用ID
-	ArchitectureId  uint64 `json:"architecture_id,optional"`   // 架构ID
-	StableVersionId uint64 `json:"stable_version_id,optional"` // 稳定版版本ID
-	GrayVersionId   uint64 `json:"gray_version_id,optional"`   // 灰度版版本ID
-	RolloutPercent  uint32 `json:"rollout_percent,optional"`   // 灰度比例
-	MinVersion      string `json:"min_version,optional"`       // 最低可用版本
-	ForceUpdate     bool   `json:"force_update,optional"`      // 是否强制更新
-	IsActive        bool   `json:"is_active,optional"`         // 是否启用
-	StableVersion   string `json:"stable_version,optional"`    // 稳定版版本号
-	GrayVersion     string `json:"gray_version,optional"`      // 灰度版版本号
-	CreatedAt       string `json:"created_at,optional"`        // 创建时间
-	UpdatedAt       string `json:"updated_at,optional"`        // 更新时间
+	ID              uint64 `json:"id,optional"`              // 记录ID
+	AppID           string `json:"appId,optional"`           // 应用ID
+	ArchitectureID  uint64 `json:"architectureId,optional"`  // 架构ID
+	StableVersionID uint64 `json:"stableVersionId,optional"` // 稳定版版本ID
+	GrayVersionID   uint64 `json:"grayVersionId,optional"`   // 灰度版版本ID
+	RolloutPercent  uint32 `json:"rolloutPercent,optional"`  // 灰度比例
+	MinVersion      string `json:"minVersion,optional"`      // 最低可用版本
+	ForceUpdate     bool   `json:"forceUpdate,optional"`     // 是否强制更新
+	IsActive        bool   `json:"isActive,optional"`        // 是否启用
+	StableVersion   string `json:"stableVersion,optional"`   // 稳定版版本号
+	GrayVersion     string `json:"grayVersion,optional"`     // 灰度版版本号
+	CreatedAt       string `json:"createdAt,optional"`       // 创建时间
+	UpdatedAt       string `json:"updatedAt,optional"`       // 更新时间
 }
 
 type ReportVersionReq struct {
@@ -453,89 +453,89 @@ type TrackRes struct {
 }
 
 type UpdateArchitectureReq struct {
-	Id          uint64 `json:"id,optional"`          // 记录ID
+	ID          uint64 `json:"id,optional"`          // 记录ID
 	Description string `json:"description,optional"` // 架构描述
-	IsActive    bool   `json:"is_active,optional"`   // 是否启用
+	IsActive    bool   `json:"isActive,optional"`    // 是否启用
 }
 
 type UpdateArchitectureRes struct {
 }
 
 type UpdateContentReportsReq struct {
-	Ids          []uint64 `json:"ids,optional"`           // 举报ID列表
-	Action       int32    `json:"action,optional"`        // 批量操作
-	HandlerId    string   `json:"handler_id,optional"`    // 处理人ID
-	HandleRemark string   `json:"handle_remark,optional"` // 处理备注
-	CaseId       uint64   `json:"case_id,optional"`       // 关联工单ID
+	IDs          []uint64 `json:"ids,optional"`          // 举报ID列表
+	Action       int32    `json:"action,optional"`       // 批量操作
+	HandlerID    string   `json:"handlerId,optional"`    // 处理人ID
+	HandleRemark string   `json:"handleRemark,optional"` // 处理备注
+	CaseID       uint64   `json:"caseId,optional"`       // 关联工单ID
 }
 
 type UpdateContentReportsRes struct {
-	AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	AffectedCount int64 `json:"affectedCount,optional"` // 影响条数
 }
 
 type UpdateWorkbenchAppReq struct {
-	WorkbenchAppId string                `json:"workbench_app_id,optional"` // 工作台应用ID
-	Name           string                `json:"name,optional"`             // 名称
-	Description    string                `json:"description,optional"`      // 描述
-	Icon           string                `json:"icon,optional"`             // 图标
-	AppType        *int32                `json:"app_type,optional"`         // 应用类型
-	ClientScope    *int32                `json:"client_scope,optional"`     // 端范围
-	EntryConfig    *WorkbenchEntryConfig `json:"entry_config,optional"`     // 入口配置
-	Category       *int32                `json:"category,optional"`         // 分类
-	Sort           *int32                `json:"sort,optional"`             // 排序
-	Status         *int32                `json:"status,optional"`           // 状态
-	Remark         string                `json:"remark,optional"`           // 备注
-	OperatorId     string                `json:"operator_id,optional"`      // 操作人
-	OpenMode       *int32                `json:"open_mode,optional"`        // 打开方式
+	WorkbenchAppID string                `json:"workbenchAppId,optional"` // 工作台应用ID
+	Name           string                `json:"name,optional"`           // 名称
+	Description    string                `json:"description,optional"`    // 描述
+	Icon           string                `json:"icon,optional"`           // 图标
+	AppType        *int32                `json:"appType,optional"`        // 应用类型
+	ClientScope    *int32                `json:"clientScope,optional"`    // 端范围
+	EntryConfig    *WorkbenchEntryConfig `json:"entryConfig,optional"`    // 入口配置
+	Category       *int32                `json:"category,optional"`       // 分类
+	Sort           *int32                `json:"sort,optional"`           // 排序
+	Status         *int32                `json:"status,optional"`         // 状态
+	Remark         string                `json:"remark,optional"`         // 备注
+	OperatorID     string                `json:"operatorId,optional"`     // 操作人
+	OpenMode       *int32                `json:"openMode,optional"`       // 打开方式
 }
 
 type UpdateWorkbenchAppRes struct {
 }
 
 type UpsertReleasePolicyReq struct {
-	AppId           string `json:"app_id,optional"`            // 应用ID
-	ArchitectureId  uint64 `json:"architecture_id,optional"`   // 架构ID
-	StableVersionId uint64 `json:"stable_version_id,optional"` // 稳定版版本ID
-	GrayVersionId   uint64 `json:"gray_version_id,optional"`   // 灰度版版本ID
-	RolloutPercent  uint32 `json:"rollout_percent,optional"`   // 灰度比例
-	MinVersion      string `json:"min_version,optional"`       // 最低可用版本
-	ForceUpdate     bool   `json:"force_update,optional"`      // 是否强制更新
-	IsActive        bool   `json:"is_active,optional"`         // 是否启用
+	AppID           string `json:"appId,optional"`           // 应用ID
+	ArchitectureID  uint64 `json:"architectureId,optional"`  // 架构ID
+	StableVersionID uint64 `json:"stableVersionId,optional"` // 稳定版版本ID
+	GrayVersionID   uint64 `json:"grayVersionId,optional"`   // 灰度版版本ID
+	RolloutPercent  uint32 `json:"rolloutPercent,optional"`  // 灰度比例
+	MinVersion      string `json:"minVersion,optional"`      // 最低可用版本
+	ForceUpdate     bool   `json:"forceUpdate,optional"`     // 是否强制更新
+	IsActive        bool   `json:"isActive,optional"`        // 是否启用
 }
 
 type UpsertReleasePolicyRes struct {
-	Id uint64 `json:"id,optional"` // 记录ID
+	ID uint64 `json:"id,optional"` // 记录ID
 }
 
 type VersionItem struct {
-	VersionId      uint64 `json:"version_id,optional"`      // 版本ID
-	ArchitectureId uint64 `json:"architecture_id,optional"` // 架构ID
-	Version        string `json:"version,optional"`         // 版本号
-	FileUrl        string `json:"file_url,optional"`        // 安装包地址
-	Description    string `json:"description,optional"`     // 描述
-	ReleaseNotes   string `json:"release_notes,optional"`   // 发布说明
-	CreatedAt      string `json:"created_at,optional"`      // 创建时间
-	UpdatedAt      string `json:"updated_at,optional"`      // 更新时间
+	VersionID      uint64 `json:"versionId,optional"`      // 版本ID
+	ArchitectureID uint64 `json:"architectureId,optional"` // 架构ID
+	Version        string `json:"version,optional"`        // 版本号
+	FileUrl        string `json:"fileUrl,optional"`        // 安装包地址
+	Description    string `json:"description,optional"`    // 描述
+	ReleaseNotes   string `json:"releaseNotes,optional"`   // 发布说明
+	CreatedAt      string `json:"createdAt,optional"`      // 创建时间
+	UpdatedAt      string `json:"updatedAt,optional"`      // 更新时间
 }
 
 type WorkbenchAppItem struct {
-	Id             uint64                `json:"id,optional"`               // 记录ID
-	WorkbenchAppId string                `json:"workbench_app_id,optional"` // 工作台应用ID
-	Name           string                `json:"name,optional"`             // 名称
-	Description    string                `json:"description,optional"`      // 描述
-	Icon           string                `json:"icon,optional"`             // 图标
-	AppType        int32                 `json:"app_type,optional"`         // 应用类型
-	ClientScope    int32                 `json:"client_scope,optional"`     // 端范围
-	EntryConfig    *WorkbenchEntryConfig `json:"entry_config,optional"`     // 入口配置
-	Category       int32                 `json:"category,optional"`         // 分类
-	Sort           int32                 `json:"sort,optional"`             // 排序
-	Status         int32                 `json:"status,optional"`           // 状态
-	CreatedBy      string                `json:"created_by,optional"`       // 创建人
-	LastModifiedBy string                `json:"last_modified_by,optional"` // 最后修改人
-	Remark         string                `json:"remark,optional"`           // 备注
-	CreatedAt      string                `json:"created_at,optional"`       // 创建时间
-	UpdatedAt      string                `json:"updated_at,optional"`       // 更新时间
-	OpenMode       int32                 `json:"open_mode,optional"`        // 打开方式
+	ID             uint64                `json:"id,optional"`             // 记录ID
+	WorkbenchAppID string                `json:"workbenchAppId,optional"` // 工作台应用ID
+	Name           string                `json:"name,optional"`           // 名称
+	Description    string                `json:"description,optional"`    // 描述
+	Icon           string                `json:"icon,optional"`           // 图标
+	AppType        int32                 `json:"appType,optional"`        // 应用类型
+	ClientScope    int32                 `json:"clientScope,optional"`    // 端范围
+	EntryConfig    *WorkbenchEntryConfig `json:"entryConfig,optional"`    // 入口配置
+	Category       int32                 `json:"category,optional"`       // 分类
+	Sort           int32                 `json:"sort,optional"`           // 排序
+	Status         int32                 `json:"status,optional"`         // 状态
+	CreatedBy      string                `json:"createdBy,optional"`      // 创建人
+	LastModifiedBy string                `json:"lastModifiedBy,optional"` // 最后修改人
+	Remark         string                `json:"remark,optional"`         // 备注
+	CreatedAt      string                `json:"createdAt,optional"`      // 创建时间
+	UpdatedAt      string                `json:"updatedAt,optional"`      // 更新时间
+	OpenMode       int32                 `json:"openMode,optional"`       // 打开方式
 }
 
 type WorkbenchEntryConfig struct {

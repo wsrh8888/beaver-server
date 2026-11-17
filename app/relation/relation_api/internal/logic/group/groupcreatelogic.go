@@ -72,12 +72,12 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		GroupID:   groupID,
 		Version:   groupVersion, // 该群的独立版本
 	}
-	if len(req.UserIdList) == 0 {
+	if len(req.UserIDList) == 0 {
 		return nil, errors.New("请选择用户")
 	}
 
 	var groupUserList = []string{req.UserID}
-	groupUserList = append(groupUserList, req.UserIdList...)
+	groupUserList = append(groupUserList, req.UserIDList...)
 
 	groupModel.Title = req.Title
 
@@ -164,7 +164,7 @@ func (l *GroupCreateLogic) GroupCreate(req *types.GroupCreateReq) (resp *types.G
 		}
 
 		// 初始化群聊会话（创建chat_conversation_meta和chat_user_conversations）
-		allUserIDs := append([]string{req.UserID}, req.UserIdList...)
+		allUserIDs := append([]string{req.UserID}, req.UserIDList...)
 		_, err = l.svcCtx.ChatRpc.InitializeConversation(ctx, &chat_rpc.InitializeConversationReq{
 			ConversationId: "group_" + groupModel.GroupID,
 			Type:           2, // 群聊类型

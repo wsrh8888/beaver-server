@@ -19,7 +19,7 @@
  * beaver-server-header-v1
  */
 
-package auth_public
+package handler
 
 import (
 	"errors"

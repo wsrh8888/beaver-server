@@ -30,7 +30,7 @@ import (
 
 func toContentReportItem(r report_models.ContentReportModel) *platform_rpc.ContentReportItem {
 	return &platform_rpc.ContentReportItem{
-		Id:             uint64(r.Id),
+		Id:             uint64(r.ID),
 		ReporterUserId: r.ReporterUserID,
 		TargetType:     int32(r.TargetType),
 		TargetId:       r.TargetID,

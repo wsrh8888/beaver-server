@@ -76,7 +76,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 
 	var existingReport update_models.UpdateReport
 	err := l.svcCtx.DB.Where("device_id = ? AND app_id = ? AND architecture_id = ?",
-		req.DeviceID, req.AppID, architecture.Id).First(&existingReport).Error
+		req.DeviceID, req.AppID, architecture.ID).First(&existingReport).Error
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		l.logger.Error(model.LogMsg{Text: "查询设备记录失败", Data: map[string]any{"deviceId": req.DeviceID, "appId": req.AppID, "err": err.Error()}})
@@ -88,7 +88,7 @@ func (l *ReportVersionLogic) ReportVersion(req *types.ReportVersionReq) (*types.
 			UserID:         identity.UserID(l.ctx),
 			DeviceID:       req.DeviceID,
 			AppID:          req.AppID,
-			ArchitectureID: architecture.Id,
+			ArchitectureID: architecture.ID,
 			Version:        req.Version,
 		}
 		if err := l.svcCtx.DB.Create(&report).Error; err != nil {

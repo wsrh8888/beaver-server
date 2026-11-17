@@ -48,16 +48,16 @@ func NewGetEmojiCollectsByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceCon
 }
 
 func (l *GetEmojiCollectsByUuidsLogic) GetEmojiCollectsByUuids(req *types.GetEmojiCollectsByUuidsReq) (resp *types.GetEmojiCollectsByUuidsRes, err error) {
-	if len(req.Ids) == 0 {
+	if len(req.IDs) == 0 {
 		return &types.GetEmojiCollectsByUuidsRes{
 			Collects: make([]types.EmojiCollectDetailItem, 0),
 		}, nil
 	}
 
 	var collects []emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("emoji_collect_id IN ?", req.Ids).Find(&collects).Error
+	err = l.svcCtx.DB.Where("emoji_collect_id IN ?", req.IDs).Find(&collects).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "按收藏ID批量查询表情收藏记录失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "按收藏ID批量查询表情收藏记录失败", Data: map[string]any{"ids": req.IDs, "err": err.Error()}})
 		return nil, err
 	}
 

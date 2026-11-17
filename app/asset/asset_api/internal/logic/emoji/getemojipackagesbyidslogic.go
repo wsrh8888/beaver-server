@@ -48,7 +48,7 @@ func NewGetEmojiPackagesByIdsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *GetEmojiPackagesByIdsLogic) GetEmojiPackagesByIds(req *types.GetEmojiPackagesByIdsReq) (resp *types.GetEmojiPackagesByIdsRes, err error) {
-	if len(req.Ids) == 0 {
+	if len(req.IDs) == 0 {
 		return &types.GetEmojiPackagesByIdsRes{
 			Packages: make([]types.EmojiPackageDetailItem, 0),
 		}, nil
@@ -56,13 +56,13 @@ func (l *GetEmojiPackagesByIdsLogic) GetEmojiPackagesByIds(req *types.GetEmojiPa
 
 	// 根据ID列表查询表情包详情
 	var packages []emoji_models.EmojiPackage
-	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", req.Ids, 1).Find(&packages).Error
+	err = l.svcCtx.DB.Where("package_id IN ? AND status = ?", req.IDs, 1).Find(&packages).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询表情包详情失败", Data: map[string]any{"ids": req.IDs, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.logger.Info(model.LogMsg{Text: "批量查询表情包详情", Data: map[string]interface{}{"requestCount": len(req.Ids), "resultCount": len(packages)}})
+	l.logger.Info(model.LogMsg{Text: "批量查询表情包详情", Data: map[string]interface{}{"requestCount": len(req.IDs), "resultCount": len(packages)}})
 
 	// 计算每个表情包的收藏数（可以考虑缓存这个统计数据）
 	var packageItems []types.EmojiPackageDetailItem

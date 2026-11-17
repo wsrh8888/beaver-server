@@ -34,7 +34,7 @@ func toFeedbackItem(f feedback_models.FeedbackModel) *platform_rpc.FeedbackItem 
 		handleTime = f.HandleTime.Format(time.RFC3339)
 	}
 	return &platform_rpc.FeedbackItem{
-		Id:           uint64(f.Id),
+		Id:           uint64(f.ID),
 		UserId:       f.UserID,
 		Content:      f.Content,
 		Type:         int32(f.Type),

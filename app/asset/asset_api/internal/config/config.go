@@ -48,7 +48,7 @@ type Config struct {
 	UserRpc     zrpc.RpcClientConf
 	// AssetRpc：file + emoji 同进程（etcd assetrpc.rpc），队间能力面薄转发到它。
 	AssetRpc zrpc.RpcClientConf
-	// StorageType 通用上传接口(/beaver/api/file/file/v1/upload)使用的默认存储后端：local|qiniu|minio
+	// StorageType 通用上传接口(/beaver/api/asset/file/v1/upload)使用的默认存储后端：local|qiniu|minio
 	StorageType string
 	Local       struct {
 		UploadDir   string // 本地文件上传目录

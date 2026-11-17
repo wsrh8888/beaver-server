@@ -13,7 +13,7 @@ type (
 		ServerTimestamp int64               `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	FriendVersionItem {
-		FriendId string `json:"friendId"` // 好友ID
+		FriendID string `json:"friendId"` // 好友ID
 		Version  int64  `json:"version"` // 好友关系版本号
 	}
 )
@@ -29,7 +29,7 @@ type (
 		ServerTimestamp      int64                     `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	FriendVerifyVersionItem {
-		VerifyId string `json:"verifyId"` // 验证记录ID
+		VerifyID string `json:"verifyId"` // 验证记录ID
 		Version  int64  `json:"version"` // 验证记录版本号
 	}
 )

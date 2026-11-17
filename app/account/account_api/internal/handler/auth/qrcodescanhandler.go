@@ -19,7 +19,7 @@
  * beaver-server-header-v1
  */
 
-package auth
+package handler
 
 import (
 	logic "beaver/app/account/account_api/internal/logic/auth"

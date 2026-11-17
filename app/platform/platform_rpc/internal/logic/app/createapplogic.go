@@ -71,5 +71,5 @@ func (l *CreateAppLogic) CreateApp(in *platform_rpc.CreateAppReq) (*platform_rpc
 
 	l.logger.Info(model.LogMsg{Text: "创建应用成功", Data: map[string]interface{}{"appId": app.AppID, "name": in.Name}})
 
-	return &platform_rpc.CreateAppRes{Id: uint64(app.Id), AppId: app.AppID}, nil
+	return &platform_rpc.CreateAppRes{Id: uint64(app.ID), AppId: app.AppID}, nil
 }

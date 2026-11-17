@@ -56,114 +56,21 @@ FileUploadRes {
 }
 )
 
-type (
-SaveFileReq {
-		OriginalName string `json:"original_name,optional"` // 原始文件名
-		Size         int64  `json:"size,optional"` // 文件大小
-		Path         string `json:"path,optional"` // 存储路径
-		Md5          string `json:"md5,optional"` // MD5
-		Type         string `json:"type,optional"` // 文件类型
-		Source       string `json:"source,optional"` // 来源
-		FileInfoJson string `json:"file_info_json,optional"` // 文件附加信息 JSON
-	}
 
-SaveFileRes {
-		FileKey string `json:"file_key,optional"` // 文件Key
-	}
-)
 
-type (
-FileItem {
-		Id           uint64 `json:"id,optional"` // 记录ID
-		FileKey      string `json:"file_key,optional"` // 文件Key
-		OriginalName string `json:"original_name,optional"` // 原始文件名
-		Size         int64  `json:"size,optional"` // 文件大小
-		Path         string `json:"path,optional"` // 存储路径
-		Md5          string `json:"md5,optional"` // MD5
-		Type         string `json:"type,optional"` // 文件类型
-		Source       string `json:"source,optional"` // 来源 qiniu/local
-		CreatedAt    string `json:"created_at,optional"` // 创建时间
-		UpdatedAt    string `json:"updated_at,optional"` // 更新时间
-	}
 
-ListFilesReq {
-		Page     int32  `json:"page,optional"` // 页码
-		PageSize int32  `json:"page_size,optional"` // 每页条数
-		Type     string `json:"type,optional"` // 文件类型筛选
-		Keywords string `json:"keywords,optional"` // 关键词
-	}
 
-ListFilesRes {
-		Total int64      `json:"total,optional"` // 总数
-		List  []FileItem `json:"list,optional"` // 文件列表
-	}
-)
 
-type (
-DeleteFileReq {
-		Id uint64 `json:"id,optional"` // 记录ID
-	}
 
-DeleteFileRes {
-		Path string `json:"path,optional"` // 被删除的存储路径
-	}
-)
 
-type (
-BatchDeleteFilesReq {
-		Ids []uint64 `json:"ids,optional"` // 记录ID列表
-	}
 
-BatchDeleteFilesRes {
-		Paths []string `json:"paths,optional"` // 被删除的存储路径列表
-	}
-)
 
-type (
-GetFileByIdReq {
-		Id uint64 `json:"id,optional"` // 记录ID
-	}
 
-GetFileByIdRes {
-		File *FileItem `json:"file,optional"` // 文件详情
-	}
-)
 
-type (
-GetFileByMd5Req {
-		Md5 string `json:"md5,optional"` // MD5
-	}
 
-GetFileByMd5Res {
-		File *FileItem `json:"file,optional"` // 文件详情
-	}
-)
 
-type (
-GetFileDetailReq {
-		FileKey string `json:"fileKey,optional"` // 文件Key
-	}
 
-GetFileDetailRes {
-		FileKey      string `json:"fileKey,optional"` // 文件Key
-		OriginalName string `json:"originalName,optional"` // 原始文件名
-		Size         int64  `json:"size,optional"` // 文件大小
-		Path         string `json:"path,optional"` // 存储路径
-		Md5          string `json:"md5,optional"` // MD5
-		Type         string `json:"type,optional"` // 文件类型
-		CreatedAt    string `json:"createdAt,optional"` // 创建时间
-		UpdatedAt    string `json:"updatedAt,optional"` // 更新时间
-	}
-)
 
-type (
-GetQiniuUploadTokenReq {}
-
-GetQiniuUploadTokenRes {
-		UploadToken string `json:"uploadToken,optional"` // 七牛上传凭证
-		ExpiresIn   int64  `json:"expiresIn,optional"` // 有效期（秒）
-	}
-)
 
 type (
 FileUploadQiniuFileInfo {
@@ -255,14 +162,118 @@ FileUploadAudioFile {
 }
 )
 
-@server (
-	group: file
+type (
+SaveFileReq {
+		OriginalName string `json:"originalName,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		Source       string `json:"source,optional"` // 来源
+		FileInfoJson string `json:"fileInfoJson,optional"` // 文件附加信息 JSON
+	}
+
+SaveFileRes {
+		FileKey string `json:"fileKey,optional"` // 文件Key
+	}
 )
-service asset {
-	@doc "文件预览"
-	@handler Preview
-	get /beaver/api/file/preview/v1/get (PreviewReq) returns (PreviewRes)
-}
+
+type (
+FileItem {
+		ID           uint64 `json:"id,optional"` // 记录ID
+		FileKey      string `json:"fileKey,optional"` // 文件Key
+		OriginalName string `json:"originalName,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		Source       string `json:"source,optional"` // 来源 qiniu/local
+		CreatedAt    string `json:"createdAt,optional"` // 创建时间
+		UpdatedAt    string `json:"updatedAt,optional"` // 更新时间
+	}
+
+ListFilesReq {
+		Page     int32  `json:"page,optional"` // 页码
+		PageSize int32  `json:"pageSize,optional"` // 每页条数
+		Type     string `json:"type,optional"` // 文件类型筛选
+		Keywords string `json:"keywords,optional"` // 关键词
+	}
+
+ListFilesRes {
+		Total int64      `json:"total,optional"` // 总数
+		List  []FileItem `json:"list,optional"` // 文件列表
+	}
+)
+
+type (
+DeleteFileReq {
+		ID uint64 `json:"id,optional"` // 记录ID
+	}
+
+DeleteFileRes {
+		Path string `json:"path,optional"` // 被删除的存储路径
+	}
+)
+
+type (
+BatchDeleteFilesReq {
+		IDs []uint64 `json:"ids,optional"` // 记录ID列表
+	}
+
+BatchDeleteFilesRes {
+		Paths []string `json:"paths,optional"` // 被删除的存储路径列表
+	}
+)
+
+type (
+GetFileByIdReq {
+		ID uint64 `json:"id,optional"` // 记录ID
+	}
+
+GetFileByIdRes {
+		File *FileItem `json:"file,optional"` // 文件详情
+	}
+)
+
+type (
+GetFileByMd5Req {
+		Md5 string `json:"md5,optional"` // MD5
+	}
+
+GetFileByMd5Res {
+		File *FileItem `json:"file,optional"` // 文件详情
+	}
+)
+
+type (
+GetFileDetailReq {
+		FileKey string `json:"fileKey,optional"` // 文件Key
+	}
+
+GetFileDetailRes {
+		FileKey      string `json:"fileKey,optional"` // 文件Key
+		OriginalName string `json:"originalName,optional"` // 原始文件名
+		Size         int64  `json:"size,optional"` // 文件大小
+		Path         string `json:"path,optional"` // 存储路径
+		Md5          string `json:"md5,optional"` // MD5
+		Type         string `json:"type,optional"` // 文件类型
+		CreatedAt    string `json:"createdAt,optional"` // 创建时间
+		UpdatedAt    string `json:"updatedAt,optional"` // 更新时间
+	}
+)
+
+type (
+GetQiniuUploadTokenReq {}
+
+GetQiniuUploadTokenRes {
+		UploadToken string `json:"uploadToken,optional"` // 七牛上传凭证
+		ExpiresIn   int64  `json:"expiresIn,optional"` // 有效期（秒）
+	}
+)
+
+type (
+
+)
 
 @server (
 	group: file
@@ -271,61 +282,57 @@ service asset {
 service asset {
 	@doc "文件上传七牛云"
 	@handler FileUploadQiniu
-	post /beaver/api/file/file/v1/upload_qiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
+	post /beaver/api/asset/file/v1/upload_qiniu (FileUploadQiniuReq) returns (FileUploadQiniuRes)
 
 	@doc "文件上传本地"
 	@handler FileUploadLocal
-	post /beaver/api/file/file/v1/upload_local (FileUploadLocalReq) returns (FileUploadLocalRes)
+	post /beaver/api/asset/file/v1/upload_local (FileUploadLocalReq) returns (FileUploadLocalRes)
 
 	@doc "文件上传MinIO"
 	@handler FileUploadMinio
-	post /beaver/api/file/file/v1/upload_minio (FileUploadMinioReq) returns (FileUploadMinioRes)
+	post /beaver/api/asset/file/v1/upload_minio (FileUploadMinioReq) returns (FileUploadMinioRes)
 
 	@doc "文件通用上传(按yaml StorageType配置路由到local/qiniu/minio)"
 	@handler FileUpload
-	post /beaver/api/file/file/v1/upload (FileUploadReq) returns (FileUploadRes)
-}
+	post /beaver/api/asset/file/v1/upload (FileUploadReq) returns (FileUploadRes)
 
-// ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
-// 这里是「按记录维度」的文件台账读写，C 端上传走 multipart，两者不重叠。
-
-@server (
-	group: file_machine
-	middleware: JwtS2s
-)
-service asset {
-	@doc "队间：登记文件记录"
+@doc "队间：登记文件记录"
 	@handler FileSave
-	post /beaver/api/file/machine/v1/save (SaveFileReq) returns (SaveFileRes)
+	post /beaver/api/asset/file_s2s/v1/save (SaveFileReq) returns (SaveFileRes)
 
 	@doc "队间：分页查询文件记录"
 	@handler FileList
-	post /beaver/api/file/machine/v1/list (ListFilesReq) returns (ListFilesRes)
+	post /beaver/api/asset/file_s2s/v1/list (ListFilesReq) returns (ListFilesRes)
 
 	@doc "队间：删除单个文件记录"
 	@handler FileDelete
-	post /beaver/api/file/machine/v1/delete (DeleteFileReq) returns (DeleteFileRes)
+	post /beaver/api/asset/file_s2s/v1/delete (DeleteFileReq) returns (DeleteFileRes)
 
 	@doc "队间：批量删除文件记录"
 	@handler FileBatchDelete
-	post /beaver/api/file/machine/v1/batch_delete (BatchDeleteFilesReq) returns (BatchDeleteFilesRes)
+	post /beaver/api/asset/file_s2s/v1/batch_delete (BatchDeleteFilesReq) returns (BatchDeleteFilesRes)
 
 	@doc "队间：按记录ID取文件"
 	@handler FileById
-	post /beaver/api/file/machine/v1/detail (GetFileByIdReq) returns (GetFileByIdRes)
+	post /beaver/api/asset/file_s2s/v1/detail (GetFileByIdReq) returns (GetFileByIdRes)
 
 	@doc "队间：按MD5取文件"
 	@handler FileByMd5
-	post /beaver/api/file/machine/v1/by_md5 (GetFileByMd5Req) returns (GetFileByMd5Res)
+	post /beaver/api/asset/file_s2s/v1/by_md5 (GetFileByMd5Req) returns (GetFileByMd5Res)
 
 	@doc "队间：按文件Key取详情"
 	@handler FileDetailByKey
-	post /beaver/api/file/machine/v1/detail_by_key (GetFileDetailReq) returns (GetFileDetailRes)
+	post /beaver/api/asset/file_s2s/v1/detail_by_key (GetFileDetailReq) returns (GetFileDetailRes)
 
 	@doc "队间：签发七牛上传凭证"
 	@handler QiniuUploadToken
-	post /beaver/api/file/machine/v1/qiniu_token (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
-}
+	post /beaver/api/asset/file_s2s/v1/qiniu_token (GetQiniuUploadTokenReq) returns (GetQiniuUploadTokenRes)
 
-// goctl api go -api asset_api.api -dir . --home ../../../template
+
+
+
+
+
+
+
+}

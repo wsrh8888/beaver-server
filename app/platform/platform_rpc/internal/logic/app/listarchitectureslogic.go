@@ -76,7 +76,7 @@ func (l *ListArchitecturesLogic) ListArchitectures(in *platform_rpc.ListArchitec
 	items := make([]*platform_rpc.ArchitectureItem, 0, len(list))
 	for _, arch := range list {
 		items = append(items, &platform_rpc.ArchitectureItem{
-			Id:          uint64(arch.Id),
+			Id:          uint64(arch.ID),
 			AppId:       arch.AppID,
 			AppName:     appNameMap[arch.AppID],
 			PlatformId:  uint32(arch.PlatformID),

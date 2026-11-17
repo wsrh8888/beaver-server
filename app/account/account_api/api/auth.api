@@ -55,6 +55,53 @@ type (
 	UpdatePasswordRes  {}
 )
 
+// ==================== 认证机器视图：内部机器票 JwtS2s（跨仓 S2S）====================
+// 与 C 端共用 /beaver/api/account/auth 业务 group；含凭据/设备维护能力。
+// ==================== 队间机器视图：认证域凭据与设备维护 ====================
+// 与 C 端共用 /beaver/api/account/auth 业务 group；入出参 JSON 与 S2S 门面逐字对齐。
+type (
+	VerifyPasswordReq {
+		UserID   string `json:"userId,optional"`
+		Password string `json:"password,optional"`
+	}
+	VerifyPasswordRes {
+		Valid bool `json:"valid,optional"`
+	}
+)
+
+type (
+	CreateCredentialReq {
+		UserID   string `json:"userId,optional"`
+		Password string `json:"password,optional"`
+	}
+	CreateCredentialRes {
+		Success bool `json:"success,optional"`
+	}
+)
+
+type (
+	ListUserDevicesReq {
+		UserID string `json:"userId,optional"`
+	}
+	ListUserDevicesRes {
+		List []UserDeviceItem `json:"list,optional"`
+	}
+)
+
+type (
+	ResetUserPasswordReq {
+		UserID      string `json:"userId,optional"`
+		NewPassword string `json:"newPassword,optional"`
+	}
+	ResetUserPasswordRes {
+		Success bool `json:"success,optional"`
+	}
+)
+
+// ==================== 认证机器视图：内部机器票 JwtS2s（跨仓 S2S）====================
+// 与 C 端共用 /beaver/api/account/auth 业务 group；含凭据/设备维护能力。
+// ==================== 队间机器视图：认证域凭据与设备维护 ====================
+// 与 C 端共用 /beaver/api/account/auth 业务 group；入出参 JSON 与 S2S 门面逐字对齐。
 @server (
 	group: auth
 	middleware: JwtS2s
@@ -79,4 +126,24 @@ service account {
 	@doc "修改密码（需验证旧密码）"
 	@handler updatePassword
 	post /beaver/api/account/auth/v1/update_password (UpdatePasswordReq) returns (UpdatePasswordRes)
+
+@doc "校验账号密码（开放平台 / 管理端代登录）"
+	@handler verifyPassword
+	post /beaver/api/account/auth_s2s/v1/verify_password (VerifyPasswordReq) returns (VerifyPasswordRes)
+
+	@doc "创建账号密码凭据"
+	@handler createCredential
+	post /beaver/api/account/auth_s2s/v1/create_credential (CreateCredentialReq) returns (CreateCredentialRes)
+
+	@doc "查指定用户的登录设备"
+	@handler listUserDevices
+	post /beaver/api/account/auth_s2s/v1/devices (ListUserDevicesReq) returns (ListUserDevicesRes)
+
+	@doc "重置指定用户密码（无需旧密码）"
+	@handler resetUserPassword
+	post /beaver/api/account/auth_s2s/v1/reset_password (ResetUserPasswordReq) returns (ResetUserPasswordRes)
+
+
+
+
 }

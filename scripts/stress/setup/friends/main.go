@@ -181,7 +181,7 @@ type friendInfoRes struct {
 // addFriend A 向 B 发送好友验证请求。source: email / qrcode / userId
 func addFriend(friendAPIBase, userID, friendID, source string) error {
 	_, status, err := httputil.PostJSON(
-		friendAPIBase+"/beaver/api/friend/friend/v1/add_friend",
+		friendAPIBase+"/beaver/api/relation/friend/v1/add_friend",
 		map[string]string{"friendId": friendID, "source": source},
 		map[string]string{"Beaver-User-Id": userID},
 	)
@@ -197,7 +197,7 @@ func addFriend(friendAPIBase, userID, friendID, source string) error {
 // validList 拉取 userID 的好友验证请求列表，用于找到发送方的 verifyID 以便同意。
 func validList(friendAPIBase, userID string) ([]friendValidInfo, error) {
 	body, status, err := httputil.PostJSON(
-		friendAPIBase+"/beaver/api/friend/friend/v1/valid_list",
+		friendAPIBase+"/beaver/api/relation/friend/v1/valid_list",
 		map[string]any{"page": 1, "limit": 50},
 		map[string]string{"Beaver-User-Id": userID},
 	)
@@ -222,7 +222,7 @@ func validList(friendAPIBase, userID string) ([]friendValidInfo, error) {
 // valid 处理好友验证请求。status: 1=同意 2=拒绝
 func valid(friendAPIBase, userID, verifyID string, status int8) error {
 	_, st, err := httputil.PostJSON(
-		friendAPIBase+"/beaver/api/friend/friend/v1/valid",
+		friendAPIBase+"/beaver/api/relation/friend/v1/valid",
 		map[string]any{"verifyId": verifyID, "status": status},
 		map[string]string{"Beaver-User-Id": userID},
 	)
@@ -238,7 +238,7 @@ func valid(friendAPIBase, userID, verifyID string, status int8) error {
 // friendInfo 拉好友详情，主要拿 conversationId（会话随好友关系自动创建）。
 func friendInfo(friendAPIBase, userID, friendID string) (friendInfoRes, error) {
 	body, status, err := httputil.GetJSON(
-		friendAPIBase+"/beaver/api/friend/friend/v1/friend_info?friendId="+friendID,
+		friendAPIBase+"/beaver/api/relation/friend/v1/friend_info?friendId="+friendID,
 		map[string]string{"Beaver-User-Id": userID},
 	)
 	if err != nil {

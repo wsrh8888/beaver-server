@@ -71,7 +71,7 @@ func (l *ListAppsLogic) ListApps(in *platform_rpc.ListAppsReq) (*platform_rpc.Li
 	list := make([]*platform_rpc.AppItem, 0, len(apps))
 	for _, app := range apps {
 		list = append(list, &platform_rpc.AppItem{
-			Id:          uint64(app.Id),
+			Id:          uint64(app.ID),
 			AppId:       app.AppID,
 			Name:        app.Name,
 			Description: app.Description,

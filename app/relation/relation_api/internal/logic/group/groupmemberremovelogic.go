@@ -63,7 +63,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 
 	// 检查要移除的成员
 	var members []group_models.GroupMemberModel
-	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.UserIds).Find(&members).Error
+	err = l.svcCtx.DB.Where("group_id = ? and user_id in ?", req.GroupID, req.UserIDs).Find(&members).Error
 	if err != nil {
 		return nil, errors.New("查询成员信息失败")
 	}
@@ -92,13 +92,13 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 
 	// 批量更新成员状态为被踢（Status = 3）
 	err = l.svcCtx.DB.Model(&group_models.GroupMemberModel{}).
-		Where("group_id = ? and user_id in ?", req.GroupID, req.UserIds).
+		Where("group_id = ? and user_id in ?", req.GroupID, req.UserIDs).
 		Updates(map[string]interface{}{
 			"status":  3, // 3被踢
 			"version": memberVersion,
 		}).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "移除成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "count": len(req.UserIds), "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "移除成员失败", Data: map[string]interface{}{"groupId": req.GroupID, "count": len(req.UserIDs), "err": err.Error()}})
 		return nil, errors.New("移除成员失败")
 	}
 
@@ -122,7 +122,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 
 		// 构建被移除成员的数据列表
 		var removedMemberData []map[string]interface{}
-		for _, memberID := range req.UserIds {
+		for _, memberID := range req.UserIDs {
 			removedMemberData = append(removedMemberData, map[string]interface{}{
 				"version": memberVersion,
 				"groupId": req.GroupID,
@@ -146,7 +146,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		}
 
 		// 添加被移除的成员
-		for _, memberID := range req.UserIds {
+		for _, memberID := range req.UserIDs {
 			if !memberMap[memberID] {
 				memberMap[memberID] = true
 				allMembers = append(allMembers, memberID)
@@ -179,7 +179,7 @@ func (l *GroupMemberRemoveLogic) GroupMemberRemove(req *types.GroupMemberRemoveR
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
 			"userId":  req.UserID,
-			"count":   len(req.UserIds),
+			"count":   len(req.UserIDs),
 		},
 	})
 

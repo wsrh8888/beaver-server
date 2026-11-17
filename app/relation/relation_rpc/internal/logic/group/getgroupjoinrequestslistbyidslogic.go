@@ -73,7 +73,7 @@ func (l *GetGroupJoinRequestsListByIdsLogic) GetGroupJoinRequestsListByIds(in *p
 	var requests []*pb.GroupJoinRequestListById
 	for _, request := range requestsData {
 		requests = append(requests, &pb.GroupJoinRequestListById{
-			RequestID: fmt.Sprintf("%d", request.Id), // 使用主键Id作为RequestID
+			RequestID: fmt.Sprintf("%d", request.ID), // 使用主键Id作为RequestID
 			GroupID:   request.GroupID,
 			UserID:    request.ApplicantUserID,
 			Message:   request.Message,

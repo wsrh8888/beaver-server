@@ -62,6 +62,6 @@ func (l *SubmitContentReportLogic) SubmitContentReport(in *platform_rpc.SubmitCo
 		l.logger.Error(model.LogMsg{Text: "创建举报失败", Data: map[string]any{"reporterUserId": in.ReporterUserId, "targetId": in.TargetId, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "提交失败")
 	}
-	l.logger.Info(model.LogMsg{Text: "提交举报成功", Data: map[string]interface{}{"id": report.Id, "reporterUserId": in.ReporterUserId, "targetId": in.TargetId}})
-	return &platform_rpc.SubmitContentReportRes{Id: uint64(report.Id)}, nil
+	l.logger.Info(model.LogMsg{Text: "提交举报成功", Data: map[string]interface{}{"id": report.ID, "reporterUserId": in.ReporterUserId, "targetId": in.TargetId}})
+	return &platform_rpc.SubmitContentReportRes{Id: uint64(report.ID)}, nil
 }

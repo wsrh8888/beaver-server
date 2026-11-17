@@ -181,7 +181,7 @@ func (l *SearchMessagesLogic) SearchMessages(req *types.SearchMessagesReq) (*typ
 		}
 
 		list = append(list, types.Message{
-			Id:               chat.Id,
+			ID:               chat.ID,
 			MessageID:        chat.MessageID,
 			ConversationID:   chat.ConversationID,
 			ConversationType: chat.ConversationType,

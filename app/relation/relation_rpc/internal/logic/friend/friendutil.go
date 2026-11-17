@@ -36,7 +36,7 @@ func friendKey(f friend_models.FriendModel) string {
 	if f.FriendID != "" {
 		return f.FriendID
 	}
-	return fmt.Sprintf("%d", f.Id)
+	return fmt.Sprintf("%d", f.ID)
 }
 
 func toFriendItem(f friend_models.FriendModel) *pb.FriendItem {
@@ -56,7 +56,7 @@ func toFriendItem(f friend_models.FriendModel) *pb.FriendItem {
 func toFriendVerifyItem(v friend_models.FriendVerifyModel) *pb.FriendVerifyItem {
 	key := v.VerifyID
 	if key == "" {
-		key = fmt.Sprintf("%d", v.Id)
+		key = fmt.Sprintf("%d", v.ID)
 	}
 	return &pb.FriendVerifyItem{
 		VerifyId:   key,
@@ -88,7 +88,7 @@ func blockKey(b friend_models.FriendBlockModel) string {
 	if b.BlockID != "" {
 		return b.BlockID
 	}
-	return fmt.Sprintf("%d", b.Id)
+	return fmt.Sprintf("%d", b.ID)
 }
 
 func toFriendBlockItem(b friend_models.FriendBlockModel) *pb.FriendBlockItem {

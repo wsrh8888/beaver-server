@@ -86,8 +86,8 @@ func (l *UpsertReleasePolicyLogic) UpsertReleasePolicy(in *platform_rpc.UpsertRe
 			l.logger.Error(model.LogMsg{Text: "创建发版策略失败", Data: map[string]any{"appId": in.AppId, "architectureId": in.ArchitectureId, "err": err.Error()}})
 			return nil, status.Error(codes.Internal, "创建发版策略失败")
 		}
-		l.logger.Info(model.LogMsg{Text: "创建发版策略成功", Data: map[string]interface{}{"id": policy.Id, "appId": in.AppId, "architectureId": in.ArchitectureId}})
-		return &platform_rpc.UpsertReleasePolicyRes{Id: uint64(policy.Id)}, nil
+		l.logger.Info(model.LogMsg{Text: "创建发版策略成功", Data: map[string]interface{}{"id": policy.ID, "appId": in.AppId, "architectureId": in.ArchitectureId}})
+		return &platform_rpc.UpsertReleasePolicyRes{Id: uint64(policy.ID)}, nil
 	}
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "查询发版策略失败", Data: map[string]any{"architectureId": in.ArchitectureId, "err": err.Error()}})
@@ -101,11 +101,11 @@ func (l *UpsertReleasePolicyLogic) UpsertReleasePolicy(in *platform_rpc.UpsertRe
 	policy.ForceUpdate = in.ForceUpdate
 	policy.IsActive = in.IsActive
 	if err := l.svcCtx.DB.Save(&policy).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "更新发版策略失败", Data: map[string]any{"id": policy.Id, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "更新发版策略失败", Data: map[string]any{"id": policy.ID, "err": err.Error()}})
 		return nil, status.Error(codes.Internal, "更新发版策略失败")
 	}
-	l.logger.Info(model.LogMsg{Text: "更新发版策略成功", Data: map[string]interface{}{"id": policy.Id, "appId": in.AppId, "architectureId": in.ArchitectureId}})
-	return &platform_rpc.UpsertReleasePolicyRes{Id: uint64(policy.Id)}, nil
+	l.logger.Info(model.LogMsg{Text: "更新发版策略成功", Data: map[string]interface{}{"id": policy.ID, "appId": in.AppId, "architectureId": in.ArchitectureId}})
+	return &platform_rpc.UpsertReleasePolicyRes{Id: uint64(policy.ID)}, nil
 }
 
 func (l *UpsertReleasePolicyLogic) ensureVersionBelongs(architectureID, versionID uint64) error {

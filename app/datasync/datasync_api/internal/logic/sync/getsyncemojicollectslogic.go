@@ -68,7 +68,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	if emojiCollectResp.EmojiCollectVersions != nil {
 		for _, item := range emojiCollectResp.EmojiCollectVersions {
 			emojiCollectVersions = append(emojiCollectVersions, types.EmojiCollectVersionItem{
-				EmojiCollectId: item.EmojiCollectId,
+				EmojiCollectID: item.EmojiCollectId,
 				Version:        item.Version,
 			})
 		}
@@ -88,7 +88,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	if emojiPackageCollectResp.EmojiPackageCollectVersions != nil {
 		for _, item := range emojiPackageCollectResp.EmojiPackageCollectVersions {
 			emojiPackageCollectVersions = append(emojiPackageCollectVersions, types.EmojiPackageCollectVersionItem{
-				PackageCollectId: item.PackageCollectId,
+				PackageCollectID: item.PackageCollectId,
 				Version:          item.Version,
 			})
 		}
@@ -108,7 +108,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	if emojiPackagesResp.EmojiPackageVersions != nil {
 		for _, item := range emojiPackagesResp.EmojiPackageVersions {
 			emojiPackageVersions = append(emojiPackageVersions, types.EmojiPackageVersionItem{
-				PackageId: item.PackageId,
+				PackageID: item.PackageId,
 				Version:   item.Version,
 			})
 		}
@@ -128,7 +128,7 @@ func (l *GetSyncEmojiCollectsLogic) GetSyncEmojiCollects(req *types.GetSyncEmoji
 	if emojiPackageContentsResp.EmojiPackageContentVersions != nil {
 		for _, item := range emojiPackageContentsResp.EmojiPackageContentVersions {
 			emojiPackageContentVersions = append(emojiPackageContentVersions, types.EmojiPackageContentVersionItem{
-				PackageId: item.PackageId,
+				PackageID: item.PackageId,
 				Version:   item.Version,
 			})
 		}

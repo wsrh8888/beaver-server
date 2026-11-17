@@ -71,7 +71,7 @@ func (l *ListVersionsLogic) ListVersions(in *platform_rpc.ListVersionsReq) (*pla
 	items := make([]*platform_rpc.VersionItem, 0, len(list))
 	for _, ver := range list {
 		items = append(items, &platform_rpc.VersionItem{
-			VersionId:      uint64(ver.Id),
+			VersionId:      uint64(ver.ID),
 			ArchitectureId: uint64(ver.ArchitectureID),
 			Version:        ver.Version,
 			FileUrl:        ver.FileUrl,

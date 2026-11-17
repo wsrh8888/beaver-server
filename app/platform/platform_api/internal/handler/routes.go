@@ -222,19 +222,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 部门树，节点带直属成员人数
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/org/org/v1/department_tree",
+					Path:    "/beaver/api/platform/org/v1/department_tree",
 					Handler: org.DepartmentTreeHandler(serverCtx),
 				},
 				{
 					// 成员列表，可按部门过滤
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/org/org/v1/member_list",
+					Path:    "/beaver/api/platform/org/v1/member_list",
 					Handler: org.ListMemberHandler(serverCtx),
 				},
 				{
 					// 查询当前组织
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/org/org/v1/organization",
+					Path:    "/beaver/api/platform/org/v1/organization",
 					Handler: org.GetOrganizationHandler(serverCtx),
 				},
 			}...,

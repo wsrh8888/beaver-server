@@ -48,7 +48,7 @@ func NewGetEmojiPackageContentsByRelationIdsLogic(ctx context.Context, svcCtx *s
 }
 
 func (l *GetEmojiPackageContentsByRelationIdsLogic) GetEmojiPackageContentsByRelationIds(req *types.GetEmojiPackageContentsByRelationIdsReq) (resp *types.GetEmojiPackageContentsByRelationIdsRes, err error) {
-	if len(req.RelationIds) == 0 {
+	if len(req.RelationIDs) == 0 {
 		return &types.GetEmojiPackageContentsByRelationIdsRes{
 			Contents: make([]types.EmojiPackageContentDetailItem, 0),
 		}, nil
@@ -56,13 +56,13 @@ func (l *GetEmojiPackageContentsByRelationIdsLogic) GetEmojiPackageContentsByRel
 
 	// 根据关联ID列表查询内容详情
 	var contents []emoji_models.EmojiPackageEmoji
-	err = l.svcCtx.DB.Where("relation_id IN ?", req.RelationIds).Find(&contents).Error
+	err = l.svcCtx.DB.Where("relation_id IN ?", req.RelationIDs).Find(&contents).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询表情包内容详情失败", Data: map[string]any{"relationIds": req.RelationIds, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询表情包内容详情失败", Data: map[string]any{"relationIds": req.RelationIDs, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.logger.Info(model.LogMsg{Text: "批量查询表情包内容详情", Data: map[string]interface{}{"relationCount": len(req.RelationIds), "resultCount": len(contents)}})
+	l.logger.Info(model.LogMsg{Text: "批量查询表情包内容详情", Data: map[string]interface{}{"relationCount": len(req.RelationIDs), "resultCount": len(contents)}})
 
 	// 转换为响应格式
 	var contentItems []types.EmojiPackageContentDetailItem

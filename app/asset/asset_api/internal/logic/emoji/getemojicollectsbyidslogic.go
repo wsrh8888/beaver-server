@@ -48,7 +48,7 @@ func NewGetEmojiCollectsByIdsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *GetEmojiCollectsByIdsLogic) GetEmojiCollectsByIds(req *types.GetEmojiCollectsByIdsReq) (resp *types.GetEmojiCollectsByIdsRes, err error) {
-	if len(req.Ids) == 0 {
+	if len(req.IDs) == 0 {
 		return &types.GetEmojiCollectsByIdsRes{
 			Collects: make([]types.EmojiCollectDetailItem, 0),
 		}, nil
@@ -56,13 +56,13 @@ func (l *GetEmojiCollectsByIdsLogic) GetEmojiCollectsByIds(req *types.GetEmojiCo
 
 	// 根据ID列表查询收藏记录详情
 	var collects []emoji_models.EmojiCollectEmoji
-	err = l.svcCtx.DB.Where("emoji_collect_id IN ? AND user_id = ?", req.Ids, req.UserID).Find(&collects).Error
+	err = l.svcCtx.DB.Where("emoji_collect_id IN ? AND user_id = ?", req.IDs, req.UserID).Find(&collects).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询表情收藏记录详情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询表情收藏记录详情失败", Data: map[string]any{"ids": req.IDs, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.logger.Info(model.LogMsg{Text: "批量查询表情收藏记录详情", Data: map[string]interface{}{"requestCount": len(req.Ids), "resultCount": len(collects)}})
+	l.logger.Info(model.LogMsg{Text: "批量查询表情收藏记录详情", Data: map[string]interface{}{"requestCount": len(req.IDs), "resultCount": len(collects)}})
 
 	// 转换为响应格式
 	var collectItems []types.EmojiCollectDetailItem

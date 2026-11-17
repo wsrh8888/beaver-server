@@ -48,7 +48,7 @@ type (
 GroupCreateReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		Title      string   `json:"title,optional"` // 群组名称，可选
-		UserIdList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
+		UserIDList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
 	}
 
 GroupCreateRes {
@@ -72,7 +72,7 @@ type (
 GroupMemberRemoveReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
-		UserIds []string `json:"userIds"` // 要移除的成员ID列表
+		UserIDs []string `json:"userIds"` // 要移除的成员ID列表
 	}
 
 GroupMemberRemoveRes {
@@ -84,7 +84,7 @@ type (
 GroupMemberAddReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
-		UserIds []string `json:"userIds"` // 要添加的成员ID列表
+		UserIDs []string `json:"userIds"` // 要添加的成员ID列表
 	}
 
 GroupMemberAddRes {
@@ -268,7 +268,7 @@ type (
 GroupInviteReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 		GroupID string   `json:"groupId"` // 群组ID
-		UserIds []string `json:"userIds"` // 被邀请的用户ID列表
+		UserIDs []string `json:"userIds"` // 被邀请的用户ID列表
 		Message string   `json:"message,optional"` // 邀请消息，可选
 	}
 
@@ -459,53 +459,53 @@ GetGroupsListByIdsRes {
 
 type (
 AddGroupMemberReq {
-		GroupId    string `json:"group_id,optional"` // 群组ID
-		UserId     string `json:"user_id,optional"` // 要加入的用户ID
-		OperatedBy string `json:"operated_by,optional"` // 操作者ID
+		GroupID    string `json:"groupId,optional"` // 群组ID
+		UserID     string `json:"userId,optional"` // 要加入的用户ID
+		OperatedBy string `json:"operatedBy,optional"` // 操作者ID
 	}
 
 AddGroupMemberRes {
 		Added         bool  `json:"added,optional"` // 是否新加入
-		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+		MemberVersion int64 `json:"memberVersion,optional"` // 群成员列表版本号
 	}
 )
 
 type (
 RemoveGroupMemberReq {
-		GroupId    string `json:"group_id,optional"` // 群组ID
-		UserId     string `json:"user_id,optional"` // 要移除的用户ID
-		OperatedBy string `json:"operated_by,optional"` // 操作者ID
+		GroupID    string `json:"groupId,optional"` // 群组ID
+		UserID     string `json:"userId,optional"` // 要移除的用户ID
+		OperatedBy string `json:"operatedBy,optional"` // 操作者ID
 		Kick       bool   `json:"kick,optional"` // true=被踢，false=退出
 	}
 
 RemoveGroupMemberRes {
-		MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+		MemberVersion int64 `json:"memberVersion,optional"` // 群成员列表版本号
 	}
 )
 
 type (
 GroupItem {
-		Id        uint64 `json:"id,optional"` // 记录ID
-		GroupId   string `json:"group_id,optional"` // 群组ID
+		ID        uint64 `json:"id,optional"` // 记录ID
+		GroupID   string `json:"groupId,optional"` // 群组ID
 		Type      int32  `json:"type,optional"` // 群类型
 		Title     string `json:"title,optional"` // 群名称
 		Avatar    string `json:"avatar,optional"` // 群头像
-		CreatorId string `json:"creator_id,optional"` // 创建者ID
+		CreatorID string `json:"creatorId,optional"` // 创建者ID
 		Notice    string `json:"notice,optional"` // 群公告
 		Status    int32  `json:"status,optional"` // 群状态
-		MuteAll   bool   `json:"mute_all,optional"` // 是否全员禁言
-		CreatedAt string `json:"created_at,optional"` // 创建时间
-		UpdatedAt string `json:"updated_at,optional"` // 更新时间
+		MuteAll   bool   `json:"muteAll,optional"` // 是否全员禁言
+		CreatedAt string `json:"createdAt,optional"` // 创建时间
+		UpdatedAt string `json:"updatedAt,optional"` // 更新时间
 	}
 
 ListGroupsReq {
 		Page     int32  `json:"page,optional"` // 页码
-		PageSize int32  `json:"page_size,optional"` // 每页条数
+		PageSize int32  `json:"pageSize,optional"` // 每页条数
 		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
 		Type     int32  `json:"type,optional"` // 类型筛选，0 表示全部
 		Keywords string `json:"keywords,optional"` // 群名关键词
-		Id       uint64 `json:"id,optional"` // 记录ID
-		GroupId  string `json:"group_id,optional"` // 业务群组ID
+		ID       uint64 `json:"id,optional"` // 记录ID
+		GroupID  string `json:"groupId,optional"` // 业务群组ID
 	}
 
 ListGroupsRes {
@@ -516,20 +516,20 @@ ListGroupsRes {
 
 type (
 GroupMemberItem {
-		Id                 uint64 `json:"id,optional"` // 记录ID
-		GroupId            string `json:"group_id,optional"` // 群组ID
-		UserId             string `json:"user_id,optional"` // 用户ID
+		ID                 uint64 `json:"id,optional"` // 记录ID
+		GroupID            string `json:"groupId,optional"` // 群组ID
+		UserID             string `json:"userId,optional"` // 用户ID
 		Role               int32  `json:"role,optional"` // 成员角色
 		Status             int32  `json:"status,optional"` // 成员状态
-		ProhibitionMinutes int32  `json:"prohibition_minutes,optional"` // 禁言剩余分钟
-		CreatedAt          string `json:"created_at,optional"` // 创建时间
-		UpdatedAt          string `json:"updated_at,optional"` // 更新时间
+		ProhibitionMinutes int32  `json:"prohibitionMinutes,optional"` // 禁言剩余分钟
+		CreatedAt          string `json:"createdAt,optional"` // 创建时间
+		UpdatedAt          string `json:"updatedAt,optional"` // 更新时间
 	}
 
 ListGroupMembersReq {
-		GroupId  string `json:"group_id,optional"` // 群组ID
+		GroupID  string `json:"groupId,optional"` // 群组ID
 		Page     int32  `json:"page,optional"` // 页码
-		PageSize int32  `json:"page_size,optional"` // 每页条数
+		PageSize int32  `json:"pageSize,optional"` // 每页条数
 		Role     int32  `json:"role,optional"` // 角色筛选，0 表示全部
 		Status   int32  `json:"status,optional"` // 状态筛选，0 表示全部
 	}
@@ -542,9 +542,9 @@ ListGroupMembersRes {
 
 type (
 UpdateGroupMemberReq {
-		Id          uint64 `json:"id,optional"` // 成员记录ID
+		ID          uint64 `json:"id,optional"` // 成员记录ID
 		Role        *int32 `json:"role,optional"` // 角色
-		MuteMinutes *int32 `json:"mute_minutes,optional"` // 禁言分钟，0 解除
+		MuteMinutes *int32 `json:"muteMinutes,optional"` // 禁言分钟，0 解除
 	}
 
 UpdateGroupMemberRes {}
@@ -552,15 +552,23 @@ UpdateGroupMemberRes {}
 
 type (
 UpdateGroupReq {
-		Id      uint64 `json:"id,optional"` // 记录ID
+		ID      uint64 `json:"id,optional"` // 记录ID
 		Title   string `json:"title,optional"` // 群名称，空表示不修改
 		Avatar  string `json:"avatar,optional"` // 群头像，空表示不修改
 		Notice  string `json:"notice,optional"` // 群公告，空表示不修改
 		Status  int32  `json:"status,optional"` // 群状态，0 表示不修改
-		MuteAll *bool  `json:"mute_all,optional"` // 全员禁言
+		MuteAll *bool  `json:"muteAll,optional"` // 全员禁言
 	}
 
 UpdateGroupRes {}
+)
+
+type (
+
+)
+
+type (
+
 )
 
 @server (
@@ -570,133 +578,129 @@ UpdateGroupRes {}
 service relation {
 	@doc "创建群组"
 	@handler groupCreate
-	post /beaver/api/group/group/v1/create (GroupCreateReq) returns (GroupCreateRes)
+	post /beaver/api/relation/group/v1/create (GroupCreateReq) returns (GroupCreateRes)
 
 	@doc "解散群组"
 	@handler groupDelete
-	post /beaver/api/group/group/v1/delete (GroupDeleteReq) returns (GroupDeleteRes)
+	post /beaver/api/relation/group/v1/delete (GroupDeleteReq) returns (GroupDeleteRes)
 
 	@doc "移除群成员"
 	@handler groupMemberRemove
-	post /beaver/api/group/group/v1/member_remove (GroupMemberRemoveReq) returns (GroupMemberRemoveRes)
+	post /beaver/api/relation/group/v1/member_remove (GroupMemberRemoveReq) returns (GroupMemberRemoveRes)
 
 	@doc "添加群成员"
 	@handler groupMemberAdd
-	post /beaver/api/group/group/v1/member_add (GroupMemberAddReq) returns (GroupMemberAddRes)
+	post /beaver/api/relation/group/v1/member_add (GroupMemberAddReq) returns (GroupMemberAddRes)
 
 	@doc "退出群组"
 	@handler quitGroup
-	post /beaver/api/group/group/v1/quit (GroupQuitReq) returns (GroupQuitRes)
+	post /beaver/api/relation/group/v1/quit (GroupQuitReq) returns (GroupQuitRes)
 
 	@doc "更新群组信息"
 	@handler updateGroupInfo
-	post /beaver/api/group/group/v1/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
+	post /beaver/api/relation/group/v1/update (UpdateGroupInfoReq) returns (UpdateGroupInfoRes)
 
 	@doc "获取群信息"
 	@handler groupInfo
-	post /beaver/api/group/group/v1/info (GroupInfoReq) returns (GroupInfoRes)
+	post /beaver/api/relation/group/v1/info (GroupInfoReq) returns (GroupInfoRes)
 
 	@doc "获取我加入的群组列表"
 	@handler groupMine
-	post /beaver/api/group/group/v1/mine (GroupMineReq) returns (GroupMineRes)
+	post /beaver/api/relation/group/v1/mine (GroupMineReq) returns (GroupMineRes)
 
 	@doc "获取群成员列表"
 	@handler getGroupMembers
-	post /beaver/api/group/group/v1/members (GroupMemberListReq) returns (GroupMemberListRes)
+	post /beaver/api/relation/group/v1/members (GroupMemberListReq) returns (GroupMemberListRes)
 
 	@doc "更新群成员角色"
 	@handler updateMemberRole
-	post /beaver/api/group/group/v1/member_role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
+	post /beaver/api/relation/group/v1/member_role (UpdateMemberRoleReq) returns (UpdateMemberRoleRes)
 
 	@doc "申请加入群组"
 	@handler joinGroup
-	post /beaver/api/group/group/v1/join (GroupJoinReq) returns (GroupJoinRes)
+	post /beaver/api/relation/group/v1/join (GroupJoinReq) returns (GroupJoinRes)
 
 	@doc "转让群主"
 	@handler transferOwner
-	post /beaver/api/group/group/v1/transfer (TransferOwnerReq) returns (TransferOwnerRes)
+	post /beaver/api/relation/group/v1/transfer (TransferOwnerReq) returns (TransferOwnerRes)
 
 	@doc "获取用户管理的群组申请列表"
 	@handler groupJoinRequestList
-	post /beaver/api/group/group/v1/join_request_list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
+	post /beaver/api/relation/group/v1/join_request_list (GroupJoinRequestListReq) returns (GroupJoinRequestListRes)
 
 	@doc "处理群组申请"
 	@handler groupJoinRequestHandle
-	post /beaver/api/group/group/v1/join_request_handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
+	post /beaver/api/relation/group/v1/join_request_handle (GroupJoinRequestHandleReq) returns (GroupJoinRequestHandleRes)
 
 	@doc "邀请用户加入群组"
 	@handler groupInvite
-	post /beaver/api/group/group/v1/invite (GroupInviteReq) returns (GroupInviteRes)
+	post /beaver/api/relation/group/v1/invite (GroupInviteReq) returns (GroupInviteRes)
 
 	@doc "解析群邀请链接"
 	@handler resolveGroupInvite
-	get /beaver/api/group/group/v1/invite_code (ResolveGroupInviteReq) returns (ResolveGroupInviteRes)
+	get /beaver/api/relation/group/v1/invite_code (ResolveGroupInviteReq) returns (ResolveGroupInviteRes)
 
 	@doc "群资料同步"
 	@handler groupSync
-	post /beaver/api/group/group/v1/sync (GroupSyncReq) returns (GroupSyncRes)
+	post /beaver/api/relation/group/v1/sync (GroupSyncReq) returns (GroupSyncRes)
 
 	@doc "群成员同步"
 	@handler groupMemberSync
-	post /beaver/api/group/group/v1/member_sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
+	post /beaver/api/relation/group/v1/member_sync (GroupMemberSyncReq) returns (GroupMemberSyncRes)
 
 	@doc "入群申请同步"
 	@handler groupJoinRequestSync
-	post /beaver/api/group/group/v1/join_request_sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
+	post /beaver/api/relation/group/v1/join_request_sync (GroupJoinRequestSyncReq) returns (GroupJoinRequestSyncRes)
 
 	@doc "搜索群组"
 	@handler searchGroups
-	get /beaver/api/group/group/v1/search (GroupSearchReq) returns (GroupSearchRes)
+	get /beaver/api/relation/group/v1/search (GroupSearchReq) returns (GroupSearchRes)
 
 	@doc "禁言/解禁群成员"
 	@handler muteGroupMember
-	post /beaver/api/group/group/v1/member_mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
+	post /beaver/api/relation/group/v1/member_mute (MuteGroupMemberReq) returns (MuteGroupMemberRes)
 
 	@doc "全员禁言/解禁"
 	@handler muteAllGroup
-	post /beaver/api/group/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
-}
+	post /beaver/api/relation/group/v1/mute_all (MuteAllGroupReq) returns (MuteAllGroupRes)
 
-// ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
-// 路径刻意与 C 端错开（C 端已有 /members、/mine、/update 等），避免视图混用。
-
-@server (
-	group: group_machine
-	middleware: JwtS2s
-)
-service relation {
-	@doc "队间：取用户加入的群组ID列表"
+@doc "队间：取用户加入的群组ID列表"
 	@handler userGroupIds
-	post /beaver/api/group/machine/v1/ids (GetUserGroupIDsReq) returns (GetUserGroupIDsRes)
+	post /beaver/api/relation/group_s2s/v1/ids (GetUserGroupIDsReq) returns (GetUserGroupIDsRes)
 
 	@doc "队间：按ID批量取群组（支持增量）"
 	@handler groupsListByIds
-	post /beaver/api/group/machine/v1/list_by_ids (GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes)
+	post /beaver/api/relation/group_s2s/v1/list_by_ids (GetGroupsListByIdsReq) returns (GetGroupsListByIdsRes)
 
 	@doc "队间：添加群成员"
 	@handler addGroupMember
-	post /beaver/api/group/machine/v1/add_member (AddGroupMemberReq) returns (AddGroupMemberRes)
+	post /beaver/api/relation/group_s2s/v1/add_member (AddGroupMemberReq) returns (AddGroupMemberRes)
 
 	@doc "队间：移除群成员"
 	@handler removeGroupMember
-	post /beaver/api/group/machine/v1/remove_member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
+	post /beaver/api/relation/group_s2s/v1/remove_member (RemoveGroupMemberReq) returns (RemoveGroupMemberRes)
 
 	@doc "队间：分页查询群组"
 	@handler listGroups
-	post /beaver/api/group/machine/v1/list (ListGroupsReq) returns (ListGroupsRes)
+	post /beaver/api/relation/group_s2s/v1/list (ListGroupsReq) returns (ListGroupsRes)
 
 	@doc "队间：分页查询群成员"
 	@handler listGroupMembers
-	post /beaver/api/group/machine/v1/member_list (ListGroupMembersReq) returns (ListGroupMembersRes)
+	post /beaver/api/relation/group_s2s/v1/member_list (ListGroupMembersReq) returns (ListGroupMembersRes)
 
 	@doc "队间：更新群成员角色/禁言"
 	@handler updateGroupMember
-	post /beaver/api/group/machine/v1/update_member (UpdateGroupMemberReq) returns (UpdateGroupMemberRes)
+	post /beaver/api/relation/group_s2s/v1/update_member (UpdateGroupMemberReq) returns (UpdateGroupMemberRes)
 
 	@doc "队间：更新群组信息"
 	@handler updateGroup
-	post /beaver/api/group/machine/v1/modify (UpdateGroupReq) returns (UpdateGroupRes)
-}
+	post /beaver/api/relation/group_s2s/v1/modify (UpdateGroupReq) returns (UpdateGroupRes)
 
-// goctl api go -api relation_api.api -dir . --home ../../../template
+
+
+
+
+
+
+
+}

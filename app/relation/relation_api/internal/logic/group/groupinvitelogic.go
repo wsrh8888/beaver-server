@@ -87,7 +87,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 	now := time.Now()
 
 	// 处理每个被邀请的用户
-	for _, userId := range req.UserIds {
+	for _, userId := range req.UserIDs {
 		// 检查用户是否已经是群成员
 		var existingMember group_models.GroupMemberModel
 		err = tx.Where("group_id = ? AND user_id = ?", req.GroupID, userId).First(&existingMember).Error
@@ -192,7 +192,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 		}
 
 		// 通知被邀请的成员
-		for _, inviteeId := range req.UserIds {
+		for _, inviteeId := range req.UserIDs {
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
@@ -218,7 +218,7 @@ func (l *GroupInviteLogic) GroupInvite(req *types.GroupInviteReq) (resp *types.G
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
 			"userId":  req.UserID,
-			"count":   len(req.UserIds),
+			"count":   len(req.UserIDs),
 		},
 	})
 	return resp, nil

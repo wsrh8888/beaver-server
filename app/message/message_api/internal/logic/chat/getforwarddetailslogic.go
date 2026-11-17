@@ -100,7 +100,7 @@ func (l *GetForwardDetailsLogic) GetForwardDetails(req *types.GetForwardDetailsR
 	var list []types.Message
 	for _, m := range detail.Content {
 		var tMsg types.Message
-		tMsg.Id = m.Id
+		tMsg.ID = m.ID
 		tMsg.MessageID = m.MessageID
 		tMsg.ConversationID = m.ConversationID
 		tMsg.ConversationType = m.ConversationType

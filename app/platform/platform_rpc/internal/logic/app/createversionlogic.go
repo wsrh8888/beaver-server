@@ -71,7 +71,7 @@ func (l *CreateVersionLogic) CreateVersion(in *platform_rpc.CreateVersionReq) (*
 		return nil, status.Error(codes.Internal, "创建版本失败")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "创建版本成功", Data: map[string]interface{}{"versionId": version.Id, "version": in.Version}})
+	l.logger.Info(model.LogMsg{Text: "创建版本成功", Data: map[string]interface{}{"versionId": version.ID, "version": in.Version}})
 
-	return &platform_rpc.CreateVersionRes{VersionId: uint64(version.Id)}, nil
+	return &platform_rpc.CreateVersionRes{VersionId: uint64(version.ID)}, nil
 }

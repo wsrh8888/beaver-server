@@ -61,7 +61,7 @@ func (l *SubmitFeedbackLogic) SubmitFeedback(in *platform_rpc.SubmitFeedbackReq)
 		return nil, status.Error(codes.Internal, "提交反馈失败")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "提交反馈成功", Data: map[string]interface{}{"id": feedback.Id, "userId": in.UserId}})
+	l.logger.Info(model.LogMsg{Text: "提交反馈成功", Data: map[string]interface{}{"id": feedback.ID, "userId": in.UserId}})
 
-	return &platform_rpc.SubmitFeedbackRes{Id: uint64(feedback.Id)}, nil
+	return &platform_rpc.SubmitFeedbackRes{Id: uint64(feedback.ID)}, nil
 }

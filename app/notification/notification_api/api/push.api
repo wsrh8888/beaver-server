@@ -12,6 +12,23 @@ type (
 	RegisterPushTokenRes  {}
 )
 
+type (
+	PushEventReq {
+		EventType   string   `json:"eventType,optional"` // 必填：friend_request/moment_like/group_join/...
+		Category    string   `json:"category,optional"` // 必填：social/moment/group/system
+		FromUserID  string   `json:"fromUserId,optional"` // 触发方
+		TargetID    string   `json:"targetId,optional"` // 目标对象ID
+		TargetType  string   `json:"targetType,optional"` // 目标类型：moment/group/user/other
+		PayloadJSON string   `json:"payloadJson,optional"` // 扩展数据JSON
+		ToUserIDs   []string `json:"toUserIds,optional"` // 接收人列表
+		DedupHash   string   `json:"dedupHash,optional"` // 幂等/合并用
+	}
+	PushEventRes {
+		EventID string `json:"eventId,optional"` // 生成的事件ID
+		Version int64  `json:"version,optional"` // 事件版本（全局序列）
+	}
+)
+
 @server (
 	middleware: JwtS2s
 	group: push
@@ -20,37 +37,9 @@ service notification {
 	@doc "注册或更新离线推送 Token（FCM/APNs）"
 	@handler registerPushToken
 	post /beaver/api/notification/push/v1/register_push_token (RegisterPushTokenReq) returns (RegisterPushTokenRes)
-}
 
-// ==================== 队间（S2S）能力面 ====================
-// 与上面 C 端视图共用同一套 /beaver/api 契约，身份由网关注入 Beaver-User-Id 头、业务 JwtS2s 验机器票。
-// 通知事件由服务端发起（社交、群组等业务线），不属于任何终端用户，故走机器票。
-
-type (
-	PushEventReq {
-		EventType   string   `json:"event_type,optional"` // 必填：friend_request/moment_like/group_join/...
-		Category    string   `json:"category,optional"` // 必填：social/moment/group/system
-		FromUserId  string   `json:"from_user_id,optional"` // 触发方
-		TargetId    string   `json:"target_id,optional"` // 目标对象ID
-		TargetType  string   `json:"target_type,optional"` // 目标类型：moment/group/user/other
-		PayloadJson string   `json:"payload_json,optional"` // 扩展数据JSON
-		ToUserIds   []string `json:"to_user_ids,optional"` // 接收人列表
-		DedupHash   string   `json:"dedup_hash,optional"` // 幂等/合并用
-	}
-	PushEventRes {
-		EventId string `json:"event_id,optional"` // 生成的事件ID
-		Version int64  `json:"version,optional"` // 事件版本（全局序列）
-	}
-)
-
-@server (
-	group: push_machine
-	middleware: JwtS2s
-)
-service notification {
-	@doc "队间：投递通知事件"
+@doc "队间：投递通知事件"
 	@handler pushEvent
-	post /beaver/api/notification/machine/v1/push_event (PushEventReq) returns (PushEventRes)
-}
+	post /beaver/api/notification/push_s2s/v1/push_event (PushEventReq) returns (PushEventRes)
 
-// goctl api go -api notification_api.api -dir . --home ../../../template
+}

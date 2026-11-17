@@ -46,13 +46,13 @@ func NewGetEmojisByUuidsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetEmojisByUuidsLogic) GetEmojisByUuids(req *types.GetEmojisByUuidsReq) (resp *types.GetEmojisByUuidsRes, err error) {
-	if len(req.Ids) == 0 {
+	if len(req.IDs) == 0 {
 		return &types.GetEmojisByUuidsRes{Emojis: []types.EmojiSimpleItem{}}, nil
 	}
 
 	var emojis []emoji_models.Emoji
-	if err := l.svcCtx.DB.Where("emoji_id IN ? AND status = 1", req.Ids).Find(&emojis).Error; err != nil {
-		l.logger.Error(model.LogMsg{Text: "按UUID查询表情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
+	if err := l.svcCtx.DB.Where("emoji_id IN ? AND status = 1", req.IDs).Find(&emojis).Error; err != nil {
+		l.logger.Error(model.LogMsg{Text: "按UUID查询表情失败", Data: map[string]any{"ids": req.IDs, "err": err.Error()}})
 		return nil, err
 	}
 

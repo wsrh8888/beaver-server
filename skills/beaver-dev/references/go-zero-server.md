@@ -19,6 +19,22 @@
 - 命名：`.api` 驼峰；`.proto` / 表名 snake_case。
 - handler：入参校验；logic：业务（DB / rpc / remote）。
 
+### Go 命名规范（强制）
+
+**Go 字段名里常见首字母缩写一律全大写**（Go 官方规范），不因历史/兼容妥协：
+
+| 错误 | 正确 |
+|---|---|
+| `UserId` / `UserIds` | `UserID` / `UserIDs` |
+| `DeviceOs` / `AppId` / `ConversationId` | `DeviceOS` / `AppID` / `ConversationID` |
+| `LastLoginIp` / `PayloadJson` | `LastLoginIP` / `PayloadJSON` |
+
+- 适用范围：**所有 Go 结构体字段**——`.api` 契约、`types/remote` DTO、**gorm model**（含 `common/models.Model` 主键必须用 `ID`，gorm 官方默认主键名就是 `ID`）、本仓 `types`、`proto` 生成体之外的手写体。
+- `.api` 里的字段名直接决定 goctl 生成的 Go 字段名，所以 `.api` 必须写 `UserID`/`AppID`；json tag 与 Go 字段名解耦，wire 格式走 lowerCamel。
+- **json tag 一律 lowerCamel**：`json:"userId"` / `json:"affectedCount"` / `json:"createdAt"`；禁止 snake_case（`user_id`）。例外：OAuth 等外部协议的固定字段（`grant_type`/`client_id`）按对端协议原样。
+- 改服务端字段/tag 后，**所有跨仓调用方 DTO 必须同步**（见 [Remote DTO 契约](#typesremote-dto-契约强制对齐-api-的-type-块规则)），否则反序列化丢字段。
+- 字段名改动用 `go build` 驱动修复引用；遇到同一行左右两侧不同类型（左 DTO 已 `ID`、右 model 仍 `Id`）时按报错行号精确改，禁止全局替换造成 `Id`↔`ID` 震荡。
+
 ### 调用方向
 
 | 场景 | 方式 |
@@ -146,11 +162,9 @@ xx_models/
 xxx_api/
   xxx_api.api          # 主入口：只 import，不写业务 type/handler
   api/                 # 必须有；按「鉴权方式」拆子 .api（见下）
-    auth_public.api
-    auth.api
-    auth_s2s.api
-    user.api
-    user_s2s.api
+    auth_public.api    # 无网关身份鉴权
+    auth.api           # JwtS2s：C 端 + auth_s2s 机器面
+    user.api           # JwtS2s：C 端 + user_s2s 机器面
     ...
   internal/
     handler/           # goctl 生成
@@ -165,29 +179,42 @@ xxx_api/
 ```api
 import "api/auth_public.api"
 import "api/auth.api"
-import "api/auth_s2s.api"
 import "api/user.api"
-import "api/user_s2s.api"
 
 // goctl api go -api xxx_api.api -dir . --home ../../../template
 ```
 
 #### 子 .api 按鉴权拆分（强制）
 
-**一个子 `.api` 文件只允许一个 `@server` 块**，按鉴权方式拆成三类后缀：
+**一个子 `.api` 文件只允许一个 `@server` 块**，按**鉴权是否相同**决定是否拆文件：
 
-| 后缀 | 鉴权 | `@server` 声明 | 用途 |
+| 文件 | 鉴权 | `@server` 声明 | 用途 |
 |---|---|---|---|
-| `xxx.api` | 网关 JwtS2s（C端用户票经网关注入可信身份头） | `middleware: JwtS2s` | 面向登录用户的自助接口 |
+| `xxx.api` | 网关 JwtS2s | `middleware: JwtS2s` | C 端自助接口 **+ 队间机器面**（两者鉴权相同，同住此文件） |
 | `xxx_public.api` | **无网关身份鉴权**（公开；含靠 `client_secret` 自身鉴权的换票端点） | 不挂 middleware | 登录/注册等公开端点、机器票换发 |
-| `xxx_s2s.api` | 内部机器票 JwtS2s | `middleware: JwtS2s` | 跨仓 S2S 调用的机器视图（批量查询/管理操作） |
+
+**关于 s2s：不再单开 `xxx_s2s.api`**。C 端与队间机器面都挂 `JwtS2s`（同一身份闸门），没有拆文件的理由——合并进 `xxx.api` 的**同一个 `@server`/`service` 块**。两者的区分不靠文件，而靠 URL 的 group 段：`xxx.api` 里 C 端用业务 group（`auth`/`chat`/`push`…），机器面用 `xxx_s2s`（如 `/beaver/api/account/auth_s2s/v1/verify_password`）。group 段本身就是契约上的鉴权/调用方边界。
 
 **换票端点（如 `/beaver/api/account/auth_token/v1/issue`）归属**：它不走身份闸门（否则换不到票），靠 `client_secret` 自身鉴权，鉴权级别与公开端点相同——写进 `xxx_public.api` 的 `@server` 块里，**不单开 `xxx_token.api`、不多加一个 `@server` 块**。URL 的 group 段保留 `auth_token` 等业务语义即可，与文件后缀不必一致。
 
 硬性：
-- 禁止在一个 `.api` 里写多个 `@server` 块；不同鉴权的接口必须拆到不同文件。
-- 文件按鉴权拆，但**URL 的 group 段按业务语义**保持（如机器面仍可用业务 group，只要 action 不撞）；代码组织与 API 契约解耦。
+- 禁止在一个 `.api` 里写多个 `@server` 块；**只有鉴权不同的接口才拆到不同文件**（当前仅"JwtS2s"与"无鉴权"两类，故只有 `xxx.api` 与 `xxx_public.api`）。
+- C 端与机器面虽同文件，但 **URL 的 group 段必须区分**：业务 group（C 端）vs `xxx_s2s`（机器面）。禁止共用同一 group 靠 action 错开。
+- 合并/拆分时**每个 handler 连同它的 `XxxReq`/`XxxRes` 及专属子类型整体迁移**，保证接口契约自包含。
+- 生成的 handler/logic 包名统一用模板默认（`package handler` / `package logic`）；`@server group` 只决定目录名（如 `auth`），不决定包名。`internal/handler/common` 等工具子目录包名保持 `common`，不受批量改名影响。
 - 同一 `service` 名在多个子 `.api` 中重复声明是允许的（goctl 会合并路由）。
+- 改 `.api` 的字段名/json tag 后，**跨仓调用方 DTO（`types/remote/server/*.go`）必须同步**：json tag 一律 lowerCamel、Go 字段名 ID 大写缩写（`Id→ID`/`Ids→IDs`/`Os→OS`/`Ip→IP`/`Json→JSON`）；否则反序列化丢字段。用交叉验证脚本比对调用 URL 是否命中服务端真实 `routes.go`。
+
+**service 段（合并后服务名）映射**（旧子域名已全部废弃，代码/配置/前端/收费仓一并替换）：
+
+| 旧 service 段 | 新 service 段 | 目标网关服务 |
+|---|---|---|
+| `auth` / `user` | `account` | account_api |
+| `friend` / `group` | `relation` | relation_api |
+| `file` / `emoji` | `asset` | asset_api |
+| `chat` | `message` | message_api |
+| `org` / `workbench` | `platform` | platform_api |
+| `notification` / `datasync` | 保持不变 | 各自服务 |
 
 ### 路由（六段）
 
@@ -198,17 +225,17 @@ import "api/user_s2s.api"
 | 段 | 含义 |
 |---|---|
 | team | `beaver` 或 `beaver-open` 等独立仓 |
-| surface | `api` / `admin` / 机器面（如 `machine`） |
-| service | 服务名，如 `auth`、`open` |
-| group | 与 `@server group`、子 `.api` 一致 |
+| surface | `api` / `admin` |
+| service | 合并后的服务名，如 `account`、`message`、`asset`（见上表） |
+| group | URL 契约分组，**不等于** `.api` 文件名，也不等于 `@server group`（后者只是生成目录名）：C 端用业务名 `xxx`、公开面 `xxx_public`、机器面 `xxx_s2s` |
 | v1 | 固定，紧挨 action |
 | action | snake_case；资源+操作并进动作名 |
 
-示例：`/beaver/api/account/auth_public/v1/phone_login`  
+示例：`/beaver/api/account/auth_public/v1/phone_login`、`/beaver/api/account/auth_s2s/v1/verify_password`  
 禁止：`:id` 路径参数；禁止 `/v1/qrcode/status` 再拆段（写成 `qrcode_status`）。
 
 `service` 段用**合并后的服务名**（account/message/relation/asset/platform…），不再用合并前的业务子域名
-（auth/user/friend/chat…）；`group` 段用子 `.api` 的业务分组（auth_public/auth/user…）。
+（auth/user/friend/chat…）；`group` 段用 URL 契约分组（业务 group / `xxx_public` / `xxx_s2s`），与 `.api` 文件名无一一对应关系。
 同一服务的多个子 `.api` 可以共享一个 service 段，靠 group 区分。
 
 网关只转发、不鉴权；鉴权在下游 `@server` 声明（`jwt` / `middleware`）；公开组不挂身份中间件。鉴权失败真实 **401**。

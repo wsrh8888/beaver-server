@@ -94,7 +94,7 @@ func (l *AdminQueryLogsLogic) AdminQueryLogs(in *platform_rpc.AdminQueryLogsReq)
 			dataStr = string(dataBytes)
 		}
 		items = append(items, &platform_rpc.AdminLogItem{
-			Id:         uint64(logItem.Id),
+			Id:         uint64(logItem.ID),
 			Level:      logItem.Level,
 			Data:       dataStr,
 			BucketId:   logItem.BucketID,

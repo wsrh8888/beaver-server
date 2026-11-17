@@ -19,7 +19,7 @@
  * beaver-server-header-v1
  */
 
-package user
+package handler
 
 import (
 	"beaver/app/account/account_api/internal/logic/user"

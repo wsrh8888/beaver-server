@@ -55,7 +55,7 @@ func (l *ListReleasePoliciesLogic) ListReleasePolicies(in *platform_rpc.ListRele
 	items := make([]*platform_rpc.ReleasePolicyItem, 0, len(list))
 	for _, p := range list {
 		items = append(items, &platform_rpc.ReleasePolicyItem{
-			Id:              uint64(p.Id),
+			Id:              uint64(p.ID),
 			AppId:           p.AppID,
 			ArchitectureId:    uint64(p.ArchitectureID),
 			StableVersionId: uint64(p.StableVersionID),

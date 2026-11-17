@@ -107,7 +107,7 @@ func (l *GroupJoinRequestListLogic) GroupJoinRequestList(req *types.GroupJoinReq
 		// 这里需要查询用户信息，但由于没有用户RPC，暂时使用默认值
 		// 在实际项目中，应该通过用户RPC获取用户昵称和头像
 		requestItems = append(requestItems, types.GroupJoinRequestItem{
-			RequestID:       request.Id,
+			RequestID:       request.ID,
 			GroupID:         request.GroupID,
 			ApplicantID:     request.ApplicantUserID,
 			ApplicantName:   "用户" + request.ApplicantUserID, // 临时值，需要从用户服务获取

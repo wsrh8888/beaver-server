@@ -79,7 +79,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 
 	resolved := coreupdate.Resolve(coreupdate.ResolveInput{
 		AppID:           req.AppID,
-		ArchitectureID:  architecture.Id,
+		ArchitectureID:  architecture.ID,
 		DeviceID:        req.DeviceID,
 		UserID:          identity.UserID(l.ctx),
 		CurrentVersion:  req.Version,
@@ -111,7 +111,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 	resp := &types.GetLatestVersionRes{
 		HasUpdate:      true,
 		ForceUpdate:    resolved.ForceUpdate,
-		ArchitectureID: architecture.Id,
+		ArchitectureID: architecture.ID,
 		Version:        target.Version,
 		FileUrl:        target.FileUrl,
 		Description:    target.Description,
@@ -122,7 +122,7 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 		Text: "检查更新",
 		Data: map[string]interface{}{
 			"appId":          req.AppID,
-			"archId":         architecture.Id,
+			"archId":         architecture.ID,
 			"currentVersion": req.Version,
 			"targetVersion":  target.Version,
 			"inGrayRollout":  resolved.InGrayRollout,
@@ -135,14 +135,14 @@ func (l *GetLatestVersionLogic) GetLatestVersion(req *types.GetLatestVersionReq)
 
 func (l *GetLatestVersionLogic) loadPolicy(arch update_models.UpdateArchitecture) (stableID, grayID, rollout uint, minVer string, forceFlag, active bool) {
 	var policy update_models.UpdateReleasePolicy
-	err := l.svcCtx.DB.Where("architecture_id = ? AND is_active = ?", arch.Id, true).First(&policy).Error
+	err := l.svcCtx.DB.Where("architecture_id = ? AND is_active = ?", arch.ID, true).First(&policy).Error
 	if err == nil {
 		return policy.StableVersionID, policy.GrayVersionID, policy.RolloutPercent, policy.MinVersion, policy.ForceUpdate, true
 	}
 
 	var latest update_models.UpdateVersion
-	if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").First(&latest).Error; err == nil {
-		return latest.Id, 0, 0, "", false, true
+	if err := l.svcCtx.DB.Where("architecture_id = ?", arch.ID).Order("created_at DESC").First(&latest).Error; err == nil {
+		return latest.ID, 0, 0, "", false, true
 	}
 	return 0, 0, 0, "", false, false
 }

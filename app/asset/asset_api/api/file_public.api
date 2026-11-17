@@ -1,0 +1,10 @@
+syntax = "v1"
+
+@server (
+	group: file
+)
+service asset {
+	@doc "文件预览"
+	@handler Preview
+	get /beaver/api/asset/preview/v1/get (PreviewReq) returns (PreviewRes)
+}

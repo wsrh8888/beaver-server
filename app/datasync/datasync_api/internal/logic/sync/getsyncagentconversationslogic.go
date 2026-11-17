@@ -82,12 +82,12 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 		versions = append(versions, types.AgentConversationVersionItem{
 			ConversationID: item.ConversationID,
 			Version:        item.Version,
-			LatestTopicId:  item.LatestTopicId,
+			LatestTopicID:  item.LatestTopicId,
 			Title:          item.Title,
 			UpdatedAt:      item.UpdatedAt,
 			Preview:        item.Preview,
 			Module:         item.Module,
-			WorkspaceId:    item.WorkspaceId,
+			WorkspaceID:    item.WorkspaceId,
 		})
 	}
 

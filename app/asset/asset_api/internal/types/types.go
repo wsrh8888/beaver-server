@@ -39,7 +39,7 @@ type AddEmojiRes struct {
 }
 
 type BatchDeleteFilesReq struct {
-	Ids []uint64 `json:"ids,optional"` // 记录ID列表
+	IDs []uint64 `json:"ids,optional"` // 记录ID列表
 }
 
 type BatchDeleteFilesRes struct {
@@ -47,7 +47,7 @@ type BatchDeleteFilesRes struct {
 }
 
 type DeleteFileReq struct {
-	Id uint64 `json:"id,optional"` // 记录ID
+	ID uint64 `json:"id,optional"` // 记录ID
 }
 
 type DeleteFileRes struct {
@@ -68,13 +68,13 @@ type EmojiCollectDetailItem struct {
 }
 
 type EmojiCollectItem struct {
-	CollectId    string `json:"collect_id,optional"`     // 收藏记录ID
-	UserId       string `json:"user_id,optional"`        // 用户ID
-	EmojiId      string `json:"emoji_id,optional"`       // 表情ID
-	EmojiTitle   string `json:"emoji_title,optional"`    // 表情名称
-	EmojiFileKey string `json:"emoji_file_key,optional"` // 表情文件Key
-	CreatedAt    string `json:"created_at,optional"`     // 创建时间
-	UpdatedAt    string `json:"updated_at,optional"`     // 更新时间
+	CollectID    string `json:"collectId,optional"`    // 收藏记录ID
+	UserID       string `json:"userId,optional"`       // 用户ID
+	EmojiID      string `json:"emojiId,optional"`      // 表情ID
+	EmojiTitle   string `json:"emojiTitle,optional"`   // 表情名称
+	EmojiFileKey string `json:"emojiFileKey,optional"` // 表情文件Key
+	CreatedAt    string `json:"createdAt,optional"`    // 创建时间
+	UpdatedAt    string `json:"updatedAt,optional"`    // 更新时间
 }
 
 type EmojiDetailItem struct {
@@ -154,16 +154,16 @@ type EmojiSimpleItem struct {
 }
 
 type FileItem struct {
-	Id           uint64 `json:"id,optional"`            // 记录ID
-	FileKey      string `json:"file_key,optional"`      // 文件Key
-	OriginalName string `json:"original_name,optional"` // 原始文件名
-	Size         int64  `json:"size,optional"`          // 文件大小
-	Path         string `json:"path,optional"`          // 存储路径
-	Md5          string `json:"md5,optional"`           // MD5
-	Type         string `json:"type,optional"`          // 文件类型
-	Source       string `json:"source,optional"`        // 来源 qiniu/local
-	CreatedAt    string `json:"created_at,optional"`    // 创建时间
-	UpdatedAt    string `json:"updated_at,optional"`    // 更新时间
+	ID           uint64 `json:"id,optional"`           // 记录ID
+	FileKey      string `json:"fileKey,optional"`      // 文件Key
+	OriginalName string `json:"originalName,optional"` // 原始文件名
+	Size         int64  `json:"size,optional"`         // 文件大小
+	Path         string `json:"path,optional"`         // 存储路径
+	Md5          string `json:"md5,optional"`          // MD5
+	Type         string `json:"type,optional"`         // 文件类型
+	Source       string `json:"source,optional"`       // 来源 qiniu/local
+	CreatedAt    string `json:"createdAt,optional"`    // 创建时间
+	UpdatedAt    string `json:"updatedAt,optional"`    // 更新时间
 }
 
 type FileUploadAudioFile struct {
@@ -306,7 +306,7 @@ type GetEmojiByUuidsInfo struct {
 
 type GetEmojiCollectsByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	Ids    []string `json:"ids"`              // 收藏记录ID列表
+	IDs    []string `json:"ids"`              // 收藏记录ID列表
 }
 
 type GetEmojiCollectsByIdsRes struct {
@@ -314,7 +314,7 @@ type GetEmojiCollectsByIdsRes struct {
 }
 
 type GetEmojiCollectsByUuidsReq struct {
-	Ids []string `json:"ids"` // 收藏记录ID列表
+	IDs []string `json:"ids"` // 收藏记录ID列表
 }
 
 type GetEmojiCollectsByUuidsRes struct {
@@ -328,7 +328,7 @@ type GetEmojiInfo struct {
 
 type GetEmojiPackageCollectsByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	Ids    []string `json:"ids"`              // 收藏记录ID列表
+	IDs    []string `json:"ids"`              // 收藏记录ID列表
 }
 
 type GetEmojiPackageCollectsByIdsRes struct {
@@ -337,7 +337,7 @@ type GetEmojiPackageCollectsByIdsRes struct {
 
 type GetEmojiPackageContentsByPackageIdsReq struct {
 	UserID     string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	PackageIds []string `json:"packageIds"`       // 表情包ID列表
+	PackageIDs []string `json:"packageIds"`       // 表情包ID列表
 }
 
 type GetEmojiPackageContentsByPackageIdsRes struct {
@@ -346,7 +346,7 @@ type GetEmojiPackageContentsByPackageIdsRes struct {
 
 type GetEmojiPackageContentsByRelationIdsReq struct {
 	UserID      string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	RelationIds []string `json:"relationIds"`      // 关联ID列表
+	RelationIDs []string `json:"relationIds"`      // 关联ID列表
 }
 
 type GetEmojiPackageContentsByRelationIdsRes struct {
@@ -386,7 +386,7 @@ type GetEmojiPackageInfo struct {
 
 type GetEmojiPackagesByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	Ids    []string `json:"ids"`              // 表情包ID列表
+	IDs    []string `json:"ids"`              // 表情包ID列表
 }
 
 type GetEmojiPackagesByIdsRes struct {
@@ -422,7 +422,7 @@ type GetEmojiPackagesSimpleItem struct {
 
 type GetEmojisByIdsReq struct {
 	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	Ids    []string `json:"ids"`              // 表情ID列表
+	IDs    []string `json:"ids"`              // 表情ID列表
 }
 
 type GetEmojisByIdsRes struct {
@@ -431,7 +431,7 @@ type GetEmojisByIdsRes struct {
 
 type GetEmojisByUuidsReq struct {
 	UserID string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-	Ids    []string `json:"ids"`              // 表情ID列表
+	IDs    []string `json:"ids"`              // 表情ID列表
 }
 
 type GetEmojisByUuidsRes struct {
@@ -450,7 +450,7 @@ type GetEmojisListRes struct {
 }
 
 type GetFileByIdReq struct {
-	Id uint64 `json:"id,optional"` // 记录ID
+	ID uint64 `json:"id,optional"` // 记录ID
 }
 
 type GetFileByIdRes struct {
@@ -500,12 +500,12 @@ type GetUserFavoritePackagesRes struct {
 }
 
 type ListEmojiCollectsReq struct {
-	Page      int32  `json:"page,optional"`       // 页码
-	PageSize  int32  `json:"page_size,optional"`  // 每页条数
-	UserId    string `json:"user_id,optional"`    // 用户ID筛选
-	EmojiId   string `json:"emoji_id,optional"`   // 表情ID筛选
-	StartTime string `json:"start_time,optional"` // 开始时间
-	EndTime   string `json:"end_time,optional"`   // 结束时间
+	Page      int32  `json:"page,optional"`      // 页码
+	PageSize  int32  `json:"pageSize,optional"`  // 每页条数
+	UserID    string `json:"userId,optional"`    // 用户ID筛选
+	EmojiID   string `json:"emojiId,optional"`   // 表情ID筛选
+	StartTime string `json:"startTime,optional"` // 开始时间
+	EndTime   string `json:"endTime,optional"`   // 结束时间
 }
 
 type ListEmojiCollectsRes struct {
@@ -514,15 +514,15 @@ type ListEmojiCollectsRes struct {
 }
 
 type ListEmojiPackagesReq struct {
-	Page      int32  `json:"page,optional"`       // 页码
-	PageSize  int32  `json:"page_size,optional"`  // 每页条数
-	UserId    string `json:"user_id,optional"`    // 所属用户筛选
-	Type      string `json:"type,optional"`       // 类型筛选
-	Status    int32  `json:"status,optional"`     // 状态筛选
-	Title     string `json:"title,optional"`      // 名称筛选
-	StartTime string `json:"start_time,optional"` // 开始时间
-	EndTime   string `json:"end_time,optional"`   // 结束时间
-	PackageId string `json:"package_id,optional"` // 表情包ID精确查
+	Page      int32  `json:"page,optional"`      // 页码
+	PageSize  int32  `json:"pageSize,optional"`  // 每页条数
+	UserID    string `json:"userId,optional"`    // 所属用户筛选
+	Type      string `json:"type,optional"`      // 类型筛选
+	Status    int32  `json:"status,optional"`    // 状态筛选
+	Title     string `json:"title,optional"`     // 名称筛选
+	StartTime string `json:"startTime,optional"` // 开始时间
+	EndTime   string `json:"endTime,optional"`   // 结束时间
+	PackageID string `json:"packageId,optional"` // 表情包ID精确查
 }
 
 type ListEmojiPackagesRes struct {
@@ -531,13 +531,13 @@ type ListEmojiPackagesRes struct {
 }
 
 type ListEmojisReq struct {
-	Page      int32  `json:"page,optional"`       // 页码
-	PageSize  int32  `json:"page_size,optional"`  // 每页条数
-	Title     string `json:"title,optional"`      // 表情名称筛选
-	StartTime string `json:"start_time,optional"` // 开始时间
-	EndTime   string `json:"end_time,optional"`   // 结束时间
-	EmojiId   string `json:"emoji_id,optional"`   // 表情ID精确查
-	PackageId string `json:"package_id,optional"` // 表情包ID筛选
+	Page      int32  `json:"page,optional"`      // 页码
+	PageSize  int32  `json:"pageSize,optional"`  // 每页条数
+	Title     string `json:"title,optional"`     // 表情名称筛选
+	StartTime string `json:"startTime,optional"` // 开始时间
+	EndTime   string `json:"endTime,optional"`   // 结束时间
+	EmojiID   string `json:"emojiId,optional"`   // 表情ID精确查
+	PackageID string `json:"packageId,optional"` // 表情包ID筛选
 }
 
 type ListEmojisRes struct {
@@ -546,10 +546,10 @@ type ListEmojisRes struct {
 }
 
 type ListFilesReq struct {
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
-	Type     string `json:"type,optional"`      // 文件类型筛选
-	Keywords string `json:"keywords,optional"`  // 关键词
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
+	Type     string `json:"type,optional"`     // 文件类型筛选
+	Keywords string `json:"keywords,optional"` // 关键词
 }
 
 type ListFilesRes struct {
@@ -563,25 +563,25 @@ type MachineEmojiInfo struct {
 }
 
 type MachineEmojiItem struct {
-	EmojiId   string            `json:"emoji_id,optional"`   // 表情ID
-	FileKey   string            `json:"file_key,optional"`   // 文件Key
-	Title     string            `json:"title,optional"`      // 表情名称
-	EmojiInfo *MachineEmojiInfo `json:"emoji_info,optional"` // 尺寸信息
-	Status    int32             `json:"status,optional"`     // 状态：1=正常 2=审核中 3=违规禁用
-	CreatedAt string            `json:"created_at,optional"` // 创建时间
-	UpdatedAt string            `json:"updated_at,optional"` // 更新时间
+	EmojiID   string            `json:"emojiId,optional"`   // 表情ID
+	FileKey   string            `json:"fileKey,optional"`   // 文件Key
+	Title     string            `json:"title,optional"`     // 表情名称
+	EmojiInfo *MachineEmojiInfo `json:"emojiInfo,optional"` // 尺寸信息
+	Status    int32             `json:"status,optional"`    // 状态：1=正常 2=审核中 3=违规禁用
+	CreatedAt string            `json:"createdAt,optional"` // 创建时间
+	UpdatedAt string            `json:"updatedAt,optional"` // 更新时间
 }
 
 type MachineEmojiPackageItem struct {
-	PackageId   string `json:"package_id,optional"`  // 表情包ID
+	PackageID   string `json:"packageId,optional"`   // 表情包ID
 	Title       string `json:"title,optional"`       // 名称
-	CoverFile   string `json:"cover_file,optional"`  // 封面文件Key
-	UserId      string `json:"user_id,optional"`     // 所属用户ID
+	CoverFile   string `json:"coverFile,optional"`   // 封面文件Key
+	UserID      string `json:"userId,optional"`      // 所属用户ID
 	Description string `json:"description,optional"` // 描述
 	Type        string `json:"type,optional"`        // 类型：official / user
 	Status      int32  `json:"status,optional"`      // 状态
-	CreatedAt   string `json:"created_at,optional"`  // 创建时间
-	UpdatedAt   string `json:"updated_at,optional"`  // 更新时间
+	CreatedAt   string `json:"createdAt,optional"`   // 创建时间
+	UpdatedAt   string `json:"updatedAt,optional"`   // 更新时间
 }
 
 type PreviewReq struct {
@@ -592,64 +592,64 @@ type PreviewRes struct {
 }
 
 type SaveEmojiPackageReq struct {
-	PackageId        string  `json:"package_id,optional"`        // 表情包ID，空表示新建
-	Title            string  `json:"title,optional"`             // 名称
-	CoverFile        string  `json:"cover_file,optional"`        // 封面文件Key
-	UserId           string  `json:"user_id,optional"`           // 所属用户ID
-	Description      string  `json:"description,optional"`       // 描述
-	Type             string  `json:"type,optional"`              // 类型
-	PatchTitle       *string `json:"patch_title,optional"`       // 增量改名称
-	PatchCoverFile   *string `json:"patch_cover_file,optional"`  // 增量改封面
-	PatchDescription *string `json:"patch_description,optional"` // 增量改描述
-	PatchType        *string `json:"patch_type,optional"`        // 增量改类型
-	PatchStatus      *int32  `json:"patch_status,optional"`      // 增量改状态
-	Delete           *bool   `json:"delete,optional"`            // 删除标记
+	PackageID        string  `json:"packageId,optional"`        // 表情包ID，空表示新建
+	Title            string  `json:"title,optional"`            // 名称
+	CoverFile        string  `json:"coverFile,optional"`        // 封面文件Key
+	UserID           string  `json:"userId,optional"`           // 所属用户ID
+	Description      string  `json:"description,optional"`      // 描述
+	Type             string  `json:"type,optional"`             // 类型
+	PatchTitle       *string `json:"patchTitle,optional"`       // 增量改名称
+	PatchCoverFile   *string `json:"patchCoverFile,optional"`   // 增量改封面
+	PatchDescription *string `json:"patchDescription,optional"` // 增量改描述
+	PatchType        *string `json:"patchType,optional"`        // 增量改类型
+	PatchStatus      *int32  `json:"patchStatus,optional"`      // 增量改状态
+	Delete           *bool   `json:"delete,optional"`           // 删除标记
 }
 
 type SaveEmojiPackageRes struct {
-	PackageId string `json:"package_id,optional"` // 表情包ID
+	PackageID string `json:"packageId,optional"` // 表情包ID
 }
 
 type SaveEmojiReq struct {
-	EmojiId      string            `json:"emoji_id,optional"`       // 表情ID，空表示新建
-	FileKey      string            `json:"file_key,optional"`       // 文件Key
-	Title        string            `json:"title,optional"`          // 表情名称
-	EmojiInfo    *MachineEmojiInfo `json:"emoji_info,optional"`     // 尺寸信息
-	PatchFileKey *string           `json:"patch_file_key,optional"` // 增量改文件Key
-	PatchTitle   *string           `json:"patch_title,optional"`    // 增量改名称
-	Delete       *bool             `json:"delete,optional"`         // 删除标记
+	EmojiID      string            `json:"emojiId,optional"`      // 表情ID，空表示新建
+	FileKey      string            `json:"fileKey,optional"`      // 文件Key
+	Title        string            `json:"title,optional"`        // 表情名称
+	EmojiInfo    *MachineEmojiInfo `json:"emojiInfo,optional"`    // 尺寸信息
+	PatchFileKey *string           `json:"patchFileKey,optional"` // 增量改文件Key
+	PatchTitle   *string           `json:"patchTitle,optional"`   // 增量改名称
+	Delete       *bool             `json:"delete,optional"`       // 删除标记
 }
 
 type SaveEmojiRes struct {
-	EmojiId string `json:"emoji_id,optional"` // 表情ID
+	EmojiID string `json:"emojiId,optional"` // 表情ID
 }
 
 type SaveFileReq struct {
-	OriginalName string `json:"original_name,optional"`  // 原始文件名
-	Size         int64  `json:"size,optional"`           // 文件大小
-	Path         string `json:"path,optional"`           // 存储路径
-	Md5          string `json:"md5,optional"`            // MD5
-	Type         string `json:"type,optional"`           // 文件类型
-	Source       string `json:"source,optional"`         // 来源
-	FileInfoJson string `json:"file_info_json,optional"` // 文件附加信息 JSON
+	OriginalName string `json:"originalName,optional"` // 原始文件名
+	Size         int64  `json:"size,optional"`         // 文件大小
+	Path         string `json:"path,optional"`         // 存储路径
+	Md5          string `json:"md5,optional"`          // MD5
+	Type         string `json:"type,optional"`         // 文件类型
+	Source       string `json:"source,optional"`       // 来源
+	FileInfoJson string `json:"fileInfoJson,optional"` // 文件附加信息 JSON
 }
 
 type SaveFileRes struct {
-	FileKey string `json:"file_key,optional"` // 文件Key
+	FileKey string `json:"fileKey,optional"` // 文件Key
 }
 
 type UpdateEmojiPackageContentReq struct {
-	PackageId string            `json:"package_id,optional"` // 表情包ID
-	Action    int32             `json:"action,optional"`     // 操作类型
-	EmojiId   string            `json:"emoji_id,optional"`   // 表情ID
-	FileKey   string            `json:"file_key,optional"`   // 文件Key
-	Title     string            `json:"title,optional"`      // 表情名称
-	EmojiInfo *MachineEmojiInfo `json:"emoji_info,optional"` // 尺寸信息
+	PackageID string            `json:"packageId,optional"` // 表情包ID
+	Action    int32             `json:"action,optional"`    // 操作类型
+	EmojiID   string            `json:"emojiId,optional"`   // 表情ID
+	FileKey   string            `json:"fileKey,optional"`   // 文件Key
+	Title     string            `json:"title,optional"`     // 表情名称
+	EmojiInfo *MachineEmojiInfo `json:"emojiInfo,optional"` // 尺寸信息
 }
 
 type UpdateEmojiPackageContentRes struct {
-	RelationId string `json:"relation_id,optional"` // 关联记录ID
-	EmojiId    string `json:"emoji_id,optional"`    // 表情ID
+	RelationID string `json:"relationId,optional"` // 关联记录ID
+	EmojiID    string `json:"emojiId,optional"`    // 表情ID
 }
 
 type UpdateFavoriteEmojiPackageReq struct {

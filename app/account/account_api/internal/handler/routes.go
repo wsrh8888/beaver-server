@@ -26,10 +26,8 @@ import (
 	"net/http"
 
 	auth "beaver/app/account/account_api/internal/handler/auth"
-	auth_machine "beaver/app/account/account_api/internal/handler/auth_machine"
 	auth_public "beaver/app/account/account_api/internal/handler/auth_public"
 	user "beaver/app/account/account_api/internal/handler/user"
-	user_machine "beaver/app/account/account_api/internal/handler/user_machine"
 	"beaver/app/account/account_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -70,37 +68,29 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/beaver/api/account/auth/v1/update_password",
 					Handler: auth.UpdatePasswordHandler(serverCtx),
 				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JwtS2s},
-			[]rest.Route{
 				{
 					// 创建账号密码凭据
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/auth/v1/create_credential",
-					Handler: auth_machine.CreateCredentialHandler(serverCtx),
+					Path:    "/beaver/api/account/auth_s2s/v1/create_credential",
+					Handler: auth.CreateCredentialHandler(serverCtx),
 				},
 				{
 					// 查指定用户的登录设备
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/auth/v1/devices",
-					Handler: auth_machine.ListUserDevicesHandler(serverCtx),
+					Path:    "/beaver/api/account/auth_s2s/v1/devices",
+					Handler: auth.ListUserDevicesHandler(serverCtx),
 				},
 				{
 					// 重置指定用户密码（无需旧密码）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/auth/v1/reset_password",
-					Handler: auth_machine.ResetUserPasswordHandler(serverCtx),
+					Path:    "/beaver/api/account/auth_s2s/v1/reset_password",
+					Handler: auth.ResetUserPasswordHandler(serverCtx),
 				},
 				{
 					// 校验账号密码（开放平台 / 管理端代登录）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/auth/v1/verify_password",
-					Handler: auth_machine.VerifyPasswordHandler(serverCtx),
+					Path:    "/beaver/api/account/auth_s2s/v1/verify_password",
+					Handler: auth.VerifyPasswordHandler(serverCtx),
 				},
 			}...,
 		),
@@ -229,67 +219,59 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/beaver/api/account/user/v1/user_info",
 					Handler: user.UserInfoHandler(serverCtx),
 				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JwtS2s},
-			[]rest.Route{
 				{
 					// 创建用户
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/create",
-					Handler: user_machine.UserCreateHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/create",
+					Handler: user.UserCreateHandler(serverCtx),
 				},
 				{
 					// 批量删除用户
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/delete",
-					Handler: user_machine.UserDeleteHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/delete",
+					Handler: user.UserDeleteHandler(serverCtx),
 				},
 				{
 					// 按 user_id 查用户信息（含管理字段）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/info",
-					Handler: user_machine.UserLookupHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/info",
+					Handler: user.UserLookupHandler(serverCtx),
 				},
 				{
 					// 管理端用户分页列表
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/list",
-					Handler: user_machine.UserListHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/list",
+					Handler: user.UserListHandler(serverCtx),
 				},
 				{
 					// 批量查用户信息
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/list_info",
-					Handler: user_machine.UserListInfoHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/list_info",
+					Handler: user.UserListInfoHandler(serverCtx),
 				},
 				{
 					// 搜索用户
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/search",
-					Handler: user_machine.UserSearchHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/search",
+					Handler: user.UserSearchHandler(serverCtx),
 				},
 				{
 					// 批量更新用户资料
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/update",
-					Handler: user_machine.UserUpdateHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/update",
+					Handler: user.UserUpdateHandler(serverCtx),
 				},
 				{
 					// 更新用户展示信息（昵称、头像）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/update_display",
-					Handler: user_machine.UserUpdateDisplayHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/update_display",
+					Handler: user.UserUpdateDisplayHandler(serverCtx),
 				},
 				{
 					// 批量修改用户状态
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/account/user/v1/update_status",
-					Handler: user_machine.UserUpdateStatusHandler(serverCtx),
+					Path:    "/beaver/api/account/user_s2s/v1/update_status",
+					Handler: user.UserUpdateStatusHandler(serverCtx),
 				},
 			}...,
 		),

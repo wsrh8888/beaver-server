@@ -383,7 +383,7 @@ func (l *JoinGroupLogic) bumpInviteUse(invite *group_models.GroupInviteLinkModel
 	if invite.MaxUses > 0 && invite.UsedCount+1 >= invite.MaxUses {
 		updates["status"] = 3
 	}
-	_ = l.svcCtx.DB.Model(&group_models.GroupInviteLinkModel{}).Where("id = ?", invite.Id).Updates(updates).Error
+	_ = l.svcCtx.DB.Model(&group_models.GroupInviteLinkModel{}).Where("id = ?", invite.ID).Updates(updates).Error
 }
 
 func (l *JoinGroupLogic) triggerOpenPlatformWebhook(groupID string, operatorID string, memberIDs []string, action string) {

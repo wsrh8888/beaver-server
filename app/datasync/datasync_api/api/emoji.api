@@ -16,19 +16,19 @@ type (
 		ServerTimestamp             int64                            `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	EmojiCollectVersionItem {
-		EmojiCollectId string `json:"emojiCollectId"` // 收藏记录ID
+		EmojiCollectID string `json:"emojiCollectId"` // 收藏记录ID
 		Version        int64  `json:"version"` // 收藏版本号
 	}
 	EmojiPackageCollectVersionItem {
-		PackageCollectId string `json:"packageCollectId"` // 收藏记录ID
+		PackageCollectID string `json:"packageCollectId"` // 收藏记录ID
 		Version          int64  `json:"version"` // 收藏版本号
 	}
 	EmojiPackageVersionItem {
-		PackageId string `json:"packageId"` // 表情包ID
+		PackageID string `json:"packageId"` // 表情包ID
 		Version   int64  `json:"version"` // 表情包版本号
 	}
 	EmojiPackageContentVersionItem {
-		PackageId string `json:"packageId"` // 表情包ID
+		PackageID string `json:"packageId"` // 表情包ID
 		Version   int64  `json:"version"` // 表情包内容版本号
 	}
 )
@@ -44,7 +44,7 @@ type (
 		ServerTimestamp int64              `json:"serverTimestamp"` // 服务端处理时间戳
 	}
 	EmojiVersionItem {
-		EmojiId string `json:"emojiId"` // 表情ID
+		EmojiID string `json:"emojiId"` // 表情ID
 		Version int64  `json:"version"` // 表情版本号
 	}
 )

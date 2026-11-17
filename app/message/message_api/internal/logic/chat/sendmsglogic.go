@@ -131,7 +131,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.CallMsgType:
 		if apiMsg.CallMsg != nil {
 			rpcMsg.CallMsg = &chat_rpc.CallMsg{
-				RoomId:   apiMsg.CallMsg.RoomId,
+				RoomId:   apiMsg.CallMsg.RoomID,
 				CallType: int32(apiMsg.CallMsg.CallType),
 				Status:   int32(apiMsg.CallMsg.Status),
 				Duration: apiMsg.CallMsg.Duration,
@@ -140,7 +140,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.WithdrawMsgType:
 		if apiMsg.WithdrawMsg != nil {
 			rpcMsg.WithdrawMsg = &chat_rpc.WithdrawMsg{
-				OriginMsgId: apiMsg.WithdrawMsg.OriginMsgId,
+				OriginMsgId: apiMsg.WithdrawMsg.OriginMsgID,
 				// 递归转换快照
 				OriginMsg: l.BuildMsgToRpc(apiMsg.WithdrawMsg.OriginMsg),
 			}
@@ -148,7 +148,7 @@ func (l *SendMsgLogic) BuildMsgToRpc(apiMsg *types.Msg) *chat_rpc.Msg {
 	case ctype.ReplyMsgType:
 		if apiMsg.ReplyMsg != nil {
 			rpcMsg.ReplyMsg = &chat_rpc.ReplyMsg{
-				OriginMsgId: apiMsg.ReplyMsg.OriginMsgId,
+				OriginMsgId: apiMsg.ReplyMsg.OriginMsgID,
 				// 递归转换快照
 				OriginMsg: l.BuildMsgToRpc(apiMsg.ReplyMsg.OriginMsg),
 				// 递归转换回复的主体消息
@@ -208,7 +208,7 @@ func (l *SendMsgLogic) SendMsg(req *types.SendMsgReq) (*types.SendMsgRes, error)
 
 	// 构建 API 响应
 	resp := &types.SendMsgRes{
-		Id:             uint(rpcResp.Id),
+		ID:             uint(rpcResp.Id),
 		MessageID:      rpcResp.MessageId,
 		ConversationID: rpcResp.ConversationId,
 		Msg:            req.Msg, // 返回原始发送的消息对象

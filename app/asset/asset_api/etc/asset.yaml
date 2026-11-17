@@ -26,7 +26,7 @@ FileMaxSize:
   unknown: 10
 MaxBytes: 1073741824 # 1GB - go-zero HTTP服务器最大请求体大小
 
-# 通用上传接口(/beaver/api/file/file/v1/upload)使用的默认存储后端：local|qiniu|minio
+# 通用上传接口(/beaver/api/asset/file/v1/upload)使用的默认存储后端：local|qiniu|minio
 StorageType: local
 
 # 本地存储配置

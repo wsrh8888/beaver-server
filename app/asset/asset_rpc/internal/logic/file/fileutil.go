@@ -30,7 +30,7 @@ import (
 
 func toFileItem(f file_models.FileModel) *pb.FileItem {
 	return &pb.FileItem{
-		Id:           uint64(f.Id),
+		Id:           uint64(f.ID),
 		FileKey:      f.FileKey,
 		OriginalName: f.OriginalName,
 		Size:         f.Size,

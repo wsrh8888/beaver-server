@@ -484,7 +484,7 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 	})
 
 	return &chat_rpc.SendMsgRes{
-		Id:               uint32(chatModel.Id),
+		Id:               uint32(chatModel.ID),
 		MessageId:        chatModel.MessageID,
 		ConversationId:   chatModel.ConversationID,
 		Msg:              convertedMsg,

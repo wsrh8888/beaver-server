@@ -49,13 +49,13 @@ func NewGetUserConversationSettingsListByIdsLogic(ctx context.Context, svcCtx *s
 
 func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsListByIds(req *types.GetUserConversationSettingsListByIdsReq) (resp *types.GetUserConversationSettingsListByIdsRes, err error) {
 	var userConversations []message_models.ChatUserConversation
-	err = l.svcCtx.DB.Where("user_id = ? AND conversation_id IN (?)", req.UserID, req.ConversationIds).Find(&userConversations).Error
+	err = l.svcCtx.DB.Where("user_id = ? AND conversation_id IN (?)", req.UserID, req.ConversationIDs).Find(&userConversations).Error
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询用户会话设置失败",
 			Data: map[string]any{
 				"userId": req.UserID,
-				"count":  len(req.ConversationIds),
+				"count":  len(req.ConversationIDs),
 				"err":    err.Error(),
 			},
 		})
@@ -81,7 +81,7 @@ func (l *GetUserConversationSettingsListByIdsLogic) GetUserConversationSettingsL
 		Text: "批量查询用户会话设置成功",
 		Data: map[string]any{
 			"userId":       req.UserID,
-			"requestCount": len(req.ConversationIds),
+			"requestCount": len(req.ConversationIDs),
 			"resultCount":  len(conversationSettings),
 		},
 	})

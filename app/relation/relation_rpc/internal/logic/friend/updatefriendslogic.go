@@ -67,7 +67,7 @@ func (l *UpdateFriendsLogic) hardDelete(relationIDs []string) (*pb.UpdateFriends
 		if err != nil {
 			continue
 		}
-		ids = append(ids, f.Id)
+		ids = append(ids, f.ID)
 	}
 	if len(ids) == 0 {
 		return &pb.UpdateFriendsRes{}, nil

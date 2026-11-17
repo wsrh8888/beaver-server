@@ -4,6 +4,10 @@ etcd: 127.0.0.1:2379
 # 服务映射：路径第 3 段 service → 完整 etcd 服务名（未命中默认 {service}_api）。
 ServiceAlias:
   account: account_api
+  message: message_api
+  relation: relation_api
+  asset: asset_api
+  platform: platform_api
   auth: account_api
   user: account_api
   chat: message_api

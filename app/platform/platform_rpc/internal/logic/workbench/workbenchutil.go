@@ -50,7 +50,7 @@ func fromProtoEntryConfig(cfg *platform_rpc.WorkbenchEntryConfig) workbench_mode
 
 func toWorkbenchAppItem(app workbench_models.WorkbenchApp) *platform_rpc.WorkbenchAppItem {
 	return &platform_rpc.WorkbenchAppItem{
-		Id:             uint64(app.Id),
+		Id:             uint64(app.ID),
 		WorkbenchAppId: app.WorkbenchAppID,
 		Name:           app.Name,
 		Description:    app.Description,

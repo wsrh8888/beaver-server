@@ -76,7 +76,7 @@ func (l *CreateArchitectureLogic) CreateArchitecture(in *platform_rpc.CreateArch
 		return nil, status.Error(codes.Internal, "创建架构失败")
 	}
 
-	l.logger.Info(model.LogMsg{Text: "创建架构成功", Data: map[string]interface{}{"appId": in.AppId, "archId": arch.Id}})
+	l.logger.Info(model.LogMsg{Text: "创建架构成功", Data: map[string]interface{}{"appId": in.AppId, "archId": arch.ID}})
 
-	return &platform_rpc.CreateArchitectureRes{Id: uint64(arch.Id)}, nil
+	return &platform_rpc.CreateArchitectureRes{Id: uint64(arch.ID)}, nil
 }

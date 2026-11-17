@@ -47,12 +47,12 @@ SendMsgReq {
 	}
 
 SendMsgRes {
-		Id             uint   `json:"id"` //数据库自增ID
+		ID             uint   `json:"id"` //数据库自增ID
 		MessageID      string `json:"messageId"` //客户端消息ID
 		ConversationID string `json:"conversationId"` //会话id
 		Msg            Msg    `json:"msg"`
 		Sender         Sender `json:"sender"` //发送者
-		CreatedAt      string `json:"created_at"` //消息时间
+		CreatedAt      string `json:"createdAt"` //消息时间
 		MsgPreview     string `json:"msgPreview"` //消息预览
 		Seq            int64  `json:"seq"` //消息序列号，用于数据同步
 	}
@@ -222,7 +222,7 @@ ChatSyncMessage {
 type (
 GetConversationsListByIdsReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		ConversationIds []string `json:"conversationIds"` // 会话ID列表
+		ConversationIDs []string `json:"conversationIds"` // 会话ID列表
 	}
 
 GetConversationsListByIdsRes {
@@ -243,7 +243,7 @@ ConversationById {
 type (
 GetUserConversationSettingsListByIdsReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
-		ConversationIds []string `json:"conversationIds"` // 会话ID列表
+		ConversationIDs []string `json:"conversationIds"` // 会话ID列表
 	}
 
 GetUserConversationSettingsListByIdsRes {
@@ -286,168 +286,40 @@ GetForwardDetailsRes {
 	}
 )
 
-type (
-PeerSendMsgReq {
-		UserId         string   `json:"user_id,optional"`
-		ConversationId string   `json:"conversation_id,optional"`
-		MessageId      string   `json:"message_id,optional"`
-		Msg            *PeerMsg `json:"msg,optional"`
-		DeviceId       string   `json:"device_id,optional"`
-	}
 
-PeerSendMsgRes {
-		Id               uint32      `json:"id,optional"`
-		MessageId        string      `json:"message_id,optional"`
-		ConversationId   string      `json:"conversation_id,optional"`
-		Msg              *PeerMsg    `json:"msg,optional"`
-		Sender           *PeerSender `json:"sender,optional"`
-		CreatedAt        string      `json:"created_at,optional"`
-		MsgPreview       string      `json:"msg_preview,optional"`
-		Status           uint32      `json:"status,optional"`
-		Seq              int64       `json:"seq,optional"`
-		ConversationType uint32      `json:"conversation_type,optional"`
-	}
-)
 
-type (
-PeerInitializeConversationReq {
-		ConversationId string   `json:"conversation_id,optional"`
-		Type           int32    `json:"type,optional"`
-		UserIds        []string `json:"user_ids,optional"`
-	}
 
-PeerInitializeConversationRes {
-		ConversationId string `json:"conversation_id,optional"`
-	}
-)
 
-type (
-PeerSendNotificationMessageReq {
-		ConversationId string   `json:"conversation_id,optional"`
-		MessageType    int32    `json:"message_type,optional"`
-		Content        string   `json:"content,optional"`
-		RelatedUserId  string   `json:"related_user_id,optional"`
-		ReadUserIds    []string `json:"read_user_ids,optional"`
-	}
 
-PeerSendNotificationMessageRes {
-		MessageId string `json:"message_id,optional"`
-	}
-)
 
-type (
-PeerGetChatMessageReq {
-		ConversationId string `json:"conversation_id,optional"`
-		MessageId      string `json:"message_id,optional"`
-	}
 
-PeerGetChatMessageRes {
-		Found bool     `json:"found,optional"`
-		Msg   *PeerMsg `json:"msg,optional"`
-	}
-)
 
-type (
-PeerChatMessageItem {
-		MessageId        string `json:"message_id,optional"`
-		ConversationId   string `json:"conversation_id,optional"`
-		ConversationType int32  `json:"conversation_type,optional"`
-		SendUserId       string `json:"send_user_id,optional"`
-		MsgType          int32  `json:"msg_type,optional"`
-		MsgPreview       string `json:"msg_preview,optional"`
-		MsgContent       string `json:"msg_content,optional"`
-		Status           int32  `json:"status,optional"`
-		CreatedAt        string `json:"created_at,optional"`
-		UpdatedAt        string `json:"updated_at,optional"`
-	}
 
-PeerListChatMessagesReq {
-		Page           int32  `json:"page,optional"`
-		PageSize       int32  `json:"page_size,optional"`
-		ConversationId string `json:"conversation_id,optional"`
-		SendUserId     string `json:"send_user_id,optional"`
-		MsgType        int32  `json:"msg_type,optional"`
-		StartTime      string `json:"start_time,optional"`
-		EndTime        string `json:"end_time,optional"`
-		MessageId      string `json:"message_id,optional"`
-		WithContent    bool   `json:"with_content,optional"`
-		Status         int32  `json:"status,optional"`
-		Order          int32  `json:"order,optional"`
-	}
 
-PeerListChatMessagesRes {
-		Total int64                  `json:"total,optional"`
-		List  []PeerChatMessageItem `json:"list,optional"`
-	}
-)
 
-type (
-PeerUpdateChatMessagesReq {
-		MessageIds     []string `json:"message_ids,optional"`
-		ConversationId string   `json:"conversation_id,optional"`
-		MsgType        int32    `json:"msg_type,optional"`
-		StartTime      string   `json:"start_time,optional"`
-		EndTime        string   `json:"end_time,optional"`
-		Status         int32    `json:"status,optional"`
-	}
 
-PeerUpdateChatMessagesRes {
-		AffectedCount int64 `json:"affected_count,optional"`
-	}
-)
 
-type (
-PeerConversationDetailItem {
-		ConversationId  string   `json:"conversation_id,optional"`
-		Type            int32    `json:"type,optional"`
-		LastMessage     string   `json:"last_message,optional"`
-		LastMessageTime string   `json:"last_message_time,optional"`
-		MessageCount    int64    `json:"message_count,optional"`
-		ParticipantIds  []string `json:"participant_ids,optional"`
-	}
-
-PeerListConversationsReq {
-		UserId           string `json:"user_id,optional"`
-		ConversationType int32  `json:"conversation_type,optional"`
-		Page             int32  `json:"page,optional"`
-		PageSize         int32  `json:"page_size,optional"`
-	}
-
-PeerListConversationsRes {
-		Total int64                        `json:"total,optional"`
-		List  []PeerConversationDetailItem `json:"list,optional"`
-	}
-
-PeerGetConversationMemberIdsReq {
-		ConversationId string `json:"conversation_id,optional"`
-		ExcludeUserId  string `json:"exclude_user_id,optional"`
-	}
-
-PeerGetConversationMemberIdsRes {
-		UserIds []string `json:"user_ids,optional"`
-	}
-)
 
 type (
 ConversationInfoRes {
 		Avatar         string `json:"avatar"`
 		NickName       string `json:"nickName"`
-		MsgPreview     string `json:"msg_preview"` //消息预览
-		UpdatedAt      string `json:"updated_at"` //消息时间
-		IsTop          bool   `json:"is_top"` //是否置顶
+		MsgPreview     string `json:"msgPreview"` //消息预览
+		UpdatedAt      string `json:"updatedAt"` //消息时间
+		IsTop          bool   `json:"isTop"` //是否置顶
 		ConversationID string `json:"conversationId"` //会话id
 		ChatType       int    `json:"chatType"` //会话类型 1:好友 2:群聊 3:AI机器人
 		Notice         string `json:"notice"` //备注
 	}
 
 Message {
-		Id               uint   `json:"id"` //数据库自增ID
+		ID               uint   `json:"id"` //数据库自增ID
 		MessageID        string `json:"messageId"` //客户端消息ID
 		ConversationID   string `json:"conversationId"` //会话id
 		ConversationType int    `json:"conversationType"` //会话类型（1=私聊 2=群聊）
 		Msg              Msg    `json:"msg"`
 		Sender           Sender `json:"sender"` //发送者
-		CreatedAt        string `json:"created_at"` //消息时间
+		CreatedAt        string `json:"createdAt"` //消息时间
 		Seq              int64  `json:"seq"` //序列号，用于数据同步
 	}
 )
@@ -524,18 +396,18 @@ EmojiMsg {
 	}
 
 ReplyMsg {
-		OriginMsgId string `json:"originMsgId"` // 被回复的消息ID
+		OriginMsgID string `json:"originMsgId"` // 被回复的消息ID
 		OriginMsg   *Msg   `json:"originMsg,optional"` // 被回复的消息内容快照
 		ReplyMsg    *Msg   `json:"replyMsg"` // 回复的消息主体 (可以是文本、图片等)
 	}
 
 WithdrawMsg {
-		OriginMsgId string `json:"originMsgId"` // 被撤回的消息ID
+		OriginMsgID string `json:"originMsgId"` // 被撤回的消息ID
 		OriginMsg   *Msg   `json:"originMsg,optional"` // 原消息快照
 	}
 
 CallMsg {
-		RoomId   string `json:"roomId"` // 房间ID
+		RoomID   string `json:"roomId"` // 房间ID
 		CallType int    `json:"callType"` // 通话类型: 1-私聊, 2-群聊
 		Status   int    `json:"status"` // 状态: 1-进行中, 2-已结束
 		Duration int64  `json:"duration,optional"` // 通话时长(秒)
@@ -549,7 +421,7 @@ ForwardMsg {
 
 Msg {
 		Type            uint32           `json:"type"` // 消息类型 1:文本 2:图片 3:视频 4:文件 5:语音 6:表情 7:通知 8:音频 9:通话 10:撤回 11:回复 12:转发 13:markdown 14:链接 15:云文档 16:名片
-		AtUserIds       []string         `json:"atUserIds,optional"` // @的用户ID列表
+		AtUserIDs       []string         `json:"atUserIds,optional"` // @的用户ID列表
 		TextMsg         *TextMsg         `json:"textMsg,optional"` // 文本消息
 		ImageMsg        *ImageMsg        `json:"imageMsg,optional"` // 图片
 		VideoMsg        *VideoMsg        `json:"videoMsg,optional"` // 视频
@@ -578,40 +450,40 @@ PeerTextMsg {
 	}
 
 PeerImageMsg {
-		FileUrl string `json:"file_url,optional"`
+		FileUrl string `json:"fileUrl,optional"`
 		Width   int32  `json:"width,optional"`
 		Height  int32  `json:"height,optional"`
 		Size    int64  `json:"size,optional"`
 	}
 
 PeerVideoMsg {
-		FileUrl      string `json:"file_url,optional"`
+		FileUrl      string `json:"fileUrl,optional"`
 		Width        int32  `json:"width,optional"`
 		Height       int32  `json:"height,optional"`
 		Duration     int32  `json:"duration,optional"`
-		ThumbnailUrl string `json:"thumbnail_url,optional"`
+		ThumbnailUrl string `json:"thumbnailUrl,optional"`
 		Size         int64  `json:"size,optional"`
 	}
 
 PeerFileMsg {
-		FileUrl   string `json:"file_url,optional"`
-		FileName  string `json:"file_name,optional"`
+		FileUrl   string `json:"fileUrl,optional"`
+		FileName  string `json:"fileName,optional"`
 		Size      int64  `json:"size,optional"`
-		MimeType  string `json:"mime_type,optional"`
+		MimeType  string `json:"mimeType,optional"`
 		Extension string `json:"extension,optional"`
-		OpenMode  int32  `json:"open_mode,optional"`
+		OpenMode  int32  `json:"openMode,optional"`
 	}
 
 PeerVoiceMsg {
-		FileUrl  string `json:"file_url,optional"`
+		FileUrl  string `json:"fileUrl,optional"`
 		Duration int32  `json:"duration,optional"`
 		Size     int64  `json:"size,optional"`
 	}
 
 PeerEmojiMsg {
-		FileUrl   string `json:"file_url,optional"`
-		EmojiId   string `json:"emoji_id,optional"`
-		PackageId string `json:"package_id,optional"`
+		FileUrl   string `json:"fileUrl,optional"`
+		EmojiID   string `json:"emojiId,optional"`
+		PackageID string `json:"packageId,optional"`
 		Width     int64  `json:"width,optional"`
 		Height    int64  `json:"height,optional"`
 	}
@@ -622,22 +494,22 @@ PeerNotificationMsg {
 	}
 
 PeerAudioFileMsg {
-		FileUrl  string `json:"file_url,optional"`
-		FileName string `json:"file_name,optional"`
+		FileUrl  string `json:"fileUrl,optional"`
+		FileName string `json:"fileName,optional"`
 		Duration int32  `json:"duration,optional"`
 		Size     int64  `json:"size,optional"`
 	}
 
 PeerCallMsg {
-		RoomId   string `json:"room_id,optional"`
-		CallType int32  `json:"call_type,optional"`
+		RoomID   string `json:"roomId,optional"`
+		CallType int32  `json:"callType,optional"`
 		Status   int32  `json:"status,optional"`
 		Duration int64  `json:"duration,optional"`
 	}
 
 PeerForwardMsg {
 		Title    string `json:"title,optional"`
-		RecordId string `json:"record_id,optional"`
+		RecordID string `json:"recordId,optional"`
 		Count    int32  `json:"count,optional"`
 	}
 
@@ -650,64 +522,206 @@ PeerLinkMsg {
 		Url      string `json:"url,optional"`
 		Title    string `json:"title,optional"`
 		Desc     string `json:"desc,optional"`
-		ImageUrl string `json:"image_url,optional"`
+		ImageUrl string `json:"imageUrl,optional"`
 	}
 
 PeerCloudDocMsg {
-		DocId    string `json:"doc_id,optional"`
-		DocType  int32  `json:"doc_type,optional"`
+		DocID    string `json:"docId,optional"`
+		DocType  int32  `json:"docType,optional"`
 		Title    string `json:"title,optional"`
-		OwnerId  string `json:"owner_id,optional"`
+		OwnerID  string `json:"ownerId,optional"`
 		Perm     int32  `json:"perm,optional"`
-		CoverUrl string `json:"cover_url,optional"`
+		CoverUrl string `json:"coverUrl,optional"`
 		Revision int64  `json:"revision,optional"`
 	}
 
 PeerCardMsg {
-		CardType    int32  `json:"card_type,optional"`
-		Id          string `json:"id,optional"`
-		ExpireAt    int64  `json:"expire_at,optional"`
-		InviteToken string `json:"invite_token,optional"`
+		CardType    int32  `json:"cardType,optional"`
+		ID          string `json:"id,optional"`
+		ExpireAt    int64  `json:"expireAt,optional"`
+		InviteToken string `json:"inviteToken,optional"`
 	}
 
 PeerMsg {
 		Type            uint32            `json:"type,optional"`
-		TargetMsgId     string            `json:"target_msg_id,optional"`
-		TextMsg         *PeerTextMsg      `json:"text_msg,optional"`
-		ImageMsg        *PeerImageMsg     `json:"image_msg,optional"`
-		VideoMsg        *PeerVideoMsg     `json:"video_msg,optional"`
-		FileMsg         *PeerFileMsg      `json:"file_msg,optional"`
-		VoiceMsg        *PeerVoiceMsg     `json:"voice_msg,optional"`
-		EmojiMsg        *PeerEmojiMsg     `json:"emoji_msg,optional"`
-		NotificationMsg *PeerNotificationMsg `json:"notification_msg,optional"`
-		AudioFileMsg    *PeerAudioFileMsg `json:"audio_file_msg,optional"`
-		CallMsg         *PeerCallMsg      `json:"call_msg,optional"`
-		WithdrawMsg     *PeerWithdrawMsg  `json:"withdraw_msg,optional"`
-		ReplyMsg        *PeerReplyMsg     `json:"reply_msg,optional"`
-		ForwardMsg      *PeerForwardMsg   `json:"forward_msg,optional"`
-		MarkdownMsg     *PeerMarkdownMsg  `json:"markdown_msg,optional"`
-		LinkMsg         *PeerLinkMsg      `json:"link_msg,optional"`
-		AtUserIds       []string          `json:"at_user_ids,optional"`
-		CloudDocMsg     *PeerCloudDocMsg  `json:"cloud_doc_msg,optional"`
-		CardMsg         *PeerCardMsg      `json:"card_msg,optional"`
+		TargetMsgID     string            `json:"targetMsgId,optional"`
+		TextMsg         *PeerTextMsg      `json:"textMsg,optional"`
+		ImageMsg        *PeerImageMsg     `json:"imageMsg,optional"`
+		VideoMsg        *PeerVideoMsg     `json:"videoMsg,optional"`
+		FileMsg         *PeerFileMsg      `json:"fileMsg,optional"`
+		VoiceMsg        *PeerVoiceMsg     `json:"voiceMsg,optional"`
+		EmojiMsg        *PeerEmojiMsg     `json:"emojiMsg,optional"`
+		NotificationMsg *PeerNotificationMsg `json:"notificationMsg,optional"`
+		AudioFileMsg    *PeerAudioFileMsg `json:"audioFileMsg,optional"`
+		CallMsg         *PeerCallMsg      `json:"callMsg,optional"`
+		WithdrawMsg     *PeerWithdrawMsg  `json:"withdrawMsg,optional"`
+		ReplyMsg        *PeerReplyMsg     `json:"replyMsg,optional"`
+		ForwardMsg      *PeerForwardMsg   `json:"forwardMsg,optional"`
+		MarkdownMsg     *PeerMarkdownMsg  `json:"markdownMsg,optional"`
+		LinkMsg         *PeerLinkMsg      `json:"linkMsg,optional"`
+		AtUserIDs       []string          `json:"atUserIds,optional"`
+		CloudDocMsg     *PeerCloudDocMsg  `json:"cloudDocMsg,optional"`
+		CardMsg         *PeerCardMsg      `json:"cardMsg,optional"`
 	}
 
 PeerWithdrawMsg {
-		OriginMsgId string   `json:"origin_msg_id,optional"`
-		OriginMsg   *PeerMsg `json:"origin_msg,optional"`
+		OriginMsgID string   `json:"originMsgId,optional"`
+		OriginMsg   *PeerMsg `json:"originMsg,optional"`
 	}
 
 PeerReplyMsg {
-		OriginMsgId string   `json:"origin_msg_id,optional"`
-		OriginMsg   *PeerMsg `json:"origin_msg,optional"`
-		ReplyMsg    *PeerMsg `json:"reply_msg,optional"`
+		OriginMsgID string   `json:"originMsgId,optional"`
+		OriginMsg   *PeerMsg `json:"originMsg,optional"`
+		ReplyMsg    *PeerMsg `json:"replyMsg,optional"`
 	}
 
 PeerSender {
-		UserId   string `json:"user_id,optional"`
+		UserID   string `json:"userId,optional"`
 		Avatar   string `json:"avatar,optional"`
-		NickName string `json:"nick_name,optional"`
-		UserType int32  `json:"user_type,optional"`
+		NickName string `json:"nickName,optional"`
+		UserType int32  `json:"userType,optional"`
+	}
+)
+
+type (
+PeerSendMsgReq {
+		UserID         string   `json:"userId,optional"`
+		ConversationID string   `json:"conversationId,optional"`
+		MessageID      string   `json:"messageId,optional"`
+		Msg            *PeerMsg `json:"msg,optional"`
+		DeviceID       string   `json:"deviceId,optional"`
+	}
+
+PeerSendMsgRes {
+		ID               uint32      `json:"id,optional"`
+		MessageID        string      `json:"messageId,optional"`
+		ConversationID   string      `json:"conversationId,optional"`
+		Msg              *PeerMsg    `json:"msg,optional"`
+		Sender           *PeerSender `json:"sender,optional"`
+		CreatedAt        string      `json:"createdAt,optional"`
+		MsgPreview       string      `json:"msgPreview,optional"`
+		Status           uint32      `json:"status,optional"`
+		Seq              int64       `json:"seq,optional"`
+		ConversationType uint32      `json:"conversationType,optional"`
+	}
+)
+
+type (
+PeerInitializeConversationReq {
+		ConversationID string   `json:"conversationId,optional"`
+		Type           int32    `json:"type,optional"`
+		UserIDs        []string `json:"userIds,optional"`
+	}
+
+PeerInitializeConversationRes {
+		ConversationID string `json:"conversationId,optional"`
+	}
+)
+
+type (
+PeerSendNotificationMessageReq {
+		ConversationID string   `json:"conversationId,optional"`
+		MessageType    int32    `json:"messageType,optional"`
+		Content        string   `json:"content,optional"`
+		RelatedUserID  string   `json:"relatedUserId,optional"`
+		ReadUserIDs    []string `json:"readUserIds,optional"`
+	}
+
+PeerSendNotificationMessageRes {
+		MessageID string `json:"messageId,optional"`
+	}
+)
+
+type (
+PeerGetChatMessageReq {
+		ConversationID string `json:"conversationId,optional"`
+		MessageID      string `json:"messageId,optional"`
+	}
+
+PeerGetChatMessageRes {
+		Found bool     `json:"found,optional"`
+		Msg   *PeerMsg `json:"msg,optional"`
+	}
+)
+
+type (
+PeerChatMessageItem {
+		MessageID        string `json:"messageId,optional"`
+		ConversationID   string `json:"conversationId,optional"`
+		ConversationType int32  `json:"conversationType,optional"`
+		SendUserID       string `json:"sendUserId,optional"`
+		MsgType          int32  `json:"msgType,optional"`
+		MsgPreview       string `json:"msgPreview,optional"`
+		MsgContent       string `json:"msgContent,optional"`
+		Status           int32  `json:"status,optional"`
+		CreatedAt        string `json:"createdAt,optional"`
+		UpdatedAt        string `json:"updatedAt,optional"`
+	}
+
+PeerListChatMessagesReq {
+		Page           int32  `json:"page,optional"`
+		PageSize       int32  `json:"pageSize,optional"`
+		ConversationID string `json:"conversationId,optional"`
+		SendUserID     string `json:"sendUserId,optional"`
+		MsgType        int32  `json:"msgType,optional"`
+		StartTime      string `json:"startTime,optional"`
+		EndTime        string `json:"endTime,optional"`
+		MessageID      string `json:"messageId,optional"`
+		WithContent    bool   `json:"withContent,optional"`
+		Status         int32  `json:"status,optional"`
+		Order          int32  `json:"order,optional"`
+	}
+
+PeerListChatMessagesRes {
+		Total int64                  `json:"total,optional"`
+		List  []PeerChatMessageItem `json:"list,optional"`
+	}
+)
+
+type (
+PeerUpdateChatMessagesReq {
+		MessageIDs     []string `json:"messageIds,optional"`
+		ConversationID string   `json:"conversationId,optional"`
+		MsgType        int32    `json:"msgType,optional"`
+		StartTime      string   `json:"startTime,optional"`
+		EndTime        string   `json:"endTime,optional"`
+		Status         int32    `json:"status,optional"`
+	}
+
+PeerUpdateChatMessagesRes {
+		AffectedCount int64 `json:"affectedCount,optional"`
+	}
+)
+
+type (
+PeerConversationDetailItem {
+		ConversationID  string   `json:"conversationId,optional"`
+		Type            int32    `json:"type,optional"`
+		LastMessage     string   `json:"lastMessage,optional"`
+		LastMessageTime string   `json:"lastMessageTime,optional"`
+		MessageCount    int64    `json:"messageCount,optional"`
+		ParticipantIDs  []string `json:"participantIds,optional"`
+	}
+
+PeerListConversationsReq {
+		UserID           string `json:"userId,optional"`
+		ConversationType int32  `json:"conversationType,optional"`
+		Page             int32  `json:"page,optional"`
+		PageSize         int32  `json:"pageSize,optional"`
+	}
+
+PeerListConversationsRes {
+		Total int64                        `json:"total,optional"`
+		List  []PeerConversationDetailItem `json:"list,optional"`
+	}
+
+PeerGetConversationMemberIdsReq {
+		ConversationID string `json:"conversationId,optional"`
+		ExcludeUserID  string `json:"excludeUserId,optional"`
+	}
+
+PeerGetConversationMemberIdsRes {
+		UserIDs []string `json:"userIds,optional"`
 	}
 )
 
@@ -718,118 +732,113 @@ PeerSender {
 service message {
 	@doc "发送消息"
 	@handler SendMsg
-	post /beaver/api/chat/chat/v1/send_msg (SendMsgReq) returns (SendMsgRes)
+	post /beaver/api/message/chat/v1/send_msg (SendMsgReq) returns (SendMsgRes)
 
 	@doc "获取会话id"
 	@handler ConversationInfo
-	post /beaver/api/chat/chat/v1/get_conversation_info (ConversationInfoReq) returns (ConversationInfoRes)
+	post /beaver/api/message/chat/v1/get_conversation_info (ConversationInfoReq) returns (ConversationInfoRes)
 
 	@doc "获取最近会话列表"
 	@handler recentChatList
-	get /beaver/api/chat/chat/v1/get_recent_chat_list (RecentChatListReq) returns (RecentChatListRes)
+	get /beaver/api/message/chat/v1/get_recent_chat_list (RecentChatListReq) returns (RecentChatListRes)
 
 	@doc "获取聊天记录"
 	@handler chatHistory
-	post /beaver/api/chat/chat/v1/get_chat_history (ChatHistoryReq) returns (ChatHistoryRes)
+	post /beaver/api/message/chat/v1/get_chat_history (ChatHistoryReq) returns (ChatHistoryRes)
 
 	@doc "搜索消息"
 	@handler searchMessages
-	post /beaver/api/chat/chat/v1/search_messages (SearchMessagesReq) returns (SearchMessagesRes)
+	post /beaver/api/message/chat/v1/search_messages (SearchMessagesReq) returns (SearchMessagesRes)
 
 	@doc "删除某个最近会话"
 	@handler deleteRecent
-	post /beaver/api/chat/chat/v1/delete_recent_chat (DeleteRecentReq) returns (DeleteRecentRes)
+	post /beaver/api/message/chat/v1/delete_recent_chat (DeleteRecentReq) returns (DeleteRecentRes)
 
 	@doc "置顶某个会话"
 	@handler pinnedChat
-	post /beaver/api/chat/chat/v1/pinned_chat (PinnedChatReq) returns (PinnedChatRes)
+	post /beaver/api/message/chat/v1/pinned_chat (PinnedChatReq) returns (PinnedChatRes)
 
 	@doc "设置会话免打扰"
 	@handler muteChat
-	post /beaver/api/chat/chat/v1/mute_chat (MuteChatReq) returns (MuteChatRes)
+	post /beaver/api/message/chat/v1/mute_chat (MuteChatReq) returns (MuteChatRes)
 
 	@doc "隐藏/显示会话"
 	@handler hideChat
-	post /beaver/api/chat/chat/v1/hide_chat (HideChatReq) returns (HideChatRes)
+	post /beaver/api/message/chat/v1/hide_chat (HideChatReq) returns (HideChatRes)
 
 	@doc "撤回消息"
 	@handler recallMessage
-	post /beaver/api/chat/chat/v1/recall (RecallMessageReq) returns (RecallMessageRes)
+	post /beaver/api/message/chat/v1/recall (RecallMessageReq) returns (RecallMessageRes)
 
 	@doc "批量删除消息(仅自己不可见)"
 	@handler deleteMessages
-	post /beaver/api/chat/chat/v1/delete_messages (DeleteMessagesReq) returns (DeleteMessagesRes)
+	post /beaver/api/message/chat/v1/delete_messages (DeleteMessagesReq) returns (DeleteMessagesRes)
 
 	@doc "标记消息媒体状态（语音已听等）"
 	@handler markMessageMedia
-	post /beaver/api/chat/chat/v1/mark_message_media (MarkMessageMediaReq) returns (MarkMessageMediaRes)
+	post /beaver/api/message/chat/v1/mark_message_media (MarkMessageMediaReq) returns (MarkMessageMediaRes)
 
 	@doc "转发消息"
 	@handler forwardMessage
-	post /beaver/api/chat/chat/v1/forward (ForwardMessageReq) returns (ForwardMessageRes)
+	post /beaver/api/message/chat/v1/forward (ForwardMessageReq) returns (ForwardMessageRes)
 
 	@doc "聊天数据同步"
 	@handler chatSync
-	post /beaver/api/chat/chat/v1/sync (ChatSyncReq) returns (ChatSyncRes)
+	post /beaver/api/message/chat/v1/sync (ChatSyncReq) returns (ChatSyncRes)
 
 	@doc "批量获取会话数据"
 	@handler getConversationsListByIds
-	post /beaver/api/chat/chat/v1/get_conversations_list_by_ids (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
+	post /beaver/api/message/chat/v1/get_conversations_list_by_ids (GetConversationsListByIdsReq) returns (GetConversationsListByIdsRes)
 
 	@doc "批量获取用户会话设置数据"
 	@handler getUserConversationSettingsListByIds
-	post /beaver/api/chat/chat/v1/get_user_conversation_settings_list_by_ids (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
+	post /beaver/api/message/chat/v1/get_user_conversation_settings_list_by_ids (GetUserConversationSettingsListByIdsReq) returns (GetUserConversationSettingsListByIdsRes)
 
 	@doc "更新会话已读序列号"
 	@handler updateReadSeq
-	post /beaver/api/chat/chat/v1/update_read_seq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
+	post /beaver/api/message/chat/v1/update_read_seq (UpdateReadSeqReq) returns (UpdateReadSeqRes)
 
 	@doc "获取合并转发详情"
 	@handler getForwardDetails
-	get /beaver/api/chat/chat/v1/get_forward_details (GetForwardDetailsReq) returns (GetForwardDetailsRes)
-}
+	get /beaver/api/message/chat/v1/get_forward_details (GetForwardDetailsReq) returns (GetForwardDetailsRes)
 
-// goctl api go -api message_api.api -dir . --home ../../../template
-
-// ==================== 队间机器视图：会话与消息 ====================
-// 与 C 端共用 /beaver/api/chat 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐，调用方零改动。
-// C 端是 camelCase 视图（面向客户端 SDK），这里是 snake_case 视图（面向同域 RPC 协议），
-// 两者都在本 .api 里，不存在第二套 HTTP 门面。
-
-@server (
-	group: chat_machine
-	middleware: JwtS2s
-)
-service message {
-	@doc "发送消息"
+@doc "发送消息"
 	@handler peerSendMsg
-	post /beaver/api/chat/machine/v1/send (PeerSendMsgReq) returns (PeerSendMsgRes)
+	post /beaver/api/message/chat_s2s/v1/send (PeerSendMsgReq) returns (PeerSendMsgRes)
 
 	@doc "初始化会话"
 	@handler peerInitializeConversation
-	post /beaver/api/chat/machine/v1/initialize_conversation (PeerInitializeConversationReq) returns (PeerInitializeConversationRes)
+	post /beaver/api/message/chat_s2s/v1/initialize_conversation (PeerInitializeConversationReq) returns (PeerInitializeConversationRes)
 
 	@doc "发送系统通知消息"
 	@handler peerSendNotificationMessage
-	post /beaver/api/chat/machine/v1/send_notification_message (PeerSendNotificationMessageReq) returns (PeerSendNotificationMessageRes)
+	post /beaver/api/message/chat_s2s/v1/send_notification_message (PeerSendNotificationMessageReq) returns (PeerSendNotificationMessageRes)
 
 	@doc "按会话+消息 ID 取单条消息"
 	@handler peerGetChatMessage
-	post /beaver/api/chat/machine/v1/get_message (PeerGetChatMessageReq) returns (PeerGetChatMessageRes)
+	post /beaver/api/message/chat_s2s/v1/get_message (PeerGetChatMessageReq) returns (PeerGetChatMessageRes)
 
 	@doc "分页查消息"
 	@handler peerListChatMessages
-	post /beaver/api/chat/machine/v1/messages (PeerListChatMessagesReq) returns (PeerListChatMessagesRes)
+	post /beaver/api/message/chat_s2s/v1/messages (PeerListChatMessagesReq) returns (PeerListChatMessagesRes)
 
 	@doc "批量更新消息状态"
 	@handler peerUpdateChatMessages
-	post /beaver/api/chat/machine/v1/update_messages (PeerUpdateChatMessagesReq) returns (PeerUpdateChatMessagesRes)
+	post /beaver/api/message/chat_s2s/v1/update_messages (PeerUpdateChatMessagesReq) returns (PeerUpdateChatMessagesRes)
 
 	@doc "分页查会话"
 	@handler peerListConversations
-	post /beaver/api/chat/machine/v1/conversations (PeerListConversationsReq) returns (PeerListConversationsRes)
+	post /beaver/api/message/chat_s2s/v1/conversations (PeerListConversationsReq) returns (PeerListConversationsRes)
 
 	@doc "查会话成员 ID 列表"
 	@handler peerGetConversationMemberIds
-	post /beaver/api/chat/machine/v1/conversation_members (PeerGetConversationMemberIdsReq) returns (PeerGetConversationMemberIdsRes)
+	post /beaver/api/message/chat_s2s/v1/conversation_members (PeerGetConversationMemberIdsReq) returns (PeerGetConversationMemberIdsRes)
+
+
+
+
+
+
+
+
 }

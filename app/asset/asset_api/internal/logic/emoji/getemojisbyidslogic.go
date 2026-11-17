@@ -48,7 +48,7 @@ func NewGetEmojisByIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetEmojisByIdsLogic) GetEmojisByIds(req *types.GetEmojisByIdsReq) (resp *types.GetEmojisByIdsRes, err error) {
-	if len(req.Ids) == 0 {
+	if len(req.IDs) == 0 {
 		return &types.GetEmojisByIdsRes{
 			Emojis: make([]types.EmojiDetailItem, 0),
 		}, nil
@@ -56,13 +56,13 @@ func (l *GetEmojisByIdsLogic) GetEmojisByIds(req *types.GetEmojisByIdsReq) (resp
 
 	// 根据ID列表查询表情详情
 	var emojis []emoji_models.Emoji
-	err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", req.Ids, 1).Find(&emojis).Error
+	err = l.svcCtx.DB.Where("emoji_id IN ? AND status = ?", req.IDs, 1).Find(&emojis).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询表情详情失败", Data: map[string]any{"ids": req.Ids, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询表情详情失败", Data: map[string]any{"ids": req.IDs, "err": err.Error()}})
 		return nil, err
 	}
 
-	l.logger.Info(model.LogMsg{Text: "批量查询表情详情", Data: map[string]interface{}{"requestCount": len(req.Ids), "resultCount": len(emojis)}})
+	l.logger.Info(model.LogMsg{Text: "批量查询表情详情", Data: map[string]interface{}{"requestCount": len(req.IDs), "resultCount": len(emojis)}})
 
 	// 获取表情ID列表，用于查询关联的包信息
 	emojiIDs := make([]string, len(emojis))

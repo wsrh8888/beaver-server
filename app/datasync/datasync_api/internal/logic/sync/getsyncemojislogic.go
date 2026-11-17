@@ -68,7 +68,7 @@ func (l *GetSyncEmojisLogic) GetSyncEmojis(req *types.GetSyncEmojisReq) (resp *t
 	if emojiResp.EmojiVersions != nil {
 		for _, emoji := range emojiResp.EmojiVersions {
 			emojiVersions = append(emojiVersions, types.EmojiVersionItem{
-				EmojiId: emoji.EmojiId,
+				EmojiID: emoji.EmojiId,
 				Version: emoji.Version,
 			})
 		}

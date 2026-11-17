@@ -28,7 +28,6 @@ import (
 	event "beaver/app/notification/notification_api/internal/handler/event"
 	inbox "beaver/app/notification/notification_api/internal/handler/inbox"
 	push "beaver/app/notification/notification_api/internal/handler/push"
-	push_machine "beaver/app/notification/notification_api/internal/handler/push_machine"
 	read "beaver/app/notification/notification_api/internal/handler/read"
 	"beaver/app/notification/notification_api/internal/svc"
 
@@ -80,19 +79,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/beaver/api/notification/push/v1/register_push_token",
 					Handler: push.RegisterPushTokenHandler(serverCtx),
 				},
-			}...,
-		),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JwtS2s},
-			[]rest.Route{
 				{
 					// 队间：投递通知事件
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/notification/machine/v1/push_event",
-					Handler: push_machine.PushEventHandler(serverCtx),
+					Path:    "/beaver/api/notification/push_s2s/v1/push_event",
+					Handler: push.PushEventHandler(serverCtx),
 				},
 			}...,
 		),

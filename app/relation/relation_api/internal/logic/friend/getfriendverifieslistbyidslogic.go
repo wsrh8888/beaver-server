@@ -48,7 +48,7 @@ func NewGetFriendVerifiesListByIdsLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(req *types.GetFriendVerifiesListByIdsReq) (resp *types.GetFriendVerifiesListByIdsRes, err error) {
-	if len(req.VerifyIds) == 0 {
+	if len(req.VerifyIDs) == 0 {
 		return &types.GetFriendVerifiesListByIdsRes{
 			FriendVerifies: []types.FriendVerifyById{},
 		}, nil
@@ -56,9 +56,9 @@ func (l *GetFriendVerifiesListByIdsLogic) GetFriendVerifiesListByIds(req *types.
 
 	// 查询指定ID列表中的好友验证信息
 	var friendVerifies []friend_models.FriendVerifyModel
-	err = l.svcCtx.DB.Where("verify_id IN (?)", req.VerifyIds).Find(&friendVerifies).Error
+	err = l.svcCtx.DB.Where("verify_id IN (?)", req.VerifyIDs).Find(&friendVerifies).Error
 	if err != nil {
-		l.logger.Error(model.LogMsg{Text: "查询好友验证信息失败", Data: map[string]any{"ids": req.VerifyIds, "err": err.Error()}})
+		l.logger.Error(model.LogMsg{Text: "查询好友验证信息失败", Data: map[string]any{"ids": req.VerifyIDs, "err": err.Error()}})
 		return nil, err
 	}
 

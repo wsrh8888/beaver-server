@@ -168,7 +168,7 @@ func (l *ChatHistoryLogic) ChatHistory(req *types.ChatHistoryReq) (resp *types.C
 		}
 
 		message := types.Message{
-			Id:               chat.Id,
+			ID:               chat.ID,
 			MessageID:        chat.MessageID,
 			ConversationID:   chat.ConversationID,
 			ConversationType: chat.ConversationType,

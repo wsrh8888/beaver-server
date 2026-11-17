@@ -74,21 +74,21 @@ func (l *ListAppVersionsLogic) ListAppVersions(in *platform_rpc.ListAppVersionsR
 	items := make([]*platform_rpc.AppVersionsArchItem, 0, len(architectures))
 	for _, arch := range architectures {
 		var versions []update_models.UpdateVersion
-		if err := l.svcCtx.DB.Where("architecture_id = ?", arch.Id).Order("created_at DESC").Find(&versions).Error; err != nil {
-			l.logger.Error(model.LogMsg{Text: "查询架构版本失败", Data: map[string]any{"archId": arch.Id, "err": err.Error()}})
+		if err := l.svcCtx.DB.Where("architecture_id = ?", arch.ID).Order("created_at DESC").Find(&versions).Error; err != nil {
+			l.logger.Error(model.LogMsg{Text: "查询架构版本失败", Data: map[string]any{"archId": arch.ID, "err": err.Error()}})
 			continue
 		}
 
 		briefs := make([]*platform_rpc.AppVersionBrief, 0, len(versions))
 		for _, ver := range versions {
 			briefs = append(briefs, &platform_rpc.AppVersionBrief{
-				VersionId: uint64(ver.Id),
+				VersionId: uint64(ver.ID),
 				Version:   ver.Version,
 			})
 		}
 
 		items = append(items, &platform_rpc.AppVersionsArchItem{
-			ArchitectureId: uint64(arch.Id),
+			ArchitectureId: uint64(arch.ID),
 			ArchId:         uint32(arch.ArchID),
 			Description:    arch.Description,
 			Versions:       briefs,

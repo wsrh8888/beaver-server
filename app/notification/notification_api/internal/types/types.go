@@ -58,19 +58,19 @@ type InboxItem struct {
 }
 
 type PushEventReq struct {
-	EventType   string   `json:"event_type,optional"`   // 必填：friend_request/moment_like/group_join/...
-	Category    string   `json:"category,optional"`     // 必填：social/moment/group/system
-	FromUserId  string   `json:"from_user_id,optional"` // 触发方
-	TargetId    string   `json:"target_id,optional"`    // 目标对象ID
-	TargetType  string   `json:"target_type,optional"`  // 目标类型：moment/group/user/other
-	PayloadJson string   `json:"payload_json,optional"` // 扩展数据JSON
-	ToUserIds   []string `json:"to_user_ids,optional"`  // 接收人列表
-	DedupHash   string   `json:"dedup_hash,optional"`   // 幂等/合并用
+	EventType   string   `json:"eventType,optional"`   // 必填：friend_request/moment_like/group_join/...
+	Category    string   `json:"category,optional"`    // 必填：social/moment/group/system
+	FromUserID  string   `json:"fromUserId,optional"`  // 触发方
+	TargetID    string   `json:"targetId,optional"`    // 目标对象ID
+	TargetType  string   `json:"targetType,optional"`  // 目标类型：moment/group/user/other
+	PayloadJSON string   `json:"payloadJson,optional"` // 扩展数据JSON
+	ToUserIDs   []string `json:"toUserIds,optional"`   // 接收人列表
+	DedupHash   string   `json:"dedupHash,optional"`   // 幂等/合并用
 }
 
 type PushEventRes struct {
-	EventId string `json:"event_id,optional"` // 生成的事件ID
-	Version int64  `json:"version,optional"`  // 事件版本（全局序列）
+	EventID string `json:"eventId,optional"` // 生成的事件ID
+	Version int64  `json:"version,optional"` // 事件版本（全局序列）
 }
 
 type ReadCursorItem struct {

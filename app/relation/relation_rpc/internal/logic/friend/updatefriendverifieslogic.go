@@ -55,7 +55,7 @@ func (l *UpdateFriendVerifiesLogic) UpdateFriendVerifies(in *pb.UpdateFriendVeri
 		if err != nil {
 			continue
 		}
-		ids = append(ids, v.Id)
+		ids = append(ids, v.ID)
 	}
 	if len(ids) == 0 {
 		return &pb.UpdateFriendVerifiesRes{}, nil

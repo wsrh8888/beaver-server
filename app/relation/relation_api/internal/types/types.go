@@ -35,14 +35,14 @@ type AddFriendRes struct {
 }
 
 type AddGroupMemberReq struct {
-	GroupId    string `json:"group_id,optional"`    // 群组ID
-	UserId     string `json:"user_id,optional"`     // 要加入的用户ID
-	OperatedBy string `json:"operated_by,optional"` // 操作者ID
+	GroupID    string `json:"groupId,optional"`    // 群组ID
+	UserID     string `json:"userId,optional"`     // 要加入的用户ID
+	OperatedBy string `json:"operatedBy,optional"` // 操作者ID
 }
 
 type AddGroupMemberRes struct {
-	Added         bool  `json:"added,optional"`          // 是否新加入
-	MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+	Added         bool  `json:"added,optional"`         // 是否新加入
+	MemberVersion int64 `json:"memberVersion,optional"` // 群成员列表版本号
 }
 
 type BlockListReq struct {
@@ -80,10 +80,10 @@ type DeleteFriendRes struct {
 }
 
 type FriendBlockItem struct {
-	BlockId       string `json:"block_id,optional"`        // 黑名单记录ID
-	UserId        string `json:"user_id,optional"`         // 执行拉黑的用户ID
-	BlockedUserId string `json:"blocked_user_id,optional"` // 被拉黑的用户ID
-	CreatedAt     string `json:"created_at,optional"`      // 创建时间
+	BlockID       string `json:"blockId,optional"`       // 黑名单记录ID
+	UserID        string `json:"userId,optional"`        // 执行拉黑的用户ID
+	BlockedUserID string `json:"blockedUserId,optional"` // 被拉黑的用户ID
+	CreatedAt     string `json:"createdAt,optional"`     // 创建时间
 }
 
 type FriendByUuid struct {
@@ -117,15 +117,15 @@ type FriendInfoRes struct {
 }
 
 type FriendItem struct {
-	FriendId       string `json:"friend_id,optional"`        // 好友关系ID
-	SendUserId     string `json:"send_user_id,optional"`     // 发起方用户ID
-	RevUserId      string `json:"rev_user_id,optional"`      // 接收方用户ID
-	SendUserNotice string `json:"send_user_notice,optional"` // 发起方备注
-	RevUserNotice  string `json:"rev_user_notice,optional"`  // 接收方备注
-	Source         string `json:"source,optional"`           // 来源
-	IsDeleted      bool   `json:"is_deleted,optional"`       // 是否已删除
-	CreatedAt      string `json:"created_at,optional"`       // 创建时间
-	UpdatedAt      string `json:"updated_at,optional"`       // 更新时间
+	FriendID       string `json:"friendId,optional"`       // 好友关系ID
+	SendUserID     string `json:"sendUserId,optional"`     // 发起方用户ID
+	RevUserID      string `json:"revUserId,optional"`      // 接收方用户ID
+	SendUserNotice string `json:"sendUserNotice,optional"` // 发起方备注
+	RevUserNotice  string `json:"revUserNotice,optional"`  // 接收方备注
+	Source         string `json:"source,optional"`         // 来源
+	IsDeleted      bool   `json:"isDeleted,optional"`      // 是否已删除
+	CreatedAt      string `json:"createdAt,optional"`      // 创建时间
+	UpdatedAt      string `json:"updatedAt,optional"`      // 更新时间
 }
 
 type FriendListReq struct {
@@ -144,7 +144,7 @@ type FriendValidInfo struct {
 	Avatar    string `json:"avatar"`    // 用户头像文件名
 	Message   string `json:"message"`   // 验证消息
 	Source    string `json:"source"`    // 添加好友来源：email/qrcode
-	Id        string `json:"id"`        // 验证记录ID（作为唯一标识）
+	ID        string `json:"id"`        // 验证记录ID（作为唯一标识）
 	Flag      string `json:"flag"`      // 用户角色：send(发送者)/receive(接收者)
 	Status    int8   `json:"status"`    // 验证状态：0(未处理)/1(已通过)/2(已拒绝)
 	CreatedAt string `json:"createdAt"` // 验证时间
@@ -174,15 +174,15 @@ type FriendVerifyById struct {
 }
 
 type FriendVerifyItem struct {
-	VerifyId   string `json:"verify_id,optional"`    // 验证记录ID
-	SendUserId string `json:"send_user_id,optional"` // 发起方用户ID
-	RevUserId  string `json:"rev_user_id,optional"`  // 接收方用户ID
-	SendStatus int32  `json:"send_status,optional"`  // 发起方状态
-	RevStatus  int32  `json:"rev_status,optional"`   // 接收方状态
-	Message    string `json:"message,optional"`      // 附加消息
-	Source     string `json:"source,optional"`       // 来源
-	CreatedAt  string `json:"created_at,optional"`   // 创建时间
-	UpdatedAt  string `json:"updated_at,optional"`   // 更新时间
+	VerifyID   string `json:"verifyId,optional"`   // 验证记录ID
+	SendUserID string `json:"sendUserId,optional"` // 发起方用户ID
+	RevUserID  string `json:"revUserId,optional"`  // 接收方用户ID
+	SendStatus int32  `json:"sendStatus,optional"` // 发起方状态
+	RevStatus  int32  `json:"revStatus,optional"`  // 接收方状态
+	Message    string `json:"message,optional"`    // 附加消息
+	Source     string `json:"source,optional"`     // 来源
+	CreatedAt  string `json:"createdAt,optional"`  // 创建时间
+	UpdatedAt  string `json:"updatedAt,optional"`  // 更新时间
 }
 
 type GetFriendIdsReq struct {
@@ -190,11 +190,11 @@ type GetFriendIdsReq struct {
 }
 
 type GetFriendIdsRes struct {
-	FriendIds []string `json:"friend_ids,optional"` // 好友用户ID列表
+	FriendIDs []string `json:"friendIds,optional"` // 好友用户ID列表
 }
 
 type GetFriendVerifiesListByIdsReq struct {
-	VerifyIds []string `json:"verifyIds"` // 验证记录ID列表
+	VerifyIDs []string `json:"verifyIds"` // 验证记录ID列表
 }
 
 type GetFriendVerifiesListByIdsRes struct {
@@ -202,7 +202,7 @@ type GetFriendVerifiesListByIdsRes struct {
 }
 
 type GetFriendsListByUuidsReq struct {
-	FriendIds []string `json:"friendIds"` // 好友记录ID列表
+	FriendIDs []string `json:"friendIds"` // 好友记录ID列表
 }
 
 type GetFriendsListByUuidsRes struct {
@@ -229,7 +229,7 @@ type GetUserGroupIDsRes struct {
 type GroupCreateReq struct {
 	UserID     string   `header:"Beaver-User-Id"`    // 当前用户ID（网关注入的可信身份头）
 	Title      string   `json:"title,optional"`      // 群组名称，可选
-	UserIdList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
+	UserIDList []string `json:"userIdList,optional"` // 初始成员ID列表，可选
 }
 
 type GroupCreateRes struct {
@@ -270,7 +270,7 @@ type GroupInfoRes struct {
 type GroupInviteReq struct {
 	UserID  string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	GroupID string   `json:"groupId"`          // 群组ID
-	UserIds []string `json:"userIds"`          // 被邀请的用户ID列表
+	UserIDs []string `json:"userIds"`          // 被邀请的用户ID列表
 	Message string   `json:"message,optional"` // 邀请消息，可选
 }
 
@@ -279,17 +279,17 @@ type GroupInviteRes struct {
 }
 
 type GroupItem struct {
-	Id        uint64 `json:"id,optional"`         // 记录ID
-	GroupId   string `json:"group_id,optional"`   // 群组ID
-	Type      int32  `json:"type,optional"`       // 群类型
-	Title     string `json:"title,optional"`      // 群名称
-	Avatar    string `json:"avatar,optional"`     // 群头像
-	CreatorId string `json:"creator_id,optional"` // 创建者ID
-	Notice    string `json:"notice,optional"`     // 群公告
-	Status    int32  `json:"status,optional"`     // 群状态
-	MuteAll   bool   `json:"mute_all,optional"`   // 是否全员禁言
-	CreatedAt string `json:"created_at,optional"` // 创建时间
-	UpdatedAt string `json:"updated_at,optional"` // 更新时间
+	ID        uint64 `json:"id,optional"`        // 记录ID
+	GroupID   string `json:"groupId,optional"`   // 群组ID
+	Type      int32  `json:"type,optional"`      // 群类型
+	Title     string `json:"title,optional"`     // 群名称
+	Avatar    string `json:"avatar,optional"`    // 群头像
+	CreatorID string `json:"creatorId,optional"` // 创建者ID
+	Notice    string `json:"notice,optional"`    // 群公告
+	Status    int32  `json:"status,optional"`    // 群状态
+	MuteAll   bool   `json:"muteAll,optional"`   // 是否全员禁言
+	CreatedAt string `json:"createdAt,optional"` // 创建时间
+	UpdatedAt string `json:"updatedAt,optional"` // 更新时间
 }
 
 type GroupJoinReq struct {
@@ -377,7 +377,7 @@ type GroupListById struct {
 type GroupMemberAddReq struct {
 	UserID  string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	GroupID string   `json:"groupId"`          // 群组ID
-	UserIds []string `json:"userIds"`          // 要添加的成员ID列表
+	UserIDs []string `json:"userIds"`          // 要添加的成员ID列表
 }
 
 type GroupMemberAddRes struct {
@@ -385,14 +385,14 @@ type GroupMemberAddRes struct {
 }
 
 type GroupMemberItem struct {
-	Id                 uint64 `json:"id,optional"`                  // 记录ID
-	GroupId            string `json:"group_id,optional"`            // 群组ID
-	UserId             string `json:"user_id,optional"`             // 用户ID
-	Role               int32  `json:"role,optional"`                // 成员角色
-	Status             int32  `json:"status,optional"`              // 成员状态
-	ProhibitionMinutes int32  `json:"prohibition_minutes,optional"` // 禁言剩余分钟
-	CreatedAt          string `json:"created_at,optional"`          // 创建时间
-	UpdatedAt          string `json:"updated_at,optional"`          // 更新时间
+	ID                 uint64 `json:"id,optional"`                 // 记录ID
+	GroupID            string `json:"groupId,optional"`            // 群组ID
+	UserID             string `json:"userId,optional"`             // 用户ID
+	Role               int32  `json:"role,optional"`               // 成员角色
+	Status             int32  `json:"status,optional"`             // 成员状态
+	ProhibitionMinutes int32  `json:"prohibitionMinutes,optional"` // 禁言剩余分钟
+	CreatedAt          string `json:"createdAt,optional"`          // 创建时间
+	UpdatedAt          string `json:"updatedAt,optional"`          // 更新时间
 }
 
 type GroupMemberListItem struct {
@@ -420,7 +420,7 @@ type GroupMemberListRes struct {
 type GroupMemberRemoveReq struct {
 	UserID  string   `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
 	GroupID string   `json:"groupId"`          // 群组ID
-	UserIds []string `json:"userIds"`          // 要移除的成员ID列表
+	UserIDs []string `json:"userIds"`          // 要移除的成员ID列表
 }
 
 type GroupMemberRemoveRes struct {
@@ -530,11 +530,11 @@ type GroupSyncVersionItem struct {
 }
 
 type ListFriendBlocksReq struct {
-	Page          int32  `json:"page,optional"`            // 页码
-	PageSize      int32  `json:"page_size,optional"`       // 每页条数
-	UserId        string `json:"user_id,optional"`         // 拉黑方用户ID筛选
-	BlockedUserId string `json:"blocked_user_id,optional"` // 被拉黑用户ID筛选
-	BlockId       string `json:"block_id,optional"`        // 记录ID精确查
+	Page          int32  `json:"page,optional"`          // 页码
+	PageSize      int32  `json:"pageSize,optional"`      // 每页条数
+	UserID        string `json:"userId,optional"`        // 拉黑方用户ID筛选
+	BlockedUserID string `json:"blockedUserId,optional"` // 被拉黑用户ID筛选
+	BlockID       string `json:"blockId,optional"`       // 记录ID精确查
 }
 
 type ListFriendBlocksRes struct {
@@ -543,15 +543,15 @@ type ListFriendBlocksRes struct {
 }
 
 type ListFriendVerifiesReq struct {
-	Page       int32  `json:"page,optional"`         // 页码
-	PageSize   int32  `json:"page_size,optional"`    // 每页条数
-	SendUserId string `json:"send_user_id,optional"` // 发起方筛选
-	RevUserId  string `json:"rev_user_id,optional"`  // 接收方筛选
-	SendStatus int32  `json:"send_status,optional"`  // 发起方状态，0 表示全部
-	RevStatus  int32  `json:"rev_status,optional"`   // 接收方状态，0 表示全部
-	StartTime  string `json:"start_time,optional"`   // 开始时间
-	EndTime    string `json:"end_time,optional"`     // 结束时间
-	VerifyId   string `json:"verify_id,optional"`    // 验证记录ID精确查
+	Page       int32  `json:"page,optional"`       // 页码
+	PageSize   int32  `json:"pageSize,optional"`   // 每页条数
+	SendUserID string `json:"sendUserId,optional"` // 发起方筛选
+	RevUserID  string `json:"revUserId,optional"`  // 接收方筛选
+	SendStatus int32  `json:"sendStatus,optional"` // 发起方状态，0 表示全部
+	RevStatus  int32  `json:"revStatus,optional"`  // 接收方状态，0 表示全部
+	StartTime  string `json:"startTime,optional"`  // 开始时间
+	EndTime    string `json:"endTime,optional"`    // 结束时间
+	VerifyID   string `json:"verifyId,optional"`   // 验证记录ID精确查
 }
 
 type ListFriendVerifiesRes struct {
@@ -560,14 +560,14 @@ type ListFriendVerifiesRes struct {
 }
 
 type ListFriendsReq struct {
-	Page       int32  `json:"page,optional"`         // 页码
-	PageSize   int32  `json:"page_size,optional"`    // 每页条数
-	UserId     string `json:"user_id,optional"`      // 参与方用户ID筛选
-	PeerUserId string `json:"peer_user_id,optional"` // 对方用户ID筛选
-	IsDeleted  *bool  `json:"is_deleted,optional"`   // 删除状态筛选
-	StartTime  string `json:"start_time,optional"`   // 开始时间
-	EndTime    string `json:"end_time,optional"`     // 结束时间
-	RelationId string `json:"relation_id,optional"`  // 好友关系记录ID精确查
+	Page       int32  `json:"page,optional"`       // 页码
+	PageSize   int32  `json:"pageSize,optional"`   // 每页条数
+	UserID     string `json:"userId,optional"`     // 参与方用户ID筛选
+	PeerUserID string `json:"peerUserId,optional"` // 对方用户ID筛选
+	IsDeleted  *bool  `json:"isDeleted,optional"`  // 删除状态筛选
+	StartTime  string `json:"startTime,optional"`  // 开始时间
+	EndTime    string `json:"endTime,optional"`    // 结束时间
+	RelationID string `json:"relationId,optional"` // 好友关系记录ID精确查
 }
 
 type ListFriendsRes struct {
@@ -576,11 +576,11 @@ type ListFriendsRes struct {
 }
 
 type ListGroupMembersReq struct {
-	GroupId  string `json:"group_id,optional"`  // 群组ID
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
-	Role     int32  `json:"role,optional"`      // 角色筛选，0 表示全部
-	Status   int32  `json:"status,optional"`    // 状态筛选，0 表示全部
+	GroupID  string `json:"groupId,optional"`  // 群组ID
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
+	Role     int32  `json:"role,optional"`     // 角色筛选，0 表示全部
+	Status   int32  `json:"status,optional"`   // 状态筛选，0 表示全部
 }
 
 type ListGroupMembersRes struct {
@@ -589,13 +589,13 @@ type ListGroupMembersRes struct {
 }
 
 type ListGroupsReq struct {
-	Page     int32  `json:"page,optional"`      // 页码
-	PageSize int32  `json:"page_size,optional"` // 每页条数
-	Status   int32  `json:"status,optional"`    // 状态筛选，0 表示全部
-	Type     int32  `json:"type,optional"`      // 类型筛选，0 表示全部
-	Keywords string `json:"keywords,optional"`  // 群名关键词
-	Id       uint64 `json:"id,optional"`        // 记录ID
-	GroupId  string `json:"group_id,optional"`  // 业务群组ID
+	Page     int32  `json:"page,optional"`     // 页码
+	PageSize int32  `json:"pageSize,optional"` // 每页条数
+	Status   int32  `json:"status,optional"`   // 状态筛选，0 表示全部
+	Type     int32  `json:"type,optional"`     // 类型筛选，0 表示全部
+	Keywords string `json:"keywords,optional"` // 群名关键词
+	ID       uint64 `json:"id,optional"`       // 记录ID
+	GroupID  string `json:"groupId,optional"`  // 业务群组ID
 }
 
 type ListGroupsRes struct {
@@ -634,14 +634,14 @@ type NoticeUpdateRes struct {
 }
 
 type RemoveGroupMemberReq struct {
-	GroupId    string `json:"group_id,optional"`    // 群组ID
-	UserId     string `json:"user_id,optional"`     // 要移除的用户ID
-	OperatedBy string `json:"operated_by,optional"` // 操作者ID
-	Kick       bool   `json:"kick,optional"`        // true=被踢，false=退出
+	GroupID    string `json:"groupId,optional"`    // 群组ID
+	UserID     string `json:"userId,optional"`     // 要移除的用户ID
+	OperatedBy string `json:"operatedBy,optional"` // 操作者ID
+	Kick       bool   `json:"kick,optional"`       // true=被踢，false=退出
 }
 
 type RemoveGroupMemberRes struct {
-	MemberVersion int64 `json:"member_version,optional"` // 群成员列表版本号
+	MemberVersion int64 `json:"memberVersion,optional"` // 群成员列表版本号
 }
 
 type ResolveGroupInviteReq struct {
@@ -706,30 +706,30 @@ type UnblockUserRes struct {
 }
 
 type UpdateFriendBlocksReq struct {
-	BlockIds []string `json:"block_ids,optional"` // 黑名单记录ID
-	Action   int32    `json:"action,optional"`    // 1=解除拉黑
+	BlockIDs []string `json:"blockIds,optional"` // 黑名单记录ID
+	Action   int32    `json:"action,optional"`   // 1=解除拉黑
 }
 
 type UpdateFriendBlocksRes struct {
-	AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	AffectedCount int64 `json:"affectedCount,optional"` // 影响条数
 }
 
 type UpdateFriendVerifiesReq struct {
-	VerifyIds []string `json:"verify_ids,optional"` // 验证记录ID
-	Action    int32    `json:"action,optional"`     // 1=删除
+	VerifyIDs []string `json:"verifyIds,optional"` // 验证记录ID
+	Action    int32    `json:"action,optional"`    // 1=删除
 }
 
 type UpdateFriendVerifiesRes struct {
-	AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	AffectedCount int64 `json:"affectedCount,optional"` // 影响条数
 }
 
 type UpdateFriendsReq struct {
-	RelationIds []string `json:"relation_ids,optional"` // 好友关系记录ID
-	Action      int32    `json:"action,optional"`       // 1=物理删除 2=恢复软删
+	RelationIDs []string `json:"relationIds,optional"` // 好友关系记录ID
+	Action      int32    `json:"action,optional"`      // 1=物理删除 2=恢复软删
 }
 
 type UpdateFriendsRes struct {
-	AffectedCount int64 `json:"affected_count,optional"` // 影响条数
+	AffectedCount int64 `json:"affectedCount,optional"` // 影响条数
 }
 
 type UpdateGroupInfoReq struct {
@@ -746,21 +746,21 @@ type UpdateGroupInfoRes struct {
 }
 
 type UpdateGroupMemberReq struct {
-	Id          uint64 `json:"id,optional"`           // 成员记录ID
-	Role        *int32 `json:"role,optional"`         // 角色
-	MuteMinutes *int32 `json:"mute_minutes,optional"` // 禁言分钟，0 解除
+	ID          uint64 `json:"id,optional"`          // 成员记录ID
+	Role        *int32 `json:"role,optional"`        // 角色
+	MuteMinutes *int32 `json:"muteMinutes,optional"` // 禁言分钟，0 解除
 }
 
 type UpdateGroupMemberRes struct {
 }
 
 type UpdateGroupReq struct {
-	Id      uint64 `json:"id,optional"`       // 记录ID
-	Title   string `json:"title,optional"`    // 群名称，空表示不修改
-	Avatar  string `json:"avatar,optional"`   // 群头像，空表示不修改
-	Notice  string `json:"notice,optional"`   // 群公告，空表示不修改
-	Status  int32  `json:"status,optional"`   // 群状态，0 表示不修改
-	MuteAll *bool  `json:"mute_all,optional"` // 全员禁言
+	ID      uint64 `json:"id,optional"`      // 记录ID
+	Title   string `json:"title,optional"`   // 群名称，空表示不修改
+	Avatar  string `json:"avatar,optional"`  // 群头像，空表示不修改
+	Notice  string `json:"notice,optional"`  // 群公告，空表示不修改
+	Status  int32  `json:"status,optional"`  // 群状态，0 表示不修改
+	MuteAll *bool  `json:"muteAll,optional"` // 全员禁言
 }
 
 type UpdateGroupRes struct {

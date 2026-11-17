@@ -29,7 +29,7 @@ import (
 )
 
 type Model struct {
-	Id        uint       `gorm:"primaryKey;autoIncrement" json:"id"` // 自增主键
+	ID        uint       `gorm:"primaryKey;autoIncrement" json:"id"` // 自增主键
 	CreatedAt CustomTime `json:"createdAt"`
 	UpdatedAt CustomTime `json:"updatedAt"`
 }

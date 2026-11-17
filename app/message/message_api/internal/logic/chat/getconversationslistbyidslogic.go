@@ -49,12 +49,12 @@ func NewGetConversationsListByIdsLogic(ctx context.Context, svcCtx *svc.ServiceC
 
 func (l *GetConversationsListByIdsLogic) GetConversationsListByIds(req *types.GetConversationsListByIdsReq) (resp *types.GetConversationsListByIdsRes, err error) {
 	var conversations []message_models.ChatConversationMeta
-	err = l.svcCtx.DB.Where("conversation_id IN (?)", req.ConversationIds).Find(&conversations).Error
+	err = l.svcCtx.DB.Where("conversation_id IN (?)", req.ConversationIDs).Find(&conversations).Error
 	if err != nil {
 		l.logger.Error(model.LogMsg{
 			Text: "查询会话信息失败",
 			Data: map[string]any{
-				"count": len(req.ConversationIds),
+				"count": len(req.ConversationIDs),
 				"err":   err.Error(),
 			},
 		})
@@ -77,7 +77,7 @@ func (l *GetConversationsListByIdsLogic) GetConversationsListByIds(req *types.Ge
 	l.logger.Info(model.LogMsg{
 		Text: "批量查询会话成功",
 		Data: map[string]any{
-			"requestCount": len(req.ConversationIds),
+			"requestCount": len(req.ConversationIDs),
 			"resultCount":  len(conversationList),
 		},
 	})

@@ -1,4 +1,5 @@
-import "api/file.api"
 import "api/emoji.api"
+import "api/file.api"
+import "api/file_public.api"
 
 // goctl api go -api asset_api.api -dir . --home ../../../template

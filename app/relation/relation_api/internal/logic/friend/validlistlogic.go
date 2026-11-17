@@ -106,7 +106,7 @@ func (l *ValidListLogic) ValidList(req *types.ValidListReq) (resp *types.ValidLi
 	for _, fv := range fvs {
 		info := types.FriendValidInfo{
 			Message:   fv.Message,
-			Id:        fv.VerifyID,
+			ID:        fv.VerifyID,
 			Source:    fv.Source,
 			CreatedAt: fv.CreatedAt.String(),
 		}

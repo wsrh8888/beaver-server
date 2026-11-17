@@ -64,7 +64,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 	// 检查哪些用户已经进群了，并分类处理
 	var existingMembers []group_models.GroupMemberModel
-	l.svcCtx.DB.Find(&existingMembers, "group_id = ? and user_id in ?", req.GroupID, req.UserIds)
+	l.svcCtx.DB.Find(&existingMembers, "group_id = ? and user_id in ?", req.GroupID, req.UserIDs)
 
 	// 构建已存在成员的映射（按userID）
 	existingMemberMap := make(map[string]*group_models.GroupMemberModel)
@@ -84,7 +84,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 	var updateMembers []group_models.GroupMemberModel
 	var lastVersion int64 // 记录最后一个版本号，用于返回
 
-	for _, memberID := range req.UserIds {
+	for _, memberID := range req.UserIDs {
 		// 获取该群成员的版本号（按群独立递增）
 		memberVersion := l.svcCtx.VersionGen.GetNextVersion("group_members", "group_id", req.GroupID)
 		if memberVersion == -1 {
@@ -147,7 +147,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 	// 更新新成员的会话记录
 	_, err = l.svcCtx.ChatRpc.BatchUpdateConversation(l.ctx, &chat_rpc.BatchUpdateConversationReq{
-		UserIds:        req.UserIds,
+		UserIds:        req.UserIDs,
 		ConversationId: "group_" + req.GroupID,
 		LastMessage:    "",
 	})
@@ -162,7 +162,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		conversationID := "group_" + req.GroupID
 
 		// 群聊内系统通知：每位新成员各一条「xxx 加入了群聊」
-		for _, memberID := range req.UserIds {
+		for _, memberID := range req.UserIDs {
 			if _, err := l.svcCtx.ChatRpc.SendNotificationMessage(ctx, &chat_rpc.SendNotificationMessageReq{
 				ConversationId: conversationID,
 				MessageType:    3,
@@ -184,7 +184,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 
 		// 构建新加入成员的ID集合
 		newMemberIds := make(map[string]bool)
-		for _, newMemberID := range req.UserIds {
+		for _, newMemberID := range req.UserIDs {
 			newMemberIds[newMemberID] = true
 		}
 
@@ -204,7 +204,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		// 1. 通知已在群的成员：group_members变化（成员列表增加了）
 		// 构建新加入成员的数据列表
 		var newMemberData []map[string]interface{}
-		for _, newMemberID := range req.UserIds {
+		for _, newMemberID := range req.UserIDs {
 			newMemberVersion := memberVersionMap[newMemberID] // 直接从映射表获取
 
 			newMemberData = append(newMemberData, map[string]interface{}{
@@ -236,7 +236,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		}
 
 		// 2. 通知新加入的成员：group_members变化（他们成为了成员）+ groups变化（群基本信息）
-		for _, newMemberID := range req.UserIds {
+		for _, newMemberID := range req.UserIDs {
 			payload := map[string]interface{}{
 				"command":  wsCommandConst.GROUP_OPERATION,
 				"type":     wsTypeConst.GroupMemberReceive,
@@ -265,7 +265,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		}
 
 		// 3. 触发开放平台 Webhook 事件(群成员变更)
-		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, req.UserIds, "added")
+		l.triggerOpenPlatformWebhook(req.GroupID, req.UserID, req.UserIDs, "added")
 	}()
 
 	// 创建并返回响应
@@ -278,7 +278,7 @@ func (l *GroupMemberAddLogic) GroupMemberAdd(req *types.GroupMemberAddReq) (resp
 		Data: map[string]interface{}{
 			"groupId": req.GroupID,
 			"userId":  req.UserID,
-			"count":   len(req.UserIds),
+			"count":   len(req.UserIDs),
 		},
 	})
 	return resp, nil

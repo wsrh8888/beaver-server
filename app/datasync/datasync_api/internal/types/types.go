@@ -25,12 +25,12 @@ package types
 type AgentConversationVersionItem struct {
 	ConversationID string `json:"conversationId"` // 会话ID
 	Version        int64  `json:"version"`        // 会话版本号（消息同步游标）
-	LatestTopicId  string `json:"latestTopicId"`  // 最新话题ID，便于客户端拉消息
+	LatestTopicID  string `json:"latestTopicId"`  // 最新话题ID，便于客户端拉消息
 	Title          string `json:"title"`          // 会话标题
 	UpdatedAt      int64  `json:"updatedAt"`      // 更新时间毫秒
 	Preview        string `json:"preview"`        // 最新消息预览
 	Module         string `json:"module"`         // 入口模块
-	WorkspaceId    string `json:"workspaceId"`    // 本机空间 id；空=云端轻会话
+	WorkspaceID    string `json:"workspaceId"`    // 本机空间 id；空=云端轻会话
 }
 
 type ChatConversationVersionItem struct {
@@ -54,37 +54,37 @@ type CircleInfoVersionItem struct {
 }
 
 type EmojiCollectVersionItem struct {
-	EmojiCollectId string `json:"emojiCollectId"` // 收藏记录ID
+	EmojiCollectID string `json:"emojiCollectId"` // 收藏记录ID
 	Version        int64  `json:"version"`        // 收藏版本号
 }
 
 type EmojiPackageCollectVersionItem struct {
-	PackageCollectId string `json:"packageCollectId"` // 收藏记录ID
+	PackageCollectID string `json:"packageCollectId"` // 收藏记录ID
 	Version          int64  `json:"version"`          // 收藏版本号
 }
 
 type EmojiPackageContentVersionItem struct {
-	PackageId string `json:"packageId"` // 表情包ID
+	PackageID string `json:"packageId"` // 表情包ID
 	Version   int64  `json:"version"`   // 表情包内容版本号
 }
 
 type EmojiPackageVersionItem struct {
-	PackageId string `json:"packageId"` // 表情包ID
+	PackageID string `json:"packageId"` // 表情包ID
 	Version   int64  `json:"version"`   // 表情包版本号
 }
 
 type EmojiVersionItem struct {
-	EmojiId string `json:"emojiId"` // 表情ID
+	EmojiID string `json:"emojiId"` // 表情ID
 	Version int64  `json:"version"` // 表情版本号
 }
 
 type FriendVerifyVersionItem struct {
-	VerifyId string `json:"verifyId"` // 验证记录ID
+	VerifyID string `json:"verifyId"` // 验证记录ID
 	Version  int64  `json:"version"`  // 验证记录版本号
 }
 
 type FriendVersionItem struct {
-	FriendId string `json:"friendId"` // 好友ID
+	FriendID string `json:"friendId"` // 好友ID
 	Version  int64  `json:"version"`  // 好友关系版本号
 }
 
