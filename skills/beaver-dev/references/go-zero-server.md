@@ -325,7 +325,42 @@ goctl rpc protoc xxx.proto --go_out=. --go-grpc_out=. -m --zrpc_out=. --home ../
 | `.api` → goctl api | `xxx_api/internal/types/` |
 | `.proto` → protoc | `xxx_rpc/pb/` |
 
-跨层用 `common/convert.To[T]`，json tag 必须一致，失败当业务错误，不要静默零值。
+跨层**显式逐字段赋值**，禁止反射式 DTO 映射工具（本仓已移除 `common/convert`）。见下节。
+
+### API ↔ RPC 类型映射（强制显式，禁止 convert）
+
+`xxx_api/internal/types`（goctl 生成）与 `xxx_rpc/pb`（protoc 生成）是同域同一语义的两套 Go 类型。logic 里互转时**必须逐字段写出**，禁止任何"按字段名自动映射"的工具（反射、`convert.To[T]`、JSON 往返）——那类工具让正确性依赖两端字段名/tag 碰巧一致，且无法表达字段的显隐与类型差异。
+
+```go
+// 反例：反射盲配，字段名/类型差异全靠运行时猜
+rpcReq, err := convert.To[accttypes.ListUsersReq](req)
+return convert.To[types.ListUsersRes](rpcRes)
+
+// 正例：逐字段显式写出
+rpcReq := &accttypes.ListUsersReq{
+	Page: req.Page, PageSize: req.PageSize, Keyword: req.Keyword,
+	UserId: req.UserID, // 注意 protoc 命名 Id ↔ Go 规范 ID
+}
+rpcRes, err := l.svcCtx.UserRpc.ListUsers(l.ctx, rpcReq)
+if err != nil {
+	return nil, err
+}
+res := &types.ListUsersRes{Total: rpcRes.Total}
+for _, it := range rpcRes.GetList() {
+	res.List = append(res.List, types.UserLookupInfo{
+		UserID: it.UserId, NickName: it.NickName, // 逐字段
+	})
+}
+return res, nil
+```
+
+硬性：
+
+- 映射方向是**本域 API types ↔ 本域 RPC pb**，字段一一列出；pb 侧 `Id`/`Url`/`UserId` 与 API 侧 `ID`/`URL`/`UserID` 按命名规范对应，逐个写清，不靠归一化匹配。
+- 指针字段显式取址（`&types.X{...}`）；slice/map 用循环逐元素构造，不整体强转。
+- **自引用/嵌套递归结构**（如消息 `Msg` 内嵌 `WithdrawMsg.OriginMsg`、`ReplyMsg`）单独写递归转换函数（如 `pbMsgToPeerMsg`），在函数中逐字段映射并对自引用字段递归调用自己。**绝不要用反射自动展开**——会在自引用上指数级膨胀（实测生成 10 万字符的单行）。
+- 只有真正字段同形同类型时才能直接赋值；任何 `int32`↔`int64`、值↔指针差异都显式转换。
+- 这样改 A 端字段时，编译期就会在 B 端映射处报错，不会静默丢字段——这正是显式映射的价值。
 
 ---
 
