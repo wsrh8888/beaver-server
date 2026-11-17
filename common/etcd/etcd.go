@@ -28,8 +28,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/netx"
+
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -37,7 +39,10 @@ import (
 func GetServiceAddr(etcdAddr string, serviceName string) string {
 	client, err := initEtcd(etcdAddr)
 	if err != nil {
-		logx.Errorf("初始化etcd客户端失败: %v", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "初始化etcd客户端失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return ""
 	}
 	defer client.Close()
@@ -50,17 +55,19 @@ func GetServiceAddr(etcdAddr string, serviceName string) string {
 
 	resp, err := client.Get(ctx, keyPrefix, clientv3.WithPrefix())
 	if err != nil {
-		logx.Errorf("获取etcd地址失败: %v", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "获取etcd地址失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return ""
 	}
 	if len(resp.Kvs) == 0 {
-		logx.Errorf("获取etcd地址失败，没有找到服务: %s", serviceName)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "获取etcd地址失败",
+			Data: map[string]any{"serviceName": serviceName, "reason": "没有找到服务"},
+		})
 		return ""
 	}
-
-	// for _, kv := range resp.Kvs {
-	// 	logx.Infof("键: %s, 值: %s", kv.Key, kv.Value)
-	// }
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	selectedInstance := resp.Kvs[r.Intn(len(resp.Kvs))]
@@ -83,7 +90,10 @@ func initEtcd(etcdAddr string) (*clientv3.Client, error) {
 func DeliveryAddress(etcdAddr string, serviceName string, addr string) {
 	list := strings.Split(addr, ":")
 	if len(list) != 2 {
-		logx.Error("addr格式错误")
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "地址格式错误",
+			Data: map[string]any{"addr": addr},
+		})
 		return
 	}
 	ip := list[0]
@@ -94,14 +104,20 @@ func DeliveryAddress(etcdAddr string, serviceName string, addr string) {
 
 	client, err := initEtcd(etcdAddr)
 	if err != nil {
-		logx.Error("初始化etcd客户端失败", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "初始化etcd客户端失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return
 	}
 	defer client.Close()
 
 	err = registerServiceWithRetry(client, etcdAddr, serviceName, addr)
 	if err != nil {
-		logx.Error("服务注册失败", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "服务注册失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 	}
 }
 
@@ -112,7 +128,10 @@ func registerServiceWithRetry(client *clientv3.Client, etcdAddr, serviceName, ad
 		if err == nil {
 			return nil
 		}
-		logx.Error("注册服务失败，重试中...", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "注册服务失败重试中",
+			Data: map[string]any{"err": err.Error()},
+		})
 		time.Sleep(2 * time.Second)
 	}
 }
@@ -127,22 +146,22 @@ func registerService(client *clientv3.Client, etcdAddr, serviceName, addr string
 
 	// 使用服务名作为前缀，实例唯一标示作为键值
 	key := fmt.Sprintf("/services/%s/%s", serviceName, addr)
-	fmt.Println("key:", key)
 
 	// 写入键值并附加租约
 	_, err = client.Put(context.Background(), key, addr, clientv3.WithLease(resp.ID))
 	if err != nil {
 		return fmt.Errorf("上送etcd地址失败: %w", err)
 	}
-	logx.Info("上送etcd地址成功", addr)
-	fmt.Println("resp.ID:", resp.ID)
+	beaverlog.New("etcd").Info(model.LogMsg{
+		Text: "上送etcd地址成功",
+		Data: map[string]any{"addr": addr, "leaseID": resp.ID},
+	})
 
 	// 自动续约
 	ch, kaerr := client.KeepAlive(context.Background(), resp.ID)
 	if kaerr != nil {
 		return fmt.Errorf("设置租约续约失败: %w", kaerr)
 	}
-	fmt.Println("续约通道:", ch)
 
 	go keepAliveService(client, etcdAddr, serviceName, addr, ch)
 
@@ -155,16 +174,14 @@ func keepAliveService(client *clientv3.Client, etcdAddr, serviceName, addr strin
 		select {
 		case ka, ok := <-ch:
 			if !ok {
-				logx.Error("续约频道关闭")
+				beaverlog.New("etcd").Error(model.LogMsg{Text: "续约频道关闭"})
 				reconnectEtcd(client, etcdAddr, serviceName, addr)
 				return
 			}
 			if ka == nil {
-				logx.Error("租约失效")
+				beaverlog.New("etcd").Error(model.LogMsg{Text: "租约失效"})
 				reconnectEtcd(client, etcdAddr, serviceName, addr)
 				return
-			} else {
-				// logx.Infof("续约成功: lease ID=%d", ka.ID)
 			}
 		}
 	}
@@ -172,7 +189,7 @@ func keepAliveService(client *clientv3.Client, etcdAddr, serviceName, addr strin
 
 // 重新建立连接并注册服务
 func reconnectEtcd(client *clientv3.Client, etcdAddr, serviceName, addr string) {
-	logx.Info("尝试重新连接etcd并注册服务")
+	beaverlog.New("etcd").Info(model.LogMsg{Text: "尝试重新连接etcd并注册服务"})
 	client.Close()
 
 	for {
@@ -181,7 +198,10 @@ func reconnectEtcd(client *clientv3.Client, etcdAddr, serviceName, addr string) 
 			client = newClient
 			break
 		}
-		logx.Error("重新初始化etcd客户端失败", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "重新初始化etcd客户端失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		time.Sleep(2 * time.Second)
 	}
 

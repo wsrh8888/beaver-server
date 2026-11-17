@@ -27,8 +27,6 @@ import (
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/common/convert"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // PeerSendMsgLogic 发送消息
@@ -36,7 +34,6 @@ import (
 // 薄转发：HTTP 出入参与同域 RPC 的 proto 类型字段名一致，用 convert 做一次
 // JSON 往返即可，不在这里复制业务规则（规则在 message_rpc 里）。
 type PeerSendMsgLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -44,7 +41,6 @@ type PeerSendMsgLogic struct {
 // NewPeerSendMsgLogic 构造 logic。
 func NewPeerSendMsgLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PeerSendMsgLogic {
 	return &PeerSendMsgLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

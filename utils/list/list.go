@@ -24,7 +24,8 @@ package utils
 import (
 	"regexp"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 func InListByRegex(list []string, key string) (ok bool) {
@@ -32,7 +33,10 @@ func InListByRegex(list []string, key string) (ok bool) {
 	for _, s := range list {
 		regex, err := regexp.Compile(s)
 		if err != nil {
-			logx.Errorf("compile regex error: %v", err)
+			beaverlog.New("list").Error(model.LogMsg{
+				Text: "正则表达式编译失败",
+				Data: map[string]any{"expr": s, "err": err.Error()},
+			})
 			return
 		}
 		if regex.MatchString(key) {

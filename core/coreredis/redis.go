@@ -23,11 +23,12 @@ package coreredis
 
 import (
 	"context"
-	"fmt"
 	"time"
 
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 func InitRedis(addr string, password string, db int) (client *redis.Client) {
@@ -37,14 +38,20 @@ func InitRedis(addr string, password string, db int) (client *redis.Client) {
 		DB:       db,
 		PoolSize: 100,
 	})
-	_, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	_, err := rdb.Ping().Result()
+	_, err := rdb.WithContext(ctx).Ping().Result()
 	if err != nil {
-		logx.Error(err)
+		beaverlog.New("redis").Error(model.LogMsg{
+			Text: "连接redis失败",
+			Data: map[string]any{"addr": addr, "err": err.Error()},
+		})
 		panic(err)
 	}
-	fmt.Println("redis链接成功")
+	beaverlog.New("redis").Info(model.LogMsg{
+		Text: "redis连接成功",
+		Data: map[string]any{"addr": addr},
+	})
 
 	return rdb
 }

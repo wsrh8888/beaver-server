@@ -30,11 +30,11 @@ import (
 )
 
 // ListBots 列开放平台机器人。
-func ListBots(ctx context.Context, header http.Header, body *opentype.ListBotsReq) (*opentype.ListBotsRes, error) {
+func ListBotsApi(ctx context.Context, header http.Header, body *opentype.ListBotsReq) (*opentype.ListBotsRes, error) {
 	return Post[opentype.ListBotsRes](ctx, commonconfig.OpenUrl+"/beaver-open/api/open/machine/v1/list_bots", header, body)
 }
 
 // UpdateBot 更新开放平台机器人（状态 / 配置）。
-func UpdateBot(ctx context.Context, header http.Header, body *opentype.UpdateBotReq) (*opentype.UpdateBotRes, error) {
+func UpdateBotApi(ctx context.Context, header http.Header, body *opentype.UpdateBotReq) (*opentype.UpdateBotRes, error) {
 	return Post[opentype.UpdateBotRes](ctx, commonconfig.OpenUrl+"/beaver-open/api/open/machine/v1/update_bot", header, body)
 }

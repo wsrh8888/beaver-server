@@ -25,62 +25,77 @@
 // 不依赖 protobuf 运行时（无 protoimpl / protoreflect / state）。
 package moment
 
-type DeleteMomentCommentsReq struct {
-	CommentIds []string `json:"comment_ids,omitempty"`
-}
+// DeleteMomentCommentsApi 删除评论：Req + Res。
+type (
+	DeleteMomentCommentsReq struct {
+		CommentIds []string `json:"comment_ids,omitempty"`
+	}
 
-type DeleteMomentCommentsRes struct{}
+	DeleteMomentCommentsRes struct{}
+)
 
-type ListMomentCommentsReq struct {
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
-	MomentId string `json:"moment_id,omitempty"`
-}
+// ListMomentCommentsApi 列评论：Req + Res + 本接口专属子类型。
+type (
+	ListMomentCommentsReq struct {
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"page_size,omitempty"`
+		MomentId string `json:"moment_id,omitempty"`
+	}
 
-type ListMomentCommentsRes struct {
-	Total int64                `json:"total,omitempty"`
-	List  []*MomentCommentItem `json:"list,omitempty"`
-}
+	ListMomentCommentsRes struct {
+		Total int64                     `json:"total,omitempty"`
+		List  []*ListMomentCommentsItem `json:"list,omitempty"`
+	}
 
-type ListMomentsReq struct {
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
-	UserId   string `json:"user_id,omitempty"`
-	Keywords string `json:"keywords,omitempty"`
-	MomentId string `json:"moment_id,omitempty"`
-}
+	// ListMomentCommentsItem 评论项。
+	ListMomentCommentsItem struct {
+		CommentId string `json:"comment_id,omitempty"`
+		MomentId  string `json:"moment_id,omitempty"`
+		UserId    string `json:"user_id,omitempty"`
+		Content   string `json:"content,omitempty"`
+		CreatedAt string `json:"created_at,omitempty"`
+		UpdatedAt string `json:"updated_at,omitempty"`
+	}
+)
 
-type ListMomentsRes struct {
-	Total int64         `json:"total,omitempty"`
-	List  []*MomentItem `json:"list,omitempty"`
-}
+// ListMomentsApi 列动态：Req + Res + 本接口专属子类型（含嵌套文件项）。
+type (
+	ListMomentsReq struct {
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"page_size,omitempty"`
+		UserId   string `json:"user_id,omitempty"`
+		Keywords string `json:"keywords,omitempty"`
+		MomentId string `json:"moment_id,omitempty"`
+	}
 
-type MomentCommentItem struct {
-	CommentId string `json:"comment_id,omitempty"`
-	MomentId  string `json:"moment_id,omitempty"`
-	UserId    string `json:"user_id,omitempty"`
-	Content   string `json:"content,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
-}
+	ListMomentsRes struct {
+		Total int64              `json:"total,omitempty"`
+		List  []*ListMomentsItem `json:"list,omitempty"`
+	}
 
-type MomentFileItem struct {
-	FileKey string `json:"file_key,omitempty"`
-}
+	// ListMomentsItem 动态项。
+	ListMomentsItem struct {
+		MomentId  string                 `json:"moment_id,omitempty"`
+		UserId    string                 `json:"user_id,omitempty"`
+		Content   string                 `json:"content,omitempty"`
+		Files     []*ListMomentsFileItem `json:"files,omitempty"`
+		IsDeleted bool                   `json:"is_deleted,omitempty"`
+		CreatedAt string                 `json:"created_at,omitempty"`
+		UpdatedAt string                 `json:"updated_at,omitempty"`
+	}
 
-type MomentItem struct {
-	MomentId  string            `json:"moment_id,omitempty"`
-	UserId    string            `json:"user_id,omitempty"`
-	Content   string            `json:"content,omitempty"`
-	Files     []*MomentFileItem `json:"files,omitempty"`
-	IsDeleted bool              `json:"is_deleted,omitempty"`
-	CreatedAt string            `json:"created_at,omitempty"`
-	UpdatedAt string            `json:"updated_at,omitempty"`
-}
+	// ListMomentsFileItem 动态附件项。
+	ListMomentsFileItem struct {
+		FileKey string `json:"file_key,omitempty"`
+	}
+)
 
-type UpdateMomentReq struct {
-	MomentId  string `json:"moment_id,omitempty"`
-	IsDeleted *bool  `json:"is_deleted,omitempty"`
-}
+// UpdateMomentApi 更新动态：Req + Res。
+type (
+	UpdateMomentReq struct {
+		MomentId  string `json:"moment_id,omitempty"`
+		IsDeleted *bool  `json:"is_deleted,omitempty"`
+	}
 
-type UpdateMomentRes struct{}
+	UpdateMomentRes struct{}
+)

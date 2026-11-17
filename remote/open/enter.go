@@ -26,7 +26,7 @@
 // 本包不依赖 beaver-open 模块。
 //
 // 结构对齐 remote/circle：Init 灌入凭据并把域名写入 commonconfig.OpenUrl；业务侧直接调包函数
-// GetDigitalByUserID(...) / ExchangeToken(...)。
+// GetDigitalByUserIDApi(...) / ExchangeTokenApi(...)。
 package open
 
 import (

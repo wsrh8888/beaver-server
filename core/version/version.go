@@ -27,8 +27,10 @@ import (
 	"strings"
 	"time"
 
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
 	"github.com/go-redis/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"gorm.io/gorm"
 )
@@ -70,10 +72,16 @@ func (vg *VersionGenerator) GetNextVersion(table string, field string, value str
 	// 1. 先尝试从Redis获取
 	version, err := vg.redisClient.Incr(key).Result()
 	if err != nil {
-		logx.Errorf("Redis获取版本号失败: table=%s, field=%s, value=%s, error=%v", table, field, value, err)
+		beaverlog.New("version").Error(model.LogMsg{
+			Text: "Redis获取版本号失败",
+			Data: map[string]any{"table": table, "field": field, "value": value, "err": err.Error()},
+		})
 		// Redis失败，初始化Redis并返回初始值
 		vg.redisClient.Set(key, initValue, 7*24*time.Hour) // 7天过期
-		logx.Infof("初始化版本号: table=%s, field=%s, value=%s, initValue=%d", table, field, value, initValue)
+		beaverlog.New("version").Info(model.LogMsg{
+			Text: "初始化版本号",
+			Data: map[string]any{"table": table, "field": field, "value": value, "initValue": initValue},
+		})
 		return initValue
 	}
 
@@ -82,7 +90,10 @@ func (vg *VersionGenerator) GetNextVersion(table string, field string, value str
 		// Redis返回1表示key不存在或刚创建，需要从MySQL同步历史版本
 		mysqlVersion := vg.getMaxVersionFromMySQL(table, field, value)
 		if mysqlVersion < 0 {
-			logx.Errorf("MySQL获取版本号失败: table=%s", table)
+			beaverlog.New("version").Error(model.LogMsg{
+				Text: "MySQL获取版本号失败",
+				Data: map[string]any{"table": table},
+			})
 			// MySQL查询失败，继续使用Redis的版本号1
 			return version
 		}
@@ -91,21 +102,33 @@ func (vg *VersionGenerator) GetNextVersion(table string, field string, value str
 			// MySQL有数据，更新Redis为MySQL版本号+1
 			newVersion := mysqlVersion + 1
 			vg.redisClient.Set(key, newVersion, 7*24*time.Hour) // 7天过期
-			logx.Infof("从MySQL同步版本号: table=%s, mysqlVersion=%d, newVersion=%d", table, mysqlVersion, newVersion)
+			beaverlog.New("version").Info(model.LogMsg{
+				Text: "从MySQL同步版本号",
+				Data: map[string]any{"table": table, "mysqlVersion": mysqlVersion, "newVersion": newVersion},
+			})
 			return newVersion
 		}
 
 		// MySQL没有数据，使用初始值
 		if initValue > 1 {
 			vg.redisClient.Set(key, initValue, 7*24*time.Hour) // 7天过期
-			logx.Infof("使用自定义初始值: table=%s, initValue=%d", table, initValue)
+			beaverlog.New("version").Info(model.LogMsg{
+				Text: "使用自定义初始值",
+				Data: map[string]any{"table": table, "initValue": initValue},
+			})
 			return initValue
 		}
 		// MySQL没有数据，继续使用Redis的版本号1
-		logx.Infof("MySQL没有数据，Redis从1开始: table=%s, version=%d", table, version)
+		beaverlog.New("version").Info(model.LogMsg{
+			Text: "MySQL没有数据Redis从1开始",
+			Data: map[string]any{"table": table, "version": version},
+		})
 	}
 
-	logx.Infof("生成版本号: table=%s, field=%s, value=%s, version=%d", table, field, value, version)
+	beaverlog.New("version").Info(model.LogMsg{
+		Text: "生成版本号",
+		Data: map[string]any{"table": table, "field": field, "value": value, "version": version},
+	})
 	return version
 }
 
@@ -123,14 +146,20 @@ func (vg *VersionGenerator) getMaxVersionFromMySQL(table string, field string, v
 			fields := strings.Split(field, "_")
 			values := strings.Split(value, "_")
 			if len(fields) != len(values) {
-				logx.Errorf("组合键字段和值数量不匹配: fields=%v, values=%v", fields, values)
+				beaverlog.New("version").Error(model.LogMsg{
+					Text: "组合键字段和值数量不匹配",
+					Data: map[string]any{"fields": fields, "values": values},
+				})
 				return -1
 			}
 			conds := make([]string, 0, len(fields))
 			args := make([]interface{}, 0, len(fields))
 			for i := range fields {
 				if !isSafeIdentifier(fields[i]) {
-					logx.Errorf("非法字段名: %s", fields[i])
+					beaverlog.New("version").Error(model.LogMsg{
+						Text: "非法字段名",
+						Data: map[string]any{"field": fields[i]},
+					})
 					return -1
 				}
 				conds = append(conds, fmt.Sprintf("%s = ?", fields[i]))
@@ -138,25 +167,40 @@ func (vg *VersionGenerator) getMaxVersionFromMySQL(table string, field string, v
 			}
 			query := fmt.Sprintf("SELECT COALESCE(MAX(version), 0) FROM %s WHERE %s", tableName, strings.Join(conds, " AND "))
 			err = vg.db.Raw(query, args...).Scan(&maxVersion).Error
-			logx.Infof("查询组合条件版本历史: table=%s, fields=%v, values=%v, maxVersion=%d", table, fields, values, maxVersion)
+			beaverlog.New("version").Info(model.LogMsg{
+				Text: "查询组合条件版本历史",
+				Data: map[string]any{"table": table, "fields": fields, "values": values, "maxVersion": maxVersion},
+			})
 		} else {
 			// 单字段条件
 			if !isSafeIdentifier(field) {
-				logx.Errorf("非法字段名: %s", field)
+				beaverlog.New("version").Error(model.LogMsg{
+					Text: "非法字段名",
+					Data: map[string]any{"field": field},
+				})
 				return -1
 			}
 			query := fmt.Sprintf("SELECT COALESCE(MAX(version), 0) FROM %s WHERE %s = ?", tableName, field)
 			err = vg.db.Raw(query, value).Scan(&maxVersion).Error
-			logx.Infof("查询条件版本历史: table=%s, field=%s, value=%s, maxVersion=%d", table, field, value, maxVersion)
+			beaverlog.New("version").Info(model.LogMsg{
+				Text: "查询条件版本历史",
+				Data: map[string]any{"table": table, "field": field, "value": value, "maxVersion": maxVersion},
+			})
 		}
 	} else {
 		// 全局版本：查询表中的最大版本号
 		err = vg.db.Raw("SELECT COALESCE(MAX(version), 0) FROM " + tableName).Scan(&maxVersion).Error
-		logx.Infof("查询全局版本历史: table=%s, maxVersion=%d", table, maxVersion)
+		beaverlog.New("version").Info(model.LogMsg{
+			Text: "查询全局版本历史",
+			Data: map[string]any{"table": table, "maxVersion": maxVersion},
+		})
 	}
 
 	if err != nil {
-		logx.Errorf("MySQL获取最大版本号失败: table=%s, field=%s, value=%s, error=%v", table, field, value, err)
+		beaverlog.New("version").Error(model.LogMsg{
+			Text: "MySQL获取最大版本号失败",
+			Data: map[string]any{"table": table, "field": field, "value": value, "err": err.Error()},
+		})
 		return -1
 	}
 	return maxVersion

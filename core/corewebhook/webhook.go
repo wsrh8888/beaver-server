@@ -33,8 +33,10 @@ import (
 	"strconv"
 	"time"
 
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
 	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // CallbackPayload Webhook 回调载荷
@@ -106,7 +108,10 @@ type WebhookTargetConfig struct {
 func (s *WebhookSender) sendAsync(config WebhookTargetConfig, data CallbackPayload) {
 	body, err := json.Marshal(data)
 	if err != nil {
-		logx.Errorf("Webhook 序列化失败: %v", err)
+		beaverlog.New("webhook").Error(model.LogMsg{
+			Text: "Webhook序列化失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return
 	}
 
@@ -131,10 +136,20 @@ func (s *WebhookSender) sendAsync(config WebhookTargetConfig, data CallbackPaylo
 
 		if s.sendHTTPRequest(config.TargetURL, body, signature, data.EventID, data.Timestamp, timeout) {
 			success = true
-			logx.Infof("Webhook 回调成功: EventID=%s, URL=%s", data.EventID, config.TargetURL)
+			beaverlog.New("webhook").Info(model.LogMsg{
+				Text: "Webhook回调成功",
+				Data: map[string]any{"eventID": data.EventID, "url": config.TargetURL},
+			})
 			break
 		}
-		logx.Errorf("Webhook 回调失败 (重试 %d/%d): EventID=%s", retry+1, retryCount, data.EventID)
+		beaverlog.New("webhook").Error(model.LogMsg{
+			Text: "Webhook回调失败",
+			Data: map[string]any{
+				"retry":   retry + 1,
+				"total":   retryCount,
+				"eventID": data.EventID,
+			},
+		})
 	}
 
 	s.saveLog(config, data, success)
@@ -147,7 +162,10 @@ func (s *WebhookSender) sendHTTPRequest(url string, body []byte, signature, even
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
-		logx.Errorf("创建 HTTP 请求失败: %v", err)
+		beaverlog.New("webhook").Error(model.LogMsg{
+			Text: "创建HTTP请求失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return false
 	}
 
@@ -158,7 +176,10 @@ func (s *WebhookSender) sendHTTPRequest(url string, body []byte, signature, even
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logx.Errorf("HTTP 请求失败: %v", err)
+		beaverlog.New("webhook").Error(model.LogMsg{
+			Text: "HTTP请求失败",
+			Data: map[string]any{"err": err.Error()},
+		})
 		return false
 	}
 	defer resp.Body.Close()

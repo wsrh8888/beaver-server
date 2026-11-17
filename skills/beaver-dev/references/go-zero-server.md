@@ -54,6 +54,19 @@ commonconfig/             # XxxUrl / RemoteProxy：出站域名与凭据注册�
 5. 出站鉴权：`Authorization: Bearer`（client_credentials）；静态 InternalToken 仅对仍声明该方式的对端。
 6. remote **不重试、不聚合、不缓存业务结果**；只缓存换票（含过期 skew）。
 7. **logic 调 remote**；handler 不直接调 remote。
+8. **`remote.go` 只放通道 plumbing**（`Post/Get/Delete` 或自管 `post` + 错误截断等工具），**业务出站方法一律拆到独立 `<biz>.go`**（一个能力一个文件，如 `sendmessage.go` / `conversation.go`），与 `open` 一致。静态 InternalToken 的对端同样照此拆分，不因方法少就塞进 `remote.go`。
+
+#### `types/remote` DTO 契约（强制，对齐 `.api` 的 type 块规则）
+
+`types/remote/<peer>` 的手写 DTO，与 `.api` 契约同口径——**一个出站接口 = 一组独立 `type ( ... )`**：
+
+- 每个 `XxxApi` 出站接口对应**一组** `type ( ... )`，块内放 `XxxReq` + `XxxRes`（Res 可空：`XxxRes struct{}`）+ **仅本接口用**的子类型（`XxxItem` 等）。有 N 个出站方法就有 N 个业务 `type` 块。
+- 每接口的类型块**各自独立**：Req 与 Item 子类型字段看起来一样也要各自拷一份、各自命名（如 `ListBotsRes` 用 `ListBotsBotItem`，别和别的接口共用 `BotItem`）。避免改 A 连带改坏 B。
+- **信封必须 standardize 到 `{code,msg,result}`**：所有 peer 的 Res **只描述 `result` 里的业务字段**，不含 code/msg——判成败是 `ajax.decode` 的职责（HTTP 200 + code!=0 一律转 `StatusError`）。对端若返回非标准信封（如早期 agent 的 `resultJson`），**改对端遵守标准，不在本仓做兼容适配**（不建 `response.go`、不自管解码、不在调用方手工判 code）。
+- 通道层统一走 `ajax.Post[Res]`；需要特殊鉴权头（如 agent 的静态 `X-Internal-Token`）时，在本 peer 的 `Post` 包装里补头，其余交 ajax。
+- **例外**：换票端点的 `TokenRequest` / `TokenResponse`（`types/remote/token.go`）是跨 peer 共用的协议结构，单独成块，不套用"每接口一块"。
+- 字段名 / json tag 必须与对端 proto JSON 编码（或 `.api` 的 lowerCamelCase）逐字段一致，不因分块而改动。
+- 只用 `//` 注释；子类型注释写清归属接口。
 
 #### 出站方法命名（强制 `Api` 后缀）
 

@@ -34,7 +34,7 @@ import (
 // GetToken 用 client_credentials 换一次出站令牌，返回 accessToken 与有效期（秒，0 表示对端没给）。
 //
 // 换票是 beaver-ai / ai 的独立机器视图接口，地址与请求体都在这里，调用方只管拿票。
-func GetToken(ctx context.Context, clientID, clientSecret string) (string, int, error) {
+func GetTokenApi(ctx context.Context, clientID, clientSecret string) (string, int, error) {
 	out, err := ajax.Post[remotetype.TokenResponse](ctx, commonconfig.AiUrl, "/beaver-ai/api/ai/machine/v1/token", nil, remotetype.TokenRequest{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,

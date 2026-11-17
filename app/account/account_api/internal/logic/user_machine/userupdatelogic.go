@@ -28,8 +28,6 @@ import (
 	"beaver/app/account/account_api/internal/types"
 	accttypes "beaver/app/account/account_rpc/pb"
 	"beaver/common/convert"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // UserUpdateLogic 批量更新用户资料
@@ -37,7 +35,6 @@ import (
 // 薄转发：HTTP 出入参与同域 RPC 的 proto 类型字段名一致，用 convert 做一次
 // JSON 往返即可，不在这里复制业务规则（规则在 account_rpc 里）。
 type UserUpdateLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -45,7 +42,6 @@ type UserUpdateLogic struct {
 // NewUserUpdateLogic 构造 logic。
 func NewUserUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserUpdateLogic {
 	return &UserUpdateLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

@@ -30,21 +30,21 @@ import (
 )
 
 // ListMoments 列圈子动态（管理后台 / 运营概览）。
-func ListMoments(ctx context.Context, header http.Header, body *momenttype.ListMomentsReq) (*momenttype.ListMomentsRes, error) {
+func ListMomentsApi(ctx context.Context, header http.Header, body *momenttype.ListMomentsReq) (*momenttype.ListMomentsRes, error) {
 	return Post[momenttype.ListMomentsRes](ctx, commonconfig.SocialUrl+"/beaver-social/api/moment/machine/v1/list_moments", header, body)
 }
 
 // UpdateMoment 更新圈子动态（状态 / 内容变更）。
-func UpdateMoment(ctx context.Context, header http.Header, body *momenttype.UpdateMomentReq) (*momenttype.UpdateMomentRes, error) {
+func UpdateMomentApi(ctx context.Context, header http.Header, body *momenttype.UpdateMomentReq) (*momenttype.UpdateMomentRes, error) {
 	return Post[momenttype.UpdateMomentRes](ctx, commonconfig.SocialUrl+"/beaver-social/api/moment/machine/v1/update_moment", header, body)
 }
 
 // ListMomentComments 列动态下的评论。
-func ListMomentComments(ctx context.Context, header http.Header, body *momenttype.ListMomentCommentsReq) (*momenttype.ListMomentCommentsRes, error) {
+func ListMomentCommentsApi(ctx context.Context, header http.Header, body *momenttype.ListMomentCommentsReq) (*momenttype.ListMomentCommentsRes, error) {
 	return Post[momenttype.ListMomentCommentsRes](ctx, commonconfig.SocialUrl+"/beaver-social/api/moment/machine/v1/list_comments", header, body)
 }
 
 // DeleteMomentComments 批量删除动态下的评论。
-func DeleteMomentComments(ctx context.Context, header http.Header, body *momenttype.DeleteMomentCommentsReq) (*momenttype.DeleteMomentCommentsRes, error) {
+func DeleteMomentCommentsApi(ctx context.Context, header http.Header, body *momenttype.DeleteMomentCommentsReq) (*momenttype.DeleteMomentCommentsRes, error) {
 	return Post[momenttype.DeleteMomentCommentsRes](ctx, commonconfig.SocialUrl+"/beaver-social/api/moment/machine/v1/delete_comments", header, body)
 }

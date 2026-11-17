@@ -31,6 +31,6 @@ import (
 
 // GetAgent 取 Agent 编排配置（人设 / 模型 / 工具；渠道无关的唯一真相源）。
 // 走对方标准机器视图路径，不经网关。
-func GetAgent(ctx context.Context, header http.Header, body *aitype.GetAgentReq) (*aitype.GetAgentRes, error) {
+func GetAgentApi(ctx context.Context, header http.Header, body *aitype.GetAgentReq) (*aitype.GetAgentRes, error) {
 	return Post[aitype.GetAgentRes](ctx, commonconfig.AiUrl+"/beaver-ai/api/ai/aiconfig/v1/get_agent", header, body)
 }

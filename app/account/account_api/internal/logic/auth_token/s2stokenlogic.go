@@ -28,9 +28,9 @@ import (
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	"beaver/commonconfig"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 	"beaver/utils/s2s"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // S2sTokenLogic 队间换票：client_credentials → 受众 core:api 的机器票。
@@ -38,17 +38,17 @@ import (
 // 这是本团队唯一的换票入口。原先由 datasync 承担（顺带挂了 74 条 RPC→HTTP 转发），
 // 现在只留这一条小路由，能力本身回到各业务面自己的 /api 契约上。
 type S2sTokenLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	logger *beaverlog.Logger
 }
 
 // NewS2sTokenLogic 构造换票 logic。
 func NewS2sTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S2sTokenLogic {
 	return &S2sTokenLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		logger: beaverlog.New("s2s_token", ctx),
 	}
 }
 
@@ -63,7 +63,10 @@ func (l *S2sTokenLogic) S2sToken(req *types.S2STokenReq) (resp *types.S2STokenRe
 
 	scopes, ok := s2s.AuthenticateClient(l.svcCtx.Config.S2S.Clients, req.ClientID, req.ClientSecret)
 	if !ok {
-		l.Errorf("换票被拒：client_id=%s", req.ClientID)
+		l.logger.Error(model.LogMsg{
+			Text: "换票被拒",
+			Data: map[string]any{"clientID": req.ClientID},
+		})
 		return nil, errors.New("invalid_client")
 	}
 
@@ -76,7 +79,10 @@ func (l *S2sTokenLogic) S2sToken(req *types.S2STokenReq) (resp *types.S2STokenRe
 		s2s.S2STTL,
 	)
 	if err != nil {
-		l.Errorf("签发机器票失败：client_id=%s err=%v", req.ClientID, err)
+		l.logger.Error(model.LogMsg{
+			Text: "签发机器票失败",
+			Data: map[string]any{"clientID": req.ClientID, "err": err.Error()},
+		})
 		return nil, err
 	}
 

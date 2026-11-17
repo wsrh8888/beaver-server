@@ -66,7 +66,7 @@ func (l *OAuthCodeLoginLogic) OAuthCodeLogin(req *types.OAuthCodeLoginReq) (*typ
 	preciseType := ua.DeviceType(l.ctx)
 	deviceGroup := ua.DeviceGroup(l.ctx)
 
-	rpcResp, err := open.ExchangeToken(l.ctx, nil, &opentype.ExchangeTokenReq{
+	rpcResp, err := open.ExchangeTokenApi(l.ctx, nil, &opentype.ExchangeTokenReq{
 		OauthId: req.OauthId,
 		Code:    req.Code,
 	})

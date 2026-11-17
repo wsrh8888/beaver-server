@@ -26,175 +26,209 @@
 // 认为必填字段未设置（field "xxx" is not set），或响应解析出零值。
 package open
 
-type BotItem struct {
-	Id               uint32 `json:"id,omitempty"`
-	BotId            string `json:"botId,omitempty"`
-	OwnerId          string `json:"ownerId,omitempty"`
-	Visibility       string `json:"visibility,omitempty"`
-	Status           int32  `json:"status,omitempty"`
-	SignatureEnabled int32  `json:"signatureEnabled,omitempty"`
-	CreatedAt        int64  `json:"createdAt,omitempty"`
-}
+// CreateDigitalApi 创建数字伙伴：Req + Res。
+type (
+	CreateDigitalReq struct {
+		Name         string `json:"name,omitempty"`
+		Description  string `json:"description,omitempty"`
+		Avatar       string `json:"avatar,omitempty"`
+		Runtime      string `json:"runtime,omitempty"`
+		Visibility   string `json:"visibility,omitempty"`
+		Source       string `json:"source,omitempty"`
+		OwnerId      string `json:"ownerId,omitempty"`
+		SystemPrompt string `json:"systemPrompt,omitempty"`
+		LlmModelId   string `json:"llmModelId,omitempty"`
+		Tools        string `json:"tools,omitempty"`
+		McpServerIds string `json:"mcpServerIds,omitempty"`
+	}
 
-type BotSecurity struct {
-	KeywordsEnabled    bool     `json:"keywordsEnabled,omitempty"`
-	Keywords           []string `json:"keywords,omitempty"`
-	IpWhitelistEnabled bool     `json:"ipWhitelistEnabled,omitempty"`
-	IpWhitelist        []string `json:"ipWhitelist,omitempty"`
-}
+	CreateDigitalRes struct {
+		DigitalId     string `json:"digitalId,omitempty"`
+		DigitalKey    string `json:"digitalKey,omitempty"`
+		DigitalSecret string `json:"digitalSecret,omitempty"`
+	}
+)
 
-type CreateDigitalReq struct {
-	Name         string `json:"name,omitempty"`
-	Description  string `json:"description,omitempty"`
-	Avatar       string `json:"avatar,omitempty"`
-	Runtime      string `json:"runtime,omitempty"`
-	Visibility   string `json:"visibility,omitempty"`
-	Source       string `json:"source,omitempty"`
-	OwnerId      string `json:"ownerId,omitempty"`
-	SystemPrompt string `json:"systemPrompt,omitempty"`
-	LlmModelId   string `json:"llmModelId,omitempty"`
-	Tools        string `json:"tools,omitempty"`
-	McpServerIds string `json:"mcpServerIds,omitempty"`
-}
+// ExchangeTokenApi 换取 token：Req + Res。
+type (
+	ExchangeTokenReq struct {
+		OauthId string `json:"oauthId,omitempty"`
+		Code    string `json:"code,omitempty"`
+	}
 
-type CreateDigitalRes struct {
-	DigitalId     string `json:"digitalId,omitempty"`
-	DigitalKey    string `json:"digitalKey,omitempty"`
-	DigitalSecret string `json:"digitalSecret,omitempty"`
-}
+	ExchangeTokenRes struct {
+		AccessToken  string `json:"accessToken,omitempty"`
+		RefreshToken string `json:"refreshToken,omitempty"`
+		ExpiresIn    int64  `json:"expiresIn,omitempty"`
+		TokenType    string `json:"tokenType,omitempty"`
+		UserId       string `json:"userId,omitempty"`
+	}
+)
 
-type DigitalItem struct {
-	DigitalId    string `json:"digitalId,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Description  string `json:"description,omitempty"`
-	Avatar       string `json:"avatar,omitempty"`
-	OwnerId      string `json:"ownerId,omitempty"`
-	Runtime      string `json:"runtime,omitempty"`
-	Visibility   string `json:"visibility,omitempty"`
-	Status       int32  `json:"status,omitempty"`
-	Source       string `json:"source,omitempty"`
-	CreatedAt    int64  `json:"createdAt,omitempty"`
-	SystemPrompt string `json:"systemPrompt,omitempty"`
-	LlmModelId   string `json:"llmModelId,omitempty"`
-	Tools        string `json:"tools,omitempty"`
-	McpServerIds string `json:"mcpServerIds,omitempty"`
-}
+// GetDigitalByUserIDApi 按用户 ID 取数字伙伴：Req + Res。
+type (
+	GetDigitalByUserIDReq struct {
+		DigitalUserId string `json:"digitalUserId,omitempty"`
+	}
 
-type ExchangeTokenReq struct {
-	OauthId string `json:"oauthId,omitempty"`
-	Code    string `json:"code,omitempty"`
-}
+	GetDigitalByUserIDRes struct {
+		Found         bool   `json:"found,omitempty"`
+		DigitalKey    string `json:"digitalKey,omitempty"`
+		DigitalUserId string `json:"digitalUserId,omitempty"`
+		Runtime       string `json:"runtime,omitempty"`
+	}
+)
 
-type ExchangeTokenRes struct {
-	AccessToken  string `json:"accessToken,omitempty"`
-	RefreshToken string `json:"refreshToken,omitempty"`
-	ExpiresIn    int64  `json:"expiresIn,omitempty"`
-	TokenType    string `json:"tokenType,omitempty"`
-	UserId       string `json:"userId,omitempty"`
-}
+// GetDigitalConfigApi 取数字伙伴配置：Req + Res。
+type (
+	GetDigitalConfigReq struct {
+		DigitalId string `json:"digitalId"`
+	}
 
-type GetDigitalByUserIDReq struct {
-	DigitalUserId string `json:"digitalUserId,omitempty"`
-}
+	GetDigitalConfigRes struct {
+		DigitalId string `json:"digitalId"`
+		Runtime   string `json:"runtime"`
+		// AgentId 数字伙伴绑定的 Agent；runtime=builtin/workflow 时非空，external 时为空。
+		// 编排配置（人设/模型/工具/知识）只在 agents 表，open 侧不再下发编排 JSON。
+		AgentId        string `json:"agentId"`
+		ExternalConfig string `json:"externalConfig"`
+	}
+)
 
-type GetDigitalByUserIDRes struct {
-	Found         bool   `json:"found,omitempty"`
-	DigitalKey    string `json:"digitalKey,omitempty"`
-	DigitalUserId string `json:"digitalUserId,omitempty"`
-	Runtime       string `json:"runtime,omitempty"`
-}
+// ListBotsApi 列机器人：Req + Res + 本接口专属子类型。
+type (
+	ListBotsReq struct {
+		Page        int32  `json:"page,omitempty"`
+		PageSize    int32  `json:"pageSize,omitempty"`
+		Keyword     string `json:"keyword,omitempty"`
+		Status      int32  `json:"status,omitempty"`
+		OwnerUserId string `json:"ownerUserId,omitempty"`
+	}
 
-type GetDigitalConfigReq struct {
-	DigitalId string `json:"digitalId"`
-}
+	ListBotsRes struct {
+		Total int64              `json:"total,omitempty"`
+		List  []*ListBotsBotItem `json:"list,omitempty"`
+	}
 
-type GetDigitalConfigRes struct {
-	DigitalId string `json:"digitalId"`
-	Runtime   string `json:"runtime"`
-	// AgentId 数字伙伴绑定的 Agent；runtime=builtin/workflow 时非空，external 时为空。
-	// 编排配置（人设/模型/工具/知识）只在 agents 表，open 侧不再下发编排 JSON。
-	AgentId        string `json:"agentId"`
-	ExternalConfig string `json:"externalConfig"`
-}
+	// ListBotsBotItem 机器人项。
+	ListBotsBotItem struct {
+		Id               uint32 `json:"id,omitempty"`
+		BotId            string `json:"botId,omitempty"`
+		OwnerId          string `json:"ownerId,omitempty"`
+		Visibility       string `json:"visibility,omitempty"`
+		Status           int32  `json:"status,omitempty"`
+		SignatureEnabled int32  `json:"signatureEnabled,omitempty"`
+		CreatedAt        int64  `json:"createdAt,omitempty"`
+	}
+)
 
-type ListBotsReq struct {
-	Page        int32  `json:"page,omitempty"`
-	PageSize    int32  `json:"pageSize,omitempty"`
-	Keyword     string `json:"keyword,omitempty"`
-	Status      int32  `json:"status,omitempty"`
-	OwnerUserId string `json:"ownerUserId,omitempty"`
-}
+// ListDigitalsApi 列数字伙伴：Req + Res + 本接口专属子类型。
+type (
+	ListDigitalsReq struct {
+		Source   string `json:"source,omitempty"`
+		Status   int32  `json:"status,omitempty"`
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"pageSize,omitempty"`
+	}
 
-type ListBotsRes struct {
-	Total int64      `json:"total,omitempty"`
-	List  []*BotItem `json:"list,omitempty"`
-}
+	ListDigitalsRes struct {
+		Total int64                      `json:"total,omitempty"`
+		List  []*ListDigitalsDigitalItem `json:"list,omitempty"`
+	}
 
-type ListDigitalsReq struct {
-	Source   string `json:"source,omitempty"`
-	Status   int32  `json:"status,omitempty"`
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"pageSize,omitempty"`
-}
+	// ListDigitalsDigitalItem 数字伙伴项。
+	ListDigitalsDigitalItem struct {
+		DigitalId    string `json:"digitalId,omitempty"`
+		Name         string `json:"name,omitempty"`
+		Description  string `json:"description,omitempty"`
+		Avatar       string `json:"avatar,omitempty"`
+		OwnerId      string `json:"ownerId,omitempty"`
+		Runtime      string `json:"runtime,omitempty"`
+		Visibility   string `json:"visibility,omitempty"`
+		Status       int32  `json:"status,omitempty"`
+		Source       string `json:"source,omitempty"`
+		CreatedAt    int64  `json:"createdAt,omitempty"`
+		SystemPrompt string `json:"systemPrompt,omitempty"`
+		LlmModelId   string `json:"llmModelId,omitempty"`
+		Tools        string `json:"tools,omitempty"`
+		McpServerIds string `json:"mcpServerIds,omitempty"`
+	}
+)
 
-type ListDigitalsRes struct {
-	Total int64          `json:"total,omitempty"`
-	List  []*DigitalItem `json:"list,omitempty"`
-}
+// ListOpenOAuthApi 列 OAuth 应用：Req + Res + 本接口专属子类型。
+type (
+	ListOpenOAuthReq struct {
+		Page        int32  `json:"page,omitempty"`
+		PageSize    int32  `json:"pageSize,omitempty"`
+		Keyword     string `json:"keyword,omitempty"`
+		OwnerUserId string `json:"ownerUserId,omitempty"`
+		Status      int32  `json:"status,omitempty"`
+		OauthId     string `json:"oauthId,omitempty"`
+	}
 
-type ListOpenOAuthReq struct {
-	Page        int32  `json:"page,omitempty"`
-	PageSize    int32  `json:"pageSize,omitempty"`
-	Keyword     string `json:"keyword,omitempty"`
-	OwnerUserId string `json:"ownerUserId,omitempty"`
-	Status      int32  `json:"status,omitempty"`
-	OauthId     string `json:"oauthId,omitempty"`
-}
+	ListOpenOAuthRes struct {
+		Total int64                     `json:"total,omitempty"`
+		List  []*ListOpenOAuthOAuthItem `json:"list,omitempty"`
+	}
 
-type ListOpenOAuthRes struct {
-	Total int64            `json:"total,omitempty"`
-	List  []*OpenOAuthItem `json:"list,omitempty"`
-}
+	// ListOpenOAuthOAuthItem OAuth 应用项。
+	ListOpenOAuthOAuthItem struct {
+		OauthId     string `json:"oauthId,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Description string `json:"description,omitempty"`
+		Icon        string `json:"icon,omitempty"`
+		OwnerUserId string `json:"ownerUserId,omitempty"`
+		Status      int32  `json:"status,omitempty"`
+		CreatedAt   int64  `json:"createdAt,omitempty"`
+	}
+)
 
-type OpenOAuthItem struct {
-	OauthId     string `json:"oauthId,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	OwnerUserId string `json:"ownerUserId,omitempty"`
-	Status      int32  `json:"status,omitempty"`
-	CreatedAt   int64  `json:"createdAt,omitempty"`
-}
+// UpdateBotApi 更新机器人：Req + Res + 本接口专属子类型。
+type (
+	UpdateBotReq struct {
+		BotId            string                `json:"botId,omitempty"`
+		Visibility       string                `json:"visibility,omitempty"`
+		SignatureEnabled int32                 `json:"signatureEnabled,omitempty"`
+		Security         *UpdateBotBotSecurity `json:"security,omitempty"`
+		Status           int32                 `json:"status,omitempty"`
+	}
 
-type UpdateBotReq struct {
-	BotId            string       `json:"botId,omitempty"`
-	Visibility       string       `json:"visibility,omitempty"`
-	SignatureEnabled int32        `json:"signatureEnabled,omitempty"`
-	Security         *BotSecurity `json:"security,omitempty"`
-	Status           int32        `json:"status,omitempty"`
-}
+	UpdateBotRes struct{}
 
-type UpdateBotRes struct{}
+	// UpdateBotBotSecurity 机器人安全配置。
+	UpdateBotBotSecurity struct {
+		KeywordsEnabled    bool     `json:"keywordsEnabled,omitempty"`
+		Keywords           []string `json:"keywords,omitempty"`
+		IpWhitelistEnabled bool     `json:"ipWhitelistEnabled,omitempty"`
+		IpWhitelist        []string `json:"ipWhitelist,omitempty"`
+	}
+)
 
-type UpdateDigitalReq struct {
-	DigitalId    string `json:"digitalId,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Visibility   string `json:"visibility,omitempty"`
-	Status       int32  `json:"status,omitempty"`
-	SystemPrompt string `json:"systemPrompt,omitempty"`
-	LlmModelId   string `json:"llmModelId,omitempty"`
-	Tools        string `json:"tools,omitempty"`
-	McpServerIds string `json:"mcpServerIds,omitempty"`
-}
+// UpdateDigitalApi 更新数字伙伴：Req + Res。
+type (
+	UpdateDigitalReq struct {
+		DigitalId    string `json:"digitalId,omitempty"`
+		Name         string `json:"name,omitempty"`
+		Visibility   string `json:"visibility,omitempty"`
+		Status       int32  `json:"status,omitempty"`
+		SystemPrompt string `json:"systemPrompt,omitempty"`
+		LlmModelId   string `json:"llmModelId,omitempty"`
+		Tools        string `json:"tools,omitempty"`
+		McpServerIds string `json:"mcpServerIds,omitempty"`
+	}
 
-type UpdateDigitalRes struct{}
+	UpdateDigitalRes struct{}
+)
 
-type UpdateOpenOAuthReq struct {
-	OauthIds   []string `json:"oauthIds,omitempty"`
-	Status     int32    `json:"status,omitempty"`
-	OperatorId string   `json:"operatorId,omitempty"`
-}
+// UpdateOpenOAuthApi 更新 OAuth 应用：Req + Res。
+type (
+	UpdateOpenOAuthReq struct {
+		OauthIds   []string `json:"oauthIds,omitempty"`
+		Status     int32    `json:"status,omitempty"`
+		OperatorId string   `json:"operatorId,omitempty"`
+	}
 
-type UpdateOpenOAuthRes struct {
-	AffectedCount int64 `json:"affectedCount,omitempty"`
-}
+	UpdateOpenOAuthRes struct {
+		AffectedCount int64 `json:"affectedCount,omitempty"`
+	}
+)

@@ -29,12 +29,12 @@ import (
 	"sort"
 
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	notifyconst "beaver/common/const/notifyconst"
 	notification_rpc "beaver/app/notification/notification_rpc/pb"
 	"beaver/app/relation/relation_api/internal/svc"
 	"beaver/app/relation/relation_api/internal/types"
 	friend_models "beaver/app/relation/relation_models/friend"
 	mqwsconst "beaver/common/const/mqwsconst"
+	notifyconst "beaver/common/const/notifyconst"
 	"beaver/common/wsEnum/wsCommandConst"
 	"beaver/common/wsEnum/wsTypeConst"
 	"beaver/openevent"
@@ -166,7 +166,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 				}
 			}()
 			ctx := context.Background()
-			res, err := open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: friendVerify.RevUserID})
+			res, err := open.GetDigitalByUserIDApi(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: friendVerify.RevUserID})
 			if err == nil && res != nil && res.Found {
 				if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, friendVerify.RevUserID,
 					openevent.EventIMDigitalFollowed, "", map[string]interface{}{
@@ -176,7 +176,7 @@ func (l *UserValidStatusLogic) UserValidStatus(req *types.FriendValidStatusReq) 
 					l.logger.Error(model.LogMsg{Text: "数字伙伴关注事件投递失败", Data: map[string]interface{}{"digitalId": friendVerify.RevUserID, "err": pushErr.Error()}})
 				}
 			}
-			res, err = open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: friendVerify.SendUserID})
+			res, err = open.GetDigitalByUserIDApi(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: friendVerify.SendUserID})
 			if err == nil && res != nil && res.Found {
 				if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, friendVerify.SendUserID,
 					openevent.EventIMDigitalFollowed, "", map[string]interface{}{

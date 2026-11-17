@@ -114,7 +114,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 			}
 		}()
 		ctx := context.Background()
-		res, err := open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: req.FriendID})
+		res, err := open.GetDigitalByUserIDApi(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: req.FriendID})
 		if err == nil && res != nil && res.Found {
 			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.FriendID,
 				openevent.EventIMDigitalUnfollowed, "", map[string]interface{}{
@@ -124,7 +124,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 				l.logger.Error(model.LogMsg{Text: "数字伙伴取关事件投递失败", Data: map[string]interface{}{"digitalId": req.FriendID, "err": pushErr.Error()}})
 			}
 		}
-		res, err = open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: req.UserID})
+		res, err = open.GetDigitalByUserIDApi(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: req.UserID})
 		if err == nil && res != nil && res.Found {
 			if pushErr := openevent.Push(ctx, l.svcCtx.RocketMQ, req.UserID,
 				openevent.EventIMDigitalUnfollowed, "", map[string]interface{}{

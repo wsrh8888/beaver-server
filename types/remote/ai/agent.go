@@ -24,24 +24,27 @@
 // 放这里而非 remote/ai 内部，便于调用方只依赖类型、不依赖客户端实现。
 package ai
 
-// GetAgentReq 取 Agent 编排配置请求（agent_id 与 scene 二选一，agent_id 优先）。
-type GetAgentReq struct {
-	AgentID string `json:"agent_id"`
-	Scene   string `json:"scene"`
-}
+// GetAgentApi 取 Agent 编排配置：Req + Res + 本接口专属子类型。
+type (
+	// GetAgentReq 取 Agent 编排配置请求（agent_id 与 scene 二选一，agent_id 优先）。
+	GetAgentReq struct {
+		AgentID string `json:"agent_id"`
+		Scene   string `json:"scene"`
+	}
 
-// AgentItem Agent 编排配置项（agents 表一行，渠道无关）。
-type AgentItem struct {
-	AgentID      string `json:"agent_id"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	Source       string `json:"source"`
-	Runtime      string `json:"runtime"`
-	SystemPrompt string `json:"system_prompt"`
-	LlmModelID   string `json:"llm_model_id"`
-}
+	// GetAgentRes 取 Agent 编排配置响应。
+	GetAgentRes struct {
+		Agent *GetAgentAgentItem `json:"agent"`
+	}
 
-// GetAgentRes 取 Agent 编排配置响应。
-type GetAgentRes struct {
-	Agent *AgentItem `json:"agent"`
-}
+	// GetAgentAgentItem Agent 编排配置项（agents 表一行，渠道无关）。
+	GetAgentAgentItem struct {
+		AgentID      string `json:"agent_id"`
+		Name         string `json:"name"`
+		Description  string `json:"description"`
+		Source       string `json:"source"`
+		Runtime      string `json:"runtime"`
+		SystemPrompt string `json:"system_prompt"`
+		LlmModelID   string `json:"llm_model_id"`
+	}
+)

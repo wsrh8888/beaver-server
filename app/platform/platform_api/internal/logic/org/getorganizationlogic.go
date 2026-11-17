@@ -27,13 +27,8 @@ import (
 	"beaver/app/platform/platform_api/internal/svc"
 	"beaver/app/platform/platform_api/internal/types"
 
-	"github.com/zeromicro/go-zero/core/logx"
-
 	beaverlog "beaver/utils/beaverlog"
 )
-
-// goctl 会把 logx 写进 imports，占位避免未使用导入。
-var _ = logx.WithContext
 
 type GetOrganizationLogic struct {
 	ctx    context.Context

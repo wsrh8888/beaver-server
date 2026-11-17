@@ -31,7 +31,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
 )
 
 // Client 极简 OpenSearch HTTP 写入（扁平 JSON 文档，无 attributes 包装）。
@@ -46,7 +47,10 @@ func New(addr string) *Client {
 	if addr == "" {
 		return nil
 	}
-	logx.Infof("OpenSearch Client 就绪, Addr: %s", addr)
+	beaverlog.New("opensearch").Info(model.LogMsg{
+		Text: "OpenSearch客户端就绪",
+		Data: map[string]any{"addr": addr},
+	})
 	return &Client{
 		baseURL: addr,
 		http:    &http.Client{Timeout: 5 * time.Second},

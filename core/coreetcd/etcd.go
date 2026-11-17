@@ -24,7 +24,9 @@ package coreetcd
 import (
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -38,7 +40,10 @@ func InitEtcd(add string) *clientv3.Client {
 	})
 
 	if err != nil {
-		logx.Error("etcd连接失败", err)
+		beaverlog.New("etcd").Error(model.LogMsg{
+			Text: "连接etcd失败",
+			Data: map[string]any{"addr": add, "err": err.Error()},
+		})
 		panic(err)
 	}
 	return cli

@@ -28,11 +28,11 @@ import (
 
 	"beaver/app/message/message_rpc/internal/svc"
 	chat_rpc "beaver/app/message/message_rpc/pb"
-	"beaver/remote/open"
-	opentype "beaver/types/remote/open"
-	"beaver/openevent"
 	"beaver/common/const/mqwsconst"
 	"beaver/common/models/ctype"
+	"beaver/openevent"
+	"beaver/remote/open"
+	opentype "beaver/types/remote/open"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	"beaver/utils/conversation"
@@ -86,7 +86,7 @@ func (p *digitalEventPusher) pushPrivateChat(senderID string, userIDs []string, 
 		return
 	}
 
-	res, err := open.GetDigitalByUserID(p.ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: peerID})
+	res, err := open.GetDigitalByUserIDApi(p.ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: peerID})
 	if err != nil || res == nil || !res.Found {
 		return
 	}
@@ -113,7 +113,7 @@ func (p *digitalEventPusher) pushGroupAt(senderID, conversationID string, msg *c
 	}
 
 	for _, atUserID := range msg.AtUserIDs {
-		res, err := open.GetDigitalByUserID(p.ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: atUserID})
+		res, err := open.GetDigitalByUserIDApi(p.ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: atUserID})
 		if err != nil || res == nil || !res.Found {
 			continue
 		}
@@ -155,10 +155,10 @@ func (p *digitalEventPusher) pushAgentTask(digitalID string, event map[string]in
 
 	payload := map[string]interface{}{
 		"messageId":      messageID,
-		"userId":        senderID,
+		"userId":         senderID,
 		"conversationId": conversationID,
-		"content":       content,
-		"digitalId":     digitalID,
+		"content":        content,
+		"digitalId":      digitalID,
 	}
 	envelope := map[string]interface{}{"payload": payload}
 	if err := p.svcCtx.RocketMQ.SendMessage(p.ctx, mqwsconst.MqTopicAgentTask, envelope); err != nil {
@@ -180,8 +180,8 @@ func (p *digitalEventPusher) pushWorkflowTask(digitalID string, event map[string
 		"messageId":      messageID,
 		"userId":         senderID,
 		"conversationId": conversationID,
-		"content":       content,
-		"digitalId":     digitalID,
+		"content":        content,
+		"digitalId":      digitalID,
 	}
 	envelope := map[string]interface{}{"payload": payload}
 	if err := p.svcCtx.RocketMQ.SendMessage(p.ctx, mqwsconst.MqTopicWorkflowTask, envelope); err != nil {
@@ -253,7 +253,7 @@ func isDigitalPeer(ctx context.Context, peerUserID string) bool {
 	if peerUserID == "" {
 		return false
 	}
-	res, err := open.GetDigitalByUserID(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: peerUserID})
+	res, err := open.GetDigitalByUserIDApi(ctx, nil, &opentype.GetDigitalByUserIDReq{DigitalUserId: peerUserID})
 	return err == nil && res != nil && res.Found
 }
 

@@ -25,7 +25,7 @@
 // 标准机器视图 /beaver-ai/api/agent/chat/v1/* 端点，静态 X-Internal-Token 鉴权
 // （与 agent_api etc/agent.yaml 的 internal_token 同值）。
 // 结构对齐 remote/{open,ai,circle}：Init 灌入令牌并把域名写入 commonconfig.AgentUrl；
-// 业务侧直接调包函数 SendMessage(...) / ListConversations(...)。
+// 业务侧直接调包函数 SendMessageApi(...) / ListConversationsApi(...)。
 package agent
 
 import (

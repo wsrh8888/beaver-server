@@ -23,7 +23,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -50,23 +49,6 @@ func NewGetSyncAgentConversationsLogic(ctx context.Context, svcCtx *svc.ServiceC
 	}
 }
 
-type agentListConversationsResult struct {
-	List          []agentConversationItem `json:"list"`
-	ServerVersion int64                   `json:"serverVersion"`
-}
-
-type agentConversationItem struct {
-	ConversationID string `json:"conversationId"`
-	Title          string `json:"title"`
-	Avatar         string `json:"avatar"`
-	Module         string `json:"module"`
-	WorkspaceId    string `json:"workspaceId"`
-	UpdatedAt      int64  `json:"updatedAt"`
-	LatestTopicId  string `json:"latestTopicId"`
-	Preview        string `json:"preview"`
-	Version        int64  `json:"version"`
-}
-
 func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.GetSyncAgentConversationsReq) (resp *types.GetSyncAgentConversationsRes, err error) {
 	userId := req.UserID
 	if userId == "" {
@@ -81,7 +63,7 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 		ServerTimestamp:      serverTimestamp,
 	}
 
-	reply, err := agent.ListConversations(l.ctx, nil, &agenttype.ListConversationsReq{
+	reply, err := agent.ListConversationsApi(l.ctx, nil, &agenttype.ListConversationsReq{
 		UserId: userId,
 		Since:  req.Since,
 		Module: req.Module,
@@ -94,22 +76,9 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 	if reply == nil {
 		return empty, nil
 	}
-	if reply.Code != 0 {
-		l.logger.Error(model.LogMsg{Text: "AgentRpc.ListConversations 业务失败", Data: map[string]any{"userId": userId, "code": reply.Code, "msg": reply.Msg}})
-		return nil, errors.New(reply.Msg)
-	}
-	if reply.ResultJson == "" {
-		return empty, nil
-	}
 
-	var result agentListConversationsResult
-	if err := json.Unmarshal([]byte(reply.ResultJson), &result); err != nil {
-		l.logger.Error(model.LogMsg{Text: "解析 AgentRpc.ListConversations 结果失败", Data: map[string]any{"userId": userId, "err": err.Error()}})
-		return nil, err
-	}
-
-	versions := make([]types.AgentConversationVersionItem, 0, len(result.List))
-	for _, item := range result.List {
+	versions := make([]types.AgentConversationVersionItem, 0, len(reply.List))
+	for _, item := range reply.List {
 		versions = append(versions, types.AgentConversationVersionItem{
 			ConversationID: item.ConversationID,
 			Version:        item.Version,
@@ -122,7 +91,7 @@ func (l *GetSyncAgentConversationsLogic) GetSyncAgentConversations(req *types.Ge
 		})
 	}
 
-	serverVersion := result.ServerVersion
+	serverVersion := reply.ServerVersion
 	if serverVersion == 0 {
 		serverVersion = req.Since
 	}

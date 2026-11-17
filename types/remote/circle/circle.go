@@ -25,149 +25,187 @@
 // 不依赖 protobuf 运行时（无 protoimpl / protoreflect / state）。
 package circle
 
-type CircleItem struct {
-	CircleId    string `json:"circle_id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Avatar      string `json:"avatar,omitempty"`
-	CreatorId   string `json:"creator_id,omitempty"`
-	JoinType    int32  `json:"join_type,omitempty"`
-	MemberCount int64  `json:"member_count,omitempty"`
-	PostCount   int64  `json:"post_count,omitempty"`
-	IsDeleted   bool   `json:"is_deleted,omitempty"`
-	CreatedAt   string `json:"created_at,omitempty"`
-	UpdatedAt   string `json:"updated_at,omitempty"`
-}
+// DeleteCommentApi 删除评论：Req + Res。
+type (
+	DeleteCommentReq struct {
+		CommentId string `json:"comment_id,omitempty"`
+	}
 
-type CircleMemberItem struct {
-	CircleId string `json:"circle_id,omitempty"`
-	UserId   string `json:"user_id,omitempty"`
-	Role     int32  `json:"role,omitempty"`
-}
+	DeleteCommentRes struct{}
+)
 
-type CircleVersionItem struct {
-	CircleId    string `json:"circle_id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Avatar      string `json:"avatar,omitempty"`
-	MemberCount int64  `json:"member_count,omitempty"`
-	Role        int32  `json:"role,omitempty"`
-	Version     int64  `json:"version,omitempty"`
-}
+// DeletePostApi 删除帖子：Req + Res。
+type (
+	DeletePostReq struct {
+		PostId string `json:"post_id,omitempty"`
+	}
 
-type CommentItem struct {
-	CommentId string `json:"comment_id,omitempty"`
-	PostId    string `json:"post_id,omitempty"`
-	UserId    string `json:"user_id,omitempty"`
-	Content   string `json:"content,omitempty"`
-	IsDeleted bool   `json:"is_deleted,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
-}
+	DeletePostRes struct{}
+)
 
-type DeleteCommentReq struct {
-	CommentId string `json:"comment_id,omitempty"`
-}
+// GetCircleListApi 列圈子：Req + Res + 本接口专属子类型。
+type (
+	GetCircleListReq struct {
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"page_size,omitempty"`
+		UserId   string `json:"user_id,omitempty"`
+		Keywords string `json:"keywords,omitempty"`
+		CircleId string `json:"circle_id,omitempty"`
+	}
 
-type DeleteCommentRes struct{}
+	GetCircleListRes struct {
+		Total int64                      `json:"total,omitempty"`
+		List  []*GetCircleListCircleItem `json:"list,omitempty"`
+	}
 
-type DeletePostReq struct {
-	PostId string `json:"post_id,omitempty"`
-}
+	// GetCircleListCircleItem 圈子项。
+	GetCircleListCircleItem struct {
+		CircleId    string `json:"circle_id,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Description string `json:"description,omitempty"`
+		Avatar      string `json:"avatar,omitempty"`
+		CreatorId   string `json:"creator_id,omitempty"`
+		JoinType    int32  `json:"join_type,omitempty"`
+		MemberCount int64  `json:"member_count,omitempty"`
+		PostCount   int64  `json:"post_count,omitempty"`
+		IsDeleted   bool   `json:"is_deleted,omitempty"`
+		CreatedAt   string `json:"created_at,omitempty"`
+		UpdatedAt   string `json:"updated_at,omitempty"`
+	}
+)
 
-type DeletePostRes struct{}
+// GetCircleMembersApi 列圈子成员：Req + Res + 本接口专属子类型。
+type (
+	GetCircleMembersReq struct {
+		CircleId string `json:"circle_id,omitempty"`
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"page_size,omitempty"`
+	}
 
-type GetCircleListReq struct {
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
-	UserId   string `json:"user_id,omitempty"`
-	Keywords string `json:"keywords,omitempty"`
-	CircleId string `json:"circle_id,omitempty"`
-}
+	GetCircleMembersRes struct {
+		Total int64                         `json:"total,omitempty"`
+		List  []*GetCircleMembersMemberItem `json:"list,omitempty"`
+	}
 
-type GetCircleListRes struct {
-	Total int64         `json:"total,omitempty"`
-	List  []*CircleItem `json:"list,omitempty"`
-}
+	// GetCircleMembersMemberItem 圈子成员项。
+	GetCircleMembersMemberItem struct {
+		CircleId string `json:"circle_id,omitempty"`
+		UserId   string `json:"user_id,omitempty"`
+		Role     int32  `json:"role,omitempty"`
+	}
+)
 
-type GetCircleMembersReq struct {
-	CircleId string `json:"circle_id,omitempty"`
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
-}
+// GetCircleVersionsApi 列圈子版本变更：Req + Res + 本接口专属子类型。
+type (
+	GetCircleVersionsReq struct {
+		UserId  string `json:"user_id,omitempty"`
+		Version int64  `json:"version,omitempty"`
+	}
 
-type GetCircleMembersRes struct {
-	Total int64               `json:"total,omitempty"`
-	List  []*CircleMemberItem `json:"list,omitempty"`
-}
+	GetCircleVersionsRes struct {
+		List []*GetCircleVersionsVersionItem `json:"list,omitempty"`
+	}
 
-type GetCircleVersionsReq struct {
-	UserId  string `json:"user_id,omitempty"`
-	Version int64  `json:"version,omitempty"`
-}
+	// GetCircleVersionsVersionItem 圈子版本项。
+	GetCircleVersionsVersionItem struct {
+		CircleId    string `json:"circle_id,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Avatar      string `json:"avatar,omitempty"`
+		MemberCount int64  `json:"member_count,omitempty"`
+		Role        int32  `json:"role,omitempty"`
+		Version     int64  `json:"version,omitempty"`
+	}
+)
 
-type GetCircleVersionsRes struct {
-	List []*CircleVersionItem `json:"list,omitempty"`
-}
+// GetUserCircleIDsApi 取用户加入的圈子 ID：Req + Res。
+type (
+	GetUserCircleIDsReq struct {
+		UserId string `json:"user_id,omitempty"`
+	}
 
-type GetUserCircleIDsReq struct {
-	UserId string `json:"user_id,omitempty"`
-}
+	GetUserCircleIDsRes struct {
+		CircleIds []string `json:"circle_ids,omitempty"`
+	}
+)
 
-type GetUserCircleIDsRes struct {
-	CircleIds []string `json:"circle_ids,omitempty"`
-}
+// GetUserCircleRoleApi 取用户圈子角色：Req + Res。
+type (
+	GetUserCircleRoleReq struct {
+		CircleId string `json:"circle_id,omitempty"`
+		UserId   string `json:"user_id,omitempty"`
+	}
 
-type GetUserCircleRoleReq struct {
-	CircleId string `json:"circle_id,omitempty"`
-	UserId   string `json:"user_id,omitempty"`
-}
+	GetUserCircleRoleRes struct {
+		Role int32 `json:"role,omitempty"`
+	}
+)
 
-type GetUserCircleRoleRes struct {
-	Role int32 `json:"role,omitempty"`
-}
+// ListCommentsApi 列帖子评论：Req + Res + 本接口专属子类型。
+type (
+	ListCommentsReq struct {
+		PostId   string `json:"post_id,omitempty"`
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"page_size,omitempty"`
+	}
 
-type ListCommentsReq struct {
-	PostId   string `json:"post_id,omitempty"`
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
-}
+	ListCommentsRes struct {
+		Total int64                      `json:"total,omitempty"`
+		List  []*ListCommentsCommentItem `json:"list,omitempty"`
+	}
 
-type ListCommentsRes struct {
-	Total int64          `json:"total,omitempty"`
-	List  []*CommentItem `json:"list,omitempty"`
-}
+	// ListCommentsCommentItem 评论项。
+	ListCommentsCommentItem struct {
+		CommentId string `json:"comment_id,omitempty"`
+		PostId    string `json:"post_id,omitempty"`
+		UserId    string `json:"user_id,omitempty"`
+		Content   string `json:"content,omitempty"`
+		IsDeleted bool   `json:"is_deleted,omitempty"`
+		CreatedAt string `json:"created_at,omitempty"`
+	}
+)
 
-type ListPostsReq struct {
-	CircleId string `json:"circle_id,omitempty"`
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
-}
+// ListPostsApi 列圈子帖子：Req + Res + 本接口专属子类型。
+type (
+	ListPostsReq struct {
+		CircleId string `json:"circle_id,omitempty"`
+		Page     int32  `json:"page,omitempty"`
+		PageSize int32  `json:"page_size,omitempty"`
+	}
 
-type ListPostsRes struct {
-	Total int64       `json:"total,omitempty"`
-	List  []*PostItem `json:"list,omitempty"`
-}
+	ListPostsRes struct {
+		Total int64                `json:"total,omitempty"`
+		List  []*ListPostsPostItem `json:"list,omitempty"`
+	}
 
-type PostItem struct {
-	PostId       string `json:"post_id,omitempty"`
-	CircleId     string `json:"circle_id,omitempty"`
-	UserId       string `json:"user_id,omitempty"`
-	Content      string `json:"content,omitempty"`
-	IsDeleted    bool   `json:"is_deleted,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	CommentCount int64  `json:"comment_count,omitempty"`
-	LikeCount    int64  `json:"like_count,omitempty"`
-}
+	// ListPostsPostItem 帖子项。
+	ListPostsPostItem struct {
+		PostId       string `json:"post_id,omitempty"`
+		CircleId     string `json:"circle_id,omitempty"`
+		UserId       string `json:"user_id,omitempty"`
+		Content      string `json:"content,omitempty"`
+		IsDeleted    bool   `json:"is_deleted,omitempty"`
+		CreatedAt    string `json:"created_at,omitempty"`
+		CommentCount int64  `json:"comment_count,omitempty"`
+		LikeCount    int64  `json:"like_count,omitempty"`
+	}
+)
 
-type RemoveCircleMembersReq struct {
-	CircleId string   `json:"circle_id,omitempty"`
-	UserIds  []string `json:"user_ids,omitempty"`
-}
+// RemoveCircleMembersApi 移除圈子成员：Req + Res。
+type (
+	RemoveCircleMembersReq struct {
+		CircleId string   `json:"circle_id,omitempty"`
+		UserIds  []string `json:"user_ids,omitempty"`
+	}
 
-type RemoveCircleMembersRes struct{}
+	RemoveCircleMembersRes struct{}
+)
 
-type UpdateCircleReq struct {
-	CircleId  string `json:"circle_id,omitempty"`
-	IsDeleted *bool  `json:"is_deleted,omitempty"`
-}
+// UpdateCircleApi 更新圈子：Req + Res。
+type (
+	UpdateCircleReq struct {
+		CircleId  string `json:"circle_id,omitempty"`
+		IsDeleted *bool  `json:"is_deleted,omitempty"`
+	}
 
-type UpdateCircleRes struct{}
+	UpdateCircleRes struct{}
+)

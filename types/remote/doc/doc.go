@@ -25,44 +25,51 @@
 // 不依赖 protobuf 运行时（无 protoimpl / protoreflect / state）。
 package doc
 
-type DocItem struct {
-	Id           uint64 `json:"id,omitempty"`
-	DocId        string `json:"doc_id,omitempty"`
-	NodeId       string `json:"node_id,omitempty"`
-	SpaceId      string `json:"space_id,omitempty"`
-	Title        string `json:"title,omitempty"`
-	ContentJson  string `json:"content_json,omitempty"`
-	Version      int32  `json:"version,omitempty"`
-	OwnerUserId  string `json:"owner_user_id,omitempty"`
-	LastEditedBy string `json:"last_edited_by,omitempty"`
-	Status       int32  `json:"status,omitempty"`
-	UpdatedAt    string `json:"updated_at,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	Epoch        int32  `json:"epoch,omitempty"`
-	DocType      string `json:"doc_type,omitempty"`
-	Icon         string `json:"icon,omitempty"`
-	Cover        string `json:"cover,omitempty"`
-	RagEnabled   bool   `json:"rag_enabled,omitempty"`
-	ContentText  string `json:"content_text,omitempty"`
-}
+// GetDocContentApi 取文档内容：Req + Res（本接口无专属子类型）。
+type (
+	GetDocContentReq struct {
+		DocId string `json:"doc_id,omitempty"`
+	}
 
-type GetDocContentReq struct {
-	DocId string `json:"doc_id,omitempty"`
-}
+	GetDocContentRes struct {
+		DocId       string `json:"doc_id,omitempty"`
+		Title       string `json:"title,omitempty"`
+		ContentText string `json:"content_text,omitempty"`
+		Version     int32  `json:"version,omitempty"`
+		Status      int32  `json:"status,omitempty"`
+	}
+)
 
-type GetDocContentRes struct {
-	DocId       string `json:"doc_id,omitempty"`
-	Title       string `json:"title,omitempty"`
-	ContentText string `json:"content_text,omitempty"`
-	Version     int32  `json:"version,omitempty"`
-	Status      int32  `json:"status,omitempty"`
-}
+// GetDocApi 取文档元数据：Req + Res + 本接口专属子类型。
+type (
+	GetDocReq struct {
+		DocId  string `json:"doc_id,omitempty"`
+		UserId string `json:"user_id,omitempty"`
+	}
 
-type GetDocReq struct {
-	DocId  string `json:"doc_id,omitempty"`
-	UserId string `json:"user_id,omitempty"`
-}
+	GetDocRes struct {
+		Doc *GetDocDocItem `json:"doc,omitempty"`
+	}
 
-type GetDocRes struct {
-	Doc *DocItem `json:"doc,omitempty"`
-}
+	// GetDocDocItem 文档元数据项。
+	GetDocDocItem struct {
+		Id           uint64 `json:"id,omitempty"`
+		DocId        string `json:"doc_id,omitempty"`
+		NodeId       string `json:"node_id,omitempty"`
+		SpaceId      string `json:"space_id,omitempty"`
+		Title        string `json:"title,omitempty"`
+		ContentJson  string `json:"content_json,omitempty"`
+		Version      int32  `json:"version,omitempty"`
+		OwnerUserId  string `json:"owner_user_id,omitempty"`
+		LastEditedBy string `json:"last_edited_by,omitempty"`
+		Status       int32  `json:"status,omitempty"`
+		UpdatedAt    string `json:"updated_at,omitempty"`
+		CreatedAt    string `json:"created_at,omitempty"`
+		Epoch        int32  `json:"epoch,omitempty"`
+		DocType      string `json:"doc_type,omitempty"`
+		Icon         string `json:"icon,omitempty"`
+		Cover        string `json:"cover,omitempty"`
+		RagEnabled   bool   `json:"rag_enabled,omitempty"`
+		ContentText  string `json:"content_text,omitempty"`
+	}
+)

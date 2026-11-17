@@ -49,7 +49,7 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 
 func (l *UserInfoLogic) UserInfo(in *pb.UserInfoReq) (*pb.UserInfoRes, error) {
 	l.logger.Info(model.LogMsg{
-		Text: "rpc UserInfo",
+		Text: "查询用户信息",
 		Data: map[string]any{"userId": in.UserID},
 	})
 

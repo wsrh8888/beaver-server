@@ -41,8 +41,10 @@ import (
 	"sync"
 	"time"
 
+	beaverlog "beaver/utils/beaverlog"
+	"beaver/utils/beaverlog/model"
+
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const (
@@ -104,14 +106,20 @@ func NewPushSender(cfg Config) *PushSender {
 	s := &PushSender{cfg: cfg}
 	if cfg.Enabled && cfg.FCM.Enabled {
 		if c, err := newFCMClient(cfg.FCM.ProjectID, cfg.FCM.CredentialsFile); err != nil {
-			logx.Errorf("FCM 初始化失败: %v", err)
+			beaverlog.New("push").Error(model.LogMsg{
+				Text: "FCM初始化失败",
+				Data: map[string]any{"err": err.Error()},
+			})
 		} else {
 			s.fcm = c
 		}
 	}
 	if cfg.Enabled && cfg.APNs.Enabled {
 		if c, err := newAPNsClient(cfg.APNs); err != nil {
-			logx.Errorf("APNs 初始化失败: %v", err)
+			beaverlog.New("push").Error(model.LogMsg{
+				Text: "APNs初始化失败",
+				Data: map[string]any{"err": err.Error()},
+			})
 		} else {
 			s.apns = c
 		}
@@ -131,7 +139,10 @@ func (s *PushSender) SendToTokens(ctx context.Context, tokens []PushToken, msg M
 	}
 	for _, tok := range tokens {
 		if err := s.sendToToken(ctx, tok, msg); err != nil {
-			logx.Errorf("推送失败: deviceId=%s, err=%v", tok.DeviceID, err)
+			beaverlog.New("push").Error(model.LogMsg{
+				Text: "推送失败",
+				Data: map[string]any{"deviceID": tok.DeviceID, "err": err.Error()},
+			})
 		}
 	}
 }

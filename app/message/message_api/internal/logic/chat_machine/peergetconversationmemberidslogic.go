@@ -28,8 +28,6 @@ import (
 	"beaver/app/message/message_api/internal/types"
 	chat_rpc "beaver/app/message/message_rpc/pb"
 	"beaver/common/convert"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // PeerGetConversationMemberIdsLogic 查会话成员 ID 列表
@@ -37,7 +35,6 @@ import (
 // 薄转发：出入参与同域 RPC 的 proto 字段名一致，用 convert 做一次 JSON 往返，
 // 业务规则在 message_rpc 里。
 type PeerGetConversationMemberIdsLogic struct {
-	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
@@ -45,7 +42,6 @@ type PeerGetConversationMemberIdsLogic struct {
 // NewPeerGetConversationMemberIdsLogic 构造 logic。
 func NewPeerGetConversationMemberIdsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PeerGetConversationMemberIdsLogic {
 	return &PeerGetConversationMemberIdsLogic{
-		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}

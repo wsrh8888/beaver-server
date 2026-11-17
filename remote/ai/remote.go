@@ -108,7 +108,7 @@ func (c *Client) bearerToken(ctx context.Context) (string, error) {
 
 // exchange 换密钥：凭据交给 token.go 的 GetToken 换一次票，这里只算过期时间。
 func (c *Client) exchange(ctx context.Context) (string, time.Time, error) {
-	token, expiresIn, err := GetToken(ctx, c.clientID, c.clientSecret)
+	token, expiresIn, err := GetTokenApi(ctx, c.clientID, c.clientSecret)
 	if err != nil {
 		return "", time.Time{}, err
 	}

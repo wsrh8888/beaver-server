@@ -58,7 +58,7 @@ func (l *GetSyncCircleInfoLogic) GetSyncCircleInfo(req *types.GetSyncCircleInfoR
 
 	serverTimestamp := time.Now().UnixMilli()
 
-	circleResp, err := circle.GetCircleVersions(l.ctx, nil, &circletype.GetCircleVersionsReq{
+	circleResp, err := circle.GetCircleVersionsApi(l.ctx, nil, &circletype.GetCircleVersionsReq{
 		UserId:  userId,
 		Version: req.Since,
 	})

@@ -85,7 +85,7 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 		ctx := context.Background()
 
 		// 拉数字伙伴编排配置，校验 Runtime=builtin。
-		cfgRes, err := open.GetDigitalConfig(ctx, nil, &opentype.GetDigitalConfigReq{DigitalId: digitalID})
+		cfgRes, err := open.GetDigitalConfigApi(ctx, nil, &opentype.GetDigitalConfigReq{DigitalId: digitalID})
 		if err != nil || cfgRes == nil {
 			l.logger.Error(model.LogMsg{Text: "GetDigitalConfig 失败", Data: map[string]any{"digitalId": digitalID, "err": fmt.Sprintf("%v", err)}})
 			return nil
@@ -118,8 +118,9 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 			return nil
 		}
 
-		// 经 agent_api S2S 调 Python agent SendMessage（fire-and-forget：只取 code，不等终稿）。
-		reply, err := agent.SendMessage(ctx, nil, &agenttype.SendMessageReq{
+		// 经 agent_api S2S 调 Python agent SendMessage（fire-and-forget：只取成败，不等终稿）。
+		// 信封 code!=0 由 ajax 统一转成 error，这里只看 err。
+		_, err = agent.SendMessageApi(ctx, nil, &agenttype.SendMessageReq{
 			UserId:         userID,
 			ConversationId: conversationID,
 			ModelId:        "",
@@ -130,10 +131,6 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 		})
 		if err != nil {
 			l.logger.Error(model.LogMsg{Text: "AgentRpc.SendMessage 调用失败", Data: map[string]any{"digitalId": digitalID, "messageId": messageID, "err": err.Error()}})
-			return nil
-		}
-		if reply.GetCode() != 0 {
-			l.logger.Error(model.LogMsg{Text: "AgentRpc.SendMessage 返回非0", Data: map[string]any{"digitalId": digitalID, "messageId": messageID, "code": reply.GetCode(), "msg": reply.GetMsg()}})
 			return nil
 		}
 
