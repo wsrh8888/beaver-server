@@ -88,7 +88,7 @@ func (l *GetDevicesLogic) GetDevices(req *types.GetDevicesReq) (*types.GetDevice
 			DeviceType:      d.DeviceType,
 			DeviceOS:        d.DeviceOS,
 			DeviceModel:     d.DeviceModel,
-			DeviceOsVersion: d.DeviceOsVersion,
+			DeviceOSVersion: d.DeviceOsVersion,
 			DeviceName:      d.DeviceName,
 			LastLoginTime:   d.LastLoginTime.Format("2006-01-02 15:04:05"),
 			IsOnline:        onlineDeviceIDs[d.DeviceID],

@@ -33,7 +33,7 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /beaver/api/auth/auth_public/.*
+  - /beaver/api/account/auth_public/.*
   - /beaver/api/file/preview/v1/get
 Email:
   QQ:
@@ -70,7 +70,7 @@ RocketMQ:
   Addr: 127.0.0.1:9876
 
 # 入站 S2S 机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
-# 换票端点在本服务：POST /beaver/api/auth/token/v1/issue（client_credentials）。
+# 换票端点在本服务：POST /beaver/api/account/auth_token/v1/issue（client_credentials）。
 S2S:
   Secret: s2s-dev-secret
   Clients:

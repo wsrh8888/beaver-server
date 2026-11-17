@@ -32,7 +32,7 @@ type AuthenticationRes struct {
 }
 
 type CreateCredentialReq struct {
-	UserId   string `json:"user_id,optional"`
+	UserID   string `json:"userId,optional"`
 	Password string `json:"password,optional"`
 }
 
@@ -45,7 +45,7 @@ type DeviceInfo struct {
 	DeviceType      string `json:"deviceType"`
 	DeviceOS        string `json:"deviceOs"`
 	DeviceModel     string `json:"deviceModel"`
-	DeviceOsVersion string `json:"deviceOsVersion"`
+	DeviceOSVersion string `json:"deviceOsVersion"`
 	DeviceName      string `json:"deviceName"`
 	LastLoginTime   string `json:"lastLoginTime"`
 	IsOnline        bool   `json:"isOnline"`
@@ -147,7 +147,7 @@ type KickDeviceRes struct {
 }
 
 type ListUserDevicesReq struct {
-	UserId string `json:"user_id,optional"`
+	UserID string `json:"userId,optional"`
 }
 
 type ListUserDevicesRes struct {
@@ -238,8 +238,8 @@ type ResetPasswordRes struct {
 }
 
 type ResetUserPasswordReq struct {
-	UserId      string `json:"user_id,optional"`
-	NewPassword string `json:"new_password,optional"`
+	UserID      string `json:"userId,optional"`
+	NewPassword string `json:"newPassword,optional"`
 }
 
 type ResetUserPasswordRes struct {
@@ -320,33 +320,33 @@ type UserCreateReq struct {
 	Phone    string `json:"phone,optional"`
 	Source   int32  `json:"source,optional"`
 	Email    string `json:"email,optional"`
-	NickName string `json:"nick_name,optional"`
-	UserType int32  `json:"user_type,optional"`
+	NickName string `json:"nickName,optional"`
+	UserType int32  `json:"userType,optional"`
 	Abstract string `json:"abstract,optional"`
 }
 
 type UserCreateRes struct {
-	UserID string `json:"userID,optional"`
+	UserID string `json:"userId,optional"`
 }
 
 type UserDeleteReq struct {
-	UserIds []string `json:"user_ids,optional"`
+	UserIDs []string `json:"userIds,optional"`
 }
 
 type UserDeleteRes struct {
-	AffectedCount int64 `json:"affected_count,optional"`
+	AffectedCount int64 `json:"affectedCount,optional"`
 }
 
 type UserDeviceItem struct {
-	DeviceId        string `json:"device_id,optional"`
-	DeviceType      string `json:"device_type,optional"`
-	DeviceOs        string `json:"device_os,optional"`
-	DeviceModel     string `json:"device_model,optional"`
-	DeviceOsVersion string `json:"device_os_version,optional"`
-	DeviceName      string `json:"device_name,optional"`
-	LastLoginTime   string `json:"last_login_time,optional"`
-	LastLoginIp     string `json:"last_login_ip,optional"`
-	IsOnline        bool   `json:"is_online,optional"`
+	DeviceID        string `json:"deviceId,optional"`
+	DeviceType      string `json:"deviceType,optional"`
+	DeviceOS        string `json:"deviceOs,optional"`
+	DeviceModel     string `json:"deviceModel,optional"`
+	DeviceOSVersion string `json:"deviceOsVersion,optional"`
+	DeviceName      string `json:"deviceName,optional"`
+	LastLoginTime   string `json:"lastLoginTime,optional"`
+	LastLoginIP     string `json:"lastLoginIp,optional"`
+	IsOnline        bool   `json:"isOnline,optional"`
 }
 
 type UserInfoReq struct {
@@ -365,23 +365,23 @@ type UserInfoRes struct {
 }
 
 type UserListInfoReq struct {
-	UserIdList     []string `json:"user_id_list,optional"`
-	SinceTimestamp int64    `json:"since_timestamp,optional"`
+	UserIDList     []string `json:"userIdList,optional"`
+	SinceTimestamp int64    `json:"sinceTimestamp,optional"`
 }
 
 type UserListInfoRes struct {
-	UserInfo map[string]UserLookupInfo `json:"user_info,optional"`
+	UserInfo map[string]UserLookupInfo `json:"userInfo,optional"`
 }
 
 type UserListReq struct {
 	Page     int32  `json:"page,optional"`
-	PageSize int32  `json:"page_size,optional"`
+	PageSize int32  `json:"pageSize,optional"`
 	Email    string `json:"email,optional"`
 	Status   int32  `json:"status,optional"`
 	Source   int32  `json:"source,optional"`
-	UserId   string `json:"user_id,optional"`
+	UserID   string `json:"userId,optional"`
 	Keyword  string `json:"keyword,optional"`
-	UserType int32  `json:"user_type,optional"`
+	UserType int32  `json:"userType,optional"`
 }
 
 type UserListRes struct {
@@ -390,8 +390,8 @@ type UserListRes struct {
 }
 
 type UserLookupInfo struct {
-	UserId    string `json:"user_id,optional"`
-	NickName  string `json:"nick_name,optional"`
+	UserID    string `json:"userId,optional"`
+	NickName  string `json:"nickName,optional"`
 	Avatar    string `json:"avatar,optional"`
 	Version   int64  `json:"version,optional"`
 	Email     string `json:"email,optional"`
@@ -399,17 +399,17 @@ type UserLookupInfo struct {
 	Phone     string `json:"phone,optional"`
 	Status    int32  `json:"status,optional"`
 	Source    int32  `json:"source,optional"`
-	UserType  int32  `json:"user_type,optional"`
-	CreatedAt string `json:"created_at,optional"`
-	UpdatedAt string `json:"updated_at,optional"`
+	UserType  int32  `json:"userType,optional"`
+	CreatedAt string `json:"createdAt,optional"`
+	UpdatedAt string `json:"updatedAt,optional"`
 }
 
 type UserLookupReq struct {
-	UserID string `json:"userID,optional"`
+	UserID string `json:"userId,optional"`
 }
 
 type UserLookupRes struct {
-	UserInfo UserLookupInfo `json:"user_info"`
+	UserInfo UserLookupInfo `json:"userInfo"`
 }
 
 type UserSearchReq struct {
@@ -418,7 +418,7 @@ type UserSearchReq struct {
 }
 
 type UserSearchRes struct {
-	UserInfo UserLookupInfo `json:"user_info"`
+	UserInfo UserLookupInfo `json:"userInfo"`
 }
 
 type UserSyncItem struct {
@@ -446,8 +446,8 @@ type UserSyncRes struct {
 }
 
 type UserUpdateDisplayReq struct {
-	UserId   string `json:"user_id,optional"`
-	NickName string `json:"nick_name,optional"`
+	UserID   string `json:"userId,optional"`
+	NickName string `json:"nickName,optional"`
 	Avatar   string `json:"avatar,optional"`
 }
 
@@ -456,24 +456,24 @@ type UserUpdateDisplayRes struct {
 }
 
 type UserUpdateReq struct {
-	UserIds       []string `json:"user_ids,optional"`
-	PatchNickName *string  `json:"patch_nick_name,optional"`
-	PatchEmail    *string  `json:"patch_email,optional"`
-	PatchAvatar   *string  `json:"patch_avatar,optional"`
-	PatchAbstract *string  `json:"patch_abstract,optional"`
+	UserIDs       []string `json:"userIds,optional"`
+	PatchNickName *string  `json:"patchNickName,optional"`
+	PatchEmail    *string  `json:"patchEmail,optional"`
+	PatchAvatar   *string  `json:"patchAvatar,optional"`
+	PatchAbstract *string  `json:"patchAbstract,optional"`
 }
 
 type UserUpdateRes struct {
-	AffectedCount int64 `json:"affected_count,optional"`
+	AffectedCount int64 `json:"affectedCount,optional"`
 }
 
 type UserUpdateStatusReq struct {
-	UserIds []string `json:"user_ids,optional"`
+	UserIDs []string `json:"userIds,optional"`
 	Status  int32    `json:"status,optional"`
 }
 
 type UserUpdateStatusRes struct {
-	AffectedCount int64 `json:"affected_count,optional"`
+	AffectedCount int64 `json:"affectedCount,optional"`
 }
 
 type UserVersion struct {
@@ -482,7 +482,7 @@ type UserVersion struct {
 }
 
 type VerifyPasswordReq struct {
-	UserId   string `json:"user_id,optional"`
+	UserID   string `json:"userId,optional"`
 	Password string `json:"password,optional"`
 }
 

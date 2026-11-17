@@ -108,7 +108,7 @@ func main() {
 // 登录接口需带 BeaverDesktop UA 做设备类型校验。
 func loginOne(authAPIBase, email, password, deviceID string) (token, userID string, err error) {
 	body, status, err := httputil.PostJSON(
-		authAPIBase+"/beaver/api/auth/auth_public/v1/email_password_login",
+		authAPIBase+"/beaver/api/account/auth_public/v1/email_password_login",
 		map[string]string{"email": email, "password": password},
 		map[string]string{
 			"deviceId":   deviceID,

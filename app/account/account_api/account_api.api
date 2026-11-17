@@ -1,5 +1,7 @@
 import "api/auth_public.api"
 import "api/auth.api"
+import "api/auth_s2s.api"
 import "api/user.api"
+import "api/user_s2s.api"
 
 // goctl api go -api account_api.api -dir . --home ../../../template

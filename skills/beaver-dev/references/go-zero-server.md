@@ -145,9 +145,12 @@ xx_models/
 ```text
 xxx_api/
   xxx_api.api          # 主入口：只 import，不写业务 type/handler
-  api/                 # 必须有；按 group 拆子 .api
+  api/                 # 必须有；按「鉴权方式」拆子 .api（见下）
     auth_public.api
+    auth.api
+    auth_s2s.api
     user.api
+    user_s2s.api
     ...
   internal/
     handler/           # goctl 生成
@@ -162,10 +165,29 @@ xxx_api/
 ```api
 import "api/auth_public.api"
 import "api/auth.api"
+import "api/auth_s2s.api"
 import "api/user.api"
+import "api/user_s2s.api"
 
 // goctl api go -api xxx_api.api -dir . --home ../../../template
 ```
+
+#### 子 .api 按鉴权拆分（强制）
+
+**一个子 `.api` 文件只允许一个 `@server` 块**，按鉴权方式拆成三类后缀：
+
+| 后缀 | 鉴权 | `@server` 声明 | 用途 |
+|---|---|---|---|
+| `xxx.api` | 网关 JwtS2s（C端用户票经网关注入可信身份头） | `middleware: JwtS2s` | 面向登录用户的自助接口 |
+| `xxx_public.api` | **无网关身份鉴权**（公开；含靠 `client_secret` 自身鉴权的换票端点） | 不挂 middleware | 登录/注册等公开端点、机器票换发 |
+| `xxx_s2s.api` | 内部机器票 JwtS2s | `middleware: JwtS2s` | 跨仓 S2S 调用的机器视图（批量查询/管理操作） |
+
+**换票端点（如 `/beaver/api/account/auth_token/v1/issue`）归属**：它不走身份闸门（否则换不到票），靠 `client_secret` 自身鉴权，鉴权级别与公开端点相同——写进 `xxx_public.api` 的 `@server` 块里，**不单开 `xxx_token.api`、不多加一个 `@server` 块**。URL 的 group 段保留 `auth_token` 等业务语义即可，与文件后缀不必一致。
+
+硬性：
+- 禁止在一个 `.api` 里写多个 `@server` 块；不同鉴权的接口必须拆到不同文件。
+- 文件按鉴权拆，但**URL 的 group 段按业务语义**保持（如机器面仍可用业务 group，只要 action 不撞）；代码组织与 API 契约解耦。
+- 同一 `service` 名在多个子 `.api` 中重复声明是允许的（goctl 会合并路由）。
 
 ### 路由（六段）
 
@@ -182,8 +204,12 @@ import "api/user.api"
 | v1 | 固定，紧挨 action |
 | action | snake_case；资源+操作并进动作名 |
 
-示例：`/beaver/api/auth/auth_public/v1/phone_login`  
+示例：`/beaver/api/account/auth_public/v1/phone_login`  
 禁止：`:id` 路径参数；禁止 `/v1/qrcode/status` 再拆段（写成 `qrcode_status`）。
+
+`service` 段用**合并后的服务名**（account/message/relation/asset/platform…），不再用合并前的业务子域名
+（auth/user/friend/chat…）；`group` 段用子 `.api` 的业务分组（auth_public/auth/user…）。
+同一服务的多个子 `.api` 可以共享一个 service 段，靠 group 区分。
 
 网关只转发、不鉴权；鉴权在下游 `@server` 声明（`jwt` / `middleware`）；公开组不挂身份中间件。鉴权失败真实 **401**。
 
@@ -213,7 +239,7 @@ type (
 )
 service account {
 	@handler phoneLogin
-	post /beaver/api/auth/auth_public/v1/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
+	post /beaver/api/account/auth_public/v1/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
 }
 ```
 

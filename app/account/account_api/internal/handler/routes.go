@@ -28,7 +28,6 @@ import (
 	auth "beaver/app/account/account_api/internal/handler/auth"
 	auth_machine "beaver/app/account/account_api/internal/handler/auth_machine"
 	auth_public "beaver/app/account/account_api/internal/handler/auth_public"
-	auth_token "beaver/app/account/account_api/internal/handler/auth_token"
 	user "beaver/app/account/account_api/internal/handler/user"
 	user_machine "beaver/app/account/account_api/internal/handler/user_machine"
 	"beaver/app/account/account_api/internal/svc"
@@ -44,31 +43,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 获取登录设备列表
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/auth/auth/v1/devices",
+					Path:    "/beaver/api/account/auth/v1/devices",
 					Handler: auth.GetDevicesHandler(serverCtx),
 				},
 				{
 					// 强制下线指定设备
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/auth/v1/kick_device",
+					Path:    "/beaver/api/account/auth/v1/kick_device",
 					Handler: auth.KickDeviceHandler(serverCtx),
 				},
 				{
 					// 用户登出
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/auth/v1/logout",
+					Path:    "/beaver/api/account/auth/v1/logout",
 					Handler: auth.LogoutHandler(serverCtx),
 				},
 				{
 					// 扫码登录-确认扫码（移动端，Header Token）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/auth/v1/qrcode_scan",
+					Path:    "/beaver/api/account/auth/v1/qrcode_scan",
 					Handler: auth.QrcodeScanHandler(serverCtx),
 				},
 				{
 					// 修改密码（需验证旧密码）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/auth/v1/update_password",
+					Path:    "/beaver/api/account/auth/v1/update_password",
 					Handler: auth.UpdatePasswordHandler(serverCtx),
 				},
 			}...,
@@ -82,25 +81,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 创建账号密码凭据
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/machine/v1/create_credential",
+					Path:    "/beaver/api/account/auth/v1/create_credential",
 					Handler: auth_machine.CreateCredentialHandler(serverCtx),
 				},
 				{
 					// 查指定用户的登录设备
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/machine/v1/devices",
+					Path:    "/beaver/api/account/auth/v1/devices",
 					Handler: auth_machine.ListUserDevicesHandler(serverCtx),
 				},
 				{
 					// 重置指定用户密码（无需旧密码）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/machine/v1/reset_password",
+					Path:    "/beaver/api/account/auth/v1/reset_password",
 					Handler: auth_machine.ResetUserPasswordHandler(serverCtx),
 				},
 				{
 					// 校验账号密码（开放平台 / 管理端代登录）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/auth/machine/v1/verify_password",
+					Path:    "/beaver/api/account/auth/v1/verify_password",
 					Handler: auth_machine.VerifyPasswordHandler(serverCtx),
 				},
 			}...,
@@ -112,85 +111,80 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				// 用户认证（服务内校验 Token）
 				Method:  http.MethodGet,
-				Path:    "/beaver/api/auth/auth_public/v1/authentication",
+				Path:    "/beaver/api/account/auth_public/v1/authentication",
 				Handler: auth_public.AuthenticationHandler(serverCtx),
 			},
 			{
 				// 邮箱验证码登录
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/email_login",
+				Path:    "/beaver/api/account/auth_public/v1/email_login",
 				Handler: auth_public.EmailLoginHandler(serverCtx),
 			},
 			{
 				// 邮箱密码登录
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/email_password_login",
+				Path:    "/beaver/api/account/auth_public/v1/email_password_login",
 				Handler: auth_public.EmailPasswordLoginHandler(serverCtx),
 			},
 			{
 				// 邮箱注册
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/email_register",
+				Path:    "/beaver/api/account/auth_public/v1/email_register",
 				Handler: auth_public.EmailRegisterHandler(serverCtx),
 			},
 			{
 				// 获取邮箱验证码
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/emailcode",
+				Path:    "/beaver/api/account/auth_public/v1/emailcode",
 				Handler: auth_public.GetEmailCodeHandler(serverCtx),
 			},
 			{
 				// OAuth 授权码登录（PC 客户端 SDK）
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/oauth_code_login",
+				Path:    "/beaver/api/account/auth_public/v1/oauth_code_login",
 				Handler: auth_public.OauthCodeLoginHandler(serverCtx),
 			},
 			{
 				// 手机号登录
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/phone_login",
+				Path:    "/beaver/api/account/auth_public/v1/phone_login",
 				Handler: auth_public.PhoneLoginHandler(serverCtx),
 			},
 			{
 				// 手机号注册
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/phone_register",
+				Path:    "/beaver/api/account/auth_public/v1/phone_register",
 				Handler: auth_public.PhoneRegisterHandler(serverCtx),
 			},
 			{
 				// 获取手机验证码
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/phonecode",
+				Path:    "/beaver/api/account/auth_public/v1/phonecode",
 				Handler: auth_public.GetPhoneCodeHandler(serverCtx),
 			},
 			{
 				// 扫码登录-生成二维码（PC）
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/qrcode_generate",
+				Path:    "/beaver/api/account/auth_public/v1/qrcode_generate",
 				Handler: auth_public.QrcodeGenerateHandler(serverCtx),
 			},
 			{
 				// 扫码登录-轮询状态（PC）
 				Method:  http.MethodGet,
-				Path:    "/beaver/api/auth/auth_public/v1/qrcode_status",
+				Path:    "/beaver/api/account/auth_public/v1/qrcode_status",
 				Handler: auth_public.QrcodeStatusHandler(serverCtx),
 			},
 			{
 				// 找回密码
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/auth_public/v1/reset_password",
+				Path:    "/beaver/api/account/auth_public/v1/reset_password",
 				Handler: auth_public.ResetPasswordHandler(serverCtx),
 			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
 			{
-				// S2S 机器票换发（client_credentials）
+				// S2S 机器票换发（client_credentials，靠 client_secret 自身鉴权，不走身份闸门）
 				Method:  http.MethodPost,
-				Path:    "/beaver/api/auth/token/v1/issue",
-				Handler: auth_token.S2sTokenHandler(serverCtx),
+				Path:    "/beaver/api/account/auth_token/v1/issue",
+				Handler: auth_public.S2sTokenHandler(serverCtx),
 			},
 		},
 	)
@@ -202,37 +196,37 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 获取用户设置（隐私、通知策略、快捷键）
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/user/profile/v1/settings",
+					Path:    "/beaver/api/account/user/v1/settings",
 					Handler: user.GetUserSettingsHandler(serverCtx),
 				},
 				{
 					// 用户数据增量同步（基于用户独立版本号，大厂标准方式）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/profile/v1/sync",
+					Path:    "/beaver/api/account/user/v1/sync",
 					Handler: user.UserSyncHandler(serverCtx),
 				},
 				{
 					// 修改用户邮箱（需要验证码）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/profile/v1/update_email",
+					Path:    "/beaver/api/account/user/v1/update_email",
 					Handler: user.UpdateEmailHandler(serverCtx),
 				},
 				{
 					// 更新用户基础信息（昵称、头像、个性签名、性别）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/profile/v1/update_info",
+					Path:    "/beaver/api/account/user/v1/update_info",
 					Handler: user.UpdateInfoHandler(serverCtx),
 				},
 				{
 					// 更新用户设置（隐私、通知策略、快捷键，支持局部更新）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/profile/v1/update_settings",
+					Path:    "/beaver/api/account/user/v1/update_settings",
 					Handler: user.UpdateUserSettingsHandler(serverCtx),
 				},
 				{
 					// 获取用户基础信息
 					Method:  http.MethodGet,
-					Path:    "/beaver/api/user/profile/v1/user_info",
+					Path:    "/beaver/api/account/user/v1/user_info",
 					Handler: user.UserInfoHandler(serverCtx),
 				},
 			}...,
@@ -246,55 +240,55 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 创建用户
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/create",
+					Path:    "/beaver/api/account/user/v1/create",
 					Handler: user_machine.UserCreateHandler(serverCtx),
 				},
 				{
 					// 批量删除用户
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/delete",
+					Path:    "/beaver/api/account/user/v1/delete",
 					Handler: user_machine.UserDeleteHandler(serverCtx),
 				},
 				{
 					// 按 user_id 查用户信息（含管理字段）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/info",
+					Path:    "/beaver/api/account/user/v1/info",
 					Handler: user_machine.UserLookupHandler(serverCtx),
 				},
 				{
 					// 管理端用户分页列表
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/list",
+					Path:    "/beaver/api/account/user/v1/list",
 					Handler: user_machine.UserListHandler(serverCtx),
 				},
 				{
 					// 批量查用户信息
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/list_info",
+					Path:    "/beaver/api/account/user/v1/list_info",
 					Handler: user_machine.UserListInfoHandler(serverCtx),
 				},
 				{
 					// 搜索用户
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/search",
+					Path:    "/beaver/api/account/user/v1/search",
 					Handler: user_machine.UserSearchHandler(serverCtx),
 				},
 				{
 					// 批量更新用户资料
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/update",
+					Path:    "/beaver/api/account/user/v1/update",
 					Handler: user_machine.UserUpdateHandler(serverCtx),
 				},
 				{
 					// 更新用户展示信息（昵称、头像）
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/update_display",
+					Path:    "/beaver/api/account/user/v1/update_display",
 					Handler: user_machine.UserUpdateDisplayHandler(serverCtx),
 				},
 				{
 					// 批量修改用户状态
 					Method:  http.MethodPost,
-					Path:    "/beaver/api/user/machine/v1/update_status",
+					Path:    "/beaver/api/account/user/v1/update_status",
 					Handler: user_machine.UserUpdateStatusHandler(serverCtx),
 				},
 			}...,

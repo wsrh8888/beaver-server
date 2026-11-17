@@ -133,55 +133,76 @@ type (
 	}
 )
 
+// ==================== 队间换票（client_credentials → core:api 机器票）====================
+// 与其余公开端点同属「无网关身份鉴权」：不走身份闸门，靠 client_secret 常量时间比对。
+// 一个团队一套票：本团队全部业务面（account/message/relation/asset/notification/platform）
+// 共用同一受众，收费仓换一次票即可打所有面，省掉每服务各换一次的往返。
+type (
+	S2STokenReq {
+		GrantType    string `json:"grant_type,optional"`
+		ClientID     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+	}
+	S2STokenRes {
+		AccessToken string `json:"access_token"`
+		TokenType   string `json:"token_type"`
+		ExpiresIn   int64  `json:"expires_in"`
+	}
+)
+
 @server (
 	group: auth_public
 )
 service account {
 	@doc "手机号登录"
 	@handler phoneLogin
-	post /beaver/api/auth/auth_public/v1/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
+	post /beaver/api/account/auth_public/v1/phone_login (PhoneLoginReq) returns (PhoneLoginRes)
 
 	@doc "邮箱密码登录"
 	@handler emailPasswordLogin
-	post /beaver/api/auth/auth_public/v1/email_password_login (EmailPasswordLoginReq) returns (EmailPasswordLoginRes)
+	post /beaver/api/account/auth_public/v1/email_password_login (EmailPasswordLoginReq) returns (EmailPasswordLoginRes)
 
 	@doc "OAuth 授权码登录（PC 客户端 SDK）"
 	@handler oauthCodeLogin
-	post /beaver/api/auth/auth_public/v1/oauth_code_login (OAuthCodeLoginReq) returns (OAuthCodeLoginRes)
+	post /beaver/api/account/auth_public/v1/oauth_code_login (OAuthCodeLoginReq) returns (OAuthCodeLoginRes)
 
 	@doc "用户认证（服务内校验 Token）"
 	@handler authentication
-	get /beaver/api/auth/auth_public/v1/authentication (AuthenticationReq) returns (AuthenticationRes)
+	get /beaver/api/account/auth_public/v1/authentication (AuthenticationReq) returns (AuthenticationRes)
 
 	@doc "手机号注册"
 	@handler phoneRegister
-	post /beaver/api/auth/auth_public/v1/phone_register (PhoneRegisterReq) returns (PhoneRegisterRes)
+	post /beaver/api/account/auth_public/v1/phone_register (PhoneRegisterReq) returns (PhoneRegisterRes)
 
 	@doc "邮箱注册"
 	@handler emailRegister
-	post /beaver/api/auth/auth_public/v1/email_register (EmailRegisterReq) returns (EmailRegisterRes)
+	post /beaver/api/account/auth_public/v1/email_register (EmailRegisterReq) returns (EmailRegisterRes)
 
 	@doc "获取手机验证码"
 	@handler getPhoneCode
-	post /beaver/api/auth/auth_public/v1/phonecode (GetPhoneCodeReq) returns (GetPhoneCodeRes)
+	post /beaver/api/account/auth_public/v1/phonecode (GetPhoneCodeReq) returns (GetPhoneCodeRes)
 
 	@doc "获取邮箱验证码"
 	@handler getEmailCode
-	post /beaver/api/auth/auth_public/v1/emailcode (GetEmailCodeReq) returns (GetEmailCodeRes)
+	post /beaver/api/account/auth_public/v1/emailcode (GetEmailCodeReq) returns (GetEmailCodeRes)
 
 	@doc "邮箱验证码登录"
 	@handler emailLogin
-	post /beaver/api/auth/auth_public/v1/email_login (EmailLoginReq) returns (EmailLoginRes)
+	post /beaver/api/account/auth_public/v1/email_login (EmailLoginReq) returns (EmailLoginRes)
 
 	@doc "找回密码"
 	@handler resetPassword
-	post /beaver/api/auth/auth_public/v1/reset_password (ResetPasswordReq) returns (ResetPasswordRes)
+	post /beaver/api/account/auth_public/v1/reset_password (ResetPasswordReq) returns (ResetPasswordRes)
 
 	@doc "扫码登录-生成二维码（PC）"
 	@handler qrcodeGenerate
-	post /beaver/api/auth/auth_public/v1/qrcode_generate (QrcodeGenerateReq) returns (QrcodeGenerateRes)
+	post /beaver/api/account/auth_public/v1/qrcode_generate (QrcodeGenerateReq) returns (QrcodeGenerateRes)
 
 	@doc "扫码登录-轮询状态（PC）"
 	@handler qrcodeStatus
-	get /beaver/api/auth/auth_public/v1/qrcode_status (QrcodeStatusReq) returns (QrcodeStatusRes)
+	get /beaver/api/account/auth_public/v1/qrcode_status (QrcodeStatusReq) returns (QrcodeStatusRes)
+
+	@doc "S2S 机器票换发（client_credentials，靠 client_secret 自身鉴权，不走身份闸门）"
+	@handler s2sToken
+	post /beaver/api/account/auth_token/v1/issue (S2STokenReq) returns (S2STokenRes)
 }

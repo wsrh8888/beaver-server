@@ -56,7 +56,7 @@ type Config struct {
 		AccessExpire int
 	}
 	// S2S 入站机器票：本团队业务面共用一套凭据，票据受众统一 core:api。
-	// 换票端点在本服务的 POST /beaver/api/auth/token/v1/issue（client_credentials）。
+	// 换票端点在本服务的 POST /beaver/api/account/auth_token/v1/issue（client_credentials）。
 	S2S struct {
 		Secret  string                     `json:",optional"`
 		Clients map[string]s2s.ClientEntry `json:",optional"`

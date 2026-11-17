@@ -33,7 +33,7 @@ Redis:
   Password: '123456'
   DB: 0
 WhiteList:
-  - /beaver/api/auth/auth_public/.*
+  - /beaver/api/account/auth_public/.*
   - /beaver/api/file/preview/v1/get
 Email:
   QQ:

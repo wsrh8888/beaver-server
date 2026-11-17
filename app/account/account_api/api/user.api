@@ -1,18 +1,7 @@
 syntax = "v1"
 
-// 用户信息
+// 用户信息：C 端自助（网关 JwtS2s）
 
-// 更新用户信息
-
-// 修改邮箱
-
-// 用户数据同步（大厂用户独立版本号方式）
-
-// 获取用户设置
-
-// 更新用户设置
-
-// 用户服务
 type (
 UserInfoReq {
 		UserID string `header:"Beaver-User-Id"` // 当前用户ID（网关注入的可信身份头）
@@ -106,185 +95,6 @@ UpdateUserSettingsReq {
 UpdateUserSettingsRes  {}
 )
 
-type (
-UserLookupReq {
-		UserID string `json:"userID,optional"`
-	}
-
-UserLookupRes {
-		UserInfo UserLookupInfo `json:"user_info"`
-	}
-)
-
-type (
-UserListInfoReq {
-		UserIdList     []string `json:"user_id_list,optional"`
-		SinceTimestamp int64    `json:"since_timestamp,optional"`
-	}
-
-UserListInfoRes {
-		UserInfo map[string]UserLookupInfo `json:"user_info,optional"`
-	}
-)
-
-type (
-UserCreateReq {
-		Phone    string `json:"phone,optional"`
-		Source   int32  `json:"source,optional"`
-		Email    string `json:"email,optional"`
-		NickName string `json:"nick_name,optional"`
-		UserType int32  `json:"user_type,optional"`
-		Abstract string `json:"abstract,optional"`
-	}
-
-UserCreateRes {
-		UserID string `json:"userID,optional"`
-	}
-)
-
-type (
-UserSearchReq {
-		Keyword string `json:"keyword,optional"`
-		Type    string `json:"type,optional"`
-	}
-
-UserSearchRes {
-		UserInfo UserLookupInfo `json:"user_info"`
-	}
-)
-
-type (
-UserUpdateDisplayReq {
-		UserId   string `json:"user_id,optional"`
-		NickName string `json:"nick_name,optional"`
-		Avatar   string `json:"avatar,optional"`
-	}
-
-UserUpdateDisplayRes {
-		Version int64 `json:"version,optional"`
-	}
-)
-
-type (
-UserLookupInfo {
-		UserId    string `json:"user_id,optional"`
-		NickName  string `json:"nick_name,optional"`
-		Avatar    string `json:"avatar,optional"`
-		Version   int64  `json:"version,optional"`
-		Email     string `json:"email,optional"`
-		Abstract  string `json:"abstract,optional"`
-		Phone     string `json:"phone,optional"`
-		Status    int32  `json:"status,optional"`
-		Source    int32  `json:"source,optional"`
-		UserType  int32  `json:"user_type,optional"`
-		CreatedAt string `json:"created_at,optional"`
-		UpdatedAt string `json:"updated_at,optional"`
-	}
-
-UserListReq {
-		Page     int32  `json:"page,optional"`
-		PageSize int32  `json:"page_size,optional"`
-		Email    string `json:"email,optional"`
-		Status   int32  `json:"status,optional"`
-		Source   int32  `json:"source,optional"`
-		UserId   string `json:"user_id,optional"`
-		Keyword  string `json:"keyword,optional"`
-		UserType int32  `json:"user_type,optional"`
-	}
-
-UserListRes {
-		Total int64            `json:"total,optional"`
-		List  []UserLookupInfo `json:"list,optional"`
-	}
-)
-
-type (
-UserUpdateReq {
-		UserIds       []string `json:"user_ids,optional"`
-		PatchNickName *string  `json:"patch_nick_name,optional"`
-		PatchEmail    *string  `json:"patch_email,optional"`
-		PatchAvatar   *string  `json:"patch_avatar,optional"`
-		PatchAbstract *string  `json:"patch_abstract,optional"`
-	}
-
-UserUpdateRes {
-		AffectedCount int64 `json:"affected_count,optional"`
-	}
-)
-
-type (
-UserDeleteReq {
-		UserIds []string `json:"user_ids,optional"`
-	}
-
-UserDeleteRes {
-		AffectedCount int64 `json:"affected_count,optional"`
-	}
-)
-
-type (
-UserUpdateStatusReq {
-		UserIds []string `json:"user_ids,optional"`
-		Status  int32    `json:"status,optional"`
-	}
-
-UserUpdateStatusRes {
-		AffectedCount int64 `json:"affected_count,optional"`
-	}
-)
-
-type (
-GetUserSettingsPrivacyItem {
-		AllowFriendRequest bool `json:"allowFriendRequest"` // 是否允许添加好友
-		ShowOnlineStatus   bool `json:"showOnlineStatus"` // 是否展示在线状态
-		AllowSearchByPhone bool `json:"allowSearchByPhone"` // 是否允许通过手机号搜索
-		AllowSearchByEmail bool `json:"allowSearchByEmail"` // 是否允许通过邮箱搜索
-	}
-
-GetUserSettingsNotificationItem {
-		NotifyFriendRequest bool `json:"notifyFriendRequest"` // 是否接收好友申请通知
-		NotifyGroupMessage  bool `json:"notifyGroupMessage"` // 是否接收群消息通知
-		NotifyMoment        bool `json:"notifyMoment"` // 是否接收朋友圈通知
-	}
-
-GetUserSettingsKeyboardItem {
-		Screenshot   string `json:"screenshot"` // 区域截图
-		ToggleWindow string `json:"toggleWindow"` // 显示/隐藏主窗口
-		SendMessage  string `json:"sendMessage"` // 发送消息
-	}
-
-UpdateUserSettingsPrivacyItem {
-		AllowFriendRequest *bool `json:"allowFriendRequest,optional"` // 是否允许添加好友
-		ShowOnlineStatus   *bool `json:"showOnlineStatus,optional"` // 是否展示在线状态
-		AllowSearchByPhone *bool `json:"allowSearchByPhone,optional"` // 是否允许通过手机号搜索
-		AllowSearchByEmail *bool `json:"allowSearchByEmail,optional"` // 是否允许通过邮箱搜索
-	}
-
-UpdateUserSettingsNotificationItem {
-		NotifyFriendRequest *bool `json:"notifyFriendRequest,optional"` // 是否接收好友申请通知
-		NotifyGroupMessage  *bool `json:"notifyGroupMessage,optional"` // 是否接收群消息通知
-		NotifyMoment        *bool `json:"notifyMoment,optional"` // 是否接收朋友圈通知
-	}
-
-UpdateUserSettingsKeyboardItem {
-		Screenshot   *string `json:"screenshot,optional"` // 区域截图
-		ToggleWindow *string `json:"toggleWindow,optional"` // 显示/隐藏主窗口
-		SendMessage  *string `json:"sendMessage,optional"` // 发送消息
-	}
-
-UserDeviceItem {
-		DeviceId        string `json:"device_id,optional"`
-		DeviceType      string `json:"device_type,optional"`
-		DeviceOs        string `json:"device_os,optional"`
-		DeviceModel     string `json:"device_model,optional"`
-		DeviceOsVersion string `json:"device_os_version,optional"`
-		DeviceName      string `json:"device_name,optional"`
-		LastLoginTime   string `json:"last_login_time,optional"`
-		LastLoginIp     string `json:"last_login_ip,optional"`
-		IsOnline        bool   `json:"is_online,optional"`
-	}
-)
-
 @server (
 	group: user
 	middleware: JwtS2s
@@ -292,92 +102,25 @@ UserDeviceItem {
 service account {
 	@doc "获取用户基础信息"
 	@handler userInfo
-	get /beaver/api/user/profile/v1/user_info (UserInfoReq) returns (UserInfoRes)
+	get /beaver/api/account/user/v1/user_info (UserInfoReq) returns (UserInfoRes)
 
 	@doc "更新用户基础信息（昵称、头像、个性签名、性别）"
 	@handler updateInfo
-	post /beaver/api/user/profile/v1/update_info (UpdateInfoReq) returns (UpdateInfoRes)
+	post /beaver/api/account/user/v1/update_info (UpdateInfoReq) returns (UpdateInfoRes)
 
 	@doc "修改用户邮箱（需要验证码）"
 	@handler updateEmail
-	post /beaver/api/user/profile/v1/update_email (UpdateEmailReq) returns (UpdateEmailRes)
+	post /beaver/api/account/user/v1/update_email (UpdateEmailReq) returns (UpdateEmailRes)
 
 	@doc "用户数据增量同步（基于用户独立版本号，大厂标准方式）"
 	@handler userSync
-	post /beaver/api/user/profile/v1/sync (UserSyncReq) returns (UserSyncRes)
+	post /beaver/api/account/user/v1/sync (UserSyncReq) returns (UserSyncRes)
 
 	@doc "获取用户设置（隐私、通知策略、快捷键）"
 	@handler getUserSettings
-	get /beaver/api/user/profile/v1/settings (GetUserSettingsReq) returns (GetUserSettingsRes)
+	get /beaver/api/account/user/v1/settings (GetUserSettingsReq) returns (GetUserSettingsRes)
 
 	@doc "更新用户设置（隐私、通知策略、快捷键，支持局部更新）"
 	@handler updateUserSettings
-	post /beaver/api/user/profile/v1/update_settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes)
-}
-
-// goctl api go -api account_api.api -dir . --home ../../../template
-
-// ==================== 队间机器视图：用户域批量与维护能力 ====================
-// 与 C 端共用 /beaver/api/user 契约文件；入出参 JSON 与旧 S2S 门面逐字对齐，调用方零改动。
-// 与 C 端视图的差别是「资源视图」不同（这里含 status/source/user_type 等管理字段），
-// 不是第二套契约——都在本 .api 里。
-
-// 单个用户信息（按 user_id 查，含管理字段）
-
-// 批量用户信息
-
-// 创建用户
-
-// 搜索用户
-
-// 更新展示信息
-
-// 管理端分页列表
-
-// 批量更新
-
-// 批量删除
-
-// 批量改状态
-
-@server (
-	group: user_machine
-	middleware: JwtS2s
-)
-service account {
-	@doc "按 user_id 查用户信息（含管理字段）"
-	@handler userLookup
-	post /beaver/api/user/machine/v1/info (UserLookupReq) returns (UserLookupRes)
-
-	@doc "批量查用户信息"
-	@handler userListInfo
-	post /beaver/api/user/machine/v1/list_info (UserListInfoReq) returns (UserListInfoRes)
-
-	@doc "创建用户"
-	@handler userCreate
-	post /beaver/api/user/machine/v1/create (UserCreateReq) returns (UserCreateRes)
-
-	@doc "搜索用户"
-	@handler userSearch
-	post /beaver/api/user/machine/v1/search (UserSearchReq) returns (UserSearchRes)
-
-	@doc "更新用户展示信息（昵称、头像）"
-	@handler userUpdateDisplay
-	post /beaver/api/user/machine/v1/update_display (UserUpdateDisplayReq) returns (UserUpdateDisplayRes)
-
-	@doc "管理端用户分页列表"
-	@handler userList
-	post /beaver/api/user/machine/v1/list (UserListReq) returns (UserListRes)
-
-	@doc "批量更新用户资料"
-	@handler userUpdate
-	post /beaver/api/user/machine/v1/update (UserUpdateReq) returns (UserUpdateRes)
-
-	@doc "批量删除用户"
-	@handler userDelete
-	post /beaver/api/user/machine/v1/delete (UserDeleteReq) returns (UserDeleteRes)
-
-	@doc "批量修改用户状态"
-	@handler userUpdateStatus
-	post /beaver/api/user/machine/v1/update_status (UserUpdateStatusReq) returns (UserUpdateStatusRes)
+	post /beaver/api/account/user/v1/update_settings (UpdateUserSettingsReq) returns (UpdateUserSettingsRes)
 }

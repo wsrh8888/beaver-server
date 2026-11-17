@@ -19,12 +19,12 @@
  * beaver-server-header-v1
  */
 
-package auth_token
+package auth_public
 
 import (
 	"net/http"
 
-	logic "beaver/app/account/account_api/internal/logic/auth_token"
+	logic "beaver/app/account/account_api/internal/logic/auth_public"
 	"beaver/app/account/account_api/internal/svc"
 	"beaver/app/account/account_api/internal/types"
 	"beaver/common/response"

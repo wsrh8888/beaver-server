@@ -3,6 +3,7 @@ Addr: 0.0.0.0:20800
 etcd: 127.0.0.1:2379
 # 服务映射：路径第 3 段 service → 完整 etcd 服务名（未命中默认 {service}_api）。
 ServiceAlias:
+  account: account_api
   auth: account_api
   user: account_api
   chat: message_api
@@ -56,8 +57,8 @@ Machine:
   Issuer: beaver-gateway
 # 公开端点：不验外部票（登录/换票/文件预览/ws 握手/公开查询等）。精确到 action。
 PublicPaths:
-  - /beaver/api/auth/auth_public/v1/
-  - /beaver/api/auth/token/v1/issue
+  - /beaver/api/account/auth_public/v1/
+  - /beaver/api/account/auth_token/v1/issue
   - /beaver/api/file/preview/v1/get
   - /beaver/api/platform/update_public/v1/
   - /beaver/api/platform/track_public/v1/
