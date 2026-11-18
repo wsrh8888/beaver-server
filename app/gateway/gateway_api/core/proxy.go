@@ -64,6 +64,16 @@ func writeErrorResponse(res http.ResponseWriter, msg string, statusCode int, uui
 // 业务服务默认只验 S2S，身份由网关写入的 Beaver-User-Id 头传递。
 type Proxy struct {
 	Config types.Config
+	auth   authMatcher // 预编译的公开/鉴权正则，NewProxy 装配
+}
+
+// NewProxy 用配置构造代理，预编译鉴权正则；正则非法即返回错误，调用方须 fail-fast。
+func NewProxy(config types.Config) (*Proxy, error) {
+	matcher, err := compileAuthMatcher(config)
+	if err != nil {
+		return nil, err
+	}
+	return &Proxy{Config: config, auth: matcher}, nil
 }
 
 type statusRecorder struct {

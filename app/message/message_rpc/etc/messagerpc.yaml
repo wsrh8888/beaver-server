@@ -4,12 +4,10 @@
 RemoteProxy:
   Open:
     BaseURL: http://127.0.0.1:21900
-    Auth: client_credentials
     ClientID: beaver-server
     ClientSecret: beaver-s2s-02-open-server
   Ai:
     BaseURL: http://127.0.0.1:22300
-    Auth: client_credentials
     ClientID: beaver-server
     ClientSecret: beaver-s2s-06-ai-server
   # Agent beaver-agent(py) S2S 出站：跨仓禁 gRPC，走 /beaver-ai/api/agent/chat/v1/* 标准机器视图。

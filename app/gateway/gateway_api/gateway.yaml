@@ -69,35 +69,29 @@ Machine:
     beaver/admin: admin:internal
   ClientID: gateway
   Issuer: beaver-gateway
-# 公开端点：不验外部票（登录/换票/文件预览/ws 握手/公开查询等）。精确到 action。
-PublicPaths:
-  - /beaver/api/account/auth_public/v1/
-  - /beaver/api/account/auth_token/v1/issue
-  - /beaver/api/file/preview/v1/get
-  - /beaver/api/platform/update_public/v1/
-  - /beaver/api/platform/track_public/v1/
-  - /beaver/api/platform/instance_public/v1/
-  - /beaver-open/api/open/auth_public/v1/
-  - /beaver-open/api/open/bot_public/v1/
-  - /beaver-open/api/open/developer/v1/auth_login
-  - /beaver-open/api/open/developer/v1/auth_oauth_login
-  - /beaver-open/api/open/developer/v1/file_preview
-  - /beaver-open/api/open/ws/v1/connect
-  - /beaver-open/api/open/oauth_public/v1/
-  # 应用级凭据（Oauth-Id / Oauth-Secret）面：第三方服务端直连，不携带外部票，由本地 OauthSecretAuth 校验。
-  - /beaver-open/api/open/oauth_secret/v1/
-  - /beaver-open/api/open/machine/v1/token
-  - /beaver-social/api/social/machine/v1/token
-  - /beaver-doc/api/doc/machine/v1/token
-  - /beaver-ai/api/ai/machine/v1/token
-  # LiveKit 服务器回调（webhook.api 为裸 service，无中间件）
-  - /beaver-call/api/call/webhook/v1/callback
-  - /beaver/admin/backend/auth_public/v1/
-# 鉴权分组：未列前缀默认 beaver（主站用户票）。
-# beaver-open 门户面用 Open 票，后台管理面用 Admin 票。
-AuthGroups:
-  # IM 客户端自用的 oauth 面（生成 authCode / 扫码登录）走用户票，不是开发者票，
-  # 用更长前缀压过 /beaver-open/ 的 open 组。
-  /beaver-open/api/open/oauth/v1/: beaver
-  /beaver-open/: open
-  /beaver/admin/: admin
+# 公开端点正则：命中任一即不验外部票（登录/换票/预览/ws/回调等）。
+# 用 URL 六段式结构表达规范，避免逐条硬编码；新增 _public 组或 machine token 端点零配置。
+PublicPatterns:
+  # 通用规则 1：group 段以 _public 结尾的整组公开
+  - ^/[^/]+/(?:api|admin)/[^/]+/[^/]+_public/v1/
+  # 通用规则 2：各团队的换票端点 group=machine + action=token
+  - ^/[^/]+/api/[^/]+/machine/v1/token$
+  # 以下为命名不合规特例（group 未用 _public，须 action 级精确放行；规整命名后可删）：
+  - ^/beaver/api/account/auth_token/v1/issue$      # 换票口
+  - ^/beaver/api/file/preview/v1/get$              # 文件预览
+  - ^/beaver-open/api/open/developer/v1/auth_login$         # 开发者登录
+  - ^/beaver-open/api/open/developer/v1/auth_oauth_login$   # OAuth 登录
+  - ^/beaver-open/api/open/developer/v1/file_preview$       # 文件预览
+  - ^/beaver-open/api/open/ws/v1/connect$           # ws 握手
+  - ^/beaver-open/api/open/oauth_secret/v1/         # 应用级凭据面（本地 OauthSecretAuth 校验）
+  - ^/beaver-call/api/call/webhook/v1/callback$     # LiveKit 回调（裸 service，无中间件）
+# 鉴权平面规则：按声明顺序取首个命中；未命中默认 beaver（主站用户票）。
+# 顺序即优先级——特例排前、team 级排后，无需最长前缀比较。
+AuthRules:
+  # IM 客户端自用 oauth 面走用户票，须排在 beaver-open 之前压过 open 组
+  - Pattern: ^/beaver-open/api/open/oauth/v1/
+    Ticket: beaver
+  - Pattern: ^/beaver-open/
+    Ticket: open
+  - Pattern: ^/beaver/admin/
+    Ticket: admin

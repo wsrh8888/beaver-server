@@ -45,10 +45,18 @@ type Config struct {
 	AuthAdmin  AuthConfig `json:",optional"`
 	// Machine 网关作为内部调用方注入到业务的机器票（业务默认只挂 JwtS2s）。
 	Machine MachineConfig `json:",optional"`
-	// PublicPaths 不验外部票的路径前缀白名单（登录、换票口、文件预览等）。
-	PublicPaths []string `json:",optional"`
-	// AuthGroups 路径前缀 → 外部票类型（beaver/open/admin/public），未命中默认 beaver。
-	AuthGroups map[string]string `json:",optional"`
+	// PublicPatterns 公开端点正则，命中任一即不验外部票（登录、换票口、文件预览等）。
+	// 用正则表达 URL 规范，避免逐条硬编码路径前缀；新增合规接口零配置。
+	PublicPatterns []string `json:",optional"`
+	// AuthRules 鉴权平面规则，按声明顺序取首个命中；未命中默认 beaver（主站用户票）。
+	// 有序切片替代原 map：顺序即优先级，特例排前、通用排后，无需最长前缀比较。
+	AuthRules []AuthRule `json:",optional"`
+}
+
+// AuthRule 一条鉴权平面规则：路径正则 → 外部票类型（beaver/open/admin/public）。
+type AuthRule struct {
+	Pattern string `json:",optional"`
+	Ticket  string `json:",optional"`
 }
 
 // AuthConfig 单个平面的外部票验签密钥。

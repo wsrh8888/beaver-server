@@ -24,9 +24,12 @@ package core
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
+	"beaver/app/gateway/gateway_api/types"
 	"beaver/utils/jwts"
 	"beaver/utils/s2s"
 )
@@ -67,40 +70,68 @@ func stripIdentityHeaders(r *http.Request) {
 	}
 }
 
-// routeAuthKind 按路径判定要验的外部票类型。
-// 优先级：PublicPaths 精确白名单 > AuthGroups 最长前缀 > 默认主站用户票（beaver）。
-// public 必须优先，否则 `/beaver-open/` 这类 team 级前缀会吞掉其下的登录/预览等公开端点。
-func (p Proxy) routeAuthKind(path string) ticketKind {
-	// 1) 公开白名单优先（最长匹配，允许精确到单个 action）。
-	bestPublic := ""
-	for _, prefix := range p.Config.PublicPaths {
-		if strings.HasPrefix(path, prefix) && len(prefix) > len(bestPublic) {
-			bestPublic = prefix
-		}
-	}
-	if bestPublic != "" {
-		return ticketPublic
-	}
+// compiledAuthRule 预编译后的单条鉴权规则。
+type compiledAuthRule struct {
+	re   *regexp.Regexp
+	kind ticketKind
+}
 
-	// 2) team/surface 级鉴权分组，取最长前缀。
-	best, kind := "", ticketBeaver
-	for prefix, name := range p.Config.AuthGroups {
-		if !strings.HasPrefix(path, prefix) || len(prefix) <= len(best) {
-			continue
+// authMatcher 预编译的鉴权规则集，随 Proxy 生命周期复用，避免每请求重新编译正则。
+type authMatcher struct {
+	public []*regexp.Regexp
+	groups []compiledAuthRule
+}
+
+// compileAuthMatcher 启动时一次性编译正则；任一非法即返回错误，由调用方 fail-fast。
+// 规则为空是合法降级：全部请求落到默认 beaver 票（与旧配置未命中行为一致）。
+func compileAuthMatcher(cfg types.Config) (authMatcher, error) {
+	var m authMatcher
+	for _, pattern := range cfg.PublicPatterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return authMatcher{}, fmt.Errorf("PublicPatterns 正则 %q 非法: %w", pattern, err)
 		}
-		best = prefix
-		switch strings.ToLower(name) {
-		case "open":
-			kind = ticketOpen
-		case "admin":
-			kind = ticketAdmin
-		case "public":
-			kind = ticketPublic
-		default:
-			kind = ticketBeaver
+		m.public = append(m.public, re)
+	}
+	for _, rule := range cfg.AuthRules {
+		re, err := regexp.Compile(rule.Pattern)
+		if err != nil {
+			return authMatcher{}, fmt.Errorf("AuthRules 正则 %q 非法: %w", rule.Pattern, err)
+		}
+		m.groups = append(m.groups, compiledAuthRule{re: re, kind: parseTicketKind(rule.Ticket)})
+	}
+	return m, nil
+}
+
+// parseTicketKind 把配置里的票面名映射到内部枚举；未知值按最严格的 beaver 处理。
+func parseTicketKind(name string) ticketKind {
+	switch strings.ToLower(strings.TrimSpace(name)) {
+	case "open":
+		return ticketOpen
+	case "admin":
+		return ticketAdmin
+	case "public":
+		return ticketPublic
+	default:
+		return ticketBeaver
+	}
+}
+
+// routeAuthKind 按路径正则判定要验的外部票类型。
+// 优先级：PublicPatterns 任一命中 → public；否则 AuthRules 按声明顺序首个命中 → 对应票；
+// 全未命中 → 默认 beaver（主站用户票）。公开必须优先，避免 team 级规则吞掉公开端点。
+func (p Proxy) routeAuthKind(path string) ticketKind {
+	for _, re := range p.auth.public {
+		if re.MatchString(path) {
+			return ticketPublic
 		}
 	}
-	return kind
+	for _, rule := range p.auth.groups {
+		if rule.re.MatchString(path) {
+			return rule.kind
+		}
+	}
+	return ticketBeaver
 }
 
 // authenticate 强制处理顺序第 1~3 步：剥头 → 验票 → 写可信身份头。

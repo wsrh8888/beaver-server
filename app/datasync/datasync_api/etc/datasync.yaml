@@ -71,6 +71,5 @@ RemoteProxy:
   # BaseURL 指向社交服务的标准 .api 地址，须与该服务自身的 S2S Secret/Clients 配置成对。
   Social:
     BaseURL: http://127.0.0.1:22100
-    Auth: client_credentials
     ClientID: beaver-server
     ClientSecret: beaver-s2s-03-social-server

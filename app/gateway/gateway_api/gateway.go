@@ -46,8 +46,10 @@ func main() {
 	conf.MustLoad(*configFile, &config)
 	logx.SetUp(config.Log)
 	beaverlog.Init(config.Name)
-	proxy := core.Proxy{
-		Config: config,
+	proxy, err := core.NewProxy(config)
+	if err != nil {
+		fmt.Printf("网关鉴权正则配置错误: %v\n", err)
+		os.Exit(1)
 	}
 
 	// 创建带有CORS设置的多路复用器
