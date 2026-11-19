@@ -28,7 +28,15 @@ import (
 	"unicode/utf8"
 )
 
-const MaxTextMessageRunes = 5000
+const (
+	// MaxTextMessageRunes 单条文本消息允许的最大字符数
+	MaxTextMessageRunes = 5000
+	// MaxPreviewRunes 入库预览的最大字符数，必须与 ChatMessage.MsgPreview 的 size 一致；
+	// gorm tag 是字符串字面量，没法引用常量，改这里记得同步改 tag
+	MaxPreviewRunes = 200
+	// MaxLastMessageRunes 会话 last_message 的最大字符数，对应 ChatConversationMeta.LastMessage 的 size
+	MaxLastMessageRunes = 256
+)
 
 type ChatMessage struct {
 	models.Model
@@ -43,11 +51,18 @@ type ChatMessage struct {
 	Msg              *ctype.Msg    `gorm:"type:json" json:"msg"`                      // 消息内容（JSON）
 }
 
+// MsgPreviewMethod 从 Msg 重算出全文，给「读历史」用（前端自己决定怎么显示）。
+// 落库一律用 PreviewText：msg_preview 列只有 200，全文塞进去会 1406。
 func (chat ChatMessage) MsgPreviewMethod() string {
 	if chat.Msg == nil {
 		return "[消息]"
 	}
 	return getPreview(chat.Msg)
+}
+
+// PreviewText 入库用的预览：截到 MaxPreviewRunes，保证永远塞得进 msg_preview。
+func (chat ChatMessage) PreviewText() string {
+	return TruncatePreview(chat.MsgPreviewMethod(), MaxPreviewRunes)
 }
 
 // getPreview 递归获取消息预览
@@ -93,7 +108,7 @@ func getPreview(msg *ctype.Msg) string {
 			if msg.MarkdownMsg.Title != "" {
 				return msg.MarkdownMsg.Title
 			}
-			return truncatePreview(msg.MarkdownMsg.Content, 80)
+			return TruncatePreview(msg.MarkdownMsg.Content, 80)
 		}
 	case ctype.LinkMsgType:
 		if msg.LinkMsg != nil {
@@ -143,12 +158,17 @@ func cloudDocPreviewLabel(docType int) string {
 	}
 }
 
-func truncatePreview(s string, maxRunes int) string {
+// TruncatePreview 按「字符数」截断，含省略号在内总长不超过 maxRunes。
+// 返回值要直接进 varchar(n) 列，所以省略号必须占用名额，不能截满再追加。
+func TruncatePreview(s string, maxRunes int) string {
+	if maxRunes <= 0 {
+		return ""
+	}
 	if utf8.RuneCountInString(s) <= maxRunes {
 		return s
 	}
 	runes := []rune(s)
-	return string(runes[:maxRunes]) + "…"
+	return string(runes[:maxRunes-1]) + "…"
 }
 
 func ValidateMsgLength(msg *ctype.Msg) error {

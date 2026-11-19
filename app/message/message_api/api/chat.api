@@ -725,6 +725,36 @@ PeerGetConversationMemberIdsRes {
 	}
 )
 
+type (
+	// PeerChatHistoryReq 按会话取可读对话流。
+	// 与用户面 ChatHistoryReq 的差别只在身份来源：S2S 面没有网关注入的
+	// Beaver-User-Id，身份由请求体 UserID 携带，logic 内必须校验其为会话成员。
+	PeerChatHistoryReq {
+		ConversationID string `json:"conversationId"`
+		UserID         string `json:"userId"` // 以谁的身份读，用于成员校验与"已删除消息"过滤
+		Page           int    `json:"page,optional"`
+		Limit          int    `json:"limit,optional"` // 缺省 20，上限 100
+		BeforeSeq      int64  `json:"beforeSeq,optional"` // 只取 seq < BeforeSeq，往前翻页；0=最新一页
+	}
+
+	// PeerChatHistoryItem 一行可读对话：发言人是昵称而不是 userId，正文是文本预览。
+	PeerChatHistoryItem {
+		MessageID  string `json:"messageId"`
+		SenderID   string `json:"senderId"`
+		SenderName string `json:"senderName"` // 通知类消息为"通知"
+		Content    string `json:"content"`    // 非文本消息给类型占位
+		MsgType    uint32 `json:"msgType"`    // 对齐 Msg.Type
+		Seq        int64  `json:"seq"`        // 供下一页 BeforeSeq
+		CreatedAt  string `json:"createdAt"`
+	}
+
+	PeerChatHistoryRes {
+		Total   int64                 `json:"total"`
+		HasMore bool                  `json:"hasMore"`
+		List    []PeerChatHistoryItem `json:"list"`
+	}
+)
+
 @server (
 	middleware: JwtS2s
 	group: chat
@@ -833,6 +863,10 @@ service message {
 	@doc "查会话成员 ID 列表"
 	@handler peerGetConversationMemberIds
 	post /beaver/api/message/chat_s2s/v1/conversation_members (PeerGetConversationMemberIdsReq) returns (PeerGetConversationMemberIdsRes)
+
+	@doc "按会话取可读对话流（发言人昵称 + 文本预览，供摘要/Agent 使用）"
+	@handler peerGetChatHistory
+	post /beaver/api/message/chat_s2s/v1/get_chat_history (PeerChatHistoryReq) returns (PeerChatHistoryRes)
 
 
 

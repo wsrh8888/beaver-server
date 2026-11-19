@@ -57,7 +57,7 @@ func main() {
 	n.Use(negroni.HandlerFunc(corsMiddleware))
 	n.UseHandler(proxy)
 
-	err := http.ListenAndServe(config.Addr, n)
+	err = http.ListenAndServe(config.Addr, n)
 	if err != nil {
 		fmt.Printf("HTTP服务启动失败: %v\n", err)
 		os.Exit(1)

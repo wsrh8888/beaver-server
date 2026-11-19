@@ -78,7 +78,7 @@ PublicPatterns:
   - ^/[^/]+/api/[^/]+/machine/v1/token$
   # 以下为命名不合规特例（group 未用 _public，须 action 级精确放行；规整命名后可删）：
   - ^/beaver/api/account/auth_token/v1/issue$      # 换票口
-  - ^/beaver/api/file/preview/v1/get$              # 文件预览
+  - ^/beaver/api/asset/preview/v1/get$             # 文件预览
   - ^/beaver-open/api/open/developer/v1/auth_login$         # 开发者登录
   - ^/beaver-open/api/open/developer/v1/auth_oauth_login$   # OAuth 登录
   - ^/beaver-open/api/open/developer/v1/file_preview$       # 文件预览

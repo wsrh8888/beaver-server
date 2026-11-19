@@ -157,6 +157,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: chat.PeerListConversationsHandler(serverCtx),
 				},
 				{
+					// 按会话取可读对话流（发言人昵称 + 文本预览，供摘要/Agent 使用）
+					Method:  http.MethodPost,
+					Path:    "/beaver/api/message/chat_s2s/v1/get_chat_history",
+					Handler: chat.PeerGetChatHistoryHandler(serverCtx),
+				},
+				{
 					// 按会话+消息 ID 取单条消息
 					Method:  http.MethodPost,
 					Path:    "/beaver/api/message/chat_s2s/v1/get_message",

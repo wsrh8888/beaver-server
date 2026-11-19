@@ -449,14 +449,14 @@ func buildFileURL(svcCtx *svc.ServiceContext, source file_models.FileSource, m *
 	case file_models.MinioSource:
 		// 走预览端点，由 previewhandler 生成 MinIO 预签名URL重定向
 		if svcCtx.Config.Domain != "" {
-			return fmt.Sprintf("%s/beaver/api/file/preview/v1/get?fileKey=%s", svcCtx.Config.Domain, m.FileKey)
+			return fmt.Sprintf("%s/beaver/api/asset/preview/v1/get?fileKey=%s", svcCtx.Config.Domain, m.FileKey)
 		}
-		return fmt.Sprintf("/beaver/api/file/preview/v1/get?fileKey=%s", m.FileKey)
+		return fmt.Sprintf("/beaver/api/asset/preview/v1/get?fileKey=%s", m.FileKey)
 	case file_models.LocalSource:
 		if svcCtx.Config.Domain != "" {
-			return fmt.Sprintf("%s/beaver/api/file/preview/v1/get?fileKey=%s", svcCtx.Config.Domain, m.FileKey)
+			return fmt.Sprintf("%s/beaver/api/asset/preview/v1/get?fileKey=%s", svcCtx.Config.Domain, m.FileKey)
 		}
-		return fmt.Sprintf("/beaver/api/file/preview/v1/get?fileKey=%s", m.FileKey)
+		return fmt.Sprintf("/beaver/api/asset/preview/v1/get?fileKey=%s", m.FileKey)
 	}
 	return ""
 }

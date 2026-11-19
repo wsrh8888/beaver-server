@@ -283,6 +283,30 @@ type PeerCardMsg struct {
 	InviteToken string `json:"inviteToken,optional"`
 }
 
+type PeerChatHistoryItem struct {
+	MessageID  string `json:"messageId"`
+	SenderID   string `json:"senderId"`
+	SenderName string `json:"senderName"` // 通知类消息为"通知"
+	Content    string `json:"content"`    // 非文本消息给类型占位
+	MsgType    uint32 `json:"msgType"`    // 对齐 Msg.Type
+	Seq        int64  `json:"seq"`        // 供下一页 BeforeSeq
+	CreatedAt  string `json:"createdAt"`
+}
+
+type PeerChatHistoryReq struct {
+	ConversationID string `json:"conversationId"`
+	UserID         string `json:"userId"` // 以谁的身份读，用于成员校验与"已删除消息"过滤
+	Page           int    `json:"page,optional"`
+	Limit          int    `json:"limit,optional"`     // 缺省 20，上限 100
+	BeforeSeq      int64  `json:"beforeSeq,optional"` // 只取 seq < BeforeSeq，往前翻页；0=最新一页
+}
+
+type PeerChatHistoryRes struct {
+	Total   int64                 `json:"total"`
+	HasMore bool                  `json:"hasMore"`
+	List    []PeerChatHistoryItem `json:"list"`
+}
+
 type PeerChatMessageItem struct {
 	MessageID        string `json:"messageId,optional"`
 	ConversationID   string `json:"conversationId,optional"`

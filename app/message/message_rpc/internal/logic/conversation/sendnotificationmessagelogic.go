@@ -110,7 +110,7 @@ func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.Send
 		Seq:              nextSeq,
 		SendUserID:       nil, // 通知消息SendUserID为null
 		MsgType:          7,   // 通知消息类型
-		MsgPreview:       in.Content,
+		MsgPreview:       message_models.TruncatePreview(in.Content, message_models.MaxPreviewRunes),
 		Msg:              notificationMsg, // 通知消息的结构化内容
 	}
 
@@ -119,8 +119,8 @@ func (l *SendNotificationMessageLogic) SendNotificationMessage(in *chat_rpc.Send
 		return nil, errors.New("创建通知消息失败")
 	}
 
-	// 更新会话级别的信息，获取会话版本号
-	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.Type, nextSeq, in.Content)
+	// 更新会话级别的信息，获取会话版本号（last_message 列比 msg_preview 宽，单独截）
+	conversationVersion, err := chatrpcutils.CreateOrUpdateConversation(l.svcCtx.DB, l.svcCtx.VersionGen, in.ConversationId, conversation.Type, nextSeq, message_models.TruncatePreview(in.Content, message_models.MaxLastMessageRunes))
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "更新会话信息失败", Data: map[string]any{"conversationId": in.ConversationId, "err": err.Error()}})
 		// 这里不返回错误，因为消息已经创建成功

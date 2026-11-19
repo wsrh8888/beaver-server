@@ -67,4 +67,9 @@ S2S:
       ClientSecret: beaver-s2s-01-core-call
       Scopes: []
       Enabled: true
+    beaver-agent:
+      ClientID: beaver-agent
+      ClientSecret: beaver-s2s-01-core-agent
+      Scopes: []
+      Enabled: true
 

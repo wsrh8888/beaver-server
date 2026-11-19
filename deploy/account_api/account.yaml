@@ -33,7 +33,7 @@ Redis:
   DB: 0
 WhiteList:
   - /beaver/api/account/auth_public/.*
-  - /beaver/api/file/preview/v1/get
+  - /beaver/api/asset/preview/v1/get
 Email:
   QQ:
     Host: smtp.qq.com
@@ -89,6 +89,11 @@ S2S:
     beaver-call:
       ClientID: beaver-call
       ClientSecret: beaver-s2s-01-core-call
+      Scopes: []
+      Enabled: true
+    beaver-agent:
+      ClientID: beaver-agent
+      ClientSecret: beaver-s2s-01-core-agent
       Scopes: []
       Enabled: true
 

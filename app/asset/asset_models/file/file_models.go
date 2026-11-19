@@ -95,7 +95,7 @@ const (
 
 type FileModel struct {
 	models.Model
-	FileKey      string     `json:"fileKey"`                       // 文件唯一ID /beaver/api/file/preview/v1/get?fileKey={uuid}
+	FileKey      string     `json:"fileKey"`                       // 文件唯一ID /beaver/api/asset/preview/v1/get?fileKey={uuid}
 	OriginalName string     `json:"originalName"`                  // 原始文件名（带后缀名）
 	Size         int64      `json:"size"`                          // 文件大小
 	Path         string     `json:"path"`                          // 文件实际存储路径

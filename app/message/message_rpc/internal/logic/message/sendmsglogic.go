@@ -403,8 +403,8 @@ func (l *SendMsgLogic) SendMsg(in *chat_rpc.SendMsgReq) (*chat_rpc.SendMsgRes, e
 		Msg:              msg,
 	}
 
-	// 1. 创建消息记录并设置预览
-	chatModel.MsgPreview = chatModel.MsgPreviewMethod()
+	// 1. 创建消息记录并设置预览（入库必须用截断后的 PreviewText，全文会撑爆 msg_preview）
+	chatModel.MsgPreview = chatModel.PreviewText()
 	err = l.svcCtx.DB.Create(&chatModel).Error
 	if err != nil {
 		l.logger.Error(model.LogMsg{Text: "创建消息记录失败", Data: map[string]interface{}{"conversationId": in.ConversationId, "userId": in.UserId, "err": err.Error()}})
