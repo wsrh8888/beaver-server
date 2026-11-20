@@ -31,6 +31,7 @@ import (
 	"beaver/app/account/account_api/internal/types"
 	auth_models "beaver/app/account/account_models/auth"
 	accttypes "beaver/app/account/account_rpc/pb"
+	usertypeconst "beaver/common/const/usertypeconst"
 	"beaver/utils/authlock"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -65,7 +66,7 @@ func (l *EmailRegisterLogic) EmailRegister(req *types.EmailRegisterReq) (*types.
 
 	nickName := fmt.Sprintf("用户%s", req.Email[:strings.Index(req.Email, "@")])
 	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &accttypes.UserCreateReq{
-		Email: req.Email, NickName: nickName, Source: 2,
+		Email: req.Email, NickName: nickName, Source: 2, UserType: int32(usertypeconst.UserTypeNormal),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{

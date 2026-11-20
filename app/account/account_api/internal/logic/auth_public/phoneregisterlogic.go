@@ -30,6 +30,7 @@ import (
 	"beaver/app/account/account_api/internal/types"
 	auth_models "beaver/app/account/account_models/auth"
 	accttypes "beaver/app/account/account_rpc/pb"
+	usertypeconst "beaver/common/const/usertypeconst"
 	"beaver/utils/authlock"
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
@@ -63,7 +64,7 @@ func (l *PhoneRegisterLogic) PhoneRegister(req *types.PhoneRegisterReq) (*types.
 	}
 
 	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &accttypes.UserCreateReq{
-		Phone: req.Phone, Source: 1,
+		Phone: req.Phone, Source: 1, UserType: int32(usertypeconst.UserTypeNormal),
 	})
 	if err != nil {
 		l.logger.Error(model.LogMsg{

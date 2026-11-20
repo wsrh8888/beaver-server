@@ -58,11 +58,7 @@ func With(ctx context.Context, id Identity) context.Context {
 	return context.WithValue(ctx, identityCtxKey{}, id)
 }
 
-// From 读取本次请求的身份结论。
-//
-// 取本包 With 注入的结构化结论；其次兼容 rest.WithJwt 平铺进 context 的字符串 key
-// （本项目用户票 claim 为 userId，见 utils/jwts/enter.go），供仍走该模式的调用方读取。
-// 两条来源归一成同一个 Identity。
+// From 读取本次请求的身份结论：只认鉴权中间件通过 With 注入的结构化值。
 func From(ctx context.Context) Identity {
 	if ctx == nil {
 		return Identity{}
@@ -70,19 +66,7 @@ func From(ctx context.Context) Identity {
 	if v, ok := ctx.Value(identityCtxKey{}).(Identity); ok {
 		return v
 	}
-
-	id := Identity{}
-	if uid, ok := ctx.Value("userId").(string); ok && uid != "" {
-		id.Kind = KindUser
-		id.UserID = uid
-	}
-	if cid, ok := ctx.Value("clientId").(string); ok && cid != "" {
-		if id.Kind == KindAnonymous {
-			id.Kind = KindS2S
-		}
-		id.ClientID = cid
-	}
-	return id
+	return Identity{}
 }
 
 // UserID 取验签得出的用户 ID；无用户身份时为空串。

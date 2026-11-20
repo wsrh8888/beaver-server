@@ -26,7 +26,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	user_models "beaver/app/account/account_models/user"
@@ -35,7 +34,6 @@ import (
 	beaverlog "beaver/utils/beaverlog"
 	"beaver/utils/beaverlog/model"
 	utils "beaver/utils/rand"
-	"gorm.io/gorm"
 )
 
 // 工号序号统一从 100000 起；Redis 计数器里存"当前已用到的最大序号"。
@@ -79,11 +77,8 @@ func (l *UserCreateLogic) generateUserID(userType int8) (string, error) {
 		return "", fmt.Errorf("未知用户类型: %d", userType)
 	}
 
-	if err := l.initializeIDCounter(rule); err != nil {
-		l.logger.Error(model.LogMsg{
-			Text: "初始化用户ID计数器失败",
-			Data: map[string]any{"prefix": rule.prefix, "err": err.Error()},
-		})
+	// 计数器首次初始化为 minUserID-1，INCR 后从 minUserID 开始；已存在则沿用它。
+	if err := l.svcCtx.Redis.SetNX(rule.key, minUserID-1, 0).Err(); err != nil {
 		return "", fmt.Errorf("初始化用户ID计数器失败: %v", err)
 	}
 
@@ -102,60 +97,9 @@ func (l *UserCreateLogic) generateUserID(userType int8) (string, error) {
 	return fmt.Sprintf("%s%06d", rule.prefix, result.Val()), nil
 }
 
-// initializeIDCounter 从库里同类 user_id 的最大序号续接，保证不与存量撞号。
-// 计数器存"当前已用到的最大序号"，首次初始化为 minUserID-1，下一次 INCR 得到 minUserID。
-func (l *UserCreateLogic) initializeIDCounter(rule userIDRule) error {
-	exists := l.svcCtx.Redis.Exists(rule.key)
-	if exists.Err() != nil {
-		return fmt.Errorf("检查用户ID计数器失败: %v", exists.Err())
-	}
-	if exists.Val() != 0 {
-		return nil
-	}
-
-	var maxUser user_models.UserModel
-	var query *gorm.DB
-	if rule.prefix == "" {
-		// 普通用户：纯数字 user_id。
-		query = l.svcCtx.DB.Select("user_id").
-			Where("user_id REGEXP '^[0-9]+$'").
-			Order("CAST(user_id AS UNSIGNED) DESC")
-	} else {
-		// 带前缀：只取本前缀 + 数字的规范工号。
-		// LIKE BINARY 避免大小写不敏感排序规则把旧 UUID（如 ac844291-...）误判为 A 号段。
-		start := len(rule.prefix) + 1
-		query = l.svcCtx.DB.Select("user_id").
-			Where("user_id LIKE BINARY ?", rule.prefix+"%").
-			Order(fmt.Sprintf("CAST(SUBSTRING(user_id, %d) AS UNSIGNED) DESC", start))
-	}
-
-	current := int64(minUserID - 1)
-	err := query.First(&maxUser).Error
-	if err != nil && err.Error() != "record not found" {
-		return fmt.Errorf("查询最大用户ID失败: %v", err)
-	}
-	if err == nil && maxUser.UserID != "" {
-		if n, parseErr := strconv.ParseInt(strings.TrimPrefix(maxUser.UserID, rule.prefix), 10, 64); parseErr == nil {
-			current = n
-		}
-	}
-
-	if err := l.svcCtx.Redis.Set(rule.key, current, 0).Err(); err != nil {
-		return fmt.Errorf("设置用户ID计数器失败: %v", err)
-	}
-	l.logger.Info(model.LogMsg{
-		Text: "用户ID计数器初始化完成",
-		Data: map[string]interface{}{"prefix": rule.prefix, "current": current},
-	})
-	return nil
-}
-
 func (l *UserCreateLogic) UserCreate(in *pb.UserCreateReq) (*pb.UserCreateRes, error) {
-	// 多数注册入口不传 UserType，统一归一化为普通用户后再走号段规则。
+	// UserType 必传，由 generateUserID 的号段注册表校验；不传直接失败，不做默认兜底。
 	userType := int8(in.UserType)
-	if userType == 0 {
-		userType = user_models.UserTypeNormal
-	}
 
 	// 验证必填字段（Bot / Digital 用户不需要联系方式）
 	isSystemUser := userType == user_models.UserTypeBot || userType == user_models.UserTypeDigital

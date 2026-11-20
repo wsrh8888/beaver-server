@@ -33,6 +33,7 @@ import (
 	"beaver/app/account/account_api/internal/types"
 	auth_models "beaver/app/account/account_models/auth"
 	accttypes "beaver/app/account/account_rpc/pb"
+	usertypeconst "beaver/common/const/usertypeconst"
 	"beaver/common/middleware/ua"
 	"beaver/utils/authlock"
 	beaverlog "beaver/utils/beaverlog"
@@ -120,7 +121,7 @@ func (l *EmailLoginLogic) EmailLogin(req *types.EmailLoginReq) (*types.EmailLogi
 func (l *EmailLoginLogic) createUserByEmail(email string) (*accttypes.UserInfo, error) {
 	nickName := fmt.Sprintf("用户%s", email[:strings.Index(email, "@")])
 	createRes, err := l.svcCtx.UserRpc.UserCreate(l.ctx, &accttypes.UserCreateReq{
-		Email: email, NickName: nickName, Source: 2,
+		Email: email, NickName: nickName, Source: 2, UserType: int32(usertypeconst.UserTypeNormal),
 	})
 	if err != nil {
 		return nil, err

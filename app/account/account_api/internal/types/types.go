@@ -321,7 +321,7 @@ type UserCreateReq struct {
 	Source   int32  `json:"source,optional"`
 	Email    string `json:"email,optional"`
 	NickName string `json:"nickName,optional"`
-	UserType int32  `json:"userType,optional"`
+	UserType int32  `json:"userType"`
 	Abstract string `json:"abstract,optional"`
 }
 
@@ -381,7 +381,7 @@ type UserListReq struct {
 	Source   int32  `json:"source,optional"`
 	UserID   string `json:"userId,optional"`
 	Keyword  string `json:"keyword,optional"`
-	UserType int32  `json:"userType,optional"`
+	UserType int32  `json:"userType"`
 }
 
 type UserListRes struct {

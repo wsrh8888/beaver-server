@@ -124,7 +124,7 @@ UserCreateReq {
 		Source   int32  `json:"source,optional"`
 		Email    string `json:"email,optional"`
 		NickName string `json:"nickName,optional"`
-		UserType int32  `json:"userType,optional"`
+		UserType int32  `json:"userType"`
 		Abstract string `json:"abstract,optional"`
 	}
 
@@ -180,7 +180,7 @@ UserListReq {
 		Source   int32  `json:"source,optional"`
 		UserID   string `json:"userId,optional"`
 		Keyword  string `json:"keyword,optional"`
-		UserType int32  `json:"userType,optional"`
+		UserType int32  `json:"userType"`
 	}
 
 UserListRes {
