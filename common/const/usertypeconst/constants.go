@@ -24,8 +24,8 @@ package usertypeconst
 
 const (
 	UserTypeNormal  int8 = 1 // 普通用户
-	UserTypeBot     int8 = 2 // 推送机器人（通知机器人）
-	UserTypeDigital int8 = 3 // 外接数字伙伴（智能体）
+	UserTypeBot     int8 = 2 // Bot 机器人（外接/推送机器人），工号前缀 B
+	UserTypeDigital int8 = 3 // Agent 数字伙伴（智能体），工号前缀 A
 )
 
 // 用户注册来源（account 域 user.source 的取值）
