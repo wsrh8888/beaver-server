@@ -22,36 +22,32 @@
 // Package agent beaver-agent（py，beaver-ai 业务线）的 S2S 出站客户端。
 //
 // beaver-agent 与本仓是跨团队边界：禁止 etcd gRPC 直连（团队铁律），统一走对方
-// 标准机器视图 /beaver-ai/api/agent/chat/v1/* 端点，静态 X-Internal-Token 鉴权
-// （与 agent_api etc/agent.yaml 的 internal_token 同值）。
-// 结构对齐 remote/{open,ai,circle}：Init 灌入令牌并把域名写入 commonconfig.AgentUrl；
+// 标准机器视图 /beaver-ai/api/agent/chat/v1/* 端点。鉴权与 beaver-ai 的其它机器面一致：
+// client_credentials 换票 + Bearer（s2s.clients 按 client_id 白名单，本仓登记为 beaver-server）。
+// 域名由 commonconfig.Load 从 yaml 的 RemoteProxy.Agent.BaseURL 灌入 commonconfig.AgentUrl。
 // 业务侧直接调包函数 SendMessageApi(...) / ListConversationsApi(...)。
 package agent
 
 import (
-	"net/http"
+	"sync"
 	"time"
-
-	"beaver/utils/ajax"
 )
-
-// agentTimeout 单次调用超时。agent 是同步短请求，10s 足够，不做成可配项。
-const agentTimeout = 10 * time.Second
 
 // client 本包唯一的出站客户端，Init 时装配。
 var client *Client
 
-// Init 装配 beaver-agent 的静态 X-Internal-Token 与服务地址，并把域名写入 commonconfig.AgentUrl。
-// 只在该服务装配依赖时调用一次。
-func Init(internalToken string) {
-	client = &Client{
-		token: internalToken,
-		hc:    ajax.HTTPClient(agentTimeout),
-	}
+// Init 装配 beaver-ai 分配给本仓的 client_credentials（与 RemoteProxy.Ai 同凭据，
+// 都是 beaver-ai 同一个服务），换票协议在 token.go。只在该服务装配依赖时调用一次。
+func Init(clientID, clientSecret string) {
+	client = &Client{clientID: clientID, clientSecret: clientSecret}
 }
 
-// Client 持静态令牌与共享连接池的 http 客户端。
+// Client 持凭据与换来的票，换票缓存挂在它上面。
 type Client struct {
-	token string
-	hc    *http.Client
+	clientID     string
+	clientSecret string
+
+	mu        sync.Mutex
+	bearer    string
+	expiresAt time.Time
 }

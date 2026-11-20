@@ -114,7 +114,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	commonconfig.Load(c.RemoteProxy)
 	opencli.Init(c.RemoteProxy.Open.ClientID, c.RemoteProxy.Open.ClientSecret)
 	aicli.Init(c.RemoteProxy.Ai.ClientID, c.RemoteProxy.Ai.ClientSecret)
-	agentcli.Init(c.RemoteProxy.Agent.InternalToken)
+	agentcli.Init(c.RemoteProxy.Agent.ClientID, c.RemoteProxy.Agent.ClientSecret)
 
 	mqClient := corerocketmq.InitRocketMQ(c.RocketMQ.Addr)
 

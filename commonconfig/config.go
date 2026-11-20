@@ -39,8 +39,6 @@ package commonconfig
 const (
 	// AuthClientCredentials OAuth2 客户端凭据换票，跨团队出站的标准方式。
 	AuthClientCredentials = "client_credentials"
-	// AuthInternalToken 静态 X-Internal-Token，仅 beaver-ai 的 py 智能体服务用。
-	AuthInternalToken = "internal_token"
 )
 
 // Endpoint 出站被调方 S2S 端点项：域名 + 鉴权方式 + 凭据。
@@ -52,13 +50,6 @@ type Endpoint struct {
 	Auth         string `json:",optional"`
 	ClientID     string `json:",optional"`
 	ClientSecret string `json:",optional"`
-}
-
-// AgentEndpoint 智能体（beaver-ai 的 py 服务）S2S 注册项：静态令牌，无 OAuth 换票。
-type AgentEndpoint struct {
-	BaseURL       string `json:",optional"`
-	Auth          string `json:",optional"`
-	InternalToken string `json:",optional"`
 }
 
 // RemoteProxy 出站 S2S 端点注册表：key 是对端团队/服务名，值是对方标准 .api 服务地址与凭据。
@@ -77,8 +68,8 @@ type RemoteProxy struct {
 	Social Endpoint `json:",optional"`
 	// Doc 在线文档服务（beaver-server-online）。
 	Doc Endpoint `json:",optional"`
-	// Agent 智能体 py 服务（beaver-ai），静态 X-Internal-Token。
-	Agent AgentEndpoint `json:",optional"`
+	// Agent 智能体 py 服务（beaver-ai，/agent/chat/v1/*）：与 Ai 同凭据，client_credentials 换票。
+	Agent Endpoint `json:",optional"`
 }
 
 // 各对端服务域名，由 Load 从服务自己的 yaml 灌入；该服务用不到的对端保持空。

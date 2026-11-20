@@ -103,8 +103,9 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 			return nil
 		}
 
-		// 拼最近聊天记录上下文。
-		historyCtx := l.buildHistoryContext(ctx, conversationID, userID, digitalID)
+		// 拼最近聊天记录上下文。用数字伙伴的 IM 工号识别「自己发的」消息（消息 sender 存的是工号），
+		// 不能用 digitalId（那是平台 UUID，与 sender 不同域）。
+		historyCtx := l.buildHistoryContext(ctx, conversationID, cfgRes.DigitalUserId)
 
 		// 组装 parts JSON：单个 text part；若有历史则拼到 content 前。
 		finalContent := content
@@ -126,8 +127,10 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 			ModelId:        "",
 			PartsJson:      string(partsJSON),
 			AgentId:        agentID,
-			DigitalId:      digitalID,
-			ClientMsgId:    messageID,
+			// DigitalId 在 Python 侧是「IM 工号」语义（senderId 兜底 + agent_done 路由回投），
+			// 终稿落库拿它当 SendMsg.UserId，所以这里必须传工号而非平台 UUID。
+			DigitalId:   cfgRes.DigitalUserId,
+			ClientMsgId: messageID,
 		})
 		if err != nil {
 			l.logger.Error(model.LogMsg{Text: "AgentRpc.SendMessage 调用失败", Data: map[string]any{"digitalId": digitalID, "messageId": messageID, "err": err.Error()}})
@@ -155,7 +158,8 @@ func (l *AgentTaskConsumerLogic) StartConsumer() error {
 }
 
 // buildHistoryContext 拉最近 20 条消息（升序）拼成 "角色: 文本" 上下文。
-func (l *AgentTaskConsumerLogic) buildHistoryContext(ctx context.Context, conversationID, userID, digitalID string) string {
+// digitalUserID 是数字伙伴的 IM 工号（user_id 列），用于把「自己发的」消息标成 assistant。
+func (l *AgentTaskConsumerLogic) buildHistoryContext(ctx context.Context, conversationID, digitalUserID string) string {
 	var msgs []message_models.ChatMessage
 	if err := l.svcCtx.DB.Where("conversation_id = ?", conversationID).
 		Order("id DESC").Limit(20).Find(&msgs).Error; err != nil {
@@ -171,7 +175,7 @@ func (l *AgentTaskConsumerLogic) buildHistoryContext(ctx context.Context, conver
 	for i := len(msgs) - 1; i >= 0; i-- {
 		m := msgs[i]
 		role := "user"
-		if m.SendUserID != nil && *m.SendUserID == digitalID {
+		if m.SendUserID != nil && *m.SendUserID == digitalUserID {
 			role = "assistant"
 		}
 		text := extractHistoryText(m.Msg)

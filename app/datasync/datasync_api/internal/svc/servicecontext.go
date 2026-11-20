@@ -65,7 +65,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// agent=beaver-agent(py，静态 X-Internal-Token)。域名与凭据来自本服务 yaml。
 	commonconfig.Load(c.RemoteProxy)
 	circle.Init(c.RemoteProxy.Social.ClientID, c.RemoteProxy.Social.ClientSecret)
-	agentcli.Init(c.RemoteProxy.Agent.InternalToken)
+	agentcli.Init(c.RemoteProxy.Agent.ClientID, c.RemoteProxy.Agent.ClientSecret)
 
 	return &ServiceContext{
 		Config:          c,

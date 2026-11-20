@@ -65,8 +65,8 @@ NotificationRpc:
 RemoteProxy:
   Agent:
     BaseURL: http://127.0.0.1:22300
-    Auth: internal_token
-    InternalToken: ""
+    ClientID: beaver-server
+    ClientSecret: beaver-s2s-06-ai-server
   # S2S 出站：社交服务（beaver-social），client_credentials 换票后调其同步接口。
   # BaseURL 指向社交服务的标准 .api 地址，须与该服务自身的 S2S Secret/Clients 配置成对。
   Social:

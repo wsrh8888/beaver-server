@@ -93,18 +93,18 @@ func (p *digitalEventPusher) pushPrivateChat(senderID string, userIDs []string, 
 
 	// builtin 模式：投 agent_task，由 beaver-agent 消费跑 LLM。
 	if res.Runtime == "builtin" {
-		p.pushAgentTask(res.DigitalUserId, event)
+		p.pushAgentTask(res.DigitalId, event)
 		return
 	}
 
 	// workflow 模式：投 workflow_task，由 workflow 引擎消费（按 Nodes/Edges 调度）。
 	if res.Runtime == "workflow" {
-		p.pushWorkflowTask(res.DigitalUserId, event)
+		p.pushWorkflowTask(res.DigitalId, event)
 		return
 	}
 
 	// external 模式：走 openevent → WS 长连接下发外部 agent。
-	p.dispatch(res.DigitalUserId, openevent.EventIMMessageReceive, event)
+	p.dispatch(res.DigitalId, openevent.EventIMMessageReceive, event)
 }
 
 func (p *digitalEventPusher) pushGroupAt(senderID, conversationID string, msg *ctype.Msg, event map[string]interface{}) {
@@ -121,16 +121,16 @@ func (p *digitalEventPusher) pushGroupAt(senderID, conversationID string, msg *c
 		groupEvent["group_id"] = conversation.GetTargetIDByConversation(conversationID, senderID)
 		// builtin 模式：投 agent_task。
 		if res.Runtime == "builtin" {
-			p.pushAgentTask(res.DigitalUserId, groupEvent)
+			p.pushAgentTask(res.DigitalId, groupEvent)
 			continue
 		}
 		// workflow 模式：投 workflow_task。
 		if res.Runtime == "workflow" {
-			p.pushWorkflowTask(res.DigitalUserId, groupEvent)
+			p.pushWorkflowTask(res.DigitalId, groupEvent)
 			continue
 		}
 		// external 模式：走 openevent。
-		p.dispatch(res.DigitalUserId, openevent.EventIMMessageReceiveGroup, groupEvent)
+		p.dispatch(res.DigitalId, openevent.EventIMMessageReceiveGroup, groupEvent)
 	}
 }
 

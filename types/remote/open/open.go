@@ -73,8 +73,9 @@ type (
 
 	GetDigitalByUserIDRes struct {
 		Found         bool   `json:"found,omitempty"`
+		DigitalId     string `json:"digitalId,omitempty"` // 平台主键（UUID）；下游 GetDigitalConfig 按它查
 		DigitalKey    string `json:"digitalKey,omitempty"`
-		DigitalUserId string `json:"digitalUserId,omitempty"`
+		DigitalUserId string `json:"digitalUserId,omitempty"` // IM 工号（user_id 列）
 		Runtime       string `json:"runtime,omitempty"`
 	}
 )
@@ -86,8 +87,9 @@ type (
 	}
 
 	GetDigitalConfigRes struct {
-		DigitalId string `json:"digitalId"`
-		Runtime   string `json:"runtime"`
+		DigitalId     string `json:"digitalId"`
+		DigitalUserId string `json:"digitalUserId"` // IM 工号；编排层拼历史时据此识别数字伙伴自己发的消息
+		Runtime       string `json:"runtime"`
 		// AgentId 数字伙伴绑定的 Agent；runtime=builtin/workflow 时非空，external 时为空。
 		// 编排配置（人设/模型/工具/知识）只在 agents 表，open 侧不再下发编排 JSON。
 		AgentId        string `json:"agentId"`
